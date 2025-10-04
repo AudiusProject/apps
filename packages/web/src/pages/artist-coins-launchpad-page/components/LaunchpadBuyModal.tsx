@@ -42,21 +42,24 @@ import zIndex from 'utils/zIndex'
 
 import { getLastConnectedSolWallet } from '../utils'
 
-const INPUT_TOKEN_MAP: Record<string, TokenInfo & { minSwapAmount?: number }> =
-  {
-    USDC: {
-      ...TOKEN_LISTING_MAP.USDC,
-      balance: null,
-      isStablecoin: true,
-      minSwapAmount: 0.01
-    },
-    SOL: {
-      ...TOKEN_LISTING_MAP.SOL,
-      balance: null,
-      isStablecoin: false,
-      minSwapAmount: 0.000001
-    }
+const INPUT_TOKEN_MAP: Record<
+  string,
+  TokenInfo & { minSwapAmount?: number; requiredRemainingBalance?: number }
+> = {
+  USDC: {
+    ...TOKEN_LISTING_MAP.USDC,
+    balance: null,
+    isStablecoin: true,
+    minSwapAmount: 0.01
+  },
+  SOL: {
+    ...TOKEN_LISTING_MAP.SOL,
+    balance: null,
+    isStablecoin: false,
+    minSwapAmount: 0.000001,
+    requiredRemainingBalance: 0.03
   }
+}
 
 const INPUT_TOKEN_LIST = Object.values(INPUT_TOKEN_MAP)
 
@@ -404,7 +407,7 @@ export const LaunchpadBuyModal = ({
   // This is because the audio balance hook is polling, so an optimistic change here is not sufficient
   const hasAudioBalanceChanged = useMemo(() => {
     return (
-      prevAudioBalance &&
+      prevAudioBalance !== undefined &&
       audioBalance?.toString() !== prevAudioBalance?.toString()
     )
   }, [audioBalance, prevAudioBalance])
@@ -447,7 +450,8 @@ export const LaunchpadBuyModal = ({
     inputToken: selectedInputToken,
     outputToken: OUTPUT_TOKEN,
     externalWalletAddress,
-    min: selectedInputToken.minSwapAmount
+    min: selectedInputToken.minSwapAmount,
+    requiredRemainingBalance: selectedInputToken.requiredRemainingBalance
   })
 
   const [currentStep, setCurrentStep] = useState<BuyModalStep>(

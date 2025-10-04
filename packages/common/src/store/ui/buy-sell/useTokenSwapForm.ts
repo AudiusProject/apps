@@ -37,6 +37,10 @@ export type TokenSwapFormProps = {
    */
   max?: number
   /**
+   * The minimum remaining balance required for the input token
+   */
+  requiredRemainingBalance?: number
+  /**
    * Callback for when transaction data changes
    */
   onTransactionDataChange?: (data: {
@@ -69,6 +73,7 @@ export const useTokenSwapForm = ({
   outputToken,
   min: providedMin,
   max: providedMax,
+  requiredRemainingBalance: providedRequiredRemainingBalance,
   onTransactionDataChange,
   initialInputValue = '',
   onInputValueChange,
@@ -110,29 +115,38 @@ export const useTokenSwapForm = ({
     outputTokenDecimals: outputToken.decimals
   })
 
+  const availableBalance = tokenData.balance
+  const adjustedMax = providedRequiredRemainingBalance
+    ? tokenData.fullBalance - (providedRequiredRemainingBalance ?? 0)
+    : max
   const swapValidation = useSwapValidation({
     inputAmount: swapCalculations.inputAmount,
     balance: tokenData.fullBalance,
-    limits: calculatedLimits,
+    limits: { min, max: adjustedMax },
     tokenSymbol: inputToken.symbol,
     tokenDecimals: inputToken.decimals,
     isBalanceLoading: tokenData.isBalanceLoading,
     isTouched: true // Simplified - in real implementation would track this properly
   })
 
-  const availableBalance = tokenData.balance
   // Create validation schema - use full balance for validation
   const validationSchema = useMemo(() => {
     return toFormikValidationSchema(
       createSwapFormSchema(
         min,
-        max,
+        adjustedMax,
         tokenData.fullBalance,
         inputToken.symbol,
         inputToken.decimals
       )
     )
-  }, [min, max, tokenData.fullBalance, inputToken.symbol, inputToken.decimals])
+  }, [
+    min,
+    adjustedMax,
+    tokenData.fullBalance,
+    inputToken.symbol,
+    inputToken.decimals
+  ])
 
   // Initialize form with Formik
   const formik = useFormik<SwapFormValues>({
@@ -266,13 +280,19 @@ export const useTokenSwapForm = ({
 
   // Handle max button click - use full untruncated balance for swaps
   const handleMaxClick = useCallback(() => {
-    const fullBalance = tokenData.fullBalance
+    const fullBalance =
+      tokenData.fullBalance - (providedRequiredRemainingBalance ?? 0)
     if (fullBalance !== undefined) {
       const finalAmountString = fullBalance.toString()
       swapCalculations.handleInputChange(finalAmountString)
       setFieldTouched('inputAmount', true, false)
     }
-  }, [tokenData.fullBalance, swapCalculations, setFieldTouched])
+  }, [
+    tokenData.fullBalance,
+    swapCalculations,
+    setFieldTouched,
+    providedRequiredRemainingBalance
+  ])
 
   return {
     inputAmount: swapCalculations.inputAmount, // Raw string input for display
