@@ -14,6 +14,8 @@ import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
+import { getKeypair } from './getKeypair'
+
 interface LaunchCoinRequestBody {
   name: string
   symbol: string
@@ -70,8 +72,7 @@ export const launchCoin = async (
 
     const walletPublicKey = new PublicKey(walletPublicKeyStr)
 
-    // TODO: get specific addresses with AUDIO in the name
-    const mintKeypair = Keypair.generate()
+    const mintKeypair = await getKeypair(logger)
     const mintPublicKey = mintKeypair.publicKey
 
     const connection = getConnection()
