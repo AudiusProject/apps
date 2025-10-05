@@ -21,9 +21,15 @@ type UseFormattedAudioBalanceReturn = {
   formattedHeldValue: string | null
 }
 
-export const useFormattedAudioBalance = (): UseFormattedAudioBalanceReturn => {
+export const useFormattedAudioBalance = ({
+  includeStaked = false
+}: {
+  includeStaked?: boolean
+} = {}): UseFormattedAudioBalanceReturn => {
   const { env } = useQueryContext()
-  const { totalBalance, isLoading: isAudioBalanceLoading } = useAudioBalance()
+  const { totalBalance, isLoading: isAudioBalanceLoading } = useAudioBalance({
+    includeStaked
+  })
 
   const { data: audioPriceData, isPending: isAudioPriceLoading } =
     useArtistCoin(env.WAUDIO_MINT_ADDRESS)

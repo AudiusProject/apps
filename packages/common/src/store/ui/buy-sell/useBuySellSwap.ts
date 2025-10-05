@@ -126,11 +126,6 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
         }
       })
     }
-    if (user?.spl_wallet) {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.audioBalance, user.spl_wallet]
-      })
-    }
   }
 
   const handleShowConfirmation = useCallback(() => {
