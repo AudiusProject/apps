@@ -7,7 +7,6 @@ import {
 } from '@audius/common/api'
 import { Feature } from '@audius/common/models'
 import { createUserBankIfNeeded } from '@audius/common/services'
-import { solana } from '@reown/appkit/networks'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { VersionedTransaction } from '@solana/web3.js'
 import {
@@ -69,7 +68,7 @@ export const useClaimFees = (
       // Get the claim fee transaction from the relay
       const claimFeesResponse = await sdk.services.solanaRelay.claimFees({
         tokenMint,
-        externalWalletAddress,
+        ownerWalletAddress: externalWalletAddress,
         receiverWalletAddress: userBank.toString()
       })
 

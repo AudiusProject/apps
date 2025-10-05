@@ -448,7 +448,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     (walletAddress: string) => {
       claimFees({
         tokenMint: mint,
-        ownerWalletAddress: walletAddress
+        externalWalletAddress: walletAddress
       })
     },
     [mint, claimFees]
