@@ -110,6 +110,7 @@ import {
 import { getClient } from 'utils/clientUtil'
 import 'utils/redirect'
 import { getPathname } from 'utils/route'
+import { TermsOfServiceUpdateBanner } from 'components/banner/TermsOfServiceUpdateBanner'
 
 import styles from './WebPlayer.module.css'
 
@@ -496,7 +497,7 @@ const WebPlayer = (props) => {
       <AppBannerWrapper>
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
-        {/* <TermsOfServiceUpdateBanner /> */}
+        <TermsOfServiceUpdateBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
