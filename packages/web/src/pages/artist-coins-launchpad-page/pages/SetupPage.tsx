@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 
 import { ErrorLevel, Feature, LaunchpadFormValues } from '@audius/common/models'
+import { route } from '@audius/common/utils'
 import { Flex, Paper, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
@@ -23,7 +24,8 @@ const messages = {
   stepInfo: `STEP 1 of ${AMOUNT_OF_STEPS}`,
   title: 'Set Up Your Coin',
   description:
-    'The Coin Name, Ticker Symbol, and Image cannot be changed once launched. Make sure you have the rights to use the Coin Name, Ticker Symbol, and Image.',
+    'The Coin Name, Ticker Symbol, and Image cannot be changed once launched. Make sure you have the rights',
+  rightsLinkText: 'to use the Coin Name, Ticker Symbol, and Image',
   errors: {
     invalidFileType: 'Please select a JPEG, PNG, or WebP image file',
     fileTooLarge: 'File size must be less than 15MB',
@@ -138,15 +140,14 @@ export const SetupPage = ({ onContinue, onBack }: PhasePageProps) => {
               {messages.title}
             </Text>
             <Text variant='body' size='l' color='subdued'>
-              The Coin Name, Ticker Symbol, and Image cannot be changed once
-              launched. Make sure you have the rights{' '}
+              {messages.description}{' '}
               <ExternalTextLink
-                to='https://audius.co/legal/artist-coin-terms'
+                to={route.ARTIST_COIN_TERMS}
                 variant='visible'
                 target='_blank'
                 rel='noopener noreferrer'
               >
-                to use the Coin Name, Ticker Symbol, and Image
+                {messages.rightsLinkText}
               </ExternalTextLink>
               .
             </Text>
