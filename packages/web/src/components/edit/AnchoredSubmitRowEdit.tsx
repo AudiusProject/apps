@@ -5,6 +5,7 @@ import { Button, Flex, IconError, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
 import { useHistoryContext } from 'app/HistoryProvider'
+import { Frosted } from 'components/frosted/Frosted'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import { EditFormScrollContext } from '../../pages/edit-page/EditTrackPage'
@@ -35,7 +36,7 @@ export const AnchoredSubmitRowEdit = ({
 
   return (
     <>
-      <Flex className={styles.buttonRow} gap='m'>
+      <Frosted className={styles.buttonRow} gap='m'>
         <Flex gap='l'>
           <Button
             variant='secondary'
@@ -68,7 +69,7 @@ export const AnchoredSubmitRowEdit = ({
             </Text>
           </Flex>
         ) : null}
-      </Flex>
+      </Frosted>
       <div className={styles.placeholder} />
     </>
   )

@@ -15,6 +15,7 @@ import { TouchableOpacity } from 'react-native'
 import { Box, Button, Divider, Flex, Paper, Text } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
+import { AudioCoinCard } from './AudioCoinCard'
 import { CoinCard, CoinCardSkeleton, HexagonalSkeleton } from './CoinCard'
 
 const messages = {
@@ -122,7 +123,7 @@ export const YourCoins = () => {
               {item === 'discover-artist-coins' ? (
                 <DiscoverArtistCoinsCard onPress={handleDiscoverArtistCoins} />
               ) : item === 'audio-coin' ? (
-                <CoinCard mint={env.WAUDIO_MINT_ADDRESS} />
+                <AudioCoinCard />
               ) : (
                 <CoinCard mint={item.mint} />
               )}

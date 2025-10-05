@@ -11,6 +11,7 @@ import {
 } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
+import { Frosted } from 'components/frosted/Frosted'
 import zIndex from 'utils/zIndex'
 
 const defaultMessages = {
@@ -63,14 +64,13 @@ export const ArtistCoinsSubmitRow = ({
 
   return (
     <>
-      <Flex
+      <Frosted
         css={{
           position: 'fixed',
           bottom: 'var(--play-bar-height)',
           left: 'var(--nav-width)',
           width: 'calc(100% - var(--nav-width))',
           padding: spacing.unit3,
-          background: color.background.surface1,
           borderTop: `1px solid ${color.border.strong}`,
           zIndex: zIndex.NAVIGATOR_POPUP
         }}
@@ -106,7 +106,7 @@ export const ArtistCoinsSubmitRow = ({
             </Text>
           </Flex>
         ) : null}
-      </Flex>
+      </Frosted>
       <Box
         css={{
           height: 'var(--play-bar-height)'

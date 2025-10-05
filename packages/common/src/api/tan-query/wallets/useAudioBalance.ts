@@ -198,7 +198,8 @@ export const useAudioBalance = (
         ...(data?.spl_wallet
           ? [{ address: data.spl_wallet, chain: Chain.Sol }]
           : [])
-      ]
+      ],
+      includeStaked
     },
     { ...options, enabled: isUserFetched }
   )

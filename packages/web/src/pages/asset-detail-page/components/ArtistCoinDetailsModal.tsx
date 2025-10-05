@@ -1,3 +1,4 @@
+import type { Coin } from '@audius/common/adapters'
 import {
   useArtistCoin,
   useCoinGeckoCoin,
@@ -14,7 +15,6 @@ import {
   Button,
   useTheme
 } from '@audius/harmony'
-import type { Coin } from '@audius/sdk'
 
 import { env } from 'services/env'
 
@@ -138,7 +138,16 @@ export const ArtistCoinDetailsModal = ({
 }
 
 export type TokenDetailsStatsSectionProps = Partial<
-  Pick<Coin, 'totalSupply' | 'marketCap' | 'price' | 'liquidity'>
+  Pick<
+    Coin,
+    | 'totalSupply'
+    | 'marketCap'
+    | 'price'
+    | 'liquidity'
+    | 'circulatingSupply'
+    | 'displayPrice'
+    | 'displayMarketCap'
+  >
 >
 
 export const convertCoinGeckoResponseToStatsDetailsProps = (
@@ -168,20 +177,20 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
         />
       ) : null}
 
-      {props?.marketCap ? (
+      {props?.displayMarketCap ? (
         <TokenInfoRow
           label={artistCoinDetails.marketCap}
-          value={`$${props.marketCap.toLocaleString()}`}
+          value={`$${props.displayMarketCap.toLocaleString()}`}
           hasTooltip
           tooltipContent={artistCoinDetails.tooltips.marketCap}
           variant='block'
         />
       ) : null}
 
-      {props?.price ? (
+      {props?.displayPrice ? (
         <TokenInfoRow
           label={artistCoinDetails.price}
-          value={formatCurrencyWithSubscript(props.price)}
+          value={formatCurrencyWithSubscript(props.displayPrice)}
           hasTooltip
           tooltipContent={artistCoinDetails.tooltips.price}
           variant='block'

@@ -53,33 +53,16 @@ const createMetric = (
 }
 
 export const createCoinMetrics = (coin: Coin): MetricData[] => {
-  // Birdeye data may not be available right after launch.
-  // Fall back to dynamic bonding curve data if so.
-  const defaultSupply = 1e9
-
-  const hasBirdeyeSupply =
-    coin.totalSupply !== undefined && coin.totalSupply > 0
-  const hasBirdeyePrice = coin.price !== undefined && coin.price > 0
-
-  // For price, use the bonding curve price if the coin hasn't graduated or we have no birdeye data
-  const price =
-    !coin.dynamicBondingCurve.isMigrated || !hasBirdeyePrice
-      ? coin.dynamicBondingCurve.priceUSD
-      : coin.price
-
-  // For market cap, use the bonding curve market cap if the coin hasn't graduated or we have no birdeye data
-  const marketCap =
-    !coin.dynamicBondingCurve.isMigrated || !hasBirdeyeSupply
-      ? price * (hasBirdeyeSupply ? coin.totalSupply : defaultSupply)
-      : coin.marketCap
-
   const potentialMetrics = [
     createMetric(
-      formatCurrencyWithSubscript(price),
+      formatCurrencyWithSubscript(coin.displayPrice),
       messages.pricePerCoin,
       coin.priceChange24hPercent
     ),
-    createMetric(`$${formatCount(marketCap, 2)}`, messages.marketCap),
+    createMetric(
+      `$${formatCount(coin.displayMarketCap, 2)}`,
+      messages.marketCap
+    ),
     createMetric(
       formatCount(coin.holder),
       messages.uniqueHolders,

@@ -1,16 +1,10 @@
-import {
-  ReactNode,
-  cloneElement,
-  useRef,
-  useState,
-  useEffect,
-  MutableRefObject
-} from 'react'
+import { ReactNode, cloneElement, useRef, MutableRefObject } from 'react'
 
 import { Box, Flex } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 
+import { Frosted } from 'components/frosted/Frosted'
 import { MetaTags, MetaTagsProps } from 'components/meta-tags/MetaTags'
 import { DesktopSearchBar } from 'components/search-bar/DesktopSearchBar'
 
@@ -25,42 +19,16 @@ type HeaderContainerProps = Pick<PageProps, 'header' | 'showSearch'>
 const HeaderContainer = (props: HeaderContainerProps) => {
   const { header, showSearch } = props
 
-  // Only Safari & Chrome support the CSS
-  // frosted glasss effect.
-  const [isChromeOrSafari, setIsChromeOrSafari] = useState(false)
-
-  useEffect(() => {
-    const chromeOrSafari = () => {
-      const userAgent = navigator.userAgent.toLowerCase()
-      return (
-        userAgent.indexOf('chrome') > -1 || userAgent.indexOf('safari') > -1
-      )
-    }
-    setIsChromeOrSafari(chromeOrSafari)
-  }, [])
-
   const headerContainerRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className={styles.headerContainer}>
-      <div
-        ref={headerContainerRef}
-        className={styles.frosted}
-        style={{
-          // Need to set a different gradient for
-          // browsers that don't support the
-          // backdrop-filter frosted glass effect.
-          background: isChromeOrSafari
-            ? 'linear-gradient(180deg, var(--harmony-n-25) 0%, var(--harmony-n-25) 20%, var(--page-header-gradient-2) 65%)'
-            : 'linear-gradient(180deg, var(--harmony-n-25) 0%, var(--page-n-25) 40%, var(--page-header-gradient-2-alt) 85%)'
-        }}
-      >
+      <Frosted>
         {cloneElement(header as any, {
-          isChromeOrSafari,
           headerContainerRef,
           topLeftElement: showSearch ? <DesktopSearchBar /> : null
         })}
-      </div>
+      </Frosted>
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}

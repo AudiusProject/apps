@@ -34,13 +34,6 @@
   z-index: 13;
 }
 
-.frosted {
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 10;
-  padding-inline: var(--harmony-unit-15);
-}
-
 .headerBoxShadow {
   height: 5px;
   width: 100%;
