@@ -6,6 +6,8 @@ import {
   QUERY_KEYS
 } from '@audius/common/api'
 import { Feature } from '@audius/common/models'
+import { createUserBankIfNeeded } from '@audius/common/services'
+import { solana } from '@reown/appkit/networks'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { VersionedTransaction } from '@solana/web3.js'
 import {
@@ -15,11 +17,12 @@ import {
 } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
+import { track } from 'services/analytics'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
 export type UseClaimFeesParams = {
   tokenMint: string
-  ownerWalletAddress: string
+  externalWalletAddress: string
 }
 
 export type ClaimFeesResponse = {
@@ -42,34 +45,32 @@ export const useClaimFees = (
   return useMutation<ClaimFeesResponse, Error, UseClaimFeesParams>({
     mutationFn: async ({
       tokenMint,
-      ownerWalletAddress
+      externalWalletAddress
     }: UseClaimFeesParams): Promise<ClaimFeesResponse> => {
       const sdk = await audiusSdk()
       const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
       if (!solanaProvider) {
         throw new Error('Missing SolanaProvider')
       }
-      if (!ownerWalletAddress) {
-        throw new Error('Missing owner wallet address')
+      if (!externalWalletAddress) {
+        throw new Error('Missing external wallet')
       }
-      let splWallet = currentUser?.spl_wallet?.toString()
-      if (!splWallet) {
-        const { userBank } =
-          await sdk.services.claimableTokensClient.getOrCreateUserBank({
-            ethWallet: currentUser?.erc_wallet,
-            mint: 'wAUDIO'
-          })
-        splWallet = userBank.toBase58()
+      if (!currentUser?.erc_wallet) {
+        throw new Error('Missing current user erc_wallet')
       }
-
-      if (!splWallet) {
+      const userBank = await createUserBankIfNeeded(sdk, {
+        recordAnalytics: track,
+        mint: 'wAUDIO',
+        ethAddress: currentUser?.erc_wallet
+      })
+      if (!userBank) {
         throw new Error('Unable to get or create wAUDIO SPL wallet address')
       }
       // Get the claim fee transaction from the relay
       const claimFeesResponse = await sdk.services.solanaRelay.claimFees({
         tokenMint,
-        ownerWalletAddress,
-        receiverWalletAddress: splWallet.toString()
+        externalWalletAddress,
+        receiverWalletAddress: userBank.toString()
       })
 
       const { claimFeesTx: claimFeesTxSerialized } = claimFeesResponse
