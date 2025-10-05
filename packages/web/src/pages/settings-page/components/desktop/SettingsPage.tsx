@@ -5,7 +5,7 @@ import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { API_TERMS } from '@audius/common/src/utils/route'
+import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
   EmailFrequency,
@@ -593,6 +593,15 @@ export const SettingsPage = () => {
             rel='noreferrer'
           >
             {settingsMessages.apiTerms}
+          </Link>
+          -{' '}
+          <Link
+            className={styles.link}
+            to={ARTIST_COIN_TERMS}
+            target='_blank'
+            rel='noreferrer'
+          >
+            {settingsMessages.artistCoinTerms}
           </Link>
         </span>
         {!isManagedAccount ? (
