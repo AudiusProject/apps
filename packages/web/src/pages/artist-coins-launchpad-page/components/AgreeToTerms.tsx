@@ -8,7 +8,8 @@ import { ExternalTextLink } from 'components/link'
 const messages = {
   termsText: 'By checking this box I agree to the latest',
   termsOfService: 'terms of service',
-  artistCoinsTerms: 'Artist Coin terms'
+  artistCoinsTerms: 'Artist Coin terms',
+  artistCoinAcceptableUse: 'Artist Coin acceptable use policy'
 }
 
 export const AgreeToTerms = () => {
@@ -31,10 +32,17 @@ export const AgreeToTerms = () => {
         {messages.termsText}{' '}
         <ExternalTextLink to={route.TERMS_OF_SERVICE} variant='visible'>
           {messages.termsOfService}
-        </ExternalTextLink>{' '}
-        and the{' '}
+        </ExternalTextLink>
+        , the{' '}
         <ExternalTextLink to={route.ARTIST_COIN_TERMS} variant='visible'>
           {messages.artistCoinsTerms}
+        </ExternalTextLink>
+        , and the{' '}
+        <ExternalTextLink
+          to={route.ARTIST_COIN_ACCEPTABLE_USE}
+          variant='visible'
+        >
+          {messages.artistCoinAcceptableUse}
         </ExternalTextLink>
         .
       </Text>

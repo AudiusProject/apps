@@ -212,6 +212,13 @@ export const AUDIUS_HOT_AND_NEW =
 export const AUDIUS_HELP_LINK = 'https://help.audius.co/'
 export const AUDIUS_ARTIST_COIN_HELP_LINK =
   'https://help.audius.co/product/artist-coins'
+<<<<<<< Updated upstream
+=======
+export const ARTIST_COIN_TERMS =
+  'https://audius.co/documents/ArtistCoinTerms.pdf'
+export const ARTIST_COIN_ACCEPTABLE_USE =
+  'http://audius.co/legal/artist-coin-acceptable-use'
+>>>>>>> Stashed changes
 
 export const AUDIUS_CAREERS_LINK = 'https://www.tikilabs.com/careers'
 export const AUDIUS_PODCAST_LINK =
