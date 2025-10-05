@@ -1,0 +1,31 @@
+.container {
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.pdfIFrame {
+  margin: 0px auto;
+  height: 52vh;
+  min-height: 550px;
+  width: 100%;
+  max-width: 1140px;
+}
+
+.contentContainer {
+  flex-shrink: 0;
+  width: 100%;
+  text-align: center;
+  padding: 120px 16px 84px;
+  background-color: var(--harmony-white);
+}
+
+/* Mobile Styles */
+.mobileContainer {
+  flex-shrink: 0;
+  padding: 128px 8px 64px;
+}
+
+.downloadLink {
+  color: var(--harmony-secondary);
+}
