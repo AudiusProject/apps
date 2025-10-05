@@ -9,8 +9,8 @@ import {
   Button,
   Divider,
   Flex,
-  IconLogoCircle,
   IconLogoCircleSOL,
+  IconLogoWhiteBackground,
   Paper,
   Text
 } from '@audius/harmony-native'
@@ -32,7 +32,19 @@ const WalletRow = ({
   return (
     <Flex row alignItems='center' gap='m' w='100%'>
       <Flex row alignItems='center' gap='s'>
-        {isInAppWallet ? <IconLogoCircle /> : <IconLogoCircleSOL />}
+        {isInAppWallet ? (
+          <Flex
+            border='default'
+            borderRadius='circle'
+            style={{ overflow: 'hidden', height: 24, width: 24 }}
+            justifyContent='center'
+            alignItems='center'
+          >
+            <IconLogoWhiteBackground size='l' />
+          </Flex>
+        ) : (
+          <IconLogoCircleSOL size='l' />
+        )}
         <Text strength='strong'>
           {isInAppWallet ? messages.builtIn : shortenSPLAddress(address)}
         </Text>

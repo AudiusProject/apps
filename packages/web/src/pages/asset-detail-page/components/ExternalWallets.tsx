@@ -20,7 +20,7 @@ import {
   Box,
   Skeleton,
   Divider,
-  IconLogoCircle
+  IconLogoWhiteBackground
 } from '@audius/harmony'
 import { UserCoinAccount } from '@audius/sdk'
 
@@ -108,7 +108,23 @@ const WalletRow = ({
       css={{ opacity: isRemovingWallet ? 0.5 : 1 }}
     >
       <Flex alignItems='center' gap='s'>
-        {isInAppWallet ? <IconLogoCircle /> : <IconLogoCircleSOL />}
+        {isInAppWallet ? (
+          <Flex
+            css={{
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '1px solid var(--harmony-n-100)',
+              width: 24,
+              height: 24,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <IconLogoWhiteBackground size='l' />
+          </Flex>
+        ) : (
+          <IconLogoCircleSOL />
+        )}
         <Text variant='body' size='m' strength='strong'>
           {isInAppWallet ? messages.builtIn : shortenSPLAddress(address)}
         </Text>
