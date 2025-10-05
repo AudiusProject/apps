@@ -111,15 +111,22 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       const baseOwnerId = baseCoin?.ownerId ?? null
       const quoteOwnerId = quoteCoin?.ownerId ?? null
 
+      console.log('REED invalidating track queries', {
+        baseOwnerId,
+        quoteOwnerId
+      })
+
       queryClient.invalidateQueries({
         predicate: (query) => {
+          if (query.queryKey[0] !== QUERY_KEYS.track) return false
+
+          const track = query.state.data as TQTrack | undefined
+          if (!track) return false
+
           return (
-            query.queryKey[0] === QUERY_KEYS.track &&
-            ((query.queryKey[1] as TQTrack)?.owner_id === baseOwnerId ||
-              (query.queryKey[1] as TQTrack)?.owner_id === quoteOwnerId) &&
-            isContentTokenGated(
-              (query.queryKey[1] as TQTrack)?.stream_conditions
-            )
+            (track.owner_id === baseOwnerId ||
+              track.owner_id === quoteOwnerId) &&
+            isContentTokenGated(track.stream_conditions)
           )
         }
       })
