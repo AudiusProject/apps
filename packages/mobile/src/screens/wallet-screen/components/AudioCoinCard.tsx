@@ -2,18 +2,18 @@ import { useCallback } from 'react'
 
 import { useFormattedAudioBalance } from '@audius/common/hooks'
 import { AUDIO_TICKER, TOKEN_LISTING_MAP } from '@audius/common/store'
-import { Image } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 import {
   Box,
   Flex,
   HexagonalIcon,
+  IconTokenAUDIO,
   Skeleton,
   spacing,
   Text
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const ICON_SIZE = 64
 
@@ -55,23 +55,6 @@ export const AudioCoinCard = () => {
   }, [navigation])
 
   const isLoading = isAudioBalanceLoading || isAudioPriceLoading
-  const logoURI = TOKEN_LISTING_MAP.AUDIO.logoURI
-
-  const renderIcon = () => {
-    return (
-      <HexagonalIcon size={ICON_SIZE}>
-        <Image
-          source={
-            typeof logoURI === 'string' ? { uri: logoURI } : (logoURI as number)
-          }
-          style={{
-            width: ICON_SIZE,
-            height: ICON_SIZE
-          }}
-        />
-      </HexagonalIcon>
-    )
-  }
 
   return (
     <TouchableOpacity onPress={onPress}>
@@ -83,7 +66,7 @@ export const AudioCoinCard = () => {
         alignItems='center'
       >
         <Flex row alignItems='center' gap='l' style={{ flexShrink: 1 }}>
-          {isLoading ? <AudioHexagonalSkeleton /> : renderIcon()}
+          {isLoading ? <AudioHexagonalSkeleton /> : <IconTokenAUDIO />}
           <Flex column gap='xs'>
             {isLoading ? (
               <AudioCoinCardSkeleton />
@@ -104,7 +87,7 @@ export const AudioCoinCard = () => {
                   style={{ maxWidth: '100%' }}
                 >
                   <Text variant='title' size='l'>
-                    {audioBalanceFormatted ?? '0'}
+                    {audioBalanceFormatted}
                   </Text>
                   <Text
                     variant='title'
@@ -124,7 +107,7 @@ export const AudioCoinCard = () => {
         <Flex row alignItems='center' gap='m' ml={spacing.unit22}>
           {!isLoading ? (
             <Text variant='title' size='l' color='default'>
-              {formattedHeldValue ?? '$0.00'}
+              {formattedHeldValue}
             </Text>
           ) : null}
         </Flex>
