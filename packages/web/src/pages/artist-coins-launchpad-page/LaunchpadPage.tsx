@@ -423,7 +423,10 @@ export const LaunchpadPage = () => {
 
       // Navigate to the new coin's detail page
       navigate(
-        route.ASSET_DETAIL_PAGE.replace(':ticker', formValues.coinSymbol)
+        route.ASSET_DETAIL_PAGE.replace(
+          ':ticker',
+          formValues.coinSymbol.toUpperCase()
+        )
       )
 
       // Open the success modal
