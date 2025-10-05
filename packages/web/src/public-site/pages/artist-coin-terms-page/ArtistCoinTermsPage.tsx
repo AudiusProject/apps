@@ -7,7 +7,8 @@ import styles from './ArtistCoinTermsPage.module.css'
 const BASENAME = env.BASENAME
 
 const messages = {
-  download: 'Download Artist Coin Terms'
+  download: 'Download Artist Coin Terms',
+  title: 'Artist Coin Terms'
 }
 
 const ArtistCoinTermsDocumentRoute = `${BASENAME}/documents/ArtistCoinTerms.pdf`
@@ -41,7 +42,7 @@ const ArtistCoinTermsPage = (props: ArtistCoinTermsPageProps) => {
           </div>
         ) : (
           <iframe
-            title='Artist Coin Terms'
+            title={messages.title}
             src={ArtistCoinTermsDocumentRoute}
             className={styles.pdfIFrame}
           ></iframe>
