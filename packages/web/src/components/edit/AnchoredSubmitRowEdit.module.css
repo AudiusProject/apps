@@ -10,7 +10,6 @@
   width: calc(100% - var(--nav-width));
 
   padding: var(--harmony-unit-3);
-  background: var(--harmony-bg-surface-1);
   border-top: 1px solid var(--harmony-border-strong);
 
   display: flex;
