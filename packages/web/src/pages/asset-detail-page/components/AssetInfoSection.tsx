@@ -8,7 +8,7 @@ import {
   useConnectedWallets,
   useCurrentAccountUser
 } from '@audius/common/api'
-import { useDiscordOAuthLink } from '@audius/common/hooks'
+import { useDiscordOAuthLink, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { Feature, WidthSizes } from '@audius/common/models'
 import {
@@ -280,6 +280,7 @@ const AssetDetailsSection = ({
   handleClaimFees,
   isClaimFeesDisabled
 }: AssetDetailsSectionProps) => {
+  const isManagerMode = useIsManagedAccount()
   return (
     <Flex
       direction='column'
@@ -324,7 +325,7 @@ const AssetDetailsSection = ({
           {formattedTotalArtistEarnings} {overflowMessages.$audio}
         </Text>
       </Flex>
-      {isCoinCreator ? (
+      {isCoinCreator && !isManagerMode ? (
         <Flex
           alignItems='center'
           justifyContent='space-between'
