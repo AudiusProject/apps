@@ -27,7 +27,7 @@ import { TokenPicker } from './TokenPicker'
 const messages = {
   paymentMethod: 'Payment Method',
   withExistingBalance: 'Balance (USDC)',
-  withCard: 'Credit/Debit Card',
+  withCard: 'Credit/Debit/Bank Account',
   withCrypto: 'USDC Transfer',
   withAnything: 'Pay with Anything',
   withAnythingHelperText: 'Pay with any Solana (SPL) token',
