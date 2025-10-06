@@ -35,7 +35,6 @@ import { env } from 'app/services/env'
 
 import { GradientText, TokenIcon, Screen } from '../../components/core'
 
-const PAGE_SIZE = 50
 const COIN_ROW_HEIGHT = 50 // Estimated height for FlashList optimization
 
 type CoinRowProps = {
@@ -131,10 +130,6 @@ export const ArtistCoinsExploreScreen = () => {
   const [sortDirection, setSortDirection] = useState<GetCoinsSortDirectionEnum>(
     GetCoinsSortDirectionEnum.Desc
   )
-  const [offset, setOffset] = useState(0)
-  const [allCoins, setAllCoins] = useState<Coin[]>([])
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoadingNewSearch, setIsLoadingNewSearch] = useState(false)
 
   // Set status bar to light content for dark header
   useStatusBarStyle('light-content')
@@ -143,53 +138,27 @@ export const ArtistCoinsExploreScreen = () => {
   useDebounce(
     () => {
       setDebouncedSearchValue(searchValue)
-      setIsLoadingNewSearch(false)
     },
     300,
     [searchValue]
   )
 
   const {
-    data: coinsData,
+    data: coins,
     isPending,
-    isFetching
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
   } = useArtistCoins({
     sortMethod,
     sortDirection,
-    query: debouncedSearchValue,
-    limit: PAGE_SIZE,
-    offset
+    query: debouncedSearchValue
   })
 
-  // Accumulate coins when new data arrives
-  useEffect(() => {
-    if (coinsData) {
-      const filteredCoins = coinsData.filter(
-        (coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS
-      )
-
-      if (offset === 0) {
-        // First page - replace all coins
-        setAllCoins(filteredCoins)
-      } else {
-        // Subsequent pages - append new coins
-        setAllCoins((prev) => [...prev, ...filteredCoins])
-      }
-
-      // Check if we have more data
-      setHasMore(filteredCoins.length > 0)
-    }
-  }, [coinsData, offset])
-
-  // Reset pagination when search or sort changes
-  useEffect(() => {
-    setOffset(0)
-    setAllCoins([])
-    setHasMore(true)
-    setIsLoadingNewSearch(true)
-  }, [searchValue, sortMethod, sortDirection])
-
-  const coins = allCoins
+  // Filter out WAUDIO
+  const allCoins =
+    coins?.filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS) ?? []
 
   const handleCoinPress = useCallback(
     (ticker?: string) => {
@@ -208,10 +177,10 @@ export const ArtistCoinsExploreScreen = () => {
   }, [navigation, sortMethod, sortDirection])
 
   const handleLoadMore = useCallback(() => {
-    if (!isFetching && hasMore && coinsData && coinsData.length === PAGE_SIZE) {
-      setOffset((prev) => prev + PAGE_SIZE)
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage()
     }
-  }, [isFetching, hasMore, coinsData])
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage])
 
   useEffect(() => {
     const routeParams = route.params as any
@@ -224,7 +193,7 @@ export const ArtistCoinsExploreScreen = () => {
   }, [route.params])
 
   const shouldShowNoCoinsContent =
-    !isPending && !isFetching && !isLoadingNewSearch && coins.length === 0
+    !isPending && !isFetching && allCoins.length === 0
 
   const renderCoinRow: ListRenderItem<Coin> = useCallback(
     ({ item }) => (
@@ -236,7 +205,7 @@ export const ArtistCoinsExploreScreen = () => {
   const keyExtractor = useCallback((coin: Coin) => coin.mint, [])
 
   const renderFooter = useCallback(() => {
-    if (isFetching && offset > 0) {
+    if (isFetchingNextPage) {
       return (
         <Flex justifyContent='center' alignItems='center' p='l'>
           <LoadingSpinner />
@@ -244,8 +213,7 @@ export const ArtistCoinsExploreScreen = () => {
       )
     }
     return null
-  }, [isFetching, offset])
-
+  }, [isFetchingNextPage])
   return (
     <Screen
       header={() => (
@@ -281,7 +249,7 @@ export const ArtistCoinsExploreScreen = () => {
           </TouchableOpacity>
         </Flex>
         <Divider orientation='horizontal' />
-        {(isPending && offset === 0) || isLoadingNewSearch ? (
+        {isPending ? (
           <Flex justifyContent='center' alignItems='center' p='4xl'>
             <LoadingSpinner />
           </Flex>
@@ -289,7 +257,7 @@ export const ArtistCoinsExploreScreen = () => {
           <NoCoinsContent />
         ) : (
           <FlashList
-            data={coins}
+            data={allCoins}
             renderItem={renderCoinRow}
             keyExtractor={keyExtractor}
             estimatedItemSize={COIN_ROW_HEIGHT}
