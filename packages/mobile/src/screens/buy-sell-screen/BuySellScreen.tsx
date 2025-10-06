@@ -1,17 +1,18 @@
 import React from 'react'
 
 import { buySellMessages as messages } from '@audius/common/messages'
+import { css } from '@emotion/native'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Flex } from '@audius/harmony-native'
+import { Flex, Paper, spacing } from '@audius/harmony-native'
 import {
   Screen,
   ScreenContent,
-  FixedFooter,
   ScrollView,
   KeyboardAvoidingView
 } from 'app/components/core'
-// import { FIXED_FOOTER_HEIGHT } from 'app/components/core/FixedFooter'
+import { FIXED_FOOTER_HEIGHT } from 'app/components/core/FixedFooter'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import type { BuySellScreenParams } from '../../types/navigation'
@@ -29,7 +30,6 @@ export const BuySellScreen = ({ route }: BuySellScreenProps) => {
   const navigation = useNavigation()
   const { params } = route
   const insets = useSafeAreaInsets()
-  // const { keyboardHeight, keyboardShown } = useKeyboard()
 
   const handleClose = () => {
     navigation.goBack()
@@ -41,18 +41,18 @@ export const BuySellScreen = ({ route }: BuySellScreenProps) => {
     coinTicker: params?.coinTicker
   })
 
-  // We need to account for the FixedFooter's height and the safe area insets.
-  // Additionally, when the keyboard is shown, we need to add the keyboard height
-  // so the content scrolls above the keyboard.
-  // const dynamicPaddingBottom =
-  //   insets.bottom + (keyboardShown ? keyboardHeight : 0)
   return (
     <Screen title={messages.title} variant='white' url='/buy-sell'>
       <ScreenContent>
         <ScrollView
-          style={{ flex: 1 }}
+          style={{
+            flex: 1
+          }}
           contentContainerStyle={{
-            flexGrow: 1
+            flexGrow: 1,
+            // On Android, make sure the content can clear the foot when the keyboard is shown
+            // (On iOS, KeyboardAvoidingView handles this)
+            paddingBottom: Platform.OS === 'android' ? FIXED_FOOTER_HEIGHT : 0
           }}
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
@@ -63,14 +63,30 @@ export const BuySellScreen = ({ route }: BuySellScreenProps) => {
             keyboardShowingOffset={insets.bottom}
           >
             <PoweredByJupiter />
-            <Flex mt='xl' p='l'>
+            <Flex mt='xl' p='l' style={{ flex: 1 }}>
               {flowData.content}
             </Flex>
           </KeyboardAvoidingView>
         </ScrollView>
-        <FixedFooter>{flowData.footer}</FixedFooter>
+        {/* Render footer outside scrollview so it doesn't move around when we adjust padding */}
+        <Paper
+          p='l'
+          justifyContent='center'
+          gap='s'
+          alignItems='center'
+          direction='column'
+          shadow='midInverted'
+          style={css({
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            borderRadius: 0,
+            paddingBottom: insets.bottom === 0 ? spacing.l : insets.bottom
+          })}
+        >
+          {flowData.footer}
+        </Paper>
       </ScreenContent>
-      {/* <FixedFooter avoidKeyboard>{flowData.footer}</FixedFooter> */}
     </Screen>
   )
 }
