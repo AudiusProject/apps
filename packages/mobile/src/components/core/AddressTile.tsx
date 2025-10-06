@@ -32,7 +32,7 @@ export const AddressTile = ({ address, analytics }: AddressTileProps) => {
     <Flex row border='default' borderRadius='s' backgroundColor='surface1'>
       <Flex pv='l' ph='xl' flex={1}>
         <Text variant='body'>
-          {address ? shortenSPLAddress(address, 8) : ''}
+          {address ? shortenSPLAddress(address, 10) : ''}
         </Text>
       </Flex>
       <Flex
