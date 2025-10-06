@@ -187,19 +187,19 @@ const DesktopArtistCoinsExplorePage = () => {
                 </Flex>
 
                 {/* With absolute positioning, must be rendered after the checklist items to have higher z-index */}
-                <PlainButton
-                  iconLeft={IconQuestionCircle}
-                  asChild
-                  css={{
-                    position: 'absolute',
-                    top: spacing.l,
-                    right: spacing.l
-                  }}
-                >
-                  <ExternalLink to={AUDIUS_ARTIST_COINS_HELP_LINK}>
+                <ExternalLink to={AUDIUS_ARTIST_COINS_HELP_LINK}>
+                  <PlainButton
+                    iconLeft={IconQuestionCircle}
+                    asChild
+                    css={{
+                      position: 'absolute',
+                      top: spacing.l,
+                      right: spacing.l
+                    }}
+                  >
                     {messages.help}
-                  </ExternalLink>
-                </PlainButton>
+                  </PlainButton>
+                </ExternalLink>
               </Box>
             </Flex>
           </Paper>
