@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
-import { useArtistCoins } from '@audius/common/api'
+import { makeLoadNextPage, useArtistCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { useBuySellModal } from '@audius/common/store'
 import {
@@ -310,18 +310,22 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const [sortDirection, setSortDirection] = useState<GetCoinsSortDirectionEnum>(
     GetCoinsSortDirectionEnum.Desc
   )
-  const [page, setPage] = useState(0)
 
-  const { data: coinsData, isPending } = useArtistCoins({
+  const queryResult = useArtistCoins({
     sortMethod,
     sortDirection,
     query: searchQuery,
-    limit: ARTIST_COINS_BATCH_SIZE,
-    offset: page * ARTIST_COINS_BATCH_SIZE
+    pageSize: ARTIST_COINS_BATCH_SIZE
   })
+
+  const { data: coinsData, isPending } = queryResult
   const coins = coinsData?.filter(
     (coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS
   )
+
+  const loadNextPage = useCallback(() => {
+    makeLoadNextPage(queryResult)()
+  }, [queryResult])
 
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
@@ -379,10 +383,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     }
   }, [])
 
-  const fetchMore = useCallback((offset: number) => {
-    setPage(Math.floor(offset / ARTIST_COINS_BATCH_SIZE))
-  }, [])
-
   const onSort = useCallback(
     (method: string, direction: string) => {
       const newSortMethod = sortMethodMap[method] ?? sortMethod
@@ -390,9 +390,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
 
       setSortMethod(newSortMethod)
       setSortDirection(newSortDirection)
-
-      // Reset page when sorting changes
-      setPage(0)
     },
     [sortMethod, sortDirection]
   )
@@ -477,7 +474,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
         onSort={onSort}
         onClickRow={handleRowClick}
         isEmptyRow={isEmptyRow}
-        fetchMore={fetchMore}
+        fetchMore={loadNextPage}
         fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
         tableHeaderClassName={styles.tableHeader}
         scrollRef={mainContentRef}

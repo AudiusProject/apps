@@ -23,6 +23,8 @@ export type UseArtistCoinsListParams = {
   query?: string
 }
 
+const DEFAULT_PAGE_SIZE = 25
+
 export const getArtistCoinsListQueryKey = (params?: UseArtistCoinsListParams) =>
   [QUERY_KEYS.coins, 'list', params] as unknown as QueryKey<Coin[]>
 
@@ -93,7 +95,7 @@ export const useArtistCoins = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
-  const pageSize = params.pageSize ?? 25
+  const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE
 
   return useInfiniteQuery({
     queryKey: getArtistCoinsQueryKey(params),
