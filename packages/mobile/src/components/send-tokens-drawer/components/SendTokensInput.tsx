@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 
 import {
   useArtistCoin,
@@ -6,6 +6,7 @@ import {
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { FixedDecimal } from '@audius/fixed-decimal'
+import { Keyboard } from 'react-native'
 
 import { Button, Divider, Flex, Text, TextInput } from '@audius/harmony-native'
 import { BalanceSection } from 'app/components/core'
@@ -38,6 +39,29 @@ export const SendTokensInput = ({
     amount: '',
     address: ''
   })
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  // Listen to keyboard events to adjust content height
+  useEffect(() => {
+    const keyboardWillShowListener = Keyboard.addListener(
+      'keyboardWillShow',
+      (event) => {
+        setKeyboardHeight(event.endCoordinates.height)
+      }
+    )
+
+    const keyboardWillHideListener = Keyboard.addListener(
+      'keyboardWillHide',
+      () => {
+        setKeyboardHeight(0)
+      }
+    )
+
+    return () => {
+      keyboardWillShowListener.remove()
+      keyboardWillHideListener.remove()
+    }
+  }, [])
 
   const validateInputs = useCallback(() => {
     const newErrors = { amount: '', address: '' }
@@ -82,7 +106,12 @@ export const SendTokensInput = ({
   }, [validateInputs, tokenInfo, amount, destinationAddress, onContinue])
 
   return (
-    <Flex gap='xl' ph='xl' pb='xl'>
+    <Flex
+      gap='xl'
+      ph='xl'
+      pb='xl'
+      style={{ minHeight: keyboardHeight > 0 ? keyboardHeight + 400 : 'auto' }}
+    >
       <BalanceSection mint={mint} />
       <Divider />
 
