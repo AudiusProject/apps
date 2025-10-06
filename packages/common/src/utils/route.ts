@@ -220,8 +220,8 @@ export const AUDIUS_PODCAST_LINK =
 export const AUDIUS_CYPHER_LINK = 'https://discord.gg/audius'
 export const AUDIUS_API_LINK = 'https://audius.org/api'
 
-export const AUDIUS_TOKENS_HELP_LINK =
-  'https://support.audius.co/product/tokens'
+export const AUDIUS_ARTIST_COINS_HELP_LINK =
+  'https://help.audius.co/product/artist-coins'
 
 // Dexscreener Links
 export const DEXSCREENER_BASE_URL = 'https://dexscreener.com'

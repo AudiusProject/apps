@@ -86,7 +86,7 @@ export const ReceiveTokensModal = () => {
       icon={IconError}
       actions={
         <ExternalTextLink
-          to={route.AUDIUS_TOKENS_HELP_LINK}
+          to={route.AUDIUS_ARTIST_COINS_HELP_LINK}
           variant='visible'
           showUnderline
         >

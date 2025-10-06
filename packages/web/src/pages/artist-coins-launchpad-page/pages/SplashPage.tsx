@@ -1,6 +1,7 @@
 import { useCurrentAccountUser } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
+import { AUDIUS_ARTIST_COINS_HELP_LINK } from '@audius/common/src/utils/route'
 import {
   Button,
   LoadingSpinner,
@@ -14,6 +15,7 @@ import {
 import gift from 'assets/fonts/emojis/gift.png'
 import globe from 'assets/fonts/emojis/globe.png'
 import moneyWithWingsEmoji from 'assets/fonts/emojis/money-with-wings.png'
+import { ExternalLink } from 'components/link'
 import { Tooltip } from 'components/tooltip'
 
 import { WalletSetupCard, WhyCreateCard } from '../components/index'
@@ -35,7 +37,9 @@ const messages = {
   launchPanelDescription2:
     'It only takes a few steps to set things up and share it with your fans.',
   launchPanelButtonText: 'Get Started!',
-  verifiedOnlyTooltip: 'Verified users only'
+  verifiedOnlyTooltip: 'Verified users only',
+  newToArtistCoins: 'New to Artist Coins?',
+  clickHere: 'Click Here'
 }
 
 const features = [
@@ -138,6 +142,12 @@ export const SplashPage = ({ onContinue, isPending }: SplashPageProps) => {
               </Text>
               <Text variant='body' color='subdued'>
                 {messages.launchPanelDescription2}
+              </Text>
+              <Text variant='body' size='s'>
+                {messages.newToArtistCoins}{' '}
+                <ExternalLink to={AUDIUS_ARTIST_COINS_HELP_LINK}>
+                  {messages.clickHere}
+                </ExternalLink>
               </Text>
             </Flex>
 

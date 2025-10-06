@@ -110,7 +110,7 @@ export const ReceiveTokensDrawer = () => {
         <Hint
           icon={IconError}
           actions={
-            <TextLink url={route.AUDIUS_TOKENS_HELP_LINK}>
+            <TextLink url={route.AUDIUS_ARTIST_COINS_HELP_LINK}>
               <Text color='accent'>
                 {walletMessages.receiveTokensLearnMore}
               </Text>

@@ -4,7 +4,10 @@ import { useCurrentAccountUser, useUserCreatedCoins } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
-import { COINS_CREATE_PAGE } from '@audius/common/src/utils/route'
+import {
+  COINS_CREATE_PAGE,
+  AUDIUS_ARTIST_COINS_HELP_LINK
+} from '@audius/common/src/utils/route'
 import {
   Box,
   Button,
@@ -193,7 +196,7 @@ const DesktopArtistCoinsExplorePage = () => {
                     right: spacing.l
                   }}
                 >
-                  <ExternalLink to='https://help.audius.co/'>
+                  <ExternalLink to={AUDIUS_ARTIST_COINS_HELP_LINK}>
                     {messages.help}
                   </ExternalLink>
                 </PlainButton>
