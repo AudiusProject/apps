@@ -1,3 +1,4 @@
+import { AUDIUS_ARTIST_COINS_HELP_LINK } from '@audius/common/src/utils/route'
 import { Flex, IconCheck, Paper, Text, TextLink } from '@audius/harmony'
 
 import { useLaunchpadAnalytics } from '../utils'
@@ -61,6 +62,7 @@ export const WalletSetupCard = () => {
         <TextLink
           size='m'
           variant='active'
+          href={AUDIUS_ARTIST_COINS_HELP_LINK}
           onClick={trackSplashLearnMoreClicked}
         >
           {messages.learnMore}
