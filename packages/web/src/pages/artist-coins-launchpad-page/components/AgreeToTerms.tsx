@@ -1,9 +1,9 @@
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { Checkbox, Flex, Text } from '@audius/harmony'
+import { Checkbox, Flex, Text, TextLink } from '@audius/harmony'
 import { Field, useFormikContext } from 'formik'
 
-import { ExternalTextLink } from 'components/link'
+// import { TextLink } from 'components/link'
 
 const messages = {
   termsText: 'By checking this box I agree to the latest',
@@ -30,20 +30,21 @@ export const AgreeToTerms = () => {
       </Field>
       <Text variant='body' size='m' color='default'>
         {messages.termsText}{' '}
-        <ExternalTextLink to={route.TERMS_OF_SERVICE} variant='visible'>
+        <TextLink isExternal href={route.TERMS_OF_SERVICE} variant='visible'>
           {messages.termsOfService}
-        </ExternalTextLink>
+        </TextLink>
         , the{' '}
-        <ExternalTextLink to={route.ARTIST_COIN_TERMS} variant='visible'>
+        <TextLink isExternal href={route.ARTIST_COIN_TERMS} variant='visible'>
           {messages.artistCoinsTerms}
-        </ExternalTextLink>
+        </TextLink>
         , and the{' '}
-        <ExternalTextLink
-          to={route.ARTIST_COIN_ACCEPTABLE_USE}
+        <TextLink
+          isExternal
+          href={route.ARTIST_COIN_ACCEPTABLE_USE}
           variant='visible'
         >
           {messages.artistCoinAcceptableUse}
-        </ExternalTextLink>
+        </TextLink>
         .
       </Text>
     </Flex>

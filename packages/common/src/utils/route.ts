@@ -10,6 +10,7 @@ import { convertGenreLabelToValue, Genre } from './genres'
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
 export const ARTIST_COIN_TERMS = '/legal/artist-coin-terms'
+export const ARTIST_COIN_ACCEPTABLE_USE = '/legal/artist-coin-acceptable-use'
 export const API_TERMS = '/legal/api-terms'
 export const DOWNLOAD_START_LINK = '/download?start_download=true'
 export const DOWNLOAD_LINK = '/download'
@@ -212,8 +213,6 @@ export const AUDIUS_HOT_AND_NEW =
 export const AUDIUS_HELP_LINK = 'https://help.audius.co/'
 export const AUDIUS_ARTIST_COIN_HELP_LINK =
   'https://help.audius.co/product/artist-coins'
-export const ARTIST_COIN_ACCEPTABLE_USE =
-  'http://audius.co/legal/artist-coin-acceptable-use'
 
 export const AUDIUS_CAREERS_LINK = 'https://www.tikilabs.com/careers'
 export const AUDIUS_PODCAST_LINK =
@@ -263,6 +262,7 @@ export const publicSiteRoutes = [
   PRIVACY_POLICY,
   API_TERMS,
   ARTIST_COIN_TERMS,
+  ARTIST_COIN_ACCEPTABLE_USE,
   DOWNLOAD_LINK,
   AUTH_REDIRECT
 ]
