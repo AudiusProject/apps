@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useDebouncedCallback } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
-import { useTokenAmountFormatting } from '@audius/common/store'
+import {
+  TokenInfo,
+  useAddCashModal,
+  useTokenAmountFormatting
+} from '@audius/common/store'
 import {
   sanitizeNumericInput,
   formatTokenInputWithSmartDecimals
@@ -14,7 +17,8 @@ import {
   Text,
   TextInput,
   IconInfo,
-  TextInputSize
+  TextInputSize,
+  TextLink
 } from '@audius/harmony'
 
 import { Tooltip } from 'components/tooltip'
@@ -61,6 +65,8 @@ export const InputTokenSection = ({
   const { symbol, isStablecoin } = tokenInfo
   const [localAmount, setLocalAmount] = useState(amount || '')
 
+  const { onOpen: openAddCashModal } = useAddCashModal()
+
   const { formattedAvailableBalance } = useTokenAmountFormatting({
     amount,
     availableBalance,
@@ -104,23 +110,30 @@ export const InputTokenSection = ({
         </Text>
 
         {formattedAvailableBalance ? (
-          <Flex alignItems='center' gap='xs'>
-            <TokenIcon
-              logoURI={tokenInfo.logoURI}
-              icon={tokenInfo.icon}
-              size='s'
-              hex
-            />
-            <Text variant='body' size='m' strength='strong'>
-              {messages.formattedAvailableBalance(
-                formattedAvailableBalance,
-                symbol,
-                !!isStablecoin
-              )}
-            </Text>
-            <Tooltip text={messages.availableBalanceTooltip} mount='body'>
-              <IconInfo color='subdued' size='s' />
-            </Tooltip>
+          <Flex column alignItems='flex-end'>
+            <Flex alignItems='center' gap='xs'>
+              <TokenIcon
+                logoURI={tokenInfo.logoURI}
+                icon={tokenInfo.icon}
+                size='s'
+                hex
+              />
+
+              <Text variant='body' size='m' strength='strong'>
+                {messages.formattedAvailableBalance(
+                  formattedAvailableBalance,
+                  symbol,
+                  !!isStablecoin
+                )}
+              </Text>
+
+              <Tooltip text={messages.availableBalanceTooltip} mount='body'>
+                <IconInfo color='subdued' size='s' />
+              </Tooltip>
+            </Flex>
+            <TextLink onClick={() => openAddCashModal()} variant='active'>
+              {messages.addCash}
+            </TextLink>
           </Flex>
         ) : null}
       </Flex>
