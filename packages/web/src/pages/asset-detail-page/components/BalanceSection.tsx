@@ -3,8 +3,7 @@ import { useCallback, useState } from 'react'
 import {
   useArtistCoin,
   useCurrentAccountUser,
-  useTokenBalance,
-  useUSDCBalance
+  useTokenBalance
 } from '@audius/common/api'
 import {
   useFormattedTokenBalance,
@@ -12,7 +11,6 @@ import {
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import {
-  useAddCashModal,
   useBuySellModal,
   useReceiveTokensModal,
   useSendTokensModal
@@ -263,13 +261,10 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
     useTokenBalance({ mint })
   const { data: currentUser } = useCurrentAccountUser()
 
-  const { data: usdcBalance } = useUSDCBalance()
-
   const { isBuySellSupported } = useBuySellRegionSupport()
 
   // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
-  const { onOpen: openAddCashModal } = useAddCashModal()
   const [, openTransferDrawer] = useModalState('TransferAudioMobileWarning')
   const { onOpen: openReceiveTokensModal } = useReceiveTokensModal()
   const { onOpen: openSendTokensModal } = useSendTokensModal()
@@ -292,14 +287,8 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   }, [openBuySellModal])
 
   const handleAddCash = useRequiresAccountCallback(() => {
-    if (usdcBalance && usdcBalance > 0) {
-      // Has USDC balance - show buy/sell modal
-      openBuySellModal()
-    } else {
-      // No USDC balance - show add cash modal (uses Coinflow)
-      openAddCashModal()
-    }
-  }, [openAddCashModal, openBuySellModal, usdcBalance])
+    openBuySellModal()
+  }, [openBuySellModal])
 
   const handleReceive = useRequiresAccountCallback(() => {
     openReceiveTokensModal({
