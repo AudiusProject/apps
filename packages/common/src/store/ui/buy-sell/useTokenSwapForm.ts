@@ -245,7 +245,8 @@ export const useTokenSwapForm = ({
       isValid: swapValidation.isValid,
       error,
       isInsufficientBalance,
-      exchangeRate: currentExchangeRate
+      exchangeRate: currentExchangeRate,
+      isExchangeRateLoading
     }),
     [
       numericInputAmount,
@@ -253,7 +254,8 @@ export const useTokenSwapForm = ({
       swapValidation.isValid,
       error,
       isInsufficientBalance,
-      currentExchangeRate
+      currentExchangeRate,
+      isExchangeRateLoading
     ]
   )
 

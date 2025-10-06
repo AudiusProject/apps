@@ -328,7 +328,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   const handleContinueClick = () => {
     setHasAttemptedSubmit(true)
-    if (transactionData?.isValid && !isContinueButtonLoading) {
+    if (
+      transactionData?.isValid &&
+      !isContinueButtonLoading &&
+      !transactionData?.isExchangeRateLoading
+    ) {
       // Track swap requested
       trackSwapRequested({
         activeTab,
@@ -495,7 +499,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
           <Button
             variant='primary'
             fullWidth
-            isLoading={isContinueButtonLoading}
+            isLoading={
+              isContinueButtonLoading || transactionData?.isExchangeRateLoading
+            }
+            disabled={transactionData?.isExchangeRateLoading}
             onClick={handleContinueClick}
           >
             {messages.continue}
