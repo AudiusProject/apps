@@ -110,6 +110,7 @@ export const SendTokensInput = ({
       gap='xl'
       ph='xl'
       pb='xl'
+      // Ensure the keyboard doesn't cover the input
       style={{ minHeight: keyboardHeight > 0 ? keyboardHeight + 400 : 'auto' }}
     >
       <BalanceSection mint={mint} />
