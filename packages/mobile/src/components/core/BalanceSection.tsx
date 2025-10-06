@@ -12,23 +12,28 @@ export type BalanceSectionProps = {
   /** Mint address for fetching balance */
   mint?: string
   /** Whether to enable polling for balance updates */
-
   isPolling?: boolean
   /** Interval for polling in milliseconds */
   pollingInterval?: number
+  /** Whether to show only internal wallet balance (excludes external wallets and staked) */
+  internalWalletOnly?: boolean
 }
 
 export const BalanceSection = ({
   mint,
   isPolling,
-  pollingInterval
+  pollingInterval,
+  internalWalletOnly = false
 }: BalanceSectionProps) => {
   const { tokenBalanceFormatted } = useFormattedTokenBalance(
     mint ?? '',
     'en-US',
     isPolling,
-    pollingInterval
+    pollingInterval,
+    !internalWalletOnly, // includeExternalWallets
+    !internalWalletOnly // includeStaked
   )
+
   const { data: coin } = useArtistCoin(mint)
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 

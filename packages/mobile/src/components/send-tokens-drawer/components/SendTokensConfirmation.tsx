@@ -41,7 +41,7 @@ export const SendTokensConfirmation = ({
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
-      <BalanceSection mint={mint} />
+      <BalanceSection mint={mint} internalWalletOnly />
       <Divider />
 
       <Flex gap='l' flex={1}>

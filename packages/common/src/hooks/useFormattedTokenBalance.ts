@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 
 import { FixedDecimal } from '@audius/fixed-decimal'
 
-import { useTokenBalance, useArtistCoin } from '../api'
+import { useTokenBalance } from '../api'
+import { useArtistCoin } from '../api/tan-query/coins/useArtistCoin'
 import {
   getTokenDecimalPlaces,
   formatCurrencyWithSubscript,
@@ -28,19 +29,25 @@ type UseFormattedTokenBalanceReturn = {
  * @param locale - Locale for number formatting (defaults to 'en-US')
  * @param isPolling - Whether to enable polling for balance updates
  * @param pollingInterval - Interval for polling in milliseconds (defaults to 3000ms)
+ * @param includeExternalWallets - Whether to include external wallet balances (defaults to true)
+ * @param includeStaked - Whether to include staked balances (defaults to true)
  * @returns Object with formatted balance, price, and loading states
  */
 export const useFormattedTokenBalance = (
   mint: string,
   locale: string = 'en-US',
   isPolling?: boolean,
-  pollingInterval?: number
+  pollingInterval?: number,
+  includeExternalWallets: boolean = true,
+  includeStaked: boolean = true
 ): UseFormattedTokenBalanceReturn => {
   const { data: tokenBalance, isPending: isTokenBalanceLoading } =
     useTokenBalance({
       mint,
       isPolling,
-      pollingInterval
+      pollingInterval,
+      includeExternalWallets,
+      includeStaked
     })
 
   const { data, isPending: isTokenPriceLoading } = useArtistCoin(mint)
