@@ -22,6 +22,7 @@ export const Frosted = ({
   return (
     <Flex
       css={{
+        flexDirection: 'column',
         backdropFilter: 'blur(10px)',
         zIndex: 10,
         position: 'relative',
