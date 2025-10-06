@@ -160,7 +160,7 @@ export const EditCoinDetailsPage = () => {
     data: coin,
     isPending,
     isSuccess,
-    error: coinError
+    isError
   } = useArtistCoinByTicker({ ticker })
 
   const [submitError, setSubmitError] = useState<string | undefined>(undefined)
@@ -243,8 +243,13 @@ export const EditCoinDetailsPage = () => {
     />
   )
 
-  if (!ticker || (coin && currentUserId !== coin.ownerId)) {
-    return <Redirect to='/wallet' />
+  if (
+    !ticker ||
+    (coin && currentUserId !== coin.ownerId) ||
+    isError ||
+    (isSuccess && !coin)
+  ) {
+    return <Redirect to='/coins' />
   }
 
   if (isPending) {
@@ -253,10 +258,6 @@ export const EditCoinDetailsPage = () => {
         <LoadingSpinner />
       </Flex>
     )
-  }
-
-  if (coinError || (isSuccess && !coin)) {
-    return <Redirect to='/wallet' />
   }
 
   return (
