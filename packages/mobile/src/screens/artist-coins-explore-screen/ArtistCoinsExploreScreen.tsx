@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import {
@@ -144,7 +144,7 @@ export const ArtistCoinsExploreScreen = () => {
   )
 
   const {
-    data,
+    data: coins,
     isPending,
     isFetching,
     fetchNextPage,
@@ -156,13 +156,9 @@ export const ArtistCoinsExploreScreen = () => {
     query: debouncedSearchValue
   })
 
-  // Flatten all pages and filter out WAUDIO
-  const allCoins = useMemo(() => {
-    if (!data?.pages) return []
-    return data.pages
-      .flat()
-      .filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS)
-  }, [data?.pages])
+  // Filter out WAUDIO
+  const allCoins =
+    coins?.filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS) ?? []
 
   const handleCoinPress = useCallback(
     (ticker?: string) => {

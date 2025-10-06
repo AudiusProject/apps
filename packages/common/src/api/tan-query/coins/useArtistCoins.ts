@@ -83,12 +83,12 @@ export const useArtistCoins = (
     UseInfiniteQueryOptions<
       Coin[],
       Error,
-      InfiniteData<Coin[], number>,
+      Coin[],
       Coin[],
       QueryKey<InfiniteData<Coin[], number>>,
       number
     >,
-    'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam'
+    'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam' | 'select'
   >
 ) => {
   const { audiusSdk } = useQueryContext()
@@ -132,6 +132,7 @@ export const useArtistCoins = (
       return allPages.length * pageSize
     },
     enabled: options?.enabled !== false,
+    select: (data) => data.pages.flat(),
     ...options
   })
 }
