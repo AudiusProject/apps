@@ -3,8 +3,6 @@ import { route } from '@audius/common/utils'
 import { Checkbox, Flex, Text, TextLink } from '@audius/harmony'
 import { Field, useFormikContext } from 'formik'
 
-// import { TextLink } from 'components/link'
-
 const messages = {
   termsText: 'By checking this box I agree to the latest',
   termsOfService: 'terms of service',
