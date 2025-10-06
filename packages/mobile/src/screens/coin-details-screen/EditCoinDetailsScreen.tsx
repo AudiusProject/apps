@@ -146,7 +146,7 @@ export const EditCoinDetailsScreen = () => {
     data: coin,
     isPending,
     isSuccess,
-    error: coinError
+    isError
   } = useArtistCoinByTicker({ ticker })
 
   const updateCoinMutation = useUpdateArtistCoin()
@@ -208,7 +208,12 @@ export const EditCoinDetailsScreen = () => {
     initialValues
   )
 
-  if (!ticker || (coin && currentUserId !== coin.ownerId)) {
+  if (
+    !ticker ||
+    (coin && currentUserId !== coin.ownerId) ||
+    isError ||
+    (isSuccess && !coin)
+  ) {
     navigation.goBack()
     return null
   }
@@ -222,12 +227,6 @@ export const EditCoinDetailsScreen = () => {
       </Screen>
     )
   }
-
-  if (coinError || (isSuccess && !coin)) {
-    navigation.goBack()
-    return null
-  }
-
   return (
     <Formik {...formConfiguration}>
       {({ handleSubmit: formikSubmit }) => (
