@@ -21,8 +21,8 @@ export const Frosted = ({
   }, [])
   return (
     <Flex
+      column
       css={{
-        flexDirection: 'column',
         backdropFilter: 'blur(10px)',
         zIndex: 10,
         position: 'relative',
