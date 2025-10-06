@@ -5,13 +5,13 @@ import {
   useArtistCoin,
   useUser,
   useUserCoins,
-  useConnectedWallets,
   useCurrentAccountUser
 } from '@audius/common/api'
-import { useDiscordOAuthLink } from '@audius/common/hooks'
+import { useDiscordOAuthLink, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { Feature, WidthSizes } from '@audius/common/models'
 import {
+  formatCurrencyWithSubscript,
   getTokenDecimalPlaces,
   removeNullable,
   route,
@@ -39,6 +39,7 @@ import {
 import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ExternalLink } from 'components/link/ExternalLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
@@ -46,8 +47,8 @@ import Tooltip from 'components/tooltip/Tooltip'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
+import { useConnectWallets } from 'hooks/useConnectWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
-import { getLastConnectedSolWallet } from 'pages/artist-coins-launchpad-page/utils'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -280,6 +281,7 @@ const AssetDetailsSection = ({
   handleClaimFees,
   isClaimFeesDisabled
 }: AssetDetailsSectionProps) => {
+  const isManagerMode = useIsManagedAccount()
   return (
     <Flex
       direction='column'
@@ -299,7 +301,10 @@ const AssetDetailsSection = ({
           <Text variant='body' size='s' strength='strong'>
             {overflowMessages.vestingSchedule}
           </Text>
-          <Tooltip text={overflowMessages.vestingSchedule} mount='body'>
+          <Tooltip
+            text={overflowMessages.tooltips.vestingSchedule}
+            mount='body'
+          >
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
@@ -316,7 +321,7 @@ const AssetDetailsSection = ({
           <Text variant='body' size='s' strength='strong'>
             {overflowMessages.artistEarnings}
           </Text>
-          <Tooltip text={overflowMessages.artistEarnings} mount='body'>
+          <Tooltip text={overflowMessages.tooltips.artistEarnings} mount='body'>
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
@@ -324,7 +329,7 @@ const AssetDetailsSection = ({
           {formattedTotalArtistEarnings} {overflowMessages.$audio}
         </Text>
       </Flex>
-      {isCoinCreator ? (
+      {isCoinCreator && !isManagerMode ? (
         <Flex
           alignItems='center'
           justifyContent='space-between'
@@ -334,7 +339,10 @@ const AssetDetailsSection = ({
             <Text variant='body' size='s' strength='strong'>
               {overflowMessages.unclaimedFees}
             </Text>
-            <Tooltip text={overflowMessages.unclaimedFees} mount='body'>
+            <Tooltip
+              text={overflowMessages.tooltips.unclaimedFees}
+              mount='body'
+            >
               <IconInfo size='s' color='subdued' />
             </Tooltip>
           </Flex>
@@ -380,13 +388,6 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
   const discordOAuthLink = useDiscordOAuthLink(userToken?.ticker)
   const { balance: userTokenBalance } = userToken ?? {}
 
-  // Get wallet addresses for claim fee
-  const { data: connectedWallets } = useConnectedWallets()
-  const externalSolWallet = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets),
-    [connectedWallets]
-  )
-
   // Claim fee hook
   const { mutate: claimFees, isPending: isClaimFeesPending } = useClaimFees({
     onSuccess: () => {
@@ -404,30 +405,31 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
           totalArtistEarnings
         }
       })
+      console.error(error)
       toast(toastMessages.feesClaimFailed)
     }
   })
 
   const unclaimedFees = coin?.dynamicBondingCurve?.creatorQuoteFee ?? 0
-  const formattedUnclaimedFees = useMemo(() => {
-    const value = wAUDIO(BigInt(unclaimedFees))
+
+  const formatFeeNumber = (input: number) => {
+    const value = wAUDIO(BigInt(input))
     const decimalPlaces = getTokenDecimalPlaces(Number(value.toString()))
-    return value.trunc(decimalPlaces).toLocaleString('en-US', {
-      maximumFractionDigits: decimalPlaces,
-      minimumFractionDigits: Math.min(decimalPlaces, 2)
-    })
+    return formatCurrencyWithSubscript(
+      Number(value.trunc(decimalPlaces).toString()),
+      'en-US',
+      ''
+    )
+  }
+  const formattedUnclaimedFees = useMemo(() => {
+    return formatFeeNumber(unclaimedFees)
   }, [unclaimedFees])
   const totalArtistEarnings =
     coin?.dynamicBondingCurve?.totalTradingQuoteFee ?? 0
-  const formattedTotalArtistEarnings = useMemo(() => {
-    // Here we divide by 2 because the artist only gets half of the fees (this value includes the AUDIO network fees)
-    const value = wAUDIO(BigInt(Math.trunc(totalArtistEarnings / 2)))
-    const decimalPlaces = getTokenDecimalPlaces(Number(value.toString()))
-    return value.trunc(decimalPlaces).toLocaleString('en-US', {
-      maximumFractionDigits: decimalPlaces,
-      minimumFractionDigits: Math.min(decimalPlaces, 2)
-    })
-  }, [totalArtistEarnings])
+  const formattedTotalArtistEarnings = useMemo(
+    () => formatFeeNumber(Math.trunc(totalArtistEarnings / 2)),
+    [totalArtistEarnings]
+  )
   const descriptionParagraphs = coin?.description?.split('\n') ?? []
 
   const openDiscord = () => {
@@ -447,29 +449,53 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     toast(overflowMessages.copiedToClipboard)
   }, [mint, toast])
 
-  const handleClaimFees = useCallback(() => {
-    if (!externalSolWallet || !mint || !currentUser?.wallet) {
-      toast(toastMessages.feesClaimFailed)
-      reportToSentry({
-        error: new Error('Unknown error while claiming fees'),
-        feature: Feature.ArtistCoins,
-        name: 'No external Solana wallet connected',
-        additionalInfo: {
-          coin,
-          mint,
-          externalSolWallet,
-          currentUser
-        }
+  const coinCreatorWalletAddress =
+    coin?.dynamicBondingCurve?.creatorWalletAddress
+  const handleClaimFees = useCallback(
+    (walletAddress: string) => {
+      claimFees({
+        tokenMint: mint,
+        externalWalletAddress: walletAddress
       })
+    },
+    [mint, claimFees]
+  )
+
+  const { openAppKitModal } = useConnectWallets(async () => {
+    const solanaAccount = appkitModal.getAccount('solana')
+    const connectedAddress = solanaAccount?.address
+
+    if (!coinCreatorWalletAddress) {
+      // If we hit this block the user has not launched the coin
+      toast(toastMessages.feesClaimFailed)
       return
     }
+    if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
+      // If we hit this block the user has not connected the wallet they used to launch the coin
+      toast(toastMessages.incorrectWalletLinked)
+      return
+    }
+    handleClaimFees(connectedAddress)
+  })
 
-    claimFees({
-      tokenMint: mint,
-      ownerWalletAddress: externalSolWallet.address,
-      ownerEthAddress: currentUser.wallet!
-    })
-  }, [externalSolWallet, mint, currentUser, claimFees, toast, coin])
+  const handleClaimFeesClick = useCallback(async () => {
+    const solanaAccount = appkitModal.getAccount('solana')
+    const connectedAddress = solanaAccount?.address
+
+    // appkit wallet is not connected, need to prompt connect flow first
+    if (!connectedAddress) {
+      openAppKitModal('solana')
+    } else if (connectedAddress !== coinCreatorWalletAddress) {
+      // If we hit this block the user has not connected the wallet they used to launch the coin
+      // Disconnect the current Solana wallet to allow connecting a different one
+      await appkitModal.disconnect('solana')
+      openAppKitModal('solana')
+    } else {
+      // appkit wallet is connected with the correct address,
+      // can just initiate claim fees flow immediately
+      handleClaimFees(connectedAddress)
+    }
+  }, [openAppKitModal, handleClaimFees, coinCreatorWalletAddress])
 
   if (isLoading || !coin) {
     return <AssetInfoSectionSkeleton />
@@ -604,8 +630,8 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
           unclaimedFees={unclaimedFees}
           formattedUnclaimedFees={formattedUnclaimedFees}
           isClaimFeesPending={isClaimFeesPending}
-          isClaimFeesDisabled={isClaimFeesPending || !externalSolWallet}
-          handleClaimFees={handleClaimFees}
+          isClaimFeesDisabled={isClaimFeesPending}
+          handleClaimFees={handleClaimFeesClick}
         />
       ) : null}
     </Paper>

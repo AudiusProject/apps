@@ -14,7 +14,6 @@ import {
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { useBuySellModal } from '@audius/common/store'
 import { route, ownedCoinsFilter } from '@audius/common/utils'
 import {
@@ -214,7 +213,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
 
   const handleCoinClick = useCallback(
     (ticker: string) => {
-      navigate(ASSET_DETAIL_PAGE.replace(':ticker', ticker))
+      navigate(route.coinPage(ticker))
     },
     [navigate]
   )

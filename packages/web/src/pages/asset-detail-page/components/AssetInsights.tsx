@@ -100,7 +100,7 @@ const GraduationProgressMetricRowComponent = ({
 
   const tooltipContent = (
     <Flex direction='column' gap='s' p='s'>
-      <Text variant='body' size='s'>
+      <Text variant='body' size='m'>
         {hasGraduated ? messages.postGraduation : messages.preGraduation}
       </Text>
     </Flex>

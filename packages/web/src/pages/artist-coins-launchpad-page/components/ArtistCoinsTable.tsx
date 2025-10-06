@@ -3,9 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Coin } from '@audius/common/adapters'
 import { useArtistCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { useBuySellModal } from '@audius/common/store'
-import { formatCurrencyWithSubscript, formatCount } from '@audius/common/utils'
+import {
+  route,
+  formatCurrencyWithSubscript,
+  formatCount
+} from '@audius/common/utils'
 import {
   Button,
   Flex,
@@ -40,7 +43,7 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
     return null
   }
 
-  const assetDetailUrl = ASSET_DETAIL_PAGE.replace(':ticker', coin.ticker)
+  const assetDetailUrl = route.coinPage(coin.ticker)
 
   return (
     <Flex
@@ -408,7 +411,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     (e: React.MouseEvent<HTMLTableRowElement>, rowInfo: any) => {
       const coin = rowInfo.original
       if (coin?.ticker) {
-        navigate(ASSET_DETAIL_PAGE.replace(':ticker', coin.ticker))
+        navigate(route.coinPage(coin.ticker))
       }
     },
     [navigate]

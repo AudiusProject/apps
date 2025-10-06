@@ -26,7 +26,7 @@ export const buySellMessages = {
     'Please review your transaction details. This action cannot be undone.',
   back: 'Back',
   confirm: 'Confirm',
-  poweredBy: 'POWERED BY',
+  poweredBy: 'Powered by',
   helpCenter: 'Check out our help center for more info!',
   walletGuide: 'Wallet Guide',
   selectPair: 'Select Token Pair',

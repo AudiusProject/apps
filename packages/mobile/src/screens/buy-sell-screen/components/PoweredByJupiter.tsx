@@ -10,6 +10,8 @@ export const PoweredByJupiter = () => {
       justifyContent='center'
       gap='l'
       p='l'
+      pv='m'
+      ph='xl'
       border='default'
       backgroundColor='surface1'
     >

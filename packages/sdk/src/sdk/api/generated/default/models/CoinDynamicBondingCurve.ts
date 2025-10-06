@@ -62,6 +62,12 @@ export interface CoinDynamicBondingCurve {
      * @memberof CoinDynamicBondingCurve
      */
     totalTradingQuoteFee: number;
+    /**
+     * Address of the pool creator's wallet
+     * @type {string}
+     * @memberof CoinDynamicBondingCurve
+     */
+    creatorWalletAddress: string;
 }
 
 /**
@@ -75,6 +81,7 @@ export function instanceOfCoinDynamicBondingCurve(value: object): value is CoinD
     isInstance = isInstance && "curveProgress" in value && value["curveProgress"] !== undefined;
     isInstance = isInstance && "creatorQuoteFee" in value && value["creatorQuoteFee"] !== undefined;
     isInstance = isInstance && "totalTradingQuoteFee" in value && value["totalTradingQuoteFee"] !== undefined;
+    isInstance = isInstance && "creatorWalletAddress" in value && value["creatorWalletAddress"] !== undefined;
 
     return isInstance;
 }
@@ -96,6 +103,7 @@ export function CoinDynamicBondingCurveFromJSONTyped(json: any, ignoreDiscrimina
         'isMigrated': !exists(json, 'isMigrated') ? undefined : json['isMigrated'],
         'creatorQuoteFee': json['creatorQuoteFee'],
         'totalTradingQuoteFee': json['totalTradingQuoteFee'],
+        'creatorWalletAddress': json['creatorWalletAddress'],
     };
 }
 
@@ -115,6 +123,7 @@ export function CoinDynamicBondingCurveToJSON(value?: CoinDynamicBondingCurve | 
         'isMigrated': value.isMigrated,
         'creatorQuoteFee': value.creatorQuoteFee,
         'totalTradingQuoteFee': value.totalTradingQuoteFee,
+        'creatorWalletAddress': value.creatorWalletAddress,
     };
 }
 

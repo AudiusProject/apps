@@ -12,6 +12,7 @@ import {
 } from '~/api/tan-query/utils/QueryContext'
 
 import { QUERY_KEYS } from '../queryKeys'
+import { combineQueryStatuses } from '../utils'
 
 import { useArtistCoin, getArtistCoinQueryKey } from './useArtistCoin'
 
@@ -100,10 +101,16 @@ export const useArtistCoinByTicker = (
   const context = useQueryContext()
   const queryClient = useQueryClient()
 
-  const { data: mint } = useQuery({
+  const mintQuery = useQuery({
     ...options,
     ...getArtistCoinByTickerOptions({ ...context, queryClient }, params)
   })
 
-  return useArtistCoin(mint!)
+  const coinQuery = useArtistCoin(mintQuery.data!)
+
+  // Return the coin query result, but surface errors from the mint lookup
+  return {
+    ...combineQueryStatuses([mintQuery, coinQuery]),
+    data: coinQuery.data
+  }
 }

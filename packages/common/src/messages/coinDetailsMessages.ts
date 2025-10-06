@@ -68,7 +68,7 @@ export const coinDetailsMessages = {
     copyCoinAddress: 'Copy Coin Address',
     unclaimedFees: 'Unclaimed Fees',
     artistEarnings: 'Artist Earnings',
-    vestingSchedule: 'Vesting Schedule',
+    vestingSchedule: 'Unlock Schedule',
     vestingScheduleValue: '5 years (post-graduation)',
     $audio: '$AUDIO',
     claim: 'Claim',
@@ -83,7 +83,15 @@ export const coinDetailsMessages = {
       artistHandle: string,
       coinAddress: string
     ) =>
-      `Check out @${artistHandle}'s artist coin $${coinTicker} on @Audius!\n\n${coinAddress}\n`
+      `Check out @${artistHandle}'s artist coin $${coinTicker} on @Audius!\n\n${coinAddress}\n`,
+    tooltips: {
+      vestingSchedule:
+        "Once an Artist Coin graduates into the open market, the artist's reserved Coins are unlocked daily over a 5-year period. Artists can claim their unlocked Coins every day, or let them accumulate over time.",
+      artistEarnings:
+        'The total revenue this artist has earned from the trading fees on their Artist Coin.',
+      unclaimedFees:
+        'The amount of trading fees you are currently able to claim.'
+    }
   },
   artistCoinDetails: {
     title: 'Artist Coin Details',
@@ -98,15 +106,17 @@ export const coinDetailsMessages = {
     close: 'Close',
     copied: 'Copied to clipboard!',
     tooltips: {
+      coinAddress:
+        'A unique address that identifies this Artist Coin on the Solana blockchain to prevent imposters.',
+      onChainDescription:
+        'A simple description of this Artist Coin on the Solana blockchain to prevent imposters.',
       totalSupply:
-        'The total number of your artist coins that will ever exist. This amount is fixed and never changes.',
+        'The total number of this Artist Coin that will ever exist. This amount is fixed and never changes.',
       marketCap:
-        'The current total value of all your artist coins in circulation, calculated by multiplying the current price by the total supply.',
-      price: 'The current price of a single artist coin in USD.',
+        'The current total value of this Artist Coin, calculated by multiplying the current price by the total supply.',
+      price: 'The current price of a single Artist Coin in USD.',
       liquidity:
-        'The amount of funds available for trading your artist coin, which affects how easily it can be bought or sold.',
-      circulatingSupply:
-        'The number of artist coins currently available for trading, excluding any tokens that are locked or reserved.'
+        'The amount of funds available for trading this Artist Coin, which affects how easily it can be bought and sold.'
     }
   },
   editCoinDetails: {
@@ -124,6 +134,8 @@ export const coinDetailsMessages = {
   },
   toasts: {
     feesClaimed: 'Fees claimed successfully!',
-    feesClaimFailed: 'Unable to claim fees. Please try again.'
+    feesClaimFailed: 'Unable to claim fees. Please try again.',
+    incorrectWalletLinked:
+      'Incorrect wallet linked. Use the same wallet used to launch the coin.'
   }
 }

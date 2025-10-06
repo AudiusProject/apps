@@ -1,6 +1,6 @@
 import { launchpadMessages } from '@audius/common/messages'
 import { useCoinSuccessModal } from '@audius/common/store'
-import { formatTickerForUrl, route } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -32,7 +32,7 @@ export const CoinSuccessModal = () => {
   const handleShareToX = () => {
     if (!coinData?.ticker || !coinData?.mint) return
 
-    const coinUrl = `https://audius.co${route.ASSET_DETAIL_PAGE.replace(':ticker', formatTickerForUrl(coinData.ticker))}`
+    const coinUrl = `https://audius.co${route.coinPage(coinData.ticker)}`
     const shareText = `My artist coin $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
     openXLink(coinUrl, shareText)
   }

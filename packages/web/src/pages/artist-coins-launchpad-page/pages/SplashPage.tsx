@@ -21,9 +21,9 @@ import { WalletSetupCard, WhyCreateCard } from '../components/index'
 const messages = {
   whyCreateTitle: 'Why Create a Coin?',
   whyCreateDescription:
-    'Create new ways to earn, reward your fans, and grow your community — all powered by your artist coin.',
+    'Create new ways to earn, reward your fans, and grow your community — all powered by your Artist Coin.',
   getPaidTitle: 'Get Paid',
-  getPaidDescription: 'Earn fees whenever fans buy or sell your coin.',
+  getPaidDescription: 'Earn fees whenever fans buy or sell your Coin.',
   rewardFansTitle: 'Reward Fans',
   rewardFansDescription: 'Give holders exclusive content, music, or perks.',
   growCommunityTitle: 'Grow Community',
@@ -31,7 +31,7 @@ const messages = {
   leftColumnPlaceholder: 'Left Column Content (716px)',
   launchPanelTitle: 'Ready to launch?',
   launchPanelDescription:
-    'Connect your wallet to start creating your artist coin.',
+    'Connect your wallet to start creating your Artist Coin.',
   launchPanelDescription2:
     'It only takes a few steps to set things up and share it with your fans.',
   launchPanelButtonText: 'Get Started!',

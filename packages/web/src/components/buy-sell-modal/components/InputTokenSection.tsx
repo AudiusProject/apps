@@ -133,7 +133,7 @@ export const InputTokenSection = ({
               hideLabel
               placeholder={placeholder}
               startAdornmentText={isStablecoin ? '$' : ''}
-              endAdornmentText={symbol === 'USDC' ? 'USD' : symbol}
+              endAdornmentText={symbol === 'USDC' ? 'USD' : `$${symbol}`}
               value={localAmount}
               onChange={(e) => handleTextChange(e.target.value)}
               type='number'

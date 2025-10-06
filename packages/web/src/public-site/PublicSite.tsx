@@ -28,6 +28,15 @@ const DownloadPage = lazy(() => import('./pages/download-page/DownloadPage'))
 const TermsOfUsePage = lazy(
   () => import('./pages/terms-of-use-page/TermsOfUsePage')
 )
+const ArtistCoinTermsPage = lazy(
+  () => import('./pages/artist-coin-terms-page/ArtistCoinTermsPage')
+)
+const ArtistCoinAcceptableUsePage = lazy(
+  () =>
+    import(
+      './pages/artist-coin-acceptable-use-page/ArtistCoinAcceptableUsePage'
+    )
+)
 
 const ROOT_ID = 'root'
 const SCROLL_LOCK_CLASS = 'scrollLock'
@@ -119,6 +128,28 @@ export const PublicSite = (props: PublicSiteProps) => {
                 path={'/legal/privacy-policy'}
                 render={() => (
                   <PrivacyPolicyPage
+                    isMobile={isMobileOrNarrow}
+                    openNavScreen={openNavScreen}
+                    setRenderPublicSite={setRenderPublicSite}
+                  />
+                )}
+              />
+              <Route
+                exact
+                path={'/legal/artist-coin-terms'}
+                render={() => (
+                  <ArtistCoinTermsPage
+                    isMobile={isMobileOrNarrow}
+                    openNavScreen={openNavScreen}
+                    setRenderPublicSite={setRenderPublicSite}
+                  />
+                )}
+              />
+              <Route
+                exact
+                path={'/legal/artist-coin-acceptable-use'}
+                render={() => (
+                  <ArtistCoinAcceptableUsePage
                     isMobile={isMobileOrNarrow}
                     openNavScreen={openNavScreen}
                     setRenderPublicSite={setRenderPublicSite}

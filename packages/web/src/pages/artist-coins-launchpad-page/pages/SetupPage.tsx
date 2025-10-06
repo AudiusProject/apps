@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
 
 import { ErrorLevel, Feature, LaunchpadFormValues } from '@audius/common/models'
-import { Flex, Paper } from '@audius/harmony'
+import { route } from '@audius/common/utils'
+import { Flex, Paper, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
+import { ExternalTextLink } from 'components/link'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import {
@@ -14,7 +16,6 @@ import {
 import { ArtistCoinsSubmitRow } from '../components/ArtistCoinsSubmitRow'
 import { CoinFormFields } from '../components/CoinFormFields'
 import { ImageUploadArea } from '../components/ImageUploadArea'
-import { StepHeader } from '../components/StepHeader'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS, MAX_IMAGE_SIZE } from '../constants'
 import { useLaunchpadAnalytics } from '../utils'
@@ -23,7 +24,8 @@ const messages = {
   stepInfo: `STEP 1 of ${AMOUNT_OF_STEPS}`,
   title: 'Set Up Your Coin',
   description:
-    'This is your one and only coin. Its name, symbol, and image are permanent once launched, so choose carefully.',
+    'The Coin Name, Ticker Symbol, and Image cannot be changed once launched. Make sure you have the rights',
+  rightsLinkText: 'to use the Coin Name, Ticker Symbol, and Image',
   errors: {
     invalidFileType: 'Please select a JPEG, PNG, or WebP image file',
     fileTooLarge: 'File size must be less than 15MB',
@@ -130,11 +132,26 @@ export const SetupPage = ({ onContinue, onBack }: PhasePageProps) => {
         pb='unit20'
       >
         <Paper p='2xl' gap='2xl' direction='column' w='100%'>
-          <StepHeader
-            stepInfo={messages.stepInfo}
-            title={messages.title}
-            description={messages.description}
-          />
+          <Flex direction='column' gap='xs' alignItems='flex-start'>
+            <Text variant='label' size='s' color='subdued'>
+              {messages.stepInfo}
+            </Text>
+            <Text variant='heading' size='l' color='default'>
+              {messages.title}
+            </Text>
+            <Text variant='body' size='l' color='subdued'>
+              {messages.description}{' '}
+              <ExternalTextLink
+                to={route.ARTIST_COIN_TERMS}
+                variant='visible'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                {messages.rightsLinkText}
+              </ExternalTextLink>
+              .
+            </Text>
+          </Flex>
 
           <form onSubmit={handleSubmit}>
             <Flex direction='column' gap='xl'>

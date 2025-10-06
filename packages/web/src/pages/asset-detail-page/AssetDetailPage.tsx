@@ -78,12 +78,12 @@ export const AssetDetailPage = () => {
   const {
     data: coin,
     isPending,
-    isSuccess,
-    error: coinError
+    isError,
+    isSuccess
   } = useArtistCoinByTicker({ ticker })
 
-  if (!ticker) {
-    return <Redirect to='/wallet' />
+  if (!ticker || isError || (isSuccess && !coin)) {
+    return <Redirect to='/coins' />
   }
 
   if (isPending) {
@@ -96,10 +96,6 @@ export const AssetDetailPage = () => {
         <LoadingSpinner />
       </Flex>
     )
-  }
-
-  if (coinError || (isSuccess && !coin)) {
-    return <Redirect to='/wallet' />
   }
 
   const isOwner = currentUserId === coin?.ownerId

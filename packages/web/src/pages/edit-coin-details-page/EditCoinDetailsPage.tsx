@@ -17,8 +17,7 @@ import {
   type EditCoinDetailsFormValues
 } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { removeNullable } from '@audius/common/utils'
+import { route, removeNullable } from '@audius/common/utils'
 import {
   Box,
   Divider,
@@ -160,7 +159,7 @@ export const EditCoinDetailsPage = () => {
     data: coin,
     isPending,
     isSuccess,
-    error: coinError
+    isError
   } = useArtistCoinByTicker({ ticker })
 
   const [submitError, setSubmitError] = useState<string | undefined>(undefined)
@@ -190,7 +189,7 @@ export const EditCoinDetailsPage = () => {
         mint: coin.mint,
         updateCoinRequest: transformedValues
       })
-      navigate(ASSET_DETAIL_PAGE.replace(':ticker', coin?.ticker ?? ''))
+      navigate(route.coinPage(coin?.ticker ?? ''))
     } catch (e) {
       const errorMessage =
         e instanceof Error
@@ -243,8 +242,13 @@ export const EditCoinDetailsPage = () => {
     />
   )
 
-  if (!ticker || (coin && currentUserId !== coin.ownerId)) {
-    return <Redirect to='/wallet' />
+  if (
+    !ticker ||
+    (coin && currentUserId !== coin.ownerId) ||
+    isError ||
+    (isSuccess && !coin)
+  ) {
+    return <Redirect to='/coins' />
   }
 
   if (isPending) {
@@ -253,10 +257,6 @@ export const EditCoinDetailsPage = () => {
         <LoadingSpinner />
       </Flex>
     )
-  }
-
-  if (coinError || (isSuccess && !coin)) {
-    return <Redirect to='/wallet' />
   }
 
   return (
@@ -280,7 +280,7 @@ export const EditCoinDetailsPage = () => {
                         {coin?.name}
                       </Text>
                       <Text variant='title' size='l' color='subdued'>
-                        {coin?.ticker}
+                        ${coin?.ticker}
                       </Text>
                     </Flex>
                   </Flex>

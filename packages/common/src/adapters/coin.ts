@@ -19,6 +19,8 @@ export type CoinMetadata = {
 // Define a full coin model with ownerId converted to number
 export type Coin = Omit<CoinSDK, 'ownerId'> & {
   ownerId: ID
+  displayPrice: number
+  displayMarketCap: number
 }
 
 // Define a UserCoin model with ownerId converted to number
@@ -50,10 +52,30 @@ export const coinFromSdk = (input: CoinSDK | undefined): Coin | undefined => {
     return undefined
   }
 
+  // Birdeye data may not be available right after launch.
+  // Fall back to dynamic bonding curve data if so.
+  const defaultSupply = 1e9
+
+  const { isMigrated, priceUSD } = input.dynamicBondingCurve
+  const hasBirdeyeSupply =
+    input.totalSupply !== undefined && input.totalSupply > 0
+  const hasBirdeyePrice = input.price !== undefined && input.price > 0
+
+  // For price, use the bonding curve price if the input hasn't graduated or we have no birdeye data
+  const displayPrice = !isMigrated || !hasBirdeyePrice ? priceUSD : input.price
+
+  // For market cap, use the bonding curve market cap if the input hasn't graduated or we have no birdeye data
+  const displayMarketCap =
+    !isMigrated || !hasBirdeyeSupply
+      ? displayPrice * (hasBirdeyeSupply ? input.totalSupply : defaultSupply)
+      : input.marketCap
+
   const { ownerId: _ignored, ...rest } = input
   return {
     ...rest,
-    ownerId: decodedOwnerId
+    ownerId: decodedOwnerId,
+    displayPrice,
+    displayMarketCap
   }
 }
 

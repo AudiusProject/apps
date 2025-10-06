@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import { Button, Flex, IconCloudUpload, IconError, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
+import { Frosted } from 'components/frosted/Frosted'
 import { EditFormScrollContext } from 'pages/edit-page/EditTrackPage'
 
 import styles from './AnchoredSubmitRow.module.css'
@@ -26,7 +27,7 @@ export const AnchoredSubmitRow = () => {
 
   return (
     <>
-      <Flex className={styles.buttonRow} gap='m'>
+      <Frosted className={styles.buttonRow} gap='m'>
         <Button
           variant='primary'
           size='default'
@@ -47,7 +48,7 @@ export const AnchoredSubmitRow = () => {
             </Text>
           </Flex>
         ) : null}
-      </Flex>
+      </Frosted>
       <div className={styles.placeholder} />
     </>
   )

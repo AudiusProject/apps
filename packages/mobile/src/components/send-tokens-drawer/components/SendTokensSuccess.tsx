@@ -54,7 +54,7 @@ export const SendTokensSuccess = ({
         </Text>
         <Text variant='heading' size='m'>
           {walletMessages.minus}
-          {formatAmount(amount)} {tokenInfo?.symbol}
+          {formatAmount(amount)} ${tokenInfo?.symbol}
         </Text>
       </Flex>
       <Divider />

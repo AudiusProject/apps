@@ -149,8 +149,8 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
       <TokenInfoRow
         label={messages.marketCap}
         value={
-          props?.marketCap
-            ? `$${new FixedDecimal(props.marketCap.toString(), 2).toLocaleString()}`
+          props?.displayMarketCap
+            ? `$${new FixedDecimal(props.displayMarketCap.toString(), 2).toLocaleString()}`
             : messages.unknown
         }
         hasTooltip
@@ -161,8 +161,8 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
       <TokenInfoRow
         label={messages.price}
         value={
-          props?.price
-            ? formatCurrencyWithSubscript(props.price)
+          props?.displayPrice
+            ? formatCurrencyWithSubscript(props.displayPrice)
             : messages.unknown
         }
         hasTooltip

@@ -126,7 +126,7 @@ const SendTokensInput = ({
   const getAmountDescription = () => {
     return messages.amountDescription.replace(
       '{symbol}',
-      tokenInfo?.symbol ?? 'tokens'
+      tokenInfo?.symbol ? `$${tokenInfo.symbol}` : 'tokens'
     )
   }
 
@@ -187,7 +187,7 @@ const SendTokensInput = ({
           label={messages.amount}
           value={amount}
           onChange={handleAmountChange}
-          tokenLabel={tokenInfo.symbol}
+          tokenLabel={`$${tokenInfo.symbol}`}
           error={!!amountError}
           decimals={tokenInfo.decimals}
         />

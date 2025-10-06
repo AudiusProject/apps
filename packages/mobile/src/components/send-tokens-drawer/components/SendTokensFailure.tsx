@@ -49,7 +49,7 @@ export const SendTokensFailure = ({
         </Text>
         <Text variant='heading' size='m'>
           {walletMessages.minus}
-          {tokenBalanceFormatted} {tokenInfo?.symbol}
+          {tokenBalanceFormatted} ${tokenInfo?.symbol}
         </Text>
       </Flex>
 

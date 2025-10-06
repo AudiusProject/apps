@@ -109,7 +109,7 @@ const SendTokensConfirmation = ({
         </Text>
         <Text variant='heading' size='s' css={{ wordBreak: 'break-all' }}>
           {walletMessages.minus}
-          {formatAmount(amount)} {tokenInfo.symbol}
+          {formatAmount(amount)} ${tokenInfo.symbol}
         </Text>
       </Flex>
 

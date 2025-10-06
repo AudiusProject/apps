@@ -101,7 +101,7 @@ export const SendTokensInput = ({
             keyboardType='decimal-pad'
             error={!!errors.amount}
             helperText={errors.amount}
-            endAdornmentText={tokenInfo?.symbol}
+            endAdornmentText={`$${tokenInfo?.symbol}`}
           />
         </Flex>
         <Divider />

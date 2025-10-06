@@ -1,3 +1,4 @@
+import type { Coin } from '@audius/common/adapters'
 import {
   useArtistCoin,
   useCoinGeckoCoin,
@@ -14,7 +15,6 @@ import {
   Button,
   useTheme
 } from '@audius/harmony'
-import type { Coin } from '@audius/sdk'
 
 import { env } from 'services/env'
 
@@ -86,7 +86,7 @@ export const ArtistCoinDetailsModal = ({
                 {artistCoin?.name}
               </Text>
               <Text variant='body' size='m' color='subdued'>
-                {artistCoin?.ticker}
+                ${artistCoin?.ticker}
               </Text>
             </Flex>
           </Flex>
@@ -96,26 +96,24 @@ export const ArtistCoinDetailsModal = ({
 
         {/* Coin Address */}
         {artistCoin?.mint ? (
-          <Flex direction='column' gap='xs' w='100%'>
-            <Text variant='body' size='m' strength='strong' color='subdued'>
-              {artistCoinDetails.coinAddress}
-            </Text>
-            <Text variant='body' size='m' userSelect='text'>
-              {artistCoin.mint}
-            </Text>
-          </Flex>
+          <TokenInfoRow
+            label={artistCoinDetails.coinAddress}
+            value={artistCoin.mint}
+            hasTooltip
+            tooltipContent={artistCoinDetails.tooltips.coinAddress}
+            variant='block'
+          />
         ) : null}
 
         {/* On-Chain Description */}
         {artistCoin?.ticker && artistHandle ? (
-          <Flex direction='column' gap='xs' w='100%'>
-            <Text variant='body' size='m' strength='strong' color='subdued'>
-              {artistCoinDetails.onChainDescription}
-            </Text>
-            <Text variant='body' size='m' userSelect='text'>
-              {LAUNCHPAD_COIN_DESCRIPTION(artistHandle, artistCoin.ticker)}
-            </Text>
-          </Flex>
+          <TokenInfoRow
+            label={artistCoinDetails.onChainDescription}
+            value={LAUNCHPAD_COIN_DESCRIPTION(artistHandle, artistCoin.ticker)}
+            hasTooltip
+            tooltipContent={artistCoinDetails.tooltips.onChainDescription}
+            variant='block'
+          />
         ) : null}
 
         <Divider />
@@ -142,7 +140,13 @@ export const ArtistCoinDetailsModal = ({
 export type TokenDetailsStatsSectionProps = Partial<
   Pick<
     Coin,
-    'totalSupply' | 'marketCap' | 'price' | 'liquidity' | 'circulatingSupply'
+    | 'totalSupply'
+    | 'marketCap'
+    | 'price'
+    | 'liquidity'
+    | 'circulatingSupply'
+    | 'displayPrice'
+    | 'displayMarketCap'
   >
 >
 
@@ -156,8 +160,7 @@ export const convertCoinGeckoResponseToStatsDetailsProps = (
     totalSupply: coingeckoResponse.market_data.total_supply,
     marketCap: coingeckoResponse.market_data.market_cap.usd,
     price: coingeckoResponse.market_data.current_price.usd,
-    liquidity: coingeckoResponse.market_data.total_volume.usd,
-    circulatingSupply: coingeckoResponse.market_data.circulating_supply
+    liquidity: coingeckoResponse.market_data.total_volume.usd
   }
 }
 
@@ -174,20 +177,20 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
         />
       ) : null}
 
-      {props?.marketCap ? (
+      {props?.displayMarketCap ? (
         <TokenInfoRow
           label={artistCoinDetails.marketCap}
-          value={`$${props.marketCap.toLocaleString()}`}
+          value={`$${props.displayMarketCap.toLocaleString()}`}
           hasTooltip
           tooltipContent={artistCoinDetails.tooltips.marketCap}
           variant='block'
         />
       ) : null}
 
-      {props?.price ? (
+      {props?.displayPrice ? (
         <TokenInfoRow
           label={artistCoinDetails.price}
-          value={formatCurrencyWithSubscript(props.price)}
+          value={formatCurrencyWithSubscript(props.displayPrice)}
           hasTooltip
           tooltipContent={artistCoinDetails.tooltips.price}
           variant='block'
@@ -200,16 +203,6 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
           value={`$${props.liquidity.toLocaleString()}`}
           hasTooltip
           tooltipContent={artistCoinDetails.tooltips.liquidity}
-          variant='block'
-        />
-      ) : null}
-
-      {props?.circulatingSupply ? (
-        <TokenInfoRow
-          label={artistCoinDetails.circulatingSupply}
-          value={props.circulatingSupply.toLocaleString()}
-          hasTooltip
-          tooltipContent={artistCoinDetails.tooltips.circulatingSupply}
           variant='block'
         />
       ) : null}

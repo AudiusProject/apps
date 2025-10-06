@@ -2,8 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { useTokenBalance, useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { formatCount, formatTickerForUrl } from '@audius/common/utils'
+import { route, formatCount } from '@audius/common/utils'
 import {
   Artwork,
   HoverCard,
@@ -70,12 +69,7 @@ export const ArtistCoinHoverCard = ({
     onClick?.()
     onClose?.()
     if (artistCoinBadge?.ticker) {
-      navigate(
-        ASSET_DETAIL_PAGE.replace(
-          ':ticker',
-          formatTickerForUrl(artistCoinBadge.ticker)
-        )
-      )
+      navigate(route.coinPage(artistCoinBadge.ticker))
     }
   }, [onClick, onClose, navigate, artistCoinBadge?.ticker])
 

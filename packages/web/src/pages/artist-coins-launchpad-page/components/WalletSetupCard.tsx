@@ -17,7 +17,7 @@ const messages = {
     },
     {
       id: 'add-funds',
-      text: 'Add funds to your wallet if you plan to buy your coin early.'
+      text: 'Add funds to your wallet if you plan to buy your Artist Coin early.'
     }
   ],
   newtoWallets: 'New to wallets?',

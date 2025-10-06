@@ -1,9 +1,8 @@
 import { useCallback } from 'react'
 
 import { useFormattedAudioBalance } from '@audius/common/hooks'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { AUDIO_TICKER, TOKEN_LISTING_MAP } from '@audius/common/store'
-import { formatTickerForUrl } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import { IconTokenAUDIO } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 import { push } from 'redux-first-history'
@@ -27,11 +26,7 @@ export const AudioCoinCard = () => {
   const isLoading = isAudioBalanceLoading || isAudioPriceLoading
 
   const handleCoinClick = useCallback(() => {
-    dispatch(
-      push(
-        ASSET_DETAIL_PAGE.replace(':ticker', formatTickerForUrl(AUDIO_TICKER))
-      )
-    )
+    dispatch(push(route.coinPage(AUDIO_TICKER)))
   }, [dispatch])
 
   return (

@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useArtistCoin, useCurrentUserId, useUser } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { useArtistCoinDetailsModal } from '@audius/common/store'
-import { makeXShareUrl, formatTickerForUrl, route } from '@audius/common/utils'
+import { route, makeXShareUrl } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Linking } from 'react-native'
 
@@ -53,7 +53,7 @@ export const AssetInsightsOverflowMenu = () => {
     if (!artistCoin?.ticker || !artistCoin?.mint || !artist?.handle) return
 
     const isArtistOwner = currentUserId === artistCoin.ownerId
-    const coinUrl = `https://audius.co${route.ASSET_DETAIL_PAGE.replace(':ticker', formatTickerForUrl(artistCoin.ticker))}`
+    const coinUrl = `https://audius.co${route.coinPage(artistCoin.ticker)}`
 
     const shareText = isArtistOwner
       ? messages.shareToXArtistCopy(artistCoin.ticker, artistCoin.mint)

@@ -3,8 +3,7 @@ import { useCallback, useState } from 'react'
 import {
   useArtistCoin,
   useCurrentAccountUser,
-  useTokenBalance,
-  useUSDCBalance
+  useTokenBalance
 } from '@audius/common/api'
 import {
   useFormattedTokenBalance,
@@ -12,7 +11,6 @@ import {
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import {
-  useAddCashModal,
   useBuySellModal,
   useReceiveTokensModal,
   useSendTokensModal
@@ -43,6 +41,7 @@ type BalanceStateProps = {
   onBuy?: () => void
   onReceive?: () => void
   onSend?: () => void
+  coinName?: string
 }
 
 const BalanceSectionSkeletonContent = () => {
@@ -90,6 +89,7 @@ const ZeroBalanceState = ({
   logoURI,
   onBuy,
   onReceive,
+  coinName,
   isBuySellSupported,
   isCoinCreator
 }: BalanceStateProps & {
@@ -101,9 +101,16 @@ const ZeroBalanceState = ({
     <>
       <Flex gap='s' alignItems='center'>
         <TokenIcon logoURI={logoURI} />
-        <Text variant='heading' size='l' color='subdued'>
-          ${ticker}
-        </Text>
+        <Flex column gap='xs'>
+          {coinName && (
+            <Text variant='heading' size='s'>
+              {coinName}
+            </Text>
+          )}
+          <Text variant='title' size='l' color='subdued'>
+            ${ticker}
+          </Text>
+        </Flex>
       </Flex>
       {!isCoinCreator ? (
         <Paper
@@ -197,7 +204,7 @@ const HasBalanceState = ({
               {coinName}
             </Text>
             <Flex gap='xs' alignItems='center'>
-              <Text variant='title' size='l'>
+              <Text variant='heading' size='s'>
                 {tokenBalanceFormatted}
               </Text>
               <Text variant='title' size='l' color='subdued'>
@@ -263,13 +270,10 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
     useTokenBalance({ mint })
   const { data: currentUser } = useCurrentAccountUser()
 
-  const { data: usdcBalance } = useUSDCBalance()
-
   const { isBuySellSupported } = useBuySellRegionSupport()
 
   // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
-  const { onOpen: openAddCashModal } = useAddCashModal()
   const [, openTransferDrawer] = useModalState('TransferAudioMobileWarning')
   const { onOpen: openReceiveTokensModal } = useReceiveTokensModal()
   const { onOpen: openSendTokensModal } = useSendTokensModal()
@@ -292,14 +296,8 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   }, [openBuySellModal])
 
   const handleAddCash = useRequiresAccountCallback(() => {
-    if (usdcBalance && usdcBalance > 0) {
-      // Has USDC balance - show buy/sell modal
-      openBuySellModal()
-    } else {
-      // No USDC balance - show add cash modal (uses Coinflow)
-      openAddCashModal()
-    }
-  }, [openAddCashModal, openBuySellModal, usdcBalance])
+    openBuySellModal()
+  }, [openBuySellModal])
 
   const handleReceive = useRequiresAccountCallback(() => {
     openReceiveTokensModal({
@@ -339,6 +337,7 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
             logoURI={logoURI}
             onBuy={isMobile ? onOpenOpenAppDrawer : handleAddCash}
             onReceive={handleReceive}
+            coinName={coinName}
             isBuySellSupported={isBuySellSupported}
             isCoinCreator={isCoinCreator}
           />

@@ -101,14 +101,9 @@ const HasBalanceState = ({
             <Text variant='heading' size='s'>
               {coinName || `$${ticker}`}
             </Text>
-            <Flex row gap='xs' alignItems='center'>
-              <Text variant='title' size='l'>
-                {tokenBalanceFormatted}
-              </Text>
-              <Text variant='title' size='l' color='subdued'>
-                ${ticker}
-              </Text>
-            </Flex>
+            <Text variant='title' size='l'>
+              {tokenBalanceFormatted}
+            </Text>
           </Flex>
         </Flex>
         <Flex row alignItems='center' gap='m' ml={spacing.unit22}>

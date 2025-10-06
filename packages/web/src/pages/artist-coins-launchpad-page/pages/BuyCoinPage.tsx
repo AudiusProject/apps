@@ -42,12 +42,12 @@ const messages = {
   title: 'Claim Your Share First',
   optional: 'optional',
   description:
-    'Before your coin goes live, do you want to buy some at the lowest price?',
+    'Before your Artist Coin goes live, do you want to buy some at the lowest price?',
   youPay: 'You Pay',
   youReceive: 'You Receive',
   valueInUSDC: 'Value',
   hintMessage:
-    "Buying now makes sure you can get in at the lowest price before others beat you to it. You'll still receive your vested coins over time after your coin reaches its graduation market cap (1M $AUDIO).",
+    "Buying now makes sure you can get in at the lowest price before others beat you to it. You'll still received your unlocked Artist Coins over time after your Coin reaches its graduation market cap (1M $AUDIO).",
   back: 'Back',
   errors: {
     quoteError: 'Failed to get a quote. Please try again.',
@@ -62,7 +62,7 @@ const messages = {
   audioInputLabel: 'AUDIO',
   radios: {
     no: 'No, thanks.',
-    yes: 'Yes, I want to buy my coin.'
+    yes: 'Yes, I want to buy my Artist Coin.'
   }
 }
 
