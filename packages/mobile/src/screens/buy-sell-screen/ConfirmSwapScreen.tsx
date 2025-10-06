@@ -277,11 +277,7 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
   // Show loading screen when confirming transaction
   if (isConfirmButtonLoading) {
     return (
-      <Screen
-        title={messages.confirmDetails}
-        variant='white'
-        url='/buy-sell/confirm'
-      >
+      <Screen variant='white' url='/buy-sell/confirm-loading'>
         <ScreenContent>
           <LoadingScreen />
         </ScreenContent>
