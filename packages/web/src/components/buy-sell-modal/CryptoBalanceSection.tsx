@@ -4,7 +4,7 @@ import { Divider, Flex, Text } from '@audius/harmony'
 import { TokenIcon } from './TokenIcon'
 
 const messages = {
-  symbol: (symbol: string) => `${symbol}`
+  symbol: (symbol: string) => `$${symbol}`
 }
 
 type CryptoBalanceSectionProps = {

@@ -41,7 +41,7 @@ export const BalanceSection = ({
             {tokenBalanceFormatted}
           </Text>
           <Text variant='heading' size='s' color='subdued'>
-            {tokenInfo?.symbol}
+            ${tokenInfo?.symbol}
           </Text>
         </Flex>
       </Flex>

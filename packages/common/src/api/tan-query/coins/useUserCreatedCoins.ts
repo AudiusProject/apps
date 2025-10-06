@@ -58,7 +58,7 @@ const getUserCreatedCoinsOptions = (
 }
 
 /**
- * Returns a list of coins the user has launchedU
+ * Returns a list of coins the user has launched
  * @param userId
  * @param options
  * @returns

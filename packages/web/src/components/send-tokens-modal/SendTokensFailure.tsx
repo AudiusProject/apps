@@ -108,7 +108,7 @@ const SendTokensFailure = ({
           {messages.failed}
         </Text>
         <Text variant='heading' size='s' color='default'>
-          -{formatAmount(amount)} {tokenInfo.symbol}
+          -{formatAmount(amount)} ${tokenInfo.symbol}
         </Text>
       </Flex>
 

@@ -47,7 +47,7 @@ export const CryptoBalanceSection = ({
                 {amount}
               </Text>
               <Text variant='title' size='l' color='subdued'>
-                {tokenInfo.symbol}
+                ${tokenInfo.symbol}
               </Text>
             </Flex>
           </Flex>
