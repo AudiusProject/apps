@@ -34,7 +34,7 @@ type TokenDropdownProps = {
 
 // Used to close the dropdown when clicking outside of it, but still inside of the modal
 const Blanket = (props: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
+  <Box
     css={{
       position: 'fixed',
       zIndex: zIndex.TOAST - 1,
@@ -149,14 +149,14 @@ export const TokenDropdown = ({
     () =>
       options.find((option) => option.value === selectedToken.symbol) || {
         value: selectedToken.symbol,
-        label: selectedToken.name,
+        label: selectedToken.name ?? selectedToken.symbol,
         tokenInfo: selectedToken
       },
     [options, selectedToken]
   )
 
   return (
-    <div css={{ position: 'relative', width: '100%' }}>
+    <Box css={{ position: 'relative', width: '100%' }}>
       <Flex
         ref={wrapperRef}
         direction='column'
@@ -201,7 +201,7 @@ export const TokenDropdown = ({
           border: 'none',
           boxShadow: 'none',
           backgroundColor: 'transparent',
-          maxWidth: 280
+          width: 300
         }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -225,6 +225,10 @@ export const TokenDropdown = ({
           tabSelectsValue={false}
           value={selectedOption}
           styles={{
+            container: (provided) => ({
+              ...provided,
+              flex: 1
+            }),
             valueContainer: (provided) => ({
               ...provided,
               gridTemplateColumns: '1fr',
@@ -263,6 +267,6 @@ export const TokenDropdown = ({
         />
       </Menu>
       {isOpen ? <Blanket onClick={() => setIsOpen(false)} /> : null}
-    </div>
+    </Box>
   )
 }
