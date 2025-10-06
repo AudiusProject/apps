@@ -41,6 +41,7 @@ type BalanceStateProps = {
   onBuy?: () => void
   onReceive?: () => void
   onSend?: () => void
+  coinName?: string
 }
 
 const BalanceSectionSkeletonContent = () => {
@@ -88,6 +89,7 @@ const ZeroBalanceState = ({
   logoURI,
   onBuy,
   onReceive,
+  coinName,
   isBuySellSupported,
   isCoinCreator
 }: BalanceStateProps & {
@@ -99,9 +101,16 @@ const ZeroBalanceState = ({
     <>
       <Flex gap='s' alignItems='center'>
         <TokenIcon logoURI={logoURI} />
-        <Text variant='heading' size='l' color='subdued'>
-          ${ticker}
-        </Text>
+        <Flex column gap='xs'>
+          {coinName && (
+            <Text variant='heading' size='s'>
+              {coinName}
+            </Text>
+          )}
+          <Text variant='title' size='l' color='subdued'>
+            ${ticker}
+          </Text>
+        </Flex>
       </Flex>
       {!isCoinCreator ? (
         <Paper
@@ -195,7 +204,7 @@ const HasBalanceState = ({
               {coinName}
             </Text>
             <Flex gap='xs' alignItems='center'>
-              <Text variant='title' size='l'>
+              <Text variant='heading' size='s'>
                 {tokenBalanceFormatted}
               </Text>
               <Text variant='title' size='l' color='subdued'>
@@ -328,6 +337,7 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
             logoURI={logoURI}
             onBuy={isMobile ? onOpenOpenAppDrawer : handleAddCash}
             onReceive={handleReceive}
+            coinName={coinName}
             isBuySellSupported={isBuySellSupported}
             isCoinCreator={isCoinCreator}
           />

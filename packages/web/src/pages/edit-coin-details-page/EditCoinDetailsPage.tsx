@@ -281,7 +281,7 @@ export const EditCoinDetailsPage = () => {
                         {coin?.name}
                       </Text>
                       <Text variant='title' size='l' color='subdued'>
-                        {coin?.ticker}
+                        ${coin?.ticker}
                       </Text>
                     </Flex>
                   </Flex>

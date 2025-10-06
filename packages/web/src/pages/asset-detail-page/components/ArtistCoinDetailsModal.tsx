@@ -86,7 +86,7 @@ export const ArtistCoinDetailsModal = ({
                 {artistCoin?.name}
               </Text>
               <Text variant='body' size='m' color='subdued'>
-                {artistCoin?.ticker}
+                ${artistCoin?.ticker}
               </Text>
             </Flex>
           </Flex>
