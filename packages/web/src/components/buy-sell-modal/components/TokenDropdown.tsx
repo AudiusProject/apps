@@ -1,10 +1,19 @@
-import { useMemo, useCallback, useRef } from 'react'
+import { useMemo, useCallback, useRef, useState } from 'react'
 
 import type { TokenInfo } from '@audius/common/store'
-import { IconCaretDown, Text, Flex, Box } from '@audius/harmony'
+import {
+  IconCaretDown,
+  Text,
+  Flex,
+  Box,
+  TextInput,
+  TextInputSize,
+  IconSearch,
+  Menu
+} from '@audius/harmony'
 import { useTheme } from '@emotion/react'
 import Select, { components } from 'react-select'
-import type { SingleValue, SingleValueProps, OptionProps } from 'react-select'
+import type { SingleValue, OptionProps, InputProps } from 'react-select'
 
 import zIndex from 'utils/zIndex'
 
@@ -23,20 +32,20 @@ type TokenDropdownProps = {
   disabled?: boolean
 }
 
-const CustomSingleValue = (props: SingleValueProps<TokenOption>) => {
-  return (
-    <components.SingleValue {...props}>
-      <Flex gap='s' alignItems='center'>
-        <TokenIcon
-          logoURI={props.data.tokenInfo.logoURI}
-          icon={props.data.tokenInfo.icon}
-          size='2xl'
-          hex
-        />
-      </Flex>
-    </components.SingleValue>
-  )
-}
+// Used to close the dropdown when clicking outside of it, but still inside of the modal
+const Blanket = (props: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    css={{
+      position: 'fixed',
+      zIndex: zIndex.TOAST - 1,
+      bottom: 0,
+      left: 0,
+      top: 0,
+      right: 0
+    }}
+    {...props}
+  />
+)
 
 const CustomOption = (props: OptionProps<TokenOption>) => {
   const { spacing, cornerRadius, color } = useTheme()
@@ -93,6 +102,19 @@ const CustomOption = (props: OptionProps<TokenOption>) => {
   )
 }
 
+const CustomInput = (props: InputProps<TokenOption>) => {
+  return (
+    <TextInput
+      {...props}
+      placeholder='Search'
+      startIcon={IconSearch}
+      label='Search'
+      autoFocus
+      size={TextInputSize.EXTRA_SMALL}
+    />
+  )
+}
+
 export const TokenDropdown = ({
   selectedToken,
   availableTokens,
@@ -100,146 +122,147 @@ export const TokenDropdown = ({
   disabled = false
 }: TokenDropdownProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const { color, spacing, shadows, cornerRadius } = useTheme()
+  const { color, spacing } = useTheme()
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleTokenSelect = useCallback(
     (option: SingleValue<TokenOption>) => {
       if (option) {
         onTokenChange?.(option.tokenInfo)
+        setIsOpen(false)
       }
     },
     [onTokenChange]
   )
 
   const options: TokenOption[] = useMemo(() => {
-    return availableTokens.map((token) => ({
-      value: token.symbol,
-      label: token.name ?? token.symbol,
-      tokenInfo: token
-    }))
+    return availableTokens
+      .map((token) => ({
+        value: token.symbol,
+        label: token.name ?? token.symbol,
+        tokenInfo: token
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
   }, [availableTokens])
 
   const selectedOption = useMemo(
     () =>
       options.find((option) => option.value === selectedToken.symbol) || {
         value: selectedToken.symbol,
-        label: selectedToken.symbol,
+        label: selectedToken.name,
         tokenInfo: selectedToken
       },
     [options, selectedToken]
   )
 
   return (
-    <Flex
-      ref={wrapperRef}
-      direction='column'
-      alignItems='flex-start'
-      justifyContent='center'
-      gap='xs'
-      flex={1}
-      alignSelf='stretch'
-      border='default'
-      pv='s'
-      borderRadius='s'
-      css={{
-        height: spacing.unit16,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        '&:hover': !disabled
-          ? {
-              backgroundColor: color.background.surface2
-            }
-          : undefined
-      }}
-    >
-      <Select<TokenOption>
-        value={selectedOption}
-        onChange={handleTokenSelect}
-        options={options}
-        isDisabled={disabled}
-        isSearchable
-        css={{ '& *': { 'caret-color': 'transparent' } }}
-        menuPlacement='auto'
-        menuPosition='absolute'
-        menuPortalTarget={document.body}
-        components={{
-          SingleValue: CustomSingleValue,
-          Option: CustomOption,
-          DropdownIndicator: (props) => (
-            <components.DropdownIndicator {...props}>
-              <IconCaretDown size='s' color='default' />
-            </components.DropdownIndicator>
-          ),
-          IndicatorSeparator: null
+    <div css={{ position: 'relative', width: '100%' }}>
+      <Flex
+        ref={wrapperRef}
+        direction='column'
+        alignItems='flex-start'
+        justifyContent='center'
+        gap='xs'
+        flex={1}
+        alignSelf='stretch'
+        border='default'
+        pv='s'
+        borderRadius='s'
+        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        css={{
+          height: spacing.unit16,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.5 : 1,
+          '&:hover': !disabled
+            ? {
+                backgroundColor: color.background.surface2
+              }
+            : undefined
         }}
-        styles={{
-          container: (provided) => ({
-            ...provided,
-            width: '100%',
-            height: '100%'
-          }),
-          control: (provided) => ({
-            ...provided,
-            backgroundColor: 'transparent',
-            border: 'none',
-            boxShadow: 'none',
-            minHeight: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            '&:hover': {
-              border: 'none'
-            },
-            paddingLeft: spacing.m,
-            paddingRight: spacing.m
-          }),
-          menuPortal: (provided) => ({
-            ...provided,
-            zIndex: zIndex.TOAST
-          }),
-          menu: (provided) => ({
-            ...provided,
-            backgroundColor: color.background.white,
-            boxShadow: shadows.far,
-            borderRadius: cornerRadius.m,
-            padding: `${spacing.s} 0`,
-            border: `1px solid ${color.border.default}`,
-            minWidth: 300,
-            right: 0,
-            marginTop: spacing.l
-          }),
-          menuList: (provided) => ({
-            ...provided,
-            padding: spacing.s,
-            maxHeight: 200,
-            overflowY: 'auto'
-          }),
-          option: (provided) => ({
-            ...provided,
-            backgroundColor: 'transparent',
-            color: color.text.default,
-            padding: 0,
-            '&:hover': {
-              backgroundColor: color.background.surface2,
-              cursor: 'pointer'
-            },
-            '&:active': {
-              backgroundColor: color.background.surface2
-            }
-          }),
-          singleValue: (provided) => ({
-            ...provided,
-            margin: 0,
-            padding: 0
-          }),
-          valueContainer: (provided) => ({
-            ...provided,
-            margin: 0,
-            padding: 0
-          })
+      >
+        <Flex
+          gap='s'
+          alignItems='center'
+          css={{ paddingLeft: spacing.m, paddingRight: spacing.m }}
+        >
+          <TokenIcon
+            logoURI={selectedToken.logoURI}
+            icon={selectedToken.icon}
+            size='2xl'
+            hex
+          />
+          <IconCaretDown size='s' color='default' />
+        </Flex>
+      </Flex>
+      <Menu
+        isVisible={isOpen}
+        anchorRef={wrapperRef}
+        css={{
+          border: 'none',
+          boxShadow: 'none',
+          backgroundColor: 'transparent',
+          maxWidth: 280
         }}
-      />
-    </Flex>
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Select<TokenOption>
+          autoFocus
+          backspaceRemovesValue={false}
+          components={{
+            DropdownIndicator: null,
+            IndicatorSeparator: null,
+            Option: CustomOption,
+            Input: CustomInput
+          }}
+          controlShouldRenderValue={false}
+          hideSelectedOptions={false}
+          isClearable={false}
+          menuIsOpen
+          onChange={handleTokenSelect}
+          options={options}
+          placeholder=''
+          tabSelectsValue={false}
+          value={selectedOption}
+          styles={{
+            valueContainer: (provided) => ({
+              ...provided,
+              gridTemplateColumns: '1fr',
+              padding: spacing.s
+            }),
+            control: (provided) => ({
+              ...provided,
+              backgroundColor: 'transparent',
+              border: 'none',
+              boxShadow: 'none',
+              padding: `${spacing.s} ${spacing.m}`,
+              cursor: 'text'
+            }),
+            menu: (provided) => ({
+              ...provided,
+              position: 'relative',
+              margin: 0,
+              top: 0,
+              border: 'none',
+              boxShadow: 'none',
+              backgroundColor: 'transparent'
+            }),
+            menuList: (provided) => ({
+              ...provided,
+              padding: `0 ${spacing.s}px ${spacing.s}px`,
+              maxHeight: 200,
+              overflowY: 'auto'
+            }),
+            option: (provided) => ({
+              ...provided,
+              backgroundColor: 'transparent',
+              color: color.text.default,
+              padding: 0
+            })
+          }}
+        />
+      </Menu>
+      {isOpen ? <Blanket onClick={() => setIsOpen(false)} /> : null}
+    </div>
   )
 }
