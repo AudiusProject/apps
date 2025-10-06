@@ -472,3 +472,6 @@ export const searchPage = (searchOptions: SearchOptions) => {
     query: searchParams
   })
 }
+
+export const coinPage = (ticker: string) =>
+  `/coins/${ticker.startsWith('$') ? ticker.slice(1) : ticker}`

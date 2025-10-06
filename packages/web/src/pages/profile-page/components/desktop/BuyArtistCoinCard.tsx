@@ -1,7 +1,6 @@
 import { useArtistCoin } from '@audius/common/api'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { useBuySellModal } from '@audius/common/store'
-import { formatTickerForUrl } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import { Button, Flex, Paper, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
@@ -23,12 +22,7 @@ export const BuyArtistCoinCard = ({ mint }: { mint: string }) => {
 
   const handleCardClick = () => {
     if (artistCoin?.ticker) {
-      navigate(
-        ASSET_DETAIL_PAGE.replace(
-          ':ticker',
-          formatTickerForUrl(artistCoin.ticker)
-        )
-      )
+      navigate(route.coinPage(artistCoin.ticker))
     }
   }
 

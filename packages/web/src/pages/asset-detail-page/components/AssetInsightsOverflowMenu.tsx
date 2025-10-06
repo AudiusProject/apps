@@ -3,7 +3,7 @@ import { useCallback, useContext, useState } from 'react'
 import { useArtistCoin, useCurrentUserId, useUser } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { COIN_DETAIL_MOBILE_WEB_ROUTE } from '@audius/common/src/utils/route'
-import { formatTickerForUrl, route } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import {
   PopupMenu,
   PopupMenuItem,
@@ -25,6 +25,13 @@ import { copyToClipboard } from '../../../utils/clipboardUtil'
 import { openXLink } from '../../../utils/xShare'
 
 import { ArtistCoinDetailsModal } from './ArtistCoinDetailsModal'
+
+// Mobile route helper function
+const coinDetailMobilePage = (ticker: string) =>
+  COIN_DETAIL_MOBILE_WEB_ROUTE.replace(
+    ':ticker',
+    ticker.startsWith('$') ? ticker.slice(1) : ticker
+  )
 
 const messages = coinDetailsMessages.overflowMenu
 
@@ -71,12 +78,7 @@ export const AssetInsightsOverflowMenu = ({
   const onOpenDetails = () => {
     if (isMobile) {
       if (artistCoin?.ticker) {
-        navigate(
-          COIN_DETAIL_MOBILE_WEB_ROUTE.replace(
-            ':ticker',
-            formatTickerForUrl(artistCoin.ticker)
-          )
-        )
+        navigate(coinDetailMobilePage(artistCoin.ticker))
       }
     } else {
       setIsDetailsModalOpen(true)
@@ -87,12 +89,7 @@ export const AssetInsightsOverflowMenu = ({
     if (!artistCoin?.ticker || !artistCoin?.mint || !artist?.handle) return
 
     const isArtistOwner = currentUserId === artistCoin.ownerId
-    const coinUrl =
-      window.location.origin +
-      route.ASSET_DETAIL_PAGE.replace(
-        ':ticker',
-        formatTickerForUrl(artistCoin.ticker)
-      )
+    const coinUrl = window.location.origin + route.coinPage(artistCoin.ticker)
 
     const shareText = isArtistOwner
       ? messages.shareToXArtistCopy(artistCoin.ticker, artistCoin.mint)

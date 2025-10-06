@@ -17,8 +17,7 @@ import {
   type EditCoinDetailsFormValues
 } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { removeNullable } from '@audius/common/utils'
+import { route, removeNullable } from '@audius/common/utils'
 import {
   Box,
   Divider,
@@ -190,7 +189,7 @@ export const EditCoinDetailsPage = () => {
         mint: coin.mint,
         updateCoinRequest: transformedValues
       })
-      navigate(ASSET_DETAIL_PAGE.replace(':ticker', coin?.ticker ?? ''))
+      navigate(route.coinPage(coin?.ticker ?? ''))
     } catch (e) {
       const errorMessage =
         e instanceof Error

@@ -4,8 +4,7 @@ import { useUserCreatedCoins } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { formatTickerForUrl } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import { useTheme } from '@audius/harmony'
 import cn from 'classnames'
 import Lottie from 'lottie-react'
@@ -57,12 +56,7 @@ const ProfilePicture = ({
 
   const handleCoinClick = () => {
     if (ownedCoin?.ticker) {
-      navigate(
-        ASSET_DETAIL_PAGE.replace(
-          ':ticker',
-          formatTickerForUrl(ownedCoin.ticker)
-        )
-      )
+      navigate(route.coinPage(ownedCoin.ticker))
     }
   }
 
