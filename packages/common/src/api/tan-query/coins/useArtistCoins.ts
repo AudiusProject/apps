@@ -93,7 +93,7 @@ export const useArtistCoins = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
-  const pageSize = params.pageSize ?? 10
+  const pageSize = params.pageSize ?? 25
 
   return useInfiniteQuery({
     queryKey: getArtistCoinsQueryKey(params),

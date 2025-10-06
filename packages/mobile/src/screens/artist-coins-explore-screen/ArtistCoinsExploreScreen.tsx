@@ -155,7 +155,6 @@ export const ArtistCoinsExploreScreen = () => {
     sortDirection,
     query: debouncedSearchValue
   })
-  console.log({ isFetchingNextPage })
 
   // Flatten all pages and filter out WAUDIO
   const allCoins = useMemo(() => {
