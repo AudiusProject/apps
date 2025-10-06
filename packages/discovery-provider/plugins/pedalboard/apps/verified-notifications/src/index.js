@@ -4,6 +4,7 @@ import listenOn from './db.js'
 import tracksHandler from './handlers/tracks.js'
 import usersHandler from './handlers/users.js'
 import purchasesHandler from './handlers/purchases.js'
+import artistCoinsHandler from './handlers/artistCoins.js'
 import { Server } from './server/index.js'
 
 const main = async () => {
@@ -16,7 +17,10 @@ const main = async () => {
   const purchases = listenOn('usdc_purchases', purchasesHandler).catch(
     console.error
   )
-  await Promise.allSettled([tracks, users, purchases])
+  const artistCoins = listenOn('artist_coins', artistCoinsHandler).catch(
+    console.error
+  )
+  await Promise.allSettled([tracks, users, purchases, artistCoins])
 }
 
 main()
