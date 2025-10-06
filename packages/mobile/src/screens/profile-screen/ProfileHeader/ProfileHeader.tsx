@@ -14,7 +14,6 @@ import { LayoutAnimation } from 'react-native'
 import { useToggle } from 'react-use'
 
 import { Box, Divider, Flex, useTheme } from '@audius/harmony-native'
-import { ProfilePicture } from 'app/components/core'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { zIndex } from 'app/utils/zIndex'
 
@@ -26,6 +25,7 @@ import { ProfileMetrics } from '../ProfileMetrics'
 import { TipAudioButton } from '../TipAudioButton'
 import { UploadTrackButton } from '../UploadTrackButton'
 
+import { ArtistProfilePicture } from './ArtistProfilePicture'
 import { Bio } from './Bio'
 import { CollapsedSection } from './CollapsedSection'
 import { ExpandHeaderToggleButton } from './ExpandHeaderToggleButton'
@@ -132,9 +132,8 @@ export const ProfileHeader = memo(() => {
           left: spacing.unit3,
           zIndex: zIndex.PROFILE_PAGE_PROFILE_PICTURE
         })}
-        pointerEvents='none'
       >
-        <ProfilePicture userId={userId} size='xl' />
+        {userId ? <ArtistProfilePicture userId={userId} /> : null}
       </Box>
       <Flex
         column
