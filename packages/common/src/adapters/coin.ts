@@ -5,7 +5,6 @@ import {
 } from '@audius/sdk'
 
 import { ID } from '~/models'
-import { Env } from '~/services/env'
 import { removeNullable } from '~/utils/typeUtils'
 
 // Define a cleaner coin model without UI dependencies
