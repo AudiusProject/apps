@@ -10,6 +10,7 @@ import { convertGenreLabelToValue, Genre } from './genres'
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
 export const ARTIST_COIN_TERMS = '/legal/artist-coin-terms'
+export const ARTIST_COIN_ACCEPTABLE_USE = '/legal/artist-coin-acceptable-use'
 export const API_TERMS = '/legal/api-terms'
 export const DOWNLOAD_START_LINK = '/download?start_download=true'
 export const DOWNLOAD_LINK = '/download'
@@ -260,6 +261,7 @@ export const publicSiteRoutes = [
   PRIVACY_POLICY,
   API_TERMS,
   ARTIST_COIN_TERMS,
+  ARTIST_COIN_ACCEPTABLE_USE,
   DOWNLOAD_LINK,
   AUTH_REDIRECT
 ]
