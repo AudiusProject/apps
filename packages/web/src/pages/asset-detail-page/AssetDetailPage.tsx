@@ -2,6 +2,7 @@ import { useArtistCoinByTicker, useCurrentUserId } from '@audius/common/api'
 import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom-v5-compat'
 
 import { Header } from 'components/header/desktop/Header'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -78,12 +79,12 @@ export const AssetDetailPage = () => {
   const {
     data: coin,
     isPending,
-    isSuccess,
-    error: coinError
+    isError,
+    isSuccess
   } = useArtistCoinByTicker({ ticker })
 
-  if (!ticker) {
-    return <Redirect to='/wallet' />
+  if (!ticker || isError || (isSuccess && !coin)) {
+    return <Redirect to='/coins' />
   }
 
   if (isPending) {
@@ -96,10 +97,6 @@ export const AssetDetailPage = () => {
         <LoadingSpinner />
       </Flex>
     )
-  }
-
-  if (coinError || (isSuccess && !coin)) {
-    return <Redirect to='/wallet' />
   }
 
   const isOwner = currentUserId === coin?.ownerId
