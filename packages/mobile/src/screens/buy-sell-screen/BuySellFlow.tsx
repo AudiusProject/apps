@@ -20,6 +20,7 @@ import {
   useTokenStates
 } from '@audius/common/store'
 import { useFocusEffect } from '@react-navigation/native'
+import { InteractionManager, Keyboard } from 'react-native'
 
 import { Button, Flex, Hint, TextLink } from '@audius/harmony-native'
 import { SegmentedControl } from 'app/components/core'
@@ -64,6 +65,14 @@ export const BuySellFlow = ({
     resetTransactionData,
     initialTab
   })
+
+  const handleTabChange = (newTab: BuySellTab) => {
+    handleActiveTabChange(newTab)
+    // Dismiss keyboard in case we were focused on an input
+    InteractionManager.runAfterInteractions(() => {
+      Keyboard.dismiss()
+    })
+  }
 
   // Use custom hooks for token state management
   const {
@@ -322,7 +331,7 @@ export const BuySellFlow = ({
           <SegmentedControl
             options={tabs}
             selected={activeTab}
-            onSelectOption={handleActiveTabChange}
+            onSelectOption={handleTabChange}
             fullWidth
           />
         </Flex>
