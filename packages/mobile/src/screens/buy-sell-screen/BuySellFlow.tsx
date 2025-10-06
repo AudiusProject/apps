@@ -303,7 +303,10 @@ export const BuySellFlow = ({
   ])
 
   const handleAddCash = useCallback(() => {
-    openAddCashModal()
+    openAddCashModal({
+      isOpen: true,
+      portalHostName: 'BuySellModalScreenDrawerPortal'
+    })
     trackAddFundsClicked('insufficient_balance_hint')
   }, [openAddCashModal, trackAddFundsClicked])
 

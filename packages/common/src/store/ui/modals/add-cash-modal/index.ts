@@ -2,6 +2,7 @@ import { createModal } from '../createModal'
 
 export type AddCashModalState = {
   isOpen: boolean
+  portalHostName?: string
 }
 
 const AddCashModal = createModal<AddCashModalState>({

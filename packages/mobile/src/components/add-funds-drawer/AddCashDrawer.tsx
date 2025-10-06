@@ -4,6 +4,7 @@ import { DEFAULT_PURCHASE_AMOUNT_CENTS } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
 import { buyUSDCActions, useAddCashModal } from '@audius/common/store'
+import { Portal } from '@gorhom/portal'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Button, Flex, Text } from '@audius/harmony-native'
@@ -29,7 +30,12 @@ const messages = {
 export const AddCashDrawer = () => {
   const dispatch = useDispatch()
   const purchaseVendorState = useSelector(getPurchaseVendor)
-  const { isOpen, onClose, onClosed } = useAddCashModal()
+  const {
+    isOpen,
+    onClose,
+    onClosed,
+    data: { portalHostName }
+  } = useAddCashModal()
 
   const [selectedPurchaseMethod, setSelectedPurchaseMethod] =
     useState<PurchaseMethod>(PurchaseMethod.CARD)
@@ -59,7 +65,7 @@ export const AddCashDrawer = () => {
     onClose()
   }, [dispatch, onClose])
 
-  return (
+  const content = (
     <Drawer isOpen={isOpen} onClose={handleClose} onClosed={onClosed}>
       <Flex gap='xl' pb='xl'>
         {page === AddCashDrawerPage.MAIN ? (
@@ -102,5 +108,11 @@ export const AddCashDrawer = () => {
         )}
       </Flex>
     </Drawer>
+  )
+
+  return portalHostName ? (
+    <Portal hostName={portalHostName}>{content}</Portal>
+  ) : (
+    content
   )
 }
