@@ -1,4 +1,3 @@
-import type { LaunchpadFormValues } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Checkbox, Flex, Text, TextLink } from '@audius/harmony'
 import { Field, useFormikContext } from 'formik'
@@ -11,7 +10,7 @@ const messages = {
 }
 
 export const AgreeToTerms = () => {
-  const { setFieldValue } = useFormikContext<LaunchpadFormValues>()
+  const { setFieldValue } = useFormikContext<any>()
 
   return (
     <Flex gap='s' alignItems='center'>
