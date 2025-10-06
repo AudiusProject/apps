@@ -12,7 +12,15 @@ import { AUDIO_TICKER } from '@audius/common/store'
 import { ownedCoinsFilter } from '@audius/common/utils'
 import { TouchableOpacity } from 'react-native'
 
-import { Box, Button, Divider, Flex, Paper, Text } from '@audius/harmony-native'
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  IconCaretRight,
+  Paper,
+  Text
+} from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { AudioCoinCard } from './AudioCoinCard'
@@ -76,6 +84,7 @@ const DiscoverArtistCoinsCard = ({ onPress }: { onPress: () => void }) => {
         <Text variant='heading' size='s' numberOfLines={1}>
           {walletMessages.artistCoins.title}
         </Text>
+        <IconCaretRight color='subdued' />
       </Flex>
     </TouchableOpacity>
   )

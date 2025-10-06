@@ -65,8 +65,12 @@ export const AudioCoinCard = () => {
         justifyContent='space-between'
         alignItems='center'
       >
-        <Flex row alignItems='center' gap='l' style={{ flexShrink: 1 }}>
-          {isLoading ? <AudioHexagonalSkeleton /> : <IconTokenAUDIO />}
+        <Flex row alignItems='center' gap='l'>
+          {isLoading ? (
+            <AudioHexagonalSkeleton />
+          ) : (
+            <IconTokenAUDIO size='4xl' />
+          )}
           <Flex column gap='xs'>
             {isLoading ? (
               <AudioCoinCardSkeleton />
