@@ -7,6 +7,7 @@ import { useTokenSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
+import { BuySellTerms } from './components/BuySellTerms'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -108,6 +109,7 @@ export const SellTab = ({
             tokenPriceDecimalPlaces={decimalPlaces}
             hideTokenDisplay={true} // Hide token display completely in sell tab output
           />
+          <BuySellTerms />
         </>
       )}
     </Flex>

@@ -5,6 +5,7 @@ import type { TokenInfo, TokenPair } from '@audius/common/store'
 import { useTokenSwapForm } from '@audius/common/store'
 
 import { Box, Flex, Skeleton } from '@audius/harmony-native'
+import { BuySellTerms } from 'app/components/buy-sell/BuySellTerms'
 import { InputTokenSection } from 'app/components/buy-sell/InputTokenSection'
 import { OutputTokenSection } from 'app/components/buy-sell/OutputTokenSection'
 
@@ -143,6 +144,7 @@ export const SellScreen = ({
             isTokenPriceLoading={false}
             tokenPriceDecimalPlaces={2}
           />
+          <BuySellTerms />
         </>
       )}
     </Flex>

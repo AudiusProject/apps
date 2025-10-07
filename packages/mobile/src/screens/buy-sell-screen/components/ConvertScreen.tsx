@@ -18,6 +18,7 @@ import {
   Skeleton,
   Divider
 } from '@audius/harmony-native'
+import { BuySellTerms } from 'app/components/buy-sell/BuySellTerms'
 import { InputTokenSection } from 'app/components/buy-sell/InputTokenSection'
 import { OutputTokenSection } from 'app/components/buy-sell/OutputTokenSection'
 
@@ -238,6 +239,7 @@ export const ConvertScreen = ({
             availableTokens={filteredAvailableOutputTokens}
             onTokenChange={handleOutputTokenChange}
           />
+          <BuySellTerms />
         </>
       )}
     </Flex>

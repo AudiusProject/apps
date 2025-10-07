@@ -14,6 +14,7 @@ import { Flex } from '@audius/harmony'
 
 import { useFlag } from 'hooks/useRemoteConfig'
 
+import { BuySellTerms } from './components/BuySellTerms'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -122,6 +123,7 @@ export const BuyTab = ({
             onTokenChange={handleOutputTokenChange}
             isArtistCoinsEnabled={isArtistCoinsEnabled}
           />
+          <BuySellTerms />
         </>
       )}
     </Flex>

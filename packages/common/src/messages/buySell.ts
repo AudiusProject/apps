@@ -91,5 +91,7 @@ export const buySellMessages = {
     isStablecoin: boolean,
     available: string
   ) => `${isStablecoin ? '$' : ''}${formattedBalance} ${available}`,
-  help: 'Help'
+  help: 'Help',
+  termsAgreement: 'By clicking continue, you agree to our',
+  termsOfUse: 'Terms of Use'
 }
