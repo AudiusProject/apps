@@ -23,6 +23,10 @@ release:
   media:
     - purpose: icon
       uri: ./media/publisher_icon.png
+    - purpose: banner
+      uri: ./media/banner_graphic.png
+    - purpose: featureGraphic
+      uri: ./media/feature_graphic.png
     - purpose: screenshot
       uri: ./media/screenshot1.png
     - purpose: screenshot
