@@ -65,7 +65,6 @@ const App = () => {
         <KeyboardProvider
           statusBarTranslucent={true}
           navigationBarTranslucent={true}
-          preserveEdgeToEdge={true}
         >
           <Provider store={store}>
             <AudiusQueryProvider>
