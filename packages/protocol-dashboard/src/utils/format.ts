@@ -121,6 +121,10 @@ export const formatShortAud = (amount: BN | null) => {
   }
 }
 
+export const formatBytes = (bytes: number) => {
+  return numeral(bytes).format('0.00 b')
+}
+
 export const getTime = (ms: number) => {
   const time = dayjs.duration(ms)
   const hours = leftPadZero(time.hours(), 2)

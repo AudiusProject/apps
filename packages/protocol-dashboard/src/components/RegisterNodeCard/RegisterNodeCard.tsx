@@ -10,6 +10,7 @@ import { RegisterNewServiceBtn } from 'components/ManageService/RegisterNewServi
 import { useAccount } from 'store/account/hooks'
 import { useCurrentVersion } from 'store/cache/protocol/hooks'
 import { ServiceType } from 'types'
+import { formatBytes } from 'utils/format'
 import { REGISTER_NODE_DOCS_URL } from 'utils/routes'
 
 const messages = {
@@ -103,7 +104,7 @@ export const RegisterNodeCard = () => {
                 </Box>
               ) : (
                 <Text variant='heading' size='s' strength='default'>
-                  {storageCommitment}
+                  {formatBytes(parseInt(storageCommitment, 10))}
                 </Text>
               )}
             </Box>
