@@ -296,12 +296,12 @@ mobile-release-saga-dapp-store:
         name: Validate release
         command: |
           cd packages/mobile/dapp-store
-          npx dapp-store validate release -k app-keypair.json -b $ANDROID_HOME/build-tools/34.0.0-rc3
+          npx dapp-store validate release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0
     - run:
         name: Publish APK
         command: |
           cd packages/mobile/dapp-store
-          npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/34.0.0-rc3 -u $SOLANA_RPC_URL
+          npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0 -u $SOLANA_RPC_URL
     - run:
         name: Issue update to dapp store
         command: |
