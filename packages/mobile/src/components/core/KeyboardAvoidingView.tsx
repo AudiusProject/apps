@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { ViewStyle, StyleProp } from 'react-native'
 import { Keyboard, Animated, Easing } from 'react-native'
@@ -14,6 +14,7 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
 }))
 
 type KeyboardAvoidingViewProps = {
+  behavior?: 'position' | 'padding'
   style?: StyleProp<ViewStyle>
   keyboardShowingDuration?: number
   keyboardHidingDuration?: number
@@ -39,34 +40,44 @@ export const KeyboardAvoidingView = ({
   keyboardShowingOffset = 0,
   onKeyboardShow,
   onKeyboardHide,
+  behavior = 'position',
   children
 }: KeyboardAvoidingViewProps) => {
   const styles = useStyles()
-  const keyboardHeight = useRef(new Animated.Value(0))
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const keyboardHeightAnim = useRef(new Animated.Value(0))
 
   const handleKeyboardWillShow = useCallback(
     (event) => {
-      Animated.timing(keyboardHeight.current, {
-        toValue: -event.endCoordinates.height + keyboardShowingOffset,
-        duration: keyboardShowingDuration,
-        // Ease out to start animation fast and settle slowly
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true
-      }).start(onKeyboardShow)
+      if (behavior === 'position') {
+        Animated.timing(keyboardHeightAnim.current, {
+          toValue: -event.endCoordinates.height + keyboardShowingOffset,
+          duration: keyboardShowingDuration,
+          // Ease out to start animation fast and settle slowly
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true
+        }).start(onKeyboardShow)
+      } else {
+        setKeyboardHeight(event.endCoordinates.height + keyboardShowingOffset)
+      }
     },
-    [keyboardShowingDuration, keyboardShowingOffset, onKeyboardShow]
+    [keyboardShowingDuration, keyboardShowingOffset, onKeyboardShow, behavior]
   )
 
   const handleKeyboardWillHide = useCallback(
     (event) => {
-      Animated.timing(keyboardHeight.current, {
-        toValue: 0,
-        duration: keyboardHidingDuration,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true
-      }).start(onKeyboardHide)
+      if (behavior === 'position') {
+        Animated.timing(keyboardHeightAnim.current, {
+          toValue: 0,
+          duration: keyboardHidingDuration,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true
+        }).start(onKeyboardHide)
+      } else {
+        setKeyboardHeight(0)
+      }
     },
-    [keyboardHidingDuration, onKeyboardHide]
+    [keyboardHidingDuration, onKeyboardHide, behavior]
   )
 
   useEffect(() => {
@@ -89,9 +100,13 @@ export const KeyboardAvoidingView = ({
       style={[
         styles.rootContainer,
         style,
-        {
-          transform: [{ translateY: keyboardHeight.current }]
-        }
+        behavior === 'position'
+          ? {
+              transform: [{ translateY: keyboardHeightAnim.current }]
+            }
+          : {
+              paddingBottom: keyboardHeight
+            }
       ]}
     >
       {children}

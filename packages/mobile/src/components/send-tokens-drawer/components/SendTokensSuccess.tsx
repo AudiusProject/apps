@@ -46,7 +46,7 @@ export const SendTokensSuccess = ({
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
-      <BalanceSection mint={mint} />
+      <BalanceSection mint={mint} internalWalletOnly />
       <Divider />
       <Flex gap='m'>
         <Text variant='heading' size='s' color='subdued'>

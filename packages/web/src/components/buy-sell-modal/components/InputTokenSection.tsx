@@ -115,10 +115,11 @@ export const InputTokenSection = ({
               {messages.formattedAvailableBalance(
                 formattedAvailableBalance,
                 symbol,
-                !!isStablecoin
+                !!isStablecoin,
+                messages.availableToTrade
               )}
             </Text>
-            <Tooltip text={messages.availableBalanceTooltip} mount='body'>
+            <Tooltip text={messages.availableToTradeTooltip} mount='body'>
               <IconInfo color='subdued' size='s' />
             </Tooltip>
           </Flex>

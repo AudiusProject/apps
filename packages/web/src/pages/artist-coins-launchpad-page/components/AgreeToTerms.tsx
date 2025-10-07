@@ -5,9 +5,9 @@ import { Field, useFormikContext } from 'formik'
 
 const messages = {
   termsText: 'By checking this box I agree to the latest',
-  termsOfService: 'terms of service',
-  artistCoinsTerms: 'Artist Coin terms',
-  artistCoinAcceptableUse: 'Artist Coin acceptable use policy'
+  termsOfService: 'Terms of Use',
+  artistCoinsTerms: 'Artist Coin Terms',
+  artistCoinAcceptableUse: 'Artist Coin Acceptable Use Policy'
 }
 
 export const AgreeToTerms = () => {

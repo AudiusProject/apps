@@ -55,6 +55,12 @@ export type TextLinkProps<
      */
     showUnderline?: boolean
 
+    /**
+     * Force the link to be treated as external, opening in the device's browser.
+     * Useful for internal URLs that should still open externally (e.g., terms of use).
+     */
+    isExternal?: boolean
+
     source?: Source
 
     /**

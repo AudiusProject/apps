@@ -97,16 +97,29 @@ const HasBalanceState = ({
       <Flex row alignItems='center' justifyContent='space-between'>
         <Flex row alignItems='center' gap='l' style={{ flexShrink: 1 }}>
           <TokenIcon logoURI={logoURI} size={64} />
-          <Flex column gap='2xs'>
+          <Flex column gap='2xs' flex={1}>
             <Text variant='heading' size='s'>
               {coinName || `$${ticker}`}
             </Text>
-            <Text variant='title' size='l'>
-              {tokenBalanceFormatted}
-            </Text>
+            <Flex row gap='xs' alignItems='center' flex={1}>
+              <Text variant='title' size='l'>
+                {tokenBalanceFormatted}
+              </Text>
+              <Text
+                variant='title'
+                size='l'
+                color='subdued'
+                numberOfLines={1}
+                style={{
+                  flexShrink: 1
+                }}
+              >
+                ${ticker}
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
-        <Flex row alignItems='center' gap='m' ml={spacing.unit22}>
+        <Flex row alignItems='center' gap='m'>
           <Text
             variant='title'
             size='l'

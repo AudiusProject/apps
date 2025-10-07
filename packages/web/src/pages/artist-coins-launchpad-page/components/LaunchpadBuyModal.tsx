@@ -85,6 +85,7 @@ const FormInputStep = ({
   onContinue,
   availableBalance,
   isBalanceLoading,
+  isExchangeRateLoading,
   handleMaxClick: onMaxClick,
   onInputTokenChange,
   onInputAmountChange,
@@ -94,6 +95,7 @@ const FormInputStep = ({
   onContinue: () => void
   availableBalance: number
   isBalanceLoading: boolean
+  isExchangeRateLoading: boolean
   handleMaxClick: () => void
   onInputTokenChange: (token: TokenInfo) => void
   onInputAmountChange: (value: string) => void
@@ -180,7 +182,8 @@ const FormInputStep = ({
                         maximumFractionDigits: 4
                       }),
                       values.selectedInputToken.symbol,
-                      !!values.selectedInputToken.isStablecoin
+                      !!values.selectedInputToken.isStablecoin,
+                      buySellMessages.available
                     )}
                   </Text>
                   <Tooltip
@@ -237,7 +240,12 @@ const FormInputStep = ({
             />
           </Flex>
           {/* Button */}
-          <Button variant='primary' onClick={onContinue}>
+          <Button
+            variant='primary'
+            onClick={onContinue}
+            disabled={isExchangeRateLoading}
+            isLoading={isExchangeRateLoading}
+          >
             {buySellMessages.continue}
           </Button>
         </Flex>
@@ -442,6 +450,7 @@ export const LaunchpadBuyModal = ({
   const {
     availableBalance,
     isBalanceLoading,
+    isExchangeRateLoading,
     formik: buyModalForm,
     handleInputAmountChange,
     handleMaxClick,
@@ -460,7 +469,7 @@ export const LaunchpadBuyModal = ({
 
   const handleContinue = () => {
     track(make({ eventName: Name.LAUNCHPAD_BUY_MODAL_CONTINUE }))
-    if (currentStep === BuyModalStep.Form) {
+    if (currentStep === BuyModalStep.Form && !isExchangeRateLoading) {
       setCurrentStep(BuyModalStep.Confirmation)
     } else if (currentStep === BuyModalStep.Confirmation) {
       track(
@@ -514,6 +523,7 @@ export const LaunchpadBuyModal = ({
         onContinue={handleContinue}
         availableBalance={availableBalance}
         isBalanceLoading={isBalanceLoading}
+        isExchangeRateLoading={isExchangeRateLoading}
         handleMaxClick={handleMaxClick}
         onInputTokenChange={onInputTokenChange}
         onInputAmountChange={handleInputAmountChange}

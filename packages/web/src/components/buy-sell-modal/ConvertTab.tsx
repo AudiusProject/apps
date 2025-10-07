@@ -14,6 +14,7 @@ import { Divider, Flex, IconButton, IconTransaction } from '@audius/harmony'
 
 import { useFlag } from 'hooks/useRemoteConfig'
 
+import { BuySellTerms } from './components/BuySellTerms'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -209,6 +210,7 @@ export const ConvertTab = ({
             onTokenChange={handleOutputTokenChange}
             isArtistCoinsEnabled={isArtistCoinsEnabled}
           />
+          <BuySellTerms />
         </>
       )}
     </Flex>

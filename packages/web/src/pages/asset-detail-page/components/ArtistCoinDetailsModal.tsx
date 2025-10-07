@@ -158,8 +158,8 @@ export const convertCoinGeckoResponseToStatsDetailsProps = (
   }
   return {
     totalSupply: coingeckoResponse.market_data.total_supply,
-    marketCap: coingeckoResponse.market_data.market_cap.usd,
-    price: coingeckoResponse.market_data.current_price.usd,
+    displayMarketCap: coingeckoResponse.market_data.market_cap.usd,
+    displayPrice: coingeckoResponse.market_data.current_price.usd,
     liquidity: coingeckoResponse.market_data.total_volume.usd
   }
 }

@@ -127,7 +127,7 @@ export const YourCoins = () => {
         {isLoadingCoins || !currentUserId ? (
           <YourCoinsSkeleton />
         ) : (
-          cards.map((item) => (
+          cards.map((item, idx) => (
             <Box key={typeof item === 'string' ? item : item.mint}>
               {item === 'discover-artist-coins' ? (
                 <DiscoverArtistCoinsCard onPress={handleDiscoverArtistCoins} />
@@ -136,7 +136,7 @@ export const YourCoins = () => {
               ) : (
                 <CoinCard mint={item.mint} />
               )}
-              <Divider />
+              {idx !== cards.length - 1 && <Divider />}
             </Box>
           ))
         )}

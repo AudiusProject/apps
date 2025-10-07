@@ -17,6 +17,10 @@ export const buySellMessages = {
   amountAUDIO: 'Amount (AUDIO)',
   max: 'MAX',
   available: 'Available',
+  availableToTrade: 'Available to Trade',
+  availableBalanceTooltip: 'This is the amount you have available to spend',
+  availableToTradeTooltip:
+    'This is the amount you have available to trade in your built-in wallet.',
   addCash: 'Add Cash',
   audioTicker: '$AUDIO',
   usdcTicker: 'USDC',
@@ -84,9 +88,10 @@ export const buySellMessages = {
   formattedAvailableBalance: (
     formattedBalance: string,
     _symbol: string,
-    isStablecoin: boolean
-  ) =>
-    `${isStablecoin ? '$' : ''}${formattedBalance} ${buySellMessages.available}`,
-  availableBalanceTooltip: 'This is the amount you have available to spend',
-  help: 'Help'
+    isStablecoin: boolean,
+    available: string
+  ) => `${isStablecoin ? '$' : ''}${formattedBalance} ${available}`,
+  help: 'Help',
+  termsAgreement: 'By clicking continue, you agree to our',
+  termsOfUse: 'Terms of Use'
 }

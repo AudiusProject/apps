@@ -2,7 +2,8 @@ import { useCallback, useState, useEffect } from 'react'
 
 import {
   useArtistCoin,
-  transformArtistCoinToTokenInfo
+  transformArtistCoinToTokenInfo,
+  useTokenBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -25,6 +26,11 @@ export const SendTokensInput = ({
   initialDestinationAddress
 }: SendTokensInputProps) => {
   const { data: coin } = useArtistCoin(mint)
+  const { data: tokenBalance } = useTokenBalance({
+    mint,
+    includeExternalWallets: false,
+    includeStaked: false
+  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
   const [amount, setAmount] = useState(
@@ -74,6 +80,12 @@ export const SendTokensInput = ({
         const parsedAmount = new FixedDecimal(amount, tokenInfo?.decimals || 0)
         if (parsedAmount.value <= 0) {
           newErrors.amount = walletMessages.sendTokensAmountInsufficient
+        } else {
+          // Check if amount exceeds available balance
+          const currentBalance = tokenBalance?.balance?.value ?? BigInt(0)
+          if (parsedAmount.value > currentBalance) {
+            newErrors.amount = walletMessages.sendTokensAmountInsufficient
+          }
         }
       } catch (error) {
         newErrors.amount = walletMessages.sendTokensInvalidAmount
@@ -89,7 +101,12 @@ export const SendTokensInput = ({
 
     setErrors(newErrors)
     return !newErrors.amount && !newErrors.address
-  }, [amount, destinationAddress, tokenInfo?.decimals])
+  }, [
+    amount,
+    destinationAddress,
+    tokenInfo?.decimals,
+    tokenBalance?.balance?.value
+  ])
 
   const handleContinue = useCallback(() => {
     if (validateInputs() && tokenInfo) {
@@ -113,7 +130,7 @@ export const SendTokensInput = ({
       // Ensure the keyboard doesn't cover the input
       style={{ minHeight: keyboardHeight > 0 ? keyboardHeight + 400 : 'auto' }}
     >
-      <BalanceSection mint={mint} />
+      <BalanceSection mint={mint} internalWalletOnly />
       <Divider />
 
       <Flex gap='l' flex={1}>
