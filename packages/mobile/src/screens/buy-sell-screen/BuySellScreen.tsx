@@ -2,17 +2,11 @@ import React from 'react'
 
 import { buySellMessages as messages } from '@audius/common/messages'
 import { css } from '@emotion/native'
-import { Platform } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex, Paper, spacing } from '@audius/harmony-native'
-import {
-  Screen,
-  ScreenContent,
-  ScrollView,
-  KeyboardAvoidingView
-} from 'app/components/core'
-import { FIXED_FOOTER_HEIGHT } from 'app/components/core/FixedFooter'
+import { Screen, ScreenContent } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import type { BuySellScreenParams } from '../../types/navigation'
@@ -44,30 +38,16 @@ export const BuySellScreen = ({ route }: BuySellScreenProps) => {
   return (
     <Screen title={messages.title} variant='white' url='/buy-sell'>
       <ScreenContent>
-        <ScrollView
-          style={{
-            flex: 1
-          }}
-          contentContainerStyle={{
-            flexGrow: 1,
-            // On Android, make sure the content can clear the foot when the keyboard is shown
-            // (On iOS, KeyboardAvoidingView handles this)
-            paddingBottom: Platform.OS === 'android' ? FIXED_FOOTER_HEIGHT : 0
-          }}
+        <KeyboardAwareScrollView
+          bottomOffset={spacing['2xl']}
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior='padding'
-            keyboardShowingOffset={insets.bottom}
-          >
-            <PoweredByJupiter />
-            <Flex mt='xl' p='l' style={{ flex: 1 }}>
-              {flowData.content}
-            </Flex>
-          </KeyboardAvoidingView>
-        </ScrollView>
+          <PoweredByJupiter />
+          <Flex mt='xl' p='l' style={{ flex: 1 }}>
+            {flowData.content}
+          </Flex>
+        </KeyboardAwareScrollView>
         {/* Render footer outside scrollview so it doesn't move around when we adjust padding */}
         <Paper
           p='l'

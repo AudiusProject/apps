@@ -135,6 +135,7 @@
     "react-native-inset-shadow": "1.0.3",
     "react-native-intersection-observer": "0.2.1",
     "react-native-keyboard-aware-scroll-view": "0.9.5",
+    "react-native-keyboard-controller": "1.19.0",
     "react-native-linear-gradient": "2.8.3",
     "react-native-markdown-display": "7.0.2",
     "react-native-modal": "13.0.1",
