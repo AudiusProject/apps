@@ -32,11 +32,13 @@ import { SelectArtistsPreviewContext } from './selectArtistsPreviewContext'
 
 type FollowArtistTileProps = {
   user: UserMetadata
+  mobileWidth?: string
 } & HTMLProps<HTMLInputElement>
 
 export const FollowArtistCard = (props: FollowArtistTileProps) => {
   const {
-    user: { name, user_id, is_verified, track_count, follower_count }
+    user: { name, user_id, is_verified, track_count, follower_count },
+    mobileWidth = 'calc(50% - 4px)'
   } = props
   const dispatch = useDispatch()
   const { isMobile } = useMedia()
@@ -107,7 +109,7 @@ export const FollowArtistCard = (props: FollowArtistTileProps) => {
   ))
 
   return (
-    <Paper h={220} w={isMobile ? 'calc(50% - 4px)' : 235}>
+    <Paper h={220} w={isMobile ? mobileWidth : 235}>
       <Flex w='100%' direction='column' alignItems='center'>
         {isPlaying ? (
           <Box
