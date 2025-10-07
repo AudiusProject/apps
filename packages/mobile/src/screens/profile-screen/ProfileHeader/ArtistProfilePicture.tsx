@@ -1,14 +1,15 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 
 import { useUserCreatedCoins } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { css } from '@emotion/native'
-import { useNavigation } from '@react-navigation/native'
 import { TouchableOpacity } from 'react-native'
 
 import { ProfilePicture, TokenIcon } from 'app/components/core'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { env } from 'app/services/env'
+import { zIndex } from 'app/utils/zIndex'
 
 const messages = {
   artistCoinBadge: 'Artist coin badge'
@@ -31,22 +32,15 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   })
   const ownedCoin = ownedCoins?.[0]
 
-  const shouldShowArtistCoinBadge = useMemo(() => {
-    if (!isArtistCoinsEnabled || !ownedCoin?.mint || !ownedCoin?.logoUri) {
-      return false
-    }
-
-    // Don't show for wAUDIO
-    if (ownedCoin.mint === env.WAUDIO_MINT_ADDRESS) {
-      return false
-    }
-
-    return true
-  }, [isArtistCoinsEnabled, ownedCoin?.mint, ownedCoin?.logoUri])
+  const shouldShowArtistCoinBadge =
+    !!isArtistCoinsEnabled &&
+    !!ownedCoin?.mint &&
+    !!ownedCoin?.logoUri &&
+    ownedCoin.mint !== env.WAUDIO_MINT_ADDRESS
 
   const handleCoinPress = useCallback(() => {
     if (ownedCoin?.ticker) {
-      ;(navigation as any).navigate('CoinDetailsScreen', {
+      navigation.navigate('CoinDetailsScreen', {
         ticker: ownedCoin.ticker
       })
     }
@@ -63,7 +57,7 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
             position: 'absolute',
             bottom: 0,
             right: 0,
-            zIndex: 10
+            zIndex: zIndex.PROFILE_PAGE_PROFILE_PICTURE + 1
           })}
         >
           <TokenIcon logoURI={ownedCoin?.logoUri} size='l' />
