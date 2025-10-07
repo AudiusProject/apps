@@ -355,7 +355,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
         })
       }
 
-      if (path.match(/^\/wallet/)) {
+      if (path.match(/^\/wallet(?:\/|\?|$)/)) {
         return createFeedStackState({
           name: 'wallet'
         })
