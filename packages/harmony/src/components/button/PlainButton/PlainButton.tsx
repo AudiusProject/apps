@@ -49,8 +49,8 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
       variant === 'subdued' && !isDisabled
         ? color.text.subdued
         : variant === 'inverted'
-        ? color.static.staticWhite
-        : color.text.default
+          ? color.static.staticWhite
+          : color.text.default
 
     const hoverTextColor =
       variant === 'inverted'
