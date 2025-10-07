@@ -156,18 +156,6 @@ export const useFeatureFlag = (
     getOverride()
   })
 
-  // Check for hard-coded flags first
-  const isHardCodedEnabled =
-    flag === FeatureFlags.ARTIST_COINS || flag === FeatureFlags.TOKEN_GATING
-
-  if (isHardCodedEnabled) {
-    return {
-      isLoaded: configLoaded,
-      isEnabled: true,
-      setOverride: async () => {}
-    }
-  }
-
   return {
     isLoaded: configLoaded,
     isEnabled: isLocallyEnabled ?? isEnabled,
