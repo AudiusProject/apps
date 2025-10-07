@@ -39,7 +39,7 @@ const messages = {
   cnEndpointPlaceholder: 'https://contentnode.audius.co',
   delegate: 'Node Wallet Address',
   learnMoreNode: 'To learn more about running a node, please read the docs.',
-  runningAudiusNode: 'Running an Audius Node',
+  runningAudiusNode: 'Running a Node',
   minStake: 'Min Stake',
   maxStakeExceeded: 'Exceeds maximum stake',
   minStakeNotMet: 'Does not meet minimum stake'

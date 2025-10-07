@@ -65,7 +65,10 @@ const messages = {
   registerNodeTooltipTitle: 'How to Register a Node?',
   registerNodeTooltipBody:
     'Node Operators run the decentralized infrastructure that powers the Audius Network.  To learn more about running a node, please read the docs.',
-  registerNodeCtaText: 'Running an Audius Node'
+  registerNodeCtaText: 'Running a Node',
+  storageCommitmentTooltipTitle: 'What is Storage Commitment?',
+  storageCommitmentTooltipBody:
+    'Storage Commitment is the amount of data that each is responsible for storing. The calculation is the total storage demand of all files on the protocol, multiplied by the replication factor, and divided by the number of registered nodes.'
 }
 
 const CTA_HREFS = {
@@ -356,6 +359,20 @@ export const DelegatorsInfoTooltip = ({
       size={size}
       title={messages.delegatorsTooltipTitle}
       body={messages.delegatorsTooltipBody}
+    />
+  )
+}
+
+export const StorageCommitmentInfoTooltip = ({
+  color,
+  size
+}: AppliedInfoTooltipProps) => {
+  return (
+    <InfoTooltip
+      color={color}
+      size={size}
+      title={messages.storageCommitmentTooltipTitle}
+      body={messages.storageCommitmentTooltipBody}
     />
   )
 }

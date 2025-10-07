@@ -15,7 +15,8 @@ export type BigNumber = BN
 
 export enum ServiceType {
   DiscoveryProvider = 'discovery-node',
-  ContentNode = 'content-node'
+  ContentNode = 'content-node',
+  Validator = 'validator'
 }
 
 export enum Permission {

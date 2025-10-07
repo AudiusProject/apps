@@ -14,7 +14,8 @@ import {
   setDelgator,
   setServiceTypeInfo,
   setEthBlockNumber,
-  setAverageBlockTime
+  setAverageBlockTime,
+  setCurrentVersion
 } from './slice'
 
 // -------------------------------- Selectors  --------------------------------
@@ -27,6 +28,19 @@ export const getAverageBlockTime = (state: AppState) =>
   state.cache.protocol.averageBlockTime
 export const getDelegatorInfo = (state: AppState) =>
   state.cache.protocol.delegator
+export const getCurrentVersion = (
+  state: AppState,
+  serviceType: ServiceType
+) => {
+  switch (serviceType) {
+    case ServiceType.DiscoveryProvider:
+      return state.cache.protocol.services.discoveryProvider.currentVersion
+    case ServiceType.ContentNode:
+      return state.cache.protocol.services.contentNode.currentVersion
+    case ServiceType.Validator:
+      return state.cache.protocol.services.validator?.currentVersion ?? '1.0.0'
+  }
+}
 
 // -------------------------------- Thunk Actions  --------------------------------// -------------------------------- Thunk Actions  --------------------------------
 
@@ -58,8 +72,20 @@ export function fetchServiceStakeValues(): ThunkAction<
     const contentNode = await aud.NodeType.getServiceTypeInfo(
       ServiceType.ContentNode
     )
+    const validator = await aud.NodeType.getServiceTypeInfo(
+      ServiceType.Validator
+    )
 
-    dispatch(setServiceTypeInfo({ discoveryProvider, contentNode }))
+    dispatch(setServiceTypeInfo({ discoveryProvider, contentNode, validator }))
+  }
+}
+
+export function fetchCurrentVersion(
+  serviceType: ServiceType
+): ThunkAction<void, AppState, Audius, Action<string>> {
+  return async (dispatch, getState, aud) => {
+    const currentVersion = await aud.NodeType.getCurrentVersion(serviceType)
+    dispatch(setCurrentVersion({ serviceType, currentVersion }))
   }
 }
 
@@ -235,6 +261,17 @@ export const useTimeRemaining = (block: number, period: number | null) => {
   }, [setTimeRemaining])
 
   return { timeRemaining, targetBlock, currentBlock }
+}
+
+export const useCurrentVersion = (serviceType: ServiceType) => {
+  const currentVersion = useSelector((state) =>
+    getCurrentVersion(state as AppState, serviceType)
+  )
+  const dispatch: ThunkDispatch<AppState, Audius, AnyAction> = useDispatch()
+  useEffect(() => {
+    if (currentVersion === undefined) dispatch(fetchCurrentVersion(serviceType))
+  }, [dispatch, currentVersion, serviceType])
+  return currentVersion
 }
 
 export const useInit = () => {
