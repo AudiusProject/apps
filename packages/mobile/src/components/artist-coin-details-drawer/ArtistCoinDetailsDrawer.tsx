@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useArtistCoin, useCoinGeckoCoin } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { useArtistCoinDetailsModal } from '@audius/common/store'
 import { formatCurrencyWithSubscript } from '@audius/common/utils'
@@ -10,6 +10,7 @@ import { Flex, Text, Divider, Button, useTheme } from '@audius/harmony-native'
 import { TokenIcon } from 'app/components/core'
 import Drawer from 'app/components/drawer/Drawer'
 import { useToast } from 'app/hooks/useToast'
+import { env } from 'app/services/env'
 
 import { DrawerHeader } from '../drawer/DrawerHeader'
 
@@ -21,6 +22,11 @@ export const ArtistCoinDetailsDrawer = () => {
   const { isOpen, onClose, data: modalData } = useArtistCoinDetailsModal()
   const mint = modalData?.mint
   const { data: artistCoin } = useArtistCoin(mint)
+  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
+  const { data: coingeckoResponse } = useCoinGeckoCoin(
+    { coinId: 'audius' },
+    { enabled: isAudio }
+  )
 
   const handleCopyAddress = useCallback(() => {
     if (artistCoin?.mint) {
@@ -94,46 +100,74 @@ export const ArtistCoinDetailsDrawer = () => {
 
         {/* Token Details */}
         <Flex direction='column' gap='m'>
-          {artistCoin?.totalSupply ? (
+          {(
+            isAudio
+              ? coingeckoResponse?.market_data?.total_supply
+              : artistCoin?.totalSupply
+          ) ? (
             <Flex direction='column' gap='xs'>
               <Text variant='label' size='s' color='subdued'>
                 {artistCoinDetails.totalSupply}
               </Text>
               <Text variant='body' size='s'>
-                {artistCoin.totalSupply.toLocaleString()}
+                {isAudio
+                  ? coingeckoResponse?.market_data?.total_supply?.toLocaleString()
+                  : artistCoin?.totalSupply?.toLocaleString()}
               </Text>
             </Flex>
           ) : null}
 
-          {artistCoin?.marketCap ? (
+          {(
+            isAudio
+              ? coingeckoResponse?.market_data?.market_cap?.usd
+              : artistCoin?.marketCap
+          ) ? (
             <Flex direction='column' gap='xs'>
               <Text variant='label' size='s' color='subdued'>
                 {artistCoinDetails.marketCap}
               </Text>
               <Text variant='body' size='s'>
-                ${artistCoin.marketCap.toLocaleString()}
+                $
+                {isAudio
+                  ? coingeckoResponse?.market_data?.market_cap?.usd?.toLocaleString()
+                  : artistCoin?.marketCap?.toLocaleString()}
               </Text>
             </Flex>
           ) : null}
 
-          {artistCoin?.price ? (
+          {(
+            isAudio
+              ? coingeckoResponse?.market_data?.current_price?.usd
+              : artistCoin?.price
+          ) ? (
             <Flex direction='column' gap='xs'>
               <Text variant='label' size='s' color='subdued'>
                 {artistCoinDetails.price}
               </Text>
               <Text variant='body' size='s'>
-                {formatCurrencyWithSubscript(artistCoin.price)}
+                {formatCurrencyWithSubscript(
+                  isAudio
+                    ? (coingeckoResponse?.market_data?.current_price?.usd ?? 0)
+                    : (artistCoin?.price ?? 0)
+                )}
               </Text>
             </Flex>
           ) : null}
 
-          {artistCoin?.liquidity ? (
+          {(
+            isAudio
+              ? coingeckoResponse?.market_data?.total_volume?.usd
+              : artistCoin?.liquidity
+          ) ? (
             <Flex direction='column' gap='xs'>
               <Text variant='label' size='s' color='subdued'>
                 {artistCoinDetails.liquidity}
               </Text>
               <Text variant='body' size='s'>
-                ${artistCoin.liquidity.toLocaleString()}
+                $
+                {isAudio
+                  ? coingeckoResponse?.market_data?.total_volume?.usd?.toLocaleString()
+                  : artistCoin?.liquidity?.toLocaleString()}
               </Text>
             </Flex>
           ) : null}
