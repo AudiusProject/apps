@@ -227,6 +227,15 @@ export const remoteConfig = <
    * Accepts a fallback flag which will be checked if the primary flag is disabled
    */
   function getFeatureEnabled(flag: FeatureFlags, fallbackFlag?: FeatureFlags) {
+    // Hard-code ARTIST_COINS to always be enabled
+    if (flag === FeatureFlags.ARTIST_COINS) {
+      return true
+    }
+
+    // Hard-code TOKEN_GATING to always be enabled
+    if (flag === FeatureFlags.TOKEN_GATING) {
+      return true
+    }
     const defaultVal =
       environmentFlagDefaults[environment][flag] ?? flagDefaults[flag]
 

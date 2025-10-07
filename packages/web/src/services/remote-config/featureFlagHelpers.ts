@@ -10,6 +10,15 @@ const getLocalStorageItem = (key: string) =>
   typeof window !== 'undefined' ? window.localStorage.getItem(key) : null
 
 const getFlagEnabled = (flag: FeatureFlags) => {
+  // Hard-code ARTIST_COINS to always be enabled
+  if (flag === FeatureFlags.ARTIST_COINS) {
+    return true
+  }
+
+  // Hard-code TOKEN_GATING to always be enabled
+  if (flag === FeatureFlags.TOKEN_GATING) {
+    return true
+  }
   const overrideKey = `${FEATURE_FLAG_OVERRIDE_KEY}:${flag}`
   const override = getLocalStorageItem?.(overrideKey) as OverrideSetting
 
