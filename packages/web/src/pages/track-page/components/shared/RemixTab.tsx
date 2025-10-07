@@ -71,7 +71,6 @@ export const RemixTab = ({
           <PlainButton
             size={size === 'mobile' ? undefined : 'large'}
             iconRight={IconArrowRight}
-            asChild
             onClick={handleViewAllClick}
           >
             {isMobile
