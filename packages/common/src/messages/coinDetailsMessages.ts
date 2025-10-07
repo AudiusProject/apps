@@ -1,4 +1,12 @@
 export const coinDetailsMessages = {
+  metaTags: {
+    getTitle: (coinName?: string, ticker?: string) =>
+      coinName && ticker ? `${coinName} ($${ticker})` : (coinName ?? ''),
+    getDescription: (coinName?: string, ticker?: string, handle?: string) =>
+      coinName && ticker && handle
+        ? `${coinName} ($${ticker}) is an artist coin created by @${handle} on Audius`
+        : undefined
+  },
   balance: {
     becomeAMember: 'Become a Member',
     hintDescription: (title: string) =>

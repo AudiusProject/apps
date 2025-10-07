@@ -1,4 +1,9 @@
-import { useArtistCoinByTicker, useCurrentUserId } from '@audius/common/api'
+import {
+  useArtistCoinByTicker,
+  useCurrentUserId,
+  useUser
+} from '@audius/common/api'
+import { coinDetailsMessages } from '@audius/common/messages'
 import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
@@ -11,15 +16,19 @@ import { BASE_URL } from 'utils/route'
 
 import { useAssetDetailTabs } from './AssetDetailTabs'
 
+const messages = coinDetailsMessages.metaTags
+
 type AssetDetailPageContentProps = {
   mint: string
   title: string
+  description: string
   isAnonymousUser: boolean
 }
 
 const DesktopAssetDetailPageContent = ({
   mint,
   title,
+  description,
   ticker,
   isOwner,
   isAnonymousUser
@@ -45,7 +54,7 @@ const DesktopAssetDetailPageContent = ({
   )
 
   return (
-    <Page title={title} header={header}>
+    <Page title={title} description={description} header={header}>
       {body}
     </Page>
   )
@@ -54,6 +63,7 @@ const DesktopAssetDetailPageContent = ({
 const MobileAssetDetailPageContent = ({
   mint,
   title,
+  description,
   isAnonymousUser
 }: AssetDetailPageContentProps) => {
   const { body } = useAssetDetailTabs({ mint, isAnonymousUser })
@@ -61,6 +71,7 @@ const MobileAssetDetailPageContent = ({
   return (
     <MobilePageContainer
       title={title}
+      description={description}
       canonicalUrl={`${BASE_URL}${ASSET_DETAIL_PAGE}/${title}`}
     >
       <Flex column w='100%' p='l'>
@@ -77,16 +88,20 @@ export const AssetDetailPage = () => {
 
   const {
     data: coin,
-    isPending,
+    isPending: coinPending,
     isError,
     isSuccess
   } = useArtistCoinByTicker({ ticker })
+
+  const { data: owner } = useUser(coin?.ownerId, {
+    enabled: !!coin?.ownerId
+  })
 
   if (!ticker || isError || (isSuccess && !coin)) {
     return <Redirect to='/coins' />
   }
 
-  if (isPending) {
+  if (coinPending) {
     return (
       <Flex
         justifyContent='center'
@@ -100,16 +115,26 @@ export const AssetDetailPage = () => {
 
   const isOwner = currentUserId === coin?.ownerId
 
+  // Format title and description for SEO
+  const title = messages.getTitle(coin?.name, coin?.ticker)
+  const description = messages.getDescription(
+    coin?.name,
+    coin?.ticker,
+    owner?.handle
+  )
+
   return isMobile ? (
     <MobileAssetDetailPageContent
       mint={coin?.mint ?? ''}
-      title={coin?.ticker ?? ''}
+      title={title}
+      description={description ?? ''}
       isAnonymousUser={!currentUserId}
     />
   ) : (
     <DesktopAssetDetailPageContent
       mint={coin?.mint ?? ''}
-      title={coin?.name ?? ''}
+      title={title}
+      description={description ?? ''}
       ticker={coin?.ticker ?? ''}
       isOwner={isOwner}
       isAnonymousUser={!currentUserId}
