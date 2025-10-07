@@ -30,7 +30,7 @@ export const useArtistCoinMessageHeader = ({
 
   let ticker
   if (coin) {
-    ticker = `$${coin.ticker}`
+    ticker = `${coin.ticker}`
   }
 
   return ticker

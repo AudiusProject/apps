@@ -27,6 +27,7 @@ export const TokenIcon = ({
   if (logoURI) {
     // Handle different size props for Artwork component
     const sizeMap: Record<string, { w: number; h: number }> = {
+      xs: { w: 14, h: 14 }, // Used for ChatBlastHeader, non-standard size
       s: { w: spacing.unit4, h: spacing.unit4 },
       m: { w: spacing.unit5, h: spacing.unit5 },
       l: { w: spacing.unit6, h: spacing.unit6 },
