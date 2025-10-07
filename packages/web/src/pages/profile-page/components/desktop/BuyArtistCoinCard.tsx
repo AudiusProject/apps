@@ -46,7 +46,7 @@ export const BuyArtistCoinCard = ({ mint }: { mint: string }) => {
             {artistCoin.name}
           </Text>
           <Text variant='title' size='s' color='subdued'>
-            {artistCoin.ticker}
+            {`$${artistCoin.ticker}`}
           </Text>
         </Flex>
       </Flex>

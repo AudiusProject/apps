@@ -12,6 +12,7 @@ import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import Lineup from 'components/lineup/Lineup'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useMainPageHeader } from 'components/nav/mobile/NavContext'
+import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
 import { FeedPageContentProps } from 'pages/feed-page/types'
 import { BASE_URL } from 'utils/route'
 
@@ -101,7 +102,7 @@ const FeedPageMobileContent = ({
           [styles.playing]: !!lineupProps.playingUid
         })}
       >
-        <Lineup {...lineupProps} />
+        <Lineup {...lineupProps} emptyElement={<EmptyFeed />} />
       </div>
     </MobilePageContainer>
   )
