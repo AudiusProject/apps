@@ -96,9 +96,9 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   ofArtistsCoin: "of the artist's coin",
   artistCoin: 'Artist coin',
   unlockTokenGatedContent: (amount: number, tokenTicker: string) =>
-    `You must hold at least ${amount} ${tokenTicker} in a connected wallet.`,
+    `You must hold at least ${amount} $${tokenTicker} in a connected wallet.`,
   unlockedTokenGatedContent: (tokenTicker: string) =>
-    `${tokenTicker} was found in a linked wallet. This ${contentType} is now available.`,
+    `$${tokenTicker} was found in a linked wallet. This ${contentType} is now available.`,
   ownTokenGated:
     'Fans can unlock access by linking a wallet containing your artist coin',
   purchased: `You've purchased this ${contentType}.`,
@@ -448,7 +448,7 @@ const LockedGatedContentSection = ({
         {coin ? (
           <Flex gap='xs' alignItems='center'>
             <TokenIcon logoURI={coin.logoUri} size='l' hex />
-            <Text variant='title'>{coin.ticker}</Text>
+            <Text variant='title'>${coin.ticker}</Text>
           </Flex>
         ) : null}
       </Flex>
@@ -686,7 +686,7 @@ const UnlockedGatedContentSection = ({
       {coin ? (
         <Flex gap='xs' alignItems='center'>
           <TokenIcon logoURI={coin.logoUri} size='l' hex />
-          <Text variant='title'>{coin.ticker}</Text>
+          <Text variant='title'>${coin.ticker}</Text>
         </Flex>
       ) : null}
     </Flex>
