@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-
 import {
   getArtistCoinsQueryKey,
   getCurrentAccountQueryKey,
@@ -41,21 +39,6 @@ export const LAUNCHPAD_COIN_DECIMALS = 9 // All our launched coins will have 9 d
 export const useLaunchCoin = () => {
   const { audiusSdk, reportToSentry } = useQueryContext()
   const queryClient = useQueryClient()
-  useEffect(() => {
-    if (reportToSentry) {
-      console.log('reportToSentry', reportToSentry)
-      reportToSentry({
-        error: new Error('TEST SENTRY ERROR'),
-        name: 'TEST SENTRY ERROR',
-        feature: Feature.ArtistCoins,
-        additionalInfo: {
-          coinName: 'test',
-          coinSymbol: '$TEST',
-          initialBuyAmount: 0
-        }
-      })
-    }
-  }, [reportToSentry])
 
   return useMutation<LaunchCoinResponse, Error, LaunchCoinParams>({
     mutationFn: async ({
