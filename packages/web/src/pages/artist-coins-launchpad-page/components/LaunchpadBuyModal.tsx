@@ -182,7 +182,8 @@ const FormInputStep = ({
                         maximumFractionDigits: 4
                       }),
                       values.selectedInputToken.symbol,
-                      !!values.selectedInputToken.isStablecoin
+                      !!values.selectedInputToken.isStablecoin,
+                      buySellMessages.available
                     )}
                   </Text>
                   <Tooltip

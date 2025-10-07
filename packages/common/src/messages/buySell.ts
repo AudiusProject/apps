@@ -18,6 +18,7 @@ export const buySellMessages = {
   max: 'MAX',
   available: 'Available',
   availableToTrade: 'Available to Trade',
+  availableBalanceTooltip: 'This is the amount you have available to spend',
   availableToTradeTooltip:
     'This is the amount you have available to trade in your built-in wallet.',
   addCash: 'Add Cash',
