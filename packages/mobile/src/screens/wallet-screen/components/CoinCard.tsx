@@ -93,7 +93,7 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   }
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} disabled={isLoading}>
       <Flex
         p='l'
         pl='xl'
