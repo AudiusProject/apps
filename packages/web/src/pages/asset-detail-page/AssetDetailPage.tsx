@@ -3,6 +3,7 @@ import {
   useCurrentUserId,
   useUser
 } from '@audius/common/api'
+import { coinDetailsMessages } from '@audius/common/messages'
 import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
@@ -14,6 +15,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { BASE_URL } from 'utils/route'
 
 import { useAssetDetailTabs } from './AssetDetailTabs'
+
+const messages = coinDetailsMessages.metaTags
 
 type AssetDetailPageContentProps = {
   mint: string
@@ -113,14 +116,12 @@ export const AssetDetailPage = () => {
   const isOwner = currentUserId === coin?.ownerId
 
   // Format title and description for SEO
-  const title =
-    coin?.name && coin?.ticker
-      ? `${coin.name} ($${coin.ticker})`
-      : (coin?.name ?? '')
-  const description =
-    coin?.name && coin?.ticker && owner?.handle
-      ? `${coin.name} ($${coin.ticker}) is an artist coin created by @${owner.handle} on Audius`
-      : undefined
+  const title = messages.getTitle(coin?.name, coin?.ticker)
+  const description = messages.getDescription(
+    coin?.name,
+    coin?.ticker,
+    owner?.handle
+  )
 
   return isMobile ? (
     <MobileAssetDetailPageContent
