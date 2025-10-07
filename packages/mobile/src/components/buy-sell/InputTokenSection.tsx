@@ -109,7 +109,10 @@ export const InputTokenSection = ({
                 !!isStablecoin
               )}
             </Text>
-            <TooltipInfoIcon />
+            <TooltipInfoIcon
+              title={messages.availableToTrade}
+              message={messages.availableToTradeTooltip}
+            />
           </Flex>
         ) : null}
       </Flex>
