@@ -53,6 +53,11 @@ type PageProps = {
   scrollableSearch?: boolean
   children?: ReactNode
   showSearch?: boolean
+  /**
+   * Optional title for meta tags/OG tags. If provided, this will be used
+   * for browser tab and social sharing instead of the `title` prop.
+   */
+  ogTitle?: string
 } & MetaTagsProps
 
 export const Page = (props: PageProps) => {
@@ -71,6 +76,7 @@ export const Page = (props: PageProps) => {
     image,
     noIndex = false,
     ogDescription,
+    ogTitle,
     scrollableSearch = false,
     showSearch = true,
     size = 'medium',
@@ -80,7 +86,7 @@ export const Page = (props: PageProps) => {
   } = props
 
   const metaTagsProps = {
-    title,
+    title: ogTitle ?? title,
     description,
     ogDescription,
     image,
