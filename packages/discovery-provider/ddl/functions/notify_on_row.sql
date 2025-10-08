@@ -31,7 +31,8 @@ declare
     'shares',
     'tracks',
     'users',
-    'usdc_purchases'
+    'usdc_purchases',
+    'artist_coins'
   ];
 begin
   FOREACH tbl IN ARRAY tbls
