@@ -443,12 +443,9 @@ export const invalidateAudioBalance = ({
   queryClient: QueryClient
   splWallet: string
 }) => {
-  for (const includeStaked of [false, true]) {
-    const queryKey = getWalletAudioBalanceQueryKey({
-      address: splWallet,
-      chain: Chain.Sol,
-      includeStaked
-    })
-    queryClient.invalidateQueries({ queryKey })
-  }
+  const queryKey = getWalletAudioBalanceQueryKey({
+    address: splWallet,
+    chain: Chain.Sol
+  })
+  queryClient.invalidateQueries({ queryKey })
 }
