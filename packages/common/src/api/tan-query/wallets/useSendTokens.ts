@@ -1,14 +1,16 @@
+import { AUDIO, wAUDIO } from '@audius/fixed-decimal'
 import { PublicKey } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Name, SolanaWalletAddress } from '~/models'
+import { Chain, Name, SolanaWalletAddress } from '~/models'
 import { getErrorMessage } from '~/utils'
 
 import { getUserCoinQueryKey } from '../coins/useUserCoin'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useWalletAddresses } from '../users/account/useWalletAddresses'
 
+import { getWalletAudioBalanceQueryKey } from './useAudioBalance'
 import { useTokenBalance } from './useTokenBalance'
 
 export type SendTokensParams = {
@@ -29,7 +31,7 @@ export type SendTokensResult = {
  */
 export const useSendTokens = ({ mint }: { mint: string }) => {
   const queryClient = useQueryClient()
-  const { audiusBackend, audiusSdk, reportToSentry, analytics } =
+  const { audiusBackend, audiusSdk, reportToSentry, analytics, env } =
     useQueryContext()
   const { data: walletAddresses } = useWalletAddresses()
   const { data: currentUser } = useCurrentAccountUser()
@@ -39,6 +41,8 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
     includeExternalWallets: false,
     includeStaked: false
   })
+
+  const isAudioMint = mint === env.WAUDIO_MINT_ADDRESS
 
   return useMutation({
     mutationFn: async ({
@@ -111,6 +115,28 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
         })
       }
 
+      // For AUDIO, also optimistically update the audio balance queries
+      if (isAudioMint && currentUser?.spl_wallet) {
+        // Update both staked and non-staked balance queries for the SOL wallet
+        for (const includeStaked of [true, false]) {
+          const audioQueryKey = getWalletAudioBalanceQueryKey({
+            address: currentUser.spl_wallet,
+            chain: Chain.Sol,
+            includeStaked
+          })
+          await queryClient.cancelQueries({ queryKey: audioQueryKey })
+
+          queryClient.setQueryData(audioQueryKey, (oldBalance: any) => {
+            if (oldBalance === undefined) return oldBalance
+            const currentBalance = oldBalance ?? AUDIO(0).value
+            const amountAudio = AUDIO(wAUDIO(amount)).value
+            const newBalance = currentBalance - amountAudio
+            // Ensure balance doesn't go negative
+            return newBalance >= 0 ? newBalance : AUDIO(0).value
+          })
+        }
+      }
+
       return { previousBalance }
     },
     onSuccess: (_, { recipientWallet }) => {
@@ -132,6 +158,18 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
         const userId = currentUser?.user_id ?? null
         const queryKey = getUserCoinQueryKey(mint, userId)
         queryClient.setQueryData(queryKey, context.previousBalance)
+      }
+
+      // For AUDIO, invalidate the audio balance queries to refetch the correct balance
+      if (isAudioMint && currentUser?.spl_wallet) {
+        for (const includeStaked of [true, false]) {
+          const audioQueryKey = getWalletAudioBalanceQueryKey({
+            address: currentUser.spl_wallet,
+            chain: Chain.Sol,
+            includeStaked
+          })
+          queryClient.invalidateQueries({ queryKey: audioQueryKey })
+        }
       }
 
       if (analytics) {
@@ -158,11 +196,6 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
           }
         })
       }
-    },
-    onSettled: () => {
-      const userId = currentUser?.user_id ?? null
-      const queryKey = getUserCoinQueryKey(mint, userId)
-      queryClient.invalidateQueries({ queryKey })
     }
   })
 }
