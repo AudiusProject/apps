@@ -88,9 +88,9 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.EXPLORE_REMIX_SECTION]: false,
   [FeatureFlags.WALLET_UI_BUY_SELL]: false,
   [FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE]: false,
-  [FeatureFlags.ARTIST_COINS]: false,
+  [FeatureFlags.ARTIST_COINS]: true,
   [FeatureFlags.SEARCH_EXPLORE_GOODIES]: false,
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
-  [FeatureFlags.TOKEN_GATING]: false,
+  [FeatureFlags.TOKEN_GATING]: true,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true
 }
