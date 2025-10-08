@@ -4,7 +4,7 @@ import { useArtistCoin, useUser } from '@audius/common/api'
 import { useUIAudio } from '@audius/common/hooks'
 import type { TipSendNotification } from '@audius/common/store'
 import { Platform, View } from 'react-native'
-import { env } from 'services/env'
+import { env } from 'app/services/env'
 
 import { IconTipping } from '@audius/harmony-native'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
