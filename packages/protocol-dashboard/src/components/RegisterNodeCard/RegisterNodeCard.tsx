@@ -9,7 +9,8 @@ import Loading from 'components/Loading'
 import { RegisterNewServiceBtn } from 'components/ManageService/RegisterNewServiceBtn'
 import { useAccount } from 'store/account/hooks'
 import { useCurrentVersion } from 'store/cache/protocol/hooks'
-import { ServiceType } from 'types'
+import { useUser } from 'store/cache/user/hooks'
+import { ServiceType, Status } from 'types'
 import { formatBytes } from 'utils/format'
 import { REGISTER_NODE_DOCS_URL } from 'utils/routes'
 
@@ -25,12 +26,15 @@ const messages = {
 
 const VALIDATOR_NODE = import.meta.env.VITE_VALIDATOR
 
-export const RegisterNodeCard = () => {
+export const RegisterNodeCard = ({ wallet }: { wallet: string }) => {
   const { isLoggedIn } = useAccount()
   const [storageCommitment, setStorageCommitment] = useState<string | null>(
     null
   )
   const currentVersion = useCurrentVersion(ServiceType.Validator)
+  const { user: serviceUser, status: serviceUserStatus } = useUser({ wallet })
+  const isServiceProvider =
+    serviceUserStatus === Status.Success && 'serviceProvider' in serviceUser
 
   useEffect(() => {
     const fetchStorageCommitment = async () => {
@@ -38,9 +42,7 @@ export const RegisterNodeCard = () => {
         const response = await fetch(
           `${VALIDATOR_NODE}/storage.v1.StorageService/GetStatus`
         )
-        const {
-          data: { storageExpectation }
-        } = await response.json()
+        const { storageExpectation } = await response.json()
         setStorageCommitment(storageExpectation)
       } catch (e) {
         setStorageCommitment('Error')
@@ -72,11 +74,13 @@ export const RegisterNodeCard = () => {
         ) : null}
       </Flex>
       <Flex ph='xl' pv='l' gap='xl' column>
-        <InfoBox
-          description={messages.registerNodeInfo}
-          ctaText={messages.registerNodeInfoLink}
-          ctaHref={REGISTER_NODE_DOCS_URL}
-        />
+        {!isServiceProvider ? (
+          <InfoBox
+            description={messages.registerNodeInfo}
+            ctaText={messages.registerNodeInfoLink}
+            ctaHref={REGISTER_NODE_DOCS_URL}
+          />
+        ) : null}
         <Flex alignItems='center' gap='xl'>
           <Card p='xl' direction='column'>
             <Box>

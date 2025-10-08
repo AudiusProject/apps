@@ -123,9 +123,9 @@ interface ManageServiceProps {
   className?: string
   showViewActiveServices?: boolean
   showPendingTransactions?: boolean
+  showRegisterNode?: boolean
   wallet: string
-  onClickDiscoveryTable?: () => void
-  onClickContentTable?: () => void
+  onClickNodesTable?: () => void
 }
 
 const Delegators = ({
@@ -418,7 +418,7 @@ const Stake = ({ stake, enableChange, disabledReason }: StakeProps) => {
 }
 
 const ManageService = (props: ManageServiceProps) => {
-  const wallet = props.wallet
+  const { wallet, showRegisterNode } = props
 
   const { isLoggedIn } = useAccount()
   const { status: accountUserStatus, user: accountUser } = useAccountUser()
@@ -535,7 +535,7 @@ const ManageService = (props: ManageServiceProps) => {
           {isOwner ? null : <NodeOperatorInfoTooltip />}
         </Flex>
         <Flex gap='xl' alignItems='center'>
-          {isOwner ? (
+          {isOwner && showRegisterNode ? (
             <RegisterNewServiceBtn customText={messages.registerNode} />
           ) : null}
           <Box css={{ textAlign: 'end' }}>

@@ -60,9 +60,8 @@ const Services: React.FC<ServicesProps> = () => {
             onClickDiscoveryTable={handleClickNodes}
             onClickContentTable={handleClickNodes}
           />
-        ) : (
-          <RegisterNodeCard />
-        )}
+        ) : null}
+        <RegisterNodeCard wallet={accountUser?.wallet ?? ''} />
         <RewardsTimingCard />
         <TopOperatorsTable
           limit={5}

@@ -83,7 +83,11 @@ const UserPage = () => {
         />
         {isOwner ? <ConnectAudiusProfileCard /> : null}
         {isServiceProvider && (
-          <ManageService wallet={wallet} onClickNodesTable={handleClickNodes} />
+          <ManageService
+            wallet={wallet}
+            onClickNodesTable={handleClickNodes}
+            showRegisterNode
+          />
         )}
         {<ManageAccountCard wallet={wallet} />}
         {isOwner ? <TransactionStatus /> : null}
