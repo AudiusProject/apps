@@ -172,8 +172,8 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri,
-              description
+              logoUri: imageUri
+              // intentionally don't send description - default to null
             }
           })
           errorMetadata.sdkCoinAdded = true
