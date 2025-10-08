@@ -173,7 +173,7 @@ export const useLaunchCoin = () => {
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
               logoUri: imageUri
-              // intentionally don't send description - default to null
+              // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })
           errorMetadata.sdkCoinAdded = true
