@@ -68,7 +68,7 @@ const messages = {
   registerNodeCtaText: 'Running a Node',
   storageCommitmentTooltipTitle: 'What is Storage Commitment?',
   storageCommitmentTooltipBody:
-    'Storage Commitment is the amount of data that each is responsible for storing. The calculation is the total storage demand of all files on the protocol, multiplied by the replication factor, and divided by the number of registered nodes.'
+    'Storage Commitment is the amount of data that each node is responsible for storing. The calculation is the total storage demand of all files on the protocol, multiplied by the replication factor, and divided by the number of registered nodes.'
 }
 
 const CTA_HREFS = {
