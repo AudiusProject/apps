@@ -80,7 +80,7 @@ export const coinDetailsMessages = {
     vestingScheduleValue: '5 years (post-graduation)',
     $audio: '$AUDIO',
     claim: 'Claim',
-    openDexscreener: 'Open Dexscreener',
+    openBirdeye: 'Open Birdeye',
     details: 'Details',
     copiedToClipboard: 'Copied Coin Address To Clipboard!',
     shareToX: 'Share to X',

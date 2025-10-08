@@ -61,11 +61,11 @@ export const AssetInsightsOverflowMenu = ({
     }
   }
 
-  const onOpenDexscreener = () => {
+  const onOpenBirdeye = () => {
     if (artistCoin?.mint) {
       const isAudio = artistCoin.mint === env.WAUDIO_MINT_ADDRESS
       window.open(
-        route.dexscreenerUrl(
+        route.birdeyeUrl(
           isAudio ? env.ETH_TOKEN_ADDRESS : artistCoin.mint,
           isAudio ? 'ethereum' : 'solana'
         ),
@@ -116,9 +116,9 @@ export const AssetInsightsOverflowMenu = ({
       onClick: onCopyCoinAddress
     },
     {
-      text: messages.openDexscreener,
+      text: messages.openBirdeye,
       icon: <IconExternalLink color='default' />,
-      onClick: onOpenDexscreener
+      onClick: onOpenBirdeye
     },
     {
       text: messages.details,

@@ -223,10 +223,10 @@ export const AUDIUS_API_LINK = 'https://audius.org/api'
 export const AUDIUS_ARTIST_COINS_HELP_LINK =
   'https://help.audius.co/product/artist-coins'
 
-// Dexscreener Links
-export const DEXSCREENER_BASE_URL = 'https://dexscreener.com'
-export const dexscreenerUrl = (mint: string, network: string = 'solana') =>
-  `${DEXSCREENER_BASE_URL}/${network}/${mint}`
+// Birdeye Links
+export const BIRDEYE_BASE_URL = 'https://birdeye.so'
+export const birdeyeUrl = (mint: string, network: string = 'solana') =>
+  `${BIRDEYE_BASE_URL}/${network}/token/${mint}`
 
 export const authenticatedRoutes = [
   FEED_PAGE,

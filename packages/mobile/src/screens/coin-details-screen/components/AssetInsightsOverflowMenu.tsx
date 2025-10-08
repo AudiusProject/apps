@@ -37,9 +37,9 @@ export const AssetInsightsOverflowMenu = () => {
     }
   }, [artistCoin?.mint, toast])
 
-  const handleOpenDexscreener = useCallback(() => {
+  const handleOpenBirdeye = useCallback(() => {
     if (artistCoin?.mint) {
-      Linking.openURL(`https://dexscreener.com/solana/${artistCoin.mint}`)
+      Linking.openURL(`https://birdeye.com/solana/${artistCoin.mint}`)
     }
   }, [artistCoin?.mint])
 
@@ -80,9 +80,9 @@ export const AssetInsightsOverflowMenu = () => {
       callback: handleCopyCoinAddress
     },
     {
-      text: messages.openDexscreener,
+      text: messages.openBirdeye,
       icon: <IconExternalLink color='accent' />,
-      callback: handleOpenDexscreener
+      callback: handleOpenBirdeye
     },
     {
       text: messages.details,
