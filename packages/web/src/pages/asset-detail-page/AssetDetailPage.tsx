@@ -20,14 +20,16 @@ const messages = coinDetailsMessages.metaTags
 
 type AssetDetailPageContentProps = {
   mint: string
-  title: string
+  visualTitle: string
+  ogTitle: string
   description: string
   isAnonymousUser: boolean
 }
 
 const DesktopAssetDetailPageContent = ({
   mint,
-  title,
+  visualTitle,
+  ogTitle,
   description,
   ticker,
   isOwner,
@@ -46,7 +48,7 @@ const DesktopAssetDetailPageContent = ({
 
   const header = (
     <Header
-      primary={title}
+      primary={visualTitle}
       showBackButton={true}
       bottomBar={tabs}
       rightDecorator={rightDecorator}
@@ -54,7 +56,12 @@ const DesktopAssetDetailPageContent = ({
   )
 
   return (
-    <Page title={title} description={description} header={header}>
+    <Page
+      title={visualTitle}
+      ogTitle={ogTitle}
+      description={description}
+      header={header}
+    >
       {body}
     </Page>
   )
@@ -62,7 +69,8 @@ const DesktopAssetDetailPageContent = ({
 
 const MobileAssetDetailPageContent = ({
   mint,
-  title,
+  visualTitle,
+  ogTitle,
   description,
   isAnonymousUser
 }: AssetDetailPageContentProps) => {
@@ -70,9 +78,10 @@ const MobileAssetDetailPageContent = ({
 
   return (
     <MobilePageContainer
-      title={title}
+      title={visualTitle}
+      ogTitle={ogTitle}
       description={description}
-      canonicalUrl={`${BASE_URL}${ASSET_DETAIL_PAGE}/${title}`}
+      canonicalUrl={`${BASE_URL}${ASSET_DETAIL_PAGE}/${visualTitle}`}
     >
       <Flex column w='100%' p='l'>
         {body}
@@ -115,8 +124,10 @@ export const AssetDetailPage = () => {
 
   const isOwner = currentUserId === coin?.ownerId
 
-  // Format title and description for SEO
-  const title = messages.getTitle(coin?.name, coin?.ticker)
+  // Visual title is just the coin name for the header
+  const visualTitle = coin?.name ?? ''
+  // OG title includes the ticker for meta tags
+  const ogTitle = messages.getTitle(coin?.name, coin?.ticker)
   const description = messages.getDescription(
     coin?.name,
     coin?.ticker,
@@ -126,14 +137,16 @@ export const AssetDetailPage = () => {
   return isMobile ? (
     <MobileAssetDetailPageContent
       mint={coin?.mint ?? ''}
-      title={title}
+      visualTitle={visualTitle}
+      ogTitle={ogTitle}
       description={description ?? ''}
       isAnonymousUser={!currentUserId}
     />
   ) : (
     <DesktopAssetDetailPageContent
       mint={coin?.mint ?? ''}
-      title={title}
+      visualTitle={visualTitle}
+      ogTitle={ogTitle}
       description={description ?? ''}
       ticker={coin?.ticker ?? ''}
       isOwner={isOwner}

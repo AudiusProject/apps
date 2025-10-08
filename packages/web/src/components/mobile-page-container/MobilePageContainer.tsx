@@ -31,6 +31,11 @@ type OwnProps = {
 
   // Has the default header and should add margins to the top for it
   hasDefaultHeader?: boolean
+  /**
+   * Optional title for meta tags/OG tags. If provided, this will be used
+   * for browser tab and social sharing instead of the `title` prop.
+   */
+  ogTitle?: string
 } & MetaTagsProps
 
 type MobilePageContainerProps = OwnProps &
@@ -64,6 +69,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
     image,
     noIndex,
     ogDescription,
+    ogTitle,
     structuredData,
     title
   } = props
@@ -114,7 +120,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
   const style = { paddingBottom }
 
   const metaTagsProps = {
-    title,
+    title: ogTitle ?? title,
     description,
     ogDescription,
     image,
