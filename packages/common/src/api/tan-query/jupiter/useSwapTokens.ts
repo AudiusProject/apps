@@ -1,15 +1,14 @@
-import { AUDIO, AudioWei, wAUDIO } from '@audius/fixed-decimal'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
   getUserCoinQueryKey,
   getUserQueryKey,
-  getWalletAudioBalanceQueryKey,
+  updateAudioBalanceOptimistically,
   useCurrentAccountUser,
   useQueryContext
 } from '~/api'
 import type { QueryContextType } from '~/api/tan-query/utils/QueryContext'
-import { Chain, Feature } from '~/models'
+import { Feature } from '~/models'
 import type { User } from '~/models/User'
 import { JupiterQuoteResult } from '~/services/Jupiter'
 
@@ -238,44 +237,20 @@ export const useSwapTokens = () => {
 
       // If AUDIO is involved, optimistically update audioBalance queries
       if ((isInputAudio || isOutputAudio) && user?.spl_wallet) {
-        // Calculate the net change in AudioWei
-        // Note: inputAmount/outputAmount are in lamports (8 decimals for AUDIO on Solana)
-        // but AudioWei expects Wei (18 decimals), so we need to convert using wAUDIO utility
+        // Calculate the net change in lamports (8 decimals for AUDIO on Solana)
         const inputAudioLamports = isInputAudio ? (inputAmount?.amount ?? 0) : 0
         const outputAudioLamports = isOutputAudio
           ? (outputAmount?.amount ?? 0)
           : 0
 
-        // Convert from lamports (8 decimals) to Wei (18 decimals)
-        const inputAudioWei = isInputAudio
-          ? AUDIO(wAUDIO(BigInt(inputAudioLamports))).value
-          : AUDIO(0).value
-        const outputAudioWei = isOutputAudio
-          ? AUDIO(wAUDIO(BigInt(outputAudioLamports))).value
-          : AUDIO(0).value
+        const netChangeLamports =
+          BigInt(outputAudioLamports) - BigInt(inputAudioLamports)
 
-        const netChange = outputAudioWei - inputAudioWei
-
-        // Update the audioBalance queries for the SOL wallet
-        // We need to update both includeStaked: false and includeStaked: true
-        // because different parts of the app use different values
-        for (const includeStaked of [false, true]) {
-          const queryKey = getWalletAudioBalanceQueryKey({
-            address: user.spl_wallet,
-            chain: Chain.Sol,
-            includeStaked
-          })
-
-          queryClient.setQueryData<AudioWei>(queryKey, (oldBalance) => {
-            if (oldBalance === undefined) return oldBalance
-
-            const currentBalance = oldBalance ?? AUDIO(0).value
-            const newBalance = AUDIO(currentBalance + netChange).value
-
-            // Ensure balance doesn't go negative
-            return newBalance >= 0 ? newBalance : AUDIO(0).value
-          })
-        }
+        updateAudioBalanceOptimistically({
+          queryClient,
+          splWallet: user.spl_wallet,
+          changeLamports: netChangeLamports
+        })
       }
 
       // Invalidate user query to ensure user data is fresh after swap

@@ -1,16 +1,18 @@
-import { AUDIO, wAUDIO } from '@audius/fixed-decimal'
 import { PublicKey } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Chain, Name, SolanaWalletAddress } from '~/models'
+import { Name, SolanaWalletAddress } from '~/models'
 import { getErrorMessage } from '~/utils'
 
 import { getUserCoinQueryKey } from '../coins/useUserCoin'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useWalletAddresses } from '../users/account/useWalletAddresses'
 
-import { getWalletAudioBalanceQueryKey } from './useAudioBalance'
+import {
+  invalidateAudioBalance,
+  updateAudioBalanceOptimistically
+} from './useAudioBalance'
 import { useTokenBalance } from './useTokenBalance'
 
 export type SendTokensParams = {
@@ -117,24 +119,11 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
 
       // For AUDIO, also optimistically update the audio balance queries
       if (isAudioMint && currentUser?.spl_wallet) {
-        // Update both staked and non-staked balance queries for the SOL wallet
-        for (const includeStaked of [true, false]) {
-          const audioQueryKey = getWalletAudioBalanceQueryKey({
-            address: currentUser.spl_wallet,
-            chain: Chain.Sol,
-            includeStaked
-          })
-          await queryClient.cancelQueries({ queryKey: audioQueryKey })
-
-          queryClient.setQueryData(audioQueryKey, (oldBalance: any) => {
-            if (oldBalance === undefined) return oldBalance
-            const currentBalance = oldBalance ?? AUDIO(0).value
-            const amountAudio = AUDIO(wAUDIO(amount)).value
-            const newBalance = currentBalance - amountAudio
-            // Ensure balance doesn't go negative
-            return newBalance >= 0 ? newBalance : AUDIO(0).value
-          })
-        }
+        updateAudioBalanceOptimistically({
+          queryClient,
+          splWallet: currentUser.spl_wallet,
+          changeLamports: -amount // Negative because we're sending tokens
+        })
       }
 
       return { previousBalance }
@@ -162,14 +151,10 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
 
       // For AUDIO, invalidate the audio balance queries to refetch the correct balance
       if (isAudioMint && currentUser?.spl_wallet) {
-        for (const includeStaked of [true, false]) {
-          const audioQueryKey = getWalletAudioBalanceQueryKey({
-            address: currentUser.spl_wallet,
-            chain: Chain.Sol,
-            includeStaked
-          })
-          queryClient.invalidateQueries({ queryKey: audioQueryKey })
-        }
+        invalidateAudioBalance({
+          queryClient,
+          splWallet: currentUser.spl_wallet
+        })
       }
 
       if (analytics) {
