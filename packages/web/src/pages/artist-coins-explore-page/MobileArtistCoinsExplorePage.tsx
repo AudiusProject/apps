@@ -32,6 +32,7 @@ import { useDebounce } from 'react-use'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { UserLink } from 'components/link'
+import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
   LeftPreset,
   RightPreset
@@ -163,62 +164,69 @@ export const MobileArtistCoinsExplorePage: React.FC = () => {
   const shouldShowNoCoinsContent = !coins || coins.length === 0
 
   return (
-    <Flex column gap='l' w='100%'>
-      <SearchSection
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+    <MobilePageContainer title={walletMessages.artistCoins.title}>
+      <Flex column gap='l' w='100%'>
+        <SearchSection
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+        />
 
-      <Paper column m='l' backgroundColor='white'>
-        <Flex ph='l' pv='s' justifyContent='space-between' alignItems='center'>
-          <Text
-            variant='title'
-            size='l'
-            css={{
-              background: 'var(--harmony-gradient)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: 'transparent' // fallback for browsers that don't support background-clip
-            }}
-          >
-            {walletMessages.artistCoins.title}
-          </Text>
+        <Paper column m='l' backgroundColor='white'>
           <Flex
-            border='default'
-            borderRadius='s'
-            ph='m'
+            ph='l'
             pv='s'
+            justifyContent='space-between'
             alignItems='center'
-            justifyContent='center'
-            onClick={handleSortPress}
           >
-            <IconSort size='s' color='default' />
-          </Flex>
-        </Flex>
-
-        <Divider />
-
-        <Box pt='s'>
-          {isPending ? (
-            <Flex justifyContent='center' alignItems='center' p='4xl'>
-              <LoadingSpinner />
+            <Text
+              variant='title'
+              size='l'
+              css={{
+                background: 'var(--harmony-gradient)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                color: 'transparent' // fallback for browsers that don't support background-clip
+              }}
+            >
+              {walletMessages.artistCoins.title}
+            </Text>
+            <Flex
+              border='default'
+              borderRadius='s'
+              ph='m'
+              pv='s'
+              alignItems='center'
+              justifyContent='center'
+              onClick={handleSortPress}
+            >
+              <IconSort size='s' color='default' />
             </Flex>
-          ) : shouldShowNoCoinsContent ? (
-            <NoCoinsContent />
-          ) : (
-            <Box>
-              {coins.map((coin) => (
-                <CoinRow
-                  key={coin.mint}
-                  coin={coin}
-                  onPress={() => handleCoinPress(coin.ticker ?? '')}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-      </Paper>
-    </Flex>
+          </Flex>
+
+          <Divider />
+
+          <Box pt='s'>
+            {isPending ? (
+              <Flex justifyContent='center' alignItems='center' p='4xl'>
+                <LoadingSpinner />
+              </Flex>
+            ) : shouldShowNoCoinsContent ? (
+              <NoCoinsContent />
+            ) : (
+              <Box>
+                {coins.map((coin) => (
+                  <CoinRow
+                    key={coin.mint}
+                    coin={coin}
+                    onPress={() => handleCoinPress(coin.ticker ?? '')}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        </Paper>
+      </Flex>
+    </MobilePageContainer>
   )
 }
