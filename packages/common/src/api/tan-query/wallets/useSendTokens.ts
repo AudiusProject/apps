@@ -9,6 +9,10 @@ import { getUserCoinQueryKey } from '../coins/useUserCoin'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useWalletAddresses } from '../users/account/useWalletAddresses'
 
+import {
+  invalidateAudioBalance,
+  updateAudioBalanceOptimistically
+} from './useAudioBalance'
 import { useTokenBalance } from './useTokenBalance'
 
 export type SendTokensParams = {
@@ -29,7 +33,7 @@ export type SendTokensResult = {
  */
 export const useSendTokens = ({ mint }: { mint: string }) => {
   const queryClient = useQueryClient()
-  const { audiusBackend, audiusSdk, reportToSentry, analytics } =
+  const { audiusBackend, audiusSdk, reportToSentry, analytics, env } =
     useQueryContext()
   const { data: walletAddresses } = useWalletAddresses()
   const { data: currentUser } = useCurrentAccountUser()
@@ -39,6 +43,8 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
     includeExternalWallets: false,
     includeStaked: false
   })
+
+  const isAudioMint = mint === env.WAUDIO_MINT_ADDRESS
 
   return useMutation({
     mutationFn: async ({
@@ -111,6 +117,15 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
         })
       }
 
+      // For AUDIO, also optimistically update the audio balance queries
+      if (isAudioMint && currentUser?.spl_wallet) {
+        updateAudioBalanceOptimistically({
+          queryClient,
+          splWallet: currentUser.spl_wallet,
+          changeLamports: -amount // Negative because we're sending tokens
+        })
+      }
+
       return { previousBalance }
     },
     onSuccess: (_, { recipientWallet }) => {
@@ -132,6 +147,14 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
         const userId = currentUser?.user_id ?? null
         const queryKey = getUserCoinQueryKey(mint, userId)
         queryClient.setQueryData(queryKey, context.previousBalance)
+      }
+
+      // For AUDIO, invalidate the audio balance queries to refetch the correct balance
+      if (isAudioMint && currentUser?.spl_wallet) {
+        invalidateAudioBalance({
+          queryClient,
+          splWallet: currentUser.spl_wallet
+        })
       }
 
       if (analytics) {
@@ -158,11 +181,6 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
           }
         })
       }
-    },
-    onSettled: () => {
-      const userId = currentUser?.user_id ?? null
-      const queryKey = getUserCoinQueryKey(mint, userId)
-      queryClient.invalidateQueries({ queryKey })
     }
   })
 }

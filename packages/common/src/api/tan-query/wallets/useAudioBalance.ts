@@ -386,3 +386,66 @@ export function* revertOptimisticUserSolBalance() {
     queryClient.invalidateQueries({ queryKey })
   }
 }
+
+/**
+ * Optimistically updates the AUDIO balance for a SOL wallet in React Query cache.
+ * Updates both staked and non-staked balance queries.
+ *
+ * @param queryClient - The React Query client
+ * @param splWallet - The Solana wallet address
+ * @param changeLamports - The amount to add (positive) or subtract (negative) in lamports (8 decimals)
+ * @returns void
+ */
+export const updateAudioBalanceOptimistically = ({
+  queryClient,
+  splWallet,
+  changeLamports
+}: {
+  queryClient: QueryClient
+  splWallet: string
+  changeLamports: bigint
+}): void => {
+  // Convert from lamports (8 decimals) to AudioWei (18 decimals)
+  const changeAudioWei = AUDIO(wAUDIO(changeLamports)).value
+
+  // Update both staked and non-staked balance queries for the SOL wallet
+  // We need to update both because different parts of the app use different values
+  for (const includeStaked of [false, true]) {
+    const queryKey = getWalletAudioBalanceQueryKey({
+      address: splWallet,
+      chain: Chain.Sol,
+      includeStaked
+    })
+
+    queryClient.setQueryData<AudioWei>(queryKey, (oldBalance) => {
+      if (oldBalance === undefined) return oldBalance
+
+      const currentBalance = oldBalance ?? AUDIO(0).value
+      const newBalance = AUDIO(currentBalance + changeAudioWei).value
+
+      // Ensure balance doesn't go negative
+      return newBalance >= 0 ? newBalance : AUDIO(0).value
+    })
+  }
+}
+
+/**
+ * Invalidates AUDIO balance queries for a SOL wallet.
+ * Use this when a transaction fails and you need to refetch the correct balance.
+ *
+ * @param queryClient - The React Query client
+ * @param splWallet - The Solana wallet address
+ */
+export const invalidateAudioBalance = ({
+  queryClient,
+  splWallet
+}: {
+  queryClient: QueryClient
+  splWallet: string
+}) => {
+  const queryKey = getWalletAudioBalanceQueryKey({
+    address: splWallet,
+    chain: Chain.Sol
+  })
+  queryClient.invalidateQueries({ queryKey })
+}
