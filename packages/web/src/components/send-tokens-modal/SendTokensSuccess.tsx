@@ -3,7 +3,10 @@ import {
   useTokenBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { makeSolanaTransactionLink } from '@audius/common/utils'
+import {
+  formatAudioBalance,
+  makeSolanaTransactionLink
+} from '@audius/common/utils'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
@@ -17,6 +20,8 @@ import {
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
+import { BalanceSection } from 'pages/asset-detail-page/components/BalanceSection'
+import { env } from 'services/env'
 
 interface SendTokensSuccessProps {
   mint: string
@@ -52,6 +57,7 @@ const SendTokensSuccess = ({
   const currentBalance = tokenBalance?.balance
     ? tokenBalance.balance.value
     : BigInt(0)
+  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -64,6 +70,9 @@ const SendTokensSuccess = ({
   }
 
   const formatBalance = (balance: bigint) => {
+    if (isAudio) {
+      return formatAudioBalance(balance)
+    }
     return new FixedDecimal(balance, tokenInfo?.decimals).toLocaleString(
       'en-US',
       {

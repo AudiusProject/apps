@@ -72,6 +72,12 @@ const SendTokensConfirmation = ({
     )
   }
 
+  const formattedBalance =
+    tokenBalance?.balance.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) ?? ''
+
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIsConfirmed(event.target.checked)
   }
@@ -93,7 +99,7 @@ const SendTokensConfirmation = ({
       <CryptoBalanceSection
         tokenInfo={tokenInfo}
         name={tokenInfo.name}
-        amount={tokenBalance?.balanceLocaleString ?? ''}
+        amount={formattedBalance}
       />
 
       <Divider orientation='horizontal' />
