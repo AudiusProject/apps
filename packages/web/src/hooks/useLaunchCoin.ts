@@ -1,5 +1,5 @@
 import {
-  getArtistCoinsQueryKey,
+  QUERY_KEYS,
   getCurrentAccountQueryKey,
   getUserCreatedCoinsQueryKey,
   getUserQueryKey,
@@ -209,7 +209,7 @@ export const useLaunchCoin = () => {
     },
     onSuccess: (_result, params, _context) => {
       // Invalidate the list of artist coins to add it to the list
-      queryClient.invalidateQueries({ queryKey: getArtistCoinsQueryKey() })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coins] })
       // Invalidate the user to refresh their badge info
       queryClient.invalidateQueries({
         queryKey: getUserQueryKey(params.userId)

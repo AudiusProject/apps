@@ -75,7 +75,7 @@ export type UseArtistCoinsParams = {
 }
 
 export const getArtistCoinsQueryKey = (params?: UseArtistCoinsParams) =>
-  [QUERY_KEYS.coins, 'infinite', params] as unknown as QueryKey<
+  [QUERY_KEYS.coins, params] as unknown as QueryKey<
     InfiniteData<Coin[], number>
   >
 
