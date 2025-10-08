@@ -68,6 +68,11 @@ const SendTokensInput = ({
     includeStaked: false
   })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const formattedBalance =
+    tokenBalance?.balance.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) ?? ''
 
   const handleAmountChange = useCallback((value: string, weiAmount: bigint) => {
     setAmount(value)
@@ -157,9 +162,6 @@ const SendTokensInput = ({
       </Flex>
     )
   }
-
-  // Use the pre-formatted balance from the tokenBalance hook
-  const formattedBalance = tokenBalance?.balanceLocaleString ?? ''
 
   return (
     <Flex direction='column' gap='xl' p='xl'>
