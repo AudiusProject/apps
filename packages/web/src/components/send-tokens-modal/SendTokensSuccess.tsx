@@ -7,7 +7,7 @@ import {
   formatAudioBalance,
   makeSolanaTransactionLink
 } from '@audius/common/utils'
-import { FixedDecimal } from '@audius/fixed-decimal'
+import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
   Text,
@@ -71,7 +71,10 @@ const SendTokensSuccess = ({
 
   const formatBalance = (balance: bigint) => {
     if (isAudio) {
-      return formatAudioBalance(balance)
+      return AUDIO(balance).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
     }
     return new FixedDecimal(balance, tokenInfo?.decimals).toLocaleString(
       'en-US',
