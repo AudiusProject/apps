@@ -404,7 +404,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     [openBuySellModal]
   )
 
-  const handleRowClick = useRequiresAccountCallback(
+  const handleRowClick = useCallback(
     (e: React.MouseEvent<HTMLTableRowElement>, rowInfo: any) => {
       const coin = rowInfo.original
       if (coin?.ticker) {
