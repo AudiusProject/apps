@@ -3,10 +3,7 @@ import {
   useTokenBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import {
-  formatAudioBalance,
-  makeSolanaTransactionLink
-} from '@audius/common/utils'
+import { makeSolanaTransactionLink } from '@audius/common/utils'
 import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
@@ -20,7 +17,6 @@ import {
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
-import { BalanceSection } from 'pages/asset-detail-page/components/BalanceSection'
 import { env } from 'services/env'
 
 interface SendTokensSuccessProps {
