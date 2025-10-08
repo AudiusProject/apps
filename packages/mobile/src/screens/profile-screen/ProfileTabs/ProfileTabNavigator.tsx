@@ -6,7 +6,6 @@ import { ProfilePageTabs } from '@audius/common/store'
 
 import {
   IconAlbum,
-  IconCollectible,
   IconNote,
   IconPlaylists,
   IconRepost
@@ -17,10 +16,7 @@ import {
 } from 'app/components/top-tab-bar'
 import { useRoute } from 'app/hooks/useRoute'
 
-import { useShouldShowCollectiblesTab } from '../utils'
-
 import { AlbumsTab } from './AlbumsTab'
-import { CollectiblesTab } from './CollectiblesTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { RepostsTab } from './RepostsTab'
 import { TracksTab } from './TracksTab'
@@ -50,12 +46,9 @@ export const ProfileTabNavigator = ({
 
   const initialParams = {
     id: user_id,
-    handle: params.handle,
-    collectibleId: params.collectibleId
+    handle: params.handle
   }
   const isArtist = useIsArtist(params)
-
-  const showCollectiblesTab = useShouldShowCollectiblesTab()
 
   const trackScreen = collapsibleTabScreen({
     name: ProfilePageTabs.TRACKS,
@@ -93,15 +86,6 @@ export const ProfileTabNavigator = ({
     onRefresh
   })
 
-  const collectiblesScreen = collapsibleTabScreen({
-    name: ProfilePageTabs.COLLECTIBLES,
-    Icon: IconCollectible,
-    component: CollectiblesTab,
-    initialParams,
-    refreshing,
-    onRefresh
-  })
-
   if (isArtist) {
     return (
       <CollapsibleTabNavigator
@@ -112,7 +96,6 @@ export const ProfileTabNavigator = ({
         {albumsScreen}
         {playlistsScreen}
         {repostsScreen}
-        {showCollectiblesTab ? collectiblesScreen : null}
       </CollapsibleTabNavigator>
     )
   }
@@ -124,7 +107,6 @@ export const ProfileTabNavigator = ({
     >
       {repostsScreen}
       {playlistsScreen}
-      {showCollectiblesTab ? collectiblesScreen : null}
     </CollapsibleTabNavigator>
   )
 }

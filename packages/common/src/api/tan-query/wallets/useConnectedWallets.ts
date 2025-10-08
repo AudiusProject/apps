@@ -19,7 +19,6 @@ import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { getUserCollectiblesQueryKey } from '../users/useUserCollectibles'
 
 export type ConnectedWallet = {
   address: string
@@ -134,9 +133,6 @@ export const useAddConnectedWallet = () => {
       await queryClient.invalidateQueries({
         queryKey: getConnectedWalletsQueryKey({ userId: currentUserId })
       })
-      queryClient.invalidateQueries({
-        queryKey: getUserCollectiblesQueryKey({ userId: currentUserId })
-      })
 
       // Temporarily manually refetch relevant redux states
       dispatch(
@@ -197,9 +193,6 @@ export const useRemoveConnectedWallet = () => {
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: getConnectedWalletsQueryKey({ userId: currentUserId })
-      })
-      queryClient.invalidateQueries({
-        queryKey: getUserCollectiblesQueryKey({ userId: currentUserId })
       })
       // Invalidate user coin query to update balances
       queryClient.invalidateQueries({

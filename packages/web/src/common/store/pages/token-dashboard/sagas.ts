@@ -1,6 +1,6 @@
 import { userWalletsFromSDK } from '@audius/common/adapters'
 import { queryCurrentUserId } from '@audius/common/api'
-import { Chain, CollectibleState } from '@audius/common/models'
+import { Chain } from '@audius/common/models'
 import {
   tokenDashboardPageActions,
   getContext,
@@ -9,10 +9,6 @@ import {
 import { Id } from '@audius/sdk'
 import { call, put, takeLatest } from 'typed-redux-saga'
 
-import {
-  fetchEthereumCollectiblesForWallets,
-  fetchSolanaCollectiblesForWallets
-} from 'common/store/profile/sagas'
 import { waitForRead } from 'utils/sagaHelpers'
 
 import { watchRemoveWallet } from './removeWalletSaga'
@@ -30,34 +26,10 @@ function* fetchEthWalletInfo(wallets: string[]) {
     wallets
   )
 
-  const collectiblesMap = (yield* call(
-    fetchEthereumCollectiblesForWallets,
-    wallets
-  )) as CollectibleState
-
-  const collectibleCounts = wallets.map(
-    (wallet) => collectiblesMap[wallet]?.length ?? 0
-  )
-
   return wallets.map((_, idx) => ({
     ...ethWalletBalances[idx],
     balance: BigInt(ethWalletBalances[idx].balance.toString()),
-    collectibleCount: collectibleCounts[idx]
-  }))
-}
-
-function* fetchSplCollectibles(wallets: string[]) {
-  const collectiblesMap = (yield* call(
-    fetchSolanaCollectiblesForWallets,
-    wallets
-  )) as CollectibleState
-
-  const collectibleCounts = wallets.map(
-    (wallet) => collectiblesMap[wallet]?.length ?? 0
-  )
-
-  return wallets.map((_, idx) => ({
-    collectibleCount: collectibleCounts[idx]
+    collectibleCount: 0
   }))
 }
 
@@ -111,22 +83,6 @@ function* fetchAccountAssociatedWallets() {
         associatedWallets: splWalletBalances.map((b) => ({
           ...b,
           collectibleCount: 0
-        })),
-        chain: Chain.Sol
-      })
-    )
-
-    // Add collectibles, this can take a while if fetching metadata is slow
-
-    const splWalletCollectibles = yield* fetchSplCollectibles(
-      associatedWallets.sol_wallets ?? []
-    )
-
-    yield* put(
-      setAssociatedWallets({
-        associatedWallets: splWalletBalances.map((b, i) => ({
-          ...b,
-          collectibleCount: splWalletCollectibles[i].collectibleCount
         })),
         chain: Chain.Sol
       })

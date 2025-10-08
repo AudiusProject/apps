@@ -67,7 +67,6 @@ class User(Base, RepresentableMixin):
     primary_id = Column(Integer)
     secondary_ids = Column(ARRAY(Integer()))
     replica_set_update_signer = Column(String)
-    has_collectibles = Column(Boolean, nullable=False, server_default=text("false"))
     txhash = Column(
         String,
         primary_key=True,

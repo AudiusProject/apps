@@ -1,6 +1,5 @@
 import { createContext, useContext } from 'react'
 
-import type { FetchNFTClient } from '@audius/fetch-nft'
 import type { AudiusSdk } from '@audius/sdk'
 import type { Dispatch } from 'redux'
 import { getContext } from 'typed-redux-saga'
@@ -51,7 +50,7 @@ export type QueryContextType = {
       properties: any
     }
   }
-  nftClient: FetchNFTClient
+  nftClient: null
   imageUtils: {
     generatePlaylistArtwork: (
       urls: string[]
@@ -100,7 +99,7 @@ export function* getQueryContext(): Generator<any, QueryContextType, any> {
     reportToSentry:
       yield* getContext<QueryContextType['reportToSentry']>('reportToSentry'),
     analytics: yield* getContext<QueryContextType['analytics']>('analytics'),
-    nftClient: yield* getContext<QueryContextType['nftClient']>('nftClient'),
+    nftClient: null,
     imageUtils: yield* getContext<QueryContextType['imageUtils']>('imageUtils')
   }
 }

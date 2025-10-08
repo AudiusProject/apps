@@ -111,7 +111,6 @@ user_model_full = ns.clone(
         "profile_picture_sizes": fields.String,
         "profile_picture_cids": fields.Nested(profile_picture, allow_null=True),
         "profile_picture_legacy": fields.String,
-        "has_collectibles": fields.Boolean(required=True),
         "playlist_library": fields.Nested(playlist_library, allow_null=True),
         "allow_ai_attribution": fields.Boolean(required=True),
         "profile_type": fields.String(allow_null=True),

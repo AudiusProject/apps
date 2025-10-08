@@ -16,7 +16,6 @@ from src.challenges.challenge_event_bus import ChallengeEventBus
 from src.exceptions import IndexingValidationError
 from src.models.tracks.track import Track
 from src.models.users.associated_wallet import AssociatedWallet
-from src.models.users.collectibles import Collectibles
 from src.models.users.user import User
 from src.models.users.user_events import UserEvent
 from src.models.users.user_payout_wallet_history import UserPayoutWalletHistory
@@ -518,41 +517,6 @@ def remove_associated_wallet(params: ManageEntityParameters):
     except Exception as e:
         logger.error(
             f"index.py | users.py | Fatal removing associated wallet while indexing {e}",
-            exc_info=True,
-        )
-        raise e
-
-
-def update_user_collectibles(params: ManageEntityParameters):
-    """Updates the user's collectibles data"""
-    validate_signer(params)
-    user_id = params.user_id
-    metadata = params.metadata
-    existing_user = params.existing_records["User"][user_id]
-    try:
-        if not isinstance(metadata.get("collectibles"), dict):
-            # If invalid format, don't update
-            raise IndexingValidationError("Invalid collectibles data format")
-
-        collectibles = Collectibles(
-            user_id=user_id,
-            data=metadata["collectibles"],
-            blockhash=params.event_blockhash,
-            blocknumber=params.block_number,
-        )
-
-        # We can just add_record here. Outer EM logic will take care
-        # of deleting previous record if it exists
-        params.add_record(user_id, collectibles, EntityType.COLLECTIBLES)
-
-        if metadata["collectibles"].items():
-            existing_user.has_collectibles = True
-        else:
-            existing_user.has_collectibles = False
-
-    except Exception as e:
-        logger.error(
-            f"index.py | users.py | Fatal error updating user collectibles {e}",
             exc_info=True,
         )
         raise e

@@ -15,7 +15,6 @@ import { ClaimAllRewardsDrawer } from 'app/components/challenge-rewards-drawer/C
 import { ChatActionsDrawer } from 'app/components/chat-actions-drawer'
 import { CoinflowOnrampDrawer } from 'app/components/coinflow-onramp-drawer/CoinflowOnrampDrawer'
 import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/CoinflowWithdrawDrawer'
-import { CollectibleDetailsDrawer } from 'app/components/collectible-details-drawer'
 import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-drawer'
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
 import { DeleteChatDrawer } from 'app/components/delete-chat-drawer'
@@ -114,7 +113,6 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
   MobileEditCollectiblesDrawer: EditCollectiblesDrawer,
   Share: ShareDrawer,
-  CollectibleDetails: CollectibleDetailsDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,

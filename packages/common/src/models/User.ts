@@ -1,4 +1,3 @@
-import { Collectible } from '~/models/Collectible'
 import { Color } from '~/models/Color'
 import { CID, ID } from '~/models/Identifiers'
 import {
@@ -31,7 +30,6 @@ export type UserMetadata = {
   balance?: Nullable<StringWei>
   bio: Nullable<string>
   blocknumber: number
-  collectibleList?: Collectible[]
   cover_photo_cids?: Nullable<CoverPhotoSizesCids>
   cover_photo_sizes: Nullable<CID>
   cover_photo: CoverPhotoSizes & { mirrors?: string[] | undefined }
@@ -64,7 +62,6 @@ export type UserMetadata = {
   profile_picture_sizes: Nullable<CID>
   profile_picture: ProfilePictureSizes & { mirrors?: string[] | undefined }
   repost_count: number
-  solanaCollectibleList?: Collectible[]
   spl_wallet: Nullable<SolanaWalletAddress>
   spl_usdc_payout_wallet?: Nullable<SolanaWalletAddress>
   supporter_count: number

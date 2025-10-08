@@ -1,9 +1,7 @@
-import { FetchNFTClient } from '@audius/fetch-nft'
 import { sdk } from '@audius/sdk'
 
 import { recordListen as recordAnalyticsListen } from '../analytics/analytics'
 
-import { getHash } from './collectibleHelpers'
 import { getIdentityEndpoint } from './getEnv'
 import { encodeHashId, decodeHashId } from './hashIds'
 import { logError } from './logError'
@@ -11,16 +9,12 @@ import { logError } from './logError'
 const IDENTITY_SERVICE_ENDPOINT = getIdentityEndpoint()
 
 const env = process.env.VITE_ENVIRONMENT
-const openSeaApiUrl = process.env.VITE_OPEN_SEA_API_URL
-const heliusDasApiUrl = process.env.VITE_HELIUS_DAS_API_URL
-const solanaRpcEndpoint = process.env.VITE_SOLANA_RPC_ENDPOINT
 const appName = process.env.VITE_APP_NAME
 const apiKey = process.env.VITE_API_KEY
 
 export const RequestedEntity = Object.seal({
   TRACKS: 'tracks',
-  COLLECTIONS: 'collections',
-  COLLECTIBLES: 'collectibles'
+  COLLECTIONS: 'collections'
 })
 
 const audiusSdk = sdk({
@@ -36,23 +30,10 @@ const apiEndpoint =
       ? 'https://api.staging.audius.co'
       : 'http://audius-api'
 
-const fetchNFTClient = new FetchNFTClient({
-  openSeaConfig: { apiEndpoint: openSeaApiUrl },
-  heliusConfig: { apiEndpoint: heliusDasApiUrl },
-  solanaConfig: { rpcEndpoint: solanaRpcEndpoint }
-})
-
 export const getTrackStreamEndpoint = (trackId, isPurchaseable) =>
   `${apiEndpoint}/v1/tracks/${trackId}/stream?app_name=${appName}&api_key=${apiKey}${
     isPurchaseable ? '&preview=true' : ''
   }`
-
-export const getCollectiblesJson = async (hashId) => {
-  const { data: collectibles } = await audiusSdk.users.getUserCollectibles({
-    id: hashId
-  })
-  return collectibles.data
-}
 
 window.audiusSdk = audiusSdk
 
@@ -120,51 +101,6 @@ export const getCollection = async (id) => {
 export const getCollectionWithHashId = async (hashId) => {
   const res = await audiusSdk.full.playlists.getPlaylist({ playlistId: hashId })
   return getFormattedCollectionResponse(res.data)
-}
-
-export const getCollectible = async (handle, collectibleId) => {
-  const { user, ethCollectibles, solCollectibles } =
-    await getCollectibles(handle)
-  const collectibles = [
-    ...Object.values(ethCollectibles).reduce(
-      (acc, vals) => [...acc, ...vals],
-      []
-    ),
-    ...Object.values(solCollectibles).reduce(
-      (acc, vals) => [...acc, ...vals],
-      []
-    )
-  ]
-
-  const foundCol = collectibles.find((col) => getHash(col.id) === collectibleId)
-  return {
-    user,
-    collectible: foundCol ?? null,
-    type: 'detail'
-  }
-}
-
-export const getCollectibles = async (handle) => {
-  const user = await audiusSdk.full.users.getUserByHandle({ handle })
-  const connectedWallets = await audiusSdk.users.getConnectedWallets({
-    id: user.data[0].id
-  })
-
-  const userEthWallet = user.data[0].ercWallet
-  const userSplWallet = user.data[0].splWallet
-  const ethWallets = [userEthWallet, ...connectedWallets.data.ercWallets]
-  const solWallets = [userSplWallet, ...connectedWallets.data.splWallets]
-  const { ethCollectibles, solCollectibles } =
-    await fetchNFTClient.getCollectibles({
-      ethWallets,
-      solWallets
-    })
-  return {
-    ethCollectibles,
-    solCollectibles,
-    type: 'gallery',
-    user: user.data[0]
-  }
 }
 
 export const getEntityEvents = async (entityId, entityType) => {
