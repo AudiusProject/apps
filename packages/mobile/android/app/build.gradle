@@ -53,11 +53,14 @@ react {
     autolinkLibrariesWithApp()
 }
 
+// react-native-config uses 'startsWith'/toLowerCase() to match the flavor for env files.
+// These should match the `productFlavors` section below.
+// Setting the ENVFILE env var will override thses.
 project.ext.envConfigFiles = [
-    release: ".env.prod",
-    stagingrelease: ".env.stage",
-    stagingreleasecandidaterelease: ".env.prod",
-    releasecandidaterelease: ".env.prod"
+    prod: ".env.prod",
+    releasecandidate: ".env.prod",
+    staging: ".env.stage",
+    stagingreleasecandidate: ".env.stage"
 ]
 
 def sentryGradleFile = file("../../node_modules/@sentry/react-native/sentry.gradle")
