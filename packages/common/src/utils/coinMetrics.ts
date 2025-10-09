@@ -63,12 +63,7 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
       `$${formatCount(coin.displayMarketCap, 2)}`,
       messages.marketCap
     ),
-    createMetric(
-      formatCount(coin.holder),
-      messages.uniqueHolders,
-      (coin.uniqueWallet24h / Math.max(coin.holder - coin.uniqueWallet24h, 1)) *
-        100
-    ),
+    createMetric(formatCount(coin.holder), messages.uniqueHolders),
     createMetric(
       `${Math.round((coin.dynamicBondingCurve?.curveProgress ?? 0) * 100)}%`,
       messages.graduationProgress
