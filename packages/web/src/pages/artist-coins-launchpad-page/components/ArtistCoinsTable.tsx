@@ -13,7 +13,6 @@ import {
   Button,
   Flex,
   IconSearch,
-  LoadingSpinner,
   Paper,
   Skeleton,
   spacing,
