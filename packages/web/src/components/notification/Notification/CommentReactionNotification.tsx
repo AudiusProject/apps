@@ -105,11 +105,7 @@ export const CommentReactionNotification = (
   return (
     <NotificationTile notification={notification} onClick={handleClick}>
       <NotificationHeader icon={<IconMessage color='accent' />}>
-        <UserProfilePictureList
-          users={users}
-          totalUserCount={userIds.length}
-          stopPropagation
-        />
+        <UserProfilePictureList users={users} stopPropagation />
       </NotificationHeader>
       <NotificationBody>
         <UserNameLink user={firstUser} notification={notification} />{' '}

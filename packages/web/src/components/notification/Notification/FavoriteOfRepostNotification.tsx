@@ -50,11 +50,7 @@ export const FavoriteOfRepostNotification = (
       disableClosePanel
     >
       <NotificationHeader icon={<IconFavorite />}>
-        <UserProfilePictureList
-          users={users}
-          totalUserCount={userIds.length}
-          stopPropagation
-        />
+        <UserProfilePictureList users={users} stopPropagation />
       </NotificationHeader>
       <NotificationBody>
         <UserNameLink user={firstUser} notification={notification} />{' '}

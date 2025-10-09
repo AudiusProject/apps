@@ -23,8 +23,6 @@ const messages = {
   relatedArtists: 'Related Artists'
 }
 
-const DEFAULT_RELATED_ARTISTS_COUNT = 100
-
 export const RelatedArtists = () => {
   const dispatch = useDispatch()
   const { user: profile } = useProfileUser()
@@ -62,11 +60,6 @@ export const RelatedArtists = () => {
       <ProfilePictureListTile
         onClick={handleClick}
         users={relatedArtists as User[]}
-        totalUserCount={
-          relatedArtists.length < MAX_PROFILE_RELATED_ARTISTS
-            ? relatedArtists.length
-            : DEFAULT_RELATED_ARTISTS_COUNT
-        }
         limit={MAX_PROFILE_RELATED_ARTISTS}
         disableProfileClick
       />
