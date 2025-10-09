@@ -291,7 +291,7 @@ mobile-release-saga-dapp-store:
         name: Build Android
         command: |
           cd packages/mobile/android
-          ./gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
+          ./gradlew app:assembleProdRelease -PreactNativeArchitectures=arm64-v8a
     - run:
         name: Validate release
         command: |
