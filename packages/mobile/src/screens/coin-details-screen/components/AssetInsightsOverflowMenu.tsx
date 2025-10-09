@@ -7,12 +7,6 @@ import { route, makeXShareUrl } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Linking } from 'react-native'
 
-import {
-  IconCopy,
-  IconExternalLink,
-  IconInfo,
-  IconX
-} from '@audius/harmony-native'
 import ActionDrawer, {
   type ActionDrawerRow
 } from 'app/components/action-drawer/ActionDrawer'
@@ -76,22 +70,18 @@ export const AssetInsightsOverflowMenu = () => {
   const rows: ActionDrawerRow[] = [
     {
       text: messages.copyCoinAddress,
-      icon: <IconCopy color='accent' />,
       callback: handleCopyCoinAddress
     },
     {
       text: messages.openBirdeye,
-      icon: <IconExternalLink color='accent' />,
       callback: handleOpenBirdeye
     },
     {
       text: messages.details,
-      icon: <IconInfo color='accent' />,
       callback: handleOpenDetails
     },
     {
       text: messages.shareToX,
-      icon: <IconX color='accent' />,
       callback: handleShareToX
     }
   ]
