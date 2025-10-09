@@ -7,12 +7,6 @@ import { route, makeXShareUrl } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Linking } from 'react-native'
 
-import {
-  IconCopy,
-  IconExternalLink,
-  IconInfo,
-  IconX
-} from '@audius/harmony-native'
 import ActionDrawer, {
   type ActionDrawerRow
 } from 'app/components/action-drawer/ActionDrawer'
