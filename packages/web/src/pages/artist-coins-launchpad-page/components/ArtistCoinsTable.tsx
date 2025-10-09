@@ -13,7 +13,6 @@ import {
   Button,
   Flex,
   IconSearch,
-  LoadingSpinner,
   Paper,
   Skeleton,
   spacing,
@@ -319,8 +318,9 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   })
 
   const { data: coinsData, isPending } = queryResult
-  const coins = coinsData?.filter(
-    (coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS
+  const coins = useMemo(
+    () => coinsData?.filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS),
+    [coinsData]
   )
 
   const loadNextPage = useCallback(() => {
@@ -425,24 +425,8 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     )
   }, [handleBuy, hiddenColumns])
 
-  if (isPending) {
-    return (
-      <Paper
-        w='100%'
-        justifyContent='center'
-        alignItems='center'
-        p='4xl'
-        border='default'
-        borderRadius='m'
-      >
-        <LoadingSpinner
-          style={{ height: spacing.unit8, width: spacing.unit8 }}
-        />
-      </Paper>
-    )
-  }
-
-  if (!coins || coins.length === 0) {
+  const isEmpty = !coins || coins.length === 0
+  if (isEmpty && !isPending) {
     return (
       <Paper
         column
@@ -469,10 +453,11 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     <Flex ref={setTableNode} border='default' borderRadius='m'>
       <Table
         columns={columns}
-        data={coins}
+        data={coins ?? []}
         isVirtualized
         onSort={onSort}
         onClickRow={handleRowClick}
+        loading={isPending}
         isEmptyRow={isEmptyRow}
         fetchMore={loadNextPage}
         fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
