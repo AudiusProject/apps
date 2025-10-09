@@ -20,7 +20,6 @@ import {
   IconSearch,
   IconSort,
   LoadingSpinner,
-  Paper,
   Text,
   TextInput,
   TextInputSize,
@@ -33,7 +32,12 @@ import { useNavigation } from 'app/hooks/useNavigation'
 import { useStatusBarStyle } from 'app/hooks/useStatusBarStyle'
 import { env } from 'app/services/env'
 
-import { GradientText, TokenIcon, Screen } from '../../components/core'
+import {
+  GradientText,
+  TokenIcon,
+  Screen,
+  VirtualizedScrollView
+} from '../../components/core'
 
 const COIN_ROW_HEIGHT = 50 // Estimated height for FlashList optimization
 
@@ -220,54 +224,62 @@ export const ArtistCoinsExploreScreen = () => {
         <Header searchValue={searchValue} setSearchValue={setSearchValue} />
       )}
     >
-      <Paper mh='l' mv='xl' border='default' borderRadius='m' flex={1}>
+      <VirtualizedScrollView>
         <Flex
-          row
-          ph='l'
-          pv='s'
-          justifyContent='space-between'
-          alignItems='center'
+          mh='l'
+          mv='xl'
+          border='default'
+          borderRadius='m'
+          backgroundColor='white'
         >
-          <GradientText
-            style={{
-              fontSize: typography.size.l,
-              fontFamily: typography.fontByWeight.bold
-            }}
+          <Flex
+            row
+            ph='l'
+            pv='s'
+            justifyContent='space-between'
+            alignItems='center'
           >
-            {walletMessages.artistCoins.title}
-          </GradientText>
-          <TouchableOpacity onPress={handleSortPress}>
-            <Flex
-              alignItems='center'
-              border='default'
-              borderRadius='s'
-              ph='m'
-              pv='s'
+            <GradientText
+              style={{
+                fontSize: typography.size.l,
+                fontFamily: typography.fontByWeight.bold
+              }}
             >
-              <IconSort size='s' color='default' />
-            </Flex>
-          </TouchableOpacity>
-        </Flex>
-        <Divider orientation='horizontal' />
-        {isPending ? (
-          <Flex justifyContent='center' alignItems='center' p='4xl'>
-            <LoadingSpinner />
+              {walletMessages.artistCoins.title}
+            </GradientText>
+            <TouchableOpacity onPress={handleSortPress}>
+              <Flex
+                alignItems='center'
+                border='default'
+                borderRadius='s'
+                ph='m'
+                pv='s'
+              >
+                <IconSort size='s' color='default' />
+              </Flex>
+            </TouchableOpacity>
           </Flex>
-        ) : shouldShowNoCoinsContent ? (
-          <NoCoinsContent />
-        ) : (
-          <FlashList
-            data={allCoins}
-            renderItem={renderCoinRow}
-            keyExtractor={keyExtractor}
-            estimatedItemSize={COIN_ROW_HEIGHT}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.8}
-            ListFooterComponent={renderFooter}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </Paper>
+          <Divider orientation='horizontal' />
+          {isPending ? (
+            <Flex justifyContent='center' alignItems='center' p='4xl'>
+              <LoadingSpinner />
+            </Flex>
+          ) : shouldShowNoCoinsContent ? (
+            <NoCoinsContent />
+          ) : (
+            <FlashList
+              data={allCoins}
+              renderItem={renderCoinRow}
+              keyExtractor={keyExtractor}
+              estimatedItemSize={COIN_ROW_HEIGHT}
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.8}
+              ListFooterComponent={renderFooter}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </Flex>
+      </VirtualizedScrollView>
       <PlayBarChin />
     </Screen>
   )
