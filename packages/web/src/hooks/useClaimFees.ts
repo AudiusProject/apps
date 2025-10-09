@@ -71,8 +71,6 @@ export const useClaimFees = (
         receiverWalletAddress: userBank.toString()
       })
 
-      console.log({ claimFeesResponse })
-
       const { claimFeeTxs: serializedTxs } = claimFeesResponse
 
       // Transaction is sent from the backend as a serialized base64 string
