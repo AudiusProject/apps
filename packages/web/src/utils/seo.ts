@@ -175,6 +175,34 @@ export const getCollectionPageSEOFields = ({
   }
 }
 
+export const getCoinsPageSEOFields = () => {
+  const pageTitle = 'Discover Artist Coins'
+  const pageDescription =
+    'Explore Artist Coins on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
+  const canonicalUrl = 'https://audius.co/coins'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
+export const getWalletPageSEOFields = () => {
+  const pageTitle = 'Wallet'
+  const pageDescription =
+    'Manage your Audius wallet. View your cash balance, artist coins, and linked wallets all in one place.'
+  const canonicalUrl = 'https://audius.co/wallet'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
 export const getDefaultSEOFields = () => ({
   title: 'Audius - Empowering Creators',
   description:
