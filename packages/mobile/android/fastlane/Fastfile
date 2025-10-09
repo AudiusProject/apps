@@ -57,25 +57,30 @@ platform :android do
   end
 
   lane :prod do |options|
-      build_and_upload(package_name: PROD_PACKAGE, track: options[:track])   
+      build_and_upload(package_name: PROD_PACKAGE, track: options[:track])
   end
 
   private_lane :build_and_upload do |options|
+      # IMPORTANT: taskName is comprised of action+flavor+buildType
+      # To avoid doing extra work and injecting the wrong env into various bundles,
+      # make sure the flavor/buildType maps to exactly one combination.
+      # ex: bundleProdRelease and not bundleRelease
+      # Our flavor array is not compatible with building multiple bundles in the same command.
       packageName = options[:package_name]
       if packageName === PROD_PACKAGE
-        buildType = 'bundleRelease'
+        taskName = 'bundleProdRelease'
         aab = './app/build/outputs/bundle/prodRelease/app-prod-release.aab'
         remoteDirectory = 'audius-mobile'
       elsif packageName === RC_PROD_PACKAGE
-        buildType = 'bundleReleaseCandidateRelease'
+        taskName = 'bundleReleaseCandidateRelease'
         aab = './app/build/outputs/bundle/releaseCandidateRelease/app-releaseCandidate-release.aab'
         remoteDirectory = 'audius-mobile-releasecandidate'
       elsif packageName === RC_STAGING_PACKAGE
-        buildType = 'bundleStagingReleaseCandidateRelease'
+        taskName = 'bundleStagingReleaseCandidateRelease'
         aab = './app/build/outputs/bundle/stagingReleaseCandidateRelease/app-stagingReleaseCandidate-release.aab'
         remoteDirectory = 'audius-mobile-staging-releasecandidate'
       elsif packageName === STAGING_PACKAGE
-        buildType = 'bundleStagingRelease'
+        taskName = 'bundleStagingRelease'
         aab = './app/build/outputs/bundle/stagingRelease/app-staging-release.aab'
         remoteDirectory = 'audius-mobile-staging'
       end
@@ -91,8 +96,8 @@ platform :android do
         incrementVersionCode(package_name: packageName, track: options[:track])
 
         # generating the release apk & bundle
-        sh("cd ../../../../ && echo \"yes\" | sdkmanager \"platforms;android-30\" && cd packages/mobile/android && ./gradlew #{buildType}")
-        
+        sh("cd ../../../../ && echo \"yes\" | sdkmanager \"platforms;android-30\" && cd packages/mobile/android && ./gradlew #{taskName}")
+
         sh("cd ../../../../ && sudo pip install awscli")
         sh("cd ../../../../ && aws s3 sync packages/mobile/android/app/build/outputs s3://#{remoteDirectory}/android --delete")
         upload_to_play_store(
