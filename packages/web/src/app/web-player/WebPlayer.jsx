@@ -32,7 +32,6 @@ import AppRedirectListener from 'components/app-redirect-popover/AppRedirectList
 import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
-import { TermsOfServiceUpdateBanner } from 'components/banner/TermsOfServiceUpdateBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
 import { ChatListener } from 'components/chat-listener/ChatListener'
@@ -497,7 +496,7 @@ const WebPlayer = (props) => {
       <AppBannerWrapper>
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
-        <TermsOfServiceUpdateBanner />
+        {/* <TermsOfServiceUpdateBanner /> */}
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
