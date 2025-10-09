@@ -202,7 +202,7 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
         ph='l'
         w='100%'
       >
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
         <IconButton

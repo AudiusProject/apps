@@ -44,7 +44,7 @@ export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
       alignItems='flex-start'
     >
       <Flex alignItems='center' gap='xs' pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
       </Flex>

@@ -36,7 +36,7 @@ const AssetInsightsSkeleton = () => {
       border='default'
     >
       <Flex direction='row' alignItems='center' gap='xs' pv='m' ph='l' w='100%'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
       </Flex>
@@ -252,7 +252,7 @@ export const AssetInsights = ({ mint }: AssetInsightsProps) => {
           ph='l'
           w='100%'
         >
-          <Text variant='heading' size='s' color='heading'>
+          <Text variant='heading' size='s'>
             {messages.title}
           </Text>
         </Flex>
@@ -285,7 +285,7 @@ export const AssetInsights = ({ mint }: AssetInsightsProps) => {
         ph='l'
         w='100%'
       >
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
         <AssetInsightsOverflowMenu mint={mint} />

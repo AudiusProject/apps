@@ -96,11 +96,7 @@ export const RepostNotification = (props: RepostNotificationProps) => {
       disableClosePanel={otherUsersCount > 0}
     >
       <NotificationHeader icon={<IconRepost />}>
-        <UserProfilePictureList
-          users={users}
-          totalUserCount={userIds.length}
-          stopPropagation
-        />
+        <UserProfilePictureList users={users} stopPropagation />
       </NotificationHeader>
       <NotificationBody>
         <UserNameLink user={firstUser} notification={notification} />{' '}

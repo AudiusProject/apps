@@ -85,7 +85,7 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
       border='default'
     >
       <Flex alignItems='center' gap='xs' pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
       </Flex>
@@ -115,7 +115,6 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
           <Flex>
             <UserProfilePictureList
               users={users ?? []}
-              totalUserCount={leaderboardUsers?.length}
               limit={isSmallScreen ? 6 : 8}
               disableProfileClick={true}
               disablePopover={true}

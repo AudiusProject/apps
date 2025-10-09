@@ -39,7 +39,7 @@ export const ChatBlastAudienceDisplay = (
   const { chat } = props
   const { data: currentUserId } = useCurrentUserId()
 
-  const { audienceCount, audienceContentId, audienceContentType } =
+  const { audienceContentId, audienceContentType } =
     useChatBlastAudienceContent({ chat })
 
   // Add 1 to the limit to ensure we have a bg photo for the overflow count
@@ -92,7 +92,6 @@ export const ChatBlastAudienceDisplay = (
         {users.length ? (
           <UserProfilePictureList
             users={users as User[]}
-            totalUserCount={audienceCount ?? 0}
             limit={USER_LIST_LIMIT}
             userListType={userListType}
             userListEntityType={

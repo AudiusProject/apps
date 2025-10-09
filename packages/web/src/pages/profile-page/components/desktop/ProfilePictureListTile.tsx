@@ -16,7 +16,6 @@ type ProfilePictureListTileProps = UserProfileListProps & {
 export const ProfilePictureListTile = ({
   onClick,
   users,
-  totalUserCount,
   limit,
   disableProfileClick,
   disablePopover,
@@ -35,7 +34,6 @@ export const ProfilePictureListTile = ({
     >
       <UserProfilePictureList
         users={users}
-        totalUserCount={totalUserCount}
         limit={limit}
         disableProfileClick={disableProfileClick}
         disablePopover={disablePopover}

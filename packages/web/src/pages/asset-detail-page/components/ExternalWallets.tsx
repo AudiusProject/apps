@@ -227,7 +227,7 @@ export const ExternalWallets = ({ mint }: ExternalWalletsProps) => {
       border='default'
     >
       <Flex direction='column' pv='l' ph='l'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {hasAccounts ? messages.hasBalanceTitle : messages.noBalanceTitle}
         </Text>
       </Flex>
