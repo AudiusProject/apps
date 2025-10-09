@@ -146,7 +146,7 @@ export const UserList = <T extends UserListDataItem>({
             <Flex
               alignItems='center'
               justifyContent='space-between'
-              borderBottom='strong'
+              borderBottom={index === data.length - 1 ? undefined : 'strong'}
               p='m'
               key={userId}
             >
