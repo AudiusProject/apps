@@ -76,22 +76,18 @@ export const AssetInsightsOverflowMenu = () => {
   const rows: ActionDrawerRow[] = [
     {
       text: messages.copyCoinAddress,
-      icon: <IconCopy color='accent' />,
       callback: handleCopyCoinAddress
     },
     {
       text: messages.openBirdeye,
-      icon: <IconExternalLink color='accent' />,
       callback: handleOpenBirdeye
     },
     {
       text: messages.details,
-      icon: <IconInfo color='accent' />,
       callback: handleOpenDetails
     },
     {
       text: messages.shareToX,
-      icon: <IconX color='accent' />,
       callback: handleShareToX
     }
   ]
