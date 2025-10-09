@@ -225,7 +225,13 @@ export const ArtistCoinsExploreScreen = () => {
       )}
     >
       <VirtualizedScrollView>
-        <Flex mh='l' mv='xl' border='default' borderRadius='m' flex={1}>
+        <Flex
+          mh='l'
+          mv='xl'
+          border='default'
+          borderRadius='m'
+          backgroundColor='white'
+        >
           <Flex
             row
             ph='l'
