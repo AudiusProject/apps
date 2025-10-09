@@ -159,5 +159,5 @@ export type ClaimFeesRequest = {
 }
 
 export type ClaimFeesResponse = {
-  claimFeesTx: string
+  claimFeeTxs: Array<string> // base64 encoded serialized transaction
 }
