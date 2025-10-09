@@ -149,7 +149,7 @@ export const setupFormSchema = ({
       [FIELDS.receiveAmount]: z.string().optional(),
       [FIELDS.termsAgreed]: z.boolean().refine((val) => val === true, {
         message:
-          'You must agree to the terms of service and artist coins terms to continue'
+          'You must agree to the terms of service and Artist Coins terms to continue'
       })
     })
     .superRefine((values, context) => {
