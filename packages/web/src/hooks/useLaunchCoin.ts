@@ -172,8 +172,8 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri,
-              description
+              logoUri: imageUri
+              // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })
           errorMetadata.sdkCoinAdded = true
