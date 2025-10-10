@@ -9,7 +9,7 @@ import {
 } from '@audius/common/api'
 import { useDiscordOAuthLink, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { Feature, WidthSizes } from '@audius/common/models'
+import { Feature, Name, WidthSizes } from '@audius/common/models'
 import {
   formatCurrencyWithSubscript,
   getTokenDecimalPlaces,
@@ -40,6 +40,7 @@ import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { appkitModal } from 'app/ReownAppKitModal'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { ExternalLink } from 'components/link/ExternalLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
@@ -262,119 +263,10 @@ type AssetInfoSectionProps = {
 
 const { REWARDS_PAGE } = route
 
-type AssetDetailsSectionProps = {
-  formattedTotalArtistEarnings: string
-  isCoinCreator: boolean
-  unclaimedFees: number
-  formattedUnclaimedFees: string
-  isClaimFeesPending: boolean
-  isClaimFeesDisabled: boolean
-  handleClaimFees: () => void
-}
-
-const AssetDetailsSection = ({
-  formattedTotalArtistEarnings,
-  isCoinCreator,
-  unclaimedFees,
-  formattedUnclaimedFees,
-  isClaimFeesPending,
-  handleClaimFees,
-  isClaimFeesDisabled
-}: AssetDetailsSectionProps) => {
-  const isManagerMode = useIsManagedAccount()
-  return (
-    <Flex
-      direction='column'
-      alignItems='flex-start'
-      alignSelf='stretch'
-      borderTop='default'
-      ph='xl'
-      pv='l'
-      gap='l'
-    >
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.vestingSchedule}
-          </Text>
-          <Tooltip
-            text={overflowMessages.tooltips.vestingSchedule}
-            mount='body'
-          >
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s' color='subdued'>
-          {overflowMessages.vestingScheduleValue}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.artistEarnings}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.artistEarnings} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s' color='subdued'>
-          {formattedTotalArtistEarnings} {overflowMessages.$audio}
-        </Text>
-      </Flex>
-      {isCoinCreator && !isManagerMode ? (
-        <Flex
-          alignItems='center'
-          justifyContent='space-between'
-          alignSelf='stretch'
-        >
-          <Flex alignItems='center' gap='s'>
-            <Text variant='body' size='s' strength='strong'>
-              {overflowMessages.unclaimedFees}
-            </Text>
-            <Tooltip
-              text={overflowMessages.tooltips.unclaimedFees}
-              mount='body'
-            >
-              <IconInfo size='s' color='subdued' />
-            </Tooltip>
-          </Flex>
-          <Flex alignItems='center' gap='s'>
-            {unclaimedFees > 0 ? (
-              <Flex gap='xs' alignItems='center'>
-                <TextLink
-                  onClick={handleClaimFees}
-                  variant={isClaimFeesDisabled ? 'subdued' : 'visible'}
-                  disabled={isClaimFeesDisabled}
-                >
-                  {overflowMessages.claim}
-                </TextLink>
-                {isClaimFeesPending ? (
-                  <LoadingSpinner size='s' color='subdued' />
-                ) : null}
-              </Flex>
-            ) : null}
-
-            <Text variant='body' size='s' color='subdued'>
-              {formattedUnclaimedFees} {overflowMessages.$audio}
-            </Text>
-          </Flex>
-        </Flex>
-      ) : null}
-    </Flex>
-  )
-}
-
 export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
+  const record = useRecord()
 
   const { data: coin, isLoading } = useArtistCoin(mint)
 
@@ -390,8 +282,16 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
 
   // Claim fee hook
   const { mutate: claimFees, isPending: isClaimFeesPending } = useClaimFees({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast(toastMessages.feesClaimed)
+      record(
+        make(Name.LAUNCHPAD_CLAIM_FEES_SUCCESS, {
+          walletAddress: coinCreatorWalletAddress ?? '',
+          coinSymbol: coin?.ticker,
+          mintAddress: mint,
+          claimedAmount: unclaimedFees.toString()
+        })
+      )
     },
     onError: (error) => {
       reportToSentry({
@@ -407,6 +307,14 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
       })
       console.error(error)
       toast(toastMessages.feesClaimFailed)
+      record(
+        make(Name.LAUNCHPAD_CLAIM_FEES_FAILURE, {
+          walletAddress: coinCreatorWalletAddress ?? '',
+          coinSymbol: coin?.ticker,
+          mintAddress: mint,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      )
     }
   })
 
@@ -482,20 +390,59 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
 
+    // Track the click event
+    record(
+      make(Name.LAUNCHPAD_CLAIM_FEES_CLICKED, {
+        walletAddress: connectedAddress ?? coinCreatorWalletAddress ?? '',
+        coinSymbol: coin?.ticker,
+        mintAddress: mint
+      })
+    )
+
     // appkit wallet is not connected, need to prompt connect flow first
     if (!connectedAddress) {
+      record(
+        make(Name.LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET, {
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
       openAppKitModal('solana')
     } else if (connectedAddress !== coinCreatorWalletAddress) {
       // If we hit this block the user has not connected the wallet they used to launch the coin
       // Disconnect the current Solana wallet to allow connecting a different one
+      record(
+        make(Name.LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET, {
+          currentWalletAddress: connectedAddress,
+          expectedWalletAddress: coinCreatorWalletAddress ?? '',
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
       await appkitModal.disconnect('solana')
       openAppKitModal('solana')
     } else {
       // appkit wallet is connected with the correct address,
       // can just initiate claim fees flow immediately
+      record(
+        make(Name.LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED, {
+          walletAddress: connectedAddress,
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
       handleClaimFees(connectedAddress)
     }
-  }, [openAppKitModal, handleClaimFees, coinCreatorWalletAddress])
+  }, [
+    openAppKitModal,
+    handleClaimFees,
+    coinCreatorWalletAddress,
+    record,
+    coin?.ticker,
+    mint
+  ])
+
+  const isManagerMode = useIsManagedAccount()
 
   if (isLoading || !coin) {
     return <AssetInfoSectionSkeleton />
@@ -506,6 +453,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
 
   const isUserBalanceUnavailable =
     !userTokenBalance || Number(userTokenBalance) <= 0
+  const isClaimFeesDisabled = isClaimFeesPending || isManagerMode
 
   return (
     <Paper
@@ -624,15 +572,95 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
         </Text>
       </Flex>
       {!isWAudio ? (
-        <AssetDetailsSection
-          formattedTotalArtistEarnings={formattedTotalArtistEarnings}
-          isCoinCreator={isCoinCreator}
-          unclaimedFees={unclaimedFees}
-          formattedUnclaimedFees={formattedUnclaimedFees}
-          isClaimFeesPending={isClaimFeesPending}
-          isClaimFeesDisabled={isClaimFeesPending}
-          handleClaimFees={handleClaimFeesClick}
-        />
+        <Flex
+          direction='column'
+          alignItems='flex-start'
+          alignSelf='stretch'
+          borderTop='default'
+          ph='xl'
+          pv='l'
+          gap='l'
+        >
+          <Flex
+            alignItems='center'
+            justifyContent='space-between'
+            alignSelf='stretch'
+          >
+            <Flex alignItems='center' gap='s'>
+              <Text variant='body' size='s' strength='strong'>
+                {overflowMessages.vestingSchedule}
+              </Text>
+              <Tooltip
+                text={overflowMessages.tooltips.vestingSchedule}
+                mount='body'
+              >
+                <IconInfo size='s' color='subdued' />
+              </Tooltip>
+            </Flex>
+            <Text variant='body' size='s' color='subdued'>
+              {overflowMessages.vestingScheduleValue}
+            </Text>
+          </Flex>
+          <Flex
+            alignItems='center'
+            justifyContent='space-between'
+            alignSelf='stretch'
+          >
+            <Flex alignItems='center' gap='s'>
+              <Text variant='body' size='s' strength='strong'>
+                {overflowMessages.artistEarnings}
+              </Text>
+              <Tooltip
+                text={overflowMessages.tooltips.artistEarnings}
+                mount='body'
+              >
+                <IconInfo size='s' color='subdued' />
+              </Tooltip>
+            </Flex>
+            <Text variant='body' size='s' color='subdued'>
+              {formattedTotalArtistEarnings} {overflowMessages.$audio}
+            </Text>
+          </Flex>
+          {isCoinCreator && !isManagerMode ? (
+            <Flex
+              alignItems='center'
+              justifyContent='space-between'
+              alignSelf='stretch'
+            >
+              <Flex alignItems='center' gap='s'>
+                <Text variant='body' size='s' strength='strong'>
+                  {overflowMessages.unclaimedFees}
+                </Text>
+                <Tooltip
+                  text={overflowMessages.tooltips.unclaimedFees}
+                  mount='body'
+                >
+                  <IconInfo size='s' color='subdued' />
+                </Tooltip>
+              </Flex>
+              <Flex alignItems='center' gap='s'>
+                {unclaimedFees > 0 ? (
+                  <Flex gap='xs' alignItems='center'>
+                    <TextLink
+                      onClick={handleClaimFeesClick}
+                      variant={isClaimFeesDisabled ? 'subdued' : 'visible'}
+                      disabled={isClaimFeesDisabled}
+                    >
+                      {overflowMessages.claim}
+                    </TextLink>
+                    {isClaimFeesPending ? (
+                      <LoadingSpinner size='s' color='subdued' />
+                    ) : null}
+                  </Flex>
+                ) : null}
+
+                <Text variant='body' size='s' color='subdued'>
+                  {formattedUnclaimedFees} {overflowMessages.$audio}
+                </Text>
+              </Flex>
+            </Flex>
+          ) : null}
+        </Flex>
       ) : null}
     </Paper>
   )

@@ -619,7 +619,13 @@ export enum Name {
   LAUNCHPAD_BUY_MODAL_FORM_CHANGE = 'Launchpad: Buy Audio Modal Form Change',
   LAUNCHPAD_BUY_MODAL_MAX_BUTTON = 'Launchpad: Buy Audio Modal Max Button Clicked',
   LAUNCHPAD_BUY_MODAL_CONTINUE = 'Launchpad: Buy Audio Modal Continue Clicked',
-  LAUNCHPAD_BUY_MODAL_BACK = 'Launchpad: Buy Audio Modal Back Clicked'
+  LAUNCHPAD_BUY_MODAL_BACK = 'Launchpad: Buy Audio Modal Back Clicked',
+  LAUNCHPAD_CLAIM_FEES_CLICKED = 'Launchpad: Claim Fees Clicked',
+  LAUNCHPAD_CLAIM_FEES_SUCCESS = 'Launchpad: Claim Fees Success',
+  LAUNCHPAD_CLAIM_FEES_FAILURE = 'Launchpad: Claim Fees Failure',
+  LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET = 'Launchpad: Claim Fees Connect Wallet',
+  LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET = 'Launchpad: Claim Fees Switch Wallet',
+  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected'
 }
 
 type PageView = {
@@ -3022,6 +3028,50 @@ export type LaunchpadBuyModalMaxButton = {
   eventName: Name.LAUNCHPAD_BUY_MODAL_MAX_BUTTON
 }
 
+export type LaunchpadClaimFeesClicked = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_CLICKED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesSuccess = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_SUCCESS
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  claimedAmount: string
+}
+
+export type LaunchpadClaimFeesFailure = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_FAILURE
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  error: string
+}
+
+export type LaunchpadClaimFeesConnectWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesSwitchWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET
+  currentWalletAddress: string
+  expectedWalletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesWalletConnected = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
 export type BaseAnalyticsEvent = { type: typeof ANALYTICS_TRACK_EVENT }
 
 export type AllTrackingEvents =
@@ -3430,3 +3480,9 @@ export type AllTrackingEvents =
   | LaunchpadBuyModalMaxButton
   | LaunchpadBuyModalContinue
   | LaunchpadBuyModalBack
+  | LaunchpadClaimFeesClicked
+  | LaunchpadClaimFeesSuccess
+  | LaunchpadClaimFeesFailure
+  | LaunchpadClaimFeesConnectWallet
+  | LaunchpadClaimFeesSwitchWallet
+  | LaunchpadClaimFeesWalletConnected
