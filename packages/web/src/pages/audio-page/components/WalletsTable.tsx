@@ -1,10 +1,6 @@
 import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
-import {
-  useConnectedWallets,
-  useWalletAudioBalance,
-  useWalletCollectibles
-} from '@audius/common/api'
+import { useConnectedWallets, useWalletAudioBalance } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, shortenEthAddress } from '@audius/common/utils'
 import type { AudioWei } from '@audius/fixed-decimal'
@@ -90,12 +86,8 @@ export const WalletTableRow = ({
       includeStaked: true
     })
 
-  const { data: collectibles, isPending: isCollectiblesPending } =
-    useWalletCollectibles({ address, chain })
-
-  const collectibleCount = collectibles?.[address]?.length ?? 0
-  const isPending =
-    isBalancePending || isCollectiblesPending || isMutationPending
+  const collectibleCount = 0
+  const isPending = isBalancePending || isMutationPending
 
   return (
     <div className={cn(styles.copyContainer)}>

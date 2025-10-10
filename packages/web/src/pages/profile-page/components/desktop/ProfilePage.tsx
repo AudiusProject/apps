@@ -425,6 +425,8 @@ const ProfilePage = ({
       : getUserProfileContent()
     : { headers: [], elements: [] }
 
+  const tabRecalculator = useTabRecalculator()
+
   const { tabs, body } = useTabs({
     didChangeTabsFrom,
     isMobile: false,
