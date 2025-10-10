@@ -32,7 +32,7 @@ const getDBCPoolTxs = async (
     new PublicKey(tokenMint)
   )
   if (!tokenPool) {
-    throw new Error(`No DBC pool found for base mint: ${tokenMint}.`)
+    return
   }
 
   const poolAddress = tokenPool.publicKey
