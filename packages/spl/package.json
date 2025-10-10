@@ -9,7 +9,8 @@
     "start": "tsc --build --verbose --watch tsconfig.all.json",
     "build": "tsc --build --verbose tsconfig.all.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "init-reward-manager": "ts-node --project scripts/tsconfig.json scripts/initRewardManager.ts"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,9 @@
     "@solana/web3.js": "^1.95.8"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0",
     "vitest": "2.1.1"
   }
 }

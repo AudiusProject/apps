@@ -1,0 +1,7 @@
+# Ignore generated keypair files
+reward-manager-*.json
+token-account-*.json
+
+# But keep the example
+!example-keypair.json
+
