@@ -142,7 +142,7 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   return (
     <Text variant='body' size='m'>
       {walletMessages.dollarSign}
-      {formatCount(coin.marketCap)}
+      {formatCount(Math.round(coin.marketCap))}
     </Text>
   )
 }
