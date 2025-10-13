@@ -197,6 +197,8 @@ export const TokenDropdown = ({
       <Menu
         isVisible={isOpen}
         anchorRef={wrapperRef}
+        disableAutoFlip
+        PaperProps={{ mt: 'none' }}
         css={{
           border: 'none',
           boxShadow: 'none',
