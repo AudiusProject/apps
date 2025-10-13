@@ -26,6 +26,7 @@ import {
   DecodedChangeManagerAccountInstruction,
   DecodedDeleteSenderPublicInstruction,
   DecodedEvaluateAttestationsInstruction,
+  DecodedInitRewardManagerInstruction,
   DecodedRewardManagerInstruction,
   DecodedSubmitAttestationsInstruction,
   EvaluateAttestationsInstructionData,
@@ -559,6 +560,7 @@ export class RewardManagerProgram {
   ): DecodedRewardManagerInstruction {
     switch (instruction.data[0]) {
       case RewardManagerInstruction.Init:
+        return RewardManagerProgram.decodeInitInstruction(instruction)
       case RewardManagerInstruction.ChangeManagerAccount:
         return RewardManagerProgram.decodeChangeManagerAccountInstruction(
           instruction
@@ -586,6 +588,12 @@ export class RewardManagerProgram {
       default:
         throw new Error('Invalid RewardManager Instruction')
     }
+  }
+
+  public static isInitInstruction(
+    decoded: DecodedRewardManagerInstruction
+  ): decoded is DecodedInitRewardManagerInstruction {
+    return decoded.data.instruction === RewardManagerInstruction.Init
   }
 
   public static isCreateSenderInstruction(
