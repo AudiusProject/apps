@@ -18,7 +18,10 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
     return {
       buy: { baseToken: baseSymbol, quoteToken: quoteSymbol },
       sell: { baseToken: baseSymbol, quoteToken: quoteSymbol },
-      convert: { baseToken: baseSymbol, quoteToken: 'USDC' } // Always USDC for convert
+      convert: {
+        baseToken: 'AUDIO',
+        quoteToken: baseSymbol
+      }
     }
   }, [selectedPair?.baseToken?.symbol, selectedPair?.quoteToken?.symbol])
 
