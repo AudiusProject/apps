@@ -4,7 +4,7 @@ import { RewardManagerInstruction } from './constants'
 
 export type InitRewardManagerParams = {
   /** The account to initialize as the reward manager state. */
-  rewardManager: PublicKey
+  rewardManagerState: PublicKey
   /** The token account to hold rewards. */
   tokenAccount: PublicKey
   /** The mint for the token account. */
@@ -28,7 +28,7 @@ export type DecodedInitRewardManagerInstruction = {
   programId: PublicKey
   keys: {
     /** The account to initialize as the reward manager state. */
-    rewardManager: AccountMeta
+    rewardManagerState: AccountMeta
     /** The token account to hold rewards. */
     tokenAccount: AccountMeta
     /** The mint for the token account. */

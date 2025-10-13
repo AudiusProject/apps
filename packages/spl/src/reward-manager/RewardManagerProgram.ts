@@ -109,7 +109,7 @@ export class RewardManagerProgram {
   }
 
   public static createInitInstruction({
-    rewardManager,
+    rewardManagerState,
     tokenAccount,
     mint,
     manager,
@@ -129,11 +129,11 @@ export class RewardManagerProgram {
 
     const authority = RewardManagerProgram.deriveAuthority({
       programId: rewardManagerProgramId,
-      rewardManagerState: rewardManager
+      rewardManagerState
     })
 
     const keys: AccountMeta[] = [
-      { pubkey: rewardManager, isSigner: false, isWritable: true },
+      { pubkey: rewardManagerState, isSigner: false, isWritable: true },
       { pubkey: tokenAccount, isSigner: false, isWritable: true },
       { pubkey: mint, isSigner: false, isWritable: false },
       { pubkey: manager, isSigner: false, isWritable: false },
@@ -151,7 +151,7 @@ export class RewardManagerProgram {
   public static decodeInitInstruction({
     programId,
     keys: [
-      rewardManager,
+      rewardManagerState,
       tokenAccount,
       mint,
       manager,
@@ -164,7 +164,7 @@ export class RewardManagerProgram {
     return {
       programId,
       keys: {
-        rewardManager,
+        rewardManagerState,
         tokenAccount,
         mint,
         manager,
