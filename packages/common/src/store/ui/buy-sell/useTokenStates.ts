@@ -15,12 +15,25 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
     const baseSymbol = selectedPair?.baseToken?.symbol ?? 'AUDIO'
     const quoteSymbol = selectedPair?.quoteToken?.symbol ?? 'USDC'
 
+    let convertQuoteDefault = 'USDC'
+    if (
+      selectedPair?.baseToken?.symbol &&
+      selectedPair.baseToken.symbol !== 'AUDIO'
+    ) {
+      convertQuoteDefault = selectedPair.baseToken.symbol
+    } else if (
+      selectedPair?.quoteToken?.symbol &&
+      selectedPair.quoteToken.symbol !== 'AUDIO'
+    ) {
+      convertQuoteDefault = selectedPair.quoteToken.symbol
+    }
+
     return {
       buy: { baseToken: baseSymbol, quoteToken: quoteSymbol },
       sell: { baseToken: baseSymbol, quoteToken: quoteSymbol },
       convert: {
         baseToken: 'AUDIO',
-        quoteToken: baseSymbol
+        quoteToken: convertQuoteDefault
       }
     }
   }, [selectedPair?.baseToken?.symbol, selectedPair?.quoteToken?.symbol])
