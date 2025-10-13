@@ -106,7 +106,7 @@ export const ArtistCoinDetailsModal = ({
         ) : null}
 
         {/* On-Chain Description */}
-        {artistCoin?.ticker && artistHandle ? (
+        {artistCoin?.ticker && artistHandle && !isAudio ? (
           <TokenInfoRow
             label={artistCoinDetails.onChainDescription}
             value={LAUNCHPAD_COIN_DESCRIPTION(artistHandle, artistCoin.ticker)}
