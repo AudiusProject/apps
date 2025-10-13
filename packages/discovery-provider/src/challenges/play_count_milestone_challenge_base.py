@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
@@ -8,6 +8,22 @@ from src.challenges.challenge import ChallengeUpdater, FullEventMetadata
 from src.models.rewards.user_challenge import UserChallenge
 from src.models.social.aggregate_monthly_plays import AggregateMonthlyPlay
 from src.models.tracks.track import Track
+from src.models.users.user import User
+
+
+def does_user_exist_with_verification_status(
+    session, user_id: int, is_verified: bool
+) -> bool:
+    user: Optional[Tuple[int]] = (
+        session.query(User.user_id)
+        .filter(
+            User.user_id == user_id,
+            bool(User.is_current),
+            User.is_verified == is_verified,
+        )
+        .one_or_none()
+    )
+    return bool(user)
 
 
 class PlayCountMilestoneUpdaterBase(ChallengeUpdater):
@@ -61,6 +77,10 @@ class PlayCountMilestoneUpdaterBase(ChallengeUpdater):
 
         for user_challenge in user_challenges:
             user_id = user_challenge.user_id
+
+            # Only allow verified users to complete this challenge
+            if not does_user_exist_with_verification_status(session, user_id, True):
+                continue
             play_count = self._get_user_play_count_2025(session, user_id)
 
             user_challenge.current_step_count = play_count
@@ -101,6 +121,10 @@ class PlayCountMilestoneUpdaterBase(ChallengeUpdater):
         # Only proceed if they've played tracks in 2025
         play_count = self._get_user_play_count_2025(session, user_id)
         if play_count <= 0:
+            return False
+
+        # Only allow verified users to complete this challenge
+        if not does_user_exist_with_verification_status(session, user_id, True):
             return False
 
         # If there's a previous milestone, check if it's completed
