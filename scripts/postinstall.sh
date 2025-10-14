@@ -42,15 +42,17 @@ if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   } > /dev/null
 fi
 
-if command -v java >/dev/null; then
-  {
-    printf "${GREEN}Setting up Android dependencies...\n${NC}"
-    cd ./packages/mobile/android
-    ./gradlew :app:downloadAar
-    cd ../../..
-  } > /dev/null
-else
-  printf "${YELLOW}WARNING: Java not found. Skipping Android AAR installation.${NC}\n"
+if [[ -z "${SKIP_POD_INSTALL}" ]]; then
+  if command -v java >/dev/null; then
+    {
+      printf "${GREEN}Setting up Android dependencies...\n${NC}"
+      cd ./packages/mobile/android
+      ./gradlew :app:downloadAar
+      cd ../../..
+    } > /dev/null
+  else
+    printf "${YELLOW}WARNING: Java not found. Skipping Android AAR installation.${NC}\n"
+  fi
 fi
 
 if [[ -z "${CI}" ]]; then
