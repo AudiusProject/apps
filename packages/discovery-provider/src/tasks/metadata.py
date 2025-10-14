@@ -235,7 +235,6 @@ user_metadata_format = {
     "handle": None,
     "associated_wallets": None,
     "associated_sol_wallets": None,
-    "collectibles": None,
     "playlist_library": None,
     "events": None,
     "is_storage_v2": False,

@@ -23,7 +23,6 @@ CID_METADATA_ROUTE = "/<string:metadata_id>"
 cid_data = full_ns.model(
     "cid_data",
     {
-        "collectibles": fields.Raw(required=False),
         "associated_sol_wallets": fields.Raw(required=False),
         "associated_wallets": fields.Raw(required=False),
     },

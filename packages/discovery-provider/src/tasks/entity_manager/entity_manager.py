@@ -104,7 +104,6 @@ from src.tasks.entity_manager.entities.user import (
     create_user,
     remove_associated_wallet,
     update_user,
-    update_user_collectibles,
     verify_user,
 )
 from src.tasks.entity_manager.utils import (
@@ -143,7 +142,6 @@ entity_type_table_mapping = {
     "Track": Track.__tablename__,
     "User": User.__tablename__,
     "AssociatedWallet": AssociatedWallet.__tablename__,
-    "Collectibles": Collectibles.__tablename__,
     "UserEvent": UserEvent.__tablename__,
     "TrackRoute": TrackRoute.__tablename__,
     "PlaylistRoute": PlaylistRoute.__tablename__,
@@ -642,7 +640,6 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                 entities_to_fetch[entity_type].add(entity_id)
             if entity_type == EntityType.USER:
                 entities_to_fetch[EntityType.USER_EVENT].add(user_id)
-                entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(user_id)
                 if action == Action.MUTE or action == Action.UNMUTE:
                     entities_to_fetch[EntityType.MUTED_USER].add((user_id, entity_id))
                     entities_to_fetch[EntityType.USER].add(entity_id)
