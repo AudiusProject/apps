@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useState } from 'react'
+import { useMemo, useCallback, useRef, useState, useEffect } from 'react'
 
 import type { TokenInfo } from '@audius/common/store'
 import {
@@ -14,10 +14,18 @@ import {
 import { useTheme } from '@emotion/react'
 import Select, { components } from 'react-select'
 import type { SingleValue, OptionProps, InputProps } from 'react-select'
+import { useDebounce } from 'react-use'
 
+import {
+  GetCoinsSortMethodEnum,
+  useArtistCoins
+} from '~/api/tan-query/coins/useArtistCoins'
 import zIndex from 'utils/zIndex'
 
 import { TokenIcon } from '../TokenIcon'
+import { transformArtistCoinToTokenInfo } from '@audius/common/api'
+
+const DEBOUNCE_MS = 300
 
 type TokenOption = {
   value: string
@@ -27,7 +35,6 @@ type TokenOption = {
 
 type TokenDropdownProps = {
   selectedToken: TokenInfo
-  availableTokens: TokenInfo[]
   onTokenChange?: (token: TokenInfo) => void
   disabled?: boolean
 }
@@ -117,43 +124,89 @@ const CustomInput = (props: InputProps<TokenOption>) => {
 
 export const TokenDropdown = ({
   selectedToken,
-  availableTokens,
   onTokenChange,
   disabled = false
 }: TokenDropdownProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { color, spacing } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+
+  useDebounce(
+    () => {
+      setDebouncedQuery(searchQuery)
+      setIsSearching(false)
+    },
+    DEBOUNCE_MS,
+    [searchQuery]
+  )
+
+  const {
+    data: artistCoins,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending
+  } = useArtistCoins(
+    {
+      pageSize: 10,
+      query: debouncedQuery
+    },
+    {
+      enabled: isOpen
+    }
+  )
 
   const handleTokenSelect = useCallback(
     (option: SingleValue<TokenOption>) => {
       if (option) {
         onTokenChange?.(option.tokenInfo)
         setIsOpen(false)
+        setSearchQuery('')
       }
     },
     [onTokenChange]
   )
 
+  const handleInputChange = useCallback((newValue: string) => {
+    setIsSearching(true)
+    setSearchQuery(newValue)
+    return newValue
+  }, [])
+
+  const handleMenuScrollToBottom = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
   const options: TokenOption[] = useMemo(() => {
-    return availableTokens
-      .map((token) => ({
-        value: token.symbol,
-        label: token.name ?? token.symbol,
-        tokenInfo: token
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label))
-  }, [availableTokens])
+    if (!artistCoins) return []
+    return artistCoins.map(transformArtistCoinToTokenInfo).map((token) => ({
+      value: token.symbol,
+      label: token.name ?? token.symbol,
+      tokenInfo: token
+    }))
+  }, [artistCoins])
 
   const selectedOption = useMemo(
     () =>
-      options.find((option) => option.value === selectedToken.symbol) || {
+      options.find((option) => option.value === selectedToken.symbol) ?? {
         value: selectedToken.symbol,
         label: selectedToken.name ?? selectedToken.symbol,
         tokenInfo: selectedToken
       },
     [options, selectedToken]
   )
+
+  // Reset search when dropdown closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('')
+    }
+  }, [isOpen])
 
   return (
     <Box css={{ position: 'relative', width: '100%' }}>
@@ -197,7 +250,6 @@ export const TokenDropdown = ({
       <Menu
         isVisible={isOpen}
         anchorRef={wrapperRef}
-        disableAutoFlip
         PaperProps={{ mt: 'none' }}
         css={{
           border: 'none',
@@ -217,11 +269,15 @@ export const TokenDropdown = ({
             Option: CustomOption,
             Input: CustomInput
           }}
+          onMenuScrollToBottom={handleMenuScrollToBottom}
           controlShouldRenderValue={false}
           hideSelectedOptions={false}
           isClearable={false}
           menuIsOpen
+          isLoading={isPending || isSearching}
           onChange={handleTokenSelect}
+          onInputChange={handleInputChange}
+          inputValue={searchQuery}
           options={options}
           placeholder=''
           tabSelectsValue={false}
