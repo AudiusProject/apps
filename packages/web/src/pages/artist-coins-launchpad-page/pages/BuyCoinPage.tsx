@@ -222,9 +222,10 @@ export const BuyCoinPage = ({
   }
 
   const handleMaxClick = () => {
-    trackFirstBuyMaxButton(audioBalanceString)
-    setFieldValue(FIELDS.payAmount, audioBalanceString)
-    debouncedPayAmountChange(audioBalanceString)
+    const audioBalanceNoCommas = audioBalanceString.replace(/,/g, '')
+    trackFirstBuyMaxButton(audioBalanceNoCommas)
+    setFieldValue(FIELDS.payAmount, audioBalanceNoCommas)
+    debouncedPayAmountChange(audioBalanceNoCommas)
   }
 
   const debouncedPayAmountChange = useDebouncedCallback(
