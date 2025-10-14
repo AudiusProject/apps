@@ -11,6 +11,7 @@ import { ActiveDiscussions } from './ActiveDiscussions'
 import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestOfAudiusTiles } from './BestOfAudiusTiles'
 import { BestSelling } from './BestSelling'
+import { FeaturedArtistCoinTracks } from './FeaturedArtistCoinTracks'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -29,6 +30,9 @@ export const ExploreContent = () => {
   const { isEnabled: isSearchGoodiesEnabled } = useFeatureFlag(
     FeatureFlags.SEARCH_EXPLORE_GOODIES
   )
+  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
+    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
+  )
 
   const showTrackContent = category === 'tracks' || category === 'all'
   const showPlaylistContent = category === 'playlists' || category === 'all'
@@ -38,6 +42,7 @@ export const ExploreContent = () => {
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && <ForYouTracks />}
+      {isExploreArtistCoinTracksEnabled && <FeaturedArtistCoinTracks />}
       {showTrackContent && <RecentlyPlayedTracks />}
       {showTrackContent && <QuickSearchGrid />}
       {showPlaylistContent && <FeaturedPlaylists />}
