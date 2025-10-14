@@ -6,15 +6,23 @@ import {
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { PublicKey } from '@solana/web3.js'
+import {
+  Keypair,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction
+} from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
 import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
+import { sendTransactionWithRetries } from '../../utils/transaction'
 
+import { makeCurve } from './curve'
 import { getKeypair } from './getKeypair'
+import { createRewardPool } from './reward_pool'
 
 interface LaunchCoinRequestBody {
   name: string
@@ -26,6 +34,20 @@ interface LaunchCoinRequestBody {
 
 const AUDIUS_COIN_URL = (ticker: string) => `https://audius.co/coins/${ticker}`
 
+/**
+ * Launches a new coin on the launchpad with bonding curve.
+ * The coin is created with a new mint and a new config.
+ * Process:
+ *  1. Creates metadata for the new coin
+ *  2. Create a config for the new coin
+ *  3. Create a reward pool for the new coin
+ *  4. Return transactions to sign and send from the client
+ * @param req Request object containing the coin details
+ * @param res Response object containing the coin details
+ * @returns Response object containing two transactions
+ *  - Pool creation transaction
+ *  - First buy transaction
+ */
 export const launchCoin = async (
   req: Request<unknown, unknown, LaunchCoinRequestBody> & {
     file?: Express.Multer.File
@@ -33,7 +55,7 @@ export const launchCoin = async (
   res: Response
 ) => {
   try {
-    const { launchpadConfigKey: configKey, solanaFeePayerWallets } = config
+    const { solanaFeePayerWallets } = config
 
     const {
       name,
@@ -70,15 +92,16 @@ export const launchCoin = async (
       )
     }
 
-    const walletPublicKey = new PublicKey(walletPublicKeyStr)
-
-    const mintKeypair = await getKeypair(logger)
-    const mintPublicKey = mintKeypair.publicKey
-
     const connection = getConnection()
     const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
-    // Create Coin Metadata
+    const walletPublicKey = new PublicKey(walletPublicKeyStr)
+
+    const mintKeypair = await getKeypair(logger)
+    const rewardPoolManager = Keypair.generate()
+    const rewardPoolTokenAccount = Keypair.generate()
+
+    // 1. Create Coin Metadata
     const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
     // Pick a random fee payer to "own" our new coin metadata and pay for the TX
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
@@ -103,60 +126,105 @@ export const launchCoin = async (
     }
     const metadataUri = await umi.uploader.uploadJson(metadata)
 
-    // Set up our pool
-    const poolConfig = await dbcClient.pool.createPoolWithFirstBuy({
-      createPoolParam: {
-        config: new PublicKey(configKey),
-        name,
-        symbol,
-        uri: metadataUri,
-        poolCreator: walletPublicKey,
-        baseMint: mintPublicKey,
-        payer: walletPublicKey
-      },
-      firstBuyParam: initialBuyAmountAudio
-        ? {
-            buyer: walletPublicKey,
-            receiver: walletPublicKey,
-            buyAmount: new BN(initialBuyAmountAudio), // Needs to already be formatted with correct decimals
-            minimumAmountOut: new BN(0), // No slippage protection for initial buy
-            referralTokenAccount: null // No referral for creator's initial buy
-          }
-        : undefined
+    // 2. Create a config for the new coin
+    const configKeypair = Keypair.generate()
+    const createConfigTx = await dbcClient.partner.createConfig(
+      makeCurve({
+        payer: mintKeypair,
+        configKey: configKeypair,
+        partner: walletPublicKey,
+        rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
+      })
+    )
+    const configRecentBlockhash = await connection.getLatestBlockhash()
+    const configMessage = new TransactionMessage({
+      recentBlockhash: configRecentBlockhash.blockhash,
+      instructions: createConfigTx.instructions,
+      payerKey: feePayer.publicKey
     })
+    const configTransaction = new VersionedTransaction(
+      configMessage.compileToV0Message()
+    )
+    configTransaction.sign([feePayer, configKeypair])
+    await sendTransactionWithRetries({
+      transaction: configTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: { ...configRecentBlockhash, signature: '' },
+      logger
+    })
+
+    // 3. Create a reward pool for the new coin
+    const rewardPoolTx = await createRewardPool({
+      connection,
+      rewardManager: rewardPoolManager,
+      tokenAccount: rewardPoolTokenAccount,
+      feePayer,
+      mint: mintKeypair.publicKey
+    })
+    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
+    const rewardPoolMessage = new TransactionMessage({
+      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
+      instructions: rewardPoolTx.instructions,
+      payerKey: feePayer.publicKey
+    })
+    const rewardPoolTransaction = new VersionedTransaction(
+      rewardPoolMessage.compileToV0Message()
+    )
+    await sendTransactionWithRetries({
+      transaction: rewardPoolTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: { ...rewardPoolRecentBlockhash, signature: '' },
+      logger
+    })
+
+    // 4. Create pool and first buy
+    const { createPoolTx, swapBuyTx } =
+      await dbcClient.pool.createPoolWithFirstBuy({
+        createPoolParam: {
+          config: configKeypair.publicKey,
+          name,
+          symbol,
+          uri: metadataUri,
+          poolCreator: walletPublicKey,
+          baseMint: mintKeypair.publicKey,
+          payer: walletPublicKey
+        },
+        firstBuyParam: initialBuyAmountAudio
+          ? {
+              buyer: walletPublicKey,
+              receiver: walletPublicKey,
+              buyAmount: new BN(initialBuyAmountAudio), // Needs to already be formatted with correct decimals
+              minimumAmountOut: new BN(0), // No slippage protection for initial buy
+              referralTokenAccount: null // No referral for creator's initial buy
+            }
+          : undefined
+      })
 
     /*
      * Prepare the transactions to be signed by the client
+     * We partially sign so that the user can sign with their wallet and send the transactions
      */
-
-    // Create pool transaction
-    const createPoolTx = poolConfig.createPoolTx
     createPoolTx.feePayer = walletPublicKey
     createPoolTx.recentBlockhash = (
       await connection.getLatestBlockhash()
     ).blockhash
-    // We need to partial sign with the mint keypair that's only accessible here
-    // The client does the final signing with the wallet keypair & will send/confirm the transactions
     createPoolTx.partialSign(mintKeypair)
-
-    // First buy transaction
-    const firstBuyTx = poolConfig.swapBuyTx
-    if (firstBuyTx) {
-      firstBuyTx.recentBlockhash = (
+    if (swapBuyTx) {
+      swapBuyTx.recentBlockhash = (
         await connection.getLatestBlockhash()
       ).blockhash
-      firstBuyTx.feePayer = walletPublicKey
+      swapBuyTx.feePayer = walletPublicKey
     }
 
     return res.status(200).send({
-      mintPublicKey: mintPublicKey.toBase58(),
+      mintPublicKey: mintKeypair.publicKey.toBase58(),
       imageUri,
       createPoolTx: Buffer.from(
         createPoolTx.serialize({ requireAllSignatures: false })
       ).toString('base64'),
-      firstBuyTx: firstBuyTx
+      firstBuyTx: swapBuyTx
         ? Buffer.from(
-            firstBuyTx.serialize({ requireAllSignatures: false })
+            swapBuyTx.serialize({ requireAllSignatures: false })
           ).toString('base64')
         : undefined,
       metadataUri
