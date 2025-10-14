@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from 'react'
 
+import { transformArtistCoinToTokenInfo } from '@audius/common/api'
 import type { TokenInfo } from '@audius/common/store'
 import {
   IconCaretDown,
@@ -15,15 +16,11 @@ import { useTheme } from '@emotion/react'
 import Select, { components } from 'react-select'
 import type { SingleValue, OptionProps, InputProps } from 'react-select'
 import { useDebounce } from 'react-use'
+import { useArtistCoins } from '~/api/tan-query/coins/useArtistCoins'
 
-import {
-  GetCoinsSortMethodEnum,
-  useArtistCoins
-} from '~/api/tan-query/coins/useArtistCoins'
 import zIndex from 'utils/zIndex'
 
 import { TokenIcon } from '../TokenIcon'
-import { transformArtistCoinToTokenInfo } from '@audius/common/api'
 
 const DEBOUNCE_MS = 300
 
