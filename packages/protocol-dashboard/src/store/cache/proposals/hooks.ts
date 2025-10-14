@@ -150,7 +150,15 @@ export function fetchRecentProposals(): ThunkAction<
 
     const proposals = allProposals.filter(Boolean) as Proposal[]
 
-    dispatch(setRecentProposals({ proposals }))
+    // Sort the 5 recent proposals by evaluatedBlock timestamp (executed date) in descending order (newest first)
+    // For in-progress proposals or those without evaluatedBlock, use submissionBlockNumber as fallback
+    const sortedProposals = proposals.sort((a, b) => {
+      const timestampA = a.evaluatedBlock?.timestamp || a.submissionBlockNumber
+      const timestampB = b.evaluatedBlock?.timestamp || b.submissionBlockNumber
+      return timestampB - timestampA // Descending order (newest first)
+    })
+
+    dispatch(setRecentProposals({ proposals: sortedProposals }))
   }
 }
 
