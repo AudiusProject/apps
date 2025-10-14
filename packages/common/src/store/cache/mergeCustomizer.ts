@@ -28,12 +28,6 @@ export const mergeCustomizer = (objValue: any, srcValue: any, key: string) => {
     return objValue
   }
 
-  // Not every user request provides collectible lists,
-  // so always prefer it's existence, starting with latest
-  if (key === 'collectibleList' || key === 'solanaCollectibleList') {
-    return srcValue || objValue
-  }
-
   if (key === 'stream_conditions' || key === 'download_conditions') {
     return srcValue || objValue
   }

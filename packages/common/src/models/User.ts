@@ -43,7 +43,6 @@ export type UserMetadata = {
   follower_count: number
   handle_lc: string
   handle: string
-  has_collectibles: boolean
   is_deactivated: boolean
   is_verified: boolean
   profile_type: Nullable<'label'>

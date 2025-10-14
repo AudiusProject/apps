@@ -813,9 +813,7 @@ class ProfilePageClassComponent extends PureComponent<
         updatedProfilePicture
       : false
 
-    const dropdownDisabled =
-      activeTab === ProfilePageTabs.REPOSTS ||
-      activeTab === ProfilePageTabs.COLLECTIBLES
+    const dropdownDisabled = activeTab === ProfilePageTabs.REPOSTS
     const following = !!profile && profile.does_current_user_follow
 
     const childProps = {
@@ -1079,7 +1077,6 @@ function mapDispatchToProps(dispatch: Dispatch, props: RouteComponentProps) {
             | 'albums'
             | 'reposts'
             | 'playlists'
-            | 'collectibles'
         })
         dispatch(trackEvent)
       }

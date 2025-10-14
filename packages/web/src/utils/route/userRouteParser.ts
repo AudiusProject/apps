@@ -61,23 +61,8 @@ export const parseUserRoute = (route: string): UserRouteParams => {
       tab === 'tracks' ||
       tab === 'albums' ||
       tab === 'playlists' ||
-      tab === 'reposts' ||
-      tab === 'collectibles'
+      tab === 'reposts'
     ) {
-      return { handle, userId: null, tab }
-    }
-  }
-
-  const profilePageTabIdMatch = matchPath<{
-    handle: string
-    tab: ProfilePageTabRoute
-  }>(route, {
-    path: `${PROFILE_PAGE}/:tab/:id`,
-    exact: true
-  })
-  if (profilePageTabIdMatch) {
-    const { handle, tab } = profilePageTabIdMatch.params
-    if (tab === 'collectibles') {
       return { handle, userId: null, tab }
     }
   }

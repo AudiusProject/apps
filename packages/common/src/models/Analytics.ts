@@ -213,7 +213,6 @@ export enum Name {
   TRACK_UPLOAD_REJECTED = 'Track Upload: Rejected',
 
   // Gated Track Uploads
-  TRACK_UPLOAD_COLLECTIBLE_GATED = 'Track Upload: Collectible Gated',
   TRACK_UPLOAD_FOLLOW_GATED = 'Track Upload: Follow Gated',
   TRACK_UPLOAD_TIP_GATED = 'Track Upload: Tip Gated',
   TRACK_UPLOAD_USDC_GATED = 'Track Upload: USDC Gated',
@@ -248,7 +247,6 @@ export enum Name {
   // Unlocked Gated Tracks
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
   USDC_PURCHASE_GATED_COLLECTION_UNLOCKED = 'USDC Gated: Collection Unlocked',
-  COLLECTIBLE_GATED_TRACK_UNLOCKED = 'Collectible Gated: Track Unlocked',
   FOLLOW_GATED_TRACK_UNLOCKED = 'Follow Gated: Track Unlocked',
   TIP_GATED_TRACK_UNLOCKED = 'Tip Gated: Track Unlocked',
   TOKEN_GATED_TRACK_UNLOCKED = 'Token Gated: Track Unlocked',
@@ -1179,14 +1177,6 @@ type TrackUploadViewTrackPage = {
   uploadType: string
 }
 
-// Gated Track Uploads
-type TrackUploadCollectibleGated = {
-  eventName: Name.TRACK_UPLOAD_COLLECTIBLE_GATED
-  kind: 'tracks'
-  downloadable: boolean
-  lossless: boolean
-}
-
 type TrackUploadFollowGated = {
   eventName: Name.TRACK_UPLOAD_FOLLOW_GATED
   kind: 'tracks'
@@ -1323,11 +1313,6 @@ type USDCGatedTrackUnlocked = {
   count: number
 }
 
-type CollectibleGatedTrackUnlocked = {
-  eventName: Name.COLLECTIBLE_GATED_TRACK_UNLOCKED
-  count: number
-}
-
 type FollowGatedTrackUnlocked = {
   eventName: Name.FOLLOW_GATED_TRACK_UNLOCKED
   trackId: number
@@ -1460,7 +1445,7 @@ type NotificationsToggleSettings = {
 // Profile
 type ProfilePageTabClick = {
   eventName: Name.PROFILE_PAGE_TAB_CLICK
-  tab: 'tracks' | 'albums' | 'reposts' | 'playlists' | 'collectibles'
+  tab: 'tracks' | 'albums' | 'reposts' | 'playlists'
 }
 type ProfilePageSort = {
   eventName: Name.PROFILE_PAGE_SORT
@@ -3098,7 +3083,6 @@ export type AllTrackingEvents =
   | TrackUploadStartUploading
   | TrackUploadTrackUploading
   | TrackUploadCompleteUpload
-  | TrackUploadCollectibleGated
   | TrackUploadFollowGated
   | TrackUploadTipGated
   | TrackUploadUSDCGated
@@ -3126,7 +3110,6 @@ export type AllTrackingEvents =
   | TrackUploadShareWithFans
   | TrackUploadViewTrackPage
   | USDCGatedTrackUnlocked
-  | CollectibleGatedTrackUnlocked
   | FollowGatedTrackUnlocked
   | TipGatedTrackUnlocked
   | TokenGatedTrackUnlocked

@@ -131,7 +131,6 @@ class EntityType(str, Enum):
     COMMENT_NOTIFICATION_SETTING = "CommentNotificationSetting"
     ENCRYPTED_EMAIL = "EncryptedEmail"
     EMAIL_ACCESS = "EmailAccess"
-    COLLECTIBLES = "Collectibles"
     EVENT = "Event"
     SHARE = "Share"
 
@@ -177,7 +176,6 @@ class RecordDict(TypedDict):
 
 class ExistingRecordDict(TypedDict):
     AssociatedWallet: Dict[str, AssociatedWallet]
-    Collectibles: Dict[int, Collectibles]
     Playlist: Dict[int, Playlist]
     Track: Dict[int, Track]
     UserWallet: Dict[str, User]
@@ -219,7 +217,6 @@ class EntitiesToFetchDict(TypedDict):
     PlaylistRoute: Set[int]
     UserEvent: Set[int]
     AssociatedWallet: Set[int]
-    Collectibles: Set[int]
     UserWallet: Set[str]
     Comment: Set[int]
     CommentReaction: Set[Tuple]

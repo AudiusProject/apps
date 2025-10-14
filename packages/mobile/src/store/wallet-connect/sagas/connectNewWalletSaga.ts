@@ -64,16 +64,12 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
       const isNewWallet = yield* checkIsNewWallet(public_key, Chain.Sol)
       if (!isNewWallet) return
 
-      const { balance, collectibleCount } = yield* getWalletInfo(
-        public_key,
-        Chain.Sol
-      )
+      const { balance } = yield* getWalletInfo(public_key, Chain.Sol)
       yield* put(
         setIsConnectingWallet({
           wallet: public_key,
           chain: Chain.Sol,
-          balance: BigInt(balance.toString()),
-          collectibleCount
+          balance: BigInt(balance.toString())
         })
       )
 
@@ -112,17 +108,13 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
       const isNewWallet = yield* checkIsNewWallet(publicKeyEncoded, Chain.Sol)
       if (!isNewWallet) return
 
-      const { balance, collectibleCount } = yield* getWalletInfo(
-        publicKeyEncoded,
-        Chain.Sol
-      )
+      const { balance } = yield* getWalletInfo(publicKeyEncoded, Chain.Sol)
 
       yield* put(
         setIsConnectingWallet({
           wallet: publicKeyEncoded,
           chain: Chain.Sol,
-          balance: BigInt(balance.toString()),
-          collectibleCount
+          balance: BigInt(balance.toString())
         })
       )
 
@@ -140,17 +132,13 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
       const isNewWallet = yield* checkIsNewWallet(wallet, Chain.Eth)
       if (!isNewWallet) return
 
-      const { balance, collectibleCount } = yield* getWalletInfo(
-        wallet,
-        Chain.Eth
-      )
+      const { balance } = yield* getWalletInfo(wallet, Chain.Eth)
 
       yield* put(
         setIsConnectingWallet({
           wallet,
           chain: Chain.Eth,
-          balance: BigInt(balance.toString()),
-          collectibleCount
+          balance: BigInt(balance.toString())
         })
       )
 
