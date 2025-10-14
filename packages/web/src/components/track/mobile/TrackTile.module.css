@@ -37,7 +37,7 @@
 }
 
 .container .artworkIcon path {
-  fill: var(--harmony-white);
+  fill: var(--harmony-static-white);
 }
 
 .container:active {
