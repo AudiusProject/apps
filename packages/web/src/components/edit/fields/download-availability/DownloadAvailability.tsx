@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import {
   AccessConditions,
   DownloadTrackAvailabilityType,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentUSDCPurchaseGated
@@ -69,9 +68,7 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
   const isSpecialAccess =
     isContentFollowGated(streamConditions) ||
     isContentTipGated(streamConditions)
-  const isCollectibleGated = isContentCollectibleGated(streamConditions)
-  const shouldRenderCallout =
-    isUsdcGated || isSpecialAccess || isCollectibleGated
+  const shouldRenderCallout = isUsdcGated || isSpecialAccess
 
   const getCalloutMessage = useCallback(() => {
     if (isUsdcGated) {
@@ -80,17 +77,12 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
     if (isSpecialAccess) {
       return messages.callout.specialAccess
     }
-    if (isCollectibleGated) {
-      return messages.callout.collectibleGated
-    }
     return ''
   }, [
-    isCollectibleGated,
     isSpecialAccess,
     isUsdcGated,
     messages.callout.premium,
-    messages.callout.specialAccess,
-    messages.callout.collectibleGated
+    messages.callout.specialAccess
   ])
 
   const handleCalloutClick = useCallback(() => {

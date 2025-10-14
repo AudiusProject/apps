@@ -2,7 +2,6 @@ import { License } from '~/utils/creativeCommons'
 
 import { DeepOmit, Nullable } from '../utils/typeUtils'
 
-import { Chain } from './Chain'
 import { Favorite } from './Favorite'
 import { CID, ID, UID } from './Identifiers'
 import { CoverArtSizes, CoverArtSizesCids } from './ImageSizes'
@@ -45,36 +44,6 @@ export type RemixOf = {
 }
 
 // Gated content
-export type EthTokenStandard = 'ERC721' | 'ERC1155'
-
-export type AccessConditionsEthNFTCollection = {
-  chain: Chain.Eth
-  standard: EthTokenStandard
-  address: string
-  name: string
-  slug: string
-  imageUrl: Nullable<string>
-  externalLink: Nullable<string>
-}
-
-export type AccessConditionsSolNFTCollection = {
-  chain: Chain.Sol
-  address: string
-  name: string
-  imageUrl: Nullable<string>
-  externalLink: Nullable<string>
-}
-
-// nft_collection can be undefined during upload flow when user has set track to
-// collectible-gated but hasn't specified collection yet, but should always be defined
-// after user has set the collection.
-export type CollectibleGatedConditions = {
-  nft_collection:
-    | AccessConditionsEthNFTCollection
-    | AccessConditionsSolNFTCollection
-    | undefined
-}
-
 export type FollowGatedConditions = { follow_user_id: number }
 
 export type TipGatedConditions = { tip_user_id: number }
@@ -95,7 +64,6 @@ export type USDCPurchaseConditions = {
 }
 
 export type AccessConditions =
-  | CollectibleGatedConditions
   | FollowGatedConditions
   | TipGatedConditions
   | USDCPurchaseConditions
@@ -107,7 +75,6 @@ export type AccessPermissions = {
 }
 
 export enum GatedContentType {
-  COLLECTIBLE_GATED = 'collectible gated',
   SPECIAL_ACCESS = 'special access',
   USDC_PURCHASE = 'usdc purchase',
   TOKEN_GATED = 'token gated'
@@ -117,21 +84,9 @@ export enum TrackAccessType {
   PUBLIC = 'public',
   TIP_GATED = 'tip_gated',
   FOLLOW_GATED = 'follow_gated',
-  COLLECTIBLE_GATED = 'collectible_gated',
   USDC_GATED = 'usdc_gated',
   TOKEN_GATED = 'token_gated'
 }
-
-type CollectibleGated = {
-  nft_collection:
-    | AccessConditionsEthNFTCollection
-    | AccessConditionsSolNFTCollection
-}
-
-export const isContentCollectibleGated = (
-  gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is CollectibleGated =>
-  !!gatedConditions && 'nft_collection' in (gatedConditions ?? {})
 
 export const isContentFollowGated = (
   gatedConditions?: Nullable<AccessConditions>
@@ -168,24 +123,6 @@ export type AccessSignature = {
 export type NFTAccessSignature = {
   mp3: AccessSignature
   original: AccessSignature
-}
-
-export type EthCollectionMap = {
-  [slug: string]: {
-    name: string
-    address: string
-    standard: EthTokenStandard
-    img: Nullable<string>
-    externalLink: Nullable<string>
-  }
-}
-
-export type SolCollectionMap = {
-  [mint: string]: {
-    name: string
-    img: Nullable<string>
-    externalLink: Nullable<string>
-  }
 }
 
 export type ResourceContributor = {

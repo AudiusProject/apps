@@ -18,7 +18,6 @@ import styles from './ActionsBar.module.css'
 
 type ActionsBarProps = {
   trackId: ID
-  isCollectible: boolean
   onToggleRepost: () => void
   onToggleFavorite: () => void
   onShare: () => void
@@ -29,7 +28,6 @@ type ActionsBarProps = {
 
 const ActionsBar = ({
   trackId,
-  isCollectible = false,
   onToggleRepost,
   onToggleFavorite,
   onShare,
@@ -71,7 +69,7 @@ const ActionsBar = ({
         isDarkMode={isDarkMode}
         isMatrixMode={isMatrixMode}
         isActive={hasReposted}
-        isDisabled={isOwner || isCollectible}
+        isDisabled={isOwner}
         onClick={onToggleRepost}
         wrapperClassName={styles.icon}
         className={styles.repostButton}
@@ -79,7 +77,7 @@ const ActionsBar = ({
       />
       <FavoriteButton
         isActive={hasSaved}
-        isDisabled={isOwner || isCollectible}
+        isDisabled={isOwner}
         isDarkMode={isDarkMode}
         isMatrixMode={isMatrixMode}
         onClick={onToggleFavorite}
@@ -91,7 +89,6 @@ const ActionsBar = ({
         aria-label='share'
         size='xl'
         color='default'
-        disabled={isCollectible}
         icon={IconShare}
         onClick={onShare}
       />

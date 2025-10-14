@@ -1,7 +1,6 @@
 import { PurchaseableContentMetadata } from '@audius/common/hooks'
 import {
   SquareSizes,
-  isContentCollectibleGated,
   isContentUSDCPurchaseGated,
   Track,
   UserMetadata,
@@ -12,7 +11,6 @@ import {
   Flex,
   Text,
   IconCart,
-  IconCollectible,
   IconComponent,
   IconSparkles
 } from '@audius/harmony'
@@ -28,7 +26,6 @@ import { TrackDogEar } from './TrackDogEar'
 
 const messages = {
   by: 'By',
-  collectibleGated: 'COLLECTIBLE GATED',
   specialAccess: 'SPECIAL ACCESS',
   premiumTrack: (contentType: 'track' | 'album') =>
     `PREMIUM ${contentType.toUpperCase()}`,
@@ -67,16 +64,12 @@ export const LockedContentDetailsTile = ({
   const image = isAlbum ? albumArt : trackArt
 
   const label = `${title} by ${owner.name}`
-  const isCollectibleGated = isContentCollectibleGated(streamConditions)
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
 
   let IconComponent: Nullable<IconComponent>
   let message: Nullable<string>
 
-  if (isCollectibleGated) {
-    IconComponent = IconCollectible
-    message = messages.collectibleGated
-  } else if (isUSDCPurchaseGated) {
+  if (isUSDCPurchaseGated) {
     IconComponent = IconCart
     message = messages.premiumTrack(isAlbum ? 'album' : 'track')
   } else if (isDownloadGated) {

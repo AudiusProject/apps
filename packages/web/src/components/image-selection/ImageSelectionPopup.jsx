@@ -25,7 +25,6 @@ const POPULAR_TERMS = ['neon', 'space', 'beach', 'nature', 'abstract']
 const messages = {
   uploadYourOwn: 'Upload',
   findArtwork: 'Find Artwork',
-  yourCollectibles: 'Your Collectibles',
   suggestionHeader: 'Suggested Searches',
   search: 'Search',
   searchAgain: 'Search Again',

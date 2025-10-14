@@ -513,7 +513,6 @@ const NowPlaying = g(
           ) : null}
           <ActionsBar
             trackId={track_id}
-            isCollectible={false}
             onToggleRepost={toggleRepost}
             onToggleFavorite={toggleFavorite}
             onShare={onShare}

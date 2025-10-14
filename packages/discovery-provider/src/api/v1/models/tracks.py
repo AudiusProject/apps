@@ -321,35 +321,3 @@ track_access_info = ns.model(
         ),
     },
 )
-
-track_signature_data = ns.model(
-    "nft_gated_track_signature_data",
-    {
-        "data": fields.String(required=True),
-        "signature": fields.String(required=True),
-    },
-)
-
-nft_gated_track_signature = ns.model(
-    "nft_gated_track_signature",
-    {
-        "mp3": fields.Nested(
-            track_signature_data,
-            required=True,
-        ),
-        "original": fields.Nested(
-            track_signature_data,
-            required=True,
-        ),
-    },
-)
-
-signature_data_wild = fields.Wildcard(
-    fields.Nested(nft_gated_track_signature, required=True)
-)
-
-nft_gated_track_signature_mapping = WildcardModel(
-    "nft_gated_track_signature_mapping",
-    {"*": signature_data_wild},
-)
-ns.add_model("nft_gated_track_signature_mapping", nft_gated_track_signature_mapping)
