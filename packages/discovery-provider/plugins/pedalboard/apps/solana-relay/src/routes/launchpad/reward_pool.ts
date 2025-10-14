@@ -88,8 +88,8 @@ export const createRewardPool = async ({
     rewardManagerState: rewardManager.publicKey
   })
 
+  // 4. Add senders
   for (const sender of SENDERS) {
-    // 4. Add senders
     transaction.add(
       RewardManagerProgram.createSenderInstruction({
         senderEthAddress: sender.senderEthAddress,
@@ -105,6 +105,14 @@ export const createRewardPool = async ({
   }
 
   // 5. Resign manager
+  transaction.add(
+    RewardManagerProgram.createChangeManagerAccountInstruction({
+      rewardManagerState: rewardManager.publicKey,
+      currentManager: manager.publicKey,
+      newManager: PublicKey.default,
+      rewardManagerProgramId: RewardManagerProgram.programId
+    })
+  )
 
   return transaction
 }
