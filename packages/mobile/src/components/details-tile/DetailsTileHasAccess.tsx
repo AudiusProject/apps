@@ -30,7 +30,6 @@ import { useColor } from 'app/utils/theme'
 
 const messages = {
   unlocked: 'UNLOCKED',
-  collectibleGated: 'COLLECTIBLE GATED',
   specialAccess: 'SPECIAL ACCESS',
   payToUnlock: 'Pay to Unlock',
   coinGated: 'COIN GATED',
@@ -39,11 +38,6 @@ const messages = {
     ` was found in a linked wallet. This ${contentType} is now available.`,
   ownerTokenGated:
     'Fans can unlock access by linking a wallet containing your artist coin',
-  unlockedCollectibleGatedPrefix: 'A Collectible from ',
-  unlockedCollectibleGatedSuffix: (contentType: PurchaseableContentType) =>
-    ` was found in a linked wallet. This ${contentType} is now available.`,
-  ownerCollectibleGatedPrefix:
-    'Users can unlock access by linking a wallet containing a collectible from ',
   unlockedFollowGatedPrefix: 'Thank you for following ',
   unlockedFollowGatedSuffix: (contentType: PurchaseableContentType) =>
     `! This ${contentType} is now available.`,

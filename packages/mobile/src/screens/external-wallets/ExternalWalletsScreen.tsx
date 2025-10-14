@@ -21,7 +21,7 @@ const { fetchAssociatedWallets } = tokenDashboardPageActions
 const messages = {
   title: 'Manage Wallets',
   subtitle: 'Connect Additional Wallets With Your Account',
-  text: 'Show off your NFT Collectibles and flaunt your $AUDIO with a VIP badge on your profile.',
+  text: 'Show off your artist coins and flaunt your $AUDIO with a VIP badge on your profile.',
   linkedWallets: 'Linked Wallets',
   audio: '$AUDIO'
 }

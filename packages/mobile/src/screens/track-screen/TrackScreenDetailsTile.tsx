@@ -112,7 +112,6 @@ const messages = {
   track: 'track',
   podcast: 'podcast',
   remix: 'remix',
-  collectibleGated: 'collectible gated',
   specialAccess: 'special access',
   premiumTrack: 'premium track',
   coinGated: 'coin gated',

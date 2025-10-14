@@ -52,10 +52,6 @@ const messages = {
   followArtist: 'Follow Artist',
   sendTip: 'Send Tip',
   buy: (price: string) => `Buy ${price}`,
-  lockedCollectibleGated:
-    'To unlock this track, you must link a wallet containing a collectible from:',
-  unlockingCollectibleGatedPrefix: 'A Collectible from ',
-  unlockingCollectibleGatedSuffix: ' was found in a linked wallet.',
   lockedFollowGatedPrefix: 'Follow ',
   unlockingFollowGatedPrefix: 'Thank you for following ',
   unlockingFollowGatedSuffix: '!',
