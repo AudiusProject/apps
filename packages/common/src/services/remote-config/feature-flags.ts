@@ -38,7 +38,8 @@ export enum FeatureFlags {
   ARTIST_COINS = 'artist_coins',
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
   TOKEN_GATING = 'token_gating',
-  LAUNCHPAD_VERIFICATION = 'launchpad_verification'
+  LAUNCHPAD_VERIFICATION = 'launchpad_verification',
+  EXPLORE_ARTIST_COIN_TRACKS = 'explore_artist_coin_tracks'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -92,5 +93,6 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.SEARCH_EXPLORE_GOODIES]: false,
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.TOKEN_GATING]: true,
-  [FeatureFlags.LAUNCHPAD_VERIFICATION]: true
+  [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
+  [FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS]: false
 }
