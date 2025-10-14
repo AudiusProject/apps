@@ -12,19 +12,8 @@ import {
   recordOpen,
   recordError
 } from '../analytics/analytics'
+import { ID_ROUTE, HASH_ID_ROUTE } from '../routes'
 import {
-  ID_ROUTE,
-  HASH_ID_ROUTE,
-  COLLECTIBLES_ROUTE,
-  COLLECTIBLE_ID_ROUTE,
-  COLLECTIBLES_DISCORD_ROUTE,
-  COLLECTIBLE_ID_DISCORD_ROUTE,
-  AUDIO_NFT_PLAYLIST_ROUTE,
-  AUDIO_NFT_PLAYLIST_DISCORD_ROUTE
-} from '../routes'
-import {
-  getCollectible,
-  getCollectibles,
   getCollection,
   getCollectionWithHashId,
   getTrack,
@@ -42,7 +31,6 @@ import { stripLeadingSlash } from '../util/stringUtil'
 import styles from './App.module.css'
 import transitions from './AppTransitions.module.css'
 import { CardContextProvider } from './card/Card'
-import CollectiblesPlayerContainer from './collectibles/CollectiblesPlayerContainer'
 import CollectionPlayerContainer from './collection/CollectionPlayerContainer'
 import DeletedContent from './deleted/DeletedContent'
 import Error from './error/Error'
@@ -58,15 +46,13 @@ const DEFAULT_DOMINANT_COLOR = '#7e1bcc'
 
 const RequestType = Object.seal({
   TRACK: 'track',
-  COLLECTION: 'collection',
-  COLLECTIBLES: 'collectibles'
+  COLLECTION: 'collection'
 })
 
 const pathComponentRequestTypeMap = {
   playlist: RequestType.COLLECTION,
   album: RequestType.COLLECTION,
-  track: RequestType.TRACK,
-  collectibles: RequestType.COLLECTIBLES
+  track: RequestType.TRACK
 }
 
 export const PlayerFlavor = Object.seal({
@@ -126,29 +112,6 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
         isTwitter
       }
     }
-    case AUDIO_NFT_PLAYLIST_ROUTE:
-    case AUDIO_NFT_PLAYLIST_DISCORD_ROUTE:
-    case COLLECTIBLES_ROUTE:
-    case COLLECTIBLES_DISCORD_ROUTE: {
-      const { handle, isTwitter } = matches
-      return {
-        requestType,
-        playerFlavor,
-        handle,
-        isTwitter
-      }
-    }
-    case COLLECTIBLE_ID_ROUTE:
-    case COLLECTIBLE_ID_DISCORD_ROUTE: {
-      const { handle, collectibleId, isTwitter } = matches
-      return {
-        requestType,
-        playerFlavor,
-        handle,
-        collectibleId,
-        isTwitter
-      }
-    }
     default:
       return null
   }
@@ -164,7 +127,6 @@ const App = (props) => {
 
   const [tracksResponse, setTracksResponse] = useState(null)
   const [collectionsResponse, setCollectionsResponse] = useState(null)
-  const [collectiblesResponse, setCollectiblesResponse] = useState(null)
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(false)
   const onGoingRequest = useRef(false)
   const [dominantColor, setDominantColor] = useState(null)
@@ -268,31 +230,6 @@ const App = (props) => {
             primary: color,
             secondary: shadeColor(color, -20)
           })
-        }
-      } else if (requestType === RequestType.COLLECTIBLES) {
-        let collectibleData
-        if (request.collectibleId) {
-          collectibleData = await getCollectible(
-            request.handle,
-            request.collectibleId
-          )
-        } else {
-          collectibleData = await getCollectibles(request.handle)
-        }
-
-        if (!collectibleData) {
-          setDid404(true)
-          setCollectiblesResponse(null)
-        } else {
-          setDid404(false)
-          setCollectiblesResponse(collectibleData)
-          recordOpen(
-            request.collectibleId,
-            collectibleData.name,
-            request.handle,
-            request.url
-          )
-          setDominantColor({ primary: '#fff' })
         }
       }
 
@@ -408,14 +345,6 @@ const App = (props) => {
                 rowBackgroundColor={dominantColor.secondary}
               />
             )}
-            {collectiblesResponse && (
-              <CollectiblesPlayerContainer
-                collectiblesInfo={collectiblesResponse}
-                flavor={requestState.playerFlavor}
-                isTwitter={requestState.isTwitter}
-                backgroundColor={dominantColor.primary}
-              />
-            )}
           </>
         </CSSTransition>
       )
@@ -425,10 +354,7 @@ const App = (props) => {
   }
 
   const renderPausePopover = () => {
-    if (
-      !requestState ||
-      (!tracksResponse && !collectionsResponse && !collectiblesResponse)
-    ) {
+    if (!requestState || (!tracksResponse && !collectionsResponse)) {
       return null
     }
 
