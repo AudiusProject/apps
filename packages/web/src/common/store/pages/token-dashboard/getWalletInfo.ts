@@ -15,7 +15,5 @@ export function* getWalletInfo(walletAddress: string, chain: Chain) {
     [walletAddress]
   )
 
-  const collectibleCount = 0
-
-  return { balance, collectibleCount }
+  return { balance }
 }

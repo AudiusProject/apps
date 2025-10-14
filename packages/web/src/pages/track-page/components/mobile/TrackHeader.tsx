@@ -59,7 +59,6 @@ const messages = {
   play: 'PLAY',
   preview: 'PREVIEW',
   pause: 'PAUSE',
-  collectibleGated: 'COLLECTIBLE GATED',
   premiumTrack: 'PREMIUM TRACK',
   specialAccess: 'SPECIAL ACCESS',
   coinGated: 'COIN GATED',

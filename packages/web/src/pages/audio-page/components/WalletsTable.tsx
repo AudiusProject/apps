@@ -32,7 +32,6 @@ const WALLET_COUNT_LIMIT = 5
 
 const messages = {
   copied: 'Copied To Clipboard!',
-  collectibles: 'COLLECTIBLES',
   audio: '$AUDIO',
   copy: 'Copy Wallet Address',
   remove: 'Remove Wallet',
@@ -86,7 +85,6 @@ export const WalletTableRow = ({
       includeStaked: true
     })
 
-  const collectibleCount = 0
   const isPending = isBalancePending || isMutationPending
 
   return (
@@ -103,9 +101,7 @@ export const WalletTableRow = ({
           size='m'
           strength='strong'
           css={{ flex: 1, textAlign: 'right' }}
-        >
-          {collectibleCount}
-        </Text>
+        ></Text>
       ) : null}
       <div className={cn(styles.audioBalance, styles.walletText)}>
         {!isPending ? (
@@ -156,7 +152,6 @@ const WalletsTable = ({
   showWalletActionMenus = false,
   className
 }: WalletsTableProps) => {
-  const isMobile = useIsMobile()
   const wm = useWithMobileStyle(styles.mobile)
 
   const { data: connectedWallets } = useConnectedWallets()
@@ -173,11 +168,6 @@ const WalletsTable = ({
         <Text variant='label' size='m' strength='strong' color='subdued'>
           {`(${numConnectedWallets}/${WALLET_COUNT_LIMIT})`}
         </Text>
-        {!isMobile && (
-          <Text variant='label' size='m' strength='strong' color='subdued'>
-            {messages.collectibles}
-          </Text>
-        )}
         <Text variant='label' size='m' strength='strong' color='subdued'>
           {messages.audio}
         </Text>

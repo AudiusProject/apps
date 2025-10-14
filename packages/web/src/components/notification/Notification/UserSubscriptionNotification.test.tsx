@@ -77,7 +77,6 @@ const mockUser = {
   profile_picture_sizes: '01JWEPE58J4MS4JJXE720W939N',
   profile_picture_cids: null,
   profile_picture_legacy: null,
-  has_collectibles: false,
   allow_ai_attribution: false,
   artist_pick_track_id: null,
   profile_picture: {

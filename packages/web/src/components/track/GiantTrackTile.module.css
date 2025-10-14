@@ -112,13 +112,6 @@
   gap: var(--harmony-unit-4);
 }
 
-.collectibleImage {
-  width: var(--harmony-unit-8);
-  height: var(--harmony-unit-8);
-  border: 1px solid var(--harmony-n-150);
-  border-radius: var(--harmony-unit-1);
-}
-
 .gatedContentDescriptionContainer {
   display: flex;
   flex-direction: column;
@@ -137,20 +130,6 @@
 .gatedContentSectionButton {
   display: flex;
   width: 250px;
-}
-
-.collectibleName {
-  color: var(--harmony-secondary);
-}
-
-.collectibleName:hover {
-  color: var(--harmony-secondary);
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.collectibleName:active {
-  color: var(--harmony-s-500);
 }
 
 .gatedContentIcon path {
@@ -203,10 +182,6 @@
   overflow-wrap: anywhere;
 }
 
-.collectibleGatedDescription {
-  margin-left: var(--harmony-unit-8);
-}
-
 .collectionIconsContainer {
   display: flex;
   align-items: center;
@@ -250,9 +225,5 @@
 
   .gatedContentSectionButton {
     width: 100%;
-  }
-
-  .collectibleGatedDescription {
-    margin-left: 0;
   }
 }

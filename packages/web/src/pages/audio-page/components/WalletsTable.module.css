@@ -47,11 +47,6 @@
   flex-basis: 100px;
 }
 
-.collectibleCount {
-  flex: 1;
-  text-align: right;
-}
-
 .audioBalance {
   flex: 0 0 100px;
   text-align: right;

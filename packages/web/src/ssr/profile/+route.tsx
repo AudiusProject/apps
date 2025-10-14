@@ -6,8 +6,7 @@ export default makePageRoute(
     '/@handle/tracks',
     '/@handle/albums',
     '/@handle/playlists',
-    '/@handle/reposts',
-    '/@handle/collectibles'
+    '/@handle/reposts'
   ],
   'Profile Page'
 )

@@ -28,8 +28,7 @@ function* fetchEthWalletInfo(wallets: string[]) {
 
   return wallets.map((_, idx) => ({
     ...ethWalletBalances[idx],
-    balance: BigInt(ethWalletBalances[idx].balance.toString()),
-    collectibleCount: 0
+    balance: BigInt(ethWalletBalances[idx].balance.toString())
   }))
 }
 
@@ -70,8 +69,6 @@ function* fetchAccountAssociatedWallets() {
       associatedWallets.sol_wallets ?? []
     )
 
-    // Put balances first w/o collectibles
-
     yield* put(
       setAssociatedWallets({
         associatedWallets: ethWalletBalances,
@@ -80,10 +77,7 @@ function* fetchAccountAssociatedWallets() {
     )
     yield* put(
       setAssociatedWallets({
-        associatedWallets: splWalletBalances.map((b) => ({
-          ...b,
-          collectibleCount: 0
-        })),
+        associatedWallets: splWalletBalances,
         chain: Chain.Sol
       })
     )

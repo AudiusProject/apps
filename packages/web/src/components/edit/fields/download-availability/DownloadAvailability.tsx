@@ -44,9 +44,6 @@ const getMessages = (props: DownloadAvailabilityProps) => ({
     specialAccess: `You're ${
       props.isUpload ? 'uploading' : 'editing'
     } a Special Access track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
-    collectibleGated: `You're ${
-      props.isUpload ? 'uploading' : 'editing'
-    } a Collectible Gated track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
     priceAndAudience: 'Price & Audience Settings'
   }
 })

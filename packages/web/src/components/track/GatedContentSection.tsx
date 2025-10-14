@@ -99,7 +99,6 @@ type GatedContentAccessSectionProps = {
   streamConditions: AccessConditions
   followee: Nullable<User>
   tippedUser: Nullable<User>
-  goToCollection: () => void
   isOwner: boolean
   className?: string
   buttonClassName?: string
@@ -112,7 +111,6 @@ const LockedGatedContentSection = ({
   streamConditions,
   followee,
   tippedUser,
-  goToCollection,
   className,
   buttonClassName,
   source
@@ -402,7 +400,6 @@ const UnlockingGatedContentSection = ({
   streamConditions,
   followee,
   tippedUser,
-  goToCollection,
   className
 }: Omit<
   GatedContentAccessSectionProps,
@@ -475,7 +472,6 @@ const UnlockedGatedContentSection = ({
   streamConditions,
   followee,
   tippedUser,
-  goToCollection,
   isOwner,
   trackOwner,
   className
@@ -652,10 +648,6 @@ export const GatedContentSection = ({
     [styles.hide]: isLoading
   }
 
-  const handleGoToCollection = useCallback(() => {
-    // No-op: collectibles gating removed
-  }, [])
-
   if (!streamConditions) return null
   if (!shouldDisplay) return null
 
@@ -669,7 +661,6 @@ export const GatedContentSection = ({
           streamConditions={streamConditions}
           followee={followee}
           tippedUser={tippedUser}
-          goToCollection={handleGoToCollection}
           isOwner={isOwner}
           className={className}
           trackOwner={trackOwner}
@@ -688,7 +679,6 @@ export const GatedContentSection = ({
           streamConditions={streamConditions}
           followee={followee}
           tippedUser={tippedUser}
-          goToCollection={handleGoToCollection}
           isOwner={isOwner}
           className={className}
         />
@@ -705,7 +695,6 @@ export const GatedContentSection = ({
         streamConditions={streamConditions}
         followee={followee}
         tippedUser={tippedUser}
-        goToCollection={handleGoToCollection}
         isOwner={isOwner}
         className={cn(styles.gatedContentSectionLocked, className)}
         buttonClassName={buttonClassName}
