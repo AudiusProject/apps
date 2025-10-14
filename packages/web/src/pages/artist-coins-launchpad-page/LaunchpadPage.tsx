@@ -16,7 +16,13 @@ import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
 import { route, shortenSPLAddress } from '@audius/common/utils'
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
-import { Flex, IconArtistCoin, IconCheck, Text } from '@audius/harmony'
+import {
+  Flex,
+  IconArtistCoin,
+  IconCheck,
+  IconClose,
+  Text
+} from '@audius/harmony'
 import { solana } from '@reown/appkit/networks'
 import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useFormikContext } from 'formik'
@@ -458,7 +464,9 @@ export const LaunchpadPage = () => {
   useEffect(() => {
     if (isFirstBuyError) {
       setIsModalOpen(false)
-      toast(messages.errors.firstBuyFailedToast)
+      toast(messages.errors.firstBuyFailedToast, Infinity, {
+        rightIcon: IconClose
+      })
     }
   }, [isFirstBuyError, toast])
 
@@ -466,7 +474,9 @@ export const LaunchpadPage = () => {
   useEffect(() => {
     if (isSwapRetryError) {
       // Show error toast but keep modal open for retry
-      toast(messages.errors.firstBuyFailed)
+      toast(messages.errors.firstBuyFailed, Infinity, {
+        rightIcon: IconClose
+      })
     }
   }, [isSwapRetryError, toast])
 
@@ -480,7 +490,9 @@ export const LaunchpadPage = () => {
         getLastConnectedSolWallet(connectedWallets)
 
       if (!currentUser || !connectedWallet) {
-        toast(messages.errors.unknownError)
+        toast(messages.errors.unknownError, Infinity, {
+          rightIcon: IconClose
+        })
         reportToSentry({
           error: new Error(
             'Unable to submit launchpad form. No user or connected wallet found'
@@ -525,7 +537,9 @@ export const LaunchpadPage = () => {
           })
         } else {
           setIsModalOpen(false)
-          toast(messages.errors.unknownError)
+          toast(messages.errors.unknownError, Infinity, {
+            rightIcon: IconClose
+          })
           reportToSentry({
             error: new Error(
               'First buy retry failed. No mint address or pay amount found.'
@@ -570,7 +584,7 @@ export const LaunchpadPage = () => {
 
   // Redirect if user is not verified or already has an artist coin
   if (hasExistingArtistCoin && isLaunchpadVerificationEnabled) {
-    return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
+    // return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
   }
 
   return (
