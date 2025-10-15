@@ -16,7 +16,7 @@ const messages = {
   pricePerCoin: 'Price',
   holdersOnAudius: 'Holders on Audius',
   uniqueHolders: 'Unique Holders',
-  totalVolume: 'Volume (All Time)',
+  totalVolume: 'Volume (All-Time)',
   marketCap: 'Market Cap',
   graduationProgress: 'Graduation Progress'
 }
@@ -62,14 +62,14 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
       `$${formatCount(coin.displayMarketCap, 2)}`,
       messages.marketCap
     ),
+    createMetric(
+      `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      messages.totalVolume
+    ),
     createMetric(formatCount(coin.holder), messages.uniqueHolders),
     createMetric(
       `${Math.round((coin.dynamicBondingCurve?.curveProgress ?? 0) * 100)}%`,
       messages.graduationProgress
-    ),
-    createMetric(
-      `$${formatCount(coin.totalVolumeUSD, 2)}`,
-      messages.totalVolume
     )
   ]
 
