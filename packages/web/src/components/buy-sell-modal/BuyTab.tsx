@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
+  TEMP_ARTIST_COINS_PAGE_SIZE,
   transformArtistCoinsToTokenInfoMap,
   useArtistCoin,
   useArtistCoins
@@ -68,7 +69,9 @@ export const BuyTab = ({
     onInputValueChange
   })
 
-  const { data: coins } = useArtistCoins()
+  const { data: coins } = useArtistCoins({
+    pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
+  })
   const artistCoins: TokenInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
