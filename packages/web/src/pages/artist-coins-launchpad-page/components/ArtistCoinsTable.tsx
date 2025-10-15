@@ -147,7 +147,7 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   )
 }
 
-const renderTotalVolumeCell = (cellInfo: CoinCell) => {
+const renderTotalVolumeUSDCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
     <Text variant='body' size='m'>
@@ -219,11 +219,11 @@ const tableColumnMap = {
     minWidth: 50,
     sorter: numericSorter('price')
   },
-  totalVolume: {
-    id: 'volumeTotal',
+  totalVolumeUSD: {
+    id: 'totalVolumeUSD',
     Header: 'Vol',
     accessor: 'totalVolumeUSD',
-    Cell: renderTotalVolumeCell,
+    Cell: renderTotalVolumeUSDCell,
     disableSortBy: false,
     align: 'right',
     width: 40,
@@ -334,7 +334,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     const width = tableRef.current.offsetWidth
     if (width < 728) {
       setHiddenColumns([
-        tableColumnMap.totalVolume.id,
+        tableColumnMap.totalVolumeUSD.id,
         tableColumnMap.marketCap.id,
         tableColumnMap.createdDate.id,
         tableColumnMap.holders.id
