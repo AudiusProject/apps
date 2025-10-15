@@ -1,8 +1,6 @@
 import type { BuySellTab } from '../../buy-sell/types'
 import { createModal } from '../createModal'
 
-export type { BuySellTab }
-
 export type BuySellModalState = {
   isOpen: boolean
   ticker?: string
