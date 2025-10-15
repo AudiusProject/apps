@@ -300,6 +300,60 @@ export interface CoinInsights {
      */
     numberMarkets?: number;
     /**
+     * Total volume of coin traded (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    totalVolume: number;
+    /**
+     * Total volume of coin traded in USD (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    totalVolumeUSD: number;
+    /**
+     * Total volume bought (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeBuy: number;
+    /**
+     * Total volume bought in USD (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeBuyUSD: number;
+    /**
+     * Total volume sold (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeSell: number;
+    /**
+     * Total volume sold in USD (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeSellUSD: number;
+    /**
+     * Total number of trades (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    totalTrade: number;
+    /**
+     * Total number of buys (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    buy: number;
+    /**
+     * Total number of sells (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    sell: number;
+    /**
      * 
      * @type {CoinDynamicBondingCurve}
      * @memberof CoinInsights
@@ -338,6 +392,15 @@ export function instanceOfCoinInsights(value: object): value is CoinInsights {
     isInstance = isInstance && "v24h" in value && value["v24h"] !== undefined;
     isInstance = isInstance && "v24hUSD" in value && value["v24hUSD"] !== undefined;
     isInstance = isInstance && "vHistory24h" in value && value["vHistory24h"] !== undefined;
+    isInstance = isInstance && "totalVolume" in value && value["totalVolume"] !== undefined;
+    isInstance = isInstance && "totalVolumeUSD" in value && value["totalVolumeUSD"] !== undefined;
+    isInstance = isInstance && "volumeBuy" in value && value["volumeBuy"] !== undefined;
+    isInstance = isInstance && "volumeBuyUSD" in value && value["volumeBuyUSD"] !== undefined;
+    isInstance = isInstance && "volumeSell" in value && value["volumeSell"] !== undefined;
+    isInstance = isInstance && "volumeSellUSD" in value && value["volumeSellUSD"] !== undefined;
+    isInstance = isInstance && "totalTrade" in value && value["totalTrade"] !== undefined;
+    isInstance = isInstance && "buy" in value && value["buy"] !== undefined;
+    isInstance = isInstance && "sell" in value && value["sell"] !== undefined;
     isInstance = isInstance && "dynamicBondingCurve" in value && value["dynamicBondingCurve"] !== undefined;
 
     return isInstance;
@@ -397,6 +460,15 @@ export function CoinInsightsFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'vSellHistory24hUSD': !exists(json, 'vSellHistory24hUSD') ? undefined : json['vSellHistory24hUSD'],
         'vSell24hChangePercent': !exists(json, 'vSell24hChangePercent') ? undefined : json['vSell24hChangePercent'],
         'numberMarkets': !exists(json, 'numberMarkets') ? undefined : json['numberMarkets'],
+        'totalVolume': json['totalVolume'],
+        'totalVolumeUSD': json['totalVolumeUSD'],
+        'volumeBuy': json['volumeBuy'],
+        'volumeBuyUSD': json['volumeBuyUSD'],
+        'volumeSell': json['volumeSell'],
+        'volumeSellUSD': json['volumeSellUSD'],
+        'totalTrade': json['totalTrade'],
+        'buy': json['buy'],
+        'sell': json['sell'],
         'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
     };
 }
@@ -454,6 +526,15 @@ export function CoinInsightsToJSON(value?: CoinInsights | null): any {
         'vSellHistory24hUSD': value.vSellHistory24hUSD,
         'vSell24hChangePercent': value.vSell24hChangePercent,
         'numberMarkets': value.numberMarkets,
+        'totalVolume': value.totalVolume,
+        'totalVolumeUSD': value.totalVolumeUSD,
+        'volumeBuy': value.volumeBuy,
+        'volumeBuyUSD': value.volumeBuyUSD,
+        'volumeSell': value.volumeSell,
+        'volumeSellUSD': value.volumeSellUSD,
+        'totalTrade': value.totalTrade,
+        'buy': value.buy,
+        'sell': value.sell,
         'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
     };
 }
