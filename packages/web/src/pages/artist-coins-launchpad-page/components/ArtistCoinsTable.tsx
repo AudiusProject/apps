@@ -4,9 +4,9 @@ import { Coin } from '@audius/common/adapters'
 import {
   makeLoadNextPage,
   useArtistCoins,
-  useTokenBalance,
   useQueryContext
 } from '@audius/common/api'
+import { useBuySellInitialTab } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useBuySellModal } from '@audius/common/store'
 import {
@@ -307,21 +307,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const { onOpen: openBuySellModal } = useBuySellModal()
   const { env } = useQueryContext()
   const tableRef = useRef<HTMLDivElement | null>(null)
-
-  // Check USDC and AUDIO balances to determine initial tab
-  const { data: usdcBalance } = useTokenBalance({
-    mint: env.USDC_MINT_ADDRESS
-  })
-  const { data: audioBalance } = useTokenBalance({
-    mint: env.WAUDIO_MINT_ADDRESS
-  })
-
-  // Determine initial tab based on balances
-  const hasUSDCBalance =
-    usdcBalance && Number(usdcBalance.balance.toString()) > 0
-  const hasAudioBalance =
-    audioBalance && Number(audioBalance.balance.toString()) > 0
-  const initialTab = !hasUSDCBalance && hasAudioBalance ? 'convert' : 'buy'
+  const initialTab = useBuySellInitialTab()
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -340,7 +326,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const { data: coinsData, isPending } = queryResult
   const coins = useMemo(
     () => coinsData?.filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS),
-    [coinsData]
+    [coinsData, env.WAUDIO_MINT_ADDRESS]
   )
 
   const loadNextPage = useCallback(() => {

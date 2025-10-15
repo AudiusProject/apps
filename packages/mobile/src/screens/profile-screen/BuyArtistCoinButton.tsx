@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
-import { useArtistOwnedCoin, useTokenBalance, useQueryContext } from '@audius/common/api'
+import { useArtistOwnedCoin } from '@audius/common/api'
+import { useBuySellInitialTab } from '@audius/common/hooks'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
@@ -19,20 +20,7 @@ export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
   )
 
   const { data: artistCoin } = useArtistOwnedCoin(userId)
-  const { env } = useQueryContext()
-
-  // Check USDC and AUDIO balances to determine initial tab
-  const { data: usdcBalance } = useTokenBalance({
-    mint: env.USDC_MINT_ADDRESS
-  })
-  const { data: audioBalance } = useTokenBalance({
-    mint: env.WAUDIO_MINT_ADDRESS
-  })
-
-  // Determine initial tab based on balances
-  const hasUSDCBalance = usdcBalance && Number(usdcBalance.balance.toString()) > 0
-  const hasAudioBalance = audioBalance && Number(audioBalance.balance.toString()) > 0
-  const initialTab = !hasUSDCBalance && hasAudioBalance ? 'convert' : 'buy'
+  const initialTab = useBuySellInitialTab()
 
   const handlePress = useCallback(() => {
     if (artistCoin?.ticker) {

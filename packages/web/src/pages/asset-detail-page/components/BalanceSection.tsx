@@ -3,10 +3,10 @@ import { useCallback, useState } from 'react'
 import {
   useArtistCoin,
   useCurrentAccountUser,
-  useTokenBalance,
-  useQueryContext
+  useTokenBalance
 } from '@audius/common/api'
 import {
+  useBuySellInitialTab,
   useFormattedTokenBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
@@ -270,24 +270,8 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   const { data: tokenBalance, isPending: tokenBalanceLoading } =
     useTokenBalance({ mint })
   const { data: currentUser } = useCurrentAccountUser()
-  const { env } = useQueryContext()
-
-  // Check USDC and AUDIO balances to determine initial tab
-  const { data: usdcBalance } = useTokenBalance({
-    mint: env.USDC_MINT_ADDRESS
-  })
-  const { data: audioBalance } = useTokenBalance({
-    mint: env.WAUDIO_MINT_ADDRESS
-  })
-
   const { isBuySellSupported } = useBuySellRegionSupport()
-
-  // Determine initial tab based on balances
-  const hasUSDCBalance =
-    usdcBalance && Number(usdcBalance.balance.toString()) > 0
-  const hasAudioBalance =
-    audioBalance && Number(audioBalance.balance.toString()) > 0
-  const initialTab = !hasUSDCBalance && hasAudioBalance ? 'convert' : 'buy'
+  const initialTab = useBuySellInitialTab()
 
   // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
