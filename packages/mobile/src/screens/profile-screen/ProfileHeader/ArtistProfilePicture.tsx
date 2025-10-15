@@ -1,8 +1,6 @@
 import { useCallback } from 'react'
 
 import { useUserCreatedCoins } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { css } from '@emotion/native'
 import { TouchableOpacity } from 'react-native'
 
@@ -22,10 +20,6 @@ export type ArtistProfilePictureProps = {
 export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   const navigation = useNavigation()
 
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-
   const { data: ownedCoins } = useUserCreatedCoins({
     userId,
     limit: 1
@@ -33,7 +27,6 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   const ownedCoin = ownedCoins?.[0]
 
   const shouldShowArtistCoinBadge =
-    !!isArtistCoinsEnabled &&
     !!ownedCoin?.mint &&
     !!ownedCoin?.logoUri &&
     ownedCoin.mint !== env.WAUDIO_MINT_ADDRESS
