@@ -23,7 +23,7 @@ import {
   PurchaseableContentType,
   useBuySellModal
 } from '@audius/common/store'
-import { removeNullable, Nullable } from '@audius/common/utils'
+import { removeNullable, Nullable, route } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 import {
   Flex,
@@ -46,7 +46,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
-import { UserLink } from 'components/link'
+import { TextLink, UserLink } from 'components/link'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
@@ -95,10 +95,10 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlockWithPurchase: `Unlock this ${contentType} with a one-time purchase!`,
   ofArtistsCoin: "of the artist's coin",
   artistCoin: 'Artist coin',
-  unlockTokenGatedContent: (amount: number, tokenTicker: string) =>
-    `You must hold at least ${amount} $${tokenTicker} in a connected wallet.`,
-  unlockedTokenGatedContent: (tokenTicker: string) =>
-    `$${tokenTicker} was found in a linked wallet. This ${contentType} is now available.`,
+  unlockTokenGatedContentPrefix: (amount: number) =>
+    `You must hold at least ${amount} `,
+  unlockTokenGatedContentSuffix: ' in a connected wallet.',
+  unlockedTokenGatedSuffix: ` was found in a linked wallet. This ${contentType} is now available.`,
   ownTokenGated:
     'Fans can unlock access by linking a wallet containing your artist coin',
   purchased: `You've purchased this ${contentType}.`,
@@ -311,10 +311,15 @@ const LockedGatedContentSection = ({
 
       return (
         <Text variant='body' strength='strong'>
-          {messages.unlockTokenGatedContent(
-            token_gate.token_amount,
-            coin?.ticker ?? messages.ofArtistsCoin
+          {messages.unlockTokenGatedContentPrefix(token_gate.token_amount)}
+          {coin?.ticker ? (
+            <TextLink to={route.coinPage(coin.ticker)} variant='visible'>
+              ${coin.ticker}
+            </TextLink>
+          ) : (
+            messages.ofArtistsCoin
           )}
+          {messages.unlockTokenGatedContentSuffix}
         </Text>
       )
     }
@@ -611,9 +616,14 @@ const UnlockedGatedContentSection = ({
         messages.ownTokenGated
       ) : (
         <Text variant='body' strength='strong'>
-          {messages.unlockedTokenGatedContent(
-            coin?.ticker ?? messages.artistCoin
+          {coin?.ticker ? (
+            <TextLink to={route.coinPage(coin.ticker)} variant='visible'>
+              ${coin.ticker}
+            </TextLink>
+          ) : (
+            messages.artistCoin
           )}
+          {messages.unlockedTokenGatedSuffix}
         </Text>
       )
     }

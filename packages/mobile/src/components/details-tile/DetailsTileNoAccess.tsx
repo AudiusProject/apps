@@ -246,6 +246,13 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
 
   const handleTokenPress = useCallback(() => {
     if (token?.ticker) {
+      navigation.navigate('CoinDetailsScreen', { ticker: token.ticker })
+      onClose()
+    }
+  }, [navigation, token?.ticker, onClose])
+
+  const handleBuyTokenPress = useCallback(() => {
+    if (token?.ticker) {
       navigation.navigate('BuySell', {
         initialTab: 'buy',
         coinTicker: token.ticker
@@ -381,7 +388,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
             </View>
           </Flex>
           <Button
-            onPress={handleTokenPress}
+            onPress={handleBuyTokenPress}
             gradient={color.special.coinGradient}
           >
             {messages.buyArtistCoin}
@@ -429,6 +436,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     handleSendTip,
     handleTokenPress,
     token?.ticker,
+    handleBuyTokenPress,
     color.special.coinGradient,
     handlePurchasePress
   ])
