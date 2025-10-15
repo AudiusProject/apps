@@ -146,8 +146,8 @@ web-distribute:
         no_output_timeout: 1h
         # If node_modules exists in cache, run postinstall. Otherwise, run npm ci
         command: |
-          [[ ! -d node_modules ]] || CI=true SKIP_MOBILE_DEPS=true NODE_OPTIONS="--max-old-space-size=8192" npm run postinstall
-          [[ -d node_modules ]] || CI=true SKIP_MOBILE_DEPS=true NODE_OPTIONS="--max-old-space-size=8192" npm ci
+          [[ ! -d node_modules ]] || CI=true SKIP_POD_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm run postinstall
+          [[ -d node_modules ]] || CI=true SKIP_POD_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm ci
 
     - save_cache:
         key: cache-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}-{{ arch }}

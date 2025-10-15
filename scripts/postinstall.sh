@@ -20,14 +20,14 @@ printf "${GREEN}Applying patches...\n${NC}"
 npm run patch-package > /dev/null
 
 # xcodebuild may exist (e.g. if xcode-select is installed via homebrew) but won't work alone
-if [[ -z "${SKIP_MOBILE_DEPS}" ]]; then
+if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   if ! xcodebuild --help &>/dev/null; then
     printf "${YELLOW}WARNING: Xcode not installed. Skipping mobile dependency installation.${NC}\n"
-    SKIP_MOBILE_DEPS=true
+    SKIP_POD_INSTALL=true
   fi
 fi
 
-if [[ -z "${SKIP_MOBILE_DEPS}" ]]; then
+if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   printf "${GREEN}Installing cocoapods...\n${NC}"
   {
     cd ./packages/mobile/ios
@@ -42,17 +42,15 @@ if [[ -z "${SKIP_MOBILE_DEPS}" ]]; then
   } > /dev/null
 fi
 
-if [[ -z "${SKIP_MOBILE_DEPS}" ]]; then
-  if command -v java >/dev/null; then
-    {
-      printf "${GREEN}Setting up Android dependencies...\n${NC}"
-      cd ./packages/mobile/android
-      ./gradlew :app:downloadAar
-      cd ../../..
-    } > /dev/null
-  else
-    printf "${YELLOW}WARNING: Java not found. Skipping Android AAR installation.${NC}\n"
-  fi
+if command -v java >/dev/null; then
+  {
+    printf "${GREEN}Setting up Android dependencies...\n${NC}"
+    cd ./packages/mobile/android
+    ./gradlew :app:downloadAar
+    cd ../../..
+  } > /dev/null
+else
+  printf "${YELLOW}WARNING: Java not found. Skipping Android AAR installation.${NC}\n"
 fi
 
 if [[ -z "${CI}" ]]; then
