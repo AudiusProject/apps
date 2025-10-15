@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
-import { makeLoadNextPage, useArtistCoins } from '@audius/common/api'
+import {
+  makeLoadNextPage,
+  useArtistCoins,
+  useTokenBalance,
+  useQueryContext
+} from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { useBuySellModal } from '@audius/common/store'
 import {
@@ -28,7 +33,6 @@ import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useMainContentRef } from 'pages/MainContentContext'
-import { env } from 'services/env'
 
 import styles from './ArtistCoinsTable.module.css'
 
@@ -301,7 +305,23 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const mainContentRef = useMainContentRef()
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
+  const { env } = useQueryContext()
   const tableRef = useRef<HTMLDivElement | null>(null)
+
+  // Check USDC and AUDIO balances to determine initial tab
+  const { data: usdcBalance } = useTokenBalance({
+    mint: env.USDC_MINT_ADDRESS
+  })
+  const { data: audioBalance } = useTokenBalance({
+    mint: env.WAUDIO_MINT_ADDRESS
+  })
+
+  // Determine initial tab based on balances
+  const hasUSDCBalance =
+    usdcBalance && Number(usdcBalance.balance.toString()) > 0
+  const hasAudioBalance =
+    audioBalance && Number(audioBalance.balance.toString()) > 0
+  const initialTab = !hasUSDCBalance && hasAudioBalance ? 'convert' : 'buy'
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -398,10 +418,11 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     (ticker: string) => {
       openBuySellModal({
         ticker,
+        initialTab,
         isOpen: true
       })
     },
-    [openBuySellModal]
+    [openBuySellModal, initialTab]
   )
 
   const handleRowClick = useCallback(

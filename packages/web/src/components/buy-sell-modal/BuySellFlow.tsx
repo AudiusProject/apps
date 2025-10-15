@@ -52,6 +52,7 @@ type BuySellFlowProps = {
   onScreenChange: (screen: Screen) => void
   onLoadingStateChange?: (isLoading: boolean) => void
   initialTicker?: string
+  initialTab?: BuySellTab
   setResetState: (resetState: () => void) => void
 }
 
@@ -62,6 +63,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     onScreenChange,
     onLoadingStateChange,
     initialTicker,
+    initialTab,
     setResetState
   } = props
   const { toast } = useContext(ToastContext)
@@ -89,7 +91,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   const { activeTab, handleActiveTabChange } = useBuySellTabs({
     setCurrentScreen,
-    resetTransactionData
+    resetTransactionData,
+    initialTab
   })
 
   // Persistent state for each tab's input values

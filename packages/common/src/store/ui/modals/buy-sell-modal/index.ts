@@ -1,8 +1,11 @@
 import { createModal } from '../createModal'
 
+export type BuySellTab = 'buy' | 'sell' | 'convert'
+
 export type BuySellModalState = {
   isOpen: boolean
   ticker?: string
+  initialTab?: BuySellTab
 }
 
 const BuySellModal = createModal<BuySellModalState>({

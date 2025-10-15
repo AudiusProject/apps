@@ -23,7 +23,7 @@ export const WALLET_GUIDE_URL = 'https://help.audius.co/product/wallet-guide'
 
 export const BuySellModal = () => {
   const { isOpen, onClose, data } = useBuySellModal()
-  const { ticker } = data
+  const { ticker, initialTab } = data
   const { onOpen: openAddCashModal } = useAddCashModal()
   const [resetState, setResetState] = useState<(() => void) | null>(null)
 
@@ -87,6 +87,7 @@ export const BuySellModal = () => {
           onScreenChange={setModalScreen}
           onLoadingStateChange={setIsFlowLoading}
           initialTicker={ticker}
+          initialTab={initialTab}
           setResetState={setResetState}
         />
       </ModalContent>
