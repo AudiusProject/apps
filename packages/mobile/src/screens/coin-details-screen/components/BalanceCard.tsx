@@ -1,6 +1,10 @@
 import { useCallback } from 'react'
 
-import { useTokenBalance, useArtistCoin } from '@audius/common/api'
+import {
+  useTokenBalance,
+  useArtistCoin,
+  useQueryContext
+} from '@audius/common/api'
 import {
   useFormattedTokenBalance,
   useIsManagedAccount
@@ -163,13 +167,29 @@ export const BalanceCard = ({ mint }: { mint: string }) => {
   const navigation = useNavigation()
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
   const { data: tokenBalance } = useTokenBalance({ mint })
+  const { env } = useQueryContext()
+
+  // Check USDC and AUDIO balances to determine initial tab
+  const { data: usdcBalance } = useTokenBalance({
+    mint: env.USDC_MINT_ADDRESS
+  })
+  const { data: audioBalance } = useTokenBalance({
+    mint: env.WAUDIO_MINT_ADDRESS
+  })
+
+  // Determine initial tab based on balances
+  const hasUSDCBalance =
+    usdcBalance && Number(usdcBalance.balance.toString()) > 0
+  const hasAudioBalance =
+    audioBalance && Number(audioBalance.balance.toString()) > 0
+  const initialTab = !hasUSDCBalance && hasAudioBalance ? 'convert' : 'buy'
 
   const handleBuy = useCallback(() => {
     navigation.navigate('BuySell', {
-      initialTab: 'buy',
+      initialTab,
       coinTicker: coin?.ticker
     })
-  }, [navigation, coin])
+  }, [navigation, coin, initialTab])
 
   const handleReceive = useCallback(() => {
     dispatch(receiveTokensModalActions.open({ mint, isOpen: true }))
