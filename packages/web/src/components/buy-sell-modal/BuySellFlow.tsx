@@ -15,7 +15,6 @@ import {
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedTokens } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import {
   BuySellTab,
@@ -23,7 +22,7 @@ import {
   useBuySellScreen,
   useBuySellSwap,
   useBuySellTabs,
-  useBuySellTabsArray,
+  buySellTabsArray,
   useBuySellTokenFilters,
   useBuySellTransactionData,
   useCurrentTokenPair,
@@ -36,7 +35,6 @@ import { matchPath, useLocation } from 'react-router-dom'
 
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -65,7 +63,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setResetState
   } = props
   const { toast } = useContext(ToastContext)
-  const { isEnabled: isArtistCoinsEnabled } = useFlag(FeatureFlags.ARTIST_COINS)
   const {
     trackSwapRequested,
     trackSwapSuccess,
@@ -193,9 +190,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTokenPair)
-
-  // Use shared tabs array logic
-  const tabs = useBuySellTabsArray()
 
   const swapTokens = useMemo(() => {
     // Return safe defaults if currentTokenPair is not available
@@ -431,7 +425,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         <Flex direction='column' gap='l'>
           <Flex alignItems='center' justifyContent='space-between'>
             <SegmentedControl
-              options={tabs}
+              options={buySellTabsArray}
               selected={activeTab}
               onSelectOption={handleActiveTabChange}
               css={{ flex: 1 }}
@@ -462,7 +456,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               availableInputTokens={availableInputTokensForSell}
               onInputTokenChange={handleInputTokenChange}
             />
-          ) : isArtistCoinsEnabled && currentTokenPair ? (
+          ) : currentTokenPair ? (
             <ConvertTab
               tokenPair={currentTokenPair}
               onTransactionDataChange={handleTransactionDataChange}

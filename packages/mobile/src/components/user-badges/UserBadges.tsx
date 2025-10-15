@@ -1,9 +1,7 @@
 import { useMemo } from 'react'
 
 import { useUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 
 import type { IconSize } from '@audius/harmony-native'
@@ -21,9 +19,6 @@ type UserBadgesProps = {
 
 export const UserBadges = (props: UserBadgesProps) => {
   const { userId, badgeSize = 's', mint, hideArtistCoinBadge } = props
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   const { data: userData } = useUser(userId, {
     select: (user) => ({
@@ -43,7 +38,6 @@ export const UserBadges = (props: UserBadgesProps) => {
   }, [mint, userArtistCoinBadge?.mint])
 
   const shouldShowArtistCoinBadge =
-    isArtistCoinEnabled &&
     !!displayMint &&
     displayMint !== env.WAUDIO_MINT_ADDRESS &&
     !hideArtistCoinBadge

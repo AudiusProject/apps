@@ -5,9 +5,7 @@ import {
   useQueryContext,
   useUserCoins
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { AUDIO_TICKER } from '@audius/common/store'
 import { ownedCoinsFilter } from '@audius/common/utils'
 import { TouchableOpacity } from 'react-native'
@@ -94,18 +92,13 @@ export const YourCoins = () => {
   const { data: currentUserId } = useCurrentUserId()
   const navigation = useNavigation()
   const { env } = useQueryContext()
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
 
   const filteredCoins =
-    artistCoins?.filter(
-      ownedCoinsFilter(!!isArtistCoinsEnabled, env.WAUDIO_MINT_ADDRESS)
-    ) ?? []
+    artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
 
   // Show audio coin card when no coins are available
   const showAudioCoin = filteredCoins.length === 0

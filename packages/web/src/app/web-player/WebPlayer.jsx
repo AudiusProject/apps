@@ -1044,16 +1044,13 @@ const FeatureFlaggedWebPlayer = (props) => {
   const { isEnabled: isSearchExploreEnabled } = useFeatureFlag(
     FeatureFlags.SEARCH_EXPLORE
   )
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const { isProduction } = useEnvironment()
 
   return (
     <RouterWebPlayer
       {...props}
       isSearchExploreEnabled={isSearchExploreEnabled}
-      isArtistCoinsEnabled={isArtistCoinsEnabled}
+      isArtistCoinsEnabled={true}
       isProduction={isProduction}
     />
   )

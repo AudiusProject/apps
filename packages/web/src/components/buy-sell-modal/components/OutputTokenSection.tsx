@@ -25,7 +25,6 @@ type OutputTokenSectionProps = {
   onAmountChange?: (amount: string) => void
   onTokenChange?: (token: TokenInfo) => void
   availableTokens?: TokenInfo[]
-  isArtistCoinsEnabled?: boolean
   hideTokenDisplay?: boolean
 }
 
@@ -37,7 +36,6 @@ export const OutputTokenSection = ({
   onAmountChange,
   availableTokens,
   onTokenChange,
-  isArtistCoinsEnabled = true,
   hideTokenDisplay = false
 }: OutputTokenSectionProps) => {
   const { symbol, isStablecoin } = tokenInfo
@@ -92,8 +90,7 @@ export const OutputTokenSection = ({
 
           {!hideTokenDisplay &&
           availableTokens &&
-          availableTokens.length > 0 &&
-          isArtistCoinsEnabled ? (
+          availableTokens.length > 0 ? (
             <Flex css={{ minWidth: '60px' }}>
               <TokenDropdown
                 selectedToken={tokenInfo}

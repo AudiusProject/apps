@@ -7,11 +7,9 @@ import {
   useCurrentUserId
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { formatNumberCommas } from '@audius/common/utils'
 import { ChatBlastAudience } from '@audius/sdk'
 import { useField } from 'formik'
@@ -249,19 +247,13 @@ const RemixCreatorsMessageField = () => {
 }
 
 const CoinHoldersMessageField = () => {
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: currentUserId } = useCurrentUserId()
   const { data: coinMembersCount } = useArtistCoinMembersCount()
   const { data: coin } = useArtistOwnedCoin(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
-  const isDisabled = !isArtistCoinEnabled || coinMembersCount === 0
-  if (!isArtistCoinEnabled) {
-    return null
-  }
+  const isDisabled = coinMembersCount === 0
 
   return (
     <ExpandableRadio

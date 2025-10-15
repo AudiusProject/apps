@@ -85,9 +85,6 @@ export const ProfileHeader = memo(() => {
   const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(
     FeatureFlags.RECENT_COMMENTS
   )
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   // Note: we also if the profile bio is longer than 3 lines, but that's handled in the Bio component.
   const shouldExpand =
     hasTier ||
@@ -172,10 +169,7 @@ export const ProfileHeader = memo(() => {
           <Flex pointerEvents='box-none' mt='s'>
             {isOwner ? (
               <UploadTrackButton />
-            ) : isArtistCoinsEnabled &&
-              isArtistCoinLoading ? null : isArtistCoinsEnabled && // Show nothing while loading artist coin status
-              userId &&
-              artistCoin?.mint ? (
+            ) : isArtistCoinLoading ? null : userId && artistCoin?.mint ? (
               <BuyArtistCoinButton userId={userId} />
             ) : (
               <TipAudioButton />
