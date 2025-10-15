@@ -23,6 +23,7 @@ import { sendTransactionWithRetries } from '../../utils/transaction'
 import { makeCurve } from './curve'
 import { getKeypair } from './getKeypair'
 import { createRewardPool } from './reward_pool'
+import { sendTransactionWithSquads } from './squads'
 
 interface LaunchCoinRequestBody {
   name: string
@@ -136,21 +137,13 @@ export const launchCoin = async (
         rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
       })
     )
-    const configRecentBlockhash = await connection.getLatestBlockhash()
-    const configMessage = new TransactionMessage({
-      recentBlockhash: configRecentBlockhash.blockhash,
+    // Execute the createConfig instructions through Squads multisig while
+    // preserving the original required signers (feePayer, configKeypair)
+    await sendTransactionWithSquads({
+      connection,
       instructions: createConfigTx.instructions,
-      payerKey: feePayer.publicKey
-    })
-    const configTransaction = new VersionedTransaction(
-      configMessage.compileToV0Message()
-    )
-    configTransaction.sign([feePayer, configKeypair])
-    await sendTransactionWithRetries({
-      transaction: configTransaction,
-      commitment: 'confirmed',
-      confirmationStrategy: { ...configRecentBlockhash, signature: '' },
-      logger
+      feePayer: feePayer.publicKey,
+      signers: [feePayer, configKeypair]
     })
 
     // 3. Create a reward pool for the new coin

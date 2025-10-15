@@ -59,6 +59,7 @@ type Config = {
   listensTrackWeeklyRateLimit: number
   antiAbuseOracle: string
   launchpadConfigKey: string
+  launchpadPartnerPrivateKey: string
 }
 
 let cachedConfig: Config | null = null
@@ -156,6 +157,9 @@ const readConfig = (): Config => {
     }),
     audius_launchpad_config_key: str({
       default: ''
+    }),
+    audius_launchpad_partner_private_key: str({
+      default: ''
     })
   })
   const solanaFeePayerWalletsParsed = env.audius_solana_fee_payer_wallets
@@ -204,7 +208,8 @@ const readConfig = (): Config => {
     listensTrackWeeklyRateLimit:
       env.audius_solana_listens_track_weekly_rate_limit,
     antiAbuseOracle: env.audius_anti_abuse_oracle,
-    launchpadConfigKey: env.audius_launchpad_config_key
+    launchpadConfigKey: env.audius_launchpad_config_key,
+    launchpadPartnerPrivateKey: env.audius_launchpad_partner_private_key
   }
   return readConfig()
 }
