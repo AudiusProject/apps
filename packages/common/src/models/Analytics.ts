@@ -591,6 +591,9 @@ export enum Name {
   ANDROID_APP_RESTART_STALE = 'Android App: Restart Due to Stale Time',
   ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit',
 
+  // Artist Coins
+  BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
@@ -2352,6 +2355,10 @@ type BannerTOSClicked = {
   eventName: Name.BANNER_TOS_CLICKED
 }
 
+type BannerArtistCoinsLaunchClicked = {
+  eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
+}
+
 type RateCtaDisplayed = {
   eventName: Name.RATE_CTA_DISPLAYED
 }
@@ -3347,6 +3354,7 @@ export type AllTrackingEvents =
   | PurchaseContentTOSClicked
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
+  | BannerArtistCoinsLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
   | RateCtaResponseYes

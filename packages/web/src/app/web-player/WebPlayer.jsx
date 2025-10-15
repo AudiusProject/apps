@@ -31,6 +31,7 @@ import AnimatedSwitch from 'components/animated-switch/AnimatedSwitch'
 import AppRedirectListener from 'components/app-redirect-popover/AppRedirectListener'
 import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
+import { ArtistCoinsLaunchBanner } from 'components/banner/ArtistCoinsLaunchBanner'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
@@ -225,14 +226,8 @@ const validSearchCategories = [
 initializeSentry()
 
 const WebPlayer = (props) => {
-  const {
-    isProduction,
-    history,
-    location,
-    mainContentRef,
-    setMainContentRef,
-    isArtistCoinsEnabled
-  } = props
+  const { isProduction, history, location, mainContentRef, setMainContentRef } =
+    props
 
   const dispatch = useDispatch()
 
@@ -497,6 +492,7 @@ const WebPlayer = (props) => {
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
         {/* <TermsOfServiceUpdateBanner /> */}
+        <ArtistCoinsLaunchBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
@@ -709,41 +705,30 @@ const WebPlayer = (props) => {
                 isMobile={isMobile}
                 component={TransactionHistoryPage}
               />
-
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path={COINS_EXPLORE_PAGE}
-                  isMobile={isMobile}
-                  component={ArtistCoinsExplorePage}
-                />
-              ) : null}
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path='/coins/sort'
-                  isMobile={isMobile}
-                  component={MobileArtistCoinsSortPage}
-                />
-              ) : null}
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path={COINS_CREATE_PAGE}
-                  isMobile={isMobile}
-                  component={LaunchpadPage}
-                />
-              ) : null}
+              <Route
+                exact
+                path={COINS_EXPLORE_PAGE}
+                isMobile={isMobile}
+                component={ArtistCoinsExplorePage}
+              />
+              <Route
+                exact
+                path='/coins/sort'
+                isMobile={isMobile}
+                component={MobileArtistCoinsSortPage}
+              />
+              <Route
+                exact
+                path={COINS_CREATE_PAGE}
+                isMobile={isMobile}
+                component={LaunchpadPage}
+              />
               <Route
                 exact
                 path={ASSET_DETAIL_PAGE}
                 isMobile={isMobile}
                 render={(props) => {
-                  return isArtistCoinsEnabled ? (
-                    <AssetDetailPage {...props} />
-                  ) : (
-                    <AudioPage {...props} />
-                  )
+                  return <AssetDetailPage {...props} />
                 }}
               />
               <Route
@@ -1042,16 +1027,12 @@ const FeatureFlaggedWebPlayer = (props) => {
   const { isEnabled: isSearchExploreEnabled } = useFeatureFlag(
     FeatureFlags.SEARCH_EXPLORE
   )
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const { isProduction } = useEnvironment()
 
   return (
     <RouterWebPlayer
       {...props}
       isSearchExploreEnabled={isSearchExploreEnabled}
-      isArtistCoinsEnabled={isArtistCoinsEnabled}
       isProduction={isProduction}
     />
   )

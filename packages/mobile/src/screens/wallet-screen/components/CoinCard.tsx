@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
 
 import { useArtistCoin } from '@audius/common/api'
-import { useFeatureFlag, useFormattedTokenBalance } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
+import { useFormattedTokenBalance } from '@audius/common/hooks'
 import { Image, TouchableOpacity } from 'react-native'
 
 import {
@@ -48,21 +47,13 @@ export type CoinCardProps = {
 export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   const navigation = useNavigation()
 
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-
   const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(mint)
   const ticker = coinData?.ticker ?? ''
   const icon = coinData?.logoUri ?? ''
 
   const onPress = useCallback(() => {
-    if (isArtistCoinsEnabled) {
-      navigation.navigate('CoinDetailsScreen', { ticker })
-    } else {
-      navigation.navigate('AudioScreen')
-    }
-  }, [ticker, navigation, isArtistCoinsEnabled])
+    navigation.navigate('CoinDetailsScreen', { ticker })
+  }, [ticker, navigation])
 
   const {
     tokenBalanceFormatted: balance,

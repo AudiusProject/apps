@@ -2,8 +2,6 @@ import { useCallback } from 'react'
 
 import { useArtistOwnedCoin } from '@audius/common/api'
 import { useBuySellInitialTab } from '@audius/common/hooks'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 
 import { Button, useTheme } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -15,9 +13,6 @@ const messages = {
 export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
   const { color } = useTheme()
   const navigation = useNavigation()
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   const { data: artistCoin } = useArtistOwnedCoin(userId)
   const initialTab = useBuySellInitialTab()
@@ -31,8 +26,8 @@ export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
     }
   }, [navigation, artistCoin?.ticker, initialTab])
 
-  // Don't render if artist coins feature is disabled or user doesn't own a coin
-  if (!isArtistCoinsEnabled || !artistCoin?.mint) {
+  // Don't render if user doesn't own a coin
+  if (!artistCoin?.mint) {
     return null
   }
 

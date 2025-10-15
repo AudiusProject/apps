@@ -11,7 +11,7 @@ import {
   useBuySellScreen,
   useBuySellSwap,
   useBuySellTabs,
-  useBuySellTabsArray,
+  buySellTabsArray,
   useBuySellTokenFilters,
   useBuySellTransactionData,
   useCurrentTokenPair,
@@ -231,9 +231,6 @@ export const BuySellFlow = ({
       : (outputCoin?.dynamicBondingCurve.priceUSD ?? 0)
   }, [outputCoin])
 
-  // Use shared tabs array logic
-  const tabs = useBuySellTabsArray()
-
   const handleContinueClick = useCallback(() => {
     setHasAttemptedSubmit(true)
     if (
@@ -334,7 +331,7 @@ export const BuySellFlow = ({
         {/* Tab Control */}
         <Flex alignItems='center' justifyContent='center'>
           <SegmentedControl
-            options={tabs}
+            options={buySellTabsArray}
             selected={activeTab}
             onSelectOption={handleTabChange}
             fullWidth

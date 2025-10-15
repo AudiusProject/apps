@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
+  TEMP_ARTIST_COINS_PAGE_SIZE,
   transformArtistCoinsToTokenInfoMap,
   useArtistCoin,
   useArtistCoins
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import type { TokenInfo } from '@audius/common/store'
 import { useTokenSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
-
-import { useFlag } from 'hooks/useRemoteConfig'
 
 import { BuySellTerms } from './components/BuySellTerms'
 import { InputTokenSection } from './components/InputTokenSection'
@@ -31,7 +29,6 @@ export const BuyTab = ({
   onOutputTokenChange
 }: BuyTabProps) => {
   const { baseToken, quoteToken } = tokenPair
-  const { isEnabled: isArtistCoinsEnabled } = useFlag(FeatureFlags.ARTIST_COINS)
 
   const [selectedOutputToken, setSelectedOutputToken] = useState(baseToken)
 
@@ -68,7 +65,9 @@ export const BuyTab = ({
     onInputValueChange
   })
 
-  const { data: coins } = useArtistCoins()
+  const { data: coins } = useArtistCoins({
+    pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
+  })
   const artistCoins: TokenInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
@@ -121,7 +120,6 @@ export const BuyTab = ({
             tokenPriceDecimalPlaces={decimalPlaces}
             availableTokens={artistCoins}
             onTokenChange={handleOutputTokenChange}
-            isArtistCoinsEnabled={isArtistCoinsEnabled}
           />
           <BuySellTerms />
         </>
