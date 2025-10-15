@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
+import { useLocalStorage } from 'react-use'
 
 import { make } from 'common/store/analytics/actions'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
@@ -20,15 +21,16 @@ const messages = {
 export const ArtistCoinsLaunchBanner = () => {
   const dispatch = useDispatch()
   const navigate = useNavigateToPage()
-  const hasDismissed = window.localStorage.getItem(
-    ARTIST_COIN_BANNER_LOCAL_STORAGE_KEY
+  const [isDismissed, setIsDismissed] = useLocalStorage(
+    ARTIST_COIN_BANNER_LOCAL_STORAGE_KEY,
+    false
   )
-  const [isVisible, setIsVisible] = useState(!hasDismissed)
+  const [isVisible, setIsVisible] = useState(!isDismissed)
 
   const handleClose = useCallback(() => {
-    window.localStorage.setItem(ARTIST_COIN_BANNER_LOCAL_STORAGE_KEY, 'true')
+    setIsDismissed(true)
     setIsVisible(false)
-  }, [])
+  }, [setIsDismissed])
 
   const handleAccept = useCallback(() => {
     dispatch(make(Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED, {}))
