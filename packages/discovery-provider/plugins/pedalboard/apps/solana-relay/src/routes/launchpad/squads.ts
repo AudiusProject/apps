@@ -19,20 +19,25 @@ export async function sendTransactionWithSquads(params: {
 }): Promise<{ transactionPda: string }> {
   const { connection, instructions, feePayer, signers } = params
 
-  if (!config.launchpadConfigKey) {
-    throw new Error('Missing launchpadConfigKey (Squads multisig address)')
+  if (!config.launchpadPartnerPublicKey) {
+    throw new Error(
+      'Missing launchpadPartnerPublicKey (Squads multisig address)'
+    )
   }
-  if (!config.launchpadPartnerPrivateKey) {
-    throw new Error('Missing launchpadPartnerPrivateKey (Squads member secret)')
+  if (!config.launchpadPartnerSignerPrivateKey) {
+    throw new Error(
+      'Missing launchpadPartnerSignerPrivateKey (Squads member secret)'
+    )
   }
 
-  const multisig = new PublicKey(config.launchpadConfigKey)
+  const multisig = new PublicKey(config.launchpadPartnerPublicKey)
 
   const member = Keypair.fromSecretKey(
-    bs58.decode(config.launchpadPartnerPrivateKey)
+    bs58.decode(config.launchpadPartnerSignerPrivateKey)
   )
 
   const authorityIndex = 1
+  console.log('connection.rpcEndpoint', connection.rpcEndpoint)
 
   const squads = Squads.endpoint(connection.rpcEndpoint, new Wallet(member))
 

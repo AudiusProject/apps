@@ -15,11 +15,12 @@ import { Keypair } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
 import { AUDIO_MINT, USDC_MINT } from './constants'
-import { makeCurve } from './curve'
+import { makeCurve, makeTestCurve } from './curve'
 
 /**
  * Gets a Jupiter swap quote to determine the USDC value of the given AUDIO amount
@@ -232,12 +233,20 @@ const getLaunchpadConfig = async (): Promise<{
 }> => {
   // Build a mock config and virtual pool entirely from our local curve design
   const dummy = Keypair.generate()
-  const curve = makeCurve({
-    payer: dummy,
-    configKey: dummy,
-    partner: dummy.publicKey,
-    rewardPoolTokenAccount: dummy.publicKey
-  })
+  const curve =
+    config.environment === 'prod'
+      ? makeCurve({
+          payer: dummy,
+          configKey: dummy,
+          partner: dummy.publicKey,
+          rewardPoolTokenAccount: dummy.publicKey
+        })
+      : makeTestCurve({
+          payer: dummy,
+          configKey: dummy,
+          partner: dummy.publicKey,
+          rewardPoolTokenAccount: dummy.publicKey
+        })
 
   const migrationSqrtPrice = curve.curve[curve.curve.length - 1].sqrtPrice
   const swapBaseAmount = getBaseTokenForSwap(
@@ -253,7 +262,10 @@ const getLaunchpadConfig = async (): Promise<{
     collectFeeMode: curve.collectFeeMode,
     activationType: curve.activationType,
     tokenType: curve.tokenType,
-    poolFees: curve.poolFees,
+    poolFees: {
+      ...curve.poolFees,
+      dynamicFee: curve.poolFees.dynamicFee ?? { initialized: false }
+    },
     migrationOption: curve.migrationOption,
     migrationFeeOption: curve.migrationFeeOption,
     migratedPoolFee: curve.migratedPoolFee,

@@ -103,6 +103,7 @@ export const launchCoin = async (
     const rewardPoolTokenAccount = Keypair.generate()
 
     // 1. Create Coin Metadata
+    logger.info('Creating coin metadata', { name, symbol, description })
     const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
     // Pick a random fee payer to "own" our new coin metadata and pay for the TX
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
@@ -128,6 +129,7 @@ export const launchCoin = async (
     const metadataUri = await umi.uploader.uploadJson(metadata)
 
     // 2. Create a config for the new coin
+    logger.info('Creating config for new coin', { name, symbol })
     const configKeypair = Keypair.generate()
     const createConfigTx = await dbcClient.partner.createConfig(
       config.environment === 'prod'
@@ -154,6 +156,7 @@ export const launchCoin = async (
     })
 
     // 3. Create a reward pool for the new coin
+    logger.info('Creating reward pool for new coin', { name, symbol })
     const rewardPoolTx = await createRewardPool({
       connection,
       rewardManager: rewardPoolManager,
@@ -178,6 +181,10 @@ export const launchCoin = async (
     })
 
     // 4. Create pool and first buy
+    logger.info('Preparing create pool and swap buy transactions', {
+      name,
+      symbol
+    })
     const { createPoolTx, swapBuyTx } =
       await dbcClient.pool.createPoolWithFirstBuy({
         createPoolParam: {

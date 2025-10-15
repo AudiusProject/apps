@@ -58,8 +58,10 @@ type Config = {
   listensTrackDailyRateLimit: number
   listensTrackWeeklyRateLimit: number
   antiAbuseOracle: string
-  launchpadConfigKey: string
-  launchpadPartnerPrivateKey: string
+  // The public key for the launchpad config partner, assumed to be a Squads multisig
+  launchpadPartnerPublicKey: string
+  // The private key for a signer of the launchpad config partner
+  launchpadPartnerSignerPrivateKey: string
 }
 
 let cachedConfig: Config | null = null
@@ -155,10 +157,10 @@ const readConfig = (): Config => {
     audius_anti_abuse_oracle: str({
       default: 'http://audius-anti-abuse-oracle-1:8000'
     }),
-    audius_launchpad_config_key: str({
+    audius_launchpad_partner_public_key: str({
       default: ''
     }),
-    audius_launchpad_partner_private_key: str({
+    audius_launchpad_partner_signer_private_key: str({
       default: ''
     })
   })
@@ -208,8 +210,9 @@ const readConfig = (): Config => {
     listensTrackWeeklyRateLimit:
       env.audius_solana_listens_track_weekly_rate_limit,
     antiAbuseOracle: env.audius_anti_abuse_oracle,
-    launchpadConfigKey: env.audius_launchpad_config_key,
-    launchpadPartnerPrivateKey: env.audius_launchpad_partner_private_key
+    launchpadPartnerPublicKey: env.audius_launchpad_partner_public_key,
+    launchpadPartnerSignerPrivateKey:
+      env.audius_launchpad_partner_signer_private_key
   }
   return readConfig()
 }
