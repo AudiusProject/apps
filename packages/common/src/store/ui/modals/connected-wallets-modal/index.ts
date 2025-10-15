@@ -11,7 +11,7 @@ const connectedWalletsModal = createModal<ConnectedWalletsModalState>({
 })
 
 export const {
-  hook: useConnectedWalletsModal,
+  hook: useAssociatedWalletsModal,
   actions: connectedWalletsModalActions,
   reducer: connectedWalletsModalReducer
 } = connectedWalletsModal

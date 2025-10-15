@@ -1,16 +1,13 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import {
   ConnectedWallet,
-  getWalletSolBalanceOptions,
-  useConnectedWallets,
   useCurrentAccountUser,
-  useQueryContext,
   useUserCreatedCoins
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
-import { Feature } from '@audius/common/models'
+import { Chain, Feature } from '@audius/common/models'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
@@ -24,19 +21,20 @@ import {
   Text
 } from '@audius/harmony'
 import { solana } from '@reown/appkit/networks'
-import { useQueryClient } from '@tanstack/react-query'
+import {
+  useAppKitAccount as useExternalWalletAccount,
+  useAppKitBalance
+} from '@reown/appkit/react'
 import { Form, Formik, useFormikContext } from 'formik'
-import { Navigate, useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom-v5-compat'
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { Header } from 'components/header/desktop/Header'
 import { useMobileHeader } from 'components/header/mobile/hooks'
 import Page from 'components/page/Page'
 import { ToastContext } from 'components/toast/ToastContext'
-import {
-  useConnectAndAssociateWallets,
-  AlreadyAssociatedError
-} from 'hooks/useConnectAndAssociateWallets'
+import { AlreadyAssociatedError } from 'hooks/useConnectAndAssociateWallets'
+import { useExternalWallets } from 'hooks/useConnectWallets'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
 import { reportToSentry } from 'store/errors/reportToSentry'
@@ -48,7 +46,7 @@ import {
 } from './components/LaunchpadModals'
 import { LAUNCHPAD_COIN_DESCRIPTION, MIN_SOL_BALANCE, Phase } from './constants'
 import { BuyCoinPage, ReviewPage, SetupPage, SplashPage } from './pages'
-import { getLastConnectedSolWallet, useLaunchpadAnalytics } from './utils'
+import { useLaunchpadAnalytics } from './utils'
 import { useLaunchpadFormSchema } from './validation'
 
 const messages = {
@@ -73,14 +71,11 @@ const LaunchpadPageContent = ({
 }) => {
   const [phase, setPhase] = useState(Phase.SPLASH)
   const { resetForm, validateForm } = useFormikContext()
-  const queryClient = useQueryClient()
-  const queryContext = useQueryContext()
-  const { data: connectedWallets } = useConnectedWallets()
+  const externalWalletAccount = useExternalWalletAccount()
+  const connectedWallet = externalWalletAccount?.address
+  const { fetchBalance } = useAppKitBalance()
+
   const { toast } = useContext(ToastContext)
-  const connectedWallet = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets),
-    [connectedWallets]
-  )
   const {
     trackSplashGetStarted,
     trackSetupContinue,
@@ -90,7 +85,7 @@ const LaunchpadPageContent = ({
     trackWalletConnectError,
     trackWalletInsufficientBalance
   } = useLaunchpadAnalytics({
-    externalWalletAddress: connectedWallet?.address
+    externalWalletAddress: connectedWallet
   })
   const [isInsufficientBalanceModalOpen, setIsInsufficientBalanceModalOpen] =
     useState(false)
@@ -106,29 +101,10 @@ const LaunchpadPageContent = ({
       icon={IconArtistCoin}
       rightDecorator={
         connectedWallet && phase !== Phase.SPLASH ? (
-          <ConnectedWalletHeader connectedWallet={connectedWallet} />
+          <ConnectedWalletHeader connectedWalletAddress={connectedWallet} />
         ) : null
       }
     />
-  )
-
-  const getIsValidWalletBalance = useCallback(
-    async (walletAddress: string) => {
-      // Check if wallet has sufficient SOL balance
-      const balanceData = await queryClient.fetchQuery({
-        ...getWalletSolBalanceOptions(queryContext, {
-          walletAddress
-        }),
-        staleTime: 0
-      })
-
-      const walletBalanceLamports = balanceData.balanceLamports
-      return {
-        isValid: walletBalanceLamports >= MIN_SOL_BALANCE,
-        walletBalanceLamports
-      }
-    },
-    [queryClient, queryContext]
   )
 
   // NOTE: this hook specifically is after the wallet is both added & has sufficient balance
@@ -147,19 +123,30 @@ const LaunchpadPageContent = ({
 
   // Wallet connection handlers
   const handleWalletConnectSuccess = useCallback(
-    async (wallets: ConnectedWallet[]) => {
-      const newWallet = wallets[0]
+    async (newWallets: {
+      solana: string | undefined
+      eth: string | undefined
+    }) => {
+      const { solana: connectedWallet } = newWallets
+      if (!connectedWallet) {
+        alert('No solana wallet connected')
+        return
+      }
 
-      const { isValid: isValidWalletBalance, walletBalanceLamports } =
-        await getIsValidWalletBalance(newWallet.address)
+      const walletBalanceData = await fetchBalance()
+      const walletSolBalance = Number(walletBalanceData.data?.balance ?? 0)
+      const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
       if (isValidWalletBalance) {
-        trackWalletConnectSuccess(newWallet.address, walletBalanceLamports)
+        trackWalletConnectSuccess(connectedWallet, walletSolBalance)
       } else {
-        trackWalletInsufficientBalance(newWallet.address, walletBalanceLamports)
+        trackWalletInsufficientBalance(connectedWallet, walletSolBalance)
       }
       try {
         if (isValidWalletBalance) {
-          handleWalletAddSuccess(newWallet)
+          handleWalletAddSuccess({
+            address: connectedWallet,
+            chain: Chain.Sol
+          })
         } else {
           setIsInsufficientBalanceModalOpen(true)
         }
@@ -168,9 +155,8 @@ const LaunchpadPageContent = ({
       }
     },
     [
-      getIsValidWalletBalance,
+      fetchBalance,
       handleWalletAddSuccess,
-      setIsInsufficientBalanceModalOpen,
       trackWalletConnectSuccess,
       trackWalletInsufficientBalance
     ]
@@ -181,20 +167,21 @@ const LaunchpadPageContent = ({
     async (error: unknown) => {
       // If wallet is already linked, continue with the flow
       if (error instanceof AlreadyAssociatedError) {
-        const lastConnectedWallet = getLastConnectedSolWallet(connectedWallets)
+        const lastConnectedWallet = externalWalletAccount?.address
         if (lastConnectedWallet) {
-          const { isValid: isValidWalletBalance, walletBalanceLamports } =
-            await getIsValidWalletBalance(lastConnectedWallet?.address)
+          const walletBalanceData = await fetchBalance()
+          const walletSolBalance = Number(walletBalanceData.data?.balance ?? 0)
+          const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
           if (isValidWalletBalance) {
-            trackWalletConnectSuccess(
-              lastConnectedWallet.address,
-              walletBalanceLamports
-            )
-            handleWalletAddSuccess(lastConnectedWallet)
+            trackWalletConnectSuccess(lastConnectedWallet, walletSolBalance)
+            handleWalletAddSuccess({
+              address: lastConnectedWallet,
+              chain: Chain.Sol
+            })
           } else {
             trackWalletInsufficientBalance(
-              lastConnectedWallet.address,
-              walletBalanceLamports
+              lastConnectedWallet,
+              walletSolBalance
             )
             setIsInsufficientBalanceModalOpen(true)
           }
@@ -204,25 +191,23 @@ const LaunchpadPageContent = ({
       }
     },
     [
-      connectedWallets,
-      getIsValidWalletBalance,
+      externalWalletAccount?.address,
+      fetchBalance,
+      trackWalletConnectSuccess,
       handleWalletAddSuccess,
-      trackWalletConnectError,
       trackWalletInsufficientBalance,
-      trackWalletConnectSuccess
+      trackWalletConnectError
     ]
   )
 
   const { openAppKitModal, isPending: isWalletConnectPending } =
-    useConnectAndAssociateWallets(
-      handleWalletConnectSuccess,
-      handleWalletConnectError
-    )
+    useExternalWallets(handleWalletConnectSuccess, handleWalletConnectError)
 
   const handleSplashContinue = useCallback(async () => {
     // Switch to Solana network to prioritize SOL wallets
     await appkitModal.switchNetwork(solana)
     trackSplashGetStarted()
+    await appkitModal.disconnect('solana')
     openAppKitModal('solana')
   }, [openAppKitModal, trackSplashGetStarted])
 
@@ -313,6 +298,7 @@ const LaunchpadPageContent = ({
 
 export const LaunchpadPage = () => {
   const { data: currentUser } = useCurrentAccountUser()
+
   const { data: createdCoins } = useUserCreatedCoins({
     userId: currentUser?.user_id
   })
@@ -323,24 +309,20 @@ export const LaunchpadPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useContext(ToastContext)
-  const { data: connectedWallets } = useConnectedWallets()
   const { validationSchema } = useLaunchpadFormSchema()
   const [formValues, setFormValues] = useState<LaunchpadFormValues | null>(null)
 
   const { onOpen: openCoinSuccessModal } = useCoinSuccessModal()
   const navigate = useNavigate()
-
-  const connectedWallet = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets),
-    [connectedWallets]
-  )
+  const externalWalletAccount = useExternalWalletAccount()
+  const connectedWalletAddress = externalWalletAccount?.address
   const {
     trackCoinCreationStarted,
     trackCoinCreationFailure,
     trackCoinCreationSuccess,
     trackFirstBuyRetry
   } = useLaunchpadAnalytics({
-    externalWalletAddress: connectedWallet?.address
+    externalWalletAddress: connectedWalletAddress
   })
 
   // Launch coin mutation hook - this handles pool creation, sdk coin creation, and first buy transaction
@@ -481,15 +463,11 @@ export const LaunchpadPage = () => {
   }, [isSwapRetryError, toast])
 
   const handleSubmit = useCallback(
-    (formValues: LaunchpadFormValues) => {
+    async (formValues: LaunchpadFormValues) => {
       // Store form values for success modal
       setFormValues(formValues)
 
-      // Get the most recent connected Solana wallet (last in the array)
-      const connectedWallet: ConnectedWallet | undefined =
-        getLastConnectedSolWallet(connectedWallets)
-
-      if (!currentUser || !connectedWallet) {
+      if (!currentUser || !connectedWalletAddress) {
         toast(messages.errors.unknownError, Infinity, {
           rightIcon: IconClose
         })
@@ -501,7 +479,7 @@ export const LaunchpadPage = () => {
           feature: Feature.ArtistCoins,
           additionalInfo: {
             currentUser,
-            connectedWallet,
+            connectedWalletAddress,
             formValues
           }
         })
@@ -509,6 +487,7 @@ export const LaunchpadPage = () => {
       }
 
       setIsModalOpen(true)
+
       const audioAmountBigNumber = formValues.payAmount
         ? wAUDIO(formValues.payAmount).value
         : undefined
@@ -531,7 +510,7 @@ export const LaunchpadPage = () => {
               address: mintAddress,
               decimals: LAUNCHPAD_COIN_DECIMALS
             },
-            walletAddress: connectedWallet.address,
+            walletAddress: connectedWalletAddress,
             inputAmountUi: Number(new FixedDecimal(formValues.payAmount).value),
             isAMM: true
           })
@@ -553,7 +532,7 @@ export const LaunchpadPage = () => {
           })
         }
       } else {
-        trackCoinCreationStarted(connectedWallet.address, formValues)
+        trackCoinCreationStarted(connectedWalletAddress, formValues)
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -563,13 +542,13 @@ export const LaunchpadPage = () => {
             currentUser.handle,
             formValues.coinSymbol
           ),
-          walletPublicKey: connectedWallet.address,
+          walletPublicKey: connectedWalletAddress,
           initialBuyAmountAudio
         })
       }
     },
     [
-      connectedWallets,
+      connectedWalletAddress,
       currentUser,
       isFirstBuyError,
       toast,

@@ -71,7 +71,7 @@ export const getConnectedWalletsQueryOptions = (
   })
 }
 
-export const useConnectedWallets = (
+export const useAssociatedWallets = (
   options?: Partial<ReturnType<typeof getConnectedWalletsQueryOptions>>
 ) => {
   const context = useQueryContext()
@@ -89,7 +89,7 @@ type AddConnectedWalletParams = {
   signature: string
 }
 
-export const useAddConnectedWallet = () => {
+export const useAddAssociatedWallet = () => {
   const queryClient = useQueryClient()
   const { audiusSdk, reportToSentry } = useQueryContext()
   const { data: currentUserId = null } = useCurrentUserId()
@@ -166,7 +166,7 @@ export type RemoveConnectedWalletParams = {
   wallet: { address: string; chain: Chain }
 }
 
-export const useRemoveConnectedWallet = () => {
+export const useRemoveAssociatedWallet = () => {
   const queryClient = useQueryClient()
   const { audiusSdk, reportToSentry } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()

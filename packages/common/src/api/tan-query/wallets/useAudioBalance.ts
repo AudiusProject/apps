@@ -24,7 +24,7 @@ import { QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUser } from '../users/useUser'
 
-import { getConnectedWalletsQueryOptions } from './useConnectedWallets'
+import { getConnectedWalletsQueryOptions } from './useAssociatedWallets'
 
 type UseWalletAudioBalanceParams = {
   /** Ethereum or Solana wallet address */

@@ -1,5 +1,3 @@
-import { ConnectedWallet } from '@audius/common/api'
-import { Chain } from '@audius/common/models'
 import { shortenSPLAddress } from '@audius/common/utils'
 import {
   Flex,
@@ -14,31 +12,23 @@ type WalletIconComponent =
   | typeof IconMetamask
   | typeof IconSolana
 
-const getWalletIcon = (
-  connectedWallet: ConnectedWallet
-): WalletIconComponent => {
-  if (connectedWallet.chain === Chain.Eth) {
-    // Check if MetaMask is available
-    if (typeof window !== 'undefined' && window.ethereum) {
-      return IconMetamask
-    }
-    return IconMetamask // Default to MetaMask for ETH wallets
-  } else if (connectedWallet.chain === Chain.Sol) {
-    // Check if Phantom is available
-    if (typeof window !== 'undefined' && window.phantom) {
-      return IconPhantom
-    }
-    return IconSolana // Default to Solana for SOL wallets
+const getWalletIcon = (): WalletIconComponent => {
+  // Check if Phantom is available
+  if (typeof window !== 'undefined' && window.phantom) {
+    return IconPhantom
+  }
+  if (typeof window !== 'undefined' && window.ethereum) {
+    return IconMetamask
   }
   return IconSolana // Fallback
 }
 
 export const ConnectedWalletHeader = ({
-  connectedWallet
+  connectedWalletAddress
 }: {
-  connectedWallet: ConnectedWallet
+  connectedWalletAddress: string
 }) => {
-  const WalletIcon = getWalletIcon(connectedWallet)
+  const WalletIcon = getWalletIcon()
   return (
     <Flex gap='s' alignItems='center' justifyContent='flex-end' w='100%'>
       <Text variant='body' size='m' color='subdued'>
@@ -66,7 +56,7 @@ export const ConnectedWalletHeader = ({
             <WalletIcon size='l' />
           </Flex>
           <Text variant='body' size='m' strength='strong' ellipses>
-            {shortenSPLAddress(connectedWallet.address)}
+            {shortenSPLAddress(connectedWalletAddress)}
           </Text>
         </Flex>
       </Flex>

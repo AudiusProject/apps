@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { useAudioBalance, useConnectedWallets } from '@audius/common/api'
+import { useAudioBalance, useAssociatedWallets } from '@audius/common/api'
 import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
 import { buySellMessages } from '@audius/common/messages'
 import { Client } from '@audius/common/models'
@@ -8,7 +8,7 @@ import { FeatureFlags, Location, StringKeys } from '@audius/common/services'
 import {
   OnRampProvider,
   useBuySellModal,
-  useConnectedWalletsModal,
+  useAssociatedWalletsModal,
   buyAudioActions,
   useReceiveTokensModal,
   useSendTokensModal
@@ -252,7 +252,7 @@ const ManageWalletsButton = () => {
   const [, setOpenConnectWalletsDrawer] = useModalState(
     'MobileConnectWalletsDrawer'
   )
-  const { onOpen: openConnectedWalletsModal } = useConnectedWalletsModal()
+  const { onOpen: openConnectedWalletsModal } = useAssociatedWalletsModal()
 
   const onCloseConnectWalletsDrawer = useCallback(() => {
     setOpenConnectWalletsDrawer(false)
@@ -278,7 +278,7 @@ export const WalletManagementTile = () => {
     includeConnectedWallets: true,
     includeStaked: true
   })
-  const { data: connectedWallets } = useConnectedWallets()
+  const { data: connectedWallets } = useAssociatedWallets()
   const [, setOpen] = useModalState('AudioBreakdown')
 
   const onRampProviders = useOnRampProviderInfo()

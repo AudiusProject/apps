@@ -39,13 +39,20 @@ export class AlreadyAssociatedError extends Error {
  * @returns a callback for opening the AppKit modal, and an `isPending` flag
  * which is true when a wallet is in the process of being associated.
  */
-export const useConnectWallets = (
-  onSuccess?: (wallets: EventsControllerState) => void,
+export const useExternalWallets = (
+  onSuccess?: (wallets: {
+    solana: string | undefined
+    eth: string | undefined
+  }) => void,
   onError?: (error: EventsControllerState) => void
 ) => {
   const theme = useTheme()
   const { open: openAppKitModal, close: closeAppKitModal } = useAppKit()
   const { data: currentUser } = useCurrentAccountUser()
+  const [currentWallets, setCurrentWallets] = useState<{
+    solana: string | undefined
+    eth: string | undefined
+  } | null>(null)
   const { switchAccountAsync } = useSwitchAccount()
   const { disconnect } = useDisconnect()
 
@@ -129,7 +136,18 @@ export const useConnectWallets = (
         }
       } else if (event.data.event === 'CONNECT_SUCCESS') {
         setIsConnecting(false)
-        await onSuccess?.(event)
+        const solanaAccount = appkitModal.getAccount('solana')
+        const ethAccount = appkitModal.getAccount('eip155')
+        const connectedAddress = solanaAccount?.address
+        const connectedEthAddress = ethAccount?.address
+        setCurrentWallets({
+          solana: connectedAddress,
+          eth: connectedEthAddress
+        })
+        await onSuccess?.({
+          solana: connectedAddress,
+          eth: connectedEthAddress
+        })
         closeAppKitModal()
       } else if (event.data.event === 'CONNECT_ERROR') {
         setIsConnecting(false)
@@ -146,6 +164,7 @@ export const useConnectWallets = (
 
   return {
     isPending: isConnecting,
+    currentWallets,
     openAppKitModal: openAppKitModalCallback
   }
 }

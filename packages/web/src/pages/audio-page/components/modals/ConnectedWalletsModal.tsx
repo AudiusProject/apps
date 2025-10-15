@@ -1,11 +1,11 @@
 import { useCallback, useContext, useState } from 'react'
 
 import {
-  useConnectedWallets,
-  useRemoveConnectedWallet
+  useAssociatedWallets,
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import { useConnectedWalletsModal } from '@audius/common/store'
+import { useAssociatedWalletsModal } from '@audius/common/store'
 import {
   Button,
   Flex,
@@ -58,7 +58,7 @@ enum Pages {
 }
 
 export const ConnectedWalletsModal = () => {
-  const { isOpen, onClose, onClosed } = useConnectedWalletsModal()
+  const { isOpen, onClose, onClosed } = useAssociatedWalletsModal()
   const { toast } = useContext(ToastContext)
 
   const [currentPage, setCurrentPage] = useState(Pages.TABLE)
@@ -72,12 +72,12 @@ export const ConnectedWalletsModal = () => {
     isPending,
     isError,
     error
-  } = useConnectedWallets()
+  } = useAssociatedWallets()
 
   const {
     mutateAsync: removeConnectedWalletAsync,
     isPending: isRemovePending
-  } = useRemoveConnectedWallet()
+  } = useRemoveAssociatedWallet()
 
   const handleRemoveClicked = useCallback(
     (wallet: { address: string; chain: Chain }) => {

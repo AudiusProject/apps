@@ -1,7 +1,7 @@
 import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
 import {
-  useConnectedWallets,
+  useAssociatedWallets,
   useWalletAudioBalance,
   useWalletCollectibles
 } from '@audius/common/api'
@@ -167,7 +167,7 @@ const WalletsTable = ({
   const isMobile = useIsMobile()
   const wm = useWithMobileStyle(styles.mobile)
 
-  const { data: connectedWallets } = useConnectedWallets()
+  const { data: connectedWallets } = useAssociatedWallets()
 
   const numConnectedWallets = connectedWallets?.length ?? 0
   return (

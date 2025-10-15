@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import type { ConnectedWallet } from '@audius/common/api'
 import {
-  useConnectedWallets,
+  useAssociatedWallets,
   useRemoveConnectedWallet
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
@@ -195,7 +195,7 @@ const WalletEmptyState = () => (
 
 export const LinkedWallets = () => {
   const navigation = useNavigation()
-  const { data: connectedWallets, isLoading } = useConnectedWallets()
+  const { data: connectedWallets, isLoading } = useAssociatedWallets()
 
   const hasWallets = !!connectedWallets?.length
   const walletCount = connectedWallets?.length ?? 0
