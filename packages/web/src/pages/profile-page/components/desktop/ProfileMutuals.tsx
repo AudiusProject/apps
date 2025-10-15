@@ -65,6 +65,7 @@ export const ProfileMutuals = () => {
       <ProfilePictureListTile
         onClick={handleClick}
         users={users}
+        totalUserCount={profile.current_user_followee_follow_count}
         limit={MAX_MUTUALS}
         disableProfileClick
       />

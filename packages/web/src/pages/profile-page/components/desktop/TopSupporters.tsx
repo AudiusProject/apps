@@ -59,6 +59,7 @@ export const TopSupporters = () => {
         <ProfilePictureListTile
           onClick={handleClick}
           users={supporters.map((supporter) => supporter.sender)}
+          totalUserCount={profile.supporter_count}
           limit={MAX_PROFILE_TOP_SUPPORTERS}
           disableProfileClick
         />
