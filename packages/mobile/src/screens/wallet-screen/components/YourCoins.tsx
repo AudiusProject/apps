@@ -101,13 +101,11 @@ export const YourCoins = () => {
     artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
 
   // Show audio coin card when no coins are available
-  const showAudioCoin = filteredCoins.length === 0
-  const baseCards = showAudioCoin ? ['audio-coin' as const] : filteredCoins
+  const coins =
+    filteredCoins.length === 0 ? ['audio-coin' as const] : filteredCoins
 
-  // Add discover artist coins card at the end if feature is enabled
-  const cards = isArtistCoinsEnabled
-    ? [...baseCards, 'discover-artist-coins' as const]
-    : baseCards
+  // Add discover artist coins card at the end
+  const cards = [...coins, 'discover-artist-coins' as const]
 
   const handleDiscoverArtistCoins = useCallback(() => {
     navigation.navigate('ArtistCoinsExplore')

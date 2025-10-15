@@ -273,11 +273,10 @@ export const YourCoins = () => {
     artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
 
   // Show audio coin card when no coins are available
-  const showAudioCoin = filteredCoins.length === 0
-  const baseCoins = showAudioCoin ? ['audio-coin' as const] : filteredCoins
-
+  const coins =
+    filteredCoins.length === 0 ? ['audio-coin' as const] : filteredCoins
   // Add discover artist coins card at the end
-  const allCoins = [...baseCoins, 'discover-artist-coins' as const]
+  const allCoins = [...coins, 'discover-artist-coins' as const]
 
   const isSingleColumn = isLarge
 
