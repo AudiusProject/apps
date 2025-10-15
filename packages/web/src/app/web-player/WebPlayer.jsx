@@ -226,14 +226,8 @@ const validSearchCategories = [
 initializeSentry()
 
 const WebPlayer = (props) => {
-  const {
-    isProduction,
-    history,
-    location,
-    mainContentRef,
-    setMainContentRef,
-    isArtistCoinsEnabled
-  } = props
+  const { isProduction, history, location, mainContentRef, setMainContentRef } =
+    props
 
   const dispatch = useDispatch()
 
@@ -711,41 +705,30 @@ const WebPlayer = (props) => {
                 isMobile={isMobile}
                 component={TransactionHistoryPage}
               />
-
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path={COINS_EXPLORE_PAGE}
-                  isMobile={isMobile}
-                  component={ArtistCoinsExplorePage}
-                />
-              ) : null}
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path='/coins/sort'
-                  isMobile={isMobile}
-                  component={MobileArtistCoinsSortPage}
-                />
-              ) : null}
-              {isArtistCoinsEnabled ? (
-                <Route
-                  exact
-                  path={COINS_CREATE_PAGE}
-                  isMobile={isMobile}
-                  component={LaunchpadPage}
-                />
-              ) : null}
+              <Route
+                exact
+                path={COINS_EXPLORE_PAGE}
+                isMobile={isMobile}
+                component={ArtistCoinsExplorePage}
+              />
+              <Route
+                exact
+                path='/coins/sort'
+                isMobile={isMobile}
+                component={MobileArtistCoinsSortPage}
+              />
+              <Route
+                exact
+                path={COINS_CREATE_PAGE}
+                isMobile={isMobile}
+                component={LaunchpadPage}
+              />
               <Route
                 exact
                 path={ASSET_DETAIL_PAGE}
                 isMobile={isMobile}
                 render={(props) => {
-                  return isArtistCoinsEnabled ? (
-                    <AssetDetailPage {...props} />
-                  ) : (
-                    <AudioPage {...props} />
-                  )
+                  return <AssetDetailPage {...props} />
                 }}
               />
               <Route
@@ -1050,7 +1033,6 @@ const FeatureFlaggedWebPlayer = (props) => {
     <RouterWebPlayer
       {...props}
       isSearchExploreEnabled={isSearchExploreEnabled}
-      isArtistCoinsEnabled={true}
       isProduction={isProduction}
     />
   )
