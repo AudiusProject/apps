@@ -3,7 +3,6 @@ from typing import Optional
 
 from sqlalchemy import desc, text
 from sqlalchemy.orm.session import Session
-from sqlalchemy.sql.elements import not_, or_
 
 from src.gated_content.constants import SHOULD_TRENDING_EXCLUDE_GATED_TRACKS
 from src.models.tracks.track import Track
