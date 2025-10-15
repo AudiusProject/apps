@@ -147,12 +147,12 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   )
 }
 
-const renderVolume24hCell = (cellInfo: CoinCell) => {
+const renderTotalVolumeCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
     <Text variant='body' size='m'>
       {walletMessages.dollarSign}
-      {formatCount(coin.v24hUSD, 2)}
+      {formatCount(coin.totalVolumeUSD, 2)}
     </Text>
   )
 }
@@ -219,16 +219,16 @@ const tableColumnMap = {
     minWidth: 50,
     sorter: numericSorter('price')
   },
-  volume24h: {
-    id: 'volume24h',
+  totalVolume: {
+    id: 'volumeTotal',
     Header: 'Vol',
-    accessor: 'v24hUSD',
-    Cell: renderVolume24hCell,
+    accessor: 'totalVolumeUSD',
+    Cell: renderTotalVolumeCell,
     disableSortBy: false,
     align: 'right',
     width: 40,
     minWidth: 40,
-    sorter: numericSorter('v24hUSD')
+    sorter: numericSorter('totalVolumeUSD')
   },
   marketCap: {
     id: 'marketCap',
@@ -277,7 +277,7 @@ const tableColumnMap = {
 const sortMethodMap: Record<string, GetCoinsSortMethodEnum> = {
   price: GetCoinsSortMethodEnum.Price,
   marketCap: GetCoinsSortMethodEnum.MarketCap,
-  v24hUSD: GetCoinsSortMethodEnum.Volume,
+  totalVolumeUSD: GetCoinsSortMethodEnum.Volume,
   createdAt: GetCoinsSortMethodEnum.CreatedAt,
   holder: GetCoinsSortMethodEnum.Holder
 }
@@ -334,7 +334,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     const width = tableRef.current.offsetWidth
     if (width < 728) {
       setHiddenColumns([
-        tableColumnMap.volume24h.id,
+        tableColumnMap.totalVolume.id,
         tableColumnMap.marketCap.id,
         tableColumnMap.createdDate.id,
         tableColumnMap.holders.id

@@ -16,8 +16,7 @@ const messages = {
   pricePerCoin: 'Price',
   holdersOnAudius: 'Holders on Audius',
   uniqueHolders: 'Unique Holders',
-  volume24hr: 'Volume (24hr)',
-  totalTransfers: 'Transfers (24hr)',
+  totalVolume: 'Volume (All Time)',
   marketCap: 'Market Cap',
   graduationProgress: 'Graduation Progress'
 }
@@ -69,11 +68,9 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
       messages.graduationProgress
     ),
     createMetric(
-      `$${formatCount(coin.v24hUSD, 2)}`,
-      messages.volume24hr,
-      coin.v24hChangePercent
-    ),
-    createMetric(formatCount(coin.trade24h), messages.totalTransfers)
+      `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      messages.totalVolume
+    )
   ]
 
   return potentialMetrics.filter(
@@ -101,7 +98,7 @@ export const createAudioCoinMetrics = (
     ),
     createMetric(
       `$${formatCount(coingeckoResponse.market_data.total_volume.usd, 2)}`,
-      messages.volume24hr
+      messages.totalVolume
     )
   ].filter((metric): metric is MetricData => metric !== null)
 }
