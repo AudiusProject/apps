@@ -1,4 +1,5 @@
 import { useArtistCoin } from '@audius/common/api'
+import { useBuySellInitialTab } from '@audius/common/hooks'
 import { useBuySellModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Button, Flex, Paper, Text } from '@audius/harmony'
@@ -14,10 +15,15 @@ export const BuyArtistCoinCard = ({ mint }: { mint: string }) => {
   const { data: artistCoin, isLoading } = useArtistCoin(mint)
   const { onOpen: openBuySellModal } = useBuySellModal()
   const navigate = useNavigate()
+  const initialTab = useBuySellInitialTab()
 
   const handleBuyCoins = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering Paper's onClick
-    openBuySellModal({ ticker: artistCoin?.ticker ?? undefined, isOpen: true })
+    openBuySellModal({
+      ticker: artistCoin?.ticker ?? undefined,
+      initialTab,
+      isOpen: true
+    })
   }
 
   const handleCardClick = () => {

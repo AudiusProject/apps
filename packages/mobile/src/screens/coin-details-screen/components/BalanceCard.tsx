@@ -3,7 +3,8 @@ import { useCallback } from 'react'
 import { useTokenBalance, useArtistCoin } from '@audius/common/api'
 import {
   useFormattedTokenBalance,
-  useIsManagedAccount
+  useIsManagedAccount,
+  useBuySellInitialTab
 } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import {
@@ -163,13 +164,14 @@ export const BalanceCard = ({ mint }: { mint: string }) => {
   const navigation = useNavigation()
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
   const { data: tokenBalance } = useTokenBalance({ mint })
+  const initialTab = useBuySellInitialTab()
 
   const handleBuy = useCallback(() => {
     navigation.navigate('BuySell', {
-      initialTab: 'buy',
+      initialTab,
       coinTicker: coin?.ticker
     })
-  }, [navigation, coin])
+  }, [navigation, coin, initialTab])
 
   const handleReceive = useCallback(() => {
     dispatch(receiveTokensModalActions.open({ mint, isOpen: true }))
