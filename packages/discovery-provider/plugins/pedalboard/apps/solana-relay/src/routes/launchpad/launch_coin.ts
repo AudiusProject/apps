@@ -20,7 +20,7 @@ import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 import { sendTransactionWithRetries } from '../../utils/transaction'
 
-import { makeCurve } from './curve'
+import { makeCurve, makeTestCurve } from './curve'
 import { getKeypair } from './getKeypair'
 import { createRewardPool } from './reward_pool'
 import { sendTransactionWithSquads } from './squads'
@@ -130,12 +130,19 @@ export const launchCoin = async (
     // 2. Create a config for the new coin
     const configKeypair = Keypair.generate()
     const createConfigTx = await dbcClient.partner.createConfig(
-      makeCurve({
-        payer: mintKeypair,
-        configKey: configKeypair,
-        partner: walletPublicKey,
-        rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
-      })
+      config.environment === 'prod'
+        ? makeCurve({
+            payer: mintKeypair,
+            configKey: configKeypair,
+            partner: walletPublicKey,
+            rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
+          })
+        : makeTestCurve({
+            payer: mintKeypair,
+            configKey: configKeypair,
+            partner: walletPublicKey,
+            rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
+          })
     )
     // Execute the createConfig instructions through Squads multisig while
     // preserving the original required signers (feePayer, configKeypair)

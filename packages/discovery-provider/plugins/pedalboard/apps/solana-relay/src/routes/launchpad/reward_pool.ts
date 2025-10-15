@@ -8,11 +8,31 @@ import {
   Transaction
 } from '@solana/web3.js'
 
+import { config } from '../../config'
+
 // Constants
 const REWARD_MANAGER_SIZE = 66 // 1 (version) + 32 (token_account) + 32 (manager) + 1 (min_votes)
 const TOKEN_ACCOUNT_SIZE = 165
 
-const SENDERS = [
+const STAGE_SENDERS = [
+  // creatornode9.staging.audius.co
+  {
+    senderEthAddress: '0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3',
+    operatorEthAddress: '0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3'
+  },
+  // creatornode11.staging.audius.co
+  {
+    senderEthAddress: '0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6',
+    operatorEthAddress: '0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6'
+  },
+  // creatornode12.staging.audius.co
+  {
+    senderEthAddress: '0x6b52969934076318863243fb92E9C4b3A08267b5',
+    operatorEthAddress: '0x6b52969934076318863243fb92E9C4b3A08267b5'
+  }
+]
+
+const PROD_SENDERS = [
   // creatornode.audius.co
   {
     senderEthAddress: '0xc8d0C29B6d540295e8fc8ac72456F2f4D41088c8',
@@ -89,7 +109,8 @@ export const createRewardPool = async ({
   })
 
   // 4. Add senders
-  for (const sender of SENDERS) {
+  const senders = config.environment === 'prod' ? PROD_SENDERS : STAGE_SENDERS
+  for (const sender of senders) {
     transaction.add(
       RewardManagerProgram.createSenderInstruction({
         senderEthAddress: sender.senderEthAddress,

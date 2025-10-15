@@ -11,7 +11,7 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 
 /**
- * Makes a curve for dbc deployment
+ * Makes a production curve for dbc deployment
  * @param params Object containing:
  *   - payer: the keypair of the payer
  *   - configKey: the keypair for the config
@@ -147,6 +147,162 @@ export const makeCurve = ({
     {
       sqrtPrice: new BN('184467440737095520'),
       liquidity: new BN('390031788038084761836886320138420224')
+    }
+  ],
+  // unused
+  padding: [],
+
+  // Immutable token
+  tokenUpdateAuthority: 1,
+
+  // Vesting design
+  lockedVesting: {
+    amountPerPeriod: new BN(500_000_000).mul(new BN(1e9)).div(new BN(5 * 365)),
+    cliffDurationFromMigrationTime: new BN(0),
+    frequency: new BN(24 * 60 * 60), // one day in seconds
+    numberOfPeriod: new BN(5 * 365), // daily
+    cliffUnlockAmount: new BN(0)
+  }
+})
+
+/**
+ * Makes a staging curve for dbc deployment
+ * Same as production but with a 1000x reduction in mkt caps
+ * @param params Object containing:
+ *   - payer: the keypair of the payer
+ *   - configKey: the keypair for the config
+ *   - partner: the public key of the partner
+ *   - rewardPool: the public key of the reward pool
+ * @returns the curve design
+ */
+export const makeTestCurve = ({
+  payer,
+  configKey,
+  partner,
+  rewardPoolTokenAccount
+}: {
+  payer: Keypair
+  configKey: Keypair
+  partner: PublicKey
+  rewardPoolTokenAccount: PublicKey
+}): CreateConfigParam => ({
+  payer: payer.publicKey,
+  config: configKey.publicKey,
+  feeClaimer: partner,
+  leftoverReceiver: rewardPoolTokenAccount,
+  quoteMint: new PublicKey('9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'),
+
+  // Fees
+  poolFees: {
+    baseFee: {
+      cliffFeeNumerator: new BN(10000000),
+      baseFeeMode: BaseFeeMode.FeeSchedulerLinear,
+      firstFactor: 0,
+      secondFactor: new BN(0),
+      thirdFactor: new BN(0)
+    },
+    dynamicFee: null
+  },
+  activationType: ActivationType.Slot,
+  collectFeeMode: CollectFeeMode.QuoteToken,
+
+  // Graduation
+  migrationOption: MigrationOption.MET_DAMM_V2,
+  migrationQuoteThreshold: new BN('20000000000'),
+  migrationFeeOption: MigrationFeeOption.FixedBps100,
+  // Migrated pool fee is unused because fee option is set above
+  migratedPoolFee: {
+    collectFeeMode: CollectFeeMode.QuoteToken,
+    dynamicFee: 0,
+    poolFeeBps: 0
+  },
+  migrationFee: {
+    feePercentage: 0,
+    creatorFeePercentage: 0
+  },
+
+  // Token params
+  tokenType: TokenType.SPL,
+  tokenDecimal: 9,
+
+  // LP design
+  partnerLpPercentage: 0,
+  creatorLpPercentage: 0,
+  partnerLockedLpPercentage: 50,
+  creatorLockedLpPercentage: 50,
+  creatorTradingFeePercentage: 50,
+
+  // Curve design
+  // Calculation worksheet: https://colab.research.google.com/drive/1hZy7CEekEF3LGi81IWHm_1DL9Pjd6t6U
+  tokenSupply: {
+    preMigrationTokenSupply: new BN('1000000000000000000'),
+    postMigrationTokenSupply: new BN('1000000000000000000')
+  },
+  sqrtStartPrice: new BN('1844674407370955'),
+  curve: [
+    {
+      sqrtPrice: new BN('2305843009213694'),
+      liquidity: new BN('18057754247175821789672614395904')
+    },
+    {
+      sqrtPrice: new BN('2689051932758076'),
+      liquidity: new BN('32995566348883979631837730308096')
+    },
+    {
+      sqrtPrice: new BN('3024084755922066'),
+      liquidity: new BN('54743341756238286998848562790400')
+    },
+    {
+      sqrtPrice: new BN('3325534081156063'),
+      liquidity: new BN('88053377860145886259638941253632')
+    },
+    {
+      sqrtPrice: new BN('3601841923080576'),
+      liquidity: new BN('138956191820458452184900508319744')
+    },
+    {
+      sqrtPrice: new BN('3858413346544284'),
+      liquidity: new BN('216306763634433951331984852647936')
+    },
+    {
+      sqrtPrice: new BN('4098956192339867'),
+      liquidity: new BN('333163773106834296934962227576832')
+    },
+    {
+      sqrtPrice: new BN('4326144956037837'),
+      liquidity: new BN('508745898944932287641762693906432')
+    },
+    {
+      sqrtPrice: new BN('4541983982202259'),
+      liquidity: new BN('771255294768285248729673728262144')
+    },
+    {
+      sqrtPrice: new BN('4748021357208935'),
+      liquidity: new BN('1161954740525860247592932825104384')
+    },
+    {
+      sqrtPrice: new BN('4945482294219893'),
+      liquidity: new BN('1741045774780616625654638131019776')
+    },
+    {
+      sqrtPrice: new BN('5135356213192297'),
+      liquidity: new BN('2596127201122984475636553916350464')
+    },
+    {
+      sqrtPrice: new BN('5318455767448199'),
+      liquidity: new BN('3854343485395775796004041718235136')
+    },
+    {
+      sqrtPrice: new BN('5495458130514078'),
+      liquidity: new BN('5699800539331489934698720343883776')
+    },
+    {
+      sqrtPrice: new BN('5666934654481518'),
+      liquidity: new BN('8398488638243657085360912050683904')
+    },
+    {
+      sqrtPrice: new BN('5833372668713516'),
+      liquidity: new BN('12333888100683631206160631641145344')
     }
   ],
   // unused
