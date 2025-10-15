@@ -6,6 +6,7 @@ import {
 } from '@jup-ag/api'
 import {
   DynamicBondingCurveClient,
+  getBaseTokenForSwap,
   PoolConfig,
   SwapMode,
   VirtualPool
@@ -238,6 +239,12 @@ const getLaunchpadConfig = async (): Promise<{
     rewardPoolTokenAccount: dummy.publicKey
   })
 
+  const migrationSqrtPrice = curve.curve[curve.curve.length - 1].sqrtPrice
+  const swapBaseAmount = getBaseTokenForSwap(
+    curve.sqrtStartPrice,
+    migrationSqrtPrice,
+    curve.curve
+  )
   const poolConfigState = {
     quoteMint: curve.quoteMint,
     tokenDecimal: curve.tokenDecimal,
@@ -259,8 +266,8 @@ const getLaunchpadConfig = async (): Promise<{
     curve: curve.curve,
     lockedVesting: curve.lockedVesting,
     padding: curve.padding,
-    swapBaseAmount: curve.tokenSupply?.preMigrationTokenSupply ?? new BN(0),
-    migrationSqrtPrice: curve.curve[curve.curve.length - 1].sqrtPrice
+    swapBaseAmount,
+    migrationSqrtPrice
   } as unknown as PoolConfig
 
   const virtualPoolState = {
