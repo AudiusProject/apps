@@ -82,6 +82,7 @@ handle_badwords = {
     "auddius",
     "avdius",
     "audus",
+    "noticeagent",  # used by scambots
 }
 
 handle_badwords_lower = {x.lower() for x in handle_badwords}

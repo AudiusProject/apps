@@ -2,6 +2,49 @@ import { AccountMeta, PublicKey } from '@solana/web3.js'
 
 import { RewardManagerInstruction } from './constants'
 
+export type InitRewardManagerParams = {
+  /** The account to initialize as the reward manager state. */
+  rewardManagerState: PublicKey
+  /** The token account to hold rewards. */
+  tokenAccount: PublicKey
+  /** The mint for the token account. */
+  mint: PublicKey
+  /** The admin account that will manage the reward manager. */
+  manager: PublicKey
+  /** Minimum number of votes required to disburse rewards. */
+  minVotes: number
+  /** The programId of the Reward Manager Program. */
+  rewardManagerProgramId?: PublicKey
+}
+
+export type InitRewardManagerInstructionData = {
+  /** The instruction identifier. */
+  instruction: RewardManagerInstruction
+  /** Minimum number of votes required to disburse rewards. */
+  minVotes: number
+}
+
+export type DecodedInitRewardManagerInstruction = {
+  programId: PublicKey
+  keys: {
+    /** The account to initialize as the reward manager state. */
+    rewardManagerState: AccountMeta
+    /** The token account to hold rewards. */
+    tokenAccount: AccountMeta
+    /** The mint for the token account. */
+    mint: AccountMeta
+    /** The admin account that will manage the reward manager. */
+    manager: AccountMeta
+    /** The reward manager authority PDA. */
+    authority: AccountMeta
+    /** The SPL Token program. */
+    tokenProgram: AccountMeta
+    /** The rent sysvar account. */
+    rent: AccountMeta
+  }
+  data: InitRewardManagerInstructionData
+}
+
 export type CreateRewardSenderParams = {
   /** The node's Ethereum wallet address. */
   senderEthAddress: string
@@ -259,6 +302,7 @@ export type DecodedEvaluateAttestationsInstruction = {
 }
 
 export type DecodedRewardManagerInstruction =
+  | DecodedInitRewardManagerInstruction
   | DecodedCreateSenderInstruction
   | DecodedCreateSenderPublicInstruction
   | DecodedDeleteSenderPublicInstruction

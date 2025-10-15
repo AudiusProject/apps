@@ -38,14 +38,14 @@ const messages = {
 
 const tooltipContent = {
   totalSupply:
-    'The total number of your artist coins that will ever exist. This amount is fixed and never changes.',
+    'The total number of your Artist Coins that will ever exist. This amount is fixed and never changes.',
   marketCap:
-    'The current total value of all your artist coins in circulation, calculated by multiplying the current price by the total supply.',
+    'The current total value of all your Artist Coins in circulation, calculated by multiplying the current price by the total supply.',
   price: 'The current price of a single artist coin in USD.',
   liquidity:
     'The amount of funds available for trading your artist coin, which affects how easily it can be bought or sold.',
   circulatingSupply:
-    'The number of artist coins currently available for trading, excluding any tokens that are locked or reserved.'
+    'The number of Artist Coins currently available for trading, excluding any tokens that are locked or reserved.'
 }
 
 export const ArtistCoinDetailsPage = () => {

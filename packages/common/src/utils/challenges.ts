@@ -13,8 +13,8 @@ export type ChallengeRewardsInfo = {
   id: ChallengeRewardID
   shortTitle?: string
   title: string
-  description: (amount: OptimisticUserChallenge | undefined) => string
-  fullDescription?: (amount: OptimisticUserChallenge | undefined) => string
+  description: (amount?: OptimisticUserChallenge | undefined) => string
+  fullDescription?: (amount?: OptimisticUserChallenge | undefined) => string
   optionalDescription?: string
   progressLabel?: string
   remainingLabel?: string
@@ -312,9 +312,9 @@ export const challengeRewardsConfig: Record<
     id: ChallengeName.PlayCount250,
     title: '250 Plays',
     description: () =>
-      `Hit 250 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     fullDescription: () =>
-      `Hit 250 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'
@@ -323,9 +323,9 @@ export const challengeRewardsConfig: Record<
     id: ChallengeName.PlayCount1000,
     title: '1,000 Plays',
     description: () =>
-      `Hit 1,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     fullDescription: () =>
-      `Hit 1,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'
@@ -334,9 +334,9 @@ export const challengeRewardsConfig: Record<
     id: ChallengeName.PlayCount10000,
     title: '10,000 Plays',
     description: () =>
-      `Hit 10,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     fullDescription: () =>
-      `Hit 10,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward`,
+      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'

@@ -19,7 +19,7 @@ app:
     - purpose: icon
       uri: ./media/app_icon.png
 release:
-  address: DWmLhWbpPas5G7ujABbVoHyVmMtkE4Qd5VAcfpQGiJbH
+  address: GQQehSFTFCrrUhf7nUp7eT31q4AL7BPFNbM2jd93WaeG
   media:
     - purpose: icon
       uri: ./media/publisher_icon.png
@@ -51,11 +51,18 @@ release:
         Out of the box, Audius includes: High Quality Audio (Streaming at 320kbps), Free Forever (Unlimited uploads and listening at no cost)
       new_in_version: 'Audius is always improving! Keep Updates on to make sure you don''t miss new features and improvements. In this version: Bug fixes, Stability improvements'
       saga_features: Connect Solana Mobile wallets directly to Audius to unlock additional features
+  android_details:
+    cert_fingerprint: 35fcf040155af8bd9edddd8c1e1d410d1cd92febd953f87a1e40a28dac14499d
+    min_sdk: 24
+    version: 1.1.507
+    version_code: 947
+    locales:
+      - en-US
 solana_mobile_dapp_publisher_portal:
   testing_instructions: Please log in as any Audius account, e.g. solanamobile@audius.co. Visit the $AUDIO & Rewards tab in the UI to connect a wallet. Connect a wallet by choosing the wallet picker, selecting Solana Mobile, and following the connect wallet & sign messages flows. Upon returning to the Audius app, your wallet should be connected and corresponding collectibles and token balances can be used to interact with unlockable Audius features.
 lastSubmittedVersionOnChain:
-  address: DWmLhWbpPas5G7ujABbVoHyVmMtkE4Qd5VAcfpQGiJbH
-  version_code: 781
-  apk_hash: VehCQ1Af4TjSiH+xJQgwKneqbZdlhJ0hIyG4mBH1ZLs=
+  address: GQQehSFTFCrrUhf7nUp7eT31q4AL7BPFNbM2jd93WaeG
+  version_code: 947
+  apk_hash: o9cHRgyLHOXoNFvOWF3FyYWFEiqU8e3MxTMDe7YLjiI=
 lastUpdatedVersionOnStore:
-  address: DWmLhWbpPas5G7ujABbVoHyVmMtkE4Qd5VAcfpQGiJbH
+  address: GQQehSFTFCrrUhf7nUp7eT31q4AL7BPFNbM2jd93WaeG

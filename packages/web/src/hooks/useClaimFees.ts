@@ -25,8 +25,7 @@ export type UseClaimFeesParams = {
 }
 
 export type ClaimFeesResponse = {
-  claimFeesTx: string
-  signature: string
+  signatures: string[]
 }
 
 /**
@@ -72,26 +71,26 @@ export const useClaimFees = (
         receiverWalletAddress: userBank.toString()
       })
 
-      const { claimFeesTx: claimFeesTxSerialized } = claimFeesResponse
+      const { claimFeeTxs: serializedTxs } = claimFeesResponse
 
       // Transaction is sent from the backend as a serialized base64 string
-      const deserializedTx = VersionedTransaction.deserialize(
-        Buffer.from(claimFeesTxSerialized, 'base64')
+      const claimFeesTxs = serializedTxs.map((tx: string) =>
+        VersionedTransaction.deserialize(Buffer.from(tx, 'base64'))
       )
 
       // Triggers 3rd party wallet to sign and send the transaction
-      const signature =
-        await solanaProvider.signAndSendTransaction(deserializedTx)
+      const allTransactions =
+        await solanaProvider.signAllTransactions(claimFeesTxs)
 
-      // Confirm the transaction
-      await sdk.services.solanaClient.connection.confirmTransaction(
-        signature,
-        'confirmed'
+      // Confirm all of the transactions
+      const signatures = await Promise.all(
+        allTransactions.map((tx) =>
+          sdk.services.solanaClient.sendTransaction(tx)
+        )
       )
 
       return {
-        claimFeesTx: claimFeesTxSerialized,
-        signature
+        signatures
       }
     },
     ...options,

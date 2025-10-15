@@ -6,6 +6,7 @@ import {
   useTokenBalance
 } from '@audius/common/api'
 import {
+  useBuySellInitialTab,
   useFormattedTokenBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
@@ -269,8 +270,8 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   const { data: tokenBalance, isPending: tokenBalanceLoading } =
     useTokenBalance({ mint })
   const { data: currentUser } = useCurrentAccountUser()
-
   const { isBuySellSupported } = useBuySellRegionSupport()
+  const initialTab = useBuySellInitialTab()
 
   // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
@@ -292,12 +293,12 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   // Handler functions with account requirements - defined before early return
   const handleBuySell = useRequiresAccountCallback(() => {
     // Has balance - show buy/sell modal
-    openBuySellModal()
-  }, [openBuySellModal])
+    openBuySellModal({ initialTab, isOpen: true })
+  }, [openBuySellModal, initialTab])
 
   const handleAddCash = useRequiresAccountCallback(() => {
-    openBuySellModal()
-  }, [openBuySellModal])
+    openBuySellModal({ initialTab, isOpen: true })
+  }, [openBuySellModal, initialTab])
 
   const handleReceive = useRequiresAccountCallback(() => {
     openReceiveTokensModal({

@@ -54,6 +54,8 @@ export const AssetInsightsOverflowMenu = ({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isMobileOverflowOpen, setIsMobileOverflowOpen] = useState(false)
 
+  const isAudio = artistCoin?.mint === env.WAUDIO_MINT_ADDRESS
+
   const onCopyCoinAddress = () => {
     if (artistCoin?.mint) {
       copyToClipboard(artistCoin.mint)
@@ -61,11 +63,10 @@ export const AssetInsightsOverflowMenu = ({
     }
   }
 
-  const onOpenDexscreener = () => {
+  const onOpenBirdeye = () => {
     if (artistCoin?.mint) {
-      const isAudio = artistCoin.mint === env.WAUDIO_MINT_ADDRESS
       window.open(
-        route.dexscreenerUrl(
+        route.birdeyeUrl(
           isAudio ? env.ETH_TOKEN_ADDRESS : artistCoin.mint,
           isAudio ? 'ethereum' : 'solana'
         ),
@@ -116,20 +117,24 @@ export const AssetInsightsOverflowMenu = ({
       onClick: onCopyCoinAddress
     },
     {
-      text: messages.openDexscreener,
+      text: messages.openBirdeye,
       icon: <IconExternalLink color='default' />,
-      onClick: onOpenDexscreener
+      onClick: onOpenBirdeye
     },
     {
       text: messages.details,
       icon: <IconInfo color='default' />,
       onClick: onOpenDetails
     },
-    {
-      text: messages.shareToX,
-      icon: <IconX color='default' />,
-      onClick: onShareToX
-    }
+    ...(isAudio
+      ? []
+      : [
+          {
+            text: messages.shareToX,
+            icon: <IconX color='default' />,
+            onClick: onShareToX
+          }
+        ])
   ]
 
   // Don't render if no artist coin data

@@ -75,7 +75,7 @@ const HasBalanceContent = ({
   return (
     <Flex column w='100%'>
       <Flex pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.hasBalanceTitle}
         </Text>
       </Flex>
@@ -109,7 +109,7 @@ const NoBalanceContent = () => {
   return (
     <Flex column>
       <Flex pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.noBalanceTitle}
         </Text>
       </Flex>

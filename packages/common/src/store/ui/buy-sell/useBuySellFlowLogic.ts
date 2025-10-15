@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
 
-import { useFeatureFlag } from '~/hooks'
 import { buySellMessages as messages } from '~/messages'
-import { FeatureFlags } from '~/services'
 
 import type { BuySellTab, TokenInfo, TokenPair } from './types'
 import { createFallbackPair } from './utils'
@@ -63,23 +61,10 @@ export const useSafeTokenPair = (currentTokenPair: TokenPair | null) => {
 }
 
 /**
- * Creates the tabs array based on feature flags
+ * Creates the tabs array for buy/sell/convert
  */
-export const useBuySellTabsArray = () => {
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-
-  return useMemo(() => {
-    const baseTabs = [
-      { key: 'buy' as BuySellTab, text: messages.buy },
-      { key: 'sell' as BuySellTab, text: messages.sell }
-    ]
-
-    if (isArtistCoinsEnabled) {
-      baseTabs.push({ key: 'convert' as BuySellTab, text: messages.convert })
-    }
-
-    return baseTabs
-  }, [isArtistCoinsEnabled])
-}
+export const buySellTabsArray = [
+  { key: 'buy' as BuySellTab, text: messages.buy },
+  { key: 'sell' as BuySellTab, text: messages.sell },
+  { key: 'convert' as BuySellTab, text: messages.convert }
+]

@@ -54,5 +54,6 @@ export * from './useOwnedTokens'
 
 export * from './useAnalytics'
 export * from './useBuySellAnalytics'
+export * from './useBuySellInitialTab'
 export * from './useShareAction'
 export * from './useArtistCoinMessageHeader'

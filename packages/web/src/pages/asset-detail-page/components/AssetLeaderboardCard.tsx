@@ -1,8 +1,4 @@
-import {
-  useArtistCoin,
-  useArtistCoinMembers,
-  useUsers
-} from '@audius/common/api'
+import { useArtistCoinMembers, useUsers } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { LEADERBOARD_USERS_ROUTE } from '@audius/common/src/utils/route'
 import { coinLeaderboardUserListActions } from '@audius/common/store'
@@ -50,18 +46,12 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
   const { isMedium: isSmallScreen } = useMedia() // <1024px
   const numUsersShowing = isSmallScreen ? 6 : 8
   const { data: leaderboardUsers, isPending: isLeaderboardPending } =
-    useArtistCoinMembers(
-      { mint },
-      {
-        select: (data) => {
-          return data.pages.flat().slice(0, numUsersShowing)
-        }
-      }
-    )
-  const { data: users, isPending: isUsersPending } = useUsers(
-    leaderboardUsers?.map((user) => user.userId)
-  )
-  const coinData = useArtistCoin(mint)
+    useArtistCoinMembers({ mint })
+  const userListUserIds = leaderboardUsers
+    ?.slice(0, numUsersShowing)
+    .map((user) => user.userId)
+  const { data: users, isPending: isUsersPending } = useUsers(userListUserIds)
+
   const dispatch = useDispatch()
   const isPending = isLeaderboardPending || isUsersPending
   const isMobile = useIsMobile()
@@ -95,7 +85,7 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
       border='default'
     >
       <Flex alignItems='center' gap='xs' pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
       </Flex>
@@ -125,7 +115,6 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
           <Flex>
             <UserProfilePictureList
               users={users ?? []}
-              totalUserCount={coinData?.data?.holder}
               limit={isSmallScreen ? 6 : 8}
               disableProfileClick={true}
               disablePopover={true}

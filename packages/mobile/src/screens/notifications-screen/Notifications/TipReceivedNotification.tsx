@@ -14,12 +14,12 @@ import type { TipReceiveNotification } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { formatNumberCommas } from '@audius/common/utils'
 import { Image, Platform, View } from 'react-native'
-import { env } from 'services/env'
 
 import { IconTipping } from '@audius/harmony-native'
 import Checkmark from 'app/assets/images/emojis/white-heavy-check-mark.png'
 import { Text } from 'app/components/core'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
+import { env } from 'app/services/env'
 import { EventNames } from 'app/types/analytics'
 
 import {

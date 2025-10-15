@@ -203,7 +203,8 @@ export const PopupInternal = forwardRef<
     portalLocation = document.body,
     shadow = 'mid',
     fixed,
-    takeWidthOfAnchor
+    takeWidthOfAnchor,
+    disableAutoFlip = false
   } = props
   const { spring, shadows } = useTheme()
 
@@ -257,14 +258,16 @@ export const PopupInternal = forwardRef<
         const {
           anchorOrigin: anchorOriginComputed,
           transformOrigin: transformOriginComputed
-        } = getComputedOrigins(
-          anchorOrigin,
-          transformOrigin,
-          anchorRect,
-          wrapperRect,
-          portalLocation,
-          containerRef
-        )
+        } = disableAutoFlip
+          ? { anchorOrigin, transformOrigin }
+          : getComputedOrigins(
+              anchorOrigin,
+              transformOrigin,
+              anchorRect,
+              wrapperRect,
+              portalLocation,
+              containerRef
+            )
         setComputedTransformOrigin(transformOriginComputed)
 
         const anchorTranslation = getOriginTranslation(
@@ -282,14 +285,12 @@ export const PopupInternal = forwardRef<
         // Ensure popup stays within viewport bounds
         const viewportHeight = window.innerHeight
         const viewportWidth = window.innerWidth
-        const adjustedTop = Math.min(
-          Math.max(0, top),
-          viewportHeight - wrapperRect.height
-        )
-        const adjustedLeft = Math.min(
-          Math.max(0, left),
-          viewportWidth - wrapperRect.width
-        )
+        const adjustedTop = disableAutoFlip
+          ? top
+          : Math.min(Math.max(0, top), viewportHeight - wrapperRect.height)
+        const adjustedLeft = disableAutoFlip
+          ? left
+          : Math.min(Math.max(0, left), viewportWidth - wrapperRect.width)
 
         if (wrapperRef.current) {
           wrapperRef.current.style.top = `${adjustedTop}px`

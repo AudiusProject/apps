@@ -1,6 +1,9 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { transformArtistCoinsToTokenInfoMap } from '~/api'
+import {
+  TEMP_ARTIST_COINS_PAGE_SIZE,
+  transformArtistCoinsToTokenInfoMap
+} from '~/api'
 import { TokenPair } from '~/store'
 import {
   createFallbackPair,
@@ -54,7 +57,9 @@ export const useTokenPair = (
   options?: Partial<ReturnType<typeof getTokenPairOptions>>
 ) => {
   const context = useQueryContext()
-  const { data: artistCoins = [], isLoading: coinsLoading } = useArtistCoins()
+  const { data: artistCoins = [], isLoading: coinsLoading } = useArtistCoins({
+    pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
+  })
 
   // Create tokens map
   const tokensMap = transformArtistCoinsToTokenInfoMap(artistCoins)

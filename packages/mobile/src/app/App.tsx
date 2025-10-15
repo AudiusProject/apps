@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/react-native'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Platform, UIManager } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import {
   SafeAreaProvider,
   initialWindowMetrics
@@ -61,42 +62,47 @@ const App = () => {
   return (
     <AppContextProvider>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <Provider store={store}>
-          <AudiusQueryProvider>
-            <QueryClientProvider client={queryClient}>
-              <SyncLocalStorageUserProvider localStorage={localStorage}>
-                <PersistGate loading={null} persistor={persistor}>
-                  <ThemeProvider>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                      <PortalProvider>
-                        <ErrorBoundary>
-                          <ConnectivityManager />
-                          <NavigationContainer
-                            navigationIntegration={navigationIntegration}
-                          >
-                            <BottomSheetModalProvider>
-                              <CommentDrawerProvider>
-                                <Toasts />
-                                <Airplay />
-                                <RootScreen />
-                                <Drawers />
-                                <OAuthWebView />
-                                <NotificationReminder />
-                                <RateCtaReminder />
-                                <PortalHost name='ChatReactionsPortal' />
-                              </CommentDrawerProvider>
-                            </BottomSheetModalProvider>
-                            <PortalHost name='DrawerPortal' />
-                          </NavigationContainer>
-                        </ErrorBoundary>
-                      </PortalProvider>
-                    </GestureHandlerRootView>
-                  </ThemeProvider>
-                </PersistGate>
-              </SyncLocalStorageUserProvider>
-            </QueryClientProvider>
-          </AudiusQueryProvider>
-        </Provider>
+        <KeyboardProvider
+          statusBarTranslucent={true}
+          navigationBarTranslucent={true}
+        >
+          <Provider store={store}>
+            <AudiusQueryProvider>
+              <QueryClientProvider client={queryClient}>
+                <SyncLocalStorageUserProvider localStorage={localStorage}>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <ThemeProvider>
+                      <GestureHandlerRootView style={{ flex: 1 }}>
+                        <PortalProvider>
+                          <ErrorBoundary>
+                            <ConnectivityManager />
+                            <NavigationContainer
+                              navigationIntegration={navigationIntegration}
+                            >
+                              <BottomSheetModalProvider>
+                                <CommentDrawerProvider>
+                                  <Toasts />
+                                  <Airplay />
+                                  <RootScreen />
+                                  <Drawers />
+                                  <OAuthWebView />
+                                  <NotificationReminder />
+                                  <RateCtaReminder />
+                                  <PortalHost name='ChatReactionsPortal' />
+                                </CommentDrawerProvider>
+                              </BottomSheetModalProvider>
+                              <PortalHost name='DrawerPortal' />
+                            </NavigationContainer>
+                          </ErrorBoundary>
+                        </PortalProvider>
+                      </GestureHandlerRootView>
+                    </ThemeProvider>
+                  </PersistGate>
+                </SyncLocalStorageUserProvider>
+              </QueryClientProvider>
+            </AudiusQueryProvider>
+          </Provider>
+        </KeyboardProvider>
       </SafeAreaProvider>
     </AppContextProvider>
   )

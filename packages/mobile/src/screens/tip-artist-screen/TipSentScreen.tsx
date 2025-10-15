@@ -7,10 +7,10 @@ import { formatNumberCommas, getXShareHandle } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { env } from 'services/env'
 
 import { IconCheck, IconClose, PlainButton } from '@audius/harmony-native'
 import { XButton } from 'app/components/x-button'
+import { env } from 'app/services/env'
 import { makeStyles } from 'app/styles'
 import { EventNames } from 'app/types/analytics'
 

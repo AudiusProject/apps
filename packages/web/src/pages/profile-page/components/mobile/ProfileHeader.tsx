@@ -5,7 +5,6 @@ import {
   imageCoverPhotoBlank,
   imageProfilePicEmpty
 } from '@audius/common/assets'
-import { useFeatureFlag } from '@audius/common/hooks'
 import {
   Name,
   SquareSizes,
@@ -15,7 +14,6 @@ import {
   CoverPhotoSizes,
   User
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { formatCount, route } from '@audius/common/utils'
 import {
   IconArtistBadge as BadgeArtist,
@@ -224,9 +222,6 @@ const ProfileHeader = ({
   // Artist coin detection
   const { data: artistCoin, isPending: isArtistCoinLoading } =
     useArtistOwnedCoin(userId)
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   const record = useRecord()
 
@@ -487,7 +482,7 @@ const ProfileHeader = ({
           {/* Artist coin buy button or tip button */}
           {mode !== 'owner' &&
             !isArtistCoinLoading &&
-            (isArtistCoinsEnabled && artistCoin?.mint ? (
+            (artistCoin?.mint ? (
               <BuyArtistCoinButton userId={userId} />
             ) : (
               <TipAudioButton />
