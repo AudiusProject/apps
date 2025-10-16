@@ -5,7 +5,7 @@ import {
   useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import { useAssociatedWalletsModal } from '@audius/common/store'
+import { useConnectedWalletsModal } from '@audius/common/store'
 import {
   Button,
   Flex,
@@ -58,7 +58,7 @@ enum Pages {
 }
 
 export const ConnectedWalletsModal = () => {
-  const { isOpen, onClose, onClosed } = useAssociatedWalletsModal()
+  const { isOpen, onClose, onClosed } = useConnectedWalletsModal()
   const { toast } = useContext(ToastContext)
 
   const [currentPage, setCurrentPage] = useState(Pages.TABLE)

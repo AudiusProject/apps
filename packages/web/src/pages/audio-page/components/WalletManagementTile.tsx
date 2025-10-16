@@ -8,7 +8,7 @@ import { FeatureFlags, Location, StringKeys } from '@audius/common/services'
 import {
   OnRampProvider,
   useBuySellModal,
-  useAssociatedWalletsModal,
+  useConnectedWalletsModal,
   buyAudioActions,
   useReceiveTokensModal,
   useSendTokensModal
@@ -252,7 +252,7 @@ const ManageWalletsButton = () => {
   const [, setOpenConnectWalletsDrawer] = useModalState(
     'MobileConnectWalletsDrawer'
   )
-  const { onOpen: openConnectedWalletsModal } = useAssociatedWalletsModal()
+  const { onOpen: openConnectedWalletsModal } = useConnectedWalletsModal()
 
   const onCloseConnectWalletsDrawer = useCallback(() => {
     setOpenConnectWalletsDrawer(false)
