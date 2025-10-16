@@ -1,4 +1,8 @@
-import { useArtistCoinMembers, useUsers } from '@audius/common/api'
+import {
+  useArtistCoinMembers,
+  useArtistCoinMembersCount,
+  useUsers
+} from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { LEADERBOARD_USERS_ROUTE } from '@audius/common/src/utils/route'
 import { coinLeaderboardUserListActions } from '@audius/common/store'
@@ -56,6 +60,8 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
   const isPending = isLeaderboardPending || isUsersPending
   const isMobile = useIsMobile()
 
+  const { data: membersCount = 0 } = useArtistCoinMembersCount({ mint })
+
   const handleViewLeaderboard = () => {
     if (isMobile) {
       dispatch(coinLeaderboardUserListActions.setCoinLeaderboard(mint))
@@ -88,6 +94,11 @@ export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
+        {membersCount ? (
+          <Text variant='heading' size='s' color='subdued'>
+            ({membersCount})
+          </Text>
+        ) : null}
       </Flex>
       <Divider css={{ width: '100%' }} />
       <Flex

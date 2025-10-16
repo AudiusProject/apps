@@ -34,6 +34,7 @@ models/CoinExtensions.ts
 models/CoinInsights.ts
 models/CoinInsightsResponse.ts
 models/CoinMember.ts
+models/CoinMembersCountResponse.ts
 models/CoinMembersResponse.ts
 models/CoinResponse.ts
 models/CoinsResponse.ts

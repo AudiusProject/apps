@@ -20,6 +20,7 @@ export * from './CoinExtensions';
 export * from './CoinInsights';
 export * from './CoinInsightsResponse';
 export * from './CoinMember';
+export * from './CoinMembersCountResponse';
 export * from './CoinMembersResponse';
 export * from './CoinResponse';
 export * from './CoinsResponse';

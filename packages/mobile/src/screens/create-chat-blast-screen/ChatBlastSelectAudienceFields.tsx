@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import {
-  useArtistCoinMembersCount,
+  useArtistCoinHoldersCount,
   useArtistOwnedCoin,
   useCurrentAccountUser,
   useCurrentUserId
@@ -250,10 +250,10 @@ const CoinHoldersMessageField = () => {
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coinMembersCount } = useArtistCoinMembersCount()
+  const { data: coinHoldersCount } = useArtistCoinHoldersCount()
   const { data: coin } = useArtistOwnedCoin(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
-  const isDisabled = coinMembersCount === 0
+  const isDisabled = coinHoldersCount === 0
 
   return (
     <ExpandableRadio
@@ -262,7 +262,7 @@ const CoinHoldersMessageField = () => {
       label={
         <LabelWithCount
           label={messages.coinHolders.label(coinSymbol)}
-          count={coinMembersCount}
+          count={coinHoldersCount}
           isSelected={isSelected}
         />
       }

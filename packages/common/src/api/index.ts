@@ -18,8 +18,6 @@ export * from './tan-query/collection/useLibraryCollections'
 export * from './tan-query/collection/useCollectionByParams'
 export * from './tan-query/collection/useDeleteCollection'
 
-// Coins
-
 // Developer Apps
 export * from '../schemas/developerApps'
 export * from './tan-query/developer-apps/useDeveloperApps'

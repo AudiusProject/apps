@@ -1,6 +1,6 @@
 import {
   useArtistOwnedCoin,
-  useArtistCoinMembersCount,
+  useArtistCoinHoldersCount,
   useCurrentAccountUser,
   useCurrentUserId
 } from '@audius/common/api'
@@ -359,8 +359,8 @@ const CoinHoldersMessageField = () => {
   const coinSymbol = coin?.ticker ?? ''
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
-  const { data: membersCount } = useArtistCoinMembersCount()
-  const isDisabled = membersCount === 0
+  const { data: holdersCount } = useArtistCoinHoldersCount()
+  const isDisabled = holdersCount === 0
 
   return (
     <Flex
@@ -374,7 +374,7 @@ const CoinHoldersMessageField = () => {
       <Flex direction='column' gap='xs' css={{ cursor: 'pointer' }}>
         <LabelWithCount
           label={messages.coinHolders.label(coinSymbol)}
-          count={membersCount}
+          count={holdersCount}
           isSelected={isSelected}
         />
         {isSelected ? (
