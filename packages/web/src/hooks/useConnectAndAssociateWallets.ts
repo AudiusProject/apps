@@ -16,7 +16,7 @@ import { useSignMessage } from 'wagmi'
 
 import { appkitModal, wagmiAdapter } from 'app/ReownAppKitModal'
 
-import { useExternalWallets } from './useConnectWallets'
+import { useExternalWallets } from './useExternalWallets'
 
 /**
  * Helper hook that signs a message using the current connected wallet, whether
