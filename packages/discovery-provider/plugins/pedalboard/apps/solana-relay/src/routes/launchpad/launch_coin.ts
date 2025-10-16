@@ -126,12 +126,21 @@ export const launchCoin = async (
       'reward-token-account',
       mintKeypair.publicKey
     )
+    logger.info({
+      message: 'Derived reward pool token account',
+      mint: mintKeypair.publicKey.toBase58(),
+      rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey.toBase58()
+    })
 
     // Transaction Execution
     // ------------------------------------------------------------
 
     // 1. Create Coin Metadata
-    logger.info('Creating coin metadata', { name, symbol })
+    logger.info({
+      message: 'Creating coin metadata',
+      name,
+      symbol
+    })
     const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
     // Pick a random fee payer to "own" our new coin metadata and pay for the TX
     const umiKeypair = umi.eddsa.createKeypairFromSecretKey(feePayer.secretKey)
@@ -153,11 +162,17 @@ export const launchCoin = async (
       isMutable: false
     }
     const metadataUri = await umi.uploader.uploadJson(metadata)
-    logger.info('Coin metadata creator', { name, symbol, metadataUri })
+    logger.info({
+      message: 'Coin metadata creator',
+      name,
+      symbol,
+      metadataUri
+    })
 
     // 2. Create a config for the new coin
     const configKeypair = Keypair.generate()
-    logger.info('Creating config for new coin', {
+    logger.info({
+      message: 'Creating config for new coin',
       name,
       symbol,
       configKeypair: configKeypair.publicKey.toBase58()
@@ -199,14 +214,16 @@ export const launchCoin = async (
       },
       logger
     })
-    logger.info('Created config', {
+    logger.info({
+      message: 'Created config',
       name,
       symbol,
       signature: createConfigSignature
     })
 
     // 3. Create pool and first buy
-    logger.info('Preparing create pool and swap buy transactions', {
+    logger.info({
+      message: 'Preparing create pool and swap buy transactions',
       name,
       symbol
     })
@@ -326,12 +343,20 @@ export const confirmLaunchCoin = async (
     const manager = deriveKeypair('manager', mint)
     const rewardManager = deriveKeypair('reward-manager', mint)
 
+    logger.info({
+      message: 'Derived reward pool accounts',
+      mint: mint.toBase58(),
+      tokenAccount: tokenAccount.publicKey.toBase58(),
+      manager: manager.publicKey.toBase58(),
+      rewardManager: rewardManager.publicKey.toBase58()
+    })
+
     // Pick a random fee payer
     const { solanaFeePayerWallets } = config
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
     const feePayer = solanaFeePayerWallets[index]
 
-    const rewardPoolTx = await createRewardPool({
+    const rewardPoolInstructions = await createRewardPool({
       connection,
       tokenAccount,
       feePayer,
@@ -342,7 +367,7 @@ export const confirmLaunchCoin = async (
     const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
     const rewardPoolMessage = new TransactionMessage({
       recentBlockhash: rewardPoolRecentBlockhash.blockhash,
-      instructions: rewardPoolTx.instructions,
+      instructions: rewardPoolInstructions,
       payerKey: feePayer.publicKey
     })
     const rewardPoolTransaction = new VersionedTransaction(

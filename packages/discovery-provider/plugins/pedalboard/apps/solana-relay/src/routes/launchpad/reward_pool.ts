@@ -5,7 +5,7 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  Transaction
+  TransactionInstruction
 } from '@solana/web3.js'
 
 import { config } from '../../config'
@@ -72,10 +72,10 @@ export const createRewardPool = async ({
   rewardManager: Keypair
   mint: PublicKey
 }) => {
-  const transaction = new Transaction()
+  const instructions: TransactionInstruction[] = []
 
   // 1. Create reward manager account
-  transaction.add(
+  instructions.push(
     SystemProgram.createAccount({
       fromPubkey: feePayer.publicKey,
       newAccountPubkey: rewardManager.publicKey,
@@ -87,7 +87,7 @@ export const createRewardPool = async ({
   )
 
   // 2. Create token account (note: initialize via your program or add SPL init)
-  transaction.add(
+  instructions.push(
     SystemProgram.createAccount({
       fromPubkey: feePayer.publicKey,
       newAccountPubkey: tokenAccount.publicKey,
@@ -99,7 +99,7 @@ export const createRewardPool = async ({
   )
 
   // 3. Initialize reward manager
-  transaction.add(
+  instructions.push(
     RewardManagerProgram.createInitInstruction({
       rewardManagerState: rewardManager.publicKey,
       tokenAccount: tokenAccount.publicKey,
@@ -137,7 +137,7 @@ export const createRewardPool = async ({
       programId: RewardManagerProgram.programId,
       authority
     })
-    transaction.add(
+    instructions.push(
       RewardManagerProgram.createSenderInstruction({
         senderEthAddress: sender.senderEthAddress,
         operatorEthAddress: sender.operatorEthAddress,
@@ -152,7 +152,7 @@ export const createRewardPool = async ({
   }
 
   // 5. Resign manager
-  transaction.add(
+  instructions.push(
     RewardManagerProgram.createChangeManagerAccountInstruction({
       rewardManagerState: rewardManager.publicKey,
       currentManager: manager.publicKey,
@@ -161,5 +161,5 @@ export const createRewardPool = async ({
     })
   )
 
-  return transaction
+  return instructions
 }
