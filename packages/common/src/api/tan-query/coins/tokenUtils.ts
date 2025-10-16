@@ -1,10 +1,10 @@
 import { Coin, coinMetadataFromCoin, type CoinMetadata } from '~/adapters'
-import { TokenInfo } from '~/store/ui/buy-sell/types'
+import { CoinInfo } from '~/store/ui/buy-sell/types'
 
 /**
- * Transform a CoinMetadata to TokenInfo for UI use
+ * Transform a CoinMetadata to CoinInfo for UI use
  */
-const coinMetadataToTokenInfo = (coin: CoinMetadata): TokenInfo => ({
+const coinMetadataToTokenInfo = (coin: CoinMetadata): CoinInfo => ({
   symbol: coin.ticker ?? '',
   name: (coin.name || coin.ticker?.replace(/^\$/, '')) ?? '',
   decimals: coin.decimals ?? 8,
@@ -14,15 +14,15 @@ const coinMetadataToTokenInfo = (coin: CoinMetadata): TokenInfo => ({
   isStablecoin: false // API tokens are never stablecoins, only USDC is (which is frontend-only)
 })
 
-export const transformArtistCoinToTokenInfo = (artistCoin: Coin): TokenInfo => {
+export const transformArtistCoinToTokenInfo = (artistCoin: Coin): CoinInfo => {
   const coinMetadata = coinMetadataFromCoin(artistCoin)
   return coinMetadataToTokenInfo(coinMetadata)
 }
 
 export const transformArtistCoinsToTokenInfoMap = (
   artistCoins: Coin[]
-): Record<string, TokenInfo> => {
-  const tokenMap: Record<string, TokenInfo> = {}
+): Record<string, CoinInfo> => {
+  const tokenMap: Record<string, CoinInfo> = {}
 
   artistCoins.forEach((coin) => {
     const coinMetadata = coinMetadataFromCoin(coin)

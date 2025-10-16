@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useDebouncedCallback } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 import {
   sanitizeNumericInput,
   formatTokenInputWithSmartDecimals
@@ -13,7 +13,7 @@ import { StaticTokenDisplay } from './StaticTokenDisplay'
 import { TokenDropdown } from './TokenDropdown'
 
 type OutputTokenSectionProps = {
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   amount: string
   availableBalance: number
   exchangeRate?: number | null
@@ -23,8 +23,8 @@ type OutputTokenSectionProps = {
   placeholder?: string
   error?: boolean
   onAmountChange?: (amount: string) => void
-  onTokenChange?: (token: TokenInfo) => void
-  availableTokens?: TokenInfo[]
+  onTokenChange?: (token: CoinInfo) => void
+  availableTokens?: CoinInfo[]
   hideTokenDisplay?: boolean
 }
 

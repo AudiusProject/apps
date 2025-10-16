@@ -1,4 +1,4 @@
-import { useTokenBalance, useQueryContext } from '~/api'
+import { useCoinBalance, useQueryContext } from '~/api'
 import type { BuySellTab } from '~/store/ui/buy-sell/types'
 
 /**
@@ -10,10 +10,10 @@ export const useBuySellInitialTab = (): BuySellTab => {
   const { env } = useQueryContext()
 
   // Check USDC and AUDIO balances to determine initial tab
-  const { data: usdcBalance } = useTokenBalance({
+  const { data: usdcBalance } = useCoinBalance({
     mint: env.USDC_MINT_ADDRESS
   })
-  const { data: audioBalance } = useTokenBalance({
+  const { data: audioBalance } = useCoinBalance({
     mint: env.WAUDIO_MINT_ADDRESS
   })
 

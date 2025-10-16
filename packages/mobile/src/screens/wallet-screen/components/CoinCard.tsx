@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { useArtistCoin } from '@audius/common/api'
-import { useFormattedTokenBalance } from '@audius/common/hooks'
+import { useFormattedCoinBalance } from '@audius/common/hooks'
 import { Image, TouchableOpacity } from 'react-native'
 
 import {
@@ -61,7 +61,7 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
     isTokenBalanceLoading,
     isTokenPriceLoading,
     formattedHeldValue
-  } = useFormattedTokenBalance(mint)
+  } = useFormattedCoinBalance(mint)
 
   const isLoading =
     isTokenBalanceLoading || isTokenPriceLoading || coinsDataLoading

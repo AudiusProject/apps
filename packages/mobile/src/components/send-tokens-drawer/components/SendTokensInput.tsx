@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from 'react'
 import {
   useArtistCoin,
   transformArtistCoinToTokenInfo,
-  useTokenBalance
+  useCoinBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -26,7 +26,7 @@ export const SendTokensInput = ({
   initialDestinationAddress
 }: SendTokensInputProps) => {
   const { data: coin } = useArtistCoin(mint)
-  const { data: tokenBalance } = useTokenBalance({
+  const { data: tokenBalance } = useCoinBalance({
     mint,
     includeExternalWallets: false,
     includeStaked: false

@@ -6,8 +6,8 @@ import {
   useArtistCoins
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Divider, Flex, IconButton, IconTransaction } from '@audius/harmony'
 
@@ -59,7 +59,7 @@ export const ConvertTab = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
+  } = useCoinSwapForm({
     inputToken: selectedInputToken,
     outputToken: selectedOutputToken,
     onTransactionDataChange,
@@ -68,7 +68,7 @@ export const ConvertTab = ({
   })
 
   const { data: coins } = useArtistCoins()
-  const artistCoins: TokenInfo[] = useMemo(() => {
+  const artistCoins: CoinInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
 
@@ -89,10 +89,10 @@ export const ConvertTab = ({
   // Generic token change handler with automatic swapping when only 2 tokens are available
   const createTokenChangeHandler = useCallback(
     (
-      primaryCallback: (token: TokenInfo) => void,
-      secondaryCallback?: (token: TokenInfo) => void
+      primaryCallback: (token: CoinInfo) => void,
+      secondaryCallback?: (token: CoinInfo) => void
     ) =>
-      (token: TokenInfo) => {
+      (token: CoinInfo) => {
         primaryCallback(token)
 
         // If there are only 2 total available tokens, automatically set the other token

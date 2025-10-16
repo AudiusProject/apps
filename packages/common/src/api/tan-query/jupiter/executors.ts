@@ -8,7 +8,7 @@ import {
   getJupiterQuoteByMintWithRetry,
   JupiterQuoteResult
 } from '~/services/Jupiter'
-import { TokenInfo } from '~/store/ui/buy-sell/types'
+import { CoinInfo } from '~/store/ui/buy-sell/types'
 import { TOKEN_LISTING_MAP } from '~/store/ui/shared/tokenConstants'
 import { convertBigIntToAmountObject } from '~/utils'
 
@@ -53,11 +53,11 @@ export interface SwapExecutionResult {
 
 export abstract class BaseSwapExecutor {
   protected dependencies: SwapDependencies
-  protected tokens: Record<string, TokenInfo>
+  protected tokens: Record<string, CoinInfo>
 
   constructor(
     dependencies: SwapDependencies,
-    tokens: Record<string, TokenInfo>
+    tokens: Record<string, CoinInfo>
   ) {
     this.dependencies = dependencies
     this.tokens = tokens

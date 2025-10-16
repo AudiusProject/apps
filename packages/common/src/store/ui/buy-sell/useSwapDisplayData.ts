@@ -5,7 +5,7 @@ import type {
   Screen,
   SuccessDisplayData,
   ConfirmationScreenData,
-  TokenPair,
+  CoinPair,
   SwapResult,
   TransactionData
 } from './types'
@@ -33,7 +33,7 @@ type UseSwapDisplayDataProps = {
   transactionData: TransactionData | null
   swapResult: SwapResult | null
   activeTab: BuySellTab
-  selectedPair: TokenPair
+  selectedPair: CoinPair
 }
 
 export const useSwapDisplayData = ({

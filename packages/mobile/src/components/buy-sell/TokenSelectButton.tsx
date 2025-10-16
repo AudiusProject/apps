@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 import { Modal, TouchableOpacity } from 'react-native'
 
 import { Text, Flex, IconCaretDown } from '@audius/harmony-native'
@@ -12,9 +12,9 @@ import { TokenIcon } from '../core'
 import { TokenSelectItem } from './TokenSelectItem'
 
 type TokenSelectButtonProps = {
-  selectedToken: TokenInfo
-  availableTokens: TokenInfo[]
-  onTokenChange: (token: TokenInfo) => void
+  selectedToken: CoinInfo
+  availableTokens: CoinInfo[]
+  onTokenChange: (token: CoinInfo) => void
   title: string
 }
 
@@ -28,14 +28,14 @@ export const TokenSelectButton = ({
   const [tempSelectedToken, setTempSelectedToken] = useState<string>('')
 
   // Create token options map for quick lookup
-  const tokensMap: { [key: string]: TokenInfo } = useMemo(
+  const tokensMap: { [key: string]: CoinInfo } = useMemo(
     () =>
       availableTokens.reduce(
         (acc, token) => {
           acc[token.symbol] = token
           return acc
         },
-        {} as { [key: string]: TokenInfo }
+        {} as { [key: string]: CoinInfo }
       ),
     [availableTokens]
   )

@@ -6,8 +6,8 @@ import {
   useArtistCoins
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import type { TokenInfo, TokenPair } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo, CoinPair } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 
 import { Box, Flex, Skeleton } from '@audius/harmony-native'
@@ -53,7 +53,7 @@ const SwapFormSkeleton = () => (
 )
 
 type BuyScreenProps = {
-  tokenPair: TokenPair
+  tokenPair: CoinPair
   onTransactionDataChange?: (data: {
     inputAmount: number
     outputAmount: number
@@ -65,7 +65,7 @@ type BuyScreenProps = {
   errorMessage?: string
   initialInputValue?: string
   onInputValueChange?: (value: string) => void
-  onOutputTokenChange?: (token: TokenInfo) => void
+  onOutputTokenChange?: (token: CoinInfo) => void
 }
 
 export const BuyScreen = ({
@@ -95,7 +95,7 @@ export const BuyScreen = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
+  } = useCoinSwapForm({
     inputToken: tokenPair?.quoteToken,
     outputToken: tokenPair?.baseToken,
     onTransactionDataChange,
@@ -104,7 +104,7 @@ export const BuyScreen = ({
   })
 
   const { data: coins } = useArtistCoins()
-  const artistCoins: TokenInfo[] = useMemo(() => {
+  const artistCoins: CoinInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
 

@@ -2,7 +2,7 @@ import React from 'react'
 
 import { buySellMessages as baseMessages } from '@audius/common/messages'
 import type { SuccessDisplayData } from '@audius/common/store'
-import { useTokenAmountFormatting } from '@audius/common/store'
+import { useCoinAmountFormatting } from '@audius/common/store'
 import { formatCurrencyWithSubscript } from '@audius/common/utils'
 
 import {
@@ -53,14 +53,14 @@ export const TransactionResultScreen = ({
   // Always call hooks at the top level to avoid conditional hook calls
   const successData = result.status === 'success' ? result.data : null
 
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: successData?.payAmount || 0,
     availableBalance: successData?.payAmount || 0,
     isStablecoin: !!successData?.payTokenInfo.isStablecoin,
     decimals: successData?.payTokenInfo.decimals || 6
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: successData?.receiveAmount || 0,
     availableBalance: successData?.receiveAmount || 0,
     isStablecoin: !!successData?.receiveTokenInfo.isStablecoin,

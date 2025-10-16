@@ -1,28 +1,28 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { BuySellTab, TokenPair } from '~/store'
+import { BuySellTab, CoinPair } from '~/store'
 
-type TokenOverride = { baseToken?: string; quoteToken?: string }
-type TabTokenMap = Record<BuySellTab, { baseToken: string; quoteToken: string }>
-type TokenType = 'baseToken' | 'quoteToken'
+type CoinOverride = { baseToken?: string; quoteToken?: string }
+type TabCoinMap = Record<BuySellTab, { baseToken: string; quoteToken: string }>
+type CoinType = 'baseToken' | 'quoteToken'
 
-const TOKEN_UPDATE_CONFIG: Record<
+const COIN_UPDATE_CONFIG: Record<
   BuySellTab,
-  { input: TokenType; output: TokenType }
+  { input: CoinType; output: CoinType }
 > = {
   buy: { input: 'quoteToken', output: 'baseToken' },
   sell: { input: 'baseToken', output: 'quoteToken' },
   convert: { input: 'baseToken', output: 'quoteToken' }
 }
 
-export const useTokenStates = (selectedPair: TokenPair | null) => {
+export const useCoinStates = (selectedPair: CoinPair | null) => {
   // State for user-initiated token changes - only track overrides
   const [userOverrides, setUserOverrides] = useState<
-    Partial<Record<BuySellTab, TokenOverride>>
+    Partial<Record<BuySellTab, CoinOverride>>
   >({})
 
   // Compute default tokens from selectedPair or fallback defaults
-  const defaultTokens = useMemo<TabTokenMap>(() => {
+  const defaultTokens = useMemo<TabCoinMap>(() => {
     const baseSymbol = selectedPair?.baseToken?.symbol ?? 'AUDIO'
     const quoteSymbol = selectedPair?.quoteToken?.symbol ?? 'USDC'
 
@@ -49,7 +49,7 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
     }
   }, [selectedPair?.baseToken?.symbol, selectedPair?.quoteToken?.symbol])
 
-  const resolvedTokens = useMemo<TabTokenMap>(() => {
+  const resolvedTokens = useMemo<TabCoinMap>(() => {
     const resolveTab = (tab: BuySellTab) => {
       const overrides = userOverrides[tab]
       const defaults = defaultTokens[tab]
@@ -72,7 +72,7 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
     resolvedTokens[activeTab]
 
   const updateOverrides = useCallback(
-    (tab: BuySellTab, overrides: TokenOverride) => {
+    (tab: BuySellTab, overrides: CoinOverride) => {
       setUserOverrides((prev) => ({
         ...prev,
         [tab]: {
@@ -84,10 +84,10 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
     []
   )
 
-  const handleTokenChange = useCallback(
+  const handleCoinChange = useCallback(
     (tab: BuySellTab, type: 'input' | 'output', symbol: string) => {
-      const field = TOKEN_UPDATE_CONFIG[tab][type]
-      updateOverrides(tab, { [field]: symbol } as TokenOverride)
+      const field = COIN_UPDATE_CONFIG[tab][type]
+      updateOverrides(tab, { [field]: symbol } as CoinOverride)
     },
     [updateOverrides]
   )
@@ -95,16 +95,16 @@ export const useTokenStates = (selectedPair: TokenPair | null) => {
   // Handle token changes
   const handleInputTokenChange = useCallback(
     (symbol: string, activeTab: BuySellTab) => {
-      handleTokenChange(activeTab, 'input', symbol)
+      handleCoinChange(activeTab, 'input', symbol)
     },
-    [handleTokenChange]
+    [handleCoinChange]
   )
 
   const handleOutputTokenChange = useCallback(
     (symbol: string, activeTab: BuySellTab) => {
-      handleTokenChange(activeTab, 'output', symbol)
+      handleCoinChange(activeTab, 'output', symbol)
     },
-    [handleTokenChange]
+    [handleCoinChange]
   )
 
   const handleSwapDirection = useCallback(

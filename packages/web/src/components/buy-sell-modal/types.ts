@@ -1,4 +1,4 @@
-import { TokenInfo, TokenPair } from '@audius/common/store'
+import { CoinInfo, CoinPair } from '@audius/common/store'
 import { TooltipPlacement } from 'antd/lib/tooltip'
 
 // Transaction data structure
@@ -35,8 +35,8 @@ export type InputConfiguration = {
 
 // Token selection configuration
 export type TokenSelection = {
-  availableInputTokens?: TokenInfo[]
-  availableOutputTokens?: TokenInfo[]
+  availableInputTokens?: CoinInfo[]
+  availableOutputTokens?: CoinInfo[]
   onInputTokenChange?: (symbol: string) => void
   onOutputTokenChange?: (symbol: string) => void
 }
@@ -49,7 +49,7 @@ export type SwapCallbacks = {
 
 // Main SwapTab props interface composed of smaller interfaces
 export type SwapTabProps = {
-  tokens: TokenPair
+  tokens: CoinPair
   configuration: UIConfiguration
   pricing: TokenPricing
   input: InputConfiguration
@@ -59,7 +59,7 @@ export type SwapTabProps = {
 
 // Base props shared across all tab components
 export type BaseTabProps = {
-  tokenPair: TokenPair
+  tokenPair: CoinPair
   onTransactionDataChange?: (data: TransactionData) => void
   error?: boolean
   errorMessage?: string
@@ -68,18 +68,18 @@ export type BaseTabProps = {
 }
 
 export type BuyTabProps = BaseTabProps & {
-  availableOutputTokens?: TokenInfo[]
+  availableOutputTokens?: CoinInfo[]
   onOutputTokenChange?: (symbol: string) => void
 }
 
 export type SellTabProps = BaseTabProps & {
-  availableInputTokens?: TokenInfo[]
+  availableInputTokens?: CoinInfo[]
   onInputTokenChange?: (symbol: string) => void
 }
 
 export type ConvertTabProps = BaseTabProps & {
-  availableInputTokens?: TokenInfo[]
-  availableOutputTokens?: TokenInfo[]
+  availableInputTokens?: CoinInfo[]
+  availableOutputTokens?: CoinInfo[]
   onInputTokenChange?: (symbol: string) => void
   onOutputTokenChange?: (symbol: string) => void
   onChangeSwapDirection?: () => void

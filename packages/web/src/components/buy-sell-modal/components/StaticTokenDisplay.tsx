@@ -1,10 +1,10 @@
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 import { Flex } from '@audius/harmony'
 
 import { TokenIcon } from '../TokenIcon'
 
 type StaticTokenDisplayProps = {
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
 }
 
 /**

@@ -58,7 +58,7 @@ export type JupiterQuoteParams = {
   onlyDirectRoutes?: boolean
 }
 
-// Add support for mint-based parameters for the useSwapTokens hook
+// Add support for mint-based parameters for the useSwapCoins hook
 export type JupiterMintQuoteParams = {
   inputMint: string
   outputMint: string
@@ -95,7 +95,7 @@ export type JupiterQuoteResult = {
 
 /**
  * Gets a quote from Jupiter using mint addresses directly
- * This version is used by the useSwapTokens hook
+ * This version is used by the useSwapCoins hook
  */
 export const getJupiterQuoteByMint = async ({
   inputMint,

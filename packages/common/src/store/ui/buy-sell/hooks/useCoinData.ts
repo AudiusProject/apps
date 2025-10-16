@@ -6,27 +6,27 @@
 
 import { useMemo } from 'react'
 
-import { QueryOptions, useTokenBalance, useTokenExchangeRate } from '~/api'
+import { QueryOptions, useCoinBalance, useCoinExchangeRate } from '~/api'
 import { useExternalWalletBalance } from '~/api/tan-query/wallets/useExternalWalletBalance'
 import { getTokenDecimalPlaces } from '~/utils'
 
-import type { TokenInfo, TokenDataHookResult } from '../types/swap.types'
+import type { CoinInfo, TokenDataHookResult } from '../types/swap.types'
 import {
   deriveDisplayExchangeRate,
   getSafeAmountForExchangeRate
 } from '../utils/tokenCalculations'
 
 export type UseTokenDataProps = {
-  inputToken: TokenInfo
-  outputToken: TokenInfo
+  inputCoin: CoinInfo
+  outputCoin: CoinInfo
   inputAmount: number
   externalWalletAddress?: string
   queryOptions?: QueryOptions
 }
 
-export const useTokenData = ({
-  inputToken,
-  outputToken,
+export const useCoinData = ({
+  inputCoin,
+  outputCoin,
   inputAmount,
   externalWalletAddress,
   queryOptions
@@ -35,8 +35,8 @@ export const useTokenData = ({
   const {
     data: internalWalletBalanceData,
     isPending: isInternalWalletBalanceLoading
-  } = useTokenBalance({
-    mint: inputToken.address,
+  } = useCoinBalance({
+    mint: inputCoin.address,
     includeExternalWallets: false,
     includeStaked: false,
     enabled: !externalWalletAddress,
@@ -50,7 +50,7 @@ export const useTokenData = ({
   } = useExternalWalletBalance(
     {
       walletAddress: externalWalletAddress,
-      mint: inputToken.address
+      mint: inputCoin.address
     },
     { ...queryOptions, enabled: !!externalWalletAddress }
   )
@@ -64,7 +64,7 @@ export const useTokenData = ({
     : isInternalWalletBalanceLoading
 
   // Get token price for calculations (currently unused but may be needed for future features)
-  // const { data: tokenPriceData } = useArtistCoin({ mint: inputToken.address })
+  // const { data: tokenPriceData } = useArtistCoin({ mint: inputCoin.address })
 
   // Calculate safe amount for exchange rate API
   const safeExchangeRateAmount = useMemo(() => {
@@ -77,11 +77,11 @@ export const useTokenData = ({
     isLoading: isExchangeRateLoading,
     error: exchangeRateError,
     refetch: refetchExchangeRate
-  } = useTokenExchangeRate({
-    inputMint: inputToken.address,
-    outputMint: outputToken.address,
-    inputDecimals: inputToken.decimals,
-    outputDecimals: outputToken.decimals,
+  } = useCoinExchangeRate({
+    inputMint: inputCoin.address,
+    outputMint: outputCoin.address,
+    inputDecimals: inputCoin.decimals,
+    outputDecimals: outputCoin.decimals,
     inputAmount: safeExchangeRateAmount > 0 ? safeExchangeRateAmount : 1
   })
 
@@ -92,7 +92,7 @@ export const useTokenData = ({
 
   // balance: truncated balance for display purposes only
   const displayDecimals = getTokenDecimalPlaces(Number(balanceFD))
-  const maxFractionDigits = Math.min(displayDecimals, inputToken.decimals)
+  const maxFractionDigits = Math.min(displayDecimals, inputCoin.decimals)
   const balance =
     balanceFD && balanceFD.toString() !== '0'
       ? Number(balanceFD.trunc(maxFractionDigits))

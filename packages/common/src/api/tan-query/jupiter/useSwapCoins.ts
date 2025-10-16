@@ -12,7 +12,7 @@ import { Feature } from '~/models'
 import type { User } from '~/models/User'
 import { JupiterQuoteResult } from '~/services/Jupiter'
 
-import { useTokens } from '../tokens/useTokens'
+import { useTradeableCoins } from '../coins/useTradeableCoins'
 
 import { SwapOrchestrator } from './orchestrator'
 import {
@@ -89,15 +89,15 @@ const initializeSwapDependencies = async (
 }
 
 /**
- * Hook for executing token swaps using Jupiter.
+ * Hook for executing coin swaps using Jupiter.
  * Swaps any supported SPL token (or SOL) for another.
  */
-export const useSwapTokens = () => {
+export const useSwapCoins = () => {
   const queryClient = useQueryClient()
   const { solanaWalletService, reportToSentry, audiusSdk, env } =
     useQueryContext()
   const { data: user } = useCurrentAccountUser()
-  const { tokens } = useTokens()
+  const { coins } = useTradeableCoins()
 
   return useMutation<SwapTokensResult, Error, SwapTokensParams>({
     mutationFn: async (params): Promise<SwapTokensResult> => {
@@ -128,7 +128,7 @@ export const useSwapTokens = () => {
         const result = await orchestrator.executeSwap(
           params,
           dependencies,
-          tokens
+          coins
         )
 
         if (result.status === SwapStatus.ERROR) {

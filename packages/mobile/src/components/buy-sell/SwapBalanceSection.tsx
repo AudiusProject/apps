@@ -1,11 +1,11 @@
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 
 import { CryptoBalanceSection } from './CryptoBalanceSection'
 import { USDCBalanceSection } from './USDCBalanceSection'
 
 type SwapBalanceSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   amount: string
 }
 

@@ -9,7 +9,7 @@ import {
 } from '@audius/common/api'
 import {
   useFeatureFlag,
-  useFormattedTokenBalance,
+  useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
@@ -224,7 +224,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     isTokenBalanceLoading,
     isTokenPriceLoading,
     formattedHeldValue
-  } = useFormattedTokenBalance(coin.mint)
+  } = useFormattedCoinBalance(coin.mint)
 
   const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(
     coin.mint

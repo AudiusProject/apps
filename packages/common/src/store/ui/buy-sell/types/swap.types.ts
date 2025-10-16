@@ -2,7 +2,7 @@
  * Core types for token swap functionality
  */
 
-export type TokenInfo = {
+export type CoinInfo = {
   address: string
   symbol: string
   name: string
@@ -144,8 +144,8 @@ export type SwapFormValues = {
  * Main hook configuration and result types
  */
 export type TokenSwapFormConfig = {
-  inputToken: TokenInfo
-  outputToken: TokenInfo
+  inputToken: CoinInfo
+  outputToken: CoinInfo
   min?: number
   max?: number
   onTransactionDataChange?: (data: TransactionData) => void
@@ -181,6 +181,6 @@ export type TokenSwapFormResult = {
   formik: any
 
   // Token info (maintaining backward compatibility)
-  inputToken: TokenInfo
-  outputToken: TokenInfo
+  inputToken: CoinInfo
+  outputToken: CoinInfo
 }

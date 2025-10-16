@@ -1,4 +1,4 @@
-import { TokenInfo } from '@audius/common/store'
+import { CoinInfo } from '@audius/common/store'
 import { Divider, Flex, Text } from '@audius/harmony'
 
 import { TokenIcon } from './TokenIcon'
@@ -9,7 +9,7 @@ const messages = {
 
 type CryptoBalanceSectionProps = {
   title?: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   name?: string
   amount: string
   priceLabel?: string
