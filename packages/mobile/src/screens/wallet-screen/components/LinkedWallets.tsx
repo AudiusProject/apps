@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import type { ConnectedWallet } from '@audius/common/api'
 import {
   useAssociatedWallets,
-  useRemoveConnectedWallet
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
@@ -117,7 +117,8 @@ export const WalletRowOverflowMenu = () => {
   const { toast } = useToast()
   const { address, chain, setIsRemovingWallet } = drawerData ?? {}
 
-  const { mutateAsync: removeConnectedWalletAsync } = useRemoveConnectedWallet()
+  const { mutateAsync: removeConnectedWalletAsync } =
+    useRemoveAssociatedWallet()
 
   const handleCopy = useCallback(() => {
     if (address) {
