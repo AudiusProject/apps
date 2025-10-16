@@ -172,7 +172,6 @@ export * from './tan-query/users/account/useSyncLocalStorageUser'
 // Wallet logic
 export * from './tan-query/wallets/useAudioBalance'
 export * from './tan-query/wallets/useAssociatedWallets'
-export * from './tan-query/wallets/useWalletCollectibles'
 export * from './tan-query/wallets/useWalletOwner'
 export * from './tan-query/wallets/useUSDCBalance'
 export * from './tan-query/wallets/useExternalWalletBalance'
