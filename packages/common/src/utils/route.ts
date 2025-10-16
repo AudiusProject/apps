@@ -71,7 +71,7 @@ export const PURCHASES_PAGE = '/payments/purchases'
 export const SALES_PAGE = '/payments/sales'
 export const WITHDRAWALS_PAGE = '/payments/withdrawals'
 export const TRANSACTION_HISTORY_PAGE = '/wallet/transaction-history'
-export const ASSET_DETAIL_PAGE = '/coins/:ticker'
+export const COIN_DETAIL_PAGE = '/coins/:ticker'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
 export const WALLET_GUIDE_PAGE = '/wallet/guide'
@@ -292,7 +292,7 @@ export const orderedRoutes = [
   PAYMENTS_PAGE,
   AUDIO_PAGE,
   WALLET_AUDIO_PAGE,
-  ASSET_DETAIL_PAGE,
+  COIN_DETAIL_PAGE,
   EDIT_COIN_DETAILS_PAGE,
   WALLET_PAGE,
   COINS_EXPLORE_PAGE,

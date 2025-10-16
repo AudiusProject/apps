@@ -35,7 +35,7 @@ import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
 import Tooltip from 'components/tooltip/Tooltip'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { OpenAppDrawer } from 'pages/asset-detail-page/components/OpenAppDrawer'
+import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
 
 import { AudioCoinCard } from './AudioCoinCard'
 import { CoinCard } from './CoinCard'

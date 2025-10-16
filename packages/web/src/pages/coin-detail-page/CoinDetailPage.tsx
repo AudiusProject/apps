@@ -4,10 +4,7 @@ import {
   useUser
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import {
-  ASSET_DETAIL_PAGE,
-  NOT_FOUND_PAGE
-} from '@audius/common/src/utils/route'
+import { route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
 
@@ -17,11 +14,13 @@ import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { BASE_URL } from 'utils/route'
 
-import { useAssetDetailTabs } from './AssetDetailTabs'
+import { useCoinDetailTabs } from './CoinDetailTabs'
+
+const { COIN_DETAIL_PAGE, NOT_FOUND_PAGE } = route
 
 const messages = coinDetailsMessages.metaTags
 
-type AssetDetailPageContentProps = {
+type CoinDetailPageContentProps = {
   mint: string
   visualTitle: string
   ogTitle: string
@@ -29,7 +28,7 @@ type AssetDetailPageContentProps = {
   isAnonymousUser: boolean
 }
 
-const DesktopAssetDetailPageContent = ({
+const DesktopCoinDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
@@ -37,12 +36,12 @@ const DesktopAssetDetailPageContent = ({
   ticker,
   isOwner,
   isAnonymousUser
-}: AssetDetailPageContentProps & {
+}: CoinDetailPageContentProps & {
   ticker: string
   isOwner: boolean
   isAnonymousUser: boolean
 }) => {
-  const { tabs, body, rightDecorator } = useAssetDetailTabs({
+  const { tabs, body, rightDecorator } = useCoinDetailTabs({
     mint,
     ticker,
     isOwner,
@@ -70,21 +69,21 @@ const DesktopAssetDetailPageContent = ({
   )
 }
 
-const MobileAssetDetailPageContent = ({
+const MobileCoinDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
   description,
   isAnonymousUser
-}: AssetDetailPageContentProps) => {
-  const { body } = useAssetDetailTabs({ mint, isAnonymousUser })
+}: CoinDetailPageContentProps) => {
+  const { body } = useCoinDetailTabs({ mint, isAnonymousUser })
 
   return (
     <MobilePageContainer
       title={visualTitle}
       ogTitle={ogTitle}
       description={description}
-      canonicalUrl={`${BASE_URL}${ASSET_DETAIL_PAGE}/${visualTitle}`}
+      canonicalUrl={`${BASE_URL}${COIN_DETAIL_PAGE}/${visualTitle}`}
     >
       <Flex column w='100%' p='l'>
         {body}
@@ -93,7 +92,7 @@ const MobileAssetDetailPageContent = ({
   )
 }
 
-export const AssetDetailPage = () => {
+export const CoinDetailPage = () => {
   const { ticker } = useParams<{ ticker: string }>()
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
@@ -142,7 +141,7 @@ export const AssetDetailPage = () => {
   )
 
   return isMobile ? (
-    <MobileAssetDetailPageContent
+    <MobileCoinDetailPageContent
       mint={coin?.mint ?? ''}
       visualTitle={visualTitle}
       ogTitle={ogTitle}
@@ -150,7 +149,7 @@ export const AssetDetailPage = () => {
       isAnonymousUser={!currentUserId}
     />
   ) : (
-    <DesktopAssetDetailPageContent
+    <DesktopCoinDetailPageContent
       mint={coin?.mint ?? ''}
       visualTitle={visualTitle}
       ogTitle={ogTitle}

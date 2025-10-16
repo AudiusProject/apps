@@ -1,6 +1,6 @@
 import { Flex, makeResponsiveStyles } from '@audius/harmony'
 
-import { AssetInfoSection } from './components/AssetInfoSection'
+import { CoinInfoSection } from './components/CoinInfoSection'
 import { AssetInsights } from './components/AssetInsights'
 import { AssetLeaderboardCard } from './components/AssetLeaderboardCard'
 import { BalanceSection } from './components/BalanceSection'
@@ -50,22 +50,22 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
   }
 })
 
-type AssetDetailContentProps = {
+type CoinDetailContentProps = {
   mint: string
   isAnonymousUser: boolean
 }
 
-export const AssetDetailContent = ({
+export const CoinDetailContent = ({
   mint,
   isAnonymousUser
-}: AssetDetailContentProps) => {
+}: CoinDetailContentProps) => {
   const styles = useStyles()
 
   return (
     <Flex css={styles.container}>
       <Flex css={styles.leftSection}>
         {isAnonymousUser ? null : <BalanceSection mint={mint} />}
-        <AssetInfoSection mint={mint} />
+        <CoinInfoSection mint={mint} />
       </Flex>
       <Flex css={styles.rightSection}>
         <AssetInsights mint={mint} />
