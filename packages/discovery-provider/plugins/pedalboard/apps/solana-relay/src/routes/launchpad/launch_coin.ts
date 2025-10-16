@@ -318,27 +318,31 @@ export const confirmLaunchCoin = async (
     const connection = getConnection()
 
     // Deserialize transactions
-    const createPoolTxBuf = Buffer.from(createPoolTx, 'base64')
-    const createPoolTransaction =
-      VersionedTransaction.deserialize(createPoolTxBuf)
-    const createSig = bs58.encode(createPoolTransaction.signatures[0])
-
-    const maybeSwapTxBuf = firstBuyTx ? Buffer.from(firstBuyTx, 'base64') : null
-    const swapTransaction = maybeSwapTxBuf
-      ? VersionedTransaction.deserialize(maybeSwapTxBuf)
+    const createPoolTransaction = VersionedTransaction.deserialize(
+      Buffer.from(createPoolTx, 'base64')
+    )
+    const swapTransaction = firstBuyTx
+      ? VersionedTransaction.deserialize(Buffer.from(firstBuyTx, 'base64'))
       : null
 
-    // 1) Send createPoolTx and wait for confirmation
-    const strategy1 = await connection.getLatestBlockhash()
+    // 1. Send create pool transaction and wait for confirmation
+    const createSig = bs58.encode(createPoolTransaction.signatures[0])
     await sendTransactionWithRetries({
       transaction: createPoolTransaction,
       commitment: 'confirmed',
-      confirmationStrategy: { ...strategy1, signature: createSig },
+      sendOptions: {
+        skipPreflight: true
+      },
+      confirmationStrategy: {
+        ...(await connection.getLatestBlockhash()),
+        signature: createSig
+      },
       logger
     })
 
-    // 2) After confirmation, create reward pool using deterministic keys
+    // 2. After confirmation, create reward pool using deterministic keys
     const mint = new PublicKey(mintPublicKey)
+
     const tokenAccount = deriveKeypair('reward-token-account', mint)
     const manager = deriveKeypair('manager', mint)
     const rewardManager = deriveKeypair('reward-manager', mint)
@@ -374,10 +378,20 @@ export const confirmLaunchCoin = async (
       rewardPoolMessage.compileToV0Message()
     )
     rewardPoolTransaction.sign([tokenAccount, feePayer, manager, rewardManager])
+    const base64tx = Buffer.from(rewardPoolTransaction.serialize()).toString(
+      'base64'
+    )
+    logger.info({
+      message: 'Reward pool transaction',
+      base64tx
+    })
     const rewardSig = bs58.encode(rewardPoolTransaction.signatures[0])
     await sendTransactionWithRetries({
       transaction: rewardPoolTransaction,
       commitment: 'confirmed',
+      sendOptions: {
+        skipPreflight: true
+      },
       confirmationStrategy: {
         ...rewardPoolRecentBlockhash,
         signature: rewardSig
@@ -385,15 +399,20 @@ export const confirmLaunchCoin = async (
       logger
     })
 
-    // 3) Finally, send the user's first buy transaction if provided
+    // 3. Send the user's first buy transaction if provided
     let swapSig: string | undefined
     if (swapTransaction) {
       swapSig = bs58.encode(swapTransaction.signatures[0])
-      const strategy3 = await connection.getLatestBlockhash()
       await sendTransactionWithRetries({
         transaction: swapTransaction,
         commitment: 'confirmed',
-        confirmationStrategy: { ...strategy3, signature: swapSig },
+        sendOptions: {
+          skipPreflight: true
+        },
+        confirmationStrategy: {
+          ...(await connection.getLatestBlockhash()),
+          signature: swapSig
+        },
         logger
       })
     }
