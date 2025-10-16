@@ -62,7 +62,8 @@ const WalletRow = ({
     toast(messages.copied, COPIED_TOAST_TIMEOUT)
   }, [address, toast])
 
-  const { mutateAsync: removeConnectedWalletAsync } = useRemoveAssociatedWallet()
+  const { mutateAsync: removeConnectedWalletAsync } =
+    useRemoveAssociatedWallet()
 
   const onOpenMobileOverflow = useCallback(() => {
     setIsMobileOverflowOpen(true)

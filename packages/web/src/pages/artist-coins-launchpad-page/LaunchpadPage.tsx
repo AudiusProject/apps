@@ -26,7 +26,7 @@ import {
   useAppKitBalance
 } from '@reown/appkit/react'
 import { Form, Formik, useFormikContext } from 'formik'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { Navigate, useNavigate } from 'react-router-dom-v5-compat'
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { Header } from 'components/header/desktop/Header'
@@ -563,7 +563,7 @@ export const LaunchpadPage = () => {
 
   // Redirect if user is not verified or already has an artist coin
   if (hasExistingArtistCoin && isLaunchpadVerificationEnabled) {
-    // return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
+    return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
   }
 
   return (

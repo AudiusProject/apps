@@ -115,7 +115,8 @@ const WalletRow = ({
     toast(walletMessages.linkedWallets.copied, COPIED_TOAST_TIMEOUT)
   }, [address, toast])
 
-  const { mutateAsync: removeConnectedWalletAsync } = useRemoveAssociatedWallet()
+  const { mutateAsync: removeConnectedWalletAsync } =
+    useRemoveAssociatedWallet()
 
   const handleRemove = useCallback(async () => {
     try {
