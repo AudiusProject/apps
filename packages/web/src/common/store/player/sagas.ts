@@ -41,8 +41,6 @@ const { getTrackPosition } = playbackPositionSelectors
 const {
   play,
   playSucceeded,
-  playCollectible,
-  playCollectibleSucceeded,
   pause,
   stop,
   setBuffering,
@@ -266,33 +264,6 @@ export function* watchPlay() {
   })
 }
 
-export function* watchCollectiblePlay() {
-  yield* takeLatest(
-    playCollectible.type,
-    function* (action: ReturnType<typeof playCollectible>) {
-      const { collectible, onEnd } = action.payload
-      const { animationUrl, videoUrl } = collectible
-      const audioPlayer = yield* getContext('audioPlayer')
-      const endChannel = eventChannel((emitter) => {
-        audioPlayer.load(
-          0,
-          () => {
-            if (onEnd) {
-              emitter(onEnd({}))
-            }
-          },
-          animationUrl ?? videoUrl
-        )
-        return () => {}
-      })
-      yield* spawn(actionChannelDispatcher, endChannel)
-
-      audioPlayer.play()
-      yield* put(playCollectibleSucceeded({ collectible }))
-    }
-  )
-}
-
 export function* watchPause() {
   yield* takeLatest(pause.type, function* (action: ReturnType<typeof pause>) {
     const onlySetState = action.payload?.onlySetState
@@ -503,7 +474,6 @@ function* recordListenWorker() {
 const sagas = () => {
   return [
     watchPlay,
-    watchCollectiblePlay,
     watchPause,
     watchStop,
     watchReset,

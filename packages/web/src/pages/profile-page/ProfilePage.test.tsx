@@ -80,7 +80,6 @@ const nonArtistUser = {
   updated_at: '2024-01-01T00:00:00.000Z',
   is_storage_v2: true,
   handle_lc: 'test-user',
-  has_collectibles: false,
   allow_ai_attribution: false
 }
 
@@ -120,13 +119,11 @@ const artistUser = {
   updated_at: '2024-01-01T00:00:00.000Z',
   is_storage_v2: true,
   handle_lc: 'test-user',
-  has_collectibles: false,
   allow_ai_attribution: false
 }
 
 const mockData = {
   connected_wallets: { data: { erc_wallets: [], spl_wallets: [] } },
-  collectibles: { data: null },
   userByHandle: { data: [artistUser] },
   supporting: { data: [] },
   supporters: { data: [] },
@@ -182,9 +179,6 @@ export function renderProfilePage(overrides = {}, options?: RenderOptions) {
     }),
     http.get(`${apiEndpoint}/v1/users/${user.id}/connected_wallets`, () => {
       return HttpResponse.json(mockData.connected_wallets)
-    }),
-    http.get(`${apiEndpoint}/v1/users/${user.id}/collectibles`, () => {
-      return HttpResponse.json(mockData.collectibles)
     }),
     http.get(`${apiEndpoint}/v1/full/users/${user.id}/supporting`, () => {
       return HttpResponse.json(mockData.supporting)
@@ -357,11 +351,6 @@ describe('ProfilePage', () => {
   it.skip('shows deactivated state if user is deactivated', async () => {
     // TODO: set up this prop
     renderProfilePage({ isDeactivated: true })
-    // TODO
-  })
-
-  it.skip('shows user with collectibles', async () => {
-    renderProfilePage()
     // TODO
   })
 

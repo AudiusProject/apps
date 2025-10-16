@@ -90,7 +90,7 @@ track_comments as (
     comments c
   where
     c.is_delete is false
-    and c.is_visible is true 
+    and c.is_visible is true
     and c.entity_type = 'Track'
   group by
     comment_entity_id
@@ -298,12 +298,7 @@ returning au.user_id;
 """
 
 update_user_score_query = """
-update aggregate_user
-set score = scores.score
-from get_user_scores() as scores
-where aggregate_user.user_id = scores.user_id
-and aggregate_user.score != scores.score
-returning aggregate_user.user_id;
+select * from refresh_all_user_scores();
 """
 
 
@@ -319,10 +314,24 @@ def _update_aggregates(session):
     start_time = datetime.now()
 
     logger.debug("update_aggregates.py | updating user scores...")
-    updated_user_ids = session.execute(update_user_score_query).fetchall()
-    logger.debug(
-        f"update_aggregates.py | updated user scores {updated_user_ids} in {datetime.now() - start_time}"
-    )
+    result = session.execute(update_user_score_query).fetchone()
+
+    if result:
+        acquired, diff_rows, updated_rows = result
+        logger.info(
+            f"update_aggregates.py | user scores update completed - acquired: {acquired}, "
+            f"diff_rows: {diff_rows}, updated_rows: {updated_rows} in {datetime.now() - start_time}"
+        )
+
+        if not acquired:
+            logger.error(
+                "update_aggregates.py | Failed to acquire lock for user scores update - "
+                "another instance is already running this update"
+            )
+    else:
+        logger.warning(
+            "update_aggregates.py | No result returned from refresh_user_scores_all()"
+        )
 
     start_time = datetime.now()
 

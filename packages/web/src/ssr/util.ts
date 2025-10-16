@@ -2,7 +2,6 @@ import {
   staticRoutes,
   SEARCH_BASE_ROUTE,
   SEARCH_PAGE,
-  PROFILE_PAGE_COLLECTIBLE_DETAILS,
   CHANGE_EMAIL_SETTINGS_PAGE,
   CHANGE_PASSWORD_SETTINGS_PAGE,
   CHATS_PAGE,
@@ -17,7 +16,6 @@ const assetPaths = new Set(['src', 'assets', 'scripts', 'fonts', 'favicons'])
 const invalidPaths = new Set(['undefined'])
 
 const nonSsrPaths = [
-  PROFILE_PAGE_COLLECTIBLE_DETAILS,
   SEARCH_BASE_ROUTE,
   SEARCH_PAGE,
   CHANGE_EMAIL_SETTINGS_PAGE,

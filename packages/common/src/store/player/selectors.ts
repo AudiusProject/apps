@@ -3,7 +3,6 @@ import { CommonState } from '../commonStore'
 export const getHasTrack = (state: CommonState) => !!state.player.trackId
 export const getUid = (state: CommonState) => state.player.uid
 export const getTrackId = (state: CommonState) => state.player.trackId
-export const getCollectible = (state: CommonState) => state.player.collectible
 
 export const getPlaying = (state: CommonState) => state.player.playing
 export const getPreviewing = (state: CommonState) => state.player.previewing

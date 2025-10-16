@@ -14,7 +14,6 @@ import { BuyAudioModal } from 'components/buy-audio-modal/BuyAudioModal'
 import { BuyAudioRecoveryModal } from 'components/buy-audio-modal/BuyAudioRecoveryModal'
 import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
-import CollectibleDetailsModal from 'components/collectibles/components/CollectibleDetailsModal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
 import DeletePlaylistConfirmationModal from 'components/delete-playlist-confirmation-modal/DeletePlaylistConfirmationModal'
 import { DeleteTrackConfirmationModal } from 'components/delete-track-confirmation-modal/DeleteTrackConfirmationModal'
@@ -154,7 +153,6 @@ const Modals = () => {
       <PasswordResetModal />
       <FirstUploadModal />
       <UnsavedChangesDialog />
-      <CollectibleDetailsModal />
       {commonModals.map(([modalName, Modal]) => {
         return <AppModal key={modalName} name={modalName} modal={Modal} />
       })}

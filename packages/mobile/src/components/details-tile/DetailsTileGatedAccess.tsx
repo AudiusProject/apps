@@ -5,7 +5,6 @@ import type {
   TokenGatedConditions
 } from '@audius/common/models'
 import {
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentSpecialAccess,
@@ -41,7 +40,6 @@ export const DetailsTileGatedAccess = ({
     { enabled: isTokenGated }
   )
   const shouldDisplay =
-    isContentCollectibleGated(streamConditions) ||
     isContentFollowGated(streamConditions) ||
     isContentTipGated(streamConditions) ||
     isContentTokenGated(streamConditions) ||

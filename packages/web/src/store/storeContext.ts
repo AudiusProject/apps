@@ -1,6 +1,5 @@
 import { FeatureFlags } from '@audius/common/services'
 import { CommonStoreContext } from '@audius/common/store'
-import { FetchNFTClient } from '@audius/fetch-nft'
 import { setTag, getCurrentScope } from '@sentry/browser'
 
 import * as analytics from 'services/analytics'
@@ -61,18 +60,7 @@ export const buildStoreContext = ({
     // @ts-ignore js file
     getLineupSelectorForRoute,
     audioPlayer: audioPlayer!,
-    nftClient: new FetchNFTClient({
-      openSeaConfig: {
-        apiEndpoint: env.OPENSEA_API_URL
-      },
-      heliusConfig: {
-        apiEndpoint: env.HELIUS_DAS_API_URL
-      },
-      solanaConfig: {
-        rpcEndpoint: env.SOLANA_CLUSTER_ENDPOINT,
-        metadataProgramId: env.METADATA_PROGRAM_ID
-      }
-    }),
+    nftClient: null,
     sentry: { setTag, getCurrentScope },
     reportToSentry,
     trackDownload,

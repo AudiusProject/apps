@@ -8,7 +8,6 @@ import { buyUSDCReducer } from './buy-usdc'
 import cast from './cast/slice'
 import changePasswordReducer from './change-password/slice'
 import { ChangePasswordState } from './change-password/types'
-import collectibles from './collectibles/slice'
 import confirmer from './confirmer/reducer'
 import { ConfirmerState } from './confirmer/types'
 import downloads, { DownloadState } from './downloads/slice'
@@ -76,9 +75,6 @@ import addToCollectionReducer, {
 } from './ui/add-to-collection/reducer'
 import buyAudioReducer from './ui/buy-audio/slice'
 import coinflowModalReducer from './ui/coinflow-modal/slice'
-import collectibleDetailsReducer, {
-  CollectibleDetailsState
-} from './ui/collectible-details/slice'
 import deletePlaylistConfirmationReducer from './ui/delete-playlist-confirmation-modal/slice'
 import { DeletePlaylistConfirmationModalState } from './ui/delete-playlist-confirmation-modal/types'
 import duplicateAddConfirmationReducer from './ui/duplicate-add-confirmation-modal/slice'
@@ -150,7 +146,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     buyAudio: buyAudioReducer,
 
     changePassword: changePasswordReducer,
-    collectibleDetails: collectibleDetailsReducer,
     deletePlaylistConfirmationModal: deletePlaylistConfirmationReducer,
     duplicateAddConfirmationModal: duplicateAddConfirmationReducer,
     mobileOverflowModal: mobileOverflowModalReducer,
@@ -216,9 +211,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   purchaseContent: purchaseContentReducer,
   withdrawUSDC: withdrawUSDCReducer,
 
-  // Collectibles
-  collectibles,
-
   upload,
   confirmer,
   downloads
@@ -262,7 +254,6 @@ export type CommonState = {
     buyAudio: ReturnType<typeof buyAudioReducer>
     addToCollection: AddToCollectionState
     changePassword: ChangePasswordState
-    collectibleDetails: CollectibleDetailsState
     deletePlaylistConfirmationModal: DeletePlaylistConfirmationModalState
     duplicateAddConfirmationModal: DuplicateAddConfirmationModalState
     mobileOverflowModal: MobileOverflowModalState
@@ -329,9 +320,6 @@ export type CommonState = {
   purchaseContent: ReturnType<typeof purchaseContentReducer>
   gatedContent: ReturnType<typeof gatedContent>
   withdrawUSDC: ReturnType<typeof withdrawUSDCReducer>
-
-  // Collectibles
-  collectibles: ReturnType<typeof collectibles>
 
   upload: UploadState
   confirmer: ConfirmerState

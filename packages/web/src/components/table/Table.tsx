@@ -74,7 +74,7 @@ export const dateSorter = (accessor: string) => (rowA: any, rowB: any) => {
   return 0
 }
 
-// Used in TracksTable, CollectiblesPlaylistTable
+// Used in TracksTable
 const isEmptyRowDefault = (row: any) => {
   return Boolean(!row?.original?.uid || row?.original?.kind === Kind.EMPTY)
 }

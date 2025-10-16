@@ -48,16 +48,14 @@ export enum ProfilePageTabs {
   TRACKS = 'Tracks',
   ALBUMS = 'Albums',
   PLAYLISTS = 'Playlists',
-  REPOSTS = 'Reposts',
-  COLLECTIBLES = 'Collectibles'
+  REPOSTS = 'Reposts'
 }
 
 export enum ProfilePageTabRoute {
   TRACKS = 'tracks',
   ALBUMS = 'albums',
   PLAYLISTS = 'playlists',
-  REPOSTS = 'reposts',
-  COLLECTIBLES = 'collectibles'
+  REPOSTS = 'reposts'
 }
 
 export const getTabForRoute = (tabRoute: ProfilePageTabRoute) => {
@@ -70,7 +68,5 @@ export const getTabForRoute = (tabRoute: ProfilePageTabRoute) => {
       return ProfilePageTabs.PLAYLISTS
     case ProfilePageTabRoute.REPOSTS:
       return ProfilePageTabs.REPOSTS
-    case ProfilePageTabRoute.COLLECTIBLES:
-      return ProfilePageTabs.COLLECTIBLES
   }
 }

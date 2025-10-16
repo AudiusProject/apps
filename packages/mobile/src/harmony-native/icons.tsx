@@ -104,7 +104,6 @@ export { default as IconPencil } from '@audius/harmony/src/assets/icons/Pencil.s
 export { default as IconUser } from '@audius/harmony/src/assets/icons/User.svg'
 export { default as IconUserArrowRotate } from '@audius/harmony/src/assets/icons/UserArrowRotate.svg'
 export { default as IconArrowRotate } from '@audius/harmony/src/assets/icons/ArrowRotate.svg'
-export { default as IconCollectible } from '@audius/harmony/src/assets/icons/Collectible.svg'
 export { default as IconPlay } from '@audius/harmony/src/assets/icons/Play.svg'
 export { default as IconUserFollow } from '@audius/harmony/src/assets/icons/UserFollow.svg'
 export { default as IconCompose } from '@audius/harmony/src/assets/icons/Compose.svg'

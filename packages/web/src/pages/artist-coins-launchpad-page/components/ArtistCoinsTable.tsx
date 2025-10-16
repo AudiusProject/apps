@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
-import { makeLoadNextPage, useArtistCoins } from '@audius/common/api'
+import {
+  makeLoadNextPage,
+  useArtistCoins,
+  useQueryContext
+} from '@audius/common/api'
+import { useBuySellInitialTab } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useBuySellModal } from '@audius/common/store'
 import {
@@ -28,7 +33,6 @@ import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useMainContentRef } from 'pages/MainContentContext'
-import { env } from 'services/env'
 
 import styles from './ArtistCoinsTable.module.css'
 
@@ -147,12 +151,12 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   )
 }
 
-const renderVolume24hCell = (cellInfo: CoinCell) => {
+const renderTotalVolumeUSDCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
     <Text variant='body' size='m'>
       {walletMessages.dollarSign}
-      {formatCount(coin.v24hUSD, 2)}
+      {formatCount(coin.totalVolumeUSD, 2)}
     </Text>
   )
 }
@@ -219,16 +223,16 @@ const tableColumnMap = {
     minWidth: 50,
     sorter: numericSorter('price')
   },
-  volume24h: {
-    id: 'volume24h',
+  totalVolumeUSD: {
+    id: 'totalVolumeUSD',
     Header: 'Vol',
-    accessor: 'v24hUSD',
-    Cell: renderVolume24hCell,
+    accessor: 'totalVolumeUSD',
+    Cell: renderTotalVolumeUSDCell,
     disableSortBy: false,
     align: 'right',
     width: 40,
     minWidth: 40,
-    sorter: numericSorter('v24hUSD')
+    sorter: numericSorter('totalVolumeUSD')
   },
   marketCap: {
     id: 'marketCap',
@@ -277,7 +281,7 @@ const tableColumnMap = {
 const sortMethodMap: Record<string, GetCoinsSortMethodEnum> = {
   price: GetCoinsSortMethodEnum.Price,
   marketCap: GetCoinsSortMethodEnum.MarketCap,
-  v24hUSD: GetCoinsSortMethodEnum.Volume,
+  totalVolumeUSD: GetCoinsSortMethodEnum.Volume,
   createdAt: GetCoinsSortMethodEnum.CreatedAt,
   holder: GetCoinsSortMethodEnum.Holder
 }
@@ -301,7 +305,9 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const mainContentRef = useMainContentRef()
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
+  const { env } = useQueryContext()
   const tableRef = useRef<HTMLDivElement | null>(null)
+  const initialTab = useBuySellInitialTab()
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -320,7 +326,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const { data: coinsData, isPending } = queryResult
   const coins = useMemo(
     () => coinsData?.filter((coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS),
-    [coinsData]
+    [coinsData, env.WAUDIO_MINT_ADDRESS]
   )
 
   const loadNextPage = useCallback(() => {
@@ -334,7 +340,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     const width = tableRef.current.offsetWidth
     if (width < 728) {
       setHiddenColumns([
-        tableColumnMap.volume24h.id,
+        tableColumnMap.totalVolumeUSD.id,
         tableColumnMap.marketCap.id,
         tableColumnMap.createdDate.id,
         tableColumnMap.holders.id
@@ -398,10 +404,11 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     (ticker: string) => {
       openBuySellModal({
         ticker,
+        initialTab,
         isOpen: true
       })
     },
-    [openBuySellModal]
+    [openBuySellModal, initialTab]
   )
 
   const handleRowClick = useCallback(

@@ -59,7 +59,7 @@ const PlayBar = ({
   pause,
   onClickInfo
 }: PlayBarProps) => {
-  const { uid, collectible } = currentQueueItem
+  const { uid } = currentQueueItem
   const track = useCurrentTrack()
   const { data: user } = useUser(track?.owner_id)
 
@@ -82,15 +82,11 @@ const PlayBar = ({
     return () => clearInterval(seekInterval)
   })
 
-  const image =
-    (useTrackCoverArt({
-      trackId: track ? track.track_id : undefined,
-      size: SquareSizes.SIZE_150_BY_150,
-      defaultImage: ''
-    }) ||
-      collectible?.imageUrl) ??
-    collectible?.frameUrl ??
-    collectible?.gifUrl
+  const image = useTrackCoverArt({
+    trackId: track ? track.track_id : undefined,
+    size: SquareSizes.SIZE_150_BY_150,
+    defaultImage: ''
+  })
 
   const { hasStreamAccess } = useGatedContentAccess(track)
   const isPreviewing = useSelector(getPreviewing)
@@ -105,27 +101,14 @@ const PlayBar = ({
     source: FavoriteSource.PLAYBAR
   })
 
-  if (((!uid || !track) && !collectible) || !user) return null
-
-  const getDisplayInfo = () => {
-    if (track && !collectible) {
-      return track
-    }
-    return {
-      title: collectible?.name,
-      track_id: collectible?.id,
-      has_current_user_saved: false,
-      _co_sign: null,
-      is_unlisted: false
-    }
-  }
+  if (!uid || !track || !user) return null
 
   const {
     title,
     track_id,
     has_current_user_saved,
     is_unlisted: isUnlisted
-  } = getDisplayInfo()
+  } = track
 
   const { name } = user
 

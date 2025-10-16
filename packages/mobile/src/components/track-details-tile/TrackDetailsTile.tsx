@@ -5,7 +5,6 @@ import { useTrack, useUser } from '@audius/common/api'
 import {
   SquareSizes,
   GatedContentType,
-  isContentCollectibleGated,
   isContentUSDCPurchaseGated,
   isContentTokenGated
 } from '@audius/common/models'
@@ -18,7 +17,6 @@ import {
   Flex,
   IconArtistCoin,
   IconCart,
-  IconCollectible,
   IconSparkles
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
@@ -33,7 +31,6 @@ import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
 
 const messages = {
-  collectibleGated: 'COLLECTIBLE GATED',
   specialAccess: 'SPECIAL ACCESS',
   premiumTrack: 'PREMIUM TRACK',
   coinGated: 'COIN GATED',
@@ -91,18 +88,15 @@ export const TrackDetailsTile = ({
   const { accentBlue, specialLightGreen } = useThemeColors()
   const { data: track } = useTrack(trackId)
   const { data: owner } = useUser(track?.owner_id)
-  const isCollectibleGated = isContentCollectibleGated(track?.stream_conditions)
   const isTokenGated = isContentTokenGated(track?.stream_conditions)
   const isUSDCPurchaseGated =
     useIsUSDCEnabled() && isContentUSDCPurchaseGated(track?.stream_conditions)
 
   const type = isUSDCPurchaseGated
     ? GatedContentType.USDC_PURCHASE
-    : isCollectibleGated
-      ? GatedContentType.COLLECTIBLE_GATED
-      : isTokenGated
-        ? GatedContentType.TOKEN_GATED
-        : GatedContentType.SPECIAL_ACCESS
+    : isTokenGated
+      ? GatedContentType.TOKEN_GATED
+      : GatedContentType.SPECIAL_ACCESS
 
   const headerAttributes: {
     [k in GatedContentType]: {
@@ -112,11 +106,6 @@ export const TrackDetailsTile = ({
     }
   } = useMemo(() => {
     return {
-      [GatedContentType.COLLECTIBLE_GATED]: {
-        message: messages.collectibleGated,
-        icon: IconCollectible,
-        color: accentBlue
-      },
       [GatedContentType.SPECIAL_ACCESS]: {
         message: messages.specialAccess,
         icon: IconSparkles,

@@ -169,8 +169,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                             Tracks: 'tracks',
                             Albums: 'albums',
                             Playlists: 'playlists',
-                            Reposts: 'reposts',
-                            Collectibles: 'collectibles'
+                            Reposts: 'reposts'
                           }
                         } as any, // Nested navigator typing with own params is broken, see: https://github.com/react-navigation/react-navigation/issues/9897
                         SettingsScreen: {
@@ -231,8 +230,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                             Tracks: 'tracks',
                             Albums: 'albums',
                             Playlists: 'playlists',
-                            Reposts: 'reposts',
-                            Collectibles: 'collectibles'
+                            Reposts: 'reposts'
                           }
                         }
                       }
@@ -440,9 +438,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
           }
           // If the path doesn't match a profile tab, it's a track
           else if (
-            !path.match(
-              /^\/[^/]+\/(tracks|albums|playlists|reposts|collectibles)$/
-            )
+            !path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)
           ) {
             path = `/track${path}`
           }
@@ -459,12 +455,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
           // set the path as `collection`
           path = path.replace(/(^\/[^/]+\/)(album)(\/[^/]+$)/, '$1collection$3')
           path = `${path}?collectionType=album`
-        } else if (path.match(/^\/[^/]+\/collectibles\/[^/]+$/)) {
-          // Handle collectible deep links by navigating to the collectibles tab
-          // The collectible ID will be passed as a parameter to open the drawer
-          const handle = pathPart(path)(1)
-          const collectibleId = pathPart(path)(3)
-          path = `/${handle}/collectibles?collectibleId=${collectibleId}`
         }
       }
 

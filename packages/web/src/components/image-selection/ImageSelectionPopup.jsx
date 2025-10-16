@@ -1,8 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 
-import { useCurrentAccountUser, useUserCollectibles } from '@audius/common/api'
 import { RandomImage } from '@audius/common/services'
-import { removeNullable } from '@audius/common/utils'
 import {
   Flex,
   Button,
@@ -22,13 +20,11 @@ import zIndex from 'utils/zIndex'
 import styles from './ImageSelectionPopup.module.css'
 import { ImageSelectionProps } from './PropTypes'
 
-const COLLECTIBLES_PER_PAGE = 15
 const POPULAR_TERMS = ['neon', 'space', 'beach', 'nature', 'abstract']
 
 const messages = {
   uploadYourOwn: 'Upload',
   findArtwork: 'Find Artwork',
-  yourCollectibles: 'Your Collectibles',
   suggestionHeader: 'Suggested Searches',
   search: 'Search',
   searchAgain: 'Search Again',
@@ -130,107 +126,6 @@ const RandomPage = ({ onSelect }) => {
   )
 }
 
-const CollectionPage = ({ onSelect, source }) => {
-  const refs = useRef({})
-  const [loadedImgs, setLoadedImgs] = useState([])
-  const [page, setPage] = useState(1)
-  const { data: accountUser } = useCurrentAccountUser({
-    select: (user) => ({
-      collectibleList: user?.collectible_list,
-      solanaCollectibleList: user?.solana_collectible_list,
-      user_id: user?.user_id
-    })
-  })
-  const { collectibleList, solanaCollectibleList, user_id } = accountUser ?? {}
-
-  const { data: profileCollectibles } = useUserCollectibles({
-    userId: user_id
-  })
-  const allCollectibles = [
-    ...(collectibleList || []),
-    ...(solanaCollectibleList || [])
-  ]
-  const collectibleIdMap = allCollectibles.reduce((acc, c) => {
-    acc[c.id] = c
-    return acc
-  }, {})
-
-  const visibleCollectibles = profileCollectibles?.order
-    ? profileCollectibles.order
-        .map((id) => collectibleIdMap[id])
-        .filter(removeNullable)
-    : allCollectibles
-
-  const imgs = visibleCollectibles.filter((c) => c.mediaType === 'IMAGE')
-  const maxPages = Math.ceil(imgs.length / COLLECTIBLES_PER_PAGE)
-
-  const prevPage = () => {
-    if (page > 1) setPage(page - 1)
-  }
-  const nextPage = () => {
-    if (page < maxPages) setPage(page + 1)
-  }
-
-  const selectImg = (imageUrl) => {
-    onSelect(
-      fetch(imageUrl).then((r) => r.blob()),
-      'url'
-    )
-  }
-
-  return (
-    <div className={styles.collection}>
-      <div className={styles.collectiblesContainer}>
-        {imgs
-          .slice(
-            COLLECTIBLES_PER_PAGE * (page - 1),
-            COLLECTIBLES_PER_PAGE * page
-          )
-          .map((collectible, i) => (
-            <img
-              ref={(ref) => {
-                refs.current[collectible.id + '_' + i] = ref
-              }}
-              key={collectible.id + '_' + i}
-              className={cn(styles.collectibleImg, {
-                [styles.profileImg]: source === 'ProfilePicture',
-                [styles.fadeIn]:
-                  refs.current[collectible.id + '_' + i]?.complete ||
-                  loadedImgs.includes(collectible.imageUrl)
-              })}
-              src={collectible.imageUrl}
-              onLoad={() =>
-                setLoadedImgs([...loadedImgs, collectible.imageUrl])
-              }
-              onClick={() => selectImg(collectible.imageUrl)}
-            />
-          ))}
-      </div>
-      {maxPages > 1 && (
-        <div className={styles.collectiblesControls}>
-          {page > 1 ? (
-            <div className={styles.prevLabel} onClick={prevPage}>
-              PREV
-            </div>
-          ) : (
-            <div />
-          )}
-          <div className={styles.pageLabel}>
-            {page}/{maxPages}
-          </div>
-          {page < maxPages ? (
-            <div className={styles.nextLabel} onClick={nextPage}>
-              NEXT
-            </div>
-          ) : (
-            <div />
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 const ImageSelectionPopup = ({
   anchorRef,
   className,
@@ -244,26 +139,6 @@ const ImageSelectionPopup = ({
   const mainContentRef = useMainContentRef()
   const [page, setPage] = useState(messages.uploadYourOwn)
   const windowSize = useWindowSize()
-  const { data: accountUser } = useCurrentAccountUser({
-    select: (user) => ({
-      collectibleList: user?.collectible_list,
-      solanaCollectibleList: user?.solana_collectible_list,
-      user_id: user?.user_id
-    })
-  })
-  const { collectibleList, solanaCollectibleList, user_id } = accountUser ?? {}
-
-  const { data: profileCollectibles } = useUserCollectibles({
-    userId: user_id
-  })
-
-  const allCollectibles = [
-    ...(collectibleList || []),
-    ...(solanaCollectibleList || [])
-  ]
-  const visibleCollectibles = profileCollectibles?.order
-    ? profileCollectibles.order
-    : allCollectibles
 
   const handleClose = () => {
     setPage(messages.uploadYourOwn)
@@ -274,10 +149,7 @@ const ImageSelectionPopup = ({
     [messages.uploadYourOwn]: (
       <DropzonePage error={error} onSelect={onSelect} />
     ),
-    [messages.findArtwork]: <RandomPage onSelect={onSelect} />,
-    [messages.yourCollectibles]: (
-      <CollectionPage onSelect={onSelect} source={source} />
-    )
+    [messages.findArtwork]: <RandomPage onSelect={onSelect} />
   }
 
   const tabSliderOptions = [
@@ -290,12 +162,6 @@ const ImageSelectionPopup = ({
       text: messages.findArtwork
     }
   ]
-  if (visibleCollectibles.length) {
-    tabSliderOptions.push({
-      key: messages.yourCollectibles,
-      text: messages.yourCollectibles
-    })
-  }
 
   let anchorOrigin = { vertical: 'bottom', horizontal: 'center' }
   let transformOrigin = { vertical: 'top', horizontal: 'center' }

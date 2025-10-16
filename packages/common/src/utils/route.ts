@@ -140,9 +140,6 @@ export const PROFILE_PAGE_TRACKS = '/:handle/tracks'
 export const PROFILE_PAGE_ALBUMS = '/:handle/albums'
 export const PROFILE_PAGE_PLAYLISTS = '/:handle/playlists'
 export const PROFILE_PAGE_REPOSTS = '/:handle/reposts'
-export const PROFILE_PAGE_COLLECTIBLES = '/:handle/collectibles'
-export const PROFILE_PAGE_COLLECTIBLE_DETAILS =
-  '/:handle/collectibles/:collectibleId'
 export const PROFILE_PAGE_AI_ATTRIBUTED_TRACKS = '/:handle/ai'
 export const PROFILE_PAGE_COMMENTS = '/:handle/comments'
 
@@ -187,8 +184,6 @@ export const AUDIUS_REMIX_CONTESTS_LINK = 'https://remix.audius.co/'
 export const AUDIUS_BLOG_LINK = 'https://blog.audius.co/'
 export const AUDIUS_AI_BLOG_LINK =
   'https://help.audius.co/help/What-should-I-know-about-AI-generated-music-on-Audius-0a5a8'
-export const AUDIUS_GATED_CONTENT_BLOG_LINK =
-  'https://blog.audius.co/article/introducing-nft-collectible-gated-content'
 export const AUDIUS_CONTACT_EMAIL_LINK = 'mailto:contact@audius.co'
 export const AUDIUS_PROTOCOL_DASHBOARD_LINK = 'https://dashboard.audius.org'
 export const OPEN_MUSIC_LICENSE_LINK =
@@ -327,9 +322,7 @@ export const orderedRoutes = [
   SUPPORTING_USERS_ROUTE,
   TOP_SUPPORTERS_USERS_ROUTE,
   PROFILE_PAGE_COMMENTS,
-  PROFILE_PAGE,
-  PROFILE_PAGE_COLLECTIBLES,
-  PROFILE_PAGE_COLLECTIBLE_DETAILS
+  PROFILE_PAGE
 ]
 
 export const staticRoutes = new Set([

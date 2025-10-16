@@ -49,7 +49,6 @@ from src.queries.generate_unpopulated_trending_tracks import TRENDING_TRACKS_LIM
 from src.queries.get_extended_purchase_gate import get_extended_purchase_gate
 from src.queries.get_feed import get_feed
 from src.queries.get_latest_entities import get_latest_entities
-from src.queries.get_nft_gated_track_signatures import get_nft_gated_track_signatures
 from src.queries.get_premium_tracks import get_usdc_purchase_tracks
 from src.queries.get_random_tracks import get_random_tracks
 from src.queries.get_recommended_tracks import (
@@ -93,7 +92,7 @@ from src.utils.redis_cache import cache
 from src.utils.redis_metrics import record_metrics
 from src.utils.rendezvous import RendezvousHash
 
-from .models.tracks import blob_info, nft_gated_track_signature_mapping
+from .models.tracks import blob_info
 from .models.tracks import remixes_response as remixes_response_model
 from .models.tracks import stem, stem_full, track, track_access_info, track_full
 
@@ -1854,22 +1853,6 @@ class FeelingLucky(Resource):
         return success_response(tracks)
 
 
-track_signatures_parser = reqparse.RequestParser(argument_class=DescriptiveArgument)
-track_signatures_parser.add_argument(
-    "track_ids",
-    description="""A list of track ids. The order of these track ids will match the order of the token ids.""",
-    type=int,
-    action="append",
-)
-track_signatures_parser.add_argument(
-    "token_ids",
-    description="""A list of ERC1155 token ids. The order of these token ids will match the order of the track ids.
-        There may be multiple token ids for a given track id, so we use a '-' as the delimiter for a track id's token ids.""",
-    type=str,
-    action="append",
-)
-
-
 full_usdc_purchase_tracks_parser = full_trending_parser.copy()
 
 
@@ -1916,48 +1899,6 @@ class FullUSDCPurchaseTracks(Resource):
         )
         premium_tracks = get_usdc_purchase_tracks(args, strategy)
         return success_response(premium_tracks)
-
-
-full_nft_gated_track_signatures_response = make_full_response(
-    "nft_gated_track_signatures_response",
-    full_ns,
-    fields.Nested(nft_gated_track_signature_mapping),
-)
-
-
-@full_ns.route("/<string:user_id>/nft-gated-signatures")
-class NFTGatedTrackSignatures(Resource):
-    @record_metrics
-    @full_ns.doc(
-        id="""Get NFT Gated Track Signatures""",
-        description="""Gets gated track signatures for passed in gated track ids""",
-        params={
-            "user_id": """The user for whom we are generating gated track signatures."""
-        },
-    )
-    @full_ns.expect(track_signatures_parser)
-    @full_ns.response(200, "Success", full_nft_gated_track_signatures_response)
-    @cache(ttl_sec=5)
-    def get(self, user_id):
-        decoded_user_id = decode_with_abort(user_id, full_ns)
-        request_args = track_signatures_parser.parse_args()
-        track_ids = request_args.get("track_ids")
-        token_ids = request_args.get("token_ids")
-
-        # Track ids and token ids should have the same length.
-        # If a track id does not have token ids, then we should still receive an empty string for its token ids.
-        # We need to enforce this because we won't be able to tell which track ids the token ids are for otherwise.
-        if len(track_ids) != len(token_ids):
-            full_ns.abort(400, "Mismatch between track ids and their token ids.")
-
-        track_token_id_map = {}
-        for i, track_id in enumerate(track_ids):
-            track_token_id_map[track_id] = (
-                token_ids[i].split("-") if token_ids[i] else []
-            )
-
-        signatures = get_nft_gated_track_signatures(decoded_user_id, track_token_id_map)
-        return success_response(signatures)
 
 
 @ns.route("/latest", doc=False)

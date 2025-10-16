@@ -6,18 +6,15 @@ import {
   useArtistCoin,
   useCollection,
   useCurrentAccount,
-  useHasAccount,
   useTrack,
   useUser,
   useUsers
 } from '~/api'
-import { Chain } from '~/models/Chain'
 import { Collection } from '~/models/Collection'
 import { ID } from '~/models/Identifiers'
 import {
   AccessConditions,
   Track,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentTokenGated,
@@ -25,15 +22,12 @@ import {
 } from '~/models/Track'
 import { FeatureFlags } from '~/services/remote-config'
 import { gatedContentSelectors } from '~/store/gated-content'
-import {
-  isContentPartialCollection,
-  isContentPartialTrack
-} from '~/utils/contentTypeUtils'
+import { isContentPartialTrack } from '~/utils/contentTypeUtils'
 import { Nullable, removeNullable } from '~/utils/typeUtils'
 
 import { useFeatureFlag } from './useFeatureFlag'
 
-const { getLockedContentId, getNftAccessSignatureMap } = gatedContentSelectors
+const { getLockedContentId } = gatedContentSelectors
 
 export const useGatedTrackAccess = (trackId: ID) => {
   const { data: track } = useTrack(trackId, {
@@ -81,9 +75,6 @@ type PartialCollection = Pick<
 export const useGatedContentAccess = (
   content: Nullable<PartialTrack> | Nullable<PartialCollection> | undefined
 ) => {
-  const nftAccessSignatureMap = useSelector(getNftAccessSignatureMap)
-  const hasAccount = useHasAccount()
-
   return useMemo(() => {
     if (!content) {
       return {
@@ -95,47 +86,26 @@ export const useGatedContentAccess = (
     }
 
     const isTrack = isContentPartialTrack<PartialTrack>(content)
-    const isCollection = isContentPartialCollection<PartialCollection>(content)
-    const trackId = isTrack
-      ? content.track_id
-      : isCollection
-        ? content.playlist_id
-        : null
     const { is_stream_gated: isStreamGated } = content
     const isDownloadGated = isTrack ? content.is_download_gated : undefined
 
     const { stream, download } = content.access ?? {}
-    const hasNftAccessSignature = !!(trackId && nftAccessSignatureMap[trackId])
-    const isCollectibleGated = isContentCollectibleGated(
-      content.stream_conditions
-    )
 
     const isPreviewable =
       isContentUSDCPurchaseGated(content.stream_conditions) &&
       isTrack &&
       !!content?.preview_cid
 
-    const isSignatureToBeFetched =
-      isCollectibleGated &&
-      !!trackId &&
-      // if nft gated track, the signature would have been fetched separately
-      nftAccessSignatureMap[trackId] === undefined &&
-      // signature is fetched only if the user is logged in
-      hasAccount
-
     return {
-      isFetchingNFTAccess: !hasNftAccessSignature && isSignatureToBeFetched,
+      isFetchingNFTAccess: false,
       hasStreamAccess: !isStreamGated || !!stream,
       hasDownloadAccess: !isDownloadGated || !!download,
       isPreviewable
     }
-  }, [content, nftAccessSignatureMap, hasAccount])
+  }, [content])
 }
 
 export const useGatedContentAccessMap = (tracks: Partial<Track>[]) => {
-  const nftAccessSignatureMap = useSelector(getNftAccessSignatureMap)
-  const hasAccount = useHasAccount()
-
   const result = useMemo(() => {
     const map: {
       [id: ID]: { isFetchingNFTAccess: boolean; hasStreamAccess: boolean }
@@ -147,25 +117,15 @@ export const useGatedContentAccessMap = (tracks: Partial<Track>[]) => {
       }
 
       const trackId = track.track_id
-      const hasNftAccessSignature = !!nftAccessSignatureMap[trackId]
-      const isCollectibleGated = isContentCollectibleGated(
-        track.stream_conditions
-      )
-      const isSignatureToBeFetched =
-        isCollectibleGated &&
-        // if nft gated track, the signature would have been fetched separately
-        nftAccessSignatureMap[trackId] === undefined &&
-        // signature is fetched only if the user is logged in
-        hasAccount
 
       map[trackId] = {
-        isFetchingNFTAccess: !hasNftAccessSignature && isSignatureToBeFetched,
+        isFetchingNFTAccess: false,
         hasStreamAccess: !track.is_stream_gated || !!track.access?.stream
       }
     })
 
     return map
-  }, [tracks, nftAccessSignatureMap, hasAccount])
+  }, [tracks])
 
   return result
 }
@@ -179,9 +139,6 @@ export const useStreamConditionsEntity = (
   const tipUserId = isContentTipGated(streamConditions)
     ? streamConditions?.tip_user_id
     : null
-  const nftCollection = isContentCollectibleGated(streamConditions)
-    ? streamConditions?.nft_collection
-    : null
   const tokenMint = isContentTokenGated(streamConditions)
     ? streamConditions?.token_gate.token_mint
     : null
@@ -193,26 +150,7 @@ export const useStreamConditionsEntity = (
   const tippedUser = tipUserId ? usersById[tipUserId] : null
   const { data: token } = useArtistCoin(tokenMint)
 
-  const collectionLink = useMemo(() => {
-    if (!nftCollection) return ''
-
-    const { chain, address, externalLink } = nftCollection
-    if (chain === Chain.Eth && 'slug' in nftCollection) {
-      return `https://opensea.io/collection/${nftCollection.slug}`
-    } else if (chain === Chain.Sol) {
-      const explorerUrl = `https://explorer.solana.com/address/${address}`
-      const externalUrl = externalLink ? new URL(externalLink) : null
-      return externalUrl
-        ? `${externalUrl.protocol}//${externalUrl.hostname}`
-        : explorerUrl
-    }
-
-    return ''
-  }, [nftCollection])
-
   return {
-    nftCollection: nftCollection ?? null,
-    collectionLink,
     followee,
     tippedUser,
     token

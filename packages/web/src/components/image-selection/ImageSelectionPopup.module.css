@@ -120,44 +120,9 @@
   margin-top: var(--harmony-unit-6);
 }
 
-.collectiblesContainer {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px 0;
-}
-
-.collectibleImg {
-  height: 64px;
-  width: 64px;
-  object-fit: cover;
-  border-radius: 2px;
-  transition: 0.07s ease-in-out;
-  opacity: 0;
-  border: 1px solid var(--harmony-n-50);
-}
 .fadeIn {
   animation: fadeIn 0.5s forwards;
 }
-.collectibleImg:hover {
-  cursor: pointer;
-  transform: perspective(1px) scale3d(1.04, 1.04, 1.04);
-}
-.collectibleImg.profileImg {
-  border-radius: 100%;
-}
-
-.collectiblesControls {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--harmony-unit-2);
-  color: var(--harmony-n-400);
-  font-size: var(--harmony-font-xs);
-  font-weight: var(--harmony-font-bold);
-}
-.collectiblesControls > div {
-  flex: 1 1 0;
-}
-
 .prevLabel {
   text-align: left;
   cursor: pointer;

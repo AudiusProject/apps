@@ -1,11 +1,4 @@
-import {
-  Genre,
-  Mood,
-  EthCollectibleGatedConditions,
-  SolCollectibleGatedConditions,
-  NativeFile,
-  MAX_DESCRIPTION_LENGTH
-} from '@audius/sdk'
+import { Genre, Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
 import { z } from 'zod'
 
 import { imageBlank } from '~/assets'
@@ -25,15 +18,6 @@ const messages = {
     nameRequiredError: 'Your album must have a name.'
   }
 }
-
-/** Same as SDK but snake-cased */
-const CollectibleGatedConditions = z
-  .object({
-    nft_collection: z.optional(
-      z.union([EthCollectibleGatedConditions, SolCollectibleGatedConditions])
-    )
-  })
-  .strict()
 
 /** Same as SDK but snake-cased */
 const FollowGatedConditionsSchema = z
@@ -109,7 +93,6 @@ const premiumMetadataSchema = z.object({
   stream_conditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditionsSchema,
         TipGatedConditionsSchema,
         USDCPurchaseConditionsSchema,
@@ -121,7 +104,6 @@ const premiumMetadataSchema = z.object({
   download_conditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditionsSchema,
         TipGatedConditionsSchema,
         USDCPurchaseConditionsSchema,

@@ -31,7 +31,6 @@ describe('getUsersBatcher', () => {
     doesFollowCurrentUser: false,
     doesCurrentUserFollow: false,
     currentUserFolloweeFollowCount: 0,
-    hasCollectibles: false,
     ercWallet: '',
     supporterCount: 0,
     supportingCount: 0,

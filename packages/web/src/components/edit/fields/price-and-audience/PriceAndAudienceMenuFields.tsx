@@ -16,7 +16,6 @@ import layoutStyles from 'components/layout/layout.module.css'
 import { ModalRadioItem } from 'components/modal-radio/ModalRadioItem'
 
 import { SpecialAccessFields } from '../stream-availability/SpecialAccessFields'
-import { CollectibleGatedRadioField } from '../stream-availability/collectible-gated/CollectibleGatedRadioField'
 import { TokenGatedRadioField } from '../stream-availability/token-gated/TokenGatedRadioField'
 import { UsdcPurchaseGatedRadioField } from '../stream-availability/usdc-purchase-gated/UsdcPurchaseGatedRadioField'
 import { STREAM_AVAILABILITY_TYPE, STREAM_CONDITIONS } from '../types'
@@ -101,13 +100,6 @@ export const PriceAndAudienceMenuFields = (
               isAlbum ? 'album' : 'track',
               'gated'
             )}
-          />
-        ) : null}
-        {!isAlbum && !isTokenGatingEnabled ? (
-          <CollectibleGatedRadioField
-            isRemix={isRemix}
-            isUpload={isUpload}
-            isInitiallyUnlisted={isInitiallyUnlisted}
           />
         ) : null}
         {!isAlbum && isTokenGatingEnabled ? (

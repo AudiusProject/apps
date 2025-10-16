@@ -2,7 +2,6 @@ import { queryAccountUser } from '@audius/common/api'
 import {
   Name,
   TrackAccessType,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentTokenGated,
@@ -22,8 +21,6 @@ function getTrackAccess({
       return TrackAccessType.FOLLOW_GATED
     } else if (isContentTipGated(stream_conditions)) {
       return TrackAccessType.TIP_GATED
-    } else if (isContentCollectibleGated(stream_conditions)) {
-      return TrackAccessType.COLLECTIBLE_GATED
     } else if (isContentTokenGated(stream_conditions)) {
       return TrackAccessType.TOKEN_GATED
     } else if (isContentUSDCPurchaseGated(stream_conditions)) {

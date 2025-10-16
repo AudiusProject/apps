@@ -106,8 +106,6 @@ describe('getCollectionsBatcher', () => {
       profilePictureSizes: '',
       profilePictureCids: undefined,
       profilePictureLegacy: undefined,
-      metadataMultihash: undefined,
-      hasCollectibles: false,
       playlistLibrary: undefined,
       allowAiAttribution: false
     }

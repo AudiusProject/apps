@@ -11,7 +11,6 @@ import {
   Name,
   PlaybackSource,
   LineupState,
-  Collectible,
   Track,
   Collection,
   UserTrackMetadata,
@@ -42,7 +41,6 @@ import { getRecommendedTracks } from 'common/store/recommendation/sagas'
 import { getLocation } from 'store/routing/selectors'
 
 const {
-  getCollectible,
   getId: getQueueTrackId,
   getIndex,
   getLength,
@@ -171,7 +169,7 @@ function* handleQueueAutoplay({
  */
 function* watchPlay() {
   yield* takeLatest(play.type, function* (action: ReturnType<typeof play>) {
-    const { uid, trackId, collectible, playerBehavior } = action.payload
+    const { uid, trackId, playerBehavior } = action.payload
 
     // Play a specific uid
     const playerUid = yield* select(getPlayerUid)
@@ -248,14 +246,6 @@ function* watchPlay() {
       } else {
         yield* put(playerActions.play({}))
       }
-    } else if (collectible) {
-      yield* put(playerActions.stop({}))
-      yield* put(
-        playerActions.playCollectible({
-          collectible,
-          onEnd: next
-        })
-      )
     } else {
       // If nothing is queued, grab the proper lineup, queue it and play it
       const index = yield* select(getIndex)
@@ -364,22 +354,6 @@ function* watchNext() {
       return
     }
 
-    // For the audio nft playlist flow
-    const collectible = yield* select(getCollectible)
-    if (collectible) {
-      const event = make(Name.PLAYBACK_PLAY, {
-        id: `${collectible.id}`,
-        source: PlaybackSource.PASSIVE
-      })
-      yield* put(event)
-
-      const source = yield* select(getSource)
-      if (source) {
-        yield* put(play({ collectible, source }))
-      }
-      return
-    }
-
     const id = (yield* select(getQueueTrackId)) as ID
     const playerBehavior = (yield* select(getPlayerBehavior) || undefined) as
       | PlayerBehavior
@@ -473,22 +447,6 @@ function* watchPrevious() {
       const undershot = yield* select(getUndershot)
       if (undershot) {
         yield* put(playerActions.reset({ shouldAutoplay: false }))
-        return
-      }
-
-      // For the audio nft playlist flow
-      const collectible: Collectible | null = yield* select(getCollectible)
-      if (collectible) {
-        const event = make(Name.PLAYBACK_PLAY, {
-          id: `${collectible.id}`,
-          source: PlaybackSource.PASSIVE
-        })
-        yield* put(event)
-
-        const source = yield* select(getSource)
-        if (source) {
-          yield* put(play({ collectible, source }))
-        }
         return
       }
 

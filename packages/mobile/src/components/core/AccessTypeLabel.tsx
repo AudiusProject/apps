@@ -10,7 +10,6 @@ import {
   IconCart,
   IconReceive,
   IconSparkles,
-  IconCollectible,
   IconArtistCoin
 } from '@audius/harmony-native'
 
@@ -62,11 +61,6 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     icon: IconArtistCoin,
     label: 'Coin Gated',
     color: 'artistCoin'
-  },
-  [AccessType.COLLECTIBLE_GATED]: {
-    icon: IconCollectible,
-    label: 'Collectible Gated',
-    color: 'special'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,

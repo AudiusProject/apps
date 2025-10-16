@@ -7,9 +7,7 @@ import {
 } from 'react'
 
 import { useUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { BadgeTier, ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import {
@@ -88,9 +86,6 @@ const UserBadges = ({
   hideArtistCoinBadge = false
 }: UserBadgesProps) => {
   const { tier: currentTier, isVerified } = useTierAndVerifiedForUser(userId)
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const { data: user } = useUser(userId, {
     select: (user) => ({
       artistCoinBadge: user?.artist_coin_badge
@@ -175,7 +170,6 @@ const UserBadges = ({
 
   const shouldShowArtistCoinBadge =
     !hideArtistCoinBadge &&
-    isArtistCoinEnabled &&
     !!displayMint &&
     displayMint !== env.WAUDIO_MINT_ADDRESS
 

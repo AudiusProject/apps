@@ -2,7 +2,7 @@ import { MouseEvent, useCallback } from 'react'
 
 import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
-import { playerSelectors, CommonState } from '@audius/common/store'
+import { playerSelectors } from '@audius/common/store'
 import {
   IconWaveForm as IconVisualizer,
   IconButton,
@@ -25,7 +25,7 @@ import { NO_VISUALIZER_ROUTES } from 'pages/visualizer/Visualizer'
 import { openVisualizer } from 'pages/visualizer/store/slice'
 import { fullTrackPage } from 'utils/route'
 
-const { getTrackId, getCollectible } = playerSelectors
+const { getTrackId } = playerSelectors
 
 const messages = {
   viewTrack: 'View currently playing track',
@@ -55,14 +55,6 @@ export const NowPlayingArtworkTile = () => {
     }
   })
   const { title, isStreamGated, permalink, isOwner } = partialTrack ?? {}
-
-  const collectibleImage = useSelector((state: CommonState) => {
-    const collectible = getCollectible(state)
-    if (collectible) {
-      const { imageUrl, frameUrl, gifUrl } = collectible
-      return imageUrl ?? frameUrl ?? gifUrl
-    }
-  })
 
   const trackCoverArtImage = useTrackCoverArt({
     trackId: trackId ?? undefined,
@@ -108,10 +100,7 @@ export const NowPlayingArtworkTile = () => {
         style={slideInProps}
       >
         <Link to={permalink} aria-label={messages.viewTrack}>
-          <DynamicImage
-            useSkeleton={false}
-            image={collectibleImage ?? trackCoverArtImage}
-          >
+          <DynamicImage useSkeleton={false} image={trackCoverArtImage}>
             <IconButton
               activeColor='active'
               ripple

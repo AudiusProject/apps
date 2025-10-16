@@ -1,4 +1,3 @@
-import { FetchNFTClient } from '@audius/fetch-nft'
 import type { AudiusSdk } from '@audius/sdk'
 import { VersionedTransaction } from '@solana/web3.js'
 import { QueryClient } from '@tanstack/react-query'
@@ -68,7 +67,7 @@ export type CommonStoreContext = {
     location: Location
   ) => (state: CommonState) => LineupState<Track>
   audioPlayer: AudioPlayer
-  nftClient: FetchNFTClient
+  nftClient: null
   sentry: {
     setTag: (key: string, value: string) => void
     getCurrentScope: () => { setUser: (user: any) => void }

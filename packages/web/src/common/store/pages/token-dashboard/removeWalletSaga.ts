@@ -1,8 +1,4 @@
-import {
-  QUERY_KEYS,
-  queryAccountUser,
-  queryCurrentUserId
-} from '@audius/common/api'
+import { QUERY_KEYS, queryCurrentUserId } from '@audius/common/api'
 import {
   tokenDashboardPageActions,
   confirmerActions,
@@ -12,12 +8,8 @@ import {
 } from '@audius/common/store'
 import { Id } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
-import { call, fork, getContext, put, takeLatest } from 'typed-redux-saga'
+import { call, getContext, put, takeLatest } from 'typed-redux-saga'
 
-import {
-  fetchEthereumCollectibles,
-  fetchSolanaCollectibles
-} from 'common/store/profile/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import { CONNECT_WALLET_CONFIRMATION_UID } from './types'
@@ -65,11 +57,6 @@ function* removeWallet(action: ConfirmRemoveWalletAction) {
       queryKey: [QUERY_KEYS.audioBalance]
     })
     yield* put(removeWalletAction({ wallet: removeWallet, chain: removeChain }))
-
-    const user = yield* call(queryAccountUser)
-
-    yield* fork(fetchSolanaCollectibles, user)
-    yield* fork(fetchEthereumCollectibles, user)
   }
 
   function* onError() {

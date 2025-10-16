@@ -1,6 +1,6 @@
-import { useCallback, memo, ReactNode, useEffect, useState } from 'react'
+import { memo, ReactNode, useEffect, useState } from 'react'
 
-import { useMutedUsers, useUserCollectibles } from '@audius/common/api'
+import { useMutedUsers } from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
 import { commentsMessages } from '@audius/common/messages'
 import {
@@ -23,7 +23,6 @@ import {
   Box,
   Flex,
   IconAlbum,
-  IconCollectible as IconCollectibles,
   IconArtistBadge as BadgeArtist,
   IconLabelBadge as BadgeLabel,
   IconNote,
@@ -35,7 +34,6 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 
-import CollectiblesPage from 'components/collectibles/components/CollectiblesPage'
 import { ConfirmationModal } from 'components/confirmation-modal'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
 import Lineup from 'components/lineup/Lineup'
@@ -266,27 +264,7 @@ const ProfilePage = ({
     return isOwner ? <ProfileCompletionHeroCard /> : null
   }
 
-  const { data: collectibles } = useUserCollectibles({ userId })
-
-  const profileHasCollectibles =
-    profile?.collectibleList?.length || profile?.solanaCollectibleList?.length
-  const profileNeverSetCollectiblesOrder = !collectibles
-  const profileHasNonEmptyCollectiblesOrder =
-    collectibles?.order?.length ?? false
-  const profileHasVisibleImageOrVideoCollectibles =
-    profileHasCollectibles &&
-    (profileNeverSetCollectiblesOrder || profileHasNonEmptyCollectiblesOrder)
-  const didCollectiblesLoadAndWasEmpty =
-    profileHasCollectibles && !profileHasNonEmptyCollectiblesOrder
-
   const isDeactivated = !!profile?.is_deactivated
-
-  const isUserOnTheirProfile = accountUserId === userId
-
-  const tabRecalculator = useTabRecalculator()
-  const recalculate = useCallback(() => {
-    tabRecalculator.recalculate()
-  }, [tabRecalculator])
 
   const getArtistProfileContent = () => {
     if (!profile) return { headers: [], elements: [] }
@@ -391,36 +369,6 @@ const ProfilePage = ({
       </Box>
     ]
 
-    if (
-      // `has_collectibles` is a shortcut that is only true iff the user has a modified collectibles state
-      (profile?.has_collectibles && !didCollectiblesLoadAndWasEmpty) ||
-      profileHasVisibleImageOrVideoCollectibles ||
-      (profileHasCollectibles && isUserOnTheirProfile)
-    ) {
-      headers.push({
-        icon: <IconCollectibles />,
-        text: ProfilePageTabs.COLLECTIBLES,
-        label: ProfilePageTabs.COLLECTIBLES,
-        to: 'collectibles'
-      })
-
-      elements.push(
-        <Box w='100%' key={ProfilePageTabs.COLLECTIBLES}>
-          <CollectiblesPage
-            userId={userId}
-            name={name}
-            isMobile={false}
-            isUserOnTheirProfile={isUserOnTheirProfile}
-            profile={profile}
-            updateProfilePicture={updateProfilePicture}
-            onLoad={recalculate}
-            onSave={onSave}
-            allowUpdates
-          />
-        </Box>
-      )
-    }
-
     return { headers, elements }
   }
 
@@ -468,35 +416,6 @@ const ProfilePage = ({
       </Box>
     ]
 
-    if (
-      (profile?.has_collectibles && !didCollectiblesLoadAndWasEmpty) ||
-      profileHasVisibleImageOrVideoCollectibles ||
-      (profileHasCollectibles && isUserOnTheirProfile)
-    ) {
-      headers.push({
-        icon: <IconCollectibles />,
-        text: ProfilePageTabs.COLLECTIBLES,
-        label: ProfilePageTabs.COLLECTIBLES,
-        to: 'collectibles'
-      })
-
-      elements.push(
-        <Box w='100%' key={ProfilePageTabs.COLLECTIBLES}>
-          <CollectiblesPage
-            userId={userId}
-            name={name}
-            isMobile={false}
-            isUserOnTheirProfile={isUserOnTheirProfile}
-            profile={profile}
-            updateProfilePicture={updateProfilePicture}
-            onLoad={recalculate}
-            onSave={onSave}
-            allowUpdates
-          />
-        </Box>
-      )
-    }
-
     return { headers, elements }
   }
 
@@ -505,6 +424,8 @@ const ProfilePage = ({
       ? getArtistProfileContent()
       : getUserProfileContent()
     : { headers: [], elements: [] }
+
+  const tabRecalculator = useTabRecalculator()
 
   const { tabs, body } = useTabs({
     didChangeTabsFrom,

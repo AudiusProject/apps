@@ -1,10 +1,6 @@
 import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
-import {
-  useAssociatedWallets,
-  useWalletAudioBalance,
-  useWalletCollectibles
-} from '@audius/common/api'
+import { useAssociatedWallets, useWalletAudioBalance } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, shortenEthAddress } from '@audius/common/utils'
 import type { AudioWei } from '@audius/fixed-decimal'
@@ -36,7 +32,6 @@ const WALLET_COUNT_LIMIT = 5
 
 const messages = {
   copied: 'Copied To Clipboard!',
-  collectibles: 'COLLECTIBLES',
   audio: '$AUDIO',
   copy: 'Copy Wallet Address',
   remove: 'Remove Wallet',
@@ -90,12 +85,7 @@ export const WalletTableRow = ({
       includeStaked: true
     })
 
-  const { data: collectibles, isPending: isCollectiblesPending } =
-    useWalletCollectibles({ address, chain })
-
-  const collectibleCount = collectibles?.[address]?.length ?? 0
-  const isPending =
-    isBalancePending || isCollectiblesPending || isMutationPending
+  const isPending = isBalancePending || isMutationPending
 
   return (
     <div className={cn(styles.copyContainer)}>
@@ -111,9 +101,7 @@ export const WalletTableRow = ({
           size='m'
           strength='strong'
           css={{ flex: 1, textAlign: 'right' }}
-        >
-          {collectibleCount}
-        </Text>
+        ></Text>
       ) : null}
       <div className={cn(styles.audioBalance, styles.walletText)}>
         {!isPending ? (
@@ -164,7 +152,6 @@ const WalletsTable = ({
   showWalletActionMenus = false,
   className
 }: WalletsTableProps) => {
-  const isMobile = useIsMobile()
   const wm = useWithMobileStyle(styles.mobile)
 
   const { data: connectedWallets } = useAssociatedWallets()
@@ -181,11 +168,6 @@ const WalletsTable = ({
         <Text variant='label' size='m' strength='strong' color='subdued'>
           {`(${numConnectedWallets}/${WALLET_COUNT_LIMIT})`}
         </Text>
-        {!isMobile && (
-          <Text variant='label' size='m' strength='strong' color='subdued'>
-            {messages.collectibles}
-          </Text>
-        )}
         <Text variant='label' size='m' strength='strong' color='subdued'>
           {messages.audio}
         </Text>

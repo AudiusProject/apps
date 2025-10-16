@@ -99,11 +99,7 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
   const recentCommentsFlag = useFeatureFlag(FeatureFlags.RECENT_COMMENTS)
   const isRecentCommentsEnabled =
     recentCommentsFlag.isLoaded && recentCommentsFlag.isEnabled
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-  const showArtistCoinCTA =
-    !isArtistCoinLoading && isArtistCoinsEnabled && !!ownedCoin
+  const showArtistCoinCTA = !isArtistCoinLoading && !!ownedCoin
 
   if (editMode) {
     return (

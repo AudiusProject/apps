@@ -32,7 +32,6 @@ import IconCloudDownloadPausedSVG from '../assets/icons/CloudDownloadPaused.svg'
 import IconCloudDownloadQueuedSVG from '../assets/icons/CloudDownloadQueued.svg'
 import IconCloudUploadSVG from '../assets/icons/CloudUpload.svg'
 import IconCoinGatedLabelSVG from '../assets/icons/CoinGatedLabel.svg'
-import IconCollectibleSVG from '../assets/icons/Collectible.svg'
 import IconComposeSVG from '../assets/icons/Compose.svg'
 import IconCopySVG from '../assets/icons/Copy.svg'
 import IconCreatePlaylistSVG from '../assets/icons/CreatePlaylist.svg'
@@ -256,7 +255,6 @@ export const IconPin = IconPinSVG as IconComponent
 export const IconUser = IconUserSVG as IconComponent
 export const IconUserArrowRotate = IconUserArrowRotateSVG as IconComponent
 export const IconArrowRotate = IconArrowRotateSVG as IconComponent
-export const IconCollectible = IconCollectibleSVG as IconComponent
 export const IconPlay = IconPlaySVG as IconComponent
 export const IconUserFollow = IconUserFollowSVG as IconComponent
 export const IconCompose = IconComposeSVG as IconComponent

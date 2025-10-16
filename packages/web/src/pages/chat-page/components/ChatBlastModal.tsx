@@ -5,12 +5,10 @@ import {
   useCurrentUserId
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   useFirstAvailableBlastAudience,
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import {
   useChatBlastModal,
   chatActions,
@@ -359,16 +357,10 @@ const CoinHoldersMessageField = () => {
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const { data: coin } = useArtistOwnedCoin(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: membersCount } = useArtistCoinMembersCount()
-  const isDisabled = !isArtistCoinEnabled || membersCount === 0
-  if (!isArtistCoinEnabled) {
-    return null
-  }
+  const isDisabled = membersCount === 0
 
   return (
     <Flex

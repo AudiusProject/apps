@@ -1,7 +1,6 @@
 import { queryAccountUser } from '@audius/common/api'
 import {
   Name,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentTokenGated,
@@ -35,15 +34,7 @@ export function* recordGatedTracks(
         ? trackOrMetadata.metadata
         : trackOrMetadata
       if (isStreamGated && streamConditions) {
-        if (isContentCollectibleGated(streamConditions)) {
-          out.push(
-            make(Name.TRACK_UPLOAD_COLLECTIBLE_GATED, {
-              kind: 'tracks',
-              downloadable: isDownloadable,
-              lossless: isOriginalAvailable
-            })
-          )
-        } else if (isContentFollowGated(streamConditions)) {
+        if (isContentFollowGated(streamConditions)) {
           out.push(
             make(Name.TRACK_UPLOAD_FOLLOW_GATED, {
               kind: 'tracks',

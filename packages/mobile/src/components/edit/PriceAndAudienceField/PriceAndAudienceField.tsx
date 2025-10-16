@@ -4,7 +4,6 @@ import { useArtistCoin } from '@audius/common/api'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import type { AccessConditions } from '@audius/common/models'
 import {
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentTokenGated,
@@ -40,9 +39,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         streamConditions.usdc_purchase.price
       )}`
       return [messages.premium, amountLabel]
-    }
-    if (isContentCollectibleGated(streamConditions)) {
-      return [messages.collectibleGated]
     }
     if (isContentFollowGated(streamConditions)) {
       return [messages.specialAccess, messages.followersOnly]

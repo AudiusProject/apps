@@ -1,1 +1,0 @@
-export { OpenSeaClient } from './OpenSeaClient'

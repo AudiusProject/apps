@@ -19,6 +19,8 @@ import { ProfilePageNavSectionItem } from './ProfilePageNavSectionItem'
 import { ProfilePageNavSectionTitle } from './ProfilePageNavSectionTitle'
 import { ProfilePictureListTile } from './ProfilePictureListTile'
 
+const DEFAULT_RELATED_ARTISTS_COUNT = 100
+
 const messages = {
   relatedArtists: 'Related Artists'
 }
@@ -60,6 +62,11 @@ export const RelatedArtists = () => {
       <ProfilePictureListTile
         onClick={handleClick}
         users={relatedArtists as User[]}
+        totalUserCount={
+          relatedArtists.length < MAX_PROFILE_RELATED_ARTISTS
+            ? relatedArtists.length
+            : DEFAULT_RELATED_ARTISTS_COUNT
+        }
         limit={MAX_PROFILE_RELATED_ARTISTS}
         disableProfileClick
       />

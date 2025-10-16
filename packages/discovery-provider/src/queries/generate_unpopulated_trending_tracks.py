@@ -3,12 +3,8 @@ from typing import Optional
 
 from sqlalchemy import desc, text
 from sqlalchemy.orm.session import Session
-from sqlalchemy.sql.elements import not_, or_
 
-from src.gated_content.constants import (
-    SHOULD_TRENDING_EXCLUDE_COLLECTIBLE_GATED_TRACKS,
-    SHOULD_TRENDING_EXCLUDE_GATED_TRACKS,
-)
+from src.gated_content.constants import SHOULD_TRENDING_EXCLUDE_GATED_TRACKS
 from src.models.tracks.track import Track
 from src.models.tracks.track_trending_score import TrackTrendingScore
 from src.queries.get_unpopulated_tracks import get_unpopulated_tracks
@@ -26,7 +22,6 @@ def make_generate_unpopulated_trending(
     strategy: BaseTrendingStrategy,
     exclude_gated: bool = SHOULD_TRENDING_EXCLUDE_GATED_TRACKS,
     usdc_purchase_only: bool = False,
-    exclude_collectible_gated: bool = SHOULD_TRENDING_EXCLUDE_COLLECTIBLE_GATED_TRACKS,
     limit: int = TRENDING_TRACKS_LIMIT,
 ):
     # year time_range equates to allTime for current implementations
@@ -77,13 +72,6 @@ def make_generate_unpopulated_trending(
     elif exclude_gated:
         trending_track_ids_query = trending_track_ids_query.filter(
             Track.is_stream_gated == False,
-        )
-    elif exclude_collectible_gated:
-        trending_track_ids_query = trending_track_ids_query.filter(
-            or_(
-                Track.is_stream_gated == False,
-                not_(text("CAST(stream_conditions AS TEXT) LIKE '%nft_collection%'")),
-            ),
         )
 
     trending_track_ids = (

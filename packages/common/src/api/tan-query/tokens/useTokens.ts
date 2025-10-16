@@ -4,9 +4,15 @@ import { transformArtistCoinsToTokenInfoMap, useQueryContext } from '~/api'
 
 import { useArtistCoins } from '../coins/useArtistCoins'
 
+export const TEMP_ARTIST_COINS_PAGE_SIZE = 100
+
 // Simple hook to get tokens from API without the complex pair logic
 export const useTokens = () => {
-  const { data: artistCoins = [], isLoading, error } = useArtistCoins()
+  const {
+    data: artistCoins = [],
+    isLoading,
+    error
+  } = useArtistCoins({ pageSize: TEMP_ARTIST_COINS_PAGE_SIZE })
   const { env } = useQueryContext()
 
   return useMemo(() => {

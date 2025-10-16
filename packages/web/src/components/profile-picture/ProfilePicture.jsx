@@ -1,9 +1,7 @@
 import { memo, useState, useEffect, useMemo } from 'react'
 
 import { useUserCreatedCoins } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import { useTheme } from '@audius/harmony'
 import cn from 'classnames'
@@ -46,10 +44,6 @@ const ProfilePicture = ({
   const [processing, setProcessing] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-
   const { data: ownedCoins } = useUserCreatedCoins({ userId, limit: 1 })
   const ownedCoin = ownedCoins?.[0]
   const navigate = useNavigate()
@@ -61,7 +55,7 @@ const ProfilePicture = ({
   }
 
   const shouldShowArtistCoinBadge = useMemo(() => {
-    if (!isArtistCoinEnabled || !ownedCoin?.mint || !ownedCoin?.logoUri) {
+    if (!ownedCoin?.mint || !ownedCoin?.logoUri) {
       return false
     }
 
@@ -71,7 +65,7 @@ const ProfilePicture = ({
     }
 
     return true
-  }, [isArtistCoinEnabled, ownedCoin?.mint, ownedCoin?.logoUri])
+  }, [ownedCoin?.mint, ownedCoin?.logoUri])
 
   useEffect(() => {
     if (editMode) {

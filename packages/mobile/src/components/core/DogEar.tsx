@@ -5,7 +5,6 @@ import { View } from 'react-native'
 import {
   IconArtistCoin,
   IconCart,
-  IconCollectible,
   IconReceive,
   IconSparkles
 } from '@audius/harmony-native'
@@ -67,10 +66,6 @@ export const DogEar = (props: DogEarProps) => {
   const { staticWhite, accentBlue, specialLightGreen } = useThemeColors()
 
   const { icon: Icon, colors } = {
-    [DogEarType.COLLECTIBLE_GATED]: {
-      icon: IconCollectible,
-      colors: [accentBlue, accentBlue]
-    },
     [DogEarType.SPECIAL_ACCESS]: {
       icon: IconSparkles,
       colors: [accentBlue, accentBlue]

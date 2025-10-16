@@ -1,1 +1,0 @@
-export { CollectibleDetailsDrawer } from './CollectibleDetailsDrawer'

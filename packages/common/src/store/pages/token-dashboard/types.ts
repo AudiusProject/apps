@@ -18,7 +18,6 @@ export type TokenDashboardPageModalState = Nullable<
 export type AssociatedWallet = {
   address: string
   balance: bigint
-  collectibleCount: number
 }
 
 export type AssociatedWallets = AssociatedWallet[]
@@ -37,7 +36,6 @@ export type AssociatedWalletsState = {
     wallet: Nullable<WalletAddress>
     chain: Nullable<Chain>
     balance: Nullable<bigint>
-    collectibleCount: Nullable<number>
     signature: Nullable<string>
   }
   errorMessage: Nullable<string>

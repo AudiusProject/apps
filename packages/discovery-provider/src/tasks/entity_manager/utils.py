@@ -37,12 +37,10 @@ from src.models.social.subscription import Subscription
 from src.models.tracks.track import Track
 from src.models.tracks.track_route import TrackRoute
 from src.models.users.associated_wallet import AssociatedWallet
-from src.models.users.collectibles import Collectibles
 from src.models.users.user import User
 from src.solana.solana_client_manager import SolanaClientManager
 from src.tasks.metadata import (
     add_associated_wallet_metadata_format,
-    collectibles_metadata_format,
     comment_metadata_format,
     encrypted_email_metadata_format,
     event_metadata_format,
@@ -133,7 +131,6 @@ class EntityType(str, Enum):
     COMMENT_NOTIFICATION_SETTING = "CommentNotificationSetting"
     ENCRYPTED_EMAIL = "EncryptedEmail"
     EMAIL_ACCESS = "EmailAccess"
-    COLLECTIBLES = "Collectibles"
     EVENT = "Event"
     SHARE = "Share"
 
@@ -179,7 +176,6 @@ class RecordDict(TypedDict):
 
 class ExistingRecordDict(TypedDict):
     AssociatedWallet: Dict[str, AssociatedWallet]
-    Collectibles: Dict[int, Collectibles]
     Playlist: Dict[int, Playlist]
     Track: Dict[int, Track]
     UserWallet: Dict[str, User]
@@ -221,7 +217,6 @@ class EntitiesToFetchDict(TypedDict):
     PlaylistRoute: Set[int]
     UserEvent: Set[int]
     AssociatedWallet: Set[int]
-    Collectibles: Set[int]
     UserWallet: Set[str]
     Comment: Set[int]
     CommentReaction: Set[Tuple]
@@ -401,9 +396,6 @@ def get_metadata_type_and_format(entity_type, action=None):
             if action == Action.CREATE
             else remove_associated_wallet_metadata_format
         )
-    elif entity_type == EntityType.COLLECTIBLES:
-        metadata_type = "collectibles"
-        metadata_format = collectibles_metadata_format
     elif entity_type == EntityType.EVENT:
         metadata_type = "event"
         metadata_format = event_metadata_format

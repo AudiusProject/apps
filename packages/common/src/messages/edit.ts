@@ -23,7 +23,6 @@ export const priceAndAudienceMessages = {
   free: 'Free for Everyone',
   premium: 'Premium',
   specialAccess: 'Special Access',
-  collectibleGated: 'Collectible Gated',
   coinGated: 'Coin Gated',
   hidden: 'Hidden',
   followersOnly: 'Followers Only',
@@ -56,16 +55,6 @@ export const priceAndAudienceMessages = {
     description: 'Anyone who meets your selected criteria can stream.',
     followersOnly: 'Followers Only',
     supportersOnly: 'Supporters Only'
-  },
-  collectibleGatedRadio: {
-    title: 'Collectible Gated',
-    description:
-      'Only fans who own a specific, digital collectible can play your track. (These tracks remain hidden from trending lists and user feeds.)',
-    learnMore: 'Learn More',
-    pickACollection: 'Pick a Collection',
-    ownersOf: 'Owners Of',
-    noCollectibles:
-      'No collectibles found. Link a wallet containing a digital collectible to enable this option.'
   },
   tokenGatedRadio: {
     title: 'Coin Gated',

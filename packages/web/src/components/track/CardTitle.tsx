@@ -1,5 +1,4 @@
 import {
-  isContentCollectibleGated,
   isContentUSDCPurchaseGated,
   AccessConditions,
   isContentTokenGated
@@ -8,7 +7,6 @@ import { Nullable } from '@audius/common/utils'
 import {
   Text,
   IconCart,
-  IconCollectible,
   IconSparkles,
   Flex,
   IconArtistCoin
@@ -19,7 +17,6 @@ const messages = {
   podcastTitle: 'PODCAST',
   remixTitle: 'REMIX',
   hiddenTrackTooltip: 'Anyone with a link to this page will be able to see it',
-  collectibleGated: 'COLLECTIBLE GATED',
   coinGated: 'COIN GATED',
   specialAccess: 'SPECIAL ACCESS',
   premiumTrack: 'PREMIUM TRACK',
@@ -56,10 +53,7 @@ export const CardTitle = ({
   } else if (isStreamGated) {
     let icon
     let message
-    if (isContentCollectibleGated(streamConditions)) {
-      icon = <IconCollectible size='s' color='subdued' />
-      message = messages.collectibleGated
-    } else if (isContentUSDCPurchaseGated(streamConditions)) {
+    if (isContentUSDCPurchaseGated(streamConditions)) {
       icon = <IconCart size='s' color='subdued' />
       message = messages.premiumTrack
     } else if (isContentTokenGated(streamConditions)) {

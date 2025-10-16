@@ -4,7 +4,6 @@ import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SquareSizes,
-  isContentCollectibleGated,
   isContentUSDCPurchaseGated,
   ID,
   FieldVisibility,
@@ -17,7 +16,6 @@ import { OverflowAction, PurchaseableContentType } from '@audius/common/store'
 import { Nullable, formatReleaseDate, dayjs } from '@audius/common/utils'
 import {
   Flex,
-  IconCollectible,
   IconPause,
   IconPlay,
   IconSparkles,
@@ -61,7 +59,6 @@ const messages = {
   play: 'PLAY',
   preview: 'PREVIEW',
   pause: 'PAUSE',
-  collectibleGated: 'COLLECTIBLE GATED',
   premiumTrack: 'PREMIUM TRACK',
   specialAccess: 'SPECIAL ACCESS',
   coinGated: 'COIN GATED',
@@ -312,10 +309,7 @@ const TrackHeader = ({
     if (isStreamGated) {
       let IconComponent = IconSparkles
       let titleMessage = messages.specialAccess
-      if (isContentCollectibleGated(streamConditions)) {
-        IconComponent = IconCollectible
-        titleMessage = messages.collectibleGated
-      } else if (isContentUSDCPurchaseGated(streamConditions)) {
+      if (isContentUSDCPurchaseGated(streamConditions)) {
         IconComponent = IconCart
         titleMessage = messages.premiumTrack
       } else if (isContentTokenGated(streamConditions)) {

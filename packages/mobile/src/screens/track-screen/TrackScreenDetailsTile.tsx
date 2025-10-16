@@ -19,7 +19,6 @@ import {
   FavoriteType,
   SquareSizes,
   isContentUSDCPurchaseGated,
-  isContentCollectibleGated,
   isContentTokenGated
 } from '@audius/common/models'
 import type {
@@ -113,7 +112,6 @@ const messages = {
   track: 'track',
   podcast: 'podcast',
   remix: 'remix',
-  collectibleGated: 'collectible gated',
   specialAccess: 'special access',
   premiumTrack: 'premium track',
   coinGated: 'coin gated',
@@ -268,9 +266,7 @@ export const TrackScreenDetailsTile = ({
   } else if (isRemix) {
     headerText = messages.remix
   } else if (isStreamGated) {
-    if (isContentCollectibleGated(streamConditions)) {
-      headerText = messages.collectibleGated
-    } else if (isContentUSDCPurchaseGated(streamConditions)) {
+    if (isContentUSDCPurchaseGated(streamConditions)) {
       headerText = messages.premiumTrack
     } else if (isTokenGated) {
       headerText = messages.coinGated

@@ -41,6 +41,7 @@ import {
 } from 'pages/search-page/types'
 
 import { ActiveDiscussionsSection } from './ActiveDiscussionsSection'
+import { ArtistCoinTracksSection } from './ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
 import { BestSellingSection } from './BestSellingSection'
 import { DownloadsAvailableSection } from './DownloadsAvailableSection'
@@ -118,6 +119,9 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
   const { isLarge } = useMedia()
   const { isEnabled: isSearchExploreGoodiesEnabled } = useFeatureFlag(
     FeatureFlags.SEARCH_EXPLORE_GOODIES
+  )
+  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
+    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
   )
   const handleSearchTab = useCallback(
     (newTab: string) => {
@@ -318,6 +322,7 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
               {showTrackContent && showUserContextualContent && (
                 <RecommendedTracksSection />
               )}
+              {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
               {showTrackContent && showUserContextualContent && (
                 <RecentlyPlayedSection />
               )}

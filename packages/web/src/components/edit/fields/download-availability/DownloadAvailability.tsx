@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import {
   AccessConditions,
   DownloadTrackAvailabilityType,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentUSDCPurchaseGated
@@ -45,9 +44,6 @@ const getMessages = (props: DownloadAvailabilityProps) => ({
     specialAccess: `You're ${
       props.isUpload ? 'uploading' : 'editing'
     } a Special Access track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
-    collectibleGated: `You're ${
-      props.isUpload ? 'uploading' : 'editing'
-    } a Collectible Gated track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
     priceAndAudience: 'Price & Audience Settings'
   }
 })
@@ -69,9 +65,7 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
   const isSpecialAccess =
     isContentFollowGated(streamConditions) ||
     isContentTipGated(streamConditions)
-  const isCollectibleGated = isContentCollectibleGated(streamConditions)
-  const shouldRenderCallout =
-    isUsdcGated || isSpecialAccess || isCollectibleGated
+  const shouldRenderCallout = isUsdcGated || isSpecialAccess
 
   const getCalloutMessage = useCallback(() => {
     if (isUsdcGated) {
@@ -80,17 +74,12 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
     if (isSpecialAccess) {
       return messages.callout.specialAccess
     }
-    if (isCollectibleGated) {
-      return messages.callout.collectibleGated
-    }
     return ''
   }, [
-    isCollectibleGated,
     isSpecialAccess,
     isUsdcGated,
     messages.callout.premium,
-    messages.callout.specialAccess,
-    messages.callout.collectibleGated
+    messages.callout.specialAccess
   ])
 
   const handleCalloutClick = useCallback(() => {

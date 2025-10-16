@@ -2,12 +2,6 @@ export * as addToCollectionUISelectors from './add-to-collection/selectors'
 export * as addToCollectionUIActions from './add-to-collection/actions'
 export { default as addToCollectionUIReducer } from './add-to-collection/reducer'
 
-export * as collectibleDetailsUISelectors from './collectible-details/selectors'
-export {
-  default as collectibleDetailsUIReducer,
-  actions as collectibleDetailsUIActions
-} from './collectible-details/slice'
-
 export * as deletePlaylistConfirmationModalUISelectors from './delete-playlist-confirmation-modal/selectors'
 export {
   default as deletePlaylistConfirmationModalUIReducer,

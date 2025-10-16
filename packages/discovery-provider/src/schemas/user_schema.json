@@ -1,265 +1,239 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/User",
-    "definitions": {
-        "User": {
-            "type": "object",
-            "additionalProperties": true,
-            "properties": {
-                "name": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "profile_picture": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "profile_picture_sizes": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "cover_photo": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "cover_photo_sizes": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "twitter_handle": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "instagram_handle": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "tiktok_handle": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "verified_with_twitter": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "verified_with_instagram": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "verified_with_tiktok": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "website": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "donation": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "bio": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "location": {
-                    "type": ["string", "null"],
-                    "default": null
-                },
-                "associated_wallets": {
-                    "$ref": "#/definitions/AssociatedWallets"
-                },
-                "associated_sol_wallets": {
-                    "$ref": "#/definitions/AssociatedSOLWallets"
-                },
-                "collectibles": {
-                    "$ref": "#/definitions/Collectibles"
-                },
-                "playlist_library": {
-                    "$ref": "#/definitions/PlaylistLibrary"
-                },
-                "events": {
-                    "$ref": "#/definitions/Events"
-                },
-                "is_deactivated": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "artist_pick_track_id": {
-                    "type": ["integer", "null"],
-                    "default": null
-                },
-                "spl_usdc_payout_wallet": {
-                    "type": ["string", "null"],
-                    "default": null
-                }
-            },
-            "required": [
-                "bio",
-                "cover_photo_sizes",
-                "location",
-                "name",
-                "profile_picture_sizes",
-                "artist_pick_track_id"
-            ],
-            "title": "User"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/User",
+  "definitions": {
+    "User": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "CID": {
-            "type": ["string", "null"],
-            "minLength": 46,
-            "maxLength": 46,
-            "pattern": "^Qm[a-zA-Z0-9]{44}$",
-            "title": "CID"
+        "profile_picture": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "AssociatedWallets": {
-            "type": ["object", "null"],
-            "default": null,
-            "patternProperties": {
-                "^0x[a-fA-F0-9]{40}$": { "$ref": "#/definitions/WalletMetadata" }
-            },
-            "additionalProperties": false,
-            "properties": {},
-            "required": [],
-            "$comment": "",
-            "title": "AssociatedWallets"
+        "profile_picture_sizes": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "AssociatedSOLWallets": {
-            "type": ["object", "null"],
-            "default": null,
-            "patternProperties": {
-                "^[a-zA-Z0-9]{44}$": { "$ref": "#/definitions/WalletMetadata" }
-            },
-            "additionalProperties": false,
-            "properties": {},
-            "required": [],
-            "$comment": "",
-            "title": "AssociatedSOLWallets"
+        "cover_photo": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "WalletMetadata": {
-            "type": ["object"],
-            "additionalProperties": true,
-            "properties": {
-                "signature": {
-                    "type": "string"
-                }
-            },
-            "required": ["signature"],
-            "$comment": "",
-            "title": "WalletMetadata"
+        "cover_photo_sizes": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "Collectible": {
-            "type": "object",
-            "additionalProperties": false
+        "twitter_handle": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "Collectibles": {
-            "type": ["object", "null"],
-            "default": null,
-            "additionalProperties": {
-                "$ref": "#/definitions/Collectible"
-            },
-            "properties": {
-                "order": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "order"
-            ]
+        "instagram_handle": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "PlaylistIdentifier": {
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "const": "playlist"
-                },
-                "playlist_id": {
-                    "type": "integer"
-                }
-            }
-
+        "tiktok_handle": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "ExplorePlaylistIdentifier": {
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "const": "explore_playlist"
-                },
-                "playlist_id": {
-                    "type": "string",
-                    "pattern": "^[a-zA-Z \/-?]+$"
-                }
-            }
+        "verified_with_twitter": {
+          "type": "boolean",
+          "default": false
         },
-        "PlaylistLibraryIdentifier": {
-            "oneOf": [
-                {
-                    "$ref": "#/definitions/PlaylistIdentifier"
-                },
-                {
-                    "$ref": "#/definitions/ExplorePlaylistIdentifier"
-                }
-            ]
+        "verified_with_instagram": {
+          "type": "boolean",
+          "default": false
         },
-        "PlaylistLibraryFolder": {
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "const": "folder"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "contents": {
-                    "type": "array",
-                    "items": {
-                        "oneOf": [
-                            {
-                                "$ref": "#/definitions/PlaylistLibraryFolder"
-                            },
-                            {
-                                "$ref": "#/definitions/PlaylistLibraryIdentifier"
-                            }
-                        ]
-                    }
-                }
-            }
+        "verified_with_tiktok": {
+          "type": "boolean",
+          "default": false
         },
-        "PlaylistLibrary": {
-            "type": ["object", "null"],
-            "default": null,
-            "properties": {
-                "contents": {
-                    "type": "array",
-                    "items": {
-                        "oneOf": [
-                            {
-                                "$ref": "#/definitions/PlaylistLibraryFolder"
-                            },
-                            {
-                                "$ref": "#/definitions/PlaylistLibraryIdentifier"
-                            }
-                        ]
-                    }
-                }
-            }
+        "website": {
+          "type": ["string", "null"],
+          "default": null
         },
-        "Events": {
-            "type": ["object", "null"],
-            "default": null,
-            "properties": {
-                "referrer": {
-                    "type": "integer"
-                },
-                "is_mobile_user": {
-                    "type": "boolean"
-                }
-            }
+        "donation": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "bio": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "location": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "associated_wallets": {
+          "$ref": "#/definitions/AssociatedWallets"
+        },
+        "associated_sol_wallets": {
+          "$ref": "#/definitions/AssociatedSOLWallets"
+        },
+        "playlist_library": {
+          "$ref": "#/definitions/PlaylistLibrary"
+        },
+        "events": {
+          "$ref": "#/definitions/Events"
+        },
+        "is_deactivated": {
+          "type": "boolean",
+          "default": false
+        },
+        "artist_pick_track_id": {
+          "type": ["integer", "null"],
+          "default": null
+        },
+        "spl_usdc_payout_wallet": {
+          "type": ["string", "null"],
+          "default": null
         }
+      },
+      "required": [
+        "bio",
+        "cover_photo_sizes",
+        "location",
+        "name",
+        "profile_picture_sizes",
+        "artist_pick_track_id"
+      ],
+      "title": "User"
+    },
+    "CID": {
+      "type": ["string", "null"],
+      "minLength": 46,
+      "maxLength": 46,
+      "pattern": "^Qm[a-zA-Z0-9]{44}$",
+      "title": "CID"
+    },
+    "AssociatedWallets": {
+      "type": ["object", "null"],
+      "default": null,
+      "patternProperties": {
+        "^0x[a-fA-F0-9]{40}$": { "$ref": "#/definitions/WalletMetadata" }
+      },
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "$comment": "",
+      "title": "AssociatedWallets"
+    },
+    "AssociatedSOLWallets": {
+      "type": ["object", "null"],
+      "default": null,
+      "patternProperties": {
+        "^[a-zA-Z0-9]{44}$": { "$ref": "#/definitions/WalletMetadata" }
+      },
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "$comment": "",
+      "title": "AssociatedSOLWallets"
+    },
+    "WalletMetadata": {
+      "type": ["object"],
+      "additionalProperties": true,
+      "properties": {
+        "signature": {
+          "type": "string"
+        }
+      },
+      "required": ["signature"],
+      "$comment": "",
+      "title": "WalletMetadata"
+    },
+    "PlaylistIdentifier": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "playlist"
+        },
+        "playlist_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "ExplorePlaylistIdentifier": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "explore_playlist"
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z \/-?]+$"
+        }
+      }
+    },
+    "PlaylistLibraryIdentifier": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/PlaylistIdentifier"
+        },
+        {
+          "$ref": "#/definitions/ExplorePlaylistIdentifier"
+        }
+      ]
+    },
+    "PlaylistLibraryFolder": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "folder"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/PlaylistLibraryFolder"
+              },
+              {
+                "$ref": "#/definitions/PlaylistLibraryIdentifier"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "PlaylistLibrary": {
+      "type": ["object", "null"],
+      "default": null,
+      "properties": {
+        "contents": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/PlaylistLibraryFolder"
+              },
+              {
+                "$ref": "#/definitions/PlaylistLibraryIdentifier"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Events": {
+      "type": ["object", "null"],
+      "default": null,
+      "properties": {
+        "referrer": {
+          "type": "integer"
+        },
+        "is_mobile_user": {
+          "type": "boolean"
+        }
+      }
     }
+  }
 }
