@@ -117,9 +117,6 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
     useCurrentUserId()
   const { motion } = useTheme()
   const { isLarge } = useMedia()
-  const { isEnabled: isSearchExploreGoodiesEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE_GOODIES
-  )
   const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
     FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
   )
@@ -317,26 +314,20 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
           gap='3xl'
           css={{ display: showSearchResults ? 'none' : undefined }}
         >
-          {isSearchExploreGoodiesEnabled ? (
-            <>
-              {showTrackContent && showUserContextualContent && (
-                <RecommendedTracksSection />
-              )}
-              {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
-              {showTrackContent && showUserContextualContent && (
-                <RecentlyPlayedSection />
-              )}
-              {showTrackContent && <QuickSearchGrid />}
-            </>
-          ) : null}
+          {showTrackContent && showUserContextualContent && (
+            <RecommendedTracksSection />
+          )}
+          {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
+          {showTrackContent && showUserContextualContent && (
+            <RecentlyPlayedSection />
+          )}
+          {showTrackContent && <QuickSearchGrid />}
           {showPlaylistContent && <FeaturedPlaylistsSection />}
           {showTrackContent && <FeaturedRemixContestsSection />}
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
-            <UndergroundTrendingTracksSection />
-          )}
+          {showTrackContent && <UndergroundTrendingTracksSection />}
           {showUserContent && <ArtistSpotlightSection />}
           {showUserContent && <LabelSpotlightSection />}
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
+          {showTrackContent && (
             <>
               <ActiveDiscussionsSection />
               <DownloadsAvailableSection />
@@ -345,17 +336,13 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
           {(showTrackContent || showAlbumContent || showPlaylistContent) && (
             <MoodGrid />
           )}
-          {isSearchExploreGoodiesEnabled ? (
-            <>
-              {showPlaylistContent && <TrendingPlaylistsSection />}
-              {showTrackContent && <MostSharedSection />}
-              {(showTrackContent || showAlbumContent) && <BestSellingSection />}
-              {showTrackContent && <RecentPremiumTracksSection />}
-              {showTrackContent && showUserContextualContent && (
-                <FeelingLuckySection />
-              )}
-            </>
-          ) : null}
+          {showPlaylistContent && <TrendingPlaylistsSection />}
+          {showTrackContent && <MostSharedSection />}
+          {(showTrackContent || showAlbumContent) && <BestSellingSection />}
+          {showTrackContent && <RecentPremiumTracksSection />}
+          {showTrackContent && showUserContextualContent && (
+            <FeelingLuckySection />
+          )}
           {showUserContextualContent && <RecentSearchesSection />}
         </Flex>
       </Flex>
