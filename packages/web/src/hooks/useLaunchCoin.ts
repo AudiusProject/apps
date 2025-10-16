@@ -84,13 +84,18 @@ export const useLaunchCoin = () => {
 
         const signTx = async (
           transactionSerialized: string
-        ): Promise<Uint8Array> => {
-          const base64Buf = Buffer.from(transactionSerialized, 'base64')
-          const bytes = Uint8Array.from(base64Buf)
-          const tx = VersionedTransaction.deserialize(bytes)
-          const signed = await (solanaProvider as any).signTransaction(tx)
-          const buf: Buffer = signed.serialize()
-          return Uint8Array.from(buf)
+        ): Promise<VersionedTransaction> => {
+          try {
+            const bytes = new Uint8Array(
+              Buffer.from(transactionSerialized, 'base64')
+            )
+            const deserializedTx = VersionedTransaction.deserialize(bytes)
+            const tx = await solanaProvider.signTransaction(deserializedTx)
+            return tx
+          } catch (e) {
+            console.error('Error signing transaction', e)
+            throw e
+          }
         }
 
         const walletPublicKey = new PublicKey(walletPublicKeyStr)
@@ -119,16 +124,16 @@ export const useLaunchCoin = () => {
         errorMetadata.lastStep = 'relayResponseReceived'
 
         // Sign locally (do not send). Send both to relay confirm endpoint.
-        const signedCreatePoolBytes = await signTx(createPoolTxSerialized)
-        const signedFirstBuyBytes = firstBuyTxSerialized
+        const signedCreatePoolTx = await signTx(createPoolTxSerialized)
+        const signedFirstBuyTx = firstBuyTxSerialized
           ? await signTx(firstBuyTxSerialized)
           : undefined
 
         try {
           const confirmRes = await sdk.services.solanaRelay.confirmLaunchCoin({
             mintPublicKey: new PublicKey(mintPublicKey),
-            createPoolTx: signedCreatePoolBytes,
-            firstBuyTx: signedFirstBuyBytes
+            createPoolTx: signedCreatePoolTx.serialize(),
+            firstBuyTx: signedFirstBuyTx?.serialize()
           })
           // Treat a successful response as confirmations completed
           errorMetadata.poolCreateConfirmed = true
