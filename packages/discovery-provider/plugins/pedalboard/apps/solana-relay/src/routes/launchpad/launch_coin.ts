@@ -1,3 +1,5 @@
+import { createHash } from 'crypto'
+
 import {
   createGenericFile,
   signerIdentity,
@@ -9,7 +11,6 @@ import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk
 import {
   Keypair,
   PublicKey,
-  SystemProgram,
   TransactionMessage,
   VersionedTransaction
 } from '@solana/web3.js'
@@ -120,9 +121,11 @@ export const launchCoin = async (
       bs58.decode(config.launchpadPartnerSignerPrivateKey)
     )
 
-    // This is the token account to custody the reward pool tokens
-    // It is used as the leftover receiver in the dbc config
-    const rewardPoolTokenAccount = Keypair.generate()
+    // Deterministic token account for reward pool custody (pubkey used in config)
+    const rewardPoolTokenAccount = deriveKeypair(
+      'reward-token-account',
+      mintKeypair.publicKey
+    )
 
     // Transaction Execution
     // ------------------------------------------------------------
@@ -229,48 +232,6 @@ export const launchCoin = async (
           : undefined
       })
 
-    // 4. Create a reward pool for the new coin
-    logger.info('Creating reward pool for new coin', { name, symbol })
-    const manager = Keypair.generate()
-    const rewardManager = Keypair.generate()
-    const rewardPoolTx = await createRewardPool({
-      connection,
-      tokenAccount: rewardPoolTokenAccount,
-      feePayer,
-      manager,
-      rewardManager,
-      mint: mintKeypair.publicKey
-    })
-    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
-    const rewardPoolMessage = new TransactionMessage({
-      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
-      instructions: rewardPoolTx.instructions,
-      payerKey: feePayer.publicKey
-    })
-    const rewardPoolTransaction = new VersionedTransaction(
-      rewardPoolMessage.compileToV0Message()
-    )
-    rewardPoolTransaction.sign([
-      rewardPoolTokenAccount,
-      feePayer,
-      manager,
-      rewardManager
-    ])
-    const rewardPoolSignature = await sendTransactionWithRetries({
-      transaction: rewardPoolTransaction,
-      commitment: 'confirmed',
-      confirmationStrategy: {
-        ...rewardPoolRecentBlockhash,
-        signature: bs58.encode(rewardPoolTransaction.signatures[0])
-      },
-      logger
-    })
-    logger.info('Created reward pool', {
-      name,
-      symbol,
-      signature: rewardPoolSignature
-    })
-
     /*
      * Prepare the transactions to be signed by the client
      * We partially sign so that the user can sign with their wallet and send the transactions
@@ -287,7 +248,7 @@ export const launchCoin = async (
       swapBuyTx.feePayer = walletPublicKey
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       mintPublicKey: mintKeypair.publicKey.toBase58(),
       imageUri,
       createPoolTx: Buffer.from(
@@ -302,6 +263,123 @@ export const launchCoin = async (
     })
   } catch (e) {
     logger.error('Error creating coin for launchpad')
+    logger.error(e)
+    res.status(500).send()
+  }
+}
+
+// Deterministically derive a Keypair from the launchpad deterministic secret, label, and mint
+const deriveKeypair = (label: string, mint: PublicKey): Keypair => {
+  const seedMaterial = Buffer.concat([
+    Buffer.from(config.launchpadDeterministicSecret, 'utf8'),
+    Buffer.from('audius-launchpad', 'utf8'),
+    Buffer.from(label, 'utf8'),
+    mint.toBuffer()
+  ])
+  const seed = createHash('sha256').update(seedMaterial).digest()
+  return Keypair.fromSeed(seed)
+}
+
+interface ConfirmLaunchCoinRequestBody {
+  mintPublicKey: string
+  createPoolTx: string // base64 VersionedTransaction, fully signed
+  firstBuyTx?: string // base64 VersionedTransaction, fully signed
+}
+
+export const confirmLaunchCoin = async (
+  req: Request<unknown, unknown, ConfirmLaunchCoinRequestBody>,
+  res: Response
+) => {
+  try {
+    const { mintPublicKey, createPoolTx, firstBuyTx } = req.body
+    if (!mintPublicKey || !createPoolTx) {
+      return res
+        .status(400)
+        .send({ error: 'mintPublicKey and createPoolTx are required' })
+    }
+
+    const connection = getConnection()
+
+    // Deserialize transactions
+    const createPoolTxBuf = Buffer.from(createPoolTx, 'base64')
+    const createPoolTransaction =
+      VersionedTransaction.deserialize(createPoolTxBuf)
+    const createSig = bs58.encode(createPoolTransaction.signatures[0])
+
+    const maybeSwapTxBuf = firstBuyTx ? Buffer.from(firstBuyTx, 'base64') : null
+    const swapTransaction = maybeSwapTxBuf
+      ? VersionedTransaction.deserialize(maybeSwapTxBuf)
+      : null
+
+    // 1) Send createPoolTx and wait for confirmation
+    const strategy1 = await connection.getLatestBlockhash()
+    await sendTransactionWithRetries({
+      transaction: createPoolTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: { ...strategy1, signature: createSig },
+      logger
+    })
+
+    // 2) After confirmation, create reward pool using deterministic keys
+    const mint = new PublicKey(mintPublicKey)
+    const tokenAccount = deriveKeypair('reward-token-account', mint)
+    const manager = deriveKeypair('manager', mint)
+    const rewardManager = deriveKeypair('reward-manager', mint)
+
+    // Pick a random fee payer
+    const { solanaFeePayerWallets } = config
+    const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
+    const feePayer = solanaFeePayerWallets[index]
+
+    const rewardPoolTx = await createRewardPool({
+      connection,
+      tokenAccount,
+      feePayer,
+      manager,
+      rewardManager,
+      mint
+    })
+    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
+    const rewardPoolMessage = new TransactionMessage({
+      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
+      instructions: rewardPoolTx.instructions,
+      payerKey: feePayer.publicKey
+    })
+    const rewardPoolTransaction = new VersionedTransaction(
+      rewardPoolMessage.compileToV0Message()
+    )
+    rewardPoolTransaction.sign([tokenAccount, feePayer, manager, rewardManager])
+    const rewardSig = bs58.encode(rewardPoolTransaction.signatures[0])
+    await sendTransactionWithRetries({
+      transaction: rewardPoolTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: {
+        ...rewardPoolRecentBlockhash,
+        signature: rewardSig
+      },
+      logger
+    })
+
+    // 3) Finally, send the user's first buy transaction if provided
+    let swapSig: string | undefined
+    if (swapTransaction) {
+      swapSig = bs58.encode(swapTransaction.signatures[0])
+      const strategy3 = await connection.getLatestBlockhash()
+      await sendTransactionWithRetries({
+        transaction: swapTransaction,
+        commitment: 'confirmed',
+        confirmationStrategy: { ...strategy3, signature: swapSig },
+        logger
+      })
+    }
+
+    return res.status(200).send({
+      createSignature: createSig,
+      rewardPoolSignature: rewardSig,
+      firstBuySignature: swapSig
+    })
+  } catch (e) {
+    logger.error('Error confirming launch coin')
     logger.error(e)
     res.status(500).send()
   }

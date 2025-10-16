@@ -10,7 +10,10 @@ import {
 
 import { config } from '../../config'
 
-// Constants
+import { deriveEthAddressForMint } from './derive_eth_address_for_mint'
+
+const DOMAIN = Buffer.from('claimAuthority')
+
 const REWARD_MANAGER_SIZE = 66 // 1 (version) + 32 (token_account) + 32 (manager) + 1 (min_votes)
 const TOKEN_ACCOUNT_SIZE = 165
 
@@ -43,25 +46,16 @@ const PROD_SENDERS = [
     senderEthAddress: '0x159200F84c2cF000b3A014cD4D8244500CCc36ca',
     operatorEthAddress: '0xe4882D9A38A2A1fc652996719AF0fb15CB968d0a'
   },
-  // audius-content-1.figment.io
+  // dn2.monophonic.digital
   {
-    senderEthAddress: '0xBfdE9a7DD3620CB6428463E9A9e9932B4d10fdc5',
-    operatorEthAddress: '0xc1f351FE81dFAcB3541e59177AC71Ed237BD15D0'
+    senderEthAddress: '0x422541273087beC833c57D3c15B9e17F919bFB1F',
+    operatorEthAddress: '0x6470Daf3bd32f5014512bCdF0D02232f5640a5BD'
   }
 ]
 
 /**
- *
- * @param param0
- * - connection: Connection
- * - tokenAccount: Keypair
- * - feePayer: Keypair
- * - managerAccount: Keypair
- *     The manager is responsible for creating the first senders
- * - rewardManagerAccount: Keypair
- *     Reward manager holds the state of the reward pool
- * - mint: PublicKey
- * @returns
+ * Creates a reward pool and registers senders (including a deterministic
+ * fourth "claimauthority" sender derived from (HD_ROOT, mint)).
  */
 export const createRewardPool = async ({
   connection,
@@ -92,7 +86,7 @@ export const createRewardPool = async ({
     })
   )
 
-  // 2. Create token account
+  // 2. Create token account (note: initialize via your program or add SPL init)
   transaction.add(
     SystemProgram.createAccount({
       fromPubkey: feePayer.publicKey,
@@ -119,10 +113,24 @@ export const createRewardPool = async ({
     programId: RewardManagerProgram.programId,
     rewardManagerState: rewardManager.publicKey
   })
-  console.log('authority', authority.toBase58())
 
-  // 4. Add senders
-  const senders = config.environment === 'prod' ? PROD_SENDERS : STAGE_SENDERS
+  // 4. Add senders (all static senders + deterministic claim authority)
+  const baseSenders =
+    config.environment === 'prod' ? PROD_SENDERS : STAGE_SENDERS
+
+  const { address: claimAuthorityEthAddress } = deriveEthAddressForMint(
+    DOMAIN,
+    config.launchpadDeterministicSecret,
+    mint
+  )
+  const senders = [
+    ...baseSenders,
+    {
+      senderEthAddress: claimAuthorityEthAddress,
+      operatorEthAddress: claimAuthorityEthAddress
+    }
+  ]
+
   for (const sender of senders) {
     const derivedSender = RewardManagerProgram.deriveSender({
       ethAddress: sender.senderEthAddress,

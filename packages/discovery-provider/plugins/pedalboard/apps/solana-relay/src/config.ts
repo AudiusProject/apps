@@ -63,6 +63,10 @@ type Config = {
   // The private key for a signer of the launchpad config partner (AKA the authority)
   // Signs the tx and is used to collect all launches for external pages, e.g. jup launchpad
   launchpadPartnerSignerPrivateKey: string
+  // Secret used to deterministically derive
+  // - ephemeral launchpad keys (HKDF seed)
+  // - reward pool claim authorities
+  launchpadDeterministicSecret: string
 }
 
 let cachedConfig: Config | null = null
@@ -163,6 +167,9 @@ const readConfig = (): Config => {
     }),
     audius_launchpad_partner_signer_private_key: str({
       default: ''
+    }),
+    audius_launchpad_deterministic_secret: str({
+      default: ''
     })
   })
   const solanaFeePayerWalletsParsed = env.audius_solana_fee_payer_wallets
@@ -213,7 +220,8 @@ const readConfig = (): Config => {
     antiAbuseOracle: env.audius_anti_abuse_oracle,
     launchpadPartnerPublicKey: env.audius_launchpad_partner_public_key,
     launchpadPartnerSignerPrivateKey:
-      env.audius_launchpad_partner_signer_private_key
+      env.audius_launchpad_partner_signer_private_key,
+    launchpadDeterministicSecret: env.audius_launchpad_deterministic_secret
   }
   return readConfig()
 }

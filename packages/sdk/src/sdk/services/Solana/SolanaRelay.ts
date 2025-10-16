@@ -218,6 +218,41 @@ export class SolanaRelay extends BaseAPI {
   }
 
   /**
+   * Confirms pool creation, then creates reward pool and (optionally) executes the first buy.
+   */
+  public async confirmLaunchCoin(params: {
+    mintPublicKey: PublicKey
+    createPoolTx: Uint8Array
+    firstBuyTx?: Uint8Array
+  }) {
+    const headerParameters: runtime.HTTPHeaders = {
+      'Content-Type': 'application/json'
+    }
+    const body = {
+      mintPublicKey: params.mintPublicKey.toBase58(),
+      createPoolTx: Buffer.from(params.createPoolTx).toString('base64'),
+      firstBuyTx: params.firstBuyTx
+        ? Buffer.from(params.firstBuyTx).toString('base64')
+        : undefined
+    }
+
+    const response = await this.request({
+      path: '/launchpad/confirm_launch_coin',
+      method: 'POST',
+      headers: headerParameters,
+      body
+    })
+
+    return await new runtime.JSONApiResponse(response, (json) => {
+      return json as {
+        createSignature: string
+        rewardPoolSignature: string
+        firstBuySignature?: string
+      }
+    }).value()
+  }
+
+  /**
    * Gets a quote for the first buy transaction on the launchpad.
    * Returns quotes for SOL to AUDIO, SOL to USDC, and the bonding curve quote.
    */
