@@ -2,7 +2,9 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 
 import {
   ConnectedWallet,
+  getExternalWalletBalanceOptions,
   useCurrentAccountUser,
+  useQueryContext,
   useUserCreatedCoins
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
@@ -21,10 +23,8 @@ import {
   Text
 } from '@audius/harmony'
 import { solana } from '@reown/appkit/networks'
-import {
-  useAppKitAccount as useExternalWalletAccount,
-  useAppKitBalance
-} from '@reown/appkit/react'
+import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useFormikContext } from 'formik'
 import { Navigate, useNavigate } from 'react-router-dom-v5-compat'
 
@@ -73,8 +73,8 @@ const LaunchpadPageContent = ({
   const { resetForm, validateForm } = useFormikContext()
   const externalWalletAccount = useExternalWalletAccount()
   const connectedWallet = externalWalletAccount?.address
-  const { fetchBalance } = useAppKitBalance()
-
+  const queryClient = useQueryClient()
+  const queryContext = useQueryContext()
   const { toast } = useContext(ToastContext)
   const {
     trackSplashGetStarted,
@@ -133,8 +133,14 @@ const LaunchpadPageContent = ({
         return
       }
 
-      const walletBalanceData = await fetchBalance()
-      const walletSolBalance = Number(walletBalanceData.data?.balance ?? 0)
+      const walletBalanceData = await queryClient.fetchQuery({
+        ...getExternalWalletBalanceOptions(queryContext, {
+          walletAddress: connectedWallet,
+          mint: TOKEN_LISTING_MAP.SOL.address
+        }),
+        staleTime: 0 // dont use cached values
+      })
+      const walletSolBalance = Number(walletBalanceData.value)
       const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
       if (isValidWalletBalance) {
         trackWalletConnectSuccess(connectedWallet, walletSolBalance)
@@ -155,10 +161,11 @@ const LaunchpadPageContent = ({
       }
     },
     [
-      fetchBalance,
-      handleWalletAddSuccess,
+      queryClient,
+      queryContext,
       trackWalletConnectSuccess,
-      trackWalletInsufficientBalance
+      trackWalletInsufficientBalance,
+      handleWalletAddSuccess
     ]
   )
 
@@ -169,8 +176,14 @@ const LaunchpadPageContent = ({
       if (error instanceof AlreadyAssociatedError) {
         const lastConnectedWallet = externalWalletAccount?.address
         if (lastConnectedWallet) {
-          const walletBalanceData = await fetchBalance()
-          const walletSolBalance = Number(walletBalanceData.data?.balance ?? 0)
+          const walletBalanceData = await queryClient.fetchQuery({
+            ...getExternalWalletBalanceOptions(queryContext, {
+              walletAddress: lastConnectedWallet,
+              mint: TOKEN_LISTING_MAP.SOL.address
+            }),
+            staleTime: 0 // dont use cached values
+          })
+          const walletSolBalance = Number(walletBalanceData.value)
           const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
           if (isValidWalletBalance) {
             trackWalletConnectSuccess(lastConnectedWallet, walletSolBalance)
@@ -192,7 +205,8 @@ const LaunchpadPageContent = ({
     },
     [
       externalWalletAccount?.address,
-      fetchBalance,
+      queryClient,
+      queryContext,
       trackWalletConnectSuccess,
       handleWalletAddSuccess,
       trackWalletInsufficientBalance,
