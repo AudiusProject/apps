@@ -22,7 +22,7 @@ import { CollectionImage } from 'components/collection/CollectionImage'
 import { TrackArtwork } from 'components/track/TrackArtwork'
 import { UserCard, UserCardSkeleton } from 'components/user-card'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { Carousel } from 'pages/explore-page/components/desktop/Carousel'
+import { Carousel } from 'pages/search-explore-page/components/desktop/Carousel'
 
 import { NoResultsTile } from '../NoResultsTile'
 import { useSearchParams } from '../hooks'

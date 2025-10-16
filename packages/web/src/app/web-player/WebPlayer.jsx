@@ -14,9 +14,8 @@ import {
   useCurrentAccountUser,
   useHasAccount
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Client, Status } from '@audius/common/models'
-import { FeatureFlags, StringKeys } from '@audius/common/services'
+import { StringKeys } from '@audius/common/services'
 import { guestRoutes } from '@audius/common/src/utils/route'
 import { UploadType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -69,7 +68,6 @@ import UserIdParserPage from 'pages/dev-tools/UserIdParserPage'
 import { EditCoinDetailsPage } from 'pages/edit-coin-details-page/EditCoinDetailsPage'
 import { EditCollectionPage } from 'pages/edit-collection-page'
 import EmptyPage from 'pages/empty-page/EmptyPage'
-import { ExplorePage } from 'pages/explore-page/ExplorePage'
 import FavoritesPage from 'pages/favorites-page/FavoritesPage'
 import { FbSharePage } from 'pages/fb-share-page/FbSharePage'
 import FeedPage from 'pages/feed-page/FeedPage'
@@ -88,6 +86,7 @@ import RemixesPage from 'pages/remixes-page/RemixesPage'
 import RepostsPage from 'pages/reposts-page/RepostsPage'
 import { RequiresUpdate } from 'pages/requires-update/RequiresUpdate'
 import { RewardsPage } from 'pages/rewards-page/RewardsPage'
+import { ExplorePage } from 'pages/search-explore-page/ExplorePage'
 import SettingsPage from 'pages/settings-page/SettingsPage'
 import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
 import SupportingPage from 'pages/supporting-page/SupportingPage'
@@ -1020,18 +1019,9 @@ const RouterWebPlayer = withRouter(WebPlayer)
 
 // Taking this approach because the class component cannot use hooks
 const FeatureFlaggedWebPlayer = (props) => {
-  const { isEnabled: isSearchExploreEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE
-  )
   const { isProduction } = useEnvironment()
 
-  return (
-    <RouterWebPlayer
-      {...props}
-      isSearchExploreEnabled={isSearchExploreEnabled}
-      isProduction={isProduction}
-    />
-  )
+  return <RouterWebPlayer {...props} isProduction={isProduction} />
 }
 
 const MainContentRouterWebPlayer = () => {

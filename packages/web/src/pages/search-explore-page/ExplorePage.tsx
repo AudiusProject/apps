@@ -1,11 +1,8 @@
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
-
 import { useIsMobile } from 'hooks/useIsMobile'
 import { createSeoDescription } from 'utils/seo'
 
-import NewDesktopExplorePage from './components/desktop/NewExplorePage'
-import SearchExplorePage from './components/mobile/SearchExplorePage'
+import DesktopSearchExplorePage from './components/desktop/SearchExplorePage'
+import MobileSearchExplorePage from './components/mobile/SearchExplorePage'
 
 const messages = {
   title: 'Explore',
@@ -16,18 +13,14 @@ const messages = {
 export const ExplorePage = () => {
   const isMobile = useIsMobile()
 
-  const { isLoaded } = useFeatureFlag(FeatureFlags.SEARCH_EXPLORE)
-  if (!isLoaded) {
-    // prevent flicker while loading feature flag
-    return null
-  }
-
   const props = {
     title: messages.title,
     pageTitle: messages.pageTitle,
     description: messages.description
   }
 
-  const Component = isMobile ? SearchExplorePage : NewDesktopExplorePage
+  const Component = isMobile
+    ? MobileSearchExplorePage
+    : DesktopSearchExplorePage
   return <Component {...props} />
 }
