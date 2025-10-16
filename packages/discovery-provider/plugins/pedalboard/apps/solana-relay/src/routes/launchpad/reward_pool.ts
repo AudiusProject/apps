@@ -50,22 +50,34 @@ const PROD_SENDERS = [
   }
 ]
 
+/**
+ *
+ * @param param0
+ * - connection: Connection
+ * - tokenAccount: Keypair
+ * - feePayer: Keypair
+ * - managerAccount: Keypair
+ *     The manager is responsible for creating the first senders
+ * - rewardManagerAccount: Keypair
+ *     Reward manager holds the state of the reward pool
+ * - mint: PublicKey
+ * @returns
+ */
 export const createRewardPool = async ({
   connection,
-  rewardManager,
   tokenAccount,
   feePayer,
+  manager,
+  rewardManager,
   mint
 }: {
   connection: Connection
   feePayer: Keypair
-  rewardManager: Keypair
   tokenAccount: Keypair
+  manager: Keypair
+  rewardManager: Keypair
   mint: PublicKey
 }) => {
-  // The manager is responsible for creating the first senders
-  const manager = Keypair.generate()
-
   const transaction = new Transaction()
 
   // 1. Create reward manager account
@@ -107,10 +119,16 @@ export const createRewardPool = async ({
     programId: RewardManagerProgram.programId,
     rewardManagerState: rewardManager.publicKey
   })
+  console.log('authority', authority.toBase58())
 
   // 4. Add senders
   const senders = config.environment === 'prod' ? PROD_SENDERS : STAGE_SENDERS
   for (const sender of senders) {
+    const derivedSender = RewardManagerProgram.deriveSender({
+      ethAddress: sender.senderEthAddress,
+      programId: RewardManagerProgram.programId,
+      authority
+    })
     transaction.add(
       RewardManagerProgram.createSenderInstruction({
         senderEthAddress: sender.senderEthAddress,
@@ -119,7 +137,7 @@ export const createRewardPool = async ({
         manager: manager.publicKey,
         authority,
         payer: feePayer.publicKey,
-        sender: feePayer.publicKey,
+        sender: derivedSender,
         rewardManagerProgramId: RewardManagerProgram.programId
       })
     )

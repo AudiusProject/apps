@@ -9,10 +9,12 @@ import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk
 import {
   Keypair,
   PublicKey,
+  SystemProgram,
   TransactionMessage,
   VersionedTransaction
 } from '@solana/web3.js'
 import BN from 'bn.js'
+import bs58 from 'bs58'
 import { Request, Response } from 'express'
 
 import { config } from '../../config'
@@ -23,7 +25,6 @@ import { sendTransactionWithRetries } from '../../utils/transaction'
 import { makeCurve, makeTestCurve } from './curve'
 import { getKeypair } from './getKeypair'
 import { createRewardPool } from './reward_pool'
-import { sendTransactionWithSquads } from './squads'
 
 interface LaunchCoinRequestBody {
   name: string
@@ -41,8 +42,8 @@ const AUDIUS_COIN_URL = (ticker: string) => `https://audius.co/coins/${ticker}`
  * Process:
  *  1. Creates metadata for the new coin
  *  2. Create a config for the new coin
- *  3. Create a reward pool for the new coin
- *  4. Return transactions to sign and send from the client
+ *  3. Return transactions to sign and send from the client
+ *  4. Spawning a process to create a reward pool for the new coin in the background
  * @param req Request object containing the coin details
  * @param res Response object containing the coin details
  * @returns Response object containing two transactions
@@ -96,18 +97,40 @@ export const launchCoin = async (
     const connection = getConnection()
     const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
+    // Account / Keypair Setup
+    // ------------------------------------------------------------
+    // The wallet public key is the creator of the coin
     const walletPublicKey = new PublicKey(walletPublicKeyStr)
 
-    const mintKeypair = await getKeypair(logger)
-    const rewardPoolManager = Keypair.generate()
-    const rewardPoolTokenAccount = Keypair.generate()
+    // The launchpad partner (or fee claiming) for the coin
+    const launchpadPartnerPublicKey = new PublicKey(
+      config.launchpadPartnerPublicKey
+    )
 
-    // 1. Create Coin Metadata
-    logger.info('Creating coin metadata', { name, symbol, description })
-    const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
-    // Pick a random fee payer to "own" our new coin metadata and pay for the TX
+    // Pick a random fee payer to pay for Tx's
+    // It also "owns" our new coin metadata and pay for the TX
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
     const feePayer = solanaFeePayerWallets[index]
+
+    // The new mint keypair for the coin
+    const mintKeypair = await getKeypair(logger)
+
+    // The audius authority is used to create the dbc config
+    const audiusAuthorityKeypair = Keypair.fromSecretKey(
+      bs58.decode(config.launchpadPartnerSignerPrivateKey)
+    )
+
+    // This is the token account to custody the reward pool tokens
+    // It is used as the leftover receiver in the dbc config
+    const rewardPoolTokenAccount = Keypair.generate()
+
+    // Transaction Execution
+    // ------------------------------------------------------------
+
+    // 1. Create Coin Metadata
+    logger.info('Creating coin metadata', { name, symbol })
+    const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
+    // Pick a random fee payer to "own" our new coin metadata and pay for the TX
     const umiKeypair = umi.eddsa.createKeypairFromSecretKey(feePayer.secretKey)
     const signer = createSignerFromKeypair(umi, umiKeypair)
     umi.use(signerIdentity(signer))
@@ -127,60 +150,59 @@ export const launchCoin = async (
       isMutable: false
     }
     const metadataUri = await umi.uploader.uploadJson(metadata)
+    logger.info('Coin metadata creator', { name, symbol, metadataUri })
 
     // 2. Create a config for the new coin
-    logger.info('Creating config for new coin', { name, symbol })
     const configKeypair = Keypair.generate()
+    logger.info('Creating config for new coin', {
+      name,
+      symbol,
+      configKeypair: configKeypair.publicKey.toBase58()
+    })
     const createConfigTx = await dbcClient.partner.createConfig(
       config.environment === 'prod'
         ? makeCurve({
-            payer: mintKeypair,
+            payer: audiusAuthorityKeypair,
             configKey: configKeypair,
-            partner: walletPublicKey,
+            partner: launchpadPartnerPublicKey,
             rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
           })
         : makeTestCurve({
-            payer: mintKeypair,
+            payer: audiusAuthorityKeypair,
             configKey: configKeypair,
-            partner: walletPublicKey,
+            partner: launchpadPartnerPublicKey,
             rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
           })
     )
-    // Execute the createConfig instructions through Squads multisig while
-    // preserving the original required signers (feePayer, configKeypair)
-    await sendTransactionWithSquads({
-      connection,
-      instructions: createConfigTx.instructions,
-      feePayer: feePayer.publicKey,
-      signers: [feePayer, configKeypair]
+    const createConfigRecentBlockhash = await connection.getLatestBlockhash()
+    const createConfigMessage = new TransactionMessage({
+      recentBlockhash: createConfigRecentBlockhash.blockhash,
+      instructions: [...createConfigTx.instructions],
+      payerKey: audiusAuthorityKeypair.publicKey
     })
-
-    // 3. Create a reward pool for the new coin
-    logger.info('Creating reward pool for new coin', { name, symbol })
-    const rewardPoolTx = await createRewardPool({
-      connection,
-      rewardManager: rewardPoolManager,
-      tokenAccount: rewardPoolTokenAccount,
-      feePayer,
-      mint: mintKeypair.publicKey
-    })
-    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
-    const rewardPoolMessage = new TransactionMessage({
-      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
-      instructions: rewardPoolTx.instructions,
-      payerKey: feePayer.publicKey
-    })
-    const rewardPoolTransaction = new VersionedTransaction(
-      rewardPoolMessage.compileToV0Message()
+    const createConfigTransaction = new VersionedTransaction(
+      createConfigMessage.compileToV0Message()
     )
-    await sendTransactionWithRetries({
-      transaction: rewardPoolTransaction,
+    createConfigTransaction.sign([
+      configKeypair, // the keypair the config is deployed to
+      audiusAuthorityKeypair // the audius authority
+    ])
+    const createConfigSignature = await sendTransactionWithRetries({
+      transaction: createConfigTransaction,
       commitment: 'confirmed',
-      confirmationStrategy: { ...rewardPoolRecentBlockhash, signature: '' },
+      confirmationStrategy: {
+        ...createConfigRecentBlockhash,
+        signature: bs58.encode(createConfigTransaction.signatures[0])
+      },
       logger
     })
+    logger.info('Created config', {
+      name,
+      symbol,
+      signature: createConfigSignature
+    })
 
-    // 4. Create pool and first buy
+    // 3. Create pool and first buy
     logger.info('Preparing create pool and swap buy transactions', {
       name,
       symbol
@@ -206,6 +228,48 @@ export const launchCoin = async (
             }
           : undefined
       })
+
+    // 4. Create a reward pool for the new coin
+    logger.info('Creating reward pool for new coin', { name, symbol })
+    const manager = Keypair.generate()
+    const rewardManager = Keypair.generate()
+    const rewardPoolTx = await createRewardPool({
+      connection,
+      tokenAccount: rewardPoolTokenAccount,
+      feePayer,
+      manager,
+      rewardManager,
+      mint: mintKeypair.publicKey
+    })
+    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
+    const rewardPoolMessage = new TransactionMessage({
+      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
+      instructions: rewardPoolTx.instructions,
+      payerKey: feePayer.publicKey
+    })
+    const rewardPoolTransaction = new VersionedTransaction(
+      rewardPoolMessage.compileToV0Message()
+    )
+    rewardPoolTransaction.sign([
+      rewardPoolTokenAccount,
+      feePayer,
+      manager,
+      rewardManager
+    ])
+    const rewardPoolSignature = await sendTransactionWithRetries({
+      transaction: rewardPoolTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: {
+        ...rewardPoolRecentBlockhash,
+        signature: bs58.encode(rewardPoolTransaction.signatures[0])
+      },
+      logger
+    })
+    logger.info('Created reward pool', {
+      name,
+      symbol,
+      signature: rewardPoolSignature
+    })
 
     /*
      * Prepare the transactions to be signed by the client

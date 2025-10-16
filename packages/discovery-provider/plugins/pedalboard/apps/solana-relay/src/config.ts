@@ -58,9 +58,10 @@ type Config = {
   listensTrackDailyRateLimit: number
   listensTrackWeeklyRateLimit: number
   antiAbuseOracle: string
-  // The public key for the launchpad config partner, assumed to be a Squads multisig
+  // The public key for the launchpad config partner (Squads multisig)
   launchpadPartnerPublicKey: string
-  // The private key for a signer of the launchpad config partner
+  // The private key for a signer of the launchpad config partner (AKA the authority)
+  // Signs the tx and is used to collect all launches for external pages, e.g. jup launchpad
   launchpadPartnerSignerPrivateKey: string
 }
 
