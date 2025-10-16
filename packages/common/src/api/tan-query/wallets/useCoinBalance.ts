@@ -17,14 +17,14 @@ const USDC_DECIMALS = 6
 const WEI_DECIMALS = 18
 
 /**
- * Wrapper hook that gives the balance of any token - including USDC which uses a different query.
+ * Wrapper hook that gives the balance of any coin - including USDC which uses a different query.
  * Uses the appropriate query hook and formats accordingly
  *
- * @param mint The mint address of the token to fetch balance for
+ * @param mint The mint address of the coin to fetch balance for
  * @param options Options for the query and polling
  * @returns Object with status, data, refresh, and cancelPolling
  */
-export const useTokenBalance = ({
+export const useCoinBalance = ({
   mint,
   userId,
   isPolling,
@@ -51,7 +51,7 @@ export const useTokenBalance = ({
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
   // For AUDIO, we need to use the useAudioBalance hook since it includes ETH audio. useUserCoin is only SOL AUDIO
-  const audioTokenQuery = useAudioBalance(
+  const audioCoinQuery = useAudioBalance(
     {
       userId,
       includeConnectedWallets: includeExternalWallets,
@@ -134,15 +134,15 @@ export const useTokenBalance = ({
   if (isAudio) {
     return {
       data: {
-        balance: AUDIO(audioTokenQuery.totalBalance),
+        balance: AUDIO(audioCoinQuery.totalBalance),
         balanceLocaleString: AUDIO(
-          audioTokenQuery.totalBalance
+          audioCoinQuery.totalBalance
         ).toLocaleString(),
         decimals: WEI_DECIMALS
       },
-      isLoading: audioTokenQuery.isLoading,
-      isPending: audioTokenQuery.isLoading,
-      isError: audioTokenQuery.isError
+      isLoading: audioCoinQuery.isLoading,
+      isPending: audioCoinQuery.isLoading,
+      isError: audioCoinQuery.isError
     }
   }
   return userCoinQuery

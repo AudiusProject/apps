@@ -6,7 +6,7 @@ import {
   SLIPPAGE_BPS,
   useArtistCoin,
   useCurrentAccountUser,
-  useSwapTokens
+  useSwapCoins
 } from '~/api'
 import { SwapStatus } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
@@ -17,7 +17,7 @@ import type {
   BuySellTab,
   Screen,
   SwapResult,
-  TokenPair,
+  CoinPair,
   TransactionData
 } from './types'
 
@@ -26,7 +26,7 @@ type UseBuySellSwapProps = {
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
-  selectedPair: TokenPair
+  selectedPair: CoinPair
   onClose: () => void
 }
 
@@ -52,7 +52,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     status: swapStatus,
     error: swapError,
     data: swapData
-  } = useSwapTokens()
+  } = useSwapCoins()
 
   const performSwap = () => {
     if (!transactionData || !transactionData.isValid) return

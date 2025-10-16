@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useDebouncedCallback } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
-import { useTokenAmountFormatting } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
+import { useCoinAmountFormatting } from '@audius/common/store'
 import {
   sanitizeNumericInput,
   formatTokenInputWithSmartDecimals
@@ -18,7 +18,7 @@ import { TooltipInfoIcon } from './TooltipInfoIcon'
 
 type InputTokenSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   amount: string
   onAmountChange: (amount: string) => void
   onMaxClick: () => void
@@ -30,8 +30,8 @@ type InputTokenSectionProps = {
   tokenPrice?: string | null
   isTokenPriceLoading?: boolean
   tokenPriceDecimalPlaces?: number
-  availableTokens?: TokenInfo[]
-  onTokenChange?: (token: TokenInfo) => void
+  availableTokens?: CoinInfo[]
+  onTokenChange?: (token: CoinInfo) => void
 }
 
 export const InputTokenSection = ({
@@ -55,7 +55,7 @@ export const InputTokenSection = ({
   const { symbol, isStablecoin } = tokenInfo
   const [localAmount, setLocalAmount] = useState(amount ?? '')
 
-  const { formattedAvailableBalance } = useTokenAmountFormatting({
+  const { formattedAvailableBalance } = useCoinAmountFormatting({
     amount,
     availableBalance,
     exchangeRate,

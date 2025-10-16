@@ -5,11 +5,11 @@ import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { useArtistCoin } from '~/api'
 
+import { useCoinData } from './hooks/useCoinData'
 import { useSwapCalculations } from './hooks/useSwapCalculations'
 import { useSwapValidation } from './hooks/useSwapValidation'
-import { useTokenData } from './hooks/useTokenData'
 import { createSwapFormSchema, type SwapFormValues } from './swapFormSchema'
-import type { TokenInfo } from './types/swap.types'
+import type { CoinInfo } from './types/swap.types'
 import { parseNumericAmount } from './utils/tokenCalculations'
 import { resolveTokenLimits } from './utils/tokenLimits'
 
@@ -19,15 +19,15 @@ export type BalanceConfig = {
   formatError: (amount: number) => string
 }
 
-export type TokenSwapFormProps = {
+export type CoinSwapFormProps = {
   /**
    * The token the user is paying with (input)
    */
-  inputToken: TokenInfo
+  inputCoin: CoinInfo
   /**
    * The token the user is receiving (output)
    */
-  outputToken: TokenInfo
+  outputCoin: CoinInfo
   /**
    * Minimum amount allowed for input (optional - will be calculated from USD limits if not provided)
    */
@@ -68,9 +68,9 @@ export type TokenSwapFormProps = {
 /**
  * A hook to manage the common functionality for token swaps
  */
-export const useTokenSwapForm = ({
-  inputToken,
-  outputToken,
+export const useCoinSwapForm = ({
+  inputCoin,
+  outputCoin,
   min: providedMin,
   max: providedMax,
   requiredRemainingBalance: providedRequiredRemainingBalance,
@@ -78,27 +78,27 @@ export const useTokenSwapForm = ({
   initialInputValue = '',
   onInputValueChange,
   externalWalletAddress
-}: TokenSwapFormProps) => {
+}: CoinSwapFormProps) => {
   // Get token price for USD-based limit calculations
-  const { data: tokenPriceData } = useArtistCoin(inputToken.address)
+  const { data: tokenPriceData } = useArtistCoin(inputCoin.address)
   const tokenPrice = tokenPriceData?.price ? Number(tokenPriceData.price) : null
 
   // Calculate min/max based on USD limits and current price
   const calculatedLimits = useMemo(() => {
     return resolveTokenLimits({
       tokenPrice,
-      isStablecoin: inputToken.isStablecoin || false,
+      isStablecoin: inputCoin.isStablecoin || false,
       providedMin,
       providedMax
     })
-  }, [providedMin, providedMax, tokenPrice, inputToken.isStablecoin])
+  }, [tokenPrice, inputCoin.isStablecoin, providedMin, providedMax])
 
   const { min, max } = calculatedLimits
 
   // Use new composed hooks
-  const tokenData = useTokenData({
-    inputToken,
-    outputToken,
+  const tokenData = useCoinData({
+    inputCoin,
+    outputCoin,
     inputAmount: parseNumericAmount(initialInputValue),
     externalWalletAddress,
     queryOptions: {
@@ -109,10 +109,10 @@ export const useTokenSwapForm = ({
   const swapCalculations = useSwapCalculations({
     exchangeRate: tokenData.exchangeRate,
     onInputValueChange,
-    inputTokenAddress: inputToken.address,
-    outputTokenAddress: outputToken.address,
-    inputTokenDecimals: inputToken.decimals,
-    outputTokenDecimals: outputToken.decimals
+    inputCoinAddress: inputCoin.address,
+    outputCoinAddress: outputCoin.address,
+    inputCoinDecimals: inputCoin.decimals,
+    outputCoinDecimals: outputCoin.decimals
   })
 
   const availableBalance = tokenData.balance
@@ -123,8 +123,8 @@ export const useTokenSwapForm = ({
     inputAmount: swapCalculations.inputAmount,
     balance: tokenData.fullBalance,
     limits: { min, max: adjustedMax },
-    tokenSymbol: inputToken.symbol,
-    tokenDecimals: inputToken.decimals,
+    tokenSymbol: inputCoin.symbol,
+    tokenDecimals: inputCoin.decimals,
     isBalanceLoading: tokenData.isBalanceLoading,
     isTouched: true // Simplified - in real implementation would track this properly
   })
@@ -136,16 +136,16 @@ export const useTokenSwapForm = ({
         min,
         adjustedMax,
         tokenData.fullBalance,
-        inputToken.symbol,
-        inputToken.decimals
+        inputCoin.symbol,
+        inputCoin.decimals
       )
     )
   }, [
     min,
     adjustedMax,
     tokenData.fullBalance,
-    inputToken.symbol,
-    inputToken.decimals
+    inputCoin.symbol,
+    inputCoin.decimals
   ])
 
   // Initialize form with Formik
@@ -153,8 +153,8 @@ export const useTokenSwapForm = ({
     initialValues: {
       inputAmount: initialInputValue,
       outputAmount: '0',
-      selectedInputToken: inputToken,
-      selectedOutputToken: outputToken
+      selectedInputToken: inputCoin,
+      selectedOutputToken: outputCoin
     },
     validationSchema,
     validateOnBlur: true,
@@ -188,7 +188,7 @@ export const useTokenSwapForm = ({
   // Re-validate input when token or balance changes. Guard to avoid infinite loops.
   const lastValidationKeyRef = useRef<string | null>(null)
   // Only re-validate on actual token change to avoid recursive updates during balance polling
-  const tokenValidationKey = `${inputToken.address}-${outputToken.address}`
+  const tokenValidationKey = `${inputCoin.address}-${outputCoin.address}`
   useEffect(() => {
     if (!values.inputAmount || values.inputAmount === '') return
     if (lastValidationKeyRef.current !== tokenValidationKey) {
@@ -312,8 +312,8 @@ export const useTokenSwapForm = ({
     handleOutputAmountChange,
     handleMaxClick,
     formik,
-    inputToken,
-    outputToken,
+    inputCoin,
+    outputCoin,
     calculatedLimits // Expose the calculated limits
   }
 }

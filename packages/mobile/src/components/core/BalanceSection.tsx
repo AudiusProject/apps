@@ -2,7 +2,7 @@ import {
   transformArtistCoinToTokenInfo,
   useArtistCoin
 } from '@audius/common/api'
-import { useFormattedTokenBalance } from '@audius/common/hooks'
+import { useFormattedCoinBalance } from '@audius/common/hooks'
 
 import { Flex, Text } from '@audius/harmony-native'
 
@@ -25,7 +25,7 @@ export const BalanceSection = ({
   pollingInterval,
   internalWalletOnly = false
 }: BalanceSectionProps) => {
-  const { tokenBalanceFormatted } = useFormattedTokenBalance(
+  const { coinBalanceFormatted } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
     isPolling,
@@ -43,7 +43,7 @@ export const BalanceSection = ({
       <Flex gap='xs'>
         <Flex>
           <Text variant='heading' size='l'>
-            {tokenBalanceFormatted}
+            {coinBalanceFormatted}
           </Text>
           <Text variant='heading' size='s' color='subdued'>
             ${tokenInfo?.symbol}

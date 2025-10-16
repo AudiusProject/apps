@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import type { CalculationSource } from '../types/swap.types'
 
-export type TokenChangeHandlerResult = {
+export type CoinChangeHandlerResult = {
   needsRecalculation: boolean
   preservedValues: {
     inputAmount: number
@@ -21,26 +21,26 @@ export type TokenChangeHandlerResult = {
   }) => void
   markForRecalculation: () => void
   clearRecalculationFlag: () => void
-  onTokensChanged: (callback: () => void) => void
+  onCoinsChanged: (callback: () => void) => void
 }
 
 /**
  * Hook that manages token change detection and value preservation
  */
-export const useTokenChangeHandler = ({
-  inputTokenAddress,
-  outputTokenAddress,
+export const useCoinChangeHandler = ({
+  inputCoinAddress,
+  outputCoinAddress,
   currentInputAmount,
   currentOutputAmount,
   currentSource
 }: {
-  inputTokenAddress?: string
-  outputTokenAddress?: string
+  inputCoinAddress?: string
+  outputCoinAddress?: string
   currentInputAmount: number
   currentOutputAmount: number
   currentSource: CalculationSource
-}): TokenChangeHandlerResult => {
-  const tokenKeyRef = useRef(`${inputTokenAddress}-${outputTokenAddress}`)
+}): CoinChangeHandlerResult => {
+  const tokenKeyRef = useRef(`${inputCoinAddress}-${outputCoinAddress}`)
   const needsRecalculation = useRef(false)
   const preservedValuesRef = useRef({
     inputAmount: 0,
@@ -59,16 +59,16 @@ export const useTokenChangeHandler = ({
 
   // Detect token changes and prepare for recalculation
   useEffect(() => {
-    if (!inputTokenAddress || !outputTokenAddress) return
+    if (!inputCoinAddress || !outputCoinAddress) return
 
-    const currentTokenKey = `${inputTokenAddress}-${outputTokenAddress}`
+    const currentTokenKey = `${inputCoinAddress}-${outputCoinAddress}`
     const tokensChanged = tokenKeyRef.current !== currentTokenKey
 
     if (tokensChanged) {
       tokenKeyRef.current = currentTokenKey
       needsRecalculation.current = true
     }
-  }, [inputTokenAddress, outputTokenAddress])
+  }, [inputCoinAddress, outputCoinAddress])
 
   const updatePreservedValues = useCallback(
     (values: {
@@ -89,7 +89,7 @@ export const useTokenChangeHandler = ({
     needsRecalculation.current = false
   }, [])
 
-  const onTokensChanged = useCallback((callback: () => void) => {
+  const onCoinsChanged = useCallback((callback: () => void) => {
     if (needsRecalculation.current) {
       needsRecalculation.current = false
       callback()
@@ -102,6 +102,6 @@ export const useTokenChangeHandler = ({
     updatePreservedValues,
     markForRecalculation,
     clearRecalculationFlag,
-    onTokensChanged
+    onCoinsChanged
   }
 }

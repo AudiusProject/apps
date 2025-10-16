@@ -7,8 +7,8 @@ import {
   useArtistCoins
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
@@ -57,9 +57,9 @@ export const BuyTab = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken: quoteToken,
-    outputToken: selectedOutputToken,
+  } = useCoinSwapForm({
+    inputCoin: quoteToken,
+    outputCoin: selectedOutputToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange
@@ -68,12 +68,12 @@ export const BuyTab = ({
   const { data: coins } = useArtistCoins({
     pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
   })
-  const artistCoins: TokenInfo[] = useMemo(() => {
+  const artistCoins: CoinInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
 
   // Token change handlers
-  const handleOutputTokenChange = (token: TokenInfo) => {
+  const handleOutputTokenChange = (token: CoinInfo) => {
     setSelectedOutputToken(token)
     onOutputTokenChange?.(token.symbol)
   }

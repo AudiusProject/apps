@@ -4,7 +4,7 @@ import { FixedDecimal } from '@audius/fixed-decimal'
 
 import { getTokenDecimalPlaces, getCurrencyDecimalPlaces } from '~/utils'
 
-export type UseTokenAmountFormattingProps = {
+export type UseCoinAmountFormattingProps = {
   amount?: string | number
   availableBalance?: number | null
   exchangeRate?: number | null
@@ -13,7 +13,7 @@ export type UseTokenAmountFormattingProps = {
   placeholder?: string
 }
 
-export const DEFAULT_TOKEN_AMOUNT_PLACEHOLDER = '0.00'
+export const DEFAULT_COIN_AMOUNT_PLACEHOLDER = '0.00'
 
 const defaultDecimalPlaces = 2
 
@@ -29,13 +29,13 @@ const getSafeNumericValue = (value: string | number): number => {
   return Math.min(Math.abs(numericValue), MAX_SAFE_AMOUNT)
 }
 
-export const useTokenAmountFormatting = ({
+export const useCoinAmountFormatting = ({
   amount,
   availableBalance,
   isStablecoin,
   decimals,
-  placeholder = DEFAULT_TOKEN_AMOUNT_PLACEHOLDER
-}: UseTokenAmountFormattingProps) => {
+  placeholder = DEFAULT_COIN_AMOUNT_PLACEHOLDER
+}: UseCoinAmountFormattingProps) => {
   const getDisplayDecimalPlaces = useCallback(
     (currentExchangeRate: number | null | undefined) => {
       if (isStablecoin) return defaultDecimalPlaces

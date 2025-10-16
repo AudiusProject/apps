@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useRef, useState } from 'react'
 
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 import {
   IconCaretDown,
   Text,
@@ -22,13 +22,13 @@ import { TokenIcon } from '../TokenIcon'
 type TokenOption = {
   value: string
   label: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
 }
 
 type TokenDropdownProps = {
-  selectedToken: TokenInfo
-  availableTokens: TokenInfo[]
-  onTokenChange?: (token: TokenInfo) => void
+  selectedToken: CoinInfo
+  availableTokens: CoinInfo[]
+  onTokenChange?: (token: CoinInfo) => void
   disabled?: boolean
 }
 

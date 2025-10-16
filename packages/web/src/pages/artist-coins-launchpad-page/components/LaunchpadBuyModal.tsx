@@ -5,9 +5,9 @@ import { buySellMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { Name } from '@audius/common/src/models/Analytics'
 import { TOKEN_LISTING_MAP } from '@audius/common/src/store/ui/buy-audio/constants'
-import { TokenInfo } from '@audius/common/src/store/ui/buy-sell/types'
-import { useTokenSwapForm } from '@audius/common/src/store/ui/buy-sell/useTokenSwapForm'
-import { useTokenAmountFormatting } from '@audius/common/store'
+import { CoinInfo } from '@audius/common/src/store/ui/buy-sell/types'
+import { useCoinSwapForm } from '@audius/common/src/store/ui/buy-sell/useCoinSwapForm'
+import { useCoinAmountFormatting } from '@audius/common/store'
 import {
   Button,
   Flex,
@@ -42,7 +42,7 @@ import zIndex from 'utils/zIndex'
 
 const INPUT_TOKEN_MAP: Record<
   string,
-  TokenInfo & { minSwapAmount?: number; requiredRemainingBalance?: number }
+  CoinInfo & { minSwapAmount?: number; requiredRemainingBalance?: number }
 > = {
   USDC: {
     ...TOKEN_LISTING_MAP.USDC,
@@ -63,7 +63,7 @@ const INPUT_TOKEN_LIST = Object.values(INPUT_TOKEN_MAP)
 
 const DEFAULT_INPUT_TOKEN = INPUT_TOKEN_MAP.SOL
 
-const OUTPUT_TOKEN: TokenInfo = {
+const OUTPUT_TOKEN: CoinInfo = {
   ...TOKEN_LISTING_MAP.AUDIO,
   balance: null,
   isStablecoin: false
@@ -74,8 +74,8 @@ const FORM_INPUT_DECIMALS = 8 // This is the number of decimals that are allowed
 type FormikValues = {
   inputAmount: string
   outputAmount: string
-  selectedInputToken: TokenInfo
-  selectedOutputToken: TokenInfo
+  selectedInputToken: CoinInfo
+  selectedOutputToken: CoinInfo
 }
 
 const FormInputStep = ({
@@ -95,13 +95,13 @@ const FormInputStep = ({
   isBalanceLoading: boolean
   isExchangeRateLoading: boolean
   handleMaxClick: () => void
-  onInputTokenChange: (token: TokenInfo) => void
+  onInputTokenChange: (token: CoinInfo) => void
   onInputAmountChange: (value: string) => void
   onOutputAmountChange: (value: string) => void
 }) => {
   const { values, errors, setFieldValue } = useFormikContext<FormikValues>()
 
-  const handleInputTokenChange = (token: TokenInfo) => {
+  const handleInputTokenChange = (token: CoinInfo) => {
     onInputTokenChange(token)
     track(
       make({
@@ -270,13 +270,13 @@ const ConfirmationStep = ({
   isConfirming: boolean
 }) => {
   const { values } = useFormikContext<FormikValues>()
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: values.inputAmount,
     isStablecoin: !!values.selectedInputToken.isStablecoin,
     decimals: values.selectedInputToken.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: values.outputAmount,
     isStablecoin: !!values.selectedOutputToken.isStablecoin,
     decimals: values.selectedOutputToken.decimals
@@ -392,7 +392,7 @@ export const LaunchpadBuyModal = ({
     data: swapData
   } = useExternalWalletSwap()
 
-  const onInputTokenChange = (token: TokenInfo) => {
+  const onInputTokenChange = (token: CoinInfo) => {
     setSelectedInputToken(token)
   }
   const externalWalletAccount = useExternalWalletAccount()
@@ -450,9 +450,9 @@ export const LaunchpadBuyModal = ({
     handleInputAmountChange,
     handleMaxClick,
     handleOutputAmountChange
-  } = useTokenSwapForm({
-    inputToken: selectedInputToken,
-    outputToken: OUTPUT_TOKEN,
+  } = useCoinSwapForm({
+    inputCoin: selectedInputToken,
+    outputCoin: OUTPUT_TOKEN,
     externalWalletAddress,
     min: selectedInputToken.minSwapAmount,
     requiredRemainingBalance: selectedInputToken.requiredRemainingBalance

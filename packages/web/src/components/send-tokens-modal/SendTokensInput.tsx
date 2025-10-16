@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback, useState } from 'react'
 
 import {
   useArtistCoin,
-  useTokenBalance,
+  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
 import { isValidSolAddress } from '@audius/common/store'
@@ -62,7 +62,7 @@ const SendTokensInput = ({
 
   // Get the coin data and balance using the same hooks as ReceiveTokensModal
   const { data: coin } = useArtistCoin(mint)
-  const { data: tokenBalance } = useTokenBalance({
+  const { data: tokenBalance } = useCoinBalance({
     mint,
     includeExternalWallets: false,
     includeStaked: false

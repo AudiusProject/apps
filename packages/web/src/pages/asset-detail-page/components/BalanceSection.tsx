@@ -3,11 +3,11 @@ import { useCallback, useState } from 'react'
 import {
   useArtistCoin,
   useCurrentAccountUser,
-  useTokenBalance
+  useCoinBalance
 } from '@audius/common/api'
 import {
   useBuySellInitialTab,
-  useFormattedTokenBalance,
+  useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
@@ -179,13 +179,13 @@ const HasBalanceState = ({
   const isManagerMode = useIsManagedAccount()
   const { motion } = useTheme()
   const {
-    tokenBalanceFormatted,
+    coinBalanceFormatted,
     formattedHeldValue,
-    isTokenBalanceLoading,
-    isTokenPriceLoading
-  } = useFormattedTokenBalance(mint)
+    isCoinBalanceLoading,
+    isCoinPriceLoading
+  } = useFormattedCoinBalance(mint)
 
-  const isLoading = isTokenBalanceLoading || isTokenPriceLoading
+  const isLoading = isCoinBalanceLoading || isCoinPriceLoading
 
   return (
     <>
@@ -206,7 +206,7 @@ const HasBalanceState = ({
             </Text>
             <Flex gap='xs' alignItems='center'>
               <Text variant='heading' size='s'>
-                {tokenBalanceFormatted}
+                {coinBalanceFormatted}
               </Text>
               <Text variant='title' size='l' color='subdued'>
                 ${ticker}
@@ -267,8 +267,9 @@ type AssetDetailProps = {
 
 const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
-  const { data: tokenBalance, isPending: tokenBalanceLoading } =
-    useTokenBalance({ mint })
+  const { data: tokenBalance, isPending: tokenBalanceLoading } = useCoinBalance(
+    { mint }
+  )
   const { data: currentUser } = useCurrentAccountUser()
   const { isBuySellSupported } = useBuySellRegionSupport()
   const initialTab = useBuySellInitialTab()

@@ -13,7 +13,7 @@ import { QueryOptions, type QueryKey } from '../types'
 const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
 const AUDIO_DECIMALS = TOKEN_LISTING_MAP.AUDIO.decimals
 
-export type TokenExchangeRateParams = {
+export type CoinExchangeRateParams = {
   inputMint: string
   outputMint: string
   inputDecimals: number
@@ -22,7 +22,7 @@ export type TokenExchangeRateParams = {
   swapMode?: SwapMode
 }
 
-export type TokenExchangeRateResponse = {
+export type CoinExchangeRateResponse = {
   rate: number
   inputAmount: {
     amount: number
@@ -63,7 +63,7 @@ export const calculatePriceImpact = (
 }
 
 /**
- * Creates a standardized TokenExchangeRateResponse object
+ * Creates a standardized CoinExchangeRateResponse object
  */
 export const createExchangeRateResponse = ({
   rate,
@@ -77,7 +77,7 @@ export const createExchangeRateResponse = ({
   outputAmount: { amount: number; uiAmount: number }
   priceImpactPct: number
   quote: QuoteResponse
-}): TokenExchangeRateResponse => {
+}): CoinExchangeRateResponse => {
   return {
     rate,
     inputAmount: {
@@ -103,7 +103,7 @@ export const getDirectQuote = async (params: {
   outputDecimals: number
   amountUi: number
   swapMode?: SwapMode
-}): Promise<TokenExchangeRateResponse> => {
+}): Promise<CoinExchangeRateResponse> => {
   const quoteResult = await getJupiterQuoteByMint({
     inputMint: params.inputMint,
     outputMint: params.outputMint,
@@ -142,7 +142,7 @@ export const getIndirectQuoteViaAudio = async (params: {
   outputDecimals: number
   amountUi: number
   swapMode?: SwapMode
-}): Promise<TokenExchangeRateResponse> => {
+}): Promise<CoinExchangeRateResponse> => {
   // Get first quote: InputToken -> AUDIO
   const firstQuote = await getJupiterQuoteByMint({
     inputMint: params.inputMint,
@@ -192,14 +192,14 @@ export const getIndirectQuoteViaAudio = async (params: {
 }
 
 // Define exchange rate query key
-export const getTokenExchangeRateQueryKey = ({
+export const getCoinExchangeRateQueryKey = ({
   inputMint,
   outputMint,
   inputDecimals,
   outputDecimals,
   inputAmount,
   swapMode
-}: TokenExchangeRateParams) =>
+}: CoinExchangeRateParams) =>
   [
     QUERY_KEYS.tokenExchangeRate,
     inputMint,
@@ -208,7 +208,7 @@ export const getTokenExchangeRateQueryKey = ({
     outputDecimals,
     inputAmount ?? 1,
     swapMode ?? 'ExactIn'
-  ] as unknown as QueryKey<TokenExchangeRateResponse>
+  ] as unknown as QueryKey<CoinExchangeRateResponse>
 
 /**
  * Hook to get the exchange rate between two tokens using Jupiter
@@ -217,8 +217,8 @@ export const getTokenExchangeRateQueryKey = ({
  * @param options Optional query configuration
  * @returns The exchange rate data
  */
-export const useTokenExchangeRate = (
-  params: TokenExchangeRateParams,
+export const useCoinExchangeRate = (
+  params: CoinExchangeRateParams,
   options?: QueryOptions
 ) => {
   // Default to 1 unit of input token if no amount specified
@@ -237,7 +237,7 @@ export const useTokenExchangeRate = (
   }, [inputAmount])
 
   return useQuery({
-    queryKey: getTokenExchangeRateQueryKey({
+    queryKey: getCoinExchangeRateQueryKey({
       inputMint: params.inputMint,
       outputMint: params.outputMint,
       inputDecimals: params.inputDecimals,

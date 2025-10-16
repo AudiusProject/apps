@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 
 import { buySellMessages } from '@audius/common/messages'
-import { BuySellTab, TokenInfo, useTokenSwapForm } from '@audius/common/store'
+import { BuySellTab, CoinInfo, useCoinSwapForm } from '@audius/common/store'
 import { Flex, Skeleton } from '@audius/harmony'
 import { Form, FormikProvider } from 'formik'
 
@@ -34,8 +34,8 @@ const SwapFormSkeleton = () => (
 )
 
 export type SwapTabProps = {
-  inputToken: TokenInfo
-  outputToken: TokenInfo
+  inputToken: CoinInfo
+  outputToken: CoinInfo
   outputBalance?: number
   inputIsDefault?: boolean
   outputIsDefault?: boolean
@@ -98,9 +98,9 @@ export const SwapTab = ({
     displayExchangeRate,
     handleInputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken,
-    outputToken: resolvedOutputToken,
+  } = useCoinSwapForm({
+    inputCoin: inputToken,
+    outputCoin: resolvedOutputToken,
     min,
     max,
     onTransactionDataChange,

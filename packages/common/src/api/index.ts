@@ -19,19 +19,6 @@ export * from './tan-query/collection/useCollectionByParams'
 export * from './tan-query/collection/useDeleteCollection'
 
 // Coins
-export * from './tan-query/coins/useArtistCoin'
-export * from './tan-query/coins/useArtistCoinByTicker'
-export * from './tan-query/coins/useArtistCoinMembers'
-export * from './tan-query/coins/useCoinGeckoCoin'
-export * from './tan-query/coins/useUserCoin'
-export * from './tan-query/coins/useUserCoins'
-export * from './tan-query/coins/useArtistCoinMembersCount'
-export * from './tan-query/coins/useUserCreatedCoins'
-export * from './tan-query/coins/useArtistCoins'
-export * from './tan-query/coins/useArtistOwnedCoin'
-export * from './tan-query/coins/useFirstBuyQuote'
-export * from './tan-query/coins/useUpdateArtistCoin'
-export * from './tan-query/coins/tokenUtils'
 
 // Developer Apps
 export * from '../schemas/developerApps'
@@ -175,10 +162,10 @@ export * from './tan-query/wallets/useAssociatedWallets'
 export * from './tan-query/wallets/useWalletOwner'
 export * from './tan-query/wallets/useUSDCBalance'
 export * from './tan-query/wallets/useExternalWalletBalance'
-export * from './tan-query/wallets/useTokenBalance'
-export * from './tan-query/wallets/useSendTokens'
-export * from './tan-query/jupiter/useSwapTokens'
-export * from './tan-query/jupiter/useTokenExchangeRate'
+export * from './tan-query/wallets/useCoinBalance'
+export * from './tan-query/wallets/useSendCoins'
+export * from './tan-query/jupiter/useSwapCoins'
+export * from './tan-query/jupiter/useCoinExchangeRate'
 export * from './tan-query/jupiter/utils'
 export * from './tan-query/jupiter/types'
 
@@ -190,5 +177,5 @@ export * from './tan-query/utils'
 export * from './tan-query/authorized-apps/useAuthorizedApps'
 export * from './tan-query/authorized-apps/useRemoveAuthorizedApp'
 
-// Tokens
-export * from './tan-query/tokens'
+// Coins
+export * from './tan-query/coins'

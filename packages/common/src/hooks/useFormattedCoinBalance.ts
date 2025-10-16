@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { FixedDecimal } from '@audius/fixed-decimal'
 
-import { useTokenBalance } from '../api'
+import { useCoinBalance } from '../api'
 import { useArtistCoin } from '../api/tan-query/coins/useArtistCoin'
 import {
   getTokenDecimalPlaces,
@@ -12,20 +12,20 @@ import {
   formatNumberCommas
 } from '../utils'
 
-type UseFormattedTokenBalanceReturn = {
-  tokenBalance: FixedDecimal | null
-  tokenBalanceFormatted: string | null
-  isTokenBalanceLoading: boolean
-  tokenPrice: string | null
-  tokenDollarValue: string
-  isTokenPriceLoading: boolean
+type UseFormattedCoinBalanceReturn = {
+  coinBalance: FixedDecimal | null
+  coinBalanceFormatted: string | null
+  isCoinBalanceLoading: boolean
+  coinPrice: string | null
+  coinDollarValue: string
+  isCoinPriceLoading: boolean
   heldValue: number | null
   formattedHeldValue: string | null
 }
 
 /**
  * Hook to get formatted balance and price information for any supported mint
- * @param mint - The mint symbol to get balance and price for
+ * @param mint - The coin mint address to get balance and price for
  * @param locale - Locale for number formatting (defaults to 'en-US')
  * @param isPolling - Whether to enable polling for balance updates
  * @param pollingInterval - Interval for polling in milliseconds (defaults to 3000ms)
@@ -33,33 +33,34 @@ type UseFormattedTokenBalanceReturn = {
  * @param includeStaked - Whether to include staked balances (defaults to true)
  * @returns Object with formatted balance, price, and loading states
  */
-export const useFormattedTokenBalance = (
+export const useFormattedCoinBalance = (
   mint: string,
   locale: string = 'en-US',
   isPolling?: boolean,
   pollingInterval?: number,
   includeExternalWallets: boolean = true,
   includeStaked: boolean = true
-): UseFormattedTokenBalanceReturn => {
-  const { data: tokenBalance, isPending: isTokenBalanceLoading } =
-    useTokenBalance({
+): UseFormattedCoinBalanceReturn => {
+  const { data: coinBalance, isPending: isCoinBalanceLoading } = useCoinBalance(
+    {
       mint,
       isPolling,
       pollingInterval,
       includeExternalWallets,
       includeStaked
-    })
+    }
+  )
 
-  const { data, isPending: isTokenPriceLoading } = useArtistCoin(mint)
+  const { data, isPending: isCoinPriceLoading } = useArtistCoin(mint)
 
-  const balance = tokenBalance?.balance
+  const balance = coinBalance?.balance
 
-  const tokenPrice = data?.displayPrice
-  const hasFetchedTokenBalance = !isNullOrUndefined(balance)
+  const coinPrice = data?.displayPrice
+  const hasFetchedCoinBalance = !isNullOrUndefined(balance)
 
   // Format mint balance with dynamic decimal places
-  const tokenBalanceFormatted = useMemo(() => {
-    if (!hasFetchedTokenBalance || !balance) return null
+  const coinBalanceFormatted = useMemo(() => {
+    if (!hasFetchedCoinBalance || !balance) return null
 
     // Convert FixedDecimal to number for formatting
     const balanceNumber = Number(balance.toString())
@@ -67,7 +68,7 @@ export const useFormattedTokenBalance = (
 
     // Cap maximumFractionDigits to not exceed the token's native decimal precision
     // FixedDecimal can't format with more decimals than it was constructed with
-    const maxFractionDigits = Math.min(decimalPlaces, tokenBalance?.decimals)
+    const maxFractionDigits = Math.min(decimalPlaces, coinBalance?.decimals)
 
     // Need formatNumberCommas for mobile :(
     return formatNumberCommas(
@@ -76,18 +77,18 @@ export const useFormattedTokenBalance = (
         roundingMode: 'trunc'
       })
     )
-  }, [balance, hasFetchedTokenBalance, locale, tokenBalance?.decimals])
+  }, [balance, hasFetchedCoinBalance, locale, coinBalance?.decimals])
 
   // Calculate dollar value of user's mint balance
-  const tokenDollarValue = useMemo(() => {
-    if (!tokenPrice) return '$0.00'
+  const coinDollarValue = useMemo(() => {
+    if (!coinPrice) return '$0.00'
 
-    const priceNumber = Number(tokenPrice)
+    const priceNumber = Number(coinPrice)
     return formatCurrencyWithSubscript(priceNumber)
-  }, [tokenPrice])
+  }, [coinPrice])
 
   const heldValue =
-    tokenPrice && balance ? Number(tokenPrice) * Number(balance) : null
+    coinPrice && balance ? Number(coinPrice) * Number(balance) : null
   const formattedHeldValue = heldValue
     ? heldValue >= 1
       ? `$${formatCount(heldValue, 2)}`
@@ -95,12 +96,12 @@ export const useFormattedTokenBalance = (
     : null
 
   return {
-    tokenBalance: balance ?? null,
-    tokenBalanceFormatted,
-    isTokenBalanceLoading,
-    tokenPrice: tokenPrice?.toString() ?? null,
-    tokenDollarValue,
-    isTokenPriceLoading,
+    coinBalance: balance ?? null,
+    coinBalanceFormatted,
+    isCoinBalanceLoading,
+    coinPrice: coinPrice?.toString() ?? null,
+    coinDollarValue,
+    isCoinPriceLoading,
     heldValue,
     formattedHeldValue
   }

@@ -13,32 +13,32 @@ import {
   invalidateAudioBalance,
   updateAudioBalanceOptimistically
 } from './useAudioBalance'
-import { useTokenBalance } from './useTokenBalance'
+import { useCoinBalance } from './useCoinBalance'
 
-export type SendTokensParams = {
+export type SendCoinsParams = {
   recipientWallet: SolanaWalletAddress
   amount: bigint
 }
 
-export type SendTokensResult = {
+export type SendCoinsResult = {
   signature: string
   success: boolean
 }
 
 /**
- * Hook for sending tokens on Solana blockchain.
+ * Hook for sending coins on Solana blockchain.
  * This hook handles only Solana transfers, not ETH transfers.
  *
- * @returns Mutation object with sendTokens function and status
+ * @returns Mutation object with sendCoins function and status
  */
-export const useSendTokens = ({ mint }: { mint: string }) => {
+export const useSendCoins = ({ mint }: { mint: string }) => {
   const queryClient = useQueryClient()
   const { audiusBackend, audiusSdk, reportToSentry, analytics, env } =
     useQueryContext()
   const { data: walletAddresses } = useWalletAddresses()
   const { data: currentUser } = useCurrentAccountUser()
 
-  const { data: tokenBalance } = useTokenBalance({
+  const { data: coinBalance } = useCoinBalance({
     mint,
     includeExternalWallets: false,
     includeStaked: false
@@ -50,7 +50,7 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
     mutationFn: async ({
       recipientWallet,
       amount
-    }: SendTokensParams): Promise<SendTokensResult> => {
+    }: SendCoinsParams): Promise<SendCoinsResult> => {
       try {
         const currentUser = walletAddresses?.currentUser
         if (!currentUser) {
@@ -59,7 +59,7 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
 
         const sdk = await audiusSdk()
 
-        if (!tokenBalance?.balance || tokenBalance.balance.value < amount) {
+        if (!coinBalance?.balance || coinBalance.balance.value < amount) {
           throw new Error('Insufficient balance to send tokens')
         }
 
@@ -76,7 +76,7 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
           success: true
         }
       } catch (error) {
-        console.error('Error sending tokens:', error)
+        console.error('Error sending coins:', error)
 
         const errorMessage = getErrorMessage(error)
 
@@ -122,7 +122,7 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
         updateAudioBalanceOptimistically({
           queryClient,
           splWallet: currentUser.spl_wallet,
-          changeLamports: -amount // Negative because we're sending tokens
+          changeLamports: -amount // Negative because we're sending coins
         })
       }
 
@@ -174,7 +174,7 @@ export const useSendTokens = ({ mint }: { mint: string }) => {
       if (reportToSentry) {
         reportToSentry({
           error: error instanceof Error ? error : new Error(error as string),
-          name: 'Send Tokens',
+          name: 'Send Coins',
           additionalInfo: {
             amount: amount.toString(),
             mint

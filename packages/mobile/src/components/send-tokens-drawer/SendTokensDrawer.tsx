@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useSendTokens } from '@audius/common/api'
+import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import type { SolanaWalletAddress } from '@audius/common/models'
 import { ErrorLevel, Feature } from '@audius/common/models'
@@ -37,7 +37,7 @@ export const SendTokensDrawer = () => {
   })
   const [error, setError] = useState<string>('')
 
-  const sendTokensMutation = useSendTokens({ mint: mint ?? '' })
+  const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
 
   const handleInputContinue = (amount: bigint, destinationAddress: string) => {
     setState({

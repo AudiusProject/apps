@@ -4,10 +4,10 @@ import { SLIPPAGE_BPS } from '@audius/common/api'
 import { useBuySellAnalytics } from '@audius/common/hooks'
 import { buySellMessages as baseMessages } from '@audius/common/messages'
 import {
-  TokenInfo,
+  CoinInfo,
   getSwapTokens,
-  TokenPair,
-  useTokenAmountFormatting
+  CoinPair,
+  useCoinAmountFormatting
 } from '@audius/common/store'
 import { formatCurrencyWithSubscript } from '@audius/common/utils'
 import { Button, Flex, Text } from '@audius/harmony'
@@ -23,8 +23,8 @@ const messages = {
 }
 
 type ConfirmSwapScreenProps = {
-  payTokenInfo: TokenInfo
-  receiveTokenInfo: TokenInfo
+  payTokenInfo: CoinInfo
+  receiveTokenInfo: CoinInfo
   payAmount: number
   receiveAmount: number
   pricePerBaseToken: number
@@ -34,7 +34,7 @@ type ConfirmSwapScreenProps = {
   onConfirm: () => void
   isConfirming: boolean
   activeTab: 'buy' | 'sell' | 'convert'
-  selectedPair: TokenPair
+  selectedPair: CoinPair
 }
 
 export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
@@ -61,13 +61,13 @@ export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
   )
 
   // balance isn't needed so we pass 0
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     isStablecoin: !!payTokenInfo.isStablecoin,
     decimals: payTokenInfo.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: receiveAmount,
     isStablecoin: !!receiveTokenInfo.isStablecoin,
     decimals: receiveTokenInfo.decimals

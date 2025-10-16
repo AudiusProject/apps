@@ -2,7 +2,7 @@ import {
   useArtistCoin,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { useFormattedTokenBalance } from '@audius/common/hooks'
+import { useFormattedCoinBalance } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { css } from '@emotion/native'
 
@@ -37,7 +37,7 @@ export const SendTokensFailure = ({
   const { color } = useTheme()
   const { data: coin } = useArtistCoin(mint)
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
-  const { tokenBalanceFormatted } = useFormattedTokenBalance(mint)
+  const { coinBalanceFormatted } = useFormattedCoinBalance(mint)
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
@@ -49,7 +49,7 @@ export const SendTokensFailure = ({
         </Text>
         <Text variant='heading' size='m'>
           {walletMessages.minus}
-          {tokenBalanceFormatted} ${tokenInfo?.symbol}
+          {coinBalanceFormatted} ${tokenInfo?.symbol}
         </Text>
       </Flex>
 

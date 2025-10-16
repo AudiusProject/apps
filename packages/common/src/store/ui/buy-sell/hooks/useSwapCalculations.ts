@@ -10,15 +10,15 @@ import { isValidNumericInput } from '../utils/tokenCalculations'
 
 import { useBidirectionalCalculator } from './useBidirectionalCalculator'
 import { useCalculationStateMachine } from './useCalculationStateMachine'
-import { useTokenChangeHandler } from './useTokenChangeHandler'
+import { useCoinChangeHandler } from './useCoinChangeHandler'
 
 export type UseSwapCalculationsProps = {
   exchangeRate: number | null
   onInputValueChange?: (value: string) => void
-  inputTokenAddress?: string
-  outputTokenAddress?: string
-  inputTokenDecimals: number
-  outputTokenDecimals: number
+  inputCoinAddress?: string
+  outputCoinAddress?: string
+  inputCoinDecimals: number
+  outputCoinDecimals: number
 }
 
 /**
@@ -28,14 +28,14 @@ export type UseSwapCalculationsProps = {
 export const useSwapCalculations = ({
   exchangeRate,
   onInputValueChange,
-  inputTokenAddress,
-  outputTokenAddress,
-  inputTokenDecimals,
-  outputTokenDecimals
+  inputCoinAddress,
+  outputCoinAddress,
+  inputCoinDecimals,
+  outputCoinDecimals
 }: UseSwapCalculationsProps): SwapCalculationsHookResult => {
   // Validate that decimals are provided
-  if (inputTokenDecimals == null || outputTokenDecimals == null) {
-    throw new Error('Token decimals must be provided for accurate calculations')
+  if (inputCoinDecimals == null || outputCoinDecimals == null) {
+    throw new Error('Coin decimals must be provided for accurate calculations')
   }
   // State machine for tracking calculation source
   const stateMachine = useCalculationStateMachine()
@@ -45,15 +45,15 @@ export const useSwapCalculations = ({
     exchangeRate,
     source: stateMachine.source, // either input or output
     isUpdateInProgress: stateMachine.isUpdateInProgress,
-    inputDecimals: inputTokenDecimals,
-    outputDecimals: outputTokenDecimals
+    inputDecimals: inputCoinDecimals,
+    outputDecimals: outputCoinDecimals
   })
   const { setOutputAmount } = calculator
 
   // Token change handler for managing token switches
-  const tokenHandler = useTokenChangeHandler({
-    inputTokenAddress,
-    outputTokenAddress,
+  const coinHandler = useCoinChangeHandler({
+    inputCoinAddress,
+    outputCoinAddress,
     currentInputAmount: calculator.numericInputAmount,
     currentOutputAmount: calculator.numericOutputAmount,
     currentSource: stateMachine.source
@@ -61,8 +61,8 @@ export const useSwapCalculations = ({
 
   // Handle token changes with recalculation
   useEffect(() => {
-    tokenHandler.onTokensChanged(() => {
-      const { preservedValues } = tokenHandler
+    coinHandler.onCoinsChanged(() => {
+      const { preservedValues } = coinHandler
 
       if (
         preservedValues.source === 'input' &&
@@ -86,7 +86,7 @@ export const useSwapCalculations = ({
         calculator.setOutputAmount('')
       }
     })
-  }, [tokenHandler, stateMachine, calculator, onInputValueChange])
+  }, [stateMachine, calculator, onInputValueChange, coinHandler])
 
   // Clear output when exchange rate becomes unavailable
   useEffect(() => {

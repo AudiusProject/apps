@@ -25,7 +25,7 @@ import {
   INTERNAL_TRANSFER_MEMO_STRING,
   MEMO_PROGRAM_ID
 } from '~/services/audius-backend/solana'
-import { TokenInfo } from '~/store/ui/buy-sell/types'
+import { CoinInfo } from '~/store/ui/buy-sell/types'
 
 import { QUERY_KEYS } from '../queryKeys'
 
@@ -269,21 +269,21 @@ const SWAP_LOOKUP_TABLE_ADDRESS = new PublicKey(
 )
 
 export const findTokenByAddress = (
-  tokens: Record<string, TokenInfo>,
+  tokens: Record<string, CoinInfo>,
   address: string
-): TokenInfo | undefined => {
+): CoinInfo | undefined => {
   return Object.values(tokens).find(
     (token) => token.address.toLowerCase() === address.toLowerCase()
   )
 }
 
-export const getClaimableTokenMint = (token: TokenInfo): ClaimableTokenMint => {
+export const getClaimableTokenMint = (token: CoinInfo): ClaimableTokenMint => {
   if (token.symbol === 'USDC') return 'USDC'
   return new PublicKey(token.address)
 }
 
 export const createTokenConfig = (
-  token: TokenInfo
+  token: CoinInfo
 ): UserBankManagedTokenInfo => ({
   mintAddress: token.address,
   claimableTokenMint: getClaimableTokenMint(token),
@@ -293,7 +293,7 @@ export const createTokenConfig = (
 export const validateAndCreateTokenConfigs = (
   inputMintAddress: string,
   outputMintAddress: string,
-  tokens: Record<string, TokenInfo>
+  tokens: Record<string, CoinInfo>
 ):
   | {
       inputTokenConfig: UserBankManagedTokenInfo
@@ -434,7 +434,7 @@ export const isDirectRouteAvailable = async (
   inputMint: string,
   outputMint: string,
   amountUi: number,
-  tokens: Record<string, TokenInfo>
+  tokens: Record<string, CoinInfo>
 ): Promise<boolean> => {
   try {
     // Validate tokens and create configs

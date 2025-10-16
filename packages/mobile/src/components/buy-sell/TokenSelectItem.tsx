@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
 
 import { Flex, Text } from '@audius/harmony-native'
 import type { ListSelectionData } from 'app/screens/list-selection-screen'
@@ -8,7 +8,7 @@ import type { ListSelectionData } from 'app/screens/list-selection-screen'
 import { TokenIcon } from '../core'
 
 type TokenSelectItemProps = {
-  token: TokenInfo
+  token: CoinInfo
   item: ListSelectionData
 }
 

@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 
-import { useTokenBalance, useArtistCoin } from '@audius/common/api'
+import { useCoinBalance, useArtistCoin } from '@audius/common/api'
 import {
-  useFormattedTokenBalance,
+  useFormattedCoinBalance,
   useIsManagedAccount,
   useBuySellInitialTab
 } from '@audius/common/hooks'
@@ -90,8 +90,8 @@ const HasBalanceState = ({
   coinName
 }: BalanceStateProps & { mint: string; coinName: string }) => {
   const isManagerMode = useIsManagedAccount()
-  const { tokenBalanceFormatted, formattedHeldValue } =
-    useFormattedTokenBalance(mint)
+  const { coinBalanceFormatted, formattedHeldValue } =
+    useFormattedCoinBalance(mint)
 
   return (
     <Flex column gap='l' w='100%'>
@@ -104,7 +104,7 @@ const HasBalanceState = ({
             </Text>
             <Flex row gap='xs' alignItems='center' flex={1}>
               <Text variant='title' size='l'>
-                {tokenBalanceFormatted}
+                {coinBalanceFormatted}
               </Text>
               <Text
                 variant='title'
@@ -163,7 +163,7 @@ export const BalanceCard = ({ mint }: { mint: string }) => {
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
-  const { data: tokenBalance } = useTokenBalance({ mint })
+  const { data: tokenBalance } = useCoinBalance({ mint })
   const initialTab = useBuySellInitialTab()
 
   const handleBuy = useCallback(() => {

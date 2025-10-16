@@ -3,7 +3,7 @@ import { useState } from 'react'
 import {
   useArtistCoin,
   transformArtistCoinToTokenInfo,
-  useSendTokens
+  useSendCoins
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { ErrorLevel, Feature, SolanaWalletAddress } from '@audius/common/models'
@@ -41,7 +41,7 @@ const SendTokensModal = () => {
   const { data: coin } = useArtistCoin(mint ?? '')
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  const sendTokensMutation = useSendTokens({ mint: mint ?? '' })
+  const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
 
   const handleInputContinue = (amount: bigint, destinationAddress: string) => {
     setState({

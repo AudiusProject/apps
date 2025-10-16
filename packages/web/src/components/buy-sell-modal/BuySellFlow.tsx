@@ -10,10 +10,10 @@ import {
 import {
   SwapStatus,
   useArtistCoin,
-  useTokenPair,
-  useTokens
+  useCoinPair,
+  useTradeableCoins
 } from '@audius/common/api'
-import { useBuySellAnalytics, useOwnedTokens } from '@audius/common/hooks'
+import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
 import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import {
@@ -25,10 +25,10 @@ import {
   buySellTabsArray,
   useBuySellTokenFilters,
   useBuySellTransactionData,
-  useCurrentTokenPair,
+  useCurrentCoinPair,
   useSafeTokenPair,
   useSwapDisplayData,
-  useTokenStates
+  useCoinStates
 } from '@audius/common/store'
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router-dom'
@@ -73,7 +73,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   } = useBuySellAnalytics()
 
   // Get tokens from API
-  const { tokens, isLoading: tokensLoading } = useTokens()
+  const { coins, isLoading: coinsLoading } = useTradeableCoins()
 
   const { currentScreen, setCurrentScreen } = useBuySellScreen({
     onScreenChange
@@ -121,7 +121,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     path: ASSET_DETAIL_PAGE,
     exact: true
   })
-  const { data: selectedPair } = useTokenPair({
+  const { data: selectedPair } = useCoinPair({
     baseSymbol: initialTicker ?? match?.params.ticker ?? '',
     quoteSymbol: 'USDC'
   })
@@ -132,7 +132,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     handleInputTokenChange: handleInputTokenChangeInternal,
     handleOutputTokenChange: handleOutputTokenChangeInternal,
     handleSwapDirection
-  } = useTokenStates(selectedPair)
+  } = useCoinStates(selectedPair)
 
   // Get current tab's token symbols
   const currentTabTokens = getCurrentTabTokens(activeTab)
@@ -156,26 +156,26 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }
 
   // Get all available tokens (simplified since we have all tokens now)
-  const availableTokens = useMemo(() => {
-    return tokensLoading ? [] : Object.values(tokens)
-  }, [tokens, tokensLoading])
+  const availableCoins = useMemo(() => {
+    return coinsLoading ? [] : Object.values(coins)
+  }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance)
-  const { ownedTokens } = useOwnedTokens(availableTokens)
+  const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
   const hasPositiveBalance = useCallback(
     (tokenAddress: string): boolean => {
-      return ownedTokens.some((token) => token.address === tokenAddress)
+      return ownedCoins.some((token) => token.address === tokenAddress)
     },
-    [ownedTokens]
+    [ownedCoins]
   )
 
   // Create current token pair based on selected base and quote tokens
-  const currentTokenPair = useCurrentTokenPair({
+  const currentTokenPair = useCurrentCoinPair({
     baseTokenSymbol,
     quoteTokenSymbol,
-    availableTokens,
+    availableCoins,
     selectedPair
   })
 
@@ -185,7 +185,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     availableInputTokensForConvert,
     availableOutputTokensForConvert
   } = useBuySellTokenFilters({
-    availableTokens,
+    availableCoins,
     baseTokenSymbol,
     quoteTokenSymbol,
     hasPositiveBalance
@@ -415,7 +415,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     return <ModalLoading />
   }
 
-  if (tokensLoading) {
+  if (coinsLoading) {
     return <SwapFormSkeleton />
   }
 
@@ -443,7 +443,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.buy}
               onInputValueChange={handleTabInputValueChange}
-              availableOutputTokens={availableTokens.filter(
+              availableOutputTokens={availableCoins.filter(
                 (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
               )}
               onOutputTokenChange={handleOutputTokenChange}

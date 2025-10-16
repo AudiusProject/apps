@@ -1,9 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useArtistCoin, useTokenPair, useTokens } from '@audius/common/api'
-import { useBuySellAnalytics, useOwnedTokens } from '@audius/common/hooks'
+import {
+  useArtistCoin,
+  useCoinPair,
+  useTradeableCoins
+} from '@audius/common/api'
+import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import type { BuySellTab, TokenInfo } from '@audius/common/store'
+import type { BuySellTab, CoinInfo } from '@audius/common/store'
 import {
   AUDIO_TICKER,
   getSwapTokens,
@@ -14,10 +18,10 @@ import {
   buySellTabsArray,
   useBuySellTokenFilters,
   useBuySellTransactionData,
-  useCurrentTokenPair,
+  useCurrentCoinPair,
   useSafeTokenPair,
   useSwapDisplayData,
-  useTokenStates
+  useCoinStates
 } from '@audius/common/store'
 import { useFocusEffect } from '@react-navigation/native'
 import { InteractionManager, Keyboard } from 'react-native'
@@ -44,7 +48,7 @@ export const BuySellFlow = ({
   const { trackSwapRequested, trackAddFundsClicked } = useBuySellAnalytics()
 
   // Get token pair for the initial coin, fallback to AUDIO/USDC
-  const { data: selectedPair } = useTokenPair({
+  const { data: selectedPair } = useCoinPair({
     baseSymbol: coinTicker,
     quoteSymbol: 'USDC'
   })
@@ -80,28 +84,28 @@ export const BuySellFlow = ({
     handleInputTokenChange: handleInputTokenChangeInternal,
     handleOutputTokenChange: handleOutputTokenChangeInternal,
     handleSwapDirection
-  } = useTokenStates(selectedPair)
+  } = useCoinStates(selectedPair)
 
   // Get current tab's token symbols
   const currentTabTokens = getCurrentTabTokens(activeTab)
   const baseTokenSymbol = currentTabTokens.baseToken
   const quoteTokenSymbol = currentTabTokens.quoteToken
 
-  const { tokens, isLoading: tokensLoading } = useTokens()
+  const { coins, isLoading: coinsLoading } = useTradeableCoins()
 
-  // Get all available tokens
-  const availableTokens: TokenInfo[] = useMemo(() => {
-    return tokensLoading ? [] : Object.values(tokens)
-  }, [tokens, tokensLoading])
+  // Get all available coins
+  const availableCoins: CoinInfo[] = useMemo(() => {
+    return coinsLoading ? [] : Object.values(coins)
+  }, [coins, coinsLoading])
 
-  const { ownedTokens } = useOwnedTokens(availableTokens)
+  const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
   const hasPositiveBalance = useCallback(
     (tokenAddress: string): boolean => {
-      return ownedTokens.some((token) => token.address === tokenAddress)
+      return ownedCoins.some((token) => token.address === tokenAddress)
     },
-    [ownedTokens]
+    [ownedCoins]
   )
 
   // Use shared token filtering logic
@@ -110,7 +114,7 @@ export const BuySellFlow = ({
     availableInputTokensForConvert,
     availableOutputTokensForConvert
   } = useBuySellTokenFilters({
-    availableTokens,
+    availableCoins,
     baseTokenSymbol,
     quoteTokenSymbol,
     hasPositiveBalance
@@ -180,11 +184,11 @@ export const BuySellFlow = ({
     resetTransactionData()
   }, [handleSwapDirection, activeTab, resetTransactionData])
 
-  // Get token pair for the current tab's tokens using the same approach as web
-  const currentTabTokenPair = useCurrentTokenPair({
+  // Get token pair for the current tab's coins using the same approach as web
+  const currentTabTokenPair = useCurrentCoinPair({
     baseTokenSymbol,
     quoteTokenSymbol,
-    availableTokens,
+    availableCoins,
     selectedPair
   })
 

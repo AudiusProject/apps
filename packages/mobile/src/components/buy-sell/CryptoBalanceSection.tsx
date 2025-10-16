@@ -1,11 +1,11 @@
-import { type TokenInfo } from '@audius/common/store'
+import { type CoinInfo } from '@audius/common/store'
 import { Image } from 'react-native'
 
 import { Flex, HexagonalIcon, Text, useTheme } from '@audius/harmony-native'
 
 type CryptoBalanceSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   name?: string
   amount: string
 }

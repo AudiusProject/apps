@@ -1,4 +1,4 @@
-import { useTokens } from '@audius/common/api'
+import { useTradeableCoins } from '@audius/common/api'
 import { useArtistCoinMessageHeader } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { Flex, Text } from '@audius/harmony'
@@ -22,7 +22,7 @@ export const ArtistCoinHeader = ({
     audience
   })
 
-  const { tokens } = useTokens()
+  const { coins } = useTradeableCoins()
 
   if (!artistCoinSymbol) return null
 
@@ -37,7 +37,7 @@ export const ArtistCoinHeader = ({
       borderBottom='default'
     >
       <Flex gap='xs' alignItems='center'>
-        <TokenIcon logoURI={tokens[artistCoinSymbol]?.logoURI} size='xs' hex />
+        <TokenIcon logoURI={coins[artistCoinSymbol]?.logoURI} size='xs' hex />
         <Text variant='label' size='s'>
           {artistCoinSymbol}
         </Text>

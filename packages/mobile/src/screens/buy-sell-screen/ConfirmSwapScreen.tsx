@@ -3,13 +3,13 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { SLIPPAGE_BPS, SwapStatus } from '@audius/common/api'
 import { useBuySellAnalytics } from '@audius/common/hooks'
 import { buySellMessages as baseMessages } from '@audius/common/messages'
-import type { TokenInfo, TokenPair } from '@audius/common/store'
+import type { CoinInfo, CoinPair } from '@audius/common/store'
 import {
   getSwapTokens,
   useBuySellScreen,
   useBuySellSwap,
   useSwapDisplayData,
-  useTokenAmountFormatting
+  useCoinAmountFormatting
 } from '@audius/common/store'
 import { formatCurrencyWithSubscript } from '@audius/common/utils'
 
@@ -48,8 +48,8 @@ type ConfirmSwapScreenProps = {
   route: {
     params: {
       confirmationData: {
-        payTokenInfo: TokenInfo
-        receiveTokenInfo: TokenInfo
+        payTokenInfo: CoinInfo
+        receiveTokenInfo: CoinInfo
         payAmount: number
         receiveAmount: number
         pricePerBaseToken: number
@@ -57,7 +57,7 @@ type ConfirmSwapScreenProps = {
         exchangeRate?: number | null
       }
       activeTab: 'buy' | 'sell' | 'convert'
-      selectedPair: TokenPair
+      selectedPair: CoinPair
     }
   }
 }
@@ -238,14 +238,14 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
   ])
 
   // balance isn't needed so we pass 0
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     availableBalance: 0,
     isStablecoin: !!payTokenInfo.isStablecoin,
     decimals: payTokenInfo.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: receiveAmount,
     availableBalance: 0,
     isStablecoin: !!receiveTokenInfo.isStablecoin,

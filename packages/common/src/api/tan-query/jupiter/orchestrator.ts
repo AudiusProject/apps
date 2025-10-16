@@ -1,4 +1,4 @@
-import { TokenInfo } from '~/store/ui/buy-sell/types'
+import { CoinInfo } from '~/store/ui/buy-sell/types'
 
 import {
   BaseSwapExecutor,
@@ -19,7 +19,7 @@ import { invalidateSwapQueries } from './utils'
 export interface SwapExecutionContext {
   params: SwapTokensParams
   dependencies: SwapDependencies
-  tokens: Record<string, TokenInfo>
+  tokens: Record<string, CoinInfo>
   attemptNumber: number
   isRetrying: boolean
 }
@@ -53,7 +53,7 @@ export class SwapOrchestrator {
   async executeSwap(
     params: SwapTokensParams,
     dependencies: SwapDependencies,
-    tokens: Record<string, TokenInfo>
+    tokens: Record<string, CoinInfo>
   ): Promise<SwapTokensResult> {
     const context: SwapExecutionContext = {
       params,
@@ -133,7 +133,7 @@ export class SwapOrchestrator {
   private createExecutor(
     params: SwapTokensParams,
     dependencies: SwapDependencies,
-    tokens: Record<string, TokenInfo>
+    tokens: Record<string, CoinInfo>
   ): BaseSwapExecutor {
     const swapType = this.determineSwapType(params, dependencies, tokens)
 
@@ -150,7 +150,7 @@ export class SwapOrchestrator {
   private determineSwapType(
     params: SwapTokensParams,
     dependencies: SwapDependencies,
-    _tokens: Record<string, TokenInfo>
+    _tokens: Record<string, CoinInfo>
   ): 'DIRECT' | 'INDIRECT' {
     const { inputMint, outputMint } = params
 

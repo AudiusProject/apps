@@ -1,4 +1,4 @@
-import { TokenInfo } from '@audius/common/store'
+import { CoinInfo } from '@audius/common/store'
 
 import { env } from 'services/env'
 
@@ -7,7 +7,7 @@ import { USDCBalanceSection } from './USDCBalanceSection'
 
 type SwapBalanceSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   amount: string
   priceLabel?: string
   hideUSDCTooltip?: boolean

@@ -1,30 +1,30 @@
 import { useMemo } from 'react'
 
-import { TokenInfo, TokenPair } from '~/store'
+import { CoinInfo, CoinPair } from '~/store'
 
 import { createPairFromSymbols } from './utils'
 
-export const useCurrentTokenPair = ({
+export const useCurrentCoinPair = ({
   baseTokenSymbol,
   quoteTokenSymbol,
-  availableTokens,
+  availableCoins,
   selectedPair,
   getPair
 }: {
   baseTokenSymbol: string
   quoteTokenSymbol: string
-  availableTokens: TokenInfo[]
-  selectedPair: TokenPair | null
-  getPair?: (baseSymbol: string, quoteSymbol: string) => TokenPair | null
+  availableCoins: CoinInfo[]
+  selectedPair: CoinPair | null
+  getPair?: (baseSymbol: string, quoteSymbol: string) => CoinPair | null
 }) => {
   return useMemo(() => {
     // Convert availableTokens array to map for efficient lookup
-    const tokenMap = availableTokens.reduce(
-      (map, token) => {
-        map[token.symbol] = token
+    const coinMap = availableCoins.reduce(
+      (map, coin) => {
+        map[coin.symbol] = coin
         return map
       },
-      {} as Record<string, TokenInfo>
+      {} as Record<string, CoinInfo>
     )
 
     // Try to get pair using the efficient API first
@@ -39,7 +39,7 @@ export const useCurrentTokenPair = ({
     const pair = createPairFromSymbols(
       baseTokenSymbol,
       quoteTokenSymbol,
-      tokenMap
+      coinMap
     )
     if (pair) {
       return pair
@@ -47,11 +47,5 @@ export const useCurrentTokenPair = ({
 
     // Final fallback to selected pair or null
     return selectedPair || null
-  }, [
-    baseTokenSymbol,
-    quoteTokenSymbol,
-    availableTokens,
-    selectedPair,
-    getPair
-  ])
+  }, [availableCoins, getPair, baseTokenSymbol, quoteTokenSymbol, selectedPair])
 }

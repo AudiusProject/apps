@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { useTokenBalance, useUser } from '@audius/common/api'
+import { useCoinBalance, useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { route, formatCount } from '@audius/common/utils'
 import {
@@ -59,7 +59,7 @@ export const ArtistCoinHoverCard = ({
   const { artistCoinBadge } = user ?? {}
 
   // Only fetch token balance when hovered and we have the mint address
-  const { data: tokenBalance } = useTokenBalance({
+  const { data: tokenBalance } = useCoinBalance({
     mint: artistCoinBadge?.mint ?? '',
     userId,
     enabled: isHovered && !!artistCoinBadge?.mint

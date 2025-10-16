@@ -6,8 +6,8 @@ import {
   useArtistCoins
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import type { TokenInfo, TokenPair } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo, CoinPair } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 
 import {
@@ -60,7 +60,7 @@ const SwapFormSkeleton = () => (
 )
 
 type ConvertScreenProps = {
-  tokenPair: TokenPair
+  tokenPair: CoinPair
   onTransactionDataChange?: (data: {
     inputAmount: number
     outputAmount: number
@@ -72,8 +72,8 @@ type ConvertScreenProps = {
   errorMessage?: string
   initialInputValue?: string
   onInputValueChange?: (value: string) => void
-  availableInputTokens?: TokenInfo[]
-  availableOutputTokens?: TokenInfo[]
+  availableInputTokens?: CoinInfo[]
+  availableOutputTokens?: CoinInfo[]
   onInputTokenChange?: (symbol: string) => void
   onOutputTokenChange?: (symbol: string) => void
   onChangeSwapDirection?: () => void
@@ -116,16 +116,16 @@ export const ConvertScreen = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken: selectedInputToken,
-    outputToken: selectedOutputToken,
+  } = useCoinSwapForm({
+    inputCoin: selectedInputToken,
+    outputCoin: selectedOutputToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange
   })
 
   const { data: coins } = useArtistCoins()
-  const artistCoins: TokenInfo[] = useMemo(() => {
+  const artistCoins: CoinInfo[] = useMemo(() => {
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
 
@@ -144,7 +144,7 @@ export const ConvertScreen = ({
   }, [totalAvailableTokens, selectedInputToken?.symbol])
 
   const handleInputTokenChange = useCallback(
-    (token: TokenInfo) => {
+    (token: CoinInfo) => {
       onInputTokenChange?.(token.symbol)
 
       // If there are only 2 total available tokens, automatically set the other token
@@ -161,7 +161,7 @@ export const ConvertScreen = ({
   )
 
   const handleOutputTokenChange = useCallback(
-    (token: TokenInfo) => {
+    (token: CoinInfo) => {
       onOutputTokenChange?.(token.symbol)
 
       // If there are only 2 total available tokens, automatically set the other token

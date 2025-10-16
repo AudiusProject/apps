@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useArtistCoin } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
@@ -52,16 +52,16 @@ export const SellTab = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken: selectedInputToken,
-    outputToken: quoteToken,
+  } = useCoinSwapForm({
+    inputCoin: selectedInputToken,
+    outputCoin: quoteToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange
   })
 
   // Token change handlers
-  const handleInputTokenChange = (token: TokenInfo) => {
+  const handleInputTokenChange = (token: CoinInfo) => {
     setSelectedInputToken(token)
     onInputTokenChange?.(token.symbol)
   }

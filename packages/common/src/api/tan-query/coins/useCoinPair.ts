@@ -1,21 +1,17 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import {
-  TEMP_ARTIST_COINS_PAGE_SIZE,
-  transformArtistCoinsToTokenInfoMap
-} from '~/api'
-import { TokenPair } from '~/store'
+import { CoinPair } from '~/store'
 import {
   createFallbackPair,
   findTokenBySymbol,
   findTokenByAddress
 } from '~/store/ui/buy-sell/utils'
 
-import { useArtistCoins } from '../coins/useArtistCoins'
 import { QUERY_KEYS } from '../queryKeys'
-import { useQueryContext } from '../utils/QueryContext'
 
-export interface UseTokenPairParams {
+import { useTradeableCoins } from './useTradeableCoins'
+
+export interface UseCoinPairParams {
   baseSymbol?: string
   quoteSymbol?: string
   baseAddress?: string
@@ -30,7 +26,7 @@ const getTokenPairQueryKey = (
   [QUERY_KEYS.tokenPair, lookupType, baseIdentifier, quoteIdentifier] as const
 
 /**
- * Helper function to get the query options for fetching a token pair.
+ * Helper function to get the query options for fetching a coin pair.
  * Useful for getting the query key tagged with the data type stored in the cache.
  */
 export const getTokenPairOptions = ({
@@ -38,7 +34,7 @@ export const getTokenPairOptions = ({
   quoteSymbol,
   baseAddress,
   quoteAddress
-}: UseTokenPairParams) => {
+}: UseCoinPairParams) => {
   const lookupType = baseAddress && quoteAddress ? 'address' : 'symbol'
   const baseIdentifier =
     lookupType === 'address' ? baseAddress! : baseSymbol || 'AUDIO'
@@ -47,34 +43,16 @@ export const getTokenPairOptions = ({
 
   return queryOptions({
     queryKey: getTokenPairQueryKey(baseIdentifier, quoteIdentifier, lookupType),
-    queryFn: async (): Promise<TokenPair | null> => null, // Will be overridden in hook
+    queryFn: async (): Promise<CoinPair | null> => null, // Will be overridden in hook
     enabled: !!(baseIdentifier && quoteIdentifier)
   })
 }
 
-export const useTokenPair = (
-  params: UseTokenPairParams = {},
+export const useCoinPair = (
+  params: UseCoinPairParams = {},
   options?: Partial<ReturnType<typeof getTokenPairOptions>>
 ) => {
-  const context = useQueryContext()
-  const { data: artistCoins = [], isLoading: coinsLoading } = useArtistCoins({
-    pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
-  })
-
-  // Create tokens map
-  const tokensMap = transformArtistCoinsToTokenInfoMap(artistCoins)
-
-  // Add USDC manually since it's frontend-only and not from API
-  tokensMap.USDC = {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    decimals: 6,
-    balance: null,
-    address: context.env.USDC_MINT_ADDRESS,
-    logoURI:
-      'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
-    isStablecoin: true
-  }
+  const { coins: coinsMap, isLoading: coinsLoading } = useTradeableCoins()
 
   const { baseSymbol, quoteSymbol, baseAddress, quoteAddress } = params
 
@@ -88,19 +66,19 @@ export const useTokenPair = (
     ...options,
     ...getTokenPairOptions(params),
     queryFn: async () => {
-      if (Object.keys(tokensMap).length === 0) {
+      if (Object.keys(coinsMap).length === 0) {
         return null
       }
 
       const baseToken =
         lookupType === 'symbol'
-          ? findTokenBySymbol(baseIdentifier, tokensMap)
-          : findTokenByAddress(baseIdentifier, tokensMap)
+          ? findTokenBySymbol(baseIdentifier, coinsMap)
+          : findTokenByAddress(baseIdentifier, coinsMap)
 
       const quoteToken =
         lookupType === 'symbol'
-          ? findTokenBySymbol(quoteIdentifier, tokensMap)
-          : findTokenByAddress(quoteIdentifier, tokensMap)
+          ? findTokenBySymbol(quoteIdentifier, coinsMap)
+          : findTokenByAddress(quoteIdentifier, coinsMap)
 
       if (!baseToken || !quoteToken || baseToken.symbol === quoteToken.symbol) {
         return null
@@ -110,11 +88,11 @@ export const useTokenPair = (
         baseToken,
         quoteToken,
         exchangeRate: null
-      } as TokenPair
+      } as CoinPair
     },
     enabled:
       !coinsLoading &&
-      Object.keys(tokensMap).length > 0 &&
+      Object.keys(coinsMap).length > 0 &&
       !!(baseIdentifier && quoteIdentifier)
   })
 
@@ -128,5 +106,5 @@ export const useTokenPair = (
 export const useDefaultTokenPair = (
   options?: Partial<ReturnType<typeof getTokenPairOptions>>
 ) => {
-  return useTokenPair({ baseSymbol: 'AUDIO', quoteSymbol: 'USDC' }, options)
+  return useCoinPair({ baseSymbol: 'AUDIO', quoteSymbol: 'USDC' }, options)
 }

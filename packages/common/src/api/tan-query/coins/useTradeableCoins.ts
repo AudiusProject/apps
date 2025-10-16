@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 
 import { transformArtistCoinsToTokenInfoMap, useQueryContext } from '~/api'
 
-import { useArtistCoins } from '../coins/useArtistCoins'
+import { useArtistCoins } from './useArtistCoins'
 
 export const TEMP_ARTIST_COINS_PAGE_SIZE = 100
 
 // Simple hook to get tokens from API without the complex pair logic
-export const useTokens = () => {
+export const useTradeableCoins = () => {
   const {
     data: artistCoins = [],
     isLoading,
@@ -16,10 +16,10 @@ export const useTokens = () => {
   const { env } = useQueryContext()
 
   return useMemo(() => {
-    const tokensMap = transformArtistCoinsToTokenInfoMap(artistCoins)
+    const coinsMap = transformArtistCoinsToTokenInfoMap(artistCoins)
 
     // Add USDC manually since it's frontend-only and not from API
-    tokensMap.USDC = {
+    coinsMap.USDC = {
       symbol: 'USDC',
       name: 'USD Coin',
       decimals: 6,
@@ -31,7 +31,7 @@ export const useTokens = () => {
     }
 
     return {
-      tokens: tokensMap,
+      coins: coinsMap,
       isLoading,
       error
     }

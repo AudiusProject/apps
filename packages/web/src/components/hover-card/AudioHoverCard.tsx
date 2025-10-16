@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { useTokenBalance } from '@audius/common/api'
+import { useCoinBalance } from '@audius/common/api'
 import { AudioTiers, BadgeTier, ID } from '@audius/common/models'
 import { AUDIO_TICKER } from '@audius/common/store'
 import { formatCount, route } from '@audius/common/utils'
@@ -78,7 +78,7 @@ export const AudioHoverCard = ({
     setIsHovered(hovered)
   }, [])
 
-  const { data: tokenBalance } = useTokenBalance({
+  const { data: tokenBalance } = useCoinBalance({
     mint: env.WAUDIO_MINT_ADDRESS,
     userId,
     enabled: isHovered

@@ -7,13 +7,13 @@ import {
   useUSDCBalance,
   UserCoin
 } from '~/api'
-import type { TokenInfo } from '~/store'
+import type { CoinInfo } from '~/store'
 import { ownedCoinsFilter } from '~/utils'
 
 /**
- * Hook to filter tokens based on user ownership and positive balance
+ * Hook to filter coins based on user ownership and positive balance
  */
-export const useOwnedTokens = (allTokens: TokenInfo[]) => {
+export const useOwnedCoins = (allCoins: CoinInfo[]) => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: userCoins } = useUserCoins(
     { userId: currentUserId },
@@ -22,8 +22,8 @@ export const useOwnedTokens = (allTokens: TokenInfo[]) => {
   const { data: usdcBalance } = useUSDCBalance()
   const { env } = useQueryContext()
 
-  const ownedTokens = useMemo(() => {
-    if (!userCoins || !allTokens.length) {
+  const ownedCoins = useMemo(() => {
+    if (!userCoins || !allCoins.length) {
       return []
     }
 
@@ -42,21 +42,21 @@ export const useOwnedTokens = (allTokens: TokenInfo[]) => {
     }
 
     // Filter available tokens to only include ones the user owns
-    const ownedTokensList = allTokens.filter((token) =>
-      userOwnedMints.has(token.address)
+    const ownedCoinsList = allCoins.filter((coin) =>
+      userOwnedMints.has(coin.address)
     )
 
-    return ownedTokensList
+    return ownedCoinsList
   }, [
     userCoins,
     usdcBalance,
-    allTokens,
+    allCoins,
     env.WAUDIO_MINT_ADDRESS,
     env.USDC_MINT_ADDRESS
   ])
 
   return {
-    ownedTokens,
+    ownedCoins,
     isLoading: !userCoins
   }
 }

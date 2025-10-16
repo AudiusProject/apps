@@ -3,8 +3,8 @@ import { useMemo, useCallback } from 'react'
 import { buySellMessages as messages } from '@audius/common/messages'
 import {
   TokenAmountSectionProps,
-  TokenInfo,
-  useTokenAmountFormatting,
+  CoinInfo,
+  useCoinAmountFormatting,
   BuySellTab
 } from '@audius/common/store'
 import {
@@ -28,9 +28,9 @@ import { TokenDropdown } from './components/TokenDropdown'
 type BalanceSectionProps = {
   isStablecoin?: boolean
   formattedAvailableBalance: string | null
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   tooltipPlacement?: TooltipPlacement
-  availableTokens?: TokenInfo[]
+  availableTokens?: CoinInfo[]
   onTokenChange?: (symbol: string) => void
   showReceiveAmount?: boolean
   formattedReceiveAmount?: string
@@ -89,7 +89,7 @@ const CryptoAmountSection = ({
   verticalLayout = false
 }: {
   formattedAmount: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   isStablecoin: boolean
   priceDisplay?: string
   noPadding?: boolean
@@ -173,7 +173,7 @@ export const TokenAmountSection = ({
   tab,
   onChangeSwapDirection
 }: TokenAmountSectionProps & {
-  availableTokens?: TokenInfo[]
+  availableTokens?: CoinInfo[]
   onTokenChange?: (symbol: string) => void
   tab?: BuySellTab
 }) => {
@@ -182,7 +182,7 @@ export const TokenAmountSection = ({
   const { symbol, isStablecoin } = tokenInfo
 
   const { formattedAvailableBalance, formattedAmount } =
-    useTokenAmountFormatting({
+    useCoinAmountFormatting({
       amount,
       availableBalance,
       exchangeRate,

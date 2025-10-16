@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
 
 import { useArtistCoin } from '@audius/common/api'
-import type { TokenInfo, TokenPair } from '@audius/common/store'
-import { useTokenSwapForm } from '@audius/common/store'
+import type { CoinInfo, CoinPair } from '@audius/common/store'
+import { useCoinSwapForm } from '@audius/common/store'
 
 import { Box, Flex, Skeleton } from '@audius/harmony-native'
 import { BuySellTerms } from 'app/components/buy-sell/BuySellTerms'
@@ -51,7 +51,7 @@ const SwapFormSkeleton = () => (
 )
 
 type SellScreenProps = {
-  tokenPair: TokenPair
+  tokenPair: CoinPair
   onTransactionDataChange?: (data: {
     inputAmount: number
     outputAmount: number
@@ -63,8 +63,8 @@ type SellScreenProps = {
   errorMessage?: string
   initialInputValue?: string
   onInputValueChange?: (value: string) => void
-  onInputTokenChange?: (token: TokenInfo) => void
-  availableInputTokens?: TokenInfo[]
+  onInputTokenChange?: (token: CoinInfo) => void
+  availableInputTokens?: CoinInfo[]
 }
 
 export const SellScreen = ({
@@ -91,9 +91,9 @@ export const SellScreen = ({
     handleInputAmountChange,
     handleOutputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken: tokenPair?.baseToken,
-    outputToken: tokenPair?.quoteToken,
+  } = useCoinSwapForm({
+    inputCoin: tokenPair?.baseToken,
+    outputCoin: tokenPair?.quoteToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange

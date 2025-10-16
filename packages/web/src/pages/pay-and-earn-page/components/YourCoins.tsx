@@ -9,7 +9,7 @@ import {
 } from '@audius/common/api'
 import {
   useFeatureFlag,
-  useFormattedTokenBalance,
+  useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
@@ -219,27 +219,27 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
   )
 
   const {
-    tokenBalanceFormatted,
-    tokenDollarValue,
-    isTokenBalanceLoading,
-    isTokenPriceLoading,
+    coinBalanceFormatted,
+    coinDollarValue,
+    isCoinBalanceLoading,
+    isCoinPriceLoading,
     formattedHeldValue
-  } = useFormattedTokenBalance(coin.mint)
+  } = useFormattedCoinBalance(coin.mint)
 
   const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(
     coin.mint
   )
 
   const isLoading =
-    isTokenBalanceLoading || isTokenPriceLoading || coinsDataLoading
+    isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
 
   return (
     <CoinCard
       icon={coinData?.logoUri}
       symbol={tokenSymbol ?? ''}
-      balance={tokenBalanceFormatted || ''}
+      balance={coinBalanceFormatted || ''}
       heldValue={formattedHeldValue}
-      dollarValue={tokenDollarValue || ''}
+      dollarValue={coinDollarValue || ''}
       loading={isLoading}
       name={coinData?.name ?? ''}
       onClick={() => handleCoinClick(coin.ticker)}

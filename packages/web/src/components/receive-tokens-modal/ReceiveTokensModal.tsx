@@ -4,7 +4,7 @@ import {
   transformArtistCoinToTokenInfo,
   useArtistCoin
 } from '@audius/common/api'
-import { useFormattedTokenBalance, useUserbank } from '@audius/common/hooks'
+import { useFormattedCoinBalance, useUserbank } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useReceiveTokensModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -36,7 +36,7 @@ export const ReceiveTokensModal = () => {
   const { isOpen, onClose, data } = useReceiveTokensModal()
   const { mint } = data ?? {}
   const { data: coin } = useArtistCoin(mint)
-  const { tokenBalanceFormatted: balance } = useFormattedTokenBalance(
+  const { coinBalanceFormatted: balance } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
     isOpen,

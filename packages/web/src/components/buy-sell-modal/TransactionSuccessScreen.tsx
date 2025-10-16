@@ -1,5 +1,5 @@
 import { buySellMessages as baseMessages } from '@audius/common/messages'
-import { useTokenAmountFormatting, TokenInfo } from '@audius/common/store'
+import { useCoinAmountFormatting, CoinInfo } from '@audius/common/store'
 import { formatCurrencyWithSubscript } from '@audius/common/utils'
 import { Button, CompletionCheck, Flex, Text } from '@audius/harmony'
 
@@ -14,8 +14,8 @@ const messages = {
 }
 
 type TransactionSuccessScreenProps = {
-  payTokenInfo: TokenInfo
-  receiveTokenInfo: TokenInfo
+  payTokenInfo: CoinInfo
+  receiveTokenInfo: CoinInfo
   payAmount: number
   receiveAmount: number
   pricePerBaseToken?: number
@@ -41,13 +41,13 @@ export const TransactionSuccessScreen = (
   } = props
 
   // Follow same pattern as ConfirmSwapScreen - call hooks first
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     isStablecoin: !!payTokenInfo.isStablecoin,
     decimals: payTokenInfo.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: receiveAmount,
     isStablecoin: !!receiveTokenInfo.isStablecoin,
     decimals: receiveTokenInfo.decimals
