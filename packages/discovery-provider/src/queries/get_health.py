@@ -411,7 +411,7 @@ def get_health(args: GetHealthArgs, use_redis_cache: bool = True) -> Tuple[Dict,
         health_results["meets_min_requirements"] = True
 
     relay_health = _get_relay_health()
-    if not _is_relay_healthy(relay_health):
+    if relay_health is None or not _is_relay_healthy(relay_health):
         errors.append("relay unhealthy")
 
     health_results["relay"] = relay_health
