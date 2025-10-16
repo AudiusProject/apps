@@ -456,8 +456,8 @@ export const LaunchpadBuyModal = ({
     handleMaxClick,
     handleOutputAmountChange
   } = useCoinSwapForm({
-    inputToken: selectedInputToken,
-    outputToken: OUTPUT_TOKEN,
+    inputCoin: selectedInputToken,
+    outputCoin: OUTPUT_TOKEN,
     externalWalletAddress,
     min: selectedInputToken.minSwapAmount,
     requiredRemainingBalance: selectedInputToken.requiredRemainingBalance

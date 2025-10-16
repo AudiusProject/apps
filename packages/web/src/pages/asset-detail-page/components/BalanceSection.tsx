@@ -179,13 +179,13 @@ const HasBalanceState = ({
   const isManagerMode = useIsManagedAccount()
   const { motion } = useTheme()
   const {
-    tokenBalanceFormatted,
+    coinBalanceFormatted,
     formattedHeldValue,
-    isTokenBalanceLoading,
-    isTokenPriceLoading
+    isCoinBalanceLoading,
+    isCoinPriceLoading
   } = useFormattedCoinBalance(mint)
 
-  const isLoading = isTokenBalanceLoading || isTokenPriceLoading
+  const isLoading = isCoinBalanceLoading || isCoinPriceLoading
 
   return (
     <>
@@ -206,7 +206,7 @@ const HasBalanceState = ({
             </Text>
             <Flex gap='xs' alignItems='center'>
               <Text variant='heading' size='s'>
-                {tokenBalanceFormatted}
+                {coinBalanceFormatted}
               </Text>
               <Text variant='title' size='l' color='subdued'>
                 ${ticker}

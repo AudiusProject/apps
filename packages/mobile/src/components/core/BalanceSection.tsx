@@ -25,7 +25,7 @@ export const BalanceSection = ({
   pollingInterval,
   internalWalletOnly = false
 }: BalanceSectionProps) => {
-  const { tokenBalanceFormatted } = useFormattedCoinBalance(
+  const { coinBalanceFormatted } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
     isPolling,
@@ -43,7 +43,7 @@ export const BalanceSection = ({
       <Flex gap='xs'>
         <Flex>
           <Text variant='heading' size='l'>
-            {tokenBalanceFormatted}
+            {coinBalanceFormatted}
           </Text>
           <Text variant='heading' size='s' color='subdued'>
             ${tokenInfo?.symbol}

@@ -37,7 +37,7 @@ export const SendTokensFailure = ({
   const { color } = useTheme()
   const { data: coin } = useArtistCoin(mint)
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
-  const { tokenBalanceFormatted } = useFormattedCoinBalance(mint)
+  const { coinBalanceFormatted } = useFormattedCoinBalance(mint)
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
@@ -49,7 +49,7 @@ export const SendTokensFailure = ({
         </Text>
         <Text variant='heading' size='m'>
           {walletMessages.minus}
-          {tokenBalanceFormatted} ${tokenInfo?.symbol}
+          {coinBalanceFormatted} ${tokenInfo?.symbol}
         </Text>
       </Flex>
 

@@ -36,7 +36,7 @@ export const ReceiveTokensModal = () => {
   const { isOpen, onClose, data } = useReceiveTokensModal()
   const { mint } = data ?? {}
   const { data: coin } = useArtistCoin(mint)
-  const { tokenBalanceFormatted: balance } = useFormattedCoinBalance(
+  const { coinBalanceFormatted: balance } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
     isOpen,

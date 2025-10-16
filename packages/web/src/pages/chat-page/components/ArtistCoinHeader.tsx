@@ -22,7 +22,7 @@ export const ArtistCoinHeader = ({
     audience
   })
 
-  const { tokens } = useTradeableCoins()
+  const { coins } = useTradeableCoins()
 
   if (!artistCoinSymbol) return null
 
@@ -37,7 +37,7 @@ export const ArtistCoinHeader = ({
       borderBottom='default'
     >
       <Flex gap='xs' alignItems='center'>
-        <TokenIcon logoURI={tokens[artistCoinSymbol]?.logoURI} size='xs' hex />
+        <TokenIcon logoURI={coins[artistCoinSymbol]?.logoURI} size='xs' hex />
         <Text variant='label' size='s'>
           {artistCoinSymbol}
         </Text>

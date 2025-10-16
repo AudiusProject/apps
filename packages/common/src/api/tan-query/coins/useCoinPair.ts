@@ -8,6 +8,7 @@ import {
 } from '~/store/ui/buy-sell/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
+
 import { useTradeableCoins } from './useTradeableCoins'
 
 export interface UseCoinPairParams {

@@ -219,10 +219,10 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
   )
 
   const {
-    tokenBalanceFormatted,
-    tokenDollarValue,
-    isTokenBalanceLoading,
-    isTokenPriceLoading,
+    coinBalanceFormatted,
+    coinDollarValue,
+    isCoinBalanceLoading,
+    isCoinPriceLoading,
     formattedHeldValue
   } = useFormattedCoinBalance(coin.mint)
 
@@ -231,15 +231,15 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
   )
 
   const isLoading =
-    isTokenBalanceLoading || isTokenPriceLoading || coinsDataLoading
+    isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
 
   return (
     <CoinCard
       icon={coinData?.logoUri}
       symbol={tokenSymbol ?? ''}
-      balance={tokenBalanceFormatted || ''}
+      balance={coinBalanceFormatted || ''}
       heldValue={formattedHeldValue}
-      dollarValue={tokenDollarValue || ''}
+      dollarValue={coinDollarValue || ''}
       loading={isLoading}
       name={coinData?.name ?? ''}
       onClick={() => handleCoinClick(coin.ticker)}

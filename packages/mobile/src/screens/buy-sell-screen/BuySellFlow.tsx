@@ -98,14 +98,14 @@ export const BuySellFlow = ({
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
-  const { ownedTokens } = useOwnedCoins(availableCoins)
+  const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
   const hasPositiveBalance = useCallback(
     (tokenAddress: string): boolean => {
-      return ownedTokens.some((token) => token.address === tokenAddress)
+      return ownedCoins.some((token) => token.address === tokenAddress)
     },
-    [ownedTokens]
+    [ownedCoins]
   )
 
   // Use shared token filtering logic

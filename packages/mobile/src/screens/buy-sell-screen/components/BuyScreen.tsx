@@ -96,8 +96,8 @@ export const BuyScreen = ({
     handleOutputAmountChange,
     handleMaxClick
   } = useCoinSwapForm({
-    inputToken: tokenPair?.quoteToken,
-    outputToken: tokenPair?.baseToken,
+    inputCoin: tokenPair?.quoteToken,
+    outputCoin: tokenPair?.baseToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange

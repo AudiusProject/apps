@@ -90,7 +90,7 @@ const HasBalanceState = ({
   coinName
 }: BalanceStateProps & { mint: string; coinName: string }) => {
   const isManagerMode = useIsManagedAccount()
-  const { tokenBalanceFormatted, formattedHeldValue } =
+  const { coinBalanceFormatted, formattedHeldValue } =
     useFormattedCoinBalance(mint)
 
   return (
@@ -104,7 +104,7 @@ const HasBalanceState = ({
             </Text>
             <Flex row gap='xs' alignItems='center' flex={1}>
               <Text variant='title' size='l'>
-                {tokenBalanceFormatted}
+                {coinBalanceFormatted}
               </Text>
               <Text
                 variant='title'

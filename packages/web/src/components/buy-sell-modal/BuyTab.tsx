@@ -58,8 +58,8 @@ export const BuyTab = ({
     handleOutputAmountChange,
     handleMaxClick
   } = useCoinSwapForm({
-    inputToken: quoteToken,
-    outputToken: selectedOutputToken,
+    inputCoin: quoteToken,
+    outputCoin: selectedOutputToken,
     onTransactionDataChange,
     initialInputValue,
     onInputValueChange

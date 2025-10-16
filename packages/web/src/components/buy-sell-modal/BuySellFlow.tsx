@@ -161,14 +161,14 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance)
-  const { ownedTokens } = useOwnedCoins(availableCoins)
+  const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
   const hasPositiveBalance = useCallback(
     (tokenAddress: string): boolean => {
-      return ownedTokens.some((token) => token.address === tokenAddress)
+      return ownedCoins.some((token) => token.address === tokenAddress)
     },
-    [ownedTokens]
+    [ownedCoins]
   )
 
   // Create current token pair based on selected base and quote tokens

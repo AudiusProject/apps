@@ -22,7 +22,7 @@ export const useOwnedCoins = (allCoins: CoinInfo[]) => {
   const { data: usdcBalance } = useUSDCBalance()
   const { env } = useQueryContext()
 
-  const ownedTokens = useMemo(() => {
+  const ownedCoins = useMemo(() => {
     if (!userCoins || !allCoins.length) {
       return []
     }
@@ -42,11 +42,11 @@ export const useOwnedCoins = (allCoins: CoinInfo[]) => {
     }
 
     // Filter available tokens to only include ones the user owns
-    const ownedTokensList = allCoins.filter((coin) =>
+    const ownedCoinsList = allCoins.filter((coin) =>
       userOwnedMints.has(coin.address)
     )
 
-    return ownedTokensList
+    return ownedCoinsList
   }, [
     userCoins,
     usdcBalance,
@@ -56,7 +56,7 @@ export const useOwnedCoins = (allCoins: CoinInfo[]) => {
   ])
 
   return {
-    ownedTokens,
+    ownedCoins,
     isLoading: !userCoins
   }
 }
