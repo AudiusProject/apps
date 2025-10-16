@@ -36,10 +36,7 @@ type ToastContextProps = {
   toast: (
     content: string | JSX.Element,
     timeout?: number,
-    {
-      leftIcon,
-      rightIcon
-    }?: { leftIcon?: IconComponent; rightIcon?: IconComponent }
+    icons?: { leftIcon?: IconComponent; rightIcon?: IconComponent } | {}
   ) => void
   clear: () => void
 }
