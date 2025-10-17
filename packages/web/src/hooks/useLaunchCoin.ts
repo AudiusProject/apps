@@ -82,29 +82,20 @@ export const useLaunchCoin = () => {
           throw new Error('Missing solana wallet keypair')
         }
 
-        const signAndSendTx = async (transactionSerialized: string) => {
-          // Transaction is sent from the backend as a serialized base64 string
-          const deserializedTx = VersionedTransaction.deserialize(
-            Buffer.from(transactionSerialized, 'base64')
-          )
-
-          // Triggers 3rd party wallet to sign the transaction, doesnt send to Solana just yet
-          const signature =
-            await solanaProvider.signAndSendTransaction(deserializedTx)
-          const result =
-            await sdk.services.solanaClient.connection.confirmTransaction(
-              signature,
-              'confirmed'
+        const signTx = async (
+          transactionSerialized: string
+        ): Promise<VersionedTransaction> => {
+          try {
+            const bytes = new Uint8Array(
+              Buffer.from(transactionSerialized, 'base64')
             )
-
-          // Check if the transaction actually succeeded
-          if (result.value.err) {
-            throw new Error(
-              `Transaction confirmed but failed: ${JSON.stringify(result.value.err)}`
-            )
+            const deserializedTx = VersionedTransaction.deserialize(bytes)
+            const tx = await solanaProvider.signTransaction(deserializedTx)
+            return tx
+          } catch (e) {
+            console.error('Error signing transaction', e)
+            throw e
           }
-
-          return signature
         }
 
         const walletPublicKey = new PublicKey(walletPublicKeyStr)
@@ -122,6 +113,7 @@ export const useLaunchCoin = () => {
           createPoolTx: createPoolTxSerialized,
           firstBuyTx: firstBuyTxSerialized,
           mintPublicKey,
+          configPublicKey,
           imageUri
         } = res
         errorMetadata.createPoolTx = createPoolTxSerialized
@@ -132,31 +124,38 @@ export const useLaunchCoin = () => {
         errorMetadata.relayResponseReceived = true
         errorMetadata.lastStep = 'relayResponseReceived'
 
-        /**
-         * Pool creation - sign & send TX
-         * Mandatory step before we do anything else
-         */
-        await signAndSendTx(createPoolTxSerialized)
-        errorMetadata.poolCreateConfirmed = true
-        errorMetadata.lastStep = 'poolCreateConfirmed'
+        // Sign locally (do not send). Send both to relay confirm endpoint.
+        const signedCreatePoolTx = await signTx(createPoolTxSerialized)
+        const signedFirstBuyTx = firstBuyTxSerialized
+          ? await signTx(firstBuyTxSerialized)
+          : undefined
 
+        let confirmRes
         try {
-          // Perform sol->audio swap & first buy
+          confirmRes = await sdk.services.solanaRelay.confirmLaunchCoin({
+            mintPublicKey: new PublicKey(mintPublicKey),
+            configPublicKey: new PublicKey(configPublicKey),
+            createPoolTx: signedCreatePoolTx.serialize(),
+            firstBuyTx: signedFirstBuyTx?.serialize()
+          })
+          // Treat a successful response as confirmations completed
+          errorMetadata.poolCreateConfirmed = true
           if (firstBuyTxSerialized && initialBuyAmountAudio) {
-            // First buy
-            await signAndSendTx(firstBuyTxSerialized)
-            errorMetadata.firstBuyConfirmed = true
-            errorMetadata.lastStep = 'firstBuyConfirmed'
+            errorMetadata.firstBuyConfirmed = !!confirmRes.firstBuySignature
           }
+          errorMetadata.lastStep = errorMetadata.firstBuyConfirmed
+            ? 'firstBuyConfirmed'
+            : 'poolCreateConfirmed'
         } catch (e) {
           if (reportToSentry) {
             reportToSentry({
               error: e instanceof Error ? e : new Error(e as string),
-              name: 'First Buy Failure',
+              name: 'Confirm Launch Failure',
               feature: Feature.ArtistCoins,
               additionalInfo: errorMetadata
             })
           }
+          throw e
         }
 
         /*
@@ -172,7 +171,8 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri
+              logoUri: imageUri,
+              dbcPool: confirmRes.dbcPool
               // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })

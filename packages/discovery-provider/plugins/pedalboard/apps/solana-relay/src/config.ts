@@ -58,7 +58,15 @@ type Config = {
   listensTrackDailyRateLimit: number
   listensTrackWeeklyRateLimit: number
   antiAbuseOracle: string
-  launchpadConfigKey: string
+  // The public key for the launchpad config partner (Squads multisig)
+  launchpadPartnerPublicKey: string
+  // The private key for a signer of the launchpad config partner (AKA the authority)
+  // Signs the tx and is used to collect all launches for external pages, e.g. jup launchpad
+  launchpadPartnerSignerPrivateKey: string
+  // Secret used to deterministically derive
+  // - ephemeral launchpad keys (HKDF seed)
+  // - reward pool authorities
+  launchpadDeterministicSecret: string
 }
 
 let cachedConfig: Config | null = null
@@ -154,7 +162,13 @@ const readConfig = (): Config => {
     audius_anti_abuse_oracle: str({
       default: 'http://audius-anti-abuse-oracle-1:8000'
     }),
-    audius_launchpad_config_key: str({
+    audius_launchpad_partner_public_key: str({
+      default: ''
+    }),
+    audius_launchpad_partner_signer_private_key: str({
+      default: ''
+    }),
+    audius_launchpad_deterministic_secret: str({
       default: ''
     })
   })
@@ -204,7 +218,10 @@ const readConfig = (): Config => {
     listensTrackWeeklyRateLimit:
       env.audius_solana_listens_track_weekly_rate_limit,
     antiAbuseOracle: env.audius_anti_abuse_oracle,
-    launchpadConfigKey: env.audius_launchpad_config_key
+    launchpadPartnerPublicKey: env.audius_launchpad_partner_public_key,
+    launchpadPartnerSignerPrivateKey:
+      env.audius_launchpad_partner_signer_private_key,
+    launchpadDeterministicSecret: env.audius_launchpad_deterministic_secret
   }
   return readConfig()
 }

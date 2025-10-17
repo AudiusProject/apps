@@ -1,3 +1,6 @@
+import { createHash } from 'crypto'
+
+import { RewardManagerProgram } from '@audius/spl'
 import {
   createGenericFile,
   signerIdentity,
@@ -5,16 +8,29 @@ import {
 } from '@metaplex-foundation/umi'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
-import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { PublicKey } from '@solana/web3.js'
+import {
+  deriveDbcPoolAddress,
+  DynamicBondingCurveClient
+} from '@meteora-ag/dynamic-bonding-curve-sdk'
+import {
+  Keypair,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction
+} from '@solana/web3.js'
 import BN from 'bn.js'
+import bs58 from 'bs58'
 import { Request, Response } from 'express'
 
 import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
+import { sendTransactionWithRetries } from '../../utils/transaction'
 
+import { AUDIO_MINT } from './constants'
+import { makeCurve, makeTestCurve } from './curve'
 import { getKeypair } from './getKeypair'
+import { createRewardPool } from './reward_pool'
 
 interface LaunchCoinRequestBody {
   name: string
@@ -26,6 +42,20 @@ interface LaunchCoinRequestBody {
 
 const AUDIUS_COIN_URL = (ticker: string) => `https://audius.co/coins/${ticker}`
 
+/**
+ * Launches a new coin on the launchpad with bonding curve.
+ * The coin is created with a new mint and a new config.
+ * Process:
+ *  1. Creates metadata for the new coin
+ *  2. Create a config for the new coin
+ *  3. Return transactions to sign and send from the client
+ *  4. Spawning a process to create a reward pool for the new coin in the background
+ * @param req Request object containing the coin details
+ * @param res Response object containing the coin details
+ * @returns Response object containing two transactions
+ *  - Pool creation transaction
+ *  - First buy transaction
+ */
 export const launchCoin = async (
   req: Request<unknown, unknown, LaunchCoinRequestBody> & {
     file?: Express.Multer.File
@@ -33,7 +63,7 @@ export const launchCoin = async (
   res: Response
 ) => {
   try {
-    const { launchpadConfigKey: configKey, solanaFeePayerWallets } = config
+    const { solanaFeePayerWallets } = config
 
     const {
       name,
@@ -66,23 +96,58 @@ export const launchCoin = async (
       !new BN(initialBuyAmountAudio).gt(new BN(0))
     ) {
       throw new Error(
-        `Invalid initialBuyAmountSol. Initial buy amount must be a number > 0. Received: ${initialBuyAmountAudio}`
+        `Invalid initialBuyAmountAudio. Initial buy amount must be a number > 0. Received: ${initialBuyAmountAudio}`
       )
     }
-
-    const walletPublicKey = new PublicKey(walletPublicKeyStr)
-
-    const mintKeypair = await getKeypair(logger)
-    const mintPublicKey = mintKeypair.publicKey
 
     const connection = getConnection()
     const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
-    // Create Coin Metadata
-    const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
-    // Pick a random fee payer to "own" our new coin metadata and pay for the TX
+    // Account / Keypair Setup
+    // ------------------------------------------------------------
+    // The wallet public key is the creator of the coin
+    const walletPublicKey = new PublicKey(walletPublicKeyStr)
+
+    // The launchpad partner (or fee claiming) for the coin
+    const launchpadPartnerPublicKey = new PublicKey(
+      config.launchpadPartnerPublicKey
+    )
+
+    // Pick a random fee payer to pay for Tx's
+    // It also "owns" our new coin metadata and pay for the TX
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
     const feePayer = solanaFeePayerWallets[index]
+
+    // The new mint keypair for the coin
+    const mintKeypair = await getKeypair(logger)
+
+    // The audius authority is used to create the dbc config
+    const audiusAuthorityKeypair = Keypair.fromSecretKey(
+      bs58.decode(config.launchpadPartnerSignerPrivateKey)
+    )
+
+    // Deterministic token account for reward pool custody (pubkey used in config)
+    const rewardManagerState = deriveKeypair(
+      'reward-manager',
+      mintKeypair.publicKey
+    )
+    logger.info({
+      message: 'Derived reward pool token account',
+      mint: mintKeypair.publicKey.toBase58(),
+      rewardManagerState: rewardManagerState.publicKey.toBase58()
+    })
+
+    // Transaction Execution
+    // ------------------------------------------------------------
+
+    // 1. Create Coin Metadata
+    logger.info({
+      message: 'Creating coin metadata',
+      name,
+      symbol
+    })
+    const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
+    // Pick a random fee payer to "own" our new coin metadata and pay for the TX
     const umiKeypair = umi.eddsa.createKeypairFromSecretKey(feePayer.secretKey)
     const signer = createSignerFromKeypair(umi, umiKeypair)
     umi.use(signerIdentity(signer))
@@ -102,67 +167,285 @@ export const launchCoin = async (
       isMutable: false
     }
     const metadataUri = await umi.uploader.uploadJson(metadata)
-
-    // Set up our pool
-    const poolConfig = await dbcClient.pool.createPoolWithFirstBuy({
-      createPoolParam: {
-        config: new PublicKey(configKey),
-        name,
-        symbol,
-        uri: metadataUri,
-        poolCreator: walletPublicKey,
-        baseMint: mintPublicKey,
-        payer: walletPublicKey
-      },
-      firstBuyParam: initialBuyAmountAudio
-        ? {
-            buyer: walletPublicKey,
-            receiver: walletPublicKey,
-            buyAmount: new BN(initialBuyAmountAudio), // Needs to already be formatted with correct decimals
-            minimumAmountOut: new BN(0), // No slippage protection for initial buy
-            referralTokenAccount: null // No referral for creator's initial buy
-          }
-        : undefined
+    logger.info({
+      message: 'Coin metadata creator',
+      name,
+      symbol,
+      metadataUri
     })
+
+    // 2. Create a config for the new coin
+    const configKeypair = Keypair.generate()
+    logger.info({
+      message: 'Creating config for new coin',
+      name,
+      symbol,
+      configKeypair: configKeypair.publicKey.toBase58()
+    })
+    const rewardPoolTokenAuthority = RewardManagerProgram.deriveAuthority({
+      programId: RewardManagerProgram.programId,
+      rewardManagerState: rewardManagerState.publicKey
+    })
+    const createConfigTx = await dbcClient.partner.createConfig(
+      config.environment === 'prod'
+        ? makeCurve({
+            payer: audiusAuthorityKeypair,
+            configKey: configKeypair,
+            partner: launchpadPartnerPublicKey,
+            rewardPoolAuthority: rewardPoolTokenAuthority
+          })
+        : makeTestCurve({
+            payer: audiusAuthorityKeypair,
+            configKey: configKeypair,
+            partner: launchpadPartnerPublicKey,
+            rewardPoolAuthority: rewardPoolTokenAuthority
+          })
+    )
+    const createConfigRecentBlockhash = await connection.getLatestBlockhash()
+    const createConfigMessage = new TransactionMessage({
+      recentBlockhash: createConfigRecentBlockhash.blockhash,
+      instructions: [...createConfigTx.instructions],
+      payerKey: audiusAuthorityKeypair.publicKey
+    })
+    const createConfigTransaction = new VersionedTransaction(
+      createConfigMessage.compileToV0Message()
+    )
+    createConfigTransaction.sign([
+      configKeypair, // the keypair the config is deployed to
+      audiusAuthorityKeypair // the audius authority
+    ])
+    const createConfigSignature = await sendTransactionWithRetries({
+      transaction: createConfigTransaction,
+      commitment: 'confirmed',
+      confirmationStrategy: {
+        ...createConfigRecentBlockhash,
+        signature: bs58.encode(createConfigTransaction.signatures[0])
+      },
+      logger
+    })
+    await connection.confirmTransaction({
+      signature: createConfigSignature,
+      blockhash: createConfigRecentBlockhash.blockhash,
+      lastValidBlockHeight: createConfigRecentBlockhash.lastValidBlockHeight
+    })
+    logger.info({
+      message: 'Created config',
+      name,
+      symbol,
+      signature: createConfigSignature
+    })
+
+    // 3. Create pool and first buy
+    logger.info({
+      message: 'Preparing create pool and swap buy transactions',
+      name,
+      symbol
+    })
+    const { createPoolTx, swapBuyTx } =
+      await dbcClient.pool.createPoolWithFirstBuy({
+        createPoolParam: {
+          config: configKeypair.publicKey,
+          name,
+          symbol,
+          uri: metadataUri,
+          poolCreator: walletPublicKey,
+          baseMint: mintKeypair.publicKey,
+          payer: walletPublicKey
+        },
+        firstBuyParam: initialBuyAmountAudio
+          ? {
+              buyer: walletPublicKey,
+              receiver: walletPublicKey,
+              buyAmount: new BN(initialBuyAmountAudio), // Needs to already be formatted with correct decimals
+              minimumAmountOut: new BN(0), // No slippage protection for initial buy
+              referralTokenAccount: null // No referral for creator's initial buy
+            }
+          : undefined
+      })
 
     /*
      * Prepare the transactions to be signed by the client
+     * We partially sign so that the user can sign with their wallet and send the transactions
      */
-
-    // Create pool transaction
-    const createPoolTx = poolConfig.createPoolTx
     createPoolTx.feePayer = walletPublicKey
     createPoolTx.recentBlockhash = (
       await connection.getLatestBlockhash()
     ).blockhash
-    // We need to partial sign with the mint keypair that's only accessible here
-    // The client does the final signing with the wallet keypair & will send/confirm the transactions
     createPoolTx.partialSign(mintKeypair)
-
-    // First buy transaction
-    const firstBuyTx = poolConfig.swapBuyTx
-    if (firstBuyTx) {
-      firstBuyTx.recentBlockhash = (
+    if (swapBuyTx) {
+      swapBuyTx.recentBlockhash = (
         await connection.getLatestBlockhash()
       ).blockhash
-      firstBuyTx.feePayer = walletPublicKey
+      swapBuyTx.feePayer = walletPublicKey
     }
 
-    return res.status(200).send({
-      mintPublicKey: mintPublicKey.toBase58(),
+    res.status(200).send({
+      mintPublicKey: mintKeypair.publicKey.toBase58(),
+      configPublicKey: configKeypair.publicKey.toBase58(),
       imageUri,
       createPoolTx: Buffer.from(
         createPoolTx.serialize({ requireAllSignatures: false })
       ).toString('base64'),
-      firstBuyTx: firstBuyTx
+      firstBuyTx: swapBuyTx
         ? Buffer.from(
-            firstBuyTx.serialize({ requireAllSignatures: false })
+            swapBuyTx.serialize({ requireAllSignatures: false })
           ).toString('base64')
         : undefined,
       metadataUri
     })
   } catch (e) {
     logger.error('Error creating coin for launchpad')
+    logger.error(e)
+    res.status(500).send()
+  }
+}
+
+// Deterministically derive a Keypair from the launchpad deterministic secret, label, and mint
+const deriveKeypair = (label: string, mint: PublicKey): Keypair => {
+  const seedMaterial = Buffer.concat([
+    Buffer.from(config.launchpadDeterministicSecret, 'utf8'),
+    Buffer.from('audius-launchpad', 'utf8'),
+    Buffer.from(label, 'utf8'),
+    mint.toBuffer()
+  ])
+  const seed = createHash('sha256').update(seedMaterial).digest()
+  return Keypair.fromSeed(seed)
+}
+
+interface ConfirmLaunchCoinRequestBody {
+  mintPublicKey: string
+  configPublicKey: string
+  createPoolTx: string // base64 VersionedTransaction, fully signed
+  firstBuyTx?: string // base64 VersionedTransaction, fully signed
+}
+
+export const confirmLaunchCoin = async (
+  req: Request<unknown, unknown, ConfirmLaunchCoinRequestBody>,
+  res: Response
+) => {
+  try {
+    const { mintPublicKey, configPublicKey, createPoolTx, firstBuyTx } =
+      req.body
+    if (!mintPublicKey || !configPublicKey || !createPoolTx) {
+      return res.status(400).send({
+        error: 'mintPublicKey, configPublicKey, and createPoolTx are required'
+      })
+    }
+
+    const connection = getConnection()
+
+    // Deserialize transactions
+    const createPoolTransaction = VersionedTransaction.deserialize(
+      Buffer.from(createPoolTx, 'base64')
+    )
+    const swapTransaction = firstBuyTx
+      ? VersionedTransaction.deserialize(Buffer.from(firstBuyTx, 'base64'))
+      : null
+
+    // 1. Send create pool transaction and wait for confirmation
+    const createSig = bs58.encode(createPoolTransaction.signatures[0])
+    await sendTransactionWithRetries({
+      transaction: createPoolTransaction,
+      commitment: 'confirmed',
+      sendOptions: {
+        skipPreflight: true
+      },
+      confirmationStrategy: {
+        ...(await connection.getLatestBlockhash()),
+        signature: createSig
+      },
+      logger
+    })
+
+    // 2. After confirmation, create reward pool using deterministic keys
+    const mint = new PublicKey(mintPublicKey)
+
+    const manager = deriveKeypair('manager', mint)
+    const rewardManager = deriveKeypair('reward-manager', mint)
+
+    logger.info({
+      message: 'Derived reward pool accounts',
+      mint: mint.toBase58(),
+      manager: manager.publicKey.toBase58(),
+      rewardManager: rewardManager.publicKey.toBase58()
+    })
+
+    // Pick a random fee payer
+    const { solanaFeePayerWallets } = config
+    const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
+    const feePayer = solanaFeePayerWallets[index]
+    const tokenAccount = Keypair.generate()
+
+    const rewardPoolInstructions = await createRewardPool({
+      connection,
+      feePayer,
+      manager,
+      rewardManager,
+      tokenAccount,
+      mint
+    })
+    const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
+    const rewardPoolMessage = new TransactionMessage({
+      recentBlockhash: rewardPoolRecentBlockhash.blockhash,
+      instructions: rewardPoolInstructions,
+      payerKey: feePayer.publicKey
+    })
+    const rewardPoolTransaction = new VersionedTransaction(
+      rewardPoolMessage.compileToV0Message()
+    )
+    rewardPoolTransaction.sign([feePayer, manager, rewardManager, tokenAccount])
+    const base64tx = Buffer.from(rewardPoolTransaction.serialize()).toString(
+      'base64'
+    )
+    logger.info({
+      message: 'Reward pool transaction',
+      base64tx
+    })
+    const rewardSig = bs58.encode(rewardPoolTransaction.signatures[0])
+    await sendTransactionWithRetries({
+      transaction: rewardPoolTransaction,
+      commitment: 'confirmed',
+      sendOptions: {
+        skipPreflight: true
+      },
+      confirmationStrategy: {
+        ...rewardPoolRecentBlockhash,
+        signature: rewardSig
+      },
+      logger
+    })
+
+    // 3. Send the user's first buy transaction if provided
+    let swapSig: string | undefined
+    if (swapTransaction) {
+      swapSig = bs58.encode(swapTransaction.signatures[0])
+      await sendTransactionWithRetries({
+        transaction: swapTransaction,
+        commitment: 'confirmed',
+        sendOptions: {
+          skipPreflight: true
+        },
+        confirmationStrategy: {
+          ...(await connection.getLatestBlockhash()),
+          signature: swapSig
+        },
+        logger
+      })
+    }
+
+    const dbcPool = deriveDbcPoolAddress(
+      new PublicKey(AUDIO_MINT),
+      new PublicKey(mintPublicKey),
+      new PublicKey(configPublicKey)
+    )
+    return res.status(200).send({
+      dbcPool,
+      createSignature: createSig,
+      rewardPoolSignature: rewardSig,
+      firstBuySignature: swapSig
+    })
+  } catch (e) {
+    logger.error('Error confirming launch coin')
     logger.error(e)
     res.status(500).send()
   }

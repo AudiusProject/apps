@@ -23,12 +23,17 @@ import {
   CreateSenderPublicInstructionData,
   DecodedCreateSenderInstruction,
   DecodedCreateSenderPublicInstruction,
+  DecodedChangeManagerAccountInstruction,
   DecodedDeleteSenderPublicInstruction,
   DecodedEvaluateAttestationsInstruction,
   DecodedRewardManagerInstruction,
   DecodedSubmitAttestationsInstruction,
   EvaluateAttestationsInstructionData,
   EvaluateRewardAttestationsParams,
+  InitRewardManagerInstructionData,
+  InitRewardManagerParams,
+  ChangeManagerAccountInstructionData,
+  ChangeManagerAccountParams,
   RewardManagerStateData,
   SubmitAttestationInstructionData,
   SubmitRewardAttestationParams,
@@ -51,6 +56,12 @@ export class RewardManagerProgram {
   )
 
   public static readonly layouts = {
+    initRewardManagerInstructionData: struct<InitRewardManagerInstructionData>([
+      u8('instruction'),
+      u8('minVotes')
+    ]),
+    changeManagerAccountInstructionData:
+      struct<ChangeManagerAccountInstructionData>([u8('instruction')]),
     createSenderInstructionData: struct<CreateSenderInstructionData>([
       u8('instruction'),
       ethAddress('senderEthAddress'),
@@ -99,6 +110,120 @@ export class RewardManagerProgram {
           'messages'
         )
       ])
+  }
+
+  public static createInitInstruction({
+    rewardManagerState,
+    tokenAccount,
+    mint,
+    manager,
+    minVotes,
+    rewardManagerProgramId = RewardManagerProgram.programId
+  }: InitRewardManagerParams) {
+    const data = Buffer.alloc(
+      RewardManagerProgram.layouts.initRewardManagerInstructionData.span
+    )
+    RewardManagerProgram.layouts.initRewardManagerInstructionData.encode(
+      {
+        instruction: RewardManagerInstruction.Init,
+        minVotes
+      },
+      data
+    )
+
+    const authority = RewardManagerProgram.deriveAuthority({
+      programId: rewardManagerProgramId,
+      rewardManagerState
+    })
+
+    const keys: AccountMeta[] = [
+      { pubkey: rewardManagerState, isSigner: false, isWritable: true },
+      { pubkey: tokenAccount, isSigner: false, isWritable: true },
+      { pubkey: mint, isSigner: false, isWritable: false },
+      { pubkey: manager, isSigner: false, isWritable: false },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({
+      programId: rewardManagerProgramId,
+      keys,
+      data
+    })
+  }
+
+  public static createChangeManagerAccountInstruction({
+    rewardManagerState,
+    currentManager,
+    newManager,
+    rewardManagerProgramId = RewardManagerProgram.programId
+  }: ChangeManagerAccountParams) {
+    const data = Buffer.alloc(
+      RewardManagerProgram.layouts.changeManagerAccountInstructionData.span
+    )
+    RewardManagerProgram.layouts.changeManagerAccountInstructionData.encode(
+      { instruction: RewardManagerInstruction.ChangeManagerAccount },
+      data
+    )
+
+    const keys: AccountMeta[] = [
+      { pubkey: rewardManagerState, isSigner: false, isWritable: true },
+      { pubkey: currentManager, isSigner: true, isWritable: false },
+      { pubkey: newManager, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({
+      programId: rewardManagerProgramId,
+      keys,
+      data
+    })
+  }
+
+  public static decodeInitInstruction({
+    programId,
+    keys: [
+      rewardManagerState,
+      tokenAccount,
+      mint,
+      manager,
+      authority,
+      tokenProgram,
+      rent
+    ],
+    data
+  }: TransactionInstruction): DecodedInitRewardManagerInstruction {
+    return {
+      programId,
+      keys: {
+        rewardManagerState,
+        tokenAccount,
+        mint,
+        manager,
+        authority,
+        tokenProgram,
+        rent
+      },
+      data: RewardManagerProgram.layouts.initRewardManagerInstructionData.decode(
+        data
+      )
+    }
+  }
+
+  public static decodeChangeManagerAccountInstruction({
+    programId,
+    keys: [rewardManagerState, currentManager, newManager],
+    data
+  }: TransactionInstruction): DecodedChangeManagerAccountInstruction {
+    return {
+      programId,
+      keys: {
+        rewardManagerState,
+        currentManager,
+        newManager
+      },
+      data: RewardManagerProgram.layouts.changeManagerAccountInstructionData.decode(
+        data
+      )
+    }
   }
 
   public static createSenderInstruction({
@@ -435,7 +560,9 @@ export class RewardManagerProgram {
     switch (instruction.data[0]) {
       case RewardManagerInstruction.Init:
       case RewardManagerInstruction.ChangeManagerAccount:
-        throw new Error('Not Implemented')
+        return RewardManagerProgram.decodeChangeManagerAccountInstruction(
+          instruction
+        )
       case RewardManagerInstruction.CreateSender:
         return RewardManagerProgram.decodeCreateSenderInstruction(instruction)
       case RewardManagerInstruction.DeleteSender:
@@ -496,6 +623,14 @@ export class RewardManagerProgram {
   ): decoded is DecodedEvaluateAttestationsInstruction {
     return (
       decoded.data.instruction === RewardManagerInstruction.EvaluateAttestations
+    )
+  }
+
+  public static isChangeManagerAccountInstruction(
+    decoded: DecodedRewardManagerInstruction
+  ): decoded is DecodedChangeManagerAccountInstruction {
+    return (
+      decoded.data.instruction === RewardManagerInstruction.ChangeManagerAccount
     )
   }
 

@@ -6,7 +6,7 @@ export const normalizeEp = (ep: string): string => {
   if (ep.startsWith('http')) {
     return ep
   } else {
-    let mep: string = Array.from(ep)
+    const mep: string = Array.from(ep)
       .filter((c, i) => i % Math.floor(ep.length / 6) !== 0)
       .join('')
     return Buffer.from(mep, 'base64').toString('utf-8')

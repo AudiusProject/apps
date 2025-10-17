@@ -6,17 +6,21 @@ import {
 } from '@jup-ag/api'
 import {
   DynamicBondingCurveClient,
+  getBaseTokenForSwap,
   PoolConfig,
   SwapMode,
   VirtualPool
 } from '@meteora-ag/dynamic-bonding-curve-sdk'
+import { Keypair } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
-import { AUDIO_MINT, QUOTE_POOL_MINT_ADDRESS, USDC_MINT } from './constants'
+import { AUDIO_MINT, USDC_MINT } from './constants'
+import { makeCurve, makeTestCurve } from './curve'
 
 /**
  * Gets a Jupiter swap quote to determine the USDC value of the given AUDIO amount
@@ -173,7 +177,7 @@ export const firstBuyQuote = async (
       poolConfigState,
       maxAudioInputAmount,
       maxTokenOutputAmount
-    } = await getLaunchpadConfig(dbcClient)
+    } = await getLaunchpadConfig()
 
     // Handle AUDIO -> token quote
     if (audioInputAmount && audioInputAmount) {
@@ -220,17 +224,73 @@ export const firstBuyQuote = async (
   }
 }
 
-const getLaunchpadConfig = async (dbcClient: DynamicBondingCurveClient) => {
-  // TODO: make a true mock virtual pool instead of building off a live pool
-  const existingPool = await dbcClient.state.getPool(QUOTE_POOL_MINT_ADDRESS)
-  const poolConfigState = await dbcClient.state.getPoolConfig(
-    existingPool.config
+const getLaunchpadConfig = async (): Promise<{
+  virtualPoolState: VirtualPool
+  poolConfigState: PoolConfig
+  maxAudioInputAmount: string
+  maxTokenOutputAmount: string
+  sqrtStartPrice: BN
+}> => {
+  // Build a mock config and virtual pool entirely from our local curve design
+  const dummy = Keypair.generate()
+  const curve =
+    config.environment === 'prod'
+      ? makeCurve({
+          payer: dummy,
+          configKey: dummy,
+          partner: dummy.publicKey,
+          rewardPoolAuthority: dummy.publicKey
+        })
+      : makeTestCurve({
+          payer: dummy,
+          configKey: dummy,
+          partner: dummy.publicKey,
+          rewardPoolAuthority: dummy.publicKey
+        })
+
+  const migrationSqrtPrice = curve.curve[curve.curve.length - 1].sqrtPrice
+  const swapBaseAmount = getBaseTokenForSwap(
+    curve.sqrtStartPrice,
+    migrationSqrtPrice,
+    curve.curve
   )
+  const poolConfigState = {
+    quoteMint: curve.quoteMint,
+    tokenDecimal: curve.tokenDecimal,
+    sqrtStartPrice: curve.sqrtStartPrice,
+    migrationQuoteThreshold: curve.migrationQuoteThreshold,
+    collectFeeMode: curve.collectFeeMode,
+    activationType: curve.activationType,
+    tokenType: curve.tokenType,
+    poolFees: {
+      ...curve.poolFees,
+      dynamicFee: curve.poolFees.dynamicFee ?? { initialized: false }
+    },
+    migrationOption: curve.migrationOption,
+    migrationFeeOption: curve.migrationFeeOption,
+    migratedPoolFee: curve.migratedPoolFee,
+    migrationFee: curve.migrationFee,
+    partnerLpPercentage: curve.partnerLpPercentage,
+    creatorLpPercentage: curve.creatorLpPercentage,
+    partnerLockedLpPercentage: curve.partnerLockedLpPercentage,
+    creatorLockedLpPercentage: curve.creatorLockedLpPercentage,
+    creatorTradingFeePercentage: curve.creatorTradingFeePercentage,
+    curve: curve.curve,
+    lockedVesting: curve.lockedVesting,
+    padding: curve.padding,
+    swapBaseAmount,
+    migrationSqrtPrice
+    // TODO: type this better but for now this is enough to get the math correct
+  } as unknown as PoolConfig
 
   const virtualPoolState = {
-    ...existingPool,
-    sqrtPrice: poolConfigState.sqrtStartPrice // in order to set our curve back to absolute 0 we reset the sqrt to the initial sqrt price
-  }
+    sqrtPrice: curve.sqrtStartPrice,
+    quoteReserve: new BN(0),
+    baseReserve: new BN(0),
+    volatilityTracker: { volatilityAccumulator: new BN(0) },
+    activationPoint: new BN(0)
+  } as VirtualPool
+
   const maxAudioInputAmount = poolConfigState.migrationQuoteThreshold
     .muln(100)
     .divn(99)
@@ -246,15 +306,12 @@ const getLaunchpadConfig = async (dbcClient: DynamicBondingCurveClient) => {
 }
 
 export const getLaunchpadConfigRoute = async (
-  req: Request,
+  _: Request,
   res: Response
 ): Promise<void> => {
   try {
-    // Solana connections
-    const connection = getConnection()
-    const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
     const { maxAudioInputAmount, maxTokenOutputAmount } =
-      await getLaunchpadConfig(dbcClient)
+      await getLaunchpadConfig()
 
     res.status(200).send({
       maxAudioInputAmount,

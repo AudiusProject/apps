@@ -14,6 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CoinArtistFees } from './CoinArtistFees';
+import {
+    CoinArtistFeesFromJSON,
+    CoinArtistFeesFromJSONTyped,
+    CoinArtistFeesToJSON,
+} from './CoinArtistFees';
 import type { CoinDynamicBondingCurve } from './CoinDynamicBondingCurve';
 import {
     CoinDynamicBondingCurveFromJSON,
@@ -429,6 +435,12 @@ export interface Coin {
      * @memberof Coin
      */
     dynamicBondingCurve: CoinDynamicBondingCurve;
+    /**
+     * 
+     * @type {CoinArtistFees}
+     * @memberof Coin
+     */
+    artistFees?: CoinArtistFees;
 }
 
 /**
@@ -558,6 +570,7 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'buy': json['buy'],
         'sell': json['sell'],
         'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
+        'artistFees': !exists(json, 'artist_fees') ? undefined : CoinArtistFeesFromJSON(json['artist_fees']),
     };
 }
 
@@ -636,6 +649,7 @@ export function CoinToJSON(value?: Coin | null): any {
         'buy': value.buy,
         'sell': value.sell,
         'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
+        'artist_fees': CoinArtistFeesToJSON(value.artistFees),
     };
 }
 
