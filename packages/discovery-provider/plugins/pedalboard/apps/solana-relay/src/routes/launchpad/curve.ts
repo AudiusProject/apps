@@ -23,17 +23,17 @@ export const makeCurve = ({
   payer,
   configKey,
   partner,
-  rewardPoolTokenAccount
+  rewardPoolAuthority
 }: {
   payer: Keypair
   configKey: Keypair
   partner: PublicKey
-  rewardPoolTokenAccount: PublicKey
+  rewardPoolAuthority: PublicKey
 }): CreateConfigParam => ({
   payer: payer.publicKey,
   config: configKey.publicKey,
   feeClaimer: partner,
-  leftoverReceiver: rewardPoolTokenAccount,
+  leftoverReceiver: rewardPoolAuthority,
   quoteMint: new PublicKey('9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'),
 
   // Fees
@@ -179,17 +179,17 @@ export const makeTestCurve = ({
   payer,
   configKey,
   partner,
-  rewardPoolTokenAccount
+  rewardPoolAuthority
 }: {
   payer: Keypair
   configKey: Keypair
   partner: PublicKey
-  rewardPoolTokenAccount: PublicKey
+  rewardPoolAuthority: PublicKey
 }): CreateConfigParam => ({
   payer: payer.publicKey,
   config: configKey.publicKey,
   feeClaimer: partner,
-  leftoverReceiver: rewardPoolTokenAccount,
+  leftoverReceiver: rewardPoolAuthority,
   quoteMint: new PublicKey('9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'),
 
   // Fees

@@ -1,5 +1,6 @@
 import { createHash } from 'crypto'
 
+import { RewardManagerProgram } from '@audius/spl'
 import {
   createGenericFile,
   signerIdentity,
@@ -122,14 +123,14 @@ export const launchCoin = async (
     )
 
     // Deterministic token account for reward pool custody (pubkey used in config)
-    const rewardPoolTokenAccount = deriveKeypair(
-      'reward-token-account',
+    const rewardManagerState = deriveKeypair(
+      'reward-manager',
       mintKeypair.publicKey
     )
     logger.info({
       message: 'Derived reward pool token account',
       mint: mintKeypair.publicKey.toBase58(),
-      rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey.toBase58()
+      rewardManagerState: rewardManagerState.publicKey.toBase58()
     })
 
     // Transaction Execution
@@ -177,19 +178,23 @@ export const launchCoin = async (
       symbol,
       configKeypair: configKeypair.publicKey.toBase58()
     })
+    const rewardPoolTokenAuthority = RewardManagerProgram.deriveAuthority({
+      programId: RewardManagerProgram.programId,
+      rewardManagerState: rewardManagerState.publicKey
+    })
     const createConfigTx = await dbcClient.partner.createConfig(
       config.environment === 'prod'
         ? makeCurve({
             payer: audiusAuthorityKeypair,
             configKey: configKeypair,
             partner: launchpadPartnerPublicKey,
-            rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
+            rewardPoolAuthority: rewardPoolTokenAuthority
           })
         : makeTestCurve({
             payer: audiusAuthorityKeypair,
             configKey: configKeypair,
             partner: launchpadPartnerPublicKey,
-            rewardPoolTokenAccount: rewardPoolTokenAccount.publicKey
+            rewardPoolAuthority: rewardPoolTokenAuthority
           })
     )
     const createConfigRecentBlockhash = await connection.getLatestBlockhash()
@@ -343,14 +348,12 @@ export const confirmLaunchCoin = async (
     // 2. After confirmation, create reward pool using deterministic keys
     const mint = new PublicKey(mintPublicKey)
 
-    const tokenAccount = deriveKeypair('reward-token-account', mint)
     const manager = deriveKeypair('manager', mint)
     const rewardManager = deriveKeypair('reward-manager', mint)
 
     logger.info({
       message: 'Derived reward pool accounts',
       mint: mint.toBase58(),
-      tokenAccount: tokenAccount.publicKey.toBase58(),
       manager: manager.publicKey.toBase58(),
       rewardManager: rewardManager.publicKey.toBase58()
     })
@@ -362,11 +365,11 @@ export const confirmLaunchCoin = async (
 
     const rewardPoolInstructions = await createRewardPool({
       connection,
-      tokenAccount,
       feePayer,
       manager,
       rewardManager,
-      mint
+      mint,
+      logger
     })
     const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
     const rewardPoolMessage = new TransactionMessage({
@@ -377,7 +380,7 @@ export const confirmLaunchCoin = async (
     const rewardPoolTransaction = new VersionedTransaction(
       rewardPoolMessage.compileToV0Message()
     )
-    rewardPoolTransaction.sign([tokenAccount, feePayer, manager, rewardManager])
+    rewardPoolTransaction.sign([feePayer, manager, rewardManager])
     const base64tx = Buffer.from(rewardPoolTransaction.serialize()).toString(
       'base64'
     )

@@ -239,13 +239,13 @@ const getLaunchpadConfig = async (): Promise<{
           payer: dummy,
           configKey: dummy,
           partner: dummy.publicKey,
-          rewardPoolTokenAccount: dummy.publicKey
+          rewardPoolAuthority: dummy.publicKey
         })
       : makeTestCurve({
           payer: dummy,
           configKey: dummy,
           partner: dummy.publicKey,
-          rewardPoolTokenAccount: dummy.publicKey
+          rewardPoolAuthority: dummy.publicKey
         })
 
   const migrationSqrtPrice = curve.curve[curve.curve.length - 1].sqrtPrice
