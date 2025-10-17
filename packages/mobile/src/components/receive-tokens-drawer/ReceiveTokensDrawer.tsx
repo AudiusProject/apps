@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useUserbank } from '@audius/common/hooks'
+import { useUserbank, useRootWalletAddress } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useReceiveTokensModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -21,6 +21,7 @@ import { QRCodeComponent, BalanceSection } from 'app/components/core'
 import { AddressTile } from 'app/components/core/AddressTile'
 import Drawer from 'app/components/drawer/Drawer'
 import { useToast } from 'app/hooks/useToast'
+import { env } from 'app/services/env'
 
 import { DrawerHeader } from '../drawer/DrawerHeader'
 
@@ -33,13 +34,23 @@ export const ReceiveTokensDrawer = () => {
   const { mint } = data ?? {}
   const { spacing } = useTheme()
   const { userBankAddress, loading: userBankLoading } = useUserbank(mint)
+  const { rootWalletAddress, loading: rootWalletLoading } =
+    useRootWalletAddress()
+
+  // Use root wallet address for USDC, user bank for others
+  const isUsdc = mint === env.USDC_MINT_ADDRESS
+  const shouldUseRootWallet = isUsdc
+  const displayAddress = shouldUseRootWallet
+    ? rootWalletAddress
+    : userBankAddress
+  const loading = shouldUseRootWallet ? rootWalletLoading : userBankLoading
 
   const handleCopyAddress = useCallback(() => {
-    if (userBankAddress) {
-      Clipboard.setString(userBankAddress)
+    if (displayAddress) {
+      Clipboard.setString(displayAddress)
       toast({ content: 'Copied to clipboard!', type: 'info' })
     }
-  }, [userBankAddress, toast])
+  }, [displayAddress, toast])
 
   const renderHeader = () => {
     return (
@@ -53,7 +64,7 @@ export const ReceiveTokensDrawer = () => {
     )
   }
 
-  if (userBankLoading || !userBankAddress) {
+  if (loading || !displayAddress) {
     return (
       <Drawer isOpen={isOpen} onClose={onClose}>
         <Flex
@@ -94,7 +105,7 @@ export const ReceiveTokensDrawer = () => {
             alignItems='center'
             justifyContent='center'
           >
-            <QRCodeComponent value={userBankAddress} size={QR_CODE_SIZE} />
+            <QRCodeComponent value={displayAddress} size={QR_CODE_SIZE} />
           </Flex>
           <Flex gap='xl' justifyContent='center' flex={1}>
             <Text variant='body' size='l'>
@@ -104,7 +115,7 @@ export const ReceiveTokensDrawer = () => {
         </Flex>
 
         {/* Address Tile */}
-        <AddressTile address={userBankAddress} />
+        <AddressTile address={displayAddress} />
 
         {/* Hint Section */}
         <Hint

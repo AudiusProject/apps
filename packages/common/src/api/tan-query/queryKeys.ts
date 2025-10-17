@@ -41,6 +41,8 @@ export const QUERY_KEYS = {
   topSupporter: 'topSupporter',
   supportedUsers: 'supportedUsers',
   relatedArtists: 'relatedArtists',
+  rootWalletAddress: 'rootWalletAddress',
+  mintRecovery: 'mintRecovery',
   purchases: 'purchases',
   purchasesCount: 'purchasesCount',
   sales: 'sales',
