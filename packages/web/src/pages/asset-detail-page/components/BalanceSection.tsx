@@ -176,11 +176,13 @@ const HasBalanceState = ({
   onReceive,
   mint,
   isBuySellSupported,
-  coinName
+  coinName,
+  isMobile
 }: BalanceStateProps & {
   mint: string
   isBuySellSupported: boolean
   coinName: string
+  isMobile: boolean
 }) => {
   const isManagerMode = useIsManagedAccount()
   const { motion } = useTheme()
@@ -283,7 +285,9 @@ const HasBalanceState = ({
                 >
                   <Flex gap='xs' alignItems='center'>
                     <Text variant='body' size='l'>
-                      {walletMessages.linkedWallets.linkedWallet(index)}
+                      {isMobile
+                        ? walletMessages.linkedWallets.wallet(index)
+                        : walletMessages.linkedWallets.linkedWallet(index)}
                     </Text>
                     <Text variant='body' size='l' color='subdued'>
                       ({shortenSPLAddress(wallet.owner)})
@@ -434,6 +438,7 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
             mint={mint}
             isBuySellSupported={isBuySellSupported}
             coinName={coinName}
+            isMobile={isMobile}
           />
         )}
         {isMobile && (
