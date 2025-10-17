@@ -56,25 +56,31 @@ const PROD_SENDERS = [
 /**
  * Creates a reward pool and registers senders (including a deterministic
  * fourth "claimauthority" sender derived from (HD_ROOT, mint)).
+ *
+ * A reward pool deployment has:
+ * - rewardManager account: to track state of reward instance
+ * - manager account: to manage the initial senders
+ * - authority account: the PDA that owns the token accounts where funds are stored
+ * - token account: (unused), we store on the ATA of the authority instead
  */
 export const createRewardPool = async ({
   connection,
-  tokenAccount,
   feePayer,
   manager,
+  tokenAccount,
   rewardManager,
   mint
 }: {
   connection: Connection
   feePayer: Keypair
-  tokenAccount: Keypair
   manager: Keypair
+  tokenAccount: Keypair
   rewardManager: Keypair
   mint: PublicKey
 }) => {
   const instructions: TransactionInstruction[] = []
 
-  // 1. Create reward manager account
+  // 1. Create reward manager account (to track state)
   instructions.push(
     SystemProgram.createAccount({
       fromPubkey: feePayer.publicKey,
@@ -87,6 +93,7 @@ export const createRewardPool = async ({
   )
 
   // 2. Create token account (note: initialize via your program or add SPL init)
+  // This is not the ATA for the authority and therefore is not used as the leftover receiver.
   instructions.push(
     SystemProgram.createAccount({
       fromPubkey: feePayer.publicKey,
@@ -127,7 +134,9 @@ export const createRewardPool = async ({
     ...baseSenders,
     {
       senderEthAddress: claimAuthorityEthAddress,
-      operatorEthAddress: claimAuthorityEthAddress
+      // Use a static address for the claim authority so multiple claim authorities can't be used
+      // to override other senders.
+      operatorEthAddress: '0x0000000000000000000000000000000000000000'
     }
   ]
 

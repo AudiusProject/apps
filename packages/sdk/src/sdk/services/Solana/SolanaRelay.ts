@@ -169,6 +169,9 @@ export class SolanaRelay extends BaseAPI {
 
   /**
    * Launches a new artist coin on the launchpad with bonding curve.
+   * Gets back two transactions to sign and send from the client:
+   * - createPoolTx: Creates the pool and metadata on-chain
+   * - firstBuyTx: Makes an initial purchase of the coin
    */
   public async launchCoin(
     params: LaunchCoinRequest
@@ -212,6 +215,9 @@ export class SolanaRelay extends BaseAPI {
       if (!runtime.exists(json, 'imageUri')) {
         throw new Error('imageUri missing from response')
       }
+      if (!runtime.exists(json, 'configPublicKey')) {
+        throw new Error('configPublicKey missing from response')
+      }
 
       return json as LaunchCoinResponse
     }).value()
@@ -219,9 +225,12 @@ export class SolanaRelay extends BaseAPI {
 
   /**
    * Confirms pool creation, then creates reward pool and (optionally) executes the first buy.
+   * Receives the createPoolTx and firstBuyTx as base64 encoded VersionedTransactions, fully signed.
+   * Launches the reward pool for the coin.
    */
   public async confirmLaunchCoin(params: {
     mintPublicKey: PublicKey
+    configPublicKey: PublicKey
     createPoolTx: Uint8Array
     firstBuyTx?: Uint8Array
   }) {
@@ -230,6 +239,7 @@ export class SolanaRelay extends BaseAPI {
     }
     const body = {
       mintPublicKey: params.mintPublicKey.toBase58(),
+      configPublicKey: params.configPublicKey.toBase58(),
       createPoolTx: Buffer.from(params.createPoolTx).toString('base64'),
       firstBuyTx: params.firstBuyTx
         ? Buffer.from(params.firstBuyTx).toString('base64')
@@ -245,6 +255,7 @@ export class SolanaRelay extends BaseAPI {
 
     return await new runtime.JSONApiResponse(response, (json) => {
       return json as {
+        dbcPool: string
         createSignature: string
         rewardPoolSignature: string
         firstBuySignature?: string

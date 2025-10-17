@@ -113,6 +113,7 @@ export const useLaunchCoin = () => {
           createPoolTx: createPoolTxSerialized,
           firstBuyTx: firstBuyTxSerialized,
           mintPublicKey,
+          configPublicKey,
           imageUri
         } = res
         errorMetadata.createPoolTx = createPoolTxSerialized
@@ -129,9 +130,11 @@ export const useLaunchCoin = () => {
           ? await signTx(firstBuyTxSerialized)
           : undefined
 
+        let confirmRes
         try {
-          const confirmRes = await sdk.services.solanaRelay.confirmLaunchCoin({
+          confirmRes = await sdk.services.solanaRelay.confirmLaunchCoin({
             mintPublicKey: new PublicKey(mintPublicKey),
+            configPublicKey: new PublicKey(configPublicKey),
             createPoolTx: signedCreatePoolTx.serialize(),
             firstBuyTx: signedFirstBuyTx?.serialize()
           })
@@ -168,7 +171,8 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri
+              logoUri: imageUri,
+              dbcPool: confirmRes.dbcPool
               // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })

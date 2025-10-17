@@ -10,6 +10,8 @@ import {
 import { Keypair, PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 
+import { AUDIO_MINT } from './constants'
+
 /**
  * Makes a production curve for dbc deployment
  * @param params Object containing:
@@ -34,7 +36,7 @@ export const makeCurve = ({
   config: configKey.publicKey,
   feeClaimer: partner,
   leftoverReceiver: rewardPoolAuthority,
-  quoteMint: new PublicKey('9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'),
+  quoteMint: new PublicKey(AUDIO_MINT),
 
   // Fees
   poolFees: {
@@ -166,7 +168,7 @@ export const makeCurve = ({
 })
 
 /**
- * Makes a staging curve for dbc deployment
+ * Makes a test curve for dbc deployment
  * Same as production but with a 1000x reduction in mkt caps
  * @param params Object containing:
  *   - payer: the keypair of the payer
@@ -190,7 +192,7 @@ export const makeTestCurve = ({
   config: configKey.publicKey,
   feeClaimer: partner,
   leftoverReceiver: rewardPoolAuthority,
-  quoteMint: new PublicKey('9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'),
+  quoteMint: new PublicKey(AUDIO_MINT),
 
   // Fees
   poolFees: {

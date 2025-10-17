@@ -8,7 +8,10 @@ import {
 } from '@metaplex-foundation/umi'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
-import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
+import {
+  deriveDbcPoolAddress,
+  DynamicBondingCurveClient
+} from '@meteora-ag/dynamic-bonding-curve-sdk'
 import {
   Keypair,
   PublicKey,
@@ -24,6 +27,7 @@ import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 import { sendTransactionWithRetries } from '../../utils/transaction'
 
+import { AUDIO_MINT } from './constants'
 import { makeCurve, makeTestCurve } from './curve'
 import { getKeypair } from './getKeypair'
 import { createRewardPool } from './reward_pool'
@@ -219,6 +223,11 @@ export const launchCoin = async (
       },
       logger
     })
+    await connection.confirmTransaction({
+      signature: createConfigSignature,
+      blockhash: createConfigRecentBlockhash.blockhash,
+      lastValidBlockHeight: createConfigRecentBlockhash.lastValidBlockHeight
+    })
     logger.info({
       message: 'Created config',
       name,
@@ -272,6 +281,7 @@ export const launchCoin = async (
 
     res.status(200).send({
       mintPublicKey: mintKeypair.publicKey.toBase58(),
+      configPublicKey: configKeypair.publicKey.toBase58(),
       imageUri,
       createPoolTx: Buffer.from(
         createPoolTx.serialize({ requireAllSignatures: false })
@@ -304,6 +314,7 @@ const deriveKeypair = (label: string, mint: PublicKey): Keypair => {
 
 interface ConfirmLaunchCoinRequestBody {
   mintPublicKey: string
+  configPublicKey: string
   createPoolTx: string // base64 VersionedTransaction, fully signed
   firstBuyTx?: string // base64 VersionedTransaction, fully signed
 }
@@ -313,11 +324,12 @@ export const confirmLaunchCoin = async (
   res: Response
 ) => {
   try {
-    const { mintPublicKey, createPoolTx, firstBuyTx } = req.body
-    if (!mintPublicKey || !createPoolTx) {
-      return res
-        .status(400)
-        .send({ error: 'mintPublicKey and createPoolTx are required' })
+    const { mintPublicKey, configPublicKey, createPoolTx, firstBuyTx } =
+      req.body
+    if (!mintPublicKey || !configPublicKey || !createPoolTx) {
+      return res.status(400).send({
+        error: 'mintPublicKey, configPublicKey, and createPoolTx are required'
+      })
     }
 
     const connection = getConnection()
@@ -362,14 +374,15 @@ export const confirmLaunchCoin = async (
     const { solanaFeePayerWallets } = config
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
     const feePayer = solanaFeePayerWallets[index]
+    const tokenAccount = Keypair.generate()
 
     const rewardPoolInstructions = await createRewardPool({
       connection,
       feePayer,
       manager,
       rewardManager,
-      mint,
-      logger
+      tokenAccount,
+      mint
     })
     const rewardPoolRecentBlockhash = await connection.getLatestBlockhash()
     const rewardPoolMessage = new TransactionMessage({
@@ -380,7 +393,7 @@ export const confirmLaunchCoin = async (
     const rewardPoolTransaction = new VersionedTransaction(
       rewardPoolMessage.compileToV0Message()
     )
-    rewardPoolTransaction.sign([feePayer, manager, rewardManager])
+    rewardPoolTransaction.sign([feePayer, manager, rewardManager, tokenAccount])
     const base64tx = Buffer.from(rewardPoolTransaction.serialize()).toString(
       'base64'
     )
@@ -420,7 +433,13 @@ export const confirmLaunchCoin = async (
       })
     }
 
+    const dbcPool = deriveDbcPoolAddress(
+      new PublicKey(AUDIO_MINT),
+      new PublicKey(mintPublicKey),
+      new PublicKey(configPublicKey)
+    )
     return res.status(200).send({
+      dbcPool,
       createSignature: createSig,
       rewardPoolSignature: rewardSig,
       firstBuySignature: swapSig

@@ -65,7 +65,7 @@ type Config = {
   launchpadPartnerSignerPrivateKey: string
   // Secret used to deterministically derive
   // - ephemeral launchpad keys (HKDF seed)
-  // - reward pool claim authorities
+  // - reward pool authorities
   launchpadDeterministicSecret: string
 }
 
