@@ -200,6 +200,20 @@ export async function getContentNodeMetadata(
   }
 }
 
+export async function getValidatorMetadata(
+  endpoint: string
+): Promise<NodeMetadata> {
+  try {
+    const {
+      data: { country, version }
+    } = await fetchWithTimeout(`${endpoint}/version`)
+    return { version, country }
+  } catch (e) {
+    // Try legacy method:
+    return await getNodeMetadata(endpoint)
+  }
+}
+
 export function decodeCallData(types: string[], callData: string) {
   // TODO: Like methods above and throughout, move to better pattern
   const web3 = window.audiusLibs.ethWeb3Manager!.web3

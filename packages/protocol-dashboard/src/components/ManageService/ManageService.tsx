@@ -456,7 +456,8 @@ const ManageService = (props: ManageServiceProps) => {
   const numNodes =
     isServiceProvider &&
     (serviceUser as Operator).discoveryProviders.length +
-      (serviceUser as Operator).contentNodes.length
+      (serviceUser as Operator).contentNodes.length +
+      (serviceUser as Operator).validators.length
   const numDelegators = isServiceProvider
     ? (serviceUser as Operator).delegators.length
     : 0

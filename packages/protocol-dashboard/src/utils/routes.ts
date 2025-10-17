@@ -22,7 +22,9 @@ export const SERVICES = '/services' // deprecated
 export const SERVICES_TITLE = 'Services Overview'
 
 export const NODES_VALIDATORS = '/nodes/validators'
+export const NODES_VALIDATOR = '/nodes/validators/:spID'
 export const NODES_VALIDATORS_TITLE = 'Validators'
+export const NODES_VALIDATOR_TITLE = 'Validator'
 
 export const NODES_DISCOVERY = '/nodes/discovery-node'
 export const SERVICES_DISCOVERY_PROVIDER = '/services/discovery-node' // deprecated
@@ -107,6 +109,10 @@ export const contentNodePage = (spID: number) => {
   return `${NODES_CONTENT}/${spID}`
 }
 
+export const validatorPage = (spID: number) => {
+  return `${NODES_VALIDATORS}/${spID}`
+}
+
 export const proposalPage = (proposalId: number) => {
   return `${GOVERNANCE}/proposal/${proposalId}`
 }
@@ -141,6 +147,7 @@ const routeTitles = {
   [NODES_CONTENT]: SERVICES_CONTENT_TITLE,
   [NODES_DISCOVERY_NODE]: SERVICES_DISCOVERY_PROVIDER_NODE_TITLE,
   [NODES_VALIDATORS]: NODES_VALIDATORS_TITLE,
+  [NODES_VALIDATOR]: NODES_VALIDATOR_TITLE,
   [API]: API_TITLE,
   [API_LEADERBOARD]: API_LEADERBOARD_TITLE
 }

@@ -34,9 +34,8 @@ const messages = {
   registerNode: 'Register Node',
   staking: 'Stake',
   stakingPlaceholder: `200,000 ${TICKER}`,
-  dpEndpointPlaceholder: 'https://discoverynode.audius.co',
   endpoint: 'Node Endpoint',
-  cnEndpointPlaceholder: 'https://contentnode.audius.co',
+  endpointPlaceholder: 'https://validator.audius.co',
   delegate: 'Node Wallet Address',
   learnMoreNode: 'To learn more about running a node, please read the docs.',
   runningAudiusNode: 'Running a Node',
@@ -76,7 +75,8 @@ const RegisterServiceModal = ({
     user &&
     'serviceProvider' in user &&
     serviceInfo.contentNode &&
-    serviceInfo.discoveryProvider
+    serviceInfo.discoveryProvider &&
+    serviceInfo.validator
   ) {
     let usedStake = new BN('0')
 
@@ -90,6 +90,12 @@ const RegisterServiceModal = ({
       const numDiscoveryNodes = new BN(user.discoveryProviders.length)
       usedStake = usedStake.add(
         numDiscoveryNodes.mul(serviceInfo.discoveryProvider.minStake)
+      )
+    }
+    if ('validators' in user) {
+      const numValidators = new BN(user.validators.length)
+      usedStake = usedStake.add(
+        numValidators.mul(serviceInfo.validator.minStake)
       )
     }
 
@@ -171,7 +177,7 @@ const RegisterServiceModal = ({
 
   const onConfirm = useCallback(() => {
     registerService(
-      ServiceType.ContentNode,
+      ServiceType.Validator,
       endpoint,
       stakingBN,
       delegateOwnerWallet
@@ -239,7 +245,7 @@ const RegisterServiceModal = ({
           value={endpoint}
           onChange={setEndpoint}
           label={messages.endpoint}
-          placeholder={messages.cnEndpointPlaceholder}
+          placeholder={messages.endpointPlaceholder}
           className={styles.input}
         />
         <TextField
