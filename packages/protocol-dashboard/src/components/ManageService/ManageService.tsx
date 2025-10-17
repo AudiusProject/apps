@@ -38,6 +38,7 @@ import MinimumDelegationAmountModal from 'components/MinimumDelegationAmountModa
 import MyEstimatedRewards from 'components/MyEstimatedRewards'
 import OperatorCutModal from 'components/OperatorCutModal'
 import { PlainLink } from 'components/PlainLink/PlainLink'
+import { RegisterNodeCard } from 'components/RegisterNodeCard/RegisterNodeCard'
 import { BasicTooltip, Position } from 'components/Tooltip/Tooltip'
 import { TransactionStatusContent } from 'components/TransactionStatus/TransactionStatus'
 import { ManageDelegation } from 'components/UpdateDelegationModal/UpdateDelegationModal'
@@ -535,9 +536,6 @@ const ManageService = (props: ManageServiceProps) => {
           {isOwner ? null : <NodeOperatorInfoTooltip />}
         </Flex>
         <Flex gap='xl' alignItems='center'>
-          {isOwner && showRegisterNode ? (
-            <RegisterNewServiceBtn customText={messages.registerNode} />
-          ) : null}
           <Box css={{ textAlign: 'end' }}>
             <Text variant='heading' size='m' color='accent'>
               {AudiusClient.displayShortAud(aggregateContribution)}
