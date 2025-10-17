@@ -7,8 +7,7 @@ import {
 import {
   useFormattedCoinBalance,
   useUserbank,
-  useRootWalletAddress,
-  useMintRecovery
+  useRootWalletAddress
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useReceiveTokensModal } from '@audius/common/store'
@@ -53,17 +52,13 @@ export const ReceiveTokensModal = () => {
     useRootWalletAddress()
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  // Use root wallet address for USDC and AUDIO, user bank for others
+  // Use root wallet address for USDC, user bank for others
   const isUsdc = mint === env.USDC_MINT_ADDRESS
-  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
-  const shouldUseRootWallet = isUsdc || isAudio
+  const shouldUseRootWallet = isUsdc
   const displayAddress = shouldUseRootWallet
     ? rootWalletAddress
     : userBankAddress
   const loading = shouldUseRootWallet ? rootWalletLoading : userBankLoading
-
-  // Poll for AUDIO recovery if there's balance in root wallet and mint is AUDIO
-  useMintRecovery(mint || '', { enabled: isAudio })
 
   const handleCopy = useCallback(() => {
     copyToClipboard(displayAddress ?? '')

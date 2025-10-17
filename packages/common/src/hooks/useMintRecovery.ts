@@ -3,15 +3,17 @@ import { PublicKey } from '@solana/web3.js'
 import { useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
-import { QueryKey } from '~/api/tan-query/types'
+import { QueryKey, SelectableQueryOptions } from '~/api/tan-query/types'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { buyUSDCActions } from '~/store/buy-usdc'
-import { buyAudioActions } from '~/store/ui'
 
 export const getMintRecoveryQueryKey = (mint: string, walletAddress: string) =>
   [QUERY_KEYS.mintRecovery, mint, walletAddress] as unknown as QueryKey<bigint>
 
-export const useMintRecovery = (mint: string) => {
+export const useMintRecovery = (
+  mint: string,
+  options?: SelectableQueryOptions<bigint, bigint>
+) => {
   const { audiusSdk, dispatch, env, solanaWalletService } = useQueryContext()
 
   return useQuery({
@@ -45,19 +47,17 @@ export const useMintRecovery = (mint: string) => {
         return BigInt(0)
       }
     },
-    enabled: !!mint,
-    refetchInterval: 2000, // Poll every 5 seconds
+    enabled: options?.enabled !== false && !!mint,
+    refetchInterval: 500, // Poll every 5 seconds
     refetchOnWindowFocus: true,
+    ...options,
     select: (balance: bigint) => {
       // If there's a balance, trigger recovery
       if (balance > BigInt(0)) {
         const isUsdc = mint === env.USDC_MINT_ADDRESS
-        const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
         if (isUsdc) {
           dispatch(buyUSDCActions.startRecoveryIfNecessary())
-        } else if (isAudio) {
-          dispatch(buyAudioActions.startRecoveryIfNecessary())
         }
       }
 
