@@ -26,7 +26,7 @@ function deregisterAudiusService(
 
       if (serviceType === ServiceType.DiscoveryProvider) {
         dispatch(getDiscoveryProvider(spID))
-      } else if (serviceType === ServiceType.DiscoveryProvider) {
+      } else if (serviceType === ServiceType.ContentNode) {
         dispatch(getContentNode(spID))
       } else {
         dispatch(getValidator(spID))
