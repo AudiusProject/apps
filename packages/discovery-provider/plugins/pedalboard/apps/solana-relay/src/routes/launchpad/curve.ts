@@ -77,7 +77,7 @@ export const makeCurve = ({
   creatorTradingFeePercentage: 50,
 
   // Curve design
-  // Calculation worksheet: https://colab.research.google.com/drive/1hZy7CEekEF3LGi81IWHm_1DL9Pjd6t6U
+  // Calculation worksheet: https://colab.research.google.com/drive/1qs2ZdFnfEDj_-wHDmVkZAqut3NCttedn?usp=sharing
   tokenSupply: {
     preMigrationTokenSupply: new BN('1000000000000000000'),
     postMigrationTokenSupply: new BN('1000000000000000000')
