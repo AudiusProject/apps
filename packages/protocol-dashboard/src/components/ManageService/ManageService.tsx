@@ -38,7 +38,6 @@ import MinimumDelegationAmountModal from 'components/MinimumDelegationAmountModa
 import MyEstimatedRewards from 'components/MyEstimatedRewards'
 import OperatorCutModal from 'components/OperatorCutModal'
 import { PlainLink } from 'components/PlainLink/PlainLink'
-import { RegisterNodeCard } from 'components/RegisterNodeCard/RegisterNodeCard'
 import { BasicTooltip, Position } from 'components/Tooltip/Tooltip'
 import { TransactionStatusContent } from 'components/TransactionStatus/TransactionStatus'
 import { ManageDelegation } from 'components/UpdateDelegationModal/UpdateDelegationModal'
@@ -63,7 +62,6 @@ import { COOLDOWN_PERIOD_DOCS_URL } from 'utils/routes'
 import { sharedMessages } from 'utils/sharedMessages'
 
 import styles from './ManageService.module.css'
-import { RegisterNewServiceBtn } from './RegisterNewServiceBtn'
 
 const messages = {
   ownerTitle: 'Your Nodes',
@@ -124,7 +122,6 @@ interface ManageServiceProps {
   className?: string
   showViewActiveServices?: boolean
   showPendingTransactions?: boolean
-  showRegisterNode?: boolean
   wallet: string
   onClickNodesTable?: () => void
 }
@@ -419,7 +416,7 @@ const Stake = ({ stake, enableChange, disabledReason }: StakeProps) => {
 }
 
 const ManageService = (props: ManageServiceProps) => {
-  const { wallet, showRegisterNode } = props
+  const { wallet } = props
 
   const { isLoggedIn } = useAccount()
   const { status: accountUserStatus, user: accountUser } = useAccountUser()
