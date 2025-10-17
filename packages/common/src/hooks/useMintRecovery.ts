@@ -48,7 +48,7 @@ export const useMintRecovery = (
       }
     },
     enabled: options?.enabled !== false && !!mint,
-    refetchInterval: 500, // Poll every 5 seconds
+    refetchInterval: 2000, // Poll every 2 seconds
     refetchOnWindowFocus: true,
     ...options,
     select: (balance: bigint) => {
