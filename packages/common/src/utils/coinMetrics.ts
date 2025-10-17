@@ -17,6 +17,7 @@ const messages = {
   holdersOnAudius: 'Holders on Audius',
   uniqueHolders: 'Unique Holders',
   totalVolume: 'Volume (All-Time)',
+  volume24h: 'Volume (24h)',
   marketCap: 'Market Cap',
   graduationProgress: 'Graduation Progress'
 }
@@ -98,7 +99,7 @@ export const createAudioCoinMetrics = (
     ),
     createMetric(
       `$${formatCount(coingeckoResponse.market_data.total_volume.usd, 2)}`,
-      messages.totalVolume
+      messages.volume24h
     )
   ].filter((metric): metric is MetricData => metric !== null)
 }
