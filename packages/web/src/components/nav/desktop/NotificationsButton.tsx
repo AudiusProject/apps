@@ -8,7 +8,7 @@ import {
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
 import { Flex, IconNotificationOn, NotificationCount } from '@audius/harmony'
-import { useSearchParam, useToggle } from 'react-use'
+import { useSearchParam } from 'react-use'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { NotificationPanel } from 'components/notification'
@@ -57,7 +57,15 @@ export const NotificationsButton = () => {
         onClose()
       }
     },
-    [hasAccount, isAccountComplete, onOpen, record, requiresAccount]
+    [
+      hasAccount,
+      isAccountComplete,
+      onOpen,
+      record,
+      requiresAccount,
+      isOpen,
+      onClose
+    ]
   )
 
   const shouldShowCount = notificationCount > 0 && !isOpen
