@@ -5,7 +5,7 @@ import {
   useUSDCBalance,
   useQueryContext
 } from '@audius/common/api'
-import { useUserbank } from '@audius/common/hooks'
+import { useRootWalletAddress, useMintRecovery } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
 import {
   purchaseContentSelectors,
@@ -71,8 +71,10 @@ export const USDCManualTransfer = ({
   const isBuyButtonDisabled = isUnlocking || balance < amount
 
   const { env } = useQueryContext()
-  const { userBankAddress: usdcUserBank, loading: userBankLoading } =
-    useUserbank(env.USDC_MINT_ADDRESS)
+  const { rootWalletAddress: usdcUserBank, loading: userBankLoading } =
+    useRootWalletAddress()
+  // Poll for USDC recovery if there's balance in root wallet
+  useMintRecovery(env.USDC_MINT_ADDRESS)
   const { toast } = useContext(ToastContext)
   const isMobile = useIsMobile()
 

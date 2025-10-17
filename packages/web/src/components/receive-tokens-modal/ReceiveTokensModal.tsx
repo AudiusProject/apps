@@ -4,7 +4,12 @@ import {
   transformArtistCoinToTokenInfo,
   useArtistCoin
 } from '@audius/common/api'
-import { useFormattedCoinBalance, useUserbank } from '@audius/common/hooks'
+import {
+  useFormattedCoinBalance,
+  useUserbank,
+  useRootWalletAddress,
+  useMintRecovery
+} from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { useReceiveTokensModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -25,6 +30,7 @@ import { QRCodeComponent } from 'components/core/QRCode'
 import { ExternalTextLink } from 'components/link'
 import ResponsiveModal from 'components/modal/ResponsiveModal'
 import { ToastContext } from 'components/toast/ToastContext'
+import { env } from 'services/env'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 const DIMENSIONS = 160
@@ -43,14 +49,28 @@ export const ReceiveTokensModal = () => {
     3000 // Poll every 3 seconds when modal is open
   )
   const { userBankAddress, loading: userBankLoading } = useUserbank(mint)
+  const { rootWalletAddress, loading: rootWalletLoading } =
+    useRootWalletAddress()
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  const handleCopy = useCallback(() => {
-    copyToClipboard(userBankAddress ?? '')
-    toast(walletMessages.receiveTokensCopied)
-  }, [userBankAddress, toast])
+  // Use root wallet address for USDC and AUDIO, user bank for others
+  const isUsdc = mint === env.USDC_MINT_ADDRESS
+  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
+  const shouldUseRootWallet = isUsdc || isAudio
+  const displayAddress = shouldUseRootWallet
+    ? rootWalletAddress
+    : userBankAddress
+  const loading = shouldUseRootWallet ? rootWalletLoading : userBankLoading
 
-  if (userBankLoading || !userBankAddress) {
+  // Poll for AUDIO recovery if there's balance in root wallet and mint is AUDIO
+  useMintRecovery(mint || '', { enabled: isAudio })
+
+  const handleCopy = useCallback(() => {
+    copyToClipboard(displayAddress ?? '')
+    toast(walletMessages.receiveTokensCopied)
+  }, [displayAddress, toast])
+
+  if (loading || !displayAddress) {
     return (
       <ResponsiveModal
         isOpen={isOpen}
@@ -124,7 +144,7 @@ export const ReceiveTokensModal = () => {
             alignItems='center'
             justifyContent='center'
           >
-            <QRCodeComponent value={userBankAddress} />
+            <QRCodeComponent value={displayAddress} />
           </Flex>
           <Flex column gap='xl' h={DIMENSIONS} justifyContent='center' flex={1}>
             <Text variant='body' size='l'>
@@ -134,7 +154,7 @@ export const ReceiveTokensModal = () => {
           </Flex>
         </Flex>
 
-        <AddressTile address={userBankAddress} />
+        <AddressTile address={displayAddress} />
 
         {isMobile ? hint : null}
 
