@@ -35,7 +35,7 @@ import Page from 'components/page/Page'
 import { ToastContext } from 'components/toast/ToastContext'
 import { AlreadyAssociatedError } from 'hooks/useConnectAndAssociateWallets'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
-import { useExternalWallets } from 'hooks/useExternalWallets'
+import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
@@ -215,7 +215,7 @@ const LaunchpadPageContent = ({
   )
 
   const { openAppKitModal, isPending: isWalletConnectPending } =
-    useExternalWallets(handleWalletConnectSuccess, handleWalletConnectError)
+    useConnectExternalWallets(handleWalletConnectSuccess, handleWalletConnectError)
 
   const handleSplashContinue = useCallback(async () => {
     // Switch to Solana network to prioritize SOL wallets

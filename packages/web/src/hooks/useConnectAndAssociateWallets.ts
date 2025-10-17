@@ -16,7 +16,7 @@ import { useSignMessage } from 'wagmi'
 
 import { appkitModal, wagmiAdapter } from 'app/ReownAppKitModal'
 
-import { useExternalWallets } from './useExternalWallets'
+import { useConnectExternalWallets } from './useConnectExternalWallets'
 
 /**
  * Helper hook that signs a message using the current connected wallet, whether
@@ -221,7 +221,7 @@ export const useConnectAndAssociateWallets = (
     [make, onError, track]
   )
 
-  const { isPending: isConnecting, openAppKitModal } = useExternalWallets(
+  const { isPending: isConnecting, openAppKitModal } = useConnectExternalWallets(
     handleConnectSuccess,
     handleConnectError
   )

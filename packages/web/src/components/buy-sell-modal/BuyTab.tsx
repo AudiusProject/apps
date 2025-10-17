@@ -12,7 +12,10 @@ import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
+import { appkitModal } from 'app/ReownAppKitModal'
+
 import { BuySellTerms } from './components/BuySellTerms'
+import { CurrentWalletBanner } from './components/CurrentWalletBanner'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -25,7 +28,6 @@ export const BuyTab = ({
   errorMessage,
   initialInputValue,
   onInputValueChange,
-  availableOutputTokens,
   onOutputTokenChange
 }: BuyTabProps) => {
   const { baseToken, quoteToken } = tokenPair
@@ -47,12 +49,12 @@ export const BuyTab = ({
     return getCurrencyDecimalPlaces(tokenPriceData.price)
   }, [tokenPriceData?.price])
 
+  const externalWalletAccount = appkitModal.getAccount()
   const {
     inputAmount,
     outputAmount,
     isExchangeRateLoading,
     isBalanceLoading,
-    availableBalance,
     currentExchangeRate,
     handleInputAmountChange,
     handleOutputAmountChange,
@@ -62,7 +64,8 @@ export const BuyTab = ({
     outputCoin: selectedOutputToken,
     onTransactionDataChange,
     initialInputValue,
-    onInputValueChange
+    onInputValueChange,
+    externalWalletAddress: externalWalletAccount?.address
   })
 
   const { data: coins } = useArtistCoins({
@@ -98,13 +101,18 @@ export const BuyTab = ({
         <TabContentSkeleton />
       ) : (
         <>
+          <CurrentWalletBanner
+            inputToken={{
+              mint: quoteToken.address,
+              symbol: quoteToken.symbol
+            }}
+          />
           <InputTokenSection
             title={buySellMessages.youPay}
             tokenInfo={quoteToken}
             amount={inputAmount}
             onAmountChange={handleInputAmountChange}
             onMaxClick={handleMaxClick}
-            availableBalance={availableBalance}
             error={error}
             errorMessage={errorMessage}
             hideTokenDisplay={true}

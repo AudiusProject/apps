@@ -49,7 +49,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
-import { useExternalWallets } from 'hooks/useExternalWallets'
+import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -369,7 +369,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     [mint, claimFees]
   )
 
-  const { openAppKitModal } = useExternalWallets(async () => {
+  const { openAppKitModal } = useConnectExternalWallets(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
 

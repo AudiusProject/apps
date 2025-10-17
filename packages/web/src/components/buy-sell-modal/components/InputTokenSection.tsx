@@ -3,23 +3,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { useDebouncedCallback } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
 import type { CoinInfo } from '@audius/common/store'
-import { useCoinAmountFormatting } from '@audius/common/store'
 import {
   sanitizeNumericInput,
   formatTokenInputWithSmartDecimals
 } from '@audius/common/utils'
-import {
-  Button,
-  Flex,
-  Text,
-  TextInput,
-  IconInfo,
-  TextInputSize
-} from '@audius/harmony'
-
-import { Tooltip } from 'components/tooltip'
-
-import { TokenIcon } from '../TokenIcon'
+import { Button, Flex, Text, TextInput, TextInputSize } from '@audius/harmony'
 
 import { StaticTokenDisplay } from './StaticTokenDisplay'
 import { TokenDropdown } from './TokenDropdown'
@@ -30,8 +18,6 @@ type InputTokenSectionProps = {
   amount: string
   onAmountChange: (amount: string) => void
   onMaxClick: () => void
-  availableBalance: number
-  exchangeRate?: number | null
   placeholder?: string
   error?: boolean
   errorMessage?: string
@@ -49,8 +35,6 @@ export const InputTokenSection = ({
   amount,
   onAmountChange,
   onMaxClick,
-  availableBalance,
-  exchangeRate,
   placeholder = '0.00',
   error,
   errorMessage,
@@ -60,15 +44,6 @@ export const InputTokenSection = ({
 }: InputTokenSectionProps) => {
   const { symbol, isStablecoin } = tokenInfo
   const [localAmount, setLocalAmount] = useState(amount || '')
-
-  const { formattedAvailableBalance } = useCoinAmountFormatting({
-    amount,
-    availableBalance,
-    exchangeRate,
-    isStablecoin: !!isStablecoin,
-    decimals: tokenInfo.decimals,
-    placeholder
-  })
 
   const shouldDisplayTokenDropdown = availableTokens?.length
 
@@ -102,28 +77,6 @@ export const InputTokenSection = ({
         <Text variant='title' size='l' color='default'>
           {title}
         </Text>
-
-        {formattedAvailableBalance ? (
-          <Flex alignItems='center' gap='xs'>
-            <TokenIcon
-              logoURI={tokenInfo.logoURI}
-              icon={tokenInfo.icon}
-              size='s'
-              hex
-            />
-            <Text variant='body' size='m' strength='strong'>
-              {messages.formattedAvailableBalance(
-                formattedAvailableBalance,
-                symbol,
-                !!isStablecoin,
-                messages.availableToTrade
-              )}
-            </Text>
-            <Tooltip text={messages.availableToTradeTooltip} mount='body'>
-              <IconInfo color='subdued' size='s' />
-            </Tooltip>
-          </Flex>
-        ) : null}
       </Flex>
 
       <Flex direction='column' gap='s'>

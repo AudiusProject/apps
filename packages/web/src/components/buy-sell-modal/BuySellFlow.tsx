@@ -31,8 +31,10 @@ import {
   useCoinStates
 } from '@audius/common/store'
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
+import { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { matchPath, useLocation } from 'react-router-dom'
 
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
 import { getPathname } from 'utils/route'
@@ -161,6 +163,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance)
+  // TODO : modify this to account for external wallets
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
@@ -219,6 +222,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
+  const externalWalletAccount = appkitModal.getAccount()
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -233,7 +237,15 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    onClose
+    externalWalletAddress: externalWalletAccount?.address,
+    signFn: async (transaction) => {
+      const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
+      if (!solanaProvider) {
+        throw new Error('Missing SolanaProvider')
+      }
+      const signedTx = await solanaProvider.signTransaction(transaction)
+      return signedTx
+    }
   })
 
   const currentExchangeRate = useMemo(

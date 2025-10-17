@@ -145,9 +145,10 @@ export const formatAudioBalance = (
  */
 export const formatCurrency = (
   num: number,
-  locale: string = 'en-US'
+  locale: string = 'en-US',
+  prefix: string = '$'
 ): string => {
-  if (num === 0) return '$0.00'
+  if (num === 0) return `${prefix}0.00`
 
   try {
     const decimalPlaces = getCurrencyDecimalPlaces(num)
@@ -158,9 +159,9 @@ export const formatCurrency = (
       maximumFractionDigits: decimalPlaces
     }).format(num)
 
-    return formatted
+    return formatted.replace('$', prefix)
   } catch {
-    return `$${num.toFixed(2)}`
+    return `${prefix}${num.toFixed(2)}`
   }
 }
 

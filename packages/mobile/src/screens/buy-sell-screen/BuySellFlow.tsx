@@ -200,8 +200,7 @@ export const BuySellFlow = ({
     currentScreen,
     setCurrentScreen,
     activeTab,
-    selectedPair: safeSelectedPair,
-    onClose
+    selectedPair: safeSelectedPair
   })
 
   // Track if user has attempted to submit the form
