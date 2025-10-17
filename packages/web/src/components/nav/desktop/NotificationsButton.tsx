@@ -7,6 +7,7 @@ import {
   useNotificationUnreadCount
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
+import { useNotificationModal } from '@audius/common/store'
 import { Flex, IconNotificationOn, NotificationCount } from '@audius/harmony'
 import { useSearchParam } from 'react-use'
 
@@ -17,7 +18,6 @@ import { useRequiresAccountFn } from 'hooks/useRequiresAccount'
 
 import { canAccess } from './NavHeader'
 import { NavHeaderButton } from './NavHeaderButton'
-import { useNotificationModal } from '@audius/common/store'
 
 const messages = {
   label: (count: number) => `${count} unread notifications`
@@ -92,7 +92,8 @@ export const NotificationsButton = () => {
     notificationCount,
     handleToggleNotificationPanel,
     isOpen,
-    shouldShowCount
+    shouldShowCount,
+    onOpen
   ])
 
   return (
