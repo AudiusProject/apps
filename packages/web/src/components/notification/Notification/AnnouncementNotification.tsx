@@ -5,10 +5,13 @@ import {
   AnnouncementNotification as AnnouncementNotificationType,
   useAnnouncementModal
 } from '@audius/common/store'
+import { route } from '@audius/common/utils'
 import cn from 'classnames'
+import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { MarkdownViewer } from 'components/markdown-viewer'
+import { push as pushRoute } from 'utils/navigation'
 
 import styles from './AnnouncementNotification.module.css'
 import { NotificationBody } from './components/NotificationBody'
@@ -30,6 +33,7 @@ type AnnouncementNotificationProps = {
 export const AnnouncementNotification = (
   props: AnnouncementNotificationProps
 ) => {
+  const dispatch = useDispatch()
   const { notification } = props
   const { title, shortDescription, longDescription, timeLabel, isViewed } =
     notification
@@ -41,18 +45,17 @@ export const AnnouncementNotification = (
   }, [notification, onOpen])
 
   const handleClick = useCallback(() => {
-    handleOpenAnnouncementModal()
+    dispatch(pushRoute(route.COINS_EXPLORE_PAGE))
     record(
-      make(Name.NOTIFICATIONS_CLICK_TILE, { kind: 'announcement', link_to: '' })
+      make(Name.NOTIFICATIONS_CLICK_TILE, {
+        kind: 'announcement',
+        link_to: route.COINS_EXPLORE_PAGE
+      })
     )
-  }, [handleOpenAnnouncementModal, record])
+  }, [dispatch, record])
 
   return (
-    <NotificationTile
-      notification={notification}
-      onClick={longDescription ? handleClick : undefined}
-      disableClosePanel
-    >
+    <NotificationTile notification={notification} onClick={handleClick}>
       <NotificationHeader icon={<IconAnnouncement />}>
         <NotificationTitle>
           <MarkdownViewer className={styles.title} markdown={title} />
