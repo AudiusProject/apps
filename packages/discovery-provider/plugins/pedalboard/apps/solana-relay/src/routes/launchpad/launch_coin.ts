@@ -96,7 +96,7 @@ export const launchCoin = async (
       !new BN(initialBuyAmountAudio).gt(new BN(0))
     ) {
       throw new Error(
-        `Invalid initialBuyAmountSol. Initial buy amount must be a number > 0. Received: ${initialBuyAmountAudio}`
+        `Invalid initialBuyAmountAudio. Initial buy amount must be a number > 0. Received: ${initialBuyAmountAudio}`
       )
     }
 

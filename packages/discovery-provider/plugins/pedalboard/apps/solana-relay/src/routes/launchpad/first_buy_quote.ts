@@ -280,6 +280,7 @@ const getLaunchpadConfig = async (): Promise<{
     padding: curve.padding,
     swapBaseAmount,
     migrationSqrtPrice
+    // TODO: type this better but for now this is enough to get the math correct
   } as unknown as PoolConfig
 
   const virtualPoolState = {
@@ -288,7 +289,7 @@ const getLaunchpadConfig = async (): Promise<{
     baseReserve: new BN(0),
     volatilityTracker: { volatilityAccumulator: new BN(0) },
     activationPoint: new BN(0)
-  } as unknown as VirtualPool
+  } as VirtualPool
 
   const maxAudioInputAmount = poolConfigState.migrationQuoteThreshold
     .muln(100)
