@@ -104,7 +104,7 @@ const getExternalWalletBalanceQueryFn =
     }
   }
 
-const getExternalWalletBalanceOptions = (
+export const getExternalWalletBalanceOptions = (
   context: FetchExternalWalletBalanceContext,
   { walletAddress, mint }: Partial<UseExternalWalletBalanceParams>
 ) => {

@@ -8,6 +8,7 @@ import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import Audius from 'services/Audius'
 import { getContentNode } from 'store/cache/contentNode/hooks'
 import { getDiscoveryProvider } from 'store/cache/discoveryProvider/hooks'
+import { getValidator } from 'store/cache/validator/hooks'
 import { AppState } from 'store/types'
 import { Status, ServiceType } from 'types'
 
@@ -25,8 +26,10 @@ function deregisterAudiusService(
 
       if (serviceType === ServiceType.DiscoveryProvider) {
         dispatch(getDiscoveryProvider(spID))
-      } else {
+      } else if (serviceType === ServiceType.ContentNode) {
         dispatch(getContentNode(spID))
+      } else {
+        dispatch(getValidator(spID))
       }
 
       setStatus(Status.Success)

@@ -879,8 +879,8 @@ export const audiusBackend = ({
       const account = await getAccount(connection, pubkey)
       return account.address
     } catch (err) {
-      // Account exists but is not a token account. Assume it's a root account
-      // and try to derive an associated account from it.
+      // Account is not a valid token account (either doesn't exist or wrong owner).
+      // Assume it's a wallet address and derive the associated token account from it.
       if (
         err instanceof TokenInvalidAccountOwnerError ||
         err instanceof TokenAccountNotFoundError
@@ -1062,12 +1062,16 @@ export const audiusBackend = ({
     try {
       return await getAccount(connection, pubkey)
     } catch (err) {
-      // Account exists but is not a token account. Assume it's a root account
-      // and try to derive an associated account from it.
-      if (err instanceof TokenInvalidAccountOwnerError) {
+      // Account is not a valid token account (either doesn't exist or wrong owner).
+      // Assume it's a wallet address and derive the associated token account from it.
+      if (
+        err instanceof TokenInvalidAccountOwnerError ||
+        err instanceof TokenAccountNotFoundError
+      ) {
         console.info(
           'Provided recipient solana address was not a token account. Assuming root account.'
         )
+
         const associatedTokenAccount = findAssociatedTokenAddress({
           solanaWalletKey: pubkey,
           mint

@@ -1,8 +1,8 @@
 import { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
-  useConnectedWallets,
-  useRemoveConnectedWallet,
+  useAssociatedWallets,
+  useRemoveAssociatedWallet,
   ConnectedWallet
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
@@ -115,7 +115,8 @@ const WalletRow = ({
     toast(walletMessages.linkedWallets.copied, COPIED_TOAST_TIMEOUT)
   }, [address, toast])
 
-  const { mutateAsync: removeConnectedWalletAsync } = useRemoveConnectedWallet()
+  const { mutateAsync: removeConnectedWalletAsync } =
+    useRemoveAssociatedWallet()
 
   const handleRemove = useCallback(async () => {
     try {
@@ -216,7 +217,7 @@ const WalletEmptyState = ({
 }
 
 export const LinkedWallets = () => {
-  const { data: connectedWallets, isLoading } = useConnectedWallets()
+  const { data: connectedWallets, isLoading } = useAssociatedWallets()
   const { toast } = useContext(ToastContext)
 
   const hasWallets = !!connectedWallets?.length

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
-import { useConnectedWallets, useWalletAudioBalance } from '@audius/common/api'
+import { useAssociatedWallets, useWalletAudioBalance } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, shortenEthAddress } from '@audius/common/utils'
 import type { AudioWei } from '@audius/fixed-decimal'
@@ -154,7 +154,7 @@ const WalletsTable = ({
 }: WalletsTableProps) => {
   const wm = useWithMobileStyle(styles.mobile)
 
-  const { data: connectedWallets } = useConnectedWallets()
+  const { data: connectedWallets } = useAssociatedWallets()
 
   const numConnectedWallets = connectedWallets?.length ?? 0
   return (

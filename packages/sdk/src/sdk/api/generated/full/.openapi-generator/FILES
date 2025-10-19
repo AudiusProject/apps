@@ -50,6 +50,7 @@ models/ClaimableRewardNotification.ts
 models/ClaimableRewardNotificationAction.ts
 models/ClaimableRewardNotificationActionData.ts
 models/Coin.ts
+models/CoinMembersCountResponse.ts
 models/CoinResponse.ts
 models/CoinsResponse.ts
 models/CollectionActivityFull.ts

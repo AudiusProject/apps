@@ -2,6 +2,7 @@
 export * from './useArtistCoin'
 export * from './useArtistCoinByTicker'
 export * from './useArtistCoinMembers'
+export * from './useArtistCoinHoldersCount'
 export * from './useArtistCoinMembersCount'
 export * from './useArtistCoins'
 export * from './useArtistOwnedCoin'

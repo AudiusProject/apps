@@ -102,6 +102,10 @@ export const formatUser = async (
       user.services
         ?.filter(({ type: { id } }) => id === ServiceType.ContentNode)
         .map((service) => parseInt(service.spId)) ?? [],
+    validators:
+      user.services
+        ?.filter(({ type: { id } }) => id === ServiceType.Validator)
+        .map((service) => parseInt(service.spId)) ?? [],
     pendingDecreaseStakeRequest: user.pendingDecreaseStake
       ? {
           amount: new BN(user.pendingDecreaseStake.decreaseAmount),

@@ -23,7 +23,7 @@ import {
   firstBuyQuote,
   getLaunchpadConfigRoute
 } from './routes/launchpad/first_buy_quote'
-import { launchCoin } from './routes/launchpad/launch_coin'
+import { confirmLaunchCoin, launchCoin } from './routes/launchpad/launch_coin'
 import { listen } from './routes/listen/listen'
 import { relay } from './routes/relay/relay'
 
@@ -46,6 +46,7 @@ const main = async () => {
   })
   // launchpad endpoints don't need user/discovery validation, so register them before middleware
   app.post('/solana/launchpad/launch_coin', upload.single('image'), launchCoin)
+  app.post('/solana/launchpad/confirm_launch_coin', confirmLaunchCoin)
   app.get('/solana/launchpad/claim_fees', claimFees)
   app.get('/solana/launchpad/first_buy_quote', firstBuyQuote)
   app.get('/solana/launchpad/config', getLaunchpadConfigRoute)

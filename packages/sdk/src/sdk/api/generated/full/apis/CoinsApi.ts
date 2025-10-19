@@ -16,6 +16,7 @@
 
 import * as runtime from '../runtime';
 import type {
+  CoinMembersCountResponse,
   CoinResponse,
   CoinsResponse,
   CreateCoinRequest,
@@ -24,6 +25,8 @@ import type {
   UpdateCoinResponse,
 } from '../models';
 import {
+    CoinMembersCountResponseFromJSON,
+    CoinMembersCountResponseToJSON,
     CoinResponseFromJSON,
     CoinResponseToJSON,
     CoinsResponseFromJSON,
@@ -49,6 +52,10 @@ export interface GetCoinRequest {
 
 export interface GetCoinByTickerRequest {
     ticker: string;
+}
+
+export interface GetCoinMembersCountRequest {
+    mint: string;
 }
 
 export interface GetCoinsRequest {
@@ -174,6 +181,37 @@ export class CoinsApi extends runtime.BaseAPI {
      */
     async getCoinByTicker(params: GetCoinByTickerRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinResponse> {
         const response = await this.getCoinByTickerRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the total number of Audius users with a non-zero balance of a specific coin
+     */
+    async getCoinMembersCountRaw(params: GetCoinMembersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CoinMembersCountResponse>> {
+        if (params.mint === null || params.mint === undefined) {
+            throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling getCoinMembersCount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/{mint}/members/count`.replace(`{${"mint"}}`, encodeURIComponent(String(params.mint))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CoinMembersCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the total number of Audius users with a non-zero balance of a specific coin
+     */
+    async getCoinMembersCount(params: GetCoinMembersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinMembersCountResponse> {
+        const response = await this.getCoinMembersCountRaw(params, initOverrides);
         return await response.value();
     }
 

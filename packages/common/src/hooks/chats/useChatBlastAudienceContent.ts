@@ -4,12 +4,12 @@ import { ChatBlast, ChatBlastAudience, OptionalHashId } from '@audius/sdk'
 
 import {
   useCollection,
-  useArtistCoinMembersCount,
   useCurrentAccountUser,
   usePurchasersCount,
   useRemixersCount,
   useTrack,
-  useArtistOwnedCoin
+  useArtistOwnedCoin,
+  useArtistCoinMembersCount
 } from '~/api'
 import {
   getChatBlastAudienceDescription,
@@ -56,9 +56,13 @@ export const useChatBlastAudienceContent = ({ chat }: { chat: ChatBlast }) => {
 
   const { data: coin } = useArtistOwnedCoin(user?.user_id)
   const coinSymbol = coin?.ticker ?? ''
-  const { data: coinHoldersCount } = useArtistCoinMembersCount({
-    enabled: audience === ChatBlastAudience.COIN_HOLDERS
-  })
+  const mint = coin?.mint
+  const { data: coinMembersCount } = useArtistCoinMembersCount(
+    { mint },
+    {
+      enabled: audience === ChatBlastAudience.COIN_HOLDERS
+    }
+  )
 
   const audienceCount = useMemo(() => {
     switch (audience) {
@@ -71,7 +75,7 @@ export const useChatBlastAudienceContent = ({ chat }: { chat: ChatBlast }) => {
       case ChatBlastAudience.REMIXERS:
         return remixersCount
       case ChatBlastAudience.COIN_HOLDERS:
-        return coinHoldersCount
+        return coinMembersCount
       default:
         return 0
     }
@@ -81,7 +85,7 @@ export const useChatBlastAudienceContent = ({ chat }: { chat: ChatBlast }) => {
     user?.supporter_count,
     purchasersCount,
     remixersCount,
-    coinHoldersCount
+    coinMembersCount
   ])
 
   const contentTitle = audienceContentId

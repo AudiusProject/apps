@@ -29,7 +29,6 @@
     "borsh": "0.3.1",
     "bs58": "4.0.1",
     "buffer": "6.0.3",
-    "redis": "4.6.11",
     "cors": "2.8.5",
     "cross-fetch": "3.1.8",
     "dotenv": "16.4.5",
@@ -38,13 +37,14 @@
     "express": "4.17.1",
     "keccak256": "1.0.6",
     "morgan": "1.10.0",
+    "multer": "2.0.2",
     "pino": "8.16.1",
+    "redis": "4.6.11",
     "request-ip": "3.3.0",
     "secp256k1": "5.0.0",
     "uuid": "8.3.2",
     "web3-eth-accounts": "4.1.2",
-    "web3-utils": "4.2.3",
-    "multer": "2.0.2"
+    "web3-utils": "4.2.3"
   },
   "devDependencies": {
     "@audius/sdk": "*",

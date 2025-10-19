@@ -250,8 +250,10 @@ const CoinHoldersMessageField = () => {
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coinMembersCount } = useArtistCoinMembersCount()
   const { data: coin } = useArtistOwnedCoin(currentUserId)
+  const { data: coinMembersCount } = useArtistCoinMembersCount({
+    mint: coin?.mint
+  })
   const coinSymbol = coin?.ticker ?? ''
   const isDisabled = coinMembersCount === 0
 

@@ -6,8 +6,12 @@
 
 import { useMemo } from 'react'
 
-import { QueryOptions, useCoinBalance, useCoinExchangeRate } from '~/api'
-import { useExternalWalletBalance } from '~/api/tan-query/wallets/useExternalWalletBalance'
+import {
+  QueryOptions,
+  useCoinBalance,
+  useCoinExchangeRate,
+  useExternalWalletBalance
+} from '~/api'
 import { getTokenDecimalPlaces } from '~/utils'
 
 import type { CoinInfo, TokenDataHookResult } from '../types/swap.types'

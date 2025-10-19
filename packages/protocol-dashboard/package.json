@@ -20,7 +20,7 @@
     "deploy:prod": "wrangler deploy --env production",
     "lint": "eslint --cache --ext=js,jsx,ts,tsx src",
     "lint:fix": "eslint --cache --fix --ext=js,jsx,ts,tsx src",
-    "lint:env": "dotenv-linter --exclude .env.prod.local",
+    "lint:env": "dotenv-linter --exclude .env.prod.local .env.stage.local",
     "pull-dev-accounts": "node ./scripts/pullDevAccounts.js",
     "typecheck": "tsc",
     "advance-blocks": "node ./scripts/advanceBlocks.js",

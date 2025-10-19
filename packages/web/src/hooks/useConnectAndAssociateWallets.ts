@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react'
 
 import {
   type ConnectedWallet,
-  useConnectedWallets,
-  useAddConnectedWallet,
+  useAssociatedWallets,
+  useAddAssociatedWallet,
   useCurrentAccountUser
 } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
@@ -16,13 +16,13 @@ import { useSignMessage } from 'wagmi'
 
 import { appkitModal, wagmiAdapter } from 'app/ReownAppKitModal'
 
-import { useConnectWallets } from './useConnectWallets'
+import { useExternalWallets } from './useExternalWallets'
 
 /**
  * Helper hook that signs a message using the current connected wallet, whether
  * using Solana or Ethereum.
  */
-const useSignMessageAgnostic = () => {
+export const useSignMessageAgnostic = () => {
   const { signMessageAsync } = useSignMessage({
     config: wagmiAdapter.wagmiConfig
   })
@@ -88,10 +88,10 @@ export const useConnectAndAssociateWallets = (
   } = useAppContext()
   const { signMessageAgnostic } = useSignMessageAgnostic()
   const { data: currentUser } = useCurrentAccountUser()
-  const { data: connectedWallets } = useConnectedWallets()
+  const { data: connectedWallets } = useAssociatedWallets()
   const [isAssociating, setIsAssociating] = useState(false)
 
-  const { mutateAsync: addConnectedWalletAsync } = useAddConnectedWallet()
+  const { mutateAsync: addConnectedWalletAsync } = useAddAssociatedWallet()
 
   /**
    * Associates any Reown connected wallets to the user's account.
@@ -221,7 +221,7 @@ export const useConnectAndAssociateWallets = (
     [make, onError, track]
   )
 
-  const { isPending: isConnecting, openAppKitModal } = useConnectWallets(
+  const { isPending: isConnecting, openAppKitModal } = useExternalWallets(
     handleConnectSuccess,
     handleConnectError
   )

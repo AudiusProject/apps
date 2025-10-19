@@ -18,8 +18,6 @@ export * from './tan-query/collection/useLibraryCollections'
 export * from './tan-query/collection/useCollectionByParams'
 export * from './tan-query/collection/useDeleteCollection'
 
-// Coins
-
 // Developer Apps
 export * from '../schemas/developerApps'
 export * from './tan-query/developer-apps/useDeveloperApps'
@@ -158,12 +156,12 @@ export * from './tan-query/users/account/useSyncLocalStorageUser'
 
 // Wallet logic
 export * from './tan-query/wallets/useAudioBalance'
-export * from './tan-query/wallets/useConnectedWallets'
+export * from './tan-query/wallets/useAssociatedWallets'
 export * from './tan-query/wallets/useWalletOwner'
 export * from './tan-query/wallets/useUSDCBalance'
+export * from './tan-query/wallets/useExternalWalletBalance'
 export * from './tan-query/wallets/useCoinBalance'
 export * from './tan-query/wallets/useSendCoins'
-export * from './tan-query/wallets/useWalletSolBalance'
 export * from './tan-query/jupiter/useSwapCoins'
 export * from './tan-query/jupiter/useCoinExchangeRate'
 export * from './tan-query/jupiter/utils'

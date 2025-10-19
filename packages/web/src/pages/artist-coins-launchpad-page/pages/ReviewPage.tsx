@@ -47,7 +47,7 @@ const formatAudioAmount = (amount: number): string => {
 
 const calculateMarketCaps = (audioPriceUSD: number) => {
   // Fixed AUDIO amounts as requested
-  const initialAudioAmount = 10000 // 10K AUDIO
+  const initialAudioAmount = 100000 // 100K AUDIO
   const graduationAudioAmount = 1000000 // 1M AUDIO
 
   // Calculate USD values based on current AUDIO price

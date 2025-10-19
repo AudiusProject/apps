@@ -33,6 +33,10 @@ import {
   fetchDiscoveryProviders,
   getFilteredNodes as getDPNodes
 } from '../discoveryProvider/hooks'
+import {
+  fetchValidators,
+  getFilteredNodes as getValidators
+} from '../validator/hooks'
 
 import {
   useUser as useGraphUser,
@@ -121,6 +125,7 @@ const getServiceProviderMetadata = async (
   discoveryProviders: Array<number>
   pendingDecreaseStakeRequest: GetPendingDecreaseStakeRequestResponse
   contentNodes: Array<number>
+  validators: Array<number>
   delegators: Array<Delegate>
   delegatedTotal: BN
   totalStakedFor: BN
@@ -143,6 +148,11 @@ const getServiceProviderMetadata = async (
       wallet,
       ServiceType.ContentNode
     )
+  const validators =
+    await aud.ServiceProviderClient.getServiceProviderIdsFromAddress(
+      wallet,
+      ServiceType.Validator
+    )
   const pendingDecreaseStakeRequest =
     await aud.ServiceProviderClient.getPendingDecreaseStakeRequest(wallet)
 
@@ -162,6 +172,7 @@ const getServiceProviderMetadata = async (
     discoveryProviders,
     pendingDecreaseStakeRequest,
     contentNodes,
+    validators,
     totalStakedFor,
     delegatedTotal,
     delegators,
@@ -217,14 +228,17 @@ function fetchUsers(): ThunkAction<void, AppState, Audius, Action<string>> {
     dispatch(setLoading())
     await Promise.all([
       dispatch(fetchDiscoveryProviders()),
-      dispatch(fetchContentNodes())
+      dispatch(fetchContentNodes()),
+      dispatch(fetchValidators())
     ])
     const state = getState()
     const dpNodes = getDPNodes()(state)
     const cnNodes = getCNNodes()(state)
+    const validators = getValidators()(state)
     let serviceProviderWallets = dpNodes
       .map((dp) => dp.owner)
       .concat(cnNodes.map((cn) => cn.owner))
+      .concat(validators.map((v) => v.owner))
     // @ts-ignore
     serviceProviderWallets = [...new Set(serviceProviderWallets)]
 

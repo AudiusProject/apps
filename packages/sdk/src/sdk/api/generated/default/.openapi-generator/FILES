@@ -29,11 +29,13 @@ models/ClaimRewardsRequest.ts
 models/ClaimRewardsResponse.ts
 models/ClaimRewardsResponseDataInner.ts
 models/Coin.ts
+models/CoinArtistFees.ts
 models/CoinDynamicBondingCurve.ts
 models/CoinExtensions.ts
 models/CoinInsights.ts
 models/CoinInsightsResponse.ts
 models/CoinMember.ts
+models/CoinMembersCountResponse.ts
 models/CoinMembersResponse.ts
 models/CoinResponse.ts
 models/CoinsResponse.ts

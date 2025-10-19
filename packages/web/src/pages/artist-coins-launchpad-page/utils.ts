@@ -1,24 +1,12 @@
 import { useCallback, useMemo } from 'react'
 
-import { ConnectedWallet } from '@audius/common/api'
 import { useAnalytics } from '@audius/common/hooks'
-import { Chain, Name, LaunchCoinResponse } from '@audius/common/models'
+import { Name, LaunchCoinResponse } from '@audius/common/models'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { useFormikContext } from 'formik'
 import { omit } from 'lodash'
 
 import { make } from 'services/analytics'
-
-/**
- * Gets the last connected Solana wallet in the connected wallets array
- */
-export const getLastConnectedSolWallet = (
-  connectedWallets: ConnectedWallet[] | undefined
-) => {
-  return connectedWallets?.filter(
-    (wallet: ConnectedWallet) => wallet.chain === Chain.Sol
-  )?.[0]
-}
 
 export const useLaunchpadAnalytics = (params?: {
   externalWalletAddress?: string
@@ -55,12 +43,12 @@ export const useLaunchpadAnalytics = (params?: {
 
   // Wallet connection events
   const trackWalletConnectSuccess = useCallback(
-    (walletAddress: string, walletBalance: bigint) => {
+    (walletAddress: string, walletBalance: number) => {
       track(
         make({
           eventName: Name.LAUNCHPAD_WALLET_CONNECT_SUCCESS,
           walletAddress,
-          walletSolBalance: Number(walletBalance)
+          walletSolBalance: walletBalance
         })
       )
     },
@@ -80,12 +68,12 @@ export const useLaunchpadAnalytics = (params?: {
   )
 
   const trackWalletInsufficientBalance = useCallback(
-    (walletAddress: string, walletBalance: bigint) => {
+    (walletAddress: string, walletBalance: number) => {
       track(
         make({
           eventName: Name.LAUNCHPAD_WALLET_INSUFFICIENT_BALANCE,
           walletAddress,
-          walletSolBalance: Number(walletBalance)
+          walletSolBalance: walletBalance
         })
       )
     },

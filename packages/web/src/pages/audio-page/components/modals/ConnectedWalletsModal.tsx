@@ -1,8 +1,8 @@
 import { useCallback, useContext, useState } from 'react'
 
 import {
-  useConnectedWallets,
-  useRemoveConnectedWallet
+  useAssociatedWallets,
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
 import { useConnectedWalletsModal } from '@audius/common/store'
@@ -72,12 +72,12 @@ export const ConnectedWalletsModal = () => {
     isPending,
     isError,
     error
-  } = useConnectedWallets()
+  } = useAssociatedWallets()
 
   const {
     mutateAsync: removeConnectedWalletAsync,
     isPending: isRemovePending
-  } = useRemoveConnectedWallet()
+  } = useRemoveAssociatedWallet()
 
   const handleRemoveClicked = useCallback(
     (wallet: { address: string; chain: Chain }) => {

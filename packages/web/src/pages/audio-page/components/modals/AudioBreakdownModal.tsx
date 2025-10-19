@@ -1,6 +1,6 @@
 import {
   useAudioBalance,
-  useConnectedWallets,
+  useAssociatedWallets,
   useWalletAudioBalances
 } from '@audius/common/api'
 import { AUDIO } from '@audius/fixed-decimal'
@@ -33,7 +33,7 @@ const AudioBreakdownBody = () => {
   const { accountBalance } = useAudioBalance()
 
   const { data: connectedWallets = [], isPending: isConnectedWalletsPending } =
-    useConnectedWallets()
+    useAssociatedWallets()
   const balances = useWalletAudioBalances(
     {
       wallets: connectedWallets,
