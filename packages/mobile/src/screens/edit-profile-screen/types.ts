@@ -11,7 +11,6 @@ export type ProfileValues = {
   tiktok_handle: Nullable<string>
   website: Nullable<string>
   donation: Nullable<string>
-  artist_coin_flair: Nullable<string>
   cover_photo: Image
   profile_picture: Image
 }

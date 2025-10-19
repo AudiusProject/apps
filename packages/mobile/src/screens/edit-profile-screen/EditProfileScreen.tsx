@@ -25,7 +25,6 @@ import { makeStyles } from 'app/styles'
 import type { Image } from 'app/types/image'
 import { isImageUriSource } from 'app/utils/image'
 
-import { ArtistCoinFlairSelector } from './ArtistCoinFlairSelector'
 import { FormScreen } from './FormScreen'
 import { ProfileHeader } from './ProfileHeader'
 import { ProfileInput } from './ProfileInput'
@@ -82,11 +81,6 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 placeholder='City, Country'
               />
             </Flex>
-          </ProfileInputCard>
-
-          {/* Artist Coin Flair Section */}
-          <ProfileInputCard title='Artist Coin Flair'>
-            <ArtistCoinFlairSelector name='artist_coin_flair' />
           </ProfileInputCard>
 
           {/* Social Handles Section */}
@@ -159,8 +153,7 @@ export const EditProfileScreen = () => {
         'instagram_handle',
         'tiktok_handle',
         'website',
-        'donation',
-        'artist_coin_flair'
+        'donation'
       ])
   })
 
@@ -215,9 +208,6 @@ export const EditProfileScreen = () => {
     donation = null
   } = profile
 
-  // @ts-ignore - artist_coin_flair may not exist on user type yet
-  const artist_coin_flair = profile.artist_coin_flair ?? null
-
   const initialValues: ProfileValues = {
     name,
     bio,
@@ -227,7 +217,6 @@ export const EditProfileScreen = () => {
     tiktok_handle,
     website,
     donation,
-    artist_coin_flair,
     cover_photo: {
       url:
         coverPhotoSource && isImageUriSource(coverPhotoSource)
