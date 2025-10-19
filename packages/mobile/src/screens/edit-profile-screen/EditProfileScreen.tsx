@@ -240,7 +240,11 @@ export const EditProfileScreen = () => {
   }
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
       {(formikProps) => {
         return (
           <EditProfileForm
