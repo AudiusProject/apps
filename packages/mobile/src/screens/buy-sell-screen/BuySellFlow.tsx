@@ -7,7 +7,7 @@ import {
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import type { BuySellTab, CoinInfo } from '@audius/common/store'
+import type { BuySellTab } from '@audius/common/store'
 import {
   AUDIO_TICKER,
   getSwapTokens,
@@ -16,7 +16,6 @@ import {
   useBuySellSwap,
   useBuySellTabs,
   buySellTabsArray,
-  useBuySellTokenFilters,
   useBuySellTransactionData,
   useCurrentCoinPair,
   useSafeTokenPair,
@@ -91,33 +90,45 @@ export const BuySellFlow = ({
   const baseTokenSymbol = currentTabTokens.baseToken
   const quoteTokenSymbol = currentTabTokens.quoteToken
 
+  // Get all available tokens without filtering
   const { coins, isLoading: coinsLoading } = useTradeableCoins()
 
-  // Get all available coins
-  const availableCoins: CoinInfo[] = useMemo(() => {
+  const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
+  // Get tokens that user owns (includes USDC if user has balance)
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
-  // Create a helper to check if user has positive balance for a token
-  const hasPositiveBalance = useCallback(
-    (tokenAddress: string): boolean => {
-      return ownedCoins.some((token) => token.address === tokenAddress)
-    },
-    [ownedCoins]
-  )
+  // Create owned addresses set for filtering
+  const ownedAddresses = useMemo(() => {
+    return new Set(ownedCoins.map((coin) => coin.address))
+  }, [ownedCoins])
 
-  // Use shared token filtering logic
-  const {
-    availableInputTokensForSell,
-    availableInputTokensForConvert,
-    availableOutputTokensForConvert
-  } = useBuySellTokenFilters({
-    availableCoins,
-    baseTokenSymbol,
-    quoteTokenSymbol,
-    hasPositiveBalance
+  // Get filtered tokens for sell tab (owned coins, excluding current base token and USDC)
+  const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
+    context: 'pay',
+    excludeSymbols: [baseTokenSymbol],
+    onlyOwned: true,
+    ownedAddresses
+  })
+
+  // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
+  const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
+    onlyOwned: true,
+    ownedAddresses
+  })
+
+  // Get filtered tokens for convert tab output (all coins except base token)
+  const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol]
+  })
+
+  // Get filtered tokens for buy tab output (all coins except quote token and USDC)
+  const { coinsArray: availableOutputTokensForBuy } = useTradeableCoins({
+    context: 'receive',
+    excludeSymbols: [quoteTokenSymbol, 'USDC']
   })
 
   // Reset screen state to 'input' when this screen comes into focus
@@ -354,6 +365,7 @@ export const BuySellFlow = ({
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.buy}
               onInputValueChange={handleBuyInputValueChange}
+              availableOutputTokens={availableOutputTokensForBuy}
               onOutputTokenChange={(token) =>
                 handleOutputTokenChange(token.symbol)
               }

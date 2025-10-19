@@ -65,6 +65,7 @@ type BuyScreenProps = {
   errorMessage?: string
   initialInputValue?: string
   onInputValueChange?: (value: string) => void
+  availableOutputTokens?: CoinInfo[]
   onOutputTokenChange?: (token: CoinInfo) => void
 }
 
@@ -75,6 +76,7 @@ export const BuyScreen = ({
   errorMessage,
   initialInputValue,
   onInputValueChange,
+  availableOutputTokens,
   onOutputTokenChange
 }: BuyScreenProps) => {
   const { data: tokenPriceData, isPending: isTokenPriceLoading } =
@@ -149,7 +151,7 @@ export const BuyScreen = ({
             tokenPrice={tokenPriceData?.price.toString() ?? null}
             isTokenPriceLoading={isTokenPriceLoading}
             tokenPriceDecimalPlaces={decimalPlaces}
-            availableTokens={artistCoins}
+            availableTokens={availableOutputTokens ?? artistCoins}
             onTokenChange={onOutputTokenChange}
           />
           <BuySellTerms />
