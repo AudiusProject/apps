@@ -119,6 +119,7 @@ export const walletMessages = {
     error: 'Something went wrong. Please try again.',
     walletAlreadyAdded: 'No new wallets selected to connect.',
     linkedWallet: (index: number) => `Linked Wallet ${index + 1}`,
+    wallet: (index: number) => `Wallet ${index + 1}`,
     linkWallet:
       'Link an external wallet to take advantage of in-app features, and take full control of your assets.',
     toasts: {

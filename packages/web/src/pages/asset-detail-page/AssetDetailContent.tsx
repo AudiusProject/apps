@@ -4,7 +4,6 @@ import { AssetInfoSection } from './components/AssetInfoSection'
 import { AssetInsights } from './components/AssetInsights'
 import { AssetLeaderboardCard } from './components/AssetLeaderboardCard'
 import { BalanceSection } from './components/BalanceSection'
-import { ExternalWallets } from './components/ExternalWallets'
 
 const LEFT_SECTION_WIDTH = '704px'
 const RIGHT_SECTION_WIDTH = '360px'
@@ -71,7 +70,6 @@ export const AssetDetailContent = ({
       <Flex css={styles.rightSection}>
         <AssetInsights mint={mint} />
         <AssetLeaderboardCard mint={mint} />
-        {isAnonymousUser ? null : <ExternalWallets mint={mint} />}
       </Flex>
     </Flex>
   )
