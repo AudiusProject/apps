@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { useCoinBalance, useArtistCoin } from '@audius/common/api'
+import { useCoinBalance, useArtistCoin, useUserCoin } from '@audius/common/api'
 import {
   useFormattedCoinBalance,
   useIsManagedAccount,
@@ -11,9 +11,17 @@ import {
   receiveTokensModalActions,
   sendTokensModalActions
 } from '@audius/common/store'
+import { shortenSPLAddress } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
 
-import { Paper, Flex, Text, Button, spacing } from '@audius/harmony-native'
+import {
+  Button,
+  Divider,
+  Flex,
+  Paper,
+  Text,
+  spacing
+} from '@audius/harmony-native'
 import { TokenIcon } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
 
@@ -93,6 +101,26 @@ const HasBalanceState = ({
   const { coinBalanceFormatted, formattedHeldValue } =
     useFormattedCoinBalance(mint)
 
+  // Fetch wallet accounts for balance breakdown
+  const { data: userCoins } = useUserCoin({ mint })
+  const { accounts: unsortedAccounts = [], decimals } = userCoins ?? {}
+
+  // Sort accounts by balance (descending)
+  const accounts = useMemo(
+    () => [...unsortedAccounts].sort((a, b) => b.balance - a.balance),
+    [unsortedAccounts]
+  )
+
+  // Separate built-in wallet from linked wallets
+  const inAppWallet = useMemo(
+    () => accounts.find((account) => account.isInAppWallet),
+    [accounts]
+  )
+  const linkedWallets = useMemo(
+    () => accounts.filter((account) => !account.isInAppWallet),
+    [accounts]
+  )
+
   return (
     <Flex column gap='l' w='100%'>
       <Flex row alignItems='center' justifyContent='space-between'>
@@ -134,6 +162,61 @@ const HasBalanceState = ({
           </Text>
         </Flex>
       </Flex>
+      {linkedWallets.length > 0 && (
+        <>
+          <Divider />
+          <Flex column gap='s' w='100%'>
+            <Text variant='title' size='l'>
+              {coinDetailsMessages.externalWallets.hasBalanceTitle}
+            </Text>
+            <Flex column gap='s' w='100%'>
+              {inAppWallet && (
+                <Flex
+                  direction='row'
+                  alignItems='center'
+                  justifyContent='space-between'
+                  w='100%'
+                  pv='2xs'
+                >
+                  <Text variant='body' size='l'>
+                    {coinDetailsMessages.externalWallets.builtIn}
+                  </Text>
+                  <Text variant='body' size='l'>
+                    {Math.trunc(
+                      inAppWallet.balance / Math.pow(10, decimals ?? 0)
+                    ).toLocaleString()}
+                  </Text>
+                </Flex>
+              )}
+              {linkedWallets.map((wallet, index) => (
+                <Flex
+                  key={wallet.owner}
+                  direction='row'
+                  alignItems='center'
+                  justifyContent='space-between'
+                  w='100%'
+                  pv='2xs'
+                >
+                  <Flex gap='xs' alignItems='center' row>
+                    <Text variant='body' size='l'>
+                      {walletMessages.linkedWallets.wallet(index)}
+                    </Text>
+                    <Text variant='body' size='l' color='subdued'>
+                      ({shortenSPLAddress(wallet.owner)})
+                    </Text>
+                  </Flex>
+                  <Text variant='body' size='l'>
+                    {Math.trunc(
+                      wallet.balance / Math.pow(10, decimals ?? 0)
+                    ).toLocaleString()}
+                  </Text>
+                </Flex>
+              ))}
+            </Flex>
+          </Flex>
+          <Divider />
+        </>
+      )}
       <Flex column gap='s'>
         <Button
           disabled={isManagerMode}
