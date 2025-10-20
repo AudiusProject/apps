@@ -1,4 +1,8 @@
-import { useQueryContext } from '@audius/common/api'
+import {
+  optimisticallyUpdateSwapBalances,
+  useCurrentAccountUser,
+  useQueryContext
+} from '@audius/common/api'
 import { ErrorLevel, Feature } from '@audius/common/models'
 import {
   SwapErrorType,
@@ -29,6 +33,7 @@ export type ExternalWalletSwapParams = {
 export const useExternalWalletSwap = () => {
   const { audiusSdk, env } = useQueryContext()
   const queryClient = useQueryClient()
+  const { data: user } = useCurrentAccountUser()
   return useMutation<SwapTokensResult, Error, ExternalWalletSwapParams>({
     mutationFn: async (
       params: ExternalWalletSwapParams
@@ -169,21 +174,21 @@ export const useExternalWalletSwap = () => {
       // NOTE: due to how we are catching errors in the function, this onSuccess will still run on a handled error
       // (since we're still returning a result no matter what)
       if (result.status === SwapStatus.SUCCESS) {
-        // Update external wallet balances optimistically
+        // Update internal wallet balances & user info
+        optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
+
+        // Update external wallet balances
         // NOTE: invalidate queries does not work here, need to manually update the balances
 
-        // Check for AUDIO as an edge case since it's stored in a different query hook
         const isSpendingAudio = params.inputMint === env.WAUDIO_MINT_ADDRESS
         const isReceivingAudio = params.outputMint === env.WAUDIO_MINT_ADDRESS
         // Update input token balance (subtract the amount spent)
         if (result.inputAmount && !isSpendingAudio) {
-          const inputTokenQueryKey = getExternalWalletBalanceQueryKey({
-            walletAddress: params.walletAddress,
-            mint: params.inputMint
-          })
-
           queryClient.setQueryData(
-            inputTokenQueryKey,
+            getExternalWalletBalanceQueryKey({
+              walletAddress: params.walletAddress,
+              mint: params.inputMint
+            }),
             (oldBalance: FixedDecimal | undefined) => {
               if (!oldBalance) return oldBalance
               const currentAmount = Number(oldBalance.toString())
@@ -196,13 +201,11 @@ export const useExternalWalletSwap = () => {
 
         // Update output token balance (add the amount received)
         if (result.outputAmount && !isReceivingAudio) {
-          const outputTokenQueryKey = getExternalWalletBalanceQueryKey({
-            walletAddress: params.walletAddress,
-            mint: params.outputMint
-          })
-
           queryClient.setQueryData(
-            outputTokenQueryKey,
+            getExternalWalletBalanceQueryKey({
+              walletAddress: params.walletAddress,
+              mint: params.outputMint
+            }),
             (oldBalance: FixedDecimal | undefined) => {
               if (!oldBalance) {
                 // If no previous balance, create a new FixedDecimal with the output amount

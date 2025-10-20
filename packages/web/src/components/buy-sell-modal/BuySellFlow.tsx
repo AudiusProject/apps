@@ -251,7 +251,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }) => {
       const swapParams = {
         ...params,
-        // External wallet swaps require some extra params
+        // External wallet swaps require some extra params. These are unused for internal swaps
         inputDecimals: swapTokens.inputTokenInfo!.decimals,
         outputDecimals: swapTokens.outputTokenInfo!.decimals,
         walletAddress: externalWalletAccount?.address as string

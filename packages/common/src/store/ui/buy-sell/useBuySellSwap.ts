@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useQueryClient } from '@tanstack/react-query'
-
 import {
-  SLIPPAGE_BPS,
-  useArtistCoin,
-  useCurrentAccountUser,
-  useSwapCoins
-} from '~/api'
-import { SwapStatus } from '~/api/tan-query/jupiter/types'
+  MutationStatus,
+  QueryStatus,
+  useQueryClient
+} from '@tanstack/react-query'
+
+import { SLIPPAGE_BPS, useArtistCoin, useCurrentAccountUser } from '~/api'
+import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
 import { isContentTokenGated } from '~/models'
@@ -27,7 +26,13 @@ type UseBuySellSwapProps = {
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
   selectedPair: CoinPair
-  swapHookData: any // TODO
+  swapHookData: {
+    data?: SwapTokensResult
+    status: MutationStatus
+    error?: Error | null
+  }
+  // The swap is handled externally to allow for external wallet swaps
+  // Web and mobile use different services for these so we let each repo handle the logic
   handleSwap: (params: {
     inputMint: string
     outputMint: string
