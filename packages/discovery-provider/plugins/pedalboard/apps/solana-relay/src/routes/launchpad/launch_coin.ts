@@ -4,10 +4,16 @@ import { RewardManagerProgram } from '@audius/spl'
 import {
   createGenericFile,
   signerIdentity,
-  createSignerFromKeypair
+  createSignerFromKeypair,
+  sol,
+  subtractAmounts,
+  isLessThanAmount
 } from '@metaplex-foundation/umi'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
-import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
+import {
+  irysUploader,
+  isIrysUploader
+} from '@metaplex-foundation/umi-uploader-irys'
 import {
   deriveDbcPoolAddress,
   DynamicBondingCurveClient
@@ -21,10 +27,11 @@ import {
 import BN from 'bn.js'
 import bs58 from 'bs58'
 import { Request, Response } from 'express'
+import sharp from 'sharp'
 
 import { config } from '../../config'
 import { logger } from '../../logger'
-import { getConnection } from '../../utils/connections'
+import { getConnection, connections } from '../../utils/connections'
 import { sendTransactionWithRetries } from '../../utils/transaction'
 
 import { AUDIO_MINT } from './constants'
@@ -41,6 +48,58 @@ interface LaunchCoinRequestBody {
 }
 
 const AUDIUS_COIN_URL = (ticker: string) => `https://audius.co/coins/${ticker}`
+
+const TARGET_IRYS_BALANCE = sol(0.1) // Target deposit balance for Irys per fee payer
+
+type FeePayerUmi = {
+  umi: ReturnType<typeof createUmi>
+}
+
+const feePayerUmis: FeePayerUmi[] = config.solanaFeePayerWallets.map(
+  (feePayer, i) => {
+    const endpoint = connections[i % connections.length].rpcEndpoint
+    const umi = createUmi(endpoint).use(irysUploader())
+    const umiKeypair = umi.eddsa.createKeypairFromSecretKey(feePayer.secretKey)
+    const signer = createSignerFromKeypair(umi, umiKeypair)
+    umi.use(signerIdentity(signer))
+    return { umi }
+  }
+)
+
+const topUpIrysBalances = async () => {
+  await Promise.all(
+    feePayerUmis.map(async ({ umi }, idx) => {
+      try {
+        const uploader = umi.uploader
+        if (!isIrysUploader(uploader)) return
+        const balance = await uploader.getBalance()
+        if (isLessThanAmount(balance, TARGET_IRYS_BALANCE)) {
+          logger.info({
+            message: 'Irys balance is less than target balance',
+            balance,
+            targetBalance: TARGET_IRYS_BALANCE
+          })
+          const required = subtractAmounts(TARGET_IRYS_BALANCE, balance)
+          logger.info({
+            message: 'Required Irys balance',
+            required
+          })
+          if (required.basisPoints > BigInt(0)) {
+            await uploader.fund(required, true)
+            logger.info({
+              message: 'Topped up Irys balance',
+              feePayerIndex: idx
+            })
+          }
+        }
+      } catch (e) {
+        logger.warn({ message: 'Failed to top up Irys balance', idx, e })
+      }
+    })
+  )
+}
+topUpIrysBalances()
+setInterval(topUpIrysBalances, 5 * 60 * 1000)
 
 /**
  * Launches a new coin on the launchpad with bonding curve.
@@ -146,14 +205,16 @@ export const launchCoin = async (
       name,
       symbol
     })
-    const umi = createUmi(connection.rpcEndpoint).use(irysUploader() as any) // note: something is off with the types with the different umi package versions
-    // Pick a random fee payer to "own" our new coin metadata and pay for the TX
-    const umiKeypair = umi.eddsa.createKeypairFromSecretKey(feePayer.secretKey)
-    const signer = createSignerFromKeypair(umi, umiKeypair)
-    umi.use(signerIdentity(signer))
+    const umi = feePayerUmis[index].umi
 
-    const umiImageFile = createGenericFile(file.buffer, '', {
-      tags: [{ name: 'Content-Type', value: 'image/jpeg' }]
+    // Resize incoming image to 400x400 and convert to png for consistency
+    const resizedBuffer = await sharp(file.buffer)
+      .resize(400, 400, { fit: 'cover' })
+      .png()
+      .toBuffer()
+
+    const umiImageFile = createGenericFile(resizedBuffer, '', {
+      tags: [{ name: 'Content-Type', value: 'image/png' }]
     })
     const imageUris = await umi.uploader.upload([umiImageFile])
     const imageUri = imageUris[0]
