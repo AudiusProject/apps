@@ -1,43 +1,30 @@
-import { Id } from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
-import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext } from '../utils/QueryContext'
 
 export const getArtistCoinMembersCountQueryKey = (
-  currentUserId?: number | null
-) =>
-  [
-    QUERY_KEYS.artistCoinMembersCount,
-    currentUserId
-  ] as unknown as QueryKey<number>
+  mint: string | null | undefined
+) => [QUERY_KEYS.artistCoinMembersCount, mint] as unknown as QueryKey<number>
 
-export const useArtistCoinMembersCount = (options?: QueryOptions) => {
+export const useArtistCoinMembersCount = (
+  { mint }: { mint: string | null | undefined },
+  options?: QueryOptions
+) => {
   const { audiusSdk } = useQueryContext()
-  const { data: currentUserId } = useCurrentUserId()
 
   return useQuery({
-    queryKey: getArtistCoinMembersCountQueryKey(currentUserId),
+    queryKey: getArtistCoinMembersCountQueryKey(mint),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      if (!currentUserId) return 0
+      if (!mint) return 0
 
-      const coinsResponse = await sdk.coins.getCoins({
-        ownerId: [Id.parse(currentUserId)]
-      })
+      const membersCountResponse = await sdk.coins.getCoinMembersCount({ mint })
 
-      const userCoin = coinsResponse?.data?.[0]
-      if (!userCoin?.mint) return 0
-
-      const insightsResponse = await sdk.coins.getCoinInsights({
-        mint: userCoin.mint
-      })
-
-      return insightsResponse?.data?.holder
+      return membersCountResponse?.data
     },
     ...options,
-    enabled: options?.enabled !== false && !!currentUserId
+    enabled: options?.enabled !== false && !!mint
   })
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { useCurrentUserId } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
@@ -9,8 +10,8 @@ import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ActiveDiscussions } from './ActiveDiscussions'
 import { ArtistSpotlight } from './ArtistSpotlight'
-import { BestOfAudiusTiles } from './BestOfAudiusTiles'
 import { BestSelling } from './BestSelling'
+import { DownloadsAvailable } from './DownloadsAvailable'
 import { FeaturedArtistCoinTracks } from './FeaturedArtistCoinTracks'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
@@ -27,13 +28,13 @@ import { UndergroundTrendingTracks } from './UndergroundTrendingTracks'
 
 export const ExploreContent = () => {
   const [category] = useSearchCategory()
-  const { isEnabled: isSearchGoodiesEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE_GOODIES
-  )
+  const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
+    useCurrentUserId()
   const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
     FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
   )
 
+  const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = category === 'tracks' || category === 'all'
   const showPlaylistContent = category === 'playlists' || category === 'all'
   const showUserContent = category === 'users' || category === 'all'
@@ -41,32 +42,32 @@ export const ExploreContent = () => {
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
-      {showTrackContent && <ForYouTracks />}
+      {showTrackContent && showUserContextualContent && <ForYouTracks />}
       {isExploreArtistCoinTracksEnabled && <FeaturedArtistCoinTracks />}
-      {showTrackContent && <RecentlyPlayedTracks />}
+      {showTrackContent && showUserContextualContent && (
+        <RecentlyPlayedTracks />
+      )}
       {showTrackContent && <QuickSearchGrid />}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <FeaturedRemixContests />}
-      {isSearchGoodiesEnabled && showTrackContent && (
-        <UndergroundTrendingTracks />
-      )}
+      {showTrackContent && <UndergroundTrendingTracks />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
-      {isSearchGoodiesEnabled && showTrackContent && <ActiveDiscussions />}
+      {showTrackContent && (
+        <>
+          <ActiveDiscussions />
+          <DownloadsAvailable />
+        </>
+      )}
       {(showTrackContent || showAlbumContent || showPlaylistContent) && (
         <MoodsGrid />
       )}
-      {isSearchGoodiesEnabled ? (
-        <>
-          {showPlaylistContent && <TrendingPlaylists />}
-          {showTrackContent && <MostSharedTracks />}
-          {(showAlbumContent || showTrackContent) && <BestSelling />}
-          {showTrackContent && <RecentPremiumTracks />}
-          {showTrackContent && <FeelingLucky />}
-        </>
-      ) : null}
-      {!isSearchGoodiesEnabled && <BestOfAudiusTiles />}
-      <RecentSearches />
+      {showPlaylistContent && <TrendingPlaylists />}
+      {showTrackContent && <MostSharedTracks />}
+      {(showAlbumContent || showTrackContent) && <BestSelling />}
+      {showTrackContent && <RecentPremiumTracks />}
+      {showTrackContent && showUserContextualContent && <FeelingLucky />}
+      {showUserContextualContent && <RecentSearches />}
     </Flex>
   )
 }

@@ -3,7 +3,6 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import { useWalletAudioBalance } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
-import { useConnectedWallets } from '@audius/common/src/api/tan-query/wallets/useConnectedWallets'
 import { Name } from '@audius/common/src/models/Analytics'
 import { TOKEN_LISTING_MAP } from '@audius/common/src/store/ui/buy-audio/constants'
 import { CoinInfo } from '@audius/common/src/store/ui/buy-sell/types'
@@ -25,6 +24,7 @@ import {
   Text,
   TokenAmountInput
 } from '@audius/harmony'
+import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { FormikProvider, useFormikContext } from 'formik'
 import { usePrevious } from 'react-use'
 
@@ -39,8 +39,6 @@ import { Tooltip } from 'components/tooltip'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { make, track } from 'services/analytics'
 import zIndex from 'utils/zIndex'
-
-import { getLastConnectedSolWallet } from '../utils'
 
 const INPUT_TOKEN_MAP: Record<
   string,
@@ -397,11 +395,8 @@ export const LaunchpadBuyModal = ({
   const onInputTokenChange = (token: CoinInfo) => {
     setSelectedInputToken(token)
   }
-  const { data: connectedWallets } = useConnectedWallets()
-  const externalWalletAddress = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets)?.address,
-    [connectedWallets]
-  )
+  const externalWalletAccount = useExternalWalletAccount()
+  const externalWalletAddress = externalWalletAccount?.address
   const { data: audioBalance } = useWalletAudioBalance(
     {
       address: externalWalletAddress!,

@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import {
-  useConnectedWallets,
-  useFirstBuyQuote,
-  useWalletAudioBalance
-} from '@audius/common/api'
+import { useFirstBuyQuote, useWalletAudioBalance } from '@audius/common/api'
 import { useDebouncedCallback } from '@audius/common/hooks'
 import { Chain, LaunchpadFormValues } from '@audius/common/models'
 import { AUDIO } from '@audius/fixed-decimal'
@@ -23,6 +19,7 @@ import {
   TextLink,
   TokenAmountInput
 } from '@audius/harmony'
+import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { useFormikContext } from 'formik'
 import { usePrevious } from 'react-use'
 
@@ -34,7 +31,7 @@ import { ArtistCoinsSubmitRow } from '../components/ArtistCoinsSubmitRow'
 import { LaunchpadBuyModal } from '../components/LaunchpadBuyModal'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS } from '../constants'
-import { getLastConnectedSolWallet, useLaunchpadAnalytics } from '../utils'
+import { useLaunchpadAnalytics } from '../utils'
 import { FIELDS } from '../validation'
 
 const messages = {
@@ -92,11 +89,8 @@ export const BuyCoinPage = ({
   }
   const [isPayAmountChanging, setIsPayAmountChanging] = useState(false)
   const [isReceiveAmountChanging, setIsReceiveAmountChanging] = useState(false)
-  const { data: connectedWallets } = useConnectedWallets()
-  const connectedWallet = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets),
-    [connectedWallets]
-  )
+  const externalWalletAccount = useExternalWalletAccount()
+  const externalWalletAddress = externalWalletAccount?.address
 
   const {
     trackBuyModalOpen,
@@ -105,7 +99,7 @@ export const BuyCoinPage = ({
     trackFormInputChange,
     trackFirstBuyMaxButton
   } = useLaunchpadAnalytics({
-    externalWalletAddress: connectedWallet?.address
+    externalWalletAddress
   })
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false)
   const handleBuyModalOpen = () => {
@@ -118,8 +112,8 @@ export const BuyCoinPage = ({
   }
   const { data: audioBalance } = useWalletAudioBalance(
     {
-      address: connectedWallet?.address ?? '',
-      chain: connectedWallet?.chain ?? Chain.Sol
+      address: externalWalletAddress ?? '',
+      chain: Chain.Sol
     },
     { refetchInterval: AUDIO_BALANCE_POLL_INTERVAL }
   )
@@ -222,9 +216,10 @@ export const BuyCoinPage = ({
   }
 
   const handleMaxClick = () => {
-    trackFirstBuyMaxButton(audioBalanceString)
-    setFieldValue(FIELDS.payAmount, audioBalanceString)
-    debouncedPayAmountChange(audioBalanceString)
+    const audioBalanceNoCommas = audioBalanceString.replace(/,/g, '')
+    trackFirstBuyMaxButton(audioBalanceNoCommas)
+    setFieldValue(FIELDS.payAmount, audioBalanceNoCommas)
+    debouncedPayAmountChange(audioBalanceNoCommas)
   }
 
   const debouncedPayAmountChange = useDebouncedCallback(

@@ -124,6 +124,7 @@ export type LaunchCoinRequest = z.infer<typeof LaunchCoinSchema>
 
 export type LaunchCoinResponse = {
   mintPublicKey: string
+  configPublicKey: string
   createPoolTx: string
   firstBuyTx: string | undefined
   metadataUri: string

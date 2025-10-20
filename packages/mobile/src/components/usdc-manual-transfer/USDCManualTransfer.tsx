@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import { useQueryContext } from '@audius/common/api'
-import { useUserbank } from '@audius/common/hooks'
+import { useRootWalletAddress, useMintRecovery } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
 import Clipboard from '@react-native-clipboard/clipboard'
 
@@ -42,10 +42,12 @@ export const USDCManualTransfer = ({
   amountInCents
 }: USDCManualTransferProps) => {
   const { toast } = useToast()
-
   const { env } = useQueryContext()
-  const { userBankAddress: usdcUserBank, loading: userBankLoading } =
-    useUserbank(env.USDC_MINT_ADDRESS)
+
+  const { rootWalletAddress: usdcUserBank, loading: userBankLoading } =
+    useRootWalletAddress()
+  // Poll for USDC recovery if there's balance in root wallet
+  useMintRecovery(env.USDC_MINT_ADDRESS)
 
   const analytics: AllEvents | null = useMemo(
     () =>

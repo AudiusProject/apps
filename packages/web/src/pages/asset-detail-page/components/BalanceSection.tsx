@@ -1,25 +1,28 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   useArtistCoin,
-  useCurrentAccountUser,
-  useCoinBalance
+  useCoinBalance,
+  useCurrentAccountUser
 } from '@audius/common/api'
 import {
   useBuySellInitialTab,
   useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
-import { walletMessages } from '@audius/common/messages'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import { useUserCoin } from '@audius/common/src/api/tan-query/coins/useUserCoin'
 import {
   useBuySellModal,
   useReceiveTokensModal,
   useSendTokensModal
 } from '@audius/common/store'
+import { shortenSPLAddress } from '@audius/common/utils'
 import {
   Artwork,
   Box,
   Button,
+  Divider,
   Flex,
   Paper,
   Text,
@@ -100,7 +103,7 @@ const ZeroBalanceState = ({
   const isManagerMode = useIsManagedAccount()
   return (
     <>
-      <Flex gap='s' alignItems='center'>
+      <Flex gap='s' alignItems='center' ph='xl'>
         <TokenIcon logoURI={logoURI} />
         <Flex column gap='xs'>
           {coinName && (
@@ -114,24 +117,27 @@ const ZeroBalanceState = ({
         </Flex>
       </Flex>
       {!isCoinCreator ? (
-        <Paper
-          ph='xl'
-          pv='l'
-          backgroundColor='surface2'
-          border='default'
-          direction='column'
-          gap='xs'
-          shadow='flat'
-        >
-          <Text variant='heading' size='s'>
-            {walletMessages.becomeMemberTitle}
-          </Text>
-          <Text variant='body' size='s' color='default' strength='default'>
-            {walletMessages.becomeMemberBody(ticker)}
-          </Text>
-        </Paper>
+        <Flex ph='xl' w='100%'>
+          <Paper
+            ph='xl'
+            pv='l'
+            backgroundColor='surface2'
+            border='default'
+            direction='column'
+            gap='xs'
+            shadow='flat'
+            w='100%'
+          >
+            <Text variant='heading' size='s'>
+              {walletMessages.becomeMemberTitle}
+            </Text>
+            <Text variant='body' size='s' color='default' strength='default'>
+              {walletMessages.becomeMemberBody(ticker)}
+            </Text>
+          </Paper>
+        </Flex>
       ) : null}
-      <Flex gap='s'>
+      <Flex gap='s' ph='xl'>
         <Tooltip
           disabled={isBuySellSupported && !isManagerMode}
           text={
@@ -170,11 +176,13 @@ const HasBalanceState = ({
   onReceive,
   mint,
   isBuySellSupported,
-  coinName
+  coinName,
+  isMobile
 }: BalanceStateProps & {
   mint: string
   isBuySellSupported: boolean
   coinName: string
+  isMobile: boolean
 }) => {
   const isManagerMode = useIsManagedAccount()
   const { motion } = useTheme()
@@ -187,9 +195,29 @@ const HasBalanceState = ({
 
   const isLoading = isCoinBalanceLoading || isCoinPriceLoading
 
+  // Fetch wallet accounts for balance breakdown
+  const { data: userCoins } = useUserCoin({ mint })
+  const { accounts: unsortedAccounts = [], decimals } = userCoins ?? {}
+
+  // Sort accounts by balance (descending)
+  const accounts = useMemo(
+    () => [...unsortedAccounts].sort((a, b) => b.balance - a.balance),
+    [unsortedAccounts]
+  )
+
+  // Separate built-in wallet from linked wallets
+  const inAppWallet = useMemo(
+    () => accounts.find((account) => account.isInAppWallet),
+    [accounts]
+  )
+  const linkedWallets = useMemo(
+    () => accounts.filter((account) => !account.isInAppWallet),
+    [accounts]
+  )
+
   return (
     <>
-      <Flex alignItems='center' justifyContent='space-between' flex={1}>
+      <Flex ph='xl' alignItems='center' justifyContent='space-between' flex={1}>
         <Flex alignItems='center' gap='l'>
           <TokenIcon logoURI={logoURI} />
           <Flex
@@ -220,7 +248,64 @@ const HasBalanceState = ({
           </Text>
         </Flex>
       </Flex>
-      <Flex direction='column' gap='s'>
+      {linkedWallets.length > 0 && (
+        <>
+          <Divider />
+          <Flex direction='column' gap='s' w='100%' ph='xl'>
+            <Text variant='title' size='l'>
+              {coinDetailsMessages.externalWallets.hasBalanceTitle}
+            </Text>
+            <Flex direction='column' gap='s' w='100%'>
+              {inAppWallet && (
+                <Flex
+                  direction='row'
+                  alignItems='center'
+                  justifyContent='space-between'
+                  w='100%'
+                  pv='2xs'
+                >
+                  <Text variant='body' size='l'>
+                    {coinDetailsMessages.externalWallets.builtIn}
+                  </Text>
+                  <Text variant='body' size='l'>
+                    {Math.trunc(
+                      inAppWallet.balance / Math.pow(10, decimals ?? 0)
+                    ).toLocaleString()}
+                  </Text>
+                </Flex>
+              )}
+              {linkedWallets.map((wallet, index) => (
+                <Flex
+                  key={wallet.owner}
+                  direction='row'
+                  alignItems='center'
+                  justifyContent='space-between'
+                  w='100%'
+                  pv='2xs'
+                >
+                  <Flex gap='xs' alignItems='center'>
+                    <Text variant='body' size='l'>
+                      {isMobile
+                        ? walletMessages.linkedWallets.wallet(index)
+                        : walletMessages.linkedWallets.linkedWallet(index)}
+                    </Text>
+                    <Text variant='body' size='l' color='subdued'>
+                      ({shortenSPLAddress(wallet.owner)})
+                    </Text>
+                  </Flex>
+                  <Text variant='body' size='l'>
+                    {Math.trunc(
+                      wallet.balance / Math.pow(10, decimals ?? 0)
+                    ).toLocaleString()}
+                  </Text>
+                </Flex>
+              ))}
+            </Flex>
+          </Flex>
+          <Divider />
+        </>
+      )}
+      <Flex direction='column' gap='s' ph='xl'>
         <Tooltip
           disabled={isBuySellSupported && !isManagerMode}
           text={
@@ -328,7 +413,7 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
   const coinName = coin.name ?? ''
 
   return (
-    <Paper ph='xl' pv='l' border='default'>
+    <Paper pv='l' border='default'>
       <Flex column gap='l' w='100%'>
         {tokenBalanceLoading ? (
           <BalanceSectionSkeletonContent />
@@ -353,6 +438,7 @@ const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
             mint={mint}
             isBuySellSupported={isBuySellSupported}
             coinName={coinName}
+            isMobile={isMobile}
           />
         )}
         {isMobile && (

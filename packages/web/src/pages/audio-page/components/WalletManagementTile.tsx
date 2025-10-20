@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { useAudioBalance, useConnectedWallets } from '@audius/common/api'
+import { useAudioBalance, useAssociatedWallets } from '@audius/common/api'
 import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
 import { buySellMessages } from '@audius/common/messages'
 import { Client } from '@audius/common/models'
@@ -278,7 +278,7 @@ export const WalletManagementTile = () => {
     includeConnectedWallets: true,
     includeStaked: true
   })
-  const { data: connectedWallets } = useConnectedWallets()
+  const { data: connectedWallets } = useAssociatedWallets()
   const [, setOpen] = useModalState('AudioBreakdown')
 
   const onRampProviders = useOnRampProviderInfo()

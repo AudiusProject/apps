@@ -15,6 +15,7 @@ import {
   getDiscoveryNodeMetadata,
   getEthBlockNumber,
   getEthWallet,
+  getValidatorMetadata,
   getWei,
   hasPermissions,
   isEoa,
@@ -94,6 +95,7 @@ export class AudiusClient {
   static getWei = getWei
   static getDiscoveryNodeMetadata = getDiscoveryNodeMetadata
   static getContentNodeMetadata = getContentNodeMetadata
+  static getValidatorMetadata = getValidatorMetadata
   static decodeCallData = decodeCallData
 }
 

@@ -3,12 +3,14 @@ import React, { useCallback } from 'react'
 import ServiceTable from 'components/ServiceTable'
 import { useContentNodes } from 'store/cache/contentNode/hooks'
 import { useDiscoveryProviders } from 'store/cache/discoveryProvider/hooks'
+import { useValidators } from 'store/cache/validator/hooks'
 import { Address, NodeService, ServiceType, Status } from 'types'
 import { usePushRoute } from 'utils/effects'
 import {
   NODES_VALIDATORS,
   contentNodePage,
-  discoveryNodePage
+  discoveryNodePage,
+  validatorPage
 } from 'utils/routes'
 
 const messages = {
@@ -30,10 +32,13 @@ const NodeTable: React.FC<NodeTableProps> = ({
   owner,
   alwaysShowMore
 }: NodeTableProps) => {
+  const { nodes: validators, status: validatorStatus } = useValidators({
+    owner
+  })
   const { nodes: cnNodes, status: cnStatus } = useContentNodes({ owner })
   const { nodes: dpNodes } = useDiscoveryProviders({ owner })
   const pushRoute = usePushRoute()
-  const allNodes = [...cnNodes, ...dpNodes]
+  const allNodes = [...validators, ...cnNodes, ...dpNodes]
 
   const onClickMore = useCallback(() => {
     pushRoute(NODES_VALIDATORS)
@@ -46,6 +51,8 @@ const NodeTable: React.FC<NodeTableProps> = ({
       } else if (row.type === ServiceType.DiscoveryProvider) {
         // TODO: remove with dp deprecation
         pushRoute(discoveryNodePage(row.spID))
+      } else if (row.type === ServiceType.Validator) {
+        pushRoute(validatorPage(row.spID))
       }
     },
     [pushRoute]
@@ -54,7 +61,9 @@ const NodeTable: React.FC<NodeTableProps> = ({
   return (
     <ServiceTable
       className={className}
-      isLoading={cnStatus === Status.Loading}
+      isLoading={
+        cnStatus === Status.Loading || validatorStatus === Status.Loading
+      }
       title={messages.title}
       data={allNodes}
       limit={limit}

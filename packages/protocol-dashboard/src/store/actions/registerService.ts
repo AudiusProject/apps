@@ -10,6 +10,7 @@ import { getAccountWallet } from 'store/account/hooks'
 import { getContentNode } from 'store/cache/contentNode/hooks'
 import { getDiscoveryProvider } from 'store/cache/discoveryProvider/hooks'
 import { fetchUser } from 'store/cache/user/hooks'
+import { getValidator } from 'store/cache/validator/hooks'
 import { AppState } from 'store/types'
 import { Status, ServiceType, BigNumber, Address } from 'types'
 
@@ -76,8 +77,10 @@ function registerAudiusService(
       if (wallet) await dispatch(fetchUser(wallet))
       if (serviceType === ServiceType.DiscoveryProvider) {
         await dispatch(getDiscoveryProvider(spID))
-      } else {
+      } else if (serviceType === ServiceType.ContentNode) {
         await dispatch(getContentNode(spID))
+      } else {
+        await dispatch(getValidator(spID))
       }
 
       setStatus(Status.Success)

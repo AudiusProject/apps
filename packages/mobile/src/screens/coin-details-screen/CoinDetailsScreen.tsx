@@ -9,7 +9,6 @@ import { BalanceCard } from './components/BalanceCard'
 import { CoinInfoCard } from './components/CoinInfoCard'
 import { CoinInsightsCard } from './components/CoinInsightsCard'
 import { CoinLeaderboardCard } from './components/CoinLeaderboardCard'
-import { ExternalWalletsCard } from './components/ExternalWalletsCard'
 
 export const CoinDetailsScreen = () => {
   const { ticker } = useRoute().params as { ticker: string }
@@ -50,7 +49,6 @@ export const CoinDetailsScreen = () => {
             <CoinInfoCard mint={mint} />
             <CoinInsightsCard mint={mint} />
             <CoinLeaderboardCard mint={mint} />
-            <ExternalWalletsCard mint={mint} />
           </Flex>
         </ScrollView>
       </ScreenContent>

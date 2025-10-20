@@ -9,6 +9,7 @@ import ManageService from 'components/ManageService'
 import NodeTable from 'components/NodeTable'
 import Page from 'components/Page'
 import ProfileInfoCard from 'components/ProfileInfoCard/ProfileInfoCard'
+import { RegisterNodeCard } from 'components/RegisterNodeCard/RegisterNodeCard'
 import Timeline from 'components/Timeline'
 import TransactionStatus from 'components/TransactionStatus'
 import { useAccount } from 'store/account/hooks'
@@ -83,7 +84,13 @@ const UserPage = () => {
         />
         {isOwner ? <ConnectAudiusProfileCard /> : null}
         {isServiceProvider && (
-          <ManageService wallet={wallet} onClickNodesTable={handleClickNodes} />
+          <>
+            <ManageService
+              wallet={wallet}
+              onClickNodesTable={handleClickNodes}
+            />
+            <RegisterNodeCard wallet={wallet} />
+          </>
         )}
         {<ManageAccountCard wallet={wallet} />}
         {isOwner ? <TransactionStatus /> : null}

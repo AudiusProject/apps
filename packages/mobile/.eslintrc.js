@@ -29,7 +29,9 @@ module.exports = {
           ['common', '@audius/web/src/common']
         ],
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.lottie']
-      }
+      },
+      typescript: true,
+      node: true
     }
   },
   ignorePatterns: ['**/harmony/**/*'],

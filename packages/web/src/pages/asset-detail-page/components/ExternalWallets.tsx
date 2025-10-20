@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo, useState } from 'react'
 
-import { useRemoveConnectedWallet } from '@audius/common/api'
+import { useRemoveAssociatedWallet } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { useUserCoin } from '@audius/common/src/api/tan-query/coins/useUserCoin'
@@ -62,7 +62,8 @@ const WalletRow = ({
     toast(messages.copied, COPIED_TOAST_TIMEOUT)
   }, [address, toast])
 
-  const { mutateAsync: removeConnectedWalletAsync } = useRemoveConnectedWallet()
+  const { mutateAsync: removeConnectedWalletAsync } =
+    useRemoveAssociatedWallet()
 
   const onOpenMobileOverflow = useCallback(() => {
     setIsMobileOverflowOpen(true)

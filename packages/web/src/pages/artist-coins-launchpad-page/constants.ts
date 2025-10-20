@@ -21,4 +21,4 @@ export const AUDIO_DECIMALS = 8
 export const USDC_DECIMALS = 6
 export const TOKEN_DECIMALS = 9
 
-export const MIN_SOL_BALANCE = 30000000 // 0.03 SOL - Minimum amount to launch a coin (0.0245 SOL) + a bit extra for swap fees
+export const MIN_SOL_BALANCE = 30000000 // 0.03 SOL - Minimum amount to launch a coin is 0.0245 SOL + a bit extra for swap fees

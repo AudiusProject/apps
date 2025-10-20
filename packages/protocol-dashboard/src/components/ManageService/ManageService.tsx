@@ -62,7 +62,6 @@ import { COOLDOWN_PERIOD_DOCS_URL } from 'utils/routes'
 import { sharedMessages } from 'utils/sharedMessages'
 
 import styles from './ManageService.module.css'
-import { RegisterNewServiceBtn } from './RegisterNewServiceBtn'
 
 const messages = {
   ownerTitle: 'Your Nodes',
@@ -124,8 +123,7 @@ interface ManageServiceProps {
   showViewActiveServices?: boolean
   showPendingTransactions?: boolean
   wallet: string
-  onClickDiscoveryTable?: () => void
-  onClickContentTable?: () => void
+  onClickNodesTable?: () => void
 }
 
 const Delegators = ({
@@ -418,7 +416,7 @@ const Stake = ({ stake, enableChange, disabledReason }: StakeProps) => {
 }
 
 const ManageService = (props: ManageServiceProps) => {
-  const wallet = props.wallet
+  const { wallet } = props
 
   const { isLoggedIn } = useAccount()
   const { status: accountUserStatus, user: accountUser } = useAccountUser()
@@ -456,7 +454,8 @@ const ManageService = (props: ManageServiceProps) => {
   const numNodes =
     isServiceProvider &&
     (serviceUser as Operator).discoveryProviders.length +
-      (serviceUser as Operator).contentNodes.length
+      (serviceUser as Operator).contentNodes.length +
+      (serviceUser as Operator).validators.length
   const numDelegators = isServiceProvider
     ? (serviceUser as Operator).delegators.length
     : 0
@@ -534,9 +533,6 @@ const ManageService = (props: ManageServiceProps) => {
           {isOwner ? null : <NodeOperatorInfoTooltip />}
         </Flex>
         <Flex gap='xl' alignItems='center'>
-          {isOwner ? (
-            <RegisterNewServiceBtn customText={messages.registerNode} />
-          ) : null}
           <Box css={{ textAlign: 'end' }}>
             <Text variant='heading' size='m' color='accent'>
               {AudiusClient.displayShortAud(aggregateContribution)}

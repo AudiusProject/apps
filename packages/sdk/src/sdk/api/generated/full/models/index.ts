@@ -36,6 +36,7 @@ export * from './ClaimableRewardNotification';
 export * from './ClaimableRewardNotificationAction';
 export * from './ClaimableRewardNotificationActionData';
 export * from './Coin';
+export * from './CoinMembersCountResponse';
 export * from './CoinResponse';
 export * from './CoinsResponse';
 export * from './CollectionActivityFull';

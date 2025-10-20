@@ -9,9 +9,7 @@ import {
 } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Flex,
   TextInput,
@@ -88,10 +86,6 @@ const SearchExplorePage = ({
   const searchBarRef = useRef<HTMLInputElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
-
-  const { isEnabled: isSearchExploreGoodiesEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE_GOODIES
-  )
 
   const handleSearchTab = useCallback(
     (newTab: string) => {
@@ -252,50 +246,34 @@ const SearchExplorePage = ({
           gap='2xl'
           css={{ display: showSearchResults ? 'none' : undefined }}
         >
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
-            <>
-              {showTrackContent && showUserContextualContent && (
-                <RecommendedTracksSection />
-              )}
-              {showTrackContent && showUserContextualContent && (
-                <RecentlyPlayedSection />
-              )}
-              <QuickSearchGrid />
-            </>
+          {showTrackContent && showUserContextualContent && (
+            <RecommendedTracksSection />
           )}
+          {showTrackContent && showUserContextualContent && (
+            <RecentlyPlayedSection />
+          )}
+          <QuickSearchGrid />
           {showPlaylistContent && <FeaturedPlaylistsSection />}
           {showTrackContent && <FeaturedRemixContestsSection />}
-
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
-            <UndergroundTrendingTracksSection />
-          )}
-
+          {showTrackContent && <UndergroundTrendingTracksSection />}
           {showUserContent && <ArtistSpotlightSection />}
-
           {showUserContent && <LabelSpotlightSection />}
-
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
+          {showTrackContent && (
             <>
               <ActiveDiscussionsSection />
               <DownloadsAvailableSection />
             </>
           )}
-
           {(showTrackContent || showAlbumContent || showPlaylistContent) && (
             <MoodGrid />
           )}
-
-          {isSearchExploreGoodiesEnabled ? (
-            <>
-              {showPlaylistContent && <TrendingPlaylistsSection />}
-              {showTrackContent && <MostSharedSection />}
-              {(showAlbumContent || showTrackContent) && <BestSellingSection />}
-              {showTrackContent && <RecentPremiumTracksSection />}
-              {showTrackContent && showUserContextualContent && (
-                <FeelingLuckySection />
-              )}
-            </>
-          ) : null}
+          {showPlaylistContent && <TrendingPlaylistsSection />}
+          {showTrackContent && <MostSharedSection />}
+          {(showAlbumContent || showTrackContent) && <BestSellingSection />}
+          {showTrackContent && <RecentPremiumTracksSection />}
+          {showTrackContent && showUserContextualContent && (
+            <FeelingLuckySection />
+          )}
           {showUserContextualContent && <RecentSearchesSection />}
         </Flex>
       </Flex>

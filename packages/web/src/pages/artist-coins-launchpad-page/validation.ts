@@ -5,20 +5,18 @@ import {
   QueryContextType,
   fetchCoinTickerAvailability,
   useQueryContext,
-  useConnectedWallets,
   useWalletAudioBalance
 } from '@audius/common/api'
 import { Chain, ErrorLevel, Feature } from '@audius/common/models'
 import { MAX_HANDLE_LENGTH } from '@audius/common/services'
 import { AUDIO } from '@audius/fixed-decimal'
+import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { useLaunchpadConfig } from 'hooks/useLaunchpadConfig'
 import { reportToSentry } from 'store/errors/reportToSentry'
-
-import { getLastConnectedSolWallet } from './utils'
 
 export const FIELDS = {
   coinName: 'coinName',
@@ -208,7 +206,6 @@ export const setupFormSchema = ({
 export const useLaunchpadFormSchema = () => {
   const queryClient = useQueryClient()
   const queryContext = useQueryContext()
-  const { data: connectedWallets } = useConnectedWallets()
   const { data: firstBuyQuoteData } = useLaunchpadConfig()
 
   const { maxAudioInputAmount, maxTokenOutputAmount } = useMemo(() => {
@@ -221,13 +218,12 @@ export const useLaunchpadFormSchema = () => {
     return firstBuyQuoteData
   }, [firstBuyQuoteData])
 
-  const connectedWallet = useMemo(
-    () => getLastConnectedSolWallet(connectedWallets),
-    [connectedWallets]
-  )
+  const externalWalletAccount = useExternalWalletAccount()
+  const externalWalletAddress = externalWalletAccount?.address
+
   const { data: audioBalance } = useWalletAudioBalance({
-    address: connectedWallet?.address ?? '',
-    chain: connectedWallet?.chain ?? Chain.Sol
+    address: externalWalletAddress ?? '',
+    chain: Chain.Sol
   })
   const { audioBalanceNumber } = useMemo(() => {
     if (!audioBalance) {
