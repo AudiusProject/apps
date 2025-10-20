@@ -423,12 +423,12 @@ export const LaunchpadBuyModal = ({
     if (swapPending) {
       setCurrentStep(BuyModalStep.Loading)
     }
-    if (swapError || swapData?.isError) {
+    if (swapError || swapData?.error) {
       track(
         make({ eventName: Name.LAUNCHPAD_BUY_MODAL_FAILURE, error: swapError })
       )
       console.error(swapError)
-      const toastMessage = swapData?.progress?.userCancelled
+      const toastMessage = swapData?.error?.userCancelled
         ? buySellMessages.transactionCancelled
         : buySellMessages.transactionFailed
       toast(toastMessage, 5000)
@@ -478,11 +478,12 @@ export const LaunchpadBuyModal = ({
         })
       )
       swapTokens({
-        inputAmountUi: Number(buyModalForm.values.inputAmount),
-        inputToken: selectedInputToken,
-        outputToken: OUTPUT_TOKEN,
+        amountUi: Number(buyModalForm.values.inputAmount),
+        inputMint: selectedInputToken.address,
+        outputMint: OUTPUT_TOKEN.address,
         walletAddress: externalWalletAddress!,
-        isAMM: false
+        inputDecimals: selectedInputToken.decimals,
+        outputDecimals: OUTPUT_TOKEN.decimals
       })
     }
   }

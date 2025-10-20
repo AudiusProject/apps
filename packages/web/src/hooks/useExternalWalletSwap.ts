@@ -129,8 +129,10 @@ export const useExternalWalletSwap = () => {
         // Determine error type based on progress
         let errorType = SwapErrorType.UNKNOWN
         let errorStage = 'UNKNOWN'
+        let userCancelled = false
 
         if (errorMessage.includes('User rejected')) {
+          userCancelled = true
           hookProgress.userCancelled = true
           errorType = SwapErrorType.WALLET_ERROR
           errorStage = 'USER_REJECTED'
@@ -156,7 +158,8 @@ export const useExternalWalletSwap = () => {
           additionalInfo: {
             ...params,
             progress: hookProgress,
-            errorStage
+            errorStage,
+            userCancelled
           }
         })
 
