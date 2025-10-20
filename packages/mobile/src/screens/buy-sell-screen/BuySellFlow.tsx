@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   useArtistCoin,
   useCoinPair,
+  useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
@@ -194,13 +195,18 @@ export const BuySellFlow = ({
 
   // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTabTokenPair)
+  const { mutate: performSwap, ...swapHookState } = useSwapCoins()
 
   const { handleShowConfirmation, isContinueButtonLoading } = useBuySellSwap({
     transactionData,
     currentScreen,
     setCurrentScreen,
     activeTab,
-    selectedPair: safeSelectedPair
+    selectedPair: safeSelectedPair,
+    swapHookData: swapHookState,
+    handleSwap: (params) => {
+      performSwap(params)
+    }
   })
 
   // Track if user has attempted to submit the form
