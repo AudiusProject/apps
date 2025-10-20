@@ -14,6 +14,7 @@ import {
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
+import { env } from 'services/env'
 
 const messages = {
   tradeWith: 'Trade with',
@@ -89,16 +90,21 @@ export const CurrentWalletBanner = ({
       handleConnect()
     }
   }
+  const isUSDC = inputToken.mint === env.USDC_MINT_ADDRESS
 
   const tokenBalanceString = isUsingExternalWallet
     ? externalWalletTokenBalance
-      ? formatCurrency(Number(externalWalletTokenBalance), 'en-US', '')
+      ? formatCurrency(
+          Number(externalWalletTokenBalance),
+          'en-US',
+          isUSDC ? '$' : ''
+        )
       : '0'
     : internalWalletTokenBalanceData
       ? formatCurrency(
           Number(internalWalletTokenBalanceData.balance),
           'en-US',
-          ''
+          isUSDC ? '$' : ''
         )
       : '0.00'
 
@@ -123,7 +129,7 @@ export const CurrentWalletBanner = ({
           </Text>
           {/* Wallet pill */}
           <Flex
-            backgroundColor='surface2'
+            backgroundColor='surface1'
             border='default'
             borderRadius='3xl'
             pl='xs'
@@ -140,11 +146,13 @@ export const CurrentWalletBanner = ({
               border='default'
               alignItems='center'
               justifyContent='center'
-              css={({ color }) => ({ backgroundColor: color.static.white })}
+              css={(theme) => ({
+                backgroundColor: theme.color.static.staticWhite
+              })}
             >
               <WalletIcon size='s' />
             </Flex>
-            <Text variant='body' size='m' strength='strong' color='subdued'>
+            <Text variant='body' size='m' strength='strong'>
               {addressText}
             </Text>
           </Flex>
