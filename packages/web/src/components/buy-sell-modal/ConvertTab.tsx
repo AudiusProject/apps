@@ -11,6 +11,8 @@ import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Divider, Flex, IconButton, IconTransaction } from '@audius/harmony'
 
+import { appkitModal } from 'app/ReownAppKitModal'
+
 import { BuySellTerms } from './components/BuySellTerms'
 import { CurrentWalletBanner } from './components/CurrentWalletBanner'
 import { InputTokenSection } from './components/InputTokenSection'
@@ -50,6 +52,7 @@ export const ConvertTab = ({
     return getCurrencyDecimalPlaces(tokenPriceData.price)
   }, [tokenPriceData?.price])
 
+  const externalWalletAccount = appkitModal.getAccount()
   const {
     inputAmount,
     outputAmount,
@@ -64,7 +67,8 @@ export const ConvertTab = ({
     outputCoin: selectedOutputToken,
     onTransactionDataChange,
     initialInputValue,
-    onInputValueChange
+    onInputValueChange,
+    externalWalletAddress: externalWalletAccount?.address
   })
 
   const { data: coins } = useArtistCoins()
