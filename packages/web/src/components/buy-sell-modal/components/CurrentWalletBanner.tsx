@@ -3,6 +3,9 @@ import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
 import {
   Flex,
   IconAudiusLogoColor,
+  IconPhantom,
+  IconMetamask,
+  IconSolana,
   LoadingSpinner,
   Skeleton,
   Text,
@@ -20,6 +23,22 @@ const messages = {
   available: 'Available'
 }
 
+type WalletIconComponent =
+  | typeof IconPhantom
+  | typeof IconMetamask
+  | typeof IconSolana
+
+const getWalletIcon = (): WalletIconComponent => {
+  // Check if Phantom is available
+  if (typeof window !== 'undefined' && window.phantom) {
+    return IconPhantom
+  }
+  if (typeof window !== 'undefined' && window.ethereum) {
+    return IconMetamask
+  }
+  return IconSolana // Fallback
+}
+
 export const CurrentWalletBanner = ({
   inputToken
 }: {
@@ -32,6 +51,10 @@ export const CurrentWalletBanner = ({
     disconnect,
     isPending: isConnectingExternalWallet
   } = useConnectExternalWallets()
+
+  const WalletIcon = isUsingExternalWallet
+    ? getWalletIcon()
+    : IconAudiusLogoColor
 
   const {
     data: externalWalletTokenBalance,
@@ -53,7 +76,7 @@ export const CurrentWalletBanner = ({
     await disconnect()
   }
   const handleConnect = () => {
-    openAppKitModal()
+    openAppKitModal('solana')
   }
   const addressText = isUsingExternalWallet
     ? shortenSPLAddress(externalWalletAccount?.address ?? '')
@@ -119,7 +142,7 @@ export const CurrentWalletBanner = ({
               justifyContent='center'
               css={({ color }) => ({ backgroundColor: color.static.white })}
             >
-              <IconAudiusLogoColor size='s' />
+              <WalletIcon size='s' />
             </Flex>
             <Text variant='body' size='m' strength='strong' color='subdued'>
               {addressText}

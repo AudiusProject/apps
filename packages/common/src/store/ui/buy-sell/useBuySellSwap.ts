@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import {
-  MutationStatus,
-  QueryStatus,
-  useQueryClient
-} from '@tanstack/react-query'
+import { MutationStatus, useQueryClient } from '@tanstack/react-query'
 
 import { SLIPPAGE_BPS, useArtistCoin, useCurrentAccountUser } from '~/api'
 import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
