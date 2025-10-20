@@ -4,7 +4,10 @@ import {
   useUser
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
+import {
+  ASSET_DETAIL_PAGE,
+  NOT_FOUND_PAGE
+} from '@audius/common/src/utils/route'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
 
@@ -106,8 +109,12 @@ export const AssetDetailPage = () => {
     enabled: !!coin?.ownerId
   })
 
-  if (!ticker || isError || (isSuccess && !coin)) {
+  if (!ticker) {
     return <Redirect to='/coins' />
+  }
+
+  if (isError || (isSuccess && !coin)) {
+    return <Redirect to={NOT_FOUND_PAGE} />
   }
 
   if (coinPending) {
