@@ -15,11 +15,14 @@ import { appkitModal } from 'app/ReownAppKitModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
 type ExternalWalletSwapParams = {
-  inputAmountUi: number
-  inputToken: { decimals: number; address: string }
-  outputToken: { decimals: number; address: string }
+  amountUi: number
+  inputMint: string
+  outputMint: string
+  slippageBps?: number
+  wrapUnwrapSol?: boolean
+  inputDecimals: number
+  outputDecimals: number
   walletAddress: string
-  isAMM: boolean
 }
 export const useExternalWalletSwap = () => {
   const { audiusSdk, env } = useQueryContext()
@@ -34,11 +37,12 @@ export const useExternalWalletSwap = () => {
         userCancelled: false
       }
       const {
-        inputAmountUi,
-        inputToken,
-        outputToken,
-        walletAddress,
-        isAMM = false
+        amountUi,
+        inputMint,
+        outputMint,
+        inputDecimals,
+        outputDecimals,
+        walletAddress
       } = params
 
       try {
@@ -49,13 +53,13 @@ export const useExternalWalletSwap = () => {
         if (!appKitSolanaProvider) {
           throw new Error('Missing appKitSolanaProvider')
         }
-        // Get jupiter quote first
+        // Get jupiter quote first (allow indirect routes through AUDIO for DBC swaps)
         const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
-          inputMint: inputToken.address,
-          outputMint: outputToken.address,
-          inputDecimals: inputToken.decimals,
-          outputDecimals: outputToken.decimals,
-          amountUi: inputAmountUi,
+          inputMint,
+          outputMint,
+          inputDecimals,
+          outputDecimals,
+          amountUi,
           swapMode: 'ExactIn',
           onlyDirectRoutes: false
         })
@@ -67,7 +71,7 @@ export const useExternalWalletSwap = () => {
           quoteResponse: quote.quote,
           userPublicKey: walletAddress,
           dynamicSlippage: true, // Uses the slippage from the quote
-          useSharedAccounts: !isAMM // Shared accounts cant be used for AMM pool swaps
+          useSharedAccounts: false // Shared accounts cant be used for AMM pool swaps
         }
         const swapTx = await jupiterInstance.swapPost({ swapRequest })
 
@@ -97,7 +101,7 @@ export const useExternalWalletSwap = () => {
 
         return {
           signature: txSignature,
-          inputAmount: inputAmountUi,
+          inputAmount: amountUi,
           outputAmount: quote.outputAmount.uiAmount,
           progress: hookProgress,
           isError: false
@@ -105,7 +109,7 @@ export const useExternalWalletSwap = () => {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error)
-        console.error('External wallet swap failed:', error)
+        console.error('External wallet swap failed:', error, hookProgress)
 
         if (errorMessage.includes('User rejected')) {
           hookProgress.userCancelled = true
@@ -134,15 +138,13 @@ export const useExternalWalletSwap = () => {
         // NOTE: invalidate queries does not work here, need to manually update the balances
 
         // Check for AUDIO as an edge case since it's stored in a different query hook
-        const isSpendingAudio =
-          params.inputToken.address === env.WAUDIO_MINT_ADDRESS
-        const isReceivingAudio =
-          params.outputToken.address === env.WAUDIO_MINT_ADDRESS
+        const isSpendingAudio = params.inputMint === env.WAUDIO_MINT_ADDRESS
+        const isReceivingAudio = params.outputMint === env.WAUDIO_MINT_ADDRESS
         // Update input token balance (subtract the amount spent)
         if (result.inputAmount && !isSpendingAudio) {
           const inputTokenQueryKey = getExternalWalletBalanceQueryKey({
             walletAddress: params.walletAddress,
-            mint: params.inputToken.address
+            mint: params.inputMint
           })
 
           queryClient.setQueryData(
@@ -161,7 +163,7 @@ export const useExternalWalletSwap = () => {
         if (result.outputAmount && !isReceivingAudio) {
           const outputTokenQueryKey = getExternalWalletBalanceQueryKey({
             walletAddress: params.walletAddress,
-            mint: params.outputToken.address
+            mint: params.outputMint
           })
 
           queryClient.setQueryData(
@@ -171,7 +173,7 @@ export const useExternalWalletSwap = () => {
                 // If no previous balance, create a new FixedDecimal with the output amount
                 return new FixedDecimal(
                   result.outputAmount!,
-                  params.outputToken.decimals
+                  params.outputDecimals
                 )
               }
               const currentAmount = Number(oldBalance.toString())

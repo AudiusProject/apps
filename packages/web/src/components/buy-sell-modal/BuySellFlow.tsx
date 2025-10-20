@@ -11,6 +11,7 @@ import {
   SwapStatus,
   useArtistCoin,
   useCoinPair,
+  useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
@@ -37,6 +38,7 @@ import { matchPath, useLocation } from 'react-router-dom'
 import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
+import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -223,6 +225,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
   const externalWalletAccount = appkitModal.getAccount()
+  const internalSwapHook = useSwapCoins()
+  const externalSwapHook = useExternalWalletSwap()
+  const { mutate: performSwap, ...swapHookState } =
+    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -237,14 +243,26 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    externalWalletAddress: externalWalletAccount?.address,
-    signFn: async (transaction) => {
-      const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
-      if (!solanaProvider) {
-        throw new Error('Missing SolanaProvider')
+    swapHookData: swapHookState,
+    handleSwap: async (params: {
+      inputMint: string
+      outputMint: string
+      amountUi: number
+      slippageBps: number
+    }) => {
+      const swapParams = {
+        ...params,
+        inputDecimals: selectedPair.quoteToken.decimals,
+        outputDecimals: selectedPair.baseToken.decimals
       }
-      const signedTx = await solanaProvider.signTransaction(transaction)
-      return signedTx
+      if (externalWalletAccount?.address) {
+        await performSwap({
+          ...swapParams,
+          walletAddress: externalWalletAccount.address
+        })
+      } else {
+        await performSwap(swapParams)
+      }
     }
   })
 
