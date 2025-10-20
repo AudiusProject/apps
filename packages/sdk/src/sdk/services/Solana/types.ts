@@ -162,3 +162,13 @@ export type ClaimFeesRequest = {
 export type ClaimFeesResponse = {
   claimFeeTxs: Array<string> // base64 encoded serialized transaction
 }
+
+export type ClaimVestedCoinsRequest = {
+  tokenMint: string
+  ownerWalletAddress: string
+  receiverWalletAddress: string
+}
+
+export type ClaimVestedCoinsResponse = {
+  claimVestedCoinsTxs: Array<string> // base64 encoded serialized transaction
+}
