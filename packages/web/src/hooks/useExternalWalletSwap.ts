@@ -3,6 +3,7 @@ import { ErrorLevel, Feature } from '@audius/common/models'
 import {
   SwapErrorType,
   SwapStatus,
+  SwapTokensParams,
   SwapTokensResult
 } from '@audius/common/src/api/tan-query/jupiter/types'
 import { getExternalWalletBalanceQueryKey } from '@audius/common/src/api/tan-query/wallets/useExternalWalletBalance'
@@ -19,16 +20,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { appkitModal } from 'app/ReownAppKitModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
-type ExternalWalletSwapParams = {
-  amountUi: number
-  inputMint: string
-  outputMint: string
-  slippageBps?: number
-  wrapUnwrapSol?: boolean
+export type ExternalWalletSwapParams = {
   inputDecimals: number
   outputDecimals: number
   walletAddress: string
-}
+} & SwapTokensParams
+
 export const useExternalWalletSwap = () => {
   const { audiusSdk, env } = useQueryContext()
   const queryClient = useQueryClient()
@@ -60,6 +57,7 @@ export const useExternalWalletSwap = () => {
         if (!appKitSolanaProvider) {
           throw new Error('Missing appKitSolanaProvider')
         }
+
         // Get jupiter quote first (allow indirect routes through AUDIO for DBC swaps)
         const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
           inputMint,

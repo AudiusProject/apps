@@ -32,7 +32,6 @@ import {
   useCoinStates
 } from '@audius/common/store'
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
-import { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { matchPath, useLocation } from 'react-router-dom'
 
 import { appkitModal } from 'app/ReownAppKitModal'
@@ -227,7 +226,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const externalWalletAccount = appkitModal.getAccount()
   const internalSwapHook = useSwapCoins()
   const externalSwapHook = useExternalWalletSwap()
-  const { mutate: performSwap, ...swapHookState } =
+  const { mutateAsync: performSwap, ...swapHookState } =
     externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
@@ -252,17 +251,12 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }) => {
       const swapParams = {
         ...params,
-        inputDecimals: selectedPair.quoteToken.decimals,
-        outputDecimals: selectedPair.baseToken.decimals
+        // External wallet swaps require some extra params
+        inputDecimals: swapTokens.inputTokenInfo!.decimals,
+        outputDecimals: swapTokens.outputTokenInfo!.decimals,
+        walletAddress: externalWalletAccount?.address as string
       }
-      if (externalWalletAccount?.address) {
-        await performSwap({
-          ...swapParams,
-          walletAddress: externalWalletAccount.address
-        })
-      } else {
-        await performSwap(swapParams)
-      }
+      await performSwap(swapParams)
     }
   })
 
