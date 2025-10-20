@@ -49,7 +49,8 @@ interface LaunchCoinRequestBody {
 
 const AUDIUS_COIN_URL = (ticker: string) => `https://audius.co/coins/${ticker}`
 
-const TARGET_IRYS_BALANCE = sol(0.1) // Target deposit balance for Irys per fee payer
+const MIN_IRYS_BALANCE = sol(0.1) // Min balance to keep in Irys per fee payer
+const FUND_TO_IRYS_BALANCE = sol(0.15) // Amount to fund Irys balance to
 
 type FeePayerUmi = {
   umi: ReturnType<typeof createUmi>
@@ -73,13 +74,13 @@ const topUpIrysBalances = async () => {
         const uploader = umi.uploader
         if (!isIrysUploader(uploader)) return
         const balance = await uploader.getBalance()
-        if (isLessThanAmount(balance, TARGET_IRYS_BALANCE)) {
+        if (isLessThanAmount(balance, MIN_IRYS_BALANCE)) {
           logger.info({
             message: 'Irys balance is less than target balance',
             balance,
-            targetBalance: TARGET_IRYS_BALANCE
+            targetBalance: FUND_TO_IRYS_BALANCE
           })
-          const required = subtractAmounts(TARGET_IRYS_BALANCE, balance)
+          const required = subtractAmounts(FUND_TO_IRYS_BALANCE, balance)
           logger.info({
             message: 'Required Irys balance',
             required
@@ -175,7 +176,6 @@ export const launchCoin = async (
     // Pick a random fee payer to pay for Tx's
     // It also "owns" our new coin metadata and pay for the TX
     const index = Math.floor(Math.random() * solanaFeePayerWallets.length)
-    const feePayer = solanaFeePayerWallets[index]
 
     // The new mint keypair for the coin
     const mintKeypair = await getKeypair(logger)
@@ -207,11 +207,13 @@ export const launchCoin = async (
     })
     const umi = feePayerUmis[index].umi
 
-    // Resize incoming image to 400x400 and convert to png for consistency
-    const resizedBuffer = await sharp(file.buffer)
-      .resize(400, 400, { fit: 'cover' })
-      .png()
-      .toBuffer()
+    // Resize incoming image to 1000x1000 and convert to png for consistency
+    const img = sharp(file.buffer)
+    const { width, height } = await img.metadata()
+    const resizedBuffer =
+      width && height && (width > 1000 || height > 1000)
+        ? await img.resize(1000, 1000, { fit: 'inside' }).png().toBuffer()
+        : await img.png().toBuffer()
 
     const umiImageFile = createGenericFile(resizedBuffer, '', {
       tags: [{ name: 'Content-Type', value: 'image/png' }]
