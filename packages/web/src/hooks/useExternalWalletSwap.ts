@@ -1,5 +1,11 @@
 import { useQueryContext } from '@audius/common/api'
 import { ErrorLevel, Feature } from '@audius/common/models'
+import {
+  SwapErrorType,
+  SwapStatus,
+  SwapTokensParams,
+  SwapTokensResult
+} from '@audius/common/src/api/tan-query/jupiter/types'
 import { getExternalWalletBalanceQueryKey } from '@audius/common/src/api/tan-query/wallets/useExternalWalletBalance'
 import {
   getJupiterQuoteByMintWithRetry,
@@ -14,18 +20,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { appkitModal } from 'app/ReownAppKitModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
-type ExternalWalletSwapParams = {
-  inputAmountUi: number
-  inputToken: { decimals: number; address: string }
-  outputToken: { decimals: number; address: string }
+export type ExternalWalletSwapParams = {
+  inputDecimals: number
+  outputDecimals: number
   walletAddress: string
-  isAMM: boolean
-}
+} & SwapTokensParams
+
 export const useExternalWalletSwap = () => {
   const { audiusSdk, env } = useQueryContext()
   const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (params: ExternalWalletSwapParams) => {
+  return useMutation<SwapTokensResult, Error, ExternalWalletSwapParams>({
+    mutationFn: async (
+      params: ExternalWalletSwapParams
+    ): Promise<SwapTokensResult> => {
       const hookProgress = {
         receivedQuote: false,
         receivedSwapTx: false,
@@ -34,11 +41,12 @@ export const useExternalWalletSwap = () => {
         userCancelled: false
       }
       const {
-        inputAmountUi,
-        inputToken,
-        outputToken,
-        walletAddress,
-        isAMM = false
+        amountUi,
+        inputMint,
+        outputMint,
+        inputDecimals,
+        outputDecimals,
+        walletAddress
       } = params
 
       try {
@@ -49,13 +57,14 @@ export const useExternalWalletSwap = () => {
         if (!appKitSolanaProvider) {
           throw new Error('Missing appKitSolanaProvider')
         }
-        // Get jupiter quote first
+
+        // Get jupiter quote first (allow indirect routes through AUDIO for DBC swaps)
         const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
-          inputMint: inputToken.address,
-          outputMint: outputToken.address,
-          inputDecimals: inputToken.decimals,
-          outputDecimals: outputToken.decimals,
-          amountUi: inputAmountUi,
+          inputMint,
+          outputMint,
+          inputDecimals,
+          outputDecimals,
+          amountUi,
           swapMode: 'ExactIn',
           onlyDirectRoutes: false
         })
@@ -67,7 +76,7 @@ export const useExternalWalletSwap = () => {
           quoteResponse: quote.quote,
           userPublicKey: walletAddress,
           dynamicSlippage: true, // Uses the slippage from the quote
-          useSharedAccounts: !isAMM // Shared accounts cant be used for AMM pool swaps
+          useSharedAccounts: false // Shared accounts cant be used for AMM pool swaps
         }
         const swapTx = await jupiterInstance.swapPost({ swapRequest })
 
@@ -96,19 +105,42 @@ export const useExternalWalletSwap = () => {
         hookProgress.confirmedSwapTx = true
 
         return {
+          status: SwapStatus.SUCCESS,
           signature: txSignature,
-          inputAmount: inputAmountUi,
-          outputAmount: quote.outputAmount.uiAmount,
-          progress: hookProgress,
-          isError: false
+          inputAmount: {
+            amount: quote.inputAmount.amount,
+            uiAmount: amountUi
+          },
+          outputAmount: {
+            amount: quote.outputAmount.amount,
+            uiAmount: quote.outputAmount.uiAmount
+          }
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error)
-        console.error('External wallet swap failed:', error)
+        console.error('External wallet swap failed:', error, hookProgress)
+
+        // Determine error type based on progress
+        let errorType = SwapErrorType.UNKNOWN
+        let errorStage = 'UNKNOWN'
 
         if (errorMessage.includes('User rejected')) {
           hookProgress.userCancelled = true
+          errorType = SwapErrorType.WALLET_ERROR
+          errorStage = 'USER_REJECTED'
+        } else if (!hookProgress.receivedQuote) {
+          errorType = SwapErrorType.QUOTE_FAILED
+          errorStage = 'GETTING_QUOTE'
+        } else if (!hookProgress.receivedSwapTx) {
+          errorType = SwapErrorType.BUILD_FAILED
+          errorStage = 'BUILDING_TRANSACTION'
+        } else if (!hookProgress.sentSwapTx) {
+          errorType = SwapErrorType.WALLET_ERROR
+          errorStage = 'SIGNING_TRANSACTION'
+        } else if (!hookProgress.confirmedSwapTx) {
+          errorType = SwapErrorType.RELAY_FAILED
+          errorStage = 'SENDING_TRANSACTION'
         }
 
         reportToSentry({
@@ -118,31 +150,36 @@ export const useExternalWalletSwap = () => {
           name: 'External Wallet Swap Error',
           additionalInfo: {
             ...params,
-            progress: hookProgress
+            progress: hookProgress,
+            errorStage
           }
         })
 
-        // We return the values here instead of throwing because we want to know if the error was due to a user cancellation or not
-        return { progress: hookProgress, isError: true }
+        return {
+          status: SwapStatus.ERROR,
+          errorStage,
+          error: {
+            type: errorType,
+            message: errorMessage
+          }
+        }
       }
     },
     onSuccess: (result, params) => {
       // NOTE: due to how we are catching errors in the function, this onSuccess will still run on a handled error
       // (since we're still returning a result no matter what)
-      if (!result.isError) {
+      if (result.status === SwapStatus.SUCCESS) {
         // Update external wallet balances optimistically
         // NOTE: invalidate queries does not work here, need to manually update the balances
 
         // Check for AUDIO as an edge case since it's stored in a different query hook
-        const isSpendingAudio =
-          params.inputToken.address === env.WAUDIO_MINT_ADDRESS
-        const isReceivingAudio =
-          params.outputToken.address === env.WAUDIO_MINT_ADDRESS
+        const isSpendingAudio = params.inputMint === env.WAUDIO_MINT_ADDRESS
+        const isReceivingAudio = params.outputMint === env.WAUDIO_MINT_ADDRESS
         // Update input token balance (subtract the amount spent)
         if (result.inputAmount && !isSpendingAudio) {
           const inputTokenQueryKey = getExternalWalletBalanceQueryKey({
             walletAddress: params.walletAddress,
-            mint: params.inputToken.address
+            mint: params.inputMint
           })
 
           queryClient.setQueryData(
@@ -150,7 +187,7 @@ export const useExternalWalletSwap = () => {
             (oldBalance: FixedDecimal | undefined) => {
               if (!oldBalance) return oldBalance
               const currentAmount = Number(oldBalance.toString())
-              const inputAmount = result.inputAmount!
+              const inputAmount = result.inputAmount!.uiAmount
               const newAmount = Math.max(0, currentAmount - inputAmount) // Ensure non-negative
               return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
             }
@@ -161,7 +198,7 @@ export const useExternalWalletSwap = () => {
         if (result.outputAmount && !isReceivingAudio) {
           const outputTokenQueryKey = getExternalWalletBalanceQueryKey({
             walletAddress: params.walletAddress,
-            mint: params.outputToken.address
+            mint: params.outputMint
           })
 
           queryClient.setQueryData(
@@ -170,12 +207,12 @@ export const useExternalWalletSwap = () => {
               if (!oldBalance) {
                 // If no previous balance, create a new FixedDecimal with the output amount
                 return new FixedDecimal(
-                  result.outputAmount!,
-                  params.outputToken.decimals
+                  result.outputAmount!.uiAmount,
+                  params.outputDecimals
                 )
               }
               const currentAmount = Number(oldBalance.toString())
-              const outputAmount = result.outputAmount!
+              const outputAmount = result.outputAmount!.uiAmount
               const newAmount = currentAmount + outputAmount
               return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
             }

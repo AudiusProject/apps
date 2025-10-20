@@ -12,6 +12,7 @@ import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Divider, Flex, IconButton, IconTransaction } from '@audius/harmony'
 
 import { BuySellTerms } from './components/BuySellTerms'
+import { CurrentWalletBanner } from './components/CurrentWalletBanner'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -54,7 +55,6 @@ export const ConvertTab = ({
     outputAmount,
     isExchangeRateLoading,
     isBalanceLoading,
-    availableBalance,
     currentExchangeRate,
     handleInputAmountChange,
     handleOutputAmountChange,
@@ -158,13 +158,18 @@ export const ConvertTab = ({
         <TabContentSkeleton />
       ) : (
         <>
+          <CurrentWalletBanner
+            inputToken={{
+              mint: selectedInputToken.address,
+              symbol: selectedInputToken.symbol
+            }}
+          />
           <InputTokenSection
             title={buySellMessages.youPay}
             tokenInfo={selectedInputToken}
             amount={inputAmount}
             onAmountChange={handleInputAmountChange}
             onMaxClick={handleMaxClick}
-            availableBalance={availableBalance}
             error={error}
             errorMessage={errorMessage}
             availableTokens={availableInputTokens}

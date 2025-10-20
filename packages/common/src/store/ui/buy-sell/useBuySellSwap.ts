@@ -27,7 +27,13 @@ type UseBuySellSwapProps = {
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
   selectedPair: CoinPair
-  onClose: () => void
+  swapHookData: any // TODO
+  handleSwap: (params: {
+    inputMint: string
+    outputMint: string
+    amountUi: number
+    slippageBps: number
+  }) => void
 }
 
 export const useBuySellSwap = (props: UseBuySellSwapProps) => {
@@ -36,7 +42,9 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     currentScreen,
     setCurrentScreen,
     activeTab,
-    selectedPair
+    selectedPair,
+    swapHookData,
+    handleSwap
   } = props
   const queryClient = useQueryClient()
   const { data: user } = useCurrentAccountUser()
@@ -47,12 +55,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     selectedPair.quoteToken.address ?? ''
   )
 
-  const {
-    mutate: swapTokens,
-    status: swapStatus,
-    error: swapError,
-    data: swapData
-  } = useSwapCoins()
+  const { status: swapStatus, error: swapError, data: swapData } = swapHookData
 
   const performSwap = () => {
     if (!transactionData || !transactionData.isValid) return
@@ -73,7 +76,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       outputMintAddress = selectedPair.quoteToken.address ?? ''
     }
 
-    swapTokens({
+    handleSwap({
       inputMint: inputMintAddress,
       outputMint: outputMintAddress,
       amountUi: inputAmount,

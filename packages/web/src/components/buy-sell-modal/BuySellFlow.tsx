@@ -11,6 +11,7 @@ import {
   SwapStatus,
   useArtistCoin,
   useCoinPair,
+  useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
@@ -33,8 +34,10 @@ import {
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router-dom'
 
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
+import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -161,6 +164,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance)
+  // TODO : modify this to account for external wallets
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
@@ -219,6 +223,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
+  const externalWalletAccount = appkitModal.getAccount()
+  const internalSwapHook = useSwapCoins()
+  const externalSwapHook = useExternalWalletSwap()
+  const { mutateAsync: performSwap, ...swapHookState } =
+    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -233,7 +242,22 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    onClose
+    swapHookData: swapHookState,
+    handleSwap: async (params: {
+      inputMint: string
+      outputMint: string
+      amountUi: number
+      slippageBps: number
+    }) => {
+      const swapParams = {
+        ...params,
+        // External wallet swaps require some extra params
+        inputDecimals: swapTokens.inputTokenInfo!.decimals,
+        outputDecimals: swapTokens.outputTokenInfo!.decimals,
+        walletAddress: externalWalletAccount?.address as string
+      }
+      await performSwap(swapParams)
+    }
   })
 
   const currentExchangeRate = useMemo(

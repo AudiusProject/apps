@@ -13,6 +13,7 @@ import {
   PlainButton,
   Text
 } from '@audius/harmony'
+import { useAppKitState } from '@reown/appkit/react'
 
 import { zIndex } from '../../utils/zIndex'
 
@@ -26,6 +27,7 @@ export const BuySellModal = () => {
   const { ticker, initialTab } = data
   const { onOpen: openAddCashModal } = useAddCashModal()
   const [resetState, setResetState] = useState<(() => void) | null>(null)
+  const { open: isAppKitModalOpen } = useAppKitState()
 
   const [modalScreen, setModalScreen] = useState<Screen>('input')
   const [isFlowLoading, setIsFlowLoading] = useState(false)
@@ -52,7 +54,8 @@ export const BuySellModal = () => {
       onClosed={resetState ?? undefined}
       size='medium'
       zIndex={zIndex.BUY_SELL_MODAL}
-      dismissOnClickOutside={modalScreen !== 'confirm'}
+      // We open the appkit modal from within this modal - dont want to close the modal while the other modal is on top
+      dismissOnClickOutside={modalScreen !== 'confirm' && !isAppKitModalOpen}
     >
       <ModalHeader
         onClose={onClose}
