@@ -171,8 +171,7 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri,
-              dbcPool: confirmRes.dbcPool
+              logoUri: imageUri
               // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })
