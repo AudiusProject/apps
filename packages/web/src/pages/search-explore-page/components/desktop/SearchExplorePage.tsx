@@ -59,7 +59,7 @@ import { RecommendedTracksSection } from './RecommendedTracksSection'
 import { TrendingPlaylistsSection } from './TrendingPlaylistsSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
-export type ExplorePageProps = {
+export type SearchExplorePageProps = {
   title: string
   pageTitle: string
   description: string
@@ -104,7 +104,11 @@ const DEBOUNCE_MS = 200
 const MIN_WIDTH = 840
 const NORMAL_WIDTH = 1200
 
-const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
+const SearchExplorePage = ({
+  title,
+  pageTitle,
+  description
+}: SearchExplorePageProps) => {
   const [categoryKey, setCategory] = useSearchCategory()
   const [searchParams, setSearchParams] = useSearchParams()
   const [inputValue, setInputValue] = useState(searchParams.get('query') || '')
@@ -350,4 +354,4 @@ const ExplorePage = ({ title, pageTitle, description }: ExplorePageProps) => {
   )
 }
 
-export default ExplorePage
+export default SearchExplorePage

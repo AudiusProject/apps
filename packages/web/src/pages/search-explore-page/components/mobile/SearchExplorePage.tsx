@@ -56,7 +56,7 @@ import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
 import { TrendingPlaylistsSection } from '../desktop/TrendingPlaylistsSection'
 import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
-export type ExplorePageProps = {
+export type SearchExplorePageProps = {
   title: string
   pageTitle: string
   description: string
@@ -71,7 +71,11 @@ export enum SearchTabs {
 
 const DEBOUNCE_MS = 200
 
-const ExplorePage = () => {
+const SearchExplorePage = ({
+  title,
+  pageTitle,
+  description
+}: SearchExplorePageProps) => {
   const [categoryKey, setCategory] = useSearchCategory()
   const [searchParams, setSearchParams] = useSearchParams()
   const [inputValue, setInputValue] = useState(searchParams.get('query') || '')
@@ -277,4 +281,4 @@ const ExplorePage = () => {
   )
 }
 
-export default ExplorePage
+export default SearchExplorePage
