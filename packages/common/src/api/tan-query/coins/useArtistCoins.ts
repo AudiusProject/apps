@@ -79,18 +79,18 @@ export const getArtistCoinsQueryKey = (params?: UseArtistCoinsParams) =>
     InfiniteData<Coin[], number>
   >
 
-export const useArtistCoins = (
+export const useArtistCoins = <TData = Coin[]>(
   params: UseArtistCoinsParams = {},
   options?: Omit<
     UseInfiniteQueryOptions<
       Coin[],
       Error,
-      Coin[],
+      TData,
       Coin[],
       QueryKey<InfiniteData<Coin[], number>>,
       number
     >,
-    'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam' | 'select'
+    'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam'
   >
 ) => {
   const { audiusSdk } = useQueryContext()
@@ -134,7 +134,7 @@ export const useArtistCoins = (
       return allPages.length * pageSize
     },
     enabled: options?.enabled !== false,
-    select: (data) => data.pages.flat(),
+    select: options?.select ?? ((data) => data.pages.flat() as TData),
     ...options
   })
 }

@@ -103,9 +103,16 @@ const CustomOption = (props: OptionProps<TokenOption>) => {
 }
 
 const CustomInput = (props: InputProps<TokenOption>) => {
+  // Extract only the props we need from react-select's InputProps
+  // to avoid passing invalid props to TextInput
+  const { value, onChange, onBlur, onFocus } = props
+
   return (
     <TextInput
-      {...props}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      onFocus={onFocus}
       placeholder='Search'
       startIcon={IconSearch}
       label='Search'
