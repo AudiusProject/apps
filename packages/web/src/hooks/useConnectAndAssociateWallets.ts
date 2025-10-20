@@ -221,10 +221,8 @@ export const useConnectAndAssociateWallets = (
     [make, onError, track]
   )
 
-  const { isPending: isConnecting, openAppKitModal } = useConnectExternalWallets(
-    handleConnectSuccess,
-    handleConnectError
-  )
+  const { isPending: isConnecting, openAppKitModal } =
+    useConnectExternalWallets(handleConnectSuccess, handleConnectError)
 
   return {
     isPending: isConnecting || isAssociating,

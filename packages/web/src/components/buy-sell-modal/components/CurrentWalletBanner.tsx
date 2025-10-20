@@ -1,5 +1,4 @@
 import { useCoinBalance, useExternalWalletBalance } from '@audius/common/api'
-import { TOKEN_LISTING_MAP } from '@audius/common/store'
 import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
 import {
   Flex,
