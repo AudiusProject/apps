@@ -52,19 +52,15 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
 
 type AssetDetailContentProps = {
   mint: string
-  isAnonymousUser: boolean
 }
 
-export const AssetDetailContent = ({
-  mint,
-  isAnonymousUser
-}: AssetDetailContentProps) => {
+export const AssetDetailContent = ({ mint }: AssetDetailContentProps) => {
   const styles = useStyles()
 
   return (
     <Flex css={styles.container}>
       <Flex css={styles.leftSection}>
-        {isAnonymousUser ? null : <BalanceSection mint={mint} />}
+        <BalanceSection mint={mint} />
         <AssetInfoSection mint={mint} />
       </Flex>
       <Flex css={styles.rightSection}>

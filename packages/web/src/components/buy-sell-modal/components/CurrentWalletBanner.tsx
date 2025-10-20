@@ -1,4 +1,8 @@
-import { useCoinBalance, useExternalWalletBalance } from '@audius/common/api'
+import {
+  useCoinBalance,
+  useCurrentAccountUser,
+  useExternalWalletBalance
+} from '@audius/common/api'
 import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
 import {
   Flex,
@@ -18,7 +22,8 @@ import { env } from 'services/env'
 
 const messages = {
   tradeWith: 'Trade with',
-  builtInWallet: 'Built-In Wallet',
+  builtInWallet: 'Built-in Wallet',
+  builtInWalletNotAvailable: 'Built-in wallet not available',
   connect: 'Connect',
   disconnect: 'Disconnect',
   available: 'Available'
@@ -45,6 +50,8 @@ export const CurrentWalletBanner = ({
 }: {
   inputToken: { mint: string; symbol: string }
 }) => {
+  const { data: currentUser } = useCurrentAccountUser()
+  const isAnonymousUser = !currentUser
   const externalWalletAccount = appkitModal.getAccount()
   const isUsingExternalWallet = !!externalWalletAccount?.address
   const {
@@ -112,62 +119,58 @@ export const CurrentWalletBanner = ({
     ? isExternalWalletTokenBalanceLoading
     : isInternalWalletTokenBalanceLoading
 
+  const noCurrentWallet = isAnonymousUser && !isUsingExternalWallet
+
   return (
     <Flex
       backgroundColor='surface1'
       border='default'
       borderRadius='m'
       p='m'
-      gap='xs'
-      direction='column'
+      gap='m'
+      alignItems='flex-start'
+      justifyContent='space-between'
     >
-      {/* Top row: "Trade with [Wallet]" and balance */}
-      <Flex alignItems='center' justifyContent='space-between' w='100%'>
+      {/* Left side: "Trade with [Wallet]" and "Connect" link */}
+      <Flex direction='column' gap='xs'>
         <Flex gap='xs' alignItems='center'>
           <Text variant='body' size='l'>
-            {messages.tradeWith}
+            {noCurrentWallet
+              ? messages.builtInWalletNotAvailable
+              : messages.tradeWith}
           </Text>
           {/* Wallet pill */}
-          <Flex
-            backgroundColor='surface1'
-            border='default'
-            borderRadius='3xl'
-            pl='xs'
-            pr='s'
-            pv='xs'
-            gap='xs'
-            alignItems='center'
-          >
-            {/* Icon circle */}
+          {!noCurrentWallet ? (
             <Flex
-              w={24}
-              h={24}
-              borderRadius='3xl'
+              backgroundColor='surface1'
               border='default'
+              borderRadius='3xl'
+              pl='xs'
+              pr='s'
+              pv='xs'
+              gap='xs'
               alignItems='center'
-              justifyContent='center'
-              css={(theme) => ({
-                backgroundColor: theme.color.static.staticWhite
-              })}
             >
-              <WalletIcon size='s' />
+              {/* Icon circle */}
+              <Flex
+                w={24}
+                h={24}
+                borderRadius='3xl'
+                border='default'
+                alignItems='center'
+                justifyContent='center'
+                css={(theme) => ({
+                  backgroundColor: theme.color.static.staticWhite
+                })}
+              >
+                <WalletIcon size='s' />
+              </Flex>
+              <Text variant='body' size='m' strength='strong'>
+                {addressText}
+              </Text>
             </Flex>
-            <Text variant='body' size='m' strength='strong'>
-              {addressText}
-            </Text>
-          </Flex>
+          ) : null}
         </Flex>
-        <Text variant='body' size='l' strength='strong'>
-          {isTokenBalanceLoading ? (
-            <Skeleton h='24px' w='60px' />
-          ) : (
-            `${tokenBalanceString} ${inputToken.symbol}`
-          )}
-        </Text>
-      </Flex>
-
-      {/* Bottom row: "Connect" link and "Available" text */}
-      <Flex alignItems='center' justifyContent='space-between' w='100%'>
         <TextLink
           variant='visible'
           href='#'
@@ -183,10 +186,23 @@ export const CurrentWalletBanner = ({
             )}
           </Text>
         </TextLink>
-        <Text variant='body' size='l' color='subdued'>
-          {messages.available}
-        </Text>
       </Flex>
+
+      {/* Right side: balance and "Available" text */}
+      {!noCurrentWallet ? (
+        <Flex direction='column' gap='xs' alignItems='flex-end'>
+          <Text variant='body' size='l' strength='strong'>
+            {isTokenBalanceLoading ? (
+              <Skeleton h='24px' w='60px' />
+            ) : (
+              `${tokenBalanceString} ${inputToken.symbol}`
+            )}
+          </Text>
+          <Text variant='body' size='l' color='subdued'>
+            {messages.available}
+          </Text>
+        </Flex>
+      ) : null}
     </Flex>
   )
 }

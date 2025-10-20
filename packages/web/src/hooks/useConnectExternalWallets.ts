@@ -13,8 +13,6 @@ import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
 
-import { useRequiresAccountCallback } from './useRequiresAccount'
-
 /**
  * Error when trying to associate a wallet that was already associated
  */
@@ -77,7 +75,7 @@ export const useConnectExternalWallets = (
    * - Ensures all existing connections are disconnected
    * - Ensures that the network is set to mainnet (for Eth)
    */
-  const openAppKitModalCallback = useRequiresAccountCallback(
+  const openAppKitModalCallback = useCallback(
     async (namespace?: keyof NamespaceTypeMap) => {
       setIsConnecting(true)
       // If previously connected, disconnect to give a "fresh" view of options

@@ -4,7 +4,8 @@ import {
   TEMP_ARTIST_COINS_PAGE_SIZE,
   transformArtistCoinsToTokenInfoMap,
   useArtistCoin,
-  useArtistCoins
+  useArtistCoins,
+  useCurrentAccountUser
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import type { CoinInfo } from '@audius/common/store'
@@ -32,6 +33,8 @@ export const BuyTab = ({
 }: BuyTabProps) => {
   const { baseToken, quoteToken } = tokenPair
 
+  const { data: currentUser } = useCurrentAccountUser()
+  const isAnonymousUser = !currentUser
   const [selectedOutputToken, setSelectedOutputToken] = useState(baseToken)
 
   // Sync selectedOutputToken with baseToken when tokenPair changes
@@ -92,7 +95,7 @@ export const BuyTab = ({
   // Show initial loading state if balance is loading,
   // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
-    isBalanceLoading ||
+    (!isAnonymousUser && isBalanceLoading) ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)
 
   return (

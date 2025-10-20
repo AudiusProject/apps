@@ -11,6 +11,7 @@ import {
   SwapStatus,
   useArtistCoin,
   useCoinPair,
+  useCurrentAccountUser,
   useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
@@ -88,6 +89,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     handleTransactionDataChange,
     resetTransactionData
   } = useBuySellTransactionData()
+
+  const { data: currentUser } = useCurrentAccountUser()
 
   const { activeTab, handleActiveTabChange } = useBuySellTabs({
     setCurrentScreen,
@@ -435,6 +438,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const shouldShowError =
     !!displayErrorMessage || (activeTab === 'buy' && !hasSufficientBalance)
 
+  const userHasNoWallet = !externalWalletAccount?.address && !currentUser
+
   if (isConfirmButtonLoading && currentScreen !== 'success') {
     return <ModalLoading />
   }
@@ -523,7 +528,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isLoading={
               isContinueButtonLoading || transactionData?.isExchangeRateLoading
             }
-            disabled={transactionData?.isExchangeRateLoading}
+            disabled={transactionData?.isExchangeRateLoading || userHasNoWallet}
             onClick={handleContinueClick}
           >
             {messages.continue}
