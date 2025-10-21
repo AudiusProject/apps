@@ -95,10 +95,12 @@ const ZeroBalanceState = ({
   onReceive,
   coinName,
   isBuySellSupported,
-  isCoinCreator
+  isCoinCreator,
+  isAnonymousUser
 }: BalanceStateProps & {
   isBuySellSupported: boolean
   isCoinCreator: boolean
+  isAnonymousUser: boolean
 }) => {
   const isManagerMode = useIsManagedAccount()
   return (
@@ -160,9 +162,11 @@ const ZeroBalanceState = ({
             </Button>
           </Box>
         </Tooltip>
-        <Button variant='secondary' fullWidth onClick={onReceive}>
-          {walletMessages.receive}
-        </Button>
+        {!isAnonymousUser ? (
+          <Button variant='secondary' fullWidth onClick={onReceive}>
+            {walletMessages.receive}
+          </Button>
+        ) : null}
       </Flex>
     </>
   )
@@ -352,7 +356,7 @@ type CoinDetailProps = {
 
 const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
-  const { data: tokenBalance, isPending: tokenBalanceLoading } = useCoinBalance(
+  const { data: tokenBalance, isLoading: tokenBalanceLoading } = useCoinBalance(
     { mint }
   )
   const { data: currentUser } = useCurrentAccountUser()
@@ -377,14 +381,10 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   }, [setIsOpenAppDrawerOpen])
 
   // Handler functions with account requirements - defined before early return
-  const handleBuySell = useRequiresAccountCallback(() => {
+  const handleBuySell = useCallback(() => {
     // Has balance - show buy/sell modal
     openBuySellModal({ initialTab, isOpen: true })
-  }, [openBuySellModal, initialTab])
-
-  const handleAddCash = useRequiresAccountCallback(() => {
-    openBuySellModal({ initialTab, isOpen: true })
-  }, [openBuySellModal, initialTab])
+  }, [initialTab, openBuySellModal])
 
   const handleReceive = useRequiresAccountCallback(() => {
     openReceiveTokensModal({
@@ -422,10 +422,11 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
           <ZeroBalanceState
             ticker={ticker}
             logoURI={logoURI}
-            onBuy={isMobile ? onOpenOpenAppDrawer : handleAddCash}
+            onBuy={isMobile ? onOpenOpenAppDrawer : handleBuySell}
             onReceive={handleReceive}
             coinName={coinName}
             isBuySellSupported={isBuySellSupported}
+            isAnonymousUser={!currentUser}
             isCoinCreator={isCoinCreator}
           />
         ) : (

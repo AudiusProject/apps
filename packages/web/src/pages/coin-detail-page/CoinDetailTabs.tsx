@@ -26,14 +26,12 @@ type UseCoinDetailTabsProps = {
   mint: string
   ticker?: string
   isOwner?: boolean
-  isAnonymousUser?: boolean
 }
 
 export const useCoinDetailTabs = ({
   mint,
   ticker,
-  isOwner = false,
-  isAnonymousUser = false
+  isOwner = false
 }: UseCoinDetailTabsProps) => {
   const [selectedTab, setSelectedTab] = useState(CoinDetailTabType.HOME)
   const navigate = useNavigate()
@@ -63,11 +61,7 @@ export const useCoinDetailTabs = ({
   ]
 
   const tabElements = [
-    <CoinDetailContent
-      key='home'
-      mint={mint}
-      isAnonymousUser={isAnonymousUser}
-    />,
+    <CoinDetailContent key='home' mint={mint} />,
     <AudioWalletTransactions key='transactions' />
   ]
 
@@ -89,7 +83,7 @@ export const useCoinDetailTabs = ({
   if (!isWAudio) {
     return {
       tabs: null,
-      body: <CoinDetailContent mint={mint} isAnonymousUser={isAnonymousUser} />,
+      body: <CoinDetailContent mint={mint} />,
       rightDecorator
     }
   }

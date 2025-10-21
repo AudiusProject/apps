@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useQueryClient } from '@tanstack/react-query'
+import { MutationStatus, useQueryClient } from '@tanstack/react-query'
 
-import {
-  SLIPPAGE_BPS,
-  useArtistCoin,
-  useCurrentAccountUser,
-  useSwapCoins
-} from '~/api'
-import { SwapStatus } from '~/api/tan-query/jupiter/types'
+import { SLIPPAGE_BPS, useArtistCoin, useCurrentAccountUser } from '~/api'
+import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
 import { isContentTokenGated } from '~/models'
@@ -21,13 +16,29 @@ import type {
   TransactionData
 } from './types'
 
+type SwapHookData = {
+  data?: SwapTokensResult
+  status: MutationStatus
+  error?: Error | null
+}
+
+type SwapParams = {
+  inputMint: string
+  outputMint: string
+  amountUi: number
+  slippageBps: number
+}
+
 type UseBuySellSwapProps = {
   transactionData: TransactionData
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
   selectedPair: CoinPair
-  onClose: () => void
+  swapHookData: SwapHookData
+  // The swap is handled externally to allow for external wallet swaps
+  // Web and mobile use different services for these so we let each repo handle the logic
+  handleSwap: (params: SwapParams) => void
 }
 
 export const useBuySellSwap = (props: UseBuySellSwapProps) => {
@@ -36,7 +47,9 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     currentScreen,
     setCurrentScreen,
     activeTab,
-    selectedPair
+    selectedPair,
+    swapHookData,
+    handleSwap
   } = props
   const queryClient = useQueryClient()
   const { data: user } = useCurrentAccountUser()
@@ -47,12 +60,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     selectedPair.quoteToken.address ?? ''
   )
 
-  const {
-    mutate: swapTokens,
-    status: swapStatus,
-    error: swapError,
-    data: swapData
-  } = useSwapCoins()
+  const { status: swapStatus, error: swapError, data: swapData } = swapHookData
 
   const performSwap = () => {
     if (!transactionData || !transactionData.isValid) return
@@ -73,7 +81,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       outputMintAddress = selectedPair.quoteToken.address ?? ''
     }
 
-    swapTokens({
+    handleSwap({
       inputMint: inputMintAddress,
       outputMint: outputMintAddress,
       amountUi: inputAmount,

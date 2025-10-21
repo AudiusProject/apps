@@ -7,7 +7,10 @@ import { useCoinSwapForm } from '@audius/common/store'
 import { getCurrencyDecimalPlaces } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
+import { appkitModal } from 'app/ReownAppKitModal'
+
 import { BuySellTerms } from './components/BuySellTerms'
+import { CurrentWalletBanner } from './components/CurrentWalletBanner'
 import { InputTokenSection } from './components/InputTokenSection'
 import { OutputTokenSection } from './components/OutputTokenSection'
 import { TabContentSkeleton } from './components/SwapSkeletons'
@@ -42,12 +45,13 @@ export const SellTab = ({
     return getCurrencyDecimalPlaces(tokenPriceData.price)
   }, [tokenPriceData?.price])
 
+  const externalWalletAccount = appkitModal.getAccount('solana')
+
   const {
     inputAmount,
     outputAmount,
     isExchangeRateLoading,
     isBalanceLoading,
-    availableBalance,
     currentExchangeRate,
     handleInputAmountChange,
     handleOutputAmountChange,
@@ -57,7 +61,8 @@ export const SellTab = ({
     outputCoin: quoteToken,
     onTransactionDataChange,
     initialInputValue,
-    onInputValueChange
+    onInputValueChange,
+    externalWalletAddress: externalWalletAccount?.address
   })
 
   // Token change handlers
@@ -86,13 +91,18 @@ export const SellTab = ({
         <TabContentSkeleton />
       ) : (
         <>
+          <CurrentWalletBanner
+            inputToken={{
+              mint: selectedInputToken.address,
+              symbol: selectedInputToken.symbol
+            }}
+          />
           <InputTokenSection
             title={buySellMessages.youPay}
             tokenInfo={selectedInputToken}
             amount={inputAmount}
             onAmountChange={handleInputAmountChange}
             onMaxClick={handleMaxClick}
-            availableBalance={availableBalance}
             error={error}
             errorMessage={errorMessage}
             availableTokens={availableInputTokens}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
-import { SLIPPAGE_BPS, SwapStatus } from '@audius/common/api'
+import { SLIPPAGE_BPS, SwapStatus, useSwapCoins } from '@audius/common/api'
 import { useBuySellAnalytics } from '@audius/common/hooks'
 import { buySellMessages as baseMessages } from '@audius/common/messages'
 import type { CoinInfo, CoinPair } from '@audius/common/store'
@@ -130,6 +130,7 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     [payAmount, receiveAmount]
   )
 
+  const { mutate: performSwap, ...swapHookState } = useSwapCoins()
   const {
     handleConfirmSwap,
     isConfirmButtonLoading,
@@ -143,7 +144,8 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair,
-    onClose: () => navigation.goBack()
+    swapHookData: swapHookState,
+    handleSwap: performSwap
   })
 
   const swapTokens = useMemo(

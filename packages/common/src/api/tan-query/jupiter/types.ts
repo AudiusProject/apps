@@ -50,6 +50,7 @@ export type SwapTokensResult = {
   error?: {
     type: SwapErrorType
     message: string
+    userCancelled?: boolean // applicable to external wallet swaps - the user can cancel the signing
   }
   inputAmount?: {
     amount: number

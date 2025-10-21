@@ -13,8 +13,6 @@ import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
 
-import { useRequiresAccountCallback } from './useRequiresAccount'
-
 /**
  * Error when trying to associate a wallet that was already associated
  */
@@ -39,7 +37,7 @@ export class AlreadyAssociatedError extends Error {
  * @returns a callback for opening the AppKit modal, and an `isPending` flag
  * which is true when a wallet is in the process of being associated.
  */
-export const useExternalWallets = (
+export const useConnectExternalWallets = (
   onSuccess?: (wallets: {
     solana: string | undefined
     eth: string | undefined
@@ -77,8 +75,9 @@ export const useExternalWallets = (
    * - Ensures all existing connections are disconnected
    * - Ensures that the network is set to mainnet (for Eth)
    */
-  const openAppKitModalCallback = useRequiresAccountCallback(
+  const openAppKitModalCallback = useCallback(
     async (namespace?: keyof NamespaceTypeMap) => {
+      setIsConnecting(true)
       // If previously connected, disconnect to give a "fresh" view of options
       if (isConnected) {
         await disconnect()
@@ -89,7 +88,6 @@ export const useExternalWallets = (
       // to the audiusChain network. Reset that to mainnet to connect properly.
       await appkitModal.switchNetwork(mainnet)
       await openAppKitModal({ view: 'Connect', namespace })
-      setIsConnecting(true)
     },
     [disconnect, isConnected, openAppKitModal, theme.type]
   )
@@ -131,6 +129,7 @@ export const useExternalWallets = (
       // Ignore events not meant for this hook instance
       if (!isConnecting) return
       if (event.data.event === 'MODAL_CLOSE') {
+        setIsConnecting(false)
         if (!isConnecting) {
           await reconnectExternalAuthWallet()
         }
@@ -165,6 +164,7 @@ export const useExternalWallets = (
   return {
     isPending: isConnecting,
     currentWallets,
+    disconnect,
     openAppKitModal: openAppKitModalCallback
   }
 }

@@ -14,7 +14,7 @@ import type { LaunchpadFormValues } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
 import { route, shortenSPLAddress } from '@audius/common/utils'
-import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
+import { wAUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
   IconArtistCoin,
@@ -34,8 +34,8 @@ import { useMobileHeader } from 'components/header/mobile/hooks'
 import Page from 'components/page/Page'
 import { ToastContext } from 'components/toast/ToastContext'
 import { AlreadyAssociatedError } from 'hooks/useConnectAndAssociateWallets'
+import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
-import { useExternalWallets } from 'hooks/useExternalWallets'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
@@ -215,7 +215,10 @@ const LaunchpadPageContent = ({
   )
 
   const { openAppKitModal, isPending: isWalletConnectPending } =
-    useExternalWallets(handleWalletConnectSuccess, handleWalletConnectError)
+    useConnectExternalWallets(
+      handleWalletConnectSuccess,
+      handleWalletConnectError
+    )
 
   const handleSplashContinue = useCallback(async () => {
     // Switch to Solana network to prioritize SOL wallets
@@ -373,7 +376,7 @@ export const LaunchpadPage = () => {
     data: swapData
   } = useExternalWalletSwap()
 
-  const isSwapRetryError = !!swapData?.isError
+  const isSwapRetryError = swapData?.error !== undefined
   const isSwapRetrySuccess = isSwapRetryFinished && !isSwapRetryError
 
   // Overall success, pending, and error states account for both hooks
@@ -519,14 +522,12 @@ export const LaunchpadPage = () => {
           trackFirstBuyRetry(launchCoinResponse)
           // Retry the first buy transaction with a new swap TX
           swapTokens({
-            inputToken: TOKEN_LISTING_MAP.AUDIO,
-            outputToken: {
-              address: mintAddress,
-              decimals: LAUNCHPAD_COIN_DECIMALS
-            },
+            inputMint: TOKEN_LISTING_MAP.AUDIO.address,
+            outputMint: mintAddress,
+            amountUi: Number(formValues.payAmount),
             walletAddress: connectedWalletAddress,
-            inputAmountUi: Number(new FixedDecimal(formValues.payAmount).value),
-            isAMM: true
+            inputDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
+            outputDecimals: LAUNCHPAD_COIN_DECIMALS
           })
         } else {
           setIsModalOpen(false)

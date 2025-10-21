@@ -11,6 +11,8 @@ import {
   SwapStatus,
   useArtistCoin,
   useCoinPair,
+  useCurrentAccountUser,
+  useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
@@ -32,8 +34,10 @@ import {
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router-dom'
 
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
+import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -81,6 +85,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     handleTransactionDataChange,
     resetTransactionData
   } = useBuySellTransactionData()
+
+  const { data: currentUser } = useCurrentAccountUser()
 
   const { activeTab, handleActiveTabChange } = useBuySellTabs({
     setCurrentScreen,
@@ -228,6 +234,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
+  const externalWalletAccount = appkitModal.getAccount('solana')
+  const internalSwapHook = useSwapCoins()
+  const externalSwapHook = useExternalWalletSwap()
+  const { mutateAsync: performSwap, ...swapHookState } =
+    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -242,7 +253,22 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    onClose
+    swapHookData: swapHookState,
+    handleSwap: async (params: {
+      inputMint: string
+      outputMint: string
+      amountUi: number
+      slippageBps: number
+    }) => {
+      const swapParams = {
+        ...params,
+        // External wallet swaps require some extra params. These are unused for internal swaps
+        inputDecimals: swapTokens.inputTokenInfo!.decimals,
+        outputDecimals: swapTokens.outputTokenInfo!.decimals,
+        walletAddress: externalWalletAccount?.address as string
+      }
+      await performSwap(swapParams)
+    }
   })
 
   const currentExchangeRate = useMemo(
@@ -420,6 +446,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const shouldShowError =
     !!displayErrorMessage || (activeTab === 'buy' && !hasSufficientBalance)
 
+  const userHasWallet = !!externalWalletAccount?.address || !!currentUser
+
   if (isConfirmButtonLoading && currentScreen !== 'success') {
     return <ModalLoading />
   }
@@ -506,7 +534,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isLoading={
               isContinueButtonLoading || transactionData?.isExchangeRateLoading
             }
-            disabled={transactionData?.isExchangeRateLoading}
+            disabled={transactionData?.isExchangeRateLoading || !userHasWallet}
             onClick={handleContinueClick}
           >
             {messages.continue}
