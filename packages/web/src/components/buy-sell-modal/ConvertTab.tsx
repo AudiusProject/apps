@@ -52,7 +52,7 @@ export const ConvertTab = ({
     return getCurrencyDecimalPlaces(tokenPriceData.price)
   }, [tokenPriceData?.price])
 
-  const externalWalletAccount = appkitModal.getAccount()
+  const externalWalletAccount = appkitModal.getAccount('solana')
   const {
     inputAmount,
     outputAmount,

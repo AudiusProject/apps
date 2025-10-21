@@ -52,7 +52,7 @@ export const CurrentWalletBanner = ({
 }) => {
   const { data: currentUser } = useCurrentAccountUser()
   const isAnonymousUser = !currentUser
-  const externalWalletAccount = appkitModal.getAccount()
+  const externalWalletAccount = appkitModal.getAccount('solana')
   const isUsingExternalWallet = !!externalWalletAccount?.address
   const {
     openAppKitModal,

@@ -226,7 +226,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
-  const externalWalletAccount = appkitModal.getAccount()
+  const externalWalletAccount = appkitModal.getAccount('solana')
   const internalSwapHook = useSwapCoins()
   const externalSwapHook = useExternalWalletSwap()
   const { mutateAsync: performSwap, ...swapHookState } =
