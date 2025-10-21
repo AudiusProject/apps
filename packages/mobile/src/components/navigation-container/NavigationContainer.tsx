@@ -362,9 +362,11 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       if (path.match(/^\/coins/)) {
         const ticker = pathPart(path)(2)
         if (ticker && ticker !== 'create') {
+          // Normalize ticker to uppercase
+          const normalizedTicker = ticker.toUpperCase()
           return createFeedStackState({
             name: 'CoinDetailsScreen',
-            params: { ticker }
+            params: { ticker: normalizedTicker }
           })
         }
 
