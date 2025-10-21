@@ -51,9 +51,11 @@ export const CurrentWalletBanner = ({
   inputToken: { mint: string; symbol: string }
 }) => {
   const { data: currentUser } = useCurrentAccountUser()
-  const isAnonymousUser = !currentUser
   const externalWalletAccount = appkitModal.getAccount('solana')
+
   const isUsingExternalWallet = !!externalWalletAccount?.address
+  const userHasWallet = currentUser || isUsingExternalWallet
+
   const {
     openAppKitModal,
     disconnect,
@@ -67,17 +69,21 @@ export const CurrentWalletBanner = ({
   const {
     data: externalWalletTokenBalance,
     isPending: isExternalWalletTokenBalanceLoading
-  } = useExternalWalletBalance({
-    walletAddress: externalWalletAccount?.address,
-    mint: inputToken.mint
-  })
+  } = useExternalWalletBalance(
+    {
+      walletAddress: externalWalletAccount?.address,
+      mint: inputToken.mint
+    },
+    { enabled: isUsingExternalWallet }
+  )
 
   const {
     data: internalWalletTokenBalanceData,
     isPending: isInternalWalletTokenBalanceLoading
   } = useCoinBalance({
     mint: inputToken.mint,
-    includeExternalWallets: false
+    includeExternalWallets: false,
+    enabled: !isUsingExternalWallet && !!currentUser
   })
 
   const handleDisconnect = async () => {
@@ -99,27 +105,25 @@ export const CurrentWalletBanner = ({
   }
   const isUSDC = inputToken.mint === env.USDC_MINT_ADDRESS
 
-  const tokenBalanceString = isUsingExternalWallet
-    ? externalWalletTokenBalance
-      ? formatCurrency(
-          Number(externalWalletTokenBalance),
-          'en-US',
-          isUSDC ? '$' : ''
-        )
-      : '0.00'
-    : internalWalletTokenBalanceData
-      ? formatCurrency(
-          Number(internalWalletTokenBalanceData.balance),
-          'en-US',
-          isUSDC ? '$' : ''
-        )
-      : '0.00'
-
+  // Format token balance with proper handling of loading and error states
+  let tokenBalanceString = '0.00'
   const isTokenBalanceLoading = isUsingExternalWallet
     ? isExternalWalletTokenBalanceLoading
     : isInternalWalletTokenBalanceLoading
 
-  const noCurrentWallet = isAnonymousUser && !isUsingExternalWallet
+  if (!isTokenBalanceLoading) {
+    const balance = isUsingExternalWallet
+      ? externalWalletTokenBalance
+      : internalWalletTokenBalanceData?.balance
+
+    if (balance !== undefined && balance !== null) {
+      tokenBalanceString = formatCurrency(
+        Number(balance),
+        'en-US',
+        isUSDC ? '$' : ''
+      )
+    }
+  }
 
   return (
     <Flex
@@ -135,12 +139,12 @@ export const CurrentWalletBanner = ({
       <Flex direction='column' gap='xs'>
         <Flex gap='xs' alignItems='center'>
           <Text variant='body' size='l'>
-            {noCurrentWallet
-              ? messages.builtInWalletNotAvailable
-              : messages.tradeWith}
+            {userHasWallet
+              ? messages.tradeWith
+              : messages.builtInWalletNotAvailable}
           </Text>
           {/* Wallet pill */}
-          {!noCurrentWallet ? (
+          {userHasWallet ? (
             <Flex
               backgroundColor='surface1'
               border='default'
@@ -189,7 +193,7 @@ export const CurrentWalletBanner = ({
       </Flex>
 
       {/* Right side: balance and "Available" text */}
-      {!noCurrentWallet ? (
+      {userHasWallet ? (
         <Flex direction='column' gap='xs' alignItems='flex-end'>
           <Text variant='body' size='l' strength='strong'>
             {isTokenBalanceLoading ? (

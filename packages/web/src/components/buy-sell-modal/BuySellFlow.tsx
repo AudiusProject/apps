@@ -167,7 +167,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance)
-  // TODO : modify this to account for external wallets
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
   // Create a helper to check if user has positive balance for a token
@@ -438,7 +437,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const shouldShowError =
     !!displayErrorMessage || (activeTab === 'buy' && !hasSufficientBalance)
 
-  const userHasNoWallet = !externalWalletAccount?.address && !currentUser
+  const userHasWallet = !!externalWalletAccount?.address || !!currentUser
 
   if (isConfirmButtonLoading && currentScreen !== 'success') {
     return <ModalLoading />
@@ -528,7 +527,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isLoading={
               isContinueButtonLoading || transactionData?.isExchangeRateLoading
             }
-            disabled={transactionData?.isExchangeRateLoading || userHasNoWallet}
+            disabled={transactionData?.isExchangeRateLoading || !userHasWallet}
             onClick={handleContinueClick}
           >
             {messages.continue}

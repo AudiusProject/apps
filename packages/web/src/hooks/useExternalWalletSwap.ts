@@ -14,6 +14,7 @@ import {
   getJupiterQuoteByMintWithRetry,
   jupiterInstance
 } from '@audius/common/src/services/Jupiter'
+import { TOKEN_LISTING_MAP } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   QuoteResponse,
@@ -22,6 +23,7 @@ import {
 } from '@jup-ag/api'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import {
+  Connection,
   PublicKey,
   TransactionInstruction,
   TransactionMessage,
@@ -32,13 +34,21 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { appkitModal } from 'app/ReownAppKitModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
-export type ExternalWalletSwapParams = {
+type BaseSwapParams = {
+  walletAddress: string
+}
+
+type SwapAmount = {
+  amount: number
+  uiAmount: number
+}
+
+export type ExternalWalletSwapParams = BaseSwapParams & {
   inputDecimals: number
   outputDecimals: number
-  walletAddress: string
 } & SwapTokensParams
 
-type IndirectSwapParams = {
+type IndirectSwapParams = BaseSwapParams & {
   inputMint: string
   outputMint: string
   audioMint: string
@@ -46,8 +56,7 @@ type IndirectSwapParams = {
   outputDecimals: number
   audioDecimals: number
   amountUi: number
-  walletAddress: string
-  solanaConnection: any
+  solanaConnection: Connection
 }
 
 const getIndirectSwapTx = async ({
@@ -62,8 +71,8 @@ const getIndirectSwapTx = async ({
   solanaConnection
 }: IndirectSwapParams): Promise<{
   transaction: VersionedTransaction
-  inputAmount: { amount: number; uiAmount: number }
-  outputAmount: { amount: number; uiAmount: number }
+  inputAmount: SwapAmount
+  outputAmount: SwapAmount
 }> => {
   // Get quote for first hop: input -> AUDIO
   const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
@@ -268,8 +277,8 @@ export const useExternalWalletSwap = () => {
         }
 
         let transaction: VersionedTransaction
-        let inputAmount: { amount: number; uiAmount: number }
-        let outputAmount: { amount: number; uiAmount: number }
+        let inputAmount: SwapAmount
+        let outputAmount: SwapAmount
 
         // Try direct swap first, fall back to indirect swap through AUDIO if it fails
         try {
@@ -318,7 +327,7 @@ export const useExternalWalletSwap = () => {
             audioMint: env.WAUDIO_MINT_ADDRESS,
             inputDecimals,
             outputDecimals,
-            audioDecimals: 8, // AUDIO has 8 decimals
+            audioDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
             amountUi,
             walletAddress,
             solanaConnection: sdk.services.solanaClient.connection

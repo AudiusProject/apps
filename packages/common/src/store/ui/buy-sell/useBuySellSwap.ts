@@ -16,25 +16,29 @@ import type {
   TransactionData
 } from './types'
 
+type SwapHookData = {
+  data?: SwapTokensResult
+  status: MutationStatus
+  error?: Error | null
+}
+
+type SwapParams = {
+  inputMint: string
+  outputMint: string
+  amountUi: number
+  slippageBps: number
+}
+
 type UseBuySellSwapProps = {
   transactionData: TransactionData
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
   selectedPair: CoinPair
-  swapHookData: {
-    data?: SwapTokensResult
-    status: MutationStatus
-    error?: Error | null
-  }
+  swapHookData: SwapHookData
   // The swap is handled externally to allow for external wallet swaps
   // Web and mobile use different services for these so we let each repo handle the logic
-  handleSwap: (params: {
-    inputMint: string
-    outputMint: string
-    amountUi: number
-    slippageBps: number
-  }) => void
+  handleSwap: (params: SwapParams) => void
 }
 
 export const useBuySellSwap = (props: UseBuySellSwapProps) => {
