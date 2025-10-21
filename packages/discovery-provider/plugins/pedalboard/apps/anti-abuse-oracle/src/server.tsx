@@ -16,10 +16,11 @@ import {
 } from './actionLog'
 import { logger } from 'hono/logger'
 import { config } from './config'
-import { SolanaUtils, Utils } from '@audius/sdk'
+import { SolanaUtils, Utils, HashId } from '@audius/sdk'
 import bn from 'bn.js'
 import { userFingerprints } from './identity'
 import { cors } from 'hono/cors'
+import { getAudiusSdk } from './sdk'
 
 let CONTENT_NODE = 'https://creatornode2.audius.co'
 let FRONTEND = 'https://audius.co'
@@ -41,6 +42,10 @@ if (!AAO_AUTH_PASSWORD) {
     AAO_AUTH_PASSWORD
   )
 }
+
+const rewardAmountRatio = 10
+
+const sdk = getAudiusSdk()
 
 async function ensureTableExists() {
   try {
@@ -167,18 +172,30 @@ app.post('/attestation/:handle', async (c) => {
   const handle = c.req.param('handle').toLowerCase()
   const { challengeId, challengeSpecifier, amount } = await c.req.json()
 
-  const users =
-    await sql`select user_id, wallet from users where handle_lc = ${handle}`
-  const user = users[0]
-  if (!user) return c.json({ error: `handle not found: ${handle}` }, 404)
+  const { data: users } = await sdk.full.users.getUserByHandle({ handle })
+  if (!users || !users[0]) {
+    return c.json({ error: `handle not found: ${handle}` }, 404)
+  }
+  const user = users[0]!
 
   // pass / fail
-  const userScore = await getUserNormalizedScore(user.user_id, user.wallet)
+  const userScore = await getUserNormalizedScore(
+    HashId.parse(user.id),
+    user.wallet
+  )
 
   // Reward attestation proportional to user score confidence
-  if (userScore.overallScore < (amount as number) / 10) {
+  if (userScore.overallScore < (amount as number) / rewardAmountRatio) {
     return c.json({ error: 'denied' }, 400)
   }
+
+  // Custom rules for specific challenges
+  if (challengeId === 'e') {
+    if (user.totalAudioBalance < 10) {
+      return c.json({ error: 'denied' }, 400)
+    }
+  }
+  console.log('userScore', userScore, user)
 
   try {
     const bnAmount = SolanaUtils.uiAudioToBNWaudio(amount)
@@ -381,6 +398,10 @@ app.get('/attestation/ui/user', async (c) => {
             </div>
           </div>
         </div>
+        <h3 class='text-lg mt-4'>
+          Allowed to claim up to{' '}
+          <b>{rewardAmountRatio * userScore.overallScore} $AUDIO</b> per reward.
+        </h3>
         <h2 class='text-xl font-bold mt-4'>Score Breakdown</h2>
         <table>
           <thead>
