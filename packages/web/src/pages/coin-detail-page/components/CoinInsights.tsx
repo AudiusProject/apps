@@ -21,12 +21,12 @@ import { env } from 'services/env'
 import { componentWithErrorBoundary } from '../../../components/error-wrapper/componentWithErrorBoundary'
 import Skeleton from '../../../components/skeleton/Skeleton'
 
-import { AssetInsightsOverflowMenu } from './AssetInsightsOverflowMenu'
+import { CoinInsightsOverflowMenu } from './CoinInsightsOverflowMenu'
 import { GraduationProgressBar } from './GraduationProgressBar'
 
 const messages = coinDetailsMessages.coinInsights
 
-const AssetInsightsSkeleton = () => {
+const CoinInsightsSkeleton = () => {
   return (
     <Paper
       direction='column'
@@ -211,11 +211,11 @@ const MetricRow = componentWithErrorBoundary(MetricRowComponent, {
   name: 'MetricRow'
 })
 
-type AssetInsightsProps = {
+type CoinInsightsProps = {
   mint: string
 }
 
-export const AssetInsights = ({ mint }: AssetInsightsProps) => {
+export const CoinInsights = ({ mint }: CoinInsightsProps) => {
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const {
     data: coin,
@@ -232,7 +232,7 @@ export const AssetInsights = ({ mint }: AssetInsightsProps) => {
   const isError = isCoinError || (isAudio && isCoingeckoError)
 
   if (isPending || !coin) {
-    return <AssetInsightsSkeleton />
+    return <CoinInsightsSkeleton />
   }
 
   if (isError || !coin) {
@@ -288,7 +288,7 @@ export const AssetInsights = ({ mint }: AssetInsightsProps) => {
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
-        <AssetInsightsOverflowMenu mint={mint} />
+        <CoinInsightsOverflowMenu mint={mint} />
       </Flex>
 
       {metrics.map((metric) => (

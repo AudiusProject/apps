@@ -1,9 +1,9 @@
 import { Flex, makeResponsiveStyles } from '@audius/harmony'
 
-import { CoinInfoSection } from './components/CoinInfoSection'
-import { AssetInsights } from './components/AssetInsights'
-import { AssetLeaderboardCard } from './components/AssetLeaderboardCard'
 import { BalanceSection } from './components/BalanceSection'
+import { CoinInfoSection } from './components/CoinInfoSection'
+import { CoinInsights } from './components/CoinInsights'
+import { CoinLeaderboardCard } from './components/CoinLeaderboardCard'
 
 const LEFT_SECTION_WIDTH = '704px'
 const RIGHT_SECTION_WIDTH = '360px'
@@ -68,8 +68,8 @@ export const CoinDetailContent = ({
         <CoinInfoSection mint={mint} />
       </Flex>
       <Flex css={styles.rightSection}>
-        <AssetInsights mint={mint} />
-        <AssetLeaderboardCard mint={mint} />
+        <CoinInsights mint={mint} />
+        <CoinLeaderboardCard mint={mint} />
       </Flex>
     </Flex>
   )

@@ -35,16 +35,16 @@ const coinDetailMobilePage = (ticker: string) =>
 
 const messages = coinDetailsMessages.overflowMenu
 
-type AssetInsightsOverflowMenuProps = {
+type CoinInsightsOverflowMenuProps = {
   /**
    * The mint address of the artist coin
    */
   mint: string
 }
 
-export const AssetInsightsOverflowMenu = ({
+export const CoinInsightsOverflowMenu = ({
   mint
-}: AssetInsightsOverflowMenuProps) => {
+}: CoinInsightsOverflowMenuProps) => {
   const navigate = useNavigate()
   const { toast } = useContext(ToastContext)
   const { data: artistCoin } = useArtistCoin(mint)
