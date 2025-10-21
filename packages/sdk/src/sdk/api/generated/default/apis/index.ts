@@ -13,3 +13,4 @@ export * from './RewardsApi';
 export * from './TipsApi';
 export * from './TracksApi';
 export * from './UsersApi';
+export * from './WalletApi';
