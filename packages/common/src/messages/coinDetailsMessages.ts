@@ -77,6 +77,9 @@ export const coinDetailsMessages = {
     artistEarnings: 'Artist Earnings',
     vestingSchedule: 'Unlock Schedule',
     vestingScheduleValue: '5 years (post-graduation)',
+    locked: 'Locked',
+    unlocked: 'Unlocked',
+    availableToClaim: 'Available to claim',
     $audio: '$AUDIO',
     claim: 'Claim',
     openBirdeye: 'Open Birdeye',
@@ -97,7 +100,13 @@ export const coinDetailsMessages = {
       artistEarnings:
         'The total revenue this artist has earned from the trading fees on their Artist Coin.',
       unclaimedFees:
-        'The amount of trading fees you are currently able to claim.'
+        'The amount of trading fees you are currently able to claim.',
+      locked:
+        'The amount of your reserved Artist Coins that are still locked and not yet available to claim.',
+      unlocked:
+        'The total amount of your reserved Artist Coins that have unlocked since graduation.',
+      availableToClaim:
+        'The amount of unlocked Artist Coins you can claim right now. This increases daily over the 5-year vesting period.'
     }
   },
   artistCoinDetails: {
@@ -142,6 +151,8 @@ export const coinDetailsMessages = {
   toasts: {
     feesClaimed: 'Fees claimed successfully!',
     feesClaimFailed: 'Unable to claim fees. Please try again.',
+    vestedCoinsClaimed: 'Vested coins claimed successfully!',
+    vestedCoinsClaimFailed: 'Unable to claim vested coins. Please try again.',
     incorrectWalletLinked:
       'Incorrect wallet linked. Use the same wallet used to launch the coin.'
   }

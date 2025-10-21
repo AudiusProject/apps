@@ -29,6 +29,10 @@ export const useUserbank = (
     queryFn: async () => {
       if (!wallet || !mint) return null
       const sdk = await audiusSdk()
+      console.log('useUserbank', {
+        mint,
+        wallet
+      })
       const accountInfo = await createUserBankIfNeeded(sdk, {
         ethAddress: wallet,
         mint: mint as any,
