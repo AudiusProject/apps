@@ -15,6 +15,7 @@ import {
   jupiterInstance
 } from '@audius/common/src/services/Jupiter'
 import { TOKEN_LISTING_MAP } from '@audius/common/store'
+import { removeNullable } from '@audius/common/utils'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   QuoteResponse,
@@ -199,9 +200,8 @@ const getIndirectSwapTx = async ({
       })
     )
 
-    const filteredLookupTableAccounts = lookupTableAccounts.filter(
-      (account) => account !== null
-    )
+    const filteredLookupTableAccounts =
+      lookupTableAccounts.filter(removeNullable)
 
     message = new TransactionMessage({
       payerKey: new PublicKey(walletAddress),
