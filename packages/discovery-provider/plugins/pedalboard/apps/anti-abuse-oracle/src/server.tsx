@@ -18,7 +18,7 @@ import { logger } from 'hono/logger'
 import { config } from './config'
 import { SolanaUtils, Utils, HashId } from '@audius/sdk'
 import bn from 'bn.js'
-import { userFingerprints } from './identity'
+import { useEmail, userFingerprints } from './identity'
 import { cors } from 'hono/cors'
 import { getAudiusSdk } from './sdk'
 
@@ -338,6 +338,7 @@ app.get('/attestation/ui/user', async (c) => {
   const idOrHandle = c.req.query('q') || '1'
   const user = await getUser(idOrHandle)
   if (!user) return c.text(`user id not found: ${idOrHandle}`, 404)
+  const email = await useEmail(user.id)
   const signals = await getUserScore(user.id)
   const userScore = (await getUserNormalizedScore(user.id, user.wallet))!
 
@@ -375,7 +376,7 @@ app.get('/attestation/ui/user', async (c) => {
             <div class='flex gap-4 items-end'>
               <div>
                 <a href={`${FRONTEND}/${user.handle}`} target='_blank'>
-                  {user.handle}
+                  {user.handle} ({email})
                 </a>
               </div>
               <div>{user.id}</div>
