@@ -106,7 +106,7 @@ export const relay = async (
         }
       }
       transaction.sign([feePayerKeyPair])
-    } else if (res.locals.signerUser && verifySignatures(transaction)) {
+    } else if (verifySignatures(transaction)) {
       res.locals.logger.info(
         `Transaction already signed by '${feePayerKey.toBase58()}'`
       )
