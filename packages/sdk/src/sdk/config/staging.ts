@@ -14,10 +14,6 @@ export const stagingConfig: SdkServicesConfig = {
         delegateOwnerWallet: '0x6b52969934076318863243fb92E9C4b3A08267b5'
       },
       {
-        endpoint: 'https://creatornode5.staging.audius.co',
-        delegateOwnerWallet: '0xDC2BDF1F23381CA2eC9e9c70D4FD96CD8645D090'
-      },
-      {
         endpoint: 'https://creatornode6.staging.audius.co',
         delegateOwnerWallet: '0x68039d001D87E7A5E6B06fe0825EA7871C1Cd6C2'
       },
@@ -57,7 +53,7 @@ export const stagingConfig: SdkServicesConfig = {
     stakingBridgeProgramAddress: 'stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj',
     rpcEndpoint: 'https://audius-fe.rpcpool.com',
     usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    wAudioTokenMint: 'BELGiMZQ34SDE6x2FUaML2UHDAgBLS64xvhXjX5tBBZo',
+    wAudioTokenMint: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
     bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     rewardManagerLookupTableAddress:
       'ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J'

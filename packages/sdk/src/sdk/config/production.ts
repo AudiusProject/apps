@@ -10,16 +10,8 @@ export const productionConfig: SdkServicesConfig = {
     apiEndpoint: 'https://api.audius.co',
     storageNodes: [
       {
-        endpoint: 'https://creatornode.audius.co',
-        delegateOwnerWallet: '0xc8d0C29B6d540295e8fc8ac72456F2f4D41088c8'
-      },
-      {
         endpoint: 'https://creatornode2.audius.co',
         delegateOwnerWallet: '0xf686647E3737d595C60c6DE2f5F90463542FE439'
-      },
-      {
-        endpoint: 'https://creatornode3.audius.co',
-        delegateOwnerWallet: '0x0C32BE6328578E99b6F06E0e7A6B385EB8FC13d1'
       },
       {
         endpoint: 'https://audius-content-1.figment.io',
@@ -273,10 +265,6 @@ export const productionConfig: SdkServicesConfig = {
       {
         endpoint: 'https://cn1.stuffisup.com',
         delegateOwnerWallet: '0x0D16f8bBfFF114B1a525Bf8b8d98ED177FA74AD3'
-      },
-      {
-        endpoint: 'https://audius-cn1.tikilabs.com',
-        delegateOwnerWallet: '0x159200F84c2cF000b3A014cD4D8244500CCc36ca'
       },
       {
         endpoint: 'https://audius-creator-7.theblueprint.xyz',
