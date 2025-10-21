@@ -245,7 +245,7 @@ export const useNotificationNavigation = () => {
       [NotificationType.Announcement]: (
         notification: AnnouncementNotification
       ) => {
-        navigation.navigate('Feed')
+        navigation.navigate('ArtistCoinsExploreScreen')
       },
       [NotificationType.ChallengeReward]: (
         notification: ChallengeRewardNotification

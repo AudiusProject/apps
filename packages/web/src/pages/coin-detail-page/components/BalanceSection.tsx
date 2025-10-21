@@ -350,11 +350,11 @@ const HasBalanceState = ({
   )
 }
 
-type AssetDetailProps = {
+type CoinDetailProps = {
   mint: string
 }
 
-const BalanceSectionContent = ({ mint }: AssetDetailProps) => {
+const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
   const { data: tokenBalance, isLoading: tokenBalanceLoading } = useCoinBalance(
     { mint }

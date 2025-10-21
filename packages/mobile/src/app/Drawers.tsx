@@ -47,7 +47,7 @@ import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-
 import { TrendingRewardsDrawer } from 'app/components/trending-rewards-drawer'
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
 import { WithdrawUSDCDrawer } from 'app/components/withdraw-usdc-drawer/WithdrawUSDCDrawer'
-import { AssetInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/AssetInsightsOverflowMenu'
+import { CoinInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/CoinInsightsOverflowMenu'
 import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/components'
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
@@ -167,7 +167,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,
-  AssetInsightsOverflowMenu,
+  CoinInsightsOverflowMenu,
   WalletRowOverflowMenu
 }
 

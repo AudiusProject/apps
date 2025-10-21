@@ -9,9 +9,9 @@ import useTabs from 'hooks/useTabs/useTabs'
 import { AudioWalletTransactions } from 'pages/audio-page/AudioWalletTransactions'
 import { env } from 'services/env'
 
-import { AssetDetailContent } from './AssetDetailContent'
+import { CoinDetailContent } from './CoinDetailContent'
 
-export enum AssetDetailTabType {
+export enum CoinDetailTabType {
   HOME = 'home',
   TRANSACTIONS = 'transactions'
 }
@@ -22,22 +22,24 @@ const messages = {
   ...coinDetailsMessages
 }
 
-type UseAssetDetailTabsProps = {
+type UseCoinDetailTabsProps = {
   mint: string
   ticker?: string
   isOwner?: boolean
+  isAnonymousUser?: boolean
 }
 
-export const useAssetDetailTabs = ({
+export const useCoinDetailTabs = ({
   mint,
   ticker,
-  isOwner = false
-}: UseAssetDetailTabsProps) => {
-  const [selectedTab, setSelectedTab] = useState(AssetDetailTabType.HOME)
+  isOwner = false,
+  isAnonymousUser = false
+}: UseCoinDetailTabsProps) => {
+  const [selectedTab, setSelectedTab] = useState(CoinDetailTabType.HOME)
   const navigate = useNavigate()
 
   const handleTabChange = useCallback((_from: string, to: string) => {
-    setSelectedTab(to as AssetDetailTabType)
+    setSelectedTab(to as CoinDetailTabType)
   }, [])
 
   const handleEditClick = useCallback(() => {
@@ -52,16 +54,20 @@ export const useAssetDetailTabs = ({
   const tabs = [
     {
       text: messages.home,
-      label: AssetDetailTabType.HOME
+      label: CoinDetailTabType.HOME
     },
     {
       text: messages.transactions,
-      label: AssetDetailTabType.TRANSACTIONS
+      label: CoinDetailTabType.TRANSACTIONS
     }
   ]
 
   const tabElements = [
-    <AssetDetailContent key='home' mint={mint} />,
+    <CoinDetailContent
+      key='home'
+      mint={mint}
+      isAnonymousUser={isAnonymousUser}
+    />,
     <AudioWalletTransactions key='transactions' />
   ]
 
@@ -83,7 +89,7 @@ export const useAssetDetailTabs = ({
   if (!isWAudio) {
     return {
       tabs: null,
-      body: <AssetDetailContent mint={mint} />,
+      body: <CoinDetailContent mint={mint} isAnonymousUser={isAnonymousUser} />,
       rightDecorator
     }
   }

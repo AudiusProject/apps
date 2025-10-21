@@ -243,17 +243,20 @@ export const CoinInfoCard = ({ mint }: { mint: string }) => {
       <BannerSection mint={mint} />
       <SocialLinksSection coin={coin} />
       <CoinDescriptionSection coin={coin} />
-      <Divider style={{ width: '100%' }} />
-      <Flex direction='column' w='100%' ph='xl' pv='l'>
-        <PlainButton
-          style={{ alignSelf: 'flex-start' }}
-          onPress={isWAudio ? handleBrowseRewards : handleLearnMore}
-          iconLeft={CTAIcon}
-        >
-          {isWAudio ? messages.browseRewards : messages.learnMore}
-        </PlainButton>
-      </Flex>
-      <Divider style={{ width: '100%' }} />
+      {isWAudio || coin.website ? (
+        <>
+          <Divider style={{ width: '100%' }} />
+          <Flex direction='column' w='100%' ph='xl' pv='l'>
+            <PlainButton
+              style={{ alignSelf: 'flex-start' }}
+              onPress={isWAudio ? handleBrowseRewards : handleLearnMore}
+              iconLeft={CTAIcon}
+            >
+              {isWAudio ? messages.browseRewards : messages.learnMore}
+            </PlainButton>
+          </Flex>
+        </>
+      ) : null}
       <Flex
         direction='row'
         w='100%'

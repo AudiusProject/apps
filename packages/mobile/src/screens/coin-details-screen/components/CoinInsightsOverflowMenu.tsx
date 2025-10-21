@@ -15,8 +15,8 @@ import { useToast } from 'app/hooks/useToast'
 
 const messages = coinDetailsMessages.overflowMenu
 
-export const AssetInsightsOverflowMenu = () => {
-  const { data: drawerData } = useDrawer('AssetInsightsOverflowMenu')
+export const CoinInsightsOverflowMenu = () => {
+  const { data: drawerData } = useDrawer('CoinInsightsOverflowMenu')
   const mint = drawerData?.mint
   const { data: artistCoin } = useArtistCoin(mint)
   const { data: currentUserId } = useCurrentUserId()
@@ -91,5 +91,5 @@ export const AssetInsightsOverflowMenu = () => {
     return null
   }
 
-  return <ActionDrawer drawerName='AssetInsightsOverflowMenu' rows={rows} />
+  return <ActionDrawer drawerName='CoinInsightsOverflowMenu' rows={rows} />
 }
