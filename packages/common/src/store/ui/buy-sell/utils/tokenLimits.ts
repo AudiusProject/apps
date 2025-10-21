@@ -2,8 +2,8 @@
  * Utilities for calculating token swap limits based on USD constraints
  */
 
-import { MIN_SWAP_AMOUNT_USD, MAX_SWAP_AMOUNT_USD } from '../constants'
 import { TOKEN_LISTING_MAP } from '../../shared/tokenConstants'
+import { MIN_SWAP_AMOUNT_USD, MAX_SWAP_AMOUNT_USD } from '../constants'
 import type { TokenLimits, TokenLimitInput } from '../types/swap.types'
 
 /**
@@ -57,7 +57,8 @@ export const calculateTokenLimits = (
  * Allows for manual override of calculated limits
  */
 export const resolveTokenLimits = (input: TokenLimitInput): TokenLimits => {
-  const { tokenPrice, isStablecoin, providedMin, providedMax, tokenAddress } = input
+  const { tokenPrice, isStablecoin, providedMin, providedMax, tokenAddress } =
+    input
 
   // Otherwise, calculate based on USD limits and price for minimum only
   const { min } = calculateTokenLimits(tokenPrice, isStablecoin, tokenAddress)
