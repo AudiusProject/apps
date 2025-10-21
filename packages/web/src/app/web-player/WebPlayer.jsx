@@ -729,10 +729,14 @@ const WebPlayer = (props) => {
                   if (ticker && ticker !== ticker.toUpperCase()) {
                     return (
                       <Redirect
-                        to={COIN_DETAIL_PAGE.replace(
-                          ':ticker',
-                          ticker.toUpperCase()
-                        )}
+                        to={{
+                          pathname: COIN_DETAIL_PAGE.replace(
+                            ':ticker',
+                            ticker.toUpperCase()
+                          ),
+                          search: props.location.search,
+                          hash: props.location.hash
+                        }}
                       />
                     )
                   }
