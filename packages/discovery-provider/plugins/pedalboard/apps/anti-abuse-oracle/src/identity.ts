@@ -54,3 +54,10 @@ export async function useEmailDeliverable(wallet: string) {
   `
   return rows[0].isEmailDeliverable
 }
+
+export async function useEmail(userId: number) {
+  const rows = await sql`
+    select "email" from "Users" where "blockchainUserId" = ${userId}
+  `
+  return rows[0].email
+}
