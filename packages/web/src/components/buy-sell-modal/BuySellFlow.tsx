@@ -158,7 +158,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }
 
   // Get external wallet account (if connected via AppKit)
-  const externalWalletAccount = appkitModal.getAccount()
+  const externalWalletAccount = appkitModal.getAccount('solana')
 
   // Get all available tokens, filtered by external wallet if connected
   const { coins, isLoading: coinsLoading } = useTradeableCoins({

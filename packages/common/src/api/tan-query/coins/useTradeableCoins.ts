@@ -90,18 +90,21 @@ export const useTradeableCoins = (
     // Create a map for efficient lookup and add USDC/SOL
     const coinsMap = new Map(baseCoins.map((coin) => [coin.address, coin]))
 
-    // Always add USDC and SOL (manually added tokens)
+    // Add USDC for all wallets
     const usdcToken = TOKEN_LISTING_MAP.USDC
     coinsMap.set(env.USDC_MINT_ADDRESS, {
       ...usdcToken,
       balance: null
     })
 
-    const solToken = TOKEN_LISTING_MAP.SOL
-    coinsMap.set(solToken.address, {
-      ...solToken,
-      balance: null
-    })
+    // Only add SOL for external wallets
+    if (externalWalletAddress) {
+      const solToken = TOKEN_LISTING_MAP.SOL
+      coinsMap.set(solToken.address, {
+        ...solToken,
+        balance: null
+      })
+    }
 
     // Convert map to array for filtering
     let filteredCoins = Array.from(coinsMap.values())
