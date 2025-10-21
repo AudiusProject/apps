@@ -14,7 +14,8 @@ import {
   Configuration,
   ExploreApi,
   RewardsApi,
-  TipsApi
+  TipsApi,
+  WalletApi
 } from './api/generated/default'
 import {
   TracksApi as TracksApiFull,
@@ -488,6 +489,7 @@ const initializeApis = ({
   )
   const challenges = new ChallengesApi(apiClientConfig)
   const coins = new CoinsApi(apiClientConfig)
+  const wallets = new WalletApi(apiClientConfig)
   const tips = new TipsApi(apiClientConfig)
   const resolveApi = new ResolveApi(apiClientConfig)
   const rewards = new RewardsApi(apiClientConfig)
@@ -566,6 +568,7 @@ const initializeApis = ({
     events,
     explore,
     coins,
+    wallets,
     challenges
   }
 }
