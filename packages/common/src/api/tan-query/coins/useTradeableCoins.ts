@@ -81,7 +81,7 @@ export const useTradeableCoins = (
           decimals: coin.decimals,
           balance: coin.balance,
           address: coin.mint,
-          logoURI: undefined,
+          logoURI: coin.logoUri ?? undefined,
           isStablecoin: coin.ticker === 'USDC'
         }))
       : // For internal wallets, use artist coins
