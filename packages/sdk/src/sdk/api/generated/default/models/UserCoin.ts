@@ -45,6 +45,12 @@ export interface UserCoin {
      */
     ownerId: string;
     /**
+     * URL to the coin's logo image
+     * @type {string}
+     * @memberof UserCoin
+     */
+    logoUri?: string | null;
+    /**
      * Whether the coin has a Discord server
      * @type {boolean}
      * @memberof UserCoin
@@ -94,6 +100,7 @@ export function UserCoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'ticker': json['ticker'],
         'decimals': json['decimals'],
         'ownerId': json['owner_id'],
+        'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
         'hasDiscord': json['has_discord'],
         'balance': json['balance'],
         'balanceUsd': json['balance_usd'],
@@ -113,6 +120,7 @@ export function UserCoinToJSON(value?: UserCoin | null): any {
         'ticker': value.ticker,
         'decimals': value.decimals,
         'owner_id': value.ownerId,
+        'logo_uri': value.logoUri,
         'has_discord': value.hasDiscord,
         'balance': value.balance,
         'balance_usd': value.balanceUsd,

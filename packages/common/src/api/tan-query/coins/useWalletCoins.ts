@@ -16,8 +16,7 @@ const DEFAULT_LIMIT = 50
 
 export const getWalletCoinsQueryKey = (params: UseWalletCoinsParams) =>
   [
-    QUERY_KEYS.coins,
-    'wallet',
+    QUERY_KEYS.walletCoins,
     params.walletAddress,
     { limit: params.limit, offset: params.offset }
   ] as unknown as QueryKey<UserCoin[]>

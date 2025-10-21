@@ -93,24 +93,14 @@ export const useTradeableCoins = (
     // Always add USDC and SOL (manually added tokens)
     const usdcToken = TOKEN_LISTING_MAP.USDC
     coinsMap.set(env.USDC_MINT_ADDRESS, {
-      symbol: usdcToken.symbol,
-      name: usdcToken.name,
-      decimals: usdcToken.decimals,
-      balance: null,
-      address: env.USDC_MINT_ADDRESS,
-      logoURI: usdcToken.logoURI,
-      isStablecoin: true
+      ...usdcToken,
+      balance: null
     })
 
     const solToken = TOKEN_LISTING_MAP.SOL
     coinsMap.set(solToken.address, {
-      symbol: solToken.symbol,
-      name: solToken.name,
-      decimals: solToken.decimals,
-      balance: null,
-      address: solToken.address,
-      logoURI: solToken.logoURI,
-      isStablecoin: false
+      ...solToken,
+      balance: null
     })
 
     // Convert map to array for filtering
