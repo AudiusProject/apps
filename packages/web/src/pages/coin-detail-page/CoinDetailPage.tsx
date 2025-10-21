@@ -25,7 +25,6 @@ type CoinDetailPageContentProps = {
   visualTitle: string
   ogTitle: string
   description: string
-  isAnonymousUser: boolean
 }
 
 const DesktopCoinDetailPageContent = ({
@@ -34,8 +33,7 @@ const DesktopCoinDetailPageContent = ({
   ogTitle,
   description,
   ticker,
-  isOwner,
-  isAnonymousUser
+  isOwner
 }: CoinDetailPageContentProps & {
   ticker: string
   isOwner: boolean
@@ -43,8 +41,7 @@ const DesktopCoinDetailPageContent = ({
   const { tabs, body, rightDecorator } = useCoinDetailTabs({
     mint,
     ticker,
-    isOwner,
-    isAnonymousUser
+    isOwner
   })
 
   const header = (
@@ -72,10 +69,9 @@ const MobileCoinDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
-  description,
-  isAnonymousUser
+  description
 }: CoinDetailPageContentProps) => {
-  const { body } = useCoinDetailTabs({ mint, isAnonymousUser })
+  const { body } = useCoinDetailTabs({ mint })
 
   return (
     <MobilePageContainer
@@ -128,7 +124,6 @@ export const CoinDetailPage = () => {
   }
 
   const isOwner = currentUserId === coin?.ownerId
-  const isAnonymousUser = !currentUserId
 
   // Visual title is just the coin name for the header
   const visualTitle = coin?.name ?? ''
@@ -146,7 +141,6 @@ export const CoinDetailPage = () => {
       visualTitle={visualTitle}
       ogTitle={ogTitle}
       description={description ?? ''}
-      isAnonymousUser={isAnonymousUser}
     />
   ) : (
     <DesktopCoinDetailPageContent
@@ -156,7 +150,6 @@ export const CoinDetailPage = () => {
       description={description ?? ''}
       ticker={coin?.ticker ?? ''}
       isOwner={isOwner}
-      isAnonymousUser={isAnonymousUser}
     />
   )
 }
