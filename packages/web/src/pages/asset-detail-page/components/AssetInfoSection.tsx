@@ -318,8 +318,6 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     }
   })
 
-  const unclaimedFees = coin?.dynamicBondingCurve?.creatorQuoteFee ?? 0
-
   const formatFeeNumber = (input: number) => {
     const value = wAUDIO(BigInt(input))
     const decimalPlaces = getTokenDecimalPlaces(Number(value.toString()))
@@ -329,13 +327,15 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
       ''
     )
   }
+
+  const unclaimedFees = coin?.artistFees?.unclaimedFees ?? 0
   const formattedUnclaimedFees = useMemo(() => {
     return formatFeeNumber(unclaimedFees)
   }, [unclaimedFees])
-  const totalArtistEarnings =
-    coin?.dynamicBondingCurve?.totalTradingQuoteFee ?? 0
+
+  const totalArtistEarnings = coin?.artistFees?.totalFees ?? 0
   const formattedTotalArtistEarnings = useMemo(
-    () => formatFeeNumber(Math.trunc(totalArtistEarnings / 2)),
+    () => formatFeeNumber(Math.trunc(totalArtistEarnings)),
     [totalArtistEarnings]
   )
   const descriptionParagraphs = coin?.description?.split('\n') ?? []
