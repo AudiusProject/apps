@@ -157,17 +157,22 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData()
   }
 
-  // Get all available tokens without filtering
-  const { coins, isLoading: coinsLoading } = useTradeableCoins()
+  // Get external wallet account (if connected via AppKit)
+  const externalWalletAccount = appkitModal.getAccount('solana')
+
+  // Get all available tokens, filtered by external wallet if connected
+  const { coins, isLoading: coinsLoading } = useTradeableCoins({
+    externalWalletAddress: externalWalletAccount?.address
+  })
 
   const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
-  // Get tokens that user owns (includes USDC if user has balance)
+  // Get tokens that user owns (includes USDC if user has balance) for internal wallet
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
-  // Create owned addresses set for filtering
+  // Create owned addresses set for filtering (only needed for internal wallets)
   const ownedAddresses = useMemo(() => {
     return new Set(ownedCoins.map((coin) => coin.address))
   }, [ownedCoins])
@@ -184,27 +189,31 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
-    onlyOwned: true,
+    externalWalletAddress: externalWalletAccount?.address,
+    // For internal wallets, only show owned tokens
+    onlyOwned: !externalWalletAccount?.address,
     ownedAddresses
   })
 
   // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
-    onlyOwned: true,
+    externalWalletAddress: externalWalletAccount?.address,
+    // For internal wallets, only show owned tokens
+    onlyOwned: !externalWalletAccount?.address,
     ownedAddresses
   })
 
   // Get filtered tokens for convert tab output (all coins except base token)
   const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
-    excludeSymbols: [baseTokenSymbol]
+    excludeSymbols: [baseTokenSymbol],
+    externalWalletAddress: externalWalletAccount?.address
   })
 
   // Get filtered tokens for buy tab output (all coins except quote token and USDC)
-  const { coinsArray: availableOutputTokensForBuy } = useTradeableCoins({
-    context: 'receive',
-    excludeSymbols: [quoteTokenSymbol, 'USDC']
-  })
+  const availableOutputTokensForBuy = availableCoins.filter(
+    (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
+  )
 
   // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTokenPair)
@@ -234,7 +243,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
-  const externalWalletAccount = appkitModal.getAccount('solana')
   const internalSwapHook = useSwapCoins()
   const externalSwapHook = useExternalWalletSwap()
   const { mutateAsync: performSwap, ...swapHookState } =
@@ -452,6 +460,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     return <ModalLoading />
   }
 
+  // Show loading when fetching coins, or when external wallet is connected and still loading wallet coins
   if (coinsLoading) {
     return <SwapFormSkeleton />
   }

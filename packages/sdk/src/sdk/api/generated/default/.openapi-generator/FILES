@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 apis/ChallengesApi.ts
 apis/CoinsApi.ts
 apis/CommentsApi.ts

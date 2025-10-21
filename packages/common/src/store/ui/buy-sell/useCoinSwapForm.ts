@@ -89,9 +89,10 @@ export const useCoinSwapForm = ({
       tokenPrice,
       isStablecoin: inputCoin.isStablecoin || false,
       providedMin,
-      providedMax
+      providedMax,
+      tokenAddress: inputCoin.address
     })
-  }, [tokenPrice, inputCoin.isStablecoin, providedMin, providedMax])
+  }, [tokenPrice, inputCoin.isStablecoin, providedMin, providedMax, inputCoin.address])
 
   const { min, max } = calculatedLimits
 

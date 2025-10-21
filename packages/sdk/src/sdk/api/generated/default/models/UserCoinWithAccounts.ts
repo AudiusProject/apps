@@ -46,6 +46,12 @@ export interface UserCoinWithAccounts {
      */
     decimals: number;
     /**
+     * URL to the coin's logo image
+     * @type {string}
+     * @memberof UserCoinWithAccounts
+     */
+    logoUri?: string | null;
+    /**
      * The total balance of the coin in the user's account (in wei)
      * @type {number}
      * @memberof UserCoinWithAccounts
@@ -93,6 +99,7 @@ export function UserCoinWithAccountsFromJSONTyped(json: any, ignoreDiscriminator
         'mint': json['mint'],
         'ticker': json['ticker'],
         'decimals': json['decimals'],
+        'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
         'balance': json['balance'],
         'balanceUsd': json['balance_usd'],
         'accounts': ((json['accounts'] as Array<any>).map(UserCoinAccountFromJSON)),
@@ -111,6 +118,7 @@ export function UserCoinWithAccountsToJSON(value?: UserCoinWithAccounts | null):
         'mint': value.mint,
         'ticker': value.ticker,
         'decimals': value.decimals,
+        'logo_uri': value.logoUri,
         'balance': value.balance,
         'balance_usd': value.balanceUsd,
         'accounts': ((value.accounts as Array<any>).map(UserCoinAccountToJSON)),
