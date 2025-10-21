@@ -171,7 +171,7 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
   const isPending = isCoinPending || (isAudio && isCoingeckoPending)
   const isError = isCoinError || (isAudio && isCoingeckoError)
 
-  const { onOpen } = useDrawer('AssetInsightsOverflowMenu')
+  const { onOpen } = useDrawer('CoinInsightsOverflowMenu')
 
   const handleOpenOverflowMenu = () => {
     onOpen({ mint })

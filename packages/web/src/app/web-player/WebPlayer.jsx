@@ -54,10 +54,10 @@ import { AiAttributedTracksPage } from 'pages/ai-attributed-tracks-page'
 import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
 import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
 import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
-import { AssetDetailPage } from 'pages/asset-detail-page/AssetDetailPage'
-import { ArtistCoinDetailsPage } from 'pages/asset-detail-page/components/mobile/ArtistCoinDetailsPage'
 import { AudioPage } from 'pages/audio-page/AudioPage'
 import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
+import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
+import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -124,7 +124,7 @@ const {
   HISTORY_PAGE,
   DASHBOARD_PAGE,
   AUDIO_PAGE,
-  ASSET_DETAIL_PAGE,
+  COIN_DETAIL_PAGE,
   REWARDS_PAGE,
   UPLOAD_PAGE,
   UPLOAD_ALBUM_PAGE,
@@ -722,10 +722,10 @@ const WebPlayer = (props) => {
               />
               <Route
                 exact
-                path={ASSET_DETAIL_PAGE}
+                path={COIN_DETAIL_PAGE}
                 isMobile={isMobile}
                 render={(props) => {
-                  return <AssetDetailPage {...props} />
+                  return <CoinDetailPage {...props} />
                 }}
               />
               <Route

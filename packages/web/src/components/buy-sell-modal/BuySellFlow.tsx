@@ -15,7 +15,7 @@ import {
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
+import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import {
   BuySellTab,
   Screen,
@@ -114,7 +114,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const location = useLocation()
   const pathname = getPathname(location)
   const match = matchPath<{ ticker: string }>(pathname, {
-    path: ASSET_DETAIL_PAGE,
+    path: COIN_DETAIL_PAGE,
     exact: true
   })
   const { data: selectedPair } = useCoinPair({

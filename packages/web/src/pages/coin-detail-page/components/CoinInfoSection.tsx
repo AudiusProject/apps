@@ -123,7 +123,7 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
   )
 }
 
-const AssetInfoSectionSkeleton = () => {
+const CoinInfoSectionSkeleton = () => {
   const theme = useTheme()
 
   return (
@@ -257,13 +257,13 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
   )
 }
 
-type AssetInfoSectionProps = {
+type CoinInfoSectionProps = {
   mint: string
 }
 
 const { REWARDS_PAGE } = route
 
-export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
+export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
@@ -445,7 +445,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
   const isManagerMode = useIsManagedAccount()
 
   if (isLoading || !coin) {
-    return <AssetInfoSectionSkeleton />
+    return <CoinInfoSectionSkeleton />
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
