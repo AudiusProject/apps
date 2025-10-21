@@ -21,6 +21,7 @@ import {
 import {
   Keypair,
   PublicKey,
+  TransactionInstruction,
   TransactionMessage,
   VersionedTransaction
 } from '@solana/web3.js'
@@ -330,11 +331,25 @@ export const launchCoin = async (
      * Prepare the transactions to be signed by the client
      * We partially sign so that the user can sign with their wallet and send the transactions
      */
+    // Add a no-op memo instruction to get the audius authority to sign
+    createPoolTx.add(
+      new TransactionInstruction({
+        programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+        keys: [
+          {
+            pubkey: audiusAuthorityKeypair.publicKey,
+            isSigner: true,
+            isWritable: false
+          }
+        ],
+        data: Buffer.alloc(0)
+      })
+    )
     createPoolTx.feePayer = walletPublicKey
     createPoolTx.recentBlockhash = (
       await connection.getLatestBlockhash()
     ).blockhash
-    createPoolTx.partialSign(mintKeypair)
+    createPoolTx.partialSign(mintKeypair, audiusAuthorityKeypair)
     if (swapBuyTx) {
       swapBuyTx.recentBlockhash = (
         await connection.getLatestBlockhash()
