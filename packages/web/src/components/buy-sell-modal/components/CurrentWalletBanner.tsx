@@ -106,7 +106,7 @@ export const CurrentWalletBanner = ({
           'en-US',
           isUSDC ? '$' : ''
         )
-      : '0'
+      : '0.00'
     : internalWalletTokenBalanceData
       ? formatCurrency(
           Number(internalWalletTokenBalanceData.balance),

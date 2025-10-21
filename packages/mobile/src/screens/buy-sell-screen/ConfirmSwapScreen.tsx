@@ -145,9 +145,7 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     activeTab,
     selectedPair,
     swapHookData: swapHookState,
-    handleSwap: (params) => {
-      performSwap(params)
-    }
+    handleSwap: performSwap
   })
 
   const swapTokens = useMemo(

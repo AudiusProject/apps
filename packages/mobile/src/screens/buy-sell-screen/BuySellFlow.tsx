@@ -204,9 +204,7 @@ export const BuySellFlow = ({
     activeTab,
     selectedPair: safeSelectedPair,
     swapHookData: swapHookState,
-    handleSwap: (params) => {
-      performSwap(params)
-    }
+    handleSwap: performSwap
   })
 
   // Track if user has attempted to submit the form

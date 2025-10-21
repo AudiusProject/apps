@@ -1,16 +1,14 @@
 import {
   optimisticallyUpdateSwapBalances,
   useCurrentAccountUser,
-  useQueryContext
-} from '@audius/common/api'
-import { ErrorLevel, Feature } from '@audius/common/models'
-import {
+  useQueryContext,
+  getExternalWalletBalanceQueryKey,
   SwapErrorType,
   SwapStatus,
   SwapTokensParams,
   SwapTokensResult
-} from '@audius/common/src/api/tan-query/jupiter/types'
-import { getExternalWalletBalanceQueryKey } from '@audius/common/src/api/tan-query/wallets/useExternalWalletBalance'
+} from '@audius/common/api'
+import { ErrorLevel, Feature } from '@audius/common/models'
 import {
   convertJupiterInstructions,
   getJupiterQuoteByMintWithRetry,
