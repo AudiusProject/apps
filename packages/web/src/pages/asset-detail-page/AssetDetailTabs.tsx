@@ -26,14 +26,12 @@ type UseAssetDetailTabsProps = {
   mint: string
   ticker?: string
   isOwner?: boolean
-  isAnonymousUser?: boolean
 }
 
 export const useAssetDetailTabs = ({
   mint,
   ticker,
-  isOwner = false,
-  isAnonymousUser = false
+  isOwner = false
 }: UseAssetDetailTabsProps) => {
   const [selectedTab, setSelectedTab] = useState(AssetDetailTabType.HOME)
   const navigate = useNavigate()
@@ -63,11 +61,7 @@ export const useAssetDetailTabs = ({
   ]
 
   const tabElements = [
-    <AssetDetailContent
-      key='home'
-      mint={mint}
-      isAnonymousUser={isAnonymousUser}
-    />,
+    <AssetDetailContent key='home' mint={mint} />,
     <AudioWalletTransactions key='transactions' />
   ]
 
@@ -89,9 +83,7 @@ export const useAssetDetailTabs = ({
   if (!isWAudio) {
     return {
       tabs: null,
-      body: (
-        <AssetDetailContent mint={mint} isAnonymousUser={isAnonymousUser} />
-      ),
+      body: <AssetDetailContent mint={mint} />,
       rightDecorator
     }
   }

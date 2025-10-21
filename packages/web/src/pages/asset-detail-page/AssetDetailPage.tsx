@@ -26,7 +26,6 @@ type AssetDetailPageContentProps = {
   visualTitle: string
   ogTitle: string
   description: string
-  isAnonymousUser: boolean
 }
 
 const DesktopAssetDetailPageContent = ({
@@ -35,18 +34,15 @@ const DesktopAssetDetailPageContent = ({
   ogTitle,
   description,
   ticker,
-  isOwner,
-  isAnonymousUser
+  isOwner
 }: AssetDetailPageContentProps & {
   ticker: string
   isOwner: boolean
-  isAnonymousUser: boolean
 }) => {
   const { tabs, body, rightDecorator } = useAssetDetailTabs({
     mint,
     ticker,
-    isOwner,
-    isAnonymousUser
+    isOwner
   })
 
   const header = (
@@ -74,10 +70,9 @@ const MobileAssetDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
-  description,
-  isAnonymousUser
+  description
 }: AssetDetailPageContentProps) => {
-  const { body } = useAssetDetailTabs({ mint, isAnonymousUser })
+  const { body } = useAssetDetailTabs({ mint })
 
   return (
     <MobilePageContainer
@@ -147,7 +142,6 @@ export const AssetDetailPage = () => {
       visualTitle={visualTitle}
       ogTitle={ogTitle}
       description={description ?? ''}
-      isAnonymousUser={!currentUserId}
     />
   ) : (
     <DesktopAssetDetailPageContent
@@ -157,7 +151,6 @@ export const AssetDetailPage = () => {
       description={description ?? ''}
       ticker={coin?.ticker ?? ''}
       isOwner={isOwner}
-      isAnonymousUser={!currentUserId}
     />
   )
 }
