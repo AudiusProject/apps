@@ -61,6 +61,10 @@ const toastMessages = coinDetailsMessages.toasts
 
 const BANNER_HEIGHT = 120
 
+// Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
+// Below this threshold is considered "dust" and not worth claiming due to transaction fees
+const MIN_CLAIMABLE_FEES = 1_000_000
+
 // Helper function to detect platform from URL
 const detectPlatform = (
   url: string
@@ -639,7 +643,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                 </Tooltip>
               </Flex>
               <Flex alignItems='center' gap='s'>
-                {unclaimedFees > 0 ? (
+                {unclaimedFees >= MIN_CLAIMABLE_FEES ? (
                   <Flex gap='xs' alignItems='center'>
                     <TextLink
                       onClick={handleClaimFeesClick}
