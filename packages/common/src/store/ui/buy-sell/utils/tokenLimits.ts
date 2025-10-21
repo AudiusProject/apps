@@ -3,16 +3,20 @@
  */
 
 import { MIN_SWAP_AMOUNT_USD, MAX_SWAP_AMOUNT_USD } from '../constants'
+import { TOKEN_LISTING_MAP } from '../../shared/tokenConstants'
 import type { TokenLimits, TokenLimitInput } from '../types/swap.types'
 
 /**
  * Calculates min/max token amounts based on USD limits and current token price
  * For stablecoins, assumes 1:1 parity with USD
+ * For SOL, uses very small minimum (0.000001) since it's expensive
+ * For artist coins, uses minimum of 1 since they're very cheap
  * For other tokens, converts USD limits using current price
  */
 export const calculateTokenLimits = (
   tokenPrice: number | null,
-  isStablecoin: boolean
+  isStablecoin: boolean,
+  tokenAddress?: string
 ): TokenLimits => {
   if (isStablecoin) {
     // For stablecoins like USDC, 1 token ≈ $1 USD
@@ -22,11 +26,23 @@ export const calculateTokenLimits = (
     }
   }
 
+  // Check if this is SOL (native Solana token)
+  const isSOL = tokenAddress === TOKEN_LISTING_MAP.SOL.address
+
   if (!tokenPrice || tokenPrice <= 0) {
     // Fallback to reasonable defaults if price is unavailable
-    return {
-      min: 1,
-      max: 1000000
+    if (isSOL) {
+      // SOL is expensive, use very small minimum
+      return {
+        min: 0.000001, // Same as artist coins launchpad
+        max: 1000000
+      }
+    } else {
+      // Artist coins are cheap, use minimum of 1
+      return {
+        min: 1, // Artist coins are very cheap
+        max: 1000000
+      }
     }
   }
 
@@ -41,10 +57,10 @@ export const calculateTokenLimits = (
  * Allows for manual override of calculated limits
  */
 export const resolveTokenLimits = (input: TokenLimitInput): TokenLimits => {
-  const { tokenPrice, isStablecoin, providedMin, providedMax } = input
+  const { tokenPrice, isStablecoin, providedMin, providedMax, tokenAddress } = input
 
   // Otherwise, calculate based on USD limits and price for minimum only
-  const { min } = calculateTokenLimits(tokenPrice, isStablecoin)
+  const { min } = calculateTokenLimits(tokenPrice, isStablecoin, tokenAddress)
   return {
     min: providedMin ?? min,
     max: providedMax ?? Number.MAX_SAFE_INTEGER

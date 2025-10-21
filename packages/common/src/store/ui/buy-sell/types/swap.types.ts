@@ -58,6 +58,7 @@ export type TokenLimitInput = {
   isStablecoin: boolean
   providedMin?: number
   providedMax?: number
+  tokenAddress?: string
 }
 
 /**

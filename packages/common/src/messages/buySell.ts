@@ -51,7 +51,18 @@ export const buySellMessages = {
   emptyAmount: 'Please enter an amount',
   insufficientBalance: (symbol: string) => `Insufficient ${symbol} balance`,
   minAmount: (min: number, symbol: string) => {
-    const formattedMin = min.toFixed(2)
+    // Handle very small numbers better - show more decimal places for small amounts
+    let formattedMin: string
+    if (min < 0.01) {
+      // For very small amounts (like SOL), show up to 6 decimal places and remove trailing zeros
+      formattedMin = min.toFixed(6).replace(/\.?0+$/, '')
+    } else if (min >= 1) {
+      // For whole numbers (like artist coins), show as integer
+      formattedMin = min % 1 === 0 ? min.toString() : min.toFixed(2)
+    } else {
+      // For amounts between 0.01 and 1, show 2 decimal places
+      formattedMin = min.toFixed(2)
+    }
     return `Minimum amount is ${formattedMin} ${symbol}`
   },
   maxAmount: (max: number, symbol: string) => {
