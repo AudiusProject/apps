@@ -45,7 +45,7 @@ export const useConnectExternalWallets = (
   onError?: (error: EventsControllerState) => void
 ) => {
   const theme = useTheme()
-  const { open: openAppKitModal, close: closeAppKitModal } = useAppKit()
+  const { open: openAppKitModal } = useAppKit()
   const { data: currentUser } = useCurrentAccountUser()
   const [currentWallets, setCurrentWallets] = useState<{
     solana: string | undefined
@@ -58,6 +58,7 @@ export const useConnectExternalWallets = (
   // Explicitly manage our own state for the open state of the modal
   // since there might be multiple hook instances listening for events
   const [isConnecting, setIsConnecting] = useState(false)
+  const isConnectingRef = useRef(false)
 
   // Keep track of any existing connected external wallets
   const { isConnected, connector, chainId } = useAccount()
@@ -78,6 +79,7 @@ export const useConnectExternalWallets = (
   const openAppKitModalCallback = useCallback(
     async (namespace?: keyof NamespaceTypeMap) => {
       setIsConnecting(true)
+      isConnectingRef.current = true
       // If previously connected, disconnect to give a "fresh" view of options
       if (isConnected) {
         await disconnect()
@@ -126,40 +128,38 @@ export const useConnectExternalWallets = (
    */
   useEffect(() => {
     return appkitModal.subscribeEvents(async (event) => {
-      // Ignore events not meant for this hook instance
-      if (!isConnecting) return
+      // Ignore events not meant for this hook instance - use ref to get current value
+      if (!isConnectingRef.current) return
+
       if (event.data.event === 'MODAL_CLOSE') {
         setIsConnecting(false)
-        if (!isConnecting) {
-          await reconnectExternalAuthWallet()
-        }
-      } else if (event.data.event === 'CONNECT_SUCCESS') {
-        setIsConnecting(false)
+        isConnectingRef.current = false
+
+        // Check if wallet was connected when modal closed
         const solanaAccount = appkitModal.getAccount('solana')
         const ethAccount = appkitModal.getAccount('eip155')
-        const connectedAddress = solanaAccount?.address
-        const connectedEthAddress = ethAccount?.address
-        setCurrentWallets({
-          solana: connectedAddress,
-          eth: connectedEthAddress
-        })
-        await onSuccess?.({
-          solana: connectedAddress,
-          eth: connectedEthAddress
-        })
-        closeAppKitModal()
+
+        if (solanaAccount?.address || ethAccount?.address) {
+          // Wallet connected - update state and call success callback
+          setCurrentWallets({
+            solana: solanaAccount?.address,
+            eth: ethAccount?.address
+          })
+          await onSuccess?.({
+            solana: solanaAccount?.address,
+            eth: ethAccount?.address
+          })
+        } else {
+          // No wallet connected - reconnect external auth if needed
+          await reconnectExternalAuthWallet()
+        }
       } else if (event.data.event === 'CONNECT_ERROR') {
         setIsConnecting(false)
+        isConnectingRef.current = false
         onError?.(event)
       }
     })
-  }, [
-    onSuccess,
-    reconnectExternalAuthWallet,
-    isConnecting,
-    closeAppKitModal,
-    onError
-  ])
+  }, [onSuccess, reconnectExternalAuthWallet, onError])
 
   return {
     isPending: isConnecting,
