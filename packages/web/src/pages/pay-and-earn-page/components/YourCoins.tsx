@@ -10,12 +10,13 @@ import {
 import {
   useFeatureFlag,
   useFormattedCoinBalance,
-  useIsManagedAccount
+  useIsManagedAccount,
+  ownedCoinsFilter
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
 import { useBuySellModal } from '@audius/common/store'
-import { route, ownedCoinsFilter } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import {
   Box,
   Button,
