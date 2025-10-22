@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@audius/sdk": "*",
+    "@audius/sdk-legacy": "*",
     "@hono/node-server": "^1.13.7",
     "@pedalboard/basekit": "*",
     "@pedalboard/logger": "*",
