@@ -725,6 +725,21 @@ const WebPlayer = (props) => {
                 path={COIN_DETAIL_PAGE}
                 isMobile={isMobile}
                 render={(props) => {
+                  const ticker = props.match.params.ticker
+                  if (ticker && ticker !== ticker.toUpperCase()) {
+                    return (
+                      <Redirect
+                        to={{
+                          pathname: COIN_DETAIL_PAGE.replace(
+                            ':ticker',
+                            ticker.toUpperCase()
+                          ),
+                          search: props.location.search,
+                          hash: props.location.hash
+                        }}
+                      />
+                    )
+                  }
                   return <CoinDetailPage {...props} />
                 }}
               />

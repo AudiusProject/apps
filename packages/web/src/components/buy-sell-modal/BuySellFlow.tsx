@@ -161,7 +161,9 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const externalWalletAccount = appkitModal.getAccount('solana')
 
   // Get all available tokens, filtered by external wallet if connected
-  const { coins, isLoading: coinsLoading } = useTradeableCoins()
+  const { coins, isLoading: coinsLoading } = useTradeableCoins({
+    includeSol: !!externalWalletAccount?.address
+  })
 
   const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
@@ -190,18 +192,21 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
-    ownedAddresses
+    ownedAddresses,
+    includeSol: !!externalWalletAccount?.address
   })
 
   // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
-    ownedAddresses
+    ownedAddresses,
+    includeSol: !!externalWalletAccount?.address
   })
 
   // Get filtered tokens for convert tab output (all coins except base token)
   const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
-    excludeSymbols: [baseTokenSymbol]
+    excludeSymbols: [baseTokenSymbol],
+    includeSol: !!externalWalletAccount?.address
   })
 
   // Get filtered tokens for buy tab output (all coins except quote token and USDC)
@@ -513,7 +518,9 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             />
           ) : null}
 
-          {activeTab === 'buy' && !hasSufficientBalance ? (
+          {activeTab === 'buy' &&
+          !hasSufficientBalance &&
+          !externalWalletAccount?.address ? (
             <Hint>
               {messages.insufficientUSDC}
               <br />

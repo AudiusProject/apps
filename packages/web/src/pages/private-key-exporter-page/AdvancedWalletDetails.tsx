@@ -118,7 +118,12 @@ export const AdvancedWalletDetails = () => {
     fetchKeypair()
   }, [solanaWalletService, authService])
 
-  if (!solanaPublicKey || !solanaEncodedPrivateKey || !ethAddress || !ethPrivateKey) {
+  if (
+    !solanaPublicKey ||
+    !solanaEncodedPrivateKey ||
+    !ethAddress ||
+    !ethPrivateKey
+  ) {
     return null
   }
 
@@ -133,12 +138,18 @@ export const AdvancedWalletDetails = () => {
         {messages.solanaWallet}
       </Text>
       <Key label={messages.address} value={solanaPublicKey} />
-      <Key label={messages.privateKey} value={solanaEncodedPrivateKey} isPrivate />
+      <Key
+        label={messages.privateKey}
+        value={solanaEncodedPrivateKey}
+        isPrivate
+      />
 
       {/* Ethereum Wallet */}
-      <Text variant='title' size='s' mt='l'>
-        {messages.ethereumWallet}
-      </Text>
+      <Box mt='l'>
+        <Text variant='title' size='s'>
+          {messages.ethereumWallet}
+        </Text>
+      </Box>
       <Key label={messages.address} value={ethAddress} />
       <Key label={messages.privateKey} value={ethPrivateKey} isPrivate />
     </Flex>
