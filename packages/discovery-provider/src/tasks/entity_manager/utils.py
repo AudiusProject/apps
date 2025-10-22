@@ -385,10 +385,8 @@ def get_metadata_type_and_format(entity_type, action=None):
     elif entity_type == EntityType.ENCRYPTED_EMAIL:
         metadata_type = "encrypted_email"
         metadata_format = encrypted_email_metadata_format
-    elif (
-        entity_type == EntityType.ASSOCIATED_WALLET
-        and action == Action.CREATE
-        or action == Action.DELETE
+    elif entity_type == EntityType.ASSOCIATED_WALLET and (
+        action == Action.CREATE or action == Action.DELETE
     ):
         metadata_type = "associated_wallet"
         metadata_format = (
