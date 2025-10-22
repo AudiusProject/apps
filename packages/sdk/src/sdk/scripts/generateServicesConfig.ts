@@ -166,8 +166,10 @@ const generateServicesConfig = async (
     getDefaultServiceTypeManagerConfig(config)
   )
 
+  const validators = await serviceProviderFactory.getValidators()
   const contentNodes = await serviceProviderFactory.getContentNodes()
-  if (!contentNodes || contentNodes.length === 0) {
+  const storageNodes = validators.concat(contentNodes)
+  if (!storageNodes || storageNodes.length === 0) {
     throw Error('Storage node services not found')
   }
   const antiAbuseAddresses =
@@ -180,7 +182,7 @@ const generateServicesConfig = async (
   const minVersion = await serviceTypeManager.getDiscoveryNodeVersion()
 
   config.network.minVersion = minVersion
-  config.network.storageNodes = contentNodes.map(
+  config.network.storageNodes = storageNodes.map(
     ([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
       endpoint,
       delegateOwnerWallet
