@@ -1,94 +1,53 @@
 import { View } from 'react-native'
 
-import { ImageField } from 'app/components/fields'
-import { makeStyles } from 'app/styles'
-
-import { ProfileInput } from './ProfileInput'
-
-const useStyles = makeStyles(({ palette }) => ({
-  container: {
-    width: '100%',
-    backgroundColor: palette.white,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: palette.neutralLight8,
-    overflow: 'visible' // Changed to visible so avatar can overflow
-  },
-  innerContainer: {
-    overflow: 'hidden',
-    borderRadius: 8
-  },
-  coverPhotoContainer: {
-    height: 96,
-    width: '100%',
-    position: 'relative'
-  },
-  coverPhoto: {
-    height: 96,
-    width: '100%',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    aspectRatio: undefined
-  },
-  coverPhotoImageContainer: {
-    marginHorizontal: 0,
-    height: 96,
-    width: '100%'
-  },
-  profilePictureContainer: {
-    position: 'absolute',
-    left: 16,
-    top: 40, // 96px (cover height) - 56px (overlap) = 40px from container top
-    zIndex: 100
-  },
-  profilePicture: {
-    height: 80,
-    width: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderColor: palette.white,
-    backgroundColor: palette.neutralLight4,
-    overflow: 'hidden'
-  },
-  profilePictureRoot: {
-    marginHorizontal: 0
-  },
-  profilePictureImageContainer: {
-    height: 80,
-    width: 80,
-    borderRadius: 40
-  },
-  profilePictureImage: {
-    height: 80,
-    width: 80,
-    borderRadius: 40
-  },
-  bottomContainer: {
-    paddingTop: 40, // Space for avatar (80px height - 56px overlap = 24px visible + 16px padding)
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    backgroundColor: palette.white,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8
-  }
-}))
+import { useTheme } from '@audius/harmony-native'
+import { ImageField, TextField } from 'app/components/fields'
 
 export const ProfileHeader = () => {
-  const styles = useStyles()
+  const { color, cornerRadius } = useTheme()
 
   return (
-    <View style={styles.container}>
-      <View style={styles.innerContainer}>
+    <View
+      style={{
+        width: '100%',
+        backgroundColor: color.background.white,
+        borderRadius: cornerRadius.m,
+        borderWidth: 1,
+        borderColor: color.border.default,
+        overflow: 'visible' // Changed to visible so avatar can overflow
+      }}
+    >
+      <View
+        style={{
+          overflow: 'hidden',
+          borderRadius: cornerRadius.m
+        }}
+      >
         {/* Cover Photo */}
-        <View style={styles.coverPhotoContainer}>
+        <View
+          style={{
+            height: 96,
+            width: '100%',
+            position: 'relative'
+          }}
+        >
           <ImageField
             name='cover_photo'
             styles={{
-              root: styles.coverPhotoImageContainer,
-              imageContainer: styles.coverPhoto
+              root: {
+                marginHorizontal: 0,
+                height: 96,
+                width: '100%'
+              },
+              imageContainer: {
+                height: 96,
+                width: '100%',
+                borderTopLeftRadius: cornerRadius.m,
+                borderTopRightRadius: cornerRadius.m,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+                aspectRatio: undefined
+              }
             }}
             pickerOptions={{
               height: 500,
@@ -99,13 +58,30 @@ export const ProfileHeader = () => {
         </View>
 
         {/* Profile Picture - Positioned absolutely to overlap cover photo */}
-        <View style={styles.profilePictureContainer}>
+        <View
+          style={{
+            position: 'absolute',
+            left: 16,
+            top: 40, // 96px (cover height) - 56px (overlap) = 40px from container top
+            zIndex: 100
+          }}
+        >
           <ImageField
             name='profile_picture'
             styles={{
-              root: styles.profilePictureRoot,
-              imageContainer: styles.profilePictureImageContainer,
-              image: styles.profilePictureImage
+              root: {
+                marginHorizontal: 0
+              },
+              imageContainer: {
+                height: 80,
+                width: 80,
+                borderRadius: 40
+              },
+              image: {
+                height: 80,
+                width: 80,
+                borderRadius: 40
+              }
             }}
             pickerOptions={{
               height: 1000,
@@ -116,8 +92,22 @@ export const ProfileHeader = () => {
         </View>
 
         {/* Bottom Container with Display Name */}
-        <View style={styles.bottomContainer}>
-          <ProfileInput name='name' label='Display Name' placeholder='Name' />
+        <View
+          style={{
+            paddingTop: 40, // Space for avatar (80px height - 56px overlap = 24px visible + 16px padding)
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+            backgroundColor: color.background.white,
+            borderBottomLeftRadius: cornerRadius.m,
+            borderBottomRightRadius: cornerRadius.m
+          }}
+        >
+          <TextField
+            name='name'
+            label='Display Name'
+            placeholder='Name'
+            noGutter
+          />
         </View>
       </View>
     </View>

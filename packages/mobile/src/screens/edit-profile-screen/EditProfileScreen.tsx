@@ -18,6 +18,7 @@ import {
   IconX
 } from '@audius/harmony-native'
 import { ScrollView } from 'app/components/core'
+import { TextField } from 'app/components/fields'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { useProfilePicture } from 'app/components/image/UserImage'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -27,7 +28,6 @@ import { isImageUriSource } from 'app/utils/image'
 
 import { FormScreen } from './FormScreen'
 import { ProfileHeader } from './ProfileHeader'
-import { ProfileInput } from './ProfileInput'
 import { ProfileInputCard } from './ProfileInputCard'
 import type { ProfileValues, UpdatedProfile } from './types'
 
@@ -68,17 +68,19 @@ const EditProfileForm = (props: EditProfileFormProps) => {
           {/* About You Section */}
           <ProfileInputCard title='About You'>
             <Flex direction='column' gap='xs'>
-              <ProfileInput
+              <TextField
                 name='bio'
                 label='Bio'
                 placeholder='Tell us about yourself'
                 multiline
                 maxLength={256}
+                noGutter
               />
-              <ProfileInput
+              <TextField
                 name='location'
                 label='Location'
                 placeholder='City, Country'
+                noGutter
               />
             </Flex>
           </ProfileInputCard>
@@ -86,50 +88,55 @@ const EditProfileForm = (props: EditProfileFormProps) => {
           {/* Social Handles Section */}
           <ProfileInputCard title='Social Handles'>
             <Flex direction='column' gap='xs'>
-              <ProfileInput
+              <TextField
                 name='twitter_handle'
                 label='X'
                 placeholder='username'
                 startAdornmentText='@'
-                Icon={IconX}
+                startIcon={IconX}
                 editable={!isXVerified}
+                noGutter
               />
-              <ProfileInput
+              <TextField
                 name='instagram_handle'
                 label='Instagram'
                 placeholder='username'
                 startAdornmentText='@'
-                Icon={IconInstagram}
+                startIcon={IconInstagram}
                 editable={!isInstagramVerified}
+                noGutter
               />
-              <ProfileInput
+              <TextField
                 name='tiktok_handle'
                 label='TikTok'
                 placeholder='username'
                 startAdornmentText='@'
-                Icon={IconTikTok}
+                startIcon={IconTikTok}
                 editable={!isTikTokVerified}
+                noGutter
               />
             </Flex>
           </ProfileInputCard>
 
           {/* Website Section */}
           <ProfileInputCard title='Website'>
-            <ProfileInput
+            <TextField
               name='website'
               label='Website'
               placeholder='yourwebsite.com'
-              Icon={IconLink}
+              startIcon={IconLink}
+              noGutter
             />
           </ProfileInputCard>
 
           {/* Donation Section */}
           <ProfileInputCard title='Donation'>
-            <ProfileInput
+            <TextField
               name='donation'
               label='Donation'
               placeholder='paypal.me/yourlink'
-              Icon={IconDonate}
+              startIcon={IconDonate}
+              noGutter
             />
           </ProfileInputCard>
         </Flex>

@@ -5,7 +5,6 @@ import { isEmpty } from 'lodash'
 import { View } from 'react-native'
 
 import { Button, Flex, IconUser, useTheme } from '@audius/harmony-native'
-import { makeStyles } from 'app/styles'
 
 import type { ScreenProps } from '../../components/core/Screen'
 import { ScreenContent, Screen } from '../../components/core/Screen'
@@ -16,23 +15,6 @@ const messages = {
   editProfile: 'Edit Profile'
 }
 
-const useStyles = makeStyles(({ palette, spacing }) => ({
-  actionBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: palette.white,
-    borderTopWidth: 1,
-    borderTopColor: palette.neutralLight8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 4
-  }
-}))
-
 type FormScreenProps = ScreenProps & {
   onSubmit: () => void
   onReset: () => void
@@ -41,8 +23,7 @@ type FormScreenProps = ScreenProps & {
 
 export const FormScreen = (props: FormScreenProps) => {
   const { children, onSubmit, onReset, errors, ...other } = props
-  const styles = useStyles()
-  const { spacing } = useTheme()
+  const { color, shadows } = useTheme()
   const navigation = useNavigation()
 
   const handleCancel = useCallback(() => {
@@ -60,13 +41,19 @@ export const FormScreen = (props: FormScreenProps) => {
       <ScreenContent>{children}</ScreenContent>
 
       {/* Bottom Action Bar */}
-      <View style={styles.actionBar}>
-        <Flex
-          direction='row'
-          gap='s'
-          p='l'
-          style={{ paddingBottom: spacing.l }}
-        >
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: color.background.white,
+          borderTopWidth: 1,
+          borderTopColor: color.border.default,
+          ...shadows.midInverted
+        }}
+      >
+        <Flex direction='row' gap='s' p='l' pb='l'>
           <Button
             variant='secondary'
             size='default'
