@@ -51,7 +51,6 @@ import { useClaimFees } from 'hooks/useClaimFees'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useClaimVestedCoins } from 'hooks/useClaimVestedCoins'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
-import { useExternalWallets } from 'hooks/useExternalWallets'
 import { useVestedCoinsInfo } from 'hooks/useVestedCoinsInfo'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
@@ -450,8 +449,8 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     }
   )
 
-  const { openAppKitModal: openAppKitModalForVestedCoins } = useExternalWallets(
-    async () => {
+  const { openAppKitModal: openAppKitModalForVestedCoins } =
+    useConnectExternalWallets(async () => {
       const solanaAccount = appkitModal.getAccount('solana')
       const connectedAddress = solanaAccount?.address
 
@@ -464,8 +463,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         return
       }
       handleClaimVestedCoins(connectedAddress)
-    }
-  )
+    })
 
   const handleClaimFeesClick = useCallback(async () => {
     const solanaAccount = appkitModal.getAccount('solana')

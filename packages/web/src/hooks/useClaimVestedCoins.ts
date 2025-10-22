@@ -26,7 +26,7 @@ export type UseClaimVestedCoinsParams = {
 }
 
 export type ClaimVestedCoinsResponse = {
-  signatures: string[]
+  signature: string
 }
 
 /**
@@ -67,17 +67,22 @@ export const useClaimVestedCoins = (
         throw new Error('Missing current user erc_wallet')
       }
 
-      console.log('Creating user bank', {
-        tokenMint,
-        externalWalletAddress
-      })
       const { userBank } =
         await sdk.services.claimableTokensClient.getOrCreateUserBank({
           ethWallet: currentUser?.erc_wallet,
           mint: new PublicKey(tokenMint)
         })
 
-      // Get the claim vested coins transaction from the relay
+      if (!userBank) {
+        throw new Error(
+          'Unable to get or create user bank for claiming vested coins'
+        )
+      }
+
+      // Get the claim vested coins transaction from relay
+      // This transaction will:
+      // 1. Claim vested tokens to the external wallet (which must sign)
+      // 2. Transfer tokens from external wallet to user bank (in same tx)
       const claimVestedCoinsResponse =
         await sdk.services.solanaRelay.claimVestedCoins({
           tokenMint,
@@ -94,19 +99,21 @@ export const useClaimVestedCoins = (
         )
       )
 
-      // Triggers 3rd party wallet to sign and send the transaction
-      const allTransactions =
-        await solanaProvider.signAllTransactions(claimVestedCoinsTxs)
-
-      // Confirm all of the transactions
-      const signatures = await Promise.all(
-        allTransactions.map((tx) =>
-          sdk.services.solanaClient.sendTransaction(tx)
-        )
+      // Triggers 3rd party wallet to sign the transaction
+      const signedTransaction = await solanaProvider.signTransaction(
+        claimVestedCoinsTxs[0]
       )
 
+      // Relay the transaction (we're not paying fees but we want the retry logic and logging)
+      const { signature } = await sdk.services.solanaRelay.relay({
+        transaction: signedTransaction,
+        sendOptions: {
+          skipPreflight: true
+        }
+      })
+
       return {
-        signatures
+        signature
       }
     },
     ...options,

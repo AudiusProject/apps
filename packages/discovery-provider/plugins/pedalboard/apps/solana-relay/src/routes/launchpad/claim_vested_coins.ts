@@ -4,6 +4,10 @@ import {
   deriveEscrow
 } from '@meteora-ag/dynamic-bonding-curve-sdk'
 import { LockClient } from '@meteora-ag/met-lock-sdk'
+import {
+  createTransferCheckedInstruction,
+  getAssociatedTokenAddressSync
+} from '@solana/spl-token'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
@@ -237,11 +241,40 @@ export const claimVestedCoins = async (
     }
 
     // Create the claim transaction using Meteora Lock SDK claimV2
+    // NOTE: recipient must be a signer, so we claim to ownerWallet (root wallet)
+    // Then immediately transfer to the user bank in the same transaction
     const claimTx = await lockClient.claimV2({
       escrow: escrow,
-      recipient: receiverWallet,
+      recipient: ownerWallet,
       maxAmount: availableAmount,
       payer: ownerWallet
+    })
+
+    // Add transfer instruction from root wallet ATA to user bank
+    // This moves tokens from the claimable root wallet to the user's token account
+    const ownerTokenAccount = getAssociatedTokenAddressSync(
+      mintPublicKey,
+      ownerWallet,
+      false
+    )
+
+    // Add transfer instruction: root wallet ATA -> user bank
+    const transferInstruction = createTransferCheckedInstruction(
+      ownerTokenAccount, // source
+      mintPublicKey, // mint
+      receiverWallet, // destination (user bank)
+      ownerWallet, // owner of source account
+      BigInt(availableAmount.toString()), // amount as BigInt to handle large values
+      9 // decimals for artist coins (matches SPL token standard)
+    )
+
+    claimTx.add(transferInstruction)
+
+    logger.info({
+      message: 'Added transfer instruction',
+      from: ownerTokenAccount.toBase58(),
+      to: receiverWallet.toBase58(),
+      amount: availableAmount.toString()
     })
 
     // Set transaction properties
