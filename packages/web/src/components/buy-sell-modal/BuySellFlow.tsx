@@ -518,7 +518,9 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             />
           ) : null}
 
-          {activeTab === 'buy' && !hasSufficientBalance ? (
+          {activeTab === 'buy' &&
+          !hasSufficientBalance &&
+          !externalWalletAccount?.address ? (
             <Hint>
               {messages.insufficientUSDC}
               <br />
