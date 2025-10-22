@@ -5,9 +5,9 @@ import {
   useQueryContext,
   useUserCoins
 } from '@audius/common/api'
+import { ownedCoinsFilter } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { AUDIO_TICKER } from '@audius/common/store'
-import { ownedCoinsFilter } from '@audius/common/utils'
 import { TouchableOpacity } from 'react-native'
 
 import {

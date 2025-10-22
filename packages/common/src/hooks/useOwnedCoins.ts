@@ -5,35 +5,66 @@ import {
   useUserCoins,
   useQueryContext,
   useUSDCBalance,
-  UserCoin
+  UserCoin,
+  useWalletCoins
 } from '~/api'
 import type { CoinInfo } from '~/store'
-import { ownedCoinsFilter } from '~/utils'
+
+/**
+ * Creates a predicate function for filtering user coins based on balance requirements
+ *
+ * @param wAudioMintAddress - The WAUDIO mint address from environment
+ * @returns Predicate function that can be used with Array.filter()
+ */
+export const ownedCoinsFilter =
+  (wAudioMintAddress: string) =>
+  (coin: UserCoin): boolean => {
+    // Show all non-USDC tokens with balance > 0
+    // OR AUDIO regardless of balance
+    return (
+      coin.ticker !== 'USDC' &&
+      (coin.balance > 0 || coin.mint === wAudioMintAddress)
+    )
+  }
 
 /**
  * Hook to filter coins based on user ownership and positive balance
  */
-export const useOwnedCoins = (allCoins: CoinInfo[]) => {
-  const { data: currentUserId } = useCurrentUserId()
-  const { data: userCoins } = useUserCoins(
-    { userId: currentUserId },
+export const useOwnedCoins = (
+  allCoins: CoinInfo[],
+  externalWalletAddress?: string
+) => {
+  // Fetch external wallet coins if external wallet is provided
+  const {
+    data: externalWalletCoins = [],
+    isLoading: isExternalWalletCoinsLoading
+  } = useWalletCoins(
+    { walletAddress: externalWalletAddress },
     { refetchInterval: 5000 }
   )
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: userCoins, isLoading: isUserCoinsLoading } = useUserCoins(
+    { userId: currentUserId },
+    { refetchInterval: 5000, enabled: !externalWalletAddress }
+  )
+
   const { data: usdcBalance } = useUSDCBalance()
   const { env } = useQueryContext()
 
-  const ownedCoins = useMemo(() => {
-    if (!userCoins || !allCoins.length) {
+  const ownedCoins = externalWalletAddress ? externalWalletCoins : userCoins
+
+  const filteredOwnedCoins = useMemo(() => {
+    if (!ownedCoins || !allCoins.length) {
       return []
     }
 
-    const filteredUserCoins = userCoins.filter(
+    const filteredOwnedCoins = ownedCoins.filter(
       ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)
     )
 
     // Create a map of user's owned tokens by mint address
     const userOwnedMints = new Set(
-      filteredUserCoins.map((coin: UserCoin) => coin.mint)
+      filteredOwnedCoins.map((coin: UserCoin) => coin.mint)
     )
 
     // Add USDC to owned tokens if user has USDC balance
@@ -48,7 +79,7 @@ export const useOwnedCoins = (allCoins: CoinInfo[]) => {
 
     return ownedCoinsList
   }, [
-    userCoins,
+    ownedCoins,
     usdcBalance,
     allCoins,
     env.WAUDIO_MINT_ADDRESS,
@@ -56,7 +87,9 @@ export const useOwnedCoins = (allCoins: CoinInfo[]) => {
   ])
 
   return {
-    ownedCoins,
-    isLoading: !userCoins
+    ownedCoins: filteredOwnedCoins,
+    isLoading: externalWalletAddress
+      ? isExternalWalletCoinsLoading
+      : isUserCoinsLoading
   }
 }
