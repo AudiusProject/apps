@@ -1,5 +1,6 @@
 import {
   QUERY_KEYS,
+  getConnectedWalletsQueryOptions,
   getCurrentAccountQueryKey,
   getUserCreatedCoinsQueryKey,
   getUserQueryKey,
@@ -220,6 +221,13 @@ export const useLaunchCoin = () => {
       // NOTE: this will eventually move to the users metadata
       queryClient.invalidateQueries({
         queryKey: getUserCreatedCoinsQueryKey(params.userId)
+      })
+      // The confirmation call will associate the external wallet, so we need to invalidate the connected wallets query
+      queryClient.invalidateQueries({
+        queryKey: getConnectedWalletsQueryOptions(
+          { audiusSdk },
+          { userId: params.userId }
+        ).queryKey
       })
     },
     onError: (error, params, _context) => {

@@ -34,6 +34,7 @@ import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection, connections } from '../../utils/connections'
 import { sendTransactionWithRetries } from '../../utils/transaction'
+import { associateExternalWallet } from '../relay/associateExternalWallet'
 
 import { AUDIO_MINT } from './constants'
 import { makeCurve, makeTestCurve } from './curve'
@@ -509,6 +510,14 @@ export const confirmLaunchCoin = async (
         },
         logger
       })
+    }
+
+    if (res.locals.signerUser?.user_id) {
+      logger.info('Associating external wallet...')
+      await associateExternalWallet(
+        createPoolTransaction,
+        res.locals.signerUser?.user_id
+      )
     }
 
     const dbcPool = deriveDbcPoolAddress(
