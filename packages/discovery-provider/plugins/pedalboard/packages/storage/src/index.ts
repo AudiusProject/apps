@@ -673,8 +673,8 @@ export type AssociatedWallets = {
   id: number;
   user_id: number;
   wallet: string;
-  blockhash: string;
-  blocknumber: number;
+  blockhash?: string | null;
+  blocknumber?: number | null;
   is_current: boolean;
   is_delete: boolean;
   chain: WalletChain;
