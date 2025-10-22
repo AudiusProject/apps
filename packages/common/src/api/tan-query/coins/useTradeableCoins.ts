@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import type { InfiniteData } from '@tanstack/react-query'
 
 import { transformArtistCoinsToTokenInfoMap, useQueryContext } from '~/api'
-import type { CoinInfo } from '~/store'
+import { CoinInfo, TOKEN_LISTING_MAP } from '~/store'
 
 import type { Coin } from '../../../adapters/coin'
 
@@ -16,7 +16,7 @@ export type TradeableCoinsContext = 'pay' | 'receive' | 'all'
 export type UseTradeableCoinsParams = {
   context?: TradeableCoinsContext
   excludeSymbols?: string[]
-  onlyOwned?: boolean
+  includeSol?: boolean
   ownedAddresses?: Set<string>
 }
 
@@ -34,7 +34,8 @@ export const useTradeableCoins = (
   const {
     context = 'all',
     excludeSymbols = [],
-    ownedAddresses = new Set()
+    ownedAddresses = new Set(),
+    includeSol = false
   } = params ?? {}
 
   const { env } = useQueryContext()
@@ -63,6 +64,14 @@ export const useTradeableCoins = (
           logoURI:
             'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
           isStablecoin: true
+        }
+
+        if (includeSol) {
+          coinsMap.SOL = {
+            ...TOKEN_LISTING_MAP.SOL,
+            balance: null,
+            isStablecoin: false
+          }
         }
 
         // Convert map to array for filtering
