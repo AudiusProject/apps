@@ -161,16 +161,17 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const externalWalletAccount = appkitModal.getAccount('solana')
 
   // Get all available tokens, filtered by external wallet if connected
-  const { coins, isLoading: coinsLoading } = useTradeableCoins({
-    externalWalletAddress: externalWalletAccount?.address
-  })
+  const { coins, isLoading: coinsLoading } = useTradeableCoins()
 
   const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
   // Get tokens that user owns (includes USDC if user has balance) for internal wallet
-  const { ownedCoins } = useOwnedCoins(availableCoins)
+  const { ownedCoins } = useOwnedCoins(
+    availableCoins,
+    externalWalletAccount?.address
+  )
 
   // Create owned addresses set for filtering (only needed for internal wallets)
   const ownedAddresses = useMemo(() => {
@@ -189,25 +190,18 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
-    externalWalletAddress: externalWalletAccount?.address,
-    // For internal wallets, only show owned tokens
-    onlyOwned: !externalWalletAccount?.address,
     ownedAddresses
   })
 
   // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
-    externalWalletAddress: externalWalletAccount?.address,
-    // For internal wallets, only show owned tokens
-    onlyOwned: !externalWalletAccount?.address,
     ownedAddresses
   })
 
   // Get filtered tokens for convert tab output (all coins except base token)
   const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
-    excludeSymbols: [baseTokenSymbol],
-    externalWalletAddress: externalWalletAccount?.address
+    excludeSymbols: [baseTokenSymbol]
   })
 
   // Get filtered tokens for buy tab output (all coins except quote token and USDC)
