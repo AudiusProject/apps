@@ -22,7 +22,10 @@ export const useOwnedCoins = (
   const {
     data: externalWalletCoins = [],
     isLoading: isExternalWalletCoinsLoading
-  } = useWalletCoins({ walletAddress: externalWalletAddress })
+  } = useWalletCoins(
+    { walletAddress: externalWalletAddress },
+    { refetchInterval: 5000 }
+  )
   const { data: currentUserId } = useCurrentUserId()
   const { data: userCoins, isLoading: isUserCoinsLoading } = useUserCoins(
     { userId: currentUserId },
