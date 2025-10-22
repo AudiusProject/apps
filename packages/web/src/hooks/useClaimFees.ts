@@ -1,4 +1,3 @@
-import { type Coin } from '@audius/common/adapters'
 import {
   getArtistCoinQueryKey,
   useCurrentAccountUser,
@@ -106,38 +105,10 @@ export const useClaimFees = (
       })
     },
     onSuccess: async (data, variables, context) => {
-      // Optimistically update the unclaimed fees data
+      // Invalidate the artist coin query to refetch the updated fees
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
-      queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
-        if (!existingCoin) return existingCoin
+      await queryClient.invalidateQueries({ queryKey })
 
-        const currentUnclaimedDbcFees =
-          existingCoin.artistFees?.unclaimedDbcFees ?? 0
-        const currentUnclaimedDammV2Fees =
-          existingCoin.artistFees?.unclaimedDammV2Fees ?? 0
-        const currentTotalDbcFees = existingCoin.artistFees?.totalDbcFees ?? 0
-
-        return {
-          ...existingCoin,
-          dynamicBondingCurve: {
-            ...existingCoin?.dynamicBondingCurve,
-            creatorQuoteFee: 0
-          },
-          artistFees: {
-            ...existingCoin?.artistFees,
-            // Set DBC unclaimed fees to 0 since we're claiming them
-            unclaimedDbcFees: 0,
-            // Update total DBC fees (add what was claimed to the total)
-            totalDbcFees: currentTotalDbcFees + currentUnclaimedDbcFees,
-            // Update total unclaimed fees (only DAMM v2 fees remain unclaimed if any)
-            unclaimedFees: currentUnclaimedDammV2Fees,
-            // Update total fees (add what was claimed)
-            totalFees:
-              (existingCoin.artistFees?.totalFees ?? 0) +
-              currentUnclaimedDbcFees
-          }
-        }
-      })
       // Call the original onSuccess if provided
       options?.onSuccess?.(data, variables, context)
 
