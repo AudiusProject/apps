@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from 'react'
 
 import {
   useArtistCoin,
+  useAssociatedWallets,
   useCoinBalance,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useWalletAudioBalances
 } from '@audius/common/api'
 import {
   useBuySellInitialTab,
@@ -11,6 +13,7 @@ import {
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import { Chain } from '@audius/common/models'
 import { useUserCoin } from '@audius/common/src/api/tan-query/coins/useUserCoin'
 import {
   useBuySellModal,
@@ -18,6 +21,7 @@ import {
   useSendTokensModal
 } from '@audius/common/store'
 import { shortenSPLAddress } from '@audius/common/utils'
+import { AUDIO } from '@audius/fixed-decimal'
 import {
   Artwork,
   Box,
@@ -36,6 +40,7 @@ import Skeleton from 'components/skeleton/Skeleton'
 import Tooltip from 'components/tooltip/Tooltip'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { env } from 'services/env'
 
 import { OpenAppDrawer } from './OpenAppDrawer'
 
@@ -181,12 +186,14 @@ const HasBalanceState = ({
   mint,
   isBuySellSupported,
   coinName,
-  isMobile
+  isMobile,
+  isAudio
 }: BalanceStateProps & {
   mint: string
   isBuySellSupported: boolean
   coinName: string
   isMobile: boolean
+  isAudio: boolean
 }) => {
   const isManagerMode = useIsManagedAccount()
   const { motion } = useTheme()
@@ -200,8 +207,37 @@ const HasBalanceState = ({
   const isLoading = isCoinBalanceLoading || isCoinPriceLoading
 
   // Fetch wallet accounts for balance breakdown
-  const { data: userCoins } = useUserCoin({ mint })
+  const { data: userCoins } = useUserCoin({ mint }, { enabled: !isAudio })
   const { accounts: unsortedAccounts = [], decimals } = userCoins ?? {}
+
+  // For AUDIO, fetch ERC and SPL balances separately for built-in wallet
+  const { data: currentUser } = useCurrentAccountUser()
+  const audioBalances = useWalletAudioBalances(
+    {
+      wallets: [
+        ...(currentUser?.erc_wallet
+          ? [{ address: currentUser.erc_wallet, chain: Chain.Eth }]
+          : []),
+        ...(currentUser?.spl_wallet
+          ? [{ address: currentUser.spl_wallet, chain: Chain.Sol }]
+          : [])
+      ],
+      includeStaked: false
+    },
+    { enabled: isAudio }
+  )
+
+  // For AUDIO, fetch associated/linked wallets (both ETH and SOL)
+  const { data: associatedWallets = [] } = useAssociatedWallets({
+    enabled: isAudio
+  })
+  const associatedAudioBalances = useWalletAudioBalances(
+    {
+      wallets: associatedWallets,
+      includeStaked: false
+    },
+    { enabled: isAudio && associatedWallets.length > 0 }
+  )
 
   // Sort accounts by balance (descending)
   const accounts = useMemo(
@@ -218,6 +254,24 @@ const HasBalanceState = ({
     () => accounts.filter((account) => !account.isInAppWallet),
     [accounts]
   )
+
+  // For AUDIO, calculate the combined ERC + SPL balance for built-in wallet
+  const audioBuiltInBalance = useMemo(() => {
+    if (!isAudio) return null
+    // AudioWei is a bigint - use bigint arithmetic to avoid precision loss
+    // Wrap addition in AUDIO().value to maintain AudioWei branded type
+    let totalWei = AUDIO(0).value
+    for (const balanceData of audioBalances.data) {
+      if (balanceData.balance) {
+        totalWei = AUDIO(totalWei + balanceData.balance).value
+      }
+    }
+    // AUDIO constructor handles bigint in wei for display formatting
+    return AUDIO(totalWei).toLocaleString('en-US', {
+      maximumFractionDigits: 2,
+      roundingMode: 'trunc'
+    })
+  }, [isAudio, audioBalances.data])
 
   return (
     <>
@@ -252,7 +306,9 @@ const HasBalanceState = ({
           </Text>
         </Flex>
       </Flex>
-      {linkedWallets.length > 0 && (
+      {(linkedWallets.length > 0 ||
+        (isAudio && audioBuiltInBalance) ||
+        (isAudio && associatedAudioBalances.data.length > 0)) && (
         <>
           <Divider />
           <Flex direction='column' gap='s' w='100%' ph='xl'>
@@ -260,7 +316,7 @@ const HasBalanceState = ({
               {coinDetailsMessages.externalWallets.hasBalanceTitle}
             </Text>
             <Flex direction='column' gap='s' w='100%'>
-              {inAppWallet && (
+              {(inAppWallet || (isAudio && audioBuiltInBalance)) && (
                 <Flex
                   direction='row'
                   alignItems='center'
@@ -272,38 +328,83 @@ const HasBalanceState = ({
                     {coinDetailsMessages.externalWallets.builtIn}
                   </Text>
                   <Text variant='body' size='l'>
-                    {Math.trunc(
-                      inAppWallet.balance / Math.pow(10, decimals ?? 0)
-                    ).toLocaleString()}
+                    {isAudio
+                      ? audioBuiltInBalance
+                      : Math.trunc(
+                          inAppWallet!.balance / Math.pow(10, decimals ?? 0)
+                        ).toLocaleString()}
                   </Text>
                 </Flex>
               )}
-              {linkedWallets.map((wallet, index) => (
-                <Flex
-                  key={wallet.owner}
-                  direction='row'
-                  alignItems='center'
-                  justifyContent='space-between'
-                  w='100%'
-                  pv='2xs'
-                >
-                  <Flex gap='xs' alignItems='center'>
-                    <Text variant='body' size='l'>
-                      {isMobile
-                        ? walletMessages.linkedWallets.wallet(index)
-                        : walletMessages.linkedWallets.linkedWallet(index)}
-                    </Text>
-                    <Text variant='body' size='l' color='subdued'>
-                      ({shortenSPLAddress(wallet.owner)})
-                    </Text>
-                  </Flex>
-                  <Text variant='body' size='l'>
-                    {Math.trunc(
-                      wallet.balance / Math.pow(10, decimals ?? 0)
-                    ).toLocaleString()}
-                  </Text>
-                </Flex>
-              ))}
+              {isAudio
+                ? // For AUDIO, show associated wallets (both ETH and SOL)
+                  associatedAudioBalances.data.map((walletBalance, index) => {
+                    if (
+                      !walletBalance.balance ||
+                      walletBalance.balance === AUDIO(0).value
+                    )
+                      return null
+                    // Use AUDIO constructor to format bigint balance properly
+                    const balanceFormatted = AUDIO(
+                      walletBalance.balance
+                    ).toLocaleString('en-US', {
+                      maximumFractionDigits: 2,
+                      roundingMode: 'trunc'
+                    })
+                    return (
+                      <Flex
+                        key={`${walletBalance.chain}-${walletBalance.address}`}
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        w='100%'
+                        pv='2xs'
+                      >
+                        <Flex gap='xs' alignItems='center'>
+                          <Text variant='body' size='l'>
+                            {isMobile
+                              ? walletMessages.linkedWallets.wallet(index)
+                              : walletMessages.linkedWallets.linkedWallet(
+                                  index
+                                )}
+                          </Text>
+                          <Text variant='body' size='l' color='subdued'>
+                            ({shortenSPLAddress(walletBalance.address)})
+                          </Text>
+                        </Flex>
+                        <Text variant='body' size='l'>
+                          {balanceFormatted}
+                        </Text>
+                      </Flex>
+                    )
+                  })
+                : // For other coins, show SPL linked wallets
+                  linkedWallets.map((wallet, index) => (
+                    <Flex
+                      key={wallet.owner}
+                      direction='row'
+                      alignItems='center'
+                      justifyContent='space-between'
+                      w='100%'
+                      pv='2xs'
+                    >
+                      <Flex gap='xs' alignItems='center'>
+                        <Text variant='body' size='l'>
+                          {isMobile
+                            ? walletMessages.linkedWallets.wallet(index)
+                            : walletMessages.linkedWallets.linkedWallet(index)}
+                        </Text>
+                        <Text variant='body' size='l' color='subdued'>
+                          ({shortenSPLAddress(wallet.owner)})
+                        </Text>
+                      </Flex>
+                      <Text variant='body' size='l'>
+                        {Math.trunc(
+                          wallet.balance / Math.pow(10, decimals ?? 0)
+                        ).toLocaleString()}
+                      </Text>
+                    </Flex>
+                  ))}
             </Flex>
           </Flex>
           <Divider />
@@ -362,6 +463,7 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   const { data: currentUser } = useCurrentAccountUser()
   const { isBuySellSupported } = useBuySellRegionSupport()
   const initialTab = useBuySellInitialTab()
+  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
   // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
@@ -440,6 +542,7 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
             isBuySellSupported={isBuySellSupported}
             coinName={coinName}
             isMobile={isMobile}
+            isAudio={isAudio}
           />
         )}
         {isMobile && (
