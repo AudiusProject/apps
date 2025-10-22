@@ -42,11 +42,11 @@ const AvatarSkeleton = (props: any) => (
   />
 )
 
-type AssetLeaderboardCardProps = {
+type CoinLeaderboardCardProps = {
   mint: string
 }
 
-export const AssetLeaderboardCard = ({ mint }: AssetLeaderboardCardProps) => {
+export const CoinLeaderboardCard = ({ mint }: CoinLeaderboardCardProps) => {
   const { isMedium: isSmallScreen } = useMedia() // <1024px
   const numUsersShowing = isSmallScreen ? 6 : 8
   const { data: leaderboardUsers, isPending: isLeaderboardPending } =

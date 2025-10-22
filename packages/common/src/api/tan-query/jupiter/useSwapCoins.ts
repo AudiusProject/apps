@@ -89,6 +89,99 @@ const initializeSwapDependencies = async (
 }
 
 /**
+ * Optimistically updates the balances of the user's coins after a swap.
+ * Contains special branching logic for AUDIO
+ * @param params - The parameters of the swap
+ * @param result - The result of the swap
+ * @param queryClient - The query client
+ * @param user - The user
+ * @param env - The environment
+ */
+export const optimisticallyUpdateSwapBalances = (
+  params: SwapTokensParams,
+  result: SwapTokensResult,
+  queryClient: ReturnType<typeof useQueryClient>,
+  user: User | undefined,
+  env: QueryContextType['env']
+) => {
+  const { inputMint, outputMint } = params
+  const { inputAmount, outputAmount } = result
+
+  // Check if AUDIO is involved in the swap
+  const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
+  const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
+
+  // Handle artist coin optimistic updates (not AUDIO)
+  if (inputMint && !isInputAudio) {
+    queryClient.setQueryData(
+      getUserCoinQueryKey(inputMint, user?.user_id),
+      (prevAccountBalances) => {
+        if (!prevAccountBalances) return null
+
+        return {
+          ...prevAccountBalances,
+          // Update aggregate account balance (includes connected wallets)
+          balance: prevAccountBalances?.balance - (inputAmount?.amount ?? 0),
+          // Update internal wallet balance (we only do swaps against internal wallets)
+          accounts: prevAccountBalances.accounts.map((account) =>
+            account.isInAppWallet
+              ? {
+                  ...account,
+                  balance: account.balance - (inputAmount?.amount ?? 0)
+                }
+              : account
+          )
+        }
+      }
+    )
+  }
+  if (outputMint && !isOutputAudio) {
+    queryClient.setQueryData(
+      getUserCoinQueryKey(outputMint, user?.user_id),
+      (prevAccountBalances) => {
+        if (!prevAccountBalances) return null
+
+        return {
+          ...prevAccountBalances,
+          // Update aggregate account balance (includes connected wallets)
+          balance: prevAccountBalances?.balance + (outputAmount?.amount ?? 0),
+          // Update internal wallet balance (we only do swaps against internal wallets)
+          accounts: prevAccountBalances.accounts.map((account) =>
+            account.isInAppWallet
+              ? {
+                  ...account,
+                  balance: account.balance + (outputAmount?.amount ?? 0)
+                }
+              : account
+          )
+        }
+      }
+    )
+  }
+
+  // If AUDIO is involved, optimistically update audioBalance queries
+  if ((isInputAudio || isOutputAudio) && user?.spl_wallet) {
+    // Calculate the net change in lamports (8 decimals for AUDIO on Solana)
+    const inputAudioLamports = isInputAudio ? (inputAmount?.amount ?? 0) : 0
+    const outputAudioLamports = isOutputAudio ? (outputAmount?.amount ?? 0) : 0
+
+    const netChangeLamports =
+      BigInt(outputAudioLamports) - BigInt(inputAudioLamports)
+
+    updateAudioBalanceOptimistically({
+      queryClient,
+      splWallet: user.spl_wallet,
+      changeLamports: netChangeLamports
+    })
+  }
+
+  // Invalidate user query to ensure user data is fresh after swap
+  queryClient.invalidateQueries({
+    queryKey: getUserQueryKey(user?.user_id)
+  })
+}
+
+/**
  * Hook for executing coin swaps using Jupiter.
  * Swaps any supported SPL token (or SOL) for another.
  */
@@ -178,85 +271,7 @@ export const useSwapCoins = () => {
       }
     },
     onSuccess: (result, params) => {
-      const { inputMint, outputMint } = params
-      const { inputAmount, outputAmount } = result
-
-      // Check if AUDIO is involved in the swap
-      const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
-      const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
-
-      // Handle artist coin optimistic updates (not AUDIO)
-      if (inputMint && !isInputAudio) {
-        queryClient.setQueryData(
-          getUserCoinQueryKey(inputMint, user?.user_id),
-          (prevAccountBalances) => {
-            if (!prevAccountBalances) return null
-
-            return {
-              ...prevAccountBalances,
-              // Update aggregate account balance (includes connected wallets)
-              balance:
-                prevAccountBalances?.balance - (inputAmount?.amount ?? 0),
-              // Update internal wallet balance (we only do swaps against internal wallets)
-              accounts: prevAccountBalances.accounts.map((account) =>
-                account.isInAppWallet
-                  ? {
-                      ...account,
-                      balance: account.balance - (inputAmount?.amount ?? 0)
-                    }
-                  : account
-              )
-            }
-          }
-        )
-      }
-      if (outputMint && !isOutputAudio) {
-        queryClient.setQueryData(
-          getUserCoinQueryKey(outputMint, user?.user_id),
-          (prevAccountBalances) => {
-            if (!prevAccountBalances) return null
-
-            return {
-              ...prevAccountBalances,
-              // Update aggregate account balance (includes connected wallets)
-              balance:
-                prevAccountBalances?.balance + (outputAmount?.amount ?? 0),
-              // Update internal wallet balance (we only do swaps against internal wallets)
-              accounts: prevAccountBalances.accounts.map((account) =>
-                account.isInAppWallet
-                  ? {
-                      ...account,
-                      balance: account.balance + (outputAmount?.amount ?? 0)
-                    }
-                  : account
-              )
-            }
-          }
-        )
-      }
-
-      // If AUDIO is involved, optimistically update audioBalance queries
-      if ((isInputAudio || isOutputAudio) && user?.spl_wallet) {
-        // Calculate the net change in lamports (8 decimals for AUDIO on Solana)
-        const inputAudioLamports = isInputAudio ? (inputAmount?.amount ?? 0) : 0
-        const outputAudioLamports = isOutputAudio
-          ? (outputAmount?.amount ?? 0)
-          : 0
-
-        const netChangeLamports =
-          BigInt(outputAudioLamports) - BigInt(inputAudioLamports)
-
-        updateAudioBalanceOptimistically({
-          queryClient,
-          splWallet: user.spl_wallet,
-          changeLamports: netChangeLamports
-        })
-      }
-
-      // Invalidate user query to ensure user data is fresh after swap
-      queryClient.invalidateQueries({
-        queryKey: getUserQueryKey(user?.user_id)
-      })
+      optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
     },
     onMutate: () => {
       return { status: SwapStatus.SENDING_TRANSACTION }

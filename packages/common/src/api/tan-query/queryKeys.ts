@@ -110,6 +110,7 @@ export const QUERY_KEYS = {
   coins: 'coins',
   userCreatedCoins: 'userCreatedCoins',
   userCoins: 'userCoins',
+  walletCoins: 'walletCoins',
   coin: 'coin',
   discordCode: 'discordCode',
   coinInsights: 'coinInsights',

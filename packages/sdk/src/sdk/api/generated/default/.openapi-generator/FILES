@@ -12,6 +12,7 @@ apis/RewardsApi.ts
 apis/TipsApi.ts
 apis/TracksApi.ts
 apis/UsersApi.ts
+apis/WalletApi.ts
 apis/index.ts
 index.ts
 models/Access.ts

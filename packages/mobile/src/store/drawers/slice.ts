@@ -34,7 +34,7 @@ export type Drawer =
   | 'Comment'
   | 'EditTrackFormOverflowMenu'
   | 'PickWinners'
-  | 'AssetInsightsOverflowMenu'
+  | 'CoinInsightsOverflowMenu'
   | 'WalletRowOverflowMenu'
 
 export type DrawerData = {
@@ -79,7 +79,7 @@ export type DrawerData = {
   Comment: { userId: ID; entityId: ID; isEntityOwner: boolean; artistId: ID }
   EditTrackFormOverflowMenu: undefined
   PickWinners: undefined
-  AssetInsightsOverflowMenu: { mint: string }
+  CoinInsightsOverflowMenu: { mint: string }
   WalletRowOverflowMenu: {
     address: string
     chain: Chain
@@ -120,7 +120,7 @@ const initialState: DrawersState = {
   Comment: false,
   EditTrackFormOverflowMenu: false,
   PickWinners: false,
-  AssetInsightsOverflowMenu: false,
+  CoinInsightsOverflowMenu: false,
   WalletRowOverflowMenu: false,
   data: {}
 }

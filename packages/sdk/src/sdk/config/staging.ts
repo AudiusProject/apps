@@ -5,74 +5,73 @@
 /* eslint-disable prettier/prettier */
 import type { SdkServicesConfig } from './types'
 export const stagingConfig: SdkServicesConfig = {
-  network: {
-    minVersion: '0.6.0',
-    apiEndpoint: 'https://api.staging.audius.co',
-    storageNodes: [
+  "network": {
+    "minVersion": "0.6.0",
+    "apiEndpoint": "https://api.staging.audius.co",
+    "storageNodes": [
       {
-        endpoint: 'https://creatornode12.staging.audius.co',
-        delegateOwnerWallet: '0x6b52969934076318863243fb92E9C4b3A08267b5'
+        "endpoint": "https://creatornode5.staging.audius.co",
+        "delegateOwnerWallet": "0xDC2BDF1F23381CA2eC9e9c70D4FD96CD8645D090"
       },
       {
-        endpoint: 'https://creatornode5.staging.audius.co',
-        delegateOwnerWallet: '0xDC2BDF1F23381CA2eC9e9c70D4FD96CD8645D090'
+        "endpoint": "https://creatornode6.staging.audius.co",
+        "delegateOwnerWallet": "0x68039d001D87E7A5E6B06fe0825EA7871C1Cd6C2"
       },
       {
-        endpoint: 'https://creatornode6.staging.audius.co',
-        delegateOwnerWallet: '0x68039d001D87E7A5E6B06fe0825EA7871C1Cd6C2'
+        "endpoint": "https://creatornode7.staging.audius.co",
+        "delegateOwnerWallet": "0x1F8e7aF58086992Ef4c4fc0371446974BBbC0D9F"
       },
       {
-        endpoint: 'https://creatornode7.staging.audius.co',
-        delegateOwnerWallet: '0x1F8e7aF58086992Ef4c4fc0371446974BBbC0D9F'
+        "endpoint": "https://creatornode9.staging.audius.co",
+        "delegateOwnerWallet": "0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3"
       },
       {
-        endpoint: 'https://creatornode9.staging.audius.co',
-        delegateOwnerWallet: '0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3'
+        "endpoint": "https://creatornode11.staging.audius.co",
+        "delegateOwnerWallet": "0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6"
       },
       {
-        endpoint: 'https://creatornode11.staging.audius.co',
-        delegateOwnerWallet: '0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6'
+        "endpoint": "https://creatornode12.staging.audius.co",
+        "delegateOwnerWallet": "0x6b52969934076318863243fb92E9C4b3A08267b5"
       }
     ],
-    antiAbuseOracleNodes: {
-      endpoints: ['https://discoveryprovider.staging.audius.co'],
-      registeredAddresses: [
-        '0x00b6462e955dA5841b6D9e1E2529B830F00f31Bf',
-        '0x57B57efFA54ba37DBF8A06B9c42E7611e84BDe6F',
-        '0xF617bbc0913bAE0a13f6D4A19eCDE5Aa07B0fF0A'
+    "antiAbuseOracleNodes": {
+      "endpoints": [
+        "https://discoveryprovider.staging.audius.co"
+      ],
+      "registeredAddresses": [
+        "0x00b6462e955dA5841b6D9e1E2529B830F00f31Bf",
+        "0x57B57efFA54ba37DBF8A06B9c42E7611e84BDe6F",
+        "0xF617bbc0913bAE0a13f6D4A19eCDE5Aa07B0fF0A"
       ]
     },
-    identityService: 'https://identityservice.staging.audius.co'
+    "identityService": "https://identityservice.staging.audius.co"
   },
-  acdc: {
-    entityManagerContractAddress: '0x1Cd8a543596D499B9b6E7a6eC15ECd2B7857Fd64',
-    chainId: 1056801
+  "acdc": {
+    "entityManagerContractAddress": "0x1Cd8a543596D499B9b6E7a6eC15ECd2B7857Fd64",
+    "chainId": 1056801
   },
-  solana: {
-    claimableTokensProgramAddress:
-      '2sjQNmUfkV6yKKi4dPR8gWRgtyma5aiymE3aXL2RAZww',
-    rewardManagerProgramAddress: 'CDpzvz7DfgbF95jSSCHLX3ERkugyfgn9Fw8ypNZ1hfXp',
-    rewardManagerStateAddress: 'GaiG9LDYHfZGqeNaoGRzFEnLiwUT7WiC6sA6FDJX9ZPq',
-    paymentRouterProgramAddress: 'sp28KA2bTnTA4oSZ3r9tTSKfmiXZtZQHnYYQqWfUyVa',
-    stakingBridgeProgramAddress: 'stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj',
-    rpcEndpoint: 'https://audius-fe.rpcpool.com',
-    usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    wAudioTokenMint: 'BELGiMZQ34SDE6x2FUaML2UHDAgBLS64xvhXjX5tBBZo',
-    bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
-    rewardManagerLookupTableAddress:
-      'ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J'
+  "solana": {
+    "claimableTokensProgramAddress": "2sjQNmUfkV6yKKi4dPR8gWRgtyma5aiymE3aXL2RAZww",
+    "rewardManagerProgramAddress": "CDpzvz7DfgbF95jSSCHLX3ERkugyfgn9Fw8ypNZ1hfXp",
+    "rewardManagerStateAddress": "GaiG9LDYHfZGqeNaoGRzFEnLiwUT7WiC6sA6FDJX9ZPq",
+    "paymentRouterProgramAddress": "sp28KA2bTnTA4oSZ3r9tTSKfmiXZtZQHnYYQqWfUyVa",
+    "stakingBridgeProgramAddress": "stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj",
+    "rpcEndpoint": "https://audius-fe.rpcpool.com",
+    "usdcTokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "wAudioTokenMint": "9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM",
+    "bonkTokenMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "rewardManagerLookupTableAddress": "ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J"
   },
-  ethereum: {
-    rpcEndpoint: 'https://eth-client.staging.audius.co',
-    addresses: {
-      ethRewardsManagerAddress: '0x563483ccD66a49Ca730275F8cf37Dd3E6Da864f1',
-      serviceProviderFactoryAddress:
-        '0x377BE01aD31360d0DFB16035A4515954395A8185',
-      serviceTypeManagerAddress: '0x9fd76d2cD48022526F3a164541E6552291F4a862',
-      audiusTokenAddress: '0x1376180Ee935AA64A27780F4BE97726Df7B0e2B2',
-      audiusWormholeAddress: '0xf6f45e4d836da1d4ecd43bb1074620bfb0b7e0d7',
-      delegateManagerAddress: '0xDA74d6FfbF268Ac441404f5a61f01103451E8697',
-      stakingAddress: '0x5bcF21A4D5Bab9B0869B9c55D233f80135C814C6'
+  "ethereum": {
+    "rpcEndpoint": "https://eth-client.staging.audius.co",
+    "addresses": {
+      "ethRewardsManagerAddress": "0x563483ccD66a49Ca730275F8cf37Dd3E6Da864f1",
+      "serviceProviderFactoryAddress": "0x377BE01aD31360d0DFB16035A4515954395A8185",
+      "serviceTypeManagerAddress": "0x9fd76d2cD48022526F3a164541E6552291F4a862",
+      "audiusTokenAddress": "0x1376180Ee935AA64A27780F4BE97726Df7B0e2B2",
+      "audiusWormholeAddress": "0xf6f45e4d836da1d4ecd43bb1074620bfb0b7e0d7",
+      "delegateManagerAddress": "0xDA74d6FfbF268Ac441404f5a61f01103451E8697",
+      "stakingAddress": "0x5bcF21A4D5Bab9B0869B9c55D233f80135C814C6"
     }
   }
 }

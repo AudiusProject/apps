@@ -11,11 +11,13 @@ import {
   SwapStatus,
   useArtistCoin,
   useCoinPair,
+  useCurrentAccountUser,
+  useSwapCoins,
   useTradeableCoins
 } from '@audius/common/api'
 import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
 import { buySellMessages as messages } from '@audius/common/messages'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
+import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import {
   BuySellTab,
   Screen,
@@ -23,7 +25,6 @@ import {
   useBuySellSwap,
   useBuySellTabs,
   buySellTabsArray,
-  useBuySellTokenFilters,
   useBuySellTransactionData,
   useCurrentCoinPair,
   useSafeTokenPair,
@@ -33,8 +34,10 @@ import {
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router-dom'
 
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
+import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -72,9 +75,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     trackAddFundsClicked
   } = useBuySellAnalytics()
 
-  // Get tokens from API
-  const { coins, isLoading: coinsLoading } = useTradeableCoins()
-
   const { currentScreen, setCurrentScreen } = useBuySellScreen({
     onScreenChange
   })
@@ -85,6 +85,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     handleTransactionDataChange,
     resetTransactionData
   } = useBuySellTransactionData()
+
+  const { data: currentUser } = useCurrentAccountUser()
 
   const { activeTab, handleActiveTabChange } = useBuySellTabs({
     setCurrentScreen,
@@ -118,7 +120,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const location = useLocation()
   const pathname = getPathname(location)
   const match = matchPath<{ ticker: string }>(pathname, {
-    path: ASSET_DETAIL_PAGE,
+    path: COIN_DETAIL_PAGE,
     exact: true
   })
   const { data: selectedPair } = useCoinPair({
@@ -155,21 +157,25 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData()
   }
 
-  // Get all available tokens (simplified since we have all tokens now)
+  // Get external wallet account (if connected via AppKit)
+  const externalWalletAccount = appkitModal.getAccount('solana')
+
+  // Get all available tokens, filtered by external wallet if connected
+  const { coins, isLoading: coinsLoading } = useTradeableCoins({
+    externalWalletAddress: externalWalletAccount?.address
+  })
+
   const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
-  // Get tokens that user owns (includes USDC if user has balance)
+  // Get tokens that user owns (includes USDC if user has balance) for internal wallet
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
-  // Create a helper to check if user has positive balance for a token
-  const hasPositiveBalance = useCallback(
-    (tokenAddress: string): boolean => {
-      return ownedCoins.some((token) => token.address === tokenAddress)
-    },
-    [ownedCoins]
-  )
+  // Create owned addresses set for filtering (only needed for internal wallets)
+  const ownedAddresses = useMemo(() => {
+    return new Set(ownedCoins.map((coin) => coin.address))
+  }, [ownedCoins])
 
   // Create current token pair based on selected base and quote tokens
   const currentTokenPair = useCurrentCoinPair({
@@ -179,17 +185,35 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     selectedPair
   })
 
-  // Use shared token filtering logic
-  const {
-    availableInputTokensForSell,
-    availableInputTokensForConvert,
-    availableOutputTokensForConvert
-  } = useBuySellTokenFilters({
-    availableCoins,
-    baseTokenSymbol,
-    quoteTokenSymbol,
-    hasPositiveBalance
+  // Get filtered tokens for sell tab (owned coins, excluding current base token and USDC)
+  const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
+    context: 'pay',
+    excludeSymbols: [baseTokenSymbol],
+    externalWalletAddress: externalWalletAccount?.address,
+    // For internal wallets, only show owned tokens
+    onlyOwned: !externalWalletAccount?.address,
+    ownedAddresses
   })
+
+  // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
+  const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
+    externalWalletAddress: externalWalletAccount?.address,
+    // For internal wallets, only show owned tokens
+    onlyOwned: !externalWalletAccount?.address,
+    ownedAddresses
+  })
+
+  // Get filtered tokens for convert tab output (all coins except base token)
+  const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol],
+    externalWalletAddress: externalWalletAccount?.address
+  })
+
+  // Get filtered tokens for buy tab output (all coins except quote token and USDC)
+  const availableOutputTokensForBuy = availableCoins.filter(
+    (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
+  )
 
   // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTokenPair)
@@ -219,6 +243,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
+  const internalSwapHook = useSwapCoins()
+  const externalSwapHook = useExternalWalletSwap()
+  const { mutateAsync: performSwap, ...swapHookState } =
+    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -233,7 +261,22 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    onClose
+    swapHookData: swapHookState,
+    handleSwap: async (params: {
+      inputMint: string
+      outputMint: string
+      amountUi: number
+      slippageBps: number
+    }) => {
+      const swapParams = {
+        ...params,
+        // External wallet swaps require some extra params. These are unused for internal swaps
+        inputDecimals: swapTokens.inputTokenInfo!.decimals,
+        outputDecimals: swapTokens.outputTokenInfo!.decimals,
+        walletAddress: externalWalletAccount?.address as string
+      }
+      await performSwap(swapParams)
+    }
   })
 
   const currentExchangeRate = useMemo(
@@ -411,10 +454,13 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const shouldShowError =
     !!displayErrorMessage || (activeTab === 'buy' && !hasSufficientBalance)
 
+  const userHasWallet = !!externalWalletAccount?.address || !!currentUser
+
   if (isConfirmButtonLoading && currentScreen !== 'success') {
     return <ModalLoading />
   }
 
+  // Show loading when fetching coins, or when external wallet is connected and still loading wallet coins
   if (coinsLoading) {
     return <SwapFormSkeleton />
   }
@@ -443,9 +489,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.buy}
               onInputValueChange={handleTabInputValueChange}
-              availableOutputTokens={availableCoins.filter(
-                (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
-              )}
+              availableOutputTokens={availableOutputTokensForBuy}
               onOutputTokenChange={handleOutputTokenChange}
             />
           ) : activeTab === 'sell' && currentTokenPair ? (
@@ -499,7 +543,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isLoading={
               isContinueButtonLoading || transactionData?.isExchangeRateLoading
             }
-            disabled={transactionData?.isExchangeRateLoading}
+            disabled={transactionData?.isExchangeRateLoading || !userHasWallet}
             onClick={handleContinueClick}
           >
             {messages.continue}

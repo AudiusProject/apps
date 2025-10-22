@@ -136,18 +136,21 @@ export const formatAudioBalance = (
  *
  * @param num - The number to format as currency
  * @param locale - Locale for number formatting (defaults to 'en-US')
+ * @param prefix - Currency prefix symbol (defaults to '$'). Use empty string '' for no prefix when displaying crypto tokens.
  * @returns Formatted currency string
  *
  * @example
- * formatCurrency(123.456)  // "$123.46"
- * formatCurrency(0.0012)   // "$0.001200"
- * formatCurrency(0)        // "$0.00"
+ * formatCurrency(123.456)           // "$123.46"
+ * formatCurrency(0.0012)            // "$0.001200"
+ * formatCurrency(0)                 // "$0.00"
+ * formatCurrency(123.456, 'en-US', '') // "123.46" (no prefix for crypto)
  */
 export const formatCurrency = (
   num: number,
-  locale: string = 'en-US'
+  locale: string = 'en-US',
+  prefix: string = '$'
 ): string => {
-  if (num === 0) return '$0.00'
+  if (num === 0) return `${prefix}0.00`
 
   try {
     const decimalPlaces = getCurrencyDecimalPlaces(num)
@@ -158,9 +161,9 @@ export const formatCurrency = (
       maximumFractionDigits: decimalPlaces
     }).format(num)
 
-    return formatted
+    return formatted.replace('$', prefix)
   } catch {
-    return `$${num.toFixed(2)}`
+    return `${prefix}${num.toFixed(2)}`
   }
 }
 

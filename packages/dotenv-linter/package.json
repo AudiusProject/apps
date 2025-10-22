@@ -10,7 +10,7 @@
     "dotenv-linter": "bin/dotenv-linter"
   },
   "scripts": {
-    "install": "BINDIR=./bin curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/v3.3.0/install.sh | sh -s",
+    "install": "BINDIR=./bin curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/v3.3.0/install.sh | sh -s v3.3.0",
     "rebuild": "npm rebuild --ignore-scripts"
   },
   "bugs": {

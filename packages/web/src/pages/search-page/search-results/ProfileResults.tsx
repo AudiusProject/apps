@@ -2,9 +2,8 @@ import { useCallback } from 'react'
 
 import { useSearchUserResults } from '@audius/common/api'
 import { Kind, Name, UserMetadata } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { searchActions } from '@audius/common/store'
-import { Box, Flex, Text, useTheme } from '@audius/harmony'
+import { Box, Flex, useTheme } from '@audius/harmony'
 import { range } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
@@ -12,19 +11,12 @@ import { useDispatch } from 'react-redux'
 import { make } from 'common/store/analytics/actions'
 import { UserCard } from 'components/user-card'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 import { NoResultsTile } from '../NoResultsTile'
-import { SortMethodFilterButton } from '../SortMethodFilterButton'
 import { useSearchParams } from '../hooks'
 
 const { addItem: addRecentSearch } = searchActions
-
-const messages = {
-  profiles: 'Profiles',
-  sortOptionsLabel: 'Sort By'
-}
 
 type ProfileResultsProps = {
   isFetching: boolean
@@ -130,9 +122,6 @@ export const ProfileResultsPage = () => {
   const isMobile = useIsMobile()
   const { color } = useTheme()
   const mainContentRef = useMainContentRef()
-  const { isEnabled: isSearchExploreEnabled } = useFlag(
-    FeatureFlags.SEARCH_EXPLORE
-  )
 
   const getMainContentRef = useCallback(() => {
     if (isMobile) {
@@ -167,14 +156,6 @@ export const ProfileResultsPage = () => {
         gap='xl'
         css={isMobile ? { backgroundColor: color.background.default } : {}}
       >
-        {!isMobile && isSearchExploreEnabled === false ? (
-          <Flex justifyContent='space-between' alignItems='center'>
-            <Text variant='heading' textAlign='left'>
-              {messages.profiles}
-            </Text>
-            <SortMethodFilterButton />
-          </Flex>
-        ) : null}
         {showNoResultsTile ? (
           <NoResultsTile />
         ) : (

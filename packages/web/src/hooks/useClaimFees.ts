@@ -3,7 +3,7 @@ import {
   getArtistCoinQueryKey,
   useCurrentAccountUser,
   useQueryContext,
-  QUERY_KEYS
+  pollUntilAudioBalanceChanges
 } from '@audius/common/api'
 import { Feature } from '@audius/common/models'
 import { createUserBankIfNeeded } from '@audius/common/services'
@@ -105,7 +105,7 @@ export const useClaimFees = (
         }
       })
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: async (data, variables, context) => {
       // Optimistically update the unclaimed fees data
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
       queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
@@ -118,14 +118,14 @@ export const useClaimFees = (
           }
         }
       })
-
-      // Invalidate audio balance queries to refresh user's AUDIO balance
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.audioBalance]
-      })
-
       // Call the original onSuccess if provided
       options?.onSuccess?.(data, variables, context)
+
+      // Poll audio balance queries until the balance actually changes
+      // The reason we want to do polling logic here is we dont actually have the value
+      if (currentUser?.spl_wallet) {
+        await pollUntilAudioBalanceChanges(queryClient, currentUser.spl_wallet)
+      }
     }
   })
 }

@@ -4,7 +4,8 @@ import {
   queryOptions,
   useQueries,
   useQuery,
-  type QueryFunctionContext
+  type QueryFunctionContext,
+  useQueryClient
 } from '@tanstack/react-query'
 import { call, getContext } from 'typed-redux-saga'
 import { getAddress } from 'viem'
@@ -448,4 +449,48 @@ export const invalidateAudioBalance = ({
     chain: Chain.Sol
   })
   queryClient.invalidateQueries({ queryKey })
+}
+
+/**
+ * Helper function to poll the audio balance until it changes from the original value.
+ * @param queryClient
+ * @param splWallet - The Solana wallet address
+ * @param maxAttempts - Maximum number of polling attempts (default: 10)
+ * @param delayMs - Delay between polling attempts in milliseconds (default: 300)
+ */
+export const pollUntilAudioBalanceChanges = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+  splWallet: string,
+  maxAttempts = 10,
+  delayMs = 300
+): Promise<void> => {
+  const queryKey = getWalletAudioBalanceQueryKey({
+    address: splWallet,
+    chain: Chain.Sol,
+    includeStaked: false
+  })
+  const originalBalance = queryClient.getQueryData<AudioWei>(queryKey)
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Wait before polling (except on first attempt where we check immediately)
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+
+    // Invalidate and refetch the balance
+    await queryClient.invalidateQueries({ queryKey })
+    await queryClient.refetchQueries({ queryKey })
+
+    // Check if the balance has changed
+    const newBalance = queryClient.getQueryData<AudioWei>(queryKey)
+    if (newBalance !== originalBalance) {
+      return
+    }
+  }
+
+  // If we've exhausted all attempts, log a warning but don't throw
+  // The balance will eventually update on the next stale query refetch
+  console.warn(
+    `Audio balance polled viia pollUntilAudioBalanceChanges but the value was not changed after ${maxAttempts} attempts`
+  )
 }

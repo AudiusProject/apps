@@ -1,8 +1,6 @@
 import { program } from 'commander'
 
-import {
-  sdk as audiusSdk,
-} from '../sdk'
+import { sdk as audiusSdk } from '../sdk'
 import { EntityManagerAction, EntityType } from '../services'
 import { HashId } from '../types/HashId'
 
@@ -13,22 +11,25 @@ program
   .option('-s, --socialHandle <social-handle>', 'The social handle to verify')
   .option('--privateKey <privateKey>', 'The private key to use for the request')
   .option(
+    '-e, --environment <environment>',
+    'The environment to use for the request',
+    'production'
+  )
+  .option(
     '-p, --platform <platform>',
     'The platform to verify (twitter, instagram, tiktok, manual)'
   )
   .action(async (args) => {
-    if (
-      !args.handle ||
-      !args.platform ||
-      !args.privateKey
-    ) {
+    if (!args.handle || !args.platform || !args.privateKey) {
       console.error(
         'Missing required arguments: handle, socialHandle, and platform are required'
       )
       process.exit(1)
     }
     if (args.platform !== 'manual' && !args.socialHandle) {
-      console.error('Missing required arguments: socialHandle is required for non-manual verification')
+      console.error(
+        'Missing required arguments: socialHandle is required for non-manual verification'
+      )
       process.exit(1)
     }
     if (!['twitter', 'instagram', 'tiktok', 'manual'].includes(args.platform)) {
@@ -38,7 +39,8 @@ program
 
     const sdk = audiusSdk({
       appName: 'verify-user',
-      apiSecret: args.privateKey
+      apiSecret: args.privateKey,
+      environment: args.environment
     })
 
     try {

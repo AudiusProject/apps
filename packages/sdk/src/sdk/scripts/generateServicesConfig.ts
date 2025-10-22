@@ -85,7 +85,7 @@ const stagingConfig: SdkServicesConfig = {
     stakingBridgeProgramAddress: 'stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj',
     rpcEndpoint: 'https://audius-fe.rpcpool.com',
     usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    wAudioTokenMint: 'BELGiMZQ34SDE6x2FUaML2UHDAgBLS64xvhXjX5tBBZo',
+    wAudioTokenMint: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
     bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     rewardManagerLookupTableAddress:
       'ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J'
@@ -166,8 +166,10 @@ const generateServicesConfig = async (
     getDefaultServiceTypeManagerConfig(config)
   )
 
+  const validators = await serviceProviderFactory.getValidators()
   const contentNodes = await serviceProviderFactory.getContentNodes()
-  if (!contentNodes || contentNodes.length === 0) {
+  const storageNodes = validators.concat(contentNodes)
+  if (!storageNodes || storageNodes.length === 0) {
     throw Error('Storage node services not found')
   }
   const antiAbuseAddresses =
@@ -180,7 +182,7 @@ const generateServicesConfig = async (
   const minVersion = await serviceTypeManager.getDiscoveryNodeVersion()
 
   config.network.minVersion = minVersion
-  config.network.storageNodes = contentNodes.map(
+  config.network.storageNodes = storageNodes.map(
     ([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
       endpoint,
       delegateOwnerWallet

@@ -14,6 +14,7 @@ export * from './useUpdateArtistCoin'
 export * from './useUserCoin'
 export * from './useUserCoins'
 export * from './useUserCreatedCoins'
+export * from './useWalletCoins'
 
 // Utils
 export * from './tokenUtils'

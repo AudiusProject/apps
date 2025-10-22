@@ -2,9 +2,8 @@ import { useCallback } from 'react'
 
 import { useSearchAlbumResults } from '@audius/common/api'
 import { Kind, Name, UserCollectionMetadata } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { searchActions } from '@audius/common/store'
-import { Box, Flex, Text, useTheme } from '@audius/harmony'
+import { Box, Flex, useTheme } from '@audius/harmony'
 import { range } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
@@ -12,18 +11,12 @@ import { useDispatch } from 'react-redux'
 import { make } from 'common/store/analytics/actions'
 import { CollectionCard } from 'components/collection'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 import { NoResultsTile } from '../NoResultsTile'
-import { SortMethodFilterButton } from '../SortMethodFilterButton'
 import { useSearchParams } from '../hooks'
 
 const { addItem: addRecentSearch } = searchActions
-
-const messages = {
-  albums: 'Albums'
-}
 
 type AlbumResultsProps = {
   data: UserCollectionMetadata[]
@@ -141,9 +134,6 @@ export const AlbumResultsPage = () => {
   const searchParams = useSearchParams()
   const queryData = useSearchAlbumResults(searchParams)
   const { data, isFetching, hasNextPage, loadNextPage, isPending } = queryData
-  const { isEnabled: isSearchExploreEnabled } = useFlag(
-    FeatureFlags.SEARCH_EXPLORE
-  )
 
   const isResultsEmpty = data?.length === 0
   const showNoResultsTile = !isFetching && isResultsEmpty
@@ -162,14 +152,6 @@ export const AlbumResultsPage = () => {
         gap='xl'
         css={isMobile ? { backgroundColor: color.background.default } : {}}
       >
-        {!isMobile && isSearchExploreEnabled === false ? (
-          <Flex justifyContent='space-between' alignItems='center'>
-            <Text variant='heading' textAlign='left'>
-              {messages.albums}
-            </Text>
-            <SortMethodFilterButton />
-          </Flex>
-        ) : null}
         {showNoResultsTile ? (
           <NoResultsTile />
         ) : (

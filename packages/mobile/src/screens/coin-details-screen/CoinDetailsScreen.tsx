@@ -37,7 +37,7 @@ export const CoinDetailsScreen = () => {
 
   return (
     <Screen
-      url={route.ASSET_DETAIL_PAGE}
+      url={route.COIN_DETAIL_PAGE}
       variant='secondary'
       topbarRight={topbarRight}
       title={ticker ? `$${ticker}` : 'Coin Details'}

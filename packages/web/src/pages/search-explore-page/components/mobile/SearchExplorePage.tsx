@@ -9,9 +9,7 @@ import {
 } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Flex,
   TextInput,
@@ -58,7 +56,7 @@ import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
 import { TrendingPlaylistsSection } from '../desktop/TrendingPlaylistsSection'
 import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
-export type ExplorePageProps = {
+export type SearchExplorePageProps = {
   title: string
   pageTitle: string
   description: string
@@ -73,7 +71,11 @@ export enum SearchTabs {
 
 const DEBOUNCE_MS = 200
 
-const ExplorePage = () => {
+const SearchExplorePage = ({
+  title,
+  pageTitle,
+  description
+}: SearchExplorePageProps) => {
   const [categoryKey, setCategory] = useSearchCategory()
   const [searchParams, setSearchParams] = useSearchParams()
   const [inputValue, setInputValue] = useState(searchParams.get('query') || '')
@@ -84,10 +86,6 @@ const ExplorePage = () => {
   const searchBarRef = useRef<HTMLInputElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
-
-  const { isEnabled: isSearchExploreGoodiesEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE_GOODIES
-  )
 
   const handleSearchTab = useCallback(
     (newTab: string) => {
@@ -248,50 +246,34 @@ const ExplorePage = () => {
           gap='2xl'
           css={{ display: showSearchResults ? 'none' : undefined }}
         >
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
-            <>
-              {showTrackContent && showUserContextualContent && (
-                <RecommendedTracksSection />
-              )}
-              {showTrackContent && showUserContextualContent && (
-                <RecentlyPlayedSection />
-              )}
-              <QuickSearchGrid />
-            </>
+          {showTrackContent && showUserContextualContent && (
+            <RecommendedTracksSection />
           )}
+          {showTrackContent && showUserContextualContent && (
+            <RecentlyPlayedSection />
+          )}
+          <QuickSearchGrid />
           {showPlaylistContent && <FeaturedPlaylistsSection />}
           {showTrackContent && <FeaturedRemixContestsSection />}
-
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
-            <UndergroundTrendingTracksSection />
-          )}
-
+          {showTrackContent && <UndergroundTrendingTracksSection />}
           {showUserContent && <ArtistSpotlightSection />}
-
           {showUserContent && <LabelSpotlightSection />}
-
-          {isSearchExploreGoodiesEnabled && showTrackContent && (
+          {showTrackContent && (
             <>
               <ActiveDiscussionsSection />
               <DownloadsAvailableSection />
             </>
           )}
-
           {(showTrackContent || showAlbumContent || showPlaylistContent) && (
             <MoodGrid />
           )}
-
-          {isSearchExploreGoodiesEnabled ? (
-            <>
-              {showPlaylistContent && <TrendingPlaylistsSection />}
-              {showTrackContent && <MostSharedSection />}
-              {(showAlbumContent || showTrackContent) && <BestSellingSection />}
-              {showTrackContent && <RecentPremiumTracksSection />}
-              {showTrackContent && showUserContextualContent && (
-                <FeelingLuckySection />
-              )}
-            </>
-          ) : null}
+          {showPlaylistContent && <TrendingPlaylistsSection />}
+          {showTrackContent && <MostSharedSection />}
+          {(showAlbumContent || showTrackContent) && <BestSellingSection />}
+          {showTrackContent && <RecentPremiumTracksSection />}
+          {showTrackContent && showUserContextualContent && (
+            <FeelingLuckySection />
+          )}
           {showUserContextualContent && <RecentSearchesSection />}
         </Flex>
       </Flex>
@@ -299,4 +281,4 @@ const ExplorePage = () => {
   )
 }
 
-export default ExplorePage
+export default SearchExplorePage

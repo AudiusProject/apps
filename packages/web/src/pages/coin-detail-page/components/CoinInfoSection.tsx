@@ -48,8 +48,8 @@ import Tooltip from 'components/tooltip/Tooltip'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
+import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
-import { useExternalWallets } from 'hooks/useExternalWallets'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -60,6 +60,10 @@ const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
 
 const BANNER_HEIGHT = 120
+
+// Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
+// Below this threshold is considered "dust" and not worth claiming due to transaction fees
+const MIN_CLAIMABLE_FEES = 1_000_000
 
 // Helper function to detect platform from URL
 const detectPlatform = (
@@ -123,7 +127,7 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
   )
 }
 
-const AssetInfoSectionSkeleton = () => {
+const CoinInfoSectionSkeleton = () => {
   const theme = useTheme()
 
   return (
@@ -257,13 +261,13 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
   )
 }
 
-type AssetInfoSectionProps = {
+type CoinInfoSectionProps = {
   mint: string
 }
 
 const { REWARDS_PAGE } = route
 
-export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
+export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
@@ -318,8 +322,6 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     }
   })
 
-  const unclaimedFees = coin?.dynamicBondingCurve?.creatorQuoteFee ?? 0
-
   const formatFeeNumber = (input: number) => {
     const value = wAUDIO(BigInt(input))
     const decimalPlaces = getTokenDecimalPlaces(Number(value.toString()))
@@ -329,13 +331,15 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
       ''
     )
   }
+
+  const unclaimedFees = coin?.artistFees?.unclaimedFees ?? 0
   const formattedUnclaimedFees = useMemo(() => {
     return formatFeeNumber(unclaimedFees)
   }, [unclaimedFees])
-  const totalArtistEarnings =
-    coin?.dynamicBondingCurve?.totalTradingQuoteFee ?? 0
+
+  const totalArtistEarnings = coin?.artistFees?.totalFees ?? 0
   const formattedTotalArtistEarnings = useMemo(
-    () => formatFeeNumber(Math.trunc(totalArtistEarnings / 2)),
+    () => formatFeeNumber(Math.trunc(totalArtistEarnings)),
     [totalArtistEarnings]
   )
   const descriptionParagraphs = coin?.description?.split('\n') ?? []
@@ -369,7 +373,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
     [mint, claimFees]
   )
 
-  const { openAppKitModal } = useExternalWallets(async () => {
+  const { openAppKitModal } = useConnectExternalWallets(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
 
@@ -445,7 +449,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
   const isManagerMode = useIsManagedAccount()
 
   if (isLoading || !coin) {
-    return <AssetInfoSectionSkeleton />
+    return <CoinInfoSectionSkeleton />
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
@@ -639,7 +643,7 @@ export const AssetInfoSection = ({ mint }: AssetInfoSectionProps) => {
                 </Tooltip>
               </Flex>
               <Flex alignItems='center' gap='s'>
-                {unclaimedFees > 0 ? (
+                {unclaimedFees >= MIN_CLAIMABLE_FEES ? (
                   <Flex gap='xs' alignItems='center'>
                     <TextLink
                       onClick={handleClaimFeesClick}
