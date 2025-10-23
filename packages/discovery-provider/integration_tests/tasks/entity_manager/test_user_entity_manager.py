@@ -84,7 +84,7 @@ def test_index_valid_user(app, mocker):
             "creator_node_endpoint": "https://creatornode2.audius.co,https://creatornode3.audius.co,https://content-node.audius.co",
             "associated_wallets": None,
             "associated_sol_wallets": None,
-            "preferred_coin_flair_mint": None,
+            "coin_flair_mint": None,
             "playlist_library": {
                 "contents": [
                     {"playlist_id": "Audio NFTs", "type": "explore_playlist"},
@@ -111,7 +111,7 @@ def test_index_valid_user(app, mocker):
             "creator_node_endpoint": "https://creatornode.audius.co,https://content-node.audius.co,https://blockdaemon-audius-content-06.bdnodes.net",
             "associated_wallets": None,
             "associated_sol_wallets": None,
-            "preferred_coin_flair_mint": "",
+            "coin_flair_mint": "",
             "playlist_library": {
                 "contents": [
                     {"playlist_id": "Audio NFTs", "type": "explore_playlist"},
@@ -234,7 +234,7 @@ def test_index_valid_user(app, mocker):
             "associated_wallets": None,
             "associated_sol_wallets": None,
             "playlist_library": {"contents": []},
-            "preferred_coin_flair_mint": "test_mint",
+            "coin_flair_mint": "test_mint",
             "events": None,
             "user_id": USER_ID_OFFSET + 1,
         },
@@ -422,7 +422,7 @@ def test_index_valid_user(app, mocker):
         assert user_1.handle == "rayjacobsonupdated"
         assert user_1.artist_pick_track_id == TRACK_ID_OFFSET
         assert user_1.allow_ai_attribution == True
-        assert user_1.preferred_coin_flair_mint == ""
+        assert user_1.coin_flair_mint == ""
 
         user_2: User = (
             session.query(User)
@@ -434,7 +434,7 @@ def test_index_valid_user(app, mocker):
         )
         assert user_2.name == "Forrest"
         assert user_2.handle == "forrest"
-        assert user_2.preferred_coin_flair_mint is None
+        assert user_2.coin_flair_mint is None
 
         user_3: User = (
             session.query(User)
@@ -446,7 +446,7 @@ def test_index_valid_user(app, mocker):
         )
         assert user_3.name == "Isaac"
         assert user_3.handle == "isaac"
-        assert user_3.preferred_coin_flair_mint is None
+        assert user_3.coin_flair_mint is None
 
         calls = [
             mock.call.dispatch(
