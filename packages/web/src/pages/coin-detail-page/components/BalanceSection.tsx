@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import {
   useArtistCoin,
-  useAssociatedWallets,
   useCoinBalance,
-  useCurrentAccountUser,
-  useWalletAudioBalances
+  useCoinBalanceBreakdown,
+  useCurrentAccountUser
 } from '@audius/common/api'
 import {
   useBuySellInitialTab,
@@ -13,8 +12,6 @@ import {
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
-import { Chain } from '@audius/common/models'
-import { useUserCoin } from '@audius/common/src/api/tan-query/coins/useUserCoin'
 import {
   useBuySellModal,
   useReceiveTokensModal,
@@ -206,72 +203,14 @@ const HasBalanceState = ({
 
   const isLoading = isCoinBalanceLoading || isCoinPriceLoading
 
-  // Fetch wallet accounts for balance breakdown
-  const { data: userCoins } = useUserCoin({ mint }, { enabled: !isAudio })
-  const { accounts: unsortedAccounts = [], decimals } = userCoins ?? {}
-
-  // For AUDIO, fetch ERC and SPL balances separately for built-in wallet
-  const { data: currentUser } = useCurrentAccountUser()
-  const audioBalances = useWalletAudioBalances(
-    {
-      wallets: [
-        ...(currentUser?.erc_wallet
-          ? [{ address: currentUser.erc_wallet, chain: Chain.Eth }]
-          : []),
-        ...(currentUser?.spl_wallet
-          ? [{ address: currentUser.spl_wallet, chain: Chain.Sol }]
-          : [])
-      ],
-      includeStaked: false
-    },
-    { enabled: isAudio }
-  )
-
-  // For AUDIO, fetch associated/linked wallets (both ETH and SOL)
-  const { data: associatedWallets = [] } = useAssociatedWallets({
-    enabled: isAudio
-  })
-  const associatedAudioBalances = useWalletAudioBalances(
-    {
-      wallets: associatedWallets,
-      includeStaked: false
-    },
-    { enabled: isAudio && associatedWallets.length > 0 }
-  )
-
-  // Sort accounts by balance (descending)
-  const accounts = useMemo(
-    () => [...unsortedAccounts].sort((a, b) => b.balance - a.balance),
-    [unsortedAccounts]
-  )
-
-  // Separate built-in wallet from linked wallets
-  const inAppWallet = useMemo(
-    () => accounts.find((account) => account.isInAppWallet),
-    [accounts]
-  )
-  const linkedWallets = useMemo(
-    () => accounts.filter((account) => !account.isInAppWallet),
-    [accounts]
-  )
-
-  // For AUDIO, calculate the combined ERC + SPL balance for built-in wallet
-  const audioBuiltInBalance = useMemo(() => {
-    if (!isAudio) return null
-    // AudioWei is a bigint - use bigint arithmetic to avoid precision loss
-    // Wrap addition in AUDIO().value to maintain AudioWei branded type
-    let totalWei = AUDIO(0).value
-    for (const balanceData of audioBalances.data) {
-      if (balanceData.balance) {
-        totalWei = AUDIO(totalWei + balanceData.balance).value
-      }
-    }
-    // AUDIO constructor handles bigint in wei for display formatting
-    return AUDIO(totalWei).toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      roundingMode: 'trunc'
-    })
-  }, [isAudio, audioBalances.data])
+  const {
+    decimals,
+    inAppWallet,
+    linkedWallets,
+    audioBuiltInBalance,
+    associatedAudioBalances,
+    hasBreakdown
+  } = useCoinBalanceBreakdown({ mint, isAudio })
 
   return (
     <>
@@ -306,9 +245,7 @@ const HasBalanceState = ({
           </Text>
         </Flex>
       </Flex>
-      {(linkedWallets.length > 0 ||
-        (isAudio && audioBuiltInBalance) ||
-        (isAudio && associatedAudioBalances.data.length > 0)) && (
+      {hasBreakdown && (
         <>
           <Divider />
           <Flex direction='column' gap='s' w='100%' ph='xl'>
