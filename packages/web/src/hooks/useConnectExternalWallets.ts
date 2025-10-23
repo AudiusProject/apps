@@ -128,12 +128,8 @@ export const useConnectExternalWallets = (
     return appkitModal.subscribeEvents(async (event) => {
       // Ignore events not meant for this hook instance
       if (!isConnecting) return
-      if (event.data.event === 'MODAL_CLOSE') {
-        setIsConnecting(false)
-        if (!isConnecting) {
-          await reconnectExternalAuthWallet()
-        }
-      } else if (event.data.event === 'CONNECT_SUCCESS') {
+
+      if (event.data.event === 'CONNECT_SUCCESS') {
         setIsConnecting(false)
         const solanaAccount = appkitModal.getAccount('solana')
         const ethAccount = appkitModal.getAccount('eip155')
@@ -147,6 +143,7 @@ export const useConnectExternalWallets = (
           solana: connectedAddress,
           eth: connectedEthAddress
         })
+        await reconnectExternalAuthWallet()
         closeAppKitModal()
       } else if (event.data.event === 'CONNECT_ERROR') {
         setIsConnecting(false)
