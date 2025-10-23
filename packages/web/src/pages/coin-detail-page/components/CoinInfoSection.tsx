@@ -278,7 +278,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
 
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
 
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading: isArtistCoinLoading } = useArtistCoin(mint)
 
   const { data: currentUser } = useCurrentAccountUser()
   const { data: userCoins } = useUserCoins({ userId: currentUser?.user_id })
@@ -610,7 +610,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     availableToClaimAmount === 0 ||
     isVestedCoinsInfoLoading
 
-  if (isLoading || !coin) {
+  if (isArtistCoinLoading || isVestedCoinsInfoLoading || !coin) {
     return <CoinInfoSectionSkeleton />
   }
 
