@@ -1,6 +1,6 @@
 {
   "name": "@audius/spl",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "The core Typescript mappings to the Audius Solana Programs",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

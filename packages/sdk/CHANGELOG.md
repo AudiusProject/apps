@@ -1,5 +1,19 @@
 # @audius/sdk
 
+## 11.1.0
+
+### Minor Changes
+
+- 8b3380f: Add all time coin stats to coins api responses
+
+### Patch Changes
+
+- a6d5e9d: Add validator type and regen bootstrap list
+- c3ffa17: remove dbc_pool from createCoin
+- 86198ae: add coin_flair_mint field to user response
+- Updated dependencies [284302b]
+  - @audius/spl@2.1.0
+
 ## 11.0.1
 
 ### Patch Changes

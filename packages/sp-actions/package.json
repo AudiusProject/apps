@@ -1,6 +1,6 @@
 {
   "name": "@audius/sp-actions",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "A utility for audius service providers to claim token rewards.",
   "bin": {
     "claim": "claim.js"
@@ -8,7 +8,7 @@
   "author": "Audius",
   "license": "Apache-2.0",
   "dependencies": {
-    "@audius/sdk-legacy": "6.0.10",
+    "@audius/sdk-legacy": "6.0.11",
     "@truffle/hdwallet-provider": "^1.2.2",
     "axios": "^0.21.0",
     "commander": "^6.2.1",
