@@ -11,6 +11,7 @@ export type SwapDetails = {
   inputAmount?: number
   outputAmount?: number
   exchangeRate?: number | null
+  externalWalletAddress?: string
 }
 
 export type SwapError = {
@@ -38,7 +39,8 @@ export const useBuySellAnalytics = () => {
         outputToken: swapDetails.outputToken,
         inputAmount: swapDetails.inputAmount,
         outputAmount: swapDetails.outputAmount,
-        exchangeRate: swapDetails.exchangeRate
+        exchangeRate: swapDetails.exchangeRate,
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -57,7 +59,8 @@ export const useBuySellAnalytics = () => {
         inputAmount: swapDetails.inputAmount,
         outputAmount: swapDetails.outputAmount,
         exchangeRate: swapDetails.exchangeRate,
-        slippageBps: swapDetails.slippageBps
+        slippageBps: swapDetails.slippageBps,
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -76,7 +79,8 @@ export const useBuySellAnalytics = () => {
         inputAmount: swapDetails.inputAmount,
         outputAmount: swapDetails.outputAmount,
         exchangeRate: swapDetails.exchangeRate,
-        signature: swapDetails.signature
+        signature: swapDetails.signature,
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -97,7 +101,8 @@ export const useBuySellAnalytics = () => {
         exchangeRate: swapDetails.exchangeRate,
         errorType: errorDetails.errorType,
         errorStage: errorDetails.errorStage,
-        errorMessage: errorDetails.errorMessage
+        errorMessage: errorDetails.errorMessage,
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]

@@ -244,8 +244,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   const internalSwapHook = useSwapCoins()
   const externalSwapHook = useExternalWalletSwap()
-  const { mutateAsync: performSwap, ...swapHookState } =
-    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
+  const isUsingExternalWallet = !!externalWalletAccount?.address
+  const { mutateAsync: performSwap, ...swapHookState } = isUsingExternalWallet
+    ? externalSwapHook
+    : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -303,7 +305,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             outputToken: swapTokens.outputToken,
             inputAmount: transactionData?.inputAmount,
             outputAmount: transactionData?.outputAmount,
-            exchangeRate: currentExchangeRate
+            exchangeRate: currentExchangeRate,
+            externalWalletAddress: externalWalletAccount?.address
           },
           {
             errorType: 'swap_error',
@@ -327,7 +330,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     transactionData,
     currentExchangeRate,
     trackSwapFailure,
-    toast
+    toast,
+    externalWalletAccount?.address
   ])
 
   const {
@@ -353,7 +357,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         inputAmount: swapResult.inputAmount,
         outputAmount: swapResult.outputAmount,
         exchangeRate: successDisplayData.exchangeRate ?? undefined,
-        signature: swapResult.signature || ''
+        signature: swapResult.signature || '',
+        externalWalletAddress: externalWalletAccount?.address
       })
     }
   }, [
@@ -362,7 +367,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     swapResult,
     activeTab,
     swapTokens,
-    trackSwapSuccess
+    trackSwapSuccess,
+    externalWalletAccount?.address
   ])
 
   const handleContinueClick = () => {
@@ -379,7 +385,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         outputToken: swapTokens.outputToken,
         inputAmount: transactionData.inputAmount,
         outputAmount: transactionData.outputAmount,
-        exchangeRate: currentExchangeRate
+        exchangeRate: currentExchangeRate,
+        externalWalletAddress: externalWalletAccount?.address
       })
 
       handleShowConfirmation()
