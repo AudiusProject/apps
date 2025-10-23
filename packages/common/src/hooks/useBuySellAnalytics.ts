@@ -40,7 +40,7 @@ export const useBuySellAnalytics = () => {
         inputAmount: swapDetails.inputAmount,
         outputAmount: swapDetails.outputAmount,
         exchangeRate: swapDetails.exchangeRate,
-        isExternalWallet: swapDetails.isExternalWallet
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -60,7 +60,7 @@ export const useBuySellAnalytics = () => {
         outputAmount: swapDetails.outputAmount,
         exchangeRate: swapDetails.exchangeRate,
         slippageBps: swapDetails.slippageBps,
-        isExternalWallet: swapDetails.isExternalWallet
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -80,7 +80,7 @@ export const useBuySellAnalytics = () => {
         outputAmount: swapDetails.outputAmount,
         exchangeRate: swapDetails.exchangeRate,
         signature: swapDetails.signature,
-        isExternalWallet: swapDetails.isExternalWallet
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
@@ -102,7 +102,7 @@ export const useBuySellAnalytics = () => {
         errorType: errorDetails.errorType,
         errorStage: errorDetails.errorStage,
         errorMessage: errorDetails.errorMessage,
-        isExternalWallet: swapDetails.isExternalWallet
+        externalWalletAddress: swapDetails.externalWalletAddress
       })
     },
     [trackEvent]
