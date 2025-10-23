@@ -248,9 +248,7 @@ export const claimVestedCoins = async (
       escrowState.amountPerPeriod.mul(escrowState.numberOfPeriod)
     )
     const currentTime = Math.floor(Date.now() / 1000)
-    // const availableAmount =
-    //   calculateAvailableAmount(escrowState, currentTime)
-    const availableAmount = new BN(2)
+    const availableAmount = calculateAvailableAmount(escrowState, currentTime)
 
     logger.info({
       message: 'Vesting calculation',
