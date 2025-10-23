@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import {
@@ -52,6 +52,8 @@ import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useClaimVestedCoins } from 'hooks/useClaimVestedCoins'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useVestedCoinsInfo } from 'hooks/useVestedCoinsInfo'
+
+import { ClaimVestedCoinsModal } from './ClaimVestedCoinsModal'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -273,6 +275,8 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
+
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
 
   const { data: coin, isLoading } = useArtistCoin(mint)
 
@@ -571,13 +575,30 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
           mintAddress: mint
         })
       )
-      handleClaimVestedCoins(connectedAddress)
+      // Open the modal to let user choose allocation
+      setIsClaimModalOpen(true)
     }
   }, [
     openAppKitModalForVestedCoins,
-    handleClaimVestedCoins,
-    coinCreatorWalletAddress
+    coinCreatorWalletAddress,
+    record,
+    coin?.ticker,
+    mint
   ])
+
+  const handleConfirmClaim = useCallback(
+    (rewardsPoolPercentage: number) => {
+      const solanaAccount = appkitModal.getAccount('solana')
+      const connectedAddress = solanaAccount?.address
+      if (connectedAddress) {
+        // TODO: Handle rewards pool allocation percentage
+        // For now, just claim all to the user's wallet
+        handleClaimVestedCoins(connectedAddress)
+        setIsClaimModalOpen(false)
+      }
+    },
+    [handleClaimVestedCoins]
+  )
 
   // Get vesting information from the coin's dynamic bonding curve data
   const hasGraduated = coin?.dynamicBondingCurve?.isMigrated ?? false
@@ -894,6 +915,16 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             </>
           ) : null}
         </Flex>
+      ) : null}
+      {coin?.ticker ? (
+        <ClaimVestedCoinsModal
+          isOpen={isClaimModalOpen}
+          onClose={() => setIsClaimModalOpen(false)}
+          ticker={coin.ticker}
+          unlockedCoins={totalUnlockedAmount}
+          onClaim={handleConfirmClaim}
+          isClaimPending={isClaimVestedCoinsPending}
+        />
       ) : null}
     </Paper>
   )
