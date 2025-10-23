@@ -33,7 +33,7 @@ export const CoinInsightsOverflowMenu = () => {
 
   const handleOpenBirdeye = useCallback(() => {
     if (artistCoin?.mint) {
-      Linking.openURL(`https://birdeye.com/solana/${artistCoin.mint}`)
+      Linking.openURL(`https://birdeye.so/solana/${artistCoin.mint}`)
     }
   }, [artistCoin?.mint])
 
