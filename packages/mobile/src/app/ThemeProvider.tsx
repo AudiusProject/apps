@@ -1,10 +1,15 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
+import {
+  useCurrentAccountUser,
+  selectIsAccountComplete
+} from '@audius/common/api'
 import { Theme, SystemAppearance } from '@audius/common/models'
 import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useNavigationState } from '@react-navigation/native'
 import { useAppState } from '@react-native-community/hooks'
 import { useDarkMode } from 'react-native-dynamic'
 import { useDispatch, useSelector } from 'react-redux'
@@ -53,6 +58,25 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   const appState = useAppState()
   const theme = useSelector(selectHarmonyTheme)
 
+  // Check if user is on sign-in/sign-up flow by checking navigation state
+  const isOnSignOnFlow = useNavigationState((state) => {
+    if (!state) return false
+    // Check if the current root screen is SignOnStack or ResetPassword
+    const currentRoute = state.routes[state.index]
+    return (
+      currentRoute?.name === 'SignOnStack' ||
+      currentRoute?.name === 'ResetPassword'
+    )
+  })
+
+  // Check if user is signed out or incomplete account
+  const { data: isAccountComplete = false } = useCurrentAccountUser({
+    select: selectIsAccountComplete
+  })
+
+  // Force light mode when signed out or in sign-up flow
+  const effectiveTheme = !isAccountComplete || isOnSignOnFlow ? 'day' : theme
+
   useAsync(async () => {
     const savedTheme = (await AsyncStorage.getItem(
       THEME_STORAGE_KEY
@@ -75,6 +99,8 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [isDarkMode, dispatch, appState])
 
   return (
-    <HarmonyThemeProvider themeName={theme}>{children}</HarmonyThemeProvider>
+    <HarmonyThemeProvider themeName={effectiveTheme}>
+      {children}
+    </HarmonyThemeProvider>
   )
 }
