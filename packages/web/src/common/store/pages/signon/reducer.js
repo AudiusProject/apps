@@ -441,7 +441,12 @@ const actionsMap = {
       routeOnExit: action.route
     }
   },
-  [SET_REFERRER](state, action) {},
+  [SET_REFERRER](state, action) {
+    return {
+      ...state,
+      referrer: action.userId
+    }
+  },
   [HIDE_PREVIEW_HINT](state) {
     return {
       ...state,
