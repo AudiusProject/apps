@@ -398,7 +398,9 @@ export class SolanaRelay extends BaseAPI {
     const queryParameters: runtime.HTTPQuery = {
       tokenMint: params.tokenMint,
       ownerWalletAddress: params.ownerWalletAddress,
-      receiverWalletAddress: params.receiverWalletAddress
+      receiverWalletAddress: params.receiverWalletAddress,
+      rewardsPoolPercentage: params.rewardsPoolPercentage,
+      rewardsPoolAddress: params.rewardsPoolAddress
     }
 
     const response = await this.request(

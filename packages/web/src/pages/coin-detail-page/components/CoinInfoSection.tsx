@@ -466,7 +466,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         toast(toastMessages.incorrectWalletLinked)
         return
       }
-      handleClaimVestedCoins(connectedAddress)
+      // Wallet is connected and verified, modal will handle the claim
     })
 
   const handleClaimFeesClick = useCallback(async () => {
@@ -526,10 +526,13 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   ])
 
   const handleClaimVestedCoins = useCallback(
-    (walletAddress: string) => {
+    (walletAddress: string, rewardsPoolPercentage: number) => {
       claimVestedCoins({
         tokenMint: mint,
-        externalWalletAddress: walletAddress
+        externalWalletAddress: walletAddress,
+        // rewardsPoolAddress: coin?.rewardsPoolAddress,
+        rewardsPoolAddress: 'GrWNH9qfwrvoCEoTm65hmnSh4z3CD96SfhtfQY6ZKUfY',
+        rewardsPoolPercentage
       })
     },
     [mint, claimVestedCoins]
@@ -591,9 +594,8 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       const solanaAccount = appkitModal.getAccount('solana')
       const connectedAddress = solanaAccount?.address
       if (connectedAddress) {
-        // TODO: Handle rewards pool allocation percentage
-        // For now, just claim all to the user's wallet
-        handleClaimVestedCoins(connectedAddress)
+        // Pass the rewards pool percentage to the claim function
+        handleClaimVestedCoins(connectedAddress, rewardsPoolPercentage)
         setIsClaimModalOpen(false)
       }
     },

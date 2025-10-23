@@ -167,6 +167,8 @@ export type ClaimVestedCoinsRequest = {
   tokenMint: string
   ownerWalletAddress: string
   receiverWalletAddress: string
+  rewardsPoolPercentage: number
+  rewardsPoolAddress?: string
 }
 
 export type ClaimVestedCoinsResponse = {

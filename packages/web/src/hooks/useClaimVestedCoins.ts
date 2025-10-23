@@ -23,6 +23,8 @@ import { reportToSentry } from 'store/errors/reportToSentry'
 export type UseClaimVestedCoinsParams = {
   tokenMint: string
   externalWalletAddress: string
+  rewardsPoolPercentage: number
+  rewardsPoolAddress?: string
 }
 
 export type ClaimVestedCoinsResponse = {
@@ -53,7 +55,9 @@ export const useClaimVestedCoins = (
   >({
     mutationFn: async ({
       tokenMint,
-      externalWalletAddress
+      externalWalletAddress,
+      rewardsPoolPercentage,
+      rewardsPoolAddress
     }: UseClaimVestedCoinsParams): Promise<ClaimVestedCoinsResponse> => {
       const sdk = await audiusSdk()
       const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
@@ -87,7 +91,9 @@ export const useClaimVestedCoins = (
         await sdk.services.solanaRelay.claimVestedCoins({
           tokenMint,
           ownerWalletAddress: externalWalletAddress,
-          receiverWalletAddress: userBank.toString()
+          receiverWalletAddress: userBank.toString(),
+          rewardsPoolPercentage,
+          rewardsPoolAddress
         })
 
       const { claimVestedCoinsTxs: serializedTxs } = claimVestedCoinsResponse

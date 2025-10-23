@@ -16,6 +16,8 @@ import Tooltip from '../../../components/tooltip/Tooltip'
 
 const messages = coinDetailsMessages.claimVestedCoinsModal
 
+const DEFAULT_REWARDS_POOL_PERCENT = 50
+
 type ClaimVestedCoinsModalProps = {
   /**
    * Whether the modal is open
@@ -51,7 +53,9 @@ export const ClaimVestedCoinsModal = ({
   onClaim,
   isClaimPending = false
 }: ClaimVestedCoinsModalProps) => {
-  const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(60)
+  const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(
+    DEFAULT_REWARDS_POOL_PERCENT
+  )
 
   const yourSharePercentage = 100 - rewardsPoolPercentage
   const yourShareAmount = Math.floor(

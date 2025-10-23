@@ -19,6 +19,8 @@ interface ClaimVestedCoinsRequestBody {
   tokenMint: string
   ownerWalletAddress: string
   receiverWalletAddress?: string
+  rewardsPoolPercentage?: number
+  rewardsPoolAddress?: string
 }
 
 interface EscrowState {
@@ -113,12 +115,28 @@ export const claimVestedCoins = async (
   res: Response
 ) => {
   try {
-    const { tokenMint, ownerWalletAddress, receiverWalletAddress } = req.query
+    const {
+      tokenMint,
+      ownerWalletAddress,
+      receiverWalletAddress,
+      rewardsPoolPercentage,
+      rewardsPoolAddress
+    } = req.query
 
     // Validate required parameters
     if (!tokenMint || !ownerWalletAddress || !receiverWalletAddress) {
       throw new Error(
         'Invalid request parameters. tokenMint, ownerWalletAddress, and receiverWalletAddress are required.'
+      )
+    }
+
+    // Validate rewardsPoolPercentage
+    const rewardsPoolPct = rewardsPoolPercentage
+      ? parseInt(rewardsPoolPercentage as string, 10)
+      : 0
+    if (isNaN(rewardsPoolPct) || rewardsPoolPct < 0 || rewardsPoolPct > 100) {
+      throw new Error(
+        'Invalid rewardsPoolPercentage. Must be a number between 0 and 100.'
       )
     }
 
@@ -211,7 +229,7 @@ export const claimVestedCoins = async (
     const currentTime = Math.floor(Date.now() / 1000)
     // const availableAmount =
     //   calculateAvailableAmount(escrowState, currentTime)
-    const availableAmount = new BN(1)
+    const availableAmount = new BN(2)
 
     logger.info({
       message: 'Vesting calculation',
@@ -250,6 +268,22 @@ export const claimVestedCoins = async (
       payer: ownerWallet
     })
 
+    // Calculate split amounts based on rewards pool percentage
+    const userAmount = availableAmount
+      .mul(new BN(100 - rewardsPoolPct))
+      .div(new BN(100))
+    const rewardsPoolAmount = availableAmount
+      .mul(new BN(rewardsPoolPct))
+      .div(new BN(100))
+
+    logger.info({
+      message: 'Rewards pool allocation',
+      totalAvailable: availableAmount.toString(),
+      userAmount: userAmount.toString(),
+      rewardsPoolAmount: rewardsPoolAmount.toString(),
+      rewardsPoolPercentage: rewardsPoolPct
+    })
+
     // Add transfer instruction from root wallet ATA to user bank
     // This moves tokens from the claimable root wallet to the user's token account
     const ownerTokenAccount = getAssociatedTokenAddressSync(
@@ -258,23 +292,46 @@ export const claimVestedCoins = async (
       false
     )
 
-    // Add transfer instruction: root wallet ATA -> user bank
-    const transferInstruction = createTransferCheckedInstruction(
-      ownerTokenAccount, // source
-      mintPublicKey, // mint
-      receiverWallet, // destination (user bank)
-      ownerWallet, // owner of source account
-      BigInt(availableAmount.toString()), // amount as BigInt to handle large values
-      9 // decimals for artist coins (matches SPL token standard)
-    )
+    // Transfer user portion to user bank
+    if (userAmount.gt(new BN(0))) {
+      const userTransferInstruction = createTransferCheckedInstruction(
+        ownerTokenAccount, // source
+        mintPublicKey, // mint
+        receiverWallet, // destination (user bank)
+        ownerWallet, // owner of source account
+        BigInt(userAmount.toString()), // amount as BigInt to handle large values
+        9 // decimals for artist coins (matches SPL token standard)
+      )
+      claimTx.add(userTransferInstruction)
+    }
 
-    claimTx.add(transferInstruction)
+    // Transfer rewards pool portion to rewards pool wallet if provided
+    if (rewardsPoolAddress && rewardsPoolAmount.gt(new BN(0))) {
+      const rewardsPoolWallet = new PublicKey(rewardsPoolAddress)
+      const rewardsPoolTokenAccount = getAssociatedTokenAddressSync(
+        mintPublicKey,
+        rewardsPoolWallet,
+        false
+      )
+
+      const rewardsPoolTransferInstruction = createTransferCheckedInstruction(
+        ownerTokenAccount, // source
+        mintPublicKey, // mint
+        rewardsPoolTokenAccount, // destination (rewards pool)
+        ownerWallet, // owner of source account
+        BigInt(rewardsPoolAmount.toString()), // amount as BigInt to handle large values
+        9 // decimals for artist coins (matches SPL token standard)
+      )
+      claimTx.add(rewardsPoolTransferInstruction)
+    }
 
     logger.info({
-      message: 'Added transfer instruction',
+      message: 'Added transfer instructions',
+      userTransferAmount: userAmount.toString(),
+      rewardsPoolTransferAmount: rewardsPoolAmount.toString(),
+      rewardsPoolAddress: rewardsPoolAddress ?? 'not provided',
       from: ownerTokenAccount.toBase58(),
-      to: receiverWallet.toBase58(),
-      amount: availableAmount.toString()
+      to: receiverWallet.toBase58()
     })
 
     // Set transaction properties
