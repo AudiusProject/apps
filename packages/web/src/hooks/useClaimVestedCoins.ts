@@ -24,7 +24,6 @@ export type UseClaimVestedCoinsParams = {
   tokenMint: string
   externalWalletAddress: string
   rewardsPoolPercentage: number
-  rewardsPoolAddress?: string
 }
 
 export type ClaimVestedCoinsResponse = {
@@ -56,8 +55,7 @@ export const useClaimVestedCoins = (
     mutationFn: async ({
       tokenMint,
       externalWalletAddress,
-      rewardsPoolPercentage,
-      rewardsPoolAddress
+      rewardsPoolPercentage
     }: UseClaimVestedCoinsParams): Promise<ClaimVestedCoinsResponse> => {
       const sdk = await audiusSdk()
       const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
@@ -92,8 +90,7 @@ export const useClaimVestedCoins = (
           tokenMint,
           ownerWalletAddress: externalWalletAddress,
           receiverWalletAddress: userBank.toString(),
-          rewardsPoolPercentage,
-          rewardsPoolAddress
+          rewardsPoolPercentage
         })
 
       const { claimVestedCoinsTxs: serializedTxs } = claimVestedCoinsResponse

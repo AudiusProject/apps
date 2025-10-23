@@ -8,7 +8,7 @@ import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
@@ -20,7 +20,6 @@ interface ClaimVestedCoinsRequestBody {
   ownerWalletAddress: string
   receiverWalletAddress?: string
   rewardsPoolPercentage?: number
-  rewardsPoolAddress?: string
 }
 
 interface EscrowState {
@@ -119,8 +118,7 @@ export const claimVestedCoins = async (
       tokenMint,
       ownerWalletAddress,
       receiverWalletAddress,
-      rewardsPoolPercentage,
-      rewardsPoolAddress
+      rewardsPoolPercentage
     } = req.query
 
     // Validate required parameters
@@ -168,6 +166,29 @@ export const claimVestedCoins = async (
     logger.info({
       message: 'Found DBC pool',
       poolAddress: originalDbcPool.publicKey.toBase58()
+    })
+
+    // Derive the rewards pool address from the DBC pool config
+    const poolConfig = await dbcClient.state.getPoolConfig(
+      originalDbcPool.account.config
+    )
+    const rewardsPoolWallet = poolConfig.leftoverReceiver
+
+    if (!rewardsPoolWallet) {
+      throw new Error('Could not find rewards pool wallet from DBC pool config')
+    }
+
+    // Derive rewards pool token account address
+    const rewardsPoolAddress = getAssociatedTokenAddressSync(
+      mintPublicKey,
+      rewardsPoolWallet,
+      true // allowOwnerOffCurve - rewardsPoolWallet is a PDA (leftoverReceiver)
+    )
+
+    logger.info({
+      message: 'Derived rewards pool address',
+      rewardsPoolWallet: rewardsPoolWallet.toBase58(),
+      rewardsPoolAddress: rewardsPoolAddress.toBase58()
     })
 
     // Get the pool state to access the config
@@ -284,8 +305,7 @@ export const claimVestedCoins = async (
       rewardsPoolPercentage: rewardsPoolPct
     })
 
-    // Add transfer instruction from root wallet ATA to user bank
-    // This moves tokens from the claimable root wallet to the user's token account
+    // Add transfer instruction from owner wallet (external wallet) to user bank
     const ownerTokenAccount = getAssociatedTokenAddressSync(
       mintPublicKey,
       ownerWallet,
@@ -305,19 +325,22 @@ export const claimVestedCoins = async (
       claimTx.add(userTransferInstruction)
     }
 
-    // Transfer rewards pool portion to rewards pool wallet if provided
+    // Transfer rewards pool portion to rewards pool token account if provided
     if (rewardsPoolAddress && rewardsPoolAmount.gt(new BN(0))) {
-      const rewardsPoolWallet = new PublicKey(rewardsPoolAddress)
-      const rewardsPoolTokenAccount = getAssociatedTokenAddressSync(
-        mintPublicKey,
-        rewardsPoolWallet,
-        false
-      )
+      // Check if rewards pool ATA exists - it should already exist
+      const rewardsPoolAccountInfo =
+        await connection.getAccountInfo(rewardsPoolAddress)
+      if (!rewardsPoolAccountInfo) {
+        throw new Error(
+          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}. ` +
+            `Expected rewards pool wallet: ${rewardsPoolWallet.toBase58()}`
+        )
+      }
 
       const rewardsPoolTransferInstruction = createTransferCheckedInstruction(
         ownerTokenAccount, // source
         mintPublicKey, // mint
-        rewardsPoolTokenAccount, // destination (rewards pool)
+        rewardsPoolAddress, // destination (rewards pool)
         ownerWallet, // owner of source account
         BigInt(rewardsPoolAmount.toString()), // amount as BigInt to handle large values
         9 // decimals for artist coins (matches SPL token standard)

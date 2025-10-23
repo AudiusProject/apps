@@ -530,8 +530,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       claimVestedCoins({
         tokenMint: mint,
         externalWalletAddress: walletAddress,
-        // rewardsPoolAddress: coin?.rewardsPoolAddress,
-        rewardsPoolAddress: 'GrWNH9qfwrvoCEoTm65hmnSh4z3CD96SfhtfQY6ZKUfY',
         rewardsPoolPercentage
       })
     },

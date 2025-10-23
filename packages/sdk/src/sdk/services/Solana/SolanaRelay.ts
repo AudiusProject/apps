@@ -399,8 +399,7 @@ export class SolanaRelay extends BaseAPI {
       tokenMint: params.tokenMint,
       ownerWalletAddress: params.ownerWalletAddress,
       receiverWalletAddress: params.receiverWalletAddress,
-      rewardsPoolPercentage: params.rewardsPoolPercentage,
-      rewardsPoolAddress: params.rewardsPoolAddress
+      rewardsPoolPercentage: params.rewardsPoolPercentage
     }
 
     const response = await this.request(
