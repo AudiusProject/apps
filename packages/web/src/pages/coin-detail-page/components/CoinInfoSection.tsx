@@ -373,7 +373,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     [mint, claimFees]
   )
 
-  const onWalletConnected = useCallback(async () => {
+  const { openAppKitModal } = useConnectExternalWallets(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
 
@@ -388,9 +388,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       return
     }
     handleClaimFees(connectedAddress)
-  }, [coinCreatorWalletAddress, handleClaimFees, toast])
-
-  const { openAppKitModal } = useConnectExternalWallets(onWalletConnected)
+  })
 
   const handleClaimFeesClick = useCallback(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
@@ -413,8 +411,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
           mintAddress: mint
         })
       )
-      // Use the openAppKitModal from the hook to ensure event subscription works
-      await openAppKitModal('solana')
+      openAppKitModal('solana')
     } else if (connectedAddress !== coinCreatorWalletAddress) {
       // If we hit this block the user has not connected the wallet they used to launch the coin
       // Disconnect the current Solana wallet to allow connecting a different one
@@ -427,8 +424,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         })
       )
       await appkitModal.disconnect('solana')
-      // Use the openAppKitModal from the hook to ensure event subscription works
-      await openAppKitModal('solana')
+      openAppKitModal('solana')
     } else {
       // appkit wallet is connected with the correct address,
       // can just initiate claim fees flow immediately
