@@ -223,7 +223,7 @@ export const claimVestedCoins = async (
     }
 
     // Get escrow state
-    const escrowState = await lockClient.getEscrow(escrow)
+    const escrowState = (await lockClient.getEscrow(escrow)) as any
 
     logger.info({
       message: 'Escrow state retrieved',
@@ -285,7 +285,7 @@ export const claimVestedCoins = async (
     const claimTx = await lockClient.claimV2({
       escrow: escrow,
       recipient: ownerWallet,
-      maxAmount: availableAmount,
+      maxAmount: availableAmount as any,
       payer: ownerWallet
     })
 

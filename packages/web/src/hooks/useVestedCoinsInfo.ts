@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import {
   DynamicBondingCurveClient,
   deriveBaseKeyForLocker,
@@ -6,6 +5,7 @@ import {
 } from '@meteora-ag/dynamic-bonding-curve-sdk'
 import { LockClient } from '@meteora-ag/met-lock-sdk'
 import { Connection, PublicKey } from '@solana/web3.js'
+import { useQuery } from '@tanstack/react-query'
 import BN from 'bn.js'
 
 import { env } from 'services/env'
@@ -131,16 +131,6 @@ async function fetchVestedCoinsInfo(mint: string): Promise<VestedCoinsInfo> {
 
   // Get escrow state
   const escrowState = (await lockClient.getEscrow(escrow)) as EscrowState
-  console.log('Escrow state retrieved', {
-    address: escrow.toBase58(),
-    vestingStartTime: escrowState.vestingStartTime.toString(),
-    cliffTime: escrowState.cliffTime.toString(),
-    frequency: escrowState.frequency.toString(),
-    amountPerPeriod: escrowState.amountPerPeriod.toString(),
-    numberOfPeriod: escrowState.numberOfPeriod.toString(),
-    totalClaimedAmount: escrowState.totalClaimedAmount.toString(),
-    recipient: escrowState.recipient.toBase58()
-  })
 
   // Calculate total amount and available amount
   const totalAmount = escrowState.cliffUnlockAmount.add(

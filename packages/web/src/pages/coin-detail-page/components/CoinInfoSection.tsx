@@ -48,16 +48,16 @@ import Tooltip from 'components/tooltip/Tooltip'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
-import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useClaimVestedCoins } from 'hooks/useClaimVestedCoins'
+import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useVestedCoinsInfo } from 'hooks/useVestedCoinsInfo'
-
-import { ClaimVestedCoinsModal } from './ClaimVestedCoinsModal'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
+
+import { ClaimVestedCoinsModal } from './ClaimVestedCoinsModal'
 
 const messages = coinDetailsMessages.coinInfo
 const overflowMessages = coinDetailsMessages.overflowMenu
@@ -331,17 +331,14 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   })
 
   // Fetch vesting information directly from Solana
-  const {
-    data: vestedCoinsInfo,
-    isLoading: isVestedCoinsInfoLoading,
-    error: vestedCoinsInfoError
-  } = useVestedCoinsInfo({
-    mint,
-    enabled:
-      isCoinCreator &&
-      (coin?.dynamicBondingCurve?.isMigrated ?? false) &&
-      !isManagerMode
-  })
+  const { data: vestedCoinsInfo, isLoading: isVestedCoinsInfoLoading } =
+    useVestedCoinsInfo({
+      mint,
+      enabled:
+        isCoinCreator &&
+        (coin?.dynamicBondingCurve?.isMigrated ?? false) &&
+        !isManagerMode
+    })
 
   // Use the vested coins info from the hook
   const availableToClaimAmount = vestedCoinsInfo?.availableAmount ?? 0
@@ -464,7 +461,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       }
       if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
         toast(toastMessages.incorrectWalletLinked)
-        return
       }
       // Wallet is connected and verified, modal will handle the claim
     })
@@ -605,7 +601,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
 
   // Calculate derived amounts from vested coins info
   const totalVestedAmount = vestedCoinsInfo?.totalAmount ?? 0
-  const claimedVestedAmount = vestedCoinsInfo?.claimedAmount ?? 0
   const lockedAmount = vestedCoinsInfo?.lockedAmount ?? 0
   const totalUnlockedAmount = totalVestedAmount - lockedAmount
 

@@ -5,9 +5,7 @@ import {
   useQueryContext,
   QUERY_KEYS
 } from '@audius/common/api'
-import { useUserbank } from '@audius/common/hooks'
 import { Feature } from '@audius/common/models'
-import { createUserBankIfNeeded, MintName } from '@audius/common/services'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import {
@@ -17,7 +15,6 @@ import {
 } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
-import { track } from 'services/analytics'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
 export type UseClaimVestedCoinsParams = {
