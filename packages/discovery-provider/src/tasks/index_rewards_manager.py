@@ -391,6 +391,11 @@ def process_batch_sol_reward_manager_txs(
             prebalance = transfer_instr["prebalance"]
             postbalance = transfer_instr["postbalance"]
             balance_change = postbalance - prebalance
+            if challenge_id not in challenge_type_map:
+                logger.error(
+                    f"index_rewards_manager.py | Challenge id {challenge_id} not found in challenge type map"
+                )
+                continue
             audio_tx_histories.append(
                 AudioTransactionsHistory(
                     user_bank=users_map[eth_recipient]["user_bank"],
