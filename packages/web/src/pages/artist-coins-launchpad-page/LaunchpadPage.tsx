@@ -9,7 +9,7 @@ import {
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
-import { Chain, Feature } from '@audius/common/models'
+import { Chain, Feature, Name } from '@audius/common/models'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
@@ -37,6 +37,7 @@ import { AlreadyAssociatedError } from 'hooks/useConnectAndAssociateWallets'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
+import { make, track } from 'services/analytics'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { ConnectedWalletHeader } from './components'
@@ -58,7 +59,10 @@ const messages = {
     firstBuyFailedToast:
       'Coin created! Your purchase failed, please try again.',
     unknownError:
-      'An unknown error occurred. The Audius team has been notified.'
+      'An unknown error occurred. The Audius team has been notified.',
+    noSolanaWalletFound: 'No Solana wallet found',
+    failedToCheckWalletBalance:
+      'Failed to check wallet balance. Please try again.'
   }
 }
 
@@ -129,7 +133,16 @@ const LaunchpadPageContent = ({
     }) => {
       const { solana: connectedWallet } = newWallets
       if (!connectedWallet) {
-        alert('No solana wallet connected')
+        alert(messages.errors.noSolanaWalletFound)
+        reportToSentry({
+          error: new Error(messages.errors.noSolanaWalletFound),
+          name: 'Launchpad Page',
+          feature: Feature.ArtistCoins,
+          additionalInfo: {
+            newWallets,
+            externalWalletAccount
+          }
+        })
         return
       }
 
@@ -157,12 +170,22 @@ const LaunchpadPageContent = ({
           setIsInsufficientBalanceModalOpen(true)
         }
       } catch (error) {
-        alert('Failed to check wallet balance. Please try again.')
+        alert(messages.errors.failedToCheckWalletBalance)
+        reportToSentry({
+          error: error instanceof Error ? error : new Error(error as string),
+          name: 'Launchpad Page',
+          feature: Feature.ArtistCoins,
+          additionalInfo: {
+            newWallets,
+            externalWalletAccount
+          }
+        })
       }
     },
     [
       queryClient,
       queryContext,
+      externalWalletAccount,
       trackWalletConnectSuccess,
       trackWalletInsufficientBalance,
       handleWalletAddSuccess
@@ -578,6 +601,7 @@ export const LaunchpadPage = () => {
 
   // Redirect if user is not verified or already has an artist coin
   if (hasExistingArtistCoin && isLaunchpadVerificationEnabled) {
+    track(make({ eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN }))
     return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
   }
 
