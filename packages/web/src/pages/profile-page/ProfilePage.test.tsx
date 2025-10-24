@@ -135,13 +135,13 @@ const mockData = {
         mint: 'test-mint-123',
         owner_id: artistUser.id, // Using the nonArtistUser.id
         balance: '100',
-        ticker: '$TEST'
+        ticker: 'TEST'
       }
     ]
   },
   artistCoin: {
     data: {
-      ticker: '$TEST',
+      ticker: 'TEST',
       mint: 'test-mint-123',
       logo_uri: 'https://example.com/logo.png',
       owner_id: artistUser.id

@@ -1,5 +1,11 @@
 # @audius/spl
 
+## 2.1.0
+
+### Minor Changes
+
+- 284302b: add revoke manager instructions
+
 ## 2.0.2
 
 ### Patch Changes

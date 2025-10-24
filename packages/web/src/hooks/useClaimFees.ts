@@ -1,4 +1,3 @@
-import { type Coin } from '@audius/common/adapters'
 import {
   getArtistCoinQueryKey,
   useCurrentAccountUser,
@@ -106,18 +105,10 @@ export const useClaimFees = (
       })
     },
     onSuccess: async (data, variables, context) => {
-      // Optimistically update the unclaimed fees data
+      // Invalidate the artist coin query to refetch the updated fees
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
-      queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
-        if (!existingCoin) return existingCoin
-        return {
-          ...existingCoin,
-          dynamicBondingCurve: {
-            ...existingCoin?.dynamicBondingCurve,
-            creatorQuoteFee: 0
-          }
-        }
-      })
+      await queryClient.invalidateQueries({ queryKey })
+
       // Call the original onSuccess if provided
       options?.onSuccess?.(data, variables, context)
 

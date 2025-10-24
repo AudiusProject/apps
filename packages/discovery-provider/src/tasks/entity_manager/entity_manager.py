@@ -846,6 +846,12 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     if user_id:
                         entities_to_fetch[EntityType.USER].add(user_id)
 
+                if entity_type == EntityType.ASSOCIATED_WALLET:
+                    wallet = json_metadata.get("wallet_address")
+                    if wallet:
+                        entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(wallet)
+                    entities_to_fetch[EntityType.USER].add(user_id)
+
             if entity_type == EntityType.ENCRYPTED_EMAIL:
                 try:
                     json_metadata = json.loads(metadata)
@@ -886,11 +892,6 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                         entities_to_fetch[EntityType.ENCRYPTED_EMAIL].add(
                             email_owner_user_id
                         )
-            if entity_type == EntityType.ASSOCIATED_WALLET:
-                wallet = json_metadata.get("wallet_address")
-                if wallet:
-                    entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(wallet)
-                entities_to_fetch[EntityType.USER].add(user_id)
 
     return entities_to_fetch
 

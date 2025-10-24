@@ -14,6 +14,8 @@ export const InstructionsProgram = new PublicKey(
   'Sysvar1nstructions1111111111111111111111111'
 )
 
+export type Environment = 'dev' | 'stage' | 'prod'
+
 // reads .env file based on environment
 const readDotEnv = () => {
   const environment = process.env.audius_discprov_env || 'dev'
@@ -24,7 +26,7 @@ const readDotEnv = () => {
 }
 
 type Config = {
-  environment: string
+  environment: Environment
   discoveryDbConnectionString: string
   redisUrl: string
   serverHost: string
@@ -34,7 +36,7 @@ type Config = {
 
 let cachedConfig: Config | null = null
 
-const readConfig = (): Config => {
+export const readConfig = (): Config => {
   if (cachedConfig !== null) return cachedConfig
   readDotEnv()
 
@@ -60,7 +62,7 @@ const readConfig = (): Config => {
   })
 
   cachedConfig = {
-    environment: env.audius_discprov_env,
+    environment: env.audius_discprov_env as Environment,
     discoveryDbConnectionString: env.audius_db_url,
     redisUrl: env.audius_redis_url,
     serverHost: env.anti_abuse_oracle_server_host,

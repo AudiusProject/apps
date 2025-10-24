@@ -182,6 +182,7 @@ const readConfig = (): Config => {
   const delegatePrivateKey: Buffer = env.audius_delegate_private_key
     ? Buffer.from(env.audius_delegate_private_key, 'hex')
     : Buffer.from([])
+  logger.level = env.audius_discprov_env !== 'prod' ? 'debug' : 'info'
 
   cachedConfig = {
     environment: env.audius_discprov_env,
