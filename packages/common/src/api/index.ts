@@ -18,17 +18,6 @@ export * from './tan-query/collection/useLibraryCollections'
 export * from './tan-query/collection/useCollectionByParams'
 export * from './tan-query/collection/useDeleteCollection'
 
-// Coins
-export * from './tan-query/coins/useArtistCoin'
-export * from './tan-query/coins/useArtistCoinInsights'
-export * from './tan-query/coins/useArtistCoinMembers'
-export * from './tan-query/coins/useUserCoin'
-export * from './tan-query/coins/useUserCoins'
-export * from './tan-query/coins/useArtistCoinMembersCount'
-
-export * from './tan-query/coins/useArtistCoins'
-export * from './tan-query/coins/tokenUtils'
-
 // Developer Apps
 export * from '../schemas/developerApps'
 export * from './tan-query/developer-apps/useDeveloperApps'
@@ -138,7 +127,6 @@ export * from './tan-query/users/useTopArtistsInGenre'
 export * from './tan-query/users/useUserAlbums'
 export * from './tan-query/users/useUserByHandle'
 export * from './tan-query/users/useUserByParams'
-export * from './tan-query/users/useUserCollectibles'
 export * from './tan-query/users/useUserPlaylists'
 export * from './tan-query/users/useUsers'
 export * from './tan-query/users/useUser'
@@ -168,16 +156,17 @@ export * from './tan-query/users/account/useSyncLocalStorageUser'
 
 // Wallet logic
 export * from './tan-query/wallets/useAudioBalance'
-export * from './tan-query/wallets/useConnectedWallets'
-export * from './tan-query/wallets/useTokenPrice'
-export * from './tan-query/wallets/useWalletCollectibles'
+export * from './tan-query/wallets/useAssociatedWallets'
 export * from './tan-query/wallets/useWalletOwner'
 export * from './tan-query/wallets/useUSDCBalance'
-export * from './tan-query/wallets/useTokenBalance'
-export * from './tan-query/wallets/useSendTokens'
-export * from './tan-query/jupiter/useSwapTokens'
-export * from './tan-query/jupiter/useTokenExchangeRate'
+export * from './tan-query/wallets/useExternalWalletBalance'
+export * from './tan-query/wallets/useCoinBalance'
+export * from './tan-query/wallets/useCoinBalanceBreakdown'
+export * from './tan-query/wallets/useSendCoins'
+export * from './tan-query/jupiter/useSwapCoins'
+export * from './tan-query/jupiter/useCoinExchangeRate'
 export * from './tan-query/jupiter/utils'
+export * from './tan-query/jupiter/types'
 
 // Saga fetch utils, remove when migration is complete
 export * from './tan-query/saga-utils'
@@ -186,3 +175,6 @@ export * from './tan-query/utils'
 // New authorized-apps exports
 export * from './tan-query/authorized-apps/useAuthorizedApps'
 export * from './tan-query/authorized-apps/useRemoveAuthorizedApp'
+
+// Coins
+export * from './tan-query/coins'

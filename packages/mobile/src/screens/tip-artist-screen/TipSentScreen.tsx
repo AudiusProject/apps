@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 
-import { useCurrentAccountUser, useTokenPrice } from '@audius/common/api'
+import { useArtistCoin, useCurrentAccountUser } from '@audius/common/api'
 import type { SolanaWalletAddress } from '@audius/common/models'
-import { tippingSelectors, TOKEN_LISTING_MAP } from '@audius/common/store'
-import { formatNumberCommas } from '@audius/common/utils'
+import { tippingSelectors } from '@audius/common/store'
+import { formatNumberCommas, getXShareHandle } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -66,20 +66,15 @@ export const TipSentScreen = () => {
     source,
     onSuccessActions
   } = useSelector(getSendTipData)
-  const { data: tokenPriceData } = useTokenPrice(
-    TOKEN_LISTING_MAP.AUDIO.address
-  )
+  const { data: tokenPriceData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
   const styles = useStyles()
   const navigation = useNavigation()
 
-  const tokenPrice = tokenPriceData?.price
+  const tokenPrice = tokenPriceData?.price?.toString()
 
   const getXShareText = () => {
     if (user_id && recipient) {
-      let recipientName = recipient.name
-      if (recipient.twitter_handle) {
-        recipientName = `@${recipient.twitter_handle}`
-      }
+      const recipientName = getXShareHandle(recipient)
       return messages.xShare(
         recipientName,
         sendAmount,

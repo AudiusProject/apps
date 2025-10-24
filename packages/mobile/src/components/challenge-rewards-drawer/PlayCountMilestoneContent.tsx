@@ -6,7 +6,8 @@ import type { CommonState } from '@audius/common/store'
 import { challengesSelectors, ClaimStatus } from '@audius/common/store'
 import {
   getChallengeStatusLabel,
-  formatNumberCommas
+  formatNumberCommas,
+  challengeRewardsConfig
 } from '@audius/common/utils'
 import { useSelector } from 'react-redux'
 
@@ -21,11 +22,11 @@ const { getOptimisticUserChallenges } = challengesSelectors
 
 const messages = {
   description250:
-    'Hit 250 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount250].description(),
   description1000:
-    'Hit 1,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount1000].description(),
   description10000:
-    'Hit 10,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount10000].description(),
   progressLabel: 'PLAYS',
   audio: '$AUDIO',
   close: 'Close',

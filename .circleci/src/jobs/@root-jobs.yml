@@ -1,5 +1,5 @@
 root-publish-github-release-client:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cibuilds/github:0.13
   steps:
@@ -14,7 +14,7 @@ root-publish-github-release-client:
           ghr -t ${GHI_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${CHANGELOG}" -soft client-v${VERSION} ./
 
 root-publish-github-release-protocol:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cibuilds/github:0.13
   steps:

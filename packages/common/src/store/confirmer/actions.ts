@@ -100,7 +100,7 @@ export const requestConfirmation = createCustomAction(
 
 /* Private */
 
-/** Enqueues a confirmation call to make, e.g. "create playlist with a temp id, wait for playlist to appear in discovery node"." */
+/** Enqueues a confirmation call to make, e.g. "create playlist with a temp id, wait for playlist to appear in API response"." */
 export const _addConfirmationCall = createCustomAction(
   ADD_CONFIRMATION_CALL,
   (

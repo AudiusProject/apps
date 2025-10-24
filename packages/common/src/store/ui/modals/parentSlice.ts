@@ -16,12 +16,10 @@ export const initialState: BasicModalsState = {
   APIRewardsExplainer: { isOpen: false },
   TransferAudioMobileWarning: { isOpen: false },
   MobileConnectWalletsDrawer: { isOpen: false },
-  MobileEditCollectiblesDrawer: { isOpen: false },
   Share: { isOpen: false },
   HCaptcha: { isOpen: false },
   BrowserPushPermissionConfirmation: { isOpen: false },
   AudioBreakdown: { isOpen: false },
-  CollectibleDetails: { isOpen: false },
   DeactivateAccountConfirmation: { isOpen: false },
   FeedFilter: { isOpen: false },
   PurchaseVendor: { isOpen: false },
@@ -82,7 +80,10 @@ export const initialState: BasicModalsState = {
   BuySellModal: { isOpen: false },
   HostRemixContest: { isOpen: false },
   FinalizeWinnersConfirmation: { isOpen: false },
-  ReceiveTokensModal: { isOpen: false }
+  ReceiveTokensModal: { isOpen: false },
+  SendTokensModal: { isOpen: false },
+  CoinSuccessModal: { isOpen: false },
+  ArtistCoinDetailsModal: { isOpen: false }
 }
 
 const slice = createSlice({

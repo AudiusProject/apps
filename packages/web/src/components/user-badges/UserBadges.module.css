@@ -2,11 +2,11 @@
   display: flex;
   overflow: visible;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .inlineContainer {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }

@@ -35,7 +35,6 @@ const pngFile = fs.readFileSync(
 )
 
 vitest.mock('../../services/EntityManager')
-vitest.mock('../../services/DiscoveryNodeSelector')
 vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
 vitest.mock('./TrackUploadHelper')

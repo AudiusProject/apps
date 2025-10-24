@@ -1,6 +1,6 @@
 import {
   useAudioBalance,
-  useConnectedWallets,
+  useAssociatedWallets,
   useWalletAudioBalances
 } from '@audius/common/api'
 import { formatNumberCommas } from '@audius/common/utils'
@@ -31,7 +31,7 @@ export const AudioBreakdownDrawer = () => {
   const { accountBalance, connectedWalletsBalance, totalBalance } =
     useAudioBalance()
 
-  const { data: connectedWallets = [] } = useConnectedWallets()
+  const { data: connectedWallets = [] } = useAssociatedWallets()
   const connectedWalletsBalances = useWalletAudioBalances({
     wallets: connectedWallets
   })

@@ -13,6 +13,10 @@ import type {
   CreateChatModalState,
   TrackMetadataForUpload
 } from '@audius/common/store'
+import type {
+  GetCoinsSortMethodEnum,
+  GetCoinsSortDirectionEnum
+} from '@audius/sdk'
 import type { EventArg, NavigationState } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
 
@@ -21,14 +25,16 @@ import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AiGeneratedTracksScreen } from 'app/screens/ai-generated-tracks-screen'
-import { AllCoinsScreen } from 'app/screens/all-coins-screen'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
-import { CoinDetailsScreen } from 'app/screens/coin-details-screen'
+import {
+  CoinDetailsScreen,
+  EditCoinDetailsScreen
+} from 'app/screens/coin-details-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
@@ -60,6 +66,9 @@ import {
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
 
+import { ArtistCoinSortScreen } from '../artist-coin-sort-screen/ArtistCoinSortScreen'
+import { ArtistCoinsExploreScreen } from '../artist-coins-explore-screen/ArtistCoinsExploreScreen'
+
 import { useAppScreenOptions } from './useAppScreenOptions'
 
 export type AppTabScreenParamList = {
@@ -70,9 +79,7 @@ export type AppTabScreenParamList = {
     commentId?: string
   } & ({ handle: string; slug: string } | { trackId: ID })
   TrackRemixes: { trackId: ID } | { handle: string; slug: string }
-  Profile: ({ handle: string; id?: ID } | { handle?: string; id: ID }) & {
-    collectibleId?: string
-  }
+  Profile: { handle: string; id?: ID } | { handle?: string; id: ID }
   Collection: {
     id?: ID
     slug?: string
@@ -111,9 +118,14 @@ export type AppTabScreenParamList = {
 
   AudioScreen: undefined
   RewardsScreen: undefined
+  ArtistCoinsExplore: undefined
+  ArtistCoinSort: {
+    initialSortMethod?: GetCoinsSortMethodEnum
+    initialSortDirection?: GetCoinsSortDirectionEnum
+  }
   wallet: undefined
-  AllCoinsScreen: undefined
-  CoinDetailsScreen: { mint: string }
+  CoinDetailsScreen: { ticker: string }
+  EditCoinDetailsScreen: { ticker: string }
   Upload: {
     initialMetadata?: Partial<TrackMetadataForUpload>
   }
@@ -230,7 +242,15 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
-      <Stack.Screen name='AllCoinsScreen' component={AllCoinsScreen} />
+      <Stack.Screen
+        name='EditCoinDetailsScreen'
+        component={EditCoinDetailsScreen}
+      />
+      <Stack.Screen
+        name='ArtistCoinsExplore'
+        component={ArtistCoinsExploreScreen}
+      />
+      <Stack.Screen name='ArtistCoinSort' component={ArtistCoinSortScreen} />
 
       <Stack.Group>
         <Stack.Screen name='EditProfile' component={EditProfileScreen} />

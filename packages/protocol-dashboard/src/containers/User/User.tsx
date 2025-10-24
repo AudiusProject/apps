@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { Flex, IconUser } from '@audius/harmony'
-import clsx from 'clsx'
 import { matchPath, useLocation, useParams } from 'react-router-dom'
 
 import { ConnectAudiusProfileCard } from 'components/ConnectAudiusProfileCard/ConnectAudiusProfileCard'
-import ContentTable from 'components/ContentTable'
-import DiscoveryTable from 'components/DiscoveryTable'
 import { ManageAccountCard } from 'components/ManageAccountCard/ManageAccountCard'
 import ManageService from 'components/ManageService'
+import NodeTable from 'components/NodeTable'
 import Page from 'components/Page'
 import ProfileInfoCard from 'components/ProfileInfoCard/ProfileInfoCard'
+import { RegisterNodeCard } from 'components/RegisterNodeCard/RegisterNodeCard'
 import Timeline from 'components/Timeline'
 import TransactionStatus from 'components/TransactionStatus'
 import { useAccount } from 'store/account/hooks'
@@ -34,15 +33,15 @@ const messages = {
 const UserPage = () => {
   const { wallet } = useParams<{ wallet: string }>()
   const location = useLocation()
-  const discoveryTableRef = useRef(null)
+  const nodeTableRef = useRef(null)
   const scrollToNodeTables = useCallback(() => {
     window.scrollTo({
-      top: discoveryTableRef.current?.offsetTop,
+      top: nodeTableRef.current?.offsetTop,
       behavior: 'smooth'
     })
   }, [])
 
-  const handleClickNodes = discoveryTableRef?.current
+  const handleClickNodes = nodeTableRef?.current
     ? scrollToNodeTables
     : undefined
 
@@ -56,11 +55,6 @@ const UserPage = () => {
   const user = userAccount as User | Operator
 
   const isServiceProvider = user && 'serviceProvider' in user
-
-  const hasDiscoveryProviders =
-    isServiceProvider && (user as Operator).discoveryProviders.length > 0
-  const hasContentNodes =
-    isServiceProvider && (user as Operator).contentNodes.length > 0
 
   const replaceRoute = useReplaceRoute()
 
@@ -90,11 +84,13 @@ const UserPage = () => {
         />
         {isOwner ? <ConnectAudiusProfileCard /> : null}
         {isServiceProvider && (
-          <ManageService
-            wallet={wallet}
-            onClickDiscoveryTable={handleClickNodes}
-            onClickContentTable={handleClickNodes}
-          />
+          <>
+            <ManageService
+              wallet={wallet}
+              onClickNodesTable={handleClickNodes}
+            />
+            <RegisterNodeCard wallet={wallet} />
+          </>
         )}
         {<ManageAccountCard wallet={wallet} />}
         {isOwner ? <TransactionStatus /> : null}
@@ -103,23 +99,8 @@ const UserPage = () => {
           wallet={user?.wallet}
           timelineType={isServiceProvider ? 'ServiceProvider' : 'Delegator'}
         />
-        <div className={styles.serviceContainer} ref={discoveryTableRef}>
-          {hasDiscoveryProviders && (
-            <DiscoveryTable
-              owner={user?.wallet}
-              className={clsx(styles.serviceTable, {
-                [styles.rightSpacing]: hasContentNodes
-              })}
-            />
-          )}
-          {hasContentNodes && (
-            <ContentTable
-              owner={user?.wallet}
-              className={clsx(styles.serviceTable, {
-                [styles.leftSpacing]: hasDiscoveryProviders
-              })}
-            />
-          )}
+        <div className={styles.serviceContainer} ref={nodeTableRef}>
+          <NodeTable owner={user?.wallet} className={styles.serviceTable} />
         </div>
       </Flex>
     </Page>

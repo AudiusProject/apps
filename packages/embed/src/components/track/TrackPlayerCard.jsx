@@ -35,7 +35,9 @@ const TrackPlayerCard = ({
   streamConditions,
   hasPremiumExtras,
   audioPlayer,
-  isRemixContest
+  isRemixContest,
+  artistCoinLogo,
+  balance
 }) => {
   const mobileWebTwitter = isMobileWebTwitter(isTwitter)
   const getBottomWrapperStyle = () =>
@@ -67,6 +69,7 @@ const TrackPlayerCard = ({
     setArtworkWrapperStyle(newStyle)
   }, [height, width])
   const isGated = !!streamConditions
+  const isTokenGated = !!streamConditions?.tokenGate
   const isPurchaseable =
     streamConditions && instanceOfPurchaseGate(streamConditions)
 
@@ -79,7 +82,15 @@ const TrackPlayerCard = ({
       {isGated || hasPremiumExtras ? (
         <DogEar
           size='s'
-          variant={isPurchaseable ? 'purchase' : isGated ? 'special' : 'extras'}
+          variant={
+            isPurchaseable
+              ? 'purchase'
+              : isTokenGated
+                ? 'coin'
+                : isGated
+                  ? 'special'
+                  : 'extras'
+          }
         />
       ) : null}
       <div className={styles.paddingContainer}>
@@ -133,6 +144,8 @@ const TrackPlayerCard = ({
                 isVerified={isVerified}
                 title={title}
                 titleUrl={trackURL}
+                artistCoinLogo={artistCoinLogo}
+                balance={balance}
               />
             </div>
             <div className={styles.shareWrapper}>

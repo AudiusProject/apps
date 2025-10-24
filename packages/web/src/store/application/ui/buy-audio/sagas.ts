@@ -1154,7 +1154,8 @@ function* recoverPurchaseIfNecessary() {
       // Use proportion to guesstimate an $AUDIO quote for the exchangeable balance
       const estimatedAudio =
         existingBalance > 0
-          ? (BigInt(exchangableBalance) * BigInt(quote.outputAmount.amount)) /
+          ? (BigInt(exchangableBalance) *
+              BigInt(quote.outputAmount.amountString)) /
             BigInt(existingBalance)
           : BigInt(0)
 

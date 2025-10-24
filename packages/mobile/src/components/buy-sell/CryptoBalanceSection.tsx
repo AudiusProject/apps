@@ -1,61 +1,55 @@
-import React from 'react'
+import { type CoinInfo } from '@audius/common/store'
+import { Image } from 'react-native'
 
-import type { TokenInfo } from '@audius/common/store'
-
-import {
-  Flex,
-  IconTokenAUDIO,
-  IconTokenUSDC,
-  Text
-} from '@audius/harmony-native'
-
-const messages = {
-  symbol: (symbol: string) => `$${symbol}`
-}
+import { Flex, HexagonalIcon, Text, useTheme } from '@audius/harmony-native'
 
 type CryptoBalanceSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
+  name?: string
   amount: string
-  priceLabel?: string
 }
 
 export const CryptoBalanceSection = ({
   title,
   tokenInfo,
-  amount,
-  priceLabel
+  name,
+  amount
 }: CryptoBalanceSectionProps) => {
-  const { symbol } = tokenInfo
-
-  // Get the appropriate token icon for mobile
-  const TokenIcon = symbol === 'AUDIO' ? IconTokenAUDIO : IconTokenUSDC
+  const { logoURI } = tokenInfo
+  const { iconSizes } = useTheme()
+  const iconSize = iconSizes['4xl']
 
   return (
-    <Flex direction='column' gap='m'>
+    <Flex gap='m'>
       {/* Header */}
-      <Text variant='heading' size='s' color='subdued'>
+      <Text variant='title' size='l'>
         {title}
       </Text>
 
       {/* Amount and token info */}
-      <Flex direction='row' alignItems='center' gap='s'>
-        <TokenIcon size='4xl' />
-        <Flex direction='column'>
-          <Flex direction='row' gap='xs' alignItems='center'>
-            <Text variant='heading' size='l'>
-              {amount}
+      <Flex row alignItems='center' gap='s'>
+        <HexagonalIcon size={iconSize}>
+          <Image
+            source={{ uri: logoURI }}
+            style={{ width: iconSize, height: iconSize }}
+          />
+        </HexagonalIcon>
+        <Flex gap='xs'>
+          {name && (
+            <Text variant='heading' size='s'>
+              {name}
             </Text>
-            <Text variant='heading' size='m' color='subdued'>
-              {messages.symbol(tokenInfo.symbol)}
-            </Text>
-          </Flex>
-          <Flex direction='row' gap='xs'>
-            {priceLabel && (
-              <Text variant='heading' size='s' color='subdued'>
-                {priceLabel}
+          )}
+          <Flex>
+            <Flex row gap='xs' alignItems='center'>
+              <Text variant='title' size='l'>
+                {amount}
               </Text>
-            )}
+              <Text variant='title' size='l' color='subdued'>
+                ${tokenInfo.symbol}
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

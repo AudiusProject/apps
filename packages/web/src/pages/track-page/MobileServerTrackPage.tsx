@@ -1,6 +1,6 @@
 import { Track } from '@audius/common/src/models/Track'
 import { User } from '@audius/common/src/models/User'
-import { formatCount } from '@audius/common/src/utils/formatUtil'
+import { formatCount } from '@audius/common/src/utils/decimal'
 import { profilePage } from '@audius/common/src/utils/route'
 import {
   formatDate,

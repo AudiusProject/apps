@@ -38,6 +38,7 @@ import { InboxUnavailableMessage } from './InboxUnavailableMessage'
 import { SendMessagePrompt } from './SendMessagePrompt'
 import { StickyScrollList } from './StickyScrollList'
 
+export const CONTENT_EXPANDED_LISTENER_KEY = 'audius:chat:content-expanded'
 const SPINNER_HEIGHT = 48
 
 const { fetchMoreMessages, markChatAsRead, setActiveChat } = chatActions
@@ -107,12 +108,16 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       }
     }, [chat, chatId])
 
+    const wasNearBottomRef = useRef<boolean>(true)
+
     const scrollHandler = useCallback(
       (e: UIEvent<HTMLDivElement>) => {
         if (!chatId) return
 
         // Handle case where scrolled to bottom
-        if (isScrolledNearBottom(e.target as HTMLDivElement)) {
+        const nearBottom = isScrolledNearBottom(e.target as HTMLDivElement)
+        wasNearBottomRef.current = nearBottom
+        if (nearBottom) {
           // Mark chat as read when the user reaches the bottom (saga handles no-op if already read)
           dispatch(markChatAsRead({ chatId }))
           dispatch(setActiveChat({ chatId }))
@@ -155,6 +160,28 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     useEffect(() => () => {
       throttledScrollHandler.cancel()
     })
+
+    // Respond to async unfurl expansions explicitly signaled by list items
+    useEffect(() => {
+      const el = ref.current
+      if (!el) return
+
+      const handleExpanded = (e: Event) => {
+        // If user was near bottom before expansion, schedule a microtask scroll
+        if (!wasNearBottomRef.current) return
+        // Wait for the layout to settle this tick
+        queueMicrotask(() => {
+          el.scrollTo({ top: el.scrollHeight })
+        })
+      }
+      window.addEventListener(CONTENT_EXPANDED_LISTENER_KEY, handleExpanded)
+      return () => {
+        window.removeEventListener(
+          CONTENT_EXPANDED_LISTENER_KEY,
+          handleExpanded
+        )
+      }
+    }, [])
 
     const scrollIntoViewOnMount = useCallback((el: HTMLDivElement) => {
       if (el) {

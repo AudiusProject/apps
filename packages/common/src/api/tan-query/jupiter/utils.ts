@@ -1,5 +1,6 @@
-import { USDC, UsdcWei } from '@audius/fixed-decimal'
-import { AudiusSdk } from '@audius/sdk'
+import { USDC } from '@audius/fixed-decimal'
+import type { AudiusSdk } from '@audius/sdk'
+import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
@@ -7,11 +8,38 @@ import {
   getAccount,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
-import { PublicKey, TransactionInstruction } from '@solana/web3.js'
+import type { Commitment, Keypair } from '@solana/web3.js'
+import {
+  PublicKey,
+  TransactionInstruction,
+  VersionedTransaction
+} from '@solana/web3.js'
+import { useQueryClient } from '@tanstack/react-query'
 
-import { SwapErrorType, SwapStatus, UserBankManagedTokenInfo } from './types'
+import type { User } from '~/models/User'
+import {
+  getJupiterQuoteByMintWithRetry,
+  jupiterInstance
+} from '~/services/Jupiter'
+import {
+  INTERNAL_TRANSFER_MEMO_STRING,
+  MEMO_PROGRAM_ID
+} from '~/services/audius-backend/solana'
+import { CoinInfo } from '~/store/ui/buy-sell/types'
 
-export async function addUserBankToAtaInstructions({
+import { QUERY_KEYS } from '../queryKeys'
+
+import {
+  ClaimableTokenMint,
+  SwapErrorType,
+  SwapStatus,
+  SwapTokensResult,
+  UserBankManagedTokenInfo
+} from './types'
+
+const USDC_MINT_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+
+export async function addTransferFromUserBankInstructions({
   tokenInfo,
   userPublicKey,
   ethAddress,
@@ -60,10 +88,19 @@ export async function addUserBankToAtaInstructions({
     })
 
   instructions.push(secpTransferInstruction, transferInstruction)
+  if (tokenInfo.mintAddress === USDC_MINT_ADDRESS) {
+    instructions.push(
+      new TransactionInstruction({
+        keys: [{ pubkey: ata, isSigner: false, isWritable: true }],
+        programId: MEMO_PROGRAM_ID,
+        data: Buffer.from(INTERNAL_TRANSFER_MEMO_STRING)
+      })
+    )
+  }
   return ata
 }
 
-export async function addAtaToUserBankInstructions({
+export async function addTransferToUserBankInstructions({
   tokenInfo,
   userPublicKey,
   ethAddress,
@@ -209,83 +246,6 @@ export function getSwapErrorResponse(params: {
 }
 
 /**
- * Formats a numeric value as USDC.
- * Uses floor(2) rounding to ensure consistent display across the application.
- *
- * @param value - The numeric value to format (can be number or string)
- * @param options - Formatting options
- * @returns Formatted USDC string
- */
-export function formatUSDCValue(
-  value?: number | string,
-  options: {
-    /** Whether to include the $ prefix (default: false) */
-    includeDollarSign?: boolean
-    /** Whether to use toFixed format instead of toLocaleString (default: true) */
-    useFixed?: boolean
-  } = {}
-) {
-  const { includeDollarSign = false, useFixed = true } = options
-
-  // Handle null, undefined, or empty string cases
-  if (!value && value !== 0) {
-    return null
-  }
-
-  const numericValue =
-    typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value
-
-  if (isNaN(numericValue) || !isFinite(numericValue)) {
-    return null
-  }
-
-  // Add early validation for extremely large numbers to prevent overflow
-  // This corresponds to ~1 trillion USDC, which is well above any realistic amount
-  const MAX_SAFE_USDC_VALUE = 1000000000000
-  if (Math.abs(numericValue) > MAX_SAFE_USDC_VALUE) {
-    console.warn('USDC value too large for safe formatting:', numericValue)
-    return null
-  }
-
-  // Use the same rounding logic as CashWallet.tsx
-  // Convert to wei (multiply by 1,000,000) and ensure it's an integer
-  const weiValue = Math.floor(Math.abs(numericValue) * 1000000)
-
-  // Ensure weiValue is valid for BigInt constructor
-  if (weiValue < 0 || !Number.isInteger(weiValue)) {
-    return null
-  }
-
-  // Additional safety check for BigInt constructor limits
-  if (weiValue > Number.MAX_SAFE_INTEGER) {
-    console.warn('Wei value exceeds MAX_SAFE_INTEGER:', weiValue)
-    return null
-  }
-
-  try {
-    const usdcValue = USDC(BigInt(weiValue) as UsdcWei).floor(2)
-
-    if (useFixed) {
-      const formatted = usdcValue.toFixed(2).replace('$', '')
-      return includeDollarSign ? `$${formatted}` : formatted
-    } else {
-      return usdcValue.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })
-    }
-  } catch (error) {
-    console.warn('Error formatting USDC value:', {
-      value,
-      numericValue,
-      weiValue,
-      error
-    })
-    return null
-  }
-}
-
-/**
  * Formats a token price string using USDC formatting with custom decimal places.
  * This function preserves the original behavior for token price display.
  *
@@ -302,4 +262,208 @@ export function formatTokenPrice(price: string, decimalPlaces: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: maxDecimalPlaces
   })
+}
+
+const SWAP_LOOKUP_TABLE_ADDRESS = new PublicKey(
+  '2WB87JxGZieRd7hi3y87wq6HAsPLyb9zrSx8B5z1QEzM'
+)
+
+export const findTokenByAddress = (
+  tokens: Record<string, CoinInfo>,
+  address: string
+): CoinInfo | undefined => {
+  return Object.values(tokens).find(
+    (token) => token.address.toLowerCase() === address.toLowerCase()
+  )
+}
+
+export const getClaimableTokenMint = (token: CoinInfo): ClaimableTokenMint => {
+  if (token.symbol === 'USDC') return 'USDC'
+  return new PublicKey(token.address)
+}
+
+export const createTokenConfig = (
+  token: CoinInfo
+): UserBankManagedTokenInfo => ({
+  mintAddress: token.address,
+  claimableTokenMint: getClaimableTokenMint(token),
+  decimals: token.decimals
+})
+
+export const validateAndCreateTokenConfigs = (
+  inputMintAddress: string,
+  outputMintAddress: string,
+  tokens: Record<string, CoinInfo>
+):
+  | {
+      inputTokenConfig: UserBankManagedTokenInfo
+      outputTokenConfig: UserBankManagedTokenInfo
+    }
+  | { error: SwapTokensResult } => {
+  // Find input and output tokens
+  const inputToken = findTokenByAddress(tokens, inputMintAddress)
+  const outputToken = findTokenByAddress(tokens, outputMintAddress)
+
+  if (!inputToken || !outputToken) {
+    return {
+      error: {
+        status: SwapStatus.ERROR,
+        error: {
+          type: SwapErrorType.BUILD_FAILED,
+          message: 'Token not found in available tokens'
+        }
+      }
+    }
+  }
+
+  // Create token configs
+  const inputTokenConfig = createTokenConfig(inputToken)
+  const outputTokenConfig = createTokenConfig(outputToken)
+
+  return { inputTokenConfig, outputTokenConfig }
+}
+
+export const getJupiterSwapInstructions = async (
+  swapRequestParams: SwapRequest,
+  outputTokenConfig?: UserBankManagedTokenInfo,
+  userPublicKey?: PublicKey,
+  feePayer?: PublicKey,
+  instructions?: TransactionInstruction[]
+): Promise<{
+  swapInstructionsResult: SwapInstructionsResponse
+  outputAtaForJupiter?: PublicKey
+}> => {
+  let swapInstructionsResult
+  let outputAtaForJupiter: PublicKey | undefined
+
+  try {
+    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
+      swapRequest: {
+        ...swapRequestParams,
+        useSharedAccounts: true
+      }
+    })
+  } catch (e) {
+    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
+      swapRequest: {
+        ...swapRequestParams,
+        useSharedAccounts: false
+      }
+    })
+
+    // Add output ATA instruction if fallback is used and all required params are provided
+    if (outputTokenConfig && userPublicKey && feePayer && instructions) {
+      outputAtaForJupiter = addJupiterOutputAtaInstruction({
+        tokenConfig: outputTokenConfig,
+        userPublicKey,
+        feePayer,
+        instructions
+      })
+    }
+  }
+
+  return { swapInstructionsResult, outputAtaForJupiter }
+}
+
+export const buildAndSendTransaction = async (
+  sdk: AudiusSdk,
+  keypair: Keypair,
+  feePayer: PublicKey,
+  instructions: TransactionInstruction[],
+  addressLookupTableAddresses: string[],
+  commitment?: Commitment
+): Promise<string> => {
+  // Build transaction
+  const swapTx: VersionedTransaction =
+    await sdk.services.solanaClient.buildTransaction({
+      feePayer,
+      instructions,
+      addressLookupTables: addressLookupTableAddresses
+        .map((addr: string) => new PublicKey(addr))
+        .concat([SWAP_LOOKUP_TABLE_ADDRESS])
+    })
+
+  // Sign and send transaction
+  swapTx.sign([keypair])
+  const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
+
+  if (commitment) {
+    await sdk.services.solanaClient.connection.confirmTransaction(
+      signature,
+      commitment
+    )
+  }
+
+  return signature
+}
+
+export const invalidateSwapQueries = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+  user: User
+): Promise<void> => {
+  // Invalidate user-specific queries
+  if (user?.wallet) {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.usdcBalance, user.wallet]
+    })
+  }
+
+  // Invalidate general user coins query
+  await queryClient.invalidateQueries({
+    queryKey: [QUERY_KEYS.userCoins]
+  })
+}
+
+export const prepareOutputUserBank = async (
+  sdk: AudiusSdk,
+  ethAddress: string,
+  outputTokenConfig: UserBankManagedTokenInfo
+): Promise<string> => {
+  const result = await sdk.services.claimableTokensClient.getOrCreateUserBank({
+    ethWallet: ethAddress,
+    mint: outputTokenConfig.claimableTokenMint
+  })
+  return result.userBank.toBase58()
+}
+
+/**
+ * Attempts to get a direct quote from Jupiter for the given token pair.
+ * Returns true if a direct quote is available, false otherwise.
+ */
+export const isDirectRouteAvailable = async (
+  inputMint: string,
+  outputMint: string,
+  amountUi: number,
+  tokens: Record<string, CoinInfo>
+): Promise<boolean> => {
+  try {
+    // Validate tokens and create configs
+    const tokenConfigsResult = validateAndCreateTokenConfigs(
+      inputMint,
+      outputMint,
+      tokens
+    )
+
+    if ('error' in tokenConfigsResult) {
+      return false
+    }
+
+    const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
+
+    // Try to get a direct quote
+    await getJupiterQuoteByMintWithRetry({
+      inputMint,
+      outputMint,
+      inputDecimals: inputTokenConfig.decimals,
+      outputDecimals: outputTokenConfig.decimals,
+      amountUi,
+      swapMode: 'ExactIn',
+      onlyDirectRoutes: false
+    })
+
+    return true
+  } catch (error) {
+    // If quote fails, there's no direct path available
+    return false
+  }
 }

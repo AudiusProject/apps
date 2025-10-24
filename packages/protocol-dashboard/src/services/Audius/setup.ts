@@ -4,10 +4,7 @@ import { Eip1193Provider } from 'ethers'
 import { CHAIN_ID, ETH_PROVIDER_URL } from 'utils/eth'
 
 import { AudiusClient } from './AudiusClient'
-import {
-  discoveryNodeSelector,
-  discoveryNodeAllowlist
-} from './discoveryNodeSelector'
+import { apiEndpoint } from './sdk'
 
 declare global {
   interface Window {
@@ -178,10 +175,7 @@ const configureReadOnlyLibs = async () => {
     ethWeb3Config,
     solanaWeb3Config,
     identityServiceConfig,
-    discoveryProviderConfig: {
-      whitelist: discoveryNodeAllowlist,
-      discoveryNodeSelector
-    },
+    discoveryProviderConfig: { endpoint: apiEndpoint },
     isServer: false,
     isDebug: !IS_PRODUCTION && !IS_STAGING
   }
@@ -268,10 +262,7 @@ const configureLibsWithAccount = async ({
     identityServiceConfig: AudiusLibs.configIdentityService(
       identityServiceEndpoint!
     ),
-    discoveryProviderConfig: {
-      whitelist: discoveryNodeAllowlist,
-      discoveryNodeSelector
-    },
+    discoveryProviderConfig: { endpoint: apiEndpoint },
     isServer: false,
     isDebug: !IS_PRODUCTION && !IS_STAGING
   }

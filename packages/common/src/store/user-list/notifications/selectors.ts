@@ -1,6 +1,6 @@
 import { CommonState } from '~/store/commonStore'
 import { NotificationType } from '~/store/notifications/types'
-import { formatCount } from '~/utils/formatUtil'
+import { formatCount } from '~/utils/decimal'
 
 const getBaseState = (state: CommonState) => state.ui.userList.notifications
 

@@ -111,7 +111,6 @@ const getSwapInstructions = async ({
     }
   })
   const {
-    tokenLedgerInstruction,
     computeBudgetInstructions,
     setupInstructions,
     swapInstruction,
@@ -119,7 +118,6 @@ const getSwapInstructions = async ({
     addressLookupTableAddresses
   } = response
   const instructionsFlattened = [
-    tokenLedgerInstruction,
     ...computeBudgetInstructions,
     ...setupInstructions,
     swapInstruction,

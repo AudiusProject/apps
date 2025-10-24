@@ -6,7 +6,9 @@ import React, {
   useState
 } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import type { ScrollView } from 'react-native'
 import { ImageBackground, Keyboard } from 'react-native'
@@ -32,7 +34,7 @@ import {
   TextInputSize,
   useTheme
 } from '@audius/harmony-native'
-import imageSearchHeaderBackground from 'app/assets/images/imageSearchHeaderBackground2x.png'
+import imageSearchHeaderBackground from 'app/assets/images/imageSearchHeaderBackground.webp'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AccountPictureHeader } from 'app/screens/app-screen/AccountPictureHeader'
 import { SearchCategoriesAndFilters } from 'app/screens/search-screen/SearchCategoriesAndFilters'
@@ -86,7 +88,12 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
     (value) => value !== undefined
   )
 
+  const { isEnabled: isCollapsedHeaderEnabled } = useFeatureFlag(
+    FeatureFlags.COLLAPSED_EXPLORE_HEADER
+  )
+
   const shouldCollapse =
+    isCollapsedHeaderEnabled ||
     isFocused ||
     !!inputValue ||
     category !== 'all' ||

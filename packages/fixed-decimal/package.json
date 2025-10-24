@@ -19,14 +19,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol.git#main"
+    "url": "git+https://github.com/AudiusProject/apps.git#main"
   },
   "author": "Audius",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/fixed-decimal",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/fixed-decimal",
   "devDependencies": {
     "eslint": "8.56.0",
     "vitest": "0.34.6"

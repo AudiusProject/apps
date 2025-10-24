@@ -1,20 +1,26 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
-import { useArtistCoin, useTokenBalance } from '@audius/common/api'
+import { useArtistCoin, useCoinBalance, useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { WALLET_PAGE } from '@audius/common/src/utils/route'
-import { formatCount } from '@audius/common/utils'
+import { formatCount, route } from '@audius/common/utils'
 import {
   Artwork,
+  Flex,
   HoverCard,
-  HoverCardHeader,
   HoverCardProps,
   IconArrowRight,
+  PlainButton,
+  Text,
   useTheme
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
 
-import { HoverCardBody } from './HoverCardBody'
+import { useNavigateToPage } from 'hooks/useNavigateToPage'
+
+const messages = {
+  creator: 'Creator',
+  member: 'Member',
+  visitCoinPage: 'Visit Coin Page'
+}
 
 type ArtistCoinHoverCardProps = Pick<
   HoverCardProps,
@@ -26,12 +32,7 @@ type ArtistCoinHoverCardProps = Pick<
   | 'triggeredBy'
 > & {
   /**
-   * The mint address of the artist coin
-   */
-  mint: string
-
-  /**
-   * The user ID to fetch balance information for
+   * The user ID to fetch coin data and balance information for
    */
   userId: ID
 }
@@ -41,7 +42,6 @@ type ArtistCoinHoverCardProps = Pick<
  */
 export const ArtistCoinHoverCard = ({
   children,
-  mint,
   userId,
   onClose,
   anchorOrigin,
@@ -49,68 +49,152 @@ export const ArtistCoinHoverCard = ({
   onClick,
   triggeredBy
 }: ArtistCoinHoverCardProps) => {
-  const navigate = useNavigate()
-  const { cornerRadius, spacing } = useTheme()
+  const navigate = useNavigateToPage()
+  const { spacing } = useTheme()
 
-  const { data: coin } = useArtistCoin({ mint })
-  const { data: tokenBalance } = useTokenBalance({
-    mint,
-    userId
+  // Track hover state to conditionally fetch token balance
+  const [isHovered, setIsHovered] = useState(false)
+
+  // Get user data to access artist_coin_badge
+  const { data: user } = useUser(userId, {
+    select: (user) => ({
+      artistCoinBadge: user?.artist_coin_badge
+    })
   })
 
-  const handleNavigateToTokenPage = useCallback(() => {
-    navigate(`${WALLET_PAGE}/${mint}`)
-  }, [navigate, mint])
+  const { artistCoinBadge } = user ?? {}
 
-  if (!tokenBalance || !coin) return null
+  // Fetch full coin data to get name and ownerId
+  const { data: coinData } = useArtistCoin(artistCoinBadge?.mint, {
+    enabled: isHovered && !!artistCoinBadge?.mint
+  })
 
-  const formattedBalance = formatCount(Number(tokenBalance.balance))
-  const coinName = coin.ticker || ''
-  const logoURI = coin.logoUri
+  // Only fetch token balance when hovered and we have the mint address
+  const { data: tokenBalance } = useCoinBalance({
+    mint: artistCoinBadge?.mint ?? '',
+    userId,
+    enabled: isHovered && !!artistCoinBadge?.mint
+  })
+
+  // Determine if the user whose badge we're showing is the creator of this coin
+  const isCreator = userId === coinData?.ownerId
+
+  const handleClick = useCallback(() => {
+    onClick?.()
+    onClose?.()
+    if (artistCoinBadge?.ticker) {
+      navigate(route.coinPage(artistCoinBadge.ticker))
+    }
+  }, [onClick, onClose, navigate, artistCoinBadge?.ticker])
+
+  // Don't render if we don't have the basic coin info
+  if (!artistCoinBadge?.ticker || !artistCoinBadge?.logo_uri) {
+    return null
+  }
+
+  const coinName = coinData?.name || artistCoinBadge.ticker || ''
+  const coinTicker = artistCoinBadge.ticker || ''
+  const formattedBalance = tokenBalance
+    ? formatCount(Number(tokenBalance.balance))
+    : null
 
   return (
     <HoverCard
       content={
         <>
-          <HoverCardHeader
-            iconLeft={() =>
-              logoURI ? (
+          {/* Custom Header */}
+          <Flex
+            w='100%'
+            alignSelf='stretch'
+            backgroundColor='surface1'
+            borderBottom='default'
+            p='xs'
+            alignItems='center'
+            justifyContent='space-between'
+          >
+            {/* Left: Creator/Member Badge */}
+            <Flex alignItems='center'>
+              <Text
+                variant='label'
+                size='m'
+                color='accent'
+                textTransform='uppercase'
+              >
+                {isCreator ? messages.creator : messages.member}
+              </Text>
+            </Flex>
+
+            {/* Right: Visit Coin Page Link */}
+            <PlainButton
+              variant='default'
+              size='default'
+              iconRight={IconArrowRight}
+              onClick={handleClick}
+            >
+              {messages.visitCoinPage}
+            </PlainButton>
+          </Flex>
+
+          {/* Custom Body */}
+          <Flex w='100%' p='xs' pr='4xl' column gap='xs'>
+            <Flex gap='xs' alignItems='center' w='100%'>
+              {/* Token Icon */}
+              {artistCoinBadge?.logo_uri ? (
                 <Artwork
-                  src={logoURI}
+                  src={artistCoinBadge.logo_uri}
                   hex
-                  w={spacing.unit6}
-                  h={spacing.unit6}
+                  w={spacing.unit12}
+                  h={spacing.unit12}
                   borderWidth={0}
                 />
-              ) : null
-            }
-            title={coinName}
-            onClick={handleNavigateToTokenPage}
-            onClose={onClose}
-            iconRight={IconArrowRight}
-          />
-          <HoverCardBody
-            icon={
-              logoURI ? (
-                <Artwork
-                  src={logoURI}
-                  hex
-                  w={spacing.unit16}
-                  h={spacing.unit16}
-                  borderWidth={0}
-                  css={{ borderRadius: cornerRadius.circle }}
-                />
-              ) : null
-            }
-            amount={formattedBalance}
-            currency={coinName}
-          />
+              ) : null}
+
+              {/* Token Details */}
+              <Flex
+                column
+                justifyContent='center'
+                css={{ flex: 1, minWidth: 0 }}
+              >
+                {/* Coin Name */}
+                <Text
+                  variant='title'
+                  size='m'
+                  color='default'
+                  css={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {coinName}
+                </Text>
+
+                {/* Balance and Ticker */}
+                <Flex gap='xs' alignItems='center' css={{ flexWrap: 'wrap' }}>
+                  {formattedBalance ? (
+                    <Text variant='title' size='s' color='default'>
+                      {formattedBalance}
+                    </Text>
+                  ) : null}
+                  <Text
+                    variant='label'
+                    size='m'
+                    color='subdued'
+                    textTransform='uppercase'
+                  >
+                    ${coinTicker}
+                  </Text>
+                </Flex>
+              </Flex>
+            </Flex>
+          </Flex>
         </>
       }
       anchorOrigin={anchorOrigin}
       transformOrigin={transformOrigin}
-      onClick={onClick}
+      onClick={handleClick}
       triggeredBy={triggeredBy}
+      onHover={setIsHovered}
     >
       {children}
     </HoverCard>

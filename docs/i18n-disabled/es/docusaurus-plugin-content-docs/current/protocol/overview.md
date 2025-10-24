@@ -9,7 +9,7 @@ Audius es un protocolo descentralizado, propiedad de la comunidad y controlado p
 
 La misión del proyecto es dar a todos la libertad de compartir, monetizar y escuchar cualquier audio.
 
-El [repositorio](https://github.com/AudiusProject/audius-protocol) del Protocolo Audius es un mono-repositorio que tiene todas las piezas que hacen y soportan el protocolo incluyendo contratos inteligentes, servicios y otras bibliotecas de soporte.
+El [repositorio](https://github.com/AudiusProject/apps) del Protocolo Audius es un mono-repositorio que tiene todas las piezas que hacen y soportan el protocolo incluyendo contratos inteligentes, servicios y otras bibliotecas de soporte.
 
 Si está interesado en operar un servicio, consulte la sección [`ejecutando un nodo`](../token/running-a-node/introduction.md). Si estás interesado en contribuir al protocolo de Audius, ¡explora el siguiente código!
 
@@ -34,17 +34,17 @@ Para obtener más información sobre la arquitectura de Audius, consulte el [Whi
 
 | Servicio                                                                                                      | Descripción                                                                                                                                   |
 |:------------------------------------------------------------------------------------------------------------- |:--------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`Nodo de contenido`](https://github.com/AudiusProject/audius-protocol/tree/main/creator-node)              | Mantiene la disponibilidad del contenido de los usuarios en IPFS incluyendo metadatos de usuario, imágenes y contenido de audio               |
-| [`Nodo de descubrimiento`](https://github.com/AudiusProject/audius-protocol/tree/main/discovery-provider)   | Indexa y almacena el contenido de los contratos de Audius en el blockchain de Ethereum para que los clientes lo consulten a través de una API |
-| [`Servicio de identificación`](https://github.com/AudiusProject/audius-protocol/tree/main/identity-service) | Guarda cifrados de cifrado de autor, hace Twitter OAuth y transmite transacciones (paga gas) en nombre de los usuarios                        |
+| [`Nodo de contenido`](https://github.com/AudiusProject/apps/tree/main/creator-node)              | Mantiene la disponibilidad del contenido de los usuarios en IPFS incluyendo metadatos de usuario, imágenes y contenido de audio               |
+| [`Nodo de descubrimiento`](https://github.com/AudiusProject/apps/tree/main/discovery-provider)   | Indexa y almacena el contenido de los contratos de Audius en el blockchain de Ethereum para que los clientes lo consulten a través de una API |
+| [`Servicio de identificación`](https://github.com/AudiusProject/apps/tree/main/identity-service) | Guarda cifrados de cifrado de autor, hace Twitter OAuth y transmite transacciones (paga gas) en nombre de los usuarios                        |
 
 ## Contratos inteligentes de Audius & librerías
 
 | Lib                                                                                           | Descripción                                                                                                                                                                                 |
 |:--------------------------------------------------------------------------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`librerías`](https://github.com/AudiusProject/audius-protocol/tree/main/libs)              | Una interfaz fácil para los servicios distribuidos de web y audio: Servicio de identidad, Nodo de descubrimiento \(proveedor de descubrimiento\), Nodo de contenido \(nodo de creador\) |
-| [`contratos`](https://github.com/AudiusProject/audius-protocol/tree/main/contracts)         | Los contratos inteligentes que se están desarrollando para el protocolo de streaming de Audius                                                                                              |
-| [`contratos eth`](https://github.com/AudiusProject/audius-protocol/tree/main/eth-contracts) | Los contratos inteligentes de Ethereum que se están desarrollando para el protocolo de streaming de Audius                                                                                  |
+| [`librerías`](https://github.com/AudiusProject/apps/tree/main/libs)              | Una interfaz fácil para los servicios distribuidos de web y audio: Servicio de identidad, Nodo de descubrimiento \(proveedor de descubrimiento\), Nodo de contenido \(nodo de creador\) |
+| [`contratos`](https://github.com/AudiusProject/apps/tree/main/contracts)         | Los contratos inteligentes que se están desarrollando para el protocolo de streaming de Audius                                                                                              |
+| [`contratos eth`](https://github.com/AudiusProject/apps/tree/main/eth-contracts) | Los contratos inteligentes de Ethereum que se están desarrollando para el protocolo de streaming de Audius                                                                                  |
 
 ## Servicio de Proveedor de Quickstart
 

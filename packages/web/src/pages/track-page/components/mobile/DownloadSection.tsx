@@ -163,9 +163,11 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
         dispatch(toast({ content: messages.followToDownload }))
         return
       }
+      // Only include parent track in count if it's downloadable
+      const parentTrackCount = partialTrack?.access?.download ? 1 : 0
       openDownloadTrackArchiveModal({
         trackId,
-        fileCount: stemTracks.length + 1
+        fileCount: stemTracks.length + parentTrackCount
       })
     },
     [
@@ -174,7 +176,8 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
       openDownloadTrackArchiveModal,
       trackId,
       stemTracks.length,
-      dispatch
+      dispatch,
+      partialTrack?.access?.download
     ]
   )
 

@@ -1,5 +1,6 @@
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
 import { AudiusSdk, Id } from '@audius/sdk'
+import { PublicKey } from '@solana/web3.js'
 
 import { userWalletsFromSDK } from '~/adapters'
 import { ID } from '~/models/Identifiers'
@@ -11,21 +12,39 @@ import {
   getUserbankAccountInfo,
   pollForTokenBalanceChange
 } from '../audius-backend'
+import { Env } from '../env'
 
 export const MIN_TRANSFERRABLE_WEI = AUDIO('0.001').value
 
 type WalletClientConfig = {
   audiusBackendInstance: AudiusBackend
   audiusSdk: () => Promise<AudiusSdk>
+  env: Env
 }
 
 export class WalletClient {
   audiusBackendInstance: AudiusBackend
   audiusSdk: () => Promise<AudiusSdk>
+  env: Env
 
   constructor(config: WalletClientConfig) {
     this.audiusBackendInstance = config.audiusBackendInstance
     this.audiusSdk = config.audiusSdk
+    this.env = config.env
+  }
+
+  getMintAddress(mint: 'wAUDIO' | 'USDC'): PublicKey {
+    // Simple mapping for the fixed set of mint names
+    const mintAddresses: Record<'wAUDIO' | 'USDC', string> = {
+      wAUDIO: this.env.WAUDIO_MINT_ADDRESS,
+      USDC: this.env.USDC_MINT_ADDRESS
+    }
+
+    const address = mintAddresses[mint]
+    if (!address) {
+      throw new Error(`Token address not found for mint: ${mint}`)
+    }
+    return new PublicKey(address)
   }
 
   /** Get user's current ETH Audio balance. Returns null on failure. */
@@ -261,25 +280,28 @@ export class WalletClient {
     }
   }
 
-  async sendWAudioTokens({
+  async sendTokens({
     address,
     amount,
-    ethAddress
+    ethAddress,
+    mint
   }: {
     address: SolanaWalletAddress
     amount: AudioWei
     ethAddress: string
+    mint: PublicKey
   }): Promise<void> {
     if (amount < MIN_TRANSFERRABLE_WEI) {
-      throw new Error('Insufficient Audio to transfer')
+      throw new Error('Insufficient tokens to transfer')
     }
     try {
       const sdk = await this.audiusSdk()
-      const { error } = await this.audiusBackendInstance.sendWAudioTokens({
+      const { error } = await this.audiusBackendInstance.sendTokens({
         address,
         amount,
         ethAddress,
-        sdk
+        sdk,
+        mint
       })
       if (error) {
         if (error === 'Missing social proof') {
@@ -295,7 +317,7 @@ export class WalletClient {
       }
     } catch (err) {
       console.error(
-        `Error sending sol wrapped audio amount ${amount.toString()} to ${address.toString()}` +
+        `Error sending tokens with mint ${mint} amount ${amount.toString()} to ${address.toString()}` +
           `with error ${(err as Error).toString()}`
       )
       throw err

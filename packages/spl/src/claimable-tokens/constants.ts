@@ -5,7 +5,7 @@ export enum ClaimableTokensInstruction {
 
 /**
  * Custom error codes from the Claimable Tokens program
- * @see {@link https://github.com/AudiusProject/audius-protocol/blob/2a37bcff1bb1a82efdf187d1723b3457dc0dcb9b/solana-programs/claimable-tokens/program/src/error.rs solana-programs/claimable-tokens/program/src/error.rs}
+ * @see {@link https://github.com/AudiusProject/apps/blob/2a37bcff1bb1a82efdf187d1723b3457dc0dcb9b/solana-programs/claimable-tokens/program/src/error.rs solana-programs/claimable-tokens/program/src/error.rs}
  */
 export enum ClaimableTokensErrorCode {
   SignatureVerificationFailed = 0,
@@ -16,7 +16,7 @@ export enum ClaimableTokensErrorCode {
 
 /**
  * The UI friendly error messages for each error code.
- * @see {@link https://github.com/AudiusProject/audius-protocol/blob/2a37bcff1bb1a82efdf187d1723b3457dc0dcb9b/solana-programs/claimable-tokens/program/src/error.rs solana-programs/claimable-tokens/program/src/error.rs}
+ * @see {@link https://github.com/AudiusProject/apps/blob/2a37bcff1bb1a82efdf187d1723b3457dc0dcb9b/solana-programs/claimable-tokens/program/src/error.rs solana-programs/claimable-tokens/program/src/error.rs}
  */
 export const ClaimableTokensErrorMessages: Record<
   ClaimableTokensErrorCode,

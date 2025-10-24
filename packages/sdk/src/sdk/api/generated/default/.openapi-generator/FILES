@@ -8,9 +8,11 @@ apis/EventsApi.ts
 apis/ExploreApi.ts
 apis/PlaylistsApi.ts
 apis/ResolveApi.ts
+apis/RewardsApi.ts
 apis/TipsApi.ts
 apis/TracksApi.ts
 apis/UsersApi.ts
+apis/WalletApi.ts
 apis/index.ts
 index.ts
 models/Access.ts
@@ -24,11 +26,17 @@ models/BestSellingItem.ts
 models/BestSellingResponse.ts
 models/BlobInfo.ts
 models/ChallengeResponse.ts
+models/ClaimRewardsRequest.ts
+models/ClaimRewardsResponse.ts
+models/ClaimRewardsResponseDataInner.ts
 models/Coin.ts
+models/CoinArtistFees.ts
+models/CoinDynamicBondingCurve.ts
+models/CoinExtensions.ts
 models/CoinInsights.ts
-models/CoinInsightsExtensions.ts
 models/CoinInsightsResponse.ts
 models/CoinMember.ts
+models/CoinMembersCountResponse.ts
 models/CoinMembersResponse.ts
 models/CoinResponse.ts
 models/CoinsResponse.ts
@@ -43,6 +51,9 @@ models/CommentResponse.ts
 models/ConnectedWallets.ts
 models/ConnectedWalletsResponse.ts
 models/CoverPhoto.ts
+models/CreateCoinRequest.ts
+models/CreateCoinResponse.ts
+models/CreateCoinResponseData.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
 models/DecodedUserToken.ts
@@ -56,6 +67,7 @@ models/EventsResponse.ts
 models/ExtendedAccessGate.ts
 models/ExtendedPaymentSplit.ts
 models/ExtendedPurchaseGate.ts
+models/ExtendedTokenGate.ts
 models/ExtendedUsdcGate.ts
 models/Favorite.ts
 models/FavoritesResponse.ts
@@ -101,6 +113,7 @@ models/Supporting.ts
 models/TagsResponse.ts
 models/Tip.ts
 models/TipGate.ts
+models/TokenGate.ts
 models/TopListener.ts
 models/Track.ts
 models/TrackAccessInfo.ts
@@ -119,6 +132,8 @@ models/TrendingPlaylistsResponse.ts
 models/UnclaimedIdResponse.ts
 models/UndisbursedChallenge.ts
 models/UndisbursedChallenges.ts
+models/UpdateCoinRequest.ts
+models/UpdateCoinResponse.ts
 models/User.ts
 models/UserCoin.ts
 models/UserCoinAccount.ts

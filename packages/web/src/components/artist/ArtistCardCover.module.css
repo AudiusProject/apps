@@ -84,6 +84,7 @@
 }
 
 .artistHandleWrapper {
+  display: flex;
   white-space: nowrap;
   margin-right: 10px;
 }

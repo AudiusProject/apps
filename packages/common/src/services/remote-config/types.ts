@@ -12,24 +12,6 @@ export enum IntKeys {
   IMAGE_QUICK_FETCH_PERFORMANCE_BATCH_SIZE = 'IMAGE_QUICK_FETCH_PERFORMANCE_BATCH_SIZE',
 
   /**
-   * Duration (in ms) before we timeout a discovery provider that is
-   * cached in the user's local storage
-   */
-  DISCOVERY_PROVIDER_SELECTION_TIMEOUT_MS = 'DISCOVERY_PROVIDER_SELECTION_TIMEOUT_MS',
-
-  /**
-   * Number of slots at which we would consider a discovery node to be
-   * unhealthy. Unset value (null) means slot diff is ignored.
-   */
-  DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS = 'DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS',
-
-  /**
-   * Number of blocks at which we would consider a discovery node to be
-   * unhealthy. Unset value (null) means use the default block diff.
-   */
-  DISCOVERY_NODE_MAX_BLOCK_DIFF = 'DISCOVERY_NODE_MAX_BLOCK_DIFF',
-
-  /**
    * Frequency (in ms) to poll for user wallet balance on the client dashboard page
    */
   DASHBOARD_WALLET_BALANCE_POLLING_FREQ_MS = 'DASHBOARD_WALLET_BALANCE_POLLING_FREQ_MS',
@@ -60,16 +42,6 @@ export enum IntKeys {
    * Number of random (recommended) tracks to fetch and add to the autoplay queue
    */
   AUTOPLAY_LIMIT = 'AUTOPLAY_LIMIT',
-
-  /**
-   * Request timeout in ms before a selected discovery node is thought of as unhealthy
-   */
-  DISCOVERY_NODE_SELECTION_REQUEST_TIMEOUT = 'DISCOVERY_NODE_SELECTION_REQUEST_TIMEOUT',
-
-  /**
-   * Number of retries to a discovery node before it is thought of as unhealthy
-   */
-  DISCOVERY_NODE_SELECTION_REQUEST_RETRIES = 'DISCOVERY_NODE_SELECTION_REQUEST_RETRIES',
 
   /**
    * Number of services that are required to attest for a user challenge
@@ -260,13 +232,7 @@ export enum BooleanKeys {
   /**
    * Boolean to enable "Transactions" button on Audio page.
    */
-  AUDIO_TRANSACTIONS_ENABLED = 'AUDIO_TRANSACTIONS_ENABLED',
-
-  /**
-   * Whether to enable discovery_max_slot feature. This is to prevent optimizely
-   * errors, since slot_diff_plays number key can't be set to null on optimizely side
-   */
-  ENABLE_DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS = 'ENABLE_DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS'
+  AUDIO_TRANSACTIONS_ENABLED = 'AUDIO_TRANSACTIONS_ENABLED'
 }
 
 export enum DoubleKeys {
@@ -316,11 +282,6 @@ export enum StringKeys {
    * Blocks content nodes from selection
    */
   CONTENT_NODE_BLOCK_LIST = 'CONTENT_NODE_BLOCK_LIST',
-
-  /**
-   * Blocks discovery nodes from selection
-   */
-  DISCOVERY_NODE_BLOCK_LIST = 'DISCOVERY_NODE_BLOCK_LIST',
 
   /**
    * Instagram Profile API url. Must contain $USERNAME$
@@ -392,6 +353,9 @@ export enum StringKeys {
 
   /** 2-Letter ISO Country Codes of Allowed Countries for Link by Stripe */
   STRIPE_ALLOWED_COUNTRIES_2_LETTER = 'STRIPE_ALLOWED_COUNTRIES_2_LETTER',
+
+  /** 2-Letter ISO Country Codes of Denied Countries for Buy/Sell */
+  BUY_SELL_DENIED_COUNTRIES = 'BUY_SELL_DENIED_COUNTRIES',
 
   /** Text to display on related features when Solana/$AUDIO features are degraded */
   AUDIO_FEATURES_DEGRADED_TEXT = 'AUDIO_FEATURES_DEGRADED_TEXT',

@@ -28,6 +28,8 @@ export type QueryOptions<T = any> = Pick<
   | 'placeholderData'
   | 'refetchOnMount'
   | 'throwOnError'
+  | 'refetchInterval'
+  | 'refetchOnWindowFocus'
 >
 
 export type SelectableQueryOptions<TData, TResult = TData> = Omit<

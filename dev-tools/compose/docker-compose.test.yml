@@ -12,10 +12,10 @@ services:
     volumes:
       - ./nginx_ingress_test.conf:/etc/nginx/conf.d/default.conf
     extra_hosts:
-      - 'audius-protocol-creator-node-1:host-gateway'
-      - 'audius-protocol-creator-node-2:host-gateway'
-      - 'audius-protocol-creator-node-3:host-gateway'
-      - 'audius-protocol-discovery-provider-1:host-gateway'
+      - 'audius-creator-node-1:host-gateway'
+      - 'audius-creator-node-2:host-gateway'
+      - 'audius-creator-node-3:host-gateway'
+      - 'audius-discovery-provider-1:host-gateway'
     extends:
       file: docker-compose.dev-tools.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: ingress

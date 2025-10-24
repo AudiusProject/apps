@@ -14,7 +14,7 @@ const messages = {
 
 export type LockedStatusBadgeProps = {
   locked: boolean
-  variant?: 'premium' | 'gated'
+  variant?: 'premium' | 'gated' | 'tokenGated'
   text?: string
   /** Whether the badge is colored when locked */
   coloredWhenLocked?: boolean
@@ -36,11 +36,13 @@ export const LockedStatusBadge = (props: LockedStatusBadgeProps) => {
 
   const { color } = useTheme()
 
-  const backgroundColor =
+  const background =
     !locked || coloredWhenLocked
       ? variant === 'gated'
         ? color.special.blue
-        : color.special.lightGreen
+        : variant === 'tokenGated'
+          ? color.special.coinGradient
+          : color.special.lightGreen
       : color.neutral.n400
 
   return (
@@ -52,7 +54,7 @@ export const LockedStatusBadge = (props: LockedStatusBadgeProps) => {
       ph='s'
       h={16}
       borderRadius='l'
-      css={{ backgroundColor }}
+      css={{ background }}
     >
       <LockComponent
         color='white'

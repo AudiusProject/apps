@@ -8,7 +8,7 @@ export type Screen = 'input' | 'confirm' | 'success'
 
 export type TokenType = 'AUDIO' | 'USDC' | 'BONK'
 
-export type TokenInfo = {
+export type CoinInfo = {
   symbol: string // e.g., 'AUDIO', 'USDC', 'WETH'
   name: string // e.g., 'Audius', 'USD Coin', 'Wrapped Ether'
   icon?: ComponentType<any> // Component for the token's icon (optional to avoid circular deps)
@@ -19,9 +19,9 @@ export type TokenInfo = {
   isStablecoin?: boolean // Flag for UI formatting ($ prefix, etc.)
 }
 
-export type TokenPair = {
-  baseToken: TokenInfo // The token being priced (e.g., AUDIO)
-  quoteToken: TokenInfo // The token used for pricing (e.g., USDC)
+export type CoinPair = {
+  baseToken: CoinInfo // The token being priced (e.g., AUDIO)
+  quoteToken: CoinInfo // The token used for pricing (e.g., USDC)
   exchangeRate: number | null // Rate of baseToken in terms of quoteToken
 }
 
@@ -29,7 +29,7 @@ export type TokenPair = {
 // For now, keeping it as per original types.ts content.
 export type TokenAmountSectionProps = {
   title: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
   isInput: boolean
   amount: number | string
   onAmountChange?: (value: string) => void
@@ -44,11 +44,12 @@ export type TokenAmountSectionProps = {
   isTokenPriceLoading?: boolean
   tokenPriceDecimalPlaces?: number
   tooltipPlacement?: TooltipPlacement
+  onChangeSwapDirection?: () => void
 }
 
 export type SuccessDisplayData = {
-  payTokenInfo: TokenInfo
-  receiveTokenInfo: TokenInfo
+  payTokenInfo: CoinInfo
+  receiveTokenInfo: CoinInfo
   payAmount: number
   receiveAmount: number
   pricePerBaseToken: number
@@ -57,8 +58,8 @@ export type SuccessDisplayData = {
 }
 
 export type ConfirmationScreenData = {
-  payTokenInfo: TokenInfo
-  receiveTokenInfo: TokenInfo
+  payTokenInfo: CoinInfo
+  receiveTokenInfo: CoinInfo
   payAmount: number
   receiveAmount: number
   pricePerBaseToken: number
@@ -78,6 +79,7 @@ export type TransactionData = {
   isValid: boolean
   error?: string | null
   exchangeRate?: number | null
+  isExchangeRateLoading?: boolean
 } | null
 
 /**
@@ -86,7 +88,7 @@ export type TransactionData = {
  * For 'sell': user pays with base token (e.g., AUDIO) to get quote token (e.g., USDC)
  * For 'convert': user pays with base token (e.g., AUDIO) to get quote token (e.g., BONK)
  */
-export const getSwapTokens = (activeTab: BuySellTab, tokenPair: TokenPair) => {
+export const getSwapTokens = (activeTab: BuySellTab, tokenPair: CoinPair) => {
   return {
     inputToken:
       activeTab === 'buy'

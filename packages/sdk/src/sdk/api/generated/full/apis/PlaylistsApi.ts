@@ -35,6 +35,7 @@ import {
 export interface GetBulkPlaylistsRequest {
     userId?: string;
     id?: Array<string>;
+    upc?: Array<string>;
 }
 
 export interface GetPlaylistRequest {
@@ -101,6 +102,10 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         if (params.id) {
             queryParameters['id'] = params.id;
+        }
+
+        if (params.upc) {
+            queryParameters['upc'] = params.upc;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

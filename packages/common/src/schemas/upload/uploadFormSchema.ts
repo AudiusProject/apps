@@ -1,11 +1,4 @@
-import {
-  Genre,
-  Mood,
-  EthCollectibleGatedConditions,
-  SolCollectibleGatedConditions,
-  NativeFile,
-  MAX_DESCRIPTION_LENGTH
-} from '@audius/sdk'
+import { Genre, Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
 import { z } from 'zod'
 
 import { imageBlank } from '~/assets'
@@ -27,15 +20,6 @@ const messages = {
 }
 
 /** Same as SDK but snake-cased */
-const CollectibleGatedConditions = z
-  .object({
-    nft_collection: z.optional(
-      z.union([EthCollectibleGatedConditions, SolCollectibleGatedConditions])
-    )
-  })
-  .strict()
-
-/** Same as SDK but snake-cased */
 const FollowGatedConditionsSchema = z
   .object({
     follow_user_id: z.number()
@@ -46,6 +30,15 @@ const FollowGatedConditionsSchema = z
 const TipGatedConditionsSchema = z
   .object({
     tip_user_id: z.number()
+  })
+  .strict()
+
+const TokenGatedConditionsSchema = z
+  .object({
+    token_gate: z.object({
+      token_mint: z.string(),
+      token_amount: z.number().positive().min(1)
+    })
   })
   .strict()
 
@@ -100,10 +93,10 @@ const premiumMetadataSchema = z.object({
   stream_conditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditionsSchema,
         TipGatedConditionsSchema,
-        USDCPurchaseConditionsSchema
+        USDCPurchaseConditionsSchema,
+        TokenGatedConditionsSchema
       ])
     )
     .nullable(),
@@ -111,10 +104,10 @@ const premiumMetadataSchema = z.object({
   download_conditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditionsSchema,
         TipGatedConditionsSchema,
-        USDCPurchaseConditionsSchema
+        USDCPurchaseConditionsSchema,
+        TokenGatedConditionsSchema
       ])
     )
     .nullable()

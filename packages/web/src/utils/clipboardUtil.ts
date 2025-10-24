@@ -30,7 +30,11 @@ export const copyToClipboard = (str: string) => {
     el.select()
   }
 
-  document.execCommand('copy')
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(str)
+  } else {
+    document.execCommand('copy')
+  }
   document.body.removeChild(el)
 }
 

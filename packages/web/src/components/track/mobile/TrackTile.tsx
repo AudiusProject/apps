@@ -217,7 +217,7 @@ export const TrackTile = ({
     return (
       <Menu menu={menu}>
         {(ref, triggerPopup) => (
-          <Box mb={-8}>
+          <Box>
             <IconButton
               ref={ref}
               icon={IconKebabHorizontal}

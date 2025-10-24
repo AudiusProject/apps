@@ -1,15 +1,16 @@
-import { TokenInfo } from '@audius/common/store'
+import { CoinInfo } from '@audius/common/store'
 import { Divider, Flex, Text } from '@audius/harmony'
 
 import { TokenIcon } from './TokenIcon'
 
 const messages = {
-  symbol: (symbol: string) => `${symbol}`
+  symbol: (symbol: string) => `$${symbol}`
 }
 
 type CryptoBalanceSectionProps = {
   title?: string
-  tokenInfo: TokenInfo
+  tokenInfo: CoinInfo
+  name?: string
   amount: string
   priceLabel?: string
 }
@@ -17,6 +18,7 @@ type CryptoBalanceSectionProps = {
 export const CryptoBalanceSection = ({
   title,
   tokenInfo,
+  name,
   amount,
   priceLabel
 }: CryptoBalanceSectionProps) => {
@@ -24,27 +26,35 @@ export const CryptoBalanceSection = ({
     <Flex direction='column' gap='l'>
       {title ? (
         <Flex alignItems='center' gap='m'>
-          <Text variant='heading' size='s' color='subdued'>
+          <Text variant='title' size='l'>
             {title}
           </Text>
           <Divider css={{ flexGrow: 1 }} />
         </Flex>
       ) : null}
-      <Flex alignItems='center' gap='s' data-testid='token-icon'>
-        <TokenIcon tokenInfo={tokenInfo} w='unit16' h='unit16' hex />
-        <Flex direction='column'>
-          <Text variant='heading' size='l'>
-            {amount}
-          </Text>
-          <Flex gap='xs'>
-            <Text variant='heading' size='s' color='subdued'>
-              {messages.symbol(tokenInfo.symbol)}
+      <Flex alignItems='center' gap='s'>
+        <TokenIcon
+          logoURI={tokenInfo.logoURI}
+          icon={tokenInfo.icon}
+          w='4xl'
+          h='4xl'
+          hex
+        />
+        <Flex direction='column' gap='xs'>
+          {name ? (
+            <Text variant='heading' size='s'>
+              {name}
             </Text>
-            {priceLabel ? (
-              <Text variant='heading' size='s' color='subdued'>
-                {priceLabel}
+          ) : null}
+          <Flex direction='column'>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='title' size='l'>
+                {amount}
               </Text>
-            ) : null}
+              <Text variant='title' size='l' color='subdued'>
+                {messages.symbol(tokenInfo.symbol)}
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

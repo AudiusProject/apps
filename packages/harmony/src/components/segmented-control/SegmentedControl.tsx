@@ -32,7 +32,7 @@ export const SegmentedControl = <T extends string>(
     forceRefreshAfterMs
   } = props
   const optionRefs = useRef(options.map((_) => createRef<HTMLLabelElement>()))
-  const [localSelected, setLocalSelected] = useState(options[0].key)
+  const [localSelected, setLocalSelected] = useState(options[0]?.key ?? '')
   const [maxOptionWidth, setMaxOptionWidth] = useState(0)
 
   const selectedOption = selected || localSelected
@@ -47,6 +47,21 @@ export const SegmentedControl = <T extends string>(
     to: { left: '0px', width: '0px' }
   }))
 
+  // Update refs when options change
+  useEffect(() => {
+    optionRefs.current = options.map((_) => createRef<HTMLLabelElement>())
+  }, [options])
+
+  // Update localSelected if current selection is no longer valid
+  useEffect(() => {
+    if (
+      options.length > 0 &&
+      !options.some((option) => option.key === localSelected)
+    ) {
+      setLocalSelected(options[0].key)
+    }
+  }, [options, localSelected])
+
   useEffect(() => {
     setMaxOptionWidth(
       optionRefs.current.reduce((currentMax, ref) => {
@@ -54,7 +69,7 @@ export const SegmentedControl = <T extends string>(
         return Math.max(rect?.width ?? 0, currentMax)
       }, 0)
     )
-  }, [])
+  }, [options])
 
   // Watch for resizes and repositions so that we move and resize the slider appropriately
   const [selectedRef, bounds] = useMeasure({
@@ -130,6 +145,12 @@ export const SegmentedControl = <T extends string>(
                   : undefined
               }
             >
+              {option.leftIcon && (
+                <option.leftIcon
+                  size='s'
+                  color={isSelected ? 'default' : 'subdued'}
+                />
+              )}
               {option.icon}
               <input
                 type='radio'

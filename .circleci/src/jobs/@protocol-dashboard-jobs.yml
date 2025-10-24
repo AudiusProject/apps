@@ -1,5 +1,5 @@
 protocol-dashboard-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
 
@@ -14,7 +14,7 @@ protocol-dashboard-init:
     # Download and cache dependencies
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     # Lint
     - run:
@@ -34,7 +34,7 @@ protocol-dashboard-init:
           - packages/sdk/node_modules
 
 protocol-dashboard-build-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/node:18.17
@@ -54,7 +54,7 @@ protocol-dashboard-build-staging:
           - packages/protocol-dashboard/*
 
 protocol-dashboard-deploy-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -67,7 +67,7 @@ protocol-dashboard-deploy-staging:
           npm run deploy:stage
 
 protocol-dashboard-build-prod:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/node:18.17
@@ -87,7 +87,7 @@ protocol-dashboard-build-prod:
           - packages/protocol-dashboard/*
 
 protocol-dashboard-deploy-prod:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:

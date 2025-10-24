@@ -10,10 +10,10 @@ import {
   vitest
 } from 'vitest'
 
-import type { HealthCheckResponseData } from '../DiscoveryNodeSelector/healthCheckTypes'
 import { Logger } from '../Logger'
 
 import { StorageNodeSelector } from './StorageNodeSelector'
+import { HealthCheckResponseData } from './types'
 
 const storageNodeA = {
   endpoint: 'https://node-a.audius.co',
@@ -31,13 +31,7 @@ const logger = new Logger()
 const mswHandlers = [
   rest.get(`${discoveryNode}/health_check`, (_req, res, ctx) => {
     const data: HealthCheckResponseData = {
-      service: 'discovery-node',
-      version: '1.2.3',
-      block_difference: 0,
       network: {
-        discovery_nodes_with_owner: [
-          { endpoint: discoveryNode, delegateOwnerWallet: '', ownerWallet: '' }
-        ],
         content_nodes: [storageNodeA, storageNodeB]
       }
     }

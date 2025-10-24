@@ -16,6 +16,8 @@ Audius is a decentralized, community-owned music-sharing protocol. This is a mon
 
 ### Essential Commands
 
+Only run these commands in the directories related to the changes being made. Do not run in root unless needed.
+
 ```bash
 # Install dependencies and setup development environment
 npm install

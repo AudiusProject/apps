@@ -4,12 +4,12 @@ A Discovery Node is the metadata and indexing layer for the Audius Protocol.
 
 ## Development
 
-See the dev-tools [README](https://github.com/AudiusProject/audius-protocol/tree/main/dev-tools).
+See the dev-tools [README](https://github.com/AudiusProject/apps/tree/main/dev-tools).
 
 ```bash
 audius-compose up
 
-curl http://audius-protocol-discovery-provider-1/health_check
+curl http://audius-discovery-provider-1/health_check
 ```
 
 ## Testing
@@ -31,11 +31,11 @@ audius-compose test discovery-provider src/api/v1/api_unit_test.py
 
 # Run the testing container to attach your own tester
 audius-compose test up discovery-provider
-docker exec -it audius-protocol-test-test-discovery-provider-1 pytest
+docker exec -it audius-test-test-discovery-provider-1 pytest
 
 # To run a single test in the testing container
 audius-compose test up discovery-provider
-docker exec -it audius-protocol-test-test-discovery-provider-1 /bin/sh
+docker exec -it audius-test-test-discovery-provider-1 /bin/sh
 pytest integration_tests/tasks/test_index_user_bank.py::test_process_user_bank_tx_details_valid_purchase
 
 # To use the vscode tester, open the command palette

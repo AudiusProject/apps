@@ -1,10 +1,10 @@
 import { useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 
-import { MusicBadge } from '@audius/harmony-native'
+import { Flex, Text } from '@audius/harmony-native'
 
 const messages = {
-  followsYou: 'Follows You'
+  followsYou: 'follows you'
 }
 
 type FollowsYouBadgeProps = {
@@ -18,5 +18,18 @@ export const FollowsYouBadge = (props: FollowsYouBadgeProps) => {
   })
   if (!doesFollowCurrentUser) return null
 
-  return <MusicBadge size='s'>{messages.followsYou}</MusicBadge>
+  return (
+    <Flex
+      alignItems='center'
+      justifyContent='center'
+      borderRadius='s'
+      ph='s'
+      pv='xs'
+      border='strong'
+    >
+      <Text variant='label' size='xs' strength='strong' color='subdued'>
+        {messages.followsYou}
+      </Text>
+    </Flex>
+  )
 }

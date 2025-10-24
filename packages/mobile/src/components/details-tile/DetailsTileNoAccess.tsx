@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react'
 import React, { useCallback } from 'react'
 
+import type { Coin } from '@audius/common/adapters'
 import { useFeatureFlag, useStreamConditionsEntity } from '@audius/common/hooks'
 import {
   FollowSource,
   ModalSource,
-  Chain,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
-  isContentUSDCPurchaseGated
+  isContentUSDCPurchaseGated,
+  isContentTokenGated
 } from '@audius/common/models'
 import type { ID, AccessConditions, User } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
@@ -22,26 +22,23 @@ import {
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import type { ViewStyle } from 'react-native'
-import { Image, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
-  IconExternalLink,
   IconUserFollow,
   IconTipping,
   Flex,
-  Button
+  Button,
+  useTheme
 } from '@audius/harmony-native'
-import LogoEth from 'app/assets/images/logoEth.svg'
-import LogoSol from 'app/assets/images/logoSol.svg'
-import { LockedStatusBadge, useLink } from 'app/components/core'
+import { LockedStatusBadge } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { UserBadges } from 'app/components/user-badges'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { make, track } from 'app/services/analytics'
 import { flexRowCentered, makeStyles } from 'app/styles'
-import { spacing } from 'app/styles/spacing'
 import { EventNames } from 'app/types/analytics'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
@@ -55,10 +52,6 @@ const messages = {
   followArtist: 'Follow Artist',
   sendTip: 'Send Tip',
   buy: (price: string) => `Buy ${price}`,
-  lockedCollectibleGated:
-    'To unlock this track, you must link a wallet containing a collectible from:',
-  unlockingCollectibleGatedPrefix: 'A Collectible from ',
-  unlockingCollectibleGatedSuffix: ' was found in a linked wallet.',
   lockedFollowGatedPrefix: 'Follow ',
   unlockingFollowGatedPrefix: 'Thank you for following ',
   unlockingFollowGatedSuffix: '!',
@@ -66,6 +59,9 @@ const messages = {
   lockedTipGatedSuffix: ' a tip.',
   unlockingTipGatedPrefix: 'Thank you for supporting ',
   unlockingTipGatedSuffix: ' by sending them a tip!',
+  lockedTokenGatedPrefix: 'You must hold at least ',
+  lockedTokenGatedSuffix: ' in a connected wallet.',
+  buyArtistCoin: 'Buy Artist Coin',
   lockedUSDCPurchase: 'Unlock access with a one-time purchase!'
 }
 
@@ -178,30 +174,29 @@ type DetailsTileNoAccessProps = {
   streamConditions: AccessConditions
   contentType: PurchaseableContentType
   trackId: ID
+  token?: Coin | undefined
   style?: ViewStyle
 }
 
 export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
-  const { trackId, contentType, streamConditions, style } = props
+  const { trackId, contentType, streamConditions, style, token } = props
   const styles = useStyles()
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const { isOpen: isModalOpen, onClose } = useDrawer('LockedContent')
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
+  const { color } = useTheme()
   const source = isModalOpen ? 'howToUnlockModal' : 'howToUnlockTrackPage'
   const followSource = isModalOpen
     ? FollowSource.HOW_TO_UNLOCK_MODAL
     : FollowSource.HOW_TO_UNLOCK_TRACK_PAGE
   const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
   const gatedTrackStatus = gatedTrackStatusMap[trackId] ?? null
-  const { nftCollection, collectionLink, followee, tippedUser } =
-    useStreamConditionsEntity(streamConditions)
+  const { followee, tippedUser } = useStreamConditionsEntity(streamConditions)
   const { isEnabled: isUsdcPurchasesEnabled } = useFeatureFlag(
     FeatureFlags.USDC_PURCHASES
   )
-
-  const { onPress: handlePressCollection } = useLink(collectionLink)
 
   const handleFollowArtist = useCallback(() => {
     if (followee) {
@@ -236,6 +231,22 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     )
   }, [trackId, contentType, openPremiumContentPurchaseModal, onClose])
 
+  const handleTokenPress = useCallback(() => {
+    if (token?.ticker) {
+      navigation.navigate('CoinDetailsScreen', { ticker: token.ticker })
+      onClose()
+    }
+  }, [navigation, token?.ticker, onClose])
+
+  const handleBuyTokenPress = useCallback(() => {
+    if (token?.ticker) {
+      navigation.navigate('BuySell', {
+        initialTab: 'buy',
+        coinTicker: token.ticker
+      })
+    }
+  }, [navigation, token?.ticker])
+
   const handlePressArtistName = useCallback(
     (handle: string) => () => {
       navigation.push('Profile', { handle })
@@ -264,50 +275,6 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
   )
 
   const renderLockedDescription = useCallback(() => {
-    if (isContentCollectibleGated(streamConditions)) {
-      if (!nftCollection) return null
-      return (
-        <>
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.description}>
-              {messages.lockedCollectibleGated}
-            </Text>
-            <View style={styles.collectionContainer}>
-              {nftCollection.imageUrl && (
-                <View style={styles.collectionImages}>
-                  <Image
-                    source={{ uri: nftCollection.imageUrl }}
-                    style={styles.collectionImage}
-                  />
-                  <View style={styles.collectionChainImageContainer}>
-                    {nftCollection.chain === Chain.Eth ? (
-                      <LogoEth
-                        style={styles.collectionChainImage}
-                        height={spacing(4)}
-                      />
-                    ) : (
-                      <LogoSol
-                        style={styles.collectionChainImage}
-                        height={spacing(4)}
-                      />
-                    )}
-                  </View>
-                </View>
-              )}
-              <Text style={styles.description}>{nftCollection.name}</Text>
-            </View>
-          </View>
-          <Button
-            color='blue'
-            iconRight={IconExternalLink}
-            onPress={handlePressCollection}
-            fullWidth
-          >
-            {messages.goToCollection}
-          </Button>
-        </>
-      )
-    }
     if (isContentFollowGated(streamConditions)) {
       if (!followee) return null
       return (
@@ -342,6 +309,36 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
         </>
       )
     }
+    if (isContentTokenGated(streamConditions)) {
+      return (
+        <Flex column gap='xl'>
+          <Flex column gap='s'>
+            <View style={styles.descriptionContainer}>
+              <Text>
+                <Text style={styles.description}>
+                  {messages.lockedTokenGatedPrefix}
+                </Text>
+                <Text
+                  style={[styles.description, styles.name]}
+                  onPress={handleTokenPress}
+                >
+                  1 ${token?.ticker}
+                </Text>
+                <Text style={styles.description}>
+                  {messages.lockedTokenGatedSuffix}
+                </Text>
+              </Text>
+            </View>
+          </Flex>
+          <Button
+            onPress={handleBuyTokenPress}
+            gradient={color.special.coinGradient}
+          >
+            {messages.buyArtistCoin}
+          </Button>
+        </Flex>
+      )
+    }
     if (isContentUSDCPurchaseGated(streamConditions)) {
       return (
         <Flex gap='s'>
@@ -365,20 +362,18 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     return null
   }, [
     streamConditions,
-    nftCollection,
     styles.descriptionContainer,
     styles.description,
-    styles.collectionContainer,
-    styles.collectionImages,
-    styles.collectionImage,
-    styles.collectionChainImageContainer,
-    styles.collectionChainImage,
-    handlePressCollection,
+    styles.name,
     followee,
     renderLockedSpecialAccessDescription,
     handleFollowArtist,
     tippedUser,
     handleSendTip,
+    handleTokenPress,
+    token?.ticker,
+    handleBuyTokenPress,
+    color.special.coinGradient,
     handlePurchasePress
   ])
 
@@ -405,26 +400,6 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
   )
 
   const renderUnlockingDescription = useCallback(() => {
-    if (nftCollection) {
-      return (
-        <View style={styles.descriptionContainer}>
-          <Text>
-            <Text style={styles.description}>
-              {messages.unlockingCollectibleGatedPrefix}
-            </Text>
-            <Text
-              onPress={handlePressCollection}
-              style={[styles.description, styles.name]}
-            >
-              {nftCollection.name}
-            </Text>
-            <Text style={styles.description}>
-              {messages.unlockingCollectibleGatedSuffix}
-            </Text>
-          </Text>
-        </View>
-      )
-    }
     if (followee) {
       return renderUnlockingSpecialAccessDescription({
         entity: followee,
@@ -444,14 +419,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
       'No entity for stream conditions... should not have reached here.'
     )
     return null
-  }, [
-    nftCollection,
-    followee,
-    tippedUser,
-    handlePressCollection,
-    renderUnlockingSpecialAccessDescription,
-    styles
-  ])
+  }, [followee, tippedUser, renderUnlockingSpecialAccessDescription])
 
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
 

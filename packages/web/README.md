@@ -15,7 +15,7 @@
 <br/>
 <br/>
 
-[![CircleCI](https://circleci.com/gh/AudiusProject/audius-protocol.svg?style=svg)](https://circleci.com/gh/AudiusProject/audius-protocol)
+[![CircleCI](https://circleci.com/gh/AudiusProject/apps.svg?style=svg)](https://circleci.com/gh/AudiusProject/apps)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -23,7 +23,7 @@
 
 There are 3 environments you can develop against
 
-- dev (local net, see the [Audius Protocol](https://github.com/AudiusProject/audius-protocol))
+- dev (local net, see the [Audius Protocol](https://github.com/AudiusProject/apps))
 - stage (test net)
 - prod (main net)
 

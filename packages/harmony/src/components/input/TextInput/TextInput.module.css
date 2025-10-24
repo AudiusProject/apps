@@ -31,6 +31,16 @@
   opacity: 0.6;
 }
 
+/* extra small input size */
+.contentContainer.extra-small,
+.contentContainer.extraSmall {
+  padding: 10px var(--harmony-spacing-m);
+  /* gap between icons & content */
+  gap: var(--harmony-spacing-s);
+  font-size: var(--harmony-font-s);
+  height: 32px;
+}
+
 /* small input size */
 .contentContainer.small {
   padding: 0 var(--harmony-spacing-m);
@@ -112,6 +122,11 @@
 }
 
 /* Change font size of the input based on size */
+.input.extra-small,
+.input.extraSmall {
+  font-size: var(--harmony-font-s);
+}
+
 .input.small {
   /* overflowing the height to improve password-manager icon size */
   height: 34px;

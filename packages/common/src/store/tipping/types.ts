@@ -27,7 +27,7 @@ export type TippingState = {
      */
     onSuccessActions?: Action[]
     /**
-     * Actions to fire when the tip is confirmed to be indexed by discovery
+     * Actions to fire when the tip is confirmed to be indexed by API
      */
     onSuccessConfirmedActions?: Action[]
   }

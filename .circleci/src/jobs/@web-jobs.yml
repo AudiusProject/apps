@@ -1,5 +1,5 @@
 web-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -12,7 +12,7 @@ web-init:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     - run:
         name: lint & typecheck
@@ -38,7 +38,7 @@ web-init:
           - packages/sdk/dist
 
 web-build-demo:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -64,7 +64,7 @@ web-build-demo:
           - packages/web/build-demo
 
 web-build-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -75,7 +75,7 @@ web-build-staging:
         build-name: build-staging
 
 web-build-ssr-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -91,7 +91,7 @@ web-build-ssr-staging:
           - node_modules/@brillout/vite-plugin-import-build/dist
 
 web-check-ssr-staging-bundlesize:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -100,7 +100,7 @@ web-check-ssr-staging-bundlesize:
         build-type: stage
 
 web-test:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -117,7 +117,7 @@ web-test:
         when: always
 
 web-build-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -128,7 +128,7 @@ web-build-production:
         build-name: build-production
 
 web-build-ssr-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -144,7 +144,7 @@ web-build-ssr-production:
           - node_modules/@brillout/vite-plugin-import-build/dist
 
 web-check-ssr-production-bundlesize:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -153,7 +153,7 @@ web-check-ssr-production-bundlesize:
         build-type: prod
 
 web-deploy-demo:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.7.12-node
   steps:
@@ -168,7 +168,7 @@ web-deploy-demo:
         comment: Preview this change https://demo.audius.co/${CIRCLE_BRANCH}
 
 web-deploy-staging-s3:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.7.12-node
   steps:
@@ -187,7 +187,7 @@ web-deploy-staging-s3:
           aws s3 cp packages/web/build-staging.tar.gz s3://staging.audius.co/build-staging.tar.gz --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
 
 web-deploy-staging-cloudflare:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -198,7 +198,7 @@ web-deploy-staging-cloudflare:
     - web-deploy-sourcemaps-s3
 
 web-deploy-release-candidate:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -209,7 +209,7 @@ web-deploy-release-candidate:
     - web-deploy-sourcemaps-s3
 
 web-deploy-staging-release-candidate:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -220,7 +220,7 @@ web-deploy-staging-release-candidate:
     - web-deploy-sourcemaps-s3
 
 web-deploy-production-s3:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.7.12-node
   steps:
@@ -246,7 +246,7 @@ web-deploy-production-s3:
         command: aws cloudfront create-invalidation --distribution-id E1ZJ9Z971FJQJ8 --paths "/*"
 
 web-deploy-production-cloudflare:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -257,7 +257,7 @@ web-deploy-production-cloudflare:
     # - web-deploy-sourcemaps-s3
 
 web-deploy-sentry-sourcemaps:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -281,7 +281,7 @@ web-deploy-sentry-sourcemaps:
           ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client finalize ${CIRCLE_SHA1}
 
 web-dist-mac-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so dmg can be created and signed.
   resource_class: macos.m1.large.gen1
   macos:
@@ -301,7 +301,7 @@ web-dist-mac-staging:
         os: 'mac'
 
 web-dist-win-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: electronuserland/builder:18-wine
   steps:
@@ -311,7 +311,7 @@ web-dist-win-staging:
         os: 'win'
 
 web-dist-linux-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: electronuserland/builder
   steps:
@@ -321,7 +321,7 @@ web-dist-linux-staging:
         os: 'linux'
 
 web-dist-mac-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so dmg can be created and signed.
   resource_class: macos.m1.large.gen1
   macos:
@@ -341,7 +341,7 @@ web-dist-mac-production:
         os: 'mac'
 
 web-dist-win-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: electronuserland/builder:18-wine
   steps:
@@ -351,7 +351,7 @@ web-dist-win-production:
         os: 'win'
 
 web-dist-linux-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: electronuserland/builder
   steps:

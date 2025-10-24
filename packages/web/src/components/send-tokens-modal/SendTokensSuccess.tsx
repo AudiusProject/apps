@@ -1,10 +1,10 @@
 import {
   useArtistCoin,
-  useTokenBalance,
+  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { route } from '@audius/common/utils'
-import { FixedDecimal } from '@audius/fixed-decimal'
+import { makeSolanaTransactionLink } from '@audius/common/utils'
+import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
   Text,
@@ -17,12 +17,13 @@ import {
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
+import { env } from 'services/env'
 
 interface SendTokensSuccessProps {
   mint: string
   amount: bigint
   destinationAddress: string
-  onDone: () => void
+  signature: string
   onClose: () => void
 }
 
@@ -38,17 +39,21 @@ const SendTokensSuccess = ({
   mint,
   amount,
   destinationAddress,
-  onDone,
+  signature,
   onClose
 }: SendTokensSuccessProps) => {
   const { isMobile } = useMedia()
-  // Get token data and balance using the same hooks as ReceiveTokensModal
-  const { data: coin } = useArtistCoin({ mint })
-  const { data: tokenBalance } = useTokenBalance({ mint })
+  const { data: coin } = useArtistCoin(mint)
+  const { data: tokenBalance } = useCoinBalance({
+    mint,
+    includeExternalWallets: false,
+    includeStaked: false
+  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
   const currentBalance = tokenBalance?.balance
     ? tokenBalance.balance.value
     : BigInt(0)
+  const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -61,6 +66,12 @@ const SendTokensSuccess = ({
   }
 
   const formatBalance = (balance: bigint) => {
+    if (isAudio) {
+      return AUDIO(balance).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    }
     return new FixedDecimal(balance, tokenInfo?.decimals).toLocaleString(
       'en-US',
       {
@@ -86,6 +97,7 @@ const SendTokensSuccess = ({
       {/* Token Balance Section */}
       <CryptoBalanceSection
         tokenInfo={tokenInfo}
+        name={tokenInfo.name}
         amount={formatBalance(currentBalance)}
       />
 
@@ -101,7 +113,7 @@ const SendTokensSuccess = ({
           {messages.sent}
         </Text>
         <Text variant='heading' size='s' color='default'>
-          -{formatAmount(amount)} {tokenInfo.symbol}
+          -{formatAmount(amount)} ${tokenInfo.symbol}
         </Text>
       </Flex>
 
@@ -124,10 +136,7 @@ const SendTokensSuccess = ({
           variant='subdued'
           css={{ alignSelf: 'flex-start' }}
           onClick={() => {
-            window.open(
-              route.solanaExplorerAddress(destinationAddress),
-              '_blank'
-            )
+            window.open(makeSolanaTransactionLink(signature), '_blank')
           }}
           iconRight={IconExternalLink}
         >
@@ -135,7 +144,6 @@ const SendTokensSuccess = ({
         </PlainButton>
       </Flex>
 
-      {/* Success Message */}
       <Flex gap='s' alignItems='center'>
         <CompletionCheck value='complete' />
         <Text variant='heading' size='s' color='default'>
@@ -143,8 +151,7 @@ const SendTokensSuccess = ({
         </Text>
       </Flex>
 
-      {/* Action Button */}
-      <Button variant='primary' onClick={onDone} fullWidth>
+      <Button variant='primary' onClick={onClose} fullWidth>
         {messages.done}
       </Button>
     </Flex>

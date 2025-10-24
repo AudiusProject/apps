@@ -9,7 +9,7 @@ export const CoinLeaderboardUserList = () => {
   const mint = useSelector(coinLeaderboardUserListSelectors.getMint)
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, isPending } =
-    useArtistCoinMembers({ mint: mint || '' })
+    useArtistCoinMembers({ mint: mint ?? '' })
 
   if (!mint) return null
 

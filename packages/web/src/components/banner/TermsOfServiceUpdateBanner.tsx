@@ -11,10 +11,10 @@ import { CallToActionBanner } from './CallToActionBanner'
 const { TERMS_OF_SERVICE } = route
 
 const messages = {
-  text: 'We’ve updated our Terms of Use. By continuing to use Audius, you agree to our updated Terms of Use'
+  text: 'We’ve updated our Terms of Service. By continuing to use Audius, you agree to our updated Terms of Service'
 }
 
-const TOS_BANNER_LOCAL_STORAGE_KEY = 'dismissTermsOfServiceBanner6.24.25'
+const TOS_BANNER_LOCAL_STORAGE_KEY = 'dismissTermsOfServiceBanner10.5.25'
 
 /**
  * Displays a CTA Banner announcing ToS Updates

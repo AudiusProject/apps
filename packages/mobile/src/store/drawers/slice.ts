@@ -1,4 +1,4 @@
-import type { ID } from '@audius/common/models'
+import type { Chain, ID } from '@audius/common/models'
 import type { Nullable } from '@audius/common/utils'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
@@ -34,6 +34,8 @@ export type Drawer =
   | 'Comment'
   | 'EditTrackFormOverflowMenu'
   | 'PickWinners'
+  | 'CoinInsightsOverflowMenu'
+  | 'WalletRowOverflowMenu'
 
 export type DrawerData = {
   EnablePushNotifications: undefined
@@ -77,6 +79,12 @@ export type DrawerData = {
   Comment: { userId: ID; entityId: ID; isEntityOwner: boolean; artistId: ID }
   EditTrackFormOverflowMenu: undefined
   PickWinners: undefined
+  CoinInsightsOverflowMenu: { mint: string }
+  WalletRowOverflowMenu: {
+    address: string
+    chain: Chain
+    setIsRemovingWallet: (isRemovingWallet: boolean) => void
+  }
 }
 
 export type DrawersState = { [drawer in Drawer]: boolean | 'closing' } & {
@@ -112,6 +120,8 @@ const initialState: DrawersState = {
   Comment: false,
   EditTrackFormOverflowMenu: false,
   PickWinners: false,
+  CoinInsightsOverflowMenu: false,
+  WalletRowOverflowMenu: false,
   data: {}
 }
 

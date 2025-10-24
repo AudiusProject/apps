@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest'
 
-import { formatCount, formatBytes } from './formatUtil'
+import { formatCount } from './decimal'
+import { formatBytes } from './formatUtil'
 
 describe('formatUtil', function () {
   it('can format count', function () {
+    expect(formatCount(0, 0)).toBe('0')
+    expect(formatCount(1.23, 1)).toBe('1.2')
+    expect(formatCount(1.23, 2)).toBe('1.23')
     expect(formatCount(0)).toBe('0')
     expect(formatCount(100)).toBe('100')
     expect(formatCount(1001)).toBe('1K')

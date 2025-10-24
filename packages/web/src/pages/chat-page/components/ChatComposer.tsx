@@ -2,17 +2,19 @@ import { ComponentPropsWithoutRef, useCallback, useState } from 'react'
 
 import { LinkEntity } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
-import { chatActions } from '@audius/common/store'
+import { chatActions, chatSelectors } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
 import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
+import { useSelector } from 'common/hooks/useSelector'
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 
 import { ComposerCollectionInfo, ComposerTrackInfo } from './ComposePreviewInfo'
 
 const { sendMessage } = chatActions
+const { getChat } = chatSelectors
 
 const messages = {
   sendMessagePlaceholder: 'Start typing...'
@@ -29,6 +31,7 @@ const MAX_MESSAGE_LENGTH = 10000
 export const ChatComposer = (props: ChatComposerProps) => {
   const { chatId, presetMessage, onMessageSent } = props
   const dispatch = useDispatch()
+  const chat = useSelector((state) => getChat(state, chatId ?? ''))
   const [value, setValue] = useState(presetMessage ?? '')
   const [messageId, setMessageId] = useState(0)
   // The track and collection ids used to render the composer preview
@@ -50,11 +53,13 @@ export const ChatComposer = (props: ChatComposerProps) => {
 
   const handleSubmit = useCallback(async () => {
     if (chatId && value) {
-      dispatch(sendMessage({ chatId, message: value }))
+      dispatch(
+        sendMessage({ chatId, message: value, audience: chat?.audience })
+      )
       setMessageId((id) => ++id)
       onMessageSent()
     }
-  }, [chatId, dispatch, onMessageSent, value])
+  }, [chatId, dispatch, onMessageSent, value, chat?.audience])
 
   return (
     <Box backgroundColor='white' className={props.className}>

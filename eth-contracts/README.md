@@ -2,13 +2,13 @@
 
 Audius has two sets of contracts - the one in this directory, which runs on Ethereum mainnet in
 production, and the one
-[here](https://github.com/AudiusProject/audius-protocol/tree/main/contracts) which runs on POA
+[here](https://github.com/AudiusProject/apps/tree/main/contracts) which runs on POA
 mainnet in production.
 
 The smart contracts in this directory implement the Audius ERC-20 token, staking functionality, service
 provider registration, delegator support and off-chain service version management. For a
 more in depth look at the contracts and architecture, please see the
-[Audius Ethereum Contracts Wiki](https://github.com/AudiusProject/audius-protocol/wiki/Ethereum-Contracts-Overview)
+[Audius Ethereum Contracts Wiki](https://github.com/AudiusProject/apps/wiki/Ethereum-Contracts-Overview)
 page.
 
 The two sets of smart contracts do not interact with one another, but both sets are used by end-user
@@ -17,7 +17,7 @@ functionality.
 
 ## Installation
 
-To install and run the contracts locally, clone the `audius-protocol` repo and go into the
+To install and run the contracts locally, clone the `apps` repo and go into the
 `eth-contracts` folder. Assuming you have node.js, npm, and docker installed, run the
 following commands to run Ganache and migrate the contracts.
 

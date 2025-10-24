@@ -1,10 +1,10 @@
 import { ReactNode } from 'react'
 
-import { Flex, Text } from '@audius/harmony'
+import { Flex, Skeleton, Text } from '@audius/harmony'
 
 export type HoverCardBodyProps = {
   icon?: ReactNode
-  amount: string
+  amount: string | null
   currency?: string
 }
 
@@ -19,9 +19,13 @@ export const HoverCardBody = ({
         <Flex>{icon}</Flex>
         <Flex column justifyContent='center'>
           <Flex alignItems='center' gap='xs'>
-            <Text variant='heading' size='m'>
-              {amount}
-            </Text>
+            {amount ? (
+              <Text variant='heading' size='m'>
+                {amount}
+              </Text>
+            ) : (
+              <Skeleton w='60px' h='20px' />
+            )}
             <Text variant='heading' size='m' color='subdued'>
               {currency}
             </Text>

@@ -10,6 +10,7 @@ import type {
 import type { IconComponent, IconProps } from '../../../icons'
 
 export enum TextInputSize {
+  EXTRA_SMALL = 'extraSmall',
   SMALL = 'small',
   DEFAULT = 'default'
 }
@@ -38,7 +39,7 @@ type InternalProps = {
 export type TextInputProps = RNTextInputProps & {
   id?: string
   /**
-   * Input sizes. NOTE: small inputs will not show the label
+   * Input sizes. NOTE: small and extra_small inputs will not show the label
    * @default default
    */
   size?: TextInputSize

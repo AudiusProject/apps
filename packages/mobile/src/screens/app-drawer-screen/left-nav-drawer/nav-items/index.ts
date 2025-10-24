@@ -1,6 +1,7 @@
 export { ProfileNavItem } from '../ProfileNavItem'
 export { MessagesNavItem } from '../MessagesNavItem'
 export { WalletNavItem } from '../WalletNavItem'
+export { ArtistCoinsNavItem } from '../ArtistCoinsNavItem'
 export { RewardsNavItem } from '../RewardsNavItem'
 export { UploadNavItem } from '../UploadNavItem'
 export { SettingsNavItem } from '../SettingsNavItem'

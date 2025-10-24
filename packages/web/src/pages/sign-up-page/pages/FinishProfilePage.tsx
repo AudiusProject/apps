@@ -8,7 +8,7 @@ import {
 } from '@audius/common/schemas'
 import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { Flex, Paper, PlainButton, Text, useTheme } from '@audius/harmony'
+import { Button, Flex, Paper, Text, useTheme } from '@audius/harmony'
 import { Formik, Form, useField, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
@@ -136,10 +136,12 @@ export const FinishProfilePage = () => {
         dispatch(setField('coverPhoto', coverPhoto))
       }
       dispatch(setFinishedPhase1(true))
-      dispatch(signUp())
       if (isFastReferral) {
+        // Fast referral: create account immediately and skip genre/artist selection
+        dispatch(signUp())
         navigate(SIGN_UP_LOADING_PAGE)
       } else {
+        // Normal flow: don't create account yet, let user select genres/artists first
         navigate(SIGN_UP_GENRES_PAGE)
       }
     },
@@ -205,9 +207,9 @@ export const FinishProfilePage = () => {
             }
             postfix={
               isMobile || isSocialConnected ? null : (
-                <PlainButton variant='subdued' onClick={history.goBack}>
+                <Button variant='secondary' fullWidth onClick={history.goBack}>
                   {finishProfilePageMessages.goBack}
-                </PlainButton>
+                </Button>
               )
             }
           />

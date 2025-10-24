@@ -1,5 +1,5 @@
 create-audius-app-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
 
@@ -13,7 +13,7 @@ create-audius-app-init:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
     - run:
         name: lint & typecheck
         command: |
@@ -25,7 +25,7 @@ create-audius-app-init:
           - packages/create-audius-app/node_modules
 
 create-audius-app-test:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -38,7 +38,7 @@ create-audius-app-test:
           npx turbo run test --filter=create-audius-app
 
 create-audius-app-test-react-e2e:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: medium
   docker:
     - image: cimg/node:18.17
@@ -65,7 +65,7 @@ create-audius-app-test-react-e2e:
         path: packages/create-audius-app/blob-report
 
 create-audius-app-test-react-hono-e2e:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: medium
   docker:
     - image: cimg/node:18.17

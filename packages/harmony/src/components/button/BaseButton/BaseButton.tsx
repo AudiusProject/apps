@@ -68,6 +68,7 @@ export const BaseButton = forwardRef<HTMLButtonElement, BaseButtonProps>(
       transition: `
         transform ${motion.hover},
         border-color ${motion.hover},
+        background ${motion.hover},
         background-color ${motion.hover},
         color ${motion.hover}
       `,

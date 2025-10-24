@@ -1,6 +1,5 @@
 import type { ShareContent } from '@audius/common/store'
-import { makeXShareUrl } from '@audius/common/utils'
-import type { User } from '~/models'
+import { makeXShareUrl, getXShareHandle } from '@audius/common/utils'
 
 import {
   getCollectionRoute,
@@ -29,11 +28,6 @@ export const getContentUrl = (content: ShareContent) => {
       return getCollectionRoute(playlist, true)
     }
   }
-}
-
-const getXShareHandle = (user: User) => {
-  const xHandle = user.twitter_handle
-  return xHandle ? `@${xHandle}` : user.handle
 }
 
 export const getXShareText = async (content: ShareContent) => {

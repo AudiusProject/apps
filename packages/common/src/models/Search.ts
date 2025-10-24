@@ -35,7 +35,6 @@ export type SearchUser = UserMultihash &
     does_current_user_follow: boolean
     handle_lc: string
     updated_at: string
-    has_collectibles: boolean
     user_id: number
   }
 

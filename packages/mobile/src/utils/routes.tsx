@@ -1,5 +1,5 @@
 import type { User, UserCollectionMetadata } from '@audius/common/models'
-import { encodeUrlName, getHash } from '@audius/common/utils'
+import { encodeUrlName } from '@audius/common/utils'
 
 import { env } from 'app/services/env'
 
@@ -48,12 +48,3 @@ export const getEmptyPageRoute = (fullUrl = false) => {
 export const getAudioPageRoute = () => {
   return '/audio'
 }
-
-export const getCollectiblesRoute = (
-  handle: string,
-  collectibleId?: string,
-  fullUrl?: boolean
-) =>
-  `${fullUrl ? AUDIUS_URL : ''}/${encodeUrlName(handle)}/collectibles${
-    collectibleId ? `/${getHash(collectibleId)}` : ''
-  }`

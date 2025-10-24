@@ -31,25 +31,6 @@ def test_skip_tx(app, mocker):
         autospec=True,
     )
 
-    mocker.patch(
-        "src.queries.confirm_indexing_transaction_error.get_all_discovery_nodes_cached",
-        return_value=[
-            {"endpoint": "node1", "delegateOwnerWallet": "wallet1"},
-            {"endpoint": "node2", "delegateOwnerWallet": "wallet2"},
-            {"endpoint": "node3", "delegateOwnerWallet": "wallet3"},
-        ],
-        autospec=True,
-    )
-
-    mock_response = mocker.Mock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"data": "FAILED"}
-
-    mocker.patch(
-        "src.queries.confirm_indexing_transaction_error.requests.get",
-        return_value=mock_response,
-    )
-
     # setup db and mocked txs
     with app.app_context():
         db = get_db()

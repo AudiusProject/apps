@@ -2,7 +2,6 @@ import { ChatPermission, Genre } from '@audius/sdk'
 
 import { FeedFilter } from '~/models/FeedFilter'
 import { ID, PlayableType } from '~/models/Identifiers'
-import { MonitorPayload, ServiceMonitorType } from '~/models/Services'
 import { TimeRange } from '~/models/TimeRange'
 import {
   SolanaWalletAddress,
@@ -12,6 +11,7 @@ import {
 import { Nullable } from '~/utils/typeUtils'
 
 import { Chain } from './Chain'
+import { LaunchCoinResponse, LaunchpadFormValues } from './Launchpad'
 import { PlaylistLibraryKind } from './PlaylistLibrary'
 import { PurchaseMethod } from './PurchaseContent'
 import { AccessConditions, TrackAccessType } from './Track'
@@ -106,6 +106,7 @@ export enum Name {
   SIGN_IN_START = 'Sign In: Start',
   SIGN_IN_FINISH = 'Sign In: Finish',
   SIGN_IN_WITH_INCOMPLETE_ACCOUNT = 'Sign In: Incomplete Account',
+  SIGN_IN_WITH_DEACTIVATED_ACCOUNT = 'Sign In: Deactivated Account',
 
   // Settings
   SETTINGS_CHANGE_THEME = 'Settings: Change Theme',
@@ -212,14 +213,15 @@ export enum Name {
   TRACK_UPLOAD_REJECTED = 'Track Upload: Rejected',
 
   // Gated Track Uploads
-  TRACK_UPLOAD_COLLECTIBLE_GATED = 'Track Upload: Collectible Gated',
   TRACK_UPLOAD_FOLLOW_GATED = 'Track Upload: Follow Gated',
   TRACK_UPLOAD_TIP_GATED = 'Track Upload: Tip Gated',
   TRACK_UPLOAD_USDC_GATED = 'Track Upload: USDC Gated',
+  TRACK_UPLOAD_TOKEN_GATED = 'Track Upload: Token Gated',
   TRACK_UPLOAD_CLICK_USDC_WAITLIST_LINK = 'Track Upload: Clicked USDC Waitlist Link',
   // Download-Only Gated Track Uploads
   TRACK_UPLOAD_FOLLOW_GATED_DOWNLOAD = 'Track Upload: Follow Gated Download',
   TRACK_UPLOAD_USDC_GATED_DOWNLOAD = 'Track Upload: USDC Gated Download',
+  TRACK_UPLOAD_TOKEN_GATED_DOWNLOAD = 'Track Upload: Token Gated Download',
   TRACK_UPLOAD_CLICK_USDC_DOWNLOAD_WAITLIST_LINK = 'Track Upload: Clicked USDC Download Waitlist Link',
 
   // Track Downloads
@@ -245,12 +247,13 @@ export enum Name {
   // Unlocked Gated Tracks
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
   USDC_PURCHASE_GATED_COLLECTION_UNLOCKED = 'USDC Gated: Collection Unlocked',
-  COLLECTIBLE_GATED_TRACK_UNLOCKED = 'Collectible Gated: Track Unlocked',
   FOLLOW_GATED_TRACK_UNLOCKED = 'Follow Gated: Track Unlocked',
   TIP_GATED_TRACK_UNLOCKED = 'Tip Gated: Track Unlocked',
+  TOKEN_GATED_TRACK_UNLOCKED = 'Token Gated: Track Unlocked',
   // Unlocked Download-Only Gated Tracks
   USDC_PURCHASE_GATED_DOWNLOAD_TRACK_UNLOCKED = 'USDC Gated: Download Track Unlocked',
   FOLLOW_GATED_DOWNLOAD_TRACK_UNLOCKED = 'Follow Gated: Download Track Unlocked',
+  TOKEN_GATED_DOWNLOAD_TRACK_UNLOCKED = 'Token Gated: Download Track Unlocked',
 
   // Trending
   TRENDING_CHANGE_VIEW = 'Trending: Change view',
@@ -326,7 +329,6 @@ export enum Name {
   // System
   WEB_VITALS = 'Web Vitals',
   PERFORMANCE = 'Performance',
-  DISCOVERY_PROVIDER_SELECTION = 'Discovery Provider Selection',
   CREATOR_NODE_SELECTION = 'Creator Node Selection',
 
   // Remixes
@@ -585,7 +587,46 @@ export enum Name {
   // Android App Lifecycle
   ANDROID_APP_RESTART_HEARTBEAT = 'Android App: Restart Due to Heartbeat',
   ANDROID_APP_RESTART_STALE = 'Android App: Restart Due to Stale Time',
-  ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit'
+  ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit',
+
+  // Artist Coins
+  BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+
+  // Artist Coin Launchpad
+  LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
+  LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
+  LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
+  LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
+  LAUNCHPAD_WALLET_INSUFFICIENT_BALANCE = 'Launchpad: Wallet Insufficient Balance',
+  LAUNCHPAD_SETUP_CONTINUE = 'Launchpad: Setup Continue',
+  LAUNCHPAD_FORM_BACK = 'Launchpad: Back To Previous Step',
+  LAUNCHPAD_FORM_INPUT_CHANGE = 'Launchpad: Form Input Change',
+  LAUNCHPAD_REVIEW_CONTINUE = 'Launchpad: Review Continue',
+  LAUNCHPAD_COIN_CREATION_STARTED = 'Launchpad: Coin Creation Started',
+  LAUNCHPAD_COIN_CREATION_SUCCESS = 'Launchpad: Coin Creation Success',
+  LAUNCHPAD_COIN_CREATION_FAILURE = 'Launchpad: Coin Creation Failure',
+  LAUNCHPAD_FIRST_BUY_STARTED = 'Launchpad: First Buy Started',
+  LAUNCHPAD_FIRST_BUY_SUCCESS = 'Launchpad: First Buy Success',
+  LAUNCHPAD_FIRST_BUY_FAILURE = 'Launchpad: First Buy Failure',
+  LAUNCHPAD_FIRST_BUY_RETRY = 'Launchpad: First Buy Retry',
+  LAUNCHPAD_FIRST_BUY_MAX_BUTTON = 'Launchpad: First Buy Max Button Clicked',
+  LAUNCHPAD_FIRST_BUY_QUOTE_RECEIVED = 'Launchpad: First Buy Quote Received',
+  LAUNCHPAD_BUY_MODAL_OPEN = 'Launchpad: Buy Audio Modal Open',
+  LAUNCHPAD_BUY_MODAL_CLOSE = 'Launchpad: Buy Audio Modal Close',
+  LAUNCHPAD_BUY_MODAL_SUBMIT = 'Launchpad: Buy Audio Modal Submit',
+  LAUNCHPAD_BUY_MODAL_SUCCESS = 'Launchpad: Buy Audio Modal Success',
+  LAUNCHPAD_BUY_MODAL_FAILURE = 'Launchpad: Buy Audio Modal Failure',
+  LAUNCHPAD_BUY_MODAL_CHANGE_CURRENCY = 'Launchpad: Buy Audio Modal Change Currency',
+  LAUNCHPAD_BUY_MODAL_FORM_CHANGE = 'Launchpad: Buy Audio Modal Form Change',
+  LAUNCHPAD_BUY_MODAL_MAX_BUTTON = 'Launchpad: Buy Audio Modal Max Button Clicked',
+  LAUNCHPAD_BUY_MODAL_CONTINUE = 'Launchpad: Buy Audio Modal Continue Clicked',
+  LAUNCHPAD_BUY_MODAL_BACK = 'Launchpad: Buy Audio Modal Back Clicked',
+  LAUNCHPAD_CLAIM_FEES_CLICKED = 'Launchpad: Claim Fees Clicked',
+  LAUNCHPAD_CLAIM_FEES_SUCCESS = 'Launchpad: Claim Fees Success',
+  LAUNCHPAD_CLAIM_FEES_FAILURE = 'Launchpad: Claim Fees Failure',
+  LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET = 'Launchpad: Claim Fees Connect Wallet',
+  LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET = 'Launchpad: Claim Fees Switch Wallet',
+  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected'
 }
 
 type PageView = {
@@ -1145,14 +1186,6 @@ type TrackUploadViewTrackPage = {
   uploadType: string
 }
 
-// Gated Track Uploads
-type TrackUploadCollectibleGated = {
-  eventName: Name.TRACK_UPLOAD_COLLECTIBLE_GATED
-  kind: 'tracks'
-  downloadable: boolean
-  lossless: boolean
-}
-
 type TrackUploadFollowGated = {
   eventName: Name.TRACK_UPLOAD_FOLLOW_GATED
   kind: 'tracks'
@@ -1175,12 +1208,26 @@ type TrackUploadUSDCGated = {
   lossless: boolean
 }
 
+type TrackUploadTokenGated = {
+  eventName: Name.TRACK_UPLOAD_TOKEN_GATED
+  kind: 'tracks'
+  downloadable: boolean
+  lossless: boolean
+}
+
 type TrackUploadClickUSDCWaitListLink = {
   eventName: Name.TRACK_UPLOAD_CLICK_USDC_WAITLIST_LINK
 }
 
 type TrackUploadFollowGatedDownload = {
   eventName: Name.TRACK_UPLOAD_FOLLOW_GATED_DOWNLOAD
+  kind: 'tracks'
+  downloadable: boolean
+  lossless: boolean
+}
+
+type TrackUploadTokenGatedDownload = {
+  eventName: Name.TRACK_UPLOAD_TOKEN_GATED_DOWNLOAD
   kind: 'tracks'
   downloadable: boolean
   lossless: boolean
@@ -1275,11 +1322,6 @@ type USDCGatedTrackUnlocked = {
   count: number
 }
 
-type CollectibleGatedTrackUnlocked = {
-  eventName: Name.COLLECTIBLE_GATED_TRACK_UNLOCKED
-  count: number
-}
-
 type FollowGatedTrackUnlocked = {
   eventName: Name.FOLLOW_GATED_TRACK_UNLOCKED
   trackId: number
@@ -1290,6 +1332,11 @@ type TipGatedTrackUnlocked = {
   trackId: number
 }
 
+type TokenGatedTrackUnlocked = {
+  eventName: Name.TOKEN_GATED_TRACK_UNLOCKED
+  trackId: number
+}
+
 type USDCGatedDownloadTrackUnlocked = {
   eventName: Name.USDC_PURCHASE_GATED_DOWNLOAD_TRACK_UNLOCKED
   count: number
@@ -1297,6 +1344,11 @@ type USDCGatedDownloadTrackUnlocked = {
 
 type FollowGatedDownloadTrackUnlocked = {
   eventName: Name.FOLLOW_GATED_DOWNLOAD_TRACK_UNLOCKED
+  trackId: number
+}
+
+type TokenGatedDownloadTrackUnlocked = {
+  eventName: Name.TOKEN_GATED_DOWNLOAD_TRACK_UNLOCKED
   trackId: number
 }
 
@@ -1402,7 +1454,7 @@ type NotificationsToggleSettings = {
 // Profile
 type ProfilePageTabClick = {
   eventName: Name.PROFILE_PAGE_TAB_CLICK
-  tab: 'tracks' | 'albums' | 'reposts' | 'playlists' | 'collectibles'
+  tab: 'tracks' | 'albums' | 'reposts' | 'playlists'
 }
 type ProfilePageSort = {
   eventName: Name.PROFILE_PAGE_SORT
@@ -1593,12 +1645,6 @@ type Performance = {
   value: number
 }
 
-type DiscoveryProviderSelection = {
-  eventName: Name.DISCOVERY_PROVIDER_SELECTION
-  endpoint: string
-  reason: string
-}
-
 type StemCompleteUpload = {
   eventName: Name.STEM_COMPLETE_UPLOAD
   id: number
@@ -1681,16 +1727,6 @@ type TransferAudioToWAudioFailure = {
   eventName: Name.TRANSFER_AUDIO_TO_WAUDIO_FAILURE
   from: WalletAddress
 }
-
-type ServiceMonitorRequest = {
-  eventName: Name.SERVICE_MONITOR_REQUEST
-  type: ServiceMonitorType
-} & MonitorPayload
-
-type ServiceMonitorHealthCheck = {
-  eventName: Name.SERVICE_MONITOR_HEALTH_CHECK
-  type: ServiceMonitorType
-} & MonitorPayload
 
 type PlaylistLibraryReorder = {
   eventName: Name.PLAYLIST_LIBRARY_REORDER
@@ -2304,6 +2340,10 @@ type BannerTOSClicked = {
   eventName: Name.BANNER_TOS_CLICKED
 }
 
+type BannerArtistCoinsLaunchClicked = {
+  eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
+}
+
 type RateCtaDisplayed = {
   eventName: Name.RATE_CTA_DISPLAYED
 }
@@ -2823,6 +2863,207 @@ export type AndroidAppRestartForceQuit = {
   eventName: Name.ANDROID_APP_RESTART_FORCE_QUIT
 }
 
+// Artist Coin Launchpad
+export type LaunchpadSplashGetStarted = {
+  eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
+}
+
+export type LaunchpadSplashLearnMoreClicked = {
+  eventName: Name.LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED
+}
+
+export type LaunchpadFormBack = {
+  eventName: Name.LAUNCHPAD_FORM_BACK
+}
+
+export type LaunchpadFormInputChange = {
+  eventName: Name.LAUNCHPAD_FORM_INPUT_CHANGE
+  input: string
+  newValue: string
+}
+
+export type LaunchpadWalletConnectSuccess = {
+  eventName: Name.LAUNCHPAD_WALLET_CONNECT_SUCCESS
+  walletAddress: string
+  walletSolBalance: number
+}
+
+export type LaunchpadWalletConnectError = {
+  eventName: Name.LAUNCHPAD_WALLET_CONNECT_ERROR
+  error: string
+}
+
+export type LaunchpadWalletInsufficientBalance = {
+  eventName: Name.LAUNCHPAD_WALLET_INSUFFICIENT_BALANCE
+  walletAddress: string
+  walletSolBalance: number
+}
+
+export type LaunchpadSetupContinue = {
+  eventName: Name.LAUNCHPAD_SETUP_CONTINUE
+} & Partial<LaunchpadFormValues>
+
+export type LaunchpadReviewContinue = {
+  eventName: Name.LAUNCHPAD_REVIEW_CONTINUE
+} & Partial<LaunchpadFormValues>
+
+export type LaunchpadCoinCreationStarted = {
+  eventName: Name.LAUNCHPAD_COIN_CREATION_STARTED
+  coinName: string
+  coinSymbol: string
+  walletAddress: string
+  initialBuyAmount?: string
+}
+
+export type LaunchpadCoinCreationSuccess = {
+  eventName: Name.LAUNCHPAD_COIN_CREATION_SUCCESS
+  launchCoinResponse: LaunchCoinResponse
+}
+
+export type LaunchpadCoinCreationFailure = {
+  eventName: Name.LAUNCHPAD_COIN_CREATION_FAILURE
+  errorState:
+    | 'poolCreateFailed'
+    | 'sdkCoinFailed'
+    | 'firstBuyFailed'
+    | 'unknownError'
+  launchCoinResponse: LaunchCoinResponse
+}
+
+export type LaunchpadFirstBuyStarted = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_STARTED
+  coinSymbol: string
+  mintAddress: string
+  payAmount: string
+  receiveAmount: string
+}
+
+export type LaunchpadFirstBuySuccess = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_SUCCESS
+  coinSymbol: string
+  mintAddress: string
+  payAmount: string
+  receiveAmount: string
+}
+
+export type LaunchpadFirstBuyFailure = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_FAILURE
+  coinSymbol: string
+  mintAddress: string
+  payAmount: string
+  error: string
+}
+
+export type LaunchpadFirstBuyRetry = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_RETRY
+  launchCoinResponse: LaunchCoinResponse
+}
+
+export type LaunchpadFirstBuyMaxButton = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_MAX_BUTTON
+  maxValue?: string
+} & Partial<LaunchpadFormValues>
+
+export type LaunchpadFirstBuyQuoteReceived = {
+  eventName: Name.LAUNCHPAD_FIRST_BUY_QUOTE_RECEIVED
+  payAmount: string
+  receiveAmount: string
+  usdcValue: string
+}
+
+export type LaunchpadBuyModalOpen = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_OPEN
+}
+
+export type LaunchpadBuyModalClose = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_CLOSE
+}
+
+export type LaunchpadBuyModalContinue = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_CONTINUE
+}
+
+export type LaunchpadBuyModalBack = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_BACK
+}
+
+export type LaunchpadBuyModalSubmit = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_SUBMIT
+  inputAmount: string
+  outputAmount: string
+  inputTokenSymbol: string
+  outputTokenSymbol: string
+  walletAddress: string
+}
+
+export type LaunchpadBuyModalSuccess = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_SUCCESS
+}
+
+export type LaunchpadBuyModalFailure = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_FAILURE
+  error: any
+}
+
+export type LaunchpadBuyModalChangeCurrency = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_CHANGE_CURRENCY
+  newCurrencySymbol: string
+}
+
+export type LaunchpadBuyModalFormChange = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_FORM_CHANGE
+  inputChanged: string
+  newValue: string
+}
+
+export type LaunchpadBuyModalMaxButton = {
+  eventName: Name.LAUNCHPAD_BUY_MODAL_MAX_BUTTON
+}
+
+export type LaunchpadClaimFeesClicked = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_CLICKED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesSuccess = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_SUCCESS
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  claimedAmount: string
+}
+
+export type LaunchpadClaimFeesFailure = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_FAILURE
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  error: string
+}
+
+export type LaunchpadClaimFeesConnectWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesSwitchWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET
+  currentWalletAddress: string
+  expectedWalletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimFeesWalletConnected = {
+  eventName: Name.LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
 export type BaseAnalyticsEvent = { type: typeof ANALYTICS_TRACK_EVENT }
 
 export type AllTrackingEvents =
@@ -2899,13 +3140,14 @@ export type AllTrackingEvents =
   | TrackUploadStartUploading
   | TrackUploadTrackUploading
   | TrackUploadCompleteUpload
-  | TrackUploadCollectibleGated
   | TrackUploadFollowGated
   | TrackUploadTipGated
   | TrackUploadUSDCGated
+  | TrackUploadTokenGated
   | TrackUploadClickUSDCWaitListLink
   | TrackUploadFollowGatedDownload
   | TrackUploadUSDCGatedDownload
+  | TrackUploadTokenGatedDownload
   | TrackUploadClickUSDCDownloadWaitListLink
   | TrackDownloadClickedDownloadAll
   | TrackDownloadSuccessfulDownloadAll
@@ -2925,11 +3167,12 @@ export type AllTrackingEvents =
   | TrackUploadShareWithFans
   | TrackUploadViewTrackPage
   | USDCGatedTrackUnlocked
-  | CollectibleGatedTrackUnlocked
   | FollowGatedTrackUnlocked
   | TipGatedTrackUnlocked
+  | TokenGatedTrackUnlocked
   | USDCGatedDownloadTrackUnlocked
   | FollowGatedDownloadTrackUnlocked
+  | TokenGatedDownloadTrackUnlocked
   | TrendingChangeView
   | TrendingPaginate
   | FeedChangeView
@@ -2983,7 +3226,6 @@ export type AllTrackingEvents =
   | NotOnFirstPage
   | BrowserNotificationSetting
   | TweetFirstUpload
-  | DiscoveryProviderSelection
   | WebVitals
   | Performance
   | StemCompleteUpload
@@ -2995,8 +3237,6 @@ export type AllTrackingEvents =
   | SendAudioRequest
   | SendAudioSuccess
   | SendAudioFailure
-  | ServiceMonitorRequest
-  | ServiceMonitorHealthCheck
   | PlaylistLibraryReorder
   | PlaylistLibraryClicked
   | PlaylistLibraryMovePlaylistIntoFolder
@@ -3097,6 +3337,7 @@ export type AllTrackingEvents =
   | PurchaseContentTOSClicked
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
+  | BannerArtistCoinsLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
   | RateCtaResponseYes
@@ -3202,3 +3443,37 @@ export type AllTrackingEvents =
   | AndroidAppRestartHeartbeat
   | AndroidAppRestartStale
   | AndroidAppRestartForceQuit
+  | LaunchpadSplashGetStarted
+  | LaunchpadSplashLearnMoreClicked
+  | LaunchpadWalletConnectSuccess
+  | LaunchpadWalletInsufficientBalance
+  | LaunchpadSetupContinue
+  | LaunchpadReviewContinue
+  | LaunchpadCoinCreationStarted
+  | LaunchpadCoinCreationSuccess
+  | LaunchpadCoinCreationFailure
+  | LaunchpadFirstBuyStarted
+  | LaunchpadFirstBuySuccess
+  | LaunchpadFirstBuyFailure
+  | LaunchpadFirstBuyRetry
+  | LaunchpadFormInputChange
+  | LaunchpadFormBack
+  | LaunchpadWalletConnectError
+  | LaunchpadFirstBuyMaxButton
+  | LaunchpadFirstBuyQuoteReceived
+  | LaunchpadBuyModalOpen
+  | LaunchpadBuyModalClose
+  | LaunchpadBuyModalSubmit
+  | LaunchpadBuyModalSuccess
+  | LaunchpadBuyModalFailure
+  | LaunchpadBuyModalChangeCurrency
+  | LaunchpadBuyModalFormChange
+  | LaunchpadBuyModalMaxButton
+  | LaunchpadBuyModalContinue
+  | LaunchpadBuyModalBack
+  | LaunchpadClaimFeesClicked
+  | LaunchpadClaimFeesSuccess
+  | LaunchpadClaimFeesFailure
+  | LaunchpadClaimFeesConnectWallet
+  | LaunchpadClaimFeesSwitchWallet
+  | LaunchpadClaimFeesWalletConnected

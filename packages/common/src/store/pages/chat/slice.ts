@@ -465,6 +465,7 @@ const slice = createSlice({
       action: PayloadAction<{
         chatId: string
         message: string
+        audience?: ChatBlastAudience
         resendMessageId?: string
       }>
     ) => {

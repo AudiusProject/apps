@@ -17,7 +17,7 @@ export enum ErrorLevel {
   /**
    * WARNING
    * What to use for: Something not ideal but within realm of expected behavior
-   * e.g. discovery network call failure
+   * e.g. api call failure
    */
   'Warning' = 'Warning',
 
@@ -46,7 +46,9 @@ export enum Feature {
   Edit = 'edit',
   Events = 'events',
   Remixes = 'remixes',
-  TanQuery = 'tan-query'
+  TanQuery = 'tan-query',
+  SendTokens = 'send-tokens',
+  ArtistCoins = 'artist-coins'
 }
 
 export type ReportToSentryArgs = {

@@ -7,7 +7,7 @@ import { useModalControls } from 'utils/hooks'
 import styles from './ManageService.module.css'
 
 const messages = {
-  register: 'Register New Service'
+  register: 'Register New Node'
 }
 
 type RegisterNewServiceBtnProps = {

@@ -93,7 +93,7 @@ const getDiscoveryListensEndpoint = () => {
       return 'https://discoveryprovider.audius.co'
     case 'development':
     default:
-      return 'http://audius-protocol-discovery-provider-1'
+      return 'http://audius-discovery-provider-1'
   }
 }
 

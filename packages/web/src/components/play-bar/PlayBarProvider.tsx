@@ -9,7 +9,7 @@ import { AppState } from 'store/types'
 
 import styles from './PlayBarProvider.module.css'
 import DesktopPlayBar from './desktop/PlayBar'
-const { getCollectible, getUid: getPlayingUid } = playerSelectors
+const { getUid: getPlayingUid } = playerSelectors
 const { getModalVisibility } = modalsSelectors
 
 type OwnProps = {
@@ -22,7 +22,6 @@ type PlayBarProviderProps = OwnProps &
 
 const PlayBarProvider = ({
   playingUid,
-  collectible,
   addToCollectionOpen
 }: PlayBarProviderProps) => {
   const isMobile = useIsMobile()
@@ -35,7 +34,7 @@ const PlayBarProvider = ({
     >
       {isMobile ? (
         <NowPlayingDrawer
-          isPlaying={!!playingUid || !!collectible}
+          isPlaying={!!playingUid}
           shouldClose={addToCollectionOpen === true}
         />
       ) : (
@@ -51,7 +50,6 @@ const PlayBarProvider = ({
 function mapStateToProps(state: AppState) {
   return {
     playingUid: getPlayingUid(state),
-    collectible: getCollectible(state),
     addToCollectionOpen: getModalVisibility(state, 'AddToCollection')
   }
 }

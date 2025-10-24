@@ -8,18 +8,7 @@ export const stagingConfig: SdkServicesConfig = {
   "network": {
     "minVersion": "0.6.0",
     "apiEndpoint": "https://api.staging.audius.co",
-    "discoveryNodes": [
-      {
-        "endpoint": "https://discoveryprovider.staging.audius.co",
-        "ownerWallet": "0x8fcFA10Bd3808570987dbb5B1EF4AB74400FbfDA",
-        "delegateOwnerWallet": "0x8fcFA10Bd3808570987dbb5B1EF4AB74400FbfDA"
-      }
-    ],
     "storageNodes": [
-      {
-        "endpoint": "https://creatornode12.staging.audius.co",
-        "delegateOwnerWallet": "0x6b52969934076318863243fb92E9C4b3A08267b5"
-      },
       {
         "endpoint": "https://creatornode5.staging.audius.co",
         "delegateOwnerWallet": "0xDC2BDF1F23381CA2eC9e9c70D4FD96CD8645D090"
@@ -39,6 +28,10 @@ export const stagingConfig: SdkServicesConfig = {
       {
         "endpoint": "https://creatornode11.staging.audius.co",
         "delegateOwnerWallet": "0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6"
+      },
+      {
+        "endpoint": "https://creatornode12.staging.audius.co",
+        "delegateOwnerWallet": "0x6b52969934076318863243fb92E9C4b3A08267b5"
       }
     ],
     "antiAbuseOracleNodes": {
@@ -65,7 +58,7 @@ export const stagingConfig: SdkServicesConfig = {
     "stakingBridgeProgramAddress": "stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj",
     "rpcEndpoint": "https://audius-fe.rpcpool.com",
     "usdcTokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "wAudioTokenMint": "BELGiMZQ34SDE6x2FUaML2UHDAgBLS64xvhXjX5tBBZo",
+    "wAudioTokenMint": "9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM",
     "bonkTokenMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "rewardManagerLookupTableAddress": "ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J"
   },

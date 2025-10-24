@@ -492,7 +492,7 @@ export const PickWinnersPage = () => {
                     options={[
                       { label: 'Most Recent', value: 'recent' },
                       { label: 'Most Plays', value: 'plays' },
-                      { label: 'Most Likes', value: 'likes' }
+                      { label: 'Most Favorites', value: 'likes' }
                     ]}
                   />
                 </Flex>

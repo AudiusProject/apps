@@ -1,4 +1,11 @@
-import { ElementType, ForwardedRef, forwardRef, useContext } from 'react'
+import {
+  cloneElement,
+  ElementType,
+  ForwardedRef,
+  forwardRef,
+  isValidElement,
+  useContext
+} from 'react'
 
 import { Theme, useTheme } from '@emotion/react'
 import { Slot } from '@radix-ui/react-slot'
@@ -23,6 +30,42 @@ const getColorCss = (color: TextProps['color'], theme: Theme) => {
   return { color: theme.color.text[color] }
 }
 
+// Check if text contains Unicode subscript characters
+const containsSubscripts = (children: any): boolean => {
+  if (!children) return false
+  const text = typeof children === 'string' ? children : String(children)
+  // Unicode subscript range: \u2080-\u2089 (₀-₉) and other subscript chars
+  return /[\u2080-\u209F]/.test(text)
+}
+
+// Process children to replace Unicode subscripts with <sub> tags
+const processSubscripts = (children: any): any => {
+  if (!children) return children
+  if (typeof children === 'string') {
+    // Replace Unicode subscript characters with <sub> tags
+    const parts = children.split(/([\u2080-\u209F]+)/)
+    if (parts.length === 1) return children // No subscripts found
+
+    return parts.map((part, index) => {
+      if (/[\u2080-\u209F]/.test(part)) {
+        return <sub key={index}>{part}</sub>
+      }
+      return part
+    })
+  }
+  if (Array.isArray(children)) {
+    return children.map(processSubscripts)
+  }
+  if (isValidElement(children)) {
+    return cloneElement(
+      children,
+      {},
+      processSubscripts((children.props as any).children)
+    )
+  }
+  return children
+}
+
 export const Text = forwardRef(
   <TextComponentType extends ElementType = 'p'>(
     props: TextProps<TextComponentType>,
@@ -42,6 +85,7 @@ export const Text = forwardRef(
       ellipses,
       maxLines,
       lineHeight,
+      userSelect,
       ...other
     } = props
 
@@ -53,6 +97,7 @@ export const Text = forwardRef(
     const size = sizeProp ?? (parentVariant ? undefined : 'm')
 
     const variantConfig = variant && variantStylesMap[variant]
+    const hasSubscripts = containsSubscripts(children)
 
     const css = {
       fontFamily: theme.typography.font,
@@ -97,6 +142,7 @@ export const Text = forwardRef(
         WebkitLineClamp: `${maxLines}`,
         WebkitBoxOrient: 'vertical'
       }),
+      ...(userSelect && { userSelect: `${userSelect} !important` }),
       unicodeBidi: 'isolate'
     }
 
@@ -105,9 +151,20 @@ export const Text = forwardRef(
 
     const Tag: ElementType = asChild ? Slot : (tag ?? variantTag ?? 'span')
 
+    // Only convert Unicode subscripts to <sub> tags for body variants with default strength.
+    // Other variants/strengths render Unicode subscripts correctly without this conversion.
+    const shouldProcessSubscripts =
+      hasSubscripts &&
+      variant === 'body' &&
+      (!strength || strength === 'default')
+
+    const processedChildren = shouldProcessSubscripts
+      ? processSubscripts(children)
+      : children
+
     const textElement = (
       <Tag ref={ref} css={css} {...other}>
-        {children}
+        {processedChildren}
       </Tag>
     )
 

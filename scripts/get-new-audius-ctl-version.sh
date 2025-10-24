@@ -28,7 +28,7 @@ latest_tag=$(\
     curl -sSL \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/AudiusProject/audius-protocol/releases?per_page=100" | \
+        "https://api.github.com/repos/AudiusProject/apps/releases?per_page=100" | \
     jq -r '[.[] | select(.tag_name | test("'"$audius_ctl_tag_regex"'"))][0].tag_name' \
 )
 

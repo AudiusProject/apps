@@ -1,18 +1,11 @@
 import { useAccessAndRemixSettings } from '@audius/common/hooks'
+import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import { StreamTrackAvailabilityType } from '@audius/common/models'
 import { IconCart } from '@audius/harmony'
 
 import { ModalRadioItem } from 'components/modal-radio/ModalRadioItem'
 
 import { UsdcPurchaseFields } from './UsdcPurchaseFields'
-
-const messages = {
-  usdcPurchase: 'Premium',
-  usdcPurchaseSubtitle: (contentType: 'album' | 'track') =>
-    `Only fans who make a purchase can play your ${contentType}.`,
-  fromFreeHint: (contentType: 'album' | 'track') =>
-    `You can't make a free ${contentType} premium.`
-}
 
 type UsdcPurchaseGatedRadioFieldProps = {
   isRemix: boolean
@@ -39,8 +32,10 @@ export const UsdcPurchaseGatedRadioField = (
   return (
     <ModalRadioItem
       icon={<IconCart />}
-      label={messages.usdcPurchase}
-      description={messages.usdcPurchaseSubtitle(isAlbum ? 'album' : 'track')}
+      label={messages.premiumRadio.title}
+      description={messages.premiumRadio.description(
+        isAlbum ? 'album' : 'track'
+      )}
       value={StreamTrackAvailabilityType.USDC_PURCHASE}
       disabled={disableUsdcGate}
       checkedContent={
@@ -52,7 +47,7 @@ export const UsdcPurchaseGatedRadioField = (
       }
       tooltipText={
         disableUsdcGate
-          ? messages.fromFreeHint(isAlbum ? 'album' : 'track')
+          ? messages.fromFreeHint(isAlbum ? 'album' : 'track', 'premium')
           : undefined
       }
     />

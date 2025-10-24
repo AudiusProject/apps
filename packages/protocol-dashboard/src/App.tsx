@@ -32,7 +32,9 @@ import ServiceUsers from 'containers/ServiceUsers'
 import Services from 'containers/Services'
 import UnregisteredNode from 'containers/UnregisteredNode'
 import User from 'containers/User'
+import Validators from 'containers/Validators'
 import { getDidGraphError } from 'store/api/hooks'
+import { ServiceType } from 'types'
 import { createStyles } from 'utils/mobile'
 import * as routes from 'utils/routes'
 
@@ -123,7 +125,7 @@ const App = () => {
                   />
                   <Route
                     path={routes.NODES_DISCOVERY_NODE}
-                    element={<Node />}
+                    element={<Node nodeType={ServiceType.DiscoveryProvider} />}
                   />
                   <Route
                     path={routes.SERVICES_DISCOVERY_PROVIDER_NODE}
@@ -146,7 +148,18 @@ const App = () => {
                     path={routes.NODES_CONTENT}
                     element={<ContentNodes />}
                   />
-                  <Route path={routes.NODES_CONTENT_NODE} element={<Node />} />
+                  <Route
+                    path={routes.NODES_CONTENT_NODE}
+                    element={<Node nodeType={ServiceType.ContentNode} />}
+                  />
+                  <Route
+                    path={routes.NODES_VALIDATORS}
+                    element={<Validators />}
+                  />
+                  <Route
+                    path={routes.NODES_VALIDATOR}
+                    element={<Node nodeType={ServiceType.Validator} />}
+                  />
                   <Route
                     path={routes.SERVICES_CONTENT_NODE}
                     element={

@@ -25,6 +25,7 @@ export const Button = (props: ButtonProps) => {
     size = 'default',
     disabled,
     style,
+    gradient,
     ...baseProps
   } = props
   const { isLoading, children } = baseProps
@@ -79,7 +80,8 @@ export const Button = (props: ButtonProps) => {
 
   // - Variant Styles -
   const primaryOverrideColor =
-    hexColor ?? (color ? themeColors.special[color] : null)
+    hexColor ??
+    (color && color !== 'coinGradient' ? themeColors.special[color] : null)
 
   const primaryStyles: ReactNativeStyle = {
     backgroundColor: isDisabled
@@ -284,6 +286,7 @@ export const Button = (props: ButtonProps) => {
     <BaseButton
       disabled={isDisabled}
       style={[buttonStyles, animatedButtonStyles, style]}
+      gradient={variant === 'primary' ? gradient : undefined}
       sharedValue={pressed}
       styles={{
         text: [textStyles, animatedTextStyles]

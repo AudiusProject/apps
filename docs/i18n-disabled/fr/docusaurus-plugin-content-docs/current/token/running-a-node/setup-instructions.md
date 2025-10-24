@@ -127,7 +127,7 @@ Les informations stockées comprennent les métadonnées des utilisateurs d'Audi
 
 #### Exécuter
 
-Utilisez `audius-cli` pour mettre à jour les variables requises. La liste complète des variables et des explications peut être trouvée sur le wiki [ici](https://github.com/AudiusProject/audius-protocol/wiki/Content-Node:-Configuration-Details#required-environment-variables).
+Utilisez `audius-cli` pour mettre à jour les variables requises. La liste complète des variables et des explications peut être trouvée sur le wiki [ici](https://github.com/AudiusProject/apps/wiki/Content-Node:-Configuration-Details#required-environment-variables).
 
 Certaines variables doivent être définies, vous pouvez le faire avec les commandes suivantes :
 
@@ -275,7 +275,7 @@ CREATE EXTENSION pg_trgm;
 ```
 
 
-Assurez-vous que votre service expose toutes les variables d'environnement requises. Voir le wiki [ici ](https://github.com/AudiusProject/audius-protocol/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) pour la liste complète des variables d'environnement et leurs descriptions.
+Assurez-vous que votre service expose toutes les variables d'environnement requises. Voir le wiki [ici ](https://github.com/AudiusProject/apps/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) pour la liste complète des variables d'environnement et leurs descriptions.
 
 
 

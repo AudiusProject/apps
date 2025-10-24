@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 
+import { useProxySelector } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import { chatActions } from '@audius/common/store'
+import { chatActions, chatSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { OptionalHashId } from '@audius/sdk'
 import type { TextInput as RNTextInput } from 'react-native'
@@ -15,6 +16,7 @@ import { spacing } from 'app/styles/spacing'
 import { ComposerCollectionInfo, ComposerTrackInfo } from './ComposePreviewInfo'
 
 const { sendMessage } = chatActions
+const { getChat } = chatSelectors
 
 const messages = {
   startNewMessage: ' Start typing...'
@@ -34,6 +36,7 @@ export const ChatTextInput = ({
   onMessageSent
 }: ChatTextInputProps) => {
   const dispatch = useDispatch()
+  const chat = useProxySelector((state) => getChat(state, chatId), [chatId])
   const [messageId, setMessageId] = useState(0)
   // The track and collection ids used to render the composer preview
   const [trackId, setTrackId] = useState<Nullable<ID>>(null)
@@ -61,13 +64,15 @@ export const ChatTextInput = ({
   const handleSubmit = useCallback(
     async (value: string) => {
       if (chatId && value) {
-        dispatch(sendMessage({ chatId, message: value }))
+        dispatch(
+          sendMessage({ chatId, message: value, audience: chat?.audience })
+        )
         onMessageSent()
         setMessageId((id) => ++id)
         setTimeout(() => ref.current?.blur())
       }
     },
-    [chatId, dispatch, onMessageSent]
+    [chatId, dispatch, onMessageSent, chat?.audience]
   )
 
   // For iOS: default padding + extra padding

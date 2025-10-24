@@ -1,6 +1,6 @@
 {
   "name": "@audius/sdk",
-  "version": "10.0.0",
+  "version": "11.1.0",
   "audius": {
     "releaseSHA": "f1d70a2a0643c5c84d8ab053f70c1e0a2ec3ad49"
   },
@@ -76,7 +76,7 @@
     "@audius/eth": "0.1.0",
     "@audius/fixed-decimal": "0.2.0",
     "@audius/hedgehog": "3.0.0-alpha.1",
-    "@audius/spl": "2.0.2",
+    "@audius/spl": "2.1.0",
     "@babel/runtime": "7.18.3",
     "@improbable-eng/grpc-web-node-http-transport": "0.15.0",
     "@noble/hashes": "1.3.0",
@@ -164,7 +164,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol/tree/main/packages/libs"
+    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/libs"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -172,9 +172,9 @@
   "author": "Audius",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/libs",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/libs",
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.24.0"
   }

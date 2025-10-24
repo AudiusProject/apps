@@ -1,13 +1,11 @@
 import React, { useCallback, useRef } from 'react'
 
 import { Flex } from '@audius/harmony'
-import clsx from 'clsx'
 
 import IconNodes from 'assets/img/iconNodes.svg'
-import ContentTable from 'components/ContentTable'
-import DiscoveryTable from 'components/DiscoveryTable'
 import { ManageAccountCard } from 'components/ManageAccountCard/ManageAccountCard'
 import ManageService from 'components/ManageService'
+import NodeTable from 'components/NodeTable'
 import Page from 'components/Page'
 import { RegisterNodeCard } from 'components/RegisterNodeCard/RegisterNodeCard'
 import { RewardsTimingCard } from 'components/RewardsTimingCard/RewardsTimingCard'
@@ -62,9 +60,8 @@ const Services: React.FC<ServicesProps> = () => {
             onClickDiscoveryTable={handleClickNodes}
             onClickContentTable={handleClickNodes}
           />
-        ) : (
-          <RegisterNodeCard />
-        )}
+        ) : null}
+        <RegisterNodeCard wallet={accountUser?.wallet ?? ''} />
         <RewardsTimingCard />
         <TopOperatorsTable
           limit={5}
@@ -72,13 +69,8 @@ const Services: React.FC<ServicesProps> = () => {
           alwaysShowMore
         />
         <div className={styles.serviceContainer} ref={discoveryTableRef}>
-          <DiscoveryTable
-            className={clsx(styles.serviceTable, styles.rightSpacing)}
-            limit={NODE_LIMIT}
-            alwaysShowMore
-          />
-          <ContentTable
-            className={clsx(styles.serviceTable, styles.leftSpacing)}
+          <NodeTable
+            className={styles.serviceTable}
             limit={NODE_LIMIT}
             alwaysShowMore
           />

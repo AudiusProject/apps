@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { ID, UID, Collectible } from '../../models'
+import { ID, UID } from '../../models'
 import { Maybe, Nullable } from '../../utils'
 import { PlayerBehavior } from '../player'
 import { RepeatMode, Queueable, QueueState } from '../queue/types'
@@ -33,7 +33,6 @@ const generateShuffleOrder = (order: Queueable[], currentIndex: number) => {
 type PlayPayload = {
   uid?: Nullable<UID>
   trackId?: Nullable<ID>
-  collectible?: Collectible
   source?: Nullable<string>
   playerBehavior?: PlayerBehavior
 }
@@ -88,13 +87,11 @@ const slice = createSlice({
   reducers: {
     // Play the queue, either resuming or playing a new uid if provided */
     play: (state, action: PayloadAction<PlayPayload>) => {
-      const { collectible, uid } = action.payload
+      const { uid } = action.payload
       let newIndex
 
       if (uid) {
         newIndex = state.positions[uid]
-      } else if (collectible) {
-        newIndex = state.positions[collectible.id]
       }
 
       const previousIndex = state.index

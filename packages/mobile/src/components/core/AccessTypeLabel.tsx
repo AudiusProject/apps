@@ -10,8 +10,10 @@ import {
   IconCart,
   IconReceive,
   IconSparkles,
-  IconCollectible
+  IconArtistCoin
 } from '@audius/harmony-native'
+
+import { CoinGatedLabelSvg } from './CoinGatedLabelSvg'
 
 type AccessTypeLabelProps = {
   type?: AccessType
@@ -55,10 +57,10 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     label: 'Special Access',
     color: 'special'
   },
-  [AccessType.COLLECTIBLE_GATED]: {
-    icon: IconCollectible,
-    label: 'Collectible Gated',
-    color: 'special'
+  [AccessType.TOKEN_GATED]: {
+    icon: IconArtistCoin,
+    label: 'Coin Gated',
+    color: 'artistCoin'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,
@@ -76,6 +78,14 @@ export const AccessTypeLabel = (props: AccessTypeLabelProps) => {
     typeof config.label === 'function'
       ? config.label(scheduledReleaseDate)
       : config.label
+
+  if (type === AccessType.TOKEN_GATED) {
+    return (
+      <Flex direction='row' gap='xs' alignItems='center'>
+        <CoinGatedLabelSvg />
+      </Flex>
+    )
+  }
 
   return (
     <Flex direction='row' gap='xs' alignItems='center'>

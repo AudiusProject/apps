@@ -34,6 +34,7 @@ BEGIN
   JOIN chat_blast ON chat_blast.blast_id = blast_id_param
     AND chat_blast.audience = 'remixer_audience'
     AND og.owner_id = chat_blast.from_user_id
+    AND t.owner_id != chat_blast.from_user_id
     AND (
       chat_blast.audience_content_id IS NULL
       OR (
@@ -61,29 +62,16 @@ BEGIN
   UNION
 
   -- coin_holder_audience
-  -- Case 1: userbank ie. sol_claimable_accounts
-  SELECT chat_blast.blast_id, u.user_id AS to_user_id
-  FROM artist_coins ac
-  JOIN chat_blast ON chat_blast.blast_id = blast_id_param
+  SELECT chat_blast.blast_id, sol_user_balances.user_id AS to_user_id
+  FROM chat_blast
+  JOIN artist_coins
+    ON artist_coins.user_id = chat_blast.from_user_id
+  JOIN sol_user_balances
+    ON sol_user_balances.mint = artist_coins.mint
+    AND sol_user_balances.balance > 0
+  WHERE chat_blast.blast_id = blast_id_param
     AND chat_blast.audience = 'coin_holder_audience'
-    AND ac.user_id = chat_blast.from_user_id
-  JOIN sol_claimable_accounts sca ON sca.mint = ac.mint
-  JOIN sol_token_account_balances stab ON stab.account = sca.account
-  JOIN users u ON u.wallet = sca.ethereum_address
-  WHERE stab.balance > 0
-
-  UNION
-
-  -- Case 2: associated_wallets
-  SELECT chat_blast.blast_id, u.user_id AS to_user_id
-  FROM artist_coins ac
-  JOIN chat_blast ON chat_blast.blast_id = blast_id_param
-    AND chat_blast.audience = 'coin_holder_audience'
-    AND ac.user_id = chat_blast.from_user_id
-  JOIN sol_token_account_balances stab ON stab.mint = ac.mint
-  JOIN associated_wallets aw ON aw.wallet = stab.owner
-  JOIN users u ON u.user_id = aw.user_id
-  WHERE stab.balance > 0;
+    AND sol_user_balances.user_id != chat_blast.from_user_id;
 
 END;
 $$ LANGUAGE plpgsql;

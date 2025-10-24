@@ -1,7 +1,10 @@
+import type { IconComponent } from '../icon'
+
 export type Option<T> = {
   key: T
   text: string
   icon?: React.ReactNode
+  leftIcon?: IconComponent
   disabled?: boolean
   variant?: 'default' | 'subdued'
 }

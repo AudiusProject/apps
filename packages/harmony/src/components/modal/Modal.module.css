@@ -58,15 +58,16 @@
   width: 100vw;
   min-height: 100vh;
   z-index: var(--harmony-layer-modal);
-  user-select: none;
   display: flex;
   justify-content: center;
   pointer-events: all;
 }
 
 .body {
-  border-radius: 6px;
+  border-radius: var(--harmony-border-radius-l);
   background-color: var(--harmony-white);
+  box-shadow: var(--harmony-shadow-far);
+  border: 1px solid var(--harmony-n-100);
   overflow-y: auto;
   overflow-x: hidden;
   max-height: 85vh;
@@ -104,7 +105,7 @@
 .headerContainer {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--harmony-n-200);
+  border-bottom: 1px solid var(--harmony-n-100);
   padding: 20px 0px;
 }
 

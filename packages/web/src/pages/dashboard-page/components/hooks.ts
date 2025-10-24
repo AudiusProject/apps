@@ -8,14 +8,12 @@ import {
 import {
   Collection,
   Track,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import {
   IconCart,
-  IconCollectible,
   IconSparkles,
   IconVisibilityHidden,
   IconVisibilityPublic
@@ -70,7 +68,7 @@ export const useFormattedTrackData = () => {
 
 /**
  * Returns a set of arrays that contain the logged-in user's tracks filtered by
- * whether the tracks are public, special access, hidden, premium, or collectible gated.
+ * whether the tracks are public, special access, hidden, or premium.
  * Also returns a boolean indicating whether the user has only one type of track.
  */
 const useSegregatedTrackData = () => {
@@ -80,8 +78,7 @@ const useSegregatedTrackData = () => {
     publicTracks,
     specialAccessTracks,
     hiddenTracks,
-    premiumTracks,
-    collectibleGatedTracks
+    premiumTracks
   } = useMemo(() => {
     const publicTracks = tracks.filter(
       (data) => data.is_unlisted === false && !data.is_stream_gated
@@ -98,18 +95,12 @@ const useSegregatedTrackData = () => {
         data.is_stream_gated &&
         isContentUSDCPurchaseGated(data.stream_conditions)
     )
-    const collectibleGatedTracks = tracks.filter(
-      (data) =>
-        data.is_stream_gated &&
-        isContentCollectibleGated(data.stream_conditions)
-    )
 
     const arrays = [
       publicTracks,
       specialAccessTracks,
       hiddenTracks,
-      premiumTracks,
-      collectibleGatedTracks
+      premiumTracks
     ]
     const nonEmptyArrays = arrays.filter((arr) => arr.length > 0)
     const hasOnlyOneSection = nonEmptyArrays.length <= 1
@@ -119,8 +110,7 @@ const useSegregatedTrackData = () => {
       publicTracks,
       specialAccessTracks,
       hiddenTracks,
-      premiumTracks,
-      collectibleGatedTracks
+      premiumTracks
     }
   }, [tracks])
 
@@ -129,8 +119,7 @@ const useSegregatedTrackData = () => {
     publicTracks,
     specialAccessTracks,
     hiddenTracks,
-    premiumTracks,
-    collectibleGatedTracks
+    premiumTracks
   }
 }
 
@@ -145,13 +134,8 @@ export const useFilteredTrackData = ({
   filterText: string
 }) => {
   const tracks = useFormattedTrackData()
-  const {
-    publicTracks,
-    specialAccessTracks,
-    hiddenTracks,
-    premiumTracks,
-    collectibleGatedTracks
-  } = useSegregatedTrackData()
+  const { publicTracks, specialAccessTracks, hiddenTracks, premiumTracks } =
+    useSegregatedTrackData()
 
   const filteredData = useMemo(() => {
     let filteredData: DataSourceTrack[] = tracks
@@ -164,9 +148,6 @@ export const useFilteredTrackData = ({
         break
       case TrackFilters.SPECIAL_ACCESS:
         filteredData = specialAccessTracks
-        break
-      case TrackFilters.COLLECTIBLE_GATED:
-        filteredData = collectibleGatedTracks
         break
       case TrackFilters.HIDDEN:
         filteredData = hiddenTracks
@@ -184,7 +165,6 @@ export const useFilteredTrackData = ({
 
     return filteredData
   }, [
-    collectibleGatedTracks,
     filterText,
     hiddenTracks,
     premiumTracks,
@@ -206,7 +186,6 @@ export const useArtistDashboardTrackFilters = () => {
     specialAccessTracks,
     hiddenTracks,
     premiumTracks,
-    collectibleGatedTracks,
     hasOnlyOneSection
   } = useSegregatedTrackData()
 
@@ -235,14 +214,6 @@ export const useArtistDashboardTrackFilters = () => {
         value: TrackFilters.SPECIAL_ACCESS
       })
     }
-    if (collectibleGatedTracks.length) {
-      filterButtonTrackOptions.push({
-        id: TrackFilters.COLLECTIBLE_GATED,
-        label: messages.gated,
-        icon: IconCollectible,
-        value: TrackFilters.COLLECTIBLE_GATED
-      })
-    }
     if (hiddenTracks.length) {
       filterButtonTrackOptions.push({
         id: TrackFilters.HIDDEN,
@@ -252,7 +223,7 @@ export const useArtistDashboardTrackFilters = () => {
       })
     }
     return filterButtonTrackOptions
-  }, [collectibleGatedTracks, hiddenTracks, premiumTracks, specialAccessTracks])
+  }, [hiddenTracks, premiumTracks, specialAccessTracks])
 
   return { filterButtonOptions, hasOnlyOneSection }
 }

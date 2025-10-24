@@ -3,6 +3,7 @@ import {
   MouseEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -73,7 +74,7 @@ export const dateSorter = (accessor: string) => (rowA: any, rowB: any) => {
   return 0
 }
 
-// Used in TracksTable, CollectiblesPlaylistTable
+// Used in TracksTable
 const isEmptyRowDefault = (row: any) => {
   return Boolean(!row?.original?.uid || row?.original?.kind === Kind.EMPTY)
 }
@@ -261,9 +262,13 @@ export const Table = ({
         {/* Sorting Container */}
         <div {...column.getSortByToggleProps()} title=''>
           <div className={styles.textCell}>
-            <Tooltip text={column.sortTitle} mount='page'>
-              {column.render('Header')}
-            </Tooltip>
+            {column.sortTitle ? (
+              <Tooltip text={column.sortTitle} mount='page'>
+                {column.render('Header')}
+              </Tooltip>
+            ) : (
+              column.render('Header')
+            )}
           </div>
           {!column.disableSortBy ? (
             <div className={styles.sortCaretContainer}>
@@ -688,6 +693,13 @@ export const Table = ({
     wrapperClassName
   ])
 
+  // Force the window scroller to update its position
+  // after the DOM has laid out
+  const wsRef = useRef<WindowScroller>(null)
+  useLayoutEffect(() => {
+    wsRef.current?.updatePosition()
+  }, [])
+
   const renderVirtualizedContent = useCallback(() => {
     return (
       <InfiniteLoader
@@ -698,7 +710,7 @@ export const Table = ({
         minimumBatchSize={fetchBatchSize}
       >
         {({ onRowsRendered, registerChild: registerListChild }) => (
-          <WindowScroller scrollElement={scrollRef?.current}>
+          <WindowScroller ref={wsRef} scrollElement={scrollRef?.current}>
             {({
               height,
               registerChild,

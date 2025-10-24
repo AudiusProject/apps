@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { useUSDCPurchaseConfig } from '@audius/common/hooks'
+import { stemsAndDownloadsMessages as messages } from '@audius/common/messages'
 import {
   AccessConditions,
   DownloadTrackAvailabilityType,
@@ -45,18 +46,6 @@ import {
   StemsAndDownloadsFormValues,
   STREAM_CONDITIONS
 } from './types'
-
-const messages = {
-  title: 'Stems & Downloads',
-  description:
-    "Upload your track's source files and customize how fans download your files.",
-  values: {
-    allowDownload: 'Full Track Available',
-    followerGated: 'Followers Only'
-  },
-  price: (price: number) =>
-    price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-}
 
 type StemsAndDownloadsFieldProps = {
   isUpload: boolean

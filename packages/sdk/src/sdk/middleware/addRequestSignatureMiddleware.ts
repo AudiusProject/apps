@@ -5,7 +5,11 @@ import {
   type RequestContext,
   type FetchParams
 } from '../api/generated/default'
-import { HedgehogWalletNotFoundError } from '../services/AudiusWalletClient'
+import {
+  HedgehogWalletNotFoundError,
+  createAppWalletClient,
+  type AudiusWalletClient
+} from '../services/AudiusWalletClient'
 import { ServicesContainer } from '../types'
 
 const SIGNATURE_EXPIRY_MS =
@@ -19,15 +23,20 @@ const SIGNATURE_HEADER = 'Encoded-Data-Signature'
  * @param options the middleware options
  */
 export const addRequestSignatureMiddleware = ({
-  services
+  services,
+  apiKey,
+  apiSecret
 }: {
   services: Pick<ServicesContainer, 'audiusWalletClient' | 'logger'>
+  apiKey?: string
+  apiSecret?: string
 }): Middleware => {
   const mutex = new Mutex()
   let message: string | null = null
   let signatureAddress: string | null = null
   let signature: string | null = null
   let timestamp: number | null = null
+  let appWalletClient: AudiusWalletClient | null = null
 
   const getSignature = async () => {
     // Run this exclusively to prevent multiple requests from updating the signature at the same time
@@ -35,7 +44,16 @@ export const addRequestSignatureMiddleware = ({
     return mutex.runExclusive(async () => {
       const { audiusWalletClient, logger } = services
       try {
-        const [currentAddress] = await audiusWalletClient.getAddresses()
+        // Prefer signing with audiusWalletClient if provided
+        if (apiSecret && !audiusWalletClient) {
+          appWalletClient = createAppWalletClient({
+            apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
+            apiSecret
+          })
+        }
+
+        const signingClient = audiusWalletClient ?? appWalletClient
+        const [currentAddress] = await signingClient.getAddresses()
         const currentTimestamp = new Date().getTime()
         const isExpired =
           !timestamp || timestamp + SIGNATURE_EXPIRY_MS < currentTimestamp
@@ -54,7 +72,7 @@ export const addRequestSignatureMiddleware = ({
 
           const m = `signature:${currentTimestamp}`
 
-          signature = await audiusWalletClient.signMessage({
+          signature = await signingClient.signMessage({
             message: m
           })
 

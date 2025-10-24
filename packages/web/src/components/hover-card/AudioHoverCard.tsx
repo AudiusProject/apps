@@ -1,10 +1,9 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
-import { useAudioBalance, useCurrentUserId, useUser } from '@audius/common/api'
+import { useCoinBalance } from '@audius/common/api'
 import { AudioTiers, BadgeTier, ID } from '@audius/common/models'
-import { AUDIO_PAGE } from '@audius/common/src/utils/route'
-import { formatCount } from '@audius/common/utils'
-import { AUDIO, AudioWei } from '@audius/fixed-decimal'
+import { AUDIO_TICKER } from '@audius/common/store'
+import { formatCount, route } from '@audius/common/utils'
 import {
   HoverCard,
   HoverCardHeader,
@@ -19,6 +18,8 @@ import {
   useTheme
 } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'
+
+import { env } from 'services/env'
 
 import { HoverCardBody } from './HoverCardBody'
 
@@ -54,12 +55,6 @@ const getBadgeName = (tier: BadgeTier) => {
   return `${tier} Badge`
 }
 
-const formatBalance = (balance: string | AudioWei | undefined | null) => {
-  if (!balance) return '0'
-  const audioValue = AUDIO(BigInt(balance))
-  return formatCount(Number(audioValue.toFixed(2)))
-}
-
 /**
  * A complete HoverCard for $AUDIO badge tiers that includes both header and body
  */
@@ -76,20 +71,28 @@ export const AudioHoverCard = ({
   const navigate = useNavigate()
   const { cornerRadius } = useTheme()
 
-  // Get user's formatted balance directly using select
-  const { data: userBalance = '0' } = useUser(userId, {
-    select: (user) => formatBalance(user?.total_balance)
-  })
-  const { data: currentUserId } = useCurrentUserId()
-  const isCurrentUser = currentUserId === userId
-  const { accountBalance: currentUserBalance } = useAudioBalance()
-  const formattedBalance = isCurrentUser
-    ? formatBalance(currentUserBalance)
-    : userBalance
+  // Track hover state to conditionally fetch token balance
+  const [isHovered, setIsHovered] = useState(false)
 
-  const handleNavigateToAudioPage = useCallback(() => {
-    navigate(AUDIO_PAGE)
-  }, [navigate])
+  const handleHover = useCallback((hovered: boolean) => {
+    setIsHovered(hovered)
+  }, [])
+
+  const { data: tokenBalance } = useCoinBalance({
+    mint: env.WAUDIO_MINT_ADDRESS,
+    userId,
+    enabled: isHovered
+  })
+
+  const formattedBalance = tokenBalance
+    ? formatCount(Number(tokenBalance.balance))
+    : null
+
+  const handleClick = useCallback(() => {
+    onClick?.()
+    onClose?.()
+    navigate(route.coinPage(AUDIO_TICKER))
+  }, [navigate, onClick, onClose])
 
   return (
     <HoverCard
@@ -98,7 +101,7 @@ export const AudioHoverCard = ({
           <HoverCardHeader
             iconLeft={audioTierBadgeMap[tier]}
             title={getBadgeName(tier)}
-            onClick={handleNavigateToAudioPage}
+            onClick={handleClick}
             onClose={onClose}
             iconRight={IconArrowRight}
           />
@@ -116,8 +119,9 @@ export const AudioHoverCard = ({
       }
       anchorOrigin={anchorOrigin}
       transformOrigin={transformOrigin}
-      onClick={onClick}
+      onClick={handleClick}
       triggeredBy={triggeredBy}
+      onHover={handleHover}
     >
       {children}
     </HoverCard>

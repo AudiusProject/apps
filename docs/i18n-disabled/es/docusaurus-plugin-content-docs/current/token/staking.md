@@ -49,7 +49,7 @@ La decisión de utilizar dos tipos de nodos permite a Audius escalar en correlac
 
 ### **Staking en Audius**
 
-Para hacer stake en Audio, los operadores de nodos pueden configurar contenido y/o nodos de descubrimiento usando [estos recursos](https://github.com/AudiusProject/audius-protocol/wiki/Staking-Resources).
+Para hacer stake en Audio, los operadores de nodos pueden configurar contenido y/o nodos de descubrimiento usando [estos recursos](https://github.com/AudiusProject/apps/wiki/Staking-Resources).
 
 https://twitter.com/Figment_io/status/1324763638729740288?s=20
 

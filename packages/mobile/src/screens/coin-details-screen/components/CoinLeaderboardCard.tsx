@@ -1,6 +1,10 @@
 import { useCallback } from 'react'
 
-import { useArtistCoinMembers, useUsers } from '@audius/common/api'
+import {
+  useArtistCoinMembers,
+  useArtistCoinMembersCount,
+  useUsers
+} from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { TouchableOpacity } from 'react-native'
 
@@ -26,6 +30,7 @@ export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
     leaderboardUsers?.map((user) => user.userId)
   )
   const isPending = isLeaderboardPending || isUsersPending
+  const { data: membersCount = 0 } = useArtistCoinMembersCount({ mint })
 
   const handleViewLeaderboard = useCallback(() => {
     navigation.navigate('CoinLeaderboard', {
@@ -43,42 +48,47 @@ export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
       column
       alignItems='flex-start'
     >
-      <Flex alignItems='center' gap='xs' pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+      <Flex row alignItems='center' gap='xs' pv='l' ph='xl'>
+        <Text variant='heading' size='s'>
           {messages.title}
         </Text>
+        {membersCount ? (
+          <Text variant='heading' size='s' color='subdued'>
+            ({membersCount})
+          </Text>
+        ) : null}
       </Flex>
       <Divider style={{ width: '100%' }} />
-      <Flex
-        row
-        pv='l'
-        ph='xl'
-        justifyContent='space-between'
-        alignItems='center'
-        w='100%'
-      >
-        {isPending ? (
-          <Flex alignItems='center'>
-            <LoadingSpinner />
-          </Flex>
-        ) : (
-          <TouchableOpacity onPress={handleViewLeaderboard}>
+      <TouchableOpacity onPress={handleViewLeaderboard} disabled={isPending}>
+        <Flex
+          row
+          pv='l'
+          ph='xl'
+          justifyContent='space-between'
+          alignItems='center'
+          w='100%'
+        >
+          {isPending ? (
+            <Flex alignItems='center' flex={1}>
+              <LoadingSpinner />
+            </Flex>
+          ) : (
             <ProfilePictureList
               interactive={false}
               users={users ?? []}
               totalUserCount={leaderboardUsers?.length ?? 0}
               limit={7}
             />
-          </TouchableOpacity>
-        )}
-        <IconButton
-          color='subdued'
-          icon={IconCaretRight}
-          aria-label='Open the leaderboard modal'
-          onPress={handleViewLeaderboard}
-          disabled={isPending}
-        />
-      </Flex>
+          )}
+          <IconButton
+            color='subdued'
+            icon={IconCaretRight}
+            aria-label='Open the leaderboard modal'
+            onPress={handleViewLeaderboard}
+            disabled={isPending}
+          />
+        </Flex>
+      </TouchableOpacity>
     </Paper>
   )
 }

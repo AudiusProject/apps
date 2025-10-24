@@ -21,6 +21,11 @@ export const TextLink = <ParamList extends ReactNavigation.RootParamList>(
   const isTo = isInternalLinkToProps(props)
   const isUrl = isExternalLinkProps(props)
 
+  // If isExternal is explicitly set to true, force external link behavior
+  if (props.isExternal && isUrl) {
+    return <ExternalLink {...props} />
+  }
+
   if (isTo) {
     return <InternalLinkTo {...props} />
   } else if (isUrl && isInternalAudiusUrl(props.url)) {

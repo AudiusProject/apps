@@ -164,7 +164,7 @@ contract('Random testing', async (accounts) => {
     const curBlockDiff = await claimsManager.getFundingRoundBlockDiff.call()
     sysLog(`Current block diff: ${curBlockDiff}`)
     // Local dev sanity config updates
-    // https://github.com/AudiusProject/audius-protocol/commit/12116eede803b395a9518c707360e7b633cf6ad2
+    // https://github.com/AudiusProject/apps/commit/12116eede803b395a9518c707360e7b633cf6ad2
     // Update funding found block diff
     await governance.guardianExecuteTransaction(
       claimsManagerProxyKey,
@@ -548,7 +548,7 @@ contract('Random testing', async (accounts) => {
       let undelegateTargetSP = Object.keys(delegatorInformation)
       let randomlySelectedUndelegateTarget =
         undelegateTargetSP[
-          Math.floor(Math.random() * undelegateTargetSP.length)
+        Math.floor(Math.random() * undelegateTargetSP.length)
         ]
       // TMP Remove all stake
       // TODO: randomize this quantity as well
@@ -723,12 +723,10 @@ contract('Random testing', async (accounts) => {
   const validateAccountStakeBalance = async (account) => {
     let info = await getAccountStakeInfo(account)
     let infoStr = `validation |\
-inStaking=${info.totalInStakingContract.toString()}, deployerCut=${
-      info.spDetails.deployerCut
-    } validBounds=${info.spDetails.validBounds} \
-outside=${info.outsideStake.toString()}=(deployerStake=${
-      info.spDetails.deployerStake
-    } delegation=${info.totalDelegatedToSP}), `
+inStaking=${info.totalInStakingContract.toString()}, deployerCut=${info.spDetails.deployerCut
+      } validBounds=${info.spDetails.validBounds} \
+outside=${info.outsideStake.toString()}=(deployerStake=${info.spDetails.deployerStake
+      } delegation=${info.totalDelegatedToSP}), `
     assert.isTrue(
       info.totalInStakingContract.eq(info.outsideStake),
       `Imbalanced stake for account ${account} - ${infoStr}`

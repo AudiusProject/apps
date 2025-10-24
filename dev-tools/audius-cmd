@@ -2,8 +2,8 @@
 set -e
 
 PROJECT_DIR=$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")
-cd "$PROJECT_DIR"/dev-tools/compose  # audius-protocol/dev-tools/compose
-export COMPOSE_PROJECT_NAME='audius-protocol'
+cd "$PROJECT_DIR"/dev-tools/compose  # apps/dev-tools/compose
+export COMPOSE_PROJECT_NAME='audius'
 
 if [[ "$1" == "build" ]]; then
 	turbo run build --filter=@audius/commands

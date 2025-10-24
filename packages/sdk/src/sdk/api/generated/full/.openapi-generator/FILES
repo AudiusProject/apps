@@ -1,6 +1,7 @@
 .openapi-generator-ignore
 apis/ChallengesApi.ts
 apis/CidDataApi.ts
+apis/CoinsApi.ts
 apis/CommentsApi.ts
 apis/ExploreApi.ts
 apis/NotificationsApi.ts
@@ -48,6 +49,10 @@ models/CidDataResponse.ts
 models/ClaimableRewardNotification.ts
 models/ClaimableRewardNotificationAction.ts
 models/ClaimableRewardNotificationActionData.ts
+models/Coin.ts
+models/CoinMembersCountResponse.ts
+models/CoinResponse.ts
+models/CoinsResponse.ts
 models/CollectionActivityFull.ts
 models/CollectionActivityFullWithoutTracks.ts
 models/CollectionLibraryResponseFull.ts
@@ -73,12 +78,16 @@ models/CosignNotificationActionData.ts
 models/CoverArt.ts
 models/CoverPhoto.ts
 models/CoverPhotoFull.ts
+models/CreateCoinRequest.ts
+models/CreateCoinResponse.ts
+models/CreateCoinResponseData.ts
 models/CreateNotification.ts
 models/CreateNotificationAction.ts
 models/CreateNotificationActionData.ts
 models/CreatePlaylistNotificationActionData.ts
 models/CreateTrackNotificationActionData.ts
 models/DataAndType.ts
+models/ExtendedTokenGate.ts
 models/FanRemixContestEndedNotification.ts
 models/FanRemixContestEndedNotificationAction.ts
 models/FanRemixContestEndedNotificationActionData.ts
@@ -137,9 +146,6 @@ models/MilestoneNotificationAction.ts
 models/MilestoneNotificationActionData.ts
 models/NftCollection.ts
 models/NftGate.ts
-models/NftGatedTrackSignature.ts
-models/NftGatedTrackSignatureData.ts
-models/NftGatedTrackSignaturesResponse.ts
 models/Notification.ts
 models/Notifications.ts
 models/NotificationsResponse.ts
@@ -223,6 +229,7 @@ models/TierChangeNotification.ts
 models/TierChangeNotificationAction.ts
 models/TierChangeNotificationActionData.ts
 models/TipGate.ts
+models/TokenGate.ts
 models/TopGenreUsersResponseFull.ts
 models/TopUsersResponseFull.ts
 models/TrackActivityFull.ts
@@ -256,6 +263,8 @@ models/TrendingTimesIds.ts
 models/TrendingUndergroundNotification.ts
 models/TrendingUndergroundNotificationAction.ts
 models/TrendingUndergroundNotificationActionData.ts
+models/UpdateCoinRequest.ts
+models/UpdateCoinResponse.ts
 models/UrlWithMirrors.ts
 models/UsdcGate.ts
 models/UsdcPurchaseBuyerNotification.ts
@@ -269,6 +278,7 @@ models/UserCommentsResponseFull.ts
 models/UserFeedItem.ts
 models/UserFeedResponse.ts
 models/UserFull.ts
+models/UserFullArtistCoinBadge.ts
 models/UserManager.ts
 models/UserMilestoneNotificationActionData.ts
 models/UserSubscribers.ts

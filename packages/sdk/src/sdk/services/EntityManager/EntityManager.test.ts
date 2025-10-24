@@ -20,9 +20,7 @@ import { Action, EntityType } from './types'
 
 const userWallet = '0xc0ffee254729296a45a3885639AC7E10F9d54979'
 
-const discoveryNode = 'https://discovery-provider.audius.co'
-
-vitest.mock('../DiscoveryNodeSelector')
+const api = 'https://api.audius.co'
 
 const audiusWalletClient = createAppWalletClient({ apiKey: userWallet }).extend(
   () => ({
@@ -32,7 +30,7 @@ const audiusWalletClient = createAppWalletClient({ apiKey: userWallet }).extend(
 )
 
 const mswHandlers = [
-  rest.post(`${discoveryNode}/relay`, (_req, res, ctx) => {
+  rest.post(`${api}/relay`, (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -44,7 +42,7 @@ const mswHandlers = [
     )
   }),
 
-  rest.get(`${discoveryNode}/block_confirmation`, (req, res, ctx) => {
+  rest.get(`${api}/block_confirmation`, (req, res, ctx) => {
     const blockNumber = req.url.searchParams.get('blocknumber')
 
     const data = {
@@ -70,7 +68,7 @@ const server = setupServer(...mswHandlers)
 const entityManager = new EntityManagerClient({
   ...getDefaultEntityManagerConfig(developmentConfig),
   audiusWalletClient,
-  endpoint: discoveryNode
+  endpoint: api
 })
 
 describe('EntityManager', () => {

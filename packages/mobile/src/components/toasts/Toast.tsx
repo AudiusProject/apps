@@ -4,7 +4,7 @@ import type { Toast as ToastType } from '@audius/common/store'
 import { toastActions } from '@audius/common/store'
 import { Link } from '@react-navigation/native'
 import type { To } from '@react-navigation/native/lib/typescript/src/useLinkTo'
-import { Animated, Platform, View } from 'react-native'
+import { Animated, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
 
@@ -71,11 +71,7 @@ export const Toast = (props: ToastProps) => {
   const dispatch = useDispatch()
 
   const handleDismiss = useCallback(() => {
-    // Hack alert: For some reason, dismissing toasts on Android breaks the toast
-    // system. It should be okay to let toasts persist on android for now.
-    if (Platform.OS === 'ios') {
-      dispatch(dismissToast({ key }))
-    }
+    dispatch(dismissToast({ key }))
   }, [dispatch, key])
 
   const animateOut = useCallback(() => {

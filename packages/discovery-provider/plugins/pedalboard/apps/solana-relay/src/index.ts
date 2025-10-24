@@ -1,6 +1,7 @@
 import { json } from 'body-parser'
 import cors from 'cors'
 import express from 'express'
+import multer from 'multer'
 
 import { config } from './config'
 import { logger } from './logger'
@@ -17,6 +18,12 @@ import { cache } from './routes/cache'
 import { feePayer } from './routes/feePayer'
 import { health } from './routes/health/health'
 import { location } from './routes/instruction/location'
+import { claimFees } from './routes/launchpad/claim_fees'
+import {
+  firstBuyQuote,
+  getLaunchpadConfigRoute
+} from './routes/launchpad/first_buy_quote'
+import { confirmLaunchCoin, launchCoin } from './routes/launchpad/launch_coin'
 import { listen } from './routes/listen/listen'
 import { relay } from './routes/relay/relay'
 
@@ -32,8 +39,21 @@ const main = async () => {
   app.use(incomingRequestLogger)
   app.get('/solana/health_check', health)
   app.post('/solana/tracks/:trackId/listen', listen)
+
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 15 * 1024 * 1024 } // 15MB limit
+  })
+  // launchpad endpoints don't need user/discovery validation, so register them before middleware
+  app.post('/solana/launchpad/launch_coin', upload.single('image'), launchCoin)
+  app.get('/solana/launchpad/claim_fees', claimFees)
+  app.get('/solana/launchpad/first_buy_quote', firstBuyQuote)
+  app.get('/solana/launchpad/config', getLaunchpadConfigRoute)
+
+  // Apply middleware for routes that need user/discovery validation
   app.use(userSignerRecoveryMiddleware)
   app.use(discoveryNodeSignerRecoveryMiddleware)
+  app.post('/solana/launchpad/confirm_launch_coin', confirmLaunchCoin)
   app.post('/solana/relay', relay)
   app.post('/solana/cache', cache)
   app.get('/solana/feePayer', feePayer)
@@ -41,9 +61,12 @@ const main = async () => {
   app.use(outgoingRequestLogger)
   app.use(errorHandlerMiddleware)
 
-  app.listen(serverPort, serverHost, () => {
+  const server = app.listen(serverPort, serverHost, () => {
     logger.info({ serverHost, serverPort }, 'server initialized')
   })
+
+  // Set server timeout to 3 minutes to accommodate long-running requests (like launch_coin)
+  server.timeout = 3 * 60 * 1000
 }
 
 main().catch((e) => logger.error({ error: e }, 'Fatal error in main!'))

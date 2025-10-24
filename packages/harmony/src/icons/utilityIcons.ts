@@ -7,6 +7,7 @@ import IconArrowLeftSVG from '../assets/icons/ArrowLeft.svg'
 import IconArrowRightSVG from '../assets/icons/ArrowRight.svg'
 import IconArrowRotateSVG from '../assets/icons/ArrowRotate.svg'
 import IconArrowUpToLineSVG from '../assets/icons/ArrowUpToLine.svg'
+import IconArtistCoinSVG from '../assets/icons/ArtistCoin.svg'
 import IconBlogSVG from '../assets/icons/Blog.svg'
 import IconBoxHeartSVG from '../assets/icons/BoxHeart.svg'
 import IconCalendarDaySVG from '../assets/icons/CalendarDay.svg'
@@ -30,7 +31,7 @@ import IconCloudDownloadInactiveSVG from '../assets/icons/CloudDownloadInactive.
 import IconCloudDownloadPausedSVG from '../assets/icons/CloudDownloadPaused.svg'
 import IconCloudDownloadQueuedSVG from '../assets/icons/CloudDownloadQueued.svg'
 import IconCloudUploadSVG from '../assets/icons/CloudUpload.svg'
-import IconCollectibleSVG from '../assets/icons/Collectible.svg'
+import IconCoinGatedLabelSVG from '../assets/icons/CoinGatedLabel.svg'
 import IconComposeSVG from '../assets/icons/Compose.svg'
 import IconCopySVG from '../assets/icons/Copy.svg'
 import IconCreatePlaylistSVG from '../assets/icons/CreatePlaylist.svg'
@@ -254,7 +255,6 @@ export const IconPin = IconPinSVG as IconComponent
 export const IconUser = IconUserSVG as IconComponent
 export const IconUserArrowRotate = IconUserArrowRotateSVG as IconComponent
 export const IconArrowRotate = IconArrowRotateSVG as IconComponent
-export const IconCollectible = IconCollectibleSVG as IconComponent
 export const IconPlay = IconPlaySVG as IconComponent
 export const IconUserFollow = IconUserFollowSVG as IconComponent
 export const IconCompose = IconComposeSVG as IconComponent
@@ -315,3 +315,5 @@ export const IconPlaybackPause = IconPlaybackPauseSVG as IconComponent
 export const IconPlaybackPlay = IconPlaybackPlaySVG as IconComponent
 export const IconQrCode = IconQrCodeSVG as IconComponent
 export const IconJupiterLogo = IconJupiterLogoSVG as IconComponent
+export const IconArtistCoin = IconArtistCoinSVG as IconComponent
+export const IconCoinGatedLabel = IconCoinGatedLabelSVG as IconComponent

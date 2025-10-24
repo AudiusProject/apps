@@ -209,14 +209,6 @@ const NodeOverview = ({
             }
           />
         )}
-        {health?.chainError && (
-          <ServiceDetail
-            label={messages.chain}
-            value={
-              <TextWithIcon icon={<IconWarning />} text={health.chainError} />
-            }
-          />
-        )}
         {!health?.startedAt && (
           <ServiceDetail
             label={messages.uptime}
@@ -343,7 +335,6 @@ const NodeOverview = ({
                     delegateOwnerWallet || health?.delegateOwnerWallet || ''
                   }
                   defaultEndpoint={endpoint}
-                  defaultServiceType={serviceType}
                 />
               </Box>
             )}

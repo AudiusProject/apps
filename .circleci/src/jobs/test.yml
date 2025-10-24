@@ -4,15 +4,15 @@ parameters:
     type: string
 machine: true
 resource_class: audiusproject/gcp-n2-standard-4
-working_directory: ~/audius-protocol
+working_directory: ~/apps
 steps:
   # - run:
   #     name: clean dir
-  #     command: cd ~; [ -d ~/audius-protocol ] && rm -rf ~/audius-protocol
+  #     command: cd ~; [ -d ~/apps ] && rm -rf ~/apps
   - checkout
   - attach_workspace:
       at: ./
-  - run: AUDIUS_DEV=false bash ~/audius-protocol/dev-tools/setup.sh
+  - run: AUDIUS_DEV=false bash ~/apps/dev-tools/setup.sh
   - run:
       name: test run << parameters.service >>
       no_output_timeout: 20m

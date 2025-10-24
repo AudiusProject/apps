@@ -146,7 +146,7 @@ export const formOAuthResponse = async ({
   let signedData: { data: string; signature: string }
   try {
     const sdk = await audiusSdk()
-    signedData = await audiusBackendInstance.signDiscoveryNodeRequest({
+    signedData = await audiusBackendInstance.signAPIRequest({
       sdk,
       input: message
     })

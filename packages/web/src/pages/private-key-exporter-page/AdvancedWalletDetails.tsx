@@ -17,6 +17,8 @@ import { copyToClipboard } from 'utils/clipboardUtil'
 
 const messages = {
   advancedWalletDetails: 'Advanced Wallet Details',
+  solanaWallet: 'Solana Wallet',
+  ethereumWallet: 'Ethereum Wallet',
   address: 'ADDRESS',
   privateKey: 'PRIVATE KEY',
   copied: 'Copied to Clipboard!'
@@ -90,23 +92,38 @@ const Key = ({ label, value, isPrivate }: KeyProps) => {
 }
 
 export const AdvancedWalletDetails = () => {
-  const [publicKey, setPublicKey] = useState<Nullable<string>>(null)
-  const [encodedPrivateKey, setEncodedPrivateKey] =
+  const [solanaPublicKey, setSolanaPublicKey] = useState<Nullable<string>>(null)
+  const [solanaEncodedPrivateKey, setSolanaEncodedPrivateKey] =
     useState<Nullable<string>>(null)
-  const { solanaWalletService } = useQueryContext()
+  const [ethAddress, setEthAddress] = useState<Nullable<string>>(null)
+  const [ethPrivateKey, setEthPrivateKey] = useState<Nullable<string>>(null)
+  const { solanaWalletService, authService } = useQueryContext()
 
   useEffect(() => {
     const fetchKeypair = async () => {
-      const keypair = await solanaWalletService.getKeypair()
-      if (keypair) {
-        setPublicKey(keypair.publicKey.toString())
-        setEncodedPrivateKey(pkg.encode(keypair.secretKey))
+      // Fetch Solana wallet details
+      const solanaKeypair = await solanaWalletService.getKeypair()
+      if (solanaKeypair) {
+        setSolanaPublicKey(solanaKeypair.publicKey.toString())
+        setSolanaEncodedPrivateKey(pkg.encode(solanaKeypair.secretKey))
+      }
+
+      // Fetch Ethereum wallet details
+      const hedgehogWallet = authService.getWallet()
+      if (hedgehogWallet) {
+        setEthAddress(hedgehogWallet.getAddressString())
+        setEthPrivateKey(hedgehogWallet.getPrivateKeyString())
       }
     }
     fetchKeypair()
-  }, [solanaWalletService])
+  }, [solanaWalletService, authService])
 
-  if (!publicKey || !encodedPrivateKey) {
+  if (
+    !solanaPublicKey ||
+    !solanaEncodedPrivateKey ||
+    !ethAddress ||
+    !ethPrivateKey
+  ) {
     return null
   }
 
@@ -115,8 +132,26 @@ export const AdvancedWalletDetails = () => {
       <Text variant='heading' size='s'>
         {messages.advancedWalletDetails}
       </Text>
-      <Key label={messages.address} value={publicKey} />
-      <Key label={messages.privateKey} value={encodedPrivateKey} isPrivate />
+
+      {/* Solana Wallet */}
+      <Text variant='title' size='s'>
+        {messages.solanaWallet}
+      </Text>
+      <Key label={messages.address} value={solanaPublicKey} />
+      <Key
+        label={messages.privateKey}
+        value={solanaEncodedPrivateKey}
+        isPrivate
+      />
+
+      {/* Ethereum Wallet */}
+      <Box mt='l'>
+        <Text variant='title' size='s'>
+          {messages.ethereumWallet}
+        </Text>
+      </Box>
+      <Key label={messages.address} value={ethAddress} />
+      <Key label={messages.privateKey} value={ethPrivateKey} isPrivate />
     </Flex>
   )
 }

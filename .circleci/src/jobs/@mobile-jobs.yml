@@ -1,5 +1,5 @@
 mobile-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -20,7 +20,7 @@ mobile-init:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     - run:
         name: lint & typecheck
@@ -43,7 +43,7 @@ mobile-init:
           - packages/mobile/android/libs
 
 mobile-build-staging-ios:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -62,7 +62,7 @@ mobile-build-staging-ios:
         env: '.env.stage'
 
 mobile-build-upload-staging-ios:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -81,7 +81,7 @@ mobile-build-upload-staging-ios:
         env: '.env.stage'
 
 mobile-build-production-ios:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -100,7 +100,7 @@ mobile-build-production-ios:
         env: '.env.prod'
 
 mobile-build-upload-production-ios-if-full-release:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -120,7 +120,7 @@ mobile-build-upload-production-ios-if-full-release:
         slack-notify: false
 
 mobile-build-upload-releasecandidate-ios:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -139,7 +139,7 @@ mobile-build-upload-releasecandidate-ios:
         env: '.env.prod'
 
 mobile-build-upload-staging-releasecandidate-ios:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   # run on macos so app can be created and signed.
   resource_class: macos.m1.medium.gen1
   macos:
@@ -158,7 +158,7 @@ mobile-build-upload-staging-releasecandidate-ios:
         env: '.env.prod'
 
 mobile-build-staging-android:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -173,7 +173,7 @@ mobile-build-staging-android:
         remote-directory: 'audius-mobile-staging'
 
 mobile-build-upload-staging-android:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -186,7 +186,7 @@ mobile-build-upload-staging-android:
         track: 'internal'
 
 mobile-build-upload-staging-releasecandidate-android:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -199,7 +199,7 @@ mobile-build-upload-staging-releasecandidate-android:
         track: 'internal'
 
 mobile-build-upload-releasecandidate-android:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -212,7 +212,7 @@ mobile-build-upload-releasecandidate-android:
         track: 'internal'
 
 mobile-build-production-android:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -227,7 +227,7 @@ mobile-build-production-android:
         remote-directory: 'audius-mobile'
 
 mobile-build-upload-production-android-if-full-release:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node
@@ -241,7 +241,7 @@ mobile-build-upload-production-android-if-full-release:
         slack-notify: false
 
 mobile-deploy-saga-dapp-store:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   resource_class: xlarge
   docker:
     - image: cimg/android:2023.08-node

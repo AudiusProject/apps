@@ -19,7 +19,6 @@ import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { AccountHeader } from '../components/AccountHeader'
 import { SkipButton } from '../components/SkipButton'
 import { Heading, Page, PageFooter, ScrollView } from '../components/layout'
-import { useFastReferral } from '../hooks/useFastReferral'
 
 const { SIGN_UP_ARTISTS_PAGE } = route
 
@@ -31,7 +30,6 @@ export const SelectGenresPage = () => {
 
   const [currentGenres, setCurrentGenres] = useState<Genre[]>([])
   const savedGenres = useSelector(getGenres)
-  const isFastReferral = useFastReferral()
   const { isMobile } = useMedia()
 
   const initialValues: SelectGenresValue = {
@@ -77,7 +75,7 @@ export const SelectGenresPage = () => {
         validationSchema={toFormikValidationSchema(selectGenresSchema)}
         validateOnMount
       >
-        {({ isValid }) => (
+        {() => (
           <Page
             as={Form}
             centered
@@ -116,12 +114,7 @@ export const SelectGenresPage = () => {
                 })}
               </Flex>
             </Flex>
-            <PageFooter
-              centered
-              sticky
-              buttonProps={{ disabled: !isValid }}
-              prefix={isFastReferral ? <SkipButton /> : null}
-            />
+            <PageFooter centered sticky postfix={<SkipButton />} />
           </Page>
         )}
       </Formik>

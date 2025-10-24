@@ -9,6 +9,8 @@ import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
+import { useTrack } from './useTrack'
+
 type GetStemsArchiveJobStatusResponse = {
   id: string
   state:
@@ -41,6 +43,11 @@ export const useDownloadTrackStems = ({ trackId }: { trackId: ID }) => {
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
+  // Use existing track data to get access information
+  const { data: trackAccess } = useTrack(trackId, {
+    select: (track) => track?.access
+  })
+
   return useMutation({
     mutationFn: async () => {
       const sdk = await audiusSdk()
@@ -51,10 +58,14 @@ export const useDownloadTrackStems = ({ trackId }: { trackId: ID }) => {
       if (!currentUserId) {
         throw new Error('Current user ID is required')
       }
+
+      // Use track access info to determine if parent track is downloadable
+      const includeParent = trackAccess?.download === true
+
       return await archiver.createStemsArchive({
         trackId: Id.parse(trackId),
         userId: Id.parse(currentUserId),
-        includeParent: true
+        includeParent
       })
     },
     onSuccess: async (response) => {

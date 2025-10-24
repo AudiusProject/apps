@@ -1,6 +1,6 @@
 # API Client Generator
 
-Generates a typed client of the Audius read-only API using a running discovery node.
+Generates a typed client of the Audius read-only API using a running API instance.
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ npm run gen:{env}:{flavor?}
 
 ### Options
 
-- `env` choices=("dev", "stage", "prod"): Which environment to choose the Discovery Provider to generate from
+- `env` choices=("dev", "stage", "prod"): Which environment to choose the API environment to generate from
   - `dev`: http://127.0.0.1:1323/
   - `stage`: https://api.staging.audius.co/
   - `prod`: https://api.audius.co

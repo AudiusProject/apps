@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, MouseEvent } from 'react'
 
+import { useArtistOwnedCoin } from '@audius/common/api'
 import {
   imageCoverPhotoBlank,
   imageProfilePicEmpty
@@ -34,6 +35,7 @@ import { ArtistRecommendationsDropdown } from 'components/artist-recommendations
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Skeleton from 'components/skeleton/Skeleton'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
+import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
 import ProfilePageBadge from 'components/user-badges/ProfilePageBadge'
 import UserBadges from 'components/user-badges/UserBadges'
@@ -41,6 +43,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
+import { BuyArtistCoinButton } from './BuyArtistCoinButton'
 import GrowingCoverPhoto from './GrowingCoverPhoto'
 import styles from './ProfileHeader.module.css'
 import { SocialLink } from './SocialLink'
@@ -215,6 +218,11 @@ const ProfileHeader = ({
     userId,
     size: SquareSizes.SIZE_150_BY_150
   })
+
+  // Artist coin detection
+  const { data: artistCoin, isPending: isArtistCoinLoading } =
+    useArtistOwnedCoin(userId)
+
   const record = useRecord()
 
   const onGoToInstagram = useCallback(() => {
@@ -333,7 +341,7 @@ const ProfileHeader = ({
               </div>
               <div className={styles.artistHandleWrapper}>
                 <div className={styles.artistHandle}>{handle}</div>
-                <FollowsYouBadge userId={userId} />
+                <FollowsYouBadge variant='flat' userId={userId} />
               </div>
             </div>
 
@@ -470,6 +478,15 @@ const ProfileHeader = ({
             artistId={userId}
             onClose={onCloseArtistRecommendations}
           />
+
+          {/* Artist coin buy button or tip button */}
+          {mode !== 'owner' &&
+            !isArtistCoinLoading &&
+            (artistCoin?.mint ? (
+              <BuyArtistCoinButton userId={userId} />
+            ) : (
+              <TipAudioButton />
+            ))}
         </div>
       )}
       {mode === 'owner' && !isEditing && <UploadButton />}

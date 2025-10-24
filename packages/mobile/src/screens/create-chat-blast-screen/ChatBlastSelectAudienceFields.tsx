@@ -2,16 +2,14 @@ import { useCallback } from 'react'
 
 import {
   useArtistCoinMembersCount,
-  useArtistCoins,
+  useArtistOwnedCoin,
   useCurrentAccountUser,
   useCurrentUserId
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { formatNumberCommas } from '@audius/common/utils'
 import { ChatBlastAudience } from '@audius/sdk'
 import { useField } from 'formik'
@@ -50,9 +48,9 @@ const messages = {
     search: 'Search for tracks with remixes'
   },
   coinHolders: {
-    label: (symbol: string) => `${symbol} Members`,
+    label: (symbol: string) => `$${symbol} Members`,
     description: (symbol: string) =>
-      `Send a bulk message to every holder of ${symbol} on Audius.`,
+      `Send a bulk message to every holder of $${symbol} on Audius.`,
     placeholder: 'Coin Holders'
   },
   count: (count: number) => ` (${formatNumberCommas(count)})`
@@ -249,22 +247,15 @@ const RemixCreatorsMessageField = () => {
 }
 
 const CoinHoldersMessageField = () => {
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coinMembersCount } = useArtistCoinMembersCount()
-  const { data: coins } = useArtistCoins({
-    owner_id: [currentUserId ?? 0],
-    limit: 1
+  const { data: coin } = useArtistOwnedCoin(currentUserId)
+  const { data: coinMembersCount } = useArtistCoinMembersCount({
+    mint: coin?.mint
   })
-  const coinSymbol = coins?.[0]?.ticker ?? ''
-  const isDisabled = !isArtistCoinEnabled || coinMembersCount === 0
-  if (!isArtistCoinEnabled) {
-    return null
-  }
+  const coinSymbol = coin?.ticker ?? ''
+  const isDisabled = coinMembersCount === 0
 
   return (
     <ExpandableRadio

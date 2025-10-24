@@ -50,7 +50,6 @@ import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import socialSagas from 'common/store/social/sagas'
 import tippingSagas from 'common/store/tipping/sagas'
 import uploadSagas from 'common/store/upload/sagas'
-import walletSagas from 'common/store/wallet/sagas'
 import { all, spawn } from 'typed-redux-saga'
 
 import collectionsSagas from 'app/store/cache/collections/sagas'
@@ -109,8 +108,6 @@ export default function* rootSaga() {
 
     // Search Users
     ...searchUsersModalSagas(),
-
-    ...walletSagas(),
 
     ...modalsSagas(),
 

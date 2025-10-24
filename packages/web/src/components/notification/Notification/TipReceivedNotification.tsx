@@ -1,21 +1,22 @@
 import { ComponentType, useCallback } from 'react'
 
 import {
-  useWriteReaction,
-  useCurrentUserId,
-  useReaction,
+  getReactionFromRawValue,
   reactionOrder,
   ReactionTypes,
-  getReactionFromRawValue,
+  useArtistCoin,
+  useCurrentUserId,
+  useReaction,
   useUser,
-  useTokenPrice
+  useWriteReaction
 } from '@audius/common/api'
 import { useUIAudio } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
-import { TipReceiveNotification, TOKEN_LISTING_MAP } from '@audius/common/store'
+import { TipReceiveNotification } from '@audius/common/store'
 
 import { make } from 'common/store/analytics/actions'
 import { XShareButton } from 'components/x-share-button/XShareButton'
+import { env } from 'services/env'
 
 import styles from './TipReceivedNotification.module.css'
 import { AudioText } from './components/AudioText'
@@ -25,7 +26,7 @@ import { NotificationHeader } from './components/NotificationHeader'
 import { NotificationTile } from './components/NotificationTile'
 import { NotificationTitle } from './components/NotificationTitle'
 import { ProfilePicture } from './components/ProfilePicture'
-import { ReactionProps, reactionMap } from './components/Reaction'
+import { reactionMap, ReactionProps } from './components/Reaction'
 import { UserNameLink } from './components/UserNameLink'
 import { IconTip } from './components/icons'
 import { useGoToProfile } from './useGoToProfile'
@@ -62,11 +63,9 @@ export const TipReceivedNotification = (
   } = notification
 
   const { data: user } = useUser(notification.entityId)
-  const { data: tokenPriceData } = useTokenPrice(
-    TOKEN_LISTING_MAP.AUDIO.address
-  )
+  const { data: tokenPriceData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
 
-  const tokenPrice = tokenPriceData?.price
+  const tokenPrice = tokenPriceData?.price?.toString()
 
   const { data: reaction } = useReaction(tipTxSignature, {
     // Only fetch if we don't have a reaction in the notification

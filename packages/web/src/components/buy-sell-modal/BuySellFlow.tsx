@@ -1,30 +1,43 @@
-import { useState, useEffect, useContext, useMemo } from 'react'
-
-import { useBuySellAnalytics } from '@audius/common/hooks'
-import { buySellMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
-import { ASSET_DETAIL_PAGE } from '@audius/common/src/utils/route'
 import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+
+import {
+  SwapStatus,
+  useArtistCoin,
+  useCoinPair,
+  useCurrentAccountUser,
+  useSwapCoins,
+  useTradeableCoins
+} from '@audius/common/api'
+import { useBuySellAnalytics, useOwnedCoins } from '@audius/common/hooks'
+import { buySellMessages as messages } from '@audius/common/messages'
+import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
+import {
+  BuySellTab,
+  Screen,
   useBuySellScreen,
   useBuySellSwap,
   useBuySellTabs,
+  buySellTabsArray,
   useBuySellTransactionData,
+  useCurrentCoinPair,
+  useSafeTokenPair,
   useSwapDisplayData,
-  BuySellTab,
-  Screen,
-  useTokenStates,
-  useCurrentTokenPair,
-  useAvailableTokens,
-  useSupportedTokenPairs,
-  useTokens
+  useCoinStates
 } from '@audius/common/store'
 import { Button, Flex, Hint, SegmentedControl, TextLink } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router-dom'
 
-import { ExternalTextLink } from 'components/link'
+import { appkitModal } from 'app/ReownAppKitModal'
 import { ModalLoading } from 'components/modal-loading'
 import { ToastContext } from 'components/toast/ToastContext'
-import { useFlag } from 'hooks/useRemoteConfig'
+import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { getPathname } from 'utils/route'
 
 import { BuyTab } from './BuyTab'
@@ -32,34 +45,35 @@ import { ConfirmSwapScreen } from './ConfirmSwapScreen'
 import { ConvertTab } from './ConvertTab'
 import { SellTab } from './SellTab'
 import { TransactionSuccessScreen } from './TransactionSuccessScreen'
-
-const WALLET_GUIDE_URL = 'https://help.audius.co/product/wallet-guide'
+import { SwapFormSkeleton } from './components/SwapSkeletons'
 
 type BuySellFlowProps = {
   onClose: () => void
   openAddCashModal: () => void
   onScreenChange: (screen: Screen) => void
   onLoadingStateChange?: (isLoading: boolean) => void
+  initialTicker?: string
+  initialTab?: BuySellTab
+  setResetState: (resetState: () => void) => void
 }
 
 export const BuySellFlow = (props: BuySellFlowProps) => {
-  const { onClose, openAddCashModal, onScreenChange, onLoadingStateChange } =
-    props
+  const {
+    onClose,
+    openAddCashModal,
+    onScreenChange,
+    onLoadingStateChange,
+    initialTicker,
+    initialTab,
+    setResetState
+  } = props
   const { toast } = useContext(ToastContext)
-  const { isEnabled: isArtistCoinsEnabled } = useFlag(FeatureFlags.ARTIST_COINS)
   const {
     trackSwapRequested,
     trackSwapSuccess,
     trackSwapFailure,
     trackAddFundsClicked
   } = useBuySellAnalytics()
-
-  // Get tokens and token pairs from API
-  const { tokens, isLoading: tokensLoading } = useTokens()
-  const { pairs: supportedTokenPairs, isLoading: pairsLoading } =
-    useSupportedTokenPairs()
-
-  const isTokenDataLoading = tokensLoading || pairsLoading
 
   const { currentScreen, setCurrentScreen } = useBuySellScreen({
     onScreenChange
@@ -72,9 +86,12 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData
   } = useBuySellTransactionData()
 
+  const { data: currentUser } = useCurrentAccountUser()
+
   const { activeTab, handleActiveTabChange } = useBuySellTabs({
     setCurrentScreen,
-    resetTransactionData
+    resetTransactionData,
+    initialTab
   })
 
   // Persistent state for each tab's input values
@@ -97,28 +114,27 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   // Track if user has attempted to submit the form
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
 
+  // Track the last handled error to prevent duplicate toast messages
+  const lastHandledErrorRef = useRef<string | null>(null)
+
   const location = useLocation()
   const pathname = getPathname(location)
-  const match = matchPath<{ mint: string }>(pathname, {
-    path: ASSET_DETAIL_PAGE,
+  const match = matchPath<{ ticker: string }>(pathname, {
+    path: COIN_DETAIL_PAGE,
     exact: true
   })
-  const pairFromLocation =
-    match?.params.mint &&
-    supportedTokenPairs.find(
-      (pair) =>
-        pair.baseToken.address === match.params.mint &&
-        pair.quoteToken.symbol === 'USDC'
-    )
-
-  const selectedPair = pairFromLocation || supportedTokenPairs[0]
+  const { data: selectedPair } = useCoinPair({
+    baseSymbol: initialTicker ?? match?.params.ticker ?? '',
+    quoteSymbol: 'USDC'
+  })
 
   // Use custom hooks for token state management
   const {
     getCurrentTabTokens,
     handleInputTokenChange: handleInputTokenChangeInternal,
-    handleOutputTokenChange: handleOutputTokenChangeInternal
-  } = useTokenStates(selectedPair)
+    handleOutputTokenChange: handleOutputTokenChangeInternal,
+    handleSwapDirection
+  } = useCoinStates(selectedPair)
 
   // Get current tab's token symbols
   const currentTabTokens = getCurrentTabTokens(activeTab)
@@ -136,21 +152,70 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData()
   }
 
-  // Get all available tokens
-  const availableTokens = useAvailableTokens({
-    tokens,
-    supportedTokenPairs,
-    isTokenDataLoading
+  const handleChangeSwapDirection = () => {
+    handleSwapDirection(activeTab)
+    resetTransactionData()
+  }
+
+  // Get external wallet account (if connected via AppKit)
+  const externalWalletAccount = appkitModal.getAccount('solana')
+
+  // Get all available tokens, filtered by external wallet if connected
+  const { coins, isLoading: coinsLoading } = useTradeableCoins({
+    includeSol: !!externalWalletAccount?.address
   })
 
+  const availableCoins = useMemo(() => {
+    return coinsLoading ? [] : Object.values(coins)
+  }, [coins, coinsLoading])
+
+  // Get tokens that user owns (includes USDC if user has balance) for internal wallet
+  const { ownedCoins } = useOwnedCoins(
+    availableCoins,
+    externalWalletAccount?.address
+  )
+
+  // Create owned addresses set for filtering (only needed for internal wallets)
+  const ownedAddresses = useMemo(() => {
+    return new Set(ownedCoins.map((coin) => coin.address))
+  }, [ownedCoins])
+
   // Create current token pair based on selected base and quote tokens
-  const currentTokenPair = useCurrentTokenPair({
+  const currentTokenPair = useCurrentCoinPair({
     baseTokenSymbol,
     quoteTokenSymbol,
-    availableTokens,
-    selectedPair,
-    supportedTokenPairs
+    availableCoins,
+    selectedPair
   })
+
+  // Get filtered tokens for sell tab (owned coins, excluding current base token and USDC)
+  const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
+    context: 'pay',
+    excludeSymbols: [baseTokenSymbol],
+    ownedAddresses,
+    includeSol: !!externalWalletAccount?.address
+  })
+
+  // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
+  const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
+    ownedAddresses,
+    includeSol: !!externalWalletAccount?.address
+  })
+
+  // Get filtered tokens for convert tab output (all coins except base token)
+  const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
+    excludeSymbols: [baseTokenSymbol],
+    includeSol: !!externalWalletAccount?.address
+  })
+
+  // Get filtered tokens for buy tab output (all coins except quote token and USDC)
+  const availableOutputTokensForBuy = availableCoins.filter(
+    (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
+  )
+
+  // Use shared safe token pair logic
+  const safeSelectedPair = useSafeTokenPair(currentTokenPair)
 
   const swapTokens = useMemo(() => {
     // Return safe defaults if currentTokenPair is not available
@@ -177,34 +242,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }
   }, [activeTab, baseTokenSymbol, quoteTokenSymbol, currentTokenPair])
 
-  // Create a safe selectedPair for hooks that can't handle null values
-  const safeSelectedPair = useMemo(() => {
-    if (currentTokenPair?.baseToken && currentTokenPair?.quoteToken) {
-      return currentTokenPair
-    }
-
-    // Return minimal safe token pair to prevent hook crashes
-    return {
-      baseToken: {
-        symbol: 'AUDIO',
-        name: 'Audius',
-        decimals: 8,
-        balance: null,
-        address: '',
-        isStablecoin: false
-      },
-      quoteToken: {
-        symbol: 'USDC',
-        name: 'USD Coin',
-        decimals: 6,
-        balance: null,
-        address: '',
-        isStablecoin: true
-      },
-      exchangeRate: null
-    }
-  }, [currentTokenPair])
-
+  const internalSwapHook = useSwapCoins()
+  const externalSwapHook = useExternalWalletSwap()
+  const { mutateAsync: performSwap, ...swapHookState } =
+    externalWalletAccount?.address ? externalSwapHook : internalSwapHook
   const {
     handleShowConfirmation,
     handleConfirmSwap,
@@ -212,14 +253,29 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     isConfirmButtonLoading,
     swapStatus,
     swapResult,
-    swapError
+    swapData
   } = useBuySellSwap({
     transactionData,
     currentScreen,
     setCurrentScreen,
     activeTab,
     selectedPair: safeSelectedPair,
-    onClose
+    swapHookData: swapHookState,
+    handleSwap: async (params: {
+      inputMint: string
+      outputMint: string
+      amountUi: number
+      slippageBps: number
+    }) => {
+      const swapParams = {
+        ...params,
+        // External wallet swaps require some extra params. These are unused for internal swaps
+        inputDecimals: swapTokens.inputTokenInfo!.decimals,
+        outputDecimals: swapTokens.outputTokenInfo!.decimals,
+        walletAddress: externalWalletAccount?.address as string
+      }
+      await performSwap(swapParams)
+    }
   })
 
   const currentExchangeRate = useMemo(
@@ -232,50 +288,47 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [isConfirmButtonLoading, onLoadingStateChange])
 
   useEffect(() => {
-    if (swapStatus === 'error' && swapError) {
-      trackSwapFailure(
-        {
-          activeTab,
-          inputToken: swapTokens.inputToken,
-          outputToken: swapTokens.outputToken,
-          inputAmount: transactionData?.inputAmount,
-          outputAmount: transactionData?.outputAmount,
-          exchangeRate: currentExchangeRate
-        },
-        {
-          errorType: 'swap_error',
-          errorStage: 'transaction',
-          errorMessage: swapError?.message
-            ? swapError.message.substring(0, 500)
-            : 'Unknown error'
-        }
-      )
+    // Handle swap data errors (returned error status) - show toast when swap fails
+    if (swapData?.status === SwapStatus.ERROR && swapData?.error) {
+      // Create a stable identifier for this error to prevent duplicate handling
+      const errorId = `${swapData.error.message || 'unknown'}_${swapData.errorStage || 'unknown'}`
 
-      toast(swapError.message ?? messages.transactionFailed, 5000)
+      // Only handle if this is a new error
+      if (lastHandledErrorRef.current !== errorId) {
+        lastHandledErrorRef.current = errorId
+        trackSwapFailure(
+          {
+            activeTab,
+            inputToken: swapTokens.inputToken,
+            outputToken: swapTokens.outputToken,
+            inputAmount: transactionData?.inputAmount,
+            outputAmount: transactionData?.outputAmount,
+            exchangeRate: currentExchangeRate
+          },
+          {
+            errorType: 'swap_error',
+            errorStage: 'transaction',
+            errorMessage: swapData.error.message
+              ? swapData.error.message.substring(0, 500)
+              : 'Unknown error'
+          }
+        )
+
+        toast(messages.transactionFailed, 5000)
+      }
+    } else if (swapData?.status === SwapStatus.SUCCESS) {
+      // Clear error ref when swap succeeds to allow handling of future errors
+      lastHandledErrorRef.current = null
     }
   }, [
-    swapStatus,
-    swapError,
-    toast,
+    swapData,
     activeTab,
-    transactionData,
     swapTokens,
+    transactionData,
     currentExchangeRate,
-    trackSwapFailure
+    trackSwapFailure,
+    toast
   ])
-
-  const tabs = useMemo(() => {
-    const baseTabs = [
-      { key: 'buy' as BuySellTab, text: messages.buy },
-      { key: 'sell' as BuySellTab, text: messages.sell }
-    ]
-
-    if (isArtistCoinsEnabled) {
-      baseTabs.push({ key: 'convert' as BuySellTab, text: messages.convert })
-    }
-
-    return baseTabs
-  }, [isArtistCoinsEnabled])
 
   const {
     successDisplayData,
@@ -314,7 +367,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   const handleContinueClick = () => {
     setHasAttemptedSubmit(true)
-    if (transactionData?.isValid && !isContinueButtonLoading) {
+    if (
+      transactionData?.isValid &&
+      !isContinueButtonLoading &&
+      !transactionData?.isExchangeRateLoading
+    ) {
       // Track swap requested
       trackSwapRequested({
         activeTab,
@@ -332,6 +389,32 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   useEffect(() => {
     setHasAttemptedSubmit(false)
   }, [activeTab])
+
+  const resetFunction = useCallback(() => {
+    resetTransactionData()
+    resetSuccessDisplayData()
+    setCurrentScreen('input')
+    // Clear all tab input values on completion
+    setTabInputValues({ buy: '', sell: '', convert: '' })
+  }, [
+    resetTransactionData,
+    resetSuccessDisplayData,
+    setCurrentScreen,
+    setTabInputValues
+  ])
+
+  useEffect(() => {
+    setResetState(() => resetFunction)
+  }, [setResetState, resetFunction])
+
+  const { data: outputCoin } = useArtistCoin(
+    swapTokens.outputTokenInfo?.address
+  )
+  const pricePerBaseToken = useMemo(() => {
+    return outputCoin?.price
+      ? outputCoin?.price
+      : (outputCoin?.dynamicBondingCurve.priceUSD ?? 0)
+  }, [outputCoin])
 
   const isTransactionInvalid = !transactionData?.isValid
 
@@ -370,12 +453,15 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const shouldShowError =
     !!displayErrorMessage || (activeTab === 'buy' && !hasSufficientBalance)
 
+  const userHasWallet = !!externalWalletAccount?.address || !!currentUser
+
   if (isConfirmButtonLoading && currentScreen !== 'success') {
     return <ModalLoading />
   }
 
-  if (isTokenDataLoading) {
-    return <ModalLoading noText />
+  // Show loading when fetching coins, or when external wallet is connected and still loading wallet coins
+  if (coinsLoading) {
+    return <SwapFormSkeleton />
   }
 
   return (
@@ -387,7 +473,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         <Flex direction='column' gap='l'>
           <Flex alignItems='center' justifyContent='space-between'>
             <SegmentedControl
-              options={tabs}
+              options={buySellTabsArray}
               selected={activeTab}
               onSelectOption={handleActiveTabChange}
               css={{ flex: 1 }}
@@ -402,9 +488,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.buy}
               onInputValueChange={handleTabInputValueChange}
-              availableOutputTokens={availableTokens.filter(
-                (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
-              )}
+              availableOutputTokens={availableOutputTokensForBuy}
               onOutputTokenChange={handleOutputTokenChange}
             />
           ) : activeTab === 'sell' && currentTokenPair ? (
@@ -415,12 +499,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.sell}
               onInputValueChange={handleTabInputValueChange}
-              availableInputTokens={availableTokens.filter(
-                (t) => t.symbol !== baseTokenSymbol && t.symbol !== 'USDC'
-              )}
+              availableInputTokens={availableInputTokensForSell}
               onInputTokenChange={handleInputTokenChange}
             />
-          ) : isArtistCoinsEnabled && currentTokenPair ? (
+          ) : currentTokenPair ? (
             <ConvertTab
               tokenPair={currentTokenPair}
               onTransactionDataChange={handleTransactionDataChange}
@@ -428,13 +510,17 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
               errorMessage={displayErrorMessage}
               initialInputValue={tabInputValues.convert}
               onInputValueChange={handleTabInputValueChange}
-              availableTokens={availableTokens}
+              availableInputTokens={availableInputTokensForConvert}
+              availableOutputTokens={availableOutputTokensForConvert}
               onInputTokenChange={handleInputTokenChange}
               onOutputTokenChange={handleOutputTokenChange}
+              onChangeSwapDirection={handleChangeSwapDirection}
             />
           ) : null}
 
-          {activeTab === 'buy' && !hasSufficientBalance ? (
+          {activeTab === 'buy' &&
+          !hasSufficientBalance &&
+          !externalWalletAccount?.address ? (
             <Hint>
               {messages.insufficientUSDC}
               <br />
@@ -452,20 +538,13 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             </Hint>
           ) : null}
 
-          {hasSufficientBalance &&
-          (activeTab !== 'convert' || !isArtistCoinsEnabled) ? (
-            <Hint>
-              {messages.helpCenter}{' '}
-              <ExternalTextLink to={WALLET_GUIDE_URL} variant='visible'>
-                {messages.walletGuide}
-              </ExternalTextLink>
-            </Hint>
-          ) : null}
-
           <Button
             variant='primary'
             fullWidth
-            isLoading={isContinueButtonLoading}
+            isLoading={
+              isContinueButtonLoading || transactionData?.isExchangeRateLoading
+            }
+            disabled={transactionData?.isExchangeRateLoading || !userHasWallet}
             onClick={handleContinueClick}
           >
             {messages.continue}
@@ -485,6 +564,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isConfirming={isConfirmButtonLoading}
             activeTab={activeTab}
             selectedPair={safeSelectedPair}
+            pricePerBaseToken={pricePerBaseToken}
           />
         ) : null}
       </Flex>
@@ -494,17 +574,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         style={{ display: currentScreen === 'success' ? 'flex' : 'none' }}
       >
         {currentScreen === 'success' && successDisplayData ? (
-          <TransactionSuccessScreen
-            {...successDisplayData}
-            onDone={() => {
-              onClose()
-              resetTransactionData()
-              resetSuccessDisplayData()
-              setCurrentScreen('input')
-              // Clear all tab input values on completion
-              setTabInputValues({ buy: '', sell: '', convert: '' })
-            }}
-          />
+          <TransactionSuccessScreen {...successDisplayData} onDone={onClose} />
         ) : null}
       </Flex>
     </>

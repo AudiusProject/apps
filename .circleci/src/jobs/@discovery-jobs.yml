@@ -1,5 +1,5 @@
 lint-discovery-provider:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.11
   steps:
@@ -13,7 +13,7 @@ lint-discovery-provider:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     - restore_cache:
         key: python-requirements-{{ checksum "packages/discovery-provider/requirements.txt" }}

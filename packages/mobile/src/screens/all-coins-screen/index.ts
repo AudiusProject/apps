@@ -1,1 +1,0 @@
-export { AllCoinsScreen } from './AllCoinsScreen'

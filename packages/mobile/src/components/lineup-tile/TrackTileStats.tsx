@@ -43,7 +43,7 @@ export const TrackTileStats = (props: TrackTileStatsProps) => {
 
   return (
     <Flex row justifyContent='space-between' alignItems='center' p='s' h={32}>
-      <Flex direction='row' gap='m'>
+      <Flex direction='row' gap='m' alignItems='center'>
         {isTrending && rankIndex !== undefined ? (
           <LineupTileRankIcon index={rankIndex} />
         ) : null}

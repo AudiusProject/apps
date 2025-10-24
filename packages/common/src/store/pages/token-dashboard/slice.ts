@@ -8,9 +8,7 @@ import { WalletAddress } from '../../../models/Wallet'
 
 import {
   AssociatedWallets,
-  CanReceiveWAudio,
   ConfirmRemoveWalletAction,
-  InputSendDataAction,
   TokenDashboardPageModalState,
   TokenDashboardState
 } from './types'
@@ -19,7 +17,6 @@ const initialConfirmingWallet = {
   wallet: null,
   chain: null,
   balance: null,
-  collectibleCount: null,
   signature: null
 }
 
@@ -62,78 +59,6 @@ const slice = createSlice({
     ) => {
       state.modalVisible = isVisible
     },
-    inputSendData: (
-      state,
-      { payload: { amount, wallet } }: InputSendDataAction
-    ) => {
-      const newState: TokenDashboardPageModalState = {
-        stage: 'SEND' as const,
-        flowState: {
-          stage: 'AWAITING_CONFIRMATION',
-          amount,
-          recipientWallet: wallet,
-          canRecipientReceiveWAudio: 'loading'
-        }
-      }
-      state.modalState = newState
-    },
-    setCanRecipientReceiveWAudio: (
-      state,
-      {
-        payload: { canRecipientReceiveWAudio }
-      }: PayloadAction<{ canRecipientReceiveWAudio: CanReceiveWAudio }>
-    ) => {
-      if (
-        state.modalState?.stage === 'SEND' &&
-        state.modalState.flowState.stage === 'AWAITING_CONFIRMATION'
-      ) {
-        state.modalState.flowState.canRecipientReceiveWAudio =
-          canRecipientReceiveWAudio
-      } else {
-        console.error(
-          'Tried to set canRecipientReceiveWAudio outside of correct flow state.'
-        )
-      }
-    },
-    transferEthAudioToSolWAudio: (state) => {
-      if (
-        state.modalState?.stage !== 'SEND' ||
-        state.modalState.flowState.stage !== 'SENDING'
-      )
-        return
-
-      state.modalState.flowState = {
-        stage: 'AWAITING_CONVERTING_ETH_AUDIO_TO_SOL',
-        recipientWallet: state.modalState.flowState.recipientWallet,
-        amount: state.modalState.flowState.amount
-      }
-    },
-    confirmSend: (state) => {
-      if (
-        state.modalState?.stage !== 'SEND' ||
-        (state.modalState.flowState.stage !== 'AWAITING_CONFIRMATION' &&
-          state.modalState.flowState.stage !==
-            'AWAITING_CONVERTING_ETH_AUDIO_TO_SOL')
-      )
-        return
-
-      state.modalState.flowState = {
-        stage: 'SENDING',
-        recipientWallet: state.modalState.flowState.recipientWallet,
-        amount: state.modalState.flowState.amount
-      }
-    },
-    pressReceive: (state) => {
-      state.modalState = {
-        stage: 'RECEIVE',
-        flowState: { stage: 'KEY_DISPLAY' }
-      }
-      state.modalVisible = true
-    },
-
-    // Saga Actions
-
-    pressSend: () => {},
     fetchAssociatedWallets: (state) => {
       state.associatedWallets.loadingStatus = Status.LOADING
     },
@@ -186,20 +111,17 @@ const slice = createSlice({
     setIsConnectingWallet: (
       state,
       {
-        payload: { wallet, chain, balance, collectibleCount }
+        payload: { wallet, chain, balance }
       }: PayloadAction<{
         wallet: string
         chain: Chain
         balance: bigint
-        collectibleCount: number
       }>
     ) => {
       // is connecting
       state.associatedWallets.confirmingWallet.wallet = wallet
       state.associatedWallets.confirmingWallet.chain = chain
       state.associatedWallets.confirmingWallet.balance = balance
-      state.associatedWallets.confirmingWallet.collectibleCount =
-        collectibleCount
     },
     connectingWalletSignatureFailed: (state) => {
       state.associatedWallets.confirmingWallet = initialConfirmingWallet
@@ -211,27 +133,24 @@ const slice = createSlice({
           wallet: string
           balance: bigint
           chain: Chain
-          collectibleCount: number
         }>
       >
     ) => {
       const confirmingWallet = state.associatedWallets.confirmingWallet
       const newWallet = { ...confirmingWallet, ...action.payload }
-      const { chain, wallet, balance, collectibleCount } = newWallet
+      const { chain, wallet, balance } = newWallet
       switch (chain) {
         case Chain.Sol: {
           state.associatedWallets.connectedSolWallets?.push({
             address: wallet!,
-            balance: balance ?? BigInt(0),
-            collectibleCount: collectibleCount ?? 0
+            balance: balance ?? BigInt(0)
           })
           break
         }
         case Chain.Eth: {
           state.associatedWallets.connectedEthWallets?.push({
             address: wallet!,
-            balance: balance ?? BigInt(0),
-            collectibleCount: collectibleCount ?? 0
+            balance: balance ?? BigInt(0)
           })
         }
       }
@@ -317,10 +236,6 @@ export const {
   addWallet,
   setModalState,
   setModalVisibility,
-  pressReceive,
-  pressSend,
-  inputSendData,
-  confirmSend,
   fetchAssociatedWallets,
   setWalletAddedConfirmed,
   setAssociatedWallets,
@@ -335,8 +250,6 @@ export const {
   preloadWalletProviders,
   resetStatus,
   resetRemovedStatus,
-  transferEthAudioToSolWAudio,
-  setCanRecipientReceiveWAudio,
   resetState
 } = slice.actions
 export const actions = slice.actions

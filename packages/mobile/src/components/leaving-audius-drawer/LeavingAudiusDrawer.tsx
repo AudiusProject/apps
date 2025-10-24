@@ -12,6 +12,7 @@ import {
 import { Text, useLink } from 'app/components/core'
 import Drawer from 'app/components/drawer/Drawer'
 import { makeStyles } from 'app/styles'
+import { zIndex } from 'app/utils/zIndex'
 
 const messages = {
   title: 'Are You Sure?',
@@ -40,6 +41,7 @@ export const LeavingAudiusDrawer = () => {
       onClosed={onClosed}
       title={messages.title}
       titleIcon={IconInfo}
+      zIndex={zIndex.LEAVING_AUDIUS_DRAWER}
     >
       <View style={styles.root}>
         <Text>{messages.content}</Text>

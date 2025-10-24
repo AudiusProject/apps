@@ -1,27 +1,31 @@
 import { useSupporter } from '@audius/common/api'
 import { useCurrentCommentSection } from '@audius/common/context'
+import { useIsCoinMember } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 
 import type { IconComponent } from '@audius/harmony-native'
 import {
   Flex,
+  IconArtistCoin,
   IconStar,
   IconTipping,
   IconTrophy,
   Text
 } from '@audius/harmony-native'
 
-type BadgeType = 'artist' | 'topSupporter' | 'tipSupporter'
+type BadgeType = 'artist' | 'topSupporter' | 'tipSupporter' | 'coinMember'
 
 const iconMap: Record<BadgeType, IconComponent> = {
   artist: IconStar,
   topSupporter: IconTrophy,
-  tipSupporter: IconTipping
+  tipSupporter: IconTipping,
+  coinMember: IconArtistCoin
 }
 const messages: Record<BadgeType, string> = {
   artist: 'Artist',
   topSupporter: 'Top Supporter',
-  tipSupporter: 'Tip Supporter'
+  tipSupporter: 'Tip Supporter',
+  coinMember: 'Coin Member'
 }
 
 type CommentBadgeProps = {
@@ -42,16 +46,19 @@ export const CommentBadge = ({
     // Read only, relying on prefetch in commentsContext
     { enabled: false }
   )
+  const { isCoinHolder } = useIsCoinMember(commentUserId, artistId)
 
   const isTopSupporter = supporter?.rank === 1
 
   const badgeType = isArtist
     ? 'artist'
-    : isTopSupporter
-      ? 'topSupporter'
-      : supporter
-        ? 'tipSupporter'
-        : null
+    : isCoinHolder
+      ? 'coinMember'
+      : isTopSupporter
+        ? 'topSupporter'
+        : supporter
+          ? 'tipSupporter'
+          : null
 
   if (badgeType === null) return null
 

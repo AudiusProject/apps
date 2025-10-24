@@ -235,7 +235,6 @@ user_metadata_format = {
     "handle": None,
     "associated_wallets": None,
     "associated_sol_wallets": None,
-    "collectibles": None,
     "playlist_library": None,
     "events": None,
     "is_storage_v2": False,
@@ -243,6 +242,7 @@ user_metadata_format = {
     "is_verified": False,
     "artist_pick_track_id": None,
     "allow_ai_attribution": False,
+    "coin_flair_mint": None,
 }
 
 comment_metadata_format = {
@@ -272,9 +272,6 @@ remove_associated_wallet_metadata_format = {
     "chain": None,
 }
 
-collectibles_metadata_format = {
-    "collectibles": None,
-}
 
 event_metadata_format = {
     "event_type": None,

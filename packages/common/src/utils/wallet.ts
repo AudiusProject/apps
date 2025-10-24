@@ -1,5 +1,7 @@
 import { AmountObject } from '~/store/ui'
 
+export const WALLET_COUNT_LIMIT = 5
+
 export const convertBigIntToAmountObject = (
   amount: bigint,
   decimals: number

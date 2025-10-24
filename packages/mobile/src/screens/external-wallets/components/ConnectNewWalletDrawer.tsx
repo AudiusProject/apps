@@ -1,9 +1,10 @@
-import { View, Platform } from 'react-native'
+import { View } from 'react-native'
 
 import { Text } from 'app/components/core'
 import { NativeDrawer } from 'app/components/drawer'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { makeStyles } from 'app/styles'
+import { isSolanaPhone } from 'app/utils/os'
 
 import { useCanConnectNewWallet } from '../useCanConnectNewWallet'
 
@@ -11,9 +12,6 @@ import { PhantomWalletConnectOption } from './PhantomWalletConnectOption'
 import { SolanaPhoneOption } from './SolanaPhoneOption'
 
 const MODAL_NAME = 'ConnectNewWallet'
-
-const isSolanaPhone =
-  Platform.OS === 'android' && Platform.constants.Model === 'Saga'
 
 const messages = {
   title: 'Select Wallet',

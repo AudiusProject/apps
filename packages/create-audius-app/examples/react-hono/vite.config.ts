@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
       plugins: [
         nodePolyfills({
           globals: {
-            process: true,
-          },
+            process: true
+          }
         }),
         cssInjectedByJsPlugin()
       ],
@@ -36,9 +36,9 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           input: './src/client/main.tsx',
           output: {
-            entryFileNames: 'static/client/main.js',
-          },
-        },
+            entryFileNames: 'static/client/main.js'
+          }
+        }
       }
     } as UserConfig
   }
@@ -54,12 +54,20 @@ export default defineConfig(({ mode }) => {
       nodePolyfills({
         protocolImports: true,
         exclude: ['process']
-      }),
+      })
     ],
-    resolve: mode === 'production' ? {
-      // Need to alias this because vite only wants to resolve the "browser" bundle
-      alias: { '@audius/sdk': path.resolve(__dirname, 'node_modules/@audius/sdk/dist/index.esm.js') },
-    } : {},
+    resolve:
+      mode === 'production'
+        ? {
+            // Need to alias this because vite only wants to resolve the "browser" bundle
+            alias: {
+              '@audius/sdk': path.resolve(
+                __dirname,
+                'node_modules/@audius/sdk/dist/index.esm.js'
+              )
+            }
+          }
+        : {},
     optimizeDeps: {
       esbuildOptions: {
         define: {
@@ -78,11 +86,11 @@ export default defineConfig(({ mode }) => {
       external: ['react', 'react-dom', 'process']
     },
     define: {
-      'process.env': {},
+      'process.env': {}
     },
     build: {
       commonjsOptions: {
-        transformMixedEsModules: true,
+        transformMixedEsModules: true
       }
     }
   } as UserConfig

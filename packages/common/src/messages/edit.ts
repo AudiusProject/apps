@@ -1,15 +1,14 @@
 export const visibilityMessages = {
-  title: 'Visibility',
+  title: 'Track Privacy',
   description:
-    'Change the visibility of this release or schedule it to release in the future.',
+    'Adjust your track’s visibility or schedule it for later release.',
   public: 'Public',
-  publicDescription: 'Visible to everyone on Audius.',
+  publicDescription: 'Available to everyone on Audius.',
   hidden: 'Hidden',
-  hiddenDescription:
-    'Only you and people you share a direct link with will be able to listen.',
+  hiddenDescription: 'Only you and those with a direct link will have access.',
   scheduledRelease: 'Scheduled Release',
   scheduledReleaseDescription:
-    'Select the date and time this will become public.',
+    'Prepare your release ahead of time, then choose when it becomes public.',
   dateLabel: 'Release Date',
   timeLabel: 'Time',
   futureReleaseHint: (timezone: string) =>
@@ -18,29 +17,34 @@ export const visibilityMessages = {
 
 export const priceAndAudienceMessages = {
   title: 'Price & Audience',
-  freePremiumDescription:
-    'Customize who can listen to this release. Sell your music and create gated experiences for your fans.',
+  freePremiumDescription: 'Control who can access your track.',
   specialAccessDescription:
-    'Customize your music’s audience and create gated experiences for your fans.',
+    "Customize your music's audience and create gated experiences for your fans.",
   free: 'Free for Everyone',
   premium: 'Premium',
   specialAccess: 'Special Access',
-  collectibleGated: 'Collectible Gated',
+  coinGated: 'Coin Gated',
+  hidden: 'Hidden',
   followersOnly: 'Followers Only',
   supportersOnly: 'Supporters Only',
   markedAsRemix:
     'This track is marked as a remix. To enable additional availability options, unmark within Remix Settings.',
+  done: 'Done',
+  publishDisabled:
+    'Publishing is disabled for empty albums and albums containing hidden tracks.',
+  fromFreeHint: (
+    contentType: 'album' | 'track',
+    gatedType: 'gated' | 'premium'
+  ) => `You can't make a free ${contentType} ${gatedType}.`,
   freeRadio: {
     title: 'Free for Everyone',
     description: (contentType: 'album' | 'track') =>
-      `Everyone can play your ${contentType} for free.`
+      `Everyone can stream your ${contentType} for free.`
   },
   premiumRadio: {
     title: 'Premium',
-    description: {
-      track: 'Only fans who make a purchase can play your track',
-      album: 'Only fans who make a purchase can play your album.'
-    },
+    description: (contentType: 'album' | 'track') =>
+      `Only those who purchase can stream your ${contentType}.`,
     waitlist:
       'Start selling your music on Audius today! Limited access beta now available.',
     join: 'Join the Waitlist',
@@ -48,26 +52,22 @@ export const priceAndAudienceMessages = {
   },
   specialAccessRadio: {
     title: 'Special Access',
-    description: 'Only fans who meet certain criteria can listen.',
+    description: 'Anyone who meets your selected criteria can stream.',
     followersOnly: 'Followers Only',
     supportersOnly: 'Supporters Only'
   },
-  collectibleGatedRadio: {
-    title: 'Collectible Gated',
-    description:
-      'Only fans who own a specific, digital collectible can play your track. (These tracks remain hidden from trending lists and user feeds.)',
-    learnMore: 'Learn More',
-    pickACollection: 'Pick a Collection',
-    ownersOf: 'Owners Of',
-    noCollectibles:
-      'No Collectibles found. To enable this option, link a wallet containing a collectible.'
+  tokenGatedRadio: {
+    title: 'Coin Gated',
+    yourCoin: 'your coin',
+    noCoins: 'No coins found. Launch a coin to enable this option.',
+    description: (coinTicker: string) =>
+      `Anyone holding $${coinTicker} can stream.`
   }
 }
 
 export const advancedTrackMessages = {
   title: 'Advanced',
-  description:
-    'Provide detailed metadata to help identify and manage your music.',
+  description: 'Share metadata to help manage your music.',
   isAiGenerated: 'AI-Generated',
   bpm: {
     header: 'Tempo',
@@ -86,11 +86,11 @@ export const advancedTrackMessages = {
   apiAllowed: {
     header: 'Disallow Streaming via the API',
     description:
-      'Keep your track from being streamed on third-party apps or services that utilize the Audius API.'
+      'Exclude from third-party apps or services, which utilize the Audius API.'
   },
   disableComments: {
     header: 'Disable Comments',
-    description: 'Prevent anyone from leaving a comment on this track.',
+    description: 'Prevent anyone from commenting on your track.',
     value: 'Comments Disabled'
   },
   isrcTooltip: `ISRC is used to identify individual sound recordings and music videos. ISWC is used to identify the underlying musical composition – the music and lyrics`,
@@ -145,6 +145,17 @@ export const advancedTrackMessages = {
   }
 }
 
+export const stemsAndDownloadsMessages = {
+  title: 'Stems & Downloads',
+  description: 'Provide additional files available for download.',
+  values: {
+    allowDownload: 'Full Track Available',
+    followerGated: 'Followers Only'
+  },
+  price: (price: number) =>
+    price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
 export const advancedAlbumMessages = {
   title: 'Advanced',
   description:
@@ -158,5 +169,22 @@ export const advancedAlbumMessages = {
   releaseDate: {
     title: 'Release Date',
     label: 'Release date'
+  }
+}
+
+export const remixSettingsMessages = {
+  title: 'Remix Settings',
+  description: 'Identify your track as a remix and adjust the settings.',
+  remixesHidden: 'Remixes Hidden',
+  remixOf: 'Remix of',
+  hideRemixField: {
+    header: 'Hide Remixes of This Track',
+    description: "Stop other artists' remixes from showing on your track page."
+  },
+  remixOfField: {
+    header: 'Identify as Remix',
+    description:
+      'Link your remix to the original for visibility and artist credit.',
+    linkLabel: 'Link to original track'
   }
 }

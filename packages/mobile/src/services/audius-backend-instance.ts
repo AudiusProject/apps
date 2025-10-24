@@ -5,7 +5,6 @@ import { track } from 'app/services/analytics'
 import { env } from 'app/services/env'
 import { reportToSentry } from 'app/utils/reportToSentry'
 
-import { monitoringCallbacks } from './monitoringCallbacks'
 import { getFeatureEnabled } from './remote-config'
 import { remoteConfigInstance } from './remote-config/remote-config-instance'
 
@@ -28,7 +27,6 @@ export const audiusBackendInstance = audiusBackend({
   generalAdmissionUrl: env.GENERAL_ADMISSION,
   isElectron: false,
   localStorage: AsyncStorage,
-  monitoringCallbacks,
   nativeMobile: true,
   recaptchaSiteKey: env.RECAPTCHA_SITE_KEY,
   recordAnalytics: track,

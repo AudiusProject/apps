@@ -14,7 +14,7 @@ audius-compose up discovery-provider-notifications
 
 ## Regenerate sql-ts types
 
-See [sql-ts](https://github.com/AudiusProject/audius-protocol/tree/main/packages/sql-ts)
+See [sql-ts](https://github.com/AudiusProject/apps/tree/main/packages/sql-ts)
 
 ## Sending a test sns push
 

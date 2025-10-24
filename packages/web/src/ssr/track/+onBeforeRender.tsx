@@ -5,28 +5,26 @@ import {
 import { FullTracksResponseFromJSON } from '@audius/sdk/src/sdk/api/generated/full/models/FullTracksResponse'
 import type { PageContextServer } from 'vike/types'
 
-import { getDiscoveryNode } from '../getDiscoveryNode'
+import { env } from 'services/env'
 
 export async function onBeforeRender(pageContext: PageContextServer) {
   const { handle, slug } = pageContext.routeParams
 
   try {
-    // Fetching directly from discovery node rather than using the sdk because
+    // Fetching directly from API rather than using the sdk because
     // including the sdk increases bundle size and creates substantial cold start times
-    const discoveryNode = getDiscoveryNode()
+    const requestPath = `v1/full/tracks?permalink=${handle}/${slug}`
+    const requestUrl = `${env.API_URL}/${requestPath}`
 
-    const discoveryRequestPath = `v1/full/tracks?permalink=${handle}/${slug}`
-    const discoveryRequestUrl = `${discoveryNode}/${discoveryRequestPath}`
-
-    const res = await fetch(discoveryRequestUrl)
+    const res = await fetch(requestUrl)
     if (res.status !== 200) {
-      throw new Error(discoveryRequestUrl)
+      throw new Error(requestUrl)
     }
 
     const { data } = FullTracksResponseFromJSON(await res.json())
     if (!data || data.length === 0) {
       throw new Error(
-        `Parsed SDK response returned no tracks for ${discoveryRequestUrl}`
+        `Parsed SDK response returned no tracks for ${requestUrl}`
       )
     }
     const [apiTrack] = data

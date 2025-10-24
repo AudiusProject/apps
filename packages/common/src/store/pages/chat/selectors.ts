@@ -246,7 +246,6 @@ export const useCanCreateChat = (userId: ID | null | undefined) => {
       callToAction: ChatPermissionAction.SIGN_UP
     }
   }
-  // cant check for truthy because user.collectible_list may get set before the user data is loaded
   if (!userId) {
     return {
       canCreateChat: true,

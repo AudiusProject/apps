@@ -1380,6 +1380,91 @@ def test_access_conditions(app, mocker):
             "download_conditions": {"tip_user_id": 1},
             "is_downloadable": True,
         },
+        "InvalidTokenGatedNoTokenMint": {
+            **default_metadata,
+            "track_id": TRACK_ID_OFFSET + 9,
+            "owner_id": 1,
+            "track_cid": "some-track-cid",
+            "title": "track 10",
+            "is_stream_gated": True,
+            "stream_conditions": {"token_amount": 100},
+            "is_download_gated": False,
+            "download_conditions": None,
+            "is_downloadable": False,
+        },
+        "InvalidTokenGatedNoTokenAmount": {
+            **default_metadata,
+            "track_id": TRACK_ID_OFFSET + 10,
+            "owner_id": 1,
+            "track_cid": "some-track-cid",
+            "title": "track 11",
+            "is_stream_gated": True,
+            "stream_conditions": {
+                "token_gate": {
+                    "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+                }
+            },
+            "is_download_gated": False,
+            "download_conditions": None,
+            "is_downloadable": False,
+        },
+        "InvalidTokenGatedMultipleConditions": {
+            **default_metadata,
+            "track_id": TRACK_ID_OFFSET + 11,
+            "owner_id": 1,
+            "track_cid": "some-track-cid",
+            "title": "track 12",
+            "is_stream_gated": True,
+            "stream_conditions": {
+                "token_gate": {
+                    "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "token_amount": 100,
+                },
+                "follow_user_id": 1,
+            },
+            "is_download_gated": False,
+            "download_conditions": None,
+            "is_downloadable": False,
+        },
+        "InvalidTokenGatedInvalidTokenAmount": {
+            **default_metadata,
+            "track_id": TRACK_ID_OFFSET + 12,
+            "owner_id": 1,
+            "track_cid": "some-track-cid",
+            "title": "track 13",
+            "is_stream_gated": True,
+            "stream_conditions": {
+                "token_gate": {
+                    "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "token_amount": -1,
+                }
+            },
+            "is_download_gated": False,
+            "download_conditions": None,
+            "is_downloadable": False,
+        },
+        "ValidTokenGated": {
+            **default_metadata,
+            "track_id": TRACK_ID_OFFSET + 13,
+            "owner_id": 1,
+            "track_cid": "some-track-cid",
+            "title": "track 14",
+            "is_stream_gated": True,
+            "stream_conditions": {
+                "token_gate": {
+                    "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "token_amount": 100,
+                }
+            },
+            "is_download_gated": True,
+            "download_conditions": {
+                "token_gate": {
+                    "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "token_amount": 100,
+                }
+            },
+            "is_downloadable": True,
+        },
     }
 
     metadata_keys = list(metadatas.keys())
@@ -1433,11 +1518,15 @@ def test_access_conditions(app, mocker):
         )
 
         all_tracks: List[Track] = session.query(Track).all()
-        assert len(all_tracks) == 1
+        assert len(all_tracks) == 2
 
         track = all_tracks[0]
         assert track.is_current == True
-        assert track.track_id == TRACK_ID_OFFSET + len(metadatas) - 1
+        assert track.track_id == TRACK_ID_OFFSET + 7
+
+        track2 = all_tracks[1]
+        assert track2.is_current == True
+        assert track2.track_id == TRACK_ID_OFFSET + 12
 
 
 def test_update_access_conditions(app, mocker):
@@ -1462,6 +1551,18 @@ def test_update_access_conditions(app, mocker):
     follow_gate = {"follow_user_id": 1}
     usdc_gate_1 = {
         "usdc_purchase": {"price": 100, "splits": [{"percentage": 100.0, "user_id": 1}]}
+    }
+    token_gate_1 = {
+        "token_gate": {
+            "token_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "token_amount": 100,
+        }
+    }
+    token_gate_2 = {
+        "token_gate": {
+            "token_mint": "So11111111111111111111111111111111111111112",
+            "token_amount": 50,
+        }
     }
 
     metadatas = {
@@ -1493,6 +1594,29 @@ def test_update_access_conditions(app, mocker):
             "stream_conditions": collectible_gate,
             "is_download_gated": True,
             "download_conditions": collectible_gate,
+        },
+        "UpdateToTokenGated": {
+            "track_id": TRACK_ID_OFFSET + 4,
+            "owner_id": 1,
+            "is_stream_gated": True,
+            "stream_conditions": token_gate_1,
+            "is_download_gated": True,
+            "download_conditions": token_gate_1,
+        },
+        "TokenGatedToFree": {
+            "track_id": TRACK_ID_OFFSET + 5,
+            "is_stream_gated": False,
+            "stream_conditions": None,
+            "is_download_gated": False,
+            "download_conditions": None,
+        },
+        "TokenGatedToTokenGated": {
+            "track_id": TRACK_ID_OFFSET + 6,
+            "owner_id": 1,
+            "is_stream_gated": True,
+            "stream_conditions": token_gate_2,
+            "is_download_gated": True,
+            "download_conditions": token_gate_2,
         },
     }
 
@@ -1567,6 +1691,30 @@ def test_update_access_conditions(app, mocker):
                 "is_download_gated": False,
                 "download_conditions": None,
             },
+            {  # non-gated (to be changed to token-gated)
+                "track_id": TRACK_ID_OFFSET + 4,
+                "owner_id": 1,
+                "is_stream_gated": False,
+                "stream_conditions": None,
+                "is_download_gated": False,
+                "download_conditions": None,
+            },
+            {  # token-gated (to be changed to free)
+                "track_id": TRACK_ID_OFFSET + 5,
+                "owner_id": 1,
+                "is_stream_gated": True,
+                "stream_conditions": token_gate_1,
+                "is_download_gated": True,
+                "download_conditions": token_gate_1,
+            },
+            {  # token-gated (to be changed to different token-gated)
+                "track_id": TRACK_ID_OFFSET + 6,
+                "owner_id": 1,
+                "is_stream_gated": True,
+                "stream_conditions": token_gate_1,
+                "is_download_gated": True,
+                "download_conditions": token_gate_1,
+            },
         ],
     }
     populate_mock_db(db, entities)
@@ -1613,6 +1761,30 @@ def test_update_access_conditions(app, mocker):
         assert hidden_follow_gated.stream_conditions == collectible_gate
         assert hidden_follow_gated.is_download_gated == True
         assert hidden_follow_gated.download_conditions == collectible_gate
+
+        token_gated: Track = (
+            session.query(Track).filter(Track.track_id == TRACK_ID_OFFSET + 4).first()
+        )
+        assert token_gated.is_stream_gated == True
+        assert token_gated.stream_conditions == token_gate_1
+        assert token_gated.is_download_gated == True
+        assert token_gated.download_conditions == token_gate_1
+
+        token_to_free: Track = (
+            session.query(Track).filter(Track.track_id == TRACK_ID_OFFSET + 5).first()
+        )
+        assert token_to_free.is_stream_gated == False
+        assert token_to_free.stream_conditions == None
+        assert token_to_free.is_download_gated == False
+        assert token_to_free.download_conditions == None
+
+        token_to_token: Track = (
+            session.query(Track).filter(Track.track_id == TRACK_ID_OFFSET + 6).first()
+        )
+        assert token_to_token.is_stream_gated == True
+        assert token_to_token.stream_conditions == token_gate_2
+        assert token_to_token.is_download_gated == True
+        assert token_to_token.download_conditions == token_gate_2
 
 
 def test_remixability(app, mocker):

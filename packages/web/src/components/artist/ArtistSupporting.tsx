@@ -82,7 +82,6 @@ export const ArtistSupporting = (props: ArtistSupportingProps) => {
       <UserProfilePictureList
         limit={MAX_ARTIST_HOVER_TOP_SUPPORTING}
         users={supportedUsers.map((supportedUser) => supportedUser.receiver)}
-        totalUserCount={supporting_count}
         disableProfileClick
         disablePopover
         profilePictureClassname={styles.profilePictureWrapper}

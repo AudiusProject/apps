@@ -31,9 +31,12 @@ const TrackPlayerCompact = ({
   streamConditions,
   hasPremiumExtras,
   audioPlayer,
-  isRemixContest
+  isRemixContest,
+  artistCoinLogo,
+  balance
 }) => {
   const isGated = !!streamConditions
+  const isTokenGated = !!streamConditions?.tokenGate
   const isPurchaseable =
     streamConditions && instanceOfPurchaseGate(streamConditions)
 
@@ -62,7 +65,13 @@ const TrackPlayerCompact = ({
           <DogEar
             size='s'
             variant={
-              isPurchaseable ? 'purchase' : isGated ? 'special' : 'extras'
+              isPurchaseable
+                ? 'purchase'
+                : isTokenGated
+                  ? 'coin'
+                  : isGated
+                    ? 'special'
+                    : 'extras'
             }
           />
         ) : null}
@@ -111,6 +120,8 @@ const TrackPlayerCompact = ({
               handle={handle}
               isVerified={isVerified}
               titleUrl={trackURL}
+              artistCoinLogo={artistCoinLogo}
+              balance={balance}
             />
           </div>
           <div className={styles.shareButtonHolder}>

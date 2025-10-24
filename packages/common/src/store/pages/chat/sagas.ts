@@ -591,7 +591,8 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
           message,
           reactions: [],
           created_at: dayjs().toISOString(),
-          is_plaintext: !!chat?.is_blast
+          is_plaintext: !!chat?.is_blast,
+          audience: chat?.audience
         },
         status: Status.LOADING,
         isSelfMessage: true

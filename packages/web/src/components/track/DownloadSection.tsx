@@ -180,12 +180,19 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const handleDownloadAll = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
+      // Only include parent track in count if it's downloadable
+      const parentTrackCount = access?.download ? 1 : 0
       openDownloadTrackArchiveModal({
         trackId,
-        fileCount: stemTracks.length + 1
+        fileCount: stemTracks.length + parentTrackCount
       })
     },
-    [openDownloadTrackArchiveModal, trackId, stemTracks.length]
+    [
+      openDownloadTrackArchiveModal,
+      trackId,
+      stemTracks.length,
+      access?.download
+    ]
   )
 
   const hasStems = stemTracks.length > 0 || isUploadingStems

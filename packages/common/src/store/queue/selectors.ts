@@ -36,10 +36,6 @@ export const getPlayerBehavior = (state: CommonState) =>
     ? (state.queue.order[state.queue.index].playerBehavior ??
       PlayerBehavior.FULL_OR_PREVIEW)
     : PlayerBehavior.FULL_OR_PREVIEW
-export const getCollectible = (state: CommonState) => {
-  if (!isQueueIndexValid(state)) return null
-  return state.queue.order[state.queue.index].collectible ?? null
-}
 export const getCollectionId = (state: CommonState) => {
   const uid = getUid(state)
   if (!uid) return null
@@ -47,12 +43,8 @@ export const getCollectionId = (state: CommonState) => {
 }
 
 export const makeGetCurrent = () => {
-  return createSelector(
-    [getPlayerUid, getSource, getCollectible],
-    (uid, source, collectible) => ({
-      uid,
-      source,
-      collectible
-    })
-  )
+  return createSelector([getPlayerUid, getSource], (uid, source) => ({
+    uid,
+    source
+  }))
 }

@@ -1,7 +1,7 @@
-import { CoinInsights } from '@audius/sdk'
+import { Coin } from '~/adapters/coin'
+import type { CoinGeckoCoinResponse } from '~/api'
 
-import { formatCurrencyWithMax } from './decimal'
-import { formatCount } from './formatUtil'
+import { formatCurrencyWithSubscript, formatCount } from './decimal'
 
 export type MetricData = {
   value: string
@@ -13,14 +13,14 @@ export type MetricData = {
 }
 
 const messages = {
-  pricePerCoin: 'Price per coin',
+  pricePerCoin: 'Price',
   holdersOnAudius: 'Holders on Audius',
   uniqueHolders: 'Unique Holders',
-  volume24hr: 'Volume (24hr)',
-  totalTransfers: 'Total Transfers'
+  totalVolume: 'Volume (All-Time)',
+  volume24h: 'Volume (24h)',
+  marketCap: 'Market Cap',
+  graduationProgress: 'Graduation Progress'
 }
-
-const CURRENCY_FORMAT_MAX = 100_000
 
 const formatPercentage = (num: number): string => {
   return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`
@@ -52,36 +52,54 @@ const createMetric = (
   }
 }
 
-export const createCoinMetrics = (coinInsights: CoinInsights): MetricData[] => {
+export const createCoinMetrics = (coin: Coin): MetricData[] => {
   const potentialMetrics = [
     createMetric(
-      formatCurrencyWithMax(coinInsights.price, CURRENCY_FORMAT_MAX),
+      formatCurrencyWithSubscript(coin.displayPrice),
       messages.pricePerCoin,
-      coinInsights.priceChange24hPercent
+      coin.priceChange24hPercent
     ),
     createMetric(
-      formatCount(coinInsights.members),
-      messages.holdersOnAudius,
-      coinInsights.membersChange24hPercent
+      `$${formatCount(coin.displayMarketCap, 2)}`,
+      messages.marketCap
     ),
     createMetric(
-      formatCount(coinInsights.holder || 0),
-      messages.uniqueHolders,
-      coinInsights.uniqueWallet24hChangePercent
+      `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      messages.totalVolume
     ),
+    createMetric(formatCount(coin.holder), messages.uniqueHolders),
     createMetric(
-      formatCurrencyWithMax(coinInsights.v24hUSD, CURRENCY_FORMAT_MAX),
-      messages.volume24hr,
-      coinInsights.v24hChangePercent
-    ),
-    createMetric(
-      formatCount(coinInsights.trade24h),
-      messages.totalTransfers,
-      coinInsights.trade24hChangePercent
+      `${Math.round((coin.dynamicBondingCurve?.curveProgress ?? 0) * 100)}%`,
+      messages.graduationProgress
     )
   ]
 
   return potentialMetrics.filter(
     (metric): metric is MetricData => metric !== null
   )
+}
+
+export const createAudioCoinMetrics = (
+  coingeckoResponse?: CoinGeckoCoinResponse
+) => {
+  if (coingeckoResponse === null || coingeckoResponse === undefined) {
+    return []
+  }
+  return [
+    createMetric(
+      formatCurrencyWithSubscript(
+        coingeckoResponse.market_data.current_price.usd
+      ),
+      messages.pricePerCoin,
+      coingeckoResponse.market_data.price_change_percentage_24h
+    ),
+    createMetric(
+      `$${formatCount(coingeckoResponse.market_data.market_cap.usd, 2)}`,
+      messages.marketCap
+    ),
+    createMetric(
+      `$${formatCount(coingeckoResponse.market_data.total_volume.usd, 2)}`,
+      messages.volume24h
+    )
+  ].filter((metric): metric is MetricData => metric !== null)
 }

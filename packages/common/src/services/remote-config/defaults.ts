@@ -14,17 +14,12 @@ export const BUY_SOL_VIA_TOKEN_SLIPPAGE_BPS = 50
 export const remoteConfigIntDefaults: { [key in IntKeys]: number | null } = {
   [IntKeys.IMAGE_QUICK_FETCH_TIMEOUT_MS]: 5000,
   [IntKeys.IMAGE_QUICK_FETCH_PERFORMANCE_BATCH_SIZE]: 20,
-  [IntKeys.DISCOVERY_PROVIDER_SELECTION_TIMEOUT_MS]: 10 * 60 * 1000,
-  [IntKeys.DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS]: null,
-  [IntKeys.DISCOVERY_NODE_MAX_BLOCK_DIFF]: null,
   [IntKeys.DASHBOARD_WALLET_BALANCE_POLLING_FREQ_MS]: 5000,
   [IntKeys.NOTIFICATION_POLLING_FREQ_MS]: 60 * 1000,
   [IntKeys.SERVICE_MONITOR_HEALTH_CHECK_SAMPLE_RATE]: 0,
   [IntKeys.SERVICE_MONITOR_REQUEST_SAMPLE_RATE]: 0,
   [IntKeys.INSTAGRAM_HANDLE_CHECK_TIMEOUT]: 4000,
   [IntKeys.AUTOPLAY_LIMIT]: 10,
-  [IntKeys.DISCOVERY_NODE_SELECTION_REQUEST_TIMEOUT]: 30000,
-  [IntKeys.DISCOVERY_NODE_SELECTION_REQUEST_RETRIES]: 5,
   [IntKeys.ATTESTATION_QUORUM_SIZE]: 0,
   [IntKeys.MIN_AUDIO_SEND_AMOUNT]: 5,
   [IntKeys.CHALLENGE_REFRESH_INTERVAL_MS]: 15000,
@@ -63,7 +58,6 @@ export const remoteConfigStringDefaults: {
   [StringKeys.ETH_PROVIDER_URLS]: ETH_PROVIDER_URLS,
   [StringKeys.CONTENT_BLOCK_LIST]: null,
   [StringKeys.CONTENT_NODE_BLOCK_LIST]: null,
-  [StringKeys.DISCOVERY_NODE_BLOCK_LIST]: null,
   [StringKeys.INSTAGRAM_API_PROFILE_URL]:
     'https://instagram.com/$USERNAME$/?__a=1',
   // Audius user id
@@ -94,7 +88,8 @@ export const remoteConfigStringDefaults: {
   [StringKeys.STRIPE_ALLOWED_COUNTRIES_2_LETTER]: '',
   [StringKeys.AUDIO_FEATURES_DEGRADED_TEXT]: null,
   [StringKeys.PAY_EXTRA_PRESET_CENT_AMOUNTS]: '200,500,1000',
-  [StringKeys.EXPLORE_PREMIUM_DENIED_USERS]: ''
+  [StringKeys.EXPLORE_PREMIUM_DENIED_USERS]: '',
+  [StringKeys.BUY_SELL_DENIED_COUNTRIES]: ''
 }
 
 export const remoteConfigDoubleDefaults: {
@@ -118,6 +113,5 @@ export const remoteConfigBooleanDefaults: {
   [BooleanKeys.DISPLAY_WEB3_PROVIDER_WALLET_LINK]: true,
   [BooleanKeys.DISPLAY_SOLANA_WEB3_PROVIDER_PHANTOM]: true,
   [BooleanKeys.SKIP_ROLLOVER_NODES_SANITY_CHECK]: false,
-  [BooleanKeys.AUDIO_TRANSACTIONS_ENABLED]: false,
-  [BooleanKeys.ENABLE_DISCOVERY_NODE_MAX_SLOT_DIFF_PLAYS]: false
+  [BooleanKeys.AUDIO_TRANSACTIONS_ENABLED]: false
 }

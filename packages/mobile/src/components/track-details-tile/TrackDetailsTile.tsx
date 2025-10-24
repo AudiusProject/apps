@@ -5,8 +5,8 @@ import { useTrack, useUser } from '@audius/common/api'
 import {
   SquareSizes,
   GatedContentType,
-  isContentCollectibleGated,
-  isContentUSDCPurchaseGated
+  isContentUSDCPurchaseGated,
+  isContentTokenGated
 } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
 import type { ColorValue } from 'react-native'
@@ -15,8 +15,8 @@ import type { SvgProps } from 'react-native-svg'
 
 import {
   Flex,
+  IconArtistCoin,
   IconCart,
-  IconCollectible,
   IconSparkles
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
@@ -26,13 +26,14 @@ import { makeStyles, flexRowCentered, typography } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
 
+import { CoinGatedLabelSvg } from '../core/CoinGatedLabelSvg'
 import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
 
 const messages = {
-  collectibleGated: 'COLLECTIBLE GATED',
   specialAccess: 'SPECIAL ACCESS',
   premiumTrack: 'PREMIUM TRACK',
+  coinGated: 'COIN GATED',
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
 }
 
@@ -87,14 +88,14 @@ export const TrackDetailsTile = ({
   const { accentBlue, specialLightGreen } = useThemeColors()
   const { data: track } = useTrack(trackId)
   const { data: owner } = useUser(track?.owner_id)
-  const isCollectibleGated = isContentCollectibleGated(track?.stream_conditions)
+  const isTokenGated = isContentTokenGated(track?.stream_conditions)
   const isUSDCPurchaseGated =
     useIsUSDCEnabled() && isContentUSDCPurchaseGated(track?.stream_conditions)
 
   const type = isUSDCPurchaseGated
     ? GatedContentType.USDC_PURCHASE
-    : isCollectibleGated
-      ? GatedContentType.COLLECTIBLE_GATED
+    : isTokenGated
+      ? GatedContentType.TOKEN_GATED
       : GatedContentType.SPECIAL_ACCESS
 
   const headerAttributes: {
@@ -105,14 +106,14 @@ export const TrackDetailsTile = ({
     }
   } = useMemo(() => {
     return {
-      [GatedContentType.COLLECTIBLE_GATED]: {
-        message: messages.collectibleGated,
-        icon: IconCollectible,
-        color: accentBlue
-      },
       [GatedContentType.SPECIAL_ACCESS]: {
         message: messages.specialAccess,
         icon: IconSparkles,
+        color: accentBlue
+      },
+      [GatedContentType.TOKEN_GATED]: {
+        message: messages.coinGated,
+        icon: IconArtistCoin,
         color: accentBlue
       },
       [GatedContentType.USDC_PURCHASE]: {
@@ -141,20 +142,26 @@ export const TrackDetailsTile = ({
         <View style={styles.metadataContainer}>
           {showLabel ? (
             <View style={styles.streamContentLabelContainer}>
-              <IconComponent
-                fill={color}
-                width={spacing(5)}
-                height={spacing(5)}
-              />
-              <Text
-                fontSize='small'
-                colorValue={color}
-                weight='demiBold'
-                textTransform='uppercase'
-                style={styles.streamContentLabel}
-              >
-                {title}
-              </Text>
+              {isTokenGated ? (
+                <CoinGatedLabelSvg style={{ height: 28, width: 108 }} />
+              ) : (
+                <>
+                  <IconComponent
+                    fill={color}
+                    width={spacing(5)}
+                    height={spacing(5)}
+                  />
+                  <Text
+                    fontSize='small'
+                    colorValue={color}
+                    weight='demiBold'
+                    textTransform='uppercase'
+                    style={styles.streamContentLabel}
+                  >
+                    {title}
+                  </Text>
+                </>
+              )}
             </View>
           ) : null}
           <Text

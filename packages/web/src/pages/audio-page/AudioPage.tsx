@@ -21,7 +21,6 @@ import { BASE_URL } from 'utils/route'
 
 import styles from './AudioPage.module.css'
 import { AudioWalletTransactions } from './AudioWalletTransactions'
-import WalletModal from './WalletModal'
 import ExplainerTile from './components/ExplainerTile'
 import { WalletManagementTile } from './components/WalletManagementTile'
 const { AUDIO_PAGE, TRENDING_PAGE } = route
@@ -42,7 +41,6 @@ const RewardsContent = () => {
 
   return (
     <Flex column gap='2xl'>
-      <WalletModal />
       {audioFeaturesDegradedText ? (
         <div className={styles.topBanner}>
           <span className={styles.topBannerText}>

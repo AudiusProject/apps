@@ -10,6 +10,7 @@ import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import {
+  Flex,
   IconDonate,
   IconInstagram,
   IconLink,
@@ -17,7 +18,7 @@ import {
   IconX
 } from '@audius/harmony-native'
 import { ScrollView } from 'app/components/core'
-import { ImageField } from 'app/components/fields'
+import { TextField } from 'app/components/fields'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { useProfilePicture } from 'app/components/image/UserImage'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -26,41 +27,17 @@ import type { Image } from 'app/types/image'
 import { isImageUriSource } from 'app/utils/image'
 
 import { FormScreen } from './FormScreen'
-import { ProfileTextField } from './ProfileTextField'
+import { ProfileHeader } from './ProfileHeader'
+import { ProfileInputCard } from './ProfileInputCard'
 import type { ProfileValues, UpdatedProfile } from './types'
 
 const { updateProfile } = profilePageActions
 
-const useStyles = makeStyles(({ palette, spacing }) => ({
-  coverPhoto: {
-    height: 96,
-    width: '100%',
-    borderRadius: 0,
-    aspectRatio: undefined
-  },
-  profilePicture: {
-    position: 'absolute',
-    top: 37,
-    left: 11,
-    height: 100,
-    width: 100,
-    borderRadius: 100 / 2,
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderColor: palette.white,
-    backgroundColor: palette.neutralLight4,
-    zIndex: 100,
-    overflow: 'hidden'
-  },
-  profilePictureImageContainer: {
-    height: 'auto',
-    width: 'auto'
-  },
-  profilePictureImage: {
-    width: 'auto'
-  },
-  textFields: {
-    paddingTop: spacing(16)
+const useStyles = makeStyles(({ spacing }) => ({
+  scrollContent: {
+    paddingTop: spacing(6),
+    paddingHorizontal: 16, // 16px horizontal margin
+    paddingBottom: spacing(24) // Extra padding for bottom action bar
   }
 }))
 
@@ -83,51 +60,86 @@ const EditProfileForm = (props: EditProfileFormProps) => {
 
   return (
     <FormScreen onReset={handleReset} onSubmit={handleSubmit} errors={errors}>
-      <ImageField
-        name='cover_photo'
-        styles={{ imageContainer: styles.coverPhoto }}
-        pickerOptions={{ height: 500, width: 2000, freeStyleCropEnabled: true }}
-      />
-      <ImageField
-        name='profile_picture'
-        styles={{
-          root: styles.profilePicture,
-          imageContainer: styles.profilePictureImageContainer,
-          image: styles.profilePictureImage
-        }}
-        pickerOptions={{
-          height: 1000,
-          width: 1000,
-          cropperCircleOverlay: true
-        }}
-      />
-      <ScrollView style={styles.textFields}>
-        <ProfileTextField isFirstInput name='name' label='Name' />
-        <ProfileTextField name='bio' label='Bio' multiline maxLength={256} />
-        <ProfileTextField name='location' label='Location' />
-        <ProfileTextField
-          editable={!isXVerified}
-          name='twitter_handle'
-          label='Twitter Handle'
-          prefix='@'
-          icon={IconX}
-        />
-        <ProfileTextField
-          editable={!isInstagramVerified}
-          name='instagram_handle'
-          label='Instagram Handle'
-          prefix='@'
-          icon={IconInstagram}
-        />
-        <ProfileTextField
-          editable={!isTikTokVerified}
-          name='tiktok_handle'
-          label='TikTok Handle'
-          prefix='@'
-          icon={IconTikTok}
-        />
-        <ProfileTextField name='website' label='Website' icon={IconLink} />
-        <ProfileTextField name='donation' label='Donation' icon={IconDonate} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Flex direction='column' gap='l' w='100%'>
+          {/* Profile Header with Cover Photo, Avatar, and Display Name */}
+          <ProfileHeader />
+
+          {/* About You Section */}
+          <ProfileInputCard title='About You'>
+            <Flex direction='column' gap='xs'>
+              <TextField
+                name='bio'
+                label='Bio'
+                placeholder='Tell us about yourself'
+                multiline
+                maxLength={256}
+                noGutter
+              />
+              <TextField
+                name='location'
+                label='Location'
+                placeholder='City, Country'
+                noGutter
+              />
+            </Flex>
+          </ProfileInputCard>
+
+          {/* Social Handles Section */}
+          <ProfileInputCard title='Social Handles'>
+            <Flex direction='column' gap='xs'>
+              <TextField
+                name='twitter_handle'
+                label='X'
+                placeholder='username'
+                startAdornmentText='@'
+                startIcon={IconX}
+                editable={!isXVerified}
+                noGutter
+              />
+              <TextField
+                name='instagram_handle'
+                label='Instagram'
+                placeholder='username'
+                startAdornmentText='@'
+                startIcon={IconInstagram}
+                editable={!isInstagramVerified}
+                noGutter
+              />
+              <TextField
+                name='tiktok_handle'
+                label='TikTok'
+                placeholder='username'
+                startAdornmentText='@'
+                startIcon={IconTikTok}
+                editable={!isTikTokVerified}
+                noGutter
+              />
+            </Flex>
+          </ProfileInputCard>
+
+          {/* Website Section */}
+          <ProfileInputCard title='Website'>
+            <TextField
+              name='website'
+              label='Website'
+              placeholder='yourwebsite.com'
+              startIcon={IconLink}
+              noGutter
+            />
+          </ProfileInputCard>
+
+          {/* Donation Section */}
+          <ProfileInputCard title='Donation'>
+            <TextField
+              name='donation'
+              label='Donation'
+              placeholder='paypal.me/yourlink'
+              startIcon={IconDonate}
+              noGutter
+            />
+          </ProfileInputCard>
+        </Flex>
       </ScrollView>
     </FormScreen>
   )
@@ -181,7 +193,7 @@ export const EditProfileScreen = () => {
       if (profile_picture.file) {
         newProfile.updatedProfilePicture = profile_picture
       }
-      dispatch(updateProfile(newProfile as UserMetadata))
+      dispatch(updateProfile(newProfile as unknown as UserMetadata))
       navigation.goBack()
     },
     [dispatch, navigation, profile]
@@ -190,12 +202,12 @@ export const EditProfileScreen = () => {
   if (!profile) return null
 
   const {
-    verified_with_twitter: verifiedWithX,
-    verified_with_instagram: verifiedWithInstagram,
-    verified_with_tiktok: verifiedWithTiktok,
-    name,
-    bio,
-    location,
+    verified_with_twitter: verifiedWithX = false,
+    verified_with_instagram: verifiedWithInstagram = false,
+    verified_with_tiktok: verifiedWithTiktok = false,
+    name = '',
+    bio = null,
+    location = null,
     twitter_handle = null,
     instagram_handle = null,
     tiktok_handle = null,
@@ -203,7 +215,7 @@ export const EditProfileScreen = () => {
     donation = null
   } = profile
 
-  const initialValues = {
+  const initialValues: ProfileValues = {
     name,
     bio,
     location,
@@ -224,7 +236,11 @@ export const EditProfileScreen = () => {
   }
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
       {(formikProps) => {
         return (
           <EditProfileForm

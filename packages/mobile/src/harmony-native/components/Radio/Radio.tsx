@@ -20,6 +20,7 @@ export type RadioProps = FlexProps & {
   disabled?: boolean
   size?: 'default' | 'large'
   children?: ReactNode
+  startAdornment?: ReactNode
 }
 
 export const Radio = (props: RadioProps) => {
@@ -29,6 +30,7 @@ export const Radio = (props: RadioProps) => {
     onValueChange: onValueChangeProp,
     label,
     icon: Icon,
+    startAdornment,
     disabled,
     children,
     style,
@@ -92,6 +94,7 @@ export const Radio = (props: RadioProps) => {
           {label ? (
             <Flex direction='row' gap='s'>
               {Icon ? <Icon color={checked ? 'accent' : 'default'} /> : null}
+              {startAdornment ? <View>{startAdornment}</View> : null}
               <Text
                 variant='title'
                 size={size === 'large' ? 'l' : 'm'}

@@ -42,8 +42,18 @@
     },
     "../android/app/build/outputs/apk/prod/release/app-prod-release.apk": {
       "path": "../android/app/build/outputs/apk/prod/release/app-prod-release.apk",
-      "sha256": "VehCQ1Af4TjSiH+xJQgwKneqbZdlhJ0hIyG4mBH1ZLs=",
-      "uri": "https://arweave.net/C5TM8rvGaHaA6R2CwfmOGEyZITp5527U9JHqGxROYQI"
+      "sha256": "o9cHRgyLHOXoNFvOWF3FyYWFEiqU8e3MxTMDe7YLjiI=",
+      "uri": "https://arweave.net/zGtqCEEi41CIY5__Rz-2WfvWRg6YeJL19O8fnrElufM"
+    },
+    "./media/banner_graphic.png": {
+      "path": "./media/banner_graphic.png",
+      "sha256": "SFZH7IR13rHlKZ1imbVrp0/ECKYkaw5i4uk4t+7Sqsk=",
+      "uri": "https://arweave.net/vIObDUc3VcWNzfWpo9wrlCxJmZT-6bEmWF2ruJ9EKuc"
+    },
+    "./media/feature_graphic.png": {
+      "path": "./media/feature_graphic.png",
+      "sha256": "RnOvxLLvSf/NxWx3Rsu4H2+ubeWkjdkuuqF2pQEcdNM=",
+      "uri": "https://arweave.net/LtVk05ssOMQuL_xpuqTvG6wfHGBr29m_LXFaDi5kPto"
     }
   }
 }

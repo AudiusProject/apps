@@ -3,10 +3,12 @@ import { Fragment, useState, useEffect, useRef, useCallback } from 'react'
 import type { LayoutChangeEvent, TextStyle, ViewStyle } from 'react-native'
 import { Animated, Pressable, View } from 'react-native'
 
-import { Text } from '@audius/harmony-native'
+import { Text, Flex } from '@audius/harmony-native'
 import { light } from 'app/haptics'
 import type { StylesProps } from 'app/styles'
 import { makeStyles } from 'app/styles'
+
+import type { IconComponent } from '../../harmony-native/icons'
 
 // Note, offset is the inner padding of the container div
 const offset = 3
@@ -14,6 +16,7 @@ const offset = 3
 export type Option<Value> = {
   key: Value
   text: string
+  leftIcon?: IconComponent
 }
 
 export type SegmentedControlProps<Value> = {
@@ -242,14 +245,25 @@ export const SegmentedControl = <Value,>(
               ]}
               onPress={() => handleSelectOption(option.key)}
             >
-              <Text
-                size='s'
-                color={isSelected ? 'default' : 'subdued'}
-                strength='strong'
-                style={[stylesProp?.text, isSelected && stylesProp?.activeText]}
-              >
-                {option.text}
-              </Text>
+              <Flex direction='row' alignItems='center' gap='s'>
+                {option.leftIcon ? (
+                  <option.leftIcon
+                    size='s'
+                    color={isSelected ? 'default' : 'subdued'}
+                  />
+                ) : null}
+                <Text
+                  size='s'
+                  color={isSelected ? 'default' : 'subdued'}
+                  strength='strong'
+                  style={[
+                    stylesProp?.text,
+                    isSelected && stylesProp?.activeText
+                  ]}
+                >
+                  {option.text}
+                </Text>
+              </Flex>
             </Pressable>
             {index !== options.length - 1 ? (
               <View

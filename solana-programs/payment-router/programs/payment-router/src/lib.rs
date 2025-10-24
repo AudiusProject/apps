@@ -99,6 +99,6 @@ security_txt! {
 
     // Optional Fields
     preferred_languages: "en",
-    source_code: "https://github.com/AudiusProject/audius-protocol/tree/main/solana-programs/payment-router",
+    source_code: "https://github.com/AudiusProject/apps/tree/main/solana-programs/payment-router",
     auditors: "Neodyme"
 }

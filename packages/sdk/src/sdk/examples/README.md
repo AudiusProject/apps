@@ -1,6 +1,6 @@
 # Simple examples using @audius/sdk
 
-For examples of using `@audius/sdk` in a full app, please see https://github.com/AudiusProject/audius-protocol/tree/main/packages/create-audius-app/examples
+For examples of using `@audius/sdk` in a full app, please see https://github.com/AudiusProject/apps/tree/main/packages/create-audius-app/examples
 
 ## Usage
 

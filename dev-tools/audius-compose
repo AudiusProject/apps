@@ -15,16 +15,16 @@ import solders.keypair
 
 LOCALHOSTS = """
 127.0.0.1       ingress \
-audius-protocol-comms-discovery-1 audius-protocol-comms-discovery-2 audius-protocol-comms-discovery-3 audius-protocol-comms-discovery-4 audius-protocol-comms-discovery-5 \
-audius-protocol-discovery-provider-1 audius-protocol-discovery-provider-2 audius-protocol-discovery-provider-3 \
-audius-protocol-creator-node-1 audius-protocol-creator-node-2 audius-protocol-creator-node-3 \
-audius-protocol-identity-service-1 \
-audius-protocol-solana-test-validator-1 \
-audius-protocol-eth-ganache-1 \
-audius-protocol-pedalboard \
-audius-protocol-anti-abuse-oracle-1 \
-audius-protocol-discovery-provider-redis-1 \
-audius-protocol-api \
+audius-comms-discovery-1 audius-comms-discovery-2 audius-comms-discovery-3 audius-comms-discovery-4 audius-comms-discovery-5 \
+audius-discovery-provider-1 audius-discovery-provider-2 audius-discovery-provider-3 \
+audius-creator-node-1 audius-creator-node-2 audius-creator-node-3 \
+audius-identity-service-1 \
+audius-solana-test-validator-1 \
+audius-eth-ganache-1 \
+audius-pedalboard \
+audius-anti-abuse-oracle-1 \
+audius-discovery-provider-redis-1 \
+audius-api \
 """
 
 
@@ -217,7 +217,7 @@ def build(
             "compose",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.yml'}",
-            f"--project-name={protocol_dir.name}",
+            "--project-name=audius",
             "--profile=circle_ci_push",
             "--profile=tests",
             "--profile=identity",
@@ -265,7 +265,7 @@ def push(ctx, services, prod):
 
     try:
         for service in services:
-            base_tag = f"{protocol_dir.name}-{service}"
+            base_tag = f"audius-{service}"
 
             subprocess.run(
                 ["docker", "tag", base_tag, f"audius/{service}:{git_commit}"],
@@ -296,7 +296,7 @@ def pull(ctx):
             "docker",
             "compose",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.yml'}",
-            f"--project-name={protocol_dir.name}",
+            "--project-name=audius",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             "--profile=solana",
             "pull",
@@ -409,7 +409,7 @@ def up(
                 "docker",
                 "compose",
                 f"--project-directory={protocol_dir / 'dev-tools/compose'}",
-                f"--project-name={protocol_dir.name}",
+                "--project-name=audius",
                 f"--file={protocol_dir / 'dev-tools/compose/docker-compose.yml'}",
                 *profiles,
                 "up",
@@ -431,7 +431,7 @@ def down(protocol_dir):
             "docker",
             "compose",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
-            f"--project-name={protocol_dir.name}",
+            "--project-name=audius",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.yml'}",
             "--profile=*",
             "down",
@@ -472,7 +472,7 @@ def test_build(protocol_dir):
             "docker",
             "compose",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.test.yml'}",
-            f"--project-name={protocol_dir.name}-test",
+            "--project-name=audius-test",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             "build",
         ],
@@ -483,7 +483,7 @@ def test_build(protocol_dir):
             "docker",
             "compose",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.test.yml'}",
-            f"--project-name={protocol_dir.name}-test",
+            "--project-name=audius-test",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             "pull",
         ],
@@ -506,7 +506,7 @@ def test_run(protocol_dir, service, args):
             "docker",
             "compose",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.test.yml'}",
-            f"--project-name={protocol_dir.name}-test",
+            "--project-name=audius-test",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             "run",
             "--rm",
@@ -536,7 +536,7 @@ def test_up(protocol_dir, service):
                 "docker",
                 "compose",
                 f"--file={protocol_dir / 'dev-tools/compose/docker-compose.test.yml'}",
-                f"--project-name={protocol_dir.name}-test",
+                "--project-name=audius-test",
                 f"--project-directory={protocol_dir / 'dev-tools/compose'}",
                 "up",
                 "-d",
@@ -557,7 +557,7 @@ def test_down(protocol_dir):
             "docker",
             "compose",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.test.yml'}",
-            f"--project-name={protocol_dir.name}-test",
+            f"--project-name=audius-test",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             "--profile=*",
             "down",
@@ -643,7 +643,7 @@ def ps(protocol_dir):
         if service["Names"] == "discovery-provider-elasticsearch":
             name = f"{service['Names']}-{replica}"
 
-        name = name.removeprefix("audius-protocol-")
+        name = name.removeprefix("audius-")
 
         print(
             service["ID"][:12].ljust(13),
@@ -652,7 +652,7 @@ def ps(protocol_dir):
             ports,
         )
 
-    print("** most containers prefixed with 'audius-protocol-' **")
+    print("** most containers prefixed with 'audius-' **")
 
 
 @cli.command()
@@ -679,7 +679,7 @@ def logs(protocol_dir, service):
             "compose",
             f"--project-directory={protocol_dir / 'dev-tools/compose'}",
             f"--file={protocol_dir / 'dev-tools/compose/docker-compose.yml'}",
-            f"--project-name={protocol_dir.name}",
+            "--project-name=audius",
             "logs",
             service,
         ],

@@ -1,6 +1,7 @@
 import { HTMLAttributes, ReactNode } from 'react'
 
 import { IconComponent } from '../icon'
+import { FlexProps } from '../layout/Flex'
 import { ScrollbarProps } from '../scrollbar'
 
 export enum Anchor {
@@ -152,4 +153,4 @@ export type ModalTitleProps = Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
   subtitleId?: string
 }
 
-export type ModalFooterProps = HTMLAttributes<HTMLDivElement>
+export type ModalFooterProps = FlexProps

@@ -320,7 +320,7 @@ type GetPurchaseMetadataArgs = {
  * Intended to replace the old purchaseWithCoinflow Saga to use new SDK.
  * purchaseAlbumWithCoinflow to follow
  * Creates the purchase transaction but doesn't send it and instead pops the coinflow modal.
- * @see {@link https://github.com/AudiusProject/audius-protocol/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/tracks/TracksApi.ts#L386 purchase}
+ * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/tracks/TracksApi.ts#L386 purchase}
  */
 function* purchaseTrackWithCoinflow(args: {
   sdk: AudiusSdk
@@ -428,7 +428,7 @@ function* purchaseTrackWithCoinflow(args: {
 /**
  * Intended to replace the old purchaseWithCoinflow Saga to use new SDK.
  * Creates the purchase transaction but doesn't send it and instead pops the coinflow modal.
- * @see {@link https://github.com/AudiusProject/audius-protocol/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/albums/AlbumsApi.ts#L386 purchase}
+ * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/albums/AlbumsApi.ts#L386 purchase}
  */
 function* purchaseAlbumWithCoinflow(args: {
   sdk: AudiusSdk

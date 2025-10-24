@@ -11,7 +11,7 @@ import numeral from 'numeral'
  * If the count is 0, it returns "0".
  * This function is pulled over from the common package because we don't use the common package in Harmony.
  */
-export const formatCount = (count: number) => {
+export const formatCount = (count: number, decimals: number = 0) => {
   if (count >= 1000) {
     const countStr = count.toString()
     if (countStr.length % 3 === 0) {
@@ -28,6 +28,6 @@ export const formatCount = (count: number) => {
   } else if (!count) {
     return '0'
   } else {
-    return `${count}`
+    return `${count.toFixed(decimals)}`
   }
 }

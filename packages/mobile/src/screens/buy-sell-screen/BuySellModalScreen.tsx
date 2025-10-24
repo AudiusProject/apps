@@ -1,4 +1,5 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import { PortalHost } from '@gorhom/portal'
 import { useRoute } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
@@ -30,14 +31,15 @@ export const BuySellModalScreen = () => {
           <Stack.Screen
             name='ConfirmSwapScreen'
             component={ConfirmSwapScreen}
-            options={{ gestureEnabled: false }}
+            options={{ gestureEnabled: false, headerLeft: () => null }}
           />
           <Stack.Screen
             name='TransactionResultScreen'
             component={TransactionResultScreen}
-            options={{ gestureEnabled: false }}
+            options={{ gestureEnabled: false, headerLeft: () => null }}
           />
         </Stack.Navigator>
+        <PortalHost name='BuySellModalScreenDrawerPortal' />
       </BottomSheetModalProvider>
     </ModalScreen>
   )

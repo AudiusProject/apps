@@ -11,7 +11,7 @@ import { SelectArtistsPreviewContextProvider } from 'components/follow-artist-ca
 
 const messages = {
   cta: `Let’s fix that by following some of these artists!`,
-  noFollowers: `Oops! There's nothing here.`
+  noFollowers: `Your feed is empty`
 }
 
 type FollowUsersValues = {

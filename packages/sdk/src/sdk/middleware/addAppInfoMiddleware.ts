@@ -20,11 +20,13 @@ let apiKey: string | undefined
 export const addAppInfoMiddleware = ({
   apiKey: providedApiKey,
   appName: providedAppName,
-  services
+  services,
+  basePath
 }: {
   apiKey?: string
   appName?: string
   services: ServicesContainer
+  basePath: string
 }): Middleware => {
   apiKey = providedApiKey
   appName = providedAppName
@@ -32,10 +34,9 @@ export const addAppInfoMiddleware = ({
     pre: async (context: RequestContext): Promise<FetchParams> => {
       // If an app name is not provided, fetch the name from the dev app
       if (!providedAppName) {
-        const middleware = [services.discoveryNodeSelector.createMiddleware()]
         const apiClientConfig = new Configuration({
           fetchApi: fetch,
-          middleware
+          basePath
         })
         const developerApps = new DeveloperAppsApi(
           apiClientConfig,

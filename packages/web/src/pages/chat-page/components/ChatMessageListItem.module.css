@@ -50,8 +50,8 @@
 
 .textWrapper {
   background-color: var(--bubble-color);
-  padding: var(--harmony-unit-4);
   text-align: left;
+  max-width: 448px;
 }
 
 .text {

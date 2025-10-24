@@ -47,7 +47,7 @@ let hedgehog: Hedgehog | undefined
 export const getHedgehog = () => {
   const getFn: GetFn = async (args) => {
     const res = await fetch(
-      `http://audius-protocol-identity-service-1/authentication?lookupKey=${args.lookupKey}`,
+      `http://audius-identity-service-1/authentication?lookupKey=${args.lookupKey}`,
       {
         method: 'GET'
       }
@@ -60,16 +60,13 @@ export const getHedgehog = () => {
 
   const setAuthFn: SetAuthFn = async (args) => {
     args.email = args.username
-    const res = await fetch(
-      'http://audius-protocol-identity-service-1/authentication',
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(args)
-      }
-    )
+    const res = await fetch('http://audius-identity-service-1/authentication', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify(args)
+    })
     if (!res.ok) {
       throw new ResponseError(res)
     }
@@ -77,7 +74,7 @@ export const getHedgehog = () => {
 
   const setUserFn: SetUserFn = async (args) => {
     args.email = args.username
-    const res = await fetch('http://audius-protocol-identity-service-1/user', {
+    const res = await fetch('http://audius-identity-service-1/user', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -143,7 +140,7 @@ export const initializeAudiusSdk = async ({
       middleware: [
         {
           pre: async (context) => {
-            const endpoint = 'http://audius-protocol-discovery-provider-1'
+            const endpoint = 'http://audius-api'
             const url = `${endpoint}${context.url}`
             return { url, init: context.init }
           }

@@ -218,4 +218,29 @@ describe('ProfilePage', () => {
     renderProfilePage(nonArtistUser)
     // TODO
   })
+
+  it('shows buy coin UI when the profile belongs to an artist with an owned coin', async () => {
+    // Mock a different current user to simulate viewing another user's profile
+    renderProfilePage(
+      artistUser, // Use the artistUser who owns the coin
+      {
+        reduxState: {
+          account: {
+            userId: 987 // Different from artistUser.id
+          }
+        }
+      }
+    )
+
+    // Wait for the profile to load
+    expect(
+      await screen.findByRole('heading', { name: artistUser.name })
+    ).toBeInTheDocument()
+
+    // Verify that coin-related elements are present when user has coins
+    const buyButton = await screen.findByRole('button', { name: 'Buy Coins' })
+    expect(buyButton).toBeInTheDocument()
+    expect(await screen.findByText('$TEST')).toBeInTheDocument()
+    expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()
+  })
 })

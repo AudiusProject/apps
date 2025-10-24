@@ -19,9 +19,6 @@ const generatePlaylistArtworkWorker = new WebWorker(
 export const ALLOWED_IMAGE_FILE_TYPES = [
   'image/jpeg',
   'image/png',
-  'image/bmp',
-  'image/tiff',
-  'image/gif',
   'image/webp'
 ]
 

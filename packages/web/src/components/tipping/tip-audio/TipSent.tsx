@@ -1,16 +1,17 @@
 import { useCallback } from 'react'
 
-import { useCurrentAccountUser, useTokenPrice } from '@audius/common/api'
+import { useArtistCoin, useCurrentAccountUser } from '@audius/common/api'
 import { Name, type SolanaWalletAddress } from '@audius/common/models'
-import { tippingSelectors, TOKEN_LISTING_MAP } from '@audius/common/store'
+import { tippingSelectors } from '@audius/common/store'
 import { formatNumberCommas } from '@audius/common/utils'
 import { IconCheck } from '@audius/harmony'
 import cn from 'classnames'
 
 import { useSelector } from 'common/hooks/useSelector'
-import { useRecord, make } from 'common/store/analytics/actions'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { XShareButton } from 'components/x-share-button/XShareButton'
 import { audiusSdk } from 'services/audius-sdk'
+import { env } from 'services/env'
 
 import { ProfileInfo } from '../../profile-info/ProfileInfo'
 
@@ -37,11 +38,9 @@ export const TipSent = () => {
     })
   })
   const { accountHandle, accountErcWallet, accountUserId } = accountData ?? {}
-  const { data: tokenPriceData } = useTokenPrice(
-    TOKEN_LISTING_MAP.AUDIO.address
-  )
+  const { data: tokenPriceData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
 
-  const tokenPrice = tokenPriceData?.price
+  const tokenPrice = tokenPriceData?.price?.toString()
 
   if (!accountErcWallet) {
     throw new Error('Failed to get account ERC wallet')

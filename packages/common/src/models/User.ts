@@ -1,4 +1,3 @@
-import { Collectible } from '~/models/Collectible'
 import { Color } from '~/models/Color'
 import { CID, ID } from '~/models/Identifiers'
 import {
@@ -21,12 +20,16 @@ export type SocialPlatform = 'x' | 'instagram' | 'tiktok'
 export type UserMetadata = {
   album_count: number
   allow_ai_attribution?: boolean
+  artist_coin_badge?: Nullable<{
+    mint: string
+    logo_uri: string
+    ticker: string
+  }>
   artist_pick_track_id: Nullable<number>
   associated_wallets_balance?: Nullable<StringWei>
   balance?: Nullable<StringWei>
   bio: Nullable<string>
   blocknumber: number
-  collectibleList?: Collectible[]
   cover_photo_cids?: Nullable<CoverPhotoSizesCids>
   cover_photo_sizes: Nullable<CID>
   cover_photo: CoverPhotoSizes & { mirrors?: string[] | undefined }
@@ -40,7 +43,6 @@ export type UserMetadata = {
   follower_count: number
   handle_lc: string
   handle: string
-  has_collectibles: boolean
   is_deactivated: boolean
   is_verified: boolean
   profile_type: Nullable<'label'>
@@ -59,7 +61,6 @@ export type UserMetadata = {
   profile_picture_sizes: Nullable<CID>
   profile_picture: ProfilePictureSizes & { mirrors?: string[] | undefined }
   repost_count: number
-  solanaCollectibleList?: Collectible[]
   spl_wallet: Nullable<SolanaWalletAddress>
   spl_usdc_payout_wallet?: Nullable<SolanaWalletAddress>
   supporter_count: number

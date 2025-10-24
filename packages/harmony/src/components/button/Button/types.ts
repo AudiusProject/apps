@@ -21,6 +21,11 @@ export type ButtonProps = {
   hexColor?: `#${string}`
 
   /**
+   * Override the hover color of the button, only valid for the `PRIMARY` variant
+   */
+  hoverColor?: SpecialColors
+
+  /**
    * The type of the button
    */
   variant?: ButtonVariant

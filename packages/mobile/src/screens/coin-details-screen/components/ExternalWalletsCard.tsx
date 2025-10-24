@@ -9,8 +9,8 @@ import {
   Button,
   Divider,
   Flex,
-  IconLogoCircle,
   IconLogoCircleSOL,
+  IconLogoWhiteBackground,
   Paper,
   Text
 } from '@audius/harmony-native'
@@ -32,7 +32,19 @@ const WalletRow = ({
   return (
     <Flex row alignItems='center' gap='m' w='100%'>
       <Flex row alignItems='center' gap='s'>
-        {isInAppWallet ? <IconLogoCircle /> : <IconLogoCircleSOL />}
+        {isInAppWallet ? (
+          <Flex
+            border='default'
+            borderRadius='circle'
+            style={{ overflow: 'hidden', height: 24, width: 24 }}
+            justifyContent='center'
+            alignItems='center'
+          >
+            <IconLogoWhiteBackground size='l' />
+          </Flex>
+        ) : (
+          <IconLogoCircleSOL size='l' />
+        )}
         <Text strength='strong'>
           {isInAppWallet ? messages.builtIn : shortenSPLAddress(address)}
         </Text>
@@ -63,12 +75,12 @@ const HasBalanceContent = ({
   return (
     <Flex column w='100%'>
       <Flex pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.hasBalanceTitle}
         </Text>
       </Flex>
       <Divider />
-      <Flex column pv='l' ph='xl'>
+      <Flex column gap='m' pv='l' ph='xl'>
         {accounts.map((account) => (
           <WalletRow
             key={account.owner}
@@ -97,7 +109,7 @@ const NoBalanceContent = () => {
   return (
     <Flex column>
       <Flex pv='l' ph='xl'>
-        <Text variant='heading' size='s' color='heading'>
+        <Text variant='heading' size='s'>
           {messages.noBalanceTitle}
         </Text>
       </Flex>

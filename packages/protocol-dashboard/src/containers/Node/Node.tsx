@@ -1,6 +1,6 @@
 import { IconEmbed } from '@audius/harmony'
 import clsx from 'clsx'
-import { useMatch, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import IndividualNodeUptimeChart from 'components/IndividualNodeUptimeChart'
 import IndividualServiceApiCallsChart from 'components/IndividualServiceApiCallsChart'
@@ -10,10 +10,10 @@ import Page from 'components/Page'
 import { useAccount } from 'store/account/hooks'
 import { useContentNode } from 'store/cache/contentNode/hooks'
 import { useDiscoveryProvider } from 'store/cache/discoveryProvider/hooks'
+import { useValidator } from 'store/cache/validator/hooks'
 import { Address, ServiceType, Status } from 'types'
 import { usePushRoute } from 'utils/effects'
 import { createStyles } from 'utils/mobile'
-import { NODES_DISCOVERY_NODE, NOT_FOUND } from 'utils/routes'
 
 import desktopStyles from './Node.module.css'
 import mobileStyles from './NodeMobile.module.css'
@@ -22,7 +22,8 @@ const styles = createStyles({ desktopStyles, mobileStyles })
 
 const messages = {
   discovery: 'Discovery Node',
-  content: 'Content Node'
+  content: 'Content Node',
+  validator: 'Validator'
 }
 
 type ContentNodeProps = { spID: number; accountWallet: Address | undefined }
@@ -116,22 +117,70 @@ const DiscoveryNode: React.FC<DiscoveryNodeProps> = ({
   )
 }
 
-const Node = () => {
+type ValidatorProps = { spID: number; accountWallet: Address | undefined }
+const Validator: React.FC<ValidatorProps> = ({
+  spID,
+  accountWallet
+}: ContentNodeProps) => {
+  const { node: validator, status } = useValidator({ spID })
+
+  if (status === Status.Failure) {
+    return null
+  }
+
+  const isOwner = accountWallet === validator?.owner
+
+  return (
+    <>
+      <div className={styles.section}>
+        <NodeOverview
+          spID={spID}
+          serviceType={ServiceType.Validator}
+          version={validator?.version}
+          endpoint={validator?.endpoint}
+          operatorWallet={validator?.owner}
+          delegateOwnerWallet={validator?.delegateOwnerWallet}
+          isOwner={isOwner}
+          isDeregistered={validator?.isDeregistered}
+          isLoading={status === Status.Loading}
+        />
+      </div>
+      {validator ? (
+        <div className={clsx(styles.section, styles.chart)}>
+          <IndividualNodeUptimeChart
+            nodeType={ServiceType.Validator}
+            node={validator.endpoint}
+          />
+        </div>
+      ) : null}
+    </>
+  )
+}
+
+type NodeProps = {
+  nodeType: ServiceType
+}
+const Node = ({ nodeType }: NodeProps) => {
   const { spID: spIDParam } = useParams<{ spID: string }>()
   const spID = parseInt(spIDParam, 10)
   const { wallet: accountWallet } = useAccount()
-  const isDiscovery = !!useMatch(NODES_DISCOVERY_NODE)
 
   return (
     <Page
       icon={IconEmbed}
-      title={isDiscovery ? messages.discovery : messages.content}
+      title={
+        nodeType === ServiceType.DiscoveryPovider
+          ? messages.discovery
+          : messages.validator
+      }
       className={styles.container}
     >
-      {isDiscovery ? (
+      {nodeType === ServiceType.DiscoveryProvider ? (
         <DiscoveryNode spID={spID} accountWallet={accountWallet} />
-      ) : (
+      ) : nodeType === ServiceType.ContentNode ? (
         <ContentNode spID={spID} accountWallet={accountWallet} />
+      ) : (
+        <Validator spID={spID} accountWallet={accountWallet} />
       )}
     </Page>
   )

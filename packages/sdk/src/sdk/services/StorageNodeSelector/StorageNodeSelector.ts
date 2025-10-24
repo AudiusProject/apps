@@ -1,13 +1,12 @@
 import { productionConfig } from '../../config/production'
-import fetch from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
 import { RendezvousHash } from '../../utils/rendezvous'
-import type { HealthCheckResponseData } from '../DiscoveryNodeSelector/healthCheckTypes'
 import type { LoggerService } from '../Logger'
 
 import { getDefaultStorageNodeSelectorConfig } from './getDefaultConfig'
 import { isNodeHealthy } from './getNStorageNodes'
 import type {
+  HealthCheckResponseData,
   StorageNode,
   StorageNodeSelectorConfig,
   StorageNodeSelectorConfigInternal,
@@ -40,21 +39,19 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
   private async updateAvailableStorageNodes(endpoint: string) {
     this.logger.info('Updating list of available storage nodes')
     const healthCheckEndpoint = `${endpoint}/health_check`
-    const discoveryHealthCheckResponse = await fetch(healthCheckEndpoint)
-    if (!discoveryHealthCheckResponse.ok) {
-      this.logger.warn(
-        'Discovery provider health check did not respond successfully'
-      )
+    const healthCheckResponse = await fetch(healthCheckEndpoint)
+    if (!healthCheckResponse.ok) {
+      this.logger.warn('API health check did not respond successfully')
       return
     }
 
     const responseData: { data: HealthCheckResponseData } =
-      await discoveryHealthCheckResponse.json()
+      await healthCheckResponse.json()
     const contentNodes = responseData.data.network?.content_nodes
 
     if (!contentNodes) {
       this.logger.warn(
-        'Discovery provider health check did not contain any available content nodes'
+        'API health check did not contain any available content nodes'
       )
       return
     }

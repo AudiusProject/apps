@@ -1,1 +1,0 @@
-export { EditCollectiblesDrawer } from './EditCollectiblesDrawer'

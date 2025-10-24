@@ -2,9 +2,10 @@ import React, { ChangeEvent, useState } from 'react'
 
 import {
   useArtistCoin,
-  useTokenBalance,
+  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
+import { walletMessages } from '@audius/common/messages'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
@@ -53,12 +54,13 @@ const SendTokensConfirmation = ({
   const { isMobile } = useMedia()
 
   // Get token data and balance using the same hooks as ReceiveTokensModal
-  const { data: coin } = useArtistCoin({ mint })
-  const { data: tokenBalance } = useTokenBalance({ mint })
+  const { data: coin } = useArtistCoin(mint)
+  const { data: tokenBalance } = useCoinBalance({
+    mint,
+    includeExternalWallets: false,
+    includeStaked: false
+  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
-  const currentBalance = tokenBalance?.balance
-    ? tokenBalance.balance.value
-    : BigInt(0)
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -70,15 +72,11 @@ const SendTokensConfirmation = ({
     )
   }
 
-  const formatBalance = (balance: bigint) => {
-    return new FixedDecimal(balance, tokenInfo?.decimals).toLocaleString(
-      'en-US',
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }
-    )
-  }
+  const formattedBalance =
+    tokenBalance?.balance.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) ?? ''
 
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIsConfirmed(event.target.checked)
@@ -100,7 +98,8 @@ const SendTokensConfirmation = ({
       {/* Token Balance Section */}
       <CryptoBalanceSection
         tokenInfo={tokenInfo}
-        amount={formatBalance(currentBalance)}
+        name={tokenInfo.name}
+        amount={formattedBalance}
       />
 
       <Divider orientation='horizontal' />
@@ -114,20 +113,16 @@ const SendTokensConfirmation = ({
         <Text variant='heading' size='s' color='subdued'>
           {messages.amountToSend}
         </Text>
-        <Text
-          variant='heading'
-          size='s'
-          color='default'
-          css={{ wordBreak: 'break-all' }}
-        >
-          -{formatAmount(amount)} {tokenInfo.symbol}
+        <Text variant='heading' size='s' css={{ wordBreak: 'break-all' }}>
+          {walletMessages.minus}
+          {formatAmount(amount)} ${tokenInfo.symbol}
         </Text>
       </Flex>
 
       <Divider orientation='horizontal' />
 
       {/* Transfer Info */}
-      <Flex direction='column' gap='m'>
+      <Flex column gap='m'>
         <Text variant='heading' size='s' color='subdued'>
           {messages.destinationAddress}
         </Text>
@@ -164,7 +159,7 @@ const SendTokensConfirmation = ({
       </Hint>
 
       {/* Action Buttons */}
-      <Flex gap='s' direction='row'>
+      <Flex gap='s' row>
         <Button variant='secondary' onClick={onBack} fullWidth>
           {messages.back}
         </Button>

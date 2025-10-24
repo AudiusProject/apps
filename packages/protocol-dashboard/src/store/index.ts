@@ -20,6 +20,7 @@ import protocol from './cache/protocol/slice'
 import rewards from './cache/rewards/slice'
 import timeline from './cache/timeline/slice'
 import user from './cache/user/slice'
+import validator from './cache/validator/slice'
 import votes from './cache/votes/slice'
 
 declare global {
@@ -71,6 +72,7 @@ export const createStore = () => {
       cache: combineReducers({
         discoveryProvider,
         contentNode,
+        validator,
         protocol,
         user,
         proposals,

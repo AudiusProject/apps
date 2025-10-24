@@ -1,4 +1,4 @@
-# sudo cp /home/ubuntu/audius-protocol/monitoring/scripts/logrotate.d/cron-alerts /etc/logrotate.d/
+# sudo cp /home/ubuntu/apps/monitoring/scripts/logrotate.d/cron-alerts /etc/logrotate.d/
 # sudo mkdir -p /tmp/logs
 # sudo chown -R root:root /tmp/logs
 # sudo touch /tmp/logs/cron-alerts.log

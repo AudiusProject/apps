@@ -4,7 +4,7 @@
   "version": "1.5.76",
   "description": "Custom eslint config for Audius.",
   "author": "Audius",
-  "homepage": "https://github.com/AudiusProject/audius-protocol#readme",
+  "homepage": "https://github.com/AudiusProject/apps#readme",
   "license": "ISC",
   "main": "src/index.js",
   "directories": {
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol.git"
+    "url": "git+https://github.com/AudiusProject/apps.git"
   },
   "peerDependencies": {
     "@emotion/eslint-plugin": "11.11.0",
@@ -44,6 +44,6 @@
     "typescript": "5.0.4"
   },
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   }
 }

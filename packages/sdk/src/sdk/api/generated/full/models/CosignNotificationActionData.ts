@@ -31,12 +31,6 @@ export interface CosignNotificationActionData {
      * @type {string}
      * @memberof CosignNotificationActionData
      */
-    parentTrackOwnerId: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CosignNotificationActionData
-     */
     trackId: string;
     /**
      * 
@@ -52,7 +46,6 @@ export interface CosignNotificationActionData {
 export function instanceOfCosignNotificationActionData(value: object): value is CosignNotificationActionData {
     let isInstance = true;
     isInstance = isInstance && "parentTrackId" in value && value["parentTrackId"] !== undefined;
-    isInstance = isInstance && "parentTrackOwnerId" in value && value["parentTrackOwnerId"] !== undefined;
     isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
     isInstance = isInstance && "trackOwnerId" in value && value["trackOwnerId"] !== undefined;
 
@@ -70,7 +63,6 @@ export function CosignNotificationActionDataFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'parentTrackId': json['parent_track_id'],
-        'parentTrackOwnerId': json['parent_track_owner_id'],
         'trackId': json['track_id'],
         'trackOwnerId': json['track_owner_id'],
     };
@@ -86,7 +78,6 @@ export function CosignNotificationActionDataToJSON(value?: CosignNotificationAct
     return {
         
         'parent_track_id': value.parentTrackId,
-        'parent_track_owner_id': value.parentTrackOwnerId,
         'track_id': value.trackId,
         'track_owner_id': value.trackOwnerId,
     };

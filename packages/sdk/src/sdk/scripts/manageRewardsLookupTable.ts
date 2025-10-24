@@ -53,15 +53,6 @@ const getSenders = async (config: SdkServicesConfig) => {
       })
     )
 
-  const discoverySenders = config.network.discoveryNodes.map((node) => ({
-    ...node,
-    sender: RewardManagerProgram.deriveSender({
-      ethAddress: node.delegateOwnerWallet,
-      programId: rewardManagerProgramId,
-      authority: rewardManagerAuthority
-    }).toBase58()
-  }))
-
   const storageSenders = config.network.storageNodes.map((node) => ({
     ...node,
     sender: RewardManagerProgram.deriveSender({
@@ -72,7 +63,7 @@ const getSenders = async (config: SdkServicesConfig) => {
   }))
 
   return {
-    validatorSenders: [...discoverySenders, ...storageSenders],
+    validatorSenders: [...storageSenders],
     oracleSenders
   }
 }

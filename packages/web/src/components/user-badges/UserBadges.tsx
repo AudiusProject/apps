@@ -6,14 +6,8 @@ import {
   useMemo
 } from 'react'
 
-import {
-  useArtistCoin,
-  useUserCoins,
-  useTokenBalance
-} from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
+import { useUser } from '@audius/common/api'
 import { BadgeTier, ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import {
@@ -28,14 +22,15 @@ import {
   IconTokenPlatinum,
   IconTokenSilver,
   IconVerified,
-  Text,
-  motion
+  motion,
+  Text
 } from '@audius/harmony'
 import { Origin } from '@audius/harmony/src/components/popup/types'
 import cn from 'classnames'
 
 import { ArtistCoinHoverCard } from 'components/hover-card/ArtistCoinHoverCard'
 import { AudioHoverCard } from 'components/hover-card/AudioHoverCard'
+import { env } from 'services/env'
 
 import styles from './UserBadges.module.css'
 
@@ -70,6 +65,9 @@ type UserBadgesProps = {
   // Optional mint address for displaying specific artist coin
   // If provided, shows the artist coin badge for that token
   mint?: string
+
+  // Optional flag to hide the artist coin badge
+  hideArtistCoinBadge?: boolean
 }
 
 /**
@@ -84,30 +82,28 @@ const UserBadges = ({
   transformOrigin,
   isVerifiedOverride,
   overrideTier,
-  mint
+  mint,
+  hideArtistCoinBadge = false
 }: UserBadgesProps) => {
   const { tier: currentTier, isVerified } = useTierAndVerifiedForUser(userId)
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-  const { data: userCoins } = useUserCoins({ userId })
-
-  // Display the mint of the prop if provided, otherwise display the mint of the coin with the highest balance
-  const displayMint = useMemo(() => {
-    if (mint) return mint
-    if (!userCoins || userCoins.length < 2) return null
-    return userCoins[1].mint
-  }, [mint, userCoins])
-
-  const { data: coin } = useArtistCoin({ mint: displayMint ?? '' })
-  const { data: tokenBalance } = useTokenBalance({
-    mint: displayMint ?? '',
-    userId
+  const { data: user } = useUser(userId, {
+    select: (user) => ({
+      artistCoinBadge: user?.artist_coin_badge
+    })
   })
+
+  const { artistCoinBadge: userArtistCoinBadge } = user ?? {}
+
+  const displayMint = useMemo(() => {
+    // Priority: explicit mint prop > user's artist_coin_badge > null
+    if (mint) return mint
+    if (userArtistCoinBadge?.mint) return userArtistCoinBadge.mint
+    return null
+  }, [mint, userArtistCoinBadge?.mint])
 
   const tier = overrideTier || currentTier
   const isUserVerified = isVerifiedOverride ?? isVerified
-  const hasContent = isUserVerified || tier !== 'none' || !!tokenBalance
+  const hasContent = isUserVerified || tier !== 'none' || !!displayMint
 
   // Create a handler to stop event propagation
   const handleStopPropagation = useCallback((e: MouseEvent) => {
@@ -173,18 +169,15 @@ const UserBadges = ({
   }, [tier, userId, anchorOrigin, transformOrigin, size])
 
   const shouldShowArtistCoinBadge =
-    isArtistCoinEnabled &&
+    !hideArtistCoinBadge &&
     !!displayMint &&
-    !!coin &&
-    !!tokenBalance &&
-    tokenBalance.balance.value !== BigInt(0)
+    displayMint !== env.WAUDIO_MINT_ADDRESS
 
   const artistCoinBadge = useMemo(() => {
     if (!shouldShowArtistCoinBadge) return null
 
     return (
       <ArtistCoinHoverCard
-        mint={displayMint ?? ''}
         userId={userId}
         anchorOrigin={anchorOrigin}
         transformOrigin={transformOrigin}
@@ -199,25 +192,22 @@ const UserBadges = ({
             }
           }}
         >
-          {coin?.logoUri ? (
-            <Artwork
-              src={coin.logoUri}
-              hex
-              w={iconSizes[size]}
-              h={iconSizes[size]}
-              borderWidth={0}
-            />
-          ) : null}
+          <Artwork
+            src={userArtistCoinBadge?.logo_uri ?? ''}
+            hex
+            w={iconSizes[size]}
+            h={iconSizes[size]}
+            borderWidth={0}
+          />
         </Flex>
       </ArtistCoinHoverCard>
     )
   }, [
     shouldShowArtistCoinBadge,
-    displayMint,
     userId,
     anchorOrigin,
     transformOrigin,
-    coin?.logoUri,
+    userArtistCoinBadge?.logo_uri,
     size
   ])
 

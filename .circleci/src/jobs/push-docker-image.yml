@@ -10,8 +10,8 @@ machine: true
 resource_class: audiusproject/gcp-n2-standard-4
 steps:
   - checkout:
-      path: '~/audius-protocol'
-  - run: AUDIUS_DEV=false bash ~/audius-protocol/dev-tools/setup.sh
+      path: '~/apps'
+  - run: AUDIUS_DEV=false bash ~/apps/dev-tools/setup.sh
   - docker-login
   - run: . ~/.profile; audius-compose push --prod << parameters.service >>
   - docker-logout
@@ -23,7 +23,7 @@ steps:
         if [ "<< parameters.notify_slack_on_failure >>" = "true" ]; then
           json_content="{ \"blocks\": ["
           json_content+="{ \"type\": \"section\","
-          json_content+="\"text\": { \"type\": \"mrkdwn\", \"text\": \"Failed to build and push << parameters.service >>. Today's release can't move forward until this is resolved. Hint: check <https://app.circleci.com/pipelines/github/AudiusProject/audius-protocol?branch=$CIRCLE_BRANCH|here>\" }"
+          json_content+="\"text\": { \"type\": \"mrkdwn\", \"text\": \"Failed to build and push << parameters.service >>. Today's release can't move forward until this is resolved. Hint: check <https://app.circleci.com/pipelines/github/AudiusProject/apps?branch=$CIRCLE_BRANCH|here>\" }"
           json_content+="}]}"
           echo "Sending error message to Slack: $json_content"
 

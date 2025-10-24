@@ -15,7 +15,6 @@ export enum TrackFilters {
   PUBLIC = 'Public',
   PREMIUM = 'Premium',
   SPECIAL_ACCESS = 'SpecialAccess',
-  COLLECTIBLE_GATED = 'CollectibleGated',
   HIDDEN = 'Hidden'
 }
 

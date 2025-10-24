@@ -19,6 +19,24 @@ export const SVGDefs = () => {
             <stop stopColor={color.special.gradientStop2} offset='100%' />
           </linearGradient>
         </defs>
+        <linearGradient id='coinGradient' gradientTransform='rotate(-5)'>
+          <stop stopColor={color.special.coinGradientColor1} offset='-4.82%' />
+          <stop stopColor={color.special.coinGradientColor2} offset='49.8%' />
+          <stop stopColor={color.special.coinGradientColor3} offset='104.43%' />
+        </linearGradient>
+        <linearGradient
+          id='coinGradientUserSpace'
+          gradientTransform='rotate(-5)'
+          x1='-12.3563'
+          y1='1.23603'
+          x2='63.8101'
+          y2='-38.1893'
+          gradientUnits='userSpaceOnUse'
+        >
+          <stop stopColor={color.special.coinGradientColor1} offset='-4.82%' />
+          <stop stopColor={color.special.coinGradientColor2} offset='49.8%' />
+          <stop stopColor={color.special.coinGradientColor3} offset='104.43%' />
+        </linearGradient>
       </svg>
       <svg width='0' height='0' style={{ position: 'absolute' }}>
         <defs>

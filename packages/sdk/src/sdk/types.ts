@@ -6,7 +6,6 @@ import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
 import type { AntiAbuseOracleSelectorService } from './services/AntiAbuseOracleSelector/types'
 import type { ArchiverService } from './services/Archiver'
 import type { AudiusWalletClient } from './services/AudiusWalletClient'
-import type { DiscoveryNodeSelectorService } from './services/DiscoveryNodeSelector'
 import { EmailEncryptionService } from './services/Encryption'
 import type { EntityManagerService } from './services/EntityManager'
 import {
@@ -34,11 +33,6 @@ import type { SolanaClient } from './services/Solana/programs/SolanaClient'
 import type { StorageService } from './services/Storage'
 import type { StorageNodeSelectorService } from './services/StorageNodeSelector'
 export type ServicesContainer = {
-  /**
-   * Service used to choose discovery node
-   */
-  discoveryNodeSelector: DiscoveryNodeSelectorService
-
   /**
    * Service used to choose storage node
    */

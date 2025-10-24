@@ -90,7 +90,6 @@ from src.api.v1.models.users import (
     account_full,
     associated_wallets,
     challenge_response,
-    collectibles,
     connected_wallets,
     decoded_user_token,
     email_access,
@@ -120,7 +119,6 @@ from src.queries.get_associated_user_id import get_associated_user_id
 from src.queries.get_associated_user_wallet import get_associated_user_wallet
 from src.queries.get_authorization import is_authorized_request
 from src.queries.get_challenges import get_challenges
-from src.queries.get_collectibles import GetCollectiblesArgs, get_collectibles
 from src.queries.get_collection_library import (
     CollectionType,
     GetCollectionLibraryArgs,
@@ -1983,27 +1981,6 @@ class ConnectedWallets(Resource):
         return success_response(
             {"erc_wallets": wallets["eth"], "spl_wallets": wallets["sol"]}
         )
-
-
-collectibles_response = make_response(
-    "collectibles_response", ns, fields.Nested(collectibles, allow_null=True)
-)
-
-
-@ns.route("/<string:id>/collectibles")
-class UserCollectibles(Resource):
-    @ns.doc(
-        id="""Get User Collectibles""",
-        description="""Get the User's indexed collectibles data""",
-        params={"id": "A User ID"},
-        responses={200: "Success", 400: "Bad request", 500: "Server error"},
-    )
-    @ns.marshal_with(collectibles_response)
-    @cache(ttl_sec=10)
-    def get(self, id):
-        decoded_id = decode_with_abort(id, full_ns)
-        collectibles = get_collectibles(GetCollectiblesArgs(user_id=decoded_id))
-        return success_response({"data": collectibles} if collectibles else None)
 
 
 get_challenges_route_parser = reqparse.RequestParser(argument_class=DescriptiveArgument)

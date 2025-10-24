@@ -73,7 +73,7 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     )
 
     return (
-      <Paper shadow='flat' ref={ref} pl={20} ml={-80} h={112}>
+      <Paper shadow='flat' ref={ref} ph={20} mh={-80} h={112}>
         <Flex w={isSmallScreen ? 96 : 400} borderRight='default'>
           {isSmallScreen ? null : headerContent}
         </Flex>

@@ -43,10 +43,6 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
   if (serviceType === 'discovery-node') {
     // ----------Discovery health----------
 
-    let chainError
-    if (!health?.chain_health) chainError = 'Missing health info'
-    if (!data?.portHealth) chainError = "Can't reach port 30300"
-
     res = {
       diskGbUsed: health?.filesystem_used
         ? bytesToGb(health.filesystem_used)
@@ -61,7 +57,6 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
       version: health?.version,
       operatorWallet: '', // not exposed in Discovery's health check
       delegateOwnerWallet: data?.signer,
-      chainError,
       startedAt: data?.comms?.booted ? new Date(data?.comms.booted) : undefined,
       otherErrors: health?.errors?.length ? health.errors : undefined
     }

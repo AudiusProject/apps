@@ -1,4 +1,9 @@
-import { IconCart, IconSparkles, IconReceive } from '@audius/harmony'
+import {
+  IconCart,
+  IconSparkles,
+  IconReceive,
+  IconArtistCoin
+} from '@audius/harmony'
 import cn from 'classnames'
 
 import Background from '../../assets/img/dogEar.svg'
@@ -8,7 +13,8 @@ import styles from './DogEar.module.css'
 const VARIANT_TO_ICON = {
   purchase: IconCart,
   special: IconSparkles,
-  extras: IconReceive
+  extras: IconReceive,
+  coin: IconArtistCoin
 }
 
 export const DogEar = ({ size, variant }) => {
@@ -20,7 +26,8 @@ export const DogEar = ({ size, variant }) => {
           [styles.small]: size === 's',
           [styles.purchase]: variant === 'purchase',
           [styles.special]: variant === 'special',
-          [styles.extras]: variant === 'extras'
+          [styles.extras]: variant === 'extras',
+          [styles.coin]: variant === 'coin'
         })}
       />
       <Icon

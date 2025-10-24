@@ -32,12 +32,6 @@ export interface RemixNotificationActionData {
      * @memberof RemixNotificationActionData
      */
     trackId: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RemixNotificationActionData
-     */
-    trackOwnerId: string;
 }
 
 /**
@@ -47,7 +41,6 @@ export function instanceOfRemixNotificationActionData(value: object): value is R
     let isInstance = true;
     isInstance = isInstance && "parentTrackId" in value && value["parentTrackId"] !== undefined;
     isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
-    isInstance = isInstance && "trackOwnerId" in value && value["trackOwnerId"] !== undefined;
 
     return isInstance;
 }
@@ -64,7 +57,6 @@ export function RemixNotificationActionDataFromJSONTyped(json: any, ignoreDiscri
         
         'parentTrackId': json['parent_track_id'],
         'trackId': json['track_id'],
-        'trackOwnerId': json['track_owner_id'],
     };
 }
 
@@ -79,7 +71,6 @@ export function RemixNotificationActionDataToJSON(value?: RemixNotificationActio
         
         'parent_track_id': value.parentTrackId,
         'track_id': value.trackId,
-        'track_owner_id': value.trackOwnerId,
     };
 }
 

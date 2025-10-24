@@ -6,6 +6,7 @@ import type { Modals } from '@audius/common/store'
 import { AddCashDrawer } from 'app/components/add-funds-drawer/AddCashDrawer'
 import { AddToCollectionDrawer } from 'app/components/add-to-collection-drawer'
 import { ApiRewardsDrawer } from 'app/components/api-rewards-drawer/ApiRewardsDrawer'
+import { ArtistCoinDetailsDrawer } from 'app/components/artist-coin-details-drawer/ArtistCoinDetailsDrawer'
 import { AudioBreakdownDrawer } from 'app/components/audio-breakdown-drawer'
 import { TiersExplainerDrawer } from 'app/components/audio-rewards'
 import { BlockMessagesDrawer } from 'app/components/block-messages-drawer'
@@ -14,7 +15,6 @@ import { ClaimAllRewardsDrawer } from 'app/components/challenge-rewards-drawer/C
 import { ChatActionsDrawer } from 'app/components/chat-actions-drawer'
 import { CoinflowOnrampDrawer } from 'app/components/coinflow-onramp-drawer/CoinflowOnrampDrawer'
 import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/CoinflowWithdrawDrawer'
-import { CollectibleDetailsDrawer } from 'app/components/collectible-details-drawer'
 import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-drawer'
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
 import { DeleteChatDrawer } from 'app/components/delete-chat-drawer'
@@ -23,7 +23,6 @@ import { DownloadTrackArchiveDrawer } from 'app/components/download-track-archiv
 import { ArtistPickConfirmationDrawer } from 'app/components/drawers/ArtistPickConfirmationDrawer'
 import { MuteCommentsConfirmationDrawer } from 'app/components/drawers/MuteCommentsConfirmationDrawer'
 import { DuplicateAddConfirmationDrawer } from 'app/components/duplicate-add-confirmation-drawer'
-import { EditCollectiblesDrawer } from 'app/components/edit-collectibles-drawer'
 import { EnablePushNotificationsDrawer } from 'app/components/enable-push-notifications-drawer'
 import { FeedFilterDrawer } from 'app/components/feed-filter-drawer'
 import { ForgotPasswordDrawer } from 'app/components/forgot-password-drawer'
@@ -38,6 +37,8 @@ import { PremiumContentPurchaseDrawer } from 'app/components/premium-content-pur
 import { ProfileActionsDrawer } from 'app/components/profile-actions-drawer'
 import { PurchaseVendorDrawer } from 'app/components/purchase-vendor-drawer/PurchaseVendorDrawer'
 import { RateCtaDrawer } from 'app/components/rate-cta-drawer'
+import { ReceiveTokensDrawer } from 'app/components/receive-tokens-drawer'
+import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
 import { ShareDrawer } from 'app/components/share-drawer'
 import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-drawer'
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
@@ -46,6 +47,7 @@ import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-
 import { TrendingRewardsDrawer } from 'app/components/trending-rewards-drawer'
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
 import { WithdrawUSDCDrawer } from 'app/components/withdraw-usdc-drawer/WithdrawUSDCDrawer'
+import { CoinInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/CoinInsightsOverflowMenu'
 import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/components'
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
@@ -53,6 +55,7 @@ import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import { TrendingFilterDrawer } from 'app/screens/trending-screen'
+import { WalletRowOverflowMenu } from 'app/screens/wallet-screen/components/LinkedWallets'
 
 import { useDrawerState } from '../components/drawer'
 import {
@@ -107,9 +110,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ClaimAllRewards: ClaimAllRewardsDrawer,
   APIRewardsExplainer: ApiRewardsDrawer,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
-  MobileEditCollectiblesDrawer: EditCollectiblesDrawer,
   Share: ShareDrawer,
-  CollectibleDetails: CollectibleDetailsDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
@@ -138,7 +139,10 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ArtistPick: ArtistPickConfirmationDrawer,
   DownloadTrackArchive: DownloadTrackArchiveDrawer,
   HostRemixContest: HostRemixContestDrawer,
-  WithdrawUSDCModal: WithdrawUSDCDrawer
+  WithdrawUSDCModal: WithdrawUSDCDrawer,
+  ReceiveTokensModal: ReceiveTokensDrawer,
+  SendTokensModal: SendTokensDrawer,
+  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer
 }
 
 const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
@@ -162,7 +166,9 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   SupportersInfo: SupportersInfoDrawer,
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
-  PickWinners: PickWinnersDrawer
+  PickWinners: PickWinnersDrawer,
+  CoinInsightsOverflowMenu,
+  WalletRowOverflowMenu
 }
 
 const commonDrawers = Object.entries(commonDrawersMap) as [

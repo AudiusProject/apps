@@ -9,7 +9,7 @@ import { env } from 'services/env'
 
 import { encodeUrlName } from './urlUtils'
 
-const { getHash, SIGN_UP_PAGE, profilePage, collectionPage } = route
+const { SIGN_UP_PAGE, profilePage, collectionPage } = route
 
 const USE_HASH_ROUTING = env.USE_HASH_ROUTING
 
@@ -63,13 +63,6 @@ export const fullCollectionPage = (
     permalink,
     isAlbum
   )}`
-}
-
-export const collectibleDetailsPage = (
-  handle: string,
-  collectibleId: string
-) => {
-  return `/${encodeUrlName(handle)}/collectibles/${getHash(collectibleId)}`
 }
 
 export const fullProfilePage = (handle: string) => {

@@ -16,7 +16,6 @@ from src.challenges.challenge_event_bus import ChallengeEventBus
 from src.exceptions import IndexingValidationError
 from src.models.tracks.track import Track
 from src.models.users.associated_wallet import AssociatedWallet
-from src.models.users.collectibles import Collectibles
 from src.models.users.user import User
 from src.models.users.user_events import UserEvent
 from src.models.users.user_payout_wallet_history import UserPayoutWalletHistory
@@ -34,7 +33,12 @@ from src.tasks.entity_manager.utils import (
 )
 from src.tasks.metadata import immutable_user_fields
 from src.utils.config import shared_config
-from src.utils.hardcoded_data import genres_lower, moods_lower, reserved_handles_lower
+from src.utils.hardcoded_data import (
+    genres_lower,
+    has_badwords,
+    moods_lower,
+    reserved_handles_lower,
+)
 from src.utils.indexing_errors import EntityMissingRequiredFieldError
 from src.utils.model_nullable_validator import all_required_fields_present
 
@@ -129,6 +133,7 @@ def validate_user_metadata(
     # If the user's handle is not set, validate that it is unique
     if not user_record.handle:
         handle_lower = validate_user_handle(user_metadata["handle"])
+        validate_user_name(user_metadata["name"])
         user_handle_exists = session.query(
             session.query(User).filter(User.handle_lc == handle_lower).exists()
         ).scalar()
@@ -182,7 +187,17 @@ def validate_user_handle(handle: Union[str, None]):
         raise IndexingValidationError(f"Handle {handle} is a genre name")
     if handle in moods_lower:
         raise IndexingValidationError(f"Handle {handle} is a mood name")
+    if has_badwords(handle):
+        raise IndexingValidationError(f"Handle {handle} contains a bad word")
     return handle
+
+
+def validate_user_name(name: Union[str, None]):
+    if not name:
+        return name
+    if has_badwords(name):
+        raise IndexingValidationError(f"Name {name} contains a bad word")
+    return name
 
 
 def create_user(params: ManageEntityParameters):
@@ -440,19 +455,17 @@ def add_associated_wallet(
                 f"Invalid signature for wallet {wallet_address}"
             )
 
-        # Check if wallet already exists
+        # Check if wallet already exists, and remove it from other users
         existing_wallet = None
         for _, wallet in params.existing_records["AssociatedWallet"].items():
-            if (
-                wallet.chain == chain
-                and wallet.user_id == user_id
-                and wallet.wallet == wallet_address
-            ):
-                existing_wallet = wallet
-                break
+            if wallet.chain == chain and wallet.wallet == wallet_address:
+                if wallet.user_id == user_id:
+                    existing_wallet = wallet
+                else:
+                    session.delete(wallet)
 
         if not existing_wallet:
-            # Create new wallet association only if it doesn't exist
+            # Create new wallet association only if it doesn't exist for this user
             associated_wallet_entry = AssociatedWallet(
                 user_id=user_id,
                 wallet=wallet_address,
@@ -509,47 +522,19 @@ def remove_associated_wallet(params: ManageEntityParameters):
         raise e
 
 
-def update_user_collectibles(params: ManageEntityParameters):
-    """Updates the user's collectibles data"""
-    validate_signer(params)
-    user_id = params.user_id
-    metadata = params.metadata
-    existing_user = params.existing_records["User"][user_id]
-    try:
-        if not isinstance(metadata.get("collectibles"), dict):
-            # If invalid format, don't update
-            raise IndexingValidationError("Invalid collectibles data format")
-
-        collectibles = Collectibles(
-            user_id=user_id,
-            data=metadata["collectibles"],
-            blockhash=params.event_blockhash,
-            blocknumber=params.block_number,
-        )
-
-        # We can just add_record here. Outer EM logic will take care
-        # of deleting previous record if it exists
-        params.add_record(user_id, collectibles, EntityType.COLLECTIBLES)
-
-        if metadata["collectibles"].items():
-            existing_user.has_collectibles = True
-        else:
-            existing_user.has_collectibles = False
-
-    except Exception as e:
-        logger.error(
-            f"index.py | users.py | Fatal error updating user collectibles {e}",
-            exc_info=True,
-        )
-        raise e
-
-
 def validate_signature(
     chain: str, web3, user_id: int, associated_wallet: str, signature: str
 ):
     if chain == "eth":
-        signed_wallet = recover_user_id_hash(web3, user_id, signature)
-        return signed_wallet == associated_wallet
+        try:
+            signed_wallet = recover_user_id_hash(web3, user_id, signature)
+            return signed_wallet == associated_wallet
+        except Exception as e:
+            logger.error(
+                f"index.py | users.py | Verifying ETH validation signature for user_id {user_id} {e}",
+                exc_info=True,
+            )
+            return False
     if chain == "sol":
         try:
             message = f"AudiusUserID:{user_id}"

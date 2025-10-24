@@ -1,9 +1,4 @@
-import type {
-  DiscoveryNodeSelector,
-  Genre,
-  Middleware,
-  Mood
-} from '@audius/sdk'
+import type { Genre, Middleware, Mood } from '@audius/sdk'
 import { FetchError, ResponseError } from '@audius/sdk'
 import axios, {
   AxiosError,
@@ -63,12 +58,12 @@ export type DiscoveryProviderConfig = {
   blacklist?: Set<string>
   ethContracts: Nullable<EthContracts>
   web3Manager?: Nullable<Web3Manager>
+  endpoint: string
   reselectTimeout?: number
   selectionRequestTimeout?: number
   selectionRequestRetries?: number
   unhealthySlotDiffPlays?: number
   unhealthyBlockDiff?: number
-  discoveryNodeSelector?: DiscoveryNodeSelector
   userId?: number
 } & Pick<
   DiscoveryProviderSelectionConfig,
@@ -152,7 +147,6 @@ export class DiscoveryProvider {
 
   discoveryProviderEndpoint: string | undefined
   isInitialized = false
-  discoveryNodeSelector?: DiscoveryNodeSelector
   discoveryNodeMiddleware?: Middleware
   selectionCallback?: DiscoveryProviderSelectionConfig['selectionCallback']
   localStorage?: LocalStorage
@@ -163,6 +157,7 @@ export class DiscoveryProvider {
     blacklist,
     ethContracts,
     web3Manager,
+    endpoint,
     reselectTimeout,
     selectionCallback,
     monitoringCallbacks,
@@ -171,7 +166,6 @@ export class DiscoveryProvider {
     localStorage,
     unhealthySlotDiffPlays,
     unhealthyBlockDiff,
-    discoveryNodeSelector,
     userId
   }: DiscoveryProviderConfig) {
     this.whitelist = whitelist
@@ -181,6 +175,7 @@ export class DiscoveryProvider {
     this.selectionCallback = selectionCallback
     this.localStorage = localStorage
     this.userId = userId
+    this.discoveryProviderEndpoint = endpoint
 
     this.unhealthyBlockDiff = unhealthyBlockDiff ?? DEFAULT_UNHEALTHY_BLOCK_DIFF
     this.serviceSelector = new DiscoveryProviderSelection(
@@ -209,30 +204,9 @@ export class DiscoveryProvider {
     this.maxRequestsForTrue404 = MAX_MAKE_REQUEST_RETRIES_WITH_404
 
     this.monitoringCallbacks = monitoringCallbacks
-    this.discoveryNodeSelector = discoveryNodeSelector
-    this.discoveryNodeMiddleware = discoveryNodeSelector?.createMiddleware()
   }
 
-  async init() {
-    if (this.discoveryNodeSelector) {
-      this.discoveryNodeSelector.addEventListener(
-        'change',
-        (endpoint: string) => {
-          this.setEndpoint(endpoint)
-          this.selectionCallback?.(endpoint, [])
-        }
-      )
-
-      const endpoint = await this.discoveryNodeSelector.getSelectedEndpoint()
-      if (endpoint) {
-        this.setEndpoint(endpoint)
-      }
-    } else {
-      // Need this for backwards compat
-      const endpoint = await this.serviceSelector.select()
-      this.setEndpoint(endpoint)
-    }
-  }
+  async init() {}
 
   setEndpoint(endpoint: string) {
     this.discoveryProviderEndpoint = endpoint
@@ -1354,23 +1328,13 @@ export class DiscoveryProvider {
    */
   async _makeRequestInternal<Response>(
     requestObj: Record<string, unknown>,
-    retry = true,
-    attemptedRetries = 0,
+    _retry = true,
+    _attemptedRetries = 0,
     throwError = false,
     blockNumber?: number
   ) {
-    if (this.discoveryNodeSelector) {
-      return await this._makeRequestInternalNext<Response>(
-        requestObj,
-        throwError,
-        blockNumber
-      )
-    }
-
-    return await this._makeRequestInternalLegacy<Response>(
+    return await this._makeRequestInternalNext<Response>(
       requestObj,
-      retry,
-      attemptedRetries,
       throwError,
       blockNumber
     )

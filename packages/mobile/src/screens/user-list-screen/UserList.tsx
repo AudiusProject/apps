@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import type { ID, User } from '@audius/common/models'
 import type { ListRenderItem } from '@shopify/flash-list'
@@ -20,11 +20,6 @@ type SkeletonItem = {
   _loading: true
   user_id: string
 }
-
-// Currently there is a lot of complex data that can change in users.
-// This is a nearly static list, with only follow/unfollow actions
-// The follow/unfollow action is handled by the follow button
-const MemoizedUserListItem = memo(UserListItem, () => true)
 
 const useStyles = makeStyles(({ spacing }) => ({
   spinner: {
@@ -113,7 +108,7 @@ export const UserList = (props: UserListProps) => {
       '_loading' in item ? (
         <UserListItemSkeleton tag={tag} />
       ) : (
-        <MemoizedUserListItem
+        <UserListItem
           userId={item.user_id}
           tag={tag}
           showRank={showRank}

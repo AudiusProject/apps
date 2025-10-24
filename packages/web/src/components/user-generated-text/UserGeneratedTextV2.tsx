@@ -310,8 +310,7 @@ export const UserGeneratedTextV2 = forwardRef(function (
     },
     // link matcher
     {
-      pattern:
-        /https?:\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g,
+      pattern: /https?:\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\S]*)/g,
       renderLink
     },
     // Handle matcher e.g. @handle

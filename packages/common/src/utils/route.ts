@@ -9,6 +9,8 @@ import { convertGenreLabelToValue, Genre } from './genres'
 // External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
+export const ARTIST_COIN_TERMS = '/legal/artist-coin-terms'
+export const ARTIST_COIN_ACCEPTABLE_USE = '/legal/artist-coin-acceptable-use'
 export const API_TERMS = '/legal/api-terms'
 export const DOWNLOAD_START_LINK = '/download?start_download=true'
 export const DOWNLOAD_LINK = '/download'
@@ -69,9 +71,12 @@ export const PURCHASES_PAGE = '/payments/purchases'
 export const SALES_PAGE = '/payments/sales'
 export const WITHDRAWALS_PAGE = '/payments/withdrawals'
 export const TRANSACTION_HISTORY_PAGE = '/wallet/transaction-history'
-export const ASSET_DETAIL_PAGE = '/wallet/:mint'
+export const COIN_DETAIL_PAGE = '/coins/:ticker'
+export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
-export const ALL_COINS_PAGE = '/wallet/coins'
+export const WALLET_GUIDE_PAGE = '/wallet/guide'
+export const COINS_CREATE_PAGE = '/coins/create'
+export const COINS_EXPLORE_PAGE = '/coins'
 export const PRIVATE_KEY_EXPORTER_SETTINGS_PAGE = '/settings/export-private-key'
 export const DEV_TOOLS_PAGE = '/dev-tools'
 export const SOLANA_TOOLS_PAGE = '/dev-tools/solana'
@@ -135,9 +140,6 @@ export const PROFILE_PAGE_TRACKS = '/:handle/tracks'
 export const PROFILE_PAGE_ALBUMS = '/:handle/albums'
 export const PROFILE_PAGE_PLAYLISTS = '/:handle/playlists'
 export const PROFILE_PAGE_REPOSTS = '/:handle/reposts'
-export const PROFILE_PAGE_COLLECTIBLES = '/:handle/collectibles'
-export const PROFILE_PAGE_COLLECTIBLE_DETAILS =
-  '/:handle/collectibles/:collectibleId'
 export const PROFILE_PAGE_AI_ATTRIBUTED_TRACKS = '/:handle/ai'
 export const PROFILE_PAGE_COMMENTS = '/:handle/comments'
 
@@ -151,6 +153,8 @@ export const REPOSTING_USERS_ROUTE = '/reposting_users'
 export const FAVORITING_USERS_ROUTE = '/favoriting_users'
 export const FOLLOWING_USERS_ROUTE = '/following'
 export const FOLLOWERS_USERS_ROUTE = '/followers'
+export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
+export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
 export const SUPPORTING_USERS_ROUTE = '/supporting'
 export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
@@ -172,7 +176,7 @@ export const AUDIUS_X_LINK = 'https://x.com/audius'
 export const AUDIUS_INSTAGRAM_LINK = 'https://www.instagram.com/audius'
 export const AUDIUS_DISCORD_LINK = 'https://discord.gg/audius'
 export const AUDIUS_DISCORD_OAUTH_LINK =
-  'https://discord.com/oauth2/authorize?client_id=1404512878890975373&response_type=code&redirect_uri=http%3A%2F%2F54.219.100.171%3A8081%2Fdiscord_callback&scope=guilds.join+identify'
+  'https://discord.com/oauth2/authorize?client_id=1404512878890975373&response_type=code&redirect_uri=http%3A%2F%2Fdiscord.audius.co%3A8081%2Fdiscord_callback&scope=guilds.join+identify'
 export const AUDIUS_TELEGRAM_LINK = 'https://t.me/Audius'
 export const AUDIUS_PRESS_LINK = 'https://brand.audius.co'
 export const AUDIUS_MERCH_LINK = 'https://merch.audius.co/'
@@ -180,8 +184,6 @@ export const AUDIUS_REMIX_CONTESTS_LINK = 'https://remix.audius.co/'
 export const AUDIUS_BLOG_LINK = 'https://blog.audius.co/'
 export const AUDIUS_AI_BLOG_LINK =
   'https://help.audius.co/help/What-should-I-know-about-AI-generated-music-on-Audius-0a5a8'
-export const AUDIUS_GATED_CONTENT_BLOG_LINK =
-  'https://blog.audius.co/article/introducing-nft-collectible-gated-content'
 export const AUDIUS_CONTACT_EMAIL_LINK = 'mailto:contact@audius.co'
 export const AUDIUS_PROTOCOL_DASHBOARD_LINK = 'https://dashboard.audius.org'
 export const OPEN_MUSIC_LICENSE_LINK =
@@ -204,6 +206,8 @@ export const AUDIUS_DEV_STAKER_LINK = 'https://audius.org/protocol'
 export const AUDIUS_HOT_AND_NEW =
   '/audius/playlist/hot-new-on-audius-%F0%9F%94%A5-4281'
 export const AUDIUS_HELP_LINK = 'https://help.audius.co/'
+export const AUDIUS_ARTIST_COIN_HELP_LINK =
+  'https://help.audius.co/product/artist-coins'
 
 export const AUDIUS_CAREERS_LINK = 'https://www.tikilabs.com/careers'
 export const AUDIUS_PODCAST_LINK =
@@ -211,8 +215,13 @@ export const AUDIUS_PODCAST_LINK =
 export const AUDIUS_CYPHER_LINK = 'https://discord.gg/audius'
 export const AUDIUS_API_LINK = 'https://audius.org/api'
 
-export const AUDIUS_TOKENS_HELP_LINK =
-  'https://support.audius.co/product/tokens'
+export const AUDIUS_ARTIST_COINS_HELP_LINK =
+  'https://help.audius.co/product/artist-coins'
+
+// Birdeye Links
+export const BIRDEYE_BASE_URL = 'https://birdeye.so'
+export const birdeyeUrl = (mint: string, network: string = 'solana') =>
+  `${BIRDEYE_BASE_URL}/${network}/token/${mint}`
 
 export const authenticatedRoutes = [
   FEED_PAGE,
@@ -230,7 +239,8 @@ export const authenticatedRoutes = [
   SALES_PAGE,
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
-  ALL_COINS_PAGE
+  COINS_CREATE_PAGE,
+  WALLET_GUIDE_PAGE
 ]
 
 export const guestRoutes = [
@@ -246,6 +256,8 @@ export const publicSiteRoutes = [
   TERMS_OF_SERVICE,
   PRIVACY_POLICY,
   API_TERMS,
+  ARTIST_COIN_TERMS,
+  ARTIST_COIN_ACCEPTABLE_USE,
   DOWNLOAD_LINK,
   AUTH_REDIRECT
 ]
@@ -280,9 +292,12 @@ export const orderedRoutes = [
   PAYMENTS_PAGE,
   AUDIO_PAGE,
   WALLET_AUDIO_PAGE,
-  ASSET_DETAIL_PAGE,
+  COIN_DETAIL_PAGE,
+  EDIT_COIN_DETAILS_PAGE,
   WALLET_PAGE,
-  ALL_COINS_PAGE,
+  COINS_EXPLORE_PAGE,
+  COINS_CREATE_PAGE,
+  WALLET_GUIDE_PAGE,
   REWARDS_PAGE,
   SETTINGS_PAGE,
   ACCOUNT_SETTINGS_PAGE,
@@ -307,9 +322,7 @@ export const orderedRoutes = [
   SUPPORTING_USERS_ROUTE,
   TOP_SUPPORTERS_USERS_ROUTE,
   PROFILE_PAGE_COMMENTS,
-  PROFILE_PAGE,
-  PROFILE_PAGE_COLLECTIBLES,
-  PROFILE_PAGE_COLLECTIBLE_DETAILS
+  PROFILE_PAGE
 ]
 
 export const staticRoutes = new Set([
@@ -332,8 +345,8 @@ export const staticRoutes = new Set([
   DASHBOARD_PAGE,
   PAYMENTS_PAGE,
   AUDIO_PAGE,
-  WALLET_PAGE,
-  ALL_COINS_PAGE,
+  WALLET_GUIDE_PAGE,
+  COINS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
   REWARDS_PAGE,
   TRACK_EDIT_PAGE,
@@ -451,6 +464,5 @@ export const searchPage = (searchOptions: SearchOptions) => {
   })
 }
 
-export const solanaExplorerAddress = (address: string) => {
-  return `https://explorer.solana.com/address/${address}`
-}
+export const coinPage = (ticker: string) =>
+  `/coins/${ticker.startsWith('$') ? ticker.slice(1) : ticker}`

@@ -23,4 +23,6 @@
   align-items: center;
   justify-content: center;
   box-shadow: none;
+  text-align: center;
+  padding: var(--harmony-spacing-m);
 }

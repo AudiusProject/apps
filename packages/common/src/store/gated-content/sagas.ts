@@ -19,6 +19,7 @@ import {
   Name,
   isContentFollowGated,
   isContentTipGated,
+  isContentTokenGated,
   isContentUSDCPurchaseGated,
   GatedContentStatus,
   UserTrackMetadata,
@@ -144,6 +145,9 @@ export function* pollGatedContent({
         if (isContentTipGated(apiEntity.stream_conditions)) {
           return Name.TIP_GATED_TRACK_UNLOCKED
         }
+        if (isContentTokenGated(apiEntity.stream_conditions)) {
+          return Name.TOKEN_GATED_TRACK_UNLOCKED
+        }
         return null
       }
       const eventName = getEventName()
@@ -177,7 +181,9 @@ export function* pollGatedContent({
           ? Name.USDC_PURCHASE_GATED_DOWNLOAD_TRACK_UNLOCKED
           : isContentFollowGated(apiEntity.download_conditions)
             ? Name.FOLLOW_GATED_DOWNLOAD_TRACK_UNLOCKED
-            : null)
+            : isContentTokenGated(apiEntity.download_conditions)
+              ? Name.TOKEN_GATED_DOWNLOAD_TRACK_UNLOCKED
+              : null)
       if (eventName) {
         analytics.track({
           eventName,

@@ -16,8 +16,9 @@ export const useBuySellTabs = (props: UseBuySellTabsProps) => {
     (newTab: string) => {
       setActiveTab(newTab as BuySellTab)
       setCurrentScreen('input')
+      resetTransactionData()
     },
-    [setCurrentScreen]
+    [setCurrentScreen, resetTransactionData]
   )
 
   return {

@@ -12,7 +12,7 @@ import Loading from 'components/Loading'
 import Modal from 'components/Modal'
 import UserImage from 'components/UserImage'
 import AudiusClient from 'services/Audius'
-import { Address, BigNumber, ServiceType, Status } from 'types'
+import { Address, BigNumber, Status } from 'types'
 import { TICKER } from 'utils/consts'
 import { sharedMessages } from 'utils/sharedMessages'
 
@@ -71,7 +71,6 @@ export const OperatorStaking: React.FC<OperatorStakingProps> = (props) => {
 
 type NewServiceProps = {
   className?: string
-  serviceType: ServiceType
   delegateOwnerWallet: string
 }
 export const NewService: React.FC<NewServiceProps> = (props) => {
@@ -82,11 +81,6 @@ export const NewService: React.FC<NewServiceProps> = (props) => {
       })}
     >
       <div className={styles.newServiceTitle}>{messages.newService}</div>
-      <div className={styles.newServiceType}>
-        {props.serviceType === ServiceType.DiscoveryProvider
-          ? messages.discoveryProvider
-          : messages.contentNode}
-      </div>
       <div className={styles.newServiceDelegateWallet}>
         {messages.delegateOwnerWallet}
       </div>

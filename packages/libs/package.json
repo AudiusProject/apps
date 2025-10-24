@@ -1,6 +1,6 @@
 {
   "name": "@audius/sdk-legacy",
-  "version": "6.0.8",
+  "version": "6.0.11",
   "audius": {
     "releaseSHA": "f1d70a2a0643c5c84d8ab053f70c1e0a2ec3ad49"
   },
@@ -44,8 +44,8 @@
   "dependencies": {
     "@audius/fixed-decimal": "0.2.0",
     "@audius/hedgehog": "3.0.0-alpha.1",
-    "@audius/sdk": "10.0.0",
-    "@audius/spl": "2.0.2",
+    "@audius/sdk": "11.1.0",
+    "@audius/spl": "2.1.0",
     "@babel/core": "^7.23.7",
     "@babel/plugin-proposal-class-static-block": "7.21.0",
     "@babel/runtime": "7.18.3",
@@ -165,7 +165,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol/tree/main/packages/libs"
+    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/libs"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -173,7 +173,7 @@
   "author": "Audius",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/libs"
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/libs"
 }

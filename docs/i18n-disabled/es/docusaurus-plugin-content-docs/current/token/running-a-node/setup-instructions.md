@@ -88,7 +88,7 @@ La información almacenada incluye metadatos de usuario de Audius, imágenes y c
 
 #### Ejecutar
 
-Use `audius-cli` para actualizar las variables requeridas. La lista completa de variables y explicaciones puede encontrarse en la wiki [aquí](https://github.com/AudiusProject/audius-protocol/wiki/Content-Node:-Configuration-Details#required-environment-variables).
+Use `audius-cli` para actualizar las variables requeridas. La lista completa de variables y explicaciones puede encontrarse en la wiki [aquí](https://github.com/AudiusProject/apps/wiki/Content-Node:-Configuration-Details#required-environment-variables).
 
 Se deben establecer algunas variables, puedes hacer esto con los siguientes comandos:
 
@@ -200,7 +200,7 @@ Tendrá que reemplazar el trabajo de la semilla en `audius/discovery-provider/di
 CREAR EXTENIÓN pg_trgm;
 ```
 
-Asegúrese de que su servicio expone todas las variables de entorno requeridas. Ver wiki [aquí](https://github.com/AudiusProject/audius-protocol/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) para ver la lista completa de variables y descripciones.
+Asegúrese de que su servicio expone todas las variables de entorno requeridas. Ver wiki [aquí](https://github.com/AudiusProject/apps/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) para ver la lista completa de variables y descripciones.
 
 #### Iniciar
 

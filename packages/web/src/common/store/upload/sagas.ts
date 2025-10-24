@@ -447,7 +447,7 @@ export function* handleUploads({
   const pendingStemCount: Record<ID, number> = {}
   for (let i = 0; i < tracks.length; i++) {
     const track = tracks[i]
-    uploadQueue.put({ trackIndex: i, stemIndex: null, track })
+    yield* put(uploadQueue, { trackIndex: i, stemIndex: null, track })
 
     // Report analytics for each track
     yield* put(
@@ -485,7 +485,7 @@ export function* handleUploads({
       stems += stemCount
       for (let j = 0; j < trackStems.length; j++) {
         const stem = trackStems[j]
-        uploadQueue.put({ trackIndex: i, stemIndex: j, track: stem })
+        yield* put(uploadQueue, { trackIndex: i, stemIndex: j, track: stem })
       }
     }
   }
@@ -563,13 +563,13 @@ export function* handleUploads({
       // track) or last track (for a collection) is uploaded.
       pendingMetadata[trackIndex] = metadata
     } else {
-      publishQueue.put({ trackIndex, stemIndex, trackId, metadata })
+      yield* put(publishQueue, { trackIndex, stemIndex, trackId, metadata })
     }
 
     if (isCollection && uploaded.length === tracks.length) {
       // Publish the collection once all tracks are uploaded
       for (let i = 0; i < pendingMetadata.length; i++) {
-        publishQueue.put({
+        yield* put(publishQueue, {
           trackIndex: i,
           stemIndex: null,
           trackId: pendingMetadata[i].trackId!,
@@ -636,7 +636,7 @@ export function* handleUploads({
         console.debug(
           `Stems finished for ${parentTrackId}, publishing parent: ${pendingMetadata[trackIndex].title}`
         )
-        publishQueue.put({
+        yield* put(publishQueue, {
           trackIndex,
           stemIndex: null,
           trackId: parentTrackId,
@@ -681,7 +681,7 @@ export function* handleUploads({
 
     // Error this track's parent
     if (stemIndex !== null) {
-      responseChannel.put({
+      yield* put(responseChannel, {
         type: 'ERROR',
         payload: {
           trackIndex,

@@ -648,12 +648,6 @@ export const Drawer: DrawerComponent = ({
     ]
   )
 
-  const handlePressClose = useCallback(() => {
-    if (!blockClose) {
-      onClose()
-    }
-  }, [blockClose, onClose])
-
   // NOTE: sk - Need to interpolate the border radius bc of a funky
   // issue with border radius under 1 in ios
   const interpolatedBorderRadius = borderRadiusAnim.current.interpolate({
@@ -702,10 +696,10 @@ export const Drawer: DrawerComponent = ({
         {...edgeProps}
       >
         {CustomDrawerHeader ? (
-          <CustomDrawerHeader onClose={handlePressClose} />
+          <CustomDrawerHeader onClose={handleClose} />
         ) : (
           <DrawerHeader
-            onClose={handlePressClose}
+            onClose={handleClose}
             title={title}
             titleIcon={titleIcon}
             titleImage={titleImage}

@@ -90,8 +90,8 @@ const toOptimisticChallenge = (
     ...userChallengeOverrides
   }
 
-  // The client is more up to date than Discovery Nodes, so override whenever possible.
-  // Don't override if the challenge is already marked as completed on Discovery.
+  // The client is more up to date than API, so override whenever possible.
+  // Don't override if the challenge is already marked as completed on API.
   if (
     !challenge.is_complete &&
     currentStepCountOverride !== undefined &&
@@ -103,7 +103,7 @@ const toOptimisticChallenge = (
   }
 
   // If we're on native mobile, we might not yet have the is_mobile user_event
-  // on DN, so optimistically mark this challenge as complete so the client
+  // on API, so optimistically mark this challenge as complete so the client
   // can start claiming
   if (challenge.challenge_id === 'mobile-install' && isNativeMobile) {
     challengeOverridden.is_complete = true
@@ -146,7 +146,7 @@ const toOptimisticChallenge = (
 
 /**
  * Returns all user challenges using an optimistic state and current_step_count
- * based on what the client tracks. Prevents UI oddness while waiting for discovery to index
+ * based on what the client tracks. Prevents UI oddness while waiting for API to index
  * @param challenge The user challenge to get the optimistic state for
  * @returns the same challenge with state and current_step_count overridden as necessary
  */

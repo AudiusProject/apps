@@ -48,7 +48,10 @@ export type PopupMenuProps = {
   renderTrigger: (
     anchorRef: React.MutableRefObject<any>,
     triggerPopup: (onMouseEnter?: boolean) => void,
-    triggerProps: Partial<ComponentProps<'button'>>
+    triggerProps: Pick<
+      ComponentProps<'button'>,
+      'aria-controls' | 'aria-haspopup' | 'aria-expanded' | 'id'
+    >
   ) => React.ReactNode
   /**
    * Providing an id is necessary for proper a11y

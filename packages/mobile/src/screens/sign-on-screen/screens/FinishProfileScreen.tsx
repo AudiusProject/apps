@@ -27,7 +27,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { Paper, useTheme, Text, Flex } from '@audius/harmony-native'
+import { Paper, useTheme, Flex, Text } from '@audius/harmony-native'
 import { ScrollView } from 'app/components/core'
 import { HarmonyTextField } from 'app/components/fields'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -37,10 +37,9 @@ import { launchSelectImageActionSheet } from 'app/utils/launchSelectImageActionS
 
 import { AccountHeader } from '../components/AccountHeader'
 import { Heading, Page, PageFooter } from '../components/layout'
+import { useFastReferral } from '../hooks/useFastReferral'
 import type { SignOnScreenParamList } from '../types'
 import { useTrackScreen } from '../utils/useTrackScreen'
-
-const AnimatedText = Animated.createAnimatedComponent(Text)
 
 const finishProfileFormikSchema = toFormikValidationSchema(finishProfileSchema)
 
@@ -57,6 +56,7 @@ export const FinishProfileScreen = () => {
   const savedProfileImage = useSelector(getProfileImageField)
   const savedCoverPhoto = useSelector(getCoverPhotoField)
   const { value: savedDisplayName } = useSelector(getNameField) ?? {}
+  const isFastReferral = useFastReferral()
 
   useTrackScreen('FinishProfile')
 
@@ -64,16 +64,23 @@ export const FinishProfileScreen = () => {
     (values: FinishProfileValues) => {
       const { displayName } = values
       dispatch(setValueField('name', displayName))
-      dispatch(signUp())
-      navigation.navigate('SelectGenre')
+      if (isFastReferral) {
+        // Fast referral: create account immediately and skip genre/artist selection
+        dispatch(signUp())
+        navigation.navigate('AccountLoading')
+      } else {
+        // Normal flow: don't create account yet, let user select genres/artists first
+        navigation.navigate('SelectGenre')
+      }
     },
-    [dispatch, navigation]
+    [dispatch, isFastReferral, navigation]
   )
 
+  const displayNameValue = savedDisplayName || ''
   const initialValues = {
     profileImage: savedProfileImage || ({} as Image),
     coverPhoto: savedCoverPhoto || ({} as Image),
-    displayName: savedDisplayName
+    displayName: displayNameValue
   }
 
   const saveDisplayName = useCallback(
@@ -105,6 +112,7 @@ export const FinishProfileScreen = () => {
                 placeholder={finishProfilePageMessages.inputPlaceholder}
                 maxLength={MAX_DISPLAY_NAME_LENGTH}
                 autoComplete='off'
+                value={displayNameValue}
                 onChange={saveDisplayName}
                 style={css({
                   padding: spacing.l,
@@ -179,6 +187,8 @@ const AccountHeaderField = () => {
     />
   )
 }
+
+const AnimatedText = Animated.createAnimatedComponent(Text)
 
 const UploadProfilePhotoHelperText = () => {
   const [{ value: displayName }, { touched }] = useField('displayName')

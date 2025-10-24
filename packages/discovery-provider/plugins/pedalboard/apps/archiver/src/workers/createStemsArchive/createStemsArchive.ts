@@ -120,12 +120,13 @@ export const createStemsArchiveWorker = (services: WorkerServices) => {
         throw new Error('No stems found for track')
       }
 
-      const filesToDownload = includeParentTrack
-        ? [
-            ...stems,
-            { ...track, origFilename: track.origFilename ?? track.title }
-          ]
-        : stems
+      const filesToDownload =
+        includeParentTrack && track.isDownloadable
+          ? [
+              ...stems,
+              { ...track, origFilename: track.origFilename ?? track.title }
+            ]
+          : stems
 
       logger.debug({ files: filesToDownload }, 'Getting file sizes')
 

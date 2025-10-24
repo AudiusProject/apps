@@ -81,16 +81,22 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     const characterCount = value !== undefined ? `${value}`.length : 0
     const hasValue = characterCount > 0
 
-    // Hide the label when requested or when the size is set to small
-    const shouldShowLabel = !hideLabel && size !== TextInputSize.SMALL
+    // Hide the label when requested or when the size is set to small or extra small
+    const shouldShowLabel =
+      !hideLabel &&
+      size !== TextInputSize.SMALL &&
+      size !== TextInputSize.EXTRA_SMALL
     const labelText = required ? `${labelProp} *` : labelProp
     const placeholderText =
       required && hideLabel
         ? `${placeholder} *`
-        : size === TextInputSize.SMALL
+        : size === TextInputSize.SMALL || size === TextInputSize.EXTRA_SMALL
           ? labelText
           : placeholder
-    const helperTextSize: TextSize = size === TextInputSize.SMALL ? 'xs' : 's'
+    const helperTextSize: TextSize =
+      size === TextInputSize.SMALL || size === TextInputSize.EXTRA_SMALL
+        ? 'xs'
+        : 's'
 
     // Whenever a label isn't visible the placeholder should be visible in it's place (if provided)
     const shouldShowPlaceholder =
@@ -116,6 +122,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     const inputRootStyle = {
       [styles.default]: size === TextInputSize.DEFAULT,
       [styles.small]: size === TextInputSize.SMALL,
+      [styles.extraSmall]: size === TextInputSize.EXTRA_SMALL,
       [styles.warning]: warningProp,
       [styles.error]: error,
       [styles.focused]: isFocused || _isFocused,
@@ -130,6 +137,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     const inputElStyle = {
       [styles.default]: size === TextInputSize.DEFAULT,
       [styles.small]: size === TextInputSize.SMALL,
+      [styles.extraSmall]: size === TextInputSize.EXTRA_SMALL,
       [styles.disabled]: disabled,
       [styles.focused]: isFocused
     }
@@ -184,7 +192,13 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         >
           {StartIcon ? (
             <StartIcon
-              size={size === TextInputSize.SMALL ? 'l' : undefined}
+              size={
+                size === TextInputSize.EXTRA_SMALL
+                  ? 's'
+                  : size === TextInputSize.SMALL
+                    ? 'l'
+                    : undefined
+              }
               color='subdued'
               {...IconProps}
             />

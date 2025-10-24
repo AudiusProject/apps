@@ -11,21 +11,21 @@ x-common: &common
     driver: json-file
   extra_hosts:
     # Allows the containers can talk to each other via their hostnames routed through nginx
-    - 'audius-protocol-comms-1:host-gateway'
-    - 'audius-protocol-comms-2:host-gateway'
-    - 'audius-protocol-comms-3:host-gateway'
-    - 'audius-protocol-creator-node-1:host-gateway'
-    - 'audius-protocol-creator-node-2:host-gateway'
-    - 'audius-protocol-creator-node-3:host-gateway'
-    - 'audius-protocol-discovery-provider-1:host-gateway'
-    - 'audius-protocol-discovery-provider-2:host-gateway'
-    - 'audius-protocol-discovery-provider-3:host-gateway'
-    - 'audius-protocol-identity-service-1:host-gateway'
-    - 'audius-protocol-solana-test-validator-1:host-gateway'
-    - 'audius-protocol-eth-ganache-1:host-gateway'
-    - 'audius-protocol-pedalboard:host-gateway'
-    - 'audius-protocol-api:host-gateway'
-    - 'audius-protocol-api-elasticsearch:host-gateway'
+    - 'audius-comms-1:host-gateway'
+    - 'audius-comms-2:host-gateway'
+    - 'audius-comms-3:host-gateway'
+    - 'audius-creator-node-1:host-gateway'
+    - 'audius-creator-node-2:host-gateway'
+    - 'audius-creator-node-3:host-gateway'
+    - 'audius-discovery-provider-1:host-gateway'
+    - 'audius-discovery-provider-2:host-gateway'
+    - 'audius-discovery-provider-3:host-gateway'
+    - 'audius-identity-service-1:host-gateway'
+    - 'audius-solana-test-validator-1:host-gateway'
+    - 'audius-eth-ganache-1:host-gateway'
+    - 'audius-pedalboard:host-gateway'
+    - 'audius-api:host-gateway'
+    - 'audius-api-elasticsearch:host-gateway'
   deploy:
     resources:
       limits:
@@ -71,7 +71,7 @@ services:
     extends:
       file: docker-compose.api.yml
       service: api
-    container_name: audius-protocol-api
+    container_name: audius-api
     env_file:
       - ${PROJECT_ROOT}/dev-tools/environment/api.env
     <<: *common
@@ -80,7 +80,7 @@ services:
     extends:
       file: docker-compose.api.yml
       service: elasticsearch
-    container_name: audius-protocol-api-elasticsearch
+    container_name: audius-api-elasticsearch
     env_file:
       - ${PROJECT_ROOT}/dev-tools/environment/api.env
     <<: *common
@@ -268,7 +268,7 @@ services:
     extends:
       file: docker-compose.legacy.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: storage
-    container_name: audius-protocol-mediorum
+    container_name: audius-mediorum
     <<: *common
 
   core:

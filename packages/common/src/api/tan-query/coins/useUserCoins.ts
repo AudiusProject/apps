@@ -1,17 +1,12 @@
 import { Id } from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
 
+import { userCoinListFromSDK, type UserCoin } from '~/adapters/coin'
 import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
+import { SelectableQueryOptions } from '../types'
 import { useQueryContext } from '../utils'
-
-export interface UserCoin {
-  mint: string
-  ticker: string
-  balance: number
-  balanceUsd: number
-}
 
 export interface UseUserCoinsParams {
   userId: ID | undefined | null
@@ -19,7 +14,12 @@ export interface UseUserCoinsParams {
   offset?: number
 }
 
-export const useUserCoins = (params: UseUserCoinsParams) => {
+export type { UserCoin }
+
+export const useUserCoins = <TResult = UserCoin[]>(
+  params: UseUserCoinsParams,
+  options?: SelectableQueryOptions<UserCoin[], TResult>
+) => {
   const { audiusSdk } = useQueryContext()
 
   return useQuery({
@@ -31,8 +31,12 @@ export const useUserCoins = (params: UseUserCoinsParams) => {
         limit: params.limit,
         offset: params.offset
       })
-      return response.data as UserCoin[]
+      if (response.data) {
+        return userCoinListFromSDK(response.data)
+      }
+      return []
     },
-    enabled: !!params.userId
+    ...options,
+    enabled: !!params.userId && options?.enabled !== false
   })
 }

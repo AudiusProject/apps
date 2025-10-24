@@ -11,6 +11,7 @@ const messages = {
 
 type ProfilePictureListTileProps = UserProfileListProps & {
   onClick: () => void
+  totalUserCount?: number
 }
 
 export const ProfilePictureListTile = ({
@@ -35,7 +36,6 @@ export const ProfilePictureListTile = ({
     >
       <UserProfilePictureList
         users={users}
-        totalUserCount={totalUserCount}
         limit={limit}
         disableProfileClick={disableProfileClick}
         disablePopover={disablePopover}
@@ -44,6 +44,7 @@ export const ProfilePictureListTile = ({
       />
       <PlainButton variant='subdued' iconRight={IconArrowRight}>
         {messages.viewAll}
+        {totalUserCount ? ` (${totalUserCount})` : null}
       </PlainButton>
     </Paper>
   )

@@ -1,12 +1,17 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { HashId } from '@audius/sdk'
-import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions
+} from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
+import { formatNumberCommas } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
-import { QueryKey, QueryOptions } from '../types'
+import { QueryKey } from '../types'
 
 import { useArtistCoin } from './useArtistCoin'
 
@@ -39,23 +44,21 @@ export const getCoinLeaderboardQueryKey = (
     sortDirection
   ] as unknown as QueryKey<InfiniteData<CoinMember[], number>>
 
-export const useArtistCoinMembers = (
+export const useArtistCoinMembers = <TResult = CoinMember[]>(
   {
     mint,
     pageSize = DEFAULT_PAGE_SIZE,
     minBalance,
     sortDirection = 'desc'
   }: UseArtistCoinMembersArgs,
-  options?: QueryOptions
+  options?: Pick<
+    UseInfiniteQueryOptions<CoinMember[], Error, TResult>,
+    'select' | 'enabled'
+  >
 ) => {
   const { audiusSdk } = useQueryContext()
 
-  const { data: artistCoin } = useArtistCoin(
-    { mint: mint as string },
-    {
-      enabled: !!mint
-    }
-  )
+  const { data: artistCoin } = useArtistCoin(mint)
 
   return useInfiniteQuery({
     queryKey: getCoinLeaderboardQueryKey(
@@ -69,8 +72,9 @@ export const useArtistCoinMembers = (
       if (lastPage.length < pageSize) return undefined
       return allPages.length * pageSize
     },
-    queryFn: async ({ pageParam }): Promise<CoinMember[]> => {
+    queryFn: async ({ pageParam }) => {
       if (!mint) return []
+      if (!artistCoin) return []
 
       const sdk = await audiusSdk()
 
@@ -84,7 +88,7 @@ export const useArtistCoinMembers = (
       const response = await sdk.coins.getCoinMembers(params)
 
       const members = (response.data ?? []).map((member) => {
-        const decimals = artistCoin?.decimals
+        const decimals = artistCoin.decimals
         const balanceFD = new FixedDecimal(
           BigInt(member.balance.toString()),
           decimals
@@ -93,18 +97,19 @@ export const useArtistCoinMembers = (
         return {
           userId: HashId.parse(member.userId),
           balance: member.balance,
-          // TODO: ideally this is a selector using logic from useTokenAmountFormatting
-          balanceLocaleString: balanceFD.toLocaleString('en-US', {
-            maximumFractionDigits: 0,
-            roundingMode: 'trunc'
-          })
+          // Need formatNumberCommas for mobile :(
+          balanceLocaleString: formatNumberCommas(
+            balanceFD.toLocaleString('en-US', {
+              maximumFractionDigits: 0,
+              roundingMode: 'trunc'
+            })
+          )
         }
       })
 
       return members
     },
-    select: (data) => data.pages.flat(),
-    ...options,
-    enabled: options?.enabled !== false && !!mint
+    select: options?.select ?? ((data) => data.pages.flat() as TResult),
+    enabled: options?.enabled !== false && !!mint && !!artistCoin
   })
 }

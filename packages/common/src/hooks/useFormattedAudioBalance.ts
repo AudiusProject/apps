@@ -2,9 +2,13 @@ import { useMemo } from 'react'
 
 import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 
-import { useAudioBalance, useTokenPrice } from '~/api'
-import { TOKEN_LISTING_MAP } from '~/store/ui/buy-audio/constants'
-import { formatAudioBalance, isNullOrUndefined } from '~/utils'
+import { useArtistCoin, useAudioBalance, useQueryContext } from '~/api'
+import {
+  formatAudioBalance,
+  formatCount,
+  formatCurrencyWithSubscript,
+  isNullOrUndefined
+} from '~/utils'
 
 type UseFormattedAudioBalanceReturn = {
   audioBalance: bigint | null
@@ -13,17 +17,23 @@ type UseFormattedAudioBalanceReturn = {
   audioPrice: string | null
   audioDollarValue: string
   isAudioPriceLoading: boolean
+  heldValue: number | null
+  formattedHeldValue: string | null
 }
 
-export const useFormattedAudioBalance = (): UseFormattedAudioBalanceReturn => {
-  const { totalBalance, isLoading: isAudioBalanceLoading } = useAudioBalance()
-
-  // AUDIO token address from Jupiter
-  const AUDIO_TOKEN_ID = TOKEN_LISTING_MAP.AUDIO.address
+export const useFormattedAudioBalance = ({
+  includeStaked = false
+}: {
+  includeStaked?: boolean
+} = {}): UseFormattedAudioBalanceReturn => {
+  const { env } = useQueryContext()
+  const { totalBalance, isLoading: isAudioBalanceLoading } = useAudioBalance({
+    includeStaked
+  })
 
   const { data: audioPriceData, isPending: isAudioPriceLoading } =
-    useTokenPrice(AUDIO_TOKEN_ID)
-  const audioPrice = audioPriceData?.price || null
+    useArtistCoin(env.WAUDIO_MINT_ADDRESS)
+  const audioPrice = audioPriceData?.price?.toString() ?? null
   const hasFetchedAudioBalance = !isNullOrUndefined(totalBalance)
   const audioBalance = hasFetchedAudioBalance ? totalBalance : null
 
@@ -43,12 +53,24 @@ export const useFormattedAudioBalance = (): UseFormattedAudioBalanceReturn => {
     return `$${totalValue.toFixed(2)} ($${Number(new FixedDecimal(audioPrice).toString()).toFixed(4)})`
   }, [audioBalance, audioPrice])
 
+  const heldValue =
+    audioPrice && audioBalance
+      ? Number(audioPrice) * Number(audioBalance)
+      : null
+  const formattedHeldValue = heldValue
+    ? heldValue >= 1
+      ? `$${formatCount(heldValue, 2)}`
+      : formatCurrencyWithSubscript(heldValue)
+    : null
+
   return {
     audioBalance,
     audioBalanceFormatted,
     isAudioBalanceLoading,
     audioPrice,
     audioDollarValue,
-    isAudioPriceLoading
+    isAudioPriceLoading,
+    heldValue,
+    formattedHeldValue
   }
 }

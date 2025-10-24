@@ -14,6 +14,13 @@ import { getEntityManagerActionKey } from './rateLimiter'
 
 const MAX_ACDC_GAS_LIMIT = 10485760
 
+const validateSender = async (encodedABI: string, senderAddress: string) => {
+  const recoveredAddress = await audiusSdk.services.entityManager.recoverSigner(
+    encodedABI as `0x${string}`
+  )
+  return recoveredAddress.toLowerCase() === senderAddress.toLowerCase()
+}
+
 export const validator = async (
   request: Request,
   response: Response,
@@ -63,6 +70,14 @@ export const validator = async (
     isApp?: boolean
   } = {
     isApp: false
+  }
+
+  if (
+    senderAddress &&
+    !(await validateSender(body.encodedABI, senderAddress))
+  ) {
+    validationError(next, 'recovered signer does not match sender address')
+    return
   }
 
   const operation = getEntityManagerActionKey(encodedABI)

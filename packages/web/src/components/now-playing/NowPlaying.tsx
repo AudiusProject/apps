@@ -60,10 +60,7 @@ import {
 } from 'hooks/useTrackCoverArt'
 import { audioPlayer } from 'services/audio-player'
 import { AppState } from 'store/types'
-import {
-  pushUniqueRoute as pushRoute,
-  collectibleDetailsPage
-} from 'utils/route'
+import { pushUniqueRoute as pushRoute } from 'utils/route'
 import { isDarkMode, isMatrix } from 'utils/theme/theme'
 import { withNullGuard } from 'utils/withNullGuard'
 
@@ -99,20 +96,15 @@ const messages = {
 }
 
 const g = withNullGuard((wide: NowPlayingProps) => {
-  const { uid, source, collectible } = wide.currentQueueItem
+  const { uid, source } = wide.currentQueueItem
   const currentTrack = useCurrentTrack()
   const { data: user } = useUser(currentTrack?.owner_id)
-  if (
-    ((uid !== null && currentTrack !== null) || collectible !== null) &&
-    source !== null &&
-    !!user
-  ) {
+  if (uid !== null && currentTrack !== null && source !== null && !!user) {
     const currentQueueItem = {
       uid,
       source,
       user,
-      track: currentTrack,
-      collectible
+      track: currentTrack
     }
     return {
       ...wide,
@@ -142,7 +134,7 @@ const NowPlaying = g(
     clickOverflow,
     goToRoute
   }) => {
-    const { uid, track, user, collectible } = currentQueueItem
+    const { uid, track, user } = currentQueueItem
     const { history } = useHistoryContext()
 
     const { data: currentUserId } = useCurrentUserId()
@@ -209,19 +201,6 @@ const NowPlaying = g(
 
     const record = useRecord()
 
-    let displayInfo
-    if (track) {
-      displayInfo = track
-    } else {
-      displayInfo = {
-        title: collectible?.name as string,
-        track_id: collectible?.id as string,
-        owner_id: user?.user_id,
-        has_current_user_saved: false,
-        has_current_user_reposted: false,
-        _co_sign: null
-      }
-    }
     const {
       title,
       track_id,
@@ -229,11 +208,11 @@ const NowPlaying = g(
       has_current_user_saved,
       has_current_user_reposted,
       _co_sign
-    } = displayInfo
+    } = track
 
     const { name, handle } = user
     const image = useTrackCoverArt({
-      trackId: typeof track_id === 'number' ? track_id : undefined,
+      trackId: track_id,
       size: SquareSizes.SIZE_480_BY_480
     })
 
@@ -267,36 +246,25 @@ const NowPlaying = g(
     }
 
     const toggleSaveTrack = useToggleFavoriteTrack({
-      trackId: track_id as number,
+      trackId: track_id,
       source: FavoriteSource.NOW_PLAYING
     })
 
     const toggleFavorite = useCallback(() => {
-      if (track && track_id && typeof track_id !== 'string') {
-        toggleSaveTrack()
-      }
-    }, [track, track_id, toggleSaveTrack])
+      toggleSaveTrack()
+    }, [toggleSaveTrack])
 
     const toggleRepost = useCallback(() => {
-      if (track && track_id && typeof track_id !== 'string') {
-        has_current_user_reposted ? undoRepost(track_id) : repost(track_id)
-      }
-    }, [track, track_id, has_current_user_reposted, undoRepost, repost])
+      has_current_user_reposted ? undoRepost(track_id) : repost(track_id)
+    }, [track_id, has_current_user_reposted, undoRepost, repost])
 
     const onShare = useCallback(() => {
-      if (track && track_id && typeof track_id !== 'string') share(track_id)
-    }, [share, track, track_id])
+      share(track_id)
+    }, [share, track_id])
 
     const goToTrackPage = () => {
       onClose()
-      if (track) {
-        goToRoute(history.location, track.permalink)
-      } else {
-        goToRoute(
-          history.location,
-          collectibleDetailsPage(user.handle, collectible?.id ?? '')
-        )
-      }
+      goToRoute(history.location, track.permalink)
     }
 
     const goToProfilePage = () => {
@@ -308,30 +276,25 @@ const NowPlaying = g(
       const isOwner = currentUserId === owner_id
 
       const overflowActions = [
-        !collectible && !isOwner
+        !isOwner
           ? has_current_user_reposted
             ? OverflowAction.UNREPOST
             : OverflowAction.REPOST
           : null,
-        !collectible && !isOwner
+        !isOwner
           ? has_current_user_saved
             ? OverflowAction.UNFAVORITE
             : OverflowAction.FAVORITE
           : null,
         isOwner ? OverflowAction.ADD_TO_ALBUM : null,
-        !collectible && (!track?.is_unlisted || isOwner)
-          ? OverflowAction.ADD_TO_PLAYLIST
-          : null,
-        track && OverflowAction.VIEW_TRACK_PAGE,
+        !track?.is_unlisted || isOwner ? OverflowAction.ADD_TO_PLAYLIST : null,
+        OverflowAction.VIEW_TRACK_PAGE,
         albumInfo ? OverflowAction.VIEW_ALBUM_PAGE : null,
-
-        collectible && OverflowAction.VIEW_COLLECTIBLE_PAGE,
         OverflowAction.VIEW_ARTIST_PAGE
       ].filter(Boolean) as OverflowAction[]
 
       const overflowCallbacks = {
         [OverflowAction.VIEW_TRACK_PAGE]: onClose,
-        [OverflowAction.VIEW_COLLECTIBLE_PAGE]: onClose,
         [OverflowAction.VIEW_ARTIST_PAGE]: onClose
       }
 
@@ -339,7 +302,6 @@ const NowPlaying = g(
     }, [
       currentUserId,
       owner_id,
-      collectible,
       has_current_user_reposted,
       has_current_user_saved,
       track,
@@ -487,7 +449,7 @@ const NowPlaying = g(
             // potentially update before the duration coming from the native layer if present
             mediaKey={`${uid}${mediaKey}${timing.duration}`}
             isPlaying={isPlaying && !isBuffering}
-            isDisabled={!uid && !collectible}
+            isDisabled={!uid}
             isMobile
             getAudioPosition={
               audioPlayer ? audioPlayer.getPosition : () => timing.position
@@ -550,8 +512,7 @@ const NowPlaying = g(
             />
           ) : null}
           <ActionsBar
-            trackId={track_id as ID}
-            isCollectible={!!collectible}
+            trackId={track_id}
             onToggleRepost={toggleRepost}
             onToggleFavorite={toggleFavorite}
             onShare={onShare}

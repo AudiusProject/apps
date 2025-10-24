@@ -1,6 +1,6 @@
 {
   "name": "@audius/sp-actions",
-  "version": "1.0.12",
+  "version": "1.0.15",
   "description": "A utility for audius service providers to claim token rewards.",
   "bin": {
     "claim": "claim.js"
@@ -8,20 +8,20 @@
   "author": "Audius",
   "license": "Apache-2.0",
   "dependencies": {
-    "@audius/sdk-legacy": "6.0.8",
+    "@audius/sdk-legacy": "6.0.11",
     "@truffle/hdwallet-provider": "^1.2.2",
     "axios": "^0.21.0",
     "commander": "^6.2.1",
     "web3": "^1.3.4"
   },
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol.git#main"
+    "url": "git+https://github.com/AudiusProject/apps.git#main"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/sp-actions",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/sp-actions",
   "prettier": {
     "semi": false,
     "singleQuote": true

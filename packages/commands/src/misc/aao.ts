@@ -17,7 +17,7 @@ const blockCommand = new Command('block')
     const audiusSdk = await initializeAudiusSdk({ handle: from })
     const handle = await getCurrentUserHandle()
     const res = await fetch(
-      'http://audius-protocol-discovery-provider-1/attestation/block-user',
+      'http://audius-discovery-provider-1/attestation/block-user',
       {
         method: 'POST',
         headers: {
@@ -42,7 +42,7 @@ const unblockCommand = new Command('unblock')
     const audiusSdk = await initializeAudiusSdk({ handle: from })
     const handle = await getCurrentUserHandle()
     const res = await fetch(
-      'http://audius-protocol-discovery-provider-1/attestation/unblock-user',
+      'http://audius-discovery-1/attestation/unblock-user',
       {
         method: 'POST',
         headers: {

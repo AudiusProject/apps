@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { Pressable } from 'react-native'
 import type { GestureResponderEvent, ViewStyle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import LinearGradient from 'react-native-linear-gradient'
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -27,6 +28,7 @@ export const BaseButton = (props: BaseButtonProps) => {
     iconRight: RightIconComponent,
     isLoading,
     isStaticIcon,
+    gradient,
     innerProps,
     children,
     style,
@@ -103,6 +105,18 @@ export const BaseButton = (props: BaseButtonProps) => {
         onPress={handlePress}
         {...other}
       >
+        {gradient ? (
+          <LinearGradient
+            {...gradient}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0
+            }}
+          />
+        ) : null}
         {isLoading ? (
           <LoadingSpinner {...innerProps?.loader} />
         ) : LeftIconComponent ? (

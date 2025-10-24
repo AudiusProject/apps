@@ -129,7 +129,7 @@ except (KeyError, RuntimeError) as e:
 
 try:
     # get latitude longitude and country
-    ip_info_url = "https://ipinfo.io"
+    ip_info_url = "http://ipinfo.io"
     ip_info_response = requests.get(ip_info_url)
     response_data = ip_info_response.json()
     shared_config["serviceLocation"]["serviceCountry"] = response_data["country"]

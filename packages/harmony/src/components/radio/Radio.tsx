@@ -6,6 +6,7 @@ import { useRadioGroup } from '../radio-group/useRadioGroup'
 
 export type RadioProps = ComponentPropsWithoutRef<'input'> & {
   inputClassName?: string
+  error?: boolean
 }
 
 /**
@@ -20,6 +21,7 @@ export const Radio = (props: RadioProps) => {
     name: nameProp,
     checked: checkedProp,
     disabled,
+    error,
     ...other
   } = props
   const { spacing, color } = useTheme()
@@ -50,6 +52,9 @@ export const Radio = (props: RadioProps) => {
       }),
       ...(disabled && {
         background: color.neutral.n150
+      }),
+      ...(error && {
+        border: `2px solid ${color.status.danger}`
       })
     }
   }

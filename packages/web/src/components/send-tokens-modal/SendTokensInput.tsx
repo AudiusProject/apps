@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback, useState } from 'react'
 
 import {
   useArtistCoin,
-  useTokenBalance,
+  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
 import { isValidSolAddress } from '@audius/common/store'
@@ -23,7 +23,6 @@ import WalletInput from './WalletInput'
 interface SendTokensInputProps {
   mint: string
   onContinue: (amount: bigint, destinationAddress: string) => void
-  onClose: () => void
   initialAmount?: string
   initialDestinationAddress?: string
 }
@@ -51,7 +50,6 @@ type ValidationError =
 const SendTokensInput = ({
   mint,
   onContinue,
-  onClose,
   initialAmount = '',
   initialDestinationAddress = ''
 }: SendTokensInputProps) => {
@@ -63,12 +61,18 @@ const SendTokensInput = ({
   const [addressError, setAddressError] = useState<ValidationError | null>(null)
 
   // Get the coin data and balance using the same hooks as ReceiveTokensModal
-  const { data: coin } = useArtistCoin({ mint })
-  const { data: tokenBalance } = useTokenBalance({ mint })
+  const { data: coin } = useArtistCoin(mint)
+  const { data: tokenBalance } = useCoinBalance({
+    mint,
+    includeExternalWallets: false,
+    includeStaked: false
+  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
-  const currentBalance = tokenBalance?.balance
-    ? tokenBalance.balance.value
-    : BigInt(0)
+  const formattedBalance =
+    tokenBalance?.balance.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) ?? ''
 
   const handleAmountChange = useCallback((value: string, weiAmount: bigint) => {
     setAmount(value)
@@ -91,7 +95,10 @@ const SendTokensInput = ({
       setAmountError('AMOUNT_REQUIRED')
       isValid = false
     } else {
-      const amountWei = new FixedDecimal(amount, tokenInfo?.decimals).value
+      const currentBalance = tokenBalance?.balance
+        ? tokenBalance.balance.value
+        : BigInt(0)
+      const amountWei = new FixedDecimal(amount, tokenBalance?.decimals).value
       if (amountWei > currentBalance) {
         setAmountError('INSUFFICIENT_BALANCE')
         isValid = false
@@ -124,7 +131,7 @@ const SendTokensInput = ({
   const getAmountDescription = () => {
     return messages.amountDescription.replace(
       '{symbol}',
-      tokenInfo?.symbol ?? 'tokens'
+      tokenInfo?.symbol ? `$${tokenInfo.symbol}` : 'tokens'
     )
   }
 
@@ -156,19 +163,14 @@ const SendTokensInput = ({
     )
   }
 
-  // Format balance for display
-  const formattedBalance = new FixedDecimal(
-    currentBalance,
-    tokenInfo.decimals
-  ).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
-
   return (
     <Flex direction='column' gap='xl' p='xl'>
       {/* Token Balance Section */}
-      <CryptoBalanceSection tokenInfo={tokenInfo} amount={formattedBalance} />
+      <CryptoBalanceSection
+        tokenInfo={tokenInfo}
+        name={tokenInfo.name}
+        amount={formattedBalance}
+      />
 
       <Divider orientation='horizontal' color='default' />
 
@@ -187,7 +189,7 @@ const SendTokensInput = ({
           label={messages.amount}
           value={amount}
           onChange={handleAmountChange}
-          tokenLabel={tokenInfo.symbol}
+          tokenLabel={`$${tokenInfo.symbol}`}
           error={!!amountError}
           decimals={tokenInfo.decimals}
         />

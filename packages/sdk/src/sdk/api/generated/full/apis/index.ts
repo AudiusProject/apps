@@ -2,6 +2,7 @@
 /* eslint-disable */
 export * from './ChallengesApi';
 export * from './CidDataApi';
+export * from './CoinsApi';
 export * from './CommentsApi';
 export * from './ExploreApi';
 export * from './NotificationsApi';

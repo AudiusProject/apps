@@ -3,7 +3,7 @@ import { HTTPQuery, querystring } from '@audius/sdk'
 const DEFAULT_TIMEOUT_MS = 3000
 export const TIMED_OUT_ERROR = 'Request Timed Out'
 
-const DISCOVERY_API = import.meta.env.VITE_DISCOVERY_API
+const API = import.meta.env.VITE_API
 
 type ApiFetchOptions = RequestInit & {
   queryParams?: HTTPQuery
@@ -13,7 +13,7 @@ export const apiFetch = async (
   endpoint: string,
   options: ApiFetchOptions = {}
 ) => {
-  let url = `${DISCOVERY_API}/${endpoint}`
+  let url = `${API}/${endpoint}`
   if (options.queryParams) {
     url += `?${querystring(options.queryParams)}`
   }

@@ -1,5 +1,11 @@
 # @audius/harmony
 
+## 0.4.3
+
+### Patch Changes
+
+- f0a7e57: Add purple/blue linear gradient
+
 ## 0.4.2
 
 ### Patch Changes

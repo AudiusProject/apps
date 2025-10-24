@@ -2,7 +2,6 @@ import { CSSProperties, forwardRef } from 'react'
 
 import { CSSObject, useTheme } from '@emotion/react'
 
-import { toCSSVariableName } from '../../../utils/styles'
 import { BaseButton } from '../BaseButton/BaseButton'
 
 import { ButtonProps } from './types'
@@ -22,6 +21,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const {
       color,
       hexColor,
+      hoverColor,
       variant = 'primary',
       size = 'default',
       disabled,
@@ -93,17 +93,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
       ...((_isHovered || _isPressed) && { color: themeColors.static.white }),
       ...(disabled && {
-        backgroundColor: themeColors.neutral.n150,
+        background: themeColors.neutral.n150,
         boxShadow: 'none'
       })
     }
 
     const secondaryHoverStyles: CSSObject = {
-      backgroundColor: themeColors.primary.primary,
+      background: themeColors.primary.primary,
       color: themeColors.static.white
     }
     const secondaryStyles: CSSObject = {
-      backgroundColor: 'transparent',
+      background: 'transparent',
       color: themeColors.text.default,
       boxShadow: `0 0 0 1px inset ${themeColors.border.strong}`,
 
@@ -114,18 +114,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     const tertiaryHoverStyles: CSSObject = {
-      backgroundColor: themeColors.background.white,
+      background: themeColors.background.white,
       boxShadow: `0 0 0 1px inset ${themeColors.border.strong}, ${shadows.mid}`,
       color: themeColors.text.default
     }
     const tertiaryActiveStyles: CSSObject = {
-      backgroundColor: themeColors.background.surface2,
+      background: themeColors.background.surface2,
       backdropFilter: 'none',
       color: themeColors.text.default,
       boxShadow: `0 0 0 1px inset ${themeColors.border.strong}`
     }
     const tertiaryStyles: CSSObject = {
-      backgroundColor:
+      background:
         type === 'dark' ? 'rgba(50, 51, 77, 0.6)' : 'rgb(255, 255, 255, 0.85)',
       color: themeColors.text.default,
       backdropFilter: 'blur(6px)',
@@ -139,11 +139,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     const destructiveHoverStyles: CSSObject = {
-      backgroundColor: themeColors.special.red,
+      background: themeColors.special.red,
       color: themeColors.static.white
     }
     const destructiveStyles: CSSObject = {
-      backgroundColor: 'transparent',
+      background: 'transparent',
       color: themeColors.special.red,
       boxShadow: `0 0 0 1px inset ${themeColors.special.red}`,
 
@@ -156,18 +156,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const hoverStyles: CSSObject = {
       boxShadow: shadows.mid,
       '&::before': {
-        backgroundColor: 'rgba(255, 255, 255, 0.2)'
-      }
+        background: 'rgba(255, 255, 255, 0.2)'
+      },
+      ...(hoverColor && {
+        background: themeColors.special[hoverColor]
+      })
     }
     const activeStyles: CSSObject = {
       boxShadow: 'none',
       '&::before': {
-        backgroundColor: 'rgba(0, 0, 0, 0.2)'
+        background: 'rgba(0, 0, 0, 0.2)'
       }
     }
 
     const buttonCss: CSSObject = {
-      backgroundColor: themeColors.primary.primary,
+      background: themeColors.primary.primary,
       color: themeColors.static.white,
       boxSizing: 'border-box',
       border: 'none',
@@ -196,7 +199,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0)'
+        background: 'rgba(0, 0, 0, 0)'
       },
 
       ...(variant !== 'tertiary' && {
@@ -220,9 +223,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const style: CSSCustomProperties =
       variant === 'primary' && !disabled
         ? {
-            backgroundColor:
-              hexColor ||
-              (color ? `var(${toCSSVariableName(color)})` : undefined)
+            background:
+              hexColor || (color ? themeColors.special[color] : undefined)
           }
         : {}
 

@@ -13,7 +13,13 @@ import { Box, IconButton, IconCaretDown, Popup } from '@audius/harmony'
 
 import { AccountListContent } from './AccountListContent'
 
-export const AccountSwitcher = () => {
+type AccountSwitcherProps = {
+  onVisibilityChange?: (isVisible: boolean) => void
+}
+
+export const AccountSwitcher = ({
+  onVisibilityChange
+}: AccountSwitcherProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const { data: isAccountComplete = false } = useCurrentAccountUser({
     select: selectIsAccountComplete
@@ -49,6 +55,18 @@ export const AccountSwitcher = () => {
     return managedAccounts.filter(({ grant }) => grant.is_approved)
   }, [managedAccounts])
 
+  const isVisible = Boolean(
+    currentWeb3User && currentUserId && accounts.length > 0
+  )
+
+  // Notify parent of visibility changes
+  useEffect(() => {
+    onVisibilityChange?.(isVisible)
+    return () => {
+      onVisibilityChange?.(false)
+    }
+  }, [isVisible, onVisibilityChange])
+
   // Reset to the web3User if we detect that the current user is no longer in
   // the managed accounts list
   useEffect(() => {
@@ -77,7 +95,7 @@ export const AccountSwitcher = () => {
     switchToWeb3User
   ])
 
-  return !currentWeb3User || !currentUserId || accounts.length === 0 ? null : (
+  return !isVisible ? null : (
     <Box ref={parentElementRef}>
       <IconButton
         color='default'
@@ -104,7 +122,7 @@ export const AccountSwitcher = () => {
         }}
       >
         <AccountListContent
-          managerAccount={currentWeb3User}
+          managerAccount={currentWeb3User!}
           currentUserId={currentUserId!}
           onAccountSelected={onAccountSelected}
           accounts={accounts}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # crontab
-# */10 * * * * sudo su ubuntu -c "cd ~/audius-protocol/monitoring && scripts/cron-alerts.sh" >> /tmp/logs/cron-alerts.log 2>&1
+# */10 * * * * sudo su ubuntu -c "cd ~/apps/monitoring && scripts/cron-alerts.sh" >> /tmp/logs/cron-alerts.log 2>&1
 
 set -ex
 

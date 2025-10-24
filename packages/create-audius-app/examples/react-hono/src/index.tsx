@@ -51,6 +51,26 @@ app.get('/', (c) => {
   )
 })
 
+app.get(
+  '/tracksByUser',
+  zValidator(
+    'query',
+    z.object({
+      id: z.string(),
+      userId: z.string()
+    })
+  ),
+  async (c) => {
+    const audiusSdk = await getAudiusSdk()
+    const { id, userId } = c.req.valid('query')
+    const { data } = await audiusSdk.full.users.getTracksByUser({
+      id,
+      userId
+    })
+    return c.json({ data })
+  }
+)
+
 app.post(
   '/favorite',
   zValidator(

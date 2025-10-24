@@ -1,52 +1,57 @@
-import { useArtistCoin } from '@audius/common/api'
-import { Flex, Paper, Text, useTheme } from '@audius/harmony'
-import { decodeHashId } from '@audius/sdk'
+import { useUser } from '@audius/common/api'
+import { Flex, Text, useTheme } from '@audius/harmony'
 
 import { Avatar } from 'components/avatar/Avatar'
+import { UserLink } from 'components/link'
 import UserBadges from 'components/user-badges/UserBadges'
 
 export type UserTokenBadgeProps = {
-  mint: string
-  size?: 's' | 'm' | 'l'
+  userId: number
 }
 
-export const UserTokenBadge = ({ mint, size = 'm' }: UserTokenBadgeProps) => {
-  const { spacing } = useTheme()
-  const { data: coin, isLoading } = useArtistCoin({ mint })
+export const UserTokenBadge = ({ userId }: UserTokenBadgeProps) => {
+  const { spacing, color, shadows, motion } = useTheme()
+  const { data: owner } = useUser(userId)
 
-  if (isLoading || !coin) {
+  if (!owner) {
     return null
   }
 
-  const userId = coin?.ownerId
-    ? (decodeHashId(coin.ownerId) ?? undefined)
-    : undefined
-
-  const name = coin.ticker
-
-  const iconSize =
-    size === 's' ? spacing.unit6 : size === 'm' ? spacing.unit8 : spacing.unit10
+  const name = owner.name
 
   return (
-    <Paper
-      direction='row'
-      alignItems='center'
-      justifyContent='center'
-      p='xs'
-      borderRadius='3xl'
-      border='default'
-      shadow='mid'
-      backgroundColor='white'
-    >
-      <Flex alignItems='center' gap='xs'>
-        {userId ? <Avatar userId={userId} w={iconSize} h={iconSize} /> : null}
+    <UserLink userId={userId} noText>
+      <Flex
+        alignItems='center'
+        justifyContent='center'
+        gap='xs'
+        pl='xs'
+        pr='s'
+        pv='xs'
+        shadow='mid'
+        backgroundColor='white'
+        borderRadius='circle'
+        border='default'
+        css={{
+          transition: `all ${motion.hover}`,
+          '&:hover': {
+            boxShadow: shadows.far
+          },
+          '&:active': {
+            boxShadow: shadows.near,
+            backgroundColor: color.background.surface2,
+            borderColor: color.border.strong
+          }
+        }}
+      >
+        <Avatar userId={userId} w={spacing.xl} h={spacing.xl} disableLink />
         <Flex alignItems='center' gap='xs'>
           <Text variant='body' size='l'>
             {name}
           </Text>
-          {userId ? <UserBadges userId={userId} size='s' inline /> : null}
+          <UserBadges userId={userId} size='s' inline />
         </Flex>
       </Flex>
-    </Paper>
+    </UserLink>
   )
 }

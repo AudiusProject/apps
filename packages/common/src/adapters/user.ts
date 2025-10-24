@@ -42,7 +42,8 @@ export const userMetadataFromSDK = (
     ...omit(snakecaseKeys(input), [
       'id',
       'cover_photo_legacy',
-      'profile_picture_legacy'
+      'profile_picture_legacy',
+      'artist_coin_badge'
     ]),
 
     // Conversions
@@ -91,7 +92,16 @@ export const userMetadataFromSDK = (
     cover_photo_sizes: input.coverPhotoSizes ?? null,
     creator_node_endpoint: input.creatorNodeEndpoint ?? null,
     location: input.location ?? null,
-    profile_picture_sizes: input.profilePictureSizes ?? null
+    profile_picture_sizes: input.profilePictureSizes ?? null,
+
+    // Explicit handling for artist_coin_badge to convert nested logoUri to logo_uri
+    artist_coin_badge: input.artistCoinBadge
+      ? {
+          mint: input.artistCoinBadge.mint ?? '',
+          logo_uri: input.artistCoinBadge.logoUri ?? '',
+          ticker: input.artistCoinBadge.ticker ?? ''
+        }
+      : null
   }
 
   return newUser

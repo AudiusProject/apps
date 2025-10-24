@@ -1,18 +1,19 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { useCurrentUserId } from '@audius/common/api'
+import { useArtistCoin, useCurrentUserId } from '@audius/common/api'
 import { useUSDCPurchaseConfig } from '@audius/common/hooks'
+import { priceAndAudienceMessages } from '@audius/common/messages'
 import {
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentUSDCPurchaseGated,
   StreamTrackAvailabilityType,
-  CollectibleGatedConditions,
   FollowGatedConditions,
   TipGatedConditions,
   USDCPurchaseConditions,
-  AccessConditions
+  AccessConditions,
+  isContentTokenGated,
+  TokenGatedConditions
 } from '@audius/common/models'
 import { CollectionValues } from '@audius/common/schemas'
 import {
@@ -22,11 +23,10 @@ import {
 import { getUsersMayLoseAccess } from '@audius/common/utils'
 import {
   IconCart,
-  IconCollectible,
   IconVisibilityHidden as IconHidden,
   IconNote,
   IconSparkles,
-  Text
+  Artwork
 } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 import { get, isEmpty, set } from 'lodash'
@@ -37,7 +37,6 @@ import {
   SelectedValue,
   SelectedValueProps
 } from 'components/data-entry/ContextualMenu'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useIndexedField, useTrackField } from 'components/edit-track/hooks'
 import {
   SingleTrackEditValues,
@@ -73,16 +72,7 @@ import { PriceAndAudienceMenuFields } from './PriceAndAudienceMenuFields'
 import { priceAndAudienceSchema } from './priceAndAudienceSchema'
 
 const messages = {
-  title: 'Price & Audience',
-  freePremiumDescription:
-    'Customize who can listen to this release. Sell your music and create gated experiences for your fans.',
-  specialAccessDescription:
-    'Customize your music’s audience and create gated experiences for your fans.',
-  public: 'Free for Everyone',
-  premium: 'Premium',
-  specialAccess: 'Special Access',
-  collectibleGated: 'Collectible Gated',
-  hidden: 'Hidden',
+  ...priceAndAudienceMessages,
   fieldVisibility: {
     genre: 'Show Genre',
     mood: 'Show Mood',
@@ -91,8 +81,6 @@ const messages = {
     play_count: 'Show Play Count',
     remixes: 'Show Remixes'
   },
-  followersOnly: 'Followers Only',
-  supportersOnly: 'Supporters Only',
   ownersOf: 'Owners Of',
   price: (price: number) =>
     price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
@@ -218,7 +206,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
   const isUsdcGated = isContentUSDCPurchaseGated(savedStreamConditions)
   const isTipGated = isContentTipGated(savedStreamConditions)
   const isFollowGated = isContentFollowGated(savedStreamConditions)
-  const isCollectibleGated = isContentCollectibleGated(savedStreamConditions)
+  const isTokenGated = isContentTokenGated(savedStreamConditions)
 
   const initialValues = useMemo(() => {
     const initialValues = {}
@@ -246,8 +234,8 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     if (isFollowGated || isTipGated) {
       availabilityType = StreamTrackAvailabilityType.SPECIAL_ACCESS
     }
-    if (isCollectibleGated) {
-      availabilityType = StreamTrackAvailabilityType.COLLECTIBLE_GATED
+    if (isTokenGated) {
+      availabilityType = StreamTrackAvailabilityType.TOKEN_GATED
     }
     set(initialValues, STREAM_AVAILABILITY_TYPE, availabilityType)
     set(initialValues, FIELD_VISIBILITY, fieldVisibility)
@@ -267,13 +255,13 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     downloadConditions,
     isDownloadable,
     lastGateKeeper,
+    isOwnedByUser,
     isUsdcGated,
     isFollowGated,
     isTipGated,
-    isCollectibleGated,
+    isTokenGated,
     fieldVisibility,
-    preview,
-    isOwnedByUser
+    preview
   ])
 
   const handleSubmit = useCallback(
@@ -348,13 +336,12 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           })
           break
         }
-        case StreamTrackAvailabilityType.COLLECTIBLE_GATED: {
-          const { nft_collection } =
-            streamConditions as CollectibleGatedConditions
+        case StreamTrackAvailabilityType.TOKEN_GATED: {
+          const { token_gate } = streamConditions as TokenGatedConditions
           setIsStreamGated(true)
-          setStreamConditionsValue({ nft_collection })
+          setStreamConditionsValue({ token_gate })
           setIsDownloadGated(true)
-          setDownloadConditionsValue({ nft_collection })
+          setDownloadConditionsValue({ token_gate })
           setLastGateKeeper({
             ...lastGateKeeper,
             access: 'accessAndSale'
@@ -377,6 +364,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           break
         }
         case StreamTrackAvailabilityType.PUBLIC: {
+          // TODO - KJ: See if we need to clear the download conditions when going back to public from token gated
           setIsUnlistedValue(false)
           if (lastGateKeeper.access === 'accessAndSale') {
             setIsDownloadGated(false)
@@ -404,38 +392,11 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     ]
   )
 
+  const { data: token } = useArtistCoin(
+    tempStreamConditions.token_gate?.token_mint ?? ''
+  )
+
   const renderValue = useCallback(() => {
-    if (isContentCollectibleGated(savedStreamConditions)) {
-      const { nft_collection } = savedStreamConditions
-      if (!nft_collection) return null
-      const { imageUrl, name } = nft_collection
-
-      return (
-        <>
-          <SelectedValue
-            label={messages.collectibleGated}
-            icon={IconCollectible}
-          />
-          <div className={styles.nftOwner}>
-            <Text variant='label' size='s'>
-              {messages.ownersOf}:
-            </Text>
-            <SelectedValue>
-              {imageUrl ? (
-                <DynamicImage
-                  wrapperClassName={styles.nftArtwork}
-                  image={imageUrl}
-                />
-              ) : null}
-              <Text variant='body' strength='strong'>
-                {name}
-              </Text>
-            </SelectedValue>
-          </div>
-        </>
-      )
-    }
-
     let selectedValues: (SelectedValueProps | string)[] = []
 
     const specialAccessValue = {
@@ -473,8 +434,17 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       selectedValues = [specialAccessValue, messages.followersOnly]
     } else if (isContentTipGated(savedStreamConditions)) {
       selectedValues = [specialAccessValue, messages.supportersOnly]
+    } else if (isContentTokenGated(savedStreamConditions)) {
+      selectedValues = [
+        {
+          label: messages.coinGated,
+          startAdornment: (
+            <Artwork src={token?.logoUri} hex h={20} w={20} borderWidth={0} />
+          )
+        }
+      ]
     } else {
-      selectedValues = [{ label: messages.public }]
+      selectedValues = [{ label: messages.free }]
     }
 
     return (
@@ -495,13 +465,13 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         })}
       </div>
     )
-  }, [savedStreamConditions, preview, isUpload])
+  }, [savedStreamConditions, preview, isUpload, token])
 
   return (
     <ContextualMenu
       label={messages.title}
       description={
-        isFollowGated || isCollectibleGated
+        isFollowGated
           ? messages.specialAccessDescription
           : messages.freePremiumDescription
       }

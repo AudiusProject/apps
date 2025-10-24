@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # crontab:
-# 0 0 * * * cd ~/audius-protocol/monitoring && scripts/deploy.sh prod
+# 0 0 * * * cd ~/apps/monitoring && scripts/deploy.sh prod
 
 set -ex
 

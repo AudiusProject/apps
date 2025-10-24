@@ -78,9 +78,10 @@ export const ListSelectionScreen = (props: ListSelectionProps) => {
 
   const styles = useStyles()
   const [filterInput, setFilterInput] = useState('')
-  const filterRegexp = new RegExp(filterInput, 'i')
-  const filteredData = data.filter(({ label, value }) =>
-    (label ?? value).match(filterRegexp)
+  const filterRegexp = new RegExp(filterInput, 'ig')
+  const filteredData = [...data].filter(
+    ({ label, value }) =>
+      label?.match(filterRegexp) || value?.match(filterRegexp)
   )
 
   return (

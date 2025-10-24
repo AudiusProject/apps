@@ -1,42 +1,41 @@
 import { useCallback } from 'react'
 
 import { useArtistCoin } from '@audius/common/api'
-import { useFeatureFlag, useFormattedTokenBalance } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
+import { useFormattedCoinBalance } from '@audius/common/hooks'
 import { Image, TouchableOpacity } from 'react-native'
 
 import {
+  Box,
   Flex,
   HexagonalIcon,
-  IconCaretRight,
   Skeleton,
+  spacing,
   Text
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
-// TODO: Fix loading states
-// Skeletons are not working as expected
+const ICON_SIZE = 64
 
-const CoinCardSkeleton = () => {
+export const CoinCardSkeleton = () => {
   return (
-    <Flex column h='2xl' w='100%' gap='xs'>
-      <Text>Test Ticker Name</Text>
-      <Skeleton w='100px' h='24px' />
+    <Flex column gap='xs'>
+      <Box w={240} h={36}>
+        <Skeleton />
+      </Box>
+      <Box w={140} h={24}>
+        <Skeleton />
+      </Box>
     </Flex>
   )
 }
 
-const HexagonSkeleton = () => {
+export const HexagonalSkeleton = () => {
   return (
-    <Skeleton
-      w='64px'
-      h='64px'
-      style={{
-        // TODO: Figure out how to use the clip path
-        // clipPath: `url(#${roundedHexClipPath})`
-        borderRadius: '100%'
-      }}
-    />
+    <HexagonalIcon size={ICON_SIZE}>
+      <Box w={ICON_SIZE} h={ICON_SIZE}>
+        <Skeleton />
+      </Box>
+    </HexagonalIcon>
   )
 }
 
@@ -47,34 +46,25 @@ export type CoinCardProps = {
 
 export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   const navigation = useNavigation()
-  const ICON_SIZE = showUserBalance ? 64 : 40
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
-  const { data: coinData, isPending: coinsDataLoading } = useArtistCoin({
-    mint
-  })
-
+  const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(mint)
+  const ticker = coinData?.ticker ?? ''
   const icon = coinData?.logoUri ?? ''
 
   const onPress = useCallback(() => {
-    if (isArtistCoinsEnabled) {
-      navigation.navigate('CoinDetailsScreen', { mint })
-    } else {
-      navigation.navigate('AudioScreen')
-    }
-  }, [mint, navigation, isArtistCoinsEnabled])
+    navigation.navigate('CoinDetailsScreen', { ticker })
+  }, [ticker, navigation])
 
   const {
-    tokenBalanceFormatted: balance,
-    tokenDollarValue: dollarValue,
-    isTokenBalanceLoading,
-    isTokenPriceLoading
-  } = useFormattedTokenBalance(mint)
+    coinBalanceFormatted: balance,
+    coinDollarValue: dollarValue,
+    isCoinBalanceLoading,
+    isCoinPriceLoading,
+    formattedHeldValue
+  } = useFormattedCoinBalance(mint)
 
   const isLoading =
-    isTokenBalanceLoading || isTokenPriceLoading || coinsDataLoading
+    isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
 
   const renderIcon = () => {
     if (typeof icon === 'string') {
@@ -94,7 +84,7 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   }
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} disabled={isLoading}>
       <Flex
         p='l'
         pl='xl'
@@ -102,43 +92,54 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
         justifyContent='space-between'
         alignItems='center'
       >
-        <Flex row alignItems='center' gap='m'>
-          {isLoading ? <HexagonSkeleton /> : renderIcon()}
-          <Flex column gap='xs' h='3xl' justifyContent='center'>
+        <Flex row alignItems='center' gap='l' style={{ flexShrink: 1 }}>
+          {isLoading ? <HexagonalSkeleton /> : renderIcon()}
+          <Flex column gap='xs'>
             {isLoading ? (
               <CoinCardSkeleton />
             ) : (
               <>
-                <Flex row alignItems='center' h='2xl' gap='xs'>
-                  {showUserBalance ? (
-                    <Text variant='heading' size='l'>
-                      {balance}
-                    </Text>
-                  ) : null}
+                {coinData?.name ? (
                   <Text
                     variant='heading'
-                    size={showUserBalance ? 'l' : 'm'}
-                    color={showUserBalance ? 'subdued' : 'default'}
+                    size='s'
+                    numberOfLines={1}
+                    ellipsizeMode='tail'
                   >
-                    {coinData?.ticker}
-                  </Text>
-                  {/* TODO: Add coin value for AllCoinsScreen */}
-                  {/* {!showUserBalance ? (
-                    <Text variant='heading' size='m' color='subdued'>
-                      (Coin Value)
-                    </Text>
-                  ) : null} */}
-                </Flex>
-                {showUserBalance ? (
-                  <Text variant='heading' size='s' color='subdued'>
-                    {dollarValue}
+                    {coinData.name}
                   </Text>
                 ) : null}
+                <Flex
+                  row
+                  alignItems='center'
+                  gap='xs'
+                  style={{ maxWidth: '100%' }}
+                >
+                  <Text variant='title' size='l'>
+                    {balance}
+                  </Text>
+                  <Text
+                    variant='title'
+                    size='l'
+                    color='subdued'
+                    numberOfLines={1}
+                    ellipsizeMode='tail'
+                    style={{ flexShrink: 1 }}
+                  >
+                    ${coinData?.ticker}
+                  </Text>
+                </Flex>
               </>
             )}
           </Flex>
         </Flex>
-        <IconCaretRight size='l' color='subdued' />
+        <Flex row alignItems='center' gap='m' ml={spacing.unit22}>
+          {!isLoading && showUserBalance ? (
+            <Text variant='title' size='l' color='default'>
+              {formattedHeldValue ?? dollarValue}
+            </Text>
+          ) : null}
+        </Flex>
       </Flex>
     </TouchableOpacity>
   )

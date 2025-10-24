@@ -74,6 +74,7 @@ const BottomButtons = (props: BottomButtonsProps) => {
         ph={props.isTrack ? undefined : 's'}
         pb={props.isTrack ? undefined : 's'}
         direction='row'
+        h='100%'
         alignItems='flex-end'
         justifyContent='space-between'
         borderTop='default'
@@ -123,7 +124,7 @@ const BottomButtons = (props: BottomButtonsProps) => {
       ph={props.isTrack ? undefined : 's'}
       pb={props.isTrack ? undefined : 's'}
       direction='row'
-      alignItems='center'
+      alignItems='flex-end'
       justifyContent='space-between'
       borderTop='default'
     >

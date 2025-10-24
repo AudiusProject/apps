@@ -45,36 +45,45 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
       height: spacing.unit5
     }
 
+    const defaultTextColor =
+      variant === 'subdued' && !isDisabled
+        ? color.text.subdued
+        : variant === 'inverted'
+          ? color.static.staticWhite
+          : color.text.default
+
+    const hoverTextColor =
+      variant === 'inverted'
+        ? color.static.staticWhite
+        : color.secondary.secondary
+
+    const activeTextColor =
+      variant === 'inverted' ? color.static.staticWhite : color.secondary.s500
+
     const buttonCss: CSSObject = {
-      '--text-color':
-        variant === 'subdued' && !isDisabled
-          ? color.text.subdued
-          : variant === 'inverted'
-            ? color.static.staticWhite
-            : color.text.default,
       background: 'transparent',
       border: 'none',
-      color: 'var(--text-color)',
+      color: defaultTextColor,
       '& svg': {
-        fill: 'var(--text-color)'
+        fill: defaultTextColor
       },
       fontWeight: typography.weight.bold,
 
       ...(size === 'large' ? largeStyles : defaultStyles),
 
       '&:hover': {
-        '--text-color':
-          variant === 'inverted'
-            ? color.static.staticWhite
-            : color.secondary.secondary,
+        color: hoverTextColor,
+        '& svg': {
+          fill: hoverTextColor
+        },
         ...(variant === 'inverted' && { opacity: 0.8 })
       },
 
       '&:active': {
-        '--text-color':
-          variant === 'inverted'
-            ? color.static.staticWhite
-            : color.secondary.s500,
+        color: activeTextColor,
+        '& svg': {
+          fill: activeTextColor
+        },
         ...(variant === 'inverted' && { opacity: 0.5 })
       },
 
@@ -85,6 +94,8 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
 
     const iconCss = size === 'large' ? largeIconStyles : defaultIconStyles
 
+    // When using asChild, we don't want to wrap a span around the children
+    // as it can mess up links with icons
     return (
       <BaseButton
         ref={ref}
@@ -95,9 +106,13 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
         }}
         {...baseProps}
       >
-        <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {children}
-        </span>
+        {baseProps.asChild ? (
+          children
+        ) : (
+          <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {children}
+          </span>
+        )}
       </BaseButton>
     )
   }

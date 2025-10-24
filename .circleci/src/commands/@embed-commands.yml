@@ -20,16 +20,10 @@ embed-build:
         paths:
           - << parameters.build-directory >>
 
-embed-install-wrangler:
-  steps:
-    - run:
-        name: install wrangler
-        command: 'cd packages/embed && npm install @cloudflare/wrangler'
-
 embed-deploy-cloudflare:
   parameters:
     build-type:
-      default: 'production'
+      default: 'prod'
       type: string
     environment:
       default: 'production'
@@ -38,16 +32,15 @@ embed-deploy-cloudflare:
     - checkout
     - attach_workspace:
         at: ./
-    - embed-install-wrangler
     - run:
         name: Set up workers site
         command: |
           cd packages/embed/workers-site
           npm i
           cd ../
-          mv build-<< parameters.build-type >> build
+          mv build-<< parameters.environment >> build
     - run:
         name: Deploy to Cloudflare
         command: |
           cd packages/embed
-          npx wrangler publish --env << parameters.environment >>
+          npm run deploy:<< parameters.build-type >>

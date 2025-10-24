@@ -1,6 +1,5 @@
 import { useEffect, useContext } from 'react'
 
-import { useUserCollectibles } from '@audius/common/api'
 import {
   Status,
   Collection,
@@ -20,14 +19,12 @@ import {
 import { route } from '@audius/common/utils'
 import {
   IconAlbum,
-  IconCollectible as IconCollectibles,
   IconNote,
   IconPlaylists,
   IconRepost as IconReposts
 } from '@audius/harmony'
 import cn from 'classnames'
 
-import CollectiblesPage from 'components/collectibles/components/CollectiblesPage'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import Lineup from 'components/lineup/Lineup'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -177,16 +174,6 @@ const userTabs: TabHeader[] = [
   }
 ]
 
-const collectiblesTab = {
-  icon: <IconCollectibles />,
-  text: ProfilePageTabs.COLLECTIBLES,
-  label: ProfilePageTabs.COLLECTIBLES,
-  to: 'collectibles'
-}
-
-const artistTabsWithCollectibles = [...artistTabs, collectiblesTab]
-const userTabsWithCollectibles = [...userTabs, collectiblesTab]
-
 const getMessages = ({
   name,
   isOwner
@@ -284,8 +271,6 @@ const ProfilePage = g(
       setHeader(null)
     }, [setHeader])
 
-    const { data: collectibles } = useUserCollectibles({ userId })
-
     const messages = getMessages({ name, isOwner })
     let content
     let profileTabs
@@ -330,19 +315,6 @@ const ProfilePage = g(
       onSave,
       hasMadeEdit
     ])
-
-    const profileHasCollectibles =
-      profile?.collectibleList?.length || profile?.solanaCollectibleList?.length
-    const profileNeverSetCollectiblesOrder = !collectibles
-    const profileHasNonEmptyCollectiblesOrder =
-      collectibles?.order?.length ?? false
-    const profileHasVisibleImageOrVideoCollectibles =
-      profileHasCollectibles &&
-      (profileNeverSetCollectiblesOrder || profileHasNonEmptyCollectiblesOrder)
-    const didCollectiblesLoadAndWasEmpty =
-      profileHasCollectibles && !profileHasNonEmptyCollectiblesOrder
-
-    const isUserOnTheirProfile = accountUserId === userId
 
     if (isLoading) {
       content = null
@@ -458,30 +430,6 @@ const ProfilePage = g(
             <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
           </div>
         ]
-      }
-
-      if (
-        // `has_collectibles` is a shortcut that is only true iff the user has a modified collectibles state
-        (profile?.has_collectibles && !didCollectiblesLoadAndWasEmpty) ||
-        profileHasVisibleImageOrVideoCollectibles ||
-        (profileHasCollectibles && isUserOnTheirProfile)
-      ) {
-        profileTabs = isArtist
-          ? artistTabsWithCollectibles
-          : userTabsWithCollectibles
-        profileElements.push(
-          <div key='collectibles' className={styles.tracksLineupContainer}>
-            <CollectiblesPage
-              userId={userId}
-              name={name}
-              isMobile={true}
-              isUserOnTheirProfile={isUserOnTheirProfile}
-              updateProfilePicture={updateProfilePicture}
-              profile={profile}
-              onSave={onSave}
-            />
-          </div>
-        )
       }
     }
 

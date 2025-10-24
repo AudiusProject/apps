@@ -3072,6 +3072,7 @@ export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandle
 export const GetUSDCTransactionCountTypeEnum = {
     PurchaseContent: 'purchase_content',
     Transfer: 'transfer',
+    InternalTransfer: 'internal_transfer',
     PrepareWithdrawal: 'prepare_withdrawal',
     RecoverWithdrawal: 'recover_withdrawal',
     Withdrawal: 'withdrawal',
@@ -3108,6 +3109,7 @@ export type GetUSDCTransactionsSortDirectionEnum = typeof GetUSDCTransactionsSor
 export const GetUSDCTransactionsTypeEnum = {
     PurchaseContent: 'purchase_content',
     Transfer: 'transfer',
+    InternalTransfer: 'internal_transfer',
     PrepareWithdrawal: 'prepare_withdrawal',
     RecoverWithdrawal: 'recover_withdrawal',
     Withdrawal: 'withdrawal',

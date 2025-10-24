@@ -41,6 +41,9 @@ const messages = {
   topContributorsTooltipTitle: 'Who are Top Contributors?',
   topContributorsTooltipBody:
     "'Top Contributors' is a ranked list of wallet addresses based on their Voting Weight, which reflects the amount of $AUDIO tokens they have staked or delegated.",
+  nodesTooltipTitle: 'What are Validator Nodes?',
+  nodesTooltipBody:
+    'Validator Nodes are vital for storing and maintaining the availability of all of the media on the Audius network as well as validating all transactions that happen on the network.',
   discoveryNodesTooltipTitle: 'What are Discovery Nodes?',
   discoveryNodesTooltipBody:
     'Discovery Nodes are services in the Audius network responsible for indexing metadata and making data available for queries. They store and update information such as user, track, and playlist details, along with social features, facilitating efficient data access for users.',
@@ -62,7 +65,10 @@ const messages = {
   registerNodeTooltipTitle: 'How to Register a Node?',
   registerNodeTooltipBody:
     'Node Operators run the decentralized infrastructure that powers the Audius Network.  To learn more about running a node, please read the docs.',
-  registerNodeCtaText: 'Running an Audius Node'
+  registerNodeCtaText: 'Running a Node',
+  storageCommitmentTooltipTitle: 'What is Storage Commitment?',
+  storageCommitmentTooltipBody:
+    'Storage Commitment is the amount of data that each node is responsible for storing. The calculation is the total storage demand of all files on the protocol, multiplied by the replication factor, and divided by the number of registered nodes.'
 }
 
 const CTA_HREFS = {
@@ -233,6 +239,17 @@ export const TopContributorsInfoTooltip = ({
   )
 }
 
+export const NodesInfoTooltip = ({ color, size }: AppliedInfoTooltipProps) => {
+  return (
+    <InfoTooltip
+      color={color}
+      size={size}
+      title={messages.nodesTooltipTitle}
+      body={messages.nodesTooltipBody}
+    />
+  )
+}
+
 export const DiscoveryNodesInfoTooltip = ({
   color,
   size
@@ -342,6 +359,20 @@ export const DelegatorsInfoTooltip = ({
       size={size}
       title={messages.delegatorsTooltipTitle}
       body={messages.delegatorsTooltipBody}
+    />
+  )
+}
+
+export const StorageCommitmentInfoTooltip = ({
+  color,
+  size
+}: AppliedInfoTooltipProps) => {
+  return (
+    <InfoTooltip
+      color={color}
+      size={size}
+      title={messages.storageCommitmentTooltipTitle}
+      body={messages.storageCommitmentTooltipBody}
     />
   )
 }

@@ -7,8 +7,9 @@ import {
   useNotificationUnreadCount
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
+import { useNotificationModal } from '@audius/common/store'
 import { Flex, IconNotificationOn, NotificationCount } from '@audius/harmony'
-import { useSearchParam, useToggle } from 'react-use'
+import { useSearchParam } from 'react-use'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { NotificationPanel } from 'components/notification'
@@ -29,8 +30,7 @@ export const NotificationsButton = () => {
     select: selectIsAccountComplete
   })
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const [isNotificationPanelOpen, toggleIsNotificationPanelOpen] =
-    useToggle(false)
+  const { isOpen, onOpen, onClose } = useNotificationModal()
 
   const record = useRecord()
   const { requiresAccount } = useRequiresAccountFn(undefined, 'account')
@@ -38,9 +38,9 @@ export const NotificationsButton = () => {
 
   useEffect(() => {
     if (shouldOpenNotifications) {
-      toggleIsNotificationPanelOpen()
+      onOpen()
     }
-  }, [shouldOpenNotifications, toggleIsNotificationPanelOpen])
+  }, [shouldOpenNotifications, onOpen])
 
   const handleToggleNotificationPanel = useCallback(
     (e: MouseEvent) => {
@@ -50,35 +50,37 @@ export const NotificationsButton = () => {
         return
       }
 
-      toggleIsNotificationPanelOpen()
-
-      record(make(Name.NOTIFICATIONS_OPEN, { source: 'button' }))
+      if (!isOpen) {
+        onOpen()
+        record(make(Name.NOTIFICATIONS_OPEN, { source: 'button' }))
+      } else {
+        onClose()
+      }
     },
     [
       hasAccount,
       isAccountComplete,
-      toggleIsNotificationPanelOpen,
+      onOpen,
       record,
-      requiresAccount
+      requiresAccount,
+      isOpen,
+      onClose
     ]
   )
 
-  const shouldShowCount = notificationCount > 0 && !isNotificationPanelOpen
+  const shouldShowCount = notificationCount > 0 && !isOpen
   const notificationButton = useMemo(() => {
     const button = (
       <NavHeaderButton
         ref={buttonRef}
         icon={IconNotificationOn}
         aria-label={messages.label(notificationCount)}
-        isActive={isNotificationPanelOpen}
+        isActive={isOpen}
       />
     )
     if (shouldShowCount) {
       return (
-        <Flex
-          css={{ cursor: 'pointer' }}
-          onClick={handleToggleNotificationPanel}
-        >
+        <Flex css={{ cursor: 'pointer' }} onClick={() => onOpen()}>
           <NotificationCount size='m' count={notificationCount}>
             {button}
           </NotificationCount>
@@ -89,8 +91,9 @@ export const NotificationsButton = () => {
   }, [
     notificationCount,
     handleToggleNotificationPanel,
-    isNotificationPanelOpen,
-    shouldShowCount
+    isOpen,
+    shouldShowCount,
+    onOpen
   ])
 
   return (
@@ -98,8 +101,8 @@ export const NotificationsButton = () => {
       {notificationButton}
       <NotificationPanel
         anchorRef={buttonRef}
-        isOpen={isNotificationPanelOpen}
-        onClose={toggleIsNotificationPanelOpen}
+        isOpen={isOpen}
+        onClose={onClose}
       />
       <AnnouncementModal />
     </>

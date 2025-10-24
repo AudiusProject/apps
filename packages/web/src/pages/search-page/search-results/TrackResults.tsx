@@ -1,15 +1,13 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 import { SEARCH_PAGE_SIZE, useSearchTrackResults } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Kind, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   searchResultsPageTracksLineupActions,
   searchActions,
   SearchKind
 } from '@audius/common/store'
-import { FilterButton, Flex, Text } from '@audius/harmony'
+import { Flex } from '@audius/harmony'
 import { css } from '@emotion/css'
 import { useDispatch } from 'react-redux'
 
@@ -20,17 +18,10 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 import { NoResultsTile } from '../NoResultsTile'
-import { SortMethodFilterButton } from '../SortMethodFilterButton'
 import { useSearchParams } from '../hooks'
-import { ViewLayout, viewLayoutOptions } from '../types'
+import { ViewLayout } from '../types'
 
 const { addItem: addRecentSearch } = searchActions
-
-const messages = {
-  tracks: 'Tracks',
-  layoutOptionsLabel: 'View As',
-  sortOptionsLabel: 'Sort By'
-}
 
 type TrackResultsProps = {
   isPending: boolean
@@ -136,43 +127,13 @@ type TrackResultsPageProps = {
 }
 
 export const TrackResultsPage = ({ layout }: TrackResultsPageProps) => {
-  const isMobile = useIsMobile()
   const searchParams = useSearchParams()
   const { isPending, isFetching, isError } = useSearchTrackResults(searchParams)
 
-  const [tracksLayout, setTracksLayout] = useState<ViewLayout>('list')
-  const { isEnabled: isSearchExploreEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE
-  )
-
-  return !isMobile && isSearchExploreEnabled === false ? (
-    <Flex direction='column' gap='xl' wrap='wrap'>
-      <Flex justifyContent='space-between' alignItems='center'>
-        <Text variant='heading' textAlign='left'>
-          {messages.tracks}
-        </Text>
-        <Flex gap='s'>
-          <SortMethodFilterButton />
-          <FilterButton
-            value={tracksLayout}
-            variant='replaceLabel'
-            optionsLabel={messages.layoutOptionsLabel}
-            onChange={setTracksLayout}
-            options={viewLayoutOptions}
-          />
-        </Flex>
-      </Flex>
-      <TrackResults
-        viewLayout={tracksLayout}
-        isPending={isPending}
-        isFetching={isFetching}
-        isError={isError}
-      />
-    </Flex>
-  ) : (
+  return (
     <Flex p={'l'} css={{ backgroundColor: 'default' }}>
       <TrackResults
-        viewLayout={isSearchExploreEnabled ? layout : undefined}
+        viewLayout={layout}
         isPending={isPending}
         isFetching={isFetching}
         isError={isError}

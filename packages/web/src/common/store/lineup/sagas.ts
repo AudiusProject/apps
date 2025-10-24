@@ -44,6 +44,7 @@ import {
   race
 } from 'typed-redux-saga'
 
+import { make } from 'common/store/analytics/actions'
 import { getToQueue } from 'common/store/queue/sagas'
 import { isPreview } from 'common/utils/isPreview'
 import { AppState } from 'store/types'
@@ -426,10 +427,9 @@ function* play<T extends Track | Collection>(
     const currentPlayerBehavior = yield* select(getPlayerBehavior)
     const newPlayerBehavior = isPreview
       ? PlayerBehavior.PREVIEW_OR_FULL
-      : undefined
+      : PlayerBehavior.FULL_OR_PREVIEW
     if (
       !currentPlayerTrackUid ||
-      action.uid !== currentPlayerTrackUid ||
       source !== lineup.prefix ||
       currentPlayerBehavior !== newPlayerBehavior
     ) {
@@ -444,6 +444,7 @@ function* play<T extends Track | Collection>(
           return queueable
         })
       )
+
       const flattenedQueue = flatten(toQueue).filter((e) => Boolean(e))
       yield* put(queueActions.clear({}))
       yield* put(queueActions.add({ entries: flattenedQueue }))
@@ -477,11 +478,12 @@ function* togglePlay<T extends Track | Collection>(
 
   if (!isPlayingUid || !isPlaying) {
     yield* put(lineupActions.play(action.uid))
-    analytics.track({
-      eventName: Name.PLAYBACK_PLAY,
-      id: `${action.id}`,
-      source: action.source
-    })
+    yield* put(
+      make(Name.PLAYBACK_PLAY, {
+        id: `${action.id}`,
+        source: action.source
+      })
+    )
   } else {
     yield* put(lineupActions.pause())
     analytics.track({

@@ -96,6 +96,12 @@ export type PopupProps = {
   fixed?: boolean
 
   /**
+   * When true, the popup will respect the provided origins and avoid flipping
+   * or clamping itself to remain within the viewport.
+   */
+  disableAutoFlip?: boolean
+
+  /**
    * Whether to take the width of the anchor element
    */
   takeWidthOfAnchor?: boolean

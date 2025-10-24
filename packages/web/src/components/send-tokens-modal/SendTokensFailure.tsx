@@ -1,6 +1,6 @@
 import {
   useArtistCoin,
-  useTokenBalance,
+  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -45,8 +45,12 @@ const SendTokensFailure = ({
 }: SendTokensFailureProps) => {
   const { isMobile } = useMedia()
   // Get token data and balance using the same hooks as ReceiveTokensModal
-  const { data: coin } = useArtistCoin({ mint })
-  const { data: tokenBalance } = useTokenBalance({ mint })
+  const { data: coin } = useArtistCoin(mint)
+  const { data: tokenBalance } = useCoinBalance({
+    mint,
+    includeExternalWallets: false,
+    includeStaked: false
+  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
   const currentBalance = tokenBalance?.balance
     ? tokenBalance.balance.value
@@ -88,6 +92,7 @@ const SendTokensFailure = ({
       {/* Token Balance Section */}
       <CryptoBalanceSection
         tokenInfo={tokenInfo}
+        name={tokenInfo.name}
         amount={formatBalance(currentBalance)}
       />
 
@@ -103,7 +108,7 @@ const SendTokensFailure = ({
           {messages.failed}
         </Text>
         <Text variant='heading' size='s' color='default'>
-          -{formatAmount(amount)} {tokenInfo.symbol}
+          -{formatAmount(amount)} ${tokenInfo.symbol}
         </Text>
       </Flex>
 

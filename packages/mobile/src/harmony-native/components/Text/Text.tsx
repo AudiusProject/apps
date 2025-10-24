@@ -18,6 +18,7 @@ export type TextProps = NativeTextProps &
     textTransform?: TextStyle['textTransform']
     // Needed for proper text wrapping
     flexShrink?: number
+    userSelect?: 'none' | 'text' | 'all' | 'contain'
   }
 
 export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
@@ -32,6 +33,7 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
     shadow,
     flexShrink,
     lineHeight,
+    userSelect,
     ...other
   } = props
   const theme = useTheme()
@@ -73,7 +75,8 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
     ...(fontWeight === 'demiBold' && Platform.OS === 'ios'
       ? { marginTop: 2 }
       : {}),
-    flexShrink
+    flexShrink,
+    ...(userSelect && { userSelect })
   })
 
   const isHeading = variant === 'display' || variant === 'heading'

@@ -8,6 +8,7 @@ import type { ServiceTypeManagerConfig } from './types'
 export class ServiceTypeManagerClient extends EthereumContract {
   discoveryNodeServiceType: `0x${string}`
   contentNodeServiceType: `0x${string}`
+  validatorServiceType: `0x${string}`
   contract: ServiceTypeManager
 
   constructor(config: ServiceTypeManagerConfig) {
@@ -15,6 +16,7 @@ export class ServiceTypeManagerClient extends EthereumContract {
 
     this.discoveryNodeServiceType = config.discoveryNodeServiceType
     this.contentNodeServiceType = config.contentNodeServiceType
+    this.validatorServiceType = config.validatorServiceType
 
     this.contract = new ServiceTypeManager(this.client, {
       address: config.addresses.serviceTypeManagerAddress
@@ -31,6 +33,13 @@ export class ServiceTypeManagerClient extends EthereumContract {
   getContentNodeVersion = async () => {
     const version = await this.contract.getCurrentVersion({
       serviceType: this.contentNodeServiceType
+    })
+    return hexToString(version, { size: 32 })
+  }
+
+  getValidatorVersion = async () => {
+    const version = await this.contract.getCurrentVersion({
+      serviceType: this.validatorServiceType
     })
     return hexToString(version, { size: 32 })
   }

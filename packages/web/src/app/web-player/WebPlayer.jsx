@@ -14,9 +14,8 @@ import {
   useCurrentAccountUser,
   useHasAccount
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Client, Status } from '@audius/common/models'
-import { FeatureFlags, StringKeys } from '@audius/common/services'
+import { StringKeys } from '@audius/common/services'
 import { guestRoutes } from '@audius/common/src/utils/route'
 import { UploadType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -31,6 +30,7 @@ import AnimatedSwitch from 'components/animated-switch/AnimatedSwitch'
 import AppRedirectListener from 'components/app-redirect-popover/AppRedirectListener'
 import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
+import { ArtistCoinsLaunchBanner } from 'components/banner/ArtistCoinsLaunchBanner'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
@@ -51,10 +51,13 @@ import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceF
 import { useEnvironment } from 'hooks/useEnvironment'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
 import { AiAttributedTracksPage } from 'pages/ai-attributed-tracks-page'
-import { AllCoinsPage } from 'pages/all-coins-page/AllCoinsPage'
-import { AssetDetailPage } from 'pages/asset-detail-page/AssetDetailPage'
+import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
+import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
+import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
 import { AudioPage } from 'pages/audio-page/AudioPage'
 import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
+import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
+import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -62,15 +65,16 @@ import { DeactivateAccountPage } from 'pages/deactivate-account-page/DeactivateA
 import DevTools from 'pages/dev-tools/DevTools'
 import SolanaToolsPage from 'pages/dev-tools/SolanaToolsPage'
 import UserIdParserPage from 'pages/dev-tools/UserIdParserPage'
+import { EditCoinDetailsPage } from 'pages/edit-coin-details-page/EditCoinDetailsPage'
 import { EditCollectionPage } from 'pages/edit-collection-page'
 import EmptyPage from 'pages/empty-page/EmptyPage'
-import { ExplorePage } from 'pages/explore-page/ExplorePage'
 import FavoritesPage from 'pages/favorites-page/FavoritesPage'
 import { FbSharePage } from 'pages/fb-share-page/FbSharePage'
 import FeedPage from 'pages/feed-page/FeedPage'
 import FollowersPage from 'pages/followers-page/FollowersPage'
 import FollowingPage from 'pages/following-page/FollowingPage'
 import HistoryPage from 'pages/history-page/HistoryPage'
+import { LeaderboardPage } from 'pages/leaderboard-page/LeaderboardPage'
 import LibraryPage from 'pages/library-page/LibraryPage'
 import { NotFoundPage } from 'pages/not-found-page/NotFoundPage'
 import { NotificationUsersPage } from 'pages/notification-users-page/NotificationUsersPage'
@@ -82,6 +86,7 @@ import RemixesPage from 'pages/remixes-page/RemixesPage'
 import RepostsPage from 'pages/reposts-page/RepostsPage'
 import { RequiresUpdate } from 'pages/requires-update/RequiresUpdate'
 import { RewardsPage } from 'pages/rewards-page/RewardsPage'
+import { ExplorePage } from 'pages/search-explore-page/ExplorePage'
 import SettingsPage from 'pages/settings-page/SettingsPage'
 import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
 import SupportingPage from 'pages/supporting-page/SupportingPage'
@@ -119,7 +124,7 @@ const {
   HISTORY_PAGE,
   DASHBOARD_PAGE,
   AUDIO_PAGE,
-  ASSET_DETAIL_PAGE,
+  COIN_DETAIL_PAGE,
   REWARDS_PAGE,
   UPLOAD_PAGE,
   UPLOAD_ALBUM_PAGE,
@@ -129,6 +134,7 @@ const {
   NOT_FOUND_PAGE,
   SEARCH_PAGE,
   PLAYLIST_PAGE,
+
   ALBUM_PAGE,
   TRACK_PAGE,
   TRACK_COMMENTS_PAGE,
@@ -148,14 +154,14 @@ const {
   ABOUT_SETTINGS_PAGE,
   FOLLOWING_USERS_ROUTE,
   FOLLOWERS_USERS_ROUTE,
+  LEADERBOARD_USERS_ROUTE,
+  COIN_DETAIL_MOBILE_WEB_ROUTE,
   TRENDING_GENRES,
   APP_REDIRECT,
   TRACK_ID_PAGE,
   USER_ID_PAGE,
   PLAYLIST_ID_PAGE,
   TRENDING_PLAYLISTS_PAGE,
-  PROFILE_PAGE_COLLECTIBLES,
-  PROFILE_PAGE_COLLECTIBLE_DETAILS,
   PROFILE_PAGE_TRACKS,
   PROFILE_PAGE_ALBUMS,
   PROFILE_PAGE_PLAYLISTS,
@@ -185,7 +191,9 @@ const {
   EDIT_ALBUM_PAGE,
   AIRDROP_PAGE,
   WALLET_PAGE,
-  ALL_COINS_PAGE,
+  COINS_CREATE_PAGE,
+  COINS_EXPLORE_PAGE,
+  EDIT_COIN_DETAILS_PAGE,
   DEV_TOOLS_PAGE,
   SOLANA_TOOLS_PAGE,
   USER_ID_PARSER_PAGE
@@ -215,14 +223,8 @@ const validSearchCategories = [
 initializeSentry()
 
 const WebPlayer = (props) => {
-  const {
-    isProduction,
-    history,
-    location,
-    mainContentRef,
-    setMainContentRef,
-    isArtistCoinsEnabled
-  } = props
+  const { isProduction, history, location, mainContentRef, setMainContentRef } =
+    props
 
   const dispatch = useDispatch()
 
@@ -487,6 +489,7 @@ const WebPlayer = (props) => {
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
         {/* <TermsOfServiceUpdateBanner /> */}
+        <ArtistCoinsLaunchBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
@@ -701,21 +704,50 @@ const WebPlayer = (props) => {
               />
               <Route
                 exact
-                path={ALL_COINS_PAGE}
+                path={COINS_EXPLORE_PAGE}
                 isMobile={isMobile}
-                component={AllCoinsPage}
+                component={ArtistCoinsExplorePage}
               />
               <Route
                 exact
-                path={ASSET_DETAIL_PAGE}
+                path='/coins/sort'
+                isMobile={isMobile}
+                component={MobileArtistCoinsSortPage}
+              />
+              <Route
+                exact
+                path={COINS_CREATE_PAGE}
+                isMobile={isMobile}
+                component={LaunchpadPage}
+              />
+              <Route
+                exact
+                path={COIN_DETAIL_PAGE}
                 isMobile={isMobile}
                 render={(props) => {
-                  return isArtistCoinsEnabled ? (
-                    <AssetDetailPage {...props} />
-                  ) : (
-                    <AudioPage {...props} />
-                  )
+                  const ticker = props.match.params.ticker
+                  if (ticker && ticker !== ticker.toUpperCase()) {
+                    return (
+                      <Redirect
+                        to={{
+                          pathname: COIN_DETAIL_PAGE.replace(
+                            ':ticker',
+                            ticker.toUpperCase()
+                          ),
+                          search: props.location.search,
+                          hash: props.location.hash
+                        }}
+                      />
+                    )
+                  }
+                  return <CoinDetailPage {...props} />
                 }}
+              />
+              <Route
+                exact
+                path={EDIT_COIN_DETAILS_PAGE}
+                isMobile={isMobile}
+                render={(props) => <EditCoinDetailsPage {...props} />}
               />
               <Route
                 exact
@@ -846,9 +878,7 @@ const WebPlayer = (props) => {
                   PROFILE_PAGE_TRACKS,
                   PROFILE_PAGE_ALBUMS,
                   PROFILE_PAGE_PLAYLISTS,
-                  PROFILE_PAGE_REPOSTS,
-                  PROFILE_PAGE_COLLECTIBLE_DETAILS,
-                  PROFILE_PAGE_COLLECTIBLES
+                  PROFILE_PAGE_REPOSTS
                 ]}
                 render={(props) => (
                   <ProfilePage
@@ -924,6 +954,18 @@ const WebPlayer = (props) => {
               />
               <MobileRoute
                 exact
+                path={LEADERBOARD_USERS_ROUTE}
+                isMobile={isMobile}
+                component={LeaderboardPage}
+              />
+              <MobileRoute
+                exact
+                path={COIN_DETAIL_MOBILE_WEB_ROUTE}
+                isMobile={isMobile}
+                component={ArtistCoinDetailsPage}
+              />
+              <MobileRoute
+                exact
                 path={SUPPORTING_USERS_ROUTE}
                 isMobile={isMobile}
                 component={SupportingPage}
@@ -992,22 +1034,9 @@ const RouterWebPlayer = withRouter(WebPlayer)
 
 // Taking this approach because the class component cannot use hooks
 const FeatureFlaggedWebPlayer = (props) => {
-  const { isEnabled: isSearchExploreEnabled } = useFeatureFlag(
-    FeatureFlags.SEARCH_EXPLORE
-  )
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
   const { isProduction } = useEnvironment()
 
-  return (
-    <RouterWebPlayer
-      {...props}
-      isSearchExploreEnabled={isSearchExploreEnabled}
-      isArtistCoinsEnabled={isArtistCoinsEnabled}
-      isProduction={isProduction}
-    />
-  )
+  return <RouterWebPlayer {...props} isProduction={isProduction} />
 }
 
 const MainContentRouterWebPlayer = () => {

@@ -3,11 +3,15 @@ import { useState } from 'react'
 import {
   useArtistCoin,
   transformArtistCoinToTokenInfo,
-  useSendTokens
+  useSendCoins
 } from '@audius/common/api'
-import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
+import { walletMessages } from '@audius/common/messages'
+import { ErrorLevel, Feature, SolanaWalletAddress } from '@audius/common/models'
+import { useSendTokensModal } from '@audius/common/store'
+import { FixedDecimal } from '@audius/fixed-decimal'
 
 import ResponsiveModal from 'components/modal/ResponsiveModal'
+import { reportToSentry } from 'store/errors/reportToSentry'
 
 import SendTokensConfirmation from './SendTokensConfirmation'
 import SendTokensFailure from './SendTokensFailure'
@@ -15,44 +19,36 @@ import SendTokensInput from './SendTokensInput'
 import SendTokensProgress from './SendTokensProgress'
 import SendTokensSuccess from './SendTokensSuccess'
 
-interface SendTokensModalProps {
-  mint: string
-  onClose: () => void
-  walletAddress: string
-  isOpen: boolean
-}
-
 type SendTokensState = {
   step: 'input' | 'confirm' | 'progress' | 'success' | 'failure'
   amount: bigint
   destinationAddress: string
+  signature: string
 }
 
-const SendTokensModal = ({
-  mint,
-  onClose,
-  walletAddress,
-  isOpen
-}: SendTokensModalProps) => {
+const SendTokensModal = () => {
+  const { isOpen, onClose: closeModal, data } = useSendTokensModal()
+  const { mint } = data ?? {}
+
   const [state, setState] = useState<SendTokensState>({
     step: 'input',
     amount: BigInt(0),
-    destinationAddress: ''
+    destinationAddress: '',
+    signature: ''
   })
   const [error, setError] = useState<string>('')
 
-  // Get token data and balance using the same hooks as ReceiveTokensModal
-  const { data: coin } = useArtistCoin({ mint })
+  const { data: coin } = useArtistCoin(mint ?? '')
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  // Use the new tan-query hook for sending tokens
-  const sendTokensMutation = useSendTokens({ mint })
+  const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
 
   const handleInputContinue = (amount: bigint, destinationAddress: string) => {
     setState({
       step: 'confirm',
       amount,
-      destinationAddress
+      destinationAddress,
+      signature: ''
     })
   }
 
@@ -61,19 +57,30 @@ const SendTokensModal = ({
     setError('') // Clear any previous errors
 
     try {
-      // Use the new hook to send tokens
-      await sendTokensMutation.mutateAsync({
-        recipientWallet: state.destinationAddress as any, // Type assertion for now
-        amount: AUDIO(state.amount).value // Convert bigint to AudioWei
+      const { signature } = await sendTokensMutation.mutateAsync({
+        recipientWallet: state.destinationAddress as SolanaWalletAddress,
+        amount: state.amount
       })
 
-      // If successful, move to success step
-      setState((prev) => ({ ...prev, step: 'success' }))
+      setState((prev) => ({
+        ...prev,
+        step: 'success',
+        signature
+      }))
     } catch (error) {
-      // If there's an error, move to failure step
       const errorMessage =
         error instanceof Error ? error.message : 'An unknown error occurred'
       setError(errorMessage)
+      reportToSentry({
+        level: ErrorLevel.Error,
+        error: error as Error,
+        additionalInfo: {
+          amount: state.amount.toString(),
+          destinationAddress: state.destinationAddress,
+          mint
+        },
+        feature: Feature.SendTokens
+      })
       setState((prev) => ({ ...prev, step: 'failure' }))
     }
   }
@@ -87,54 +94,24 @@ const SendTokensModal = ({
     setError('')
   }
 
-  const handleDone = () => {
-    onClose()
+  const handleClose = () => {
+    closeModal()
     setState({
       step: 'input',
       amount: BigInt(0),
-      destinationAddress: ''
+      destinationAddress: '',
+      signature: ''
     })
     setError('')
   }
 
-  const handleClose = () => {
-    if (state.step === 'input') {
-      onClose()
-      setState({
-        step: 'input',
-        amount: BigInt(0),
-        destinationAddress: ''
-      })
-      setError('')
-    }
-  }
-
-  const getModalTitle = () => {
-    if (!tokenInfo) return 'Send Tokens'
-
-    switch (state.step) {
-      case 'input':
-        return `Send ${tokenInfo.symbol}`
-      case 'confirm':
-        return 'Confirm Send'
-      case 'progress':
-        return 'Sending...'
-      case 'success':
-        return 'Sent Successfully'
-      case 'failure':
-        return 'Send Failed'
-      default:
-        return `Send ${tokenInfo.symbol}`
-    }
-  }
-
-  if (!isOpen) return null
+  if (!isOpen || !mint) return null
 
   return (
     <ResponsiveModal
       isOpen={isOpen}
       onClose={handleClose}
-      title={getModalTitle()}
+      title={walletMessages.send}
       size='m'
       dismissOnClickOutside={state.step === 'input'}
       showDismissButton={state.step === 'input'}
@@ -143,7 +120,6 @@ const SendTokensModal = ({
         <SendTokensInput
           mint={mint}
           onContinue={handleInputContinue}
-          onClose={handleClose}
           initialAmount={
             state.amount > 0
               ? new FixedDecimal(state.amount, tokenInfo?.decimals).toString()
@@ -171,7 +147,7 @@ const SendTokensModal = ({
           mint={mint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
-          onDone={handleDone}
+          signature={state.signature}
           onClose={handleClose}
         />
       ) : null}

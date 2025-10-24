@@ -41,13 +41,20 @@ import {
     TipGateFromJSONTyped,
     TipGateToJSON,
 } from './TipGate';
+import {
+    TokenGate,
+    instanceOfTokenGate,
+    TokenGateFromJSON,
+    TokenGateFromJSONTyped,
+    TokenGateToJSON,
+} from './TokenGate';
 
 /**
  * @type AccessGate
  * 
  * @export
  */
-export type AccessGate = FollowGate | NftGate | PurchaseGate | TipGate;
+export type AccessGate = FollowGate | NftGate | PurchaseGate | TipGate | TokenGate;
 
 export function AccessGateFromJSON(json: any): AccessGate {
     return AccessGateFromJSONTyped(json, false);
@@ -57,7 +64,7 @@ export function AccessGateFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return { ...FollowGateFromJSONTyped(json, true), ...NftGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true) };
+    return { ...FollowGateFromJSONTyped(json, true), ...NftGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
 }
 
 export function AccessGateToJSON(value?: AccessGate | null): any {
@@ -79,6 +86,9 @@ export function AccessGateToJSON(value?: AccessGate | null): any {
     }
     if (instanceOfTipGate(value)) {
         return TipGateToJSON(value as TipGate);
+    }
+    if (instanceOfTokenGate(value)) {
+        return TokenGateToJSON(value as TokenGate);
     }
 
     return {};

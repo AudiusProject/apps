@@ -1,6 +1,5 @@
 import {
   AccessConditions,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
   isContentUSDCPurchaseGated,
@@ -24,9 +23,6 @@ export const getUsersMayLoseAccess = ({
   )
   const isInitiallyTipGated = isContentTipGated(initialStreamConditions)
   const isInitiallyFollowGated = isContentFollowGated(initialStreamConditions)
-  const isInitiallyCollectibleGated = isContentCollectibleGated(
-    initialStreamConditions
-  )
 
   const stillUsdcGated =
     isInitiallyUsdcGated &&
@@ -39,11 +35,7 @@ export const getUsersMayLoseAccess = ({
     isInitiallyTipGated &&
     availability === StreamTrackAvailabilityType.SPECIAL_ACCESS &&
     specialAccessType === 'tip'
-  const stillCollectibleGated =
-    isInitiallyCollectibleGated &&
-    availability === StreamTrackAvailabilityType.COLLECTIBLE_GATED
-  const stillSameGate =
-    stillUsdcGated || stillFollowGated || stillTipGated || stillCollectibleGated
+  const stillSameGate = stillUsdcGated || stillFollowGated || stillTipGated
 
   return (
     !stillSameGate &&

@@ -6,10 +6,6 @@ export const messages = {
   featureFlagsDescription:
     'Override feature flags for testing purposes. Changes require a page refresh to take effect.',
   featureFlagsButton: 'Open Feature Flag Editor',
-  discoveryNodeTitle: 'Discovery Node Selector',
-  discoveryNodeDescription:
-    "Select a specific Discovery Node to connect to. Alternatively, press 'D' key to toggle this tool.",
-  discoveryNodeButton: 'Open Discovery Node Selector',
   confirmerPreviewTitle: 'Confirmer Preview',
   confirmerPreviewDescription:
     "Preview the state of the confirmer, which manages transaction retries. Alternatively, press 'C' key to toggle this tool.",

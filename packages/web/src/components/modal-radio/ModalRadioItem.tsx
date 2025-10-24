@@ -21,6 +21,7 @@ type ModalRadioItemProps = {
   icon?: ReactNode
   checkedContent?: ReactNode
   tooltipText?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export const ModalRadioItem = (props: ModalRadioItemProps) => {
@@ -34,7 +35,8 @@ export const ModalRadioItem = (props: ModalRadioItemProps) => {
     value,
     disabled,
     checkedContent,
-    tooltipText
+    tooltipText,
+    onChange
   } = props
   const [isCollapsed, setIsCollapsed] = useState(true)
   const radioGroup = useContext(RadioGroupContext)
@@ -63,6 +65,7 @@ export const ModalRadioItem = (props: ModalRadioItemProps) => {
         <Radio
           aria-label={label}
           value={value}
+          onChange={onChange}
           disabled={disabled}
           inputClassName={styles.input}
         />

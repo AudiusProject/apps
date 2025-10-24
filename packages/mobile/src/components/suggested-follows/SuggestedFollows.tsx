@@ -38,9 +38,8 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 }))
 
 const messages = {
-  title: `Oops! There's nothing here.`,
-  instruction:
-    'Tracks uploaded or reposted by people you follow will appear in your feed.'
+  title: `Follow users to personalize your feed`,
+  instruction: `Let's fix that by following some of these artists!`
 }
 
 export const SuggestedFollows = () => {

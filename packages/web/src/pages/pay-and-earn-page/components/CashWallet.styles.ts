@@ -47,11 +47,11 @@ export const useCashWalletStyles = makeResponsiveStyles<Styles>(
 
     // Bottom button area
     buttonArea: {
+      tablet: {
+        flexDirection: 'column'
+      },
       mobile: {
-        ...(media.isExtraSmall && {
-          flexDirection: 'column',
-          gap: theme.spacing.m
-        })
+        flexDirection: 'column'
       }
     }
   })

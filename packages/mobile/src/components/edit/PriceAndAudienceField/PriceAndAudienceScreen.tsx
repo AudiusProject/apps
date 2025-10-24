@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFeatureFlag, useAccessAndRemixSettings } from '@audius/common/hooks'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import {
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentTipGated,
+  isContentTokenGated,
   isContentUSDCPurchaseGated,
   StreamTrackAvailabilityType
 } from '@audius/common/models'
@@ -26,11 +26,11 @@ import type {
 import { ExpandableRadio } from '../ExpandableRadio'
 import { ExpandableRadioGroup } from '../ExpandableRadioGroup'
 
-import { CollectibleGatedRadioField } from './GollectibleGatedRadioField'
 import { PremiumRadioField } from './PremiumRadioField/PremiumRadioField'
 import { TRACK_PREVIEW } from './PremiumRadioField/TrackPreviewField'
 import { TRACK_PRICE } from './PremiumRadioField/TrackPriceField'
 import { SpecialAccessRadioField } from './SpecialAccessRadioField'
+import { TokenGatedRadioField } from './TokenGatedRadioField'
 
 const publicAvailability = StreamTrackAvailabilityType.PUBLIC
 
@@ -54,14 +54,17 @@ export const PriceAndAudienceScreen = () => {
   const { isEnabled: isUsdcEnabled } = useFeatureFlag(
     FeatureFlags.USDC_PURCHASES
   )
+  const { isEnabled: isTokenGatingEnabled } = useFeatureFlag(
+    FeatureFlags.TOKEN_GATING
+  )
 
   const initialStreamConditions = initialValues?.stream_conditions ?? null
   const initialAvailability = useMemo(() => {
     if (isUsdcEnabled && isContentUSDCPurchaseGated(streamConditions)) {
       return StreamTrackAvailabilityType.USDC_PURCHASE
     }
-    if (isContentCollectibleGated(streamConditions)) {
-      return StreamTrackAvailabilityType.COLLECTIBLE_GATED
+    if (isContentTokenGated(streamConditions)) {
+      return StreamTrackAvailabilityType.TOKEN_GATED
     }
     if (
       isContentFollowGated(streamConditions) ||
@@ -81,8 +84,8 @@ export const PriceAndAudienceScreen = () => {
     disableUsdcGate: disableUsdcGateOption,
     disableSpecialAccessGate,
     disableSpecialAccessGateFields,
-    disableCollectibleGate,
-    disableCollectibleGateFields
+    disableTokenGate,
+    disableTokenGateFields
   } = useAccessAndRemixSettings({
     isUpload,
     isRemix,
@@ -115,20 +118,19 @@ export const PriceAndAudienceScreen = () => {
     )
   }, [streamConditions, price, priceError, preview, previewError])
 
-  const collectibleGateHasNoSelectedCollection = useMemo(
+  const tokenGateHasNoSelectedToken = useMemo(
     () =>
-      isContentCollectibleGated(streamConditions) &&
-      !streamConditions.nft_collection,
+      isContentTokenGated(streamConditions) &&
+      !streamConditions.token_gate?.token_mint,
     [streamConditions]
   )
 
   /**
    * Do not navigate back if:
-   * - track is collectible gated and user has not selected an nft collection, or
+   * - track is token gated and user has not selected a token, or
    * - track is usdc purchase gated and user has not selected a valid price or preview
    */
-  const isFormInvalid =
-    usdcGateIsInvalid || collectibleGateHasNoSelectedCollection
+  const isFormInvalid = usdcGateIsInvalid || tokenGateHasNoSelectedToken
 
   const navigation = useNavigation()
   const [usersMayLoseAccess, setUsersMayLoseAccess] = useState(false)
@@ -212,9 +214,9 @@ export const PriceAndAudienceScreen = () => {
             previousStreamConditions={previousStreamConditions}
           />
         ) : null}
-        {entityType === 'track' ? (
-          <CollectibleGatedRadioField
-            disabled={disableCollectibleGate || disableCollectibleGateFields}
+        {entityType === 'track' && isTokenGatingEnabled ? (
+          <TokenGatedRadioField
+            disabled={disableTokenGate || disableTokenGateFields}
             previousStreamConditions={previousStreamConditions}
           />
         ) : null}

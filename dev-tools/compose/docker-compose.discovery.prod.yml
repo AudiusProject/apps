@@ -142,9 +142,9 @@ services:
 
       audius_db_url: postgresql://postgres:postgres@db:5432/discovery_provider_1
       audius_db_url_read_replica: postgresql://postgres:postgres@db:5432/discovery_provider_1
-      audius_redis_url: redis://audius-protocol-discovery-provider-redis-1:6379/00
+      audius_redis_url: redis://audius-discovery-provider-redis-1:6379/00
       audius_enable_rsyslog: 'false'
-      audius_discprov_url: http://audius-protocol-discovery-provider-1
+      audius_discprov_url: http://audius-discovery-1
       audius_delegate_owner_wallet: '0x73EB6d82CFB20bA669e9c178b718d770C49BB52f'
       audius_delegate_private_key: d09ba371c359f10f22ccda12fd26c598c7921bda3220c9942174562bc6a36fe8
 

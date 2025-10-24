@@ -1,5 +1,5 @@
 embed-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -10,7 +10,7 @@ embed-init:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     - persist_to_workspace:
         root: ./
@@ -25,7 +25,7 @@ embed-init:
           - packages/sdk/dist
 
 embed-build-staging:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -35,7 +35,7 @@ embed-build-staging:
         build-type: stage
 
 embed-build-production:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   resource_class: xlarge
@@ -45,19 +45,19 @@ embed-build-production:
         build-type: prod
 
 embed-deploy-staging-cloudflare:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.7.12-node
   steps:
     - embed-deploy-cloudflare:
-        build-type: staging
+        build-type: stage
         environment: staging
 
 embed-deploy-production-cloudflare:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/python:3.7.12-node
   steps:
     - embed-deploy-cloudflare:
-        build-type: production
+        build-type: prod
         environment: production

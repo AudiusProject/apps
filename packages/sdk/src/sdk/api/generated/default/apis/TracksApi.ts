@@ -68,6 +68,7 @@ export interface DownloadTrackRequest {
 export interface GetBulkTracksRequest {
     permalink?: Array<string>;
     id?: Array<string>;
+    isrc?: Array<string>;
 }
 
 export interface GetFeelingLuckyTracksRequest {
@@ -254,6 +255,10 @@ export class TracksApi extends runtime.BaseAPI {
 
         if (params.id) {
             queryParameters['id'] = params.id;
+        }
+
+        if (params.isrc) {
+            queryParameters['isrc'] = params.isrc;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

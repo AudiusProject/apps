@@ -9,7 +9,6 @@ import { createWalletClient, custom, RpcRequestError } from 'viem'
 import { mainnet } from 'viem/chains'
 import { getHttpRpcClient } from 'viem/utils'
 
-import { discoveryNodeSelectorService } from 'services/audius-sdk/discoveryNodeSelector'
 import { env } from 'services/env'
 
 import { getAudiusWalletClient } from './auth'
@@ -31,9 +30,6 @@ export const initSdk = async () => {
   const solanaRelay = new SolanaRelay(
     new Configuration({
       basePath: '/solana',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       middleware: [
         {
           pre: async (context) => {
@@ -60,8 +56,6 @@ export const initSdk = async () => {
       ]
     })
   )
-  // Overrides some DN configuration from optimizely
-  const discoveryNodeSelector = await discoveryNodeSelectorService.getInstance()
 
   // Set up a relay to identity for Ethereum RPC requests so that identity can
   // pay for gas fees on approved transactions.
@@ -100,7 +94,6 @@ export const initSdk = async () => {
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,
     services: {
-      discoveryNodeSelector,
       solanaRelay,
       audiusWalletClient,
       ethWalletClient,

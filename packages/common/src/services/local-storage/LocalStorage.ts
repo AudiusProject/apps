@@ -19,11 +19,6 @@ type LocalStorageConfig = {
   localStorage: LocalStorageType
 }
 
-export type CachedDiscoveryProviderType = {
-  endpoint: string
-  timestamp: string
-}
-
 export class LocalStorage {
   localStorage: LocalStorageType
 

@@ -69,12 +69,17 @@ export default function App() {
     const { data: selectedUser } = await sdk.users.getUserByHandle({
       handle: handleInputRef.current?.value ?? ''
     })
+    if (!selectedUser) {
+      return
+    }
 
-    const { data: tracks } = await sdk.full.users.getTracksByUser({
-      id: selectedUser?.id ?? '',
-      userId: user?.id ?? ''
+    const res = await client.tracksByUser.$get({
+      query: {
+        id: selectedUser.id,
+        userId: user?.id ?? ''
+      }
     })
-
+    const { data: tracks } = await res.json()
     setTracks(tracks ?? [])
 
     const trackFavorites = (tracks ?? []).reduce<Record<string, boolean>>(

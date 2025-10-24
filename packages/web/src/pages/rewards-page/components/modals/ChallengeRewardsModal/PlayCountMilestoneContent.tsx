@@ -8,7 +8,10 @@ import {
   ClaimStatus,
   CommonState
 } from '@audius/common/store'
-import { getChallengeStatusLabel } from '@audius/common/utils'
+import {
+  challengeRewardsConfig,
+  getChallengeStatusLabel
+} from '@audius/common/utils'
 import { Box, Flex, Text, IconCheck } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
@@ -28,11 +31,11 @@ const messages = {
   title1000: '1,000 PLAYS',
   title10000: '10,000 PLAYS',
   description250:
-    'Hit 250 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount250].description(),
   description1000:
-    'Hit 1,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount1000].description(),
   description10000:
-    'Hit 10,000 plays across all of your tracks in 2025 to earn an $AUDIO Reward',
+    challengeRewardsConfig[ChallengeName.PlayCount10000].description(),
   progressLabel: 'PLAYS',
   close: 'Close'
 }

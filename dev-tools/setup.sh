@@ -77,15 +77,15 @@ debian | ubuntu)
 esac
 
 if [[ "${BASH_SOURCE[0]}" == "" ]]; then
-    protocol_dir="$HOME/audius-protocol"
-    git clone https://github.com/AudiusProject/audius-protocol.git "$protocol_dir"
+    dir="$HOME/apps"
+    git clone https://github.com/AudiusProject/apps.git "$dir"
 else
-    protocol_dir="$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")"
+    dir="$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")"
 fi
 
-python3 -m pip install -r "$protocol_dir/dev-tools/requirements.txt"
+python3 -m pip install -r "$dir/dev-tools/requirements.txt"
 
 mkdir -p "$HOME/.local/bin"
 
-ln -sf "$protocol_dir/dev-tools/audius-compose" "$HOME/.local/bin/audius-compose"
-ln -sf "$protocol_dir/dev-tools/audius-cmd" "$HOME/.local/bin/audius-cmd"
+ln -sf "$dir/dev-tools/audius-compose" "$HOME/.local/bin/audius-compose"
+ln -sf "$dir/dev-tools/audius-cmd" "$HOME/.local/bin/audius-cmd"

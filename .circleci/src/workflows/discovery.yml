@@ -24,7 +24,7 @@ jobs:
       requires:
         - lint-discovery-provider
 
-  # Deploy audius-protocol `main` branch (stage)
+  # Deploy `main` branch (stage)
   - deploy-stage-nodes-just-tag:
       name: deploy-stage-discovery-provider
       requires:

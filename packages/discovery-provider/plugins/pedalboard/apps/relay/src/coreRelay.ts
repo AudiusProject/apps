@@ -118,7 +118,6 @@ export const coreRelay = async (
       encodedABI as `0x${string}`
     )
 
-    const signer = request.senderAddress
     const signature = ethers.utils.hexlify(subjectSig)
     const nonce = ethers.utils.hexlify(nonceBytes)
 
@@ -129,7 +128,6 @@ export const coreRelay = async (
       action,
       metadata,
       signature,
-      signer,
       nonce
     })
 
@@ -181,8 +179,8 @@ export const coreRelay = async (
       transactionIndex: 0,
       blockHash: blockHash,
       blockNumber: Number(blockHeight),
-      from: signer || '',
-      to: signer || '',
+      from: request.senderAddress || '',
+      to: request.senderAddress || '',
       cumulativeGasUsed: 10,
       gasUsed: 10,
       effectiveGasPrice: 420

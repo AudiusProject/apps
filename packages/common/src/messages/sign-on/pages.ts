@@ -126,3 +126,7 @@ export const welcomeModalMessages = {
   youreIn:
     "You're in! Discover music from our talented DJs, producers, and artists."
 }
+
+export const skipButtonMessages = {
+  skipThisStep: 'Skip'
+}

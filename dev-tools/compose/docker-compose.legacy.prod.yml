@@ -11,12 +11,12 @@ services:
     environment:
       - dirTemplate=/data/mediorum_dev_%d
       - dbUrlTemplate=postgresql://postgres:postgres@db:5432/creator_node_%d
-      - hostNameTemplate=http://audius-protocol-creator-node-%d
-      - identityService=http://audius-protocol-identity-service-1
+      - hostNameTemplate=http://audius-creator-node-%d
+      - identityService=http://audius-identity-service-1
       - web3EthProviderUrl=http://eth-ganache:8545 # Used only in register script
       - ethProviderUrl=http://eth-ganache:8545
       - ethRegistryAddress=${ETH_REGISTRY_ADDRESS}
-      - discoveryListensEndpoints=http://audius-protocol-discovery-provider-1
+      - discoveryListensEndpoints=http://audius-discovery-provider-1
     env_file: .env # Used in register script to get wallets
     ports:
       - 1991:1991

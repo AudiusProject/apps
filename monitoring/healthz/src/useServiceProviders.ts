@@ -7,7 +7,7 @@ const prodEndpoint =
 const stagingEndpoint =
   'https://api.staging.audius.co'
 
-const devEndpoint = 'http://audius-protocol-discovery-provider-1/core/nodes'
+const devEndpoint = 'http://audius-discovery-provider-1/core/nodes'
 
 export type SP = {
   delegateOwnerWallet: string

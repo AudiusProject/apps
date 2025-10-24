@@ -26,6 +26,7 @@ export type ContextualMenuProps = {
   error?: boolean
   errorMessage?: string
   lastItem?: boolean
+  startAdornment?: ReactNode
   renderValue?: (value: any) => JSX.Element | null
 }
 
@@ -35,6 +36,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     paddingHorizontal: spacing(4)
   },
   select: {
+    position: 'relative',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -50,7 +52,12 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   pill: {
     marginTop: spacing(2),
-    marginRight: spacing(2)
+    marginRight: spacing(2),
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(1)
   },
   optionPill: {
     paddingHorizontal: spacing(2),
@@ -68,6 +75,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 export const ContextualMenu = (props: ContextualMenuProps) => {
   const {
     label,
+    startAdornment,
     value,
     menuScreenName,
     styles: stylesProp,
@@ -92,6 +100,7 @@ export const ContextualMenu = (props: ContextualMenuProps) => {
       <View style={styles.optionPills}>
         {values.map((value, i) => (
           <SelectedValue key={`${value}-${i}`} style={styles.pill}>
+            {startAdornment ? <View>{startAdornment}</View> : null}
             <Text fontSize='small' weight='demiBold'>
               {value}
             </Text>

@@ -3,12 +3,10 @@ import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
 import { stagingConfig } from './config/staging'
 import { sdk } from './sdk'
-import { DiscoveryNodeSelector } from './services'
 import { Genre } from './types/Genre'
 import { Mood } from './types/Mood'
 import { ParseRequestError } from './utils/parseParams'
 ;(window as any).audiusSdk = sdk
-;(window as any).audiusSdk.DiscoveryNodeSelector = DiscoveryNodeSelector
 ;(window as any).audiusSdk.config = {
   staging: stagingConfig,
   production: productionConfig,

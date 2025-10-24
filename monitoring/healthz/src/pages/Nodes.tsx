@@ -260,7 +260,7 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
           </span>
           <span className="w-px" /><span className="w-px" />
           <a
-            href={`https://github.com/AudiusProject/${isContent ? 'audiusd' : 'audius-protocol'}/commits/${health.git}`}
+            href={`https://github.com/AudiusProject/${isContent ? 'audiusd' : 'apps'}/commits/${health.git}`}
             target="_blank"
             className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
           >

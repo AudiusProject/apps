@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo } from 'react'
 
-import { WALLET_PAGE } from '@audius/common/src/utils/route'
+import { COINS_EXPLORE_PAGE, WALLET_PAGE } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
 
@@ -18,6 +18,7 @@ type NavBarActionDrawerProps = {
 const messages = {
   wallet: 'Wallet',
   rewards: 'Rewards',
+  artistCoins: 'Artist Coins',
   settings: 'Settings'
 }
 
@@ -51,11 +52,20 @@ export const NavBarActionDrawer = ({
     onClose()
   }, [goToRoute, onClose])
 
+  const goToArtistCoinsExplorePage = useCallback(() => {
+    setImmediate(() => goToRoute(COINS_EXPLORE_PAGE))
+    onClose()
+  }, [goToRoute, onClose])
+
   const actions = useMemo(
     () => [
       {
         text: messages.wallet,
         onClick: goToWalletPage
+      },
+      {
+        text: messages.artistCoins,
+        onClick: goToArtistCoinsExplorePage
       },
       {
         text: messages.rewards,
@@ -66,7 +76,12 @@ export const NavBarActionDrawer = ({
         onClick: goToSettingsPage
       }
     ],
-    [goToRewardsPage, goToSettingsPage, goToWalletPage]
+    [
+      goToRewardsPage,
+      goToSettingsPage,
+      goToWalletPage,
+      goToArtistCoinsExplorePage
+    ]
   )
 
   return <ActionDrawer actions={actions} onClose={onClose} isOpen={isOpen} />

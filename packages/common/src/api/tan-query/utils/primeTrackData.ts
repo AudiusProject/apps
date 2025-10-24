@@ -156,8 +156,7 @@ export const primeTrackDataInternal = ({
       const user = (track as { user: User }).user
       primeUserData({
         users: [user],
-        queryClient,
-        forceReplace
+        queryClient
       })
     }
   })

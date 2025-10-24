@@ -246,14 +246,16 @@ export const remoteConfig = <
         platform,
         mobilePlatform: mobileClientInfo?.mobilePlatform ?? null,
         mobileAppVersion: mobileClientInfo?.mobileAppVersion ?? null
-      })
+        // Note: this actually returns `undefined` if optimizely data has not been requested
+      }) as boolean | undefined
     }
 
     try {
       if (state.didInitialize) {
         return (
-          isFeatureEnabled(flag) ||
-          (fallbackFlag && isFeatureEnabled(fallbackFlag))
+          (isFeatureEnabled(flag) ||
+            (fallbackFlag && isFeatureEnabled(fallbackFlag))) ??
+          defaultVal
         )
       }
       return defaultVal

@@ -88,7 +88,7 @@ The information stored includes Audius user metadata, images, and audio content.
 
 #### Run
 
-Use `audius-cli` to update required variables. The full list of variables and explanations can be found on the wiki [here](https://github.com/AudiusProject/audius-protocol/wiki/Content-Node:-Configuration-Details#required-environment-variables).
+Use `audius-cli` to update required variables. The full list of variables and explanations can be found on the wiki [here](https://github.com/AudiusProject/apps/wiki/Content-Node:-Configuration-Details#required-environment-variables).
 
 Some variables must be set, you can do this with the following commands:
 
@@ -200,7 +200,7 @@ You will have to replace the db seed job in `audius/discovery-provider/discovery
 CREATE EXTENSION pg_trgm;
 ```
 
-Make sure that your service exposes all the required environment variables. See wiki [here](https://github.com/AudiusProject/audius-protocol/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) for full list of env vars and descriptions.
+Make sure that your service exposes all the required environment variables. See wiki [here](https://github.com/AudiusProject/apps/wiki/Discovery-Node:-Configuration-Details#required-environment-variables) for full list of env vars and descriptions.
 
 #### Launch
 

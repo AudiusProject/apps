@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
 
+import { formatCount, formatCurrencyWithSubscript } from '~/utils'
+
 import { useUSDCBalance } from '../api/tan-query/wallets/useUSDCBalance'
 import { Status } from '../models'
 
@@ -12,6 +14,8 @@ type UseFormattedUSDCBalanceReturn = {
   usdcValue: ReturnType<typeof USDC>
   isLoading: boolean
   status: Status
+  heldValue: number | null
+  formattedHeldValue: string | null
 }
 
 export const useFormattedUSDCBalance = (): UseFormattedUSDCBalanceReturn => {
@@ -28,12 +32,21 @@ export const useFormattedUSDCBalance = (): UseFormattedUSDCBalanceReturn => {
 
   const isLoading = balanceStatus === Status.LOADING
 
+  const heldValue = balance ? Number(balance) : null
+  const formattedHeldValue = heldValue
+    ? heldValue >= 1
+      ? `$${formatCount(heldValue, 2)}`
+      : formatCurrencyWithSubscript(heldValue)
+    : null
+
   return {
     balance,
     balanceFormatted,
     balanceCents,
     usdcValue,
     isLoading,
-    status: balanceStatus
+    status: balanceStatus,
+    heldValue,
+    formattedHeldValue
   }
 }

@@ -39,6 +39,7 @@ RUN ./scripts/setup-predeployed-ganache.sh /usr/db 1000000000000
 
 ARG CONTENT_NODE_VERSION
 ARG DISCOVERY_NODE_VERSION
+ARG VALIDATOR_VERSION
 
 RUN ./scripts/setup-dev.sh /usr/db 1000000000000
 

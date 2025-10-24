@@ -162,7 +162,9 @@ const TrackPlayerContainer = ({
     audioPlayer,
     isRemixContest: track?.events?.some(
       (event) => event.eventType === 'remix_contest'
-    )
+    ),
+    artistCoinLogo: track?.user?.artistCoinBadge?.logoUri,
+    balance: track?.user?.totalBalance
   }
 
   let trackPlayer

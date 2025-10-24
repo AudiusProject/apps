@@ -30,9 +30,9 @@ export const MainContentContextProvider = memo(
         value={{
           setRef: (node: HTMLDivElement) => {
             if (node && !ref.current) {
-              ref.current = node
               setReady(true)
             }
+            ref.current = node
           },
           ref,
           ready

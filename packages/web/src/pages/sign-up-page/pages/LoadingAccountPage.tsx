@@ -25,12 +25,11 @@ export const LoadingAccountPage = () => {
   const navigate = useNavigateToPage()
   const isFastReferral = useFastReferral()
   const accountReady = useSelector(getAccountReady)
-
   const accountCreationStatus = useSelector(getStatus)
 
   const isAccountReady = isFastReferral
     ? accountReady
-    : accountCreationStatus === EditingStatus.SUCCESS
+    : accountReady || accountCreationStatus === EditingStatus.SUCCESS
 
   useEffect(() => {
     if (isAccountReady) {

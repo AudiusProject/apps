@@ -1,49 +1,143 @@
-import { Id, Coin } from '@audius/sdk'
-import { useQuery } from '@tanstack/react-query'
+import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
+import {
+  useQuery,
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+  type UseInfiniteQueryOptions
+} from '@tanstack/react-query'
 
-import { ID } from '~/models'
-import { removeNullable } from '~/utils/typeUtils'
+import { coinListFromSDK, Coin } from '~/adapters/coin'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, SelectableQueryOptions } from '../types'
 import { useQueryContext } from '../utils/QueryContext'
 
-export type UseArtistCoinsParams = {
-  mint?: string[]
-  owner_id?: ID[]
+import { getArtistCoinQueryKey } from './useArtistCoin'
+
+export type UseArtistCoinsListParams = {
   limit?: number
   offset?: number
+  sortMethod?: GetCoinsSortMethodEnum
+  sortDirection?: GetCoinsSortDirectionEnum
+  query?: string
 }
 
-export const getArtistCoinsQueryKey = (params: UseArtistCoinsParams) =>
+const DEFAULT_PAGE_SIZE = 25
+
+export const getArtistCoinsListQueryKey = (params?: UseArtistCoinsListParams) =>
   [QUERY_KEYS.coins, 'list', params] as unknown as QueryKey<Coin[]>
 
-export const useArtistCoins = <TResult = Coin[]>(
-  params: UseArtistCoinsParams = {},
+export const useArtistCoinsList = <TResult = Coin[]>(
+  params: UseArtistCoinsListParams = {},
   options?: SelectableQueryOptions<Coin[], TResult>
 ) => {
   const { audiusSdk } = useQueryContext()
+  const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: getArtistCoinsQueryKey(params),
+    queryKey: getArtistCoinsListQueryKey(params),
     queryFn: async () => {
       const sdk = await audiusSdk()
 
-      // Encode owner_id params to match API expectations
-      const encodedOwnerIds = params.owner_id
-        ?.map((id) => Id.parse(id))
-        .filter(removeNullable)
-
       const response = await sdk.coins.getCoins({
-        mint: params.mint,
-        ownerId: encodedOwnerIds,
         limit: params.limit,
-        offset: params.offset
+        offset: params.offset,
+        sortMethod: params.sortMethod,
+        sortDirection: params.sortDirection,
+        query: params.query
       })
 
-      return response?.data
+      const coins = response?.data
+      const parsedCoins = coinListFromSDK(coins)
+
+      // Prime individual coin data for each mint
+      if (parsedCoins) {
+        parsedCoins.forEach((coin) => {
+          if (coin.mint) {
+            queryClient.setQueryData(getArtistCoinQueryKey(coin.mint), coin)
+          }
+        })
+      }
+
+      return parsedCoins
     },
     ...options,
     enabled: options?.enabled !== false
   })
 }
+
+export type UseArtistCoinsParams = {
+  pageSize?: number
+  sortMethod?: GetCoinsSortMethodEnum
+  sortDirection?: GetCoinsSortDirectionEnum
+  query?: string
+}
+
+export const getArtistCoinsQueryKey = (params?: UseArtistCoinsParams) =>
+  [QUERY_KEYS.coins, params] as unknown as QueryKey<
+    InfiniteData<Coin[], number>
+  >
+
+export const useArtistCoins = <TData = Coin[]>(
+  params: UseArtistCoinsParams = {},
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      Coin[],
+      Error,
+      TData,
+      Coin[],
+      QueryKey<InfiniteData<Coin[], number>>,
+      number
+    >,
+    'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam'
+  >
+) => {
+  const { audiusSdk } = useQueryContext()
+  const queryClient = useQueryClient()
+  const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE
+
+  return useInfiniteQuery({
+    queryKey: getArtistCoinsQueryKey(params),
+    queryFn: async ({ pageParam = 0 }) => {
+      const sdk = await audiusSdk()
+
+      const response = await sdk.coins.getCoins({
+        limit: pageSize,
+        offset: pageParam,
+        sortMethod: params.sortMethod,
+        sortDirection: params.sortDirection,
+        query: params.query
+      })
+
+      const coins = response?.data
+      const parsedCoins = coinListFromSDK(coins)
+
+      // Prime individual coin data for each mint
+      if (parsedCoins) {
+        parsedCoins.forEach((coin) => {
+          if (coin.mint) {
+            queryClient.setQueryData(getArtistCoinQueryKey(coin.mint), coin)
+          }
+        })
+      }
+
+      return parsedCoins ?? []
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      // If the last page has fewer items than the page size, we've reached the end
+      if (lastPage.length < pageSize) {
+        return undefined
+      }
+      // Otherwise, return the next offset
+      return allPages.length * pageSize
+    },
+    enabled: options?.enabled !== false,
+    select: options?.select ?? ((data) => data.pages.flat() as TData),
+    ...options
+  })
+}
+
+// Export enum types for use in other components
+export { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum }

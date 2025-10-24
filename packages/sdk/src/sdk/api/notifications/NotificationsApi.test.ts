@@ -7,7 +7,6 @@ import { Configuration } from '../generated/default'
 import { NotificationsApi } from './NotificationsApi'
 
 vitest.mock('../../services/EntityManager')
-vitest.mock('../../services/DiscoveryNodeSelector')
 vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
 vitest.mock('./TrackUploadHelper')

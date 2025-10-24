@@ -1,27 +1,20 @@
 import { useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-
-import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
-
-import styles from './FollowsYouBadge.module.css'
+import { Flex, Text } from '@audius/harmony'
 
 const messages = {
-  followsYou: 'Follows You'
+  followsYou: 'follows you'
 }
 
 type FollowsYouBadgeProps = {
   userId: ID
-  className?: string
-  /** For badges appearing in a list, expose a variant with a transparent background */
-  variant?: 'standard' | 'list'
+  variant?: 'standard' | 'flat'
 }
 
 const FollowsYouBadge = ({
   userId,
-  className = '',
   variant = 'standard'
 }: FollowsYouBadgeProps) => {
-  const wm = useWithMobileStyle(styles.mobile)
   const { data: doesFollowCurrentUser } = useUser(userId, {
     select: (user) => user.does_follow_current_user
   })
@@ -29,15 +22,20 @@ const FollowsYouBadge = ({
   if (!doesFollowCurrentUser) return null
 
   return (
-    <div
-      className={wm(
-        styles.badge,
-        { [styles.list]: variant === 'list' },
-        className
-      )}
+    <Flex
+      alignItems='center'
+      justifyContent='center'
+      borderRadius='s'
+      ph='s'
+      pv='xs'
+      backgroundColor={variant === 'standard' ? 'white' : undefined}
+      shadow={variant === 'standard' ? 'near' : undefined}
+      border={variant === 'flat' ? 'strong' : undefined}
     >
-      {messages.followsYou}
-    </div>
+      <Text variant='label' size='xs' strength='strong' color='subdued'>
+        {messages.followsYou}
+      </Text>
+    </Flex>
   )
 }
 

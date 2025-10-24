@@ -14,12 +14,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CoinInsightsExtensions } from './CoinInsightsExtensions';
+import type { CoinDynamicBondingCurve } from './CoinDynamicBondingCurve';
 import {
-    CoinInsightsExtensionsFromJSON,
-    CoinInsightsExtensionsFromJSONTyped,
-    CoinInsightsExtensionsToJSON,
-} from './CoinInsightsExtensions';
+    CoinDynamicBondingCurveFromJSON,
+    CoinDynamicBondingCurveFromJSONTyped,
+    CoinDynamicBondingCurveToJSON,
+} from './CoinDynamicBondingCurve';
+import type { CoinExtensions } from './CoinExtensions';
+import {
+    CoinExtensionsFromJSON,
+    CoinExtensionsFromJSONTyped,
+    CoinExtensionsToJSON,
+} from './CoinExtensions';
 
 /**
  * Additional token information from Birdeye's defi token overview API.
@@ -34,25 +40,25 @@ export interface CoinInsights {
      * @type {string}
      * @memberof CoinInsights
      */
-    address: string;
+    address?: string;
     /**
      * Number of decimals for the token
      * @type {number}
      * @memberof CoinInsights
      */
-    decimals: number;
+    decimals?: number;
     /**
      * The token symbol
      * @type {string}
      * @memberof CoinInsights
      */
-    symbol: string;
+    symbol?: string;
     /**
      * The token name
      * @type {string}
      * @memberof CoinInsights
      */
-    name: string;
+    name?: string;
     /**
      * Market capitalization in USD
      * @type {number}
@@ -67,16 +73,10 @@ export interface CoinInsights {
     fdv: number;
     /**
      * 
-     * @type {CoinInsightsExtensions}
+     * @type {CoinExtensions}
      * @memberof CoinInsights
      */
-    extensions: CoinInsightsExtensions;
-    /**
-     * URL to the token's logo image
-     * @type {string}
-     * @memberof CoinInsights
-     */
-    logoURI: string;
+    extensions?: CoinExtensions;
     /**
      * Current liquidity in USD
      * @type {number}
@@ -300,17 +300,65 @@ export interface CoinInsights {
      */
     numberMarkets?: number;
     /**
-     * The number of Audius users holding the coin
+     * Total volume of coin traded (all time)
      * @type {number}
      * @memberof CoinInsights
      */
-    members: number;
+    totalVolume: number;
     /**
-     * The percentage change in the number of members holding the coin over the last 24 hours
+     * Total volume of coin traded in USD (all time)
      * @type {number}
      * @memberof CoinInsights
      */
-    membersChange24hPercent: number;
+    totalVolumeUSD: number;
+    /**
+     * Total volume bought (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeBuy: number;
+    /**
+     * Total volume bought in USD (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeBuyUSD: number;
+    /**
+     * Total volume sold (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeSell: number;
+    /**
+     * Total volume sold in USD (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    volumeSellUSD: number;
+    /**
+     * Total number of trades (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    totalTrade: number;
+    /**
+     * Total number of buys (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    buy: number;
+    /**
+     * Total number of sells (all time)
+     * @type {number}
+     * @memberof CoinInsights
+     */
+    sell: number;
+    /**
+     * 
+     * @type {CoinDynamicBondingCurve}
+     * @memberof CoinInsights
+     */
+    dynamicBondingCurve: CoinDynamicBondingCurve;
 }
 
 /**
@@ -318,14 +366,8 @@ export interface CoinInsights {
  */
 export function instanceOfCoinInsights(value: object): value is CoinInsights {
     let isInstance = true;
-    isInstance = isInstance && "address" in value && value["address"] !== undefined;
-    isInstance = isInstance && "decimals" in value && value["decimals"] !== undefined;
-    isInstance = isInstance && "symbol" in value && value["symbol"] !== undefined;
-    isInstance = isInstance && "name" in value && value["name"] !== undefined;
     isInstance = isInstance && "marketCap" in value && value["marketCap"] !== undefined;
     isInstance = isInstance && "fdv" in value && value["fdv"] !== undefined;
-    isInstance = isInstance && "extensions" in value && value["extensions"] !== undefined;
-    isInstance = isInstance && "logoURI" in value && value["logoURI"] !== undefined;
     isInstance = isInstance && "liquidity" in value && value["liquidity"] !== undefined;
     isInstance = isInstance && "lastTradeUnixTime" in value && value["lastTradeUnixTime"] !== undefined;
     isInstance = isInstance && "lastTradeHumanTime" in value && value["lastTradeHumanTime"] !== undefined;
@@ -350,8 +392,16 @@ export function instanceOfCoinInsights(value: object): value is CoinInsights {
     isInstance = isInstance && "v24h" in value && value["v24h"] !== undefined;
     isInstance = isInstance && "v24hUSD" in value && value["v24hUSD"] !== undefined;
     isInstance = isInstance && "vHistory24h" in value && value["vHistory24h"] !== undefined;
-    isInstance = isInstance && "members" in value && value["members"] !== undefined;
-    isInstance = isInstance && "membersChange24hPercent" in value && value["membersChange24hPercent"] !== undefined;
+    isInstance = isInstance && "totalVolume" in value && value["totalVolume"] !== undefined;
+    isInstance = isInstance && "totalVolumeUSD" in value && value["totalVolumeUSD"] !== undefined;
+    isInstance = isInstance && "volumeBuy" in value && value["volumeBuy"] !== undefined;
+    isInstance = isInstance && "volumeBuyUSD" in value && value["volumeBuyUSD"] !== undefined;
+    isInstance = isInstance && "volumeSell" in value && value["volumeSell"] !== undefined;
+    isInstance = isInstance && "volumeSellUSD" in value && value["volumeSellUSD"] !== undefined;
+    isInstance = isInstance && "totalTrade" in value && value["totalTrade"] !== undefined;
+    isInstance = isInstance && "buy" in value && value["buy"] !== undefined;
+    isInstance = isInstance && "sell" in value && value["sell"] !== undefined;
+    isInstance = isInstance && "dynamicBondingCurve" in value && value["dynamicBondingCurve"] !== undefined;
 
     return isInstance;
 }
@@ -366,14 +416,13 @@ export function CoinInsightsFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
-        'address': json['address'],
-        'decimals': json['decimals'],
-        'symbol': json['symbol'],
-        'name': json['name'],
+        'address': !exists(json, 'address') ? undefined : json['address'],
+        'decimals': !exists(json, 'decimals') ? undefined : json['decimals'],
+        'symbol': !exists(json, 'symbol') ? undefined : json['symbol'],
+        'name': !exists(json, 'name') ? undefined : json['name'],
         'marketCap': json['marketCap'],
         'fdv': json['fdv'],
-        'extensions': CoinInsightsExtensionsFromJSON(json['extensions']),
-        'logoURI': json['logoURI'],
+        'extensions': !exists(json, 'extensions') ? undefined : CoinExtensionsFromJSON(json['extensions']),
         'liquidity': json['liquidity'],
         'lastTradeUnixTime': json['lastTradeUnixTime'],
         'lastTradeHumanTime': json['lastTradeHumanTime'],
@@ -411,8 +460,16 @@ export function CoinInsightsFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'vSellHistory24hUSD': !exists(json, 'vSellHistory24hUSD') ? undefined : json['vSellHistory24hUSD'],
         'vSell24hChangePercent': !exists(json, 'vSell24hChangePercent') ? undefined : json['vSell24hChangePercent'],
         'numberMarkets': !exists(json, 'numberMarkets') ? undefined : json['numberMarkets'],
-        'members': json['members'],
-        'membersChange24hPercent': json['membersChange24hPercent'],
+        'totalVolume': json['totalVolume'],
+        'totalVolumeUSD': json['totalVolumeUSD'],
+        'volumeBuy': json['volumeBuy'],
+        'volumeBuyUSD': json['volumeBuyUSD'],
+        'volumeSell': json['volumeSell'],
+        'volumeSellUSD': json['volumeSellUSD'],
+        'totalTrade': json['totalTrade'],
+        'buy': json['buy'],
+        'sell': json['sell'],
+        'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
     };
 }
 
@@ -431,8 +488,7 @@ export function CoinInsightsToJSON(value?: CoinInsights | null): any {
         'name': value.name,
         'marketCap': value.marketCap,
         'fdv': value.fdv,
-        'extensions': CoinInsightsExtensionsToJSON(value.extensions),
-        'logoURI': value.logoURI,
+        'extensions': CoinExtensionsToJSON(value.extensions),
         'liquidity': value.liquidity,
         'lastTradeUnixTime': value.lastTradeUnixTime,
         'lastTradeHumanTime': value.lastTradeHumanTime,
@@ -470,8 +526,16 @@ export function CoinInsightsToJSON(value?: CoinInsights | null): any {
         'vSellHistory24hUSD': value.vSellHistory24hUSD,
         'vSell24hChangePercent': value.vSell24hChangePercent,
         'numberMarkets': value.numberMarkets,
-        'members': value.members,
-        'membersChange24hPercent': value.membersChange24hPercent,
+        'totalVolume': value.totalVolume,
+        'totalVolumeUSD': value.totalVolumeUSD,
+        'volumeBuy': value.volumeBuy,
+        'volumeBuyUSD': value.volumeBuyUSD,
+        'volumeSell': value.volumeSell,
+        'volumeSellUSD': value.volumeSellUSD,
+        'totalTrade': value.totalTrade,
+        'buy': value.buy,
+        'sell': value.sell,
+        'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
     };
 }
 

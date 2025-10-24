@@ -170,7 +170,7 @@ def get_feed_es(args, limit=10, offset=0):
     )
 
     # take a "soft limit" here.  Some tracks / reposts might get filtered out below
-    # if is_delete, or if track is collectible gated
+    # if is_delete
     sorted_with_reposts = sorted_with_reposts[0 : size * 2]
 
     mget_reposts = []
@@ -289,19 +289,6 @@ def get_feed_es(args, limit=10, offset=0):
         if "favorite_count" in item:
             item["save_count"] = item["favorite_count"]
 
-    # Filter out collectible gated tracks from feed.
-    # The soft limit above allows us to filter out collectible gated tracks
-    # and still be able to probabilistically satisfy the given limit later below.
-    sorted_feed = list(
-        filter(
-            lambda item: ("stream_conditions" not in item)  # not a track
-            or (item["stream_conditions"] is None)  # not a gated track
-            or (
-                "nft_collection" not in item["stream_conditions"]
-            ),  # not a collectible gated track
-            sorted_feed,
-        )
-    )
     # batch populate gated track and collection metadata
     db = get_db_read_replica()
     with db.scoped_session() as session:

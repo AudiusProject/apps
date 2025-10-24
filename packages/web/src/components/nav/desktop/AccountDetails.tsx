@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import {
   selectIsAccountComplete,
   useCurrentAccount,
@@ -108,23 +110,28 @@ const SignedInView = ({
   const { color } = useTheme()
   const profileLink = profilePage(handle)
 
+  const [isAccountSwitcherVisible, setIsAccountSwitcherVisible] =
+    useState(false)
+
   return (
     <AccountContentWrapper>
       <Avatar userId={userId} h={48} w={48} />
       <AccountInfo>
         <Flex alignItems='center' justifyContent='space-between' gap='s' h={20}>
-          <Flex css={{ maxWidth: '85%' }}>
+          <Flex
+            css={{
+              maxWidth: isAccountSwitcherVisible ? '85%' : '100%',
+              overflow: 'hidden'
+            }}
+          >
             <UserLink
               popover
               textVariant='title'
               size='s'
               userId={userId}
               badgeSize='xs'
+              ellipses
               css={{
-                flex: 1,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                wordBreak: 'break-word',
                 ...(isManagedAccount && {
                   color: color.secondary.s500,
                   '&:hover': { color: color.secondary.s500 }
@@ -132,7 +139,7 @@ const SignedInView = ({
               }}
             />
           </Flex>
-          <AccountSwitcher />
+          <AccountSwitcher onVisibilityChange={setIsAccountSwitcherVisible} />
         </Flex>
         <TextLink
           size='s'

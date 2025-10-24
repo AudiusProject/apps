@@ -1,5 +1,4 @@
 import {
-  DiscoveryNodeSelector,
   EntityManager,
   RepostTrackRequest,
   FavoriteTrackRequest,
@@ -51,19 +50,13 @@ const port = 3100
 
 // Test/develop sdk functionality here
 
-const discoveryNodeSelector = new DiscoveryNodeSelector({
-  initialSelectedNode: 'http://discoveryprovider.staging.audius.co'
-})
-
 const logger = new Logger({ logLevel: 'info' })
 const apiKey = ''
 const apiSecret = ''
 
 const audiusSdk = sdk({
   services: {
-    discoveryNodeSelector,
     entityManager: new EntityManager({
-      discoveryNodeSelector,
       web3ProviderUrl: stagingConfig.web3ProviderUrl,
       contractAddress: stagingConfig.entityManagerContractAddress,
       identityServiceUrl: stagingConfig.identityServiceUrl,
@@ -71,7 +64,6 @@ const audiusSdk = sdk({
     }),
     storageNodeSelector: new StorageNodeSelector({
       auth: new AppAuth(apiKey, apiSecret),
-      discoveryNodeSelector: discoveryNodeSelector,
       bootstrapNodes: stagingConfig.storageNodes
     }),
     logger

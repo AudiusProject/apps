@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol/tree/main/packages/eth"
+    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/eth"
   },
   "author": "Audius",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/eth",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/eth",
   "dependencies": {
     "viem": "2.21.21"
   }

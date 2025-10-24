@@ -7,11 +7,11 @@ sidebar_position: 2
 
 ## Database
 
-The discovery node uses PostgreSQL. Our Postgres database is managed through [SQLAlchemy](https://www.sqlalchemy.org/), an object relational mapper and [Alembic](http://alembic.zzzcomputing.com/en/latest/index.html), a lightweight database migration tool. The data models are defined in [src/models.py](https://github.com/AudiusProject/audius-protocol/blob/main/discovery-provider/src/models.py) which is used by alembic to automatically generate the migrations under [alembic/versions](https://github.com/AudiusProject/audius-protocol/tree/main/discovery-provider/alembic/versions). You can find the connection defined between alembic and our data models in [alembic/env.py](https://github.com/AudiusProject/audius-discovery-provider/blob/develop/alembic/env.py)
+The discovery node uses PostgreSQL. Our Postgres database is managed through [SQLAlchemy](https://www.sqlalchemy.org/), an object relational mapper and [Alembic](http://alembic.zzzcomputing.com/en/latest/index.html), a lightweight database migration tool. The data models are defined in [src/models.py](https://github.com/AudiusProject/apps/blob/main/discovery-provider/src/models.py) which is used by alembic to automatically generate the migrations under [alembic/versions](https://github.com/AudiusProject/apps/tree/main/discovery-provider/alembic/versions). You can find the connection defined between alembic and our data models in [alembic/env.py](https://github.com/AudiusProject/audius-discovery-provider/blob/develop/alembic/env.py)
 
 ## Flask
 
-The discovery node web server serves as the entrypoint for reading data through the audius protocol. All queries are returned as JSON objects parsed from SQLAlchemy query resultsn, and can be found in [src/queries](https://github.com/AudiusProject/audius-protocol/tree/main/discovery-provider/src/queries). Some examples of queries include user-specific feeds, track data, playlist data, etc.
+The discovery node web server serves as the entrypoint for reading data through the audius protocol. All queries are returned as JSON objects parsed from SQLAlchemy query resultsn, and can be found in [src/queries](https://github.com/AudiusProject/apps/tree/main/discovery-provider/src/queries). Some examples of queries include user-specific feeds, track data, playlist data, etc.
 
 ## Celery
 
@@ -34,7 +34,7 @@ What happens when 'index_blocks' is actually executed? The celery task does the 
 
     In each block, check if any transactions relevant to the audius smart contracts are present. If present, we retrieve specific event information from the associated transaction hash - examples include creator and track metadata. To do so, the discovery node *must* be aware of both the contract ABIs as well as each contract's address - these are shipped with each discovery node image. 
 
-3. Given operations from audius contracts in a given block, the task updates the corresponding table in the database. Certain index operations require a metadata fetch from decentralized storage (Audius Storage Protocol). Metadata formats can be found [here](https://github.com/AudiusProject/audius-protocol/blob/main/discovery-provider/src/tasks/metadata.py).
+3. Given operations from audius contracts in a given block, the task updates the corresponding table in the database. Certain index operations require a metadata fetch from decentralized storage (Audius Storage Protocol). Metadata formats can be found [here](https://github.com/AudiusProject/apps/blob/main/discovery-provider/src/tasks/metadata.py).
 
 *Why index blocks instead of using event filters?*
 
@@ -56,4 +56,4 @@ We use Redis for several things in the discovery node
 
 Elastic Search is used denormalize data and support certain quries (Feed, Search, Related Artists, etc.). Elastic Search data is populated and kept up to date by database triggers that live on the Postgres database.
 
-ETL code for the Elastic Search layer is found in the [es-indexer](https://github.com/AudiusProject/audius-protocol/tree/main/discovery-provider/es-indexer).
+ETL code for the Elastic Search layer is found in the [es-indexer](https://github.com/AudiusProject/apps/tree/main/discovery-provider/es-indexer).

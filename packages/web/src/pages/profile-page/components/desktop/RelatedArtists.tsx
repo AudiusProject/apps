@@ -19,11 +19,11 @@ import { ProfilePageNavSectionItem } from './ProfilePageNavSectionItem'
 import { ProfilePageNavSectionTitle } from './ProfilePageNavSectionTitle'
 import { ProfilePictureListTile } from './ProfilePictureListTile'
 
+const DEFAULT_RELATED_ARTISTS_COUNT = 100
+
 const messages = {
   relatedArtists: 'Related Artists'
 }
-
-const DEFAULT_RELATED_ARTISTS_COUNT = 100
 
 export const RelatedArtists = () => {
   const dispatch = useDispatch()

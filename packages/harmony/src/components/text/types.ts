@@ -22,6 +22,7 @@ export type BaseTextProps<TextComponentType extends ElementType = 'p'> = {
   maxLines?: number
   textTransform?: CSSProperties['textTransform']
   lineHeight?: 'single' | 'multi'
+  userSelect?: CSSProperties['userSelect']
 }
 
 export type TextProps<TextComponentType extends ElementType = 'p'> =

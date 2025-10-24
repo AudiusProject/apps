@@ -70,8 +70,8 @@ steps:
         (
           set -e
 
-          git clone --branch $CIRCLE_BRANCH https://github.com/AudiusProject/audius-protocol.git audius-protocol
-          cd audius-protocol
+          git clone --branch $CIRCLE_BRANCH https://github.com/AudiusProject/apps.git apps
+          cd apps
           git checkout $CIRCLE_BRANCH
 
           VERSION_REGEX="release-v(.+)"
@@ -83,16 +83,16 @@ steps:
           fi
           OLD_VERSION=$(echo ${NEW_VERSION} | awk -F. '{$NF = $NF - 1;} 1' | sed 's/ /./g')
 
-          # Generate diff for audius-protocol repo commits from last release to HEAD (we're on the new release branch thanks to the checkout step)
+          # Generate diff for repo commits from last release to HEAD (we're on the new release branch thanks to the checkout step)
           PROTOCOL_DIRS=$(bash ./scripts/get-release-dirs.sh protocol)
-          GIT_DIFF=$(git log --pretty=format:'%an - %s [<https://github.com/AudiusProject/audius-protocol/commit/%H|%h>]' --abbrev-commit origin/release-v$OLD_VERSION..HEAD -- $PROTOCOL_DIRS | sed 's/"/\\"/g' | tr -d '\r' | sed ':a;N;$!ba;s/\n/=DELIM@/g')
+          GIT_DIFF=$(git log --pretty=format:'%an - %s [<https://github.com/AudiusProject/apps/commit/%H|%h>]' --abbrev-commit origin/release-v$OLD_VERSION..HEAD -- $PROTOCOL_DIRS | sed 's/"/\\"/g' | tr -d '\r' | sed ':a;N;$!ba;s/\n/=DELIM@/g')
           json_content="{ \"blocks\": ["
           json_content+="{ \"type\": \"header\", \"text\": { \"type\": \"plain_text\", \"text\": \"New Protocol Release (v$NEW_VERSION)\n\" } },"
           audius_protocol_commit_blocks=$(generate_json_content "$GIT_DIFF")
           if [ -z "$audius_protocol_commit_blocks" ]; then
-            json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"No new audius-protocol commits.\n\" } },"
+            json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"No new commits.\n\" } },"
           else
-            json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Commits in audius-protocol:\n\" } },"
+            json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Commits in apps:\n\" } },"
             json_content+="$audius_protocol_commit_blocks"
           fi
 

@@ -125,7 +125,7 @@ Deploy production changes by ssh'ing into our monitoring box, checking out the n
 ```bash
 ssh-add ~/.ssh/id_ed25519.github
 ssh prometheus-grafana-metrics
-cd ~/audius-protocol/monitoring
+cd ~/apps/monitoring
 
 git checkout main
 git pull
@@ -136,7 +136,7 @@ scripts/deploy.sh prod
 This job is also set to run nightly via a `cronjob` to auto-generate our list of node operators:
 
 ```
-0 0 * * * cd ~/audius-protocol/monitoring && scripts/deploy.sh prod
+0 0 * * * cd ~/apps/monitoring && scripts/deploy.sh prod
 ```
 
 ## Grafana
@@ -451,7 +451,7 @@ When saving production dashboards, everything works out of the box if you ssh in
 ```bash
 ssh-add ~/.ssh/id_ed25519.github
 ssh prometheus-grafana-metrics
-cd ~/audius-protocol/monitoring
+cd ~/apps/monitoring
 
 # pull and sanatize all production dashboards
 ./grafana/bin/save-dashboards.sh
@@ -485,7 +485,7 @@ When releasing locally-developed dashboards to Production, ensure we save any ma
 ```bash
 ssh-add ~/.ssh/id_ed25519.github
 ssh prometheus-grafana-metrics
-cd ~/audius-protocol/monitoring
+cd ~/apps/monitoring
 
 # ensure we're on the latest tip of main
 git pull

@@ -46,7 +46,7 @@ const Menu = ({
     }
 
     const artistPageMenuItem = {
-      text: 'Visit Artist Page',
+      text: 'Visit Profile',
       onClick: () => goToRoute(profilePage(handle))
     }
 

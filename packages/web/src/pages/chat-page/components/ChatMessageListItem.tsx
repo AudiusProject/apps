@@ -1,9 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 
 import { useCurrentUserId, useUsers } from '@audius/common/api'
-import { useCanSendMessage, useFeatureFlag } from '@audius/common/hooks'
+import { useCanSendMessage } from '@audius/common/hooks'
 import { Status, ChatMessageWithExtras } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import {
   formatMessageDate,
@@ -23,6 +22,7 @@ import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGenerate
 import ChatTail from '../../../assets/img/ChatTail.svg'
 
 import { ArtistCoinHeader } from './ArtistCoinHeader'
+import { CONTENT_EXPANDED_LISTENER_KEY } from './ChatMessageList'
 import styles from './ChatMessageListItem.module.css'
 import { ChatMessagePlaylist } from './ChatMessagePlaylist'
 import { ChatMessageTrack } from './ChatMessageTrack'
@@ -45,9 +45,6 @@ const messages = {
 
 export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
   const { chatId, message, hasTail } = props
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
 
   // Refs
   const reactionButtonRef = useRef<HTMLDivElement>(null)
@@ -122,8 +119,16 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
   const onUnfurlSuccess = useCallback(() => {
     if (linkValue) {
       setEmptyUnfurl(false)
+      // Notify the message list that content expanded so it can adjust scroll
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent(CONTENT_EXPANDED_LISTENER_KEY, {
+            detail: { chatId }
+          })
+        )
+      }
     }
-  }, [linkValue])
+  }, [linkValue, chatId])
 
   // Only render reactions if user has message permissions
   const { canSendMessage } = useCanSendMessage(chatId)
@@ -183,12 +188,10 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       >
         <Flex className={styles.bubbleCorners}>
           <Flex column>
-            {isArtistCoinEnabled ? (
-              <ArtistCoinHeader
-                userId={senderUserId}
-                audience={message.audience}
-              />
-            ) : null}
+            <ArtistCoinHeader
+              userId={senderUserId}
+              audience={message.audience}
+            />
             {isCollectionUrl(linkValue) ? (
               <ChatMessagePlaylist
                 className={styles.unfurl}
@@ -214,7 +217,7 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
               />
             ) : null}
             {!hideMessage ? (
-              <Flex className={styles.textWrapper}>
+              <Flex p='l' className={styles.textWrapper}>
                 <UserGeneratedTextV2
                   className={styles.text}
                   color={isAuthor ? 'white' : 'default'}

@@ -21,7 +21,6 @@ type MobileOverflowModalProps = {
   onPublishPlaylist?: () => void
   onVisitTrackPage?: () => void
   onVisitArtistPage?: () => void
-  onVisitCollectiblePage?: () => void
   onVisitCollectionPage?: () => void
   onFollow?: () => void
   onUnfollow?: () => void
@@ -43,9 +42,8 @@ const rowMessageMap = {
   [OverflowAction.DELETE_PLAYLIST]: 'Delete Playlist',
   [OverflowAction.PUBLISH_PLAYLIST]: 'Publish Playlist',
   [OverflowAction.VIEW_TRACK_PAGE]: 'View Track Page',
-  [OverflowAction.VIEW_ARTIST_PAGE]: 'View Artist Page',
+  [OverflowAction.VIEW_ARTIST_PAGE]: 'View Profile',
   [OverflowAction.VIEW_PLAYLIST_PAGE]: 'View Playlist Page',
-  [OverflowAction.VIEW_COLLECTIBLE_PAGE]: 'View Collectible Page',
   [OverflowAction.VIEW_EPISODE_PAGE]: 'View Episode Page',
   [OverflowAction.VIEW_ALBUM_PAGE]: 'View Album Page',
   [OverflowAction.FOLLOW_ARTIST]: 'Follow Artist',
@@ -80,7 +78,6 @@ const MobileOverflowModal = ({
   onVisitTrackPage,
   onVisitArtistPage,
   onVisitCollectionPage,
-  onVisitCollectiblePage,
   onFollow,
   onUnfollow,
   onPurchase
@@ -102,7 +99,6 @@ const MobileOverflowModal = ({
     [OverflowAction.VIEW_TRACK_PAGE]: onVisitTrackPage,
     [OverflowAction.VIEW_EPISODE_PAGE]: onVisitTrackPage,
     [OverflowAction.VIEW_ARTIST_PAGE]: onVisitArtistPage,
-    [OverflowAction.VIEW_COLLECTIBLE_PAGE]: onVisitCollectiblePage,
     [OverflowAction.VIEW_PLAYLIST_PAGE]: onVisitCollectionPage,
     [OverflowAction.VIEW_ALBUM_PAGE]: onVisitCollectionPage,
     [OverflowAction.FOLLOW_ARTIST]: onFollow,

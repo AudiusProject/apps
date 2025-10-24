@@ -44,9 +44,9 @@ const defaultCoreEndpoint = (env: string): string => {
 }
 
 export const chainId = (config: Config): string => {
-  if (config.environment == "stage") return "1056801"
-  if (config.environment == "dev") return "1337"
-  return "31524"
+  if (config.environment == 'stage') return '1056801'
+  if (config.environment == 'dev') return '1337'
+  return '31524'
 }
 
 export const readConfig = (): Config => {
@@ -63,10 +63,10 @@ export const readConfig = (): Config => {
       default: '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B'
     }),
     audius_web3_localhost: str({
-      default: 'http://audius-protocol-poa-ganache-1:8545'
+      default: 'http://audius-poa-ganache-1:8545'
     }),
     audius_web3_host: str({
-      default: 'http://audius-protocol-poa-ganache-1:8545'
+      default: 'http://audius-poa-ganache-1:8545'
     }),
     audius_db_url: str({
       default:
@@ -78,7 +78,7 @@ export const readConfig = (): Config => {
     relay_server_port: num({ default: 6001 }),
     audius_final_poa_block: num({ default: 0 }),
     audius_redis_url: str({
-      default: 'redis://audius-protocol-discovery-provider-redis-1:6379/0'
+      default: 'redis://audius--provider-redis-1:6379/0'
     }),
     audius_contracts_verified_address: str({ default: '' }),
     audius_core_endpoint: str({ default: '' })

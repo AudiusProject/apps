@@ -54,6 +54,12 @@
   --harmony-gradient-color-1: #5b23e1ff;
   --harmony-gradient-color-2: #a22febff;
   --harmony-gradient: linear-gradient(315deg, #5b23e1ff 0%, #a22febff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #cc0fe0ff -4.82%,
+    #7e1bccff 49.8%,
+    #1ba1f1ff 104.43%
+  );
   --harmony-trending-blue: #216fdcff;
   --harmony-ai-green: #1fd187ff;
   --harmony-glass-overlay: #ffffffd9;
@@ -105,6 +111,12 @@ html[data-theme='day'] {
   --harmony-gradient-color-1: #5b23e1ff;
   --harmony-gradient-color-2: #a22febff;
   --harmony-gradient: linear-gradient(315deg, #5b23e1ff 0%, #a22febff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #cc0fe0ff -4.82%,
+    #7e1bccff 49.8%,
+    #1ba1f1ff 104.43%
+  );
   --harmony-trending-blue: #216fdcff;
   --harmony-ai-green: #1fd187ff;
   --harmony-glass-overlay: #ffffffd9;
@@ -156,6 +168,12 @@ html[data-theme='dark'] {
   --harmony-gradient-color-1: #9469eeff;
   --harmony-gradient-color-2: #c781fcff;
   --harmony-gradient: linear-gradient(315deg, #9469eeff 0%, #c781fcff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #d767e1ff -4.82%,
+    #c67cffff 49.8%,
+    #58b9f4ff 104.43%
+  );
   --harmony-trending-blue: #2a85e8ff;
   --harmony-ai-green: #1ecf7aff;
   --harmony-glass-overlay: #2f334899;
@@ -207,6 +225,12 @@ html[data-theme='matrix'] {
   --harmony-gradient-color-1: #6cdf44ff;
   --harmony-gradient-color-2: #13c65aff;
   --harmony-gradient: linear-gradient(315deg, #6cdf44ff 0%, #13c65aff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #0bd90bff -4.82%,
+    #00e252ff 49.8%,
+    #20e290ff 104.43%
+  );
   --harmony-trending-blue: #1eeb6fff;
   --harmony-ai-green: #1eeb57ff;
   --harmony-glass-overlay: #01010199;

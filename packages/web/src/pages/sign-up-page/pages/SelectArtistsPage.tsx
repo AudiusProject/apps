@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useTopArtistsInGenre, useSuggestedArtists } from '@audius/common/api'
+import { useSuggestedArtists, useTopArtistsInGenre } from '@audius/common/api'
 import { selectArtistsPageMessages } from '@audius/common/messages'
 import { UserMetadata } from '@audius/common/models'
 import { selectArtistsSchema } from '@audius/common/schemas'
 import { Genre, convertGenreLabelToValue, route } from '@audius/common/utils'
-import { Flex, Text, SelectablePill, Paper, useTheme } from '@audius/harmony'
-import { useSpring, animated } from '@react-spring/web'
+import { Flex, Paper, SelectablePill, Text, useTheme } from '@audius/harmony'
+import { animated, useSpring } from '@react-spring/web'
 import { Form, Formik, useFormikContext } from 'formik'
 import { range } from 'lodash'
 import { useDispatch } from 'react-redux'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { addFollowArtists } from 'common/store/pages/signon/actions'
+import { addFollowArtists, signUp } from 'common/store/pages/signon/actions'
 import { getGenres } from 'common/store/pages/signon/selectors'
 import {
   FollowArtistCard,
@@ -27,14 +27,12 @@ import { useSelector } from 'utils/reducer'
 
 import { AccountHeader } from '../components/AccountHeader'
 import { PreviewArtistHint } from '../components/PreviewArtistHint'
-import { SkipButton } from '../components/SkipButton'
 import {
   Heading,
   HiddenLegend,
   PageFooter,
   ScrollView
 } from '../components/layout'
-import { useFastReferral } from '../hooks/useFastReferral'
 
 const { SIGN_UP_APP_CTA_PAGE, SIGN_UP_COMPLETED_REDIRECT } = route
 
@@ -67,7 +65,6 @@ export const SelectArtistsPage = () => {
   const navigate = useNavigateToPage()
   const { color } = useTheme()
   const headerContainerRef = useRef<HTMLDivElement | null>(null)
-  const isFastReferral = useFastReferral()
   const { isMobile } = useMedia()
 
   const handleChangeGenre = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -77,8 +74,16 @@ export const SelectArtistsPage = () => {
   const handleSubmit = useCallback(
     (values: SelectArtistsValues) => {
       const { selectedArtists } = values
-      const artistsIDArray = [...selectedArtists].map((a) => Number(a))
-      dispatch(addFollowArtists(artistsIDArray))
+
+      // Only add artists if some were selected
+      if (selectedArtists.length > 0) {
+        const artistsIDArray = [...selectedArtists].map((a) => Number(a))
+        dispatch(addFollowArtists(artistsIDArray))
+      }
+
+      // Always create the account (whether artists selected or not)
+      dispatch(signUp())
+
       if (isMobile) {
         navigate(SIGN_UP_COMPLETED_REDIRECT)
       } else {
@@ -150,7 +155,7 @@ export const SelectArtistsPage = () => {
       validationSchema={!noArtistsSkipValidation ? formikSchema : undefined}
       validateOnMount
     >
-      {({ values, isValid, isSubmitting, isValidating, setErrors }) => {
+      {({ values, isValid, isSubmitting, isValidating }) => {
         const { selectedArtists } = values
         return (
           <ScrollView as={Form} gap={isMobile ? undefined : '3xl'}>
@@ -256,15 +261,16 @@ export const SelectArtistsPage = () => {
               centered
               sticky
               buttonProps={{
-                disabled: !isValid || isSubmitting,
+                disabled: isSubmitting,
                 isLoading: isSubmitting || isValidating
               }}
-              prefix={isFastReferral ? <SkipButton /> : null}
-              postfix={
-                <Text variant='body'>
-                  {selectArtistsPageMessages.selected}{' '}
-                  {selectedArtists.length || 0}/3
-                </Text>
+              prefix={
+                <Flex direction='column' gap='m' alignItems='center'>
+                  <Text variant='body'>
+                    {selectArtistsPageMessages.selected}{' '}
+                    {selectedArtists.length || 0}/3
+                  </Text>
+                </Flex>
               }
             />
           </ScrollView>

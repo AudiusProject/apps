@@ -24,13 +24,13 @@ const messages = {
   blastTitleRemixers: 'Remix Creators',
   blastTitleCustomers2: 'All Purchasers',
   blastTitleRemixers2: 'Remixed',
-  blastTitleCoinHolders: (symbol: string) => `${symbol} Members`,
+  blastTitleCoinHolders: (ticker: string) => `$${ticker} Members`,
   blastFollowersDescription: 'Everyone who follows you.',
   blastSupportersDescription: 'Everyone who has sent you a tip.',
   blastCustomersDescription: 'Everyone who has paid for your content.',
   blastRemixersDescription: 'Everyone who has remixed your tracks.',
   blastCoinHoldersDescription: (symbol: string) =>
-    `Everyone who holds ${symbol}.`,
+    `Everyone who holds $${symbol}.`,
   blastCTABase: 'Send a message blast to ',
   blastCTAFollowers: 'each of your followers',
   blastCTASupporters: 'everyone who has sent you a tip',
@@ -42,7 +42,7 @@ const messages = {
     audienceContentId
       ? 'everyone who remixed this track'
       : 'everyone who has remixed your tracks',
-  blastCTACoinHolders: (symbol: string) => `everyone who holds ${symbol}`
+  blastCTACoinHolders: (ticker: string) => `everyone who holds $${ticker}`
 }
 
 /**

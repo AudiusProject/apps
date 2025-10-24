@@ -11,6 +11,7 @@
       "outputLogs": "new-only"
     },
     "android": {
+      "env": ["ENVFILE"],
       "dependsOn": ["build"],
       "cache": false,
       "persistent": true,

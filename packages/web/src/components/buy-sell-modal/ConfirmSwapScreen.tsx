@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
 
-import { formatUSDCValue, SLIPPAGE_BPS } from '@audius/common/api'
+import { SLIPPAGE_BPS } from '@audius/common/api'
 import { useBuySellAnalytics } from '@audius/common/hooks'
 import { buySellMessages as baseMessages } from '@audius/common/messages'
 import {
-  TokenInfo,
+  CoinInfo,
   getSwapTokens,
-  TokenPair,
-  useTokenAmountFormatting
+  CoinPair,
+  useCoinAmountFormatting
 } from '@audius/common/store'
+import { formatCurrencyWithSubscript } from '@audius/common/utils'
 import { Button, Flex, Text } from '@audius/harmony'
 
 import { SwapBalanceSection } from './SwapBalanceSection'
@@ -16,14 +17,14 @@ import { SwapBalanceSection } from './SwapBalanceSection'
 const messages = {
   ...baseMessages,
   priceEach: (price: number) => {
-    const formatted = formatUSDCValue(price, { includeDollarSign: true })
+    const formatted = formatCurrencyWithSubscript(price)
     return `(${formatted} ea.)`
   }
 }
 
 type ConfirmSwapScreenProps = {
-  payTokenInfo: TokenInfo
-  receiveTokenInfo: TokenInfo
+  payTokenInfo: CoinInfo
+  receiveTokenInfo: CoinInfo
   payAmount: number
   receiveAmount: number
   pricePerBaseToken: number
@@ -33,7 +34,7 @@ type ConfirmSwapScreenProps = {
   onConfirm: () => void
   isConfirming: boolean
   activeTab: 'buy' | 'sell' | 'convert'
-  selectedPair: TokenPair
+  selectedPair: CoinPair
 }
 
 export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
@@ -60,13 +61,13 @@ export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
   )
 
   // balance isn't needed so we pass 0
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     isStablecoin: !!payTokenInfo.isStablecoin,
     decimals: payTokenInfo.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: receiveAmount,
     isStablecoin: !!receiveTokenInfo.isStablecoin,
     decimals: receiveTokenInfo.decimals
@@ -96,11 +97,11 @@ export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
   }
 
   return (
-    <Flex direction='column' gap='l'>
-      <Text variant='body' size='m' textAlign='center'>
+    <Flex column gap='l'>
+      <Text variant='body' size='m'>
         {messages.confirmReview}
       </Text>
-      <Flex direction='column' gap='xl'>
+      <Flex column gap='xl'>
         <SwapBalanceSection
           title={messages.youPay}
           tokenInfo={payTokenInfo}
@@ -113,6 +114,21 @@ export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
           priceLabel={priceLabel}
         />
       </Flex>
+
+      {exchangeRate ? (
+        <Flex gap='xs' alignItems='center' mt='l'>
+          <Text variant='body' size='s' color='subdued'>
+            {messages.exchangeRateLabel}
+          </Text>
+          <Text variant='body' size='s' color='default'>
+            {messages.exchangeRateValue(
+              payTokenInfo.symbol,
+              receiveTokenInfo.symbol,
+              exchangeRate
+            )}
+          </Text>
+        </Flex>
+      ) : null}
 
       <Flex gap='s' mt='xl'>
         <Button variant='secondary' fullWidth onClick={onBack}>

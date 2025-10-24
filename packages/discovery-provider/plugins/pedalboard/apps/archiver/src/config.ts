@@ -14,8 +14,6 @@ export type Config = {
   concurrentJobs: number
   /** How many attempts to make to create a stems archive (default: 3) */
   maxStemsArchiveAttempts: number
-  /** List of discovery nodes to use for fetching track info and downloading tracks (default: undefined, will use SDK defaults) */
-  discoveryNodeAllowlist: string[] | undefined
   redisUrl: string
   serverHost: string
   serverPort: number
@@ -39,7 +37,7 @@ export const readConfig = (): Config => {
       default: 'dev'
     }),
     audius_redis_url: str({
-      default: 'redis://audius-protocol-discovery-provider-redis-1:6379/0'
+      default: 'redis://audius-discovery-provider-redis-1:6379/0'
     }),
     archiver_server_host: str({ default: '0.0.0.0' }),
     archiver_server_port: num({ default: 6004 }),
@@ -58,8 +56,6 @@ export const readConfig = (): Config => {
   config = {
     environment: env.audius_discprov_env,
     concurrentJobs: env.archiver_concurrent_jobs,
-    discoveryNodeAllowlist:
-      process.env.archiver_discovery_node_allowlist?.split(',') ?? undefined,
     redisUrl: env.audius_redis_url,
     serverHost: env.archiver_server_host,
     serverPort: env.archiver_server_port,

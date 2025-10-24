@@ -17,7 +17,7 @@ services:
 
   # Building Solana Programs in container is long and cumbersome (30min+).
   # Use saved image instead.
-  # See audius-protocol/solana-programs/README.md for how to update the image
+  # See apps/solana-programs/README.md for how to update the image
   # and build the programs on your host machine.
   solana-test-validator:
     env_file: .env
@@ -29,7 +29,7 @@ services:
       # RPC port
       - '8900:8900'
 
-  # See audius-protocol/solana-programs/README.md
+  # See apps/solana-programs/README.md
   solana-test-validator-build:
     env_file: .env
     image: audius/solana-test-validator:latest

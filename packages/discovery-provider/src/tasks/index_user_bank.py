@@ -109,6 +109,7 @@ INITIAL_FETCH_SIZE = 10
 
 PREPARE_WITHDRAWAL_MEMO_STRING = "Prepare Withdrawal"
 WITHDRAWAL_MEMO_STRING = "Withdrawal"
+INTERNAL_TRANSFER_MEMO_STRING = "Internal Transfer"
 
 # Used to find the correct accounts for sender/receiver in the transaction and the ClaimableTokensPDA
 TRANSFER_SENDER_ACCOUNT_INDEX = 1
@@ -255,6 +256,8 @@ def get_transfer_type_from_memo(memos: List[str]) -> USDCTransactionType:
             return USDCTransactionType.prepare_withdrawal
         elif memo == WITHDRAWAL_MEMO_STRING:
             return USDCTransactionType.withdrawal
+        elif memo == INTERNAL_TRANSFER_MEMO_STRING:
+            return USDCTransactionType.internal_transfer
     return USDCTransactionType.transfer
 
 

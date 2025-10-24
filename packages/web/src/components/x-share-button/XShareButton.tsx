@@ -1,7 +1,7 @@
 import { MouseEventHandler, useCallback } from 'react'
 
 import { useUserByHandle } from '@audius/common/api'
-import { Nullable } from '@audius/common/utils'
+import { Nullable, getXShareHandle } from '@audius/common/utils'
 import { Button, ButtonProps, IconX } from '@audius/harmony'
 
 import { useRecord, TrackEvent } from 'common/store/analytics/actions'
@@ -69,13 +69,12 @@ export const XShareButton = (props: XShareButtonProps) => {
         user?.handle &&
         (other.additionalHandle ? additionalUser?.handle : true)
       ) {
-        const handle = user?.handle ? `@${user?.handle}` : user?.name
+        const handle = user ? getXShareHandle(user) : ''
 
-        const otherHandle = other.additionalHandle
-          ? additionalUser?.handle
-            ? `@${additionalUser?.handle}`
-            : additionalUser?.name
-          : null
+        const otherHandle =
+          other.additionalHandle && additionalUser
+            ? getXShareHandle(additionalUser)
+            : null
 
         const xData = other.shareData(handle, otherHandle)
         if (xData) {
@@ -88,16 +87,7 @@ export const XShareButton = (props: XShareButtonProps) => {
         }
       }
     },
-    [
-      other,
-      user?.handle,
-      user?.name,
-      additionalUser?.handle,
-      additionalUser?.name,
-      url,
-      onAfterShare,
-      record
-    ]
+    [other, user, additionalUser, url, onAfterShare, record]
   )
 
   return (

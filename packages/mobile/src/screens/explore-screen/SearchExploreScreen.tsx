@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Platform } from 'react-native'
 import { IOScrollView } from 'react-native-intersection-observer'
 import Animated, {
@@ -14,6 +16,7 @@ import Animated, {
 import { useTheme } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
+import { useStatusBarStyle } from 'app/hooks/useStatusBarStyle'
 
 import { SearchResults } from '../search-screen/search-results/SearchResults'
 import {
@@ -39,6 +42,9 @@ const SearchExploreContent = () => {
   const { spacing, motion } = useTheme()
   const { params } = useExploreRoute<'SearchExplore'>()
 
+  // Set status bar to light content for dark header
+  useStatusBarStyle('light-content')
+
   // Get state from context
   const [, setCategory] = useSearchCategory()
   const [filters, setFilters] = useSearchFilters()
@@ -50,6 +56,11 @@ const SearchExploreContent = () => {
   const prevScrollY = useSharedValue(0)
   const scrollDirection = useSharedValue<'up' | 'down'>('down')
   const scrollRef = useRef<Animated.ScrollView>(null)
+
+  // Feature flag for collapsed header
+  const { isEnabled: isCollapsedHeaderEnabled } = useFeatureFlag(
+    FeatureFlags.COLLAPSED_EXPLORE_HEADER
+  )
 
   // Derived data
   const hasAnyFilter = Object.values(filters).some(
@@ -151,7 +162,7 @@ const SearchExploreContent = () => {
           ref={scrollRef}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
-          style={contentPaddingStyle}
+          style={isCollapsedHeaderEnabled ? undefined : contentPaddingStyle}
           showsVerticalScrollIndicator={false}
         >
           <ExploreContent />

@@ -28,19 +28,25 @@ const HexagonSkeleton = () => {
 
 export type CoinCardProps = {
   icon: string | ReactNode
+  name: string
   symbol: string
   balance: string
+  heldValue?: string | null
   dollarValue: string
   loading?: boolean
+  noDollarSignPrefix?: boolean
   onClick?: () => void
 }
 
 export const CoinCard = ({
   icon,
+  name,
   symbol,
   balance,
+  heldValue,
   dollarValue,
   loading = false,
+  noDollarSignPrefix = false,
   onClick
 }: CoinCardProps) => {
   const { color, spacing } = useTheme()
@@ -64,37 +70,50 @@ export const CoinCard = ({
     <Flex
       alignItems='center'
       justifyContent='space-between'
-      p='xl'
+      p='l'
       flex={1}
       onClick={onClick}
       css={{
         cursor: onClick ? 'pointer' : 'default',
+        minWidth: 0,
         '&:hover': onClick ? { backgroundColor: color.background.surface2 } : {}
       }}
     >
-      <Flex alignItems='center' gap='m'>
+      <Flex alignItems='center' gap='l' css={{ minWidth: 0, flex: 1 }}>
         {loading ? <HexagonSkeleton /> : renderIcon()}
-        <Flex direction='column' gap='xs'>
+        <Flex direction='column' gap='2xs' flex={1} css={{ minWidth: 0 }}>
           {loading ? (
             <CoinCardSkeleton />
           ) : (
             <>
-              <Flex gap='xs'>
-                <Text variant='heading' size='l' color='default'>
+              <Text variant='heading' size='s' css={{ wordWrap: 'break-word' }}>
+                {name}
+              </Text>
+              <Flex gap='xs' alignItems='center' css={{ flexWrap: 'wrap' }}>
+                <Text variant='title' size='l' css={{ wordWrap: 'break-word' }}>
                   {balance}
                 </Text>
-                <Text variant='heading' size='l' color='subdued'>
-                  {symbol}
+                <Text
+                  variant='title'
+                  size='l'
+                  color='subdued'
+                  css={{ wordWrap: 'break-word' }}
+                >
+                  {noDollarSignPrefix ? symbol : `$${symbol}`}
                 </Text>
               </Flex>
-              <Text variant='heading' size='s' color='subdued'>
-                {dollarValue}
-              </Text>
             </>
           )}
         </Flex>
       </Flex>
-      {onClick ? <IconCaretRight size='l' color='subdued' /> : null}
+      <Flex alignItems='center' gap='m' css={{ flexShrink: 0 }}>
+        {!loading && (
+          <Text variant='title' size='l' color='default'>
+            {heldValue ?? dollarValue}
+          </Text>
+        )}
+        {onClick ? <IconCaretRight size='l' color='subdued' /> : null}
+      </Flex>
     </Flex>
   )
 }

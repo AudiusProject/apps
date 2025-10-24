@@ -84,14 +84,14 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
         color: color.text.white,
         background: color.secondary.s300,
         path: {
-          fill: color.text.staticWhite
+          fill: color.icon.white
         }
       },
       '&.destructive': {
         color: color.status.error,
         '&:hover': {
           background: color.status.error,
-          color: color.text.staticWhite
+          color: color.icon.white
         }
       }
     }
@@ -118,7 +118,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
           hideCloseButton={hideCloseButton}
           onClose={handlePopupClose}
           ref={ref}
-          title={title || ''}
+          title={title ?? ''}
           zIndex={zIndex}
           containerRef={containerRef}
           transformOrigin={transformOrigin}

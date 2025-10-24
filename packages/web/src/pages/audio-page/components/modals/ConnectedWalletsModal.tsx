@@ -1,8 +1,8 @@
 import { useCallback, useContext, useState } from 'react'
 
 import {
-  useConnectedWallets,
-  useRemoveConnectedWallet
+  useAssociatedWallets,
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
 import { useConnectedWalletsModal } from '@audius/common/store'
@@ -36,7 +36,7 @@ export const WALLET_COUNT_LIMIT = 5
 const messages = {
   title: 'Connected Wallets',
   description:
-    'Connect wallets to your account to display external $AUDIO balances and showcase NFT collectibles on your profile.',
+    'Connect wallets to your account to display external $AUDIO balances and showcase your artist coins',
   connect: 'Connect Wallet',
   limit: `Reached Limit of ${WALLET_COUNT_LIMIT} Connected Wallets.`,
   noConnected: 'You haven’t connected any wallets yet.',
@@ -72,12 +72,12 @@ export const ConnectedWalletsModal = () => {
     isPending,
     isError,
     error
-  } = useConnectedWallets()
+  } = useAssociatedWallets()
 
   const {
     mutateAsync: removeConnectedWalletAsync,
     isPending: isRemovePending
-  } = useRemoveConnectedWallet()
+  } = useRemoveAssociatedWallet()
 
   const handleRemoveClicked = useCallback(
     (wallet: { address: string; chain: Chain }) => {
@@ -235,7 +235,9 @@ export const ConnectedWalletsModal = () => {
             variant='primary'
             disabled={isConnectDisabled}
             isLoading={isConnectingWallets}
-            onClick={openAppKitModal}
+            onClick={() => {
+              openAppKitModal()
+            }}
             fullWidth
           >
             {messages.connect}

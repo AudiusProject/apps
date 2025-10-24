@@ -99,7 +99,9 @@ const DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS = 5_000
 const messages = {
   incompleteAccount:
     'Oops, it looks like your account was never fully completed!',
-  emailCheckFailed: 'Something has gone wrong, please try again later.'
+  emailCheckFailed: 'Something has gone wrong, please try again later.',
+  deactivatedAccount:
+    'Your account has been deactivated. Please contact support.'
 }
 
 function* getDefautFollowUserIds() {
@@ -193,7 +195,7 @@ function* validateHandle(
     yield* delay(1000) // Wait 1000ms to debounce user input
 
     // Call fetch user by handle and do not retry if the user is not created, it will
-    // return 404 and force discovery reselection
+    // return 404
     const user = yield* call(queryUserByHandle, handle)
     const handleInUse = !isEmpty(user)
     const handleCheckTimeout =
@@ -805,13 +807,21 @@ function* signUp() {
         function* () {
           yield* put(signOnActions.sendWelcomeEmail(name))
           yield* call(fetchAccountAsync, { shouldMarkAccountAsLoading: true })
-          yield* call(
-            waitForValue,
-            getFollowIds,
-            null,
-            (value: ID[]) => value.length > 0
-          )
-          yield* put(signOnActions.followArtists())
+          // Check if user has selected artists to follow
+          const selectedUserIds = yield* select(getFollowIds)
+          if (selectedUserIds && selectedUserIds.length > 0) {
+            // User has selected artists, wait for them and follow
+            yield* call(
+              waitForValue,
+              getFollowIds,
+              null,
+              (value: ID[]) => value.length > 0
+            )
+            yield* put(signOnActions.followArtists())
+          } else {
+            // User skipped artist selection, just follow default artists
+            yield* put(signOnActions.followArtists())
+          }
           yield* put(make(Name.CREATE_ACCOUNT_COMPLETE_CREATING, { handle }))
           yield* put(signOnActions.signUpSucceeded())
         },
@@ -926,7 +936,17 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
 
     const { user } = account
 
-    // Loging succeeded and we found a user, but it's missing name, likely
+    // Handle deactivated account
+    if (user.is_deactivated) {
+      yield* put(
+        make(Name.SIGN_IN_WITH_DEACTIVATED_ACCOUNT, { handle: user.handle })
+      )
+      yield* put(signOnActions.signInFailed('Account is deactivated'))
+      yield* put(toastActions.toast({ content: messages.deactivatedAccount }))
+      return
+    }
+
+    // Login succeeded and we found a user, but it's missing name, likely
     // due to incomplete signup
 
     if (!user.name) {

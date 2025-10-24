@@ -65,6 +65,15 @@ export const TipGatedConditions = z
   })
   .strict()
 
+export const TokenGatedConditions = z
+  .object({
+    tokenGate: z.object({
+      tokenMint: z.string(),
+      tokenAmount: z.number()
+    })
+  })
+  .strict()
+
 export const USDCPurchaseConditions = z
   .object({
     usdcPurchase: z.object({
@@ -109,7 +118,8 @@ export const UploadTrackMetadataSchema = z.object({
         CollectibleGatedConditions,
         FollowGatedConditions,
         TipGatedConditions,
-        USDCPurchaseConditions
+        USDCPurchaseConditions,
+        TokenGatedConditions
       ])
     )
     .nullable(),
@@ -120,7 +130,8 @@ export const UploadTrackMetadataSchema = z.object({
         CollectibleGatedConditions,
         FollowGatedConditions,
         TipGatedConditions,
-        USDCPurchaseConditions
+        USDCPurchaseConditions,
+        TokenGatedConditions
       ])
     )
     .nullable(),

@@ -6,7 +6,7 @@
   "description": "This repository contains the smart contracts being developed for the audius protocol.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AudiusProject/audius-protocol/tree/main/contracts"
+    "url": "https://github.com/AudiusProject/apps/tree/main/contracts"
   },
   "private": true,
   "scripts": {

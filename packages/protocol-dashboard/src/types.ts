@@ -15,7 +15,8 @@ export type BigNumber = BN
 
 export enum ServiceType {
   DiscoveryProvider = 'discovery-node',
-  ContentNode = 'content-node'
+  ContentNode = 'content-node',
+  Validator = 'validator'
 }
 
 export enum Permission {
@@ -45,7 +46,13 @@ export type ContentNode = {
   isDeregistered: boolean
 } & Node
 
-export type NodeService = DiscoveryProvider | ContentNode
+export type Validator = {
+  type: ServiceType.Validator
+  version: Version
+  isDeregistered: boolean
+} & Node
+
+export type NodeService = DiscoveryProvider | ContentNode | Validator
 
 export type ServiceProvider = {
   deployerCut: number
@@ -83,6 +90,7 @@ export type Operator = {
   discoveryProviders: Array<number>
   pendingDecreaseStakeRequest: GetPendingDecreaseStakeRequestResponse
   contentNodes: Array<number>
+  validators: Array<number>
   delegators: Array<Delegate>
   delegatedTotal: BN
   totalStakedFor: BN

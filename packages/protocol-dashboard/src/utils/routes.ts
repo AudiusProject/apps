@@ -21,6 +21,11 @@ export const NODES = '/nodes'
 export const SERVICES = '/services' // deprecated
 export const SERVICES_TITLE = 'Services Overview'
 
+export const NODES_VALIDATORS = '/nodes/validators'
+export const NODES_VALIDATOR = '/nodes/validators/:spID'
+export const NODES_VALIDATORS_TITLE = 'Validators'
+export const NODES_VALIDATOR_TITLE = 'Validator'
+
 export const NODES_DISCOVERY = '/nodes/discovery-node'
 export const SERVICES_DISCOVERY_PROVIDER = '/services/discovery-node' // deprecated
 export const SERVICES_DISCOVERY_PROVIDER_TITLE = 'Discovery Nodes'
@@ -83,7 +88,7 @@ export const AUDIUS_DAPP_URL =
   import.meta.env.VITE_AUDIUS_URL || 'https://audius.co'
 export const DOCS_URL = 'https://docs.audius.org/'
 export const REGISTER_NODE_DOCS_URL =
-  'https://docs.audius.org/node-operator/setup/overview'
+  'https://docs.openaudio.org/tutorials/running-a-node'
 export const COOLDOWN_PERIOD_DOCS_URL =
   'https://docs.audius.org/node-operator/staking/delegate#cooldown-period'
 
@@ -102,6 +107,10 @@ export const discoveryNodePage = (spID: number) => {
 
 export const contentNodePage = (spID: number) => {
   return `${NODES_CONTENT}/${spID}`
+}
+
+export const validatorPage = (spID: number) => {
+  return `${NODES_VALIDATORS}/${spID}`
 }
 
 export const proposalPage = (proposalId: number) => {
@@ -137,6 +146,8 @@ const routeTitles = {
   [NODES_CONTENT_NODE]: SERVICES_CONTENT_NODE_TITLE,
   [NODES_CONTENT]: SERVICES_CONTENT_TITLE,
   [NODES_DISCOVERY_NODE]: SERVICES_DISCOVERY_PROVIDER_NODE_TITLE,
+  [NODES_VALIDATORS]: NODES_VALIDATORS_TITLE,
+  [NODES_VALIDATOR]: NODES_VALIDATOR_TITLE,
   [API]: API_TITLE,
   [API_LEADERBOARD]: API_LEADERBOARD_TITLE
 }

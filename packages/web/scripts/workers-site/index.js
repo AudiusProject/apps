@@ -62,7 +62,7 @@ function checkIsCrawler(val) {
   return crawlerTest.test(val)
 }
 
-async function getMetadata(pathname, discoveryNode) {
+async function getMetadata(pathname, apiEndpoint) {
   if (pathname.startsWith('/scripts')) {
     return { metadata: null, name: null }
   }
@@ -72,37 +72,37 @@ async function getMetadata(pathname, discoveryNode) {
     return { metadata: null, name: null }
   }
 
-  let discoveryRequestPath
+  let apiRequestPath
   switch (route.name) {
     case 'user': {
       const { handle } = route.params
       if (!handle) return { metadata: null, name: null }
-      discoveryRequestPath = `v1/users/handle/${handle}`
+      apiRequestPath = `v1/users/handle/${handle}`
       break
     }
     case 'track': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      discoveryRequestPath = `v1/tracks?permalink=${handle + '/' + title}`
+      apiRequestPath = `v1/tracks?permalink=${handle + '/' + title}`
       break
     }
     case 'playlist': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      discoveryRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
+      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
       break
     }
     case 'album': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      discoveryRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
+      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
       break
     }
     default:
       return { metadata: null, name: null }
   }
   try {
-    const res = await fetch(`${discoveryNode}/${discoveryRequestPath}`)
+    const res = await fetch(`${apiEndpoint}/${apiRequestPath}`)
     if (res.status !== 200) {
       throw new Error(res.status)
     }
@@ -134,16 +134,16 @@ class SEOHandlerBody {
 }
 
 class SEOHandlerHead {
-  constructor(pathname, discoveryNode, host) {
+  constructor(pathname, apiEndpoint, host) {
     self.pathname = pathname
-    self.discoveryNode = discoveryNode
+    self.apiEndpoint = apiEndpoint
     self.host = host
   }
 
   async element(element) {
     const { metadata, name } = await getMetadata(
       self.pathname,
-      self.discoveryNode
+      self.apiEndpoint
     )
 
     if (!metadata || !name || !metadata.data || metadata.data.length === 0) {
@@ -230,7 +230,7 @@ class SEOHandlerHead {
   }
 }
 
-async function getOEmbedResponse(url, discoveryNode) {
+async function getOEmbedResponse(url, apiEndpoint) {
   // Parse the URL query parameter to get the resource URL pathname
   const params = new URLSearchParams(url.search)
   const oembedUrl = params.get('url')
@@ -242,7 +242,7 @@ async function getOEmbedResponse(url, discoveryNode) {
   // Get the metadata from the pathname
   const { metadata, name: entityType } = await getMetadata(
     pathname,
-    discoveryNode
+    apiEndpoint
   )
 
   // Ensure https
@@ -315,20 +315,18 @@ async function handleEvent(request, env, ctx) {
     return Response.redirect(url.origin, 302)
   }
 
-  const discoveryNodes = env.DISCOVERY_NODES.split(',')
-  const discoveryNode =
-    discoveryNodes[Math.floor(Math.random() * discoveryNodes.length)]
+  const apiEndpoint = env.API_URL
 
   const isSitemap = pathname.startsWith('/sitemaps')
   if (isSitemap) {
-    const destinationURL = discoveryNode + pathname + search + hash
+    const destinationURL = apiEndpoint + pathname + search + hash
     const newRequest = new Request(destinationURL, request)
     return await fetch(newRequest)
   }
 
   const isOEmbed = pathname.startsWith('/oembed')
   if (isOEmbed) {
-    return await getOEmbedResponse(url, discoveryNode)
+    return await getOEmbedResponse(url, apiEndpoint)
   }
 
   const userAgent = request.headers.get('User-Agent') || ''
@@ -386,7 +384,7 @@ async function handleEvent(request, env, ctx) {
         const asset = await getAsset(request, env, ctx, options)
 
         const rewritten = new HTMLRewriter()
-          .on('head', new SEOHandlerHead(pathname, discoveryNode, url.host))
+          .on('head', new SEOHandlerHead(pathname, apiEndpoint, url.host))
           .on('body', new SEOHandlerBody())
           .transform(asset)
 

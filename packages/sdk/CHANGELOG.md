@@ -1,5 +1,43 @@
 # @audius/sdk
 
+## 11.1.0
+
+### Minor Changes
+
+- 8b3380f: Add all time coin stats to coins api responses
+
+### Patch Changes
+
+- a6d5e9d: Add validator type and regen bootstrap list
+- c3ffa17: remove dbc_pool from createCoin
+- 86198ae: add coin_flair_mint field to user response
+- Updated dependencies [284302b]
+  - @audius/spl@2.1.0
+
+## 11.0.1
+
+### Patch Changes
+
+- 1c969f6: fix comms requests failing due to extra /v1 prefix
+
+## 11.0.0
+
+### Major Changes
+
+- 51b2a0f: Remove DiscoveryNodeSelector and related functionality
+- f5e607a: removes unsupported nft-gated-signatures endpoint
+
+### Minor Changes
+
+- 4a21db9: Add RewardsAPI
+- 1443320: add insights to coins endpoints
+
+### Patch Changes
+
+- 4a21db9: Remove membersChange24hrPercent
+- 9c3ede0: Add token gate functionality with TokenGate, ExtendedTokenGate, and updated coin creation API
+- f5b304c: Fix oauth login when no discovery node
+
 ## 10.0.0
 
 ### Major Changes

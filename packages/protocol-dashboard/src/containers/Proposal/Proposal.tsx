@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 
-import ReactMarkdown from 'react-markdown'
+import Markdown from 'react-markdown'
 import { useParams } from 'react-router-dom'
-import gfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import remarkGfm from 'remark-gfm'
 
 import Loading from 'components/Loading'
 import Page from 'components/Page'
@@ -71,9 +72,30 @@ const Proposal = () => {
         </div>
         {proposal ? (
           <div className={styles.descriptionBody}>
-            <ReactMarkdown plugins={[gfm]} linkTarget='_blank'>
+            <Markdown
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              components={{
+                a: ({ node, ...props }) => (
+                  <a {...props} target='_blank' rel='noopener noreferrer' />
+                ),
+                ul: ({ node, ...props }) => (
+                  <ul
+                    style={{
+                      listStyleType: 'disc',
+                      paddingLeft: '1.5rem',
+                      marginLeft: '1rem',
+                      marginBottom: '1rem'
+                    }}
+                    {...props}
+                  />
+                ),
+                p: ({ node, ...props }) => (
+                  <p style={{ marginBottom: '1rem' }} {...props} />
+                )
+              }}
+            >
               {proposal.description || ''}
-            </ReactMarkdown>
+            </Markdown>
           </div>
         ) : (
           <Loading className={styles.loading} />

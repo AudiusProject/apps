@@ -7,6 +7,7 @@ import { AlbumTrackRemoveConfirmationModalState } from './album-track-remove-con
 import { AnnouncementModalState } from './announcement-modal'
 import { ArtistPickModalState } from './artist-pick-modal'
 import { BuySellModalState } from './buy-sell-modal'
+import { CoinSuccessModalState } from './coin-success-modal'
 import { CoinflowOnrampModalState } from './coinflow-onramp-modal'
 import { CoinflowWithdrawModalState } from './coinflow-withdraw-modal'
 import { ChatBlastModalState } from './create-chat-blast-modal'
@@ -49,12 +50,10 @@ export type Modals =
   | 'APIRewardsExplainer'
   | 'TransferAudioMobileWarning'
   | 'MobileConnectWalletsDrawer'
-  | 'MobileEditCollectiblesDrawer'
   | 'Share'
   | 'HCaptcha'
   | 'BrowserPushPermissionConfirmation'
   | 'AudioBreakdown'
-  | 'CollectibleDetails'
   | 'DeactivateAccountConfirmation'
   | 'FeedFilter'
   | 'PurchaseVendor'
@@ -115,7 +114,10 @@ export type Modals =
   | 'BuySellModal'
   | 'HostRemixContest'
   | 'ReceiveTokensModal'
+  | 'SendTokensModal'
+  | 'ArtistCoinDetailsModal'
   | 'FinalizeWinnersConfirmation'
+  | 'CoinSuccessModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState
@@ -152,9 +154,20 @@ export type StatefulModalsState = {
   BuySellModal: BuySellModalState
   HostRemixContest: HostRemixContestModalState
   ReceiveTokensModal: ReceiveTokensModalState
+  SendTokensModal: SendTokensModalState
+  CoinSuccessModal: CoinSuccessModalState
+  ArtistCoinDetailsModal: ArtistCoinDetailsModalState
 }
 
 export type ReceiveTokensModalState = BaseModalState & {
+  mint?: string
+}
+
+export type SendTokensModalState = BaseModalState & {
+  mint?: string
+}
+
+export type ArtistCoinDetailsModalState = BaseModalState & {
   mint?: string
 }
 

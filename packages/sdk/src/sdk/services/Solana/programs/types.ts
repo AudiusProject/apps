@@ -167,4 +167,4 @@ export const BuildTransactionSchema = z
   })
   .strict()
 
-export type BuildTransactionRequest = z.infer<typeof BuildTransactionSchema>
+export type BuildTransactionRequest = z.input<typeof BuildTransactionSchema>

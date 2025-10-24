@@ -2,6 +2,7 @@ import { ComponentType, lazy } from 'react'
 
 import { Modals as ModalTypes } from '@audius/common/store'
 
+import { CoinSuccessModal } from 'components/CoinSuccessModal'
 import { AddCashModal } from 'components/add-cash-modal/AddCashModal'
 import AddToCollectionModal from 'components/add-to-collection/desktop/AddToCollectionModal'
 import { AiAttributionSettingsModal } from 'components/ai-attribution-settings-modal'
@@ -13,11 +14,9 @@ import { BuyAudioModal } from 'components/buy-audio-modal/BuyAudioModal'
 import { BuyAudioRecoveryModal } from 'components/buy-audio-modal/BuyAudioRecoveryModal'
 import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
-import CollectibleDetailsModal from 'components/collectibles/components/CollectibleDetailsModal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
 import DeletePlaylistConfirmationModal from 'components/delete-playlist-confirmation-modal/DeletePlaylistConfirmationModal'
 import { DeleteTrackConfirmationModal } from 'components/delete-track-confirmation-modal/DeleteTrackConfirmationModal'
-import DiscoveryNodeSelection from 'components/discovery-node-selection/DiscoveryNodeSelection'
 import { DownloadTrackArchiveModal } from 'components/download-track-archive-modal/DownloadTrackArchiveModal'
 import { DuplicateAddConfirmationModal } from 'components/duplicate-add-confirmation-modal'
 import { EarlyReleaseConfirmationModal } from 'components/early-release-confirmation-modal'
@@ -42,6 +41,7 @@ import { ReplaceTrackConfirmationModal } from 'components/replace-track-confirma
 import { ReplaceTrackProgressModal } from 'components/replace-track-progress-modal/ReplaceTrackProgressModal'
 import { ClaimAllRewardsModal } from 'components/rewards/modals/ClaimAllRewardsModal'
 import TopAPIModal from 'components/rewards/modals/TopAPI'
+import { SendTokensModal } from 'components/send-tokens-modal'
 import { TipAudioModal } from 'components/tipping/tip-audio/TipAudioModal'
 import ConnectedMobileOverflowModal from 'components/track-overflow-modal/ConnectedMobileOverflowModal'
 import { TransactionDetailsModal } from 'components/transaction-details-modal'
@@ -136,7 +136,8 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   ConnectedWallets: ConnectedWalletsModal,
   DownloadTrackArchive: DownloadTrackArchiveModal,
   BuySellModal,
-  ReceiveTokensModal
+  ReceiveTokensModal,
+  SendTokensModal
 }
 
 const commonModals = Object.entries(commonModalsMap) as [
@@ -152,7 +153,6 @@ const Modals = () => {
       <PasswordResetModal />
       <FirstUploadModal />
       <UnsavedChangesDialog />
-      <CollectibleDetailsModal />
       {commonModals.map(([modalName, Modal]) => {
         return <AppModal key={modalName} name={modalName} modal={Modal} />
       })}
@@ -168,11 +168,11 @@ const Modals = () => {
           <AppCTAModal />
           {/* dev-mode hot-key modals */}
           <ConfirmerPreview />
-          <DiscoveryNodeSelection />
           <FeatureFlagOverrideModal />
         </>
       )}
       <TipAudioModal />
+      <CoinSuccessModal />
     </>
   )
 }

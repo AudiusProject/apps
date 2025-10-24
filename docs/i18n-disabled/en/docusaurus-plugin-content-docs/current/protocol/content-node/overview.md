@@ -8,7 +8,7 @@ sidebar_position: 1
 An Audius Content Node is a service that stores and maintains the availability of all content across the Audius network.
 Content types include user, track, and playlist metadata, images and artwork, and audio content.
 
-[github repository](https://github.com/AudiusProject/audius-protocol/tree/main/creator-node)
+[github repository](https://github.com/AudiusProject/apps/tree/main/creator-node)
 
 [registered content nodes](https://dashboard.audius.org/#/services/content-node)
 

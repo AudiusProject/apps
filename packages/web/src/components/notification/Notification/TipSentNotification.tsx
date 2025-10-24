@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 
-import { useTokenPrice, useUser } from '@audius/common/api'
+import { useArtistCoin, useUser } from '@audius/common/api'
 import { useUIAudio } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
-import { TipSendNotification, TOKEN_LISTING_MAP } from '@audius/common/store'
+import { TipSendNotification } from '@audius/common/store'
 
 import { make } from 'common/store/analytics/actions'
 import { XShareButton } from 'components/x-share-button/XShareButton'
@@ -20,8 +20,6 @@ import { ProfilePicture } from './components/ProfilePicture'
 import { UserNameLink } from './components/UserNameLink'
 import { IconTip } from './components/icons'
 import { useGoToProfile } from './useGoToProfile'
-
-const AUDIO_TOKEN_ID = TOKEN_LISTING_MAP.AUDIO.address
 
 const messages = {
   title: 'Your Tip Was Sent!',
@@ -41,9 +39,9 @@ export const TipSentNotification = (props: TipSentNotificationProps) => {
   const { notification } = props
   const { amount, timeLabel, isViewed } = notification
   const uiAmount = useUIAudio(amount)
-  const { data: tokenPriceData } = useTokenPrice(AUDIO_TOKEN_ID)
+  const { data: tokenPriceData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
 
-  const tokenPrice = tokenPriceData?.price
+  const tokenPrice = tokenPriceData?.price?.toString()
 
   const { data: user } = useUser(notification.entityId)
   const handleClick = useGoToProfile(user)

@@ -45,6 +45,18 @@ export interface UserCoin {
      */
     ownerId: string;
     /**
+     * URL to the coin's logo image
+     * @type {string}
+     * @memberof UserCoin
+     */
+    logoUri?: string | null;
+    /**
+     * Whether the coin has a Discord server
+     * @type {boolean}
+     * @memberof UserCoin
+     */
+    hasDiscord: boolean;
+    /**
      * The balance of the coin in the user's account (in wei)
      * @type {number}
      * @memberof UserCoin
@@ -67,6 +79,7 @@ export function instanceOfUserCoin(value: object): value is UserCoin {
     isInstance = isInstance && "ticker" in value && value["ticker"] !== undefined;
     isInstance = isInstance && "decimals" in value && value["decimals"] !== undefined;
     isInstance = isInstance && "ownerId" in value && value["ownerId"] !== undefined;
+    isInstance = isInstance && "hasDiscord" in value && value["hasDiscord"] !== undefined;
     isInstance = isInstance && "balance" in value && value["balance"] !== undefined;
     isInstance = isInstance && "balanceUsd" in value && value["balanceUsd"] !== undefined;
 
@@ -87,6 +100,8 @@ export function UserCoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'ticker': json['ticker'],
         'decimals': json['decimals'],
         'ownerId': json['owner_id'],
+        'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
+        'hasDiscord': json['has_discord'],
         'balance': json['balance'],
         'balanceUsd': json['balance_usd'],
     };
@@ -105,6 +120,8 @@ export function UserCoinToJSON(value?: UserCoin | null): any {
         'ticker': value.ticker,
         'decimals': value.decimals,
         'owner_id': value.ownerId,
+        'logo_uri': value.logoUri,
+        'has_discord': value.hasDiscord,
         'balance': value.balance,
         'balance_usd': value.balanceUsd,
     };

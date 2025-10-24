@@ -7,7 +7,7 @@ view their registered services & which ones are out date, and explore all audius
 ## Running the Application
 The application requires ethereum contracts.
 You can run `npm run start:stage` which will use the contracts that are on the staging environment.
-If you want to have contracts running locally, you'll also need to run this [setup script](https://github.com/AudiusProject/audius-protocol/blob/master/service-commands/scripts/setup.js) e.g. `node setup.js run eth-contracts up`
+If you want to have contracts running locally, you'll also need to run this [setup script](https://github.com/AudiusProject/apps/blob/master/service-commands/scripts/setup.js) e.g. `node setup.js run eth-contracts up`
 
 To start:
 1. Install Dependencies `npm install`

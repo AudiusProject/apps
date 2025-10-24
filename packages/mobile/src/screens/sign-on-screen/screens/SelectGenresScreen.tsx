@@ -17,6 +17,7 @@ import { make, track } from 'app/services/analytics'
 import { EventNames } from 'app/types/analytics'
 
 import { ReadOnlyAccountHeader } from '../components/AccountHeader'
+import { SkipButton } from '../components/SkipButton'
 import { Heading, PageFooter, gutterSize } from '../components/layout'
 import type { SignOnScreenParamList } from '../types'
 import { useTrackScreen } from '../utils/useTrackScreen'
@@ -128,7 +129,10 @@ export const SelectGenresScreen = () => {
             </Flex>
           </Paper>
         </ScrollView>
-        <PageFooter />
+        <PageFooter
+          buttonProps={{ disabled: false }}
+          postfix={<SkipButton />}
+        />
       </View>
     </Formik>
   )

@@ -15,7 +15,7 @@ import {
 
 beforeEach(async () => {
   // run with npm run test with audius-compose up
-  config.redisUrl = 'redis://audius-protocol-discovery-provider-redis-1/00'
+  config.redisUrl = 'redis://audius-discovery-provider-redis-1/00'
   const redis = await getRedisConnection()
   for await (const key of redis.scanIterator()) {
     if (

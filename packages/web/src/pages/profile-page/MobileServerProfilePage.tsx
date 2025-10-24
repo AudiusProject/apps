@@ -1,5 +1,5 @@
 import { useProfileUser } from '@audius/common/src/api/tan-query/users/useProfileUser'
-import { formatCount } from '@audius/common/src/utils/formatUtil'
+import { formatCount } from '@audius/common/src/utils/decimal'
 import BadgeArtist from '@audius/harmony/src/assets/icons/ArtistBadge.svg'
 import IconDonate from '@audius/harmony/src/assets/icons/Donate.svg'
 import IconLink from '@audius/harmony/src/assets/icons/Link.svg'

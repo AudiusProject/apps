@@ -1,6 +1,6 @@
 {
   "name": "@audius/spl",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "The core Typescript mappings to the Audius Solana Programs",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/audius-protocol/tree/main/packages/spl"
+    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/spl"
   },
   "author": "Audius",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/AudiusProject/audius-protocol/issues"
+    "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/audius-protocol/tree/main/packages/spl",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/spl",
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
     "@noble/hashes": "1.4.0",

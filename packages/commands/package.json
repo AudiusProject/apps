@@ -2,7 +2,7 @@
   "name": "@audius/commands",
   "version": "1.0.31",
   "private": true,
-  "description": "Collection of command useful for debugging audius-protocol",
+  "description": "Collection of command useful for debugging",
   "main": "dist/index.js",
   "bin": {
     "audius-cmd": "dist/index.js"

@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "1.5.148",
+  "version": "1.5.157",
   "workspaces": [
     "packages/*",
     "packages/discovery-provider/plugins/pedalboard/apps/*",
@@ -117,6 +117,7 @@
     "@babel/types": "7.27.1",
     "@changesets/cli": "2.27.1",
     "@escape.tech/mookme": "2.4.1",
+    "@metaplex-foundation/umi": "1.2.0",
     "@redux-devtools/remote": "0.8.0",
     "@types/express": "^4.17.21",
     "@wagmi/core": "2.16.7",

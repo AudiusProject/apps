@@ -1,8 +1,9 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
-  createJupiterApiClient,
+  Configuration,
   Instruction,
   QuoteResponse,
+  SwapApi,
   SwapMode
 } from '@jup-ag/api'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
@@ -22,12 +23,17 @@ export type JupiterTokenSymbol = keyof typeof TOKEN_LISTING_MAP
 
 export const DEFAULT_MAX_ACCOUNTS = 20
 export const MAX_ALLOWED_ACCOUNTS = 64
+const JUP_BASE_PATH = 'https://jup.audius.co/swap/v1'
 
-let _jup: ReturnType<typeof createJupiterApiClient>
+let _jup: SwapApi
 
 const initJupiter = () => {
   try {
-    return createJupiterApiClient()
+    return new SwapApi(
+      new Configuration({
+        basePath: JUP_BASE_PATH
+      })
+    )
   } catch (e) {
     console.error('Jupiter failed to initialize', e)
     throw e
@@ -52,14 +58,14 @@ export type JupiterQuoteParams = {
   onlyDirectRoutes?: boolean
 }
 
-// Add support for mint-based parameters for the useSwapTokens hook
+// Add support for mint-based parameters for the useSwapCoins hook
 export type JupiterMintQuoteParams = {
   inputMint: string
   outputMint: string
   inputDecimals: number
   outputDecimals: number
   amountUi: number
-  slippageBps: number
+  slippageBps?: number
   swapMode?: SwapMode
   onlyDirectRoutes?: boolean
   maxAccounts?: number
@@ -89,7 +95,7 @@ export type JupiterQuoteResult = {
 
 /**
  * Gets a quote from Jupiter using mint addresses directly
- * This version is used by the useSwapTokens hook
+ * This version is used by the useSwapCoins hook
  */
 export const getJupiterQuoteByMint = async ({
   inputMint,
@@ -114,7 +120,8 @@ export const getJupiterQuoteByMint = async ({
     slippageBps,
     swapMode,
     onlyDirectRoutes,
-    maxAccounts
+    maxAccounts,
+    dynamicSlippage: !slippageBps
   })
 
   if (!quote) {

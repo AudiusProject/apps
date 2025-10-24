@@ -62,7 +62,8 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     paddingVertical: spacing(4)
   },
   listItemContent: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   radio: {
     marginRight: spacing(4)

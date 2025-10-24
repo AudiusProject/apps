@@ -205,7 +205,10 @@ export const sendTransactionWithRetries = async ({
         const confirmationRes = await connection.getSignatureStatus(
           confirmationStrategy.signature
         )
-        if (confirmationRes.value?.confirmationStatus === commitment) {
+        if (
+          confirmationRes.value?.confirmationStatus === commitment &&
+          !confirmationRes.value?.err
+        ) {
           success = true
           logger.info(
             { signature: confirmationStrategy.signature },

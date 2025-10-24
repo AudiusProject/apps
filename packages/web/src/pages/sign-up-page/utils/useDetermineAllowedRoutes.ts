@@ -67,33 +67,37 @@ export const useDetermineAllowedRoute = () => {
       // At this point their identity account is either fully created or being created in the background
       // Either way the user can't go back any more
       allowedRoutes = [SignUpPath.selectGenres]
+      // Always allow loading step as users can skip genres and artists
+      allowedRoutes.push(SignUpPath.loading)
 
       if (isFastReferral) {
         allowedRoutes.push(SignUpPath.selectArtists)
         allowedRoutes.push(SignUpPath.appCta)
         allowedRoutes.push(SignUpPath.completedRedirect)
         allowedRoutes.push(SignUpPath.completedReferrerRedirect)
-        allowedRoutes.push(SignUpPath.loading)
       }
 
       // TODO: These checks below here may need to fall under a different route umbrella separate from sign up
-      if (signUpState.genres && signUpState.genres.length > 0) {
-        // Already have genres selected
-        allowedRoutes.push(SignUpPath.selectArtists)
+      // Always allow SelectArtistsPage after SelectGenresPage (even if no genres selected)
+      allowedRoutes.push(SignUpPath.selectArtists)
 
-        if (signUpState.selectedUserIds?.length >= 3 || isDevEnvironment) {
-          // Already have 3 artists followed, ready to finish sign up
-          allowedRoutes.push(SignUpPath.appCta)
+      // Allow completion pages if user has selected artists, OR account creation has started/completed
+      const hasCompletedSelection =
+        (signUpState.genres && signUpState.genres.length > 0) ||
+        (signUpState.selectedUserIds &&
+          signUpState.selectedUserIds.length > 0) ||
+        isDevEnvironment
 
-          if (
-            signUpState.status === EditingStatus.SUCCESS ||
-            isAccountComplete
-          ) {
-            allowedRoutes.push(SignUpPath.completedRedirect)
-          } else {
-            allowedRoutes.push(SignUpPath.loading)
-          }
-        }
+      const accountCreationStarted =
+        signUpState.status === EditingStatus.LOADING ||
+        signUpState.status === EditingStatus.SUCCESS
+
+      if (hasCompletedSelection || accountCreationStarted) {
+        // User has either made selections or account creation has started/completed
+        allowedRoutes.push(SignUpPath.appCta)
+        // Allow completed redirect route once account creation has started
+        // The redirect page will wait for account to be ready
+        allowedRoutes.push(SignUpPath.completedRedirect)
       }
     } else {
       // Still before the "has account" phase

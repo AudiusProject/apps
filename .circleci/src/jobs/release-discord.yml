@@ -8,7 +8,7 @@ steps:
       command: |
         export VERSION="$(jq -r .version packages/discovery-provider/.version.json)"
         curl -d '{
-          "content": "New protocol release ('"${VERSION}"') is available\n• [Changelogs](<https://github.com/AudiusProject/audius-protocol/releases/tag/protocol-v'"${VERSION}"'>)",
+          "content": "New protocol release ('"${VERSION}"') is available\n• [Changelogs](<https://github.com/AudiusProject/apps/releases/tag/protocol-v'"${VERSION}"'>)",
           "embeds": null,
           "attachments": []
         }' \

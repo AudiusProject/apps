@@ -1,16 +1,12 @@
-import { ShareToTwitter, User } from '@audius/common/models'
+import { ShareToTwitter } from '@audius/common/models'
 import { ShareContent } from '@audius/common/store'
+import { getXShareHandle } from '@audius/common/utils'
 
 import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
 
 import { messages } from './messages'
 
 type ShareToTwitterEvent = Omit<ShareToTwitter, 'eventName' | 'source'>
-
-const getXShareHandle = (user: User) => {
-  const xHandle = user.twitter_handle
-  return xHandle ? `@${xHandle}` : user.handle
-}
 
 type ShareMessageConfig = Pick<
   typeof messages,

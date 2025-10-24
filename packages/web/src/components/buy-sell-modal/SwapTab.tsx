@@ -1,17 +1,17 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import { buySellMessages } from '@audius/common/messages'
-import { TokenInfo, useTokenSwapForm, BuySellTab } from '@audius/common/store'
-import { Flex, Skeleton, Text } from '@audius/harmony'
+import { BuySellTab, CoinInfo, useCoinSwapForm } from '@audius/common/store'
+import { Flex, Skeleton } from '@audius/harmony'
 import { Form, FormikProvider } from 'formik'
 
 import { TokenAmountSection } from './TokenAmountSection'
 import type {
-  TokenPricing,
-  UIConfiguration,
   InputConfiguration,
+  SwapCallbacks,
+  TokenPricing,
   TokenSelection,
-  SwapCallbacks
+  UIConfiguration
 } from './types'
 
 const messages = {
@@ -34,12 +34,14 @@ const SwapFormSkeleton = () => (
 )
 
 export type SwapTabProps = {
-  inputToken: TokenInfo
-  outputToken: TokenInfo
+  inputToken: CoinInfo
+  outputToken: CoinInfo
   outputBalance?: number
   inputIsDefault?: boolean
   outputIsDefault?: boolean
   tab?: BuySellTab
+  onChangeSwapDirection?: () => void
+  initialTicker?: string
 } & TokenPricing &
   UIConfiguration &
   InputConfiguration &
@@ -68,8 +70,23 @@ export const SwapTab = ({
   availableOutputTokens,
   onInputTokenChange,
   onOutputTokenChange,
-  outputBalance
+  outputBalance,
+  onChangeSwapDirection,
+  initialTicker
 }: SwapTabProps) => {
+  // If initialTicker is provided, try to find the token and use it as the output token
+  const resolvedOutputToken = useMemo(() => {
+    if (initialTicker && availableOutputTokens) {
+      const tokenByTicker = availableOutputTokens.find(
+        (token) => token.symbol === initialTicker
+      )
+      if (tokenByTicker) {
+        return tokenByTicker
+      }
+    }
+    return outputToken
+  }, [initialTicker, availableOutputTokens, outputToken])
+
   const {
     formik,
     inputAmount,
@@ -81,9 +98,9 @@ export const SwapTab = ({
     displayExchangeRate,
     handleInputAmountChange,
     handleMaxClick
-  } = useTokenSwapForm({
-    inputToken,
-    outputToken,
+  } = useCoinSwapForm({
+    inputCoin: inputToken,
+    outputCoin: resolvedOutputToken,
     min,
     max,
     onTransactionDataChange,
@@ -142,11 +159,12 @@ export const SwapTab = ({
                 onTokenChange={
                   !inputSectionIsDefault ? onInputTokenChange : undefined
                 }
+                onChangeSwapDirection={onChangeSwapDirection}
               />
 
               <TokenAmountSection
                 title={messages.youReceive}
-                tokenInfo={outputToken}
+                tokenInfo={resolvedOutputToken}
                 isInput={false}
                 amount={outputAmount}
                 availableBalance={outputBalance ?? 0}
@@ -163,23 +181,8 @@ export const SwapTab = ({
                 onTokenChange={
                   !outputSectionIsDefault ? onOutputTokenChange : undefined
                 }
+                onChangeSwapDirection={onChangeSwapDirection}
               />
-
-              {/* Show exchange rate for convert flow */}
-              {displayExchangeRate ? (
-                <Flex p='l' justifyContent='flex-start'>
-                  <Text variant='body' size='s' color='subdued'>
-                    {messages.exchangeRateLabel}&nbsp;
-                  </Text>
-                  <Text variant='body' size='s' color='default'>
-                    {messages.exchangeRateValue(
-                      inputToken.symbol,
-                      outputToken.symbol,
-                      displayExchangeRate
-                    )}
-                  </Text>
-                </Flex>
-              ) : null}
             </>
           )}
         </Flex>

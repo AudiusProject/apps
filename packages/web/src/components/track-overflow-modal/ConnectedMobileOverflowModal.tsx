@@ -35,7 +35,6 @@ import { Dispatch } from 'redux'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
-import { collectibleDetailsPage } from 'utils/route'
 
 import MobileOverflowModal from './components/MobileOverflowModal'
 
@@ -86,7 +85,6 @@ const ConnectedMobileOverflowModal = ({
   publishPlaylist,
   visitTrackPage,
   visitArtistPage,
-  visitCollectiblePage,
   visitPlaylistPage,
   follow,
   unfollow,
@@ -135,7 +133,6 @@ const ConnectedMobileOverflowModal = ({
     onVisitTrackPage,
     onVisitArtistPage,
     onVisitCollectionPage,
-    onVisitCollectiblePage,
     onFollow,
     onUnfollow,
     onPurchase
@@ -152,7 +149,6 @@ const ConnectedMobileOverflowModal = ({
     onDeletePlaylist?: () => void
     onVisitTrackPage?: () => void
     onVisitArtistPage?: () => void
-    onVisitCollectiblePage?: () => void
     onVisitCollectionPage?: () => void
     onFollow?: () => void
     onUnfollow?: () => void
@@ -171,9 +167,6 @@ const ConnectedMobileOverflowModal = ({
           onAddToAlbum: () => addToCollection('album', id as ID, track.title),
           onAddToPlaylist: () =>
             addToCollection('playlist', id as ID, track.title),
-          onVisitCollectiblePage: () => {
-            visitCollectiblePage(user.handle, id as string)
-          },
           onVisitTrackPage: () =>
             track.permalink
               ? visitTrackPage(track.permalink)
@@ -208,8 +201,6 @@ const ConnectedMobileOverflowModal = ({
               collection.permalink,
               collection.is_album
             ),
-          onVisitCollectiblePage: () =>
-            visitCollectiblePage(user.handle, id as string),
           onEditPlaylist: () => navigate(`${collection.permalink}/edit`),
           onDeletePlaylist: collection.is_album
             ? () => {}
@@ -249,7 +240,6 @@ const ConnectedMobileOverflowModal = ({
       onDeletePlaylist={onDeletePlaylist}
       onVisitArtistPage={onVisitArtistPage}
       onVisitCollectionPage={onVisitCollectionPage}
-      onVisitCollectiblePage={onVisitCollectiblePage}
       onFollow={onFollow}
       onUnfollow={onUnfollow}
       onPurchase={onPurchase}
@@ -312,9 +302,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     ) => dispatch(openAddToCollection(collectionType, trackId, title)),
     visitTrackPage: (permalink: string) => dispatch(push(permalink)),
     visitArtistPage: (handle: string) => dispatch(push(profilePage(handle))),
-    visitCollectiblePage: (handle: string, id: string) => {
-      dispatch(push(collectibleDetailsPage(handle, id)))
-    },
     visitPlaylistPage: (
       playlistId: ID,
       handle: string,

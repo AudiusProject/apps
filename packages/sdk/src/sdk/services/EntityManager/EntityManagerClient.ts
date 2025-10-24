@@ -143,8 +143,7 @@ export class EntityManagerClient implements EntityManagerService {
   }
 
   /**
-   * Confirms a write by polling for the block to be indexed by the selected
-   * discovery node
+   * Confirms a write by polling for the block to be indexed by API
    */
   public async confirmWrite({
     blockHash,

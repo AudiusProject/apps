@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { UID, ID, Collectible, Feature } from '../../models'
+import { UID, ID, Feature } from '../../models'
 import { Maybe, Nullable } from '../../utils'
 
 import { PlaybackRate, PlayerBehavior } from './types'
@@ -9,8 +9,6 @@ export type PlayerState = {
   // Identifiers for the audio that's playing.
   uid: UID | null
   trackId: ID | null
-
-  collectible: Collectible | null
 
   // Keep 'playing' in the store separately from the audio
   // object to allow components to subscribe to changes.
@@ -47,8 +45,6 @@ export const initialState: PlayerState = {
   uid: null,
   trackId: null,
 
-  collectible: null,
-
   playing: false,
   previewing: false,
   buffering: false,
@@ -72,15 +68,6 @@ type PlaySucceededPayload = {
   isPreview?: boolean
   uid?: Nullable<UID>
   trackId?: ID
-}
-
-type PlayCollectiblePayload = {
-  collectible: Collectible
-  onEnd?: (...args: any) => any
-}
-
-type PlayCollectibleSucceededPayload = {
-  collectible: Collectible
 }
 
 type PausePayload = Maybe<{
@@ -139,24 +126,8 @@ const slice = createSlice({
       if (!uid || !trackId) return
       state.uid = uid || state.uid
       state.trackId = trackId || state.trackId
-      state.collectible = null
       state.counter = state.counter + 1
       state.previewing = !!action.payload.isPreview
-    },
-    playCollectible: (
-      _state,
-      _action: PayloadAction<PlayCollectiblePayload>
-    ) => {},
-    playCollectibleSucceeded: (
-      state,
-      action: PayloadAction<PlayCollectibleSucceededPayload>
-    ) => {
-      const { collectible } = action.payload
-      state.previewing = false
-      state.playing = true
-      state.uid = null
-      state.trackId = null
-      state.collectible = collectible || state.collectible
     },
     pause: (state, _action: PayloadAction<PausePayload>) => {
       state.playing = false
@@ -203,8 +174,6 @@ const slice = createSlice({
 export const {
   play,
   playSucceeded,
-  playCollectible,
-  playCollectibleSucceeded,
   pause,
   stop,
   setBuffering,

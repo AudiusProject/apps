@@ -82,13 +82,13 @@ describe('formatContestDeadline', () => {
   test('should format deadline with card format', () => {
     const result = formatContestDeadline('2023-12-17T15:30:00Z', 'card')
     expect(result).toContain('12/17/23 at')
-    expect(result).toContain('AM') // or PM depending on timezone
+    expect(result).toMatch(/(AM|PM)/)
   })
 
   test('should format deadline with long format', () => {
     const result = formatContestDeadline('2023-12-17T15:30:00Z', 'long')
     expect(result).toContain('Sun. Dec 17, 2023 at')
-    expect(result).toContain('AM') // or PM depending on timezone
+    expect(result).toMatch(/(AM|PM)/)
     expect(result).toContain(getLocalTimezone())
   })
 

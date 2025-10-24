@@ -3,13 +3,14 @@ import { formatReleaseDate } from '@audius/common/utils'
 import {
   IconSparkles,
   IconCart,
-  IconCollectible,
   IconReceive,
   IconCalendarMonth,
   IconVisibilityHidden,
   IconColors,
   Flex,
-  Text
+  Text,
+  IconArtistCoin,
+  IconCoinGatedLabel
 } from '@audius/harmony'
 
 type AccessTypeLabelProps = {
@@ -54,10 +55,10 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     label: 'Special Access',
     color: 'special'
   },
-  [AccessType.COLLECTIBLE_GATED]: {
-    icon: IconCollectible,
-    label: 'Collectible Gated',
-    color: 'special'
+  [AccessType.TOKEN_GATED]: {
+    icon: IconArtistCoin,
+    label: 'Coin Gated',
+    color: 'artistCoin'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,
@@ -75,6 +76,15 @@ export const AccessTypeLabel = (props: AccessTypeLabelProps) => {
     typeof config.label === 'function'
       ? config.label(scheduledReleaseDate)
       : config.label
+
+  // Use coin gated label svg instead of icon and text for token gated
+  if (type === AccessType.TOKEN_GATED) {
+    return (
+      <Flex alignItems='center'>
+        <IconCoinGatedLabel height={20} />
+      </Flex>
+    )
+  }
 
   return (
     <Flex gap='xs' alignItems='center'>

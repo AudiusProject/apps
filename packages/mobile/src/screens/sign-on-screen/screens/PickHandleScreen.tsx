@@ -30,6 +30,7 @@ import { SocialMediaLoading } from '../components/SocialMediaLoading'
 import { SocialMediaSignUpButtons } from '../components/SocialMediaSignUpButtons'
 import { Heading, Page, PageFooter } from '../components/layout'
 import { useSocialMediaLoader } from '../components/useSocialMediaLoader'
+import { useFastReferral } from '../hooks/useFastReferral'
 import type { SignOnScreenParamList } from '../types'
 import { restrictedHandles } from '../utils/restrictedHandles'
 import { useTrackScreen } from '../utils/useTrackScreen'
@@ -96,6 +97,7 @@ export const PickHandleScreen = () => {
   const navigation = useNavigation<SignOnScreenParamList>()
   const dispatch = useDispatch()
   const alreadyLinkedSocial = useSelector(getIsSocialConnected)
+  const isFastReferral = useFastReferral()
   const {
     isWaitingForSocialLogin,
     handleStartSocialMediaLogin,
@@ -122,9 +124,12 @@ export const PickHandleScreen = () => {
     (values: PickHandleValues) => {
       const { handle } = values
       dispatch(setValueField('handle', handle))
+      if (isFastReferral) {
+        dispatch(setValueField('name', handle))
+      }
       navigation.navigate('FinishProfile')
     },
-    [dispatch, navigation]
+    [dispatch, isFastReferral, navigation]
   )
 
   const handleSocialMediaLoginSuccess = useCallback(
@@ -138,13 +143,16 @@ export const PickHandleScreen = () => {
     }) => {
       handleCompleteSocialMediaLogin()
       dispatch(setValueField('handle', handle))
+      if (isFastReferral) {
+        dispatch(setValueField('name', handle))
+      }
       if (requiresReview) {
         navigation.navigate('ReviewHandle')
       } else {
         navigation.navigate('FinishProfile')
       }
     },
-    [dispatch, handleCompleteSocialMediaLogin, navigation]
+    [dispatch, handleCompleteSocialMediaLogin, isFastReferral, navigation]
   )
 
   return (

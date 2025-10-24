@@ -1,5 +1,5 @@
 e2e-init:
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   docker:
     - image: cimg/node:18.17
   steps:
@@ -12,7 +12,7 @@ e2e-init:
 
     - restore_cache:
         keys:
-          - npm-cache-v1-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
+          - npm-cache-2025-10-01-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}
 
     - persist_to_workspace:
         root: ./
@@ -32,11 +32,11 @@ e2e-init:
 e2e-test:
   machine: true
   resource_class: audiusproject/gcp-n2-standard-4
-  working_directory: ~/audius-protocol
+  working_directory: ~/apps
   steps:
     # - run:
     #     name: clean dir
-    #     command: cd ~; [ -d ~/audius-protocol ] && rm -rf ~/audius-protocol
+    #     command: cd ~; [ -d ~/apps ] && rm -rf ~/apps
     - checkout
     - attach_workspace:
         at: ./
@@ -55,7 +55,7 @@ e2e-test:
     # - run:
     #     name: verify sdk types
     #     command: |
-    #       cd ~/audius-protocol/packages/sdk
+    #       cd ~/apps/packages/sdk
     #       . ~/.profile
     #       audius-compose connect --nopass
     #       ./scripts/check-generated-types.sh

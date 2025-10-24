@@ -4,7 +4,6 @@ import { IconUser } from '@audius/harmony'
 import cn from 'classnames'
 
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
-import { isDarkMode } from 'utils/theme/theme'
 
 import styles from './ArtistChip.module.css'
 
@@ -23,7 +22,6 @@ export const ArtistChipFollowers = ({
   followerCount,
   showFollowsYou
 }: ArtistChipFollowersProps) => {
-  const darkMode = isDarkMode()
   return (
     <div className={styles.followersContainer}>
       <div className={cn(styles.followers, 'followers')}>
@@ -36,11 +34,7 @@ export const ArtistChipFollowers = ({
         </span>
       </div>
       {showFollowsYou ? (
-        <FollowsYouBadge
-          userId={userId}
-          variant='list'
-          className={cn(styles.followsYou, { [styles.darkMode]: darkMode })}
-        />
+        <FollowsYouBadge variant='flat' userId={userId} />
       ) : null}
     </div>
   )

@@ -66,8 +66,7 @@ export const primeCollectionData = ({
     if ('user' in collection) {
       primeUserData({
         users: [collection.user],
-        queryClient,
-        forceReplace
+        queryClient
       })
     }
 

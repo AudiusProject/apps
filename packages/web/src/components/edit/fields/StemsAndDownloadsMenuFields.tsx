@@ -39,9 +39,8 @@ const messages = {
   description:
     'Upload your stems and source files to allow fans to remix your track. This does not affect users ability to listen offline.',
   [IS_DOWNLOADABLE]: {
-    header: 'Allow Full Track Download',
-    description:
-      'Allow your fans to download a lossless copy of your full track.'
+    header: 'Full Track Download',
+    description: 'Provide a full lossless copy of your track for download.'
   },
   priceTooLow: (minPrice: number) =>
     `Price must be at least $${USDC(minPrice / 100).toLocaleString()}.`,

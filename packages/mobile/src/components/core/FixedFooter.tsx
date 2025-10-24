@@ -11,6 +11,7 @@ import { KeyboardAvoidingView } from 'app/components/core'
 type FixedFooterProps = {
   children: ReactNode
   avoidKeyboard?: boolean
+  keyboardShowingOffset?: number
 }
 
 /**
@@ -29,7 +30,8 @@ export const FIXED_FOOTER_HEIGHT = 48 + spacing.l * 2 + spacing.xl
  */
 export const FixedFooter = ({
   children,
-  avoidKeyboard = false
+  avoidKeyboard = false,
+  keyboardShowingOffset = spacing.unit5
 }: FixedFooterProps) => {
   const insets = useSafeAreaInsets()
 
@@ -47,7 +49,7 @@ export const FixedFooter = ({
         left: 0
       })}
     >
-      <KeyboardAvoidContainer keyboardShowingOffset={spacing.unit5}>
+      <KeyboardAvoidContainer keyboardShowingOffset={keyboardShowingOffset}>
         <Paper
           p='l'
           justifyContent='center'

@@ -1,10 +1,13 @@
 import React, { useCallback } from 'react'
 
-import { useCurrentUserId, useUserCoins } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { buySellMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
-import type { CoinPairItem } from '@audius/common/store'
+import {
+  useCurrentUserId,
+  useQueryContext,
+  useUserCoins
+} from '@audius/common/api'
+import { ownedCoinsFilter } from '@audius/common/hooks'
+import { buySellMessages, walletMessages } from '@audius/common/messages'
+import { AUDIO_TICKER } from '@audius/common/store'
 import { TouchableOpacity } from 'react-native'
 
 import {
@@ -18,15 +21,34 @@ import {
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
-import { CoinCard } from './CoinCard'
+import { AudioCoinCard } from './AudioCoinCard'
+import { CoinCard, CoinCardSkeleton, HexagonalSkeleton } from './CoinCard'
 
 const messages = {
-  ...buySellMessages,
-  findMoreCoins: 'Find More Coins',
-  exploreArtistCoins: 'Explore available artist coins on Audius.'
+  ...buySellMessages
 }
 
-const TokensHeader = () => {
+const YourCoinsSkeleton = () => {
+  return (
+    <Flex p='l' pl='xl' row justifyContent='space-between' alignItems='center'>
+      <Flex row alignItems='center' gap='l'>
+        <HexagonalSkeleton />
+        <CoinCardSkeleton />
+      </Flex>
+    </Flex>
+  )
+}
+
+const YourCoinsHeader = () => {
+  const navigation = useNavigation()
+
+  const handleBuySell = useCallback(() => {
+    navigation.navigate('BuySell', {
+      initialTab: 'buy',
+      coinTicker: AUDIO_TICKER
+    })
+  }, [navigation])
+
   return (
     <Flex
       row
@@ -36,36 +58,31 @@ const TokensHeader = () => {
       pb='s'
       borderBottom='default'
     >
-      <Text variant='heading' color='heading'>
-        {messages.yourCoins}
+      <Text variant='heading' size='s' color='heading'>
+        {messages.coins}
       </Text>
+      <Button variant='secondary' size='small' onPress={handleBuySell}>
+        {messages.buySell}
+      </Button>
     </Flex>
   )
 }
 
-const FindMoreCoins = () => {
-  const navigation = useNavigation()
-
-  const handlePress = useCallback(() => {
-    navigation.navigate('AllCoinsScreen')
-  }, [navigation])
-
+const DiscoverArtistCoinsCard = ({ onPress }: { onPress: () => void }) => {
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity onPress={onPress}>
       <Flex
-        row
         p='l'
         pl='xl'
-        alignItems='center'
+        row
+        h={96}
         justifyContent='space-between'
+        alignItems='center'
       >
-        <Flex column gap='xs'>
-          <Text variant='heading' size='s'>
-            {messages.findMoreCoins}
-          </Text>
-          <Text>{messages.exploreArtistCoins}</Text>
-        </Flex>
-        <IconCaretRight size='l' color='subdued' />
+        <Text variant='heading' size='s' numberOfLines={1}>
+          {walletMessages.artistCoins.title}
+        </Text>
+        <IconCaretRight color='subdued' />
       </Flex>
     </TouchableOpacity>
   )
@@ -73,42 +90,48 @@ const FindMoreCoins = () => {
 
 export const YourCoins = () => {
   const { data: currentUserId } = useCurrentUserId()
-  const { isEnabled: isArtistCoinsEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
-  const { isEnabled: isWalletUIBuySellEnabled } = useFeatureFlag(
-    FeatureFlags.WALLET_UI_BUY_SELL
-  )
+  const navigation = useNavigation()
+  const { env } = useQueryContext()
 
-  const { data: artistCoins } = useUserCoins({
+  const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const cards = isArtistCoinsEnabled
-    ? [...(artistCoins || []), 'find-more']
-    : (artistCoins?.slice(0, 1) ?? [])
+
+  const filteredCoins =
+    artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
+
+  // Show audio coin card when no coins are available
+  const coins =
+    filteredCoins.length === 0 ? ['audio-coin' as const] : filteredCoins
+
+  // Add discover artist coins card at the end
+  const cards = [...coins, 'discover-artist-coins' as const]
+
+  const handleDiscoverArtistCoins = useCallback(() => {
+    navigation.navigate('ArtistCoinsExplore')
+  }, [navigation])
 
   return (
     <Paper>
-      <TokensHeader />
+      <YourCoinsHeader />
       <Flex column>
-        {cards.map((item: CoinPairItem) => (
-          <Box key={item === 'find-more' ? 'find-more' : item.mint}>
-            {item === 'find-more' ? (
-              <FindMoreCoins />
-            ) : (
-              <CoinCard mint={item.mint} />
-            )}
-            <Divider />
-          </Box>
-        ))}
+        {isLoadingCoins || !currentUserId ? (
+          <YourCoinsSkeleton />
+        ) : (
+          cards.map((item, idx) => (
+            <Box key={typeof item === 'string' ? item : item.mint}>
+              {item === 'discover-artist-coins' ? (
+                <DiscoverArtistCoinsCard onPress={handleDiscoverArtistCoins} />
+              ) : item === 'audio-coin' ? (
+                <AudioCoinCard />
+              ) : (
+                <CoinCard mint={item.mint} />
+              )}
+              {idx !== cards.length - 1 && <Divider />}
+            </Box>
+          ))
+        )}
       </Flex>
-      {isWalletUIBuySellEnabled ? (
-        <Flex p='l'>
-          <Button variant='secondary' size='small' onPress={() => {}}>
-            {messages.buySell}
-          </Button>
-        </Flex>
-      ) : null}
     </Paper>
   )
 }

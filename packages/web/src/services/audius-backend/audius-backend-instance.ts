@@ -3,7 +3,6 @@ import { audiusBackend } from '@audius/common/services'
 import { track } from 'services/analytics'
 import { getFeatureEnabled } from 'services/remote-config/featureFlagHelpers'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
-import { monitoringCallbacks } from 'services/serviceMonitoring'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { isElectron } from 'utils/clientUtil'
 
@@ -25,7 +24,6 @@ export const audiusBackendInstance = audiusBackend({
   identityServiceUrl: env.IDENTITY_SERVICE,
   generalAdmissionUrl: env.GENERAL_ADMISSION,
   isElectron: isElectron(),
-  monitoringCallbacks,
   nativeMobile: false,
   recaptchaSiteKey: env.RECAPTCHA_SITE_KEY,
   recordAnalytics: track,

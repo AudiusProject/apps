@@ -55,12 +55,12 @@ cd ../dapp-store
 
 Before publishing the apk, validate the release:
 ```
-npx dapp-store validate release -k app-keypair.json -b $ANDROID_HOME/build-tools/33.0.0
+npx dapp-store validate release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0
 ```
 
 ### Publishing the apk
 ```
-npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/33.0.0 -u https://audius-fe.rpcpool.com
+npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0 -u https://audius-fe.rpcpool.com
 ```
 > You may not have specified ANDROID_HOME, or have a different build tools version, modify accordingly.
 

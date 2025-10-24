@@ -143,16 +143,19 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
       return
     }
 
+    // Only include parent track in count if it's downloadable
+    const parentTrackCount = track?.access?.download ? 1 : 0
     openDownloadTrackArchiveModal({
       trackId,
-      fileCount: stemTracks.length + 1
+      fileCount: stemTracks.length + parentTrackCount
     })
   }, [
     openDownloadTrackArchiveModal,
     shouldDisplayDownloadFollowGated,
     stemTracks.length,
     toast,
-    trackId
+    trackId,
+    track?.access?.download
   ])
 
   const hasStems = stemTracks.length > 0

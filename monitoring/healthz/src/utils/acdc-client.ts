@@ -17,13 +17,12 @@ export function useEthersProvider() {
   const isStage = useLocation().pathname.indexOf('/stage') == 0
   const isDev = useLocation().pathname.indexOf('/dev') == 0
 
-
   let rpcEndpoint = 'https://discoveryprovider.audius.co/chain'
   if (isStage) {
     rpcEndpoint = 'https://discoveryprovider.staging.audius.co/chain'
   }
   if (isDev) {
-    rpcEndpoint = 'http://audius-protocol-discovery-provider-1/chain'
+    rpcEndpoint = 'http://audius-discovery-provider-1/chain'
   }
 
   return useMemo(() => {
@@ -42,9 +41,9 @@ export function useSomeDiscoveryEndpoint() {
     return 'https://discoveryprovider.audius.co'
   }
   if (isStage) {
-    'https://discoveryprovider.staging.audius.co'
+    ;('https://discoveryprovider.staging.audius.co')
   }
-  return 'http://audius-protocol-discovery-provider-1'
+  return 'http://audius-discovery-provider-1'
 }
 
 export function useSomeContentEndpoint() {
@@ -57,7 +56,7 @@ export function useSomeContentEndpoint() {
   if (isStage) {
     return 'https://creatornode12.staging.audius.co'
   }
-  return 'http://audius-protocol-creator-node-1'
+  return 'http://audius-creator-node-1'
 }
 
 const iface = new Interface([

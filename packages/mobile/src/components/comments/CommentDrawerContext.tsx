@@ -11,6 +11,7 @@ import React, {
 import { Name, type ID } from '@audius/common/models'
 import type { BottomSheetModal } from '@gorhom/bottom-sheet'
 
+import { useDrawer } from 'app/hooks/useDrawer'
 import { make, track } from 'app/services/analytics'
 
 import type { CommentDrawerData } from './CommentDrawer'
@@ -32,11 +33,14 @@ const CommentDrawerContext = createContext<
 export const CommentDrawerProvider = (props: PropsWithChildren) => {
   const { children } = props
   const [isOpen, setIsOpen] = useState(false)
+  const { onClose: closeNowPlayingDrawer, isOpen: isNowPlayingDrawerOpen } =
+    useDrawer('NowPlaying')
   const [drawerData, setDrawerData] = useState<CommentDrawerData>()
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
 
   const open = useCallback((props: CommentDrawerData) => {
     setDrawerData(props)
+
     setIsOpen(true)
     track(
       make({
@@ -46,15 +50,22 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
     )
   }, [])
 
-  const close = useCallback((trackId: ID) => {
-    setIsOpen(false)
-    track(
-      make({
-        eventName: Name.COMMENTS_CLOSE_COMMENT_DRAWER,
-        trackId
-      })
-    )
-  }, [])
+  const close = useCallback(
+    (trackId: ID) => {
+      setIsOpen(false)
+      // This happens when you click on a UserLink inside the comments drawer
+      if (isNowPlayingDrawerOpen) {
+        closeNowPlayingDrawer()
+      }
+      track(
+        make({
+          eventName: Name.COMMENTS_CLOSE_COMMENT_DRAWER,
+          trackId
+        })
+      )
+    },
+    [closeNowPlayingDrawer, isNowPlayingDrawerOpen]
+  )
 
   useEffect(() => {
     if (isOpen) {

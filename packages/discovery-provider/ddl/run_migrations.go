@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"bridgerton.audius.co/config"
+	"api.audius.co/config"
 )
 
 func RunMigrations() error {

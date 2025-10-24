@@ -63,15 +63,7 @@ type PickArtworkFieldProps = {
 }
 
 export const PickArtworkField = (props: PickArtworkFieldProps) => {
-  const {
-    name,
-    onChange,
-    buttonTitle,
-    onPress,
-    onImageLoad,
-    isLoading,
-    isUpload
-  } = props
+  const { name, onChange, buttonTitle, onPress, onImageLoad, isLoading } = props
   const styles = useStyles()
   const { neutralLight8 } = useThemeColors()
   const [{ value }, { error, touched }, { setValue: setArtwork }] = useField<{
@@ -102,35 +94,32 @@ export const PickArtworkField = (props: PickArtworkFieldProps) => {
 
   return (
     <View style={styles.root}>
-      {isUpload || source?.uri ? (
-        <DynamicImage
-          source={source}
-          onLoad={handleImageLoad}
-          style={styles.image}
-          noSkeleton
-        >
-          <View style={styles.iconPicture}>
-            {isLoading || isImageLoading ? (
-              <LoadingSpinner style={styles.loading} />
-            ) : trackArtworkUrl ? null : (
-              <IconImage height={128} width={128} fill={neutralLight8} />
-            )}
-          </View>
-          <Flex style={styles.button} ph='m'>
-            <Button
-              variant='tertiary'
-              iconLeft={IconPencil}
-              onPress={onPress ?? handleChangeArtwork}
-              fullWidth
-            >
-              {buttonTitle ||
-                (trackArtworkUrl
-                  ? messages.changeArtwork
-                  : messages.addArtwork)}
-            </Button>
-          </Flex>
-        </DynamicImage>
-      ) : null}
+      <DynamicImage
+        source={source}
+        onLoad={handleImageLoad}
+        style={styles.image}
+        noSkeleton
+      >
+        <View style={styles.iconPicture}>
+          {isLoading || isImageLoading ? (
+            <LoadingSpinner style={styles.loading} />
+          ) : trackArtworkUrl ? null : (
+            <IconImage height={128} width={128} fill={neutralLight8} />
+          )}
+        </View>
+        <Flex style={styles.button} ph='m'>
+          <Button
+            variant='tertiary'
+            iconLeft={IconPencil}
+            onPress={onPress ?? handleChangeArtwork}
+            fullWidth
+          >
+            {buttonTitle ||
+              (trackArtworkUrl ? messages.changeArtwork : messages.addArtwork)}
+          </Button>
+        </Flex>
+      </DynamicImage>
+
       {error && touched ? (
         // @ts-ignore
         <InputErrorMessage message={error?.url || error} />

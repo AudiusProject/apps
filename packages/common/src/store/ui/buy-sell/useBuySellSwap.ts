@@ -1,26 +1,44 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { useQueryClient } from '@tanstack/react-query'
+import { MutationStatus, useQueryClient } from '@tanstack/react-query'
 
-import { SLIPPAGE_BPS, useCurrentAccountUser, useSwapTokens } from '~/api'
-import { SwapStatus } from '~/api/tan-query/jupiter/types'
+import { SLIPPAGE_BPS, useArtistCoin, useCurrentAccountUser } from '~/api'
+import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
+import { TQTrack } from '~/api/tan-query/models'
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
+import { isContentTokenGated } from '~/models'
 
 import type {
   BuySellTab,
   Screen,
   SwapResult,
-  TokenPair,
+  CoinPair,
   TransactionData
 } from './types'
+
+type SwapHookData = {
+  data?: SwapTokensResult
+  status: MutationStatus
+  error?: Error | null
+}
+
+type SwapParams = {
+  inputMint: string
+  outputMint: string
+  amountUi: number
+  slippageBps: number
+}
 
 type UseBuySellSwapProps = {
   transactionData: TransactionData
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
   activeTab: BuySellTab
-  selectedPair: TokenPair
-  onClose: () => void
+  selectedPair: CoinPair
+  swapHookData: SwapHookData
+  // The swap is handled externally to allow for external wallet swaps
+  // Web and mobile use different services for these so we let each repo handle the logic
+  handleSwap: (params: SwapParams) => void
 }
 
 export const useBuySellSwap = (props: UseBuySellSwapProps) => {
@@ -29,25 +47,20 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     currentScreen,
     setCurrentScreen,
     activeTab,
-    selectedPair
+    selectedPair,
+    swapHookData,
+    handleSwap
   } = props
   const queryClient = useQueryClient()
   const { data: user } = useCurrentAccountUser()
   const [swapResult, setSwapResult] = useState<SwapResult | null>(null)
-  const [retryCount, setRetryCount] = useState(0)
-  const [isRetrying, setIsRetrying] = useState(false)
-  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const lastSwapDataRef = useRef<any>(null)
 
-  const MAX_RETRIES = 3
-  const RETRY_DELAY = 2000
+  const { data: baseCoin } = useArtistCoin(selectedPair.baseToken.address ?? '')
+  const { data: quoteCoin } = useArtistCoin(
+    selectedPair.quoteToken.address ?? ''
+  )
 
-  const {
-    mutate: swapTokens,
-    status: swapStatus,
-    error: swapError,
-    data: swapData
-  } = useSwapTokens()
+  const { status: swapStatus, error: swapError, data: swapData } = swapHookData
 
   const performSwap = () => {
     if (!transactionData || !transactionData.isValid) return
@@ -68,7 +81,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       outputMintAddress = selectedPair.quoteToken.address ?? ''
     }
 
-    swapTokens({
+    handleSwap({
       inputMint: inputMintAddress,
       outputMint: outputMintAddress,
       amountUi: inputAmount,
@@ -78,41 +91,50 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
 
   const invalidateBalances = () => {
     if (user?.wallet) {
-      // Invalidate balances for all token types that could be involved
+      // Invalidate USDC balance queries
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.usdcBalance, user.wallet]
       })
+      // Invalidate individual user coin queries (for artist coins and $AUDIO)
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.userCoin]
+      })
+      // Invalidate general user coins queries
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoins]
       })
-    }
-    if (user?.spl_wallet) {
+      // Invalidate artist coin members queries (leaderboard)
+      if (baseCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.artistCoinMembers, baseCoin?.mint]
+        })
+      }
+      if (quoteCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.artistCoinMembers, quoteCoin?.mint]
+        })
+      }
+
+      // Invalidate track queries to provide track access if the user has traded the artist coin
+      const baseOwnerId = baseCoin?.ownerId ?? null
+      const quoteOwnerId = quoteCoin?.ownerId ?? null
+
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.audioBalance, user.spl_wallet]
+        predicate: (query) => {
+          if (query.queryKey[0] !== QUERY_KEYS.track) return false
+
+          const track = query.state.data as TQTrack | undefined
+          if (!track) return false
+
+          return (
+            (track.owner_id === baseOwnerId ||
+              track.owner_id === quoteOwnerId) &&
+            isContentTokenGated(track.stream_conditions)
+          )
+        }
       })
     }
   }
-
-  const scheduleRetry = () => {
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current)
-    }
-
-    // @ts-ignore - weird mobile type issue
-    retryTimeoutRef.current = setTimeout(() => {
-      invalidateBalances()
-      performSwap()
-    }, RETRY_DELAY) as unknown as NodeJS.Timeout
-  }
-
-  const resetAndReturnToInput = useCallback(() => {
-    setCurrentScreen('input')
-    setRetryCount(0)
-    setIsRetrying(false)
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current)
-    }
-  }, [setCurrentScreen])
 
   const handleShowConfirmation = useCallback(() => {
     if (
@@ -132,22 +154,15 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     )
       return
 
-    setRetryCount(0)
-    setIsRetrying(true)
     performSwap()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionData, currentScreen, activeTab])
 
   useEffect(() => {
-    // Only process if we have new data (avoid processing the same result multiple times)
-    if (swapData === lastSwapDataRef.current) {
-      return
-    }
-    lastSwapDataRef.current = swapData
-
     if (swapStatus === 'success' && swapData) {
       if (swapData.status === SwapStatus.SUCCESS) {
-        // Success - navigate to success screen
+        // Success - invalidate balances and navigate to success screen
+        invalidateBalances()
         setSwapResult({
           inputAmount:
             swapData.inputAmount?.uiAmount ??
@@ -158,60 +173,21 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
           signature: swapData.signature
         })
         setCurrentScreen('success')
-        setRetryCount(0)
-        setIsRetrying(false)
-        if (retryTimeoutRef.current) {
-          clearTimeout(retryTimeoutRef.current)
-        }
-      } else if (isRetrying) {
-        // Swap failed, handle retry
-        if (retryCount < MAX_RETRIES) {
-          setRetryCount((prev) => prev + 1)
-          scheduleRetry()
-        } else {
-          resetAndReturnToInput()
-        }
       } else {
-        // Swap failed but not retrying - return to input screen (fallback)
-        resetAndReturnToInput()
+        // Error data returned - return to input screen
+        setCurrentScreen('input')
       }
     } else if (swapStatus === 'error') {
-      if (isRetrying) {
-        // Network/API error, handle retry
-        if (retryCount < MAX_RETRIES) {
-          setRetryCount((prev) => prev + 1)
-          scheduleRetry()
-        } else {
-          resetAndReturnToInput()
-        }
-      } else {
-        // Network/API error but not retrying - return to input screen (fallback)
-        resetAndReturnToInput()
-      }
+      // Error - return to input screen
+      setCurrentScreen('input')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    swapStatus,
-    swapData,
-    setCurrentScreen,
-    transactionData,
-    retryCount,
-    isRetrying,
-    resetAndReturnToInput
-  ])
-
-  useEffect(() => {
-    return () => {
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current)
-      }
-    }
-  }, [])
+  }, [swapStatus, swapData, setCurrentScreen, transactionData])
 
   const isContinueButtonLoading =
     swapStatus === 'pending' && currentScreen === 'input'
   const isConfirmButtonLoading =
-    (swapStatus === 'pending' || isRetrying) && currentScreen === 'confirm'
+    swapStatus === 'pending' && currentScreen === 'confirm'
 
   return {
     handleShowConfirmation,
@@ -220,6 +196,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
     isConfirmButtonLoading,
     swapError,
     swapStatus,
-    swapResult
+    swapResult,
+    swapData
   }
 }

@@ -16,7 +16,7 @@ type RetrieveUserTracksArgs = {
   limit?: number
   /**
    * This will only let a user obtain their own unlisted tracks, not
-   * anyone's unlisted tracks. Prevention logic is in discovery node.
+   * anyone's unlisted tracks. Prevention logic is in API.
    */
   getUnlisted?: boolean
 }

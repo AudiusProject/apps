@@ -1,5 +1,9 @@
 import React from 'react'
 
+import { useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
+
 import { Flex } from '@audius/harmony-native'
 import { RecentSearches } from 'app/screens/search-screen/RecentSearches'
 import { useSearchCategory } from 'app/screens/search-screen/searchState'
@@ -7,22 +11,30 @@ import { useSearchCategory } from 'app/screens/search-screen/searchState'
 import { ActiveDiscussions } from './ActiveDiscussions'
 import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestSelling } from './BestSelling'
+import { DownloadsAvailable } from './DownloadsAvailable'
+import { FeaturedArtistCoinTracks } from './FeaturedArtistCoinTracks'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
+import { ForYouTracks } from './ForYouTracks'
 import { LabelSpotlight } from './LabelSpotlight'
 import { MoodsGrid } from './MoodsGrid'
 import { MostSharedTracks } from './MostSharedTracks'
 import { QuickSearchGrid } from './QuickSearchGrid'
 import { RecentPremiumTracks } from './RecentPremiumTracks'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
-import { RecommendedTracks } from './RecommendedTracks'
 import { TrendingPlaylists } from './TrendingPlaylists'
 import { UndergroundTrendingTracks } from './UndergroundTrendingTracks'
 
-const MemoizedExploreContent = () => {
+export const ExploreContent = () => {
   const [category] = useSearchCategory()
+  const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
+    useCurrentUserId()
+  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
+    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
+  )
 
+  const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = category === 'tracks' || category === 'all'
   const showPlaylistContent = category === 'playlists' || category === 'all'
   const showUserContent = category === 'users' || category === 'all'
@@ -30,30 +42,32 @@ const MemoizedExploreContent = () => {
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
-      {showTrackContent && <RecommendedTracks />}
-      {showTrackContent && <RecentlyPlayedTracks />}
+      {showTrackContent && showUserContextualContent && <ForYouTracks />}
+      {isExploreArtistCoinTracksEnabled && <FeaturedArtistCoinTracks />}
+      {showTrackContent && showUserContextualContent && (
+        <RecentlyPlayedTracks />
+      )}
       {showTrackContent && <QuickSearchGrid />}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <FeaturedRemixContests />}
       {showTrackContent && <UndergroundTrendingTracks />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
-      {showTrackContent && <ActiveDiscussions />}
+      {showTrackContent && (
+        <>
+          <ActiveDiscussions />
+          <DownloadsAvailable />
+        </>
+      )}
       {(showTrackContent || showAlbumContent || showPlaylistContent) && (
         <MoodsGrid />
       )}
       {showPlaylistContent && <TrendingPlaylists />}
       {showTrackContent && <MostSharedTracks />}
       {(showAlbumContent || showTrackContent) && <BestSelling />}
-      {/* TODO: Feeling lucky for playlists/albums
-      https://linear.app/audius/issue/PE-6585/feeling-lucky-for-playlistsalbums
-       */}
       {showTrackContent && <RecentPremiumTracks />}
-      {showTrackContent && <FeelingLucky />}
-      <RecentSearches />
+      {showTrackContent && showUserContextualContent && <FeelingLucky />}
+      {showUserContextualContent && <RecentSearches />}
     </Flex>
   )
 }
-
-// Memoize the entire component since it has no props
-export const ExploreContent = React.memo(MemoizedExploreContent)

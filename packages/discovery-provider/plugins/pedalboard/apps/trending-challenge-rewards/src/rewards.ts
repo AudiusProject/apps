@@ -55,7 +55,7 @@ export const onDisburse = async (
 
   console.log(`doing ${dryRun ? 'a dry run' : 'a live run'}`)
 
-  const sdk = app.viewAppData().sdk
+  const { sdk, apiEndpoint } = app.viewAppData()
 
   let completedBlock, specifier
   if (!targetSpecifier) {
@@ -82,9 +82,7 @@ export const onDisburse = async (
     let failedAnAttestation = false
 
     // Pick an endpoint and collect all undisbursed challenges from that endpoint
-    const endpoint =
-      await sdk.services.discoveryNodeSelector.getSelectedEndpoint()
-    console.log('endpoint = ', endpoint)
+    console.log('endpoint = ', apiEndpoint)
     const toDisburse: Challenge[] = []
     for (const challengeId of TRENDING_REWARD_IDS) {
       let completedBlocknumber = await getCompletedBlockNumberFromDaysAgo(db, 6)
@@ -92,7 +90,7 @@ export const onDisburse = async (
         console.error('Could not find a completed block number')
         completedBlocknumber = 0
       }
-      const url = `${endpoint}/v1/challenges/undisbursed?challenge_id=${challengeId}&completed_blocknumber=${completedBlocknumber}`
+      const url = `${apiEndpoint}/v1/challenges/undisbursed?challenge_id=${challengeId}&completed_blocknumber=${completedBlocknumber}`
       console.log('fetching undisbursed challenges from url = ', url)
       // Fetch all undisbursed challenges
       const res = await axios.get(url)
@@ -105,10 +103,10 @@ export const onDisburse = async (
         (id) => id === challenge.challenge_id
       )!
       console.log('Claimable challengeId = ', challenge)
-      const totalAttestationRetries = 10
+      const totalRetries = 10
       let res
-      let attestationRetries = totalAttestationRetries
-      while (attestationRetries > 0) {
+      let retries = totalRetries
+      while (retries > 0) {
         try {
           if (!dryRun) {
             console.log(
@@ -119,24 +117,34 @@ export const onDisburse = async (
               'amount = ',
               challenge.amount
             )
-            res = await sdk.challenges.claimReward({
-              challengeId,
-              userId: challenge.user_id,
-              specifier: challenge.specifier,
-              amount: parseFloat(challenge.amount)
+            res = await sdk.rewards.claimRewards({
+              claimRewardsRequest: {
+                challengeId,
+                userId: challenge.user_id,
+                specifier: challenge.specifier
+              }
             })
+            if (res?.data?.[0]?.error) {
+              if (
+                res.data[0].error.includes('failed to get oracle attestation')
+              ) {
+                // If the error is because the attestation failed, break
+                break
+              }
+              throw new Error(res.data[0].error)
+            }
             console.log('res = ', res)
             break // Success - exit retry loop
           }
         } catch (e) {
           console.error(
-            `Error claiming reward, challengeId = ${challengeId}, attempt ${totalAttestationRetries - attestationRetries + 1} of ${totalAttestationRetries}, error = `,
+            `Error claiming reward, challengeId = ${challengeId}, attempt ${totalRetries - retries + 1} of ${totalRetries}, error = `,
             e
           )
-          attestationRetries -= 1
-          if (attestationRetries === 0) {
+          retries -= 1
+          if (retries === 0) {
             console.error(
-              `Failed to claim reward after ${totalAttestationRetries} attempts for challengeId = ${challengeId}`
+              `Failed to claim reward after ${totalRetries} attempts for challengeId = ${challengeId}`
             )
             failedAnAttestation = true
           }

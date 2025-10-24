@@ -35,17 +35,19 @@ const ArtistIdentifier = ({
 }: ArtistIdentifierProps) => {
   return showPopover ? (
     <div css={{ overflow: 'hidden' }}>
-      <ArtistPopover
-        handle={handle}
-        mouseEnterDelay={0.3}
-        mount={popoverMount}
-        onNavigateAway={onNavigateAway}
-      >
-        <div className={styles.name}>
+      <div className={styles.name}>
+        <ArtistPopover
+          handle={handle}
+          mouseEnterDelay={0.3}
+          mount={popoverMount}
+          onNavigateAway={onNavigateAway}
+        >
           <p>{name}</p>
+        </ArtistPopover>
+        <span>
           <UserBadges userId={userId} className={cn(styles.badge)} inline />
-        </div>
-      </ArtistPopover>
+        </span>
+      </div>
       <ArtistPopover
         handle={handle}
         mouseEnterDelay={0.3}

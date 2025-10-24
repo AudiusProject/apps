@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useCallback } from 'react'
 
 import { toastActions, CommonState } from '@audius/common/store'
+import { IconComponent } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useTransition, animated } from 'react-spring'
@@ -10,7 +11,7 @@ import zIndex from 'utils/zIndex'
 
 import styles from './ToastContext.module.css'
 import Toast from './mobile/Toast'
-const { clearToasts, toast } = toastActions
+const { clearToasts, toast, dismissToast } = toastActions
 
 const DEFAULT_TIMEOUT = 3000
 
@@ -32,7 +33,11 @@ const interp = (i: number) => (y: number) =>
     : `translate3d(-50%, ${y + i * TOAST_SPACING}px, 0)`
 
 type ToastContextProps = {
-  toast: (content: string | JSX.Element, timeout?: number) => void
+  toast: (
+    content: string | JSX.Element,
+    timeout?: number,
+    icons?: { leftIcon?: IconComponent; rightIcon?: IconComponent } | {}
+  ) => void
   clear: () => void
 }
 
@@ -41,6 +46,8 @@ type ToastType = {
   key: string
   link?: string
   linkText?: string
+  leftIcon?: IconComponent
+  rightIcon?: IconComponent
 }
 
 export const ToastContext = createContext<ToastContextProps>({
@@ -53,8 +60,19 @@ export const ToastContextProvider = (props: { children: ReactNode }) => {
   const dispatch = useDispatch()
 
   const handleToast = useCallback(
-    (content: string | JSX.Element, timeout: number = DEFAULT_TIMEOUT) => {
-      dispatch(toast({ content, timeout }))
+    (
+      content: string | JSX.Element,
+      timeout: number = DEFAULT_TIMEOUT,
+      icons: { leftIcon?: IconComponent; rightIcon?: IconComponent } = {}
+    ) => {
+      dispatch(
+        toast({
+          content,
+          timeout,
+          leftIcon: icons.leftIcon,
+          rightIcon: icons.rightIcon
+        })
+      )
     },
     [dispatch]
   )
@@ -62,6 +80,13 @@ export const ToastContextProvider = (props: { children: ReactNode }) => {
   const clear = useCallback(() => {
     dispatch(clearToasts())
   }, [dispatch])
+
+  const handleDismiss = useCallback(
+    (key: string) => {
+      dispatch(dismissToast({ key }))
+    },
+    [dispatch]
+  )
 
   const transitions = useTransition(toasts, (toast) => toast.key, {
     from: (toast: ToastType) => ({ y: FROM_POSITION, opacity: 0 }),
@@ -96,8 +121,26 @@ export const ToastContextProvider = (props: { children: ReactNode }) => {
             content={item.content}
             link={item.link}
             linkText={item.linkText}
-            leftIcon={item.leftIcon}
-            rightIcon={item.rightIcon}
+            leftIcon={
+              item.leftIcon && (
+                <item.leftIcon
+                  size='s'
+                  color='staticWhite'
+                  css={{ cursor: 'pointer' }}
+                  onClick={() => handleDismiss(item.key)}
+                />
+              )
+            }
+            rightIcon={
+              item.rightIcon && (
+                <item.rightIcon
+                  size='s'
+                  color='staticWhite'
+                  css={{ cursor: 'pointer' }}
+                  onClick={() => handleDismiss(item.key)}
+                />
+              )
+            }
             isControlled
             isOpen
           />

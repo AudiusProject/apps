@@ -62,7 +62,7 @@ const messages = {
   unfavorite: 'Unfavorite',
   unreposted: 'Un-Reposted!',
   unsetArtistPick: 'Unset as Artist Pick',
-  visitArtistPage: 'Visit Artist Page',
+  visitArtistPage: 'Visit Profile',
   visitAlbumPage: 'Visit Album Page',
   visitTrackPage: 'Visit Track Page',
   visitEpisodePage: 'Visit Episode Page',

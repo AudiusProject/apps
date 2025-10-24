@@ -202,7 +202,6 @@ BEGIN
         country = 'Ukraine' OR
         country = 'United Arab Emirates' OR
         country = 'United Kingdom' OR
-        country = 'United States' OR
         country = 'Uruguay' OR
         country = 'Uzbekistan' OR
         country = 'Vanuatu' OR
@@ -347,7 +346,6 @@ BEGIN
         country = 'MU' OR
         country = 'MV' OR
         country = 'MW' OR
-        country = 'MX' OR
         country = 'MY' OR
         country = 'MZ' OR
         country = 'NA' OR
@@ -416,7 +414,6 @@ BEGIN
         country = 'TZ' OR
         country = 'UA' OR
         country = 'UG' OR
-        country = 'US' OR
         country = 'UY' OR
         country = 'UZ' OR
         country = 'VA' OR

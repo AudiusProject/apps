@@ -1,17 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
-import { formatUSDCValue, SLIPPAGE_BPS } from '@audius/common/api'
+import { SLIPPAGE_BPS, SwapStatus, useSwapCoins } from '@audius/common/api'
 import { useBuySellAnalytics } from '@audius/common/hooks'
 import { buySellMessages as baseMessages } from '@audius/common/messages'
-import type { TokenInfo } from '@audius/common/store'
+import type { CoinInfo, CoinPair } from '@audius/common/store'
 import {
-  useSupportedTokenPairs,
+  getSwapTokens,
   useBuySellScreen,
   useBuySellSwap,
   useSwapDisplayData,
-  useTokenAmountFormatting,
-  getSwapTokens
+  useCoinAmountFormatting
 } from '@audius/common/store'
+import { formatCurrencyWithSubscript } from '@audius/common/utils'
 
 import {
   Button,
@@ -22,12 +22,13 @@ import {
   Text
 } from '@audius/harmony-native'
 import {
-  Screen,
-  ScreenContent,
   FixedFooter,
-  FixedFooterContent
+  FixedFooterContent,
+  Screen,
+  ScreenContent
 } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useToast } from 'app/hooks/useToast'
 
 import { SwapBalanceSection } from '../../components/buy-sell'
 
@@ -36,7 +37,7 @@ import { PoweredByJupiter } from './components/PoweredByJupiter'
 const messages = {
   ...baseMessages,
   priceEach: (price: number) => {
-    const formatted = formatUSDCValue(price, { includeDollarSign: true })
+    const formatted = formatCurrencyWithSubscript(price)
     return `(${formatted} ea.)`
   },
   loadingTitle: 'Transaction in Progress',
@@ -47,14 +48,16 @@ type ConfirmSwapScreenProps = {
   route: {
     params: {
       confirmationData: {
-        payTokenInfo: TokenInfo
-        receiveTokenInfo: TokenInfo
+        payTokenInfo: CoinInfo
+        receiveTokenInfo: CoinInfo
         payAmount: number
         receiveAmount: number
         pricePerBaseToken: number
         baseTokenSymbol: string
         exchangeRate?: number | null
       }
+      activeTab: 'buy' | 'sell' | 'convert'
+      selectedPair: CoinPair
     }
   }
 }
@@ -88,6 +91,7 @@ const LoadingScreen = () => (
 
 export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
   const navigation = useNavigation()
+  const { toast } = useToast()
   const { trackSwapConfirmed, trackSwapSuccess, trackSwapFailure } =
     useBuySellAnalytics()
 
@@ -97,10 +101,10 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
       receiveTokenInfo,
       payAmount,
       receiveAmount,
-      pricePerBaseToken,
-      baseTokenSymbol,
       exchangeRate = null
-    }
+    },
+    activeTab,
+    selectedPair
   } = route.params
 
   const stableOnScreenChange = useCallback(() => {
@@ -126,26 +130,22 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     [payAmount, receiveAmount]
   )
 
-  // Determine if this is a buy or sell based on token types
-  const activeTab = payTokenInfo.symbol === 'USDC' ? 'buy' : 'sell'
-
-  const [selectedPairIndex] = useState(0)
-  const { pairs: supportedTokenPairs } = useSupportedTokenPairs()
-  const selectedPair = supportedTokenPairs[selectedPairIndex]
-
+  const { mutate: performSwap, ...swapHookState } = useSwapCoins()
   const {
     handleConfirmSwap,
     isConfirmButtonLoading,
     swapStatus,
     swapError,
-    swapResult
+    swapResult,
+    swapData
   } = useBuySellSwap({
     transactionData,
     currentScreen,
     setCurrentScreen,
     activeTab,
     selectedPair,
-    onClose: () => navigation.goBack()
+    swapHookData: swapHookState,
+    handleSwap: performSwap
   })
 
   const swapTokens = useMemo(
@@ -168,10 +168,10 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
         activeTab,
         inputToken: swapTokens.inputToken,
         outputToken: swapTokens.outputToken,
-        inputAmount: swapResult?.inputAmount || payAmount,
-        outputAmount: swapResult?.outputAmount || receiveAmount,
+        inputAmount: swapResult?.inputAmount ?? payAmount,
+        outputAmount: swapResult?.outputAmount ?? receiveAmount,
         exchangeRate,
-        signature: swapResult?.signature || ''
+        signature: swapResult?.signature ?? ''
       })
 
       navigation.navigate('TransactionResultScreen', {
@@ -194,9 +194,13 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     trackSwapSuccess
   ])
 
-  // Handle swap error
+  // Handle swap data errors (when swap returns error status) - navigate back and show toast
   useEffect(() => {
-    if (swapStatus === 'error' && swapError) {
+    if (
+      (swapData?.status === SwapStatus.ERROR && swapData?.error) ||
+      swapStatus === 'error' ||
+      swapError
+    ) {
       trackSwapFailure(
         {
           activeTab,
@@ -209,50 +213,46 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
         {
           errorType: 'swap_error',
           errorStage: 'transaction',
-          errorMessage: swapError?.message
-            ? swapError.message.substring(0, 500)
+          errorMessage: swapData?.error?.message
+            ? swapData?.error?.message.substring(0, 500)
             : 'Unknown error'
         }
       )
 
-      navigation.navigate('TransactionResultScreen', {
-        result: {
-          status: 'error' as const,
-          error: swapError
-        }
-      })
+      // Navigate back to input screen (matching web behavior)
+      navigation.navigate('BuySellMain')
+
+      // Show toast notification
+      toast({ content: messages.transactionFailed, type: 'error' })
     }
   }, [
-    swapStatus,
-    swapError,
-    navigation,
+    swapData,
     activeTab,
+    swapTokens,
     payAmount,
     receiveAmount,
-    swapTokens,
     exchangeRate,
-    trackSwapFailure
+    trackSwapFailure,
+    navigation,
+    toast,
+    swapStatus,
+    swapError
   ])
 
   // balance isn't needed so we pass 0
-  const { formattedAmount: formattedPayAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     availableBalance: 0,
     isStablecoin: !!payTokenInfo.isStablecoin,
     decimals: payTokenInfo.decimals
   })
 
-  const { formattedAmount: formattedReceiveAmount } = useTokenAmountFormatting({
+  const { formattedAmount: formattedReceiveAmount } = useCoinAmountFormatting({
     amount: receiveAmount,
     availableBalance: 0,
     isStablecoin: !!receiveTokenInfo.isStablecoin,
     decimals: receiveTokenInfo.decimals
   })
-
-  const isReceivingBaseToken = receiveTokenInfo.symbol === baseTokenSymbol
-  const priceLabel = isReceivingBaseToken
-    ? messages.priceEach(pricePerBaseToken)
-    : undefined
 
   const handleBack = () => {
     navigation.goBack()
@@ -279,11 +279,7 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
   // Show loading screen when confirming transaction
   if (isConfirmButtonLoading) {
     return (
-      <Screen
-        title={messages.confirmDetails}
-        variant='white'
-        url='/buy-sell/confirm'
-      >
+      <Screen variant='white' url='/buy-sell/confirm-loading'>
         <ScreenContent>
           <LoadingScreen />
         </ScreenContent>
@@ -315,9 +311,22 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
                 title={messages.youReceive}
                 tokenInfo={receiveTokenInfo}
                 amount={formattedReceiveAmount}
-                priceLabel={priceLabel}
               />
             </Flex>
+            {exchangeRate ? (
+              <Flex row gap='xs' alignItems='center' pt='s'>
+                <Text variant='body' size='s' color='subdued'>
+                  {messages.exchangeRateLabel}
+                </Text>
+                <Text variant='body' size='s' color='default'>
+                  {messages.exchangeRateValue(
+                    payTokenInfo.symbol,
+                    receiveTokenInfo.symbol,
+                    exchangeRate
+                  )}
+                </Text>
+              </Flex>
+            ) : null}
           </Flex>
         </FixedFooterContent>
 

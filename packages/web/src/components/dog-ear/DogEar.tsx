@@ -2,12 +2,12 @@ import { DogEarType } from '@audius/common/models'
 import {
   IconSparkles,
   IconCart,
-  IconCollectible,
   IconLock,
   IconReceive,
   useTheme,
   ColorTheme,
-  Box
+  Box,
+  IconArtistCoin
 } from '@audius/harmony'
 
 import Rectangle from 'assets/img/dogEarRectangle.svg'
@@ -23,12 +23,12 @@ const getIcon = (type: DogEarType) => {
   switch (type) {
     case DogEarType.LOCKED:
       return IconLock
-    case DogEarType.COLLECTIBLE_GATED:
-      return IconCollectible
     case DogEarType.USDC_PURCHASE:
       return IconCart
     case DogEarType.USDC_EXTRAS:
       return IconReceive
+    case DogEarType.TOKEN_GATED:
+      return IconArtistCoin
     case DogEarType.SPECIAL_ACCESS:
     default:
       return IconSparkles
@@ -37,13 +37,14 @@ const getIcon = (type: DogEarType) => {
 
 const getColor = (type: DogEarType, color: ColorTheme['day']) => {
   switch (type) {
-    case DogEarType.COLLECTIBLE_GATED:
     case DogEarType.SPECIAL_ACCESS:
     case DogEarType.LOCKED:
       return color.special.blue
     case DogEarType.USDC_PURCHASE:
     case DogEarType.USDC_EXTRAS:
       return color.special.lightGreen
+    case DogEarType.TOKEN_GATED:
+      return color.special.coinGradient
   }
 }
 
@@ -74,7 +75,13 @@ export const DogEar = (props: DogEarProps) => {
           left: 0,
           width: '100%',
           height: '100%',
-          color: tagColor
+          color: tagColor,
+          ...(type === DogEarType.TOKEN_GATED && {
+            fill: `url(#coinGradient)`,
+            '& path:nth-child(1)': {
+              fill: 'inherit'
+            }
+          })
         }}
       />
       <Icon

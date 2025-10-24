@@ -44,7 +44,7 @@ const config = {
           path: 'docs',
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/AudiusProject/audius-protocol/tree/main/docs',
+          editUrl: 'https://github.com/AudiusProject/apps/tree/main/docs',
           docItemComponent: '@theme/ApiItem', // add @theme/ApiItem here
         },
         theme: {

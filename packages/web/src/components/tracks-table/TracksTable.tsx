@@ -6,7 +6,6 @@ import {
   Track,
   UID,
   UserTrack,
-  isContentCollectibleGated,
   isContentFollowGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
@@ -22,7 +21,6 @@ import {
   IconLock,
   Flex,
   IconSparkles,
-  IconCollectible,
   IconCart,
   Text
 } from '@audius/harmony'
@@ -426,11 +424,9 @@ export const TracksTable = ({
           ? IconVisibilityHidden
           : isContentUSDCPurchaseGated(streamConditions)
             ? IconCart
-            : isContentCollectibleGated(streamConditions)
-              ? IconCollectible
-              : isContentFollowGated(streamConditions)
-                ? IconSparkles
-                : null
+            : isContentFollowGated(streamConditions)
+              ? IconSparkles
+              : null
       } else {
         Icon = !hasStreamAccess
           ? IconLock

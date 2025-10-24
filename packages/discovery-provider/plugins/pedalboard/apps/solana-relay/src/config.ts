@@ -58,6 +58,15 @@ type Config = {
   listensTrackDailyRateLimit: number
   listensTrackWeeklyRateLimit: number
   antiAbuseOracle: string
+  // The public key for the launchpad config partner (Squads multisig)
+  launchpadPartnerPublicKey: string
+  // The private key for a signer of the launchpad config partner (AKA the authority)
+  // Signs the tx and is used to collect all launches for external pages, e.g. jup launchpad
+  launchpadPartnerSignerPrivateKey: string
+  // Secret used to deterministically derive
+  // - ephemeral launchpad keys (HKDF seed)
+  // - reward pool authorities
+  launchpadDeterministicSecret: string
 }
 
 let cachedConfig: Config | null = null
@@ -72,14 +81,14 @@ const readConfig = (): Config => {
       default: 'dev'
     }),
     audius_discprov_url: str({
-      default: 'http://audius-protocol-discovery-provider-1'
+      default: 'http://audius-discovery-provider-1'
     }),
     audius_db_url: str({
       default:
         'postgresql+psycopg2://postgres:postgres@db:5432/discovery_provider_1'
     }),
     audius_redis_url: str({
-      default: 'redis://audius-protocol-discovery-provider-redis-1:6379/00'
+      default: 'redis://audius-discovery-redis-1:6379/00'
     }),
     audius_solana_endpoint: str({
       default: 'http://solana-test-validator:8899'
@@ -151,7 +160,16 @@ const readConfig = (): Config => {
     audius_solana_listens_track_daily_rate_limit: num({ default: 50000 }),
     audius_solana_listens_track_weekly_rate_limit: num({ default: 50000000 }),
     audius_anti_abuse_oracle: str({
-      default: 'http://audius-protocol-anti-abuse-oracle-1:8000'
+      default: 'http://audius-anti-abuse-oracle-1:8000'
+    }),
+    audius_launchpad_partner_public_key: str({
+      default: ''
+    }),
+    audius_launchpad_partner_signer_private_key: str({
+      default: ''
+    }),
+    audius_launchpad_deterministic_secret: str({
+      default: ''
     })
   })
   const solanaFeePayerWalletsParsed = env.audius_solana_fee_payer_wallets
@@ -164,6 +182,7 @@ const readConfig = (): Config => {
   const delegatePrivateKey: Buffer = env.audius_delegate_private_key
     ? Buffer.from(env.audius_delegate_private_key, 'hex')
     : Buffer.from([])
+  logger.level = env.audius_discprov_env !== 'prod' ? 'debug' : 'info'
 
   cachedConfig = {
     environment: env.audius_discprov_env,
@@ -199,7 +218,11 @@ const readConfig = (): Config => {
       env.audius_solana_listens_track_daily_rate_limit,
     listensTrackWeeklyRateLimit:
       env.audius_solana_listens_track_weekly_rate_limit,
-    antiAbuseOracle: env.audius_anti_abuse_oracle
+    antiAbuseOracle: env.audius_anti_abuse_oracle,
+    launchpadPartnerPublicKey: env.audius_launchpad_partner_public_key,
+    launchpadPartnerSignerPrivateKey:
+      env.audius_launchpad_partner_signer_private_key,
+    launchpadDeterministicSecret: env.audius_launchpad_deterministic_secret
   }
   return readConfig()
 }

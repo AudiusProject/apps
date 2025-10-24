@@ -1,16 +1,14 @@
 import {
-  useArtistCoins,
-  useArtistCoinMembersCount,
+  useArtistOwnedCoin,
   useCurrentAccountUser,
-  useCurrentUserId
+  useCurrentUserId,
+  useArtistCoinMembersCount
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   useFirstAvailableBlastAudience,
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import {
   useChatBlastModal,
   chatActions,
@@ -63,9 +61,9 @@ const messages = {
     placeholder: 'Tracks with Remixes'
   },
   coinHolders: {
-    label: (symbol: string) => `${symbol} Members`,
-    description: (symbol: string) =>
-      `Send a bulk message to every holder of ${symbol} on Audius.`,
+    label: (ticker: string) => `$${ticker} Members`,
+    description: (ticker: string) =>
+      `Send a bulk message to every holder of $${ticker} on Audius.`,
     placeholder: 'Coin Holders'
   }
 }
@@ -357,21 +355,14 @@ const RemixCreatorsMessageField = () => {
 const CoinHoldersMessageField = () => {
   const { data: currentUserId } = useCurrentUserId()
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
-  const { data: coins } = useArtistCoins({
-    owner_id: [currentUserId ?? 0],
-    limit: 1
-  })
-  const coinSymbol = coins?.[0]?.ticker ?? ''
-  const { isEnabled: isArtistCoinEnabled } = useFeatureFlag(
-    FeatureFlags.ARTIST_COINS
-  )
+  const { data: coin } = useArtistOwnedCoin(currentUserId)
+  const coinSymbol = coin?.ticker ?? ''
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
-  const { data: membersCount } = useArtistCoinMembersCount()
-  const isDisabled = !isArtistCoinEnabled || membersCount === 0
-  if (!isArtistCoinEnabled) {
-    return null
-  }
+  const { data: coinMembersCount } = useArtistCoinMembersCount({
+    mint: coin?.mint
+  })
+  const isDisabled = coinMembersCount === 0
 
   return (
     <Flex
@@ -385,7 +376,7 @@ const CoinHoldersMessageField = () => {
       <Flex direction='column' gap='xs' css={{ cursor: 'pointer' }}>
         <LabelWithCount
           label={messages.coinHolders.label(coinSymbol)}
-          count={membersCount}
+          count={coinMembersCount}
           isSelected={isSelected}
         />
         {isSelected ? (

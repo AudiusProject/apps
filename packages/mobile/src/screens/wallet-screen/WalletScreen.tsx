@@ -4,6 +4,10 @@ import { Flex, IconWallet } from '@audius/harmony-native'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
 
 import { CashWallet } from './components/CashWallet'
+import {
+  LinkedWallets,
+  WalletRowOverflowMenu
+} from './components/LinkedWallets'
 import { YourCoins } from './components/YourCoins'
 
 const messages = {
@@ -20,11 +24,13 @@ export const WalletScreen = () => {
     >
       <ScreenContent>
         <ScrollView>
-          <Flex direction='column' gap='xl' ph='s' pv='2xl'>
+          <Flex gap='xl' ph='s' pv='2xl'>
             <CashWallet />
             <YourCoins />
+            <LinkedWallets />
           </Flex>
         </ScrollView>
+        <WalletRowOverflowMenu />
       </ScreenContent>
     </Screen>
   )

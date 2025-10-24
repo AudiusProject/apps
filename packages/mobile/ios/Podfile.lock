@@ -1425,6 +1425,27 @@ PODS:
     - React-Core
   - react-native-keep-awake (1.2.2):
     - React-Core
+  - react-native-keyboard-controller (1.19.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.10.14.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-netinfo (11.2.1):
     - React-Core
   - react-native-notifications (5.1.0):
@@ -2159,6 +2180,7 @@ DEPENDENCIES:
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
   - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
+  - react-native-keyboard-controller (from `../../../node_modules/react-native-keyboard-controller`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-pager-view (from `../../../node_modules/react-native-pager-view`)
@@ -2351,6 +2373,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-in-app-review"
   react-native-keep-awake:
     :path: "../node_modules/@sayem314/react-native-keep-awake"
+  react-native-keyboard-controller:
+    :path: "../../../node_modules/react-native-keyboard-controller"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-notifications:
@@ -2538,6 +2562,7 @@ SPEC CHECKSUMS:
   react-native-image-picker: a05e7cf2b13aa348e6a5e2354bcf8b5033a8aed0
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keep-awake: ad1d67f617756b139536977a0bf06b27cec0714a
+  react-native-keyboard-controller: b1ef38ac5c37c90479c1b5dc23bb095803dea20f
   react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-pager-view: ad90e78510ae4cb5f91d8b0d7ebb8a794c2ad266

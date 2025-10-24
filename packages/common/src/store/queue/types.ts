@@ -1,4 +1,4 @@
-import { ID, UID, Collectible, Track, User } from '../../models'
+import { ID, UID, Track, User } from '../../models'
 import type { PlayerBehavior } from '../player/types'
 
 export enum RepeatMode {
@@ -15,7 +15,6 @@ export enum QueueSource {
   DISCOVER_TRENDING_MONTH = 'DISCOVER_TRENDING_MONTH',
   DISCOVER_TRENDING_ALL_TIME = 'DISCOVER_TRENDING_ALL_TIME',
   HISTORY_TRACKS = 'HISTORY_TRACKS',
-  COLLECTIBLE_PLAYLIST_TRACKS = 'COLLECTIBLE_PLAYLIST_TRACKS',
   PROFILE_FEED = 'PROFILE_FEED',
   PROFILE_TRACKS = 'PROFILE_TRACKS',
   SAVED_TRACKS = 'SAVED_TRACKS',
@@ -33,7 +32,6 @@ export type Queueable = {
   id: ID | string
   uid: UID
   artistId?: ID
-  collectible?: Collectible
   source: QueueSource
   playerBehavior?: PlayerBehavior
 }

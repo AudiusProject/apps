@@ -4,19 +4,18 @@ import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SquareSizes,
-  isContentCollectibleGated,
   isContentUSDCPurchaseGated,
   ID,
   FieldVisibility,
   Remix,
-  AccessConditions
+  AccessConditions,
+  isContentTokenGated
 } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { OverflowAction, PurchaseableContentType } from '@audius/common/store'
 import { Nullable, formatReleaseDate, dayjs } from '@audius/common/utils'
 import {
   Flex,
-  IconCollectible,
   IconPause,
   IconPlay,
   IconSparkles,
@@ -24,7 +23,8 @@ import {
   Box,
   Button,
   MusicBadge,
-  Text
+  Text,
+  IconArtistCoin
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
 import IconRobot from '@audius/harmony/src/assets/icons/Robot.svg'
@@ -59,9 +59,9 @@ const messages = {
   play: 'PLAY',
   preview: 'PREVIEW',
   pause: 'PAUSE',
-  collectibleGated: 'COLLECTIBLE GATED',
   premiumTrack: 'PREMIUM TRACK',
   specialAccess: 'SPECIAL ACCESS',
+  coinGated: 'COIN GATED',
   generatedWithAi: 'Generated With AI',
   artworkAltText: 'Track Artwork',
   hidden: 'Hidden',
@@ -309,12 +309,12 @@ const TrackHeader = ({
     if (isStreamGated) {
       let IconComponent = IconSparkles
       let titleMessage = messages.specialAccess
-      if (isContentCollectibleGated(streamConditions)) {
-        IconComponent = IconCollectible
-        titleMessage = messages.collectibleGated
-      } else if (isContentUSDCPurchaseGated(streamConditions)) {
+      if (isContentUSDCPurchaseGated(streamConditions)) {
         IconComponent = IconCart
         titleMessage = messages.premiumTrack
+      } else if (isContentTokenGated(streamConditions)) {
+        IconComponent = IconArtistCoin
+        titleMessage = messages.coinGated
       }
       return (
         <Flex gap='xs' justifyContent='center' alignItems='center'>
@@ -344,8 +344,8 @@ const TrackHeader = ({
 
   return (
     <Box w='100%' borderRadius='m' backgroundColor='white' p='l'>
+      <TrackDogEar trackId={trackId} />
       <Flex column gap='l' alignItems='center'>
-        <TrackDogEar trackId={trackId} />
         <Flex gap='s' column>
           {renderHeaderText()}
           {aiAttributedUserId ? (

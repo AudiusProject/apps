@@ -7,7 +7,7 @@ import { BaseButtonProps } from '../button/BaseButton/types'
 import { Text } from '../text'
 
 export type PillProps = BaseButtonProps & {
-  variant?: 'default' | 'active' | 'custom'
+  variant?: 'default' | 'active' | 'primary' | 'custom'
 }
 
 /**
@@ -24,24 +24,28 @@ export const Pill = forwardRef(
     const backgroundColors = {
       default: color.background.surface2,
       active: color.background.accent,
+      primary: color.background.primary,
       custom: undefined
     }
 
     const hoverBackgroundColors = {
       default: color.background.accent,
       active: color.background.accent,
+      primary: color.background.accent,
       custom: undefined
     }
 
     const textColors = {
       default: color.text.subdued,
       active: color.text.white,
+      primary: color.text.white,
       custom: color.text.white
     }
 
     const hoverTextColors = {
       default: color.text.white,
       active: color.text.white,
+      primary: color.text.white,
       custom: color.text.white
     }
 

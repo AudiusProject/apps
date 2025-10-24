@@ -53,6 +53,12 @@ export type HoverCardProps = {
    * @default 'hover'
    */
   triggeredBy?: TriggerType
+
+  /**
+   * Callback fired when hover state changes
+   * @param isHovered Whether the component is currently being hovered
+   */
+  onHover?: (isHovered: boolean) => void
 }
 
 export type HoverCardHeaderProps = {

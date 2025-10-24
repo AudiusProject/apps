@@ -2,7 +2,7 @@
 COMMAND_PREFIX='secrets'
 
 if ! git secrets > /dev/null 2>&1; then
-  echo "Please install 'git-secrets' from https://github.com/awslabs/git-secrets and run 'git secrets --install' in the audius-protocol/ repo"
+  echo "Please install 'git-secrets' from https://github.com/awslabs/git-secrets and run 'git secrets --install' in the apps/ repo"
   exit 1
 fi
 

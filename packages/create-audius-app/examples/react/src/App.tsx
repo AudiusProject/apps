@@ -49,17 +49,14 @@ export default function App() {
 
   /**
    * Fetch tracks based on the user handle present in handleInputRef
-   * Update favorites state with the results of the fetch
    */
   const fetchTrack = async () => {
     const { data: selectedUser } = await sdk.users.getUserByHandle({
       handle: handleInputRef.current?.value ?? ''
     })
-    console.log({ selectedUser })
 
     const { data: tracks } = await sdk.full.users.getTracksByUser({
-      id: selectedUser?.id ?? '',
-      userId: user?.userId ?? ''
+      id: selectedUser?.id ?? ''
     })
 
     setTracks(tracks ?? [])

@@ -75,7 +75,7 @@ export const AboutScreen = () => {
         <SettingsRow url={route.AUDIUS_INSTAGRAM_LINK}>
           <SettingsRowLabel label={messages.instagram} icon={IconInstagram} />
         </SettingsRow>
-        <SettingsRow url={route.AUDIUS_CONTACT_EMAIL_LINK}>
+        <SettingsRow url={route.AUDIUS_HELP_LINK}>
           <SettingsRowLabel label={messages.contact} icon={IconMessage} />
         </SettingsRow>
         <SettingsRow url={route.AUDIUS_CAREERS_LINK}>

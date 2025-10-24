@@ -17,7 +17,7 @@ SLACK_USER_ID="$(eval echo \$$env_key_name)"
 
 # Format the commit message of the last commit
 echo "Generating Commit Message..."
-COMMIT_SHA_LINK=$(git log -1 --pretty=format:'<https://github.com/AudiusProject/audius-protocol/commit/%H|%h>' HEAD)
+COMMIT_SHA_LINK=$(git log -1 --pretty=format:'<https://github.com/AudiusProject/apps/commit/%H|%h>' HEAD)
 COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s' HEAD)
 
 # Get Pipeline URL

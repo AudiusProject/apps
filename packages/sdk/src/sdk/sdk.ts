@@ -3,17 +3,19 @@ import { mainnet } from 'viem/chains'
 
 import { ResolveApi } from './api/ResolveApi'
 import { AlbumsApi } from './api/albums/AlbumsApi'
-import { ChallengesApi } from './api/challenges/ChallengesApi'
 import { ChatsApi } from './api/chats/ChatsApi'
 import { CommentsApi } from './api/comments/CommentsAPI'
 import { DashboardWalletUsersApi } from './api/dashboard-wallet-users/DashboardWalletUsersApi'
 import { DeveloperAppsApi } from './api/developer-apps/DeveloperAppsApi'
 import { EventsApi } from './api/events/EventsApi'
 import {
+  ChallengesApi,
   CoinsApi,
   Configuration,
   ExploreApi,
-  TipsApi
+  RewardsApi,
+  TipsApi,
+  WalletApi
 } from './api/generated/default'
 import {
   TracksApi as TracksApiFull,
@@ -50,10 +52,6 @@ import { AntiAbuseOracle } from './services/AntiAbuseOracle/AntiAbuseOracle'
 import { getDefaultAntiAbuseOracleSelectorConfig } from './services/AntiAbuseOracleSelector'
 import { AntiAbuseOracleSelector } from './services/AntiAbuseOracleSelector/AntiAbuseOracleSelector'
 import { createAppWalletClient } from './services/AudiusWalletClient'
-import {
-  DiscoveryNodeSelector,
-  getDefaultDiscoveryNodeSelectorConfig
-} from './services/DiscoveryNodeSelector'
 import { EmailEncryptionService } from './services/Encryption'
 import {
   EntityManagerClient,
@@ -181,13 +179,6 @@ const initializeServices = (config: SdkConfig) => {
       transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
-  const discoveryNodeSelector =
-    config.services?.discoveryNodeSelector ??
-    new DiscoveryNodeSelector({
-      ...getDefaultDiscoveryNodeSelectorConfig(servicesConfig),
-      logger
-    })
-
   const storageNodeSelector =
     config.services?.storageNodeSelector ??
     new StorageNodeSelector({
@@ -225,15 +216,20 @@ const initializeServices = (config: SdkConfig) => {
     })
 
   const middleware = [
-    addRequestSignatureMiddleware({ services: { audiusWalletClient, logger } }),
-    discoveryNodeSelector.createMiddleware()
+    addRequestSignatureMiddleware({
+      services: { audiusWalletClient, logger },
+      apiKey: config.apiKey,
+      apiSecret: config.apiSecret
+    })
   ]
 
   /* Solana Programs */
   const solanaRelay = config.services?.solanaRelay
     ? config.services.solanaRelay.withMiddleware(
         addRequestSignatureMiddleware({
-          services: { audiusWalletClient, logger }
+          services: { audiusWalletClient, logger },
+          apiKey: config.apiKey,
+          apiSecret: config.apiSecret
         })
       )
     : new SolanaRelay(
@@ -245,7 +241,9 @@ const initializeServices = (config: SdkConfig) => {
   const archiverService = config.services?.archiverService
     ? config.services.archiverService.withMiddleware(
         addRequestSignatureMiddleware({
-          services: { audiusWalletClient, logger }
+          services: { audiusWalletClient, logger },
+          apiKey: config.apiKey,
+          apiSecret: config.apiSecret
         })
       )
     : undefined
@@ -380,7 +378,6 @@ const initializeServices = (config: SdkConfig) => {
 
   const services: ServicesContainer = {
     storageNodeSelector,
-    discoveryNodeSelector,
     antiAbuseOracleSelector,
     entityManager,
     storage,
@@ -423,21 +420,31 @@ const initializeApis = ({
   appName?: string
   services: ServicesContainer
 }) => {
-  const basePath =
+  const apiEndpoint =
     config.environment === 'development'
       ? developmentConfig.network.apiEndpoint
       : config.environment === 'staging'
         ? stagingConfig.network.apiEndpoint
         : productionConfig.network.apiEndpoint
+  const basePath = `${apiEndpoint}/v1`
 
   const middleware = [
-    addAppInfoMiddleware({ apiKey, appName, services }),
-    addRequestSignatureMiddleware({ services })
+    addAppInfoMiddleware({
+      apiKey,
+      appName,
+      services,
+      basePath
+    }),
+    addRequestSignatureMiddleware({
+      services,
+      apiKey,
+      apiSecret: config.apiSecret
+    })
   ]
   const apiClientConfig = new Configuration({
     fetchApi: fetch,
     middleware,
-    basePath: `${basePath}/v1`
+    basePath
   })
 
   const tracks = new TracksApi(
@@ -480,14 +487,17 @@ const initializeApis = ({
     services.entityManager,
     services.logger
   )
+  const challenges = new ChallengesApi(apiClientConfig)
   const coins = new CoinsApi(apiClientConfig)
+  const wallets = new WalletApi(apiClientConfig)
   const tips = new TipsApi(apiClientConfig)
   const resolveApi = new ResolveApi(apiClientConfig)
+  const rewards = new RewardsApi(apiClientConfig)
   const resolve = resolveApi.resolve.bind(resolveApi)
 
   const chats = new ChatsApi(
     new Configuration({
-      basePath, // comms is not a v1 API
+      basePath: apiEndpoint, // comms is not a v1 API
       fetchApi: fetch,
       middleware
     }),
@@ -507,24 +517,13 @@ const initializeApis = ({
     services.entityManager
   )
 
-  const challenges = new ChallengesApi(
-    apiClientConfig,
-    users,
-    services.discoveryNodeSelector,
-    services.rewardManagerClient,
-    services.claimableTokensClient,
-    services.antiAbuseOracle,
-    services.logger,
-    services.solanaClient
-  )
-
   const notifications = new NotificationsApi(
     apiClientConfig,
     services.entityManager
   )
 
   const generatedApiClientConfigFull = new ConfigurationFull({
-    basePath: `${basePath}/v1/full`,
+    basePath: `${basePath}/full`,
     fetchApi: fetch,
     middleware
   })
@@ -562,13 +561,15 @@ const initializeApis = ({
     grants,
     developerApps,
     dashboardWalletUsers,
-    challenges,
+    rewards,
     services,
     comments,
     notifications,
     events,
     explore,
-    coins
+    coins,
+    wallets,
+    challenges
   }
 }
 

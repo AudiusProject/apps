@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useTrack } from '@audius/common/api'
+import { remixSettingsMessages as messages } from '@audius/common/messages'
 import {
   isContentUSDCPurchaseGated,
   ID,
@@ -35,14 +36,6 @@ import {
   SHOW_REMIXES,
   SHOW_REMIXES_BASE
 } from './types'
-
-const messages = {
-  title: 'Remix Settings',
-  description:
-    'Mark your music as a remix, tag the original track, and customize remix settings.',
-  remixOf: 'Remix of',
-  remixesHidden: 'Remixes Hidden'
-}
 
 export type RemixOfField = Nullable<{ tracks: { parent_track_id: ID }[] }>
 

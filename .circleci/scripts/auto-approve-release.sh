@@ -84,7 +84,7 @@ echo "Running against protocol version: $VERSION"
 
 # Get the pipeline for the most recent commit on the release branch
 response=$(curl --request GET \
-  --url "https://circleci.com/api/v2/project/gh/AudiusProject/audius-protocol/pipeline?branch=release-v$VERSION" \
+  --url "https://circleci.com/api/v2/project/gh/AudiusProject/apps/pipeline?branch=release-v$VERSION" \
   --header "Circle-Token: $CIRCLE_DAILY_DEPLOY_API_TOKEN")
 
 pipeline_id=$(echo "$response" | jq -r '.items[0].id')
@@ -111,7 +111,7 @@ job_id=$(curl --request GET \
 # If we found the job, approve it automatically
 if [ -n "$job_id" ]; then
   echo "Approving job with id=$job_id"
-  job_url="https://app.circleci.com/pipelines/gh/AudiusProject/audius-protocol/$pipeline_number/workflows/$workflow_id"
+  job_url="https://app.circleci.com/pipelines/gh/AudiusProject/apps/$pipeline_number/workflows/$workflow_id"
   curl --request POST \
     "https://circleci.com/api/v2/workflow/$workflow_id/approve/$job_id" \
     --header "Circle-Token: $CIRCLE_DAILY_DEPLOY_API_TOKEN"
@@ -119,5 +119,5 @@ if [ -n "$job_id" ]; then
   send_slack_message "Deploying <${job_url}|release-v$VERSION> to $release_type nodes. Please watch for issues."
 else
   # If we couldn't find the deploy trigger job on hold, send the failure message
-  send_slack_message "No CircleCI job is on hold for me to auto-approve for today's $release_type release (hint: check <https://app.circleci.com/pipelines/github/AudiusProject/audius-protocol?branch=$CIRCLE_BRANCH|here>)"
+  send_slack_message "No CircleCI job is on hold for me to auto-approve for today's $release_type release (hint: check <https://app.circleci.com/pipelines/github/AudiusProject/apps?branch=$CIRCLE_BRANCH|here>)"
 fi

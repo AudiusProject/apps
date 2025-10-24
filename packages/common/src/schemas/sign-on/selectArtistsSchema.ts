@@ -1,5 +1,5 @@
 import { z } from 'zod'
 
 export const selectArtistsSchema = z.object({
-  selectedArtists: z.array(z.string()).min(3)
+  selectedArtists: z.array(z.string()).optional()
 })

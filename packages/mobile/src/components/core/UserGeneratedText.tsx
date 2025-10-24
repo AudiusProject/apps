@@ -346,8 +346,7 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
               // URL match
               // Intentionally not using the default URL matcher to avoid conflict with the handle matcher. See: https://github.com/joshswan/react-native-autolink/issues/78
               {
-                pattern:
-                  /(https?:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g
+                pattern: /(https?:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\S]*)/g
               },
               // custom matchers provided via props
               ...(matchers ?? [])

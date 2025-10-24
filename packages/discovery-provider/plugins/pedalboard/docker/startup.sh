@@ -3,7 +3,7 @@
 # NOTE: This script is meant to be used from within docker containers
 
 # Get the replica number from the host name
-export replica=$(nslookup $(hostname -i) | sed -n "s/^.*audius-protocol-[A-z\-]*\([0-9]\)\+.*$/\1/p")
+export replica=$(nslookup $(hostname -i) | sed -n "s/^.*audius-[A-z\-]*\([0-9]\)\+.*$/\1/p")
 
 # If non-replicated, default to 1 (for eg verified-notifications)
 if [ -z "$replica" ]; then
@@ -17,14 +17,14 @@ if [[ "$audius_db_url" == "" ]]; then
 fi
 
 if [[ "$audius_redis_url" == "" ]]; then
-    export audius_redis_url="redis://audius-protocol-discovery-provider-redis-${replica}:6379/00"
+    export audius_redis_url="redis://audius-discovery-provider-redis-${replica}:6379/00"
 fi
 
-export audius_discprov_url="http://audius-protocol-discovery-provider-${replica}"
+export audius_discprov_url="http://audius-discovery-provider-${replica}"
 
 export audius_delegate_owner_wallet=$(printenv "DP${replica}_DELEGATE_OWNER_ADDRESS")
 export audius_delegate_private_key=$(printenv "DP${replica}_DELEGATE_OWNER_PRIVATE_KEY")
-elasticsearch_host="audius-protocol-discovery-provider-elasticsearch-${replica}"
+elasticsearch_host="audius-discovery-provider-elasticsearch-${replica}"
 if nslookup "$elasticsearch_host" >/dev/null 2>&1; then
     export audius_elasticsearch_url="http://${elasticsearch_host}:9200"
 fi

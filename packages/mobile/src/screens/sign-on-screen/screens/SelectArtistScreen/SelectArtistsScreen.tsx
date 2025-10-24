@@ -1,17 +1,12 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { selectArtistsPageMessages } from '@audius/common/messages'
 import {
   addFollowArtists,
-  finishSignUp,
+  signUp,
   completeFollowArtists
 } from '@audius/web/src/common/store/pages/signon/actions'
-import { EditingStatus } from '@audius/web/src/common/store/pages/signon/types'
-import {
-  getFollowIds,
-  getGenres,
-  getStatus
-} from 'common/store/pages/signon/selectors'
+import { getFollowIds, getGenres } from 'common/store/pages/signon/selectors'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Flex, Text } from '@audius/harmony-native'
@@ -41,7 +36,7 @@ export const SelectArtistsScreen = () => {
   const navigation = useNavigation<SignOnScreenParamList>()
   useTrackScreen('SelectArtists')
 
-  const accountCreationStatus = useSelector(getStatus)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const renderHeader = useCallback(
     () => (
@@ -61,15 +56,18 @@ export const SelectArtistsScreen = () => {
   )
 
   const handleSubmit = useCallback(() => {
-    // Follow selected artists
-    dispatch(addFollowArtists(selectedArtists))
-    dispatch(completeFollowArtists())
-    // This call is what eventually triggers the RootScreen to redirect to the home page (via conditional rendering)
-    dispatch(finishSignUp())
-    if (accountCreationStatus === EditingStatus.LOADING) {
-      navigation.navigate('AccountLoading')
+    setIsSubmitting(true)
+
+    // Only add artists if some were selected
+    if (selectedArtists.length > 0) {
+      dispatch(addFollowArtists(selectedArtists))
+      dispatch(completeFollowArtists())
     }
-  }, [accountCreationStatus, dispatch, navigation, selectedArtists])
+
+    // Always create the account (whether artists selected or not)
+    dispatch(signUp())
+    navigation.navigate('AccountLoading')
+  }, [dispatch, navigation, selectedArtists])
 
   return (
     <SelectArtistsPreviewContextProvider>
@@ -90,14 +88,18 @@ export const SelectArtistsScreen = () => {
         </Tab.Navigator>
         <PageFooter
           buttonProps={{
-            disabled: selectedArtists.length < 3,
+            disabled: isSubmitting,
+            isLoading: isSubmitting,
             onPress: handleSubmit
           }}
-          postfix={
-            <Text variant='body'>
-              {selectArtistsPageMessages.selected} {selectedArtists.length || 0}
-              /3
-            </Text>
+          prefix={
+            <Flex direction='column' gap='m' alignItems='center'>
+              <Text variant='body'>
+                {selectArtistsPageMessages.selected}{' '}
+                {selectedArtists.length || 0}
+                /3
+              </Text>
+            </Flex>
           }
         />
       </Flex>

@@ -14,11 +14,11 @@ steps:
         git merge $release_commit_hash --no-edit
         git push origin foundation
   - checkout:
-      path: ~/audius-protocol
+      path: ~/apps
   - run:
       name: Fetch and export version
       command: |
-        echo "export exported_version_tag=$(jq -r .version ~/audius-protocol/packages/discovery-provider/.version.json)" >> "$BASH_ENV"
+        echo "export exported_version_tag=$(jq -r .version ~/apps/packages/discovery-provider/.version.json)" >> "$BASH_ENV"
   - docker-tag-images:
       tag: edge
       service: all

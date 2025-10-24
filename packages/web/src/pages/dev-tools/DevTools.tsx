@@ -108,13 +108,6 @@ export const DevTools = () => {
     }
   }
 
-  const handleOpenDiscoveryNodeSelector = () => {
-    ensureDevModeEnabledInProduction()
-    document.body.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'd', keyCode: 68, bubbles: true })
-    )
-  }
-
   const handleOpenConfirmerPreview = () => {
     ensureDevModeEnabledInProduction()
     document.body.dispatchEvent(
@@ -160,14 +153,6 @@ export const DevTools = () => {
             description={messages.featureFlagsDescription}
             buttonText={messages.featureFlagsButton}
             onButtonClick={handleOpenFeatureFlags}
-          />
-
-          <DevToolCard
-            icon={IconSettings}
-            title={messages.discoveryNodeTitle}
-            description={messages.discoveryNodeDescription}
-            buttonText={messages.discoveryNodeButton}
-            onButtonClick={handleOpenDiscoveryNodeSelector}
           />
 
           <DevToolCard

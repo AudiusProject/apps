@@ -249,14 +249,18 @@ async function claimRewardsForChallenge({
         })
       )
         .then(() =>
-          sdk.challenges.claimReward({
-            challengeId,
-            specifier: specifierWithAmount.specifier,
-            amount: specifierWithAmount.amount,
-            userId
+          sdk.rewards.claimRewards({
+            claimRewardsRequest: {
+              challengeId,
+              specifier: specifierWithAmount.specifier,
+              userId
+            }
           })
         )
-        .then(() =>
+        .then((res) => {
+          if (res?.data?.[0]?.error) {
+            throw new Error(res.data[0].error)
+          }
           track(
             make({
               eventName: Name.REWARDS_CLAIM_SUCCESS,
@@ -265,7 +269,8 @@ async function claimRewardsForChallenge({
               amount: specifierWithAmount.amount
             })
           )
-        )
+          return res
+        })
         .then(() => {
           return specifierWithAmount
         })
@@ -637,7 +642,7 @@ function* watchFetchUserChallenges() {
 
 /**
  * Resets the listen streak override if current_step_count is fetched and non-zero
- * This handles the case where discovery can reset the user's listen streak
+ * This handles the case where API can reset the user's listen streak
  */
 function* handleOptimisticListenStreakUpdate(
   challenge: UserChallenge,

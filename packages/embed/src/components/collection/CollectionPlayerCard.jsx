@@ -141,6 +141,8 @@ const CollectionPlayerCard = ({
               isVerified={collection.user.isVerified}
               title={collection.playlistName}
               titleUrl={permalink}
+              artistCoinLogo={collection.user.artist_coin_badge?.logo_uri}
+              balance={collection.user.totalBalance}
             />
             <div className={styles.scrubber}>
               <BedtimeScrubber

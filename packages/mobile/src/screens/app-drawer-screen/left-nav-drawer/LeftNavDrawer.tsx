@@ -15,6 +15,7 @@ import {
   ProfileNavItem,
   MessagesNavItem,
   WalletNavItem,
+  ArtistCoinsNavItem,
   RewardsNavItem,
   UploadNavItem,
   SettingsNavItem,
@@ -49,6 +50,7 @@ const WrappedLeftNavDrawer = () => {
         <ProfileNavItem />
         <MessagesNavItem />
         <WalletNavItem />
+        <ArtistCoinsNavItem />
         <RewardsNavItem />
         <UploadNavItem />
         <SettingsNavItem />

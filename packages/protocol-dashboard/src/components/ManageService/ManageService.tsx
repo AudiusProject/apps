@@ -25,12 +25,11 @@ import { InfoBox } from 'components/InfoBox/InfoBox'
 import {
   AggregateContributionInfoTooltip,
   AppliedInfoTooltipProps,
-  ContentNodesInfoTooltip,
   DelegatedAudioInfoTooltip,
   DelegatorsInfoTooltip,
-  DiscoveryNodesInfoTooltip,
   EstimatedAudioRewardsPoolInfoTooltip,
   NodeOperatorInfoTooltip,
+  NodesInfoTooltip,
   NodeServiceFeeInfoTooltip,
   OperatorStakeInfoTooltip
 } from 'components/InfoTooltip/InfoTooltips'
@@ -63,7 +62,6 @@ import { COOLDOWN_PERIOD_DOCS_URL } from 'utils/routes'
 import { sharedMessages } from 'utils/sharedMessages'
 
 import styles from './ManageService.module.css'
-import { RegisterNewServiceBtn } from './RegisterNewServiceBtn'
 
 const messages = {
   ownerTitle: 'Your Nodes',
@@ -78,6 +76,8 @@ const messages = {
   contentNodesSingular: 'Content Node',
   discoveryNodes: 'Discovery Nodes',
   discoveryNodesSingular: 'Discovery Node',
+  nodes: 'Nodes',
+  nodesSingular: 'Node',
   delegators: 'Delegators',
   delegatorsSingular: 'Delegator',
   change: 'Change',
@@ -123,8 +123,7 @@ interface ManageServiceProps {
   showViewActiveServices?: boolean
   showPendingTransactions?: boolean
   wallet: string
-  onClickDiscoveryTable?: () => void
-  onClickContentTable?: () => void
+  onClickNodesTable?: () => void
 }
 
 const Delegators = ({
@@ -417,7 +416,7 @@ const Stake = ({ stake, enableChange, disabledReason }: StakeProps) => {
 }
 
 const ManageService = (props: ManageServiceProps) => {
-  const wallet = props.wallet
+  const { wallet } = props
 
   const { isLoggedIn } = useAccount()
   const { status: accountUserStatus, user: accountUser } = useAccountUser()
@@ -452,10 +451,11 @@ const ManageService = (props: ManageServiceProps) => {
 
   const isTotalStakeInBounds =
     (serviceUser as Operator)?.serviceProvider?.validBounds ?? false
-  const numDiscoveryNodes =
-    isServiceProvider && (serviceUser as Operator).discoveryProviders.length
-  const numContentNodes =
-    isServiceProvider && (serviceUser as Operator).contentNodes.length
+  const numNodes =
+    isServiceProvider &&
+    (serviceUser as Operator).discoveryProviders.length +
+      (serviceUser as Operator).contentNodes.length +
+      (serviceUser as Operator).validators.length
   const numDelegators = isServiceProvider
     ? (serviceUser as Operator).delegators.length
     : 0
@@ -473,10 +473,7 @@ const ManageService = (props: ManageServiceProps) => {
     pendingClaim.status === Status.Success &&
     userDelegatesStatus === Status.Success
   const showDelegate =
-    isDoneLoading &&
-    (numDiscoveryNodes ?? 0) + (numContentNodes ?? 0) > 0 &&
-    !isOwner &&
-    delegates.isZero()
+    isDoneLoading && (numNodes ?? 0) > 0 && !isOwner && delegates.isZero()
   const showUndelegate =
     isDoneLoading &&
     !isOwner &&
@@ -536,9 +533,6 @@ const ManageService = (props: ManageServiceProps) => {
           {isOwner ? null : <NodeOperatorInfoTooltip />}
         </Flex>
         <Flex gap='xl' alignItems='center'>
-          {isOwner ? (
-            <RegisterNewServiceBtn customText={messages.registerNode} />
-          ) : null}
           <Box css={{ textAlign: 'end' }}>
             <Text variant='heading' size='m' color='accent'>
               {AudiusClient.displayShortAud(aggregateContribution)}
@@ -555,28 +549,12 @@ const ManageService = (props: ManageServiceProps) => {
       </Flex>
       <Flex pv='l' ph='xl' gap='2xl' alignItems='stretch' wrap='wrap'>
         <Flex direction='column' alignItems='stretch' gap='s'>
-          {numContentNodes ? (
+          {numNodes ? (
             <ServiceBigStat
-              data={numContentNodes}
-              label={
-                numContentNodes === 1
-                  ? messages.contentNodesSingular
-                  : messages.contentNodes
-              }
-              tooltipComponent={ContentNodesInfoTooltip}
-              onClick={() => props.onClickContentTable?.()}
-            />
-          ) : null}
-          {numDiscoveryNodes ? (
-            <ServiceBigStat
-              data={numDiscoveryNodes}
-              label={
-                numDiscoveryNodes === 1
-                  ? messages.discoveryNodesSingular
-                  : messages.discoveryNodes
-              }
-              tooltipComponent={DiscoveryNodesInfoTooltip}
-              onClick={() => props.onClickDiscoveryTable?.()}
+              data={numNodes}
+              label={numNodes === 1 ? messages.nodesSingular : messages.nodes}
+              tooltipComponent={NodesInfoTooltip}
+              onClick={() => props.onClickNodesTable?.()}
             />
           ) : null}
           {numDelegators ? (

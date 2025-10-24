@@ -83,7 +83,7 @@ else
             curl -sSL \
                 -H "Accept: application/vnd.github+json" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/repos/AudiusProject/audius-protocol/releases?page=$page" | \
+                "https://api.github.com/repos/AudiusProject/apps/releases?page=$page" | \
             "$jq_path" -r '([.[] | select(.tag_name | test("'"$audius_ctl_tag_regex"'"))][0] | .assets[]? | select(.name == "'"$BINARY_NAME"'") | .url) // ""' \
         )
         if [ -n "$asset_url" ]; then 
@@ -94,7 +94,7 @@ else
     # handle release not found
     if [ -z "$asset_url" ]; then 
         echo "Couldn't find latest audius-ctl binary '$BINARY_NAME'."
-        echo "Please check for an open issue at https://github.com/AudiusProject/audius-protocol/issues"
+        echo "Please check for an open issue at https://github.com/AudiusProject/apps/issues"
         [ -n "$cleanup_jq" ] && rm "$jq_path" || true
         exit 1
     fi

@@ -53,11 +53,18 @@ react {
     autolinkLibrariesWithApp()
 }
 
+/**
+ * react-native-config attempts to match based on the name of the *task* being run, lowercased and using a startsWith() check.
+ * These *should* be run by our tooling (either react-native-cli or fastlane) to target exactly one flavor (prod,
+ * releasecandidate, staging, stagingReleaseCandidate) so that they map to the correct env file below.
+ * See package.json and ../fastlane/Fastfile to see the invocations.
+ * You can manually set the ENVFILE env var to override this.
+ */
 project.ext.envConfigFiles = [
-    release: ".env.prod",
-    stagingrelease: ".env.stage",
-    stagingreleasecandidaterelease: ".env.prod",
-    releasecandidaterelease: ".env.prod"
+    prod: ".env.prod",
+    releasecandidate: ".env.prod",
+    staging: ".env.stage",
+    stagingreleasecandidate: ".env.stage",
 ]
 
 def sentryGradleFile = file("../../node_modules/@sentry/react-native/sentry.gradle")
@@ -125,7 +132,7 @@ android {
         // versionCode is automatically incremented in CI
         versionCode 1
         // Make sure this is above the currently released Android version in the play store if your changes touch native code:
-        versionName "1.1.499"
+        versionName "1.1.509"
         resValue "string", "build_config_package", "co.audius.app"
         resConfigs "en"
     }

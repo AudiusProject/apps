@@ -45,9 +45,7 @@ export const RewardsBanner = (props: RewardsBannerProps) => {
   return (
     <Paper m='l' mb={0} onPress={handlePress}>
       <LinearGradient
-        colors={color.special.gradient.colors}
-        start={color.special.gradient.end}
-        end={color.special.gradient.start}
+        {...color.special.gradient}
         style={{ width: '100%', borderRadius: 8 }}
       >
         <Flex direction='column' alignItems='center' ph='l' pv='m'>

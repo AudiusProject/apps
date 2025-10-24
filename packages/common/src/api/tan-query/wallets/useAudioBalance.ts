@@ -4,7 +4,8 @@ import {
   queryOptions,
   useQueries,
   useQuery,
-  type QueryFunctionContext
+  type QueryFunctionContext,
+  useQueryClient
 } from '@tanstack/react-query'
 import { call, getContext } from 'typed-redux-saga'
 import { getAddress } from 'viem'
@@ -14,19 +15,17 @@ import {
   useQueryContext,
   type QueryContextType
 } from '~/api/tan-query/utils/QueryContext'
-import { Chain } from '~/models'
+import { Chain, ID } from '~/models'
 import { Feature } from '~/models/ErrorReporting'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { queryCurrentUserId, queryUser } from '../saga-utils'
+import { QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUser } from '../users/useUser'
 
-import {
-  getConnectedWalletsQueryOptions,
-  useConnectedWallets
-} from './useConnectedWallets'
+import { getConnectedWalletsQueryOptions } from './useAssociatedWallets'
 
 type UseWalletAudioBalanceParams = {
   /** Ethereum or Solana wallet address */
@@ -36,7 +35,7 @@ type UseWalletAudioBalanceParams = {
   includeStaked?: boolean
 }
 
-const getWalletAudioBalanceQueryKey = ({
+export const getWalletAudioBalanceQueryKey = ({
   address,
   includeStaked,
   chain
@@ -165,21 +164,30 @@ export const useWalletAudioBalances = (
   })
 }
 
-type UseAudioBalanceOptions = {
+type UseAudioBalanceParams = {
   /** Whether to include connected/linked wallets in the balance calculation. Defaults to true. */
   includeConnectedWallets?: boolean
   includeStaked?: boolean
+  userId?: ID
 }
 
 /**
  * Hook for getting the AUDIO balance of the current user, optionally including connected wallets.
  */
-export const useAudioBalance = (options: UseAudioBalanceOptions = {}) => {
-  const { includeConnectedWallets = true, includeStaked = false } = options
+export const useAudioBalance = (
+  params: UseAudioBalanceParams = {},
+  options?: QueryOptions
+) => {
+  const {
+    includeConnectedWallets = true,
+    includeStaked = false,
+    userId: userIdParam
+  } = params
 
   // Get account balances
   const { data: currentUserId } = useCurrentUserId()
-  const { data, isSuccess: isUserFetched } = useUser(currentUserId)
+  const userId = userIdParam ?? currentUserId
+  const { data, isSuccess: isUserFetched } = useUser(userId)
   const accountBalances = useWalletAudioBalances(
     {
       wallets: [
@@ -191,9 +199,10 @@ export const useAudioBalance = (options: UseAudioBalanceOptions = {}) => {
         ...(data?.spl_wallet
           ? [{ address: data.spl_wallet, chain: Chain.Sol }]
           : [])
-      ]
+      ],
+      includeStaked
     },
-    { enabled: isUserFetched }
+    { ...options, enabled: isUserFetched }
   )
   let accountBalance = AUDIO(0).value
 
@@ -204,17 +213,28 @@ export const useAudioBalance = (options: UseAudioBalanceOptions = {}) => {
   }
 
   // Get linked/connected wallets balances
+  const context = useQueryContext()
+  const connectedWalletsQuery = useQuery({
+    ...getConnectedWalletsQueryOptions(context, { userId }),
+    enabled: !!userId && includeConnectedWallets
+  })
   const {
     data: connectedWallets = [],
     isFetched: isConnectedWalletsFetched,
     isError: isConnectedWalletsError
-  } = useConnectedWallets()
+  } = connectedWalletsQuery
   const connectedWalletsBalances = useWalletAudioBalances(
     {
       wallets: connectedWallets,
       includeStaked
     },
-    { enabled: isConnectedWalletsFetched && includeConnectedWallets }
+    {
+      ...options,
+      enabled:
+        isConnectedWalletsFetched &&
+        includeConnectedWallets &&
+        options?.enabled !== false
+    }
   )
   let connectedWalletsBalance = AUDIO(0).value
   const isConnectedWalletsBalanceLoading = includeConnectedWallets
@@ -366,4 +386,111 @@ export function* revertOptimisticUserSolBalance() {
     const queryKey = getWalletAudioBalanceQueryKey(queryParams)
     queryClient.invalidateQueries({ queryKey })
   }
+}
+
+/**
+ * Optimistically updates the AUDIO balance for a SOL wallet in React Query cache.
+ * Updates both staked and non-staked balance queries.
+ *
+ * @param queryClient - The React Query client
+ * @param splWallet - The Solana wallet address
+ * @param changeLamports - The amount to add (positive) or subtract (negative) in lamports (8 decimals)
+ * @returns void
+ */
+export const updateAudioBalanceOptimistically = ({
+  queryClient,
+  splWallet,
+  changeLamports
+}: {
+  queryClient: QueryClient
+  splWallet: string
+  changeLamports: bigint
+}): void => {
+  // Convert from lamports (8 decimals) to AudioWei (18 decimals)
+  const changeAudioWei = AUDIO(wAUDIO(changeLamports)).value
+
+  // Update both staked and non-staked balance queries for the SOL wallet
+  // We need to update both because different parts of the app use different values
+  for (const includeStaked of [false, true]) {
+    const queryKey = getWalletAudioBalanceQueryKey({
+      address: splWallet,
+      chain: Chain.Sol,
+      includeStaked
+    })
+
+    queryClient.setQueryData<AudioWei>(queryKey, (oldBalance) => {
+      if (oldBalance === undefined) return oldBalance
+
+      const currentBalance = oldBalance ?? AUDIO(0).value
+      const newBalance = AUDIO(currentBalance + changeAudioWei).value
+
+      // Ensure balance doesn't go negative
+      return newBalance >= 0 ? newBalance : AUDIO(0).value
+    })
+  }
+}
+
+/**
+ * Invalidates AUDIO balance queries for a SOL wallet.
+ * Use this when a transaction fails and you need to refetch the correct balance.
+ *
+ * @param queryClient - The React Query client
+ * @param splWallet - The Solana wallet address
+ */
+export const invalidateAudioBalance = ({
+  queryClient,
+  splWallet
+}: {
+  queryClient: QueryClient
+  splWallet: string
+}) => {
+  const queryKey = getWalletAudioBalanceQueryKey({
+    address: splWallet,
+    chain: Chain.Sol
+  })
+  queryClient.invalidateQueries({ queryKey })
+}
+
+/**
+ * Helper function to poll the audio balance until it changes from the original value.
+ * @param queryClient
+ * @param splWallet - The Solana wallet address
+ * @param maxAttempts - Maximum number of polling attempts (default: 10)
+ * @param delayMs - Delay between polling attempts in milliseconds (default: 300)
+ */
+export const pollUntilAudioBalanceChanges = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+  splWallet: string,
+  maxAttempts = 10,
+  delayMs = 300
+): Promise<void> => {
+  const queryKey = getWalletAudioBalanceQueryKey({
+    address: splWallet,
+    chain: Chain.Sol,
+    includeStaked: false
+  })
+  const originalBalance = queryClient.getQueryData<AudioWei>(queryKey)
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Wait before polling (except on first attempt where we check immediately)
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+
+    // Invalidate and refetch the balance
+    await queryClient.invalidateQueries({ queryKey })
+    await queryClient.refetchQueries({ queryKey })
+
+    // Check if the balance has changed
+    const newBalance = queryClient.getQueryData<AudioWei>(queryKey)
+    if (newBalance !== originalBalance) {
+      return
+    }
+  }
+
+  // If we've exhausted all attempts, log a warning but don't throw
+  // The balance will eventually update on the next stale query refetch
+  console.warn(
+    `Audio balance polled viia pollUntilAudioBalanceChanges but the value was not changed after ${maxAttempts} attempts`
+  )
 }

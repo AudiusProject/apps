@@ -21,11 +21,15 @@ const messages = {
 type AddressTileProps = {
   address?: string
   iconRight?: IconComponent
+  shorten?: boolean
+  shortenLength?: number
 }
 
 export const AddressTile = ({
   address,
-  iconRight: IconRight
+  iconRight: IconRight,
+  shorten = false,
+  shortenLength = 12
 }: AddressTileProps) => {
   const { toast } = useContext(ToastContext)
   const isMobile = useIsMobile()
@@ -48,7 +52,7 @@ export const AddressTile = ({
   }
 
   return (
-    <Flex column border='default' borderRadius='s'>
+    <Flex column border='default' borderRadius='s' w='100%'>
       <Flex
         backgroundColor='surface1'
         alignItems='stretch'
@@ -56,17 +60,22 @@ export const AddressTile = ({
         borderBottomLeftRadius='s'
         borderBottomRightRadius='s'
       >
-        <Box p='l' borderRadius='s'>
+        <Box
+          p='l'
+          borderRadius='s'
+          w='100%'
+          css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
           <Text
             css={{
               userSelect: 'text',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
               lineHeight: '125%'
             }}
             variant='body'
           >
-            {isMobile ? shortenSPLAddress(address, 12) : address}
+            {isMobile || shorten
+              ? shortenSPLAddress(address, shortenLength)
+              : address}
           </Text>
         </Box>
         <Flex alignItems='center' borderLeft='default' ph='l'>

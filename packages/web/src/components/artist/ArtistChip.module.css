@@ -103,18 +103,6 @@
   margin-right: 4px;
   font-weight: var(--harmony-font-bold);
 }
-.followersContainer .followsYou {
-  box-shadow: none;
-  border: 1px solid var(--harmony-n-400);
-  color: var(--harmony-n-400);
-}
-
-.followersContainer .followsYou.darkMode {
-  box-shadow: none;
-  border: 1px solid var(--harmony-n-400);
-  color: var(--harmony-n-400);
-  background: none;
-}
 
 .tipContainer .rank {
   margin-right: 24px;

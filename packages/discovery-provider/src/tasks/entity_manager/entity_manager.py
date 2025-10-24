@@ -23,6 +23,7 @@ from src.models.events.event import Event, EventEntityType
 from src.models.grants.developer_app import DeveloperApp
 from src.models.grants.grant import Grant
 from src.models.indexing.revert_block import RevertBlock
+from src.models.indexing.skipped_transaction import SkippedTransaction
 from src.models.moderation.muted_user import MutedUser
 from src.models.notifications.notification import NotificationSeen, PlaylistSeen
 from src.models.playlists.playlist import Playlist
@@ -35,18 +36,9 @@ from src.models.social.subscription import Subscription
 from src.models.tracks.track import Track
 from src.models.tracks.track_route import TrackRoute
 from src.models.users.associated_wallet import AssociatedWallet
-from src.models.users.collectibles import Collectibles
 from src.models.users.email import EmailAccess, EncryptedEmail
 from src.models.users.user import User
 from src.models.users.user_events import UserEvent
-from src.queries.confirm_indexing_transaction_error import (
-    confirm_indexing_transaction_error,
-)
-from src.queries.get_skipped_transactions import (
-    clear_indexing_error,
-    save_and_get_skip_tx_hash,
-    set_indexing_error,
-)
 from src.tasks.entity_manager.entities.comment import (
     create_comment,
     delete_comment,
@@ -112,7 +104,6 @@ from src.tasks.entity_manager.entities.user import (
     create_user,
     remove_associated_wallet,
     update_user,
-    update_user_collectibles,
     verify_user,
 )
 from src.tasks.entity_manager.utils import (
@@ -151,7 +142,6 @@ entity_type_table_mapping = {
     "Track": Track.__tablename__,
     "User": User.__tablename__,
     "AssociatedWallet": AssociatedWallet.__tablename__,
-    "Collectibles": Collectibles.__tablename__,
     "UserEvent": UserEvent.__tablename__,
     "TrackRoute": TrackRoute.__tablename__,
     "PlaylistRoute": PlaylistRoute.__tablename__,
@@ -475,11 +465,6 @@ def entity_manager_update(
                             remove_associated_wallet(params)
                         elif (
                             params.action == Action.CREATE
-                            or params.action == Action.UPDATE
-                        ) and params.entity_type == EntityType.COLLECTIBLES:
-                            update_user_collectibles(params)
-                        elif (
-                            params.action == Action.CREATE
                             and params.entity_type == EntityType.EVENT
                         ):
                             create_event(params)
@@ -509,9 +494,7 @@ def entity_manager_update(
                         logger.error(
                             f"entity_manager.py | Indexing error {e}", exc_info=True
                         )
-                        create_and_raise_indexing_error(
-                            indexing_error, update_task.redis, session
-                        )
+                        create_and_raise_indexing_error(indexing_error, session)
                         logger.error(f"skipping transaction hash {indexing_error}")
 
             # compile records_to_save
@@ -657,9 +640,6 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                 entities_to_fetch[entity_type].add(entity_id)
             if entity_type == EntityType.USER:
                 entities_to_fetch[EntityType.USER_EVENT].add(user_id)
-                entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(user_id)
-                if action == Action.UPDATE:
-                    entities_to_fetch[EntityType.COLLECTIBLES].add(user_id)
                 if action == Action.MUTE or action == Action.UNMUTE:
                     entities_to_fetch[EntityType.MUTED_USER].add((user_id, entity_id))
                     entities_to_fetch[EntityType.USER].add(entity_id)
@@ -866,6 +846,12 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     if user_id:
                         entities_to_fetch[EntityType.USER].add(user_id)
 
+                if entity_type == EntityType.ASSOCIATED_WALLET:
+                    wallet = json_metadata.get("wallet_address")
+                    if wallet:
+                        entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(wallet)
+                    entities_to_fetch[EntityType.USER].add(user_id)
+
             if entity_type == EntityType.ENCRYPTED_EMAIL:
                 try:
                     json_metadata = json.loads(metadata)
@@ -906,11 +892,6 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                         entities_to_fetch[EntityType.ENCRYPTED_EMAIL].add(
                             email_owner_user_id
                         )
-            if entity_type == EntityType.ASSOCIATED_WALLET:
-                entities_to_fetch[EntityType.ASSOCIATED_WALLET].add(user_id)
-            if entity_type == EntityType.COLLECTIBLES:
-                entities_to_fetch[EntityType.COLLECTIBLES].add(user_id)
-                entities_to_fetch[EntityType.USER].add(user_id)
 
     return entities_to_fetch
 
@@ -1037,7 +1018,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 literal_column(f"row_to_json({AssociatedWallet.__tablename__})"),
             )
             .filter(
-                AssociatedWallet.user_id.in_(entities_to_fetch["AssociatedWallet"]),
+                AssociatedWallet.wallet.in_(entities_to_fetch["AssociatedWallet"]),
                 AssociatedWallet.is_current == True,
             )
             .all()
@@ -1048,24 +1029,6 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
         existing_entities_in_json[EntityType.ASSOCIATED_WALLET] = {
             (wallet_json["wallet"]): wallet_json
             for _, wallet_json in associated_wallets
-        }
-
-    if entities_to_fetch["Collectibles"]:
-        collectibles_results: List[Tuple[Collectibles, dict]] = (
-            session.query(
-                Collectibles,
-                literal_column(f"row_to_json({Collectibles.__tablename__})"),
-            )
-            .filter(Collectibles.user_id.in_(entities_to_fetch["Collectibles"]))
-            .all()
-        )
-        existing_entities[EntityType.COLLECTIBLES] = {
-            collectibles.user_id: collectibles
-            for collectibles, _ in collectibles_results
-        }
-        existing_entities_in_json[EntityType.COLLECTIBLES] = {
-            collectible_json["user_id"]: collectible_json
-            for _, collectible_json in collectibles_results
         }
 
     # FOLLOWS
@@ -1431,7 +1394,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReaction,
                 literal_column(f"row_to_json({CommentReaction.__tablename__})"),
             )
-            .filter(or_(*or_queries))
+            .filter(or_(*or_queries), CommentReaction.is_delete == False)
             .all()
         )
         existing_entities[EntityType.COMMENT_REACTION] = {
@@ -1478,7 +1441,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentMention,
                 literal_column(f"row_to_json({CommentMention.__tablename__})"),
             )
-            .filter(or_(*or_queries))
+            .filter(or_(*or_queries), CommentMention.is_delete == False)
             .all()
         )
 
@@ -1510,7 +1473,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 MutedUser,
                 literal_column(f"row_to_json({MutedUser.__tablename__})"),
             )
-            .filter(or_(*or_queries))
+            .filter(or_(*or_queries), MutedUser.is_delete == False)
             .all()
         )
         existing_entities[EntityType.MUTED_USER] = {
@@ -1543,7 +1506,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReport,
                 literal_column(f"row_to_json({CommentReport.__tablename__})"),
             )
-            .filter(or_(*or_queries))
+            .filter(or_(*or_queries), CommentReport.is_delete == False)
             .all()
         )
         existing_entities[EntityType.COMMENT_REPORT] = {
@@ -1673,28 +1636,16 @@ def get_entity_manager_events_tx(update_task, tx_receipt: TxReceipt):
     return [tx_receipt]
 
 
-def create_and_raise_indexing_error(err, redis, session):
+def create_and_raise_indexing_error(err, session):
     logger.error(
         f"Error in the indexing task at"
         f" block={err.blocknumber} and hash={err.txhash}"
     )
-    # set indexing error
-    set_indexing_error(redis, err.blocknumber, err.blockhash, err.txhash, err.message)
 
-    # seek consensus
-    has_consensus = confirm_indexing_transaction_error(
-        redis, err.blocknumber, err.blockhash, err.txhash, err.message
+    # Record skipped transaction to db
+    skipped_tx = SkippedTransaction(
+        blocknumber=err.blocknumber,
+        blockhash=err.blockhash,
+        txhash=err.txhash,
     )
-    if not has_consensus:
-        # escalate error and halt indexing until there's consensus
-        error_message = "Indexing halted due to lack of consensus"
-        raise Exception(error_message) from err
-
-    # try to insert into skip tx table
-    skip_tx_hash = save_and_get_skip_tx_hash(session, redis)
-
-    if not skip_tx_hash:
-        error_message = "Reached max transaction skips"
-        raise Exception(error_message) from err
-
-    clear_indexing_error(redis)
+    session.add(skipped_tx)

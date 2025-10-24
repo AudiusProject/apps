@@ -15,7 +15,7 @@ export type StorageNode = {
 
 export type StorageNodeSelectorConfigInternal = {
   /**
-   * Starting list of healthy storage nodes to use before a discovery node is selected
+   * Starting list of healthy storage nodes to use before the current list is fetched from API
    */
   bootstrapNodes: StorageNode[]
   /**
@@ -30,3 +30,11 @@ export type StorageNodeSelectorConfigInternal = {
 
 export type StorageNodeSelectorConfig =
   Partial<StorageNodeSelectorConfigInternal>
+
+// Partial shape of response from API /health_check endpoint
+// that we use to get the list of storage nodes
+export type HealthCheckResponseData = {
+  network?: {
+    content_nodes: StorageNode[]
+  }
+}

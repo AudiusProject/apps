@@ -83,10 +83,18 @@ type PageFooterProps = {
   buttonProps?: Partial<ButtonProps>
   centered?: boolean
   avoidKeyboard?: boolean
+  requireDirty?: boolean
 } & Omit<PaperProps & BoxProps, 'prefix'>
 
 export const PageFooter = (props: PageFooterProps) => {
-  const { prefix, postfix, buttonProps, avoidKeyboard, ...other } = props
+  const {
+    prefix,
+    postfix,
+    buttonProps,
+    avoidKeyboard,
+    requireDirty = true,
+    ...other
+  } = props
   const insets = useSafeAreaInsets()
   const { spacing } = useTheme()
   const { handleSubmit, dirty, isValid } = useFormikContext() ?? {}
@@ -118,8 +126,6 @@ export const PageFooter = (props: PageFooterProps) => {
         left: 0
       })}
     >
-      {/* Prefixes float above the shadowed paper container  */}
-      {prefix ? <Flex ph={gutterSize}>{prefix}</Flex> : null}
       <KeyboardAvoidContainer keyboardShowingOffset={spacing.unit5}>
         <Paper
           p='l'
@@ -134,9 +140,11 @@ export const PageFooter = (props: PageFooterProps) => {
           })}
           {...other}
         >
+          {/* Prefixes float above the shadowed paper container  */}
+          {prefix}
           <Button
             fullWidth
-            disabled={!dirty || !isValid}
+            disabled={requireDirty ? !dirty || !isValid : !isValid}
             onPress={() => handleSubmit?.()}
             {...buttonProps}
           >
@@ -169,11 +177,11 @@ export const Heading = (props: HeadingProps) => {
       {...other}
     >
       {prefix}
-      <Text variant='heading' color='heading' size='m'>
+      <Text variant='heading' color='heading' size='m' textAlign='center'>
         {heading}
       </Text>
       {description ? (
-        <Text size='m' variant='body'>
+        <Text size='l' variant='body'>
           {description}
         </Text>
       ) : undefined}

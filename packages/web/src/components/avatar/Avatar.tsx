@@ -26,6 +26,7 @@ export type AvatarProps = Omit<HarmonyAvatarProps, 'src'> & {
   onClick?: () => void
   imageSize?: SquareSizes
   popover?: boolean
+  disableLink?: boolean // Prevents Avatar from wrapping with UserLink when already inside a link
 }
 
 export const AvatarContent = (props: AvatarProps) => {
@@ -35,6 +36,7 @@ export const AvatarContent = (props: AvatarProps) => {
     'aria-hidden': ariaHidden,
     imageSize = SquareSizes.SIZE_150_BY_150,
     popover,
+    disableLink,
     ...other
   } = props
 
@@ -92,7 +94,7 @@ export const AvatarContent = (props: AvatarProps) => {
     )
   }
 
-  if (userId) {
+  if (userId && !disableLink) {
     return (
       <UserLink
         userId={userId}

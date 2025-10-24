@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import type { IconComponent, IconProps } from '../../icon'
 
 export enum TextInputSize {
+  EXTRA_SMALL = 'extra-small',
   SMALL = 'small',
   DEFAULT = 'default'
 }
@@ -40,7 +41,7 @@ export type TextInputProps = Omit<
   'size' | 'required'
 > & {
   /**
-   * Input sizes. NOTE: small inputs will not show the label
+   * Input sizes. NOTE: small and extra-small inputs will not show the label
    * @default default
    */
   size?: TextInputSize

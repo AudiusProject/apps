@@ -1,12 +1,11 @@
 import type { Hex } from 'viem'
 
-import type { DiscoveryNode, StorageNode } from '../services'
+import type { StorageNode } from '../services'
 
 export type SdkServicesConfig = {
   network: {
     minVersion: string
     apiEndpoint: string
-    discoveryNodes: DiscoveryNode[]
     storageNodes: StorageNode[]
     antiAbuseOracleNodes: {
       registeredAddresses: string[]

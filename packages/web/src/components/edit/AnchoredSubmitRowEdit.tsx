@@ -5,6 +5,7 @@ import { Button, Flex, IconError, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
 import { useHistoryContext } from 'app/HistoryProvider'
+import { Frosted } from 'components/frosted/Frosted'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import { EditFormScrollContext } from '../../pages/edit-page/EditTrackPage'
@@ -18,7 +19,15 @@ const messages = {
   fixErrors: 'Fix errors to continue your update.'
 }
 
-export const AnchoredSubmitRowEdit = () => {
+type AnchoredSubmitRowEditProps = {
+  isSubmitting?: boolean
+  errorText?: string
+}
+
+export const AnchoredSubmitRowEdit = ({
+  errorText,
+  isSubmitting = false
+}: AnchoredSubmitRowEditProps = {}) => {
   const scrollToTop = useContext(EditFormScrollContext)
   const { isValid } = useFormikContext()
 
@@ -27,11 +36,12 @@ export const AnchoredSubmitRowEdit = () => {
 
   return (
     <>
-      <Flex className={styles.buttonRow} gap='m'>
+      <Frosted className={styles.buttonRow} gap='m'>
         <Flex gap='l'>
           <Button
             variant='secondary'
             size='default'
+            disabled={isSubmitting}
             onClick={() =>
               history.length > 0 ? history.goBack() : navigate(FEED_PAGE)
             }
@@ -45,19 +55,21 @@ export const AnchoredSubmitRowEdit = () => {
               scrollToTop()
             }}
             type='submit'
+            disabled={isSubmitting}
+            isLoading={isSubmitting}
           >
             {messages.save}
           </Button>
         </Flex>
-        {!isValid ? (
+        {errorText || !isValid ? (
           <Flex alignItems='center' gap='xs'>
             <IconError color='danger' size='s' />
             <Text color='danger' size='s' variant='body'>
-              {messages.fixErrors}
+              {errorText ?? messages.fixErrors}
             </Text>
           </Flex>
         ) : null}
-      </Flex>
+      </Frosted>
       <div className={styles.placeholder} />
     </>
   )

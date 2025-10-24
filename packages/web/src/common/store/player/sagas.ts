@@ -41,8 +41,6 @@ const { getTrackPosition } = playbackPositionSelectors
 const {
   play,
   playSucceeded,
-  playCollectible,
-  playCollectibleSucceeded,
   pause,
   stop,
   setBuffering,
@@ -178,8 +176,8 @@ export function* watchPlay() {
       }
 
       let endChannel: EventChannel<any>
-      // If we have a stream URL from Discovery already for content node, use that.
-      // If not, we might need the NFT gated signature, so fallback to the DN stream endpoint.
+      // If we have a stream URL from API already for content node, use that.
+      // If not, we might need the NFT gated signature, so fallback to the API stream endpoint.
       if (contentNodeStreamUrl) {
         endChannel = yield* call(createEndChannel, contentNodeStreamUrl)
       } else {
@@ -187,7 +185,7 @@ export function* watchPlay() {
           audiusBackendInstance.signGatedContentRequest,
           { sdk }
         )
-        const discoveryNodeStreamUrl = yield* call(
+        const streamUrl = yield* call(
           [sdk.tracks, sdk.tracks.getTrackStreamUrl],
           {
             trackId: Id.parse(trackId),
@@ -200,7 +198,7 @@ export function* watchPlay() {
             preview: shouldPreview ? true : undefined
           }
         )
-        endChannel = yield* call(createEndChannel, discoveryNodeStreamUrl)
+        endChannel = yield* call(createEndChannel, streamUrl)
       }
 
       const isLongFormContent =
@@ -264,33 +262,6 @@ export function* watchPlay() {
       yield* put(playSucceeded({ uid, trackId, isPreview: shouldPreview }))
     }
   })
-}
-
-export function* watchCollectiblePlay() {
-  yield* takeLatest(
-    playCollectible.type,
-    function* (action: ReturnType<typeof playCollectible>) {
-      const { collectible, onEnd } = action.payload
-      const { animationUrl, videoUrl } = collectible
-      const audioPlayer = yield* getContext('audioPlayer')
-      const endChannel = eventChannel((emitter) => {
-        audioPlayer.load(
-          0,
-          () => {
-            if (onEnd) {
-              emitter(onEnd({}))
-            }
-          },
-          animationUrl ?? videoUrl
-        )
-        return () => {}
-      })
-      yield* spawn(actionChannelDispatcher, endChannel)
-
-      audioPlayer.play()
-      yield* put(playCollectibleSucceeded({ collectible }))
-    }
-  )
 }
 
 export function* watchPause() {
@@ -503,7 +474,6 @@ function* recordListenWorker() {
 const sagas = () => {
   return [
     watchPlay,
-    watchCollectiblePlay,
     watchPause,
     watchStop,
     watchReset,

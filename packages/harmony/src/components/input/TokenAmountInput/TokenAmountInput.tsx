@@ -25,6 +25,7 @@ export const TokenAmountInput = forwardRef(
       isWhole = false,
       value: valueProp,
       onChange,
+      endIcon,
       ...other
     } = props
 
@@ -65,6 +66,9 @@ export const TokenAmountInput = forwardRef(
       },
       [decimals, isWhole, setValueState, onChange]
     )
+    // Determine if endIcon is an IconComponent or ReactNode
+    const isIconComponent = endIcon && typeof endIcon === 'function'
+
     return (
       <TextInput
         ref={ref}
@@ -72,6 +76,8 @@ export const TokenAmountInput = forwardRef(
         value={value}
         onChange={handleChange}
         endAdornmentText={tokenLabel}
+        endIcon={isIconComponent ? (endIcon as any) : undefined}
+        endAdornment={!isIconComponent ? endIcon : undefined}
       />
     )
   }
