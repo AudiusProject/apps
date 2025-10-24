@@ -420,15 +420,6 @@ export const useExternalWalletSwap = () => {
         // Update internal wallet balances & user info
         optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
 
-        if (user?.user_id) {
-          queryClient.invalidateQueries({
-            queryKey: getConnectedWalletsQueryOptions(
-              { audiusSdk },
-              { userId: user.user_id }
-            ).queryKey
-          })
-        }
-
         // Update external wallet balances
         // NOTE: invalidate queries does not work here, need to manually update the balances
 
