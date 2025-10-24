@@ -85,6 +85,11 @@ export const mockCoinByMint = (coin: typeof mockArtistCoin) =>
     HttpResponse.json({ data: coin })
   )
 
+export const mockCoinByTicker = (coin: typeof mockArtistCoin) =>
+  http.get(`${apiEndpoint}/v1/coins/ticker/${coin.symbol}`, () =>
+    HttpResponse.json({ data: coin })
+  )
+
 /**
  * Collections
  */

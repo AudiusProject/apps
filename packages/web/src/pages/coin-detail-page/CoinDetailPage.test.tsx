@@ -13,16 +13,19 @@ import {
 } from 'vitest'
 
 import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
-import { mockCoinByMint } from 'test/msw/mswMocks'
+import { mockCoinByTicker } from 'test/msw/mswMocks'
 import { RenderOptions, mswServer, render, screen } from 'test/test-utils'
 
 import { CoinDetailPage } from './CoinDetailPage'
 
-export function renderCoinDetailPage(coin: any, options?: RenderOptions) {
-  mswServer.use(mockCoinByMint(coin))
+export function renderCoinDetailPage(
+  coin: typeof mockArtistCoin = mockArtistCoin,
+  options?: RenderOptions
+) {
+  mswServer.use(mockCoinByTicker(coin))
 
   const history = createMemoryHistory({
-    initialEntries: [`/wallet/${coin.mint}`]
+    initialEntries: [`/coins/${coin.symbol}`]
   })
 
   return render(
@@ -67,7 +70,10 @@ describe('CoinDetailPage', () => {
 
     // Check that the ticker is rendered in the header
     expect(
-      await screen.findByRole('heading', { name: mockArtistCoin.ticker })
+      await screen.findByRole('heading', {
+        name: mockArtistCoin.name,
+        level: 1
+      })
     ).toBeInTheDocument()
 
     // TODO: check more things
