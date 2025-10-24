@@ -475,6 +475,7 @@ export enum Name {
   CONNECT_WALLET_NEW_WALLET_START = 'Connect Wallet: New Wallet Start',
   CONNECT_WALLET_NEW_WALLET_CONNECTING = 'Connect Wallet: New Wallet Connecting',
   CONNECT_WALLET_NEW_WALLET_CONNECTED = 'Connect Wallet: New Wallet Connected',
+  CONNECT_WALLET_DISCONNECTED = 'Connect Wallet: Disconnected',
   CONNECT_WALLET_ALREADY_ASSOCIATED = 'Connect Wallet: Already Associated',
   CONNECT_WALLET_ASSOCIATION_ERROR = 'Connect Wallet: Association Error',
   CONNECT_WALLET_ERROR = 'Connect Wallet: Error',
@@ -594,6 +595,7 @@ export enum Name {
 
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
+  LAUNCHPAD_HAS_EXISTING_ARTIST_COIN = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
   LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
   LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
@@ -2372,6 +2374,10 @@ type ConnectWalletNewWalletConnected = {
   walletAddress: WalletAddress
 }
 
+type ConnectWalletDisconnected = {
+  eventName: Name.CONNECT_WALLET_DISCONNECTED
+}
+
 type ConnectWalletAlreadyAssociated = {
   eventName: Name.CONNECT_WALLET_ALREADY_ASSOCIATED
   chain: Chain
@@ -2868,6 +2874,10 @@ export type LaunchpadSplashGetStarted = {
   eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
 }
 
+export type LaunchpadHasExistingArtistCoin = {
+  eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN
+}
+
 export type LaunchpadSplashLearnMoreClicked = {
   eventName: Name.LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED
 }
@@ -3344,6 +3354,7 @@ export type AllTrackingEvents =
   | ConnectWalletNewWalletStart
   | ConnectWalletNewWalletConnecting
   | ConnectWalletNewWalletConnected
+  | ConnectWalletDisconnected
   | ConnectWalletAlreadyAssociated
   | ConnectWalletAssociationError
   | ConnectWalletError
@@ -3444,6 +3455,7 @@ export type AllTrackingEvents =
   | AndroidAppRestartStale
   | AndroidAppRestartForceQuit
   | LaunchpadSplashGetStarted
+  | LaunchpadHasExistingArtistCoin
   | LaunchpadSplashLearnMoreClicked
   | LaunchpadWalletConnectSuccess
   | LaunchpadWalletInsufficientBalance
