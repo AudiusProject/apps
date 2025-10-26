@@ -159,6 +159,7 @@ const userMetadataSchema = {
   events: null,
   is_deactivated: false,
   artist_pick_track_id: null,
+  coin_flair_mint: null,
   spl_usdc_payout_wallet: null
 }
 

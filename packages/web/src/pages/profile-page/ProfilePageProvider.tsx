@@ -88,7 +88,8 @@ const INITIAL_UPDATE_FIELDS = {
   updatedInstagramHandle: null,
   updatedTikTokHandle: null,
   updatedWebsite: null,
-  updatedDonation: null
+  updatedDonation: null,
+  updatedArtistCoinBadge: null
 }
 
 type OwnProps = {
@@ -122,6 +123,11 @@ type ProfilePageState = {
   updatedTikTokHandle: string | null
   updatedWebsite: string | null
   updatedDonation: string | null
+  updatedArtistCoinBadge: Nullable<{
+    mint: string
+    logo_uri: string
+    ticker: string
+  }>
   tracksLineupOrder: TracksSortMode
   areArtistRecommendationsVisible: boolean
   showBlockUserConfirmationModal: boolean
@@ -408,6 +414,18 @@ class ProfilePageClassComponent extends PureComponent<
     })
   }
 
+  updateArtistCoinBadge = (
+    badge: Nullable<{
+      mint: string
+      logo_uri: string
+      ticker: string
+    }>
+  ) => {
+    this.setState({
+      updatedArtistCoinBadge: badge
+    })
+  }
+
   changeTab = (tab: ProfilePageTabs) => {
     this.setState({
       activeTab: tab
@@ -454,7 +472,8 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle: null,
       updatedTikTokHandle: null,
       updatedWebsite: null,
-      updatedDonation: null
+      updatedDonation: null,
+      updatedArtistCoinBadge: null
     })
   }
 
@@ -474,7 +493,8 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation
+      updatedDonation,
+      updatedArtistCoinBadge
     } = this.state
 
     const updatedMetadata = newUserMetadata({ ...profile })
@@ -510,6 +530,28 @@ class ProfilePageClassComponent extends PureComponent<
     if (updatedDonation !== null) {
       updatedMetadata.donation = updatedDonation
     }
+
+    // Always include coin_flair_mint in updates (consistent with other fields)
+    const artistCoinBadge = profile
+      ? updatedArtistCoinBadge !== null
+        ? updatedArtistCoinBadge
+        : profile.artist_coin_badge || null
+      : null
+
+    if (artistCoinBadge) {
+      // Map badge to coin_flair_mint field
+      // null = auto/default, '' = none, 'mint' = specific coin
+      if (artistCoinBadge.mint === '__default__') {
+        updatedMetadata.coin_flair_mint = null
+      } else if (artistCoinBadge.mint === '__none__') {
+        updatedMetadata.coin_flair_mint = ''
+      } else {
+        updatedMetadata.coin_flair_mint = artistCoinBadge.mint
+      }
+    } else {
+      // If no badge selected, ensure we send null to clear it
+      updatedMetadata.coin_flair_mint = null
+    }
     this.props.updateProfile(updatedMetadata)
     this.setState({
       editMode: false
@@ -531,7 +573,8 @@ class ProfilePageClassComponent extends PureComponent<
       updatedCoverPhoto: null,
       updatedProfilePicture: null,
       updatedBio: null,
-      updatedLocation: null
+      updatedLocation: null,
+      updatedArtistCoinBadge: null
     })
   }
 
@@ -747,7 +790,8 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation
+      updatedDonation,
+      updatedArtistCoinBadge
     } = this.state
 
     const isArtist = this.getIsArtist()
@@ -807,6 +851,11 @@ class ProfilePageClassComponent extends PureComponent<
         ? updatedDonation
         : profile.donation || ''
       : ''
+    const artistCoinBadge = profile
+      ? updatedArtistCoinBadge !== null
+        ? updatedArtistCoinBadge
+        : profile.artist_coin_badge || null
+      : null
     const hasProfilePicture = profile
       ? !!profile.profile_picture ||
         !!profile.profile_picture_sizes ||
@@ -833,6 +882,7 @@ class ProfilePageClassComponent extends PureComponent<
       tikTokHandle,
       website,
       donation,
+      artistCoinBadge,
       hasProfilePicture,
       following,
       mode,
@@ -874,6 +924,7 @@ class ProfilePageClassComponent extends PureComponent<
       updateTikTokHandle: this.updateTikTokHandle,
       updateWebsite: this.updateWebsite,
       updateDonation: this.updateDonation,
+      updateArtistCoinBadge: this.updateArtistCoinBadge,
       updateCoverPhoto: this.updateCoverPhoto,
       didChangeTabsFrom: this.didChangeTabsFrom,
       onMessage: this.onMessage,
@@ -894,6 +945,7 @@ class ProfilePageClassComponent extends PureComponent<
         updatedTikTokHandle !== null ||
         updatedWebsite !== null ||
         updatedDonation !== null ||
+        updatedArtistCoinBadge !== null ||
         updatedCoverPhoto !== null ||
         updatedProfilePicture !== null,
       onClickMobileOverflow: this.props.clickOverflow

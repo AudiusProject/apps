@@ -25,6 +25,7 @@ export type UserMetadata = {
     logo_uri: string
     ticker: string
   }>
+  coin_flair_mint?: Nullable<string>
   artist_pick_track_id: Nullable<number>
   associated_wallets_balance?: Nullable<StringWei>
   balance?: Nullable<StringWei>

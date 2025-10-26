@@ -178,6 +178,14 @@ function* confirmUpdateProfile(userId, metadata) {
           newMetadata.profile_picture_cids = confirmedUser.profile_picture_cids
           newMetadata.profile_picture = confirmedUser.profile_picture
         }
+        // Update coin_flair_mint if it was part of the update
+        // Use the value from confirmedUser if available, otherwise fall back to what we sent
+        if ('coin_flair_mint' in metadata) {
+          newMetadata.coin_flair_mint =
+            confirmedUser.coin_flair_mint !== undefined
+              ? confirmedUser.coin_flair_mint
+              : metadata.coin_flair_mint
+        }
         queryClient.setQueryData(
           getUserQueryKey(confirmedUser.user_id),
           (prevUser) =>
