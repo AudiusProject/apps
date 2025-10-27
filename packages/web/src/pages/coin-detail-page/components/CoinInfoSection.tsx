@@ -57,6 +57,8 @@ import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
 
+const { REWARDS_PAGE } = route
+
 const messages = coinDetailsMessages.coinInfo
 const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
@@ -126,119 +128,6 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
         )
       })}
     </Flex>
-  )
-}
-
-type ArtistVestingSectionProps = {
-  coin: Coin
-  handleClaimVestedCoinsClick: () => void
-  isClaimVestedCoinsDisabled: boolean
-  isClaimVestedCoinsPending: boolean
-}
-
-const ArtistVestingSection = ({
-  coin,
-  handleClaimVestedCoinsClick,
-  isClaimVestedCoinsDisabled,
-  isClaimVestedCoinsPending
-}: ArtistVestingSectionProps) => {
-  return (
-    <>
-      <Flex
-        css={{ height: '1px', background: '$neutralLight8' }}
-        alignSelf='stretch'
-      />
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.vestingSchedule}
-          </Text>
-          <Tooltip
-            text={overflowMessages.tooltips.vestingSchedule}
-            mount='body'
-          >
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s' color='subdued'>
-          {overflowMessages.vestingScheduleValue}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.locked}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.locked} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s' color='subdued'>
-          {coin.artistLocker.locked.toLocaleString()} ${coin.ticker}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.unlocked}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.unlocked} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s' color='subdued'>
-          {coin.artistLocker.unlocked.toLocaleString()} ${coin.ticker}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.availableToClaim}
-          </Text>
-          <Tooltip
-            text={overflowMessages.tooltips.availableToClaim}
-            mount='body'
-          >
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Flex alignItems='center' gap='s'>
-          {coin.artistLocker.claimable > 0 ? (
-            <Flex gap='xs' alignItems='center'>
-              <TextLink
-                onClick={handleClaimVestedCoinsClick}
-                variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
-                disabled={isClaimVestedCoinsDisabled}
-              >
-                {overflowMessages.claim}
-              </TextLink>
-              {isClaimVestedCoinsPending ? (
-                <LoadingSpinner size='s' color='subdued' />
-              ) : null}
-            </Flex>
-          ) : null}
-          <Text variant='body' size='s' color='subdued'>
-            {coin.artistLocker.claimable.toLocaleString()} ${coin.ticker}
-          </Text>
-        </Flex>
-      </Flex>
-    </>
   )
 }
 
@@ -376,11 +265,122 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
   )
 }
 
+type ArtistVestingSectionProps = {
+  coin: Coin
+  handleClaimVestedCoinsClick: () => void
+  isClaimVestedCoinsDisabled: boolean
+  isClaimVestedCoinsPending: boolean
+}
+
+const ArtistVestingSection = ({
+  coin,
+  handleClaimVestedCoinsClick,
+  isClaimVestedCoinsDisabled,
+  isClaimVestedCoinsPending
+}: ArtistVestingSectionProps) => {
+  return (
+    <>
+      <Flex
+        css={{ height: '1px', background: '$neutralLight8' }}
+        alignSelf='stretch'
+      />
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.vestingSchedule}
+          </Text>
+          <Tooltip
+            text={overflowMessages.tooltips.vestingSchedule}
+            mount='body'
+          >
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s' color='subdued'>
+          {overflowMessages.vestingScheduleValue}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.locked}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.locked} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s' color='subdued'>
+          {coin.artistLocker?.locked?.toLocaleString()} ${coin.ticker}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.unlocked}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.unlocked} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s' color='subdued'>
+          {coin.artistLocker?.unlocked?.toLocaleString()} ${coin.ticker}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.availableToClaim}
+          </Text>
+          <Tooltip
+            text={overflowMessages.tooltips.availableToClaim}
+            mount='body'
+          >
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Flex alignItems='center' gap='s'>
+          {coin.artistLocker?.claimable && coin.artistLocker.claimable > 0 ? (
+            <Flex gap='xs' alignItems='center'>
+              <TextLink
+                onClick={handleClaimVestedCoinsClick}
+                variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
+                disabled={isClaimVestedCoinsDisabled}
+              >
+                {overflowMessages.claim}
+              </TextLink>
+              {isClaimVestedCoinsPending ? (
+                <LoadingSpinner size='s' color='subdued' />
+              ) : null}
+            </Flex>
+          ) : null}
+          <Text variant='body' size='s' color='subdued'>
+            {coin.artistLocker?.claimable?.toLocaleString()} ${coin.ticker}
+          </Text>
+        </Flex>
+      </Flex>
+    </>
+  )
+}
+
 type CoinInfoSectionProps = {
   mint: string
 }
-
-const { REWARDS_PAGE } = route
 
 export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
@@ -451,7 +451,8 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             walletAddress: coinCreatorWalletAddress ?? '',
             coinSymbol: coin?.ticker,
             mintAddress: mint,
-            claimedAmount: coin?.artist_locker
+            claimedAmount:
+              coin?.artistLocker?.claimable?.toLocaleString() ?? '0'
           })
         )
       },
