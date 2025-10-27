@@ -64,7 +64,7 @@ export const ClaimVestedCoinsModal = () => {
       onClose={onClose}
       title={messages.title}
       showDismissButton
-      size='s'
+      size='m'
     >
       <Flex column gap='l' p='l'>
         {/* Rewards Pool Allocation Section */}
