@@ -9,7 +9,7 @@ import type { Coin } from '../../../adapters/coin'
 
 import { useArtistCoins } from './useArtistCoins'
 
-export const TEMP_ARTIST_COINS_PAGE_SIZE = 1000
+export const TEMP_ARTIST_COINS_PAGE_SIZE = 100
 
 export type TradeableCoinsContext = 'pay' | 'receive' | 'all'
 
