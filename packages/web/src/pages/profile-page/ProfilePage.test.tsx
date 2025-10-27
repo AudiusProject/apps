@@ -79,8 +79,7 @@ const nonArtistUser = {
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z',
   is_storage_v2: true,
-  handle_lc: 'test-user',
-  allow_ai_attribution: false
+  handle_lc: 'test-user'
 }
 
 const artistUser = {
@@ -118,8 +117,7 @@ const artistUser = {
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z',
   is_storage_v2: true,
-  handle_lc: 'test-user',
-  allow_ai_attribution: false
+  handle_lc: 'test-user'
 }
 
 const mockData = {
