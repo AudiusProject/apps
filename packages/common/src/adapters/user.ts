@@ -173,7 +173,6 @@ export const userMetadataToSdk = (
       'name',
       'handle',
       'is_deactivated',
-      'allow_ai_attribution',
       'profile_type',
       'spl_usdc_payout_wallet'
     ])

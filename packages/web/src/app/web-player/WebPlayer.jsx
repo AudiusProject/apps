@@ -50,7 +50,6 @@ import TrendingGenreSelectionPage from 'components/trending-genre-selection/Tren
 import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceFetcher'
 import { useEnvironment } from 'hooks/useEnvironment'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
-import { AiAttributedTracksPage } from 'pages/ai-attributed-tracks-page'
 import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
 import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
 import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
@@ -174,7 +173,6 @@ const {
   TOP_SUPPORTERS_USERS_ROUTE,
   publicSiteRoutes,
   CHAT_PAGE,
-  PROFILE_PAGE_AI_ATTRIBUTED_TRACKS,
   PROFILE_PAGE_COMMENTS,
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
@@ -891,11 +889,6 @@ const WebPlayer = (props) => {
                 exact
                 path={PROFILE_PAGE_COMMENTS}
                 component={CommentHistoryPage}
-              />
-              <Route
-                exact
-                path={PROFILE_PAGE_AI_ATTRIBUTED_TRACKS}
-                component={AiAttributedTracksPage}
               />
               <Route exact path={TRACK_PAGE} component={TrackPage} />
               <MobileRoute

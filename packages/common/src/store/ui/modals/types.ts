@@ -82,7 +82,6 @@ export type Modals =
   | 'ProfileActions'
   | 'PublishContentModal'
   | 'LabelAccount'
-  | 'AiAttributionSettings'
   | 'DuplicateAddConfirmation'
   | 'PremiumContentPurchaseModal'
   | 'CreateChatModal'
