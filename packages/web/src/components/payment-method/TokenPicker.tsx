@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { Flex, FilterButton } from '@audius/harmony'
 import { useAsync } from 'react-use'
 
-const TOKEN_LIST_URL = 'https://token.jup.ag/strict'
+const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'
 
 type Asset = {
   address: string

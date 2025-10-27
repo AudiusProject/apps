@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
-import { Name, Chain } from '@audius/common/models'
+import { Name, Chain, Feature } from '@audius/common/models'
 import { useTheme } from '@emotion/react'
 import type { NamespaceTypeMap } from '@reown/appkit'
 import { mainnet } from '@reown/appkit/networks'
@@ -14,6 +14,7 @@ import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
 import { useRecord, make } from 'common/store/analytics/actions'
+import { reportToSentry } from 'store/errors/reportToSentry'
 
 /**
  * Error when trying to associate a wallet that was already associated
@@ -137,34 +138,41 @@ export const useConnectExternalWallets = (
         setIsConnecting(false)
         const solanaAccount = appkitModal.getAccount('solana')
         const ethAccount = appkitModal.getAccount('eip155')
-        const connectedAddress = solanaAccount?.address
-        const connectedEthAddress = ethAccount?.address
+        const solAddress = solanaAccount?.address
+        const ethAddress = ethAccount?.address
 
         // Track analytics for connected wallets
-        if (connectedAddress) {
+        if (solAddress) {
           record(
             make(Name.CONNECT_WALLET_NEW_WALLET_CONNECTED, {
               chain: Chain.Sol,
-              walletAddress: connectedAddress
+              walletAddress: solAddress
             })
           )
         }
-        if (connectedEthAddress) {
+        if (ethAddress) {
           record(
             make(Name.CONNECT_WALLET_NEW_WALLET_CONNECTED, {
               chain: Chain.Eth,
-              walletAddress: connectedEthAddress
+              walletAddress: ethAddress
             })
           )
         }
+        if (!solAddress && !ethAddress) {
+          reportToSentry({
+            error: new Error('No wallets found to connect'),
+            name: 'Connect Wallet Error',
+            feature: Feature.ArtistCoins
+          })
+        }
 
         setCurrentWallets({
-          solana: connectedAddress,
-          eth: connectedEthAddress
+          solana: solAddress,
+          eth: ethAddress
         })
         await onSuccess?.({
-          solana: connectedAddress,
-          eth: connectedEthAddress
+          solana: solAddress,
+          eth: ethAddress
         })
         await reconnectExternalAuthWallet()
         closeAppKitModal()
@@ -175,6 +183,14 @@ export const useConnectExternalWallets = (
             error: String(event.data)
           })
         )
+        reportToSentry({
+          error: new Error('Connect Wallet Error'),
+          name: 'Connect Wallet Error',
+          feature: Feature.ArtistCoins,
+          additionalInfo: {
+            error: String(event.data)
+          }
+        })
         onError?.(event)
       }
     })
