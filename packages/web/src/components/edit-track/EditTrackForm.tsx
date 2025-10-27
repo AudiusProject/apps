@@ -203,9 +203,6 @@ const TrackEditForm = (
     stopPreview()
   })
 
-  const { isEnabled: isTrackAudioReplaceEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_AUDIO_REPLACE
-  )
   const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
     FeatureFlags.TRACK_REPLACE_DOWNLOADS
   )
@@ -372,16 +369,14 @@ const TrackEditForm = (
               layoutStyles.gap4
             )}
           >
-            {isTrackAudioReplaceEnabled ? (
-              <FileReplaceContainer
-                fileName={fileName || messages.untitled}
-                onTogglePlay={handleTogglePreview}
-                isPlaying={isPreviewPlaying}
-                onClickReplace={onClickReplace}
-                onClickDownload={onClickDownload}
-                downloadEnabled={!isUpload && isTrackReplaceDownloadsEnabled}
-              />
-            ) : null}
+            <FileReplaceContainer
+              fileName={fileName || messages.untitled}
+              onTogglePlay={handleTogglePreview}
+              isPlaying={isPreviewPlaying}
+              onClickReplace={onClickReplace}
+              onClickDownload={onClickDownload}
+              downloadEnabled={!isUpload && isTrackReplaceDownloadsEnabled}
+            />
             <TrackMetadataFields />
             <div className={cn(layoutStyles.col, layoutStyles.gap4)}>
               <VisibilityField entityType='track' isUpload={isUpload} />
@@ -401,14 +396,6 @@ const TrackEditForm = (
               />
               <RemixSettingsField isUpload={isUpload} />
             </div>
-            {!isTrackAudioReplaceEnabled && isUpload ? (
-              <PreviewButton
-                // Since edit form is a single component, render a different preview for each track
-                key={trackIdx}
-                className={styles.previewButton}
-                index={trackIdx}
-              />
-            ) : null}
           </div>
           {isMultiTrack ? <MultiTrackFooter /> : null}
         </div>
