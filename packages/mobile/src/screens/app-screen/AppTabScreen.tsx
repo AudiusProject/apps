@@ -24,7 +24,6 @@ import { FilterButtonScreen } from '@audius/harmony-native'
 import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
-import { AiGeneratedTracksScreen } from 'app/screens/ai-generated-tracks-screen'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
@@ -93,7 +92,6 @@ export type AppTabScreenParamList = {
   Followers: { userId: ID }
   Following: { userId: ID }
   Mutuals: { userId: ID }
-  AiGeneratedTracks: { userId: ID }
   RelatedArtists: { userId: ID }
   SupportingUsers: { userId: ID }
   TopSupporters: { userId: ID; source: TipSource }
@@ -222,10 +220,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         <Stack.Screen name='Followers' component={FollowersScreen} />
         <Stack.Screen name='Following' component={FollowingScreen} />
         <Stack.Screen name='Favorited' component={FavoritedScreen} />
-        <Stack.Screen
-          name='AiGeneratedTracks'
-          component={AiGeneratedTracksScreen}
-        />
         <Stack.Screen name='Mutuals' component={MutualsScreen} />
         <Stack.Screen name='RelatedArtists' component={RelatedArtistsScreen} />
         <Stack.Screen

@@ -116,7 +116,6 @@ export const userTrackMetadataFromSDK = (
     license: (input.license as License) ?? null,
 
     // Nullable fields
-    ai_attribution_user_id: input.aiAttributionUserId ?? null,
     allowed_api_keys: input.allowedApiKeys ?? null,
     artists: input.artists
       ? transformAndCleanList(input.artists, resourceContributorFromSDK)
@@ -271,7 +270,6 @@ export const trackMetadataForUploadToSdk = (
   previewStartSeconds: input.preview_start_seconds ?? undefined,
   previewCid: input.preview_cid ?? '',
   ddexApp: input.ddex_app ?? '',
-  aiAttributionUserId: OptionalId.parse(input.ai_attribution_user_id),
   audioUploadId: input.audio_upload_id ?? undefined,
   duration: input.duration ?? undefined,
   musicalKey: input.musical_key

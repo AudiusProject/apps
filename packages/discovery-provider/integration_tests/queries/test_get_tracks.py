@@ -573,27 +573,3 @@ def test_get_remixes_of_with_multiple_events(app):
         assert (
             response["count"] == 3
         ), f"Expected count of 3, got {response['count']} - count may be inflated by duplicates"
-
-
-def test_get_ai_attributed_tracks(app):
-    """Test getting tracks with AI attribution"""
-
-    with app.app_context():
-        db = get_db()
-
-    populate_tracks(db)
-
-    with db.scoped_session() as session:
-        tracks = _get_tracks(
-            session,
-            {
-                "user_id": 1287289,
-                "offset": 0,
-                "limit": 10,
-                "ai_attributed_only": True,
-                "sort": "date",
-            },
-        )
-        assert len(tracks) == 2
-        assert tracks[0]["track_id"] == 12
-        assert tracks[1]["track_id"] == 3

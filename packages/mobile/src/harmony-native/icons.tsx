@@ -144,7 +144,6 @@ export { default as IconError } from '@audius/harmony/src/assets/icons/Error.svg
 export { default as IconRepost } from '@audius/harmony/src/assets/icons/Repost.svg'
 export { default as IconWallet } from '@audius/harmony/src/assets/icons/Wallet.svg'
 export { default as IconExplore } from '@audius/harmony/src/assets/icons/Explore.svg'
-export { default as IconRobot } from '@audius/harmony/src/assets/icons/Robot.svg'
 export { default as IconWand } from '@audius/harmony/src/assets/icons/Wand.svg'
 export { default as IconExternalLink } from '@audius/harmony/src/assets/icons/ExternalLink.svg'
 export { default as IconRocket } from '@audius/harmony/src/assets/icons/Rocket.svg'

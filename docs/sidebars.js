@@ -208,7 +208,6 @@ module.exports = {
         'developers/api/get-purchasers',
         'developers/api/get-remixers',
         'developers/api/get-top-track-tags',
-        'developers/api/get-ai-attributed-tracks-by-user-handle',
         'developers/api/get-related-users',
         'developers/api/verify-id-token',
         'developers/api/get-authorized-apps',

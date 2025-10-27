@@ -19,7 +19,6 @@ export type SocialPlatform = 'x' | 'instagram' | 'tiktok'
 
 export type UserMetadata = {
   album_count: number
-  allow_ai_attribution?: boolean
   artist_coin_badge?: Nullable<{
     mint: string
     logo_uri: string

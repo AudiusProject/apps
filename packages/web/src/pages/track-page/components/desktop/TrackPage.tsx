@@ -106,7 +106,6 @@ const TrackPage = ({
       previewing={previewing}
       trackTitle={defaults.title}
       trackId={defaults.trackId}
-      aiAttributionUserId={defaults.aiAttributionUserId}
       userId={user?.user_id ?? 0}
       artistHandle={emptyStringGuard(user?.handle)}
       tags={defaults.tags}

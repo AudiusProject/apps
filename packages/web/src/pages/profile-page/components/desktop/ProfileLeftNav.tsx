@@ -5,7 +5,6 @@ import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import { Box, Flex, Text } from '@audius/harmony'
 
-import { AiGeneratedCallout } from 'components/ai-generated-button/AiGeneratedCallout'
 import Input from 'components/data-entry/Input'
 import TextArea from 'components/data-entry/TextArea'
 import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
@@ -44,7 +43,6 @@ type ProfileLeftNavProps = {
   editMode: boolean
   loading: boolean
   isDeactivated: boolean
-  allowAiAttribution: boolean
   twitterHandle: string
   onUpdateTwitterHandle: (handle: string) => void
   instagramHandle: string
@@ -84,7 +82,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     editMode,
     loading,
     isDeactivated,
-    allowAiAttribution,
     twitterHandle,
     onUpdateTwitterHandle,
     instagramHandle,
@@ -258,7 +255,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
         <TopSupporters />
         <ProfileMutuals />
         <RelatedArtists />
-        {allowAiAttribution ? <AiGeneratedCallout handle={handle} /> : null}
         {isArtist ? <ProfileTopTags /> : null}
         {showUploadChip ? (
           <UploadChip type='track' variant='nav' source='nav' />

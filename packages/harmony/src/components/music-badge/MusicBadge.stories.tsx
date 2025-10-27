@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
-import IconRobot from '~harmony/assets/icons/Robot.svg'
+import { IconTrending } from '~harmony/icons'
 
 import { MusicBadge } from './MusicBadge'
 
@@ -15,7 +15,7 @@ type Story = StoryObj<typeof MusicBadge>
 
 export const Default: Story = {
   args: {
-    icon: IconRobot,
+    icon: IconTrending,
     children: 'Example Badge'
   }
 }
