@@ -56,7 +56,6 @@ import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
-import { log } from 'console'
 
 const messages = coinDetailsMessages.coinInfo
 const overflowMessages = coinDetailsMessages.overflowMenu
@@ -403,12 +402,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const { balance: userTokenBalance } = userToken ?? {}
 
   const isManagerMode = useIsManagedAccount()
-  console.log(
-    'REED isManagerMode',
-    isManagerMode,
-    coin?.dynamicBondingCurve?.isMigrated,
-    coin?.artistLocker
-  )
 
   // Claim fee hook
   const { mutate: claimFees, isPending: isClaimFeesPending } = useClaimFees({
