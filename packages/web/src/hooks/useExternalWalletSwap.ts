@@ -3,6 +3,7 @@ import {
   useCurrentAccountUser,
   useQueryContext,
   getExternalWalletBalanceQueryKey,
+  getArtistCoinQueryKey,
   SwapErrorType,
   SwapStatus,
   SwapTokensParams,
@@ -462,6 +463,18 @@ export const useExternalWalletSwap = () => {
               return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
             }
           )
+        }
+
+        // Invalidate artist coin queries to refresh fee claiming and graduation progress
+        if (params.inputMint && !isSpendingAudio) {
+          queryClient.invalidateQueries({
+            queryKey: getArtistCoinQueryKey(params.inputMint)
+          })
+        }
+        if (params.outputMint && !isReceivingAudio) {
+          queryClient.invalidateQueries({
+            queryKey: getArtistCoinQueryKey(params.outputMint)
+          })
         }
       }
     }
