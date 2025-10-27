@@ -46,6 +46,7 @@ export type Modals =
   | 'TrendingRewardsExplainer'
   | 'ChallengeRewards'
   | 'ClaimAllRewards'
+  | 'ClaimVestedCoinsModal'
   | 'LinkSocialRewardsExplainer'
   | 'APIRewardsExplainer'
   | 'TransferAudioMobileWarning'
@@ -127,6 +128,7 @@ export type StatefulModalsState = {
   CoinflowOnramp: CoinflowOnrampModalState
   CreateChatModal: CreateChatModalState
   ChatBlastModal: ChatBlastModalState
+  ClaimVestedCoinsModal: ClaimVestedCoinsModalState
   InboxUnavailableModal: InboxUnavailableModalState
   LeavingAudiusModal: LeavingAudiusModalState
   WithdrawUSDCModal: WithdrawUSDCModalState
@@ -169,6 +171,13 @@ export type SendTokensModalState = BaseModalState & {
 
 export type ArtistCoinDetailsModalState = BaseModalState & {
   mint?: string
+}
+
+export type ClaimVestedCoinsModalState = BaseModalState & {
+  ticker: string
+  claimable: number
+  onClaim: (rewardsPoolPercentage: number) => void
+  isClaimPending?: boolean
 }
 
 export type ModalsState = BasicModalsState & StatefulModalsState

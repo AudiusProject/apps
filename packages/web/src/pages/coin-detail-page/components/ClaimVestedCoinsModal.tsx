@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { coinDetailsMessages } from '@audius/common/messages'
+import { useClaimVestedCoinsModal } from '@audius/common/store'
 import {
   Button,
   Divider,
@@ -18,52 +19,21 @@ const messages = coinDetailsMessages.claimVestedCoinsModal
 
 const DEFAULT_REWARDS_POOL_PERCENT = 50
 
-type ClaimVestedCoinsModalProps = {
-  /**
-   * Whether the modal is open
-   */
-  isOpen: boolean
-  /**
-   * Callback to close the modal
-   */
-  onClose: () => void
-  /**
-   * The ticker symbol of the coin
-   */
-  ticker: string
-  /**
-   * Total unlocked coins available
-   */
-  unlockedCoins: number
-  /**
-   * Callback when user confirms the claim
-   */
-  onClaim: (rewardsPoolPercentage: number) => void
-  /**
-   * Whether the claim is in progress
-   */
-  isClaimPending?: boolean
-}
+export const ClaimVestedCoinsModal = () => {
+  const { isOpen, onClose, data } = useClaimVestedCoinsModal()
+  const { ticker, claimable, onClaim, isClaimPending } = data ?? {}
 
-export const ClaimVestedCoinsModal = ({
-  isOpen,
-  onClose,
-  ticker,
-  unlockedCoins,
-  onClaim,
-  isClaimPending = false
-}: ClaimVestedCoinsModalProps) => {
   const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(
     DEFAULT_REWARDS_POOL_PERCENT
   )
 
   const yourSharePercentage = 100 - rewardsPoolPercentage
-  const yourShareAmount = Math.floor(
-    (unlockedCoins * yourSharePercentage) / 100
-  )
-  const rewardsPoolAmount = Math.floor(
-    (unlockedCoins * rewardsPoolPercentage) / 100
-  )
+  const yourShareAmount = claimable
+    ? Math.floor((claimable * yourSharePercentage) / 100)
+    : 0
+  const rewardsPoolAmount = claimable
+    ? Math.floor((claimable * rewardsPoolPercentage) / 100)
+    : 0
 
   const handlePercentageChange = (value: string) => {
     // Remove % symbol if present and any non-digit characters
@@ -81,7 +51,11 @@ export const ClaimVestedCoinsModal = ({
   }
 
   const handleClaim = () => {
-    onClaim(rewardsPoolPercentage)
+    onClaim?.(rewardsPoolPercentage)
+  }
+
+  if (!ticker || !claimable || !onClaim) {
+    return null
   }
 
   return (
@@ -135,14 +109,14 @@ export const ClaimVestedCoinsModal = ({
         <Flex alignItems='center' justifyContent='space-between'>
           <Flex alignItems='center' gap='s'>
             <Text variant='body' size='s' strength='strong' color='subdued'>
-              {messages.unlockedCoins}
+              {messages.claimable}
             </Text>
-            <Tooltip text={messages.tooltips.unlockedCoins}>
+            <Tooltip text={messages.tooltips.claimable}>
               <IconInfo size='s' color='subdued' />
             </Tooltip>
           </Flex>
           <Text variant='body' size='s' color='default'>
-            {unlockedCoins.toLocaleString()} ${ticker}
+            {claimable.toLocaleString()} ${ticker}
           </Text>
         </Flex>
 

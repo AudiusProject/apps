@@ -153,14 +153,14 @@ export const coinDetailsMessages = {
     rewardsPoolAllocation: 'Rewards Pool Allocation',
     rewardsPoolDescription:
       'Allocate a portion of your unlocked coins towards the community rewards pool.',
-    unlockedCoins: 'Unlocked Coins',
+    claimable: 'Unlocked Coins',
     yourShare: 'Your Share',
     rewardsPool: 'Rewards Pool',
     claim: 'Claim',
     tooltips: {
       rewardsPoolAllocation:
         'Choose what percentage of your unlocked coins you want to allocate to the community rewards pool. The remaining percentage will be claimed directly to your wallet.',
-      unlockedCoins:
+      claimable:
         'The total amount of your reserved Artist Coins that have unlocked and are available to claim now.',
       yourShare:
         'The amount of unlocked coins that will be claimed directly to your wallet based on your allocation percentage.',

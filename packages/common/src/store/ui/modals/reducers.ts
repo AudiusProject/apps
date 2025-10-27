@@ -6,6 +6,7 @@ import { announcementModalReducer } from './announcement-modal'
 import { artistCoinDetailsModalReducer } from './artist-coin-details-modal'
 import { artistPickModalReducer } from './artist-pick-modal'
 import { buySellModalReducer } from './buy-sell-modal'
+import { claimVestedCoinsModalReducer } from './claim-vested-coins-modal'
 import { coinSuccessModalReducer } from './coin-success-modal'
 import { coinflowOnrampModalReducer } from './coinflow-onramp-modal'
 import { coinflowWithdrawModalReducer } from './coinflow-withdraw-modal'
@@ -65,6 +66,7 @@ const combinedReducers = combineReducers({
   USDCManualTransferModal: usdcManualTransferModalReducer,
   AddCashModal: addCashModalReducer,
   BuySellModal: buySellModalReducer,
+  ClaimVestedCoinsModal: claimVestedCoinsModalReducer,
   USDCTransactionDetailsModal: usdcTransactionDetailsModalReducer,
   PremiumContentPurchaseModal: premiumContentPurchaseModalReducer,
   CoinflowOnramp: coinflowOnrampModalReducer,
