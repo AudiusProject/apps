@@ -6,8 +6,7 @@ import {
   SwapErrorType,
   SwapStatus,
   SwapTokensParams,
-  SwapTokensResult,
-  getConnectedWalletsQueryOptions
+  SwapTokensResult
 } from '@audius/common/api'
 import { ErrorLevel, Feature } from '@audius/common/models'
 import {
