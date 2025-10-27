@@ -16,7 +16,6 @@ import {
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 import {
   mockUserByHandle,
-  mockUserCollectibles,
   mockSupportingUsers,
   mockSupporterUsers,
   mockRelatedUsers,
@@ -57,7 +56,6 @@ const ProfilePageWithRef = () => {
 export function renderProfilePage(user: any, options?: RenderOptions) {
   mswServer.use(
     mockUserByHandle(user),
-    mockUserCollectibles(user),
     mockSupportingUsers(user),
     mockSupporterUsers(user),
     mockRelatedUsers(user),

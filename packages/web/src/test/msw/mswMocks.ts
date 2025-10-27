@@ -1,4 +1,4 @@
-import { Collectible, User } from '@audius/common/models'
+import { User } from '@audius/common/models'
 import { developmentConfig } from '@audius/sdk'
 import { http, HttpResponse } from 'msw'
 
@@ -19,14 +19,6 @@ const { apiEndpoint } = developmentConfig.network
 export const mockUserByHandle = (user: typeof artistUser) =>
   http.get(`${apiEndpoint}/v1/full/users/handle/${user.handle}`, () =>
     HttpResponse.json({ data: [user] })
-  )
-
-export const mockUserCollectibles = (
-  user: typeof artistUser,
-  collectibles?: Collectible[]
-) =>
-  http.get(`${apiEndpoint}/v1/users/${user.id}/collectibles`, () =>
-    HttpResponse.json({ data: collectibles ?? null })
   )
 
 export const mockSupportingUsers = (
@@ -88,6 +80,11 @@ export const mockCoinByMint = (coin: typeof mockArtistCoin) =>
 export const mockCoinByTicker = (coin: typeof mockArtistCoin) =>
   http.get(`${apiEndpoint}/v1/coins/ticker/${coin.symbol}`, () =>
     HttpResponse.json({ data: coin })
+  )
+
+export const mockCoinMembersCount = (mint: string, count: number) =>
+  http.get(`${apiEndpoint}/v1/coins/${mint}/members/count`, () =>
+    HttpResponse.json({ data: count })
   )
 
 /**

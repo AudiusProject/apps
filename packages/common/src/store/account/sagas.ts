@@ -174,6 +174,7 @@ export function* fetchAccountAsync({
 }: {
   shouldMarkAccountAsLoading: boolean
 }) {
+  console.log('fetchAccountAsync')
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const remoteConfigInstance = yield* getContext('remoteConfigInstance')
   const localStorage = yield* getContext('localStorage')
