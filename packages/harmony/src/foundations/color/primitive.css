@@ -61,7 +61,6 @@
     #1ba1f1ff 104.43%
   );
   --harmony-trending-blue: #216fdcff;
-  --harmony-ai-green: #1fd187ff;
   --harmony-glass-overlay: #ffffffd9;
 }
 
@@ -118,7 +117,6 @@ html[data-theme='day'] {
     #1ba1f1ff 104.43%
   );
   --harmony-trending-blue: #216fdcff;
-  --harmony-ai-green: #1fd187ff;
   --harmony-glass-overlay: #ffffffd9;
 }
 
@@ -175,7 +173,6 @@ html[data-theme='dark'] {
     #58b9f4ff 104.43%
   );
   --harmony-trending-blue: #2a85e8ff;
-  --harmony-ai-green: #1ecf7aff;
   --harmony-glass-overlay: #2f334899;
 }
 
@@ -232,6 +229,5 @@ html[data-theme='matrix'] {
     #20e290ff 104.43%
   );
   --harmony-trending-blue: #1eeb6fff;
-  --harmony-ai-green: #1eeb57ff;
   --harmony-glass-overlay: #01010199;
 }
