@@ -1,11 +1,13 @@
-import { User } from '@audius/common/models'
-import { developmentConfig } from '@audius/sdk'
+import { getWalletAddressesQueryKey } from '@audius/common/api'
+import { Status, User } from '@audius/common/models'
+import { developmentConfig, HashId } from '@audius/sdk'
 import { http, HttpResponse } from 'msw'
 
+import { queryClient } from 'services/query-client'
 import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
 import { testCollection } from 'test/mocks/fixtures/collections'
 import { testTrack } from 'test/mocks/fixtures/tracks'
-import { artistUser } from 'test/mocks/fixtures/users'
+import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 
 const { apiEndpoint } = developmentConfig.network
 
@@ -50,6 +52,37 @@ export const mockNfts = () =>
     'https://rinkeby-api.opensea.io/api/v2/chain/ethereum/account/0x123/nfts',
     () => HttpResponse.json({ data: [] })
   )
+
+export const mockCurrentAccount = (
+  user: typeof artistUser | typeof nonArtistUser
+) => {
+  // Set wallet addresses first - this is required for useCurrentAccount to be enabled
+  queryClient.setQueryData(getWalletAddressesQueryKey(), {
+    currentUser: user.wallet,
+    web3User: user.wallet
+  })
+
+  const account = {
+    collections: {},
+    userId: HashId.parse(user.id),
+    hasTracks: false,
+    status: Status.SUCCESS,
+    reason: null,
+    connectivityFailure: false,
+    needsAccountRecovery: false,
+    walletAddresses: {
+      currentUser: user.wallet,
+      web3User: user.wallet
+    },
+    playlistLibrary: null,
+    trackSaveCount: 0,
+    guestEmail: null
+  }
+  // Set current account data
+  return http.get(`${apiEndpoint}/v1/full/users/account/${user.wallet}`, () =>
+    HttpResponse.json({ data: account })
+  )
+}
 
 /**
  * Wallets

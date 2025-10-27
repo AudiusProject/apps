@@ -43,7 +43,9 @@ export const useCurrentAccountUser = <TResult = User>(
   options?: SelectableQueryOptions<User, TResult>
 ) => {
   const { data: currentAccount } = useCurrentAccount()
-  return useUser(currentAccount?.userId, options)
+  const userData = useUser(currentAccount?.userId, options)
+
+  return userData
 }
 
 export const useHasAccount = () => {

@@ -61,13 +61,10 @@ export const getCurrentAccountQueryFn = async (
   currentUserWallet: string | null,
   queryClient: QueryClient
 ): Promise<AccountState | null | undefined> => {
-  console.log({ currentUserWallet })
   const localAccount = getLocalAccount(localStorage, queryClient)
   if (localAccount) {
     return localAccount
   }
-
-  console.log({ currentUserWallet, localAccount })
 
   if (!currentUserWallet) {
     return null

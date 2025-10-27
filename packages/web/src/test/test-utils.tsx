@@ -5,7 +5,7 @@ import { AppContext } from '@audius/common/context'
 import { FeatureFlags } from '@audius/common/services'
 import { MediaProvider, ThemeProvider } from '@audius/harmony'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render, RenderOptions } from '@testing-library/react'
+import { render, RenderOptions, configure } from '@testing-library/react'
 import { History } from 'history'
 import { setupServer } from 'msw/node'
 import { Provider } from 'react-redux'
@@ -129,3 +129,8 @@ export type { CustomRenderOptions as RenderOptions }
 export { customRender as render }
 
 export const mswServer = setupServer()
+
+// Removes the long DOM output from failed queries
+configure({
+  getElementError: (message: any) => new Error(message)
+})

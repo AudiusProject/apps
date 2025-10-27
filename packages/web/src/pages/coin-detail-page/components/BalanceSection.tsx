@@ -398,6 +398,7 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
     { mint }
   )
   const { data: currentUser } = useCurrentAccountUser()
+  console.log({ currentUser })
   const { isBuySellSupported } = useBuySellRegionSupport()
   const initialTab = useBuySellInitialTab()
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS

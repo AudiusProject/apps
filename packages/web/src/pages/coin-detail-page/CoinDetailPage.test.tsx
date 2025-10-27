@@ -1,5 +1,7 @@
+import { getCurrentAccountQueryKey } from '@audius/common/api'
+import { Status } from '@audius/common/models'
 import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { developmentConfig } from '@audius/sdk'
+import { developmentConfig, HashId } from '@audius/sdk'
 import { createMemoryHistory } from 'history'
 import { http, HttpResponse } from 'msw'
 import { Switch, Route } from 'react-router-dom'
@@ -14,9 +16,10 @@ import {
   beforeEach
 } from 'vitest'
 
+import { queryClient } from 'services/query-client'
 import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
-import { mockCoinByTicker } from 'test/msw/mswMocks'
+import { mockCoinByTicker, mockCurrentAccount } from 'test/msw/mswMocks'
 import { RenderOptions, mswServer, render, screen } from 'test/test-utils'
 
 import { CoinDetailPage } from './CoinDetailPage'
@@ -120,7 +123,8 @@ describe('CoinDetailPage', () => {
     mswServer.close()
   })
 
-  it('non-coin owner - renders all sections', async () => {
+  it('Authed User - NOT coin holder - NOT coin creator', async () => {
+    mswServer.use(mockCurrentAccount(nonArtistUser))
     renderCoinDetailPageAsAuthenticatedUser(mockArtistCoin, nonArtistUser)
 
     // Wait for the page to load by finding the Insights heading (unique to this page)
