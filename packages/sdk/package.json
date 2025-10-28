@@ -164,7 +164,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/libs"
+    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/sdk"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -174,7 +174,7 @@
   "bugs": {
     "url": "https://github.com/AudiusProject/apps/issues"
   },
-  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/libs",
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/sdk",
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.24.0"
   }
