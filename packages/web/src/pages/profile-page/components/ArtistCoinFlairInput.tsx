@@ -34,7 +34,10 @@ export const ArtistCoinFlairInput = ({
   })
 
   // Filter to only owned coins
-  const { ownedCoins } = useOwnedCoins(allCoins)
+  const { ownedCoins, isLoading: isOwnedCoinsLoading } = useOwnedCoins(allCoins)
+
+  // Show loading state until both queries are complete
+  const isLoadingBoth = isLoading || isOwnedCoinsLoading
 
   // Create special "Default" and "None" coin options
   const specialOptions: CoinInfo[] = useMemo(() => {
@@ -150,13 +153,23 @@ export const ArtistCoinFlairInput = ({
     onChange(badge)
   }
 
-  if (isLoading) {
+  if (isLoadingBoth) {
     return (
-      <Box p='m'>
-        <Text variant='body' size='s' color='subdued'>
+      <Flex
+        gap='xs'
+        alignItems='center'
+        justifyContent='space-between'
+        border='strong'
+        borderRadius='s'
+        pv='s'
+        ph='m'
+        w='100%'
+        backgroundColor='surface2'
+      >
+        <Text variant='body' size='m' color='subdued'>
           Loading coins...
         </Text>
-      </Box>
+      </Flex>
     )
   }
 

@@ -62,11 +62,13 @@ type ProfileLeftNavProps = {
     logo_uri: string
     ticker: string
   }>
-  onUpdateArtistCoinBadge: (badge: {
-    mint: string
-    logo_uri: string
-    ticker: string
-  } | null) => void
+  onUpdateArtistCoinBadge: (
+    badge: {
+      mint: string
+      logo_uri: string
+      ticker: string
+    } | null
+  ) => void
   twitterVerified: boolean
   instagramVerified: boolean
   tikTokVerified: boolean
