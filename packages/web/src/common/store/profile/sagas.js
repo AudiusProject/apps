@@ -164,30 +164,13 @@ function* confirmUpdateProfile(userId, metadata) {
         return userMetadataListFromSDK(data)[0]
       },
       function* (confirmedUser) {
-        // Update the cached user so it no longer contains image upload artifacts
-        // and contains updated profile picture / cover photo sizes if any
-        const newMetadata = {}
-        if (metadata.updatedCoverPhoto) {
-          newMetadata.cover_photo_sizes = confirmedUser.cover_photo_sizes
-          newMetadata.cover_photo_cids = confirmedUser.cover_photo_cids
-          newMetadata.cover_photo = confirmedUser.cover_photo
-        }
-        if (metadata.updatedProfilePicture) {
-          newMetadata.profile_picture_sizes =
-            confirmedUser.profile_picture_sizes
-          newMetadata.profile_picture_cids = confirmedUser.profile_picture_cids
-          newMetadata.profile_picture = confirmedUser.profile_picture
-        }
-        queryClient.setQueryData(
-          getUserQueryKey(confirmedUser.user_id),
-          (prevUser) =>
-            !prevUser
-              ? undefined
-              : {
-                  ...prevUser,
-                  ...newMetadata
-                }
-        )
+        // Invalidate the user query to refetch fresh data from the server
+        // This ensures we get the canonical data including:
+        // - Processed image sizes (cover photo, profile picture)
+        // - Computed artist_coin_badge (based on coin_flair_mint and user's coins)
+        queryClient.invalidateQueries({
+          queryKey: getUserQueryKey(confirmedUser.user_id)
+        })
         yield put(profileActions.updateProfileSucceeded(metadata.user_id))
       },
       function* () {
