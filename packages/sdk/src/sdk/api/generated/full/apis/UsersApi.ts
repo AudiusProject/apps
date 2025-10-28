@@ -386,6 +386,7 @@ export interface GetTracksByUserRequest {
     sortMethod?: GetTracksByUserSortMethodEnum;
     sortDirection?: GetTracksByUserSortDirectionEnum;
     filterTracks?: GetTracksByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksByUserGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -400,6 +401,7 @@ export interface GetTracksByUserHandleRequest {
     sortMethod?: GetTracksByUserHandleSortMethodEnum;
     sortDirection?: GetTracksByUserHandleSortDirectionEnum;
     filterTracks?: GetTracksByUserHandleFilterTracksEnum;
+    gateCondition?: Array<GetTracksByUserHandleGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -2100,6 +2102,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['filter_tracks'] = params.filterTracks;
         }
 
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
@@ -2169,6 +2175,10 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.filterTracks !== undefined) {
             queryParameters['filter_tracks'] = params.filterTracks;
+        }
+
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -3029,6 +3039,18 @@ export type GetTracksByUserFilterTracksEnum = typeof GetTracksByUserFilterTracks
 /**
  * @export
  */
+export const GetTracksByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksByUserGateConditionEnum = typeof GetTracksByUserGateConditionEnum[keyof typeof GetTracksByUserGateConditionEnum];
+/**
+ * @export
+ */
 export const GetTracksByUserHandleSortEnum = {
     Date: 'date',
     Plays: 'plays'
@@ -3066,6 +3088,18 @@ export const GetTracksByUserHandleFilterTracksEnum = {
     Unlisted: 'unlisted'
 } as const;
 export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandleFilterTracksEnum[keyof typeof GetTracksByUserHandleFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserHandleGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksByUserHandleGateConditionEnum = typeof GetTracksByUserHandleGateConditionEnum[keyof typeof GetTracksByUserHandleGateConditionEnum];
 /**
  * @export
  */

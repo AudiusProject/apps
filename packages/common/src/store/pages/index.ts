@@ -119,3 +119,14 @@ export * from './chat'
 export { default as premiumTracksPageLineupReducer } from './premium-tracks/lineup/reducer'
 export * as premiumTracksPageLineupSelectors from './premium-tracks/lineup/selectors'
 export { premiumTracksActions as premiumTracksPageLineupActions } from './premium-tracks/lineup/actions'
+
+export {
+  default as exclusiveTracksPageLineupReducer,
+  initialState as exclusiveTracksPageLineupInitialState
+} from './exclusive-tracks/lineup/reducer'
+export { tracksActions as exclusiveTracksPageLineupActions } from './exclusive-tracks/lineup/actions'
+export {
+  default as exclusiveTracksPageReducer,
+  actions as exclusiveTracksPageActions
+} from './exclusive-tracks/slice'
+export * as exclusiveTracksPageSelectors from './exclusive-tracks/selectors'

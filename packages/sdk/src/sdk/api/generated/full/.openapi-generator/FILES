@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 apis/ChallengesApi.ts
 apis/CidDataApi.ts
 apis/CoinsApi.ts
