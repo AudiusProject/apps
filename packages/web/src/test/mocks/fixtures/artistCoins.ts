@@ -1,8 +1,7 @@
 import { Id } from '@audius/sdk'
 
 export const mockArtistCoin = {
-  ticker: '$MOCK',
-  symbol: 'MOCK',
+  ticker: 'MOCK',
   name: 'Mock Coin',
   mint: 'abcedfg1234567890',
   decimals: 9,
@@ -85,4 +84,22 @@ export const mockArtistCoin = {
     total_fees: 903028316
   },
   updatedAt: '2025-10-24T23:18:12.389258Z'
+}
+
+export const mockCoinHoldings = {
+  ticker: mockArtistCoin.ticker,
+  mint: mockArtistCoin.mint,
+  decimals: 5,
+  logo_uri: mockArtistCoin.logo_uri,
+  balance: 2806208545,
+  balance_usd: 0.418136809630839,
+  accounts: [
+    {
+      account: '9VEzg6NinLCGecKkcR3m3B6xSdKbz9fM6eYm12932NGU',
+      owner: 'FiFMKTVf8rCQjyxiQHgt3tqZ8LYPytmvakZ9ZRZ5cgHi',
+      balance: 2806208545,
+      balance_usd: 0.418136809630839,
+      is_in_app_wallet: false
+    }
+  ]
 }
