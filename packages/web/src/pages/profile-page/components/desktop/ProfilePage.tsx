@@ -18,7 +18,7 @@ import {
   profilePageTracksLineupActions as tracksActions,
   ProfilePageTabs
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import { Nullable, route } from '@audius/common/utils'
 import {
   Box,
   Flex,
@@ -100,6 +100,11 @@ export type ProfilePageProps = {
   tikTokVerified: boolean
   website: string
   donation: string
+  artistCoinBadge: Nullable<{
+    mint: string
+    logo_uri: string
+    ticker: string
+  }>
   updatedCoverPhoto: { error: boolean; url: string }
   profilePictureSizes: ProfilePictureSizes | null
   updatedProfilePicture: { error: boolean; url: string }
@@ -137,6 +142,13 @@ export type ProfilePageProps = {
   updateTikTokHandle: (handle: string) => void
   updateWebsite: (website: string) => void
   updateDonation: (donation: string) => void
+  updateArtistCoinBadge: (
+    badge: Nullable<{
+      mint: string
+      logo_uri: string
+      ticker: string
+    }>
+  ) => void
   changeTab: (tab: ProfilePageTabs) => void
   getLineupProps: (lineup: any) => any
   onEdit: () => void
@@ -206,6 +218,7 @@ const ProfilePage = ({
   updateTikTokHandle,
   updateWebsite,
   updateDonation,
+  updateArtistCoinBadge,
   updateProfilePicture,
   updateCoverPhoto,
   changeTab,
@@ -253,6 +266,7 @@ const ProfilePage = ({
   tikTokVerified,
   website,
   donation,
+  artistCoinBadge,
   updatedCoverPhoto,
   profilePictureSizes,
   updatedProfilePicture,
@@ -668,7 +682,6 @@ const ProfilePage = ({
                   handle={handle}
                   bio={bio}
                   location={location}
-                  allowAiAttribution={!!profile?.allow_ai_attribution}
                   twitterHandle={twitterHandle}
                   instagramHandle={instagramHandle}
                   tikTokHandle={tikTokHandle}
@@ -677,6 +690,7 @@ const ProfilePage = ({
                   tikTokVerified={tikTokVerified}
                   website={website}
                   donation={donation}
+                  artistCoinBadge={artistCoinBadge}
                   created={created}
                   onUpdateBio={updateBio}
                   onUpdateLocation={updateLocation}
@@ -685,6 +699,7 @@ const ProfilePage = ({
                   onUpdateTikTokHandle={updateTikTokHandle}
                   onUpdateWebsite={updateWebsite}
                   onUpdateDonation={updateDonation}
+                  onUpdateArtistCoinBadge={updateArtistCoinBadge}
                 />
                 <Box flex='1 1 100%'>{body}</Box>
               </Flex>

@@ -24,12 +24,6 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: 'doc',
-          id: 'developers/api/get-ai-attributed-tracks-by-user-handle',
-          label: 'Get AI Attributed Tracks by User Handle',
-          className: 'api-method get',
-        },
-        {
-          type: 'doc',
           id: 'developers/api/get-user-id-from-wallet',
           label: 'Get User ID from Wallet',
           className: 'api-method get',

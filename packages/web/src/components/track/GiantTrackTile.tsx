@@ -45,7 +45,6 @@ import {
   spacing
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
-import IconRobot from '@audius/harmony/src/assets/icons/Robot.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
 import IconVisibilityHidden from '@audius/harmony/src/assets/icons/VisibilityHidden.svg'
 import { useTheme } from '@emotion/react'
@@ -64,7 +63,6 @@ import Tooltip from 'components/tooltip/Tooltip'
 import { ComponentPlacement } from 'components/types'
 import { UserGeneratedText } from 'components/user-generated-text'
 
-import { AiTrackSection } from './AiTrackSection'
 import { CardTitle } from './CardTitle'
 import { GatedContentSection } from './GatedContentSection'
 import GiantArtwork from './GiantArtwork'
@@ -115,7 +113,6 @@ const messages = {
 }
 
 type GiantTrackTileProps = {
-  aiAttributionUserId: Nullable<number>
   artistHandle: string
   coSign: Nullable<Remix>
   credits: string
@@ -163,7 +160,6 @@ type GiantTrackTileProps = {
 }
 
 export const GiantTrackTile = ({
-  aiAttributionUserId,
   artistHandle,
   coSign,
   description,
@@ -615,11 +611,6 @@ export const GiantTrackTile = ({
           justifyContent='flex-end'
           css={{ position: 'absolute', right: 'var(--harmony-unit-6)' }}
         >
-          {aiAttributionUserId ? (
-            <MusicBadge icon={IconRobot} color='lightGreen'>
-              {messages.generatedWithAi}
-            </MusicBadge>
-          ) : null}
           {trendingRank ? (
             <MusicBadge color='blue' icon={IconTrending}>
               {trendingRank}
@@ -649,10 +640,6 @@ export const GiantTrackTile = ({
             ownerId={userId}
           />
         </Box>
-      ) : null}
-
-      {aiAttributionUserId ? (
-        <AiTrackSection attributedUserId={aiAttributionUserId} />
       ) : null}
 
       <Flex

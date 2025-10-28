@@ -103,9 +103,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
 
-  const { isEnabled: isTrackReplaceEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_AUDIO_REPLACE
-  )
   const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
     FeatureFlags.TRACK_REPLACE_DOWNLOADS
   )
@@ -345,23 +342,21 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
           <>
             <KeyboardAwareScrollView>
               <Tile style={styles.tile}>
-                {isTrackReplaceEnabled ? (
-                  <Flex pt='l' ph='l'>
-                    <FileReplaceContainer
-                      fileName={
-                        selectedTrack?.file.name ||
-                        origFilename ||
-                        values.title ||
-                        messages.untitled
-                      }
-                      // @ts-ignore
-                      filePath={selectedTrackFile || streamUrl || ''}
-                      trackId={values.track_id}
-                      isUpload={isUpload}
-                      onMenuButtonPress={handleOverflowMenuOpen}
-                    />
-                  </Flex>
-                ) : null}
+                <Flex pt='l' ph='l'>
+                  <FileReplaceContainer
+                    fileName={
+                      selectedTrack?.file.name ||
+                      origFilename ||
+                      values.title ||
+                      messages.untitled
+                    }
+                    // @ts-ignore
+                    filePath={selectedTrackFile || streamUrl || ''}
+                    trackId={values.track_id}
+                    isUpload={isUpload}
+                    onMenuButtonPress={handleOverflowMenuOpen}
+                  />
+                </Flex>
                 <PickArtworkField name='artwork' isUpload={isUpload} />
                 <TextField name='title' label={messages.trackName} required />
                 <SubmenuList>

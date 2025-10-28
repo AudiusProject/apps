@@ -79,7 +79,6 @@ import { Tag } from 'app/components/core'
 import { DeletedTile } from 'app/components/details-tile/DeletedTile'
 import { DetailsProgressInfo } from 'app/components/details-tile/DetailsProgressInfo'
 import { DetailsTileActionButtons } from 'app/components/details-tile/DetailsTileActionButtons'
-import { DetailsTileAiAttribution } from 'app/components/details-tile/DetailsTileAiAttribution'
 import { DetailsTileHasAccess } from 'app/components/details-tile/DetailsTileHasAccess'
 import { DetailsTileNoAccess } from 'app/components/details-tile/DetailsTileNoAccess'
 import { DetailsTileStats } from 'app/components/details-tile/DetailsTileStats'
@@ -229,7 +228,6 @@ export const TrackScreenDetailsTile = ({
 
   const isLongFormContent =
     track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
-  const aiAttributionUserId = track?.ai_attribution_user_id
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: remixContest } = useRemixContest(trackId)
   const isRemixContest = !!remixContest
@@ -285,12 +283,6 @@ export const TrackScreenDetailsTile = ({
   const trendingRank = useTrackRank(trackId)
 
   const badges = [
-    aiAttributionUserId ? (
-      <DetailsTileAiAttribution
-        userId={aiAttributionUserId}
-        key='ai-attribution-badge'
-      />
-    ) : null,
     trendingRank ? (
       <MusicBadge color='blue' icon={IconTrending} key='trending-badge'>
         {trendingRank}

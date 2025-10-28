@@ -102,7 +102,6 @@ import IconRemixSVG from '../assets/icons/Remix.svg'
 import IconRemoveSVG from '../assets/icons/Remove.svg'
 import IconRepeatOffSVG from '../assets/icons/RepeatOff.svg'
 import IconRepostSVG from '../assets/icons/Repost.svg'
-import IconRobotSVG from '../assets/icons/Robot.svg'
 import IconRocketSVG from '../assets/icons/Rocket.svg'
 import IconSaveSVG from '../assets/icons/Save.svg'
 import IconSearchSVG from '../assets/icons/Search.svg'
@@ -294,7 +293,6 @@ export const IconError = IconErrorSVG as IconComponent
 export const IconRepost = IconRepostSVG as IconComponent
 export const IconWallet = IconWalletSVG as IconComponent
 export const IconExplore = IconExploreSVG as IconComponent
-export const IconRobot = IconRobotSVG as IconComponent
 export const IconWand = IconWandSVG as IconComponent
 export const IconExternalLink = IconExternalLinkSVG as IconComponent
 export const IconRocket = IconRocketSVG as IconComponent

@@ -2,9 +2,9 @@ import { useUserCreatedCoins } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
+import { Nullable } from '@audius/common/utils'
 import { Box, Flex, Text } from '@audius/harmony'
 
-import { AiGeneratedCallout } from 'components/ai-generated-button/AiGeneratedCallout'
 import Input from 'components/data-entry/Input'
 import TextArea from 'components/data-entry/TextArea'
 import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
@@ -13,6 +13,7 @@ import { Type } from 'pages/profile-page/components/SocialLink'
 import { ProfileTopTags } from 'pages/profile-page/components/desktop/ProfileTopTags'
 import { zIndex } from 'utils/zIndex'
 
+import { ArtistCoinFlairInput } from '../ArtistCoinFlairInput'
 import SocialLinkInput from '../SocialLinkInput'
 
 import { BuyArtistCoinCard } from './BuyArtistCoinCard'
@@ -29,6 +30,7 @@ const messages = {
   description: 'Description',
   location: 'Location',
   socialHandles: 'Social Handles',
+  artistCoinFlair: 'Artist Coin Flair',
   website: 'Website',
   donate: 'Donate'
 }
@@ -41,7 +43,6 @@ type ProfileLeftNavProps = {
   editMode: boolean
   loading: boolean
   isDeactivated: boolean
-  allowAiAttribution: boolean
   twitterHandle: string
   onUpdateTwitterHandle: (handle: string) => void
   instagramHandle: string
@@ -56,6 +57,18 @@ type ProfileLeftNavProps = {
   onUpdateDonation: (donation: string) => void
   bio: string
   onUpdateBio: (bio: string) => void
+  artistCoinBadge?: Nullable<{
+    mint: string
+    logo_uri: string
+    ticker: string
+  }>
+  onUpdateArtistCoinBadge: (
+    badge: {
+      mint: string
+      logo_uri: string
+      ticker: string
+    } | null
+  ) => void
   twitterVerified: boolean
   instagramVerified: boolean
   tikTokVerified: boolean
@@ -71,7 +84,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     editMode,
     loading,
     isDeactivated,
-    allowAiAttribution,
     twitterHandle,
     onUpdateTwitterHandle,
     instagramHandle,
@@ -86,6 +98,8 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     onUpdateDonation,
     bio,
     onUpdateBio,
+    artistCoinBadge,
+    onUpdateArtistCoinBadge,
     twitterVerified,
     instagramVerified,
     tikTokVerified,
@@ -173,6 +187,17 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               onChange={onUpdateTikTokHandle}
             />
           </Flex>
+
+          <Flex column gap='s'>
+            <Text variant='title' color='white'>
+              {messages.artistCoinFlair}
+            </Text>
+            <ArtistCoinFlairInput
+              selectedBadge={artistCoinBadge}
+              onChange={onUpdateArtistCoinBadge}
+            />
+          </Flex>
+
           <Flex column gap='s'>
             <Text variant='title' color='white'>
               {messages.website}
@@ -232,7 +257,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
         <TopSupporters />
         <ProfileMutuals />
         <RelatedArtists />
-        {allowAiAttribution ? <AiGeneratedCallout handle={handle} /> : null}
         {isArtist ? <ProfileTopTags /> : null}
         {showUploadChip ? (
           <UploadChip type='track' variant='nav' source='nav' />

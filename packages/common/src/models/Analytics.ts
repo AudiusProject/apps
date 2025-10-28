@@ -628,7 +628,13 @@ export enum Name {
   LAUNCHPAD_CLAIM_FEES_FAILURE = 'Launchpad: Claim Fees Failure',
   LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET = 'Launchpad: Claim Fees Connect Wallet',
   LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET = 'Launchpad: Claim Fees Switch Wallet',
-  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected'
+  LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET = 'Launchpad: Claim Vested Coins Switch Wallet',
+  LAUNCHPAD_CLAIM_VESTED_COINS_CLICKED = 'Launchpad: Claim Vested Coins Clicked',
+  LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET = 'Launchpad: Claim Vested Coins Connect Wallet',
+  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected',
+  LAUNCHPAD_CLAIM_VESTED_COINS_WALLET_CONNECTED = 'Launchpad: Claim Vested Coins Wallet Connected',
+  LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS = 'Launchpad: Claim Vested Coins Success',
+  LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE = 'Launchpad: Claim Vested Coins Failure'
 }
 
 type PageView = {
@@ -3074,6 +3080,50 @@ export type LaunchpadClaimFeesWalletConnected = {
   mintAddress?: string
 }
 
+export type LaunchpadClaimVestedCoinsClicked = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_CLICKED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsConnectWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsSuccess = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  claimedAmount: string
+}
+
+export type LaunchpadClaimVestedCoinsFailure = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  error: string
+}
+
+export type LaunchpadClaimVestedCoinsSwitchWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET
+  currentWalletAddress: string
+  expectedWalletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsWalletConnected = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_WALLET_CONNECTED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
 export type BaseAnalyticsEvent = { type: typeof ANALYTICS_TRACK_EVENT }
 
 export type AllTrackingEvents =
@@ -3489,3 +3539,9 @@ export type AllTrackingEvents =
   | LaunchpadClaimFeesConnectWallet
   | LaunchpadClaimFeesSwitchWallet
   | LaunchpadClaimFeesWalletConnected
+  | LaunchpadClaimVestedCoinsClicked
+  | LaunchpadClaimVestedCoinsSuccess
+  | LaunchpadClaimVestedCoinsFailure
+  | LaunchpadClaimVestedCoinsConnectWallet
+  | LaunchpadClaimVestedCoinsSwitchWallet
+  | LaunchpadClaimVestedCoinsWalletConnected

@@ -20,6 +20,12 @@ import {
     CoinArtistFeesFromJSONTyped,
     CoinArtistFeesToJSON,
 } from './CoinArtistFees';
+import type { CoinArtistLocker } from './CoinArtistLocker';
+import {
+    CoinArtistLockerFromJSON,
+    CoinArtistLockerFromJSONTyped,
+    CoinArtistLockerToJSON,
+} from './CoinArtistLocker';
 import type { CoinDynamicBondingCurve } from './CoinDynamicBondingCurve';
 import {
     CoinDynamicBondingCurveFromJSON,
@@ -32,6 +38,12 @@ import {
     CoinExtensionsFromJSONTyped,
     CoinExtensionsToJSON,
 } from './CoinExtensions';
+import type { CoinRewardPool } from './CoinRewardPool';
+import {
+    CoinRewardPoolFromJSON,
+    CoinRewardPoolFromJSONTyped,
+    CoinRewardPoolToJSON,
+} from './CoinRewardPool';
 
 /**
  * 
@@ -441,6 +453,18 @@ export interface Coin {
      * @memberof Coin
      */
     artistFees?: CoinArtistFees;
+    /**
+     * 
+     * @type {CoinArtistLocker}
+     * @memberof Coin
+     */
+    artistLocker?: CoinArtistLocker;
+    /**
+     * 
+     * @type {CoinRewardPool}
+     * @memberof Coin
+     */
+    rewardPool?: CoinRewardPool;
 }
 
 /**
@@ -571,6 +595,8 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'sell': json['sell'],
         'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
         'artistFees': !exists(json, 'artist_fees') ? undefined : CoinArtistFeesFromJSON(json['artist_fees']),
+        'artistLocker': !exists(json, 'artist_locker') ? undefined : CoinArtistLockerFromJSON(json['artist_locker']),
+        'rewardPool': !exists(json, 'reward_pool') ? undefined : CoinRewardPoolFromJSON(json['reward_pool']),
     };
 }
 
@@ -650,6 +676,8 @@ export function CoinToJSON(value?: Coin | null): any {
         'sell': value.sell,
         'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
         'artist_fees': CoinArtistFeesToJSON(value.artistFees),
+        'artist_locker': CoinArtistLockerToJSON(value.artistLocker),
+        'reward_pool': CoinRewardPoolToJSON(value.rewardPool),
     };
 }
 

@@ -26,10 +26,11 @@ import { makeStyles } from 'app/styles'
 import type { Image } from 'app/types/image'
 import { isImageUriSource } from 'app/utils/image'
 
+import { ArtistCoinFlairSelector } from './ArtistCoinFlairSelector'
 import { FormScreen } from './FormScreen'
 import { ProfileHeader } from './ProfileHeader'
 import { ProfileInputCard } from './ProfileInputCard'
-import type { ProfileValues, UpdatedProfile } from './types'
+import type { ArtistCoinBadge, ProfileValues, UpdatedProfile } from './types'
 
 const { updateProfile } = profilePageActions
 
@@ -54,9 +55,18 @@ const EditProfileForm = (props: EditProfileFormProps) => {
     isXVerified,
     isInstagramVerified,
     isTikTokVerified,
-    errors
+    errors,
+    values,
+    setFieldValue
   } = props
   const styles = useStyles()
+
+  const handleArtistCoinBadgeChange = useCallback(
+    (badge: ArtistCoinBadge | null) => {
+      setFieldValue('artist_coin_badge', badge)
+    },
+    [setFieldValue]
+  )
 
   return (
     <FormScreen onReset={handleReset} onSubmit={handleSubmit} errors={errors}>
@@ -83,6 +93,14 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 noGutter
               />
             </Flex>
+          </ProfileInputCard>
+
+          {/* Artist Coin Flair Section */}
+          <ProfileInputCard title='Artist Coin Flair'>
+            <ArtistCoinFlairSelector
+              selectedBadge={values.artist_coin_badge}
+              onChange={handleArtistCoinBadgeChange}
+            />
           </ProfileInputCard>
 
           {/* Social Handles Section */}
@@ -160,7 +178,8 @@ export const EditProfileScreen = () => {
         'instagram_handle',
         'tiktok_handle',
         'website',
-        'donation'
+        'donation',
+        'artist_coin_badge'
       ])
   })
 
@@ -179,7 +198,8 @@ export const EditProfileScreen = () => {
   const handleSubmit = useCallback(
     (values: ProfileValues) => {
       if (!profile) return
-      const { cover_photo, profile_picture, ...restValues } = values
+      const { cover_photo, profile_picture, artist_coin_badge, ...restValues } =
+        values
 
       // @ts-ignore typing is hard here, will come back
       const newProfile: UpdatedProfile = {
@@ -193,6 +213,21 @@ export const EditProfileScreen = () => {
       if (profile_picture.file) {
         newProfile.updatedProfilePicture = profile_picture
       }
+
+      // Handle artist coin badge
+      if (artist_coin_badge) {
+        if (
+          artist_coin_badge.mint === '__default__' ||
+          artist_coin_badge.mint === '__none__'
+        ) {
+          // Set to null for default/none
+          newProfile.artist_coin_badge = null
+        } else {
+          // Set the actual badge
+          newProfile.artist_coin_badge = artist_coin_badge
+        }
+      }
+
       dispatch(updateProfile(newProfile as unknown as UserMetadata))
       navigation.goBack()
     },
@@ -212,7 +247,8 @@ export const EditProfileScreen = () => {
     instagram_handle = null,
     tiktok_handle = null,
     website = null,
-    donation = null
+    donation = null,
+    artist_coin_badge = null
   } = profile
 
   const initialValues: ProfileValues = {
@@ -224,6 +260,7 @@ export const EditProfileScreen = () => {
     tiktok_handle,
     website,
     donation,
+    artist_coin_badge,
     cover_photo: {
       url:
         coverPhotoSource && isImageUriSource(coverPhotoSource)

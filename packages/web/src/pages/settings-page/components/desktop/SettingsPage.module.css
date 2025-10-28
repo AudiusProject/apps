@@ -51,12 +51,6 @@
   fill: var(--harmony-static-white);
 }
 
-.aiAttributionEnabled {
-  color: var(--harmony-green);
-  font-size: var(--harmony-font-s);
-  font-weight: var(--harmony-font-medium);
-}
-
 .showPrivateKey {
   line-height: var(--harmony-unit-5);
 }
