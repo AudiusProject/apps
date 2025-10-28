@@ -140,9 +140,9 @@ export const claimVestedCoins = async (
 
     const connection = getConnection()
 
-    const ownerWallet = new PublicKey(ownerWalletAddress as string)
+    const ownerWallet = new PublicKey(ownerWalletAddress)
     const receiverWallet = new PublicKey(receiverWalletAddress)
-    const mintPublicKey = new PublicKey(tokenMint as string)
+    const mintPublicKey = new PublicKey(tokenMint)
 
     logger.info({
       message: 'Claim vested coins request',
@@ -198,6 +198,12 @@ export const claimVestedCoins = async (
     if (!dbcPoolState) {
       throw new Error('Could not fetch DBC pool state')
     }
+    // Check if user is authorized to claim (is the pool creator)
+    if (!dbcPoolState.creator.equals(ownerWallet)) {
+      throw new Error(
+        `You are not the pool creator. Pool creator: ${dbcPoolState.creator.toBase58()}, Your wallet: ${ownerWallet.toBase58()}`
+      )
+    }
 
     // Derive the locker addresses
     const base = deriveBaseKeyForLocker(originalDbcPool.publicKey)
@@ -215,15 +221,8 @@ export const claimVestedCoins = async (
       throw new Error('Escrow account does not exist')
     }
 
-    // Check if user is authorized to claim (is the pool creator)
-    if (!dbcPoolState.creator.equals(ownerWallet)) {
-      throw new Error(
-        `You are not the pool creator. Pool creator: ${dbcPoolState.creator.toBase58()}, Your wallet: ${ownerWallet.toBase58()}`
-      )
-    }
-
     // Get escrow state
-    const escrowState = (await lockClient.getEscrow(escrow)) as any
+    const escrowState = await lockClient.getEscrow(escrow)
 
     logger.info({
       message: 'Escrow state retrieved',
@@ -285,7 +284,7 @@ export const claimVestedCoins = async (
     const claimTx = await lockClient.claimV2({
       escrow: escrow,
       recipient: ownerWallet,
-      maxAmount: availableAmount as any,
+      maxAmount: availableAmount,
       payer: ownerWallet
     })
 
