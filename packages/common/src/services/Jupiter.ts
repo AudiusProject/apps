@@ -108,10 +108,17 @@ export const getJupiterQuoteByMint = async ({
   onlyDirectRoutes = false,
   maxAccounts = DEFAULT_MAX_ACCOUNTS
 }: JupiterMintQuoteParams): Promise<JupiterQuoteResult> => {
+  // Convert to string using toFixed to prevent scientific notation for very small numbers
+  // Use the relevant decimal count based on swap mode
+  const relevantDecimals =
+    swapMode === 'ExactIn' ? inputDecimals : outputDecimals
+  const amountUiString = amountUi.toFixed(relevantDecimals)
   const amount =
     swapMode === 'ExactIn'
-      ? Number(new FixedDecimal(amountUi, inputDecimals).value.toString())
-      : Number(new FixedDecimal(amountUi, outputDecimals).value.toString())
+      ? Number(new FixedDecimal(amountUiString, inputDecimals).value.toString())
+      : Number(
+          new FixedDecimal(amountUiString, outputDecimals).value.toString()
+        )
 
   const quote = await jupiterInstance.quoteGet({
     inputMint,

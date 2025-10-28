@@ -437,7 +437,10 @@ export const useExternalWalletSwap = () => {
               const currentAmount = Number(oldBalance.toString())
               const inputAmount = result.inputAmount!.uiAmount
               const newAmount = Math.max(0, currentAmount - inputAmount) // Ensure non-negative
-              return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
+              return new FixedDecimal(
+                newAmount.toFixed(oldBalance.decimalPlaces),
+                oldBalance.decimalPlaces
+              )
             }
           )
         }
@@ -453,14 +456,17 @@ export const useExternalWalletSwap = () => {
               if (!oldBalance) {
                 // If no previous balance, create a new FixedDecimal with the output amount
                 return new FixedDecimal(
-                  result.outputAmount!.uiAmount,
+                  result.outputAmount!.uiAmount.toFixed(params.outputDecimals),
                   params.outputDecimals
                 )
               }
               const currentAmount = Number(oldBalance.toString())
               const outputAmount = result.outputAmount!.uiAmount
               const newAmount = currentAmount + outputAmount
-              return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
+              return new FixedDecimal(
+                newAmount.toFixed(oldBalance.decimalPlaces),
+                oldBalance.decimalPlaces
+              )
             }
           )
         }

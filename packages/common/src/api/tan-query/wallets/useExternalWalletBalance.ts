@@ -92,7 +92,11 @@ const getExternalWalletBalanceQueryFn =
       }
 
       // Convert raw balance to FixedDecimal with proper decimals
-      return new FixedDecimal(tokenBalance.uiAmount, tokenBalance.decimals)
+      // Use toFixed to prevent scientific notation for very small balances
+      return new FixedDecimal(
+        tokenBalance.uiAmount.toFixed(tokenBalance.decimals),
+        tokenBalance.decimals
+      )
     } catch (error) {
       reportToSentry({
         error: toErrorWithMessage(error),

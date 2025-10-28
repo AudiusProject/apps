@@ -58,7 +58,7 @@ export const useCoinAmountFormatting = ({
 
       // Use FixedDecimal truncation for consistency with cash wallet
       // Create FixedDecimal with the token's decimal precision to avoid rounding during construction
-      const fd = new FixedDecimal(availableBalance, decimals)
+      const fd = new FixedDecimal(availableBalance.toFixed(decimals), decimals)
       const truncatedValue = Number(fd.trunc(maxFractionDigits).toString())
 
       return truncatedValue.toLocaleString('en-US', {
@@ -67,7 +67,10 @@ export const useCoinAmountFormatting = ({
       })
     }
 
-    const tokenAmount = new FixedDecimal(availableBalance, decimals)
+    const tokenAmount = new FixedDecimal(
+      availableBalance.toFixed(decimals),
+      decimals
+    )
     const displayDecimals = getTokenDecimalPlaces(availableBalance)
     const maxFractionDigits = Math.min(displayDecimals, decimals)
 
@@ -95,7 +98,10 @@ export const useCoinAmountFormatting = ({
       })
     }
 
-    const tokenAmount = new FixedDecimal(safeNumericAmount, decimals)
+    const tokenAmount = new FixedDecimal(
+      safeNumericAmount.toFixed(decimals),
+      decimals
+    )
     const displayDecimals = getTokenDecimalPlaces(safeNumericAmount)
     const maxFractionDigits = Math.min(displayDecimals, decimals)
 

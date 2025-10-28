@@ -512,9 +512,12 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Use the predicted amount if we have enough, otherwise use actual balance
       const predictedAmount = step1Result.firstQuote.outputAmount.uiAmount
-      const predictedFixed = new FixedDecimal(predictedAmount, AUDIO_DECIMALS)
+      const predictedFixed = new FixedDecimal(
+        predictedAmount.toFixed(AUDIO_DECIMALS),
+        AUDIO_DECIMALS
+      )
       const actualFixed = new FixedDecimal(
-        actualAudioBalance.uiAmount,
+        actualAudioBalance.uiAmount.toFixed(AUDIO_DECIMALS),
         AUDIO_DECIMALS
       )
       const amountToSwap =

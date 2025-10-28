@@ -39,7 +39,7 @@ export const createSwapFormSchema = (
           if (val === '') return false
           try {
             const amount = new FixedDecimal(val, decimals)
-            const minAmount = new FixedDecimal(min, decimals)
+            const minAmount = new FixedDecimal(min.toFixed(decimals), decimals)
             return amount.value >= minAmount.value
           } catch {
             return false
@@ -54,7 +54,7 @@ export const createSwapFormSchema = (
           if (val === '') return false
           try {
             const amount = new FixedDecimal(val, decimals)
-            const maxAmount = new FixedDecimal(max, decimals)
+            const maxAmount = new FixedDecimal(max.toFixed(decimals), decimals)
             return amount.value <= maxAmount.value
           } catch {
             return false
@@ -71,7 +71,10 @@ export const createSwapFormSchema = (
           if (balance == null || balance === undefined) return true
           try {
             const amount = new FixedDecimal(val, decimals)
-            const balanceAmount = new FixedDecimal(balance, decimals)
+            const balanceAmount = new FixedDecimal(
+              balance.toFixed(decimals),
+              decimals
+            )
             return amount.value <= balanceAmount.value
           } catch {
             return false

@@ -55,7 +55,7 @@ export const validateMinimumAmount = (
   try {
     const amount = new FixedDecimal(value, decimals)
     // The UI displays this value up to 2 decimal places. To prevent confusion we round this number up
-    const minAmount = new FixedDecimal(min, decimals).round(2)
+    const minAmount = new FixedDecimal(min.toFixed(decimals), decimals).round(2)
 
     if (amount.value < minAmount.value) {
       return messages.minAmount(min, tokenSymbol)
@@ -80,7 +80,7 @@ export const validateMaximumAmount = (
 
   try {
     const amount = new FixedDecimal(value, decimals)
-    const maxAmount = new FixedDecimal(max, decimals)
+    const maxAmount = new FixedDecimal(max.toFixed(decimals), decimals)
 
     if (amount.value > maxAmount.value) {
       return messages.maxAmount(max, tokenSymbol)
@@ -110,7 +110,7 @@ export const validateSufficientBalance = (
 
   try {
     const amount = new FixedDecimal(value, decimals)
-    const balanceAmount = new FixedDecimal(balance, decimals)
+    const balanceAmount = new FixedDecimal(balance.toFixed(decimals), decimals)
 
     if (amount.value > balanceAmount.value) {
       return messages.insufficientBalance(tokenSymbol)
