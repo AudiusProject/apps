@@ -146,7 +146,6 @@ const createSdkSchema = () =>
   z
     .object({
       track_id: z.optional(z.number()).nullable(),
-      ai_attribution_user_id: z.optional(z.number()).nullable(),
       allowed_api_keys: z.optional(z.array(z.string())).nullable(),
       description: z
         .optional(z.string().max(MAX_DESCRIPTION_LENGTH))

@@ -1,5 +1,6 @@
 import { CpAmm, getUnClaimReward } from '@meteora-ag/cp-amm-sdk'
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
+import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   TOKEN_PROGRAM_ID,
   createTransferInstruction,
@@ -8,10 +9,13 @@ import {
 import { Connection, PublicKey } from '@solana/web3.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
 import { AUDIO_MINT } from './constants'
+
+const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 interface ClaimFeesRequestBody {
   tokenMint: string
@@ -21,31 +25,27 @@ interface ClaimFeesRequestBody {
 
 const getDBCPoolTxs = async (
   connection: Connection,
-  tokenMint: string,
+  poolAddress: string,
   ownerWalletAddress: string,
   receiverWalletAddress: string,
   ownerWalletAudioATA: PublicKey
 ) => {
   const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
-  const tokenPool = await dbcClient.state.getPoolByBaseMint(
-    new PublicKey(tokenMint)
-  )
-  if (!tokenPool) {
+  const poolState = await dbcClient.state.getPool(new PublicKey(poolAddress))
+  if (!poolState) {
     return
   }
 
-  const poolAddress = tokenPool.publicKey
-  const poolData = tokenPool.account
   const ownerWallet = new PublicKey(ownerWalletAddress)
   const receiverWallet = new PublicKey(receiverWalletAddress)
-  const maxQuoteAmount = poolData.creatorQuoteFee
+  const maxQuoteAmount = poolState.creatorQuoteFee
 
   const claimFeesTx = await dbcClient.creator.claimCreatorTradingFee({
-    pool: poolAddress,
+    pool: new PublicKey(poolAddress),
     payer: ownerWallet,
     creator: ownerWallet,
-    maxBaseAmount: poolData.creatorBaseFee, // Match max amount to the claimable amount (effectively no limit)
+    maxBaseAmount: poolState.creatorBaseFee, // Match max amount to the claimable amount (effectively no limit)
     maxQuoteAmount, // Match max amount to the claimable amount (effectively no limit)
     receiver: ownerWallet
   })
@@ -68,30 +68,21 @@ const getDBCPoolTxs = async (
 
 const getDammV2PoolTxs = async (
   connection: Connection,
-  tokenMint: string,
+  poolAddress: string,
   ownerWallet: PublicKey,
   receiverWallet: PublicKey,
   ownerWalletAudioATA: PublicKey
 ) => {
   const cpAmm = new CpAmm(connection)
-  // Get all pools and find the one matching the token mint
-  const allPools = await cpAmm.getAllPools()
-  const targetPool = allPools.find(
-    (pool) =>
-      pool.account.tokenAMint.toBase58() === tokenMint ||
-      pool.account.tokenBMint.toBase58() === tokenMint
-  )
 
-  if (!targetPool) {
+  const poolState = await cpAmm.fetchPoolState(new PublicKey(poolAddress))
+  if (!poolState) {
     return []
   }
 
-  const poolAddress = targetPool.publicKey
-  const poolState = targetPool.account
-
   // Get all positions for this pool owned by the creator
   const ownerPositions = await cpAmm.getUserPositionByPool(
-    poolAddress,
+    new PublicKey(poolAddress),
     ownerWallet
   )
 
@@ -108,7 +99,7 @@ const getDammV2PoolTxs = async (
 
     const claimFeeTx = await cpAmm.claimPositionFee2({
       owner: ownerWallet,
-      pool: poolAddress,
+      pool: new PublicKey(poolAddress),
       position: positionAddress,
       // Due to ATA issues we have to send the fees to the owner wallet then redirect them to the receiver wallet afterwards
       receiver: ownerWallet,
@@ -159,6 +150,27 @@ export const claimFees = async (
       )
     }
 
+    const [pools]: Array<{
+      dbc_pool: string | null
+      damm_v2_pool: string | null
+    }> = await db('artist_coins')
+      .where('mint', tokenMint)
+      .leftJoin(
+        'sol_meteora_dbc_pools',
+        'artist_coins.mint',
+        'sol_meteora_dbc_pools.base_mint'
+      )
+      .leftJoin(
+        'sol_meteora_damm_v2_pools',
+        'artist_coins.damm_v2_pool',
+        'sol_meteora_damm_v2_pools.account'
+      )
+      .select(
+        'sol_meteora_dbc_pools.account as dbc_pool',
+        'sol_meteora_damm_v2_pools.account as damm_v2_pool'
+      )
+      .limit(1)
+
     const connection = getConnection()
 
     const ownerWallet = new PublicKey(ownerWalletAddress as string)
@@ -176,36 +188,42 @@ export const claimFees = async (
 
     // Attempt to get DBC claim fee transactions
     // A user can only have one claim fee transaction from the DBC but could also have fee TXs from the DAMM V2
-    try {
-      const dbcClaimFeeTx = await getDBCPoolTxs(
-        connection,
-        tokenMint as string,
-        ownerWalletAddress as string,
-        receiverWalletAddress as string,
-        ownerWalletAudioATA
-      )
-      if (dbcClaimFeeTx) {
-        claimFeeTxs.push(dbcClaimFeeTx)
+    if (pools.dbc_pool !== null) {
+      logger.debug('Attempting to get DBC claim fee transaction...')
+      try {
+        const dbcClaimFeeTx = await getDBCPoolTxs(
+          connection,
+          pools.dbc_pool,
+          ownerWalletAddress as string,
+          receiverWalletAddress as string,
+          ownerWalletAudioATA
+        )
+        if (dbcClaimFeeTx) {
+          claimFeeTxs.push(dbcClaimFeeTx)
+        }
+      } catch (e) {
+        logger.error('error in claim_fees - DBC')
+        logger.error(e)
       }
-    } catch (e) {
-      logger.error('error in claim_fees - DBC')
-      logger.error(e)
     }
 
     // Attempt to get DAMM V2 claim fee transactions
     // A user can technically have multiple claim fee transactions from the DAMM V2 (but this is unlikely for our users)
-    try {
-      const dammV2ClaimFeeTxs = await getDammV2PoolTxs(
-        connection,
-        tokenMint as string,
-        ownerWallet,
-        receiverWallet,
-        ownerWalletAudioATA
-      )
-      claimFeeTxs.push(...dammV2ClaimFeeTxs)
-    } catch (e) {
-      logger.error('error in claim_fees - DAMM V2')
-      logger.error(e)
+    if (pools.damm_v2_pool !== null) {
+      logger.debug('Attempting to get DAMM V2 claim fee transactions...')
+      try {
+        const dammV2ClaimFeeTxs = await getDammV2PoolTxs(
+          connection,
+          tokenMint as string,
+          ownerWallet,
+          receiverWallet,
+          ownerWalletAudioATA
+        )
+        claimFeeTxs.push(...dammV2ClaimFeeTxs)
+      } catch (e) {
+        logger.error('error in claim_fees - DAMM V2')
+        logger.error(e)
+      }
     }
 
     return res.status(200).send({

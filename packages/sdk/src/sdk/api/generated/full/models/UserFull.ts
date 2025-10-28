@@ -80,6 +80,12 @@ export interface UserFull {
      * @type {string}
      * @memberof UserFull
      */
+    coinFlairMint?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserFull
+     */
     bio?: string;
     /**
      * 
@@ -474,6 +480,7 @@ export function UserFullFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'albumCount': json['album_count'],
         'artistPickTrackId': !exists(json, 'artist_pick_track_id') ? undefined : json['artist_pick_track_id'],
         'artistCoinBadge': UserFullArtistCoinBadgeFromJSON(json['artist_coin_badge']),
+        'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
         'bio': !exists(json, 'bio') ? undefined : json['bio'],
         'coverPhoto': !exists(json, 'cover_photo') ? undefined : CoverPhotoFullFromJSON(json['cover_photo']),
         'followeeCount': json['followee_count'],
@@ -545,6 +552,7 @@ export function UserFullToJSON(value?: UserFull | null): any {
         'album_count': value.albumCount,
         'artist_pick_track_id': value.artistPickTrackId,
         'artist_coin_badge': UserFullArtistCoinBadgeToJSON(value.artistCoinBadge),
+        'coin_flair_mint': value.coinFlairMint,
         'bio': value.bio,
         'cover_photo': CoverPhotoFullToJSON(value.coverPhoto),
         'followee_count': value.followeeCount,

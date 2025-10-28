@@ -84,6 +84,7 @@ class User(Base, RepresentableMixin):
     allow_ai_attribution = Column(Boolean, nullable=False, server_default=text("false"))
     spl_usdc_payout_wallet = Column(String)
     profile_type = Column(String)
+    coin_flair_mint = Column(String)
 
     block1 = relationship(  # type: ignore
         "Block", primaryjoin="User.blocknumber == Block.number"

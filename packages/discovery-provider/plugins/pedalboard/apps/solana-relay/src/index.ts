@@ -19,6 +19,7 @@ import { feePayer } from './routes/feePayer'
 import { health } from './routes/health/health'
 import { location } from './routes/instruction/location'
 import { claimFees } from './routes/launchpad/claim_fees'
+import { claimVestedCoins } from './routes/launchpad/claim_vested_coins'
 import {
   firstBuyQuote,
   getLaunchpadConfigRoute
@@ -46,14 +47,15 @@ const main = async () => {
   })
   // launchpad endpoints don't need user/discovery validation, so register them before middleware
   app.post('/solana/launchpad/launch_coin', upload.single('image'), launchCoin)
-  app.post('/solana/launchpad/confirm_launch_coin', confirmLaunchCoin)
   app.get('/solana/launchpad/claim_fees', claimFees)
+  app.get('/solana/launchpad/claim_vested_coins', claimVestedCoins)
   app.get('/solana/launchpad/first_buy_quote', firstBuyQuote)
   app.get('/solana/launchpad/config', getLaunchpadConfigRoute)
 
   // Apply middleware for routes that need user/discovery validation
   app.use(userSignerRecoveryMiddleware)
   app.use(discoveryNodeSignerRecoveryMiddleware)
+  app.post('/solana/launchpad/confirm_launch_coin', confirmLaunchCoin)
   app.post('/solana/relay', relay)
   app.post('/solana/cache', cache)
   app.get('/solana/feePayer', feePayer)

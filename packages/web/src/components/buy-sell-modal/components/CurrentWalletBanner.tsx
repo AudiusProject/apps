@@ -1,9 +1,12 @@
 import {
   useCoinBalance,
   useCurrentAccountUser,
-  useExternalWalletBalance
+  useExternalWalletBalance,
+  useWalletAudioBalance
 } from '@audius/common/api'
+import { Chain } from '@audius/common/models'
 import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
+import { AUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
   IconAudiusLogoColor,
@@ -77,13 +80,32 @@ export const CurrentWalletBanner = ({
     { enabled: isUsingExternalWallet }
   )
 
+  // For AUDIO, we need to fetch only SPL balance (not combined ERC + SPL)
+  const isAudio = inputToken.mint === env.WAUDIO_MINT_ADDRESS
+
+  // Fetch SPL AUDIO balance directly for internal wallet
+  const {
+    data: internalWalletAudioBalance,
+    isPending: isInternalWalletAudioBalanceLoading
+  } = useWalletAudioBalance(
+    {
+      address: currentUser?.spl_wallet ?? '',
+      chain: Chain.Sol,
+      includeStaked: false
+    },
+    {
+      enabled: isAudio && !isUsingExternalWallet && !!currentUser?.spl_wallet
+    }
+  )
+
+  // Fetch other coin balances
   const {
     data: internalWalletTokenBalanceData,
     isPending: isInternalWalletTokenBalanceLoading
   } = useCoinBalance({
     mint: inputToken.mint,
     includeExternalWallets: false,
-    enabled: !isUsingExternalWallet && !!currentUser
+    enabled: !isAudio && !isUsingExternalWallet && !!currentUser
   })
 
   const handleDisconnect = async () => {
@@ -109,12 +131,26 @@ export const CurrentWalletBanner = ({
   let tokenBalanceString = '0.00'
   const isTokenBalanceLoading = isUsingExternalWallet
     ? isExternalWalletTokenBalanceLoading
-    : isInternalWalletTokenBalanceLoading
+    : isAudio
+      ? isInternalWalletAudioBalanceLoading
+      : isInternalWalletTokenBalanceLoading
 
   if (!isTokenBalanceLoading) {
-    const balance = isUsingExternalWallet
+    let balance = isUsingExternalWallet
       ? externalWalletTokenBalance
-      : internalWalletTokenBalanceData?.balance
+      : isAudio
+        ? internalWalletAudioBalance
+        : internalWalletTokenBalanceData?.balance
+
+    // Convert AudioWei to FixedDecimal for AUDIO
+    if (
+      isAudio &&
+      !isUsingExternalWallet &&
+      balance !== undefined &&
+      balance !== null
+    ) {
+      balance = AUDIO(balance)
+    }
 
     if (balance !== undefined && balance !== null) {
       tokenBalanceString = formatCurrency(

@@ -10,8 +10,6 @@ const { getTheme, getSystemAppearance } = themeSelectors
 export { Theme } from '@audius/common/models'
 
 export type ThemeColors = {
-  aiPrimary: string
-  aiSecondary: string
   background: string
   backgroundSecondary: string
   backgroundSurface: string
@@ -83,8 +81,6 @@ const createMobileThemeFromHarmony = (
   const { color } = harmonyTheme
 
   return {
-    aiPrimary: color.special.aiGreen,
-    aiSecondary: color.special.aiGreen, // No direct mapping, using aiGreen
     background: color.special.background,
     backgroundSecondary: color.background.surface1,
     backgroundSurface: color.background.surface1,

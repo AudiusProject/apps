@@ -9,7 +9,7 @@ import { Text, Flex, FilterButton } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { ListSelectionScreen } from 'app/screens/list-selection-screen'
 
-const TOKEN_LIST_URL = 'https://token.jup.ag/strict'
+const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'
 
 const messages = {
   asset: 'Select Asset'

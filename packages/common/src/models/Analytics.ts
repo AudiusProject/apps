@@ -475,6 +475,7 @@ export enum Name {
   CONNECT_WALLET_NEW_WALLET_START = 'Connect Wallet: New Wallet Start',
   CONNECT_WALLET_NEW_WALLET_CONNECTING = 'Connect Wallet: New Wallet Connecting',
   CONNECT_WALLET_NEW_WALLET_CONNECTED = 'Connect Wallet: New Wallet Connected',
+  CONNECT_WALLET_DISCONNECTED = 'Connect Wallet: Disconnected',
   CONNECT_WALLET_ALREADY_ASSOCIATED = 'Connect Wallet: Already Associated',
   CONNECT_WALLET_ASSOCIATION_ERROR = 'Connect Wallet: Association Error',
   CONNECT_WALLET_ERROR = 'Connect Wallet: Error',
@@ -594,6 +595,7 @@ export enum Name {
 
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
+  LAUNCHPAD_HAS_EXISTING_ARTIST_COIN = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
   LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
   LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
@@ -626,7 +628,13 @@ export enum Name {
   LAUNCHPAD_CLAIM_FEES_FAILURE = 'Launchpad: Claim Fees Failure',
   LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET = 'Launchpad: Claim Fees Connect Wallet',
   LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET = 'Launchpad: Claim Fees Switch Wallet',
-  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected'
+  LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET = 'Launchpad: Claim Vested Coins Switch Wallet',
+  LAUNCHPAD_CLAIM_VESTED_COINS_CLICKED = 'Launchpad: Claim Vested Coins Clicked',
+  LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET = 'Launchpad: Claim Vested Coins Connect Wallet',
+  LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED = 'Launchpad: Claim Fees Wallet Connected',
+  LAUNCHPAD_CLAIM_VESTED_COINS_WALLET_CONNECTED = 'Launchpad: Claim Vested Coins Wallet Connected',
+  LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS = 'Launchpad: Claim Vested Coins Success',
+  LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE = 'Launchpad: Claim Vested Coins Failure'
 }
 
 type PageView = {
@@ -2372,6 +2380,10 @@ type ConnectWalletNewWalletConnected = {
   walletAddress: WalletAddress
 }
 
+type ConnectWalletDisconnected = {
+  eventName: Name.CONNECT_WALLET_DISCONNECTED
+}
+
 type ConnectWalletAlreadyAssociated = {
   eventName: Name.CONNECT_WALLET_ALREADY_ASSOCIATED
   chain: Chain
@@ -2868,6 +2880,10 @@ export type LaunchpadSplashGetStarted = {
   eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
 }
 
+export type LaunchpadHasExistingArtistCoin = {
+  eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN
+}
+
 export type LaunchpadSplashLearnMoreClicked = {
   eventName: Name.LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED
 }
@@ -3059,6 +3075,50 @@ export type LaunchpadClaimFeesSwitchWallet = {
 
 export type LaunchpadClaimFeesWalletConnected = {
   eventName: Name.LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsClicked = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_CLICKED
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsConnectWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsSuccess = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  claimedAmount: string
+}
+
+export type LaunchpadClaimVestedCoinsFailure = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE
+  walletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+  error: string
+}
+
+export type LaunchpadClaimVestedCoinsSwitchWallet = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET
+  currentWalletAddress: string
+  expectedWalletAddress: string
+  coinSymbol?: string
+  mintAddress?: string
+}
+
+export type LaunchpadClaimVestedCoinsWalletConnected = {
+  eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_WALLET_CONNECTED
   walletAddress: string
   coinSymbol?: string
   mintAddress?: string
@@ -3344,6 +3404,7 @@ export type AllTrackingEvents =
   | ConnectWalletNewWalletStart
   | ConnectWalletNewWalletConnecting
   | ConnectWalletNewWalletConnected
+  | ConnectWalletDisconnected
   | ConnectWalletAlreadyAssociated
   | ConnectWalletAssociationError
   | ConnectWalletError
@@ -3444,6 +3505,7 @@ export type AllTrackingEvents =
   | AndroidAppRestartStale
   | AndroidAppRestartForceQuit
   | LaunchpadSplashGetStarted
+  | LaunchpadHasExistingArtistCoin
   | LaunchpadSplashLearnMoreClicked
   | LaunchpadWalletConnectSuccess
   | LaunchpadWalletInsufficientBalance
@@ -3477,3 +3539,9 @@ export type AllTrackingEvents =
   | LaunchpadClaimFeesConnectWallet
   | LaunchpadClaimFeesSwitchWallet
   | LaunchpadClaimFeesWalletConnected
+  | LaunchpadClaimVestedCoinsClicked
+  | LaunchpadClaimVestedCoinsSuccess
+  | LaunchpadClaimVestedCoinsFailure
+  | LaunchpadClaimVestedCoinsConnectWallet
+  | LaunchpadClaimVestedCoinsSwitchWallet
+  | LaunchpadClaimVestedCoinsWalletConnected

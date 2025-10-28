@@ -19,7 +19,9 @@ import {
   FirstBuyQuoteRequest,
   LaunchpadConfigResponse,
   ClaimFeesRequest,
-  ClaimFeesResponse
+  ClaimFeesResponse,
+  ClaimVestedCoinsRequest,
+  ClaimVestedCoinsResponse
 } from './types'
 
 /**
@@ -379,6 +381,39 @@ export class SolanaRelay extends BaseAPI {
 
     return await new runtime.JSONApiResponse(response, (json) => {
       return json as ClaimFeesResponse
+    }).value()
+  }
+
+  /**
+   * Claims vested/unlocked artist coins from the vesting schedule.
+   * After an artist coin graduates, the artist's reserved coins unlock daily over a 5-year period.
+   */
+  public async claimVestedCoins(
+    params: ClaimVestedCoinsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<ClaimVestedCoinsResponse> {
+    const headerParameters: runtime.HTTPHeaders = {
+      'Content-Type': 'application/json'
+    }
+    const queryParameters: runtime.HTTPQuery = {
+      tokenMint: params.tokenMint,
+      ownerWalletAddress: params.ownerWalletAddress,
+      receiverWalletAddress: params.receiverWalletAddress,
+      rewardsPoolPercentage: params.rewardsPoolPercentage
+    }
+
+    const response = await this.request(
+      {
+        path: '/launchpad/claim_vested_coins',
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (json) => {
+      return json as ClaimVestedCoinsResponse
     }).value()
   }
 }

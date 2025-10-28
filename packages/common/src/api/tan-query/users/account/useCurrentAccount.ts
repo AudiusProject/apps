@@ -2,7 +2,7 @@ import { AudiusSdk } from '@audius/sdk'
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { accountFromSDK } from '~/adapters/user'
-import { primeUserData, useQueryContext } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Status } from '~/models'
 import { UserMetadata } from '~/models/User'
@@ -11,7 +11,6 @@ import { AccountState } from '~/store'
 
 import { QUERY_KEYS } from '../../queryKeys'
 import { QueryKey, SelectableQueryOptions } from '../../types'
-import { getUserQueryKey } from '../useUser'
 
 import { getAccountStatusQueryKey } from './useAccountStatus'
 import { useWalletAddresses } from './useWalletAddresses'
@@ -22,20 +21,11 @@ export const getCurrentAccountQueryKey = () =>
     QUERY_KEYS.accountUser
   ] as unknown as QueryKey<AccountState>
 
-const getLocalAccount = (
-  localStorage: LocalStorage,
-  queryClient: QueryClient
-) => {
+const getLocalAccount = (localStorage: LocalStorage) => {
   const localAccount = localStorage.getAudiusAccountSync?.()
   const localAccountUser =
     localStorage.getAudiusAccountUserSync?.() as UserMetadata
   if (localAccount && localAccountUser) {
-    if (
-      localAccountUser &&
-      !queryClient.getQueryData(getUserQueryKey(localAccountUser.user_id))
-    ) {
-      primeUserData({ users: [localAccountUser], queryClient })
-    }
     // feature-tan-query TODO: when removing account sagas,
     //    need to add wallets and local account user from local storage
     return {
@@ -57,15 +47,9 @@ const getLocalAccount = (
 
 export const getCurrentAccountQueryFn = async (
   sdk: AudiusSdk,
-  localStorage: LocalStorage,
   currentUserWallet: string | null,
   queryClient: QueryClient
 ): Promise<AccountState | null | undefined> => {
-  const localAccount = getLocalAccount(localStorage, queryClient)
-  if (localAccount) {
-    return localAccount
-  }
-
   if (!currentUserWallet) {
     return null
   }
@@ -83,7 +67,6 @@ export const getCurrentAccountQueryFn = async (
 
   if (account) {
     queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
-    primeUserData({ users: [account.user], queryClient })
   } else {
     queryClient.setQueryData(getAccountStatusQueryKey(), Status.ERROR)
   }
@@ -120,11 +103,12 @@ export const useCurrentAccount = <TResult = AccountState | null | undefined>(
     queryFn: async () =>
       getCurrentAccountQueryFn(
         await audiusSdk(),
-        localStorage,
         currentUserWallet!,
         queryClient
       ),
     staleTime: Infinity,
+    // Use function form so localStorage is only accessed once on initial mount
+    initialData: () => getLocalAccount(localStorage) ?? undefined,
     gcTime: Infinity,
     enabled: options?.enabled !== false && !!currentUserWallet,
     ...options

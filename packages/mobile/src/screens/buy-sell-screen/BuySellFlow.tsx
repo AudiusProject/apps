@@ -110,14 +110,12 @@ export const BuySellFlow = ({
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
-    onlyOwned: true,
     ownedAddresses
   })
 
   // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
-    onlyOwned: true,
     ownedAddresses
   })
 

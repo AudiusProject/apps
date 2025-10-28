@@ -14,7 +14,6 @@ import {
   Flex,
   IconCcBy as IconCreativeCommons,
   IconInfo,
-  IconRobot,
   Text
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -23,7 +22,6 @@ import { get, set } from 'lodash'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { AiAttributionDropdown } from 'components/ai-attribution-modal/AiAttributionDropdown'
 import {
   ContextualMenu,
   SelectedValue,
@@ -48,10 +46,8 @@ import { SwitchRowField } from './SwitchRowField'
 const { computeLicense, ALL_RIGHTS_RESERVED_TYPE, computeLicenseVariables } =
   creativeCommons
 
-const IS_AI_ATTRIBUTED = 'isAiAttribution'
 const BLOCK_THIRD_PARTY_STREAMING = 'blockThirdPartyStreaming'
 const ALLOWED_API_KEYS = 'allowed_api_keys'
-const AI_USER_ID = 'ai_attribution_user_id'
 const ISRC = 'isrc'
 const ISWC = 'iswc'
 const RELEASE_DATE = 'release_date'
@@ -92,10 +88,8 @@ const iswcRegex = /^T-?\d{3}.?\d{3}.?\d{3}.?-?\d$/i
 
 const AdvancedFormSchema = z
   .object({
-    [IS_AI_ATTRIBUTED]: z.optional(z.boolean()),
     [BLOCK_THIRD_PARTY_STREAMING]: z.optional(z.boolean()),
     [ALLOWED_API_KEYS]: z.optional(z.array(z.string()).nullable()),
-    [AI_USER_ID]: z.optional(z.number().nullable()),
     [ISRC]: z.optional(z.string().nullable()),
     [ISWC]: z.optional(z.string().nullable()),
     [ALLOW_ATTRIBUTION]: z.optional(z.boolean()),
@@ -106,10 +100,6 @@ const AdvancedFormSchema = z
     [COVER_ORIGINAL_SONG_TITLE]: z.optional(z.string().nullable()),
     [COVER_ORIGINAL_ARTIST]: z.optional(z.string().nullable()),
     [IS_COVER]: z.optional(z.boolean())
-  })
-  .refine((form) => !form[IS_AI_ATTRIBUTED] || form[AI_USER_ID], {
-    message: messages.aiGenerated.requiredError,
-    path: [AI_USER_ID]
   })
   .refine((form) => !form[ISRC] || isrcRegex.test(form[ISRC]), {
     message: messages.isrc.validError,
@@ -136,8 +126,6 @@ const getInitialBpm = (bpm: number | null | undefined) => {
 }
 
 export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
-  const [{ value: aiUserId }, _ignored, { setValue: setAiUserId }] =
-    useTrackField<SingleTrackEditValues[typeof AI_USER_ID]>(AI_USER_ID)
   const [{ value: isrcValue }, _ignored2, { setValue: setIsrc }] =
     useTrackField<SingleTrackEditValues[typeof ISRC]>(ISRC)
   const [{ value: releaseDate }, _ignored3, { setValue: setReleaseDate }] =
@@ -186,8 +174,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
 
   const initialValues = useMemo(() => {
     const initialValues = {}
-    set(initialValues, AI_USER_ID, aiUserId)
-    set(initialValues, IS_AI_ATTRIBUTED, !!aiUserId)
     set(initialValues, ISRC, isrcValue)
     set(initialValues, ISWC, iswcValue)
     set(initialValues, ALLOWED_API_KEYS, allowedApiKeys)
@@ -203,7 +189,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     set(initialValues, IS_COVER, isCover)
     return initialValues as AdvancedFormValues
   }, [
-    aiUserId,
     isrcValue,
     iswcValue,
     allowedApiKeys,
@@ -220,11 +205,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
 
   const onSubmit = useCallback(
     (values: AdvancedFormValues) => {
-      if (get(values, IS_AI_ATTRIBUTED)) {
-        setAiUserId(get(values, AI_USER_ID) ?? aiUserId)
-      } else {
-        setAiUserId(null)
-      }
       if (get(values, BLOCK_THIRD_PARTY_STREAMING)) {
         setAllowedApiKeys([env.API_KEY])
       } else {
@@ -268,8 +248,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       releaseDate,
       setIsCommentsDisabled,
       commentsDisabled,
-      setAiUserId,
-      aiUserId,
       setAllowedApiKeys,
       setCoverOriginalSongTitle,
       coverOriginalSongTitle,
@@ -305,11 +283,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     if (iswcValue) {
       value.push(<SelectedValue key={iswcValue} label={iswcValue} />)
     }
-    if (aiUserId) {
-      value.push(
-        <SelectedValue label={messages.isAiGenerated} icon={IconRobot} />
-      )
-    }
     if (bpm) {
       value.push(
         <SelectedValue
@@ -344,12 +317,11 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       )
     }
 
-    return <SelectedValues key={messages.isAiGenerated}>{value}</SelectedValues>
+    return <SelectedValues>{value}</SelectedValues>
   }, [
     license,
     isrcValue,
     iswcValue,
-    aiUserId,
     bpm,
     musicalKey,
     commentsDisabled,
@@ -374,11 +346,6 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
   const { isEnabled: isRightsAndCoversEnabled } = useFeatureFlag(
     FeatureFlags.RIGHTS_AND_COVERS
   )
-  const [aiUserIdField, aiUserHelperFields, { setValue: setAiUserId }] =
-    useField({
-      name: AI_USER_ID,
-      type: 'select'
-    })
   const [{ value: allowAttribution }] = useField<boolean>(ALLOW_ATTRIBUTION)
   const [{ value: commercialUse }] = useField<boolean>(COMMERCIAL_USE)
   const [{ value: derivativeWorks }] = useField<boolean>(DERIVATIVE_WORKS)
@@ -398,9 +365,6 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
   )
 
   const licenseIcons = computeLicenseIcons(licenseType)
-
-  const dropdownHasError =
-    aiUserHelperFields.touched && aiUserHelperFields.error
 
   const { isEnabled: isCommentsEnabled } = useFeatureFlag(
     FeatureFlags.COMMENTS_ENABLED
@@ -639,23 +603,6 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
           <Divider />
         </>
       ) : null}
-      <SwitchRowField
-        name={IS_AI_ATTRIBUTED}
-        header={messages.aiGenerated.header}
-        description={messages.aiGenerated.description}
-        tooltipText={messages.aiGenerated.tooltip}
-      >
-        <AiAttributionDropdown
-          {...aiUserIdField}
-          error={dropdownHasError}
-          helperText={dropdownHasError && aiUserHelperFields.error}
-          value={aiUserIdField.value}
-          onSelect={(value: SingleTrackEditValues[typeof AI_USER_ID]) => {
-            setAiUserId(value ?? null)
-          }}
-        />
-      </SwitchRowField>
-      <Divider />
       <SwitchRowField
         name={BLOCK_THIRD_PARTY_STREAMING}
         header={messages.apiAllowed.header}

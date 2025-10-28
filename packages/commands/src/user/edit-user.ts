@@ -14,26 +14,19 @@ export const editUserCommand = new Command('edit')
   .option('-n, --name <name>', "The user's new name")
   .option('-b, --bio <bio>', "The user's new bio")
   .option('-l, --location <location>', "The user's new location")
-  .option(
-    '-ai, --allow-ai-attribution <isAllowed>',
-    "Whether to allow other users to attribute AI tracks using this user's likeness",
-    parseBoolean
-  )
   .addOption(outputFormatOption)
-  .action(
-    async (handle, { name, bio, location, allowAiAttribution, output }) => {
-      const audiusSdk = await initializeAudiusSdk({ handle })
-      const userId = await getCurrentUserId()
+  .action(async (handle, { name, bio, location, output }) => {
+    const audiusSdk = await initializeAudiusSdk({ handle })
+    const userId = await getCurrentUserId()
 
-      const result = await audiusSdk.users.updateProfile({
-        userId,
-        metadata: { name, bio, location, allowAiAttribution }
-      })
+    const result = await audiusSdk.users.updateProfile({
+      userId,
+      metadata: { name, bio, location }
+    })
 
-      if (output === 'json') {
-        console.log(JSON.stringify(result))
-      } else {
-        console.log(chalk.green('Successfully updated user!'))
-      }
+    if (output === 'json') {
+      console.log(JSON.stringify(result))
+    } else {
+      console.log(chalk.green('Successfully updated user!'))
     }
-  )
+  })

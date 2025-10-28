@@ -53,7 +53,6 @@ const trackMetadataSchema = {
   isrc: null,
   iswc: null,
   is_playlist_upload: false,
-  ai_attribution_user_id: null,
   ddex_release_ids: null,
   ddex_app: null,
   artists: null,
@@ -137,7 +136,6 @@ export const newCollectionMetadata = (fields?: any, validate = false) => {
 }
 
 const userMetadataSchema = {
-  allow_ai_attribution: false,
   wallet: '',
   name: null,
   handle: '',

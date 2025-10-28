@@ -28,7 +28,6 @@ import backendSagas from 'common/store/backend/sagas'
 import collectionsSagas from 'common/store/cache/collections/webSagas'
 import tracksSagas from 'common/store/cache/tracks/sagas'
 import changePasswordSagas from 'common/store/change-password/sagas'
-import aiSagas from 'common/store/pages/ai/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
@@ -94,7 +93,6 @@ export default function* rootSaga() {
     signOutSagas(),
 
     // Pages
-    aiSagas(),
     collectionSagas(),
     chatSagas(),
     dashboardSagas(),
@@ -189,7 +187,6 @@ export function* testRootSaga() {
     // signOutSagas(),
 
     // Pages
-    // aiSagas(),
     // collectionSagas(),
     // chatSagas(),
     // dashboardSagas(),

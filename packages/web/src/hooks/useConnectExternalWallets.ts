@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
+import { Name, Chain, Feature } from '@audius/common/models'
 import { useTheme } from '@emotion/react'
 import type { NamespaceTypeMap } from '@reown/appkit'
 import { mainnet } from '@reown/appkit/networks'
@@ -12,6 +13,8 @@ import {
 import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
+import { useRecord, make } from 'common/store/analytics/actions'
+import { reportToSentry } from 'store/errors/reportToSentry'
 
 /**
  * Error when trying to associate a wallet that was already associated
@@ -44,8 +47,9 @@ export const useConnectExternalWallets = (
   }) => void,
   onError?: (error: EventsControllerState) => void
 ) => {
+  const record = useRecord()
   const theme = useTheme()
-  const { open: openAppKitModal } = useAppKit()
+  const { open: openAppKitModal, close: closeAppKitModal } = useAppKit()
   const { data: currentUser } = useCurrentAccountUser()
   const [currentWallets, setCurrentWallets] = useState<{
     solana: string | undefined
@@ -58,7 +62,6 @@ export const useConnectExternalWallets = (
   // Explicitly manage our own state for the open state of the modal
   // since there might be multiple hook instances listening for events
   const [isConnecting, setIsConnecting] = useState(false)
-  const isConnectingRef = useRef(false)
 
   // Keep track of any existing connected external wallets
   const { isConnected, connector, chainId } = useAccount()
@@ -78,8 +81,8 @@ export const useConnectExternalWallets = (
    */
   const openAppKitModalCallback = useCallback(
     async (namespace?: keyof NamespaceTypeMap) => {
+      record(make(Name.CONNECT_WALLET_NEW_WALLET_START, {}))
       setIsConnecting(true)
-      isConnectingRef.current = true
       // If previously connected, disconnect to give a "fresh" view of options
       if (isConnected) {
         await disconnect()
@@ -91,7 +94,7 @@ export const useConnectExternalWallets = (
       await appkitModal.switchNetwork(mainnet)
       await openAppKitModal({ view: 'Connect', namespace })
     },
-    [disconnect, isConnected, openAppKitModal, theme.type]
+    [disconnect, isConnected, openAppKitModal, record, theme.type]
   )
 
   /**
@@ -128,38 +131,77 @@ export const useConnectExternalWallets = (
    */
   useEffect(() => {
     return appkitModal.subscribeEvents(async (event) => {
-      // Ignore events not meant for this hook instance - use ref to get current value
-      if (!isConnectingRef.current) return
+      // Ignore events not meant for this hook instance
+      if (!isConnecting) return
 
-      if (event.data.event === 'MODAL_CLOSE') {
+      if (event.data.event === 'CONNECT_SUCCESS') {
         setIsConnecting(false)
-        isConnectingRef.current = false
-
-        // Check if wallet was connected when modal closed
         const solanaAccount = appkitModal.getAccount('solana')
         const ethAccount = appkitModal.getAccount('eip155')
+        const solAddress = solanaAccount?.address
+        const ethAddress = ethAccount?.address
 
-        if (solanaAccount?.address || ethAccount?.address) {
-          // Wallet connected - update state and call success callback
-          setCurrentWallets({
-            solana: solanaAccount?.address,
-            eth: ethAccount?.address
-          })
-          await onSuccess?.({
-            solana: solanaAccount?.address,
-            eth: ethAccount?.address
-          })
-        } else {
-          // No wallet connected - reconnect external auth if needed
-          await reconnectExternalAuthWallet()
+        // Track analytics for connected wallets
+        if (solAddress) {
+          record(
+            make(Name.CONNECT_WALLET_NEW_WALLET_CONNECTED, {
+              chain: Chain.Sol,
+              walletAddress: solAddress
+            })
+          )
         }
+        if (ethAddress) {
+          record(
+            make(Name.CONNECT_WALLET_NEW_WALLET_CONNECTED, {
+              chain: Chain.Eth,
+              walletAddress: ethAddress
+            })
+          )
+        }
+        if (!solAddress && !ethAddress) {
+          reportToSentry({
+            error: new Error('No wallets found to connect'),
+            name: 'Connect Wallet Error',
+            feature: Feature.ArtistCoins
+          })
+        }
+
+        setCurrentWallets({
+          solana: solAddress,
+          eth: ethAddress
+        })
+        await onSuccess?.({
+          solana: solAddress,
+          eth: ethAddress
+        })
+        await reconnectExternalAuthWallet()
+        closeAppKitModal()
       } else if (event.data.event === 'CONNECT_ERROR') {
         setIsConnecting(false)
-        isConnectingRef.current = false
+        record(
+          make(Name.CONNECT_WALLET_ERROR, {
+            error: String(event.data)
+          })
+        )
+        reportToSentry({
+          error: new Error('Connect Wallet Error'),
+          name: 'Connect Wallet Error',
+          feature: Feature.ArtistCoins,
+          additionalInfo: {
+            error: String(event.data)
+          }
+        })
         onError?.(event)
       }
     })
-  }, [onSuccess, reconnectExternalAuthWallet, onError])
+  }, [
+    onSuccess,
+    reconnectExternalAuthWallet,
+    isConnecting,
+    closeAppKitModal,
+    onError,
+    record
+  ])
 
   return {
     isPending: isConnecting,

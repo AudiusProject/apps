@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import { ChallengeRewardID } from '../../../models/AudioRewards'
+import { ChallengeRewardID, UserChallenge } from '../../../models/AudioRewards'
 import { CommonState } from '../../commonStore'
 
 import { ClaimStatus } from './types'
@@ -25,7 +25,7 @@ export const getUserChallenges = createSelector(
         ...acc,
         [challenge.challenge_id]: challenge
       }
-    }, {})
+    }, {}) as Record<ChallengeRewardID, UserChallenge>
   }
 )
 

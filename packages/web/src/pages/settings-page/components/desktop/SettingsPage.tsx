@@ -32,7 +32,6 @@ import {
   IconMessages,
   IconNotificationOn as IconNotification,
   IconReceive,
-  IconRobot,
   IconSettings,
   IconSignOut,
   IconVerified,
@@ -159,9 +158,6 @@ export const SettingsPage = () => {
   )
   const [, setIsInboxSettingsModalVisible] = useModalState('InboxSettings')
   const [, setIsCommentSettingsModalVisible] = useModalState('CommentSettings')
-  const [, setIsAIAttributionSettingsModalVisible] = useModalState(
-    'AiAttributionSettings'
-  )
 
   useEffect(() => {
     dispatch(getNotificationSettings())
@@ -245,10 +241,6 @@ export const SettingsPage = () => {
   const openCommentSettingsModal = useCallback(() => {
     setIsCommentSettingsModalVisible(true)
   }, [setIsCommentSettingsModalVisible])
-
-  const openAiAttributionSettingsModal = useCallback(() => {
-    setIsAIAttributionSettingsModalVisible(true)
-  }, [setIsAIAttributionSettingsModalVisible])
 
   const onTwitterLogin = useCallback(
     (uuid: string, profile: TwitterProfile) =>
@@ -369,9 +361,6 @@ export const SettingsPage = () => {
     return options
   }, [showMatrix])
 
-  const { data: allowAiAttribution } = useCurrentAccountUser({
-    select: (user) => user?.allow_ai_attribution
-  })
   const { isEnabled: isCommentsEnabled } = useFlag(
     FeatureFlags.COMMENTS_ENABLED
   )
@@ -517,24 +506,6 @@ export const SettingsPage = () => {
         <LabelAccountSettingsCard />
         <AccountsManagingYouSettingsCard />
         <AccountsYouManageSettingsCard />
-        <SettingsCard
-          icon={<IconRobot />}
-          title={settingsMessages.aiGeneratedCardTitle}
-          description={settingsMessages.aiGeneratedCardDescription}
-        >
-          {allowAiAttribution ? (
-            <span className={styles.aiAttributionEnabled}>
-              {settingsMessages.aiGeneratedEnabled}
-            </span>
-          ) : null}
-          <Button
-            onClick={openAiAttributionSettingsModal}
-            variant='secondary'
-            fullWidth
-          >
-            {settingsMessages.aiGeneratedButtonText}
-          </Button>
-        </SettingsCard>
         {isDownloadDesktopEnabled ? (
           <SettingsCard
             icon={<IconReceive />}

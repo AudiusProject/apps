@@ -1,8 +1,4 @@
-import {
-  getUserQueryKey,
-  queryAccountUser,
-  queryCurrentUserId
-} from '@audius/common/api'
+import { queryCurrentUserId } from '@audius/common/api'
 import {
   settingsPageActions as actions,
   getContext,
@@ -11,7 +7,6 @@ import {
 import { getErrorMessage } from '@audius/common/utils'
 import { call, put, takeEvery } from 'typed-redux-saga'
 
-import { queryClient } from 'services/query-client'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import errorSagas from './errorSagas'
@@ -62,37 +57,6 @@ function* watchUpdateEmailFrequency() {
   )
 }
 
-function* watchSetAiAttribution() {
-  const audiusBackendInstance = yield* getContext('audiusBackendInstance')
-  const sdk = yield* getSDK()
-  yield* takeEvery(
-    actions.SET_AI_ATTRIBUTION,
-    function* (action: actions.SetAiAttribution) {
-      const { allowAiAttribution } = action
-      const accountUser = yield* call(queryAccountUser)
-      if (!accountUser) return
-      if (accountUser.allow_ai_attribution === allowAiAttribution) return
-
-      accountUser.allow_ai_attribution = allowAiAttribution
-
-      yield* call(audiusBackendInstance.updateCreator, {
-        metadata: accountUser,
-        sdk
-      })
-
-      queryClient.setQueryData(getUserQueryKey(accountUser.user_id), {
-        ...accountUser,
-        allow_ai_attribution: allowAiAttribution
-      })
-    }
-  )
-}
-
 export default function sagas() {
-  return [
-    watchGetSettings,
-    watchUpdateEmailFrequency,
-    watchSetAiAttribution,
-    errorSagas
-  ]
+  return [watchGetSettings, watchUpdateEmailFrequency, errorSagas]
 }

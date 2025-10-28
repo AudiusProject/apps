@@ -242,6 +242,7 @@ user_metadata_format = {
     "is_verified": False,
     "artist_pick_track_id": None,
     "allow_ai_attribution": False,
+    "coin_flair_mint": None,
 }
 
 comment_metadata_format = {

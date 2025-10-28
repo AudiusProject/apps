@@ -668,7 +668,6 @@ const ProfilePage = ({
                   handle={handle}
                   bio={bio}
                   location={location}
-                  allowAiAttribution={!!profile?.allow_ai_attribution}
                   twitterHandle={twitterHandle}
                   instagramHandle={instagramHandle}
                   tikTokHandle={tikTokHandle}
