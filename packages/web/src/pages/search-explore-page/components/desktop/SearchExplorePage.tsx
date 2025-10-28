@@ -25,6 +25,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'
+import Page from 'components/page/Page'
 import useTabs from 'hooks/useTabs/useTabs'
 import { filters } from 'pages/search-page/SearchFilters'
 import { SearchResults } from 'pages/search-page/SearchResults'
@@ -58,7 +59,6 @@ import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
 import { TrendingPlaylistsSection } from './TrendingPlaylistsSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
-import Page from 'components/page/Page'
 
 export type SearchExplorePageProps = {
   title: string
