@@ -533,6 +533,9 @@ def validate_comment_reaction_tx(params: ManageEntityParameters):
         params.action == Action.REACT
         and (user_id, comment_id)
         in params.existing_records[EntityType.COMMENT_REACTION.value]
+        and not params.existing_records[EntityType.COMMENT_REACTION.value][
+            (user_id, comment_id)
+        ].is_delete
     ):
         raise IndexingValidationError(
             f"User {user_id} already reacted to comment {comment_id}"
@@ -554,6 +557,25 @@ def react_comment(params: ManageEntityParameters):
     metadata = params.metadata
     entity_id = metadata.get("entity_id")
     entity_type = metadata.get("entity_type", EntityType.TRACK.value)
+
+    existing_reaction = params.existing_records[EntityType.COMMENT_REACTION.value].get(
+        (user_id, comment_id)
+    )
+    if existing_reaction and existing_reaction.is_delete:
+        reactivated_reaction = copy_record(
+            existing_reaction,
+            params.block_number,
+            params.event_blockhash,
+            params.txhash,
+            params.block_datetime,
+        )
+        reactivated_reaction.is_delete = False
+        params.add_record(
+            (user_id, comment_id),
+            reactivated_reaction,
+            EntityType.COMMENT_REACTION,
+        )
+        return
 
     comment_reaction_record = CommentReaction(
         comment_id=comment_id,
