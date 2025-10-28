@@ -1,11 +1,10 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
 import {
   useExclusiveTracks,
-  useExclusiveTracksCount
-} from '@audius/common/src/api/tan-query/users/useExclusiveTracks'
-import { useUser } from '@audius/common/src/api/tan-query/users/useUser'
+  useExclusiveTracksCount,
+  useArtistCoin
+} from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { Flex, PlainButton, Skeleton, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'

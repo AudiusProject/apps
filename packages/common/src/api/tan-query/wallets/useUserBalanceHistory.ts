@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useCurrentUserId } from '../../user/useCurrentUserId'
 import { QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 export type BalanceHistoryDataPoint = {
   timestamp: number
