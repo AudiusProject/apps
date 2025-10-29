@@ -2,6 +2,12 @@ import type { Nullable } from '@audius/common/utils'
 
 import type { Image } from 'app/types/image'
 
+export type ArtistCoinBadge = {
+  mint: string
+  logo_uri: string
+  ticker: string
+}
+
 export type ProfileValues = {
   name: string
   bio: Nullable<string>
@@ -11,6 +17,7 @@ export type ProfileValues = {
   tiktok_handle: Nullable<string>
   website: Nullable<string>
   donation: Nullable<string>
+  artist_coin_badge: Nullable<ArtistCoinBadge>
   cover_photo: Image
   profile_picture: Image
 }

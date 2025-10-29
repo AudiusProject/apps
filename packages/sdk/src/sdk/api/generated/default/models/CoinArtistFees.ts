@@ -21,30 +21,6 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CoinArtistFees {
     /**
-     * Unclaimed fees from the dynamic bonding curve, in $AUDIO.
-     * @type {number}
-     * @memberof CoinArtistFees
-     */
-    unclaimedDbcFees?: number;
-    /**
-     * Total fees earned from the dynamic bonding curve, in $AUDIO.
-     * @type {number}
-     * @memberof CoinArtistFees
-     */
-    totalDbcFees?: number;
-    /**
-     * Unclaimed fees from the DAMM v2 pools, in $AUDIO.
-     * @type {number}
-     * @memberof CoinArtistFees
-     */
-    unclaimedDammV2Fees?: number;
-    /**
-     * Total fees earned from the DAMM v2 pools, in $AUDIO.
-     * @type {number}
-     * @memberof CoinArtistFees
-     */
-    totalDammV2Fees?: number;
-    /**
      * Total unclaimed fees from all sources, in $AUDIO.
      * @type {number}
      * @memberof CoinArtistFees
@@ -77,10 +53,6 @@ export function CoinArtistFeesFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'unclaimedDbcFees': !exists(json, 'unclaimed_dbc_fees') ? undefined : json['unclaimed_dbc_fees'],
-        'totalDbcFees': !exists(json, 'total_dbc_fees') ? undefined : json['total_dbc_fees'],
-        'unclaimedDammV2Fees': !exists(json, 'unclaimed_damm_v2_fees') ? undefined : json['unclaimed_damm_v2_fees'],
-        'totalDammV2Fees': !exists(json, 'total_damm_v2_fees') ? undefined : json['total_damm_v2_fees'],
         'unclaimedFees': !exists(json, 'unclaimed_fees') ? undefined : json['unclaimed_fees'],
         'totalFees': !exists(json, 'total_fees') ? undefined : json['total_fees'],
     };
@@ -95,10 +67,6 @@ export function CoinArtistFeesToJSON(value?: CoinArtistFees | null): any {
     }
     return {
         
-        'unclaimed_dbc_fees': value.unclaimedDbcFees,
-        'total_dbc_fees': value.totalDbcFees,
-        'unclaimed_damm_v2_fees': value.unclaimedDammV2Fees,
-        'total_damm_v2_fees': value.totalDammV2Fees,
         'unclaimed_fees': value.unclaimedFees,
         'total_fees': value.totalFees,
     };

@@ -43,7 +43,6 @@ export const primitiveTheme = {
       neutral: '#6C6780FF'
     },
     special: {
-      aiGreen: '#1FD187FF',
       background: '#F6F5F7FF',
       blue: '#1BA1F1FF',
       darkRed: '#BB0218FF',
@@ -110,7 +109,6 @@ export const primitiveTheme = {
       neutral: '#C6C8D6FF'
     },
     special: {
-      aiGreen: '#1ECF7AFF',
       background: '#202131FF',
       blue: '#58B9F4FF',
       darkRed: '#C43047FF',
@@ -177,7 +175,6 @@ export const primitiveTheme = {
       neutral: '#3EF56BFF'
     },
     special: {
-      aiGreen: '#1EEB57FF',
       background: '#000000FF',
       blue: '#20E290FF',
       darkRed: '#D63C5AFF',

@@ -22,9 +22,6 @@ export const AdvancedScreen = () => {
   const { isEnabled: isCommentsEnabled } = useFeatureFlag(
     FeatureFlags.COMMENTS_ENABLED
   )
-  const { isEnabled: isRightsAndCoversEnabled } = useFeatureFlag(
-    FeatureFlags.RIGHTS_AND_COVERS
-  )
 
   return (
     <FormScreen
@@ -47,7 +44,7 @@ export const AdvancedScreen = () => {
         )}
         <LicenseTypeField />
         <IsrcField />
-        {isRightsAndCoversEnabled ? <CoverAttributionField /> : <></>}
+        <CoverAttributionField />
       </SubmenuList>
     </FormScreen>
   )

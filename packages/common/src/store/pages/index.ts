@@ -77,15 +77,6 @@ export {
 } from './remixes/slice'
 export * as remixesPageSelectors from './remixes/selectors'
 
-export {
-  default as aiPageLineupReducer,
-  initialState as aiPageLineupInitialState
-} from './ai/lineup/reducer'
-export { tracksActions as aiPageLineupActions } from './ai/lineup/actions'
-export { default as aiPageReducer, actions as aiPageActions } from './ai/slice'
-export type { FetchAiUserAction } from './ai/slice'
-export * as aiPageSelectors from './ai/selectors'
-
 export { default as profilePageFeedLineupReducer } from './profile/lineups/feed/reducer'
 export { feedActions as profilePageFeedLineupActions } from './profile/lineups/feed/actions'
 export { default as profilePageTracksLineupReducer } from './profile/lineups/tracks/reducer'

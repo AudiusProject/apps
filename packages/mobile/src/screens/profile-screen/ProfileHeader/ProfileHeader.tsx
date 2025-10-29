@@ -48,8 +48,7 @@ export const ProfileHeader = memo(() => {
     twitter_handle: twitterHandle,
     instagram_handle: instagramHandle,
     tiktok_handle: tikTokHandle,
-    supporting_count: supportingCount,
-    allow_ai_attribution
+    supporting_count: supportingCount
   } = useProfileUser({
     select: (user) => ({
       user_id: user.user_id,
@@ -61,8 +60,7 @@ export const ProfileHeader = memo(() => {
       twitter_handle: user.twitter_handle,
       instagram_handle: user.instagram_handle,
       tiktok_handle: user.tiktok_handle,
-      supporting_count: user.supporting_count,
-      allow_ai_attribution: user.allow_ai_attribution
+      supporting_count: user.supporting_count
     })
   }).user ?? {}
 
@@ -91,7 +89,6 @@ export const ProfileHeader = memo(() => {
     hasMutuals ||
     hasMultipleSocials ||
     isSupporting ||
-    allow_ai_attribution ||
     (comments && comments?.length > 0 && isRecentCommentsEnabled)
 
   useEffect(() => {

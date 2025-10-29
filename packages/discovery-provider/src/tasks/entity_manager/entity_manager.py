@@ -1394,7 +1394,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReaction,
                 literal_column(f"row_to_json({CommentReaction.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentReaction.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.COMMENT_REACTION] = {
@@ -1441,7 +1441,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentMention,
                 literal_column(f"row_to_json({CommentMention.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentMention.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
 
@@ -1473,7 +1473,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 MutedUser,
                 literal_column(f"row_to_json({MutedUser.__tablename__})"),
             )
-            .filter(or_(*or_queries), MutedUser.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.MUTED_USER] = {
@@ -1506,7 +1506,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReport,
                 literal_column(f"row_to_json({CommentReport.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentReport.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.COMMENT_REPORT] = {

@@ -15,7 +15,6 @@ import { queryUser } from './queryUser'
 export function* queryCurrentAccount() {
   const sdk = yield* getSDK()
   const queryClient = yield* getContext('queryClient')
-  const localStorage = yield* getContext('localStorage')
   const walletAddresses = queryClient.getQueryData(
     getWalletAddressesQueryKey()
   ) ?? {
@@ -27,12 +26,7 @@ export function* queryCurrentAccount() {
   const queryData = yield* call([queryClient, queryClient.fetchQuery], {
     queryKey: getCurrentAccountQueryKey(),
     queryFn: async () =>
-      getCurrentAccountQueryFn(
-        sdk,
-        localStorage,
-        currentUserWallet,
-        queryClient
-      ),
+      getCurrentAccountQueryFn(sdk, currentUserWallet, queryClient),
     staleTime: Infinity,
     gcTime: Infinity
   })

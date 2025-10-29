@@ -1,7 +1,5 @@
 import { LineupState } from '~/models/Lineup'
 import {
-  aiPageLineupActions,
-  aiPageSelectors,
   collectionPageLineupActions,
   collectionPageSelectors,
   feedPageLineupActions,
@@ -35,10 +33,6 @@ type LineupEntry = {
 }
 
 export const lineupRegistry: Record<string, LineupEntry> = {
-  [aiPageLineupActions.prefix]: {
-    actions: aiPageLineupActions,
-    selector: aiPageSelectors.getLineup
-  },
   [collectionPageLineupActions.prefix]: {
     actions: collectionPageLineupActions,
     selector: collectionPageSelectors.getCollectionTracksLineup

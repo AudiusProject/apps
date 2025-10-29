@@ -16,7 +16,6 @@ export const settingsMessages = {
   matrixMode: 'Matrix',
   signOut: 'Sign Out',
 
-  aiGeneratedCardTitle: 'AI Generated music',
   appearanceTitle: 'Appearance',
   inboxSettingsCardTitle: 'Inbox Settings',
   commentSettingsCardTitle: 'Comment Settings',
@@ -29,8 +28,6 @@ export const settingsMessages = {
   verificationCardTitle: 'Verification',
   desktopAppCardTitle: 'Download the Desktop App',
 
-  aiGeneratedCardDescription:
-    'Opt in to allow AI models to be trained on your likeness, and to let users credit you in their AI generated works.',
   appearanceDescription:
     "Enable dark mode or choose 'Auto' to change with your system settings.",
   inboxSettingsCardDescription:
@@ -50,8 +47,6 @@ export const settingsMessages = {
   labelAccountCardDescription:
     'Identify as a record label on your Audius profile.',
 
-  aiGeneratedEnabled: 'Enabled',
-  aiGeneratedButtonText: 'AI Generated Music Settings',
   inboxSettingsButtonText: 'Inbox Settings',
   commentSettingsButtonText: 'Comment Settings',
   notificationsButtonText: 'Configure Notifications',

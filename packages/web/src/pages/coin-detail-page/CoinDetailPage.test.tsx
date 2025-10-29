@@ -340,17 +340,6 @@ const assertCoinInfoSection = async ({
     within(coinInfoSection).getByRole('button', { name: /copy coin address/i })
   ).toBeInTheDocument()
 
-  // Check for Vesting Schedule section
-  const vestingScheduleRow =
-    within(coinInfoSection).getByTestId('vesting-schedule')
-  expect(vestingScheduleRow).toBeInTheDocument()
-  expect(
-    within(vestingScheduleRow).getByText(/unlock schedule/i)
-  ).toBeInTheDocument()
-  expect(
-    within(vestingScheduleRow).getByText(/5 years \(post-graduation\)/i)
-  ).toBeInTheDocument()
-
   // Check for Artist Earnings section
   const artistEarningsRow =
     within(coinInfoSection).getByTestId('artist-earnings')

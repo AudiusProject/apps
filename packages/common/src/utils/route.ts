@@ -140,7 +140,6 @@ export const PROFILE_PAGE_TRACKS = '/:handle/tracks'
 export const PROFILE_PAGE_ALBUMS = '/:handle/albums'
 export const PROFILE_PAGE_PLAYLISTS = '/:handle/playlists'
 export const PROFILE_PAGE_REPOSTS = '/:handle/reposts'
-export const PROFILE_PAGE_AI_ATTRIBUTED_TRACKS = '/:handle/ai'
 export const PROFILE_PAGE_COMMENTS = '/:handle/comments'
 
 // Opaque id routes

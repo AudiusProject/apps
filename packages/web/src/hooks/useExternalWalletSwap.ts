@@ -3,11 +3,11 @@ import {
   useCurrentAccountUser,
   useQueryContext,
   getExternalWalletBalanceQueryKey,
+  getArtistCoinQueryKey,
   SwapErrorType,
   SwapStatus,
   SwapTokensParams,
-  SwapTokensResult,
-  getConnectedWalletsQueryOptions
+  SwapTokensResult
 } from '@audius/common/api'
 import { ErrorLevel, Feature } from '@audius/common/models'
 import {
@@ -420,15 +420,6 @@ export const useExternalWalletSwap = () => {
         // Update internal wallet balances & user info
         optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
 
-        if (user?.user_id) {
-          queryClient.invalidateQueries({
-            queryKey: getConnectedWalletsQueryOptions(
-              { audiusSdk },
-              { userId: user.user_id }
-            ).queryKey
-          })
-        }
-
         // Update external wallet balances
         // NOTE: invalidate queries does not work here, need to manually update the balances
 
@@ -472,6 +463,18 @@ export const useExternalWalletSwap = () => {
               return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
             }
           )
+        }
+
+        // Invalidate artist coin queries to refresh fee claiming and graduation progress
+        if (params.inputMint && !isSpendingAudio) {
+          queryClient.invalidateQueries({
+            queryKey: getArtistCoinQueryKey(params.inputMint)
+          })
+        }
+        if (params.outputMint && !isReceivingAudio) {
+          queryClient.invalidateQueries({
+            queryKey: getArtistCoinQueryKey(params.outputMint)
+          })
         }
       }
     }

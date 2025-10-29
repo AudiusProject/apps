@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 11.1.1
+
+### Patch Changes
+
+- 40e5b07: Update hompeage URL
+
 ## 11.1.0
 
 ### Minor Changes

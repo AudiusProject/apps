@@ -1,6 +1,6 @@
 {
   "name": "create-audius-app",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Create an Audius app with one command",
   "scripts": {
     "build": "tsup ./index.ts",

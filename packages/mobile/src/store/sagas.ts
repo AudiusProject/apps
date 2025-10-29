@@ -25,7 +25,6 @@ import analyticsSagas from 'common/store/analytics/sagas'
 import backendSagas from 'common/store/backend/sagas'
 import tracksSagas from 'common/store/cache/tracks/sagas'
 import changePasswordSagas from 'common/store/change-password/sagas'
-import aiSagas from 'common/store/pages/ai/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
@@ -126,7 +125,6 @@ export default function* rootSaga() {
     ...historySagas(),
     ...rewardsPageSagas(),
     ...settingsSagas(),
-    ...aiSagas(),
     ...premiumTracksSagas(),
     ...searchTracksLineupSagas(),
 

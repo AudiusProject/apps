@@ -16,6 +16,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   const content = isMobile ? MobileProfilePage : DesktopProfilePage
 
   return (
+    // @ts-ignore
     <ProfilePageProvider containerRef={containerRef}>
       {content}
     </ProfilePageProvider>

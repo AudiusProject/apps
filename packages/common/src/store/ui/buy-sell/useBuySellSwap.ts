@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { MutationStatus, useQueryClient } from '@tanstack/react-query'
 
-import { SLIPPAGE_BPS, useArtistCoin, useCurrentAccountUser } from '~/api'
+import {
+  SLIPPAGE_BPS,
+  useArtistCoin,
+  useCurrentAccountUser,
+  getArtistCoinQueryKey
+} from '~/api'
 import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
@@ -112,6 +117,18 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       if (quoteCoin?.mint) {
         queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.artistCoinMembers, quoteCoin?.mint]
+        })
+      }
+
+      // Invalidate artist coin queries to refresh fee claiming and graduation progress
+      if (baseCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getArtistCoinQueryKey(baseCoin.mint)
+        })
+      }
+      if (quoteCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getArtistCoinQueryKey(quoteCoin.mint)
         })
       }
 

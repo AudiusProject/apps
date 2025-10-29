@@ -31,6 +31,7 @@ models/ClaimRewardsResponse.ts
 models/ClaimRewardsResponseDataInner.ts
 models/Coin.ts
 models/CoinArtistFees.ts
+models/CoinArtistLocker.ts
 models/CoinDynamicBondingCurve.ts
 models/CoinExtensions.ts
 models/CoinInsights.ts
@@ -39,6 +40,7 @@ models/CoinMember.ts
 models/CoinMembersCountResponse.ts
 models/CoinMembersResponse.ts
 models/CoinResponse.ts
+models/CoinRewardPool.ts
 models/CoinsResponse.ts
 models/Collectibles.ts
 models/CollectiblesResponse.ts
