@@ -4,7 +4,7 @@ import {
   getUserQueryKey,
   getWalletAddressesQueryKey
 } from '@audius/common/api'
-import { Status, User } from '@audius/common/models'
+import { Status } from '@audius/common/models'
 import { developmentConfig, HashId } from '@audius/sdk'
 import { http, HttpResponse } from 'msw'
 
@@ -24,6 +24,8 @@ const { apiEndpoint } = developmentConfig.network
  * TODO: Use better types - these types need to match the API, not the SDK outputs
  */
 
+type TestUser = typeof artistUser | typeof nonArtistUser
+
 /**
  *  User mocks
  */
@@ -34,7 +36,7 @@ export const mockUserByHandle = (user: typeof artistUser) =>
 
 export const mockSupportingUsers = (
   user: typeof artistUser,
-  supportingUsers?: User[]
+  supportingUsers?: TestUser[]
 ) =>
   http.get(`${apiEndpoint}/v1/full/users/${user.id}/supporting`, () =>
     HttpResponse.json({ data: supportingUsers ?? [] })
@@ -42,7 +44,7 @@ export const mockSupportingUsers = (
 
 export const mockSupporterUsers = (
   user: typeof artistUser,
-  supporterUsers?: User[]
+  supporterUsers?: TestUser[]
 ) =>
   http.get(`${apiEndpoint}/v1/full/users/${user.id}/supporters`, () =>
     HttpResponse.json({ data: supporterUsers ?? [] })
@@ -50,7 +52,7 @@ export const mockSupporterUsers = (
 
 export const mockRelatedUsers = (
   user: typeof artistUser,
-  relatedUsers?: User[]
+  relatedUsers?: TestUser[]
 ) =>
   http.get(`${apiEndpoint}/v1/full/users/${user.id}/related`, () =>
     HttpResponse.json({ data: relatedUsers ?? [] })
@@ -91,6 +93,7 @@ export const mockCurrentAccount = (
   queryClient.setQueryData(getCurrentAccountQueryKey(), account)
   queryClient.setQueryData(
     getUserQueryKey(HashId.parse(user.id)),
+    // @ts-ignore - user is a TestUser, not matching full user type spec (yet)
     userMetadataFromSDK(user)
   )
   // Set current account data
