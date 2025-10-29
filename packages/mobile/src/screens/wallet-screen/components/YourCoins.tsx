@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 
 import {
+  useArtistOwnedCoin,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
@@ -22,6 +23,7 @@ import { useNavigation } from 'app/hooks/useNavigation'
 
 import { AudioCoinCard } from './AudioCoinCard'
 import { CoinCard, CoinCardSkeleton, HexagonalSkeleton } from './CoinCard'
+import { removeNullable } from '@audius/common/utils'
 
 const messages = {
   ...buySellMessages
@@ -95,19 +97,21 @@ export const YourCoins = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const launchedCoin = artistCoins?.find(
-    (coin) => coin?.ownerId === currentUserId
-  )
+  const { data: artistOwnedCoin } = useArtistOwnedCoin(currentUserId)
   const audioCoin = artistCoins?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
   const otherCoins = artistCoins?.filter(
     (coin) =>
       coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
-      coin?.mint !== launchedCoin?.mint &&
+      coin?.mint !== artistOwnedCoin?.mint &&
       coin?.balance > 0
   )
-  const orderedCoins = [audioCoin, launchedCoin, ...(otherCoins ?? [])]
+  const orderedCoins = [
+    audioCoin,
+    artistOwnedCoin,
+    ...(otherCoins ?? [])
+  ].filter(removeNullable)
 
   // Show audio coin card when no coins are available
   const coins =

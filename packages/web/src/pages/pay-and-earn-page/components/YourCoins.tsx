@@ -3,6 +3,7 @@ import { Fragment, useCallback, useContext, useState } from 'react'
 import {
   UserCoin,
   useArtistCoin,
+  useArtistOwnedCoin,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
@@ -15,7 +16,7 @@ import {
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
 import { useBuySellModal } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import { removeNullable, route } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -266,20 +267,22 @@ export const YourCoins = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const launchedCoin = artistCoins?.find(
-    (coin) => coin?.ownerId === currentUserId
-  )
+  const { data: artistOwnedCoin } = useArtistOwnedCoin(currentUserId)
   const audioCoin = artistCoins?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
   const otherCoins = artistCoins?.filter(
     (coin) =>
       coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
-      coin?.mint !== launchedCoin?.mint &&
+      coin?.mint !== artistOwnedCoin?.mint &&
       coin?.balance > 0
   )
-  // Ensure that the launched coin appears first in the list
-  const orderedCoins = [audioCoin, launchedCoin, ...(otherCoins ?? [])]
+  // Ensure that the artist owned coin appears first in the list
+  const orderedCoins = [
+    audioCoin,
+    artistOwnedCoin,
+    ...(otherCoins ?? [])
+  ].filter(removeNullable)
 
   const { isLarge } = useMedia()
 
