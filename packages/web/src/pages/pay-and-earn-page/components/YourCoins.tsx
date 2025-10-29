@@ -10,8 +10,7 @@ import {
 import {
   useFeatureFlag,
   useFormattedCoinBalance,
-  useIsManagedAccount,
-  ownedCoinsFilter
+  useIsManagedAccount
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
@@ -267,15 +266,26 @@ export const YourCoins = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
+  const launchedCoin = artistCoins?.find(
+    (coin) => coin?.ownerId === currentUserId
+  )
+  const audioCoin = artistCoins?.find(
+    (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
+  )
+  const otherCoins = artistCoins?.filter(
+    (coin) =>
+      coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
+      coin?.mint !== launchedCoin?.mint &&
+      coin?.balance > 0
+  )
+  // Ensure that the launched coin appears first in the list
+  const orderedCoins = [audioCoin, launchedCoin, ...(otherCoins ?? [])]
 
   const { isLarge } = useMedia()
 
-  const filteredCoins =
-    artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
-
   // Show audio coin card when no coins are available
   const coins =
-    filteredCoins.length === 0 ? ['audio-coin' as const] : filteredCoins
+    orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
   // Add discover artist coins card at the end
   const allCoins = [...coins, 'discover-artist-coins' as const]
 
