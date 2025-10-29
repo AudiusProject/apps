@@ -249,6 +249,7 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
         backgroundRepeat: 'repeat, no-repeat',
         position: 'relative'
       }}
+      data-testid='coin-cover-photo'
     >
       <Flex column alignItems='flex-start' alignSelf='stretch' p='l' gap='s'>
         <Text variant='label' size='m' color='staticWhite' shadow='emphasis'>
@@ -466,6 +467,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       column
       alignItems='flex-start'
       border='default'
+      data-testid='coin-info-section'
     >
       <BannerSection mint={mint} />
 

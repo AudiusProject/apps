@@ -10,8 +10,9 @@ export const artistUser = {
   handle: 'test-user',
   name: 'Test User',
   profile_picture: {
-    [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/image-profile-small.jpg`,
-    [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/image-profile-medium.jpg`,
+    [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/artist-user-image-profile-small.jpg`,
+    [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/artist-user-image-profile-medium.jpg`,
+    [SquareSizes.SIZE_1000_BY_1000]: `${apiEndpoint}/artist-user-image-profile-large.jpg`,
     mirrors: [apiEndpoint]
   },
   follower_count: 1230,
@@ -22,7 +23,8 @@ export const artistUser = {
   album_count: 4,
   bio: 'Artist bio',
   cover_photo: {
-    [WidthSizes.SIZE_2000]: `${apiEndpoint}/image-cover.jpg`,
+    [WidthSizes.SIZE_2000]: `${apiEndpoint}/artist-user-image-cover-2000.jpg`,
+    [WidthSizes.SIZE_640]: `${apiEndpoint}/artist-user-image-cover-640.jpg`,
     mirrors: [apiEndpoint]
   },
   is_verified: true,
@@ -50,8 +52,9 @@ export const nonArtistUser = {
   handle: 'test-user',
   name: 'Test User',
   profile_picture: {
-    [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/image-profile-small.jpg`,
-    [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/image-profile-medium.jpg`,
+    [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/non-artist-user-image-profile-small.jpg`,
+    [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/non-artist-user-image-profile-medium.jpg`,
+    [SquareSizes.SIZE_1000_BY_1000]: `${apiEndpoint}/non-artist-user-image-profile-large.jpg`,
     mirrors: [apiEndpoint]
   },
   follower_count: 1,
@@ -62,7 +65,8 @@ export const nonArtistUser = {
   album_count: 0,
   bio: 'Test bio',
   cover_photo: {
-    [WidthSizes.SIZE_2000]: `${apiEndpoint}/image-cover.jpg`,
+    [WidthSizes.SIZE_2000]: `${apiEndpoint}/non-artist-user-image-cover-2000.jpg`,
+    [WidthSizes.SIZE_640]: `${apiEndpoint}/non-artist-user-image-cover-640.jpg`,
     mirrors: [apiEndpoint]
   },
   is_verified: false,
@@ -93,8 +97,9 @@ export const generateRandomUser = () => {
     handle: `test-user-${id}`,
     name: `Test User ${id}`,
     profile_picture: {
-      [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/image-profile-small.jpg`,
-      [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/image-profile-medium.jpg`,
+      [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/test-user-${id}-image-profile-small.jpg`,
+      [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/test-user-${id}-image-profile-medium.jpg`,
+      [SquareSizes.SIZE_1000_BY_1000]: `${apiEndpoint}/test-user-${id}-image-profile-large.jpg`,
       mirrors: [apiEndpoint]
     },
     follower_count: Math.floor(Math.random() * 1000),
@@ -105,7 +110,8 @@ export const generateRandomUser = () => {
     album_count: 0,
     bio: `User ${id} bio`,
     cover_photo: {
-      [WidthSizes.SIZE_2000]: `${apiEndpoint}/image-cover.jpg`,
+      [WidthSizes.SIZE_2000]: `${apiEndpoint}/test-user-${id}-image-cover-2000.jpg`,
+      [WidthSizes.SIZE_640]: `${apiEndpoint}/test-user-${id}-image-cover-640.jpg`,
       mirrors: [apiEndpoint]
     },
     is_verified: false,

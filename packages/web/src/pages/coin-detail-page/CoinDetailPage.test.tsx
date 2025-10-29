@@ -15,7 +15,6 @@ import {
 import {
   mockArtistCoin,
   mockUserCoinHasBalance,
-  mockCoinMembers,
   mockUserCoinNoBalance
 } from 'test/mocks/fixtures/artistCoins'
 import {
@@ -248,25 +247,66 @@ const assertCoinBalanceSection = async ({
   }
 }
 
-const assertCoinInfoSection = ({
+const assertCreatedBySection = async () => {
+  // Check for "Created By" label
+  const createdByLabel = await screen.findByText(/created by/i)
+  expect(createdByLabel).toBeInTheDocument()
+
+  // Check for artist link with correct handle
+  const artistLink = screen.getByRole('link', {
+    name: new RegExp(artistUser.name, 'i')
+  })
+  expect(artistLink).toBeInTheDocument()
+  expect(artistLink).toHaveAttribute('href', `/${artistUser.handle}`)
+
+  // Check for artist name
+  expect(screen.getByText(artistUser.name)).toBeInTheDocument()
+
+  // Check for artist avatar/profile picture within the user token badge
+  const userTokenBadge = screen.getByTestId('user-token-badge')
+  expect(userTokenBadge).toBeInTheDocument()
+
+  const profileImage = within(userTokenBadge).getByRole('img')
+  expect(profileImage).toBeInTheDocument()
+
+  // Verify the profile image has a src attribute (actual URL from artistUser fixture)
+  const profileSrc = profileImage.getAttribute('src')
+  expect(profileSrc).toBeTruthy()
+
+  // Check for artist cover photo banner section
+  // The cover photo is applied as a background via CSS-in-JS using the artist's cover_photo
+  // The actual background rendering is handled by the BannerSection component
+  const coverPhoto = screen.getByTestId('coin-cover-photo')
+  expect(coverPhoto).toBeInTheDocument()
+}
+
+const assertCoinInfoSection = async ({
   isArtist,
   unclaimedFees
 }: { isArtist?: boolean; unclaimedFees?: string } = {}) => {
+  // Get the coin info section to scope all assertions within it
+  const coinInfoSection = screen.getByTestId('coin-info-section')
+  expect(coinInfoSection).toBeInTheDocument()
+
+  // Check for "Created By" section
+  await assertCreatedBySection()
+
   // Check for coin description (first paragraph)
   if (mockArtistCoin.description) {
     const firstParagraph = mockArtistCoin.description.split('\n')[0]
     expect(
-      screen.getByText(firstParagraph, { exact: false })
+      within(coinInfoSection).getByText(firstParagraph, { exact: false })
     ).toBeInTheDocument()
   }
 
   // Check for Copy Coin Address button
   expect(
-    screen.getByRole('button', { name: /copy coin address/i })
+    within(coinInfoSection).getByRole('button', { name: /copy coin address/i })
   ).toBeInTheDocument()
 
   // Check for Vesting Schedule section
-  const vestingScheduleRow = screen.getByTestId('vesting-schedule')
+  const vestingScheduleRow =
+    within(coinInfoSection).getByTestId('vesting-schedule')
   expect(vestingScheduleRow).toBeInTheDocument()
   expect(
     within(vestingScheduleRow).getByText(/unlock schedule/i)
@@ -276,7 +316,8 @@ const assertCoinInfoSection = ({
   ).toBeInTheDocument()
 
   // Check for Artist Earnings section
-  const artistEarningsRow = screen.getByTestId('artist-earnings')
+  const artistEarningsRow =
+    within(coinInfoSection).getByTestId('artist-earnings')
   expect(artistEarningsRow).toBeInTheDocument()
   expect(
     within(artistEarningsRow).getByText(/artist earnings/i)
@@ -287,7 +328,8 @@ const assertCoinInfoSection = ({
 
   if (isArtist) {
     // Check for Unclaimed Fees section (only visible to artist/coin creator)
-    const unclaimedFeesRow = screen.getByTestId('unclaimed-fees')
+    const unclaimedFeesRow =
+      within(coinInfoSection).getByTestId('unclaimed-fees')
     expect(unclaimedFeesRow).toBeInTheDocument()
     expect(
       within(unclaimedFeesRow).getByText(/unclaimed fees/i)
@@ -316,6 +358,7 @@ describe('CoinDetailPage', () => {
   afterEach(() => {
     mswServer.resetHandlers()
     vi.clearAllMocks()
+    saveDomToFile('coin-detail-page.html')
   })
 
   beforeAll(() => {
@@ -345,7 +388,7 @@ describe('CoinDetailPage', () => {
       hasBalance: false
     })
     await assertCoinInsightsSection()
-    assertCoinInfoSection({ unclaimedFees: '7.03' })
+    await assertCoinInfoSection({ unclaimedFees: '7.03' })
     assertCoinLeaderboardSection()
   })
 
@@ -368,7 +411,7 @@ describe('CoinDetailPage', () => {
       isArtist: false,
       hasBalance: true
     })
-    assertCoinInfoSection()
+    await assertCoinInfoSection()
     assertCoinLeaderboardSection()
   })
 
@@ -384,7 +427,7 @@ describe('CoinDetailPage', () => {
     })
 
     await assertCoinInsightsSection()
-    assertCoinInfoSection()
+    await assertCoinInfoSection()
     assertCoinLeaderboardSection()
   })
 
@@ -408,7 +451,7 @@ describe('CoinDetailPage', () => {
 
     await assertCoinInsightsSection()
     assertCoinLeaderboardSection()
-    assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+    await assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
   })
 
   it('Coin Creator - IS coin holder - has unclaimed fees from DBC', async () => {
@@ -432,7 +475,7 @@ describe('CoinDetailPage', () => {
 
     await assertCoinInsightsSection()
     assertCoinLeaderboardSection()
-    assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+    await assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
   })
   it('Coin Creator - has unclaimed fees from both DBC & DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
@@ -454,7 +497,7 @@ describe('CoinDetailPage', () => {
     renderCoinDetailPage(mockCoinWithDammV2Fees)
 
     await assertHeader()
-    assertCoinInfoSection({ unclaimedFees: '17.03' })
+    await assertCoinInfoSection({ unclaimedFees: '17.03' })
   })
   it('Coin Creator - has unclaimed fees from just DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
@@ -478,6 +521,6 @@ describe('CoinDetailPage', () => {
     renderCoinDetailPage(mockCoinWithDammV2Fees)
 
     await assertHeader()
-    assertCoinInfoSection({ unclaimedFees: '11.03' })
+    await assertCoinInfoSection({ unclaimedFees: '11.03' })
   })
 })
