@@ -67,7 +67,9 @@ export const ExclusiveTracksSection = ({
             ({totalCount})
           </Text>
         </Flex>
-        <PlainButton onClick={handleViewAll}>{messages.viewAll}</PlainButton>
+        <PlainButton size='large' onClick={handleViewAll}>
+          {messages.viewAll}
+        </PlainButton>
       </Flex>
 
       {isLoading ? (

@@ -71,9 +71,7 @@ export const ExclusiveTracksSection = ({
           <Text variant='heading' size='s'>
             {title}{' '}
             {totalCount > 0 ? (
-              <Text variant='title' size='l' color='subdued'>
-                ({totalCount})
-              </Text>
+              <Text color='subdued'>({totalCount})</Text>
             ) : null}
           </Text>
         </Flex>
