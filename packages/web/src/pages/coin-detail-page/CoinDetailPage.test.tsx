@@ -291,12 +291,48 @@ const assertCoinInfoSection = async ({
   // Check for "Created By" section
   await assertCreatedBySection()
 
-  // Check for coin description (first paragraph)
+  // Check for coin description
   if (mockArtistCoin.description) {
-    const firstParagraph = mockArtistCoin.description.split('\n')[0]
     expect(
-      within(coinInfoSection).getByText(firstParagraph, { exact: false })
+      within(coinInfoSection).getByText(mockArtistCoin.description)
     ).toBeInTheDocument()
+  }
+
+  // Check for social links (link_2, link_3, link_4)
+  const allLinks = within(coinInfoSection).getAllByRole('link', {
+    hidden: true
+  })
+
+  if (mockArtistCoin.link_2) {
+    const link2 = allLinks.find(
+      (link) => link.getAttribute('href') === mockArtistCoin.link_2
+    )
+    expect(link2).toBeDefined()
+    expect(link2).toHaveAttribute('href', mockArtistCoin.link_2)
+  }
+
+  if (mockArtistCoin.link_3) {
+    const twitterLink = allLinks.find(
+      (link) => link.getAttribute('href') === mockArtistCoin.link_3
+    )
+    expect(twitterLink).toBeDefined()
+    expect(twitterLink).toHaveAttribute('href', mockArtistCoin.link_3)
+  }
+
+  if (mockArtistCoin.link_4) {
+    const instagramLink = allLinks.find(
+      (link) => link.getAttribute('href') === mockArtistCoin.link_4
+    )
+    expect(instagramLink).toBeDefined()
+    expect(instagramLink).toHaveAttribute('href', mockArtistCoin.link_4)
+  }
+
+  // Check for website "Learn More" button
+  if (mockArtistCoin.website) {
+    const learnMoreButton = within(coinInfoSection).getByRole('button', {
+      name: /learn more/i
+    })
+    expect(learnMoreButton).toBeInTheDocument()
   }
 
   // Check for Copy Coin Address button

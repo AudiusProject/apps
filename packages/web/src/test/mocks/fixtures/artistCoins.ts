@@ -8,9 +8,12 @@ export const mockArtistCoin = {
   owner_id: Id.parse(1),
   logo_uri:
     'https://s3.coinmarketcap.com/static-gravity/image/a28128d9ff7c49c9ad33ee2f626fda40.png',
-  description:
-    '$MOCK is a community token on the Audius platform. You can use $MOCK for tipping artists, participating in community activities, and engaging with the decentralized music ecosystem.\n\nHolding $MOCK gives you access to exclusive features and helps support your favorite artists on Audius.',
-  website: 'https://coinmarketcap.com/currencies/mock/',
+  description: 'This is my mock coin',
+  link_2:
+    'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing',
+  link_3: 'https://x.com/mock-coin',
+  link_4: 'https://instagram.com/mock-coin',
+  website: 'https://mock-coin.com',
   created_at: '2025-07-23T22:40:23.402315Z',
   /**
    * @note All the stuff below is sample data copied from prod data on Oct 24, 2025
