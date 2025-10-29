@@ -409,6 +409,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       toast(toastMessages.feesClaimed)
       record(
         make(Name.LAUNCHPAD_CLAIM_FEES_SUCCESS, {
+          signatures: data.signatures,
           walletAddress: coinCreatorWalletAddress ?? '',
           coinSymbol: coin?.ticker,
           mintAddress: mint,
@@ -448,6 +449,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         toast(toastMessages.vestedCoinsClaimed)
         record(
           make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS, {
+            signature: data.signature,
             walletAddress: coinCreatorWalletAddress ?? '',
             coinSymbol: coin?.ticker,
             mintAddress: mint,

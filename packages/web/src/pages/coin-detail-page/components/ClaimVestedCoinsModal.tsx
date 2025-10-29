@@ -52,6 +52,7 @@ export const ClaimVestedCoinsModal = () => {
 
   const handleClaim = () => {
     onClaim?.(rewardsPoolPercentage)
+    onClose()
   }
 
   if (!ticker || !claimable || !onClaim) {
