@@ -1020,6 +1020,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
             .filter(
                 AssociatedWallet.wallet.in_(entities_to_fetch["AssociatedWallet"]),
                 AssociatedWallet.is_current == True,
+                AssociatedWallet.is_delete == False,
             )
             .all()
         )
