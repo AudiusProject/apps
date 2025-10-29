@@ -457,12 +457,13 @@ def add_associated_wallet(
 
         # Check if wallet already exists, and remove it from other users
         existing_wallet = None
-        for _, wallet in params.existing_records["AssociatedWallet"].items():
-            if wallet.chain == chain and wallet.wallet == wallet_address:
-                if wallet.user_id == user_id:
-                    existing_wallet = wallet
-                else:
-                    session.delete(wallet)
+        for _, wallets in params.existing_records["AssociatedWallet"].items():
+            for wallet in wallets:
+                if wallet.chain == chain and wallet.wallet == wallet_address:
+                    if wallet.user_id == user_id:
+                        existing_wallet = wallet
+                    else:
+                        session.delete(wallet)
 
         if not existing_wallet:
             # Create new wallet association only if it doesn't exist for this user
@@ -497,12 +498,13 @@ def remove_associated_wallet(params: ManageEntityParameters):
     try:
         # Find the wallet to remove
         wallet_to_remove = None
-        for _, wallet in params.existing_records["AssociatedWallet"].items():
-            if (
-                wallet.chain == chain
-                and wallet.user_id == user_id
-                and wallet.wallet == wallet_address
-            ):
+        for _, wallets in params.existing_records["AssociatedWallet"].items():
+            for wallet in wallets:
+                if (
+                    wallet.chain == chain
+                    and wallet.user_id == user_id
+                    and wallet.wallet == wallet_address
+                ):
                 wallet_to_remove = wallet
                 break
 
