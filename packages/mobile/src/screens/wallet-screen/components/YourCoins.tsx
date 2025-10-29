@@ -8,6 +8,7 @@ import {
 } from '@audius/common/api'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { AUDIO_TICKER } from '@audius/common/store'
+import { removeNullable } from '@audius/common/utils'
 import { TouchableOpacity } from 'react-native'
 
 import {
@@ -23,7 +24,6 @@ import { useNavigation } from 'app/hooks/useNavigation'
 
 import { AudioCoinCard } from './AudioCoinCard'
 import { CoinCard, CoinCardSkeleton, HexagonalSkeleton } from './CoinCard'
-import { removeNullable } from '@audius/common/utils'
 
 const messages = {
   ...buySellMessages
