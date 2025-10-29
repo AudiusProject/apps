@@ -2,6 +2,9 @@ import { SquareSizes, WidthSizes } from '@audius/common/models'
 import { Id, developmentConfig } from '@audius/sdk'
 const { apiEndpoint } = developmentConfig.network
 
+// These are reserved for "artistUser" (1) and "nonArtistUser" (2)
+const usedIds = [1, 2]
+
 export const artistUser = {
   id: Id.parse(1),
   handle: 'test-user',
@@ -80,4 +83,52 @@ export const nonArtistUser = {
   handle_lc: 'test-user',
   has_collectibles: false,
   allow_ai_attribution: false
+}
+
+export const generateRandomUser = () => {
+  const id = usedIds.length + 1
+  usedIds.push(id)
+  return {
+    id: Id.parse(id),
+    handle: `test-user-${id}`,
+    name: `Test User ${id}`,
+    profile_picture: {
+      [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/image-profile-small.jpg`,
+      [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/image-profile-medium.jpg`,
+      mirrors: [apiEndpoint]
+    },
+    follower_count: Math.floor(Math.random() * 1000),
+    followee_count: Math.floor(Math.random() * 1000),
+    track_count: 0,
+    playlist_count: Math.floor(Math.random() * 10),
+    repost_count: Math.floor(Math.random() * 100),
+    album_count: 0,
+    bio: `User ${id} bio`,
+    cover_photo: {
+      [WidthSizes.SIZE_2000]: `${apiEndpoint}/image-cover.jpg`,
+      mirrors: [apiEndpoint]
+    },
+    is_verified: false,
+    is_deactivated: false,
+    is_available: true,
+    erc_wallet: '0x123',
+    spl_wallet: 'SPL456',
+    wallet: '0x123',
+    balance: '0',
+    associated_wallets_balance: '0',
+    total_balance: '0',
+    waudio_balance: '0',
+    associated_sol_wallets_balance: '0',
+    blocknumber: Math.floor(Math.random() * 1000000),
+    created_at: '2024-01-01T00:00:00.000Z',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    is_storage_v2: true,
+    handle_lc: `test-user-${id}`,
+    has_collectibles: false,
+    allow_ai_attribution: false
+  }
+}
+
+export const generateRandomTestUsers = (count: number) => {
+  return Array.from({ length: count }, generateRandomUser)
 }

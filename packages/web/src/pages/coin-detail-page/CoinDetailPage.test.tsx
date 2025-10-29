@@ -14,15 +14,31 @@ import {
 
 import {
   mockArtistCoin,
-  mockCoinHoldings
+  mockUserCoinHasBalance,
+  mockCoinMembers,
+  mockUserCoinNoBalance
 } from 'test/mocks/fixtures/artistCoins'
-import { nonArtistUser } from 'test/mocks/fixtures/users'
+import {
+  artistUser,
+  generateRandomTestUsers,
+  nonArtistUser
+} from 'test/mocks/fixtures/users'
 import {
   mockCoinByTicker,
+  mockCoinMembersCount,
+  mockCoinMembersList,
   mockCurrentAccount,
-  mockUserCoinHoldings
+  mockUserCoinsByMint,
+  mockUsers
 } from 'test/msw/mswMocks'
-import { RenderOptions, mswServer, render, screen } from 'test/test-utils'
+import {
+  RenderOptions,
+  mswServer,
+  render,
+  saveDomToFile,
+  screen,
+  within
+} from 'test/test-utils'
 
 import { CoinDetailPage } from './CoinDetailPage'
 
@@ -31,6 +47,18 @@ export function renderCoinDetailPage(
   options?: RenderOptions
 ) {
   mswServer.use(mockCoinByTicker(coin))
+  const randomUsers = generateRandomTestUsers(10)
+  mswServer.use(
+    mockCoinMembersList(
+      coin.mint,
+      randomUsers.map((user) => ({
+        user_id: user.id,
+        balance: Math.floor(Math.random() * 1000000)
+      }))
+    )
+  )
+  mswServer.use(mockCoinMembersCount(coin.mint, randomUsers.length))
+  mswServer.use(mockUsers([nonArtistUser, artistUser, ...randomUsers]))
 
   const history = createMemoryHistory({
     initialEntries: [`/coins/${coin.ticker}`]
@@ -51,6 +79,234 @@ export function renderCoinDetailPage(
   )
 }
 
+const assertCoinInsightsSection = async () => {
+  await screen.findByRole('heading', { name: /insights/i })
+
+  // Price: $0.0₅905 (formatted with subscript notation)
+  const priceRow = screen.getByTestId('metric-row-Price')
+  expect(priceRow).toBeInTheDocument()
+  expect(within(priceRow).getByText('$0.0₅905')).toBeInTheDocument()
+  expect(within(priceRow).getByText(/^price$/i)).toBeInTheDocument()
+
+  // Market Cap: ~$9.0K
+  const marketCapRow = screen.getByTestId('metric-row-Market Cap')
+  expect(marketCapRow).toBeInTheDocument()
+  expect(within(marketCapRow).getByText(/\$9\.0K/i)).toBeInTheDocument()
+  expect(within(marketCapRow).getByText(/^market cap$/i)).toBeInTheDocument()
+
+  // Volume (All-Time): $127.32
+  const volumeRow = screen.getByTestId('metric-row-Volume (All-Time)')
+  expect(volumeRow).toBeInTheDocument()
+  expect(within(volumeRow).getByText(/\$127\.32/)).toBeInTheDocument()
+  expect(
+    within(volumeRow).getByText(/^volume \(all-time\)$/i)
+  ).toBeInTheDocument()
+
+  // Unique Holders: 11
+  const holdersRow = screen.getByTestId('metric-row-Unique Holders')
+  expect(holdersRow).toBeInTheDocument()
+  expect(within(holdersRow).getByText('11')).toBeInTheDocument()
+  expect(within(holdersRow).getByText(/^unique holders$/i)).toBeInTheDocument()
+
+  // Graduation Progress: 1% (curveProgress: 0.012981... = ~1.3%)
+  const graduationRow = screen.getByTestId('metric-row-Graduation Progress')
+  expect(graduationRow).toBeInTheDocument()
+  expect(within(graduationRow).getByText(/1%/)).toBeInTheDocument()
+  expect(
+    within(graduationRow).getByText(/graduation progress/i)
+  ).toBeInTheDocument()
+
+  // Check graduation progress bar is in the same row
+  const progressBar = within(graduationRow).getByRole('progressbar')
+  expect(progressBar).toBeInTheDocument()
+  expect(progressBar).toHaveAttribute('aria-valuenow', '1')
+}
+
+const assertCoinLeaderboardSection = () => {
+  // Check for Members Leaderboard heading
+  const leaderboardHeading = screen.getByRole('heading', {
+    name: /members leaderboard/i
+  })
+  expect(leaderboardHeading).toBeInTheDocument()
+
+  // Check for members count in parentheses (10 random users generated)
+  const membersCountText = screen.getByText(/\(10\)/)
+  expect(membersCountText).toBeInTheDocument()
+
+  // Check for the button to open leaderboard modal
+  const openLeaderboardButton = screen.getByRole('button', {
+    name: /open the leaderboard modal/i
+  })
+  expect(openLeaderboardButton).toBeInTheDocument()
+
+  // The leaderboard section should be within a container
+  const leaderboardSection = leaderboardHeading.closest('div')?.parentElement
+  expect(leaderboardSection).toBeInTheDocument()
+
+  // Check that the button is in the same container (either disabled during loading or enabled)
+  const leaderboardContainer =
+    openLeaderboardButton.closest('div[role="button"]')
+  expect(leaderboardContainer).toBeInTheDocument()
+}
+
+const assertHeader = async () => {
+  // Wait for the page to load by finding the Insights heading (unique to this page)
+  await screen.findByRole('heading', { name: /insights/i })
+
+  // Check that the coin name is rendered in the header (h1)
+  const headings = screen.getAllByRole('heading', {
+    name: mockArtistCoin.name
+  })
+  expect(headings.length).toBeGreaterThan(0)
+  expect(headings[0]).toBeInTheDocument()
+}
+
+const assertCoinBalanceSection = async ({
+  isAuthed = true,
+  isArtist = false,
+  hasBalance = false
+}: {
+  isAuthed: boolean
+  isArtist: boolean
+  hasBalance: boolean
+}) => {
+  const assertBalanceBreakdownRow = (
+    address: string,
+    balance: string,
+    isBuiltIn: boolean = false
+  ) => {
+    // Check for Linked Wallet with truncated address and balance in the same row
+    // Find the wallet address element (in parentheses)
+    const walletAddress = screen.getByText(
+      isBuiltIn
+        ? address
+        : new RegExp(`${address.slice(0, 4)}...${address.slice(-5)}`)
+    )
+    expect(walletAddress).toBeInTheDocument()
+
+    // Get the parent row container - need to go up 2 levels to get the row that contains both address and balance
+    const walletInfoDiv = walletAddress.parentElement
+    const walletRow = walletInfoDiv?.parentElement
+    expect(walletRow).toBeInTheDocument()
+
+    // Verify the balance (28,062) appears in the same row
+    expect(walletRow).toHaveTextContent(balance)
+  }
+  if (!hasBalance) {
+    expect(
+      await screen.findByRole('button', { name: /buy/i })
+    ).toBeInTheDocument()
+    if (isAuthed) {
+      expect(
+        screen.getByRole('button', { name: /receive/i })
+      ).toBeInTheDocument()
+    }
+    if (!isArtist) {
+      expect(
+        screen.getByText(/become a member/i, { exact: false })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /buy \$MOCK to gain access to exclusive members-only perks!/i,
+          {
+            exact: false
+          }
+        )
+      ).toBeInTheDocument()
+    } else {
+      expect(
+        screen.queryByText(/become a member/i, { exact: false })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText(
+          /buy \$MOCK to gain access to exclusive members-only perks!/i,
+          {
+            exact: false
+          }
+        )
+      ).not.toBeInTheDocument()
+    }
+  } else {
+    // Check for action buttons
+    expect(
+      screen.getByRole('button', { name: /buy\/sell/i })
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /receive/i })).toBeInTheDocument()
+
+    // Check for overall balance number (without dollar sign)
+    expect(screen.getByText(/89,493,965\.32/)).toBeInTheDocument()
+
+    // Check for USD balance value
+    expect(screen.getByText(/\$809\.57/)).toBeInTheDocument()
+
+    // Check for individual balance breakdown
+    expect(screen.getByText(/balance breakdown/i)).toBeInTheDocument()
+    assertBalanceBreakdownRow('TESTACCOUNTWALLETADDRESS', '28,062')
+    assertBalanceBreakdownRow('Built-In Wallet', '34,063', true)
+    assertBalanceBreakdownRow('TESTACCOUNTWALLETADDRESS2', '89,431,839')
+  }
+}
+
+const assertCoinInfoSection = ({
+  isArtist,
+  unclaimedFees
+}: { isArtist?: boolean; unclaimedFees?: string } = {}) => {
+  // Check for coin description (first paragraph)
+  if (mockArtistCoin.description) {
+    const firstParagraph = mockArtistCoin.description.split('\n')[0]
+    expect(
+      screen.getByText(firstParagraph, { exact: false })
+    ).toBeInTheDocument()
+  }
+
+  // Check for Copy Coin Address button
+  expect(
+    screen.getByRole('button', { name: /copy coin address/i })
+  ).toBeInTheDocument()
+
+  // Check for Vesting Schedule section
+  const vestingScheduleRow = screen.getByTestId('vesting-schedule')
+  expect(vestingScheduleRow).toBeInTheDocument()
+  expect(
+    within(vestingScheduleRow).getByText(/unlock schedule/i)
+  ).toBeInTheDocument()
+  expect(
+    within(vestingScheduleRow).getByText(/5 years \(post-graduation\)/i)
+  ).toBeInTheDocument()
+
+  // Check for Artist Earnings section
+  const artistEarningsRow = screen.getByTestId('artist-earnings')
+  expect(artistEarningsRow).toBeInTheDocument()
+  expect(
+    within(artistEarningsRow).getByText(/artist earnings/i)
+  ).toBeInTheDocument()
+  // Artist fees total_fees: 903028316 (in smallest units) = 9.03 $AUDIO
+  expect(within(artistEarningsRow).getByText(/9\.03/)).toBeInTheDocument()
+  expect(within(artistEarningsRow).getByText(/\$AUDIO/)).toBeInTheDocument()
+
+  if (isArtist) {
+    // Check for Unclaimed Fees section (only visible to artist/coin creator)
+    const unclaimedFeesRow = screen.getByTestId('unclaimed-fees')
+    expect(unclaimedFeesRow).toBeInTheDocument()
+    expect(
+      within(unclaimedFeesRow).getByText(/unclaimed fees/i)
+    ).toBeInTheDocument()
+
+    // Check for Claim link within the unclaimed fees row
+    const claimButton = within(unclaimedFeesRow).getByRole('button', {
+      name: /claim/i
+    })
+    expect(claimButton).toBeInTheDocument()
+
+    // Verify the unclaimed amount appears in the unclaimed fees row
+    expect(
+      within(unclaimedFeesRow).getByText(new RegExp(unclaimedFees ?? ''))
+    ).toBeInTheDocument()
+    expect(within(unclaimedFeesRow).getByText(/\$AUDIO/)).toBeInTheDocument()
+  }
+}
+
 describe('CoinDetailPage', () => {
   beforeEach(() => {
     // Mock any DOM methods if needed
@@ -58,15 +314,12 @@ describe('CoinDetailPage', () => {
   })
 
   afterEach(() => {
+    mswServer.resetHandlers()
     vi.clearAllMocks()
   })
 
   beforeAll(() => {
     mswServer.listen()
-  })
-
-  afterEach(() => {
-    mswServer.resetHandlers()
   })
 
   afterAll(() => {
@@ -75,295 +328,156 @@ describe('CoinDetailPage', () => {
 
   it('Authed User - NOT coin holder - NOT coin creator', async () => {
     mswServer.use(mockCurrentAccount(nonArtistUser))
+    mswServer.use(
+      mockUserCoinsByMint(
+        nonArtistUser.id,
+        mockArtistCoin.mint,
+        mockUserCoinNoBalance
+      )
+    )
     renderCoinDetailPage(mockArtistCoin)
 
-    // Wait for the page to load by finding the Insights heading (unique to this page)
-    await screen.findByRole('heading', { name: /insights/i })
+    await assertHeader()
 
-    // Check that the coin name is rendered in the header (h1)
-    const headings = screen.getAllByRole('heading', {
-      name: mockArtistCoin.name
+    await assertCoinBalanceSection({
+      isAuthed: true,
+      isArtist: false,
+      hasBalance: false
     })
-    expect(headings.length).toBeGreaterThan(0)
-    expect(headings[0]).toBeInTheDocument()
-
-    // Check for Buy button (zero balance state)
-    expect(screen.getByRole('button', { name: /buy/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /receive/i })).toBeInTheDocument()
-
-    // Check for "Become a member" section
-    expect(
-      screen.getByText(/become a member/i, { exact: false })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        /buy \$MOCK to gain access to exclusive members-only perks!/i,
-        {
-          exact: false
-        }
-      )
-    ).toBeInTheDocument()
-
-    // Check for Insights panel metrics labels
-    expect(screen.getByText(/price/i)).toBeInTheDocument()
-    expect(screen.getByText(/market cap/i)).toBeInTheDocument()
-    expect(screen.getByText(/volume \(all-time\)/i)).toBeInTheDocument()
-    expect(screen.getByText(/unique holders/i)).toBeInTheDocument()
-    expect(screen.getByText(/graduation progress/i)).toBeInTheDocument()
-
-    // Check for specific insight values from mock data
-    // Price: $0.0₅905 (formatted with subscript notation)
-    expect(screen.getByText('$0.0₅905')).toBeInTheDocument()
-
-    // Market Cap: ~$9.0K (10049 formatted)
-    expect(screen.getByText(/\$9\.0K/i)).toBeInTheDocument()
-
-    // Volume (All-Time): $127.32
-    expect(screen.getByText(/\$127\.32/)).toBeInTheDocument()
-
-    // Unique Holders: 11
-    expect(screen.getByText('11')).toBeInTheDocument()
-
-    // Graduation Progress: 1% (curveProgress: 0.012981... = ~1.3%)
-    expect(screen.getByText(/1%/)).toBeInTheDocument()
-
-    // Check graduation progress bar
-    const progressBar = screen.getByRole('progressbar')
-    expect(progressBar).toBeInTheDocument()
-    expect(progressBar).toHaveAttribute('aria-valuenow', '1')
-
-    // Check for coin description (first paragraph)
-    if (mockArtistCoin.description) {
-      const firstParagraph = mockArtistCoin.description.split('\n')[0]
-      expect(
-        screen.getByText(firstParagraph, { exact: false })
-      ).toBeInTheDocument()
-    }
-
-    // Check for Copy Coin Address button
-    expect(
-      screen.getByRole('button', { name: /copy coin address/i })
-    ).toBeInTheDocument()
-
-    // Check for Unlock Schedule - visible in CoinInfoSection
-    expect(screen.getByText(/unlock schedule/i)).toBeInTheDocument()
-    expect(screen.getByText(/5 years \(post-graduation\)/i)).toBeInTheDocument()
-
-    // Check for Artist Earnings section - both header and value
-    expect(screen.getByText(/artist earnings/i)).toBeInTheDocument()
-    // Artist fees total_fees: 903028316 (in smallest units) = 9.03 $AUDIO
-    expect(screen.getByText(/9\.03/)).toBeInTheDocument()
-    expect(screen.getByText(/\$AUDIO/)).toBeInTheDocument()
-
-    // Check for Members Leaderboard heading
-    expect(
-      screen.getByRole('heading', { name: /members leaderboard/i })
-    ).toBeInTheDocument()
+    await assertCoinInsightsSection()
+    assertCoinInfoSection({ unclaimedFees: '7.03' })
+    assertCoinLeaderboardSection()
   })
 
   it('Authed User - IS coin holder - NOT coin creator', async () => {
     mswServer.use(mockCurrentAccount(nonArtistUser))
     mswServer.use(
-      mockUserCoinHoldings(
+      mockUserCoinsByMint(
         nonArtistUser.id,
         mockArtistCoin.mint,
-        mockCoinHoldings
+        mockUserCoinHasBalance
       )
     )
     renderCoinDetailPage(mockArtistCoin)
 
-    // Wait for the page to load by finding the Insights heading (unique to this page)
-    await screen.findByRole('heading', { name: /insights/i })
+    await assertHeader()
 
-    // Check that the coin name is rendered in the header (h1)
-    const headings = screen.getAllByRole('heading', {
-      name: mockArtistCoin.name
+    await assertCoinInsightsSection()
+    await assertCoinBalanceSection({
+      isAuthed: true,
+      isArtist: false,
+      hasBalance: true
     })
-    expect(headings.length).toBeGreaterThan(0)
-    expect(headings[0]).toBeInTheDocument()
-
-    // Check for Balance display (holdings state)
-    // Balance: 28,062.08 $MOCK
-    expect(screen.getByText(/28,062\.08/)).toBeInTheDocument()
-    expect(screen.getByText(/\$MOCK/)).toBeInTheDocument()
-
-    // Check for USD balance value
-    expect(screen.getByText(/\$0\.4181/)).toBeInTheDocument()
-
-    // Check for Balance Breakdown heading
-    expect(screen.getByText(/balance breakdown/i)).toBeInTheDocument()
-
-    // Check for Linked Wallet with truncated address (FiFM...5cgHi)
-    expect(screen.getByText(/FiFM\.{3}5cgHi/)).toBeInTheDocument()
-
-    // Check for wallet balance in breakdown (28,062)
-    expect(screen.getByText('28,062')).toBeInTheDocument()
-
-    // Check for action buttons
-    expect(
-      screen.getByRole('button', { name: /buy\/sell/i })
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /receive/i })).toBeInTheDocument()
-
-    // Check for "Become a member" section
-    expect(
-      screen.getByText(/become a member/i, { exact: false })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        /buy \$MOCK to gain access to exclusive members-only perks!/i,
-        {
-          exact: false
-        }
-      )
-    ).toBeInTheDocument()
-
-    // Check for Insights panel metrics labels
-    expect(screen.getByText(/price/i)).toBeInTheDocument()
-    expect(screen.getByText(/market cap/i)).toBeInTheDocument()
-    expect(screen.getByText(/volume \(all-time\)/i)).toBeInTheDocument()
-    expect(screen.getByText(/unique holders/i)).toBeInTheDocument()
-    expect(screen.getByText(/graduation progress/i)).toBeInTheDocument()
-
-    // Check for specific insight values from mock data
-    // Price: $0.0₅905 (formatted with subscript notation)
-    expect(screen.getByText('$0.0₅905')).toBeInTheDocument()
-
-    // Market Cap: ~$9.0K (10049 formatted)
-    expect(screen.getByText(/\$9\.0K/i)).toBeInTheDocument()
-
-    // Volume (All-Time): $127.32
-    expect(screen.getByText(/\$127\.32/)).toBeInTheDocument()
-
-    // Unique Holders: 11
-    expect(screen.getByText('11')).toBeInTheDocument()
-
-    // Graduation Progress: 1% (curveProgress: 0.012981... = ~1.3%)
-    expect(screen.getByText(/1%/)).toBeInTheDocument()
-
-    // Check graduation progress bar
-    const progressBar = screen.getByRole('progressbar')
-    expect(progressBar).toBeInTheDocument()
-    expect(progressBar).toHaveAttribute('aria-valuenow', '1')
-
-    // Check for coin description (first paragraph)
-    if (mockArtistCoin.description) {
-      const firstParagraph = mockArtistCoin.description.split('\n')[0]
-      expect(
-        screen.getByText(firstParagraph, { exact: false })
-      ).toBeInTheDocument()
-    }
-
-    // Check for Copy Coin Address button
-    expect(
-      screen.getByRole('button', { name: /copy coin address/i })
-    ).toBeInTheDocument()
-
-    // Check for Unlock Schedule - visible in CoinInfoSection
-    expect(screen.getByText(/unlock schedule/i)).toBeInTheDocument()
-    expect(screen.getByText(/5 years \(post-graduation\)/i)).toBeInTheDocument()
-
-    // Check for Artist Earnings section - both header and value
-    expect(screen.getByText(/artist earnings/i)).toBeInTheDocument()
-    // Artist fees total_fees: 903028316 (in smallest units) = 9.03 $AUDIO
-    expect(screen.getByText(/9\.03/)).toBeInTheDocument()
-    expect(screen.getByText(/\$AUDIO/)).toBeInTheDocument()
-
-    // Check for Members Leaderboard heading
-    expect(
-      screen.getByRole('heading', { name: /members leaderboard/i })
-    ).toBeInTheDocument()
+    assertCoinInfoSection()
+    assertCoinLeaderboardSection()
   })
 
   it('Unauthed User', async () => {
     renderCoinDetailPage(mockArtistCoin)
 
-    // Wait for the page to load by finding the Insights heading (unique to this page)
-    await screen.findByRole('heading', { name: /insights/i })
+    await assertHeader()
 
-    // Check that the coin name is rendered in the header (h1)
-    const headings = screen.getAllByRole('heading', {
-      name: mockArtistCoin.name
+    await assertCoinBalanceSection({
+      isAuthed: false,
+      isArtist: false,
+      hasBalance: false
     })
-    expect(headings.length).toBeGreaterThan(0)
-    expect(headings[0]).toBeInTheDocument()
 
-    // Check for Buy button (zero balance state)
-    expect(screen.getByRole('button', { name: /buy/i })).toBeInTheDocument()
+    await assertCoinInsightsSection()
+    assertCoinInfoSection()
+    assertCoinLeaderboardSection()
+  })
 
-    // This is the only real difference between the authed and unauthed user - the Receive button should NOT be visible
-    expect(
-      screen.queryByRole('button', { name: /receive/i })
-    ).not.toBeInTheDocument()
-
-    // Check for "Become a member" section
-    expect(
-      screen.getByText(/become a member/i, { exact: false })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        /buy \$MOCK to gain access to exclusive members-only perks!/i,
-        {
-          exact: false
-        }
+  it('Coin Creator - NOT coin holder', async () => {
+    mswServer.use(mockCurrentAccount(artistUser))
+    mswServer.use(
+      mockUserCoinsByMint(
+        artistUser.id,
+        mockArtistCoin.mint,
+        mockUserCoinNoBalance
       )
-    ).toBeInTheDocument()
+    )
+    renderCoinDetailPage(mockArtistCoin)
+    await assertHeader()
 
-    // Check for Insights panel metrics labels
-    expect(screen.getByText(/price/i)).toBeInTheDocument()
-    expect(screen.getByText(/market cap/i)).toBeInTheDocument()
-    expect(screen.getByText(/volume \(all-time\)/i)).toBeInTheDocument()
-    expect(screen.getByText(/unique holders/i)).toBeInTheDocument()
-    expect(screen.getByText(/graduation progress/i)).toBeInTheDocument()
+    await assertCoinBalanceSection({
+      isAuthed: true,
+      isArtist: true,
+      hasBalance: false
+    })
 
-    // Check for specific insight values from mock data
-    // Price: $0.0₅905 (formatted with subscript notation)
-    expect(screen.getByText('$0.0₅905')).toBeInTheDocument()
+    await assertCoinInsightsSection()
+    assertCoinLeaderboardSection()
+    assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+  })
 
-    // Market Cap: ~$9.0K (10049 formatted)
-    expect(screen.getByText(/\$9\.0K/i)).toBeInTheDocument()
+  it('Coin Creator - IS coin holder - has unclaimed fees from DBC', async () => {
+    mswServer.use(mockCurrentAccount(artistUser))
+    mswServer.use(
+      mockUserCoinsByMint(
+        artistUser.id,
+        mockArtistCoin.mint,
+        mockUserCoinHasBalance
+      )
+    )
+    renderCoinDetailPage(mockArtistCoin)
 
-    // Volume (All-Time): $127.32
-    expect(screen.getByText(/\$127\.32/)).toBeInTheDocument()
+    await assertHeader()
 
-    // Unique Holders: 11
-    expect(screen.getByText('11')).toBeInTheDocument()
+    await assertCoinBalanceSection({
+      isAuthed: true,
+      isArtist: true,
+      hasBalance: true
+    })
 
-    // Graduation Progress: 1% (curveProgress: 0.012981... = ~1.3%)
-    expect(screen.getByText(/1%/)).toBeInTheDocument()
-
-    // Check graduation progress bar
-    const progressBar = screen.getByRole('progressbar')
-    expect(progressBar).toBeInTheDocument()
-    expect(progressBar).toHaveAttribute('aria-valuenow', '1')
-
-    // Check for coin description (first paragraph)
-    if (mockArtistCoin.description) {
-      const firstParagraph = mockArtistCoin.description.split('\n')[0]
-      expect(
-        screen.getByText(firstParagraph, { exact: false })
-      ).toBeInTheDocument()
+    await assertCoinInsightsSection()
+    assertCoinLeaderboardSection()
+    assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+  })
+  it('Coin Creator - has unclaimed fees from both DBC & DAMM v2', async () => {
+    const mockCoinWithDammV2Fees = {
+      ...mockArtistCoin,
+      artist_fees: {
+        ...mockArtistCoin.artist_fees,
+        unclaimed_damm_v2_fees: 1000000000,
+        total_damm_v2_fees: 1000000000
+      }
     }
+    mswServer.use(mockCurrentAccount(artistUser))
+    mswServer.use(
+      mockUserCoinsByMint(
+        artistUser.id,
+        mockCoinWithDammV2Fees.mint,
+        mockUserCoinHasBalance
+      )
+    )
+    renderCoinDetailPage(mockCoinWithDammV2Fees)
 
-    // Check for Copy Coin Address button
-    expect(
-      screen.getByRole('button', { name: /copy coin address/i })
-    ).toBeInTheDocument()
+    await assertHeader()
+    assertCoinInfoSection({ unclaimedFees: '17.03' })
+  })
+  it('Coin Creator - has unclaimed fees from just DAMM v2', async () => {
+    const mockCoinWithDammV2Fees = {
+      ...mockArtistCoin,
+      artist_fees: {
+        ...mockArtistCoin.artist_fees,
+        unclaimed_dbc_fees: 0,
+        total_dbc_fees: 0,
+        unclaimed_damm_v2_fees: 110300000,
+        total_damm_v2_fees: 1103000000
+      }
+    }
+    mswServer.use(mockCurrentAccount(artistUser))
+    mswServer.use(
+      mockUserCoinsByMint(
+        artistUser.id,
+        mockCoinWithDammV2Fees.mint,
+        mockUserCoinHasBalance
+      )
+    )
+    renderCoinDetailPage(mockCoinWithDammV2Fees)
 
-    // Check for Unlock Schedule - visible in CoinInfoSection
-    expect(screen.getByText(/unlock schedule/i)).toBeInTheDocument()
-    expect(screen.getByText(/5 years \(post-graduation\)/i)).toBeInTheDocument()
-
-    // Check for Artist Earnings section - both header and value
-    expect(screen.getByText(/artist earnings/i)).toBeInTheDocument()
-    // Artist fees total_fees: 903028316 (in smallest units) = 9.03 $AUDIO
-    expect(screen.getByText(/9\.03/)).toBeInTheDocument()
-    expect(screen.getByText(/\$AUDIO/)).toBeInTheDocument()
-
-    // Check for Members Leaderboard heading
-    expect(
-      screen.getByRole('heading', { name: /members leaderboard/i })
-    ).toBeInTheDocument()
+    await assertHeader()
+    assertCoinInfoSection({ unclaimedFees: '11.03' })
   })
 })

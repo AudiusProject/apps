@@ -589,6 +589,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             alignItems='center'
             justifyContent='space-between'
             alignSelf='stretch'
+            data-testid='vesting-schedule'
           >
             <Flex alignItems='center' gap='s'>
               <Text variant='body' size='s' strength='strong'>
@@ -609,6 +610,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             alignItems='center'
             justifyContent='space-between'
             alignSelf='stretch'
+            data-testid='artist-earnings'
           >
             <Flex alignItems='center' gap='s'>
               <Text variant='body' size='s' strength='strong'>
@@ -630,6 +632,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
               alignItems='center'
               justifyContent='space-between'
               alignSelf='stretch'
+              data-testid='unclaimed-fees'
             >
               <Flex alignItems='center' gap='s'>
                 <Text variant='body' size='s' strength='strong'>

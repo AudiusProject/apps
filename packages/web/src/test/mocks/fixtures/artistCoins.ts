@@ -76,30 +76,141 @@ export const mockArtistCoin = {
     creatorWalletAddress: 'awdouanwdounwad'
   },
   artist_fees: {
-    unclaimed_dbc_fees: 903028314,
+    unclaimed_dbc_fees: 703028314,
     total_dbc_fees: 903028316,
     unclaimed_damm_v2_fees: 0,
     total_damm_v2_fees: 0,
-    unclaimed_fees: 903028314,
+    unclaimed_fees: 703028314,
     total_fees: 903028316
   },
   updatedAt: '2025-10-24T23:18:12.389258Z'
 }
 
-export const mockCoinHoldings = {
+export const mockUserCoinHasBalance = {
   ticker: mockArtistCoin.ticker,
   mint: mockArtistCoin.mint,
   decimals: 5,
   logo_uri: mockArtistCoin.logo_uri,
-  balance: 2806208545,
-  balance_usd: 0.418136809630839,
+  // Should match the sum of all the balances in the accounts array
+  balance: 8943183931062 + 2806208545 + 3406392544,
+  balance_usd: 0.418136809630839 + 0.062363526989732576 + 0.002378729223560982,
   accounts: [
     {
-      account: '9VEzg6NinLCGecKkcR3m3B6xSdKbz9fM6eYm12932NGU',
-      owner: 'FiFMKTVf8rCQjyxiQHgt3tqZ8LYPytmvakZ9ZRZ5cgHi',
+      account: 'oawndawoudnaoudnaoudnwaoudnwadouw',
+      owner: 'TESTACCOUNTWALLETADDRESS',
       balance: 2806208545,
       balance_usd: 0.418136809630839,
       is_in_app_wallet: false
+    },
+
+    {
+      account: '66HEii2PVGsrZdjqdVvUV8LfLgJTeWQTnK6jhznt2Tqe',
+      owner: 'TESTACCOUNTWALLETADDRESS2',
+      balance: 8943183931062,
+      balance_usd: 0.062363526989732576,
+      is_in_app_wallet: false
+    },
+    {
+      account: '7jRr2NrnueGfRyEbaeuVYB8fRqvN2d9Ly8aXhh4tYAak',
+      owner: '5tcMBYwoVCiaD6pVVhpsge9esJ8Moek25Ce64PrGQmND',
+      balance: 3406392544,
+      balance_usd: 0.002378729223560982,
+      is_in_app_wallet: true
     }
   ]
 }
+
+export const mockUserCoinNoBalance = {
+  ticker: mockArtistCoin.ticker,
+  mint: mockArtistCoin.mint,
+  decimals: mockArtistCoin.decimals,
+  has_discord: mockArtistCoin.has_discord,
+  owner_id: mockArtistCoin.owner_id,
+  logo_uri: mockArtistCoin.logo_uri,
+  balance: 0,
+  balance_usd: 0,
+  accounts: []
+}
+
+export const mockCoinMembers = [
+  {
+    user_id: '0Yva6m',
+    balance: 5087677917
+  },
+  {
+    user_id: '80w62ZO',
+    balance: 5087677917
+  },
+  {
+    user_id: 'lv7wo8A',
+    balance: 4303499835
+  },
+  {
+    user_id: 'D809W',
+    balance: 4302661453
+  },
+  {
+    user_id: '07wAJpk',
+    balance: 2806208545
+  },
+  {
+    user_id: 'jNYPWaV',
+    balance: 2806208545
+  },
+  {
+    user_id: '4WX8w1E',
+    balance: 2806208545
+  },
+  {
+    user_id: 'rmmRj8',
+    balance: 1862387572
+  },
+  {
+    user_id: 'MaMyR2V',
+    balance: 1286980360
+  },
+  {
+    user_id: 'OPNajKX',
+    balance: 900000000
+  },
+  {
+    user_id: 'lZ2KY6Z',
+    balance: 817613250
+  },
+  {
+    user_id: '51Aq2',
+    balance: 430460008
+  },
+  {
+    user_id: 'OWa0jgR',
+    balance: 374329236
+  },
+  {
+    user_id: '80z0ybW',
+    balance: 349201214
+  },
+  {
+    user_id: 'ngNmq',
+    balance: 140363252
+  },
+  {
+    user_id: 'eGrya',
+    balance: 140363252
+  },
+  {
+    user_id: 'oGNW6A2',
+    balance: 140363252
+  },
+  {
+    user_id: 'X6bNkjy',
+    balance: 134150928
+  },
+  {
+    user_id: 'AEJWBv',
+    balance: 42847000
+  },
+  {
+    user_id: 'ebWQP',
+    balance: 10000000
+  }
+]

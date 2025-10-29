@@ -1,3 +1,4 @@
+import { userMetadataFromSDK } from '@audius/common/adapters'
 import {
   getCurrentAccountQueryKey,
   getUserQueryKey,
@@ -10,7 +11,8 @@ import { http, HttpResponse } from 'msw'
 import { queryClient } from 'services/query-client'
 import {
   mockArtistCoin,
-  mockCoinHoldings
+  mockUserCoinHasBalance,
+  mockCoinMembers
 } from 'test/mocks/fixtures/artistCoins'
 import { testCollection } from 'test/mocks/fixtures/collections'
 import { testTrack } from 'test/mocks/fixtures/tracks'
@@ -87,7 +89,10 @@ export const mockCurrentAccount = (
   }
 
   queryClient.setQueryData(getCurrentAccountQueryKey(), account)
-  queryClient.setQueryData(getUserQueryKey(HashId.parse(user.id)), user as any)
+  queryClient.setQueryData(
+    getUserQueryKey(HashId.parse(user.id)),
+    userMetadataFromSDK(user)
+  )
   // Set current account data
   return http.get(`${apiEndpoint}/v1/full/users/account/${user.wallet}`, () =>
     HttpResponse.json({ data: account })
@@ -130,13 +135,21 @@ export const mockCoinMembersCount = (mint: string, count: number) =>
     HttpResponse.json({ data: count })
   )
 
-export const mockUserCoinHoldings = (
-  userId: string | HashId,
+export const mockUserCoinsByMint = (
+  userId: string,
   mint: string,
-  holdings: typeof mockCoinHoldings
+  holdings: typeof mockUserCoinHasBalance
 ) =>
   http.get(`${apiEndpoint}/v1/users/${userId}/coins/${mint}`, () =>
     HttpResponse.json({ data: holdings })
+  )
+
+export const mockCoinMembersList = (
+  mint: string,
+  members: typeof mockCoinMembers
+) =>
+  http.get(`${apiEndpoint}/v1/coins/${mint}/members`, () =>
+    HttpResponse.json({ data: members })
   )
 
 /**

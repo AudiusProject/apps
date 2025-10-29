@@ -1,11 +1,19 @@
 import { ReactElement, ReactNode } from 'react'
 
+import fs from 'fs'
+import path from 'path'
+
 import { QueryContext, QueryContextType } from '@audius/common/api'
 import { AppContext } from '@audius/common/context'
 import { FeatureFlags } from '@audius/common/services'
 import { MediaProvider, ThemeProvider } from '@audius/harmony'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render, RenderOptions, configure } from '@testing-library/react'
+import {
+  render,
+  RenderOptions,
+  configure,
+  prettyDOM
+} from '@testing-library/react'
 import { History } from 'history'
 import { setupServer } from 'msw/node'
 import { Provider } from 'react-redux'
@@ -134,3 +142,37 @@ export const mswServer = setupServer()
 configure({
   getElementError: (message: any) => new Error(message)
 })
+
+/**
+ * Saves the current document DOM (or a provided node) to an HTML file.
+ *
+ * @param filename  Optional filename (defaults to timestamped file)
+ * @param node      Optional specific node (defaults to document.body)
+ * @param maxLength Max number of characters to include (default: 10_000)
+ */
+export function saveDomToFile(
+  filename?: string,
+  node?: HTMLElement | DocumentFragment
+) {
+  const target = node ?? document.body
+  if (!target) {
+    console.warn('No DOM available to save.')
+    return
+  }
+
+  const html =
+    (target as HTMLElement).outerHTML ??
+    Array.from((target as DocumentFragment).children || [])
+      .map((c: Element) => c.outerHTML)
+      .join('\n')
+  const outputDir = path.resolve(process.cwd(), 'test-output')
+  fs.mkdirSync(outputDir, { recursive: true })
+
+  const name =
+    filename || `dom-${new Date().toISOString().replace(/[:.]/g, '-')}.html`
+
+  const filePath = path.join(outputDir, name)
+  fs.writeFileSync(filePath, html, 'utf8')
+
+  console.log(`🧾 DOM snapshot written to: ${filePath}`)
+}
