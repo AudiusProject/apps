@@ -8,12 +8,7 @@ import { AppContext } from '@audius/common/context'
 import { FeatureFlags } from '@audius/common/services'
 import { MediaProvider, ThemeProvider } from '@audius/harmony'
 import { QueryClientProvider } from '@tanstack/react-query'
-import {
-  render,
-  RenderOptions,
-  configure,
-  prettyDOM
-} from '@testing-library/react'
+import { render, RenderOptions, configure } from '@testing-library/react'
 import { History } from 'history'
 import { setupServer } from 'msw/node'
 import { Provider } from 'react-redux'
@@ -174,5 +169,6 @@ export function saveDomToFile(
   const filePath = path.join(outputDir, name)
   fs.writeFileSync(filePath, html, 'utf8')
 
+  // eslint-disable-next-line no-console
   console.log(`🧾 DOM snapshot written to: ${filePath}`)
 }

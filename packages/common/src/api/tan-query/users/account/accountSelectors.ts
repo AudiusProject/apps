@@ -45,5 +45,3 @@ export const useCurrentAccountUser = <TResult = User>(
   const { data: currentAccount } = useCurrentAccount()
   return useUser(currentAccount?.userId, options)
 }
-
-
