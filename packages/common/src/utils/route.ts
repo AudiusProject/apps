@@ -155,6 +155,8 @@ export const FOLLOWING_USERS_ROUTE = '/following'
 export const FOLLOWERS_USERS_ROUTE = '/followers'
 export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
 export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
+export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
+  '/coins/:ticker/exclusive-tracks/mobile'
 export const SUPPORTING_USERS_ROUTE = '/supporting'
 export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'

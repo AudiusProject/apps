@@ -62,12 +62,12 @@ export const CoinDetailContent = ({ mint }: CoinDetailContentProps) => {
     <Flex css={styles.container}>
       <Flex css={styles.leftSection}>
         <BalanceSection mint={mint} />
-        <ExclusiveTracksSection mint={mint} />
         <CoinInfoSection mint={mint} />
       </Flex>
       <Flex css={styles.rightSection}>
         <CoinInsights mint={mint} />
         <CoinLeaderboardCard mint={mint} />
+        <ExclusiveTracksSection mint={mint} />
       </Flex>
     </Flex>
   )

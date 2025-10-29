@@ -42,6 +42,7 @@ export * from './tan-query/lineups/useTrendingPlaylists'
 export * from './tan-query/lineups/useTrendingUnderground'
 export * from './tan-query/lineups/useTrackPageLineup'
 export * from './tan-query/lineups/useLineupQuery'
+export * from './tan-query/lineups/useExclusiveTracks'
 
 // Notifications
 export * from './tan-query/notifications/useMarkNotificationsAsViewed'
@@ -131,8 +132,6 @@ export * from './tan-query/users/useUserPlaylists'
 export * from './tan-query/users/useUsers'
 export * from './tan-query/users/useUser'
 export * from './tan-query/users/useUserTracksByHandle'
-export * from './tan-query/users/useExclusiveTracks'
-export * from './tan-query/users/useExclusiveTracksLineup'
 export * from './tan-query/users/useProfileUser'
 export * from './tan-query/users/useOtherChatUsers'
 

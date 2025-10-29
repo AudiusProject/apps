@@ -1,5 +1,3 @@
-import { useCallback } from 'react'
-
 import {
   useExclusiveTracks,
   useExclusiveTracksCount,
@@ -11,6 +9,7 @@ import { useNavigate } from 'react-router-dom-v5-compat'
 
 import { TrackTile } from 'components/track/desktop/TrackTile'
 import { TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
 
 const messages = {
   exclusiveTracks: 'Exclusive Tracks',
@@ -27,34 +26,35 @@ export const ExclusiveTracksSection = ({
   mint
 }: ExclusiveTracksSectionProps) => {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
   // Fetch exclusive tracks (token-gated) for the coin owner
-  const { data: tracks, status } = useExclusiveTracks({
+  const { data: tracks, lineup } = useExclusiveTracks({
     userId: ownerId,
-    gateConditions: ['token'],
-    limit: MAX_PREVIEW_TRACKS,
-    enabled: !!ownerId
+    pageSize: MAX_PREVIEW_TRACKS
   })
 
   const { data: totalCount = 0 } = useExclusiveTracksCount({
-    userId: ownerId,
-    gateConditions: ['token'],
-    enabled: !!ownerId
+    userId: ownerId
   })
 
-  const handleViewAll = useCallback(() => {
+  const handleViewAll = () => {
     if (coin?.ticker) {
-      navigate(route.coinPage(coin.ticker) + '/exclusive-tracks')
+      if (isMobile) {
+        navigate(`/coins/${coin.ticker}/exclusive-tracks/mobile`)
+      } else {
+        navigate(route.coinPage(coin.ticker) + '/exclusive-tracks')
+      }
     }
-  }, [coin?.ticker, navigate])
+  }
 
   const shouldShowSection = totalCount > 0 && ownerId
 
   if (!shouldShowSection) return null
 
-  const isLoading = status === 'pending'
+  const isLoading = lineup.isMetadataLoading
 
   return (
     <Flex column gap='l' w='100%'>
@@ -80,9 +80,9 @@ export const ExclusiveTracksSection = ({
         <Flex column gap='s' w='100%'>
           {tracks?.map((track, index) => (
             <TrackTile
-              key={track.track_id}
-              uid={`track-${track.track_id}`}
-              id={track.track_id}
+              key={track.id}
+              uid={`track-${track.id}`}
+              id={track.id}
               index={index}
               size={TrackTileSize.SMALL}
               statSize='small'
