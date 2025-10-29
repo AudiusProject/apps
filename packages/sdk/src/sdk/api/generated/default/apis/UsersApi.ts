@@ -1659,7 +1659,7 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const response = await this.request({
-            path: `/users/{id}/balance_history`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            path: `/users/{id}/balance/history`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
