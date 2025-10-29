@@ -41,8 +41,7 @@ export const getUserQueryFn = async (
     queryClient,
     dispatch
   })
-  const userData = await batchGetUsers.fetch(userId!)
-  return userData
+  return await batchGetUsers.fetch(userId!)
 }
 
 export const useUser = <TResult = User>(
