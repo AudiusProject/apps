@@ -22,6 +22,8 @@ models/AlbumBacklink.ts
 models/AlbumsResponse.ts
 models/AuthorizedApp.ts
 models/AuthorizedApps.ts
+models/BalanceHistoryDataPoint.ts
+models/BalanceHistoryResponse.ts
 models/BestSellingItem.ts
 models/BestSellingResponse.ts
 models/BlobInfo.ts
@@ -42,6 +44,8 @@ models/CoinMembersResponse.ts
 models/CoinResponse.ts
 models/CoinRewardPool.ts
 models/CoinsResponse.ts
+models/CoinsVolumeLeadersResponse.ts
+models/CoinsVolumeLeadersResponseDataInner.ts
 models/Collectibles.ts
 models/CollectiblesResponse.ts
 models/CollectionActivity.ts

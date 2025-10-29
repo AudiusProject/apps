@@ -127,5 +127,6 @@ export const QUERY_KEYS = {
   walletSolBalance: 'walletSolBalance',
   launchpadConfig: 'launchpadConfig',
   externalWalletBalance: 'externalWalletBalance',
-  claimFee: 'claimFee'
+  claimFee: 'claimFee',
+  userBalanceHistory: 'userBalanceHistory'
 } as const

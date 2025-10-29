@@ -39,6 +39,8 @@ export * from './Coin';
 export * from './CoinMembersCountResponse';
 export * from './CoinResponse';
 export * from './CoinsResponse';
+export * from './CoinsVolumeLeadersResponse';
+export * from './CoinsVolumeLeadersResponseDataInner';
 export * from './CollectionActivityFull';
 export * from './CollectionActivityFullWithoutTracks';
 export * from './CollectionLibraryResponseFull';

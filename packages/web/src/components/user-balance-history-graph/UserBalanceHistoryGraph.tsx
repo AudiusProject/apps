@@ -1,0 +1,273 @@
+import { useEffect, useRef, useState } from 'react'
+
+import { useUserBalanceHistory } from '@audius/common/api'
+import { Flex, Text } from '@audius/harmony'
+import { Line } from 'react-chartjs-2'
+
+import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
+
+import styles from './UserBalanceHistoryGraph.module.css'
+
+const messages = {
+  title: 'Balance History',
+  loading: 'Loading balance history...',
+  error: 'Unable to load balance history'
+}
+
+type UserBalanceHistoryGraphProps = {
+  userId?: number
+}
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value)
+}
+
+const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp)
+  const month = date.toLocaleDateString('en-US', { month: 'short' })
+  const day = date.getDate()
+  return `${month} ${day}`
+}
+
+const formatTooltipDate = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+}
+
+const getChartData = (timestamps: number[], balances: number[]) => ({
+  labels: timestamps,
+  datasets: [
+    {
+      fill: true,
+      lineTension: 0.4,
+      backgroundColor: 'rgba(126, 27, 204, 0.15)',
+      borderColor: 'rgba(126, 27, 204, 1)',
+      borderWidth: 2,
+      borderCapStyle: 'round' as const,
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: 'round' as const,
+      pointBorderColor: 'rgba(126, 27, 204, 1)',
+      pointBackgroundColor: 'rgba(126, 27, 204, 1)',
+      pointBorderWidth: 0,
+      pointHoverRadius: 4,
+      pointHoverBackgroundColor: 'rgba(126, 27, 204, 1)',
+      pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
+      pointHoverBorderWidth: 2,
+      pointRadius: 0,
+      pointHitRadius: 10,
+      data: balances
+    }
+  ]
+})
+
+const getChartOptions = (chartId: string) => ({
+  maintainAspectRatio: false,
+  responsive: true,
+  layout: {
+    padding: {
+      top: 20,
+      bottom: 0,
+      left: 8,
+      right: 8
+    }
+  },
+  scales: {
+    xAxes: [
+      {
+        type: 'time',
+        time: {
+          unit: 'day',
+          displayFormats: {
+            day: 'MMM D'
+          }
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxTicksLimit: 7,
+          padding: 12,
+          fontColor: 'rgba(158, 158, 167, 1)',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 11,
+          fontStyle: '500',
+          maxRotation: 0,
+          minRotation: 0,
+          callback: function (value: any) {
+            return formatDate(value)
+          }
+        }
+      }
+    ],
+    yAxes: [
+      {
+        gridLines: {
+          display: true,
+          drawBorder: false,
+          color: 'rgba(243, 243, 245, 1)',
+          zeroLineColor: 'rgba(243, 243, 245, 1)'
+        },
+        ticks: {
+          maxTicksLimit: 5,
+          padding: 12,
+          beginAtZero: false,
+          fontColor: 'rgba(158, 158, 167, 1)',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 11,
+          fontStyle: '500',
+          callback: function (value: any) {
+            return formatCurrency(value)
+          }
+        }
+      }
+    ]
+  },
+  legend: {
+    display: false
+  },
+  tooltips: {
+    enabled: false,
+    mode: 'index',
+    intersect: false,
+    custom: function (tooltipModel: any) {
+      let tooltipEl = document.getElementById(
+        `balance-chart-tooltip-${chartId}`
+      )
+
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div')
+        tooltipEl.id = `balance-chart-tooltip-${chartId}`
+        tooltipEl.className = styles.tooltip
+        document.body.appendChild(tooltipEl)
+      }
+
+      if (tooltipModel.opacity === 0) {
+        tooltipEl.style.opacity = '0'
+        return
+      }
+
+      if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+        const dataPoint = tooltipModel.dataPoints[0]
+        const timestamp = dataPoint.xLabel
+        const balance = dataPoint.yLabel
+
+        tooltipEl.innerHTML = `
+          <div class="${styles.tooltipContent}">
+            <div class="${styles.tooltipDate}">${formatTooltipDate(timestamp)}</div>
+            <div class="${styles.tooltipValue}">${formatCurrency(balance)}</div>
+          </div>
+        `
+      }
+
+      const position = (this as any)._chart.canvas.getBoundingClientRect()
+
+      tooltipEl.style.opacity = '1'
+      tooltipEl.style.position = 'absolute'
+      tooltipEl.style.left =
+        position.x +
+        window.pageXOffset +
+        tooltipModel.caretX -
+        tooltipEl.offsetWidth / 2 +
+        'px'
+      tooltipEl.style.top =
+        position.y +
+        window.pageYOffset +
+        tooltipModel.caretY -
+        tooltipEl.offsetHeight -
+        12 +
+        'px'
+      tooltipEl.style.pointerEvents = 'none'
+      tooltipEl.style.transition = 'opacity 0.15s ease-in-out'
+    }
+  }
+})
+
+export const UserBalanceHistoryGraph = ({
+  userId
+}: UserBalanceHistoryGraphProps) => {
+  const chartId = useRef(Math.random().toString(36).substring(7)).current
+  const {
+    data: historyData,
+    isLoading,
+    isError
+  } = useUserBalanceHistory({ userId })
+  const [latestBalance, setLatestBalance] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (historyData && historyData.length > 0) {
+      setLatestBalance(historyData[historyData.length - 1].balanceUsd)
+    }
+  }, [historyData])
+
+  useEffect(() => {
+    return () => {
+      const tooltipEl = document.getElementById(
+        `balance-chart-tooltip-${chartId}`
+      )
+      tooltipEl?.remove()
+    }
+  }, [chartId])
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingContainer}>
+          <LoadingSpinner />
+          <Text variant='body' size='s' strength='weak'>
+            {messages.loading}
+          </Text>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError ?? !historyData ?? historyData.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorContainer}>
+          <Text variant='body' size='m' strength='weak' color='danger'>
+            {messages.error}
+          </Text>
+        </div>
+      </div>
+    )
+  }
+
+  const timestamps = historyData.map((d) => d.timestamp)
+  const balances = historyData.map((d) => d.balanceUsd)
+
+  return (
+    <div className={styles.container}>
+      <Flex column gap='m'>
+        <Flex column gap='xs'>
+          {latestBalance !== null ? (
+            <Text variant='heading' size='l' strength='strong'>
+              {formatCurrency(latestBalance)}
+            </Text>
+          ) : null}
+          <Text variant='body' size='m' strength='weak'>
+            {messages.title}
+          </Text>
+        </Flex>
+        <div className={styles.chartContainer}>
+          <Line
+            data={getChartData(timestamps, balances)}
+            options={getChartOptions(chartId)}
+            height={200}
+          />
+        </div>
+      </Flex>
+    </div>
+  )
+}

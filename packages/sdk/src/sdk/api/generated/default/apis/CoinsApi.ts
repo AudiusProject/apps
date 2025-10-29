@@ -21,6 +21,7 @@ import type {
   CoinMembersResponse,
   CoinResponse,
   CoinsResponse,
+  CoinsVolumeLeadersResponse,
   CreateCoinRequest,
   CreateCoinResponse,
   UpdateCoinRequest,
@@ -37,6 +38,8 @@ import {
     CoinResponseToJSON,
     CoinsResponseFromJSON,
     CoinsResponseToJSON,
+    CoinsVolumeLeadersResponseFromJSON,
+    CoinsVolumeLeadersResponseToJSON,
     CreateCoinRequestFromJSON,
     CreateCoinRequestToJSON,
     CreateCoinResponseFromJSON,
@@ -84,6 +87,13 @@ export interface GetCoinsRequest {
     limit?: number;
     sortMethod?: GetCoinsSortMethodEnum;
     sortDirection?: GetCoinsSortDirectionEnum;
+}
+
+export interface GetVolumeLeadersRequest {
+    from?: string;
+    to?: string;
+    offset?: number;
+    limit?: number;
 }
 
 export interface UpdateCoinOperationRequest {
@@ -362,6 +372,49 @@ export class CoinsApi extends runtime.BaseAPI {
      */
     async getCoins(params: GetCoinsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinsResponse> {
         const response = await this.getCoinsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets top coin<>AUDIO trading addresses by volume
+     */
+    async getVolumeLeadersRaw(params: GetVolumeLeadersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CoinsVolumeLeadersResponse>> {
+        const queryParameters: any = {};
+
+        if (params.from !== undefined) {
+            queryParameters['from'] = params.from;
+        }
+
+        if (params.to !== undefined) {
+            queryParameters['to'] = params.to;
+        }
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/volume-leaders`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CoinsVolumeLeadersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets top coin<>AUDIO trading addresses by volume
+     */
+    async getVolumeLeaders(params: GetVolumeLeadersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinsVolumeLeadersResponse> {
+        const response = await this.getVolumeLeadersRaw(params, initOverrides);
         return await response.value();
     }
 
