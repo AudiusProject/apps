@@ -5,12 +5,11 @@ import { StyleSheet, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
-import { Flex, Text } from '@audius/harmony-native'
+import { Text } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { useThemeColors } from 'app/utils/theme'
 
 const messages = {
-  title: 'Balance History',
   loading: 'Loading balance history...',
   error: 'Unable to load balance history'
 }
@@ -40,14 +39,6 @@ const formatShortCurrency = (value: number): string => {
   return `$${value.toFixed(0)}`
 }
 
-const formatDate = (timestamp: number): string => {
-  const date = new Date(timestamp)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  })
-}
-
 const formatTooltipDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -63,7 +54,7 @@ export const UserBalanceHistoryGraph = ({
   width = 350,
   height = 200
 }: UserBalanceHistoryGraphProps) => {
-  const { neutralLight4, neutral, accentPurple, white } = useThemeColors()
+  const { neutral, accentPurple, white } = useThemeColors()
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
   const {
@@ -72,28 +63,14 @@ export const UserBalanceHistoryGraph = ({
     isError
   } = useUserBalanceHistory({ userId: effectiveUserId })
 
-  const latestBalance = useMemo(() => {
-    if (!historyData || historyData.length === 0) return null
-    return historyData[historyData.length - 1].balanceUsd
-  }, [historyData])
-
   const chartData = useMemo((): lineDataItem[] => {
     if (!historyData || historyData.length === 0) return []
 
-    // Sample the data to show reasonable number of labels (show ~7 day labels for a week of data)
-    const samplingRate = Math.ceil(historyData.length / 7)
-
-    return historyData.map((point, index) => ({
+    return historyData.map((point) => ({
       value: point.balanceUsd,
-      label: index % samplingRate === 0 ? formatDate(point.timestamp) : '',
-      labelTextStyle: {
-        color: neutral,
-        fontSize: 11,
-        fontWeight: '500'
-      },
       dataPointLabelComponent: () => null
     }))
-  }, [historyData, neutral])
+  }, [historyData])
 
   const renderTooltip = useCallback(
     (items: any[]) => {
@@ -104,40 +81,36 @@ export const UserBalanceHistoryGraph = ({
       const value = item.value
 
       return (
-        <View style={[styles.tooltip, { backgroundColor: white }]}>
-          <Text style={[styles.tooltipDate, { color: neutral }]}>
-            {timestamp ? formatTooltipDate(timestamp) : ''}
+        <View style={[styles.tooltip, { backgroundColor: accentPurple }]}>
+          <Text style={[styles.tooltipDate, { color: white }]}>
+            {timestamp ? formatTooltipDate(timestamp).toUpperCase() : ''}
           </Text>
-          <Text style={[styles.tooltipValue, { color: accentPurple }]}>
+          <Text style={[styles.tooltipValue, { color: white }]}>
             {formatCurrency(value)}
           </Text>
         </View>
       )
     },
-    [historyData, white, neutral, accentPurple]
+    [historyData, white, accentPurple]
   )
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: neutralLight4 }]}>
-        <View style={styles.loadingContainer}>
-          <LoadingSpinner style={styles.spinner} />
-          <Text variant='body' size='s' strength='weak'>
-            {messages.loading}
-          </Text>
-        </View>
+      <View style={styles.loadingContainer}>
+        <LoadingSpinner style={styles.spinner} />
+        <Text variant='body' size='s' strength='weak'>
+          {messages.loading}
+        </Text>
       </View>
     )
   }
 
   if (isError || !historyData || historyData.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: neutralLight4 }]}>
-        <View style={styles.errorContainer}>
-          <Text variant='body' size='m' strength='weak' color='danger'>
-            {messages.error}
-          </Text>
-        </View>
+      <View style={styles.errorContainer}>
+        <Text variant='body' size='m' strength='weak' color='danger'>
+          {messages.error}
+        </Text>
       </View>
     )
   }
@@ -161,107 +134,75 @@ export const UserBalanceHistoryGraph = ({
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: neutralLight4 }]}>
-      <Flex column gap='m'>
-        <Flex column gap='xs'>
-          {latestBalance !== null ? (
-            <Text variant='heading' size='l' strength='strong'>
-              {formatCurrency(latestBalance)}
-            </Text>
-          ) : null}
-          <Text variant='body' size='m' strength='weak'>
-            {messages.title}
-          </Text>
-        </Flex>
-
-        <View style={styles.chartWrapper}>
-          <LineChart
-            data={chartData}
-            width={width - 48}
-            height={height}
-            curved
-            isAnimated
-            animationDuration={800}
-            // Line styling
-            color={accentPurple}
-            thickness={2}
-            // Gradient fill
-            areaChart
-            startFillColor={`${accentPurple}26`} // 15% opacity
-            endFillColor={`${accentPurple}0D`} // 5% opacity
-            // Data points
-            hideDataPoints={false}
-            dataPointsColor={accentPurple}
-            dataPointsRadius={2}
-            dataPointsHeight={4}
-            dataPointsWidth={4}
-            // Focus/hover behavior
-            focusEnabled
-            showStripOnFocus
-            showTextOnFocus
-            stripColor={`${accentPurple}4D`} // 30% opacity
-            stripHeight={height}
-            stripWidth={2}
-            // Axes
-            hideRules={false}
-            rulesColor={neutralLight4}
-            rulesThickness={1}
-            noOfVerticalLines={0}
-            yAxisColor='transparent'
-            xAxisColor='transparent'
-            yAxisThickness={0}
-            xAxisThickness={0}
-            yAxisTextStyle={{
-              color: neutral,
-              fontSize: 11,
-              fontWeight: '500'
-            }}
-            xAxisLabelTextStyle={{
-              color: neutral,
-              fontSize: 11,
-              fontWeight: '500',
-              width: 60,
-              textAlign: 'center'
-            }}
-            // Y-axis formatting
-            formatYLabel={formatYLabelWrapper}
-            yAxisOffset={minValue - valueRange * 0.1}
-            // Spacing
-            spacing={(width - 48) / Math.max(chartData.length - 1, 1)}
-            initialSpacing={10}
-            endSpacing={10}
-            yAxisLabelWidth={50}
-            yAxisLabelContainerStyle={{
-              paddingRight: 8
-            }}
-            // Pointer/tooltip config
-            pointerConfig={{
-              pointerStripHeight: height - 20,
-              pointerStripColor: accentPurple,
-              pointerStripWidth: 2,
-              strokeDashArray: [4, 4],
-              pointerColor: accentPurple,
-              radius: 6,
-              pointerLabelWidth: 140,
-              pointerLabelHeight: 80,
-              activatePointersOnLongPress: false,
-              autoAdjustPointerLabelPosition: true,
-              pointerLabelComponent: renderTooltip,
-              pointerVanishDelay: 4000,
-              activatePointersDelay: 100
-            }}
-          />
-        </View>
-      </Flex>
+    <View style={styles.chartWrapper}>
+      <LineChart
+        data={chartData}
+        width={width - 48}
+        height={height}
+        curved
+        isAnimated
+        animationDuration={800}
+        // Line styling
+        color={accentPurple}
+        thickness={2}
+        // Gradient fill
+        areaChart
+        startFillColor={`${accentPurple}26`} // 15% opacity
+        endFillColor={`${accentPurple}0D`} // 5% opacity
+        // Data points
+        hideDataPoints
+        // Focus/hover behavior
+        focusEnabled
+        showStripOnFocus
+        showTextOnFocus
+        stripColor={`${accentPurple}4D`} // 30% opacity
+        stripHeight={height}
+        stripWidth={2}
+        // Axes
+        hideRules
+        noOfVerticalLines={0}
+        yAxisColor='transparent'
+        xAxisColor='transparent'
+        yAxisThickness={0}
+        xAxisThickness={0}
+        yAxisTextStyle={{
+          color: neutral,
+          fontSize: 11,
+          fontWeight: '500'
+        }}
+        // Y-axis formatting
+        formatYLabel={formatYLabelWrapper}
+        yAxisOffset={minValue - valueRange * 0.1}
+        // Spacing
+        spacing={(width - 48) / Math.max(chartData.length - 1, 1)}
+        initialSpacing={10}
+        endSpacing={10}
+        yAxisLabelWidth={50}
+        yAxisLabelContainerStyle={{
+          paddingRight: 8
+        }}
+        // Pointer/tooltip config
+        pointerConfig={{
+          pointerStripHeight: height - 20,
+          pointerStripColor: accentPurple,
+          pointerStripWidth: 2,
+          strokeDashArray: [4, 4],
+          pointerColor: accentPurple,
+          radius: 6,
+          pointerLabelWidth: 140,
+          pointerLabelHeight: 80,
+          activatePointersOnLongPress: false,
+          autoAdjustPointerLabelPosition: true,
+          pointerLabelComponent: renderTooltip,
+          pointerVanishDelay: 4000,
+          activatePointersDelay: 100
+        }}
+      />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    borderRadius: 12
-  },
   chartWrapper: {
     paddingVertical: 8
   },
@@ -283,26 +224,34 @@ const styles = StyleSheet.create({
     height: 24
   },
   tooltip: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
-    minWidth: 120
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 4,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   tooltipDate: {
-    fontSize: 11,
-    fontWeight: '500',
-    marginBottom: 4
+    fontFamily: 'AvenirNextLTPro-Bold',
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 16,
+    letterSpacing: 0.5,
+    textAlign: 'center'
   },
   tooltipValue: {
-    fontSize: 16,
-    fontWeight: '700'
+    fontFamily: 'AvenirNextLTPro-Bold',
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 24,
+    textAlign: 'center'
   }
 })

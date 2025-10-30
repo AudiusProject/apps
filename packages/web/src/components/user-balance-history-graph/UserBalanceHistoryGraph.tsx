@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import {
   type BalanceHistoryDataPoint,
   useCurrentUserId,
   useUserBalanceHistory
 } from '@audius/common/api'
-import { Flex, Text } from '@audius/harmony'
+import { Text } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -13,7 +13,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import styles from './UserBalanceHistoryGraph.module.css'
 
 const messages = {
-  title: 'Balance History',
   loading: 'Loading balance history...',
   error: 'Unable to load balance history'
 }
@@ -33,9 +32,18 @@ const formatCurrency = (value: number): string => {
 
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp)
-  const month = date.toLocaleDateString('en-US', { month: 'short' })
-  const day = date.getDate()
-  return `${month} ${day}`
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const targetDate = new Date(timestamp)
+  targetDate.setHours(0, 0, 0, 0)
+
+  // Check if it's today
+  if (targetDate.getTime() === today.getTime()) {
+    return 'TODAY'
+  }
+
+  // Otherwise return the day of the week
+  return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
 }
 
 const formatTooltipDate = (timestamp: number): string => {
@@ -120,7 +128,9 @@ const getChartOptions = (chartId: string) => ({
           display: true,
           drawBorder: false,
           color: 'rgba(243, 243, 245, 1)',
-          zeroLineColor: 'rgba(243, 243, 245, 1)'
+          zeroLineColor: 'rgba(243, 243, 245, 1)',
+          borderDash: [4, 4],
+          lineWidth: 1
         },
         ticks: {
           maxTicksLimit: 5,
@@ -208,14 +218,6 @@ export const UserBalanceHistoryGraph = ({
     isLoading,
     isError
   } = useUserBalanceHistory({ userId: effectiveUserId })
-  const [latestBalance, setLatestBalance] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (historyData && historyData.length > 0) {
-      setLatestBalance(historyData[historyData.length - 1].balanceUsd)
-    }
-  }, [historyData])
-
   useEffect(() => {
     return () => {
       const tooltipEl = document.getElementById(
@@ -256,26 +258,12 @@ export const UserBalanceHistoryGraph = ({
   const balances = historyData.map((d: BalanceHistoryDataPoint) => d.balanceUsd)
 
   return (
-    <div className={styles.container}>
-      <Flex column gap='m'>
-        <Flex column gap='xs'>
-          {latestBalance !== null ? (
-            <Text variant='heading' size='l' strength='strong'>
-              {formatCurrency(latestBalance)}
-            </Text>
-          ) : null}
-          <Text variant='body' size='m' strength='weak'>
-            {messages.title}
-          </Text>
-        </Flex>
-        <div className={styles.chartContainer}>
-          <Line
-            data={getChartData(timestamps, balances)}
-            options={getChartOptions(chartId)}
-            height={200}
-          />
-        </div>
-      </Flex>
+    <div className={styles.chartContainer}>
+      <Line
+        data={getChartData(timestamps, balances)}
+        options={getChartOptions(chartId)}
+        height={200}
+      />
     </div>
   )
 }
