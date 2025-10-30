@@ -39,12 +39,12 @@ export const ArtistCoinFlairInput = ({
   // Show loading state until both queries are complete
   const isLoadingBoth = isLoading || isOwnedCoinsLoading
 
-  // Create special "Default" and "None" coin options
+  // Create special "Highest Balance" and "None" coin options
   const specialOptions: CoinInfo[] = useMemo(() => {
     return [
       {
         symbol: '',
-        name: 'Default',
+        name: 'Highest Balance',
         address: DEFAULT_OPTION_VALUE,
         decimals: 0,
         balance: null,
@@ -69,7 +69,7 @@ export const ArtistCoinFlairInput = ({
 
     // Add currently selected coin if it's not already in the list
     // This ensures the previously selected coin appears in the dropdown
-    // even after switching to Default or None
+    // even after switching to Highest Balance or None
     if (
       selectedBadge &&
       selectedBadge.mint !== DEFAULT_OPTION_VALUE &&
@@ -95,7 +95,7 @@ export const ArtistCoinFlairInput = ({
 
   // Convert selectedBadge to CoinInfo format for TokenDropdown
   const selectedCoin: CoinInfo = useMemo(() => {
-    // If no badge is selected, default to the first option (Default)
+    // If no badge is selected, default to the first option (Highest Balance)
     if (!selectedBadge) {
       return specialOptions[0]
     }
@@ -217,6 +217,7 @@ export const ArtistCoinFlairInput = ({
         disabled={false}
         anchorOriginHorizontal='left'
         customTrigger={customTrigger}
+        sortAlphabetically={false}
       />
     </Box>
   )
