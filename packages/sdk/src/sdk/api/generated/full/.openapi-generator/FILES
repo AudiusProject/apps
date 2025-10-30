@@ -53,6 +53,8 @@ models/Coin.ts
 models/CoinMembersCountResponse.ts
 models/CoinResponse.ts
 models/CoinsResponse.ts
+models/CoinsVolumeLeadersResponse.ts
+models/CoinsVolumeLeadersResponseDataInner.ts
 models/CollectionActivityFull.ts
 models/CollectionActivityFullWithoutTracks.ts
 models/CollectionLibraryResponseFull.ts
@@ -249,6 +251,7 @@ models/TrackLibraryResponseFull.ts
 models/TrackMilestoneNotificationActionData.ts
 models/TrackRepostsResponseFull.ts
 models/TrackSegment.ts
+models/TracksCountResponse.ts
 models/TransactionDetails.ts
 models/TransactionHistoryCountResponse.ts
 models/TransactionHistoryResponse.ts

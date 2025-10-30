@@ -57,7 +57,9 @@ import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileAr
 import { AudioPage } from 'pages/audio-page/AudioPage'
 import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
 import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
+import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
 import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
+import { ExclusiveTracksPage as MobileExclusiveTracksPage } from 'pages/coin-detail-page/components/mobile/ExclusiveTracksPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -167,6 +169,8 @@ const {
   PROFILE_PAGE_PLAYLISTS,
   PROFILE_PAGE_REPOSTS,
   TRENDING_UNDERGROUND_PAGE,
+  COIN_EXCLUSIVE_TRACKS_PAGE,
+  COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE,
   CHECK_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   DEACTIVATE_PAGE,
@@ -741,6 +745,20 @@ const WebPlayer = (props) => {
                     )
                   }
                   return <CoinDetailPage {...props} />
+                }}
+              />
+              <DesktopRoute
+                exact
+                path={COIN_EXCLUSIVE_TRACKS_PAGE}
+                isMobile={isMobile}
+                component={ExclusiveTracksPage}
+              />
+              <Route
+                exact
+                path={COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE}
+                render={(props) => {
+                  const ticker = props.match.params.ticker
+                  return <MobileExclusiveTracksPage ticker={ticker} />
                 }}
               />
               <Route
