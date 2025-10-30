@@ -300,6 +300,10 @@ export const BuySellFlow = ({
   const isTransactionInvalid = !transactionData?.isValid
 
   const displayErrorMessage = useMemo(() => {
+    // Show exchange rate errors immediately as they prevent transactions
+    if (transactionData?.exchangeRateError) {
+      return 'Unable to fetch exchange rate. Please try again.'
+    }
     if (
       activeTab === 'sell' &&
       !hasSufficientBalance &&
@@ -436,7 +440,10 @@ export const BuySellFlow = ({
         isLoading={
           isContinueButtonLoading || transactionData?.isExchangeRateLoading
         }
-        disabled={transactionData?.isExchangeRateLoading}
+        disabled={
+          transactionData?.isExchangeRateLoading ||
+          !!transactionData?.exchangeRateError
+        }
         onPress={handleContinueClick}
       >
         {messages.continue}
