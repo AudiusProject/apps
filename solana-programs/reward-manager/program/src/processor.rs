@@ -480,6 +480,7 @@ impl Processor {
         bot_oracle_info: &AccountInfo<'a>,
         payer_info: &AccountInfo<'a>,
         rent_info: &AccountInfo<'a>,
+        mint_info: Option<&AccountInfo<'a>>,
         transfer_data: EvaluateAttestationsArgs,
     ) -> ProgramResult {
         let rent = &Rent::from_account_info(rent_info)?;
@@ -546,15 +547,29 @@ impl Processor {
             &verified_messages.messages,
         )?;
 
-        // Transfer reward tokens to user
-        spl_token_transfer(
-            program_id,
-            &reward_manager_info.key,
-            reward_token_source_info,
-            reward_token_recipient_info,
-            reward_manager_authority_info,
-            transfer_data.amount,
-        )?;
+        if transfer_data.eth_recipient == EthereumAddress::default() {
+            msg!("Burning reward tokens as recipient is zero address");
+            // Burn the reward
+            let mint = mint_info.ok_or(ProgramError::NotEnoughAccountKeys)?;
+            spl_token_burn(
+                program_id,
+                &reward_manager_info.key,
+                reward_token_source_info,
+                mint,
+                reward_manager_authority_info,
+                transfer_data.amount,
+            )?;
+        } else {
+            // Transfer reward tokens to user
+            spl_token_transfer(
+                program_id,
+                &reward_manager_info.key,
+                reward_token_source_info,
+                reward_token_recipient_info,
+                reward_manager_authority_info,
+                transfer_data.amount,
+            )?;
+        }
 
         // Create the transfer account to represent this disbursement,
         // preventing the same transfer_data from being used twice.
@@ -802,6 +817,7 @@ impl Processor {
                 let rent_info = next_account_info(account_info_iter)?;
                 let _token_program_id = next_account_info(account_info_iter)?;
                 let _system_program_id = next_account_info(account_info_iter)?;
+                let mint_info = account_info_iter.next();
 
                 Self::process_evaluate_attestations(
                     program_id,
@@ -814,6 +830,7 @@ impl Processor {
                     bot_oracle_info,
                     payer_info,
                     rent_info,
+                    mint_info,
                     EvaluateAttestationsArgs {
                         amount,
                         id,

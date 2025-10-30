@@ -118,3 +118,9 @@ Helper script to install solana in a container. Building the x86_64 build of `au
 `./scripts/update-keys.sh`
 
 Helper script to update Program IDs and deploy keys to the local dev configured ones. Uses `../dev-tools/compose/.env` to source the private keys for each program. This will dirty the git status, so be sure to run `./scripts/update-keys.sh restore` when you're done (`./scripts/build.sh` calls this internally)
+
+### Note: rust-analyzer
+
+Due to the pinned Rust versions used for these programs, the rust-analyzer version used must be pinned to v0.3.1386. For VS Code's extension, drop down from "Uninstall" and select "Install specific version".
+
+See: https://github.com/rust-lang/rust-analyzer/issues/17910

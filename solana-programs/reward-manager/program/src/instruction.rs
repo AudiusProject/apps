@@ -132,17 +132,18 @@ pub enum Instructions {
 
     ///   Evaluate attestations, transferring tokens to token recipient
     ///
-    ///   0. `[]` Verified messages - New or existing account PDA storing verified messages-
+    ///   0. `[writable]` Verified messages - New or existing account PDA storing verified messages
     ///   1. `[]` Reward manager
     ///   2. `[]` Reward manager authority
-    ///   3. `[]` Reward token source
-    ///   4. `[]` Reward token recipient
-    ///   5. `[]` Transfer account - the account which represents a successful transfer
+    ///   3. `[writable]` Reward token source
+    ///   4. `[writable]` Reward token recipient
+    ///   5. `[writable]` Transfer account - the account which represents a successful transfer
     ///   6. `[]` Bot oracle - the ethereum public address of the oracle
-    ///   7. `[]` Payer
+    ///   7. `[signer]` Payer
     ///   8. `[]` Sysvar rent
     ///   9. `[]` Token program id
     ///  10. `[]` System program id
+    ///  11. `[writable]` Token mint (optional: if burning)
     EvaluateAttestations(EvaluateAttestationsArgs),
 }
 
@@ -408,6 +409,7 @@ pub fn evaluate_attestations(
     amount: u64,
     id: String,
     eth_recipient: [u8; 20],
+    mint: Option<&Pubkey>,
 ) -> Result<Instruction, ProgramError> {
     let data = Instructions::EvaluateAttestations(EvaluateAttestationsArgs {
         amount,
@@ -437,6 +439,16 @@ pub fn evaluate_attestations(
         AccountMeta::new_readonly(spl_token::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
+
+    if mint.is_some() {
+        let mut accounts_with_mint = accounts;
+        accounts_with_mint.push(AccountMeta::new(*mint.unwrap(), false));
+        return Ok(Instruction {
+            program_id: *program_id,
+            accounts: accounts_with_mint,
+            data,
+        });
+    }
 
     Ok(Instruction {
         program_id: *program_id,
