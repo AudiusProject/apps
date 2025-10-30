@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Flex, IconWallet } from '@audius/harmony-native'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 import { CashWallet } from './components/CashWallet'
 import {
@@ -26,6 +27,7 @@ export const WalletScreen = () => {
         <ScrollView>
           <Flex gap='xl' ph='s' pv='2xl'>
             <CashWallet />
+            <UserBalanceHistoryGraph />
             <YourCoins />
             <LinkedWallets />
           </Flex>

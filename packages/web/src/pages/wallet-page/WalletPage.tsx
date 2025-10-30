@@ -8,6 +8,7 @@ import { useMobileHeader } from 'components/header/mobile/hooks'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
+import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { CashWallet } from 'pages/pay-and-earn-page/components/CashWallet'
 import { YourCoins } from 'pages/pay-and-earn-page/components/YourCoins'
@@ -50,6 +51,7 @@ export const WalletPage = () => {
       }}
     >
       <CashWallet />
+      <UserBalanceHistoryGraph />
       <YourCoins />
       <LinkedWallets />
     </Flex>

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { useUserBalanceHistory } from '@audius/common/api'
+import {
+  type BalanceHistoryDataPoint,
+  useCurrentUserId,
+  useUserBalanceHistory
+} from '@audius/common/api'
 import { Flex, Text } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
@@ -197,11 +201,13 @@ export const UserBalanceHistoryGraph = ({
   userId
 }: UserBalanceHistoryGraphProps) => {
   const chartId = useRef(Math.random().toString(36).substring(7)).current
+  const { data: currentUserId } = useCurrentUserId()
+  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
     isLoading,
     isError
-  } = useUserBalanceHistory({ userId })
+  } = useUserBalanceHistory({ userId: effectiveUserId })
   const [latestBalance, setLatestBalance] = useState<number | null>(null)
 
   useEffect(() => {
@@ -232,7 +238,7 @@ export const UserBalanceHistoryGraph = ({
     )
   }
 
-  if (isError ?? !historyData ?? historyData.length === 0) {
+  if (isError || !historyData || historyData.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.errorContainer}>
@@ -244,8 +250,10 @@ export const UserBalanceHistoryGraph = ({
     )
   }
 
-  const timestamps = historyData.map((d) => d.timestamp)
-  const balances = historyData.map((d) => d.balanceUsd)
+  const timestamps = historyData.map(
+    (d: BalanceHistoryDataPoint) => d.timestamp
+  )
+  const balances = historyData.map((d: BalanceHistoryDataPoint) => d.balanceUsd)
 
   return (
     <div className={styles.container}>

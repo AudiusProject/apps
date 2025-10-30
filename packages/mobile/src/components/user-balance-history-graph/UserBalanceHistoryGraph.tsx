@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from 'react'
-import { StyleSheet, View } from 'react-native'
 
-import { useUserBalanceHistory } from '@audius/common/api'
-import { Flex, Text } from '@audius/harmony'
+import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import { StyleSheet, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
+import { Flex, Text } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { useThemeColors } from 'app/utils/theme'
 
@@ -64,11 +64,13 @@ export const UserBalanceHistoryGraph = ({
   height = 200
 }: UserBalanceHistoryGraphProps) => {
   const { neutralLight4, neutral, accentPurple, white } = useThemeColors()
+  const { data: currentUserId } = useCurrentUserId()
+  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
     isLoading,
     isError
-  } = useUserBalanceHistory({ userId })
+  } = useUserBalanceHistory({ userId: effectiveUserId })
 
   const latestBalance = useMemo(() => {
     if (!historyData || historyData.length === 0) return null
@@ -89,9 +91,7 @@ export const UserBalanceHistoryGraph = ({
         fontSize: 11,
         fontWeight: '500'
       },
-      dataPointLabelComponent: () => null,
-      // Store the timestamp for tooltip
-      customDataPoint: point.timestamp
+      dataPointLabelComponent: () => null
     }))
   }, [historyData, neutral])
 
@@ -142,9 +142,23 @@ export const UserBalanceHistoryGraph = ({
     )
   }
 
-  const maxValue = Math.max(...chartData.map((d) => d.value))
-  const minValue = Math.min(...chartData.map((d) => d.value))
+  // TypeScript guard: we know chartData is not empty here because of the check above
+  if (chartData.length === 0) {
+    return null
+  }
+
+  const values = chartData.map((d) => d.value as number)
+  // Safe to assert: we know chartData.length > 0 from check above
+  const maxValue = Math.max(...values)
+  const minValue = Math.min(...values)
   const valueRange = maxValue - minValue
+
+  // Format Y label - library expects (label: string) => string
+  const formatYLabelWrapper = (label: string): string => {
+    const value = Number.parseFloat(label)
+    if (Number.isNaN(value)) return label
+    return formatShortCurrency(value)
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: neutralLight4 }]}>
@@ -193,7 +207,6 @@ export const UserBalanceHistoryGraph = ({
             rulesColor={neutralLight4}
             rulesThickness={1}
             noOfVerticalLines={0}
-            noOfHorizontalLines={4}
             yAxisColor='transparent'
             xAxisColor='transparent'
             yAxisThickness={0}
@@ -211,7 +224,7 @@ export const UserBalanceHistoryGraph = ({
               textAlign: 'center'
             }}
             // Y-axis formatting
-            formatYLabel={formatShortCurrency}
+            formatYLabel={formatYLabelWrapper}
             yAxisOffset={minValue - valueRange * 0.1}
             // Spacing
             spacing={(width - 48) / Math.max(chartData.length - 1, 1)}
