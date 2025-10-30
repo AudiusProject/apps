@@ -6,7 +6,6 @@ import {
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
-import { TRANSACTION_HISTORY_PAGE } from '@audius/common/src/utils/route'
 import {
   WithdrawUSDCModalPages,
   useWithdrawUSDCModal,

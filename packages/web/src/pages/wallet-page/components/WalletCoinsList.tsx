@@ -46,8 +46,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
 import { env } from 'services/env'
 
-import { AudioCoinCard } from '../../pay-and-earn-page/components/AudioCoinCard'
-import { CoinCard } from '../../pay-and-earn-page/components/CoinCard'
+import { AudioCoinCard } from './AudioCoinCard'
+import { CoinRow } from './CoinCard'
 
 const { COINS_EXPLORE_PAGE, CASH_PAGE } = route
 
@@ -65,7 +65,7 @@ const USDCCoinCard = () => {
       })}`
     : '$0.00'
   return (
-    <CoinCard
+    <CoinRow
       onClick={() => navigate(CASH_PAGE)}
       name={messages.cash}
       icon={<IconLogoCircleUSDCPng width={64} height={64} hex />}
@@ -258,7 +258,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
 
   return (
-    <CoinCard
+    <CoinRow
       icon={coinData?.logoUri}
       symbol={tokenSymbol ?? ''}
       balance={coinBalanceFormatted || ''}

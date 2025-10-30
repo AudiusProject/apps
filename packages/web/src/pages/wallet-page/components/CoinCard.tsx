@@ -38,7 +38,7 @@ export type CoinCardProps = {
   onClick?: () => void
 }
 
-export const CoinCard = ({
+export const CoinRow = ({
   icon,
   name,
   symbol,

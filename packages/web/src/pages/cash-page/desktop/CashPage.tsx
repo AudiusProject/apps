@@ -202,4 +202,3 @@ export const CashPage = () => {
     </Page>
   )
 }
-

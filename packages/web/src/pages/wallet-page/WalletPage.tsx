@@ -9,7 +9,6 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { CashWallet } from 'pages/pay-and-earn-page/components/CashWallet'
 import { WalletCoinsList } from 'pages/wallet-page/components/WalletCoinsList'
 
 import { LinkedWallets } from './components/LinkedWallets'
