@@ -112,7 +112,8 @@ export const createRewardPool = async ({
       tokenAccount: tokenAccount.publicKey,
       mint,
       manager: manager.publicKey,
-      minVotes: 3
+      minVotes: 3,
+      rewardManagerProgramId: new PublicKey(config.rewardsManagerProgramId)
     })
   )
 
