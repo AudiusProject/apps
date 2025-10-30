@@ -2,13 +2,10 @@
  * Core types for token swap functionality
  */
 
-export type CoinInfo = {
-  address: string
-  symbol: string
-  name: string
-  decimals: number
-  isStablecoin?: boolean
-}
+import type { CoinInfo } from './types'
+
+// Re-export the main CoinInfo type for convenience
+export type { CoinInfo }
 
 export type ExchangeRateData = {
   rate: number

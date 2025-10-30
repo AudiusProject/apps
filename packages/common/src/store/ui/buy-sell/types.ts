@@ -17,6 +17,8 @@ export type CoinInfo = {
   balance: number | null // User's balance for this token
   address: string // Contract/mint address (required for token identification)
   isStablecoin?: boolean // Flag for UI formatting ($ prefix, etc.)
+  dbcPoolAddress?: string // Address of the Meteora DBC pool for this token
+  connection?: any // Solana connection for DBC operations
 }
 
 export type CoinPair = {

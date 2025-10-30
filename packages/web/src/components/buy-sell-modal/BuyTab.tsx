@@ -5,7 +5,8 @@ import {
   transformArtistCoinsToTokenInfoMap,
   useArtistCoin,
   useArtistCoins,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useQueryContext
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import type { CoinInfo } from '@audius/common/store'
@@ -74,7 +75,9 @@ export const BuyTab = ({
   const { data: coins } = useArtistCoins({
     pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
   })
+
   const artistCoins: CoinInfo[] = useMemo(() => {
+    // For now, we'll pass undefined as connection - it will be obtained at the exchange rate level
     return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
   }, [coins])
 

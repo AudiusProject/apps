@@ -4,7 +4,9 @@ import { CoinInfo } from '~/store/ui/buy-sell/types'
 /**
  * Transform a CoinMetadata to CoinInfo for UI use
  */
-const coinMetadataToTokenInfo = (coin: CoinMetadata): CoinInfo => ({
+const coinMetadataToTokenInfo = (
+  coin: CoinMetadata
+): Omit<CoinInfo, 'dbcPoolAddress' | 'connection'> => ({
   symbol: coin.ticker ?? '',
   name: (coin.name || coin.ticker?.replace(/^\$/, '')) ?? '',
   decimals: coin.decimals ?? 8,
@@ -14,13 +16,23 @@ const coinMetadataToTokenInfo = (coin: CoinMetadata): CoinInfo => ({
   isStablecoin: false // API tokens are never stablecoins, only USDC is (which is frontend-only)
 })
 
-export const transformArtistCoinToTokenInfo = (artistCoin: Coin): CoinInfo => {
+export const transformArtistCoinToTokenInfo = (
+  artistCoin: Coin,
+  connection?: any
+): CoinInfo => {
   const coinMetadata = coinMetadataFromCoin(artistCoin)
-  return coinMetadataToTokenInfo(coinMetadata)
+  const baseCoinInfo = coinMetadataToTokenInfo(coinMetadata)
+
+  return {
+    ...baseCoinInfo,
+    dbcPoolAddress: artistCoin.dynamicBondingCurve?.address,
+    connection
+  }
 }
 
 export const transformArtistCoinsToTokenInfoMap = (
-  artistCoins: Coin[]
+  artistCoins: Coin[],
+  connection?: any
 ): Record<string, CoinInfo> => {
   const tokenMap: Record<string, CoinInfo> = {}
 
@@ -28,7 +40,7 @@ export const transformArtistCoinsToTokenInfoMap = (
     const coinMetadata = coinMetadataFromCoin(coin)
     const ticker = coinMetadata.ticker || ''
     if (ticker) {
-      tokenMap[ticker] = coinMetadataToTokenInfo(coinMetadata)
+      tokenMap[ticker] = transformArtistCoinToTokenInfo(coin, connection)
     }
   })
 

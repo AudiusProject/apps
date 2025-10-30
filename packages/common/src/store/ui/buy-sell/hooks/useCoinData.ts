@@ -86,7 +86,9 @@ export const useCoinData = ({
     outputMint: outputCoin.address,
     inputDecimals: inputCoin.decimals,
     outputDecimals: outputCoin.decimals,
-    inputAmount: safeExchangeRateAmount > 0 ? safeExchangeRateAmount : 1
+    inputAmount: safeExchangeRateAmount > 0 ? safeExchangeRateAmount : 1,
+    dbcPoolAddress: inputCoin.dbcPoolAddress,
+    connection: undefined // Connection will be obtained when needed in the exchange rate hook
   })
 
   // Process balance data

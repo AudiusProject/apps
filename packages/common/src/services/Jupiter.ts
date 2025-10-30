@@ -93,10 +93,6 @@ export type JupiterQuoteResult = {
   quote: QuoteResponse
 }
 
-/**
- * Gets a quote from Jupiter using mint addresses directly
- * This version is used by the useSwapCoins hook
- */
 export const getJupiterQuoteByMint = async ({
   inputMint,
   outputMint,
@@ -108,41 +104,43 @@ export const getJupiterQuoteByMint = async ({
   onlyDirectRoutes = false,
   maxAccounts = DEFAULT_MAX_ACCOUNTS
 }: JupiterMintQuoteParams): Promise<JupiterQuoteResult> => {
-  const amount =
-    swapMode === 'ExactIn'
-      ? Number(new FixedDecimal(amountUi, inputDecimals).value.toString())
-      : Number(new FixedDecimal(amountUi, outputDecimals).value.toString())
+  throw new Error('Jupiter API simulated failure for testing')
 
-  const quote = await jupiterInstance.quoteGet({
-    inputMint,
-    outputMint,
-    amount,
-    slippageBps,
-    swapMode,
-    onlyDirectRoutes,
-    maxAccounts,
-    dynamicSlippage: !slippageBps
-  })
+  // const amount =
+  //   swapMode === 'ExactIn'
+  //     ? Number(new FixedDecimal(amountUi, inputDecimals).value.toString())
+  //     : Number(new FixedDecimal(amountUi, outputDecimals).value.toString())
 
-  if (!quote) {
-    throw new Error('Failed to get Jupiter quote')
-  }
+  // const quote = await jupiterInstance.quoteGet({
+  //   inputMint,
+  //   outputMint,
+  //   amount,
+  //   slippageBps,
+  //   swapMode,
+  //   onlyDirectRoutes,
+  //   maxAccounts,
+  //   dynamicSlippage: !slippageBps
+  // })
 
-  return {
-    inputAmount: convertBigIntToAmountObject(
-      BigInt(quote.inAmount),
-      inputDecimals
-    ),
-    outputAmount: convertBigIntToAmountObject(
-      BigInt(quote.outAmount),
-      outputDecimals
-    ),
-    otherAmountThreshold: convertBigIntToAmountObject(
-      BigInt(quote.otherAmountThreshold),
-      swapMode === 'ExactIn' ? outputDecimals : inputDecimals
-    ),
-    quote
-  }
+  // if (!quote) {
+  //   throw new Error('Failed to get Jupiter quote')
+  // }
+
+  // return {
+  //   inputAmount: convertBigIntToAmountObject(
+  //     BigInt(quote.inAmount),
+  //     inputDecimals
+  //   ),
+  //   outputAmount: convertBigIntToAmountObject(
+  //     BigInt(quote.outAmount),
+  //     outputDecimals
+  //   ),
+  //   otherAmountThreshold: convertBigIntToAmountObject(
+  //     BigInt(quote.otherAmountThreshold),
+  //     swapMode === 'ExactIn' ? outputDecimals : inputDecimals
+  //   ),
+  //   quote
+  // }
 }
 
 export type JupiterQuoteWithRetryResult = {
