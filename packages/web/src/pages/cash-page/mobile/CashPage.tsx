@@ -227,4 +227,3 @@ export const CashPage = () => {
     </MobilePageContainer>
   )
 }
-
