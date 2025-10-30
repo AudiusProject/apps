@@ -1024,10 +1024,13 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
             .all()
         )
         existing_entities[EntityType.ASSOCIATED_WALLET] = {
-            wallet.wallet: wallet for wallet, _ in associated_wallets
+            wallet.wallet: [wallet for wallet, _ in associated_wallets]
+            for wallet, _ in associated_wallets
         }
         existing_entities_in_json[EntityType.ASSOCIATED_WALLET] = {
-            (wallet_json["wallet"]): wallet_json
+            wallet_json["wallet"]: [
+                wallet_json for _, wallet_json in associated_wallets
+            ]
             for _, wallet_json in associated_wallets
         }
 
