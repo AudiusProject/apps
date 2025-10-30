@@ -2,6 +2,7 @@ import { EntityType, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
+  useQuery,
   useQueryClient
 } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
@@ -130,31 +131,19 @@ export const useExclusiveTracksCount = (args: {
   const { userId, gateConditions = ['token'], enabled = true } = args
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
-  const queryClient = useQueryClient()
 
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: [QUERY_KEYS.exclusiveTracksCount, userId, { gateConditions }],
-    initialPageParam: 0,
-    getNextPageParam: () => undefined, // Only fetch first page for count
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data: tracks = [] } = await sdk.full.users.getTracksByUser({
+      const { data: count } = await sdk.full.users.getTracksCountByUser({
         id: OptionalId.parse(userId)!,
         userId: OptionalId.parse(currentUserId),
-        gateCondition: gateConditions as any,
-        limit: 100,
-        offset: 0
+        gateCondition: gateConditions as any
       })
 
-      const processedTracks = transformAndCleanList(
-        tracks,
-        userTrackMetadataFromSDK
-      )
-      primeTrackData({ tracks: processedTracks, queryClient })
-
-      return processedTracks.length
+      return count ?? 0
     },
-    select: (data) => data?.pages[0] ?? 0,
     enabled: enabled && !!userId
   })
 }

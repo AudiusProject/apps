@@ -389,6 +389,7 @@ export interface GetTracksByUserRequest {
     sortMethod?: GetTracksByUserSortMethodEnum;
     sortDirection?: GetTracksByUserSortDirectionEnum;
     filterTracks?: GetTracksByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksByUserGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -2112,6 +2113,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['filter_tracks'] = params.filterTracks;
         }
 
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
@@ -3089,6 +3094,18 @@ export const GetTracksByUserFilterTracksEnum = {
     Unlisted: 'unlisted'
 } as const;
 export type GetTracksByUserFilterTracksEnum = typeof GetTracksByUserFilterTracksEnum[keyof typeof GetTracksByUserFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksByUserGateConditionEnum = typeof GetTracksByUserGateConditionEnum[keyof typeof GetTracksByUserGateConditionEnum];
 /**
  * @export
  */
