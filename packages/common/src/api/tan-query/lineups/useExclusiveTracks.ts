@@ -24,13 +24,7 @@ import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 10
 
-type GateCondition =
-  | 'ungated'
-  | 'usdc_purchase'
-  | 'follow'
-  | 'tip'
-  | 'nft'
-  | 'token'
+type GateCondition = 'ungated' | 'usdc_purchase' | 'follow' | 'tip' | 'token'
 
 type UseExclusiveTracksArgs = {
   userId: ID | null | undefined
