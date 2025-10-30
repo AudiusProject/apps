@@ -161,6 +161,7 @@ export const UserBalanceHistoryGraph = ({
         // Axes
         hideRules
         noOfVerticalLines={0}
+        noOfSections={2}
         yAxisColor='transparent'
         xAxisColor='transparent'
         yAxisThickness={0}

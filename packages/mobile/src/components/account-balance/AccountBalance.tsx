@@ -107,7 +107,7 @@ export const AccountBalance = ({
             {formatCurrencyLarge(changeStats.balance)}
           </Text>
         ) : null}
-        <Flex gap='xs' alignItems='center'>
+        <Flex row gap='xs' alignItems='center'>
           <Icon
             color={changeStats.isPositive ? 'success' : 'default'}
             width={16}

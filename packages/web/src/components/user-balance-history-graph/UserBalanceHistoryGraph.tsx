@@ -133,7 +133,7 @@ const getChartOptions = (chartId: string) => ({
           lineWidth: 1
         },
         ticks: {
-          maxTicksLimit: 5,
+          maxTicksLimit: 3,
           padding: 12,
           beginAtZero: false,
           fontColor: 'rgba(158, 158, 167, 1)',
