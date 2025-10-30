@@ -88,7 +88,7 @@ export const createRewardPool = async ({
       lamports:
         await connection.getMinimumBalanceForRentExemption(REWARD_MANAGER_SIZE),
       space: REWARD_MANAGER_SIZE,
-      programId: RewardManagerProgram.programId
+      programId: new PublicKey(config.rewardsManagerProgramId)
     })
   )
 
@@ -117,7 +117,7 @@ export const createRewardPool = async ({
   )
 
   const authority = RewardManagerProgram.deriveAuthority({
-    programId: RewardManagerProgram.programId,
+    programId: new PublicKey(config.rewardsManagerProgramId),
     rewardManagerState: rewardManager.publicKey
   })
 
@@ -143,7 +143,7 @@ export const createRewardPool = async ({
   for (const sender of senders) {
     const derivedSender = RewardManagerProgram.deriveSender({
       ethAddress: sender.senderEthAddress,
-      programId: RewardManagerProgram.programId,
+      programId: new PublicKey(config.rewardsManagerProgramId),
       authority
     })
     instructions.push(
@@ -155,7 +155,7 @@ export const createRewardPool = async ({
         authority,
         payer: feePayer.publicKey,
         sender: derivedSender,
-        rewardManagerProgramId: RewardManagerProgram.programId
+        rewardManagerProgramId: new PublicKey(config.rewardsManagerProgramId)
       })
     )
   }
@@ -166,7 +166,7 @@ export const createRewardPool = async ({
       rewardManagerState: rewardManager.publicKey,
       currentManager: manager.publicKey,
       newManager: PublicKey.default,
-      rewardManagerProgramId: RewardManagerProgram.programId
+      rewardManagerProgramId: new PublicKey(config.rewardsManagerProgramId)
     })
   )
 
