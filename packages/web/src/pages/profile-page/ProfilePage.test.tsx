@@ -97,7 +97,7 @@ describe('ProfilePage', () => {
     mswServer.close()
   })
 
-  it.only('should render the profile page for a non-artist', async () => {
+  it('should render the profile page for a non-artist', async () => {
     renderProfilePage(nonArtistUser)
 
     // User header
