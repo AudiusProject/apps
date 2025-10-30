@@ -464,7 +464,13 @@ def add_associated_wallet(
                 else:
                     session.delete(wallet)
 
-        if not existing_wallet:
+        existing_wallet_in_session = (
+            session.query(AssociatedWallet)
+            .filter_by(user_id=user_id, wallet=wallet_address, chain=chain)
+            .first()
+        )
+
+        if not existing_wallet and not existing_wallet_in_session:
             # Create new wallet association only if it doesn't exist for this user
             associated_wallet_entry = AssociatedWallet(
                 user_id=user_id,
