@@ -175,7 +175,7 @@ class RecordDict(TypedDict):
 
 
 class ExistingRecordDict(TypedDict):
-    AssociatedWallet: Dict[str, AssociatedWallet]
+    AssociatedWallet: Dict[str, List[AssociatedWallet]]
     Playlist: Dict[int, Playlist]
     Track: Dict[int, Track]
     UserWallet: Dict[str, User]

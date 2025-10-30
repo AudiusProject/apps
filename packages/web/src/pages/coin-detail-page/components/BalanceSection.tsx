@@ -4,7 +4,8 @@ import {
   useArtistCoin,
   useCoinBalance,
   useCoinBalanceBreakdown,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useExternalWalletBalance
 } from '@audius/common/api'
 import {
   useBuySellInitialTab,
@@ -35,6 +36,7 @@ import { useBuySellRegionSupport } from 'components/buy-sell-modal'
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
 import Skeleton from 'components/skeleton/Skeleton'
 import Tooltip from 'components/tooltip/Tooltip'
+import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { env } from 'services/env'
@@ -399,7 +401,19 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   )
   const { data: currentUser } = useCurrentAccountUser()
   const { isBuySellSupported } = useBuySellRegionSupport()
-  const initialTab = useBuySellInitialTab()
+  const externalWalletAddress = useExternalWalletAddress()
+  const { data: externalUsdcBalance } = useExternalWalletBalance({
+    mint: env.USDC_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const { data: externalAudioBalance } = useExternalWalletBalance({
+    mint: env.WAUDIO_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const initialTab = useBuySellInitialTab({
+    externalUsdcBalance,
+    externalAudioBalance
+  })
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
   // Modal hooks

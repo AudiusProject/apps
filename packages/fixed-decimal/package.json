@@ -29,6 +29,6 @@
   "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/fixed-decimal",
   "devDependencies": {
     "eslint": "8.56.0",
-    "vitest": "0.34.6"
+    "vitest": "2.1.1"
   }
 }
