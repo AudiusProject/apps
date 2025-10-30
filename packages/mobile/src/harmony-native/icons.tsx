@@ -125,7 +125,6 @@ export { default as IconUserUnfollow } from '@audius/harmony/src/assets/icons/Us
 export { default as IconDesktop } from '@audius/harmony/src/assets/icons/Desktop.svg'
 export { default as IconRadar } from '@audius/harmony/src/assets/icons/Radar.svg'
 export { default as IconVisibilityHidden } from '@audius/harmony/src/assets/icons/VisibilityHidden.svg'
-export { default as IconDonate } from '@audius/harmony/src/assets/icons/Donate.svg'
 export { default as IconReceive } from '@audius/harmony/src/assets/icons/Receive.svg'
 export { default as IconVisibilityPublic } from '@audius/harmony/src/assets/icons/VisibilityPublic.svg'
 export { default as IconDrag } from '@audius/harmony/src/assets/icons/Drag.svg'

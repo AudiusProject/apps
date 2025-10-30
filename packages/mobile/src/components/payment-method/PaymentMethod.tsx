@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   IconCreditCard,
-  IconDonate,
+  IconReceive,
   Text,
   Flex,
   IconQrCode,
@@ -153,7 +153,7 @@ export const PaymentMethod = ({
         </View>
       ),
       icon: () => (
-        <IconDonate
+        <IconReceive
           style={isExistingBalanceDisabled ? styles.disabled : null}
           width={spacing(6)}
           height={spacing(6)}

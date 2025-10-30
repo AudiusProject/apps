@@ -5,7 +5,6 @@ import {
   IconTikTok,
   IconX,
   IconInstagram,
-  IconDonate,
   useTheme
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -19,16 +18,14 @@ const socialLinkIcons = {
   [Type.X]: IconX,
   [Type.INSTAGRAM]: IconInstagram,
   [Type.TIKTOK]: IconTikTok,
-  [Type.WEBSITE]: IconLink,
-  [Type.DONATION]: IconDonate
+  [Type.WEBSITE]: IconLink
 }
 
 const socialLinkPlaceholders = {
   [Type.X]: 'X Handle',
   [Type.INSTAGRAM]: 'Instagram Handle',
   [Type.TIKTOK]: 'TikTok Handle',
-  [Type.WEBSITE]: 'Website',
-  [Type.DONATION]: 'Donate'
+  [Type.WEBSITE]: 'Website'
 }
 
 const sanitizeHandle = (handle: string) => {

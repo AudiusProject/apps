@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux'
 
 import {
   Flex,
-  IconDonate,
   IconInstagram,
   IconLink,
   IconTikTok,
@@ -146,17 +145,6 @@ const EditProfileForm = (props: EditProfileFormProps) => {
               noGutter
             />
           </ProfileInputCard>
-
-          {/* Donation Section */}
-          <ProfileInputCard title='Donation'>
-            <TextField
-              name='donation'
-              label='Donation'
-              placeholder='paypal.me/yourlink'
-              startIcon={IconDonate}
-              noGutter
-            />
-          </ProfileInputCard>
         </Flex>
       </ScrollView>
     </FormScreen>
@@ -178,7 +166,6 @@ export const EditProfileScreen = () => {
         'instagram_handle',
         'tiktok_handle',
         'website',
-        'donation',
         'artist_coin_badge'
       ])
   })
@@ -247,7 +234,6 @@ export const EditProfileScreen = () => {
     instagram_handle = null,
     tiktok_handle = null,
     website = null,
-    donation = null,
     artist_coin_badge = null
   } = profile
 
@@ -259,7 +245,6 @@ export const EditProfileScreen = () => {
     instagram_handle,
     tiktok_handle,
     website,
-    donation,
     artist_coin_badge,
     cover_photo: {
       url:

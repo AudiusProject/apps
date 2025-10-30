@@ -5,21 +5,17 @@ import {
   IconTikTok,
   IconX,
   IconInstagram,
-  IconDonate,
   Text,
   Flex
 } from '@audius/harmony'
 
 import { ExternalTextLink } from 'components/link'
-import Tooltip from 'components/tooltip/Tooltip'
-import { UserGeneratedText } from 'components/user-generated-text'
 
 export enum Type {
   X,
   INSTAGRAM,
   TIKTOK,
-  WEBSITE,
-  DONATION
+  WEBSITE
 }
 
 const SITE_URL_MAP = {
@@ -38,8 +34,7 @@ const socialIcons = {
   [Type.X]: IconX,
   [Type.INSTAGRAM]: IconInstagram,
   [Type.TIKTOK]: IconTikTok,
-  [Type.WEBSITE]: IconLink,
-  [Type.DONATION]: IconDonate
+  [Type.WEBSITE]: IconLink
 }
 
 const isHandleType = (type: Type): type is HandleType =>
@@ -58,19 +53,13 @@ const SocialLink = (props: SocialLinkProps) => {
 
   const SocialIcon = socialIcons[type]
 
-  let icon = <SocialIcon color='default' size={iconOnly ? 'l' : 'm'} />
-  if (type === Type.DONATION) {
-    icon = <Tooltip text='Donate'>{icon}</Tooltip>
-  }
+  const icon = <SocialIcon color='default' size={iconOnly ? 'l' : 'm'} />
 
   let text: ReactNode
   if (isHandleType(type)) {
     text = `@${link}`
   } else {
     text = link.replace(/((?:https?):\/\/)|www./g, '')
-    if (type === Type.DONATION) {
-      text = <UserGeneratedText size='s'>{text}</UserGeneratedText>
-    }
   }
 
   let href = ''

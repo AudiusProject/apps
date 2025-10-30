@@ -44,7 +44,6 @@ export const ProfileHeader = memo(() => {
     does_current_user_follow: doesCurrentUserFollow,
     current_user_followee_follow_count: currentUserFolloweeFollowCount,
     website,
-    donation,
     twitter_handle: twitterHandle,
     instagram_handle: instagramHandle,
     tiktok_handle: tikTokHandle,
@@ -56,7 +55,6 @@ export const ProfileHeader = memo(() => {
       current_user_followee_follow_count:
         user.current_user_followee_follow_count,
       website: user.website,
-      donation: user.donation,
       twitter_handle: user.twitter_handle,
       instagram_handle: user.instagram_handle,
       tiktok_handle: user.tiktok_handle,
@@ -75,9 +73,8 @@ export const ProfileHeader = memo(() => {
   const isOwner = userId === accountId
   const hasMutuals = !isOwner && (currentUserFolloweeFollowCount ?? 0) > 0
   const hasMultipleSocials =
-    [website, donation, twitterHandle, instagramHandle, tikTokHandle].filter(
-      Boolean
-    ).length > 1
+    [website, twitterHandle, instagramHandle, tikTokHandle].filter(Boolean)
+      .length > 1
   const isSupporting = supportingCount && supportingCount > 0
 
   const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(

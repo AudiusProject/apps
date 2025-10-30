@@ -150,7 +150,6 @@ const userMetadataSchema = {
   instagram_handle: null,
   tiktok_handle: null,
   website: null,
-  donation: null,
   creator_node_endpoint: null,
   updated_at: null,
   playlist_library: null,

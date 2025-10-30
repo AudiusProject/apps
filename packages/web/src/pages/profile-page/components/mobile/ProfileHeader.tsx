@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, MouseEvent } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 import { useArtistOwnedCoin } from '@audius/common/api'
 import {
@@ -18,7 +18,6 @@ import { formatCount, route } from '@audius/common/utils'
 import {
   IconArtistBadge as BadgeArtist,
   IconInstagram,
-  IconDonate,
   IconLink,
   IconTikTok,
   IconX,
@@ -109,7 +108,6 @@ type ProfileHeaderProps = {
   instagramHandle: string
   tikTokHandle: string
   website: string
-  donation: string
   followers: any
   goToRoute: (route: string) => void
   following: boolean
@@ -153,7 +151,6 @@ const ProfileHeader = ({
   instagramHandle,
   tikTokHandle,
   website,
-  donation,
   setFollowersUserId,
   setFollowingUserId,
   goToRoute,
@@ -197,10 +194,10 @@ const ProfileHeader = ({
   }, [hasEllipsis, isDescriptionMinimized])
 
   useEffect(() => {
-    if ((website || donation) && !hasEllipsis) {
+    if (website && !hasEllipsis) {
       setHasEllipsis(true)
     }
-  }, [website, donation, hasEllipsis, setHasEllipsis])
+  }, [website, hasEllipsis, setHasEllipsis])
 
   let { image: coverPhoto } = useCoverPhoto({
     userId,
@@ -276,19 +273,6 @@ const ProfileHeader = ({
       })
     )
   }
-
-  const handleClickDonationLink = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
-      record(
-        make(Name.PROFILE_PAGE_CLICK_DONATION, {
-          handle,
-          // @ts-expect-error
-          donation: event.target.href
-        })
-      )
-    },
-    [record, handle]
-  )
 
   // If we're not loading, we know that
   // nullable fields such as userId are valid.
@@ -438,23 +422,12 @@ const ProfileHeader = ({
               {bio}
             </UserGeneratedText>
           ) : null}
-          {hasEllipsis && !isDescriptionMinimized && (website || donation) && (
+          {hasEllipsis && !isDescriptionMinimized && website && (
             <div className={styles.sites}>
               {website && (
                 <div className={styles.website} onClick={onGoToWebsite}>
                   <IconLink size='m' color='default' />
                   <span>{website}</span>
-                </div>
-              )}
-              {donation && (
-                <div className={styles.donation}>
-                  <IconDonate size='m' color='default' />
-                  <UserGeneratedText
-                    size='s'
-                    onClickLink={handleClickDonationLink}
-                  >
-                    {donation}
-                  </UserGeneratedText>
                 </div>
               )}
             </div>

@@ -1,7 +1,6 @@
 import { Flex } from '@audius/harmony-native'
 
 import {
-  DonationSocialLink,
   InstagramSocialLink,
   TikTokSocialLink,
   XSocialLink,
@@ -15,7 +14,6 @@ export const SocialsAndSites = () => {
       <InstagramSocialLink showText />
       <TikTokSocialLink showText />
       <WebsiteSocialLink showText />
-      <DonationSocialLink showText />
     </Flex>
   )
 }
