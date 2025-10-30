@@ -22,14 +22,12 @@ const parseFixedDecimalString = <T extends bigint>(
       cDecimal = cDecimal ?? ''
       const whole = cWhole + cDecimal.substring(0, exp)
       const decimal = cDecimal.substring(exp)
-      const value = decimal.length > 0 ? `${whole}.${decimal}` : whole
-      return parseFixedDecimalString<T>(value, decimalPlaces)
+      value = decimal.length > 0 ? `${whole}.${decimal}` : whole
     }
     if (exp < 0) {
       let [cWhole, cDecimal] = coefficient.split('.')
       cDecimal = cDecimal ?? ''
-      const value = '0.' + cWhole.padStart(-exp, '0') + cDecimal
-      return parseFixedDecimalString<T>(value, decimalPlaces)
+      value = '0.' + cWhole.padStart(-exp, '0') + cDecimal
     }
   }
 
