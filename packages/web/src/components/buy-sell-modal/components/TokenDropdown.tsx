@@ -32,6 +32,7 @@ type TokenDropdownProps = {
   disabled?: boolean
   anchorOriginHorizontal?: 'left' | 'right'
   customTrigger?: ReactNode
+  sortAlphabetically?: boolean
 }
 
 // Used to close the dropdown when clicking outside of it, but still inside of the modal
@@ -132,7 +133,8 @@ export const TokenDropdown = ({
   onTokenChange,
   disabled = false,
   anchorOriginHorizontal = 'right',
-  customTrigger
+  customTrigger,
+  sortAlphabetically = true
 }: TokenDropdownProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { color, spacing } = useTheme()
@@ -149,14 +151,16 @@ export const TokenDropdown = ({
   )
 
   const options: TokenOption[] = useMemo(() => {
-    return availableTokens
-      .map((token) => ({
-        value: token.address,
-        label: token.name ?? token.symbol,
-        tokenInfo: token
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label))
-  }, [availableTokens])
+    const mapped = availableTokens.map((token) => ({
+      value: token.address,
+      label: token.name ?? token.symbol,
+      tokenInfo: token
+    }))
+
+    return sortAlphabetically
+      ? mapped.sort((a, b) => a.label.localeCompare(b.label))
+      : mapped
+  }, [availableTokens, sortAlphabetically])
 
   const selectedOption = useMemo(
     () =>
