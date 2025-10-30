@@ -140,16 +140,6 @@ export const CashWallet = () => {
             <PayoutWalletDisplay />
           </Flex>
         </Flex>
-
-        {/* Right Side - Transaction History Link */}
-        <TextLink
-          variant='visible'
-          size='m'
-          to={TRANSACTION_HISTORY_PAGE}
-          css={styles.transactionLink}
-        >
-          {walletMessages.transactionHistory}
-        </TextLink>
       </Flex>
 
       {/* Bottom Button Area */}

@@ -97,6 +97,7 @@ import TrendingPage from 'pages/trending-page/TrendingPage'
 import TrendingPlaylistsPage from 'pages/trending-playlists/TrendingPlaylistPage'
 import TrendingUndergroundPage from 'pages/trending-underground/TrendingUndergroundPage'
 import Visualizer from 'pages/visualizer/Visualizer'
+import { CashPage } from 'pages/cash-page'
 import { WalletPage } from 'pages/wallet-page'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
 import { initializeSentry } from 'services/sentry'
@@ -189,6 +190,7 @@ const {
   EDIT_ALBUM_PAGE,
   AIRDROP_PAGE,
   WALLET_PAGE,
+  CASH_PAGE,
   COINS_CREATE_PAGE,
   COINS_EXPLORE_PAGE,
   EDIT_COIN_DETAILS_PAGE,
@@ -764,6 +766,12 @@ const WebPlayer = (props) => {
                 path={WALLET_PAGE}
                 isMobile={isMobile}
                 component={WalletPage}
+              />
+              <Route
+                exact
+                path={CASH_PAGE}
+                isMobile={isMobile}
+                component={CashPage}
               />
               <Route
                 exact

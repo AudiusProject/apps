@@ -10,7 +10,7 @@ import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { CashWallet } from 'pages/pay-and-earn-page/components/CashWallet'
-import { YourCoins } from 'pages/pay-and-earn-page/components/YourCoins'
+import { WalletCoinsList } from 'pages/wallet-page/components/WalletCoinsList'
 
 import { LinkedWallets } from './components/LinkedWallets'
 
@@ -49,8 +49,7 @@ export const WalletPage = () => {
         }
       }}
     >
-      <CashWallet />
-      <YourCoins />
+      <WalletCoinsList />
       <LinkedWallets />
     </Flex>
   )
