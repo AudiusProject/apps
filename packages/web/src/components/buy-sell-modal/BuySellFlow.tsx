@@ -428,7 +428,7 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const displayErrorMessage = useMemo(() => {
     // Show exchange rate errors immediately as they prevent transactions
     if (transactionData?.exchangeRateError) {
-      return 'Unable to fetch exchange rate. Please try again.'
+      return messages.unableToFetchExchangeRate
     }
     if (activeTab === 'sell' && !hasSufficientBalance) {
       return messages.insufficientAUDIOForSale

@@ -104,5 +104,6 @@ export const buySellMessages = {
   ) => `${isStablecoin ? '$' : ''}${formattedBalance} ${available}`,
   help: 'Help',
   termsAgreement: 'By clicking continue, you agree to our',
-  termsOfUse: 'Terms of Use'
+  termsOfUse: 'Terms of Use',
+  unableToFetchExchangeRate: 'Unable to fetch exchange rate. Please try again.'
 }
