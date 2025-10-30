@@ -19,7 +19,7 @@ use solana_sdk::{
     secp256k1_instruction::construct_eth_pubkey, signature::Keypair, signer::Signer,
     transaction::Transaction, transport::TransportError,
 };
-use std::{mem::MaybeUninit, option::Option::None};
+use std::{mem::MaybeUninit};
 use utils::*;
 
 // Test a transfer can be completed successfully
@@ -126,7 +126,6 @@ async fn success_transfer() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -251,7 +250,6 @@ async fn invalid_messages_are_wiped() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -330,7 +328,6 @@ async fn invalid_messages_are_wiped() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -482,7 +479,6 @@ async fn failure_transfer_invalid_message_format() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -604,7 +600,6 @@ async fn failure_transfer_invalid_oracle_message_format() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -832,7 +827,6 @@ async fn failure_multiple_disbursements() {
                 10_000u64,
                 transfer_id.to_string(),
                 *recipient_eth_key,
-                None,
             )
             .unwrap()],
             Some(&context.payer.pubkey()),
@@ -962,7 +956,6 @@ async fn failure_only_aao_attestations() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -1099,7 +1092,6 @@ async fn disallows_transfers_to_invalid_account() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),
@@ -1251,7 +1243,6 @@ async fn success_transfer_denial_with_lamports() {
             10_000u64,
             transfer_id.to_string(),
             recipient_eth_key,
-            None,
         )
         .unwrap()],
         Some(&context.payer.pubkey()),

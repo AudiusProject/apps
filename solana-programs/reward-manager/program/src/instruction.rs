@@ -136,7 +136,7 @@ pub enum Instructions {
     ///   1. `[]` Reward manager
     ///   2. `[]` Reward manager authority
     ///   3. `[writable]` Reward token source
-    ///   4. `[writable]` Reward token recipient
+    ///   4. `[writable]` Reward token recipient (or token mint if burning)
     ///   5. `[writable]` Transfer account - the account which represents a successful transfer
     ///   6. `[]` Bot oracle - the ethereum public address of the oracle
     ///   7. `[signer]` Payer
@@ -403,13 +403,12 @@ pub fn evaluate_attestations(
     verified_messages: &Pubkey,
     reward_manager: &Pubkey,
     reward_token_source: &Pubkey,
-    reward_token_recipient: &Pubkey,
+    reward_token_recipient_or_mint: &Pubkey,
     bot_oracle: &Pubkey,
     payer: &Pubkey,
     amount: u64,
     id: String,
     eth_recipient: [u8; 20],
-    mint: Option<&Pubkey>,
 ) -> Result<Instruction, ProgramError> {
     let data = Instructions::EvaluateAttestations(EvaluateAttestationsArgs {
         amount,
@@ -431,7 +430,7 @@ pub fn evaluate_attestations(
         AccountMeta::new_readonly(*reward_manager, false),
         AccountMeta::new_readonly(reward_manager_authority, false),
         AccountMeta::new(*reward_token_source, false),
-        AccountMeta::new(*reward_token_recipient, false),
+        AccountMeta::new(*reward_token_recipient_or_mint, false),
         AccountMeta::new(derived_address, false),
         AccountMeta::new_readonly(*bot_oracle, false),
         AccountMeta::new(*payer, true),
@@ -439,16 +438,6 @@ pub fn evaluate_attestations(
         AccountMeta::new_readonly(spl_token::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
-
-    if mint.is_some() {
-        let mut accounts_with_mint = accounts;
-        accounts_with_mint.push(AccountMeta::new(*mint.unwrap(), false));
-        return Ok(Instruction {
-            program_id: *program_id,
-            accounts: accounts_with_mint,
-            data,
-        });
-    }
 
     Ok(Instruction {
         program_id: *program_id,

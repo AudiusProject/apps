@@ -64,13 +64,6 @@ async fn success_burn() {
     ]
     .concat());
 
-    let recipient_sol_key = claimable_tokens::utils::program::find_address_pair(
-        &claimable_tokens::id(),
-        &mint.pubkey(),
-        recipient_eth_key,
-    )
-    .unwrap();
-
     // Generate data and create senders
     let keys: [[u8; 32]; 3] = rng.gen();
     let operators: [EthereumAddress; 3] = rng.gen();
@@ -148,13 +141,12 @@ async fn success_burn() {
         &verified_messages_account,
         &reward_manager.pubkey(),
         &token_account.pubkey(),
-        &recipient_sol_key.derive.address,
+        &mint.pubkey(),
         &oracle_derived_address,
         &context.payer.pubkey(),
         10_000u64,
         transfer_id.to_string(),
         recipient_eth_key,
-        Some(&mint.pubkey()),
     )
     .unwrap();
 

@@ -475,12 +475,11 @@ impl Processor {
         reward_manager_info: &AccountInfo<'a>,
         reward_manager_authority_info: &AccountInfo<'a>,
         reward_token_source_info: &AccountInfo<'a>,
-        reward_token_recipient_info: &AccountInfo<'a>,
+        reward_token_recipient_or_mint_info: &AccountInfo<'a>,
         transfer_account_info: &AccountInfo<'a>,
         bot_oracle_info: &AccountInfo<'a>,
         payer_info: &AccountInfo<'a>,
         rent_info: &AccountInfo<'a>,
-        mint_info: Option<&AccountInfo<'a>>,
         transfer_data: EvaluateAttestationsArgs,
     ) -> ProgramResult {
         let rent = &Rent::from_account_info(rent_info)?;
@@ -493,14 +492,6 @@ impl Processor {
 
         let mut verified_messages = VerifiedMessages::unpack(&verified_messages_info.data.borrow())?;
         assert_initialized(&verified_messages)?;
-
-        // Assert the rewards_token_recipient_info is indeed the UserBank
-        // derived from the transfer_data.eth_recipient
-        validate_token_account_derivation(
-            &reward_token_source_info,
-            &reward_token_recipient_info,
-            transfer_data.eth_recipient,
-        )?;
 
         // Ensure the transfer account doesn't yet exist
         let transfer_acct_is_empty = transfer_account_info.try_data_is_empty().unwrap_or(true);
@@ -550,22 +541,28 @@ impl Processor {
         if transfer_data.eth_recipient == EthereumAddress::default() {
             msg!("Burning reward tokens as recipient is zero address");
             // Burn the reward
-            let mint = mint_info.ok_or(ProgramError::NotEnoughAccountKeys)?;
             spl_token_burn(
                 program_id,
                 &reward_manager_info.key,
                 reward_token_source_info,
-                mint,
+                reward_token_recipient_or_mint_info,
                 reward_manager_authority_info,
                 transfer_data.amount,
             )?;
         } else {
+            // Assert the rewards_token_recipient_info is indeed the UserBank
+            // derived from the transfer_data.eth_recipient
+            validate_token_account_derivation(
+                &reward_token_source_info,
+                &reward_token_recipient_or_mint_info,
+                transfer_data.eth_recipient,
+            )?;
             // Transfer reward tokens to user
             spl_token_transfer(
                 program_id,
                 &reward_manager_info.key,
                 reward_token_source_info,
-                reward_token_recipient_info,
+                reward_token_recipient_or_mint_info,
                 reward_manager_authority_info,
                 transfer_data.amount,
             )?;
@@ -817,7 +814,6 @@ impl Processor {
                 let rent_info = next_account_info(account_info_iter)?;
                 let _token_program_id = next_account_info(account_info_iter)?;
                 let _system_program_id = next_account_info(account_info_iter)?;
-                let mint_info = account_info_iter.next();
 
                 Self::process_evaluate_attestations(
                     program_id,
@@ -830,7 +826,6 @@ impl Processor {
                     bot_oracle_info,
                     payer_info,
                     rent_info,
-                    mint_info,
                     EvaluateAttestationsArgs {
                         amount,
                         id,
