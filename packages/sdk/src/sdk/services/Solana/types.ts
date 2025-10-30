@@ -172,4 +172,10 @@ export type ClaimVestedCoinsRequest = {
 
 export type ClaimVestedCoinsResponse = {
   claimVestedCoinsTxs: Array<string> // base64 encoded serialized transaction
+  availableAmount: string
+  totalAmount?: string
+  claimedAmount?: string
+  remainingLocked?: string
+  userClaimedAmount?: string
+  rewardsPoolClaimedAmount?: string
 }

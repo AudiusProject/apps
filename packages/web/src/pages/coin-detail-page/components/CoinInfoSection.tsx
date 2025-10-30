@@ -35,7 +35,8 @@ import {
   PlainButton,
   Text,
   TextLink,
-  useTheme
+  useTheme,
+  Divider
 } from '@audius/harmony'
 import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
@@ -278,12 +279,11 @@ const ArtistVestingSection = ({
   isClaimVestedCoinsDisabled,
   isClaimVestedCoinsPending
 }: ArtistVestingSectionProps) => {
+  const { data: currentUser } = useCurrentAccountUser()
+  const isOwner = currentUser?.user_id === coin.ownerId
   return (
-    <>
-      <Flex
-        css={{ height: '1px', background: '$neutralLight8' }}
-        alignSelf='stretch'
-      />
+    <Flex column gap='m' w='100%'>
+      <Divider orientation='horizontal' />
       <Flex
         alignItems='center'
         justifyContent='space-between'
@@ -300,7 +300,7 @@ const ArtistVestingSection = ({
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
-        <Text variant='body' size='s' color='subdued'>
+        <Text variant='body' size='s'>
           {overflowMessages.vestingScheduleValue}
         </Text>
       </Flex>
@@ -317,7 +317,7 @@ const ArtistVestingSection = ({
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
-        <Text variant='body' size='s' color='subdued'>
+        <Text variant='body' size='s'>
           {coin.artistLocker?.locked?.toLocaleString()} ${coin.ticker}
         </Text>
       </Flex>
@@ -334,7 +334,7 @@ const ArtistVestingSection = ({
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
-        <Text variant='body' size='s' color='subdued'>
+        <Text variant='body' size='s'>
           {coin.artistLocker?.unlocked?.toLocaleString()} ${coin.ticker}
         </Text>
       </Flex>
@@ -354,27 +354,47 @@ const ArtistVestingSection = ({
             <IconInfo size='s' color='subdued' />
           </Tooltip>
         </Flex>
-        <Flex alignItems='center' gap='s'>
-          {coin.artistLocker?.claimable && coin.artistLocker.claimable > 0 ? (
-            <Flex gap='xs' alignItems='center'>
-              <TextLink
-                onClick={handleClaimVestedCoinsClick}
-                variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
-                disabled={isClaimVestedCoinsDisabled}
-              >
-                {overflowMessages.claim}
-              </TextLink>
-              {isClaimVestedCoinsPending ? (
-                <LoadingSpinner size='s' color='subdued' />
-              ) : null}
-            </Flex>
-          ) : null}
-          <Text variant='body' size='s' color='subdued'>
-            {coin.artistLocker?.claimable?.toLocaleString()} ${coin.ticker}
-          </Text>
-        </Flex>
+        {isOwner ? (
+          <Flex alignItems='center' gap='s'>
+            {coin.artistLocker?.claimable && coin.artistLocker.claimable > 0 ? (
+              <Flex gap='xs' alignItems='center'>
+                <TextLink
+                  onClick={handleClaimVestedCoinsClick}
+                  variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
+                  disabled={isClaimVestedCoinsDisabled}
+                >
+                  {overflowMessages.claim}
+                </TextLink>
+                {isClaimVestedCoinsPending ? (
+                  <LoadingSpinner size='s' color='subdued' />
+                ) : null}
+              </Flex>
+            ) : null}
+            <Text variant='body' size='s'>
+              {coin.artistLocker?.claimable?.toLocaleString()} ${coin.ticker}
+            </Text>
+          </Flex>
+        ) : null}
       </Flex>
-    </>
+      <Divider orientation='horizontal' />
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.rewardsPool}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.rewardsPool} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s'>
+          {coin.rewardPool?.balance?.toLocaleString()} ${coin.ticker}
+        </Text>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -830,6 +850,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         justifyContent='space-between'
         alignSelf='stretch'
         p='l'
+        ph='xl'
         borderTop='default'
       >
         <PlainButton
@@ -869,7 +890,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                 <IconInfo size='s' color='subdued' />
               </Tooltip>
             </Flex>
-            <Text variant='body' size='s' color='subdued'>
+            <Text variant='body' size='s'>
               {formattedTotalArtistEarnings} {overflowMessages.$audio}
             </Text>
           </Flex>
@@ -881,10 +902,10 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             >
               <Flex alignItems='center' gap='s'>
                 <Text variant='body' size='s' strength='strong'>
-                  {overflowMessages.unclaimedFees}
+                  {overflowMessages.unclaimedEarnings}
                 </Text>
                 <Tooltip
-                  text={overflowMessages.tooltips.unclaimedFees}
+                  text={overflowMessages.tooltips.unclaimedEarnings}
                   mount='body'
                 >
                   <IconInfo size='s' color='subdued' />
@@ -906,7 +927,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                   </Flex>
                 ) : null}
 
-                <Text variant='body' size='s' color='subdued'>
+                <Text variant='body' size='s'>
                   {formattedUnclaimedFees} {overflowMessages.$audio}
                 </Text>
               </Flex>

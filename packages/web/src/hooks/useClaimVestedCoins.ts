@@ -1,6 +1,11 @@
 import { type Coin } from '@audius/common/adapters'
+import type {
+  ClaimVestedCoinsResponse,
+  UserCoinWithAccounts
+} from '@audius/sdk'
 import {
   getArtistCoinQueryKey,
+  getUserCoinQueryKey,
   useCurrentAccountUser,
   useQueryContext,
   QUERY_KEYS
@@ -23,8 +28,11 @@ export type UseClaimVestedCoinsParams = {
   rewardsPoolPercentage: number
 }
 
-export type ClaimVestedCoinsResponse = {
+export type ClaimVestedCoinsResult = {
   signature: string
+  availableAmount?: string
+  userClaimedAmount?: string
+  rewardsPoolClaimedAmount?: string
 }
 
 /**
@@ -35,7 +43,7 @@ export type ClaimVestedCoinsResponse = {
  */
 export const useClaimVestedCoins = (
   options?: UseMutationOptions<
-    ClaimVestedCoinsResponse,
+    ClaimVestedCoinsResult,
     Error,
     UseClaimVestedCoinsParams
   >
@@ -44,16 +52,12 @@ export const useClaimVestedCoins = (
   const queryClient = useQueryClient()
   const { data: currentUser } = useCurrentAccountUser()
 
-  return useMutation<
-    ClaimVestedCoinsResponse,
-    Error,
-    UseClaimVestedCoinsParams
-  >({
+  return useMutation<ClaimVestedCoinsResult, Error, UseClaimVestedCoinsParams>({
     mutationFn: async ({
       tokenMint,
       externalWalletAddress,
       rewardsPoolPercentage
-    }: UseClaimVestedCoinsParams): Promise<ClaimVestedCoinsResponse> => {
+    }: UseClaimVestedCoinsParams): Promise<ClaimVestedCoinsResult> => {
       const sdk = await audiusSdk()
       const solanaProvider = appkitModal.getProvider<SolanaProvider>('solana')
       if (!solanaProvider) {
@@ -90,6 +94,9 @@ export const useClaimVestedCoins = (
           rewardsPoolPercentage
         })
 
+      // Cast to access additional fields that may not be in SDK types yet
+      const responseWithAmounts =
+        claimVestedCoinsResponse as typeof claimVestedCoinsResponse
       const { claimVestedCoinsTxs: serializedTxs } = claimVestedCoinsResponse
 
       // Transaction is sent from the backend as a serialized base64 string
@@ -113,7 +120,10 @@ export const useClaimVestedCoins = (
       })
 
       return {
-        signature
+        signature,
+        availableAmount: responseWithAmounts.availableAmount,
+        userClaimedAmount: responseWithAmounts.userClaimedAmount,
+        rewardsPoolClaimedAmount: responseWithAmounts.rewardsPoolClaimedAmount
       }
     },
     ...options,
@@ -129,22 +139,84 @@ export const useClaimVestedCoins = (
       })
       options?.onError?.(error, params, undefined)
     },
-    onSuccess: (data, variables, context) => {
-      // Optimistically update the coin data
+    onSuccess: (data: ClaimVestedCoinsResult, variables, context) => {
+      // Optimistically update the coin data with new locker amounts
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
       queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
-        if (!existingCoin) return existingCoin
-        // TODO: Update this when we have vested coin amount in the Coin type
-        // For now, just invalidate the query to refetch fresh data
-        return existingCoin
+        console.log('REED existingCoin', existingCoin, data.availableAmount)
+
+        if (
+          !existingCoin ||
+          !existingCoin.artistLocker ||
+          !data.availableAmount
+        )
+          return existingCoin
+
+        const claimedAmount = parseFloat(data.availableAmount)
+        console.log('REED claimedAmount', {
+          claimedAmount,
+          userClaimedAmount: data.userClaimedAmount,
+          rewardsPoolClaimedAmount: data.rewardsPoolClaimedAmount,
+          claimable: existingCoin.artistLocker.claimable,
+          unlocked: existingCoin.artistLocker.unlocked,
+          rewardPoolBalance: existingCoin.rewardPool?.balance
+        })
+
+        return {
+          ...existingCoin,
+          artistLocker: {
+            ...existingCoin.artistLocker,
+            // Subtract the claimed amount from claimable
+            claimable: Math.max(
+              0,
+              (existingCoin.artistLocker.claimable ?? 0) - claimedAmount
+            ),
+            // Update unlocked amount if it exists (adding claimed to unlocked)
+            unlocked: existingCoin.artistLocker.unlocked
+              ? existingCoin.artistLocker.unlocked + claimedAmount
+              : existingCoin.artistLocker.unlocked
+          },
+          rewardPool: existingCoin.rewardPool
+            ? {
+                ...existingCoin.rewardPool,
+                balance:
+                  (existingCoin.rewardPool.balance ?? 0) +
+                  parseFloat(data.rewardsPoolClaimedAmount ?? '0')
+              }
+            : existingCoin.rewardPool
+        }
       })
+
+      // Optimistically update the user's coin balance
+      if (data.userClaimedAmount && currentUser?.user_id) {
+        const claimedAmount = BigInt(data.userClaimedAmount)
+        const userCoinQueryKey = getUserCoinQueryKey(
+          variables.tokenMint,
+          currentUser.user_id
+        )
+
+        queryClient.setQueryData<UserCoinWithAccounts | null>(
+          userCoinQueryKey,
+          (existingUserCoin) => {
+            if (!existingUserCoin) return existingUserCoin
+
+            return {
+              ...existingUserCoin,
+              balance: Number(
+                BigInt(existingUserCoin.balance.toString()) + claimedAmount
+              )
+              // Also update balanceUsd if we had the price data, but for now we'll let it be recalculated
+            }
+          }
+        )
+      }
 
       // Invalidate coin queries to refresh vested coin amounts
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.coins]
       })
 
-      // Invalidate user coin balance to refresh the claimed coins
+      // Invalidate user coin balance to refresh the claimed coins (fallback)
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoins]
       })
