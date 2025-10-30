@@ -524,6 +524,7 @@ fn command_transfer(
         amount,
         transfer_id,
         decoded_recipient_address,
+        None,
     )?);
 
     let transaction = CustomTransaction {
