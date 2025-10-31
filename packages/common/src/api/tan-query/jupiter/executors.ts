@@ -269,7 +269,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       // Execute first transaction with retries: InputToken -> AUDIO
       const step1RetryResult = await this.retryPolicy.executeWithRetry(
         async () => {
-          return await this.executeStep1(params)
+          return await this.executeSwapToAudio(params)
         },
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
@@ -292,7 +292,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       // Execute second transaction with retries: AUDIO -> OutputToken
       const step2RetryResult = await this.retryPolicy.executeWithRetry(
         async () => {
-          return await this.executeStep2(params, step1Result)
+          return await this.executeSwapAudioToToken(params, step1Result)
         },
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
@@ -329,10 +329,10 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  async executeStep1(
+  async executeSwapToAudio(
     params: SwapTokensParams
   ): Promise<IndirectSwapStep1Result> {
-    let errorStage = 'INDIRECT_SWAP_STEP1_UNKNOWN'
+    let errorStage = 'INDIRECT_SWAP_TO_AUDIO_UNKNOWN'
 
     try {
       const { inputMint: inputMintUiAddress, amountUi } = params
@@ -343,7 +343,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const instructions: TransactionInstruction[] = []
 
       // Validate input token and create config
-      errorStage = 'INDIRECT_SWAP_STEP1_TOKEN_VALIDATION'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         inputMintUiAddress,
         AUDIO_MINT,
@@ -359,13 +359,13 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const { inputTokenConfig } = tokenConfigsResult
 
       // Create AUDIO token config
-      errorStage = 'INDIRECT_SWAP_STEP1_AUDIO_CONFIG'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_AUDIO_CONFIG'
       const audioTokenInfo = createTokenConfig(
         findTokenByAddress(this.tokens, AUDIO_MINT)!
       )
 
       // Get quote: InputToken -> AUDIO
-      errorStage = 'INDIRECT_SWAP_STEP1_QUOTE'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_QUOTE'
       const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
         outputMint: AUDIO_MINT,
@@ -377,7 +377,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       })
 
       // Prepare input token
-      errorStage = 'INDIRECT_SWAP_STEP1_PREPARE_INPUT'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_PREPARE_INPUT'
       const sourceAtaForJupiter = await addTransferFromUserBankInstructions({
         tokenInfo: inputTokenConfig,
         userPublicKey,
@@ -389,7 +389,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       })
 
       // Get/create AUDIO user bank
-      errorStage = 'INDIRECT_SWAP_STEP1_PREPARE_AUDIO_USER_BANK'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_PREPARE_AUDIO_USER_BANK'
       const audioUserBankResult =
         await sdk.services.claimableTokensClient.getOrCreateUserBank({
           ethWallet: ethAddress!,
@@ -398,7 +398,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const audioUserBank = audioUserBankResult.userBank
 
       // Get swap instructions (InputToken -> AUDIO)
-      errorStage = 'INDIRECT_SWAP_STEP1_SWAP_INSTRUCTIONS'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_SWAP_INSTRUCTIONS'
       const firstSwapRequestParams: SwapRequest = {
         quoteResponse: firstQuote.quote,
         userPublicKey: userPublicKey.toBase58(),
@@ -424,7 +424,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       instructions.push(...firstSwapInstructions)
 
       // Cleanup ATAs after first swap
-      errorStage = 'INDIRECT_SWAP_STEP1_CLEANUP'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_CLEANUP'
       const firstAtasToClose: PublicKey[] = [sourceAtaForJupiter]
       if (firstOutputAtaForJupiter) {
         firstAtasToClose.push(firstOutputAtaForJupiter)
@@ -437,7 +437,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       }
 
       // Build and send first transaction
-      errorStage = 'INDIRECT_SWAP_STEP1_BUILD_AND_SEND'
+      errorStage = 'INDIRECT_SWAP_TO_AUDIO_BUILD_AND_SEND'
       const signature = await buildAndSendTransaction(
         sdk,
         keypair,
@@ -459,11 +459,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  async executeStep2(
+  async executeSwapAudioToToken(
     params: SwapTokensParams,
     step1Result: IndirectSwapStep1Result
   ): Promise<IndirectSwapStep2Result> {
-    let errorStage = 'INDIRECT_SWAP_STEP2_UNKNOWN'
+    let errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_UNKNOWN'
 
     try {
       const { outputMint: outputMintUiAddress } = params
@@ -475,7 +475,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const instructions: TransactionInstruction[] = []
 
       // Validate output token config
-      errorStage = 'INDIRECT_SWAP_STEP2_TOKEN_VALIDATION'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         AUDIO_MINT,
         outputMintUiAddress,
@@ -491,13 +491,13 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const { outputTokenConfig } = tokenConfigsResult
 
       // Create AUDIO token config
-      errorStage = 'INDIRECT_SWAP_STEP2_AUDIO_CONFIG'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_AUDIO_CONFIG'
       const audioTokenInfo = createTokenConfig(
         findTokenByAddress(this.tokens, AUDIO_MINT)!
       )
 
       // Query actual AUDIO balance from intermediate account
-      errorStage = 'INDIRECT_SWAP_STEP2_QUERY_BALANCE'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUERY_BALANCE'
       const actualAudioBalance = await this.getTokenBalance(
         step1Result.intermediateAudioAta,
         AUDIO_DECIMALS
@@ -523,7 +523,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           : actualAudioBalance.uiAmount
 
       // Get quote: AUDIO -> OutputToken
-      errorStage = 'INDIRECT_SWAP_STEP2_QUOTE'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUOTE'
       const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry(
         {
           inputMint: AUDIO_MINT,
@@ -537,7 +537,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       )
 
       // Transfer AUDIO from user bank to ATA for second swap
-      errorStage = 'INDIRECT_SWAP_STEP2_PREPARE_AUDIO_INPUT'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_PREPARE_AUDIO_INPUT'
       const audioSourceAtaForJupiter =
         await addTransferFromUserBankInstructions({
           tokenInfo: audioTokenInfo,
@@ -550,7 +550,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         })
 
       // Prepare output destination
-      errorStage = 'INDIRECT_SWAP_STEP2_PREPARE_OUTPUT'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_PREPARE_OUTPUT'
       const preferredJupiterDestination = await prepareOutputUserBank(
         sdk,
         ethAddress!,
@@ -558,7 +558,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       )
 
       // Get swap instructions (AUDIO -> OutputToken)
-      errorStage = 'INDIRECT_SWAP_STEP2_SWAP_INSTRUCTIONS'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_SWAP_INSTRUCTIONS'
       const secondSwapRequestParams: SwapRequest = {
         quoteResponse: secondQuote.quote,
         userPublicKey: userPublicKey.toBase58(),
@@ -582,7 +582,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       instructions.push(...secondSwapInstructions)
 
       // Cleanup
-      errorStage = 'INDIRECT_SWAP_STEP2_CLEANUP'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_CLEANUP'
       const atasToClose: PublicKey[] = [audioSourceAtaForJupiter]
       if (outputAtaForJupiter) {
         atasToClose.push(outputAtaForJupiter)
@@ -595,7 +595,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       }
 
       // Build and send second transaction
-      errorStage = 'INDIRECT_SWAP_STEP2_BUILD_AND_SEND'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_BUILD_AND_SEND'
       const signature = await buildAndSendTransaction(
         sdk,
         keypair,
