@@ -11,6 +11,8 @@ const AUDIO_DECIMALS = 8
 /**
  * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC
  *
+ * For now this just handles DBCs - it could be extended to include DAMMs as well
+ *
  * Query params:
  * - inputAmountUi: Amount in UI format (human-readable, e.g., "100")
  * - coinMint: The mint address of the artist coin
