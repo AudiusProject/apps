@@ -118,6 +118,17 @@ export const getJupiterQuoteByMint = async ({
       ? Number(new FixedDecimal(amountUi, inputDecimals).value.toString())
       : Number(new FixedDecimal(amountUi, outputDecimals).value.toString())
 
+  console.log('REED Jupiter quote request:', {
+    inputMint,
+    outputMint,
+    amountUi,
+    inputDecimals,
+    outputDecimals,
+    swapMode,
+    calculatedAmount: amount,
+    amountAsString: amount.toString()
+  })
+
   // Build query parameters for Ultra API
   const params = new URLSearchParams({
     inputMint,

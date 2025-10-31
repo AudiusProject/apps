@@ -420,6 +420,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         dynamicSlippage: true
       }
 
+      console.log('REED indirect swap step 1 about to get swap instructions')
       const {
         swapInstructionsResult,
         outputAtaForJupiter: firstOutputAtaForJupiter
@@ -535,6 +536,17 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         predictedFixed.value <= actualFixed.value
           ? predictedAmount
           : actualAudioBalance.uiAmount
+
+      console.log('REED indirect swap step 2 amounts:', {
+        predictedAmount,
+        actualAudioBalance: actualAudioBalance.uiAmount,
+        amountToSwap,
+        AUDIO_DECIMALS,
+        predictedFixedValue: predictedFixed.value.toString(),
+        actualFixedValue: actualFixed.value.toString(),
+        predictedAmountString: predictedAmount.toString(),
+        actualBalanceString: actualAudioBalance.uiAmount.toString()
+      })
 
       // Get quote: AUDIO -> OutputToken
       errorStage = 'INDIRECT_SWAP_STEP2_QUOTE'

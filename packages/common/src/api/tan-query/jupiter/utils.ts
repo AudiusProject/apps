@@ -351,12 +351,25 @@ export const getJupiterSwapInstructions = async (
   }
 
   // Use Ultra API with taker to get complete transaction
+  // Convert raw inAmount back to UI amount for the Ultra API call
+  const rawAmount = BigInt(quoteResponse.inAmount)
+  const uiAmount =
+    Number(rawAmount) / Math.pow(10, inputTokenConfig?.decimals ?? 6)
+
+  console.log('REED getJupiterSwapInstructions ultraParams:', {
+    quoteResponseInAmount: quoteResponse.inAmount,
+    rawAmount: rawAmount.toString(),
+    inputDecimals: inputTokenConfig?.decimals ?? 6,
+    calculatedUiAmount: uiAmount,
+    inputTokenConfig
+  })
+
   const ultraParams: Omit<JupiterMintQuoteParams, 'maxAccounts'> = {
     inputMint: quoteResponse.inputMint,
     outputMint: quoteResponse.outputMint,
     inputDecimals: inputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
     outputDecimals: outputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
-    amountUi: parseFloat(quoteResponse.inAmount),
+    amountUi: uiAmount,
     slippageBps: quoteResponse.slippageBps,
     swapMode: quoteResponse.swapMode,
     onlyDirectRoutes: false, // Default to false, as this is typically not set in legacy requests
