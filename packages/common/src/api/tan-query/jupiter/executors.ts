@@ -1,7 +1,11 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { SwapRequest } from '@jup-ag/api'
 import { createCloseAccountInstruction } from '@solana/spl-token'
-import { PublicKey, TransactionInstruction } from '@solana/web3.js'
+import {
+  PublicKey,
+  TransactionInstruction,
+  VersionedTransaction
+} from '@solana/web3.js'
 
 import {
   convertJupiterInstructions,
@@ -250,15 +254,31 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
   }
 }
 
-export interface IndirectSwapStep1Result {
+export interface IndirectSwapToAudioResult {
   firstQuote: JupiterQuoteResult
   signature: string
   intermediateAudioAta: PublicKey
+  inputAmount: {
+    amount: number
+    uiAmount: number
+  }
 }
 
-export interface IndirectSwapStep2Result {
+export interface SwapWithMeteoraDBCResult {
+  signature: string
+  outputAmount: {
+    amount: number
+    uiAmount: number
+  }
+}
+
+export interface IndirectSwapToTokenResult {
   signature: string
   secondQuote: JupiterQuoteResult
+  outputAmount: {
+    amount: number
+    uiAmount: number
+  }
 }
 
 export class IndirectSwapExecutor extends BaseSwapExecutor {
@@ -267,7 +287,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
     try {
       // Execute first transaction with retries: InputToken -> AUDIO
-      const step1RetryResult = await this.retryPolicy.executeWithRetry(
+      const swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
         async () => {
           return await this.executeSwapToAudio(params)
         },
@@ -277,22 +297,23 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         }
       )
 
-      if (!step1RetryResult.success || !step1RetryResult.result) {
+      if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
         return {
           status: SwapStatus.ERROR,
           error: {
             type: SwapErrorType.UNKNOWN,
-            message: `Step 1 failed after ${step1RetryResult.attemptsMade} attempts: ${step1RetryResult.error?.message || 'Unknown error'}`
+            message: `Step 1 failed after ${swapToAudioRetryResult.attemptsMade} attempts: ${swapToAudioRetryResult.error?.message || 'Unknown error'}`
           }
         }
       }
 
-      const step1Result = step1RetryResult.result
+      const swapToAudioResult = swapToAudioRetryResult.result
 
       // Execute second transaction with retries: AUDIO -> OutputToken
-      const step2RetryResult = await this.retryPolicy.executeWithRetry(
+      let swapToTokenResult
+      const swapToTokenRetryResult = await this.retryPolicy.executeWithRetry(
         async () => {
-          return await this.executeSwapAudioToToken(params, step1Result)
+          return await this.executeSwapToToken(params, swapToAudioResult)
         },
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
@@ -300,23 +321,42 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         }
       )
 
-      if (!step2RetryResult.success || !step2RetryResult.result) {
-        return {
-          status: SwapStatus.ERROR,
-          error: {
-            type: SwapErrorType.UNKNOWN,
-            message: `Step 2 failed after ${step2RetryResult.attemptsMade} attempts: ${step2RetryResult.error?.message || 'Unknown error'}`
+      if (!swapToTokenRetryResult.success || !swapToTokenRetryResult.result) {
+        // If the 2nd swap fails, we fall back to swapping with Meteora DBC
+        // This flow could be triggered if Jupiter is having issues finding routes for our coins (due to liquidity issues)
+        const swapWithMeteoraDBCRetryResult =
+          await this.retryPolicy.executeWithRetry(
+            async () => {
+              return await this.executeSwapWithMeteoraDBC(params)
+            },
+            async (_attemptNumber: number) => {
+              // Invalidate queries before retry
+              await this.invalidateQueries()
+            }
+          )
+        if (
+          !swapWithMeteoraDBCRetryResult.success ||
+          !swapWithMeteoraDBCRetryResult.result
+        ) {
+          return {
+            status: SwapStatus.ERROR,
+            error: {
+              type: SwapErrorType.UNKNOWN,
+              message: `Step 2 failed after both Jupiter and Meteora DBC swaps failed. DBC swap failed with error: ${swapWithMeteoraDBCRetryResult.error?.message || 'Unknown error'}`
+            }
           }
+        } else {
+          swapToTokenResult = swapWithMeteoraDBCRetryResult.result
         }
+      } else {
+        swapToTokenResult = swapToTokenRetryResult.result
       }
-
-      const step2Result = step2RetryResult.result
 
       return {
         status: SwapStatus.SUCCESS,
-        signature: step2Result.signature,
-        inputAmount: step1Result.firstQuote.inputAmount,
-        outputAmount: step2Result.secondQuote.outputAmount
+        signature: swapToTokenResult.signature,
+        inputAmount: swapToAudioResult.inputAmount,
+        outputAmount: swapToTokenResult.outputAmount
       }
     } catch (error: unknown) {
       return {
@@ -331,7 +371,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
   async executeSwapToAudio(
     params: SwapTokensParams
-  ): Promise<IndirectSwapStep1Result> {
+  ): Promise<IndirectSwapToAudioResult> {
     let errorStage = 'INDIRECT_SWAP_TO_AUDIO_UNKNOWN'
 
     try {
@@ -450,7 +490,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       return {
         firstQuote,
         signature,
-        intermediateAudioAta: audioUserBank
+        intermediateAudioAta: audioUserBank,
+        inputAmount: {
+          amount: firstQuote.inputAmount.amount,
+          uiAmount: firstQuote.inputAmount.uiAmount
+        }
       }
     } catch (error: unknown) {
       throw new Error(
@@ -459,10 +503,55 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  async executeSwapAudioToToken(
+  /**
+   *
+   * @param params
+   * @param sdk
+   */
+  async executeSwapWithMeteoraDBC(
+    params: Pick<SwapTokensParams, 'amountUi' | 'outputMint'>
+  ): Promise<SwapWithMeteoraDBCResult> {
+    const { sdk, userPublicKey, keypair } = this.dependencies
+
+    try {
+      console.log('Doing swap with meteora DBC')
+      const { transaction } = await sdk.services.solanaRelay.swapCoin({
+        inputAmountUi: params.amountUi.toString(),
+        outputMint: params.outputMint,
+        userPublicKey
+      })
+      const swapTx = VersionedTransaction.deserialize(
+        Buffer.from(transaction, 'base64')
+      )
+      // Sign and send transaction
+      swapTx.sign([keypair])
+      const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
+
+      await sdk.services.solanaClient.connection.confirmTransaction(
+        signature,
+        'confirmed'
+      )
+      console.log('meteora DBC swap successful')
+      return {
+        signature,
+        outputAmount: {
+          amount: Number(
+            new FixedDecimal(params.amountUi, AUDIO_DECIMALS).value
+          ),
+          uiAmount: params.amountUi
+        }
+      }
+    } catch (error: unknown) {
+      throw new Error(
+        `Meteora DBC swap failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async executeSwapToToken(
     params: SwapTokensParams,
-    step1Result: IndirectSwapStep1Result
-  ): Promise<IndirectSwapStep2Result> {
+    swapToAudioResult: IndirectSwapToAudioResult
+  ): Promise<IndirectSwapToTokenResult> {
     let errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_UNKNOWN'
 
     try {
@@ -475,7 +564,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const instructions: TransactionInstruction[] = []
 
       // Validate output token config
-      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_TOKEN_VALIDATION'
+      errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         AUDIO_MINT,
         outputMintUiAddress,
@@ -499,7 +588,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       // Query actual AUDIO balance from intermediate account
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUERY_BALANCE'
       const actualAudioBalance = await this.getTokenBalance(
-        step1Result.intermediateAudioAta,
+        swapToAudioResult.intermediateAudioAta,
         AUDIO_DECIMALS
       )
 
@@ -511,7 +600,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       }
 
       // Use the predicted amount if we have enough, otherwise use actual balance
-      const predictedAmount = step1Result.firstQuote.outputAmount.uiAmount
+      const predictedAmount = swapToAudioResult.firstQuote.outputAmount.uiAmount
       const predictedFixed = new FixedDecimal(predictedAmount, AUDIO_DECIMALS)
       const actualFixed = new FixedDecimal(
         actualAudioBalance.uiAmount,
@@ -524,8 +613,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Get quote: AUDIO -> OutputToken
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUOTE'
-      const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry(
-        {
+      const { quoteResult: audioToTokenQuote } =
+        await getJupiterQuoteByMintWithRetry({
           inputMint: AUDIO_MINT,
           outputMint: outputMintUiAddress,
           inputDecimals: AUDIO_DECIMALS,
@@ -533,8 +622,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           amountUi: amountToSwap,
           swapMode: 'ExactIn',
           onlyDirectRoutes: false
-        }
-      )
+        })
 
       // Transfer AUDIO from user bank to ATA for second swap
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_PREPARE_AUDIO_INPUT'
@@ -543,7 +631,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           tokenInfo: audioTokenInfo,
           userPublicKey,
           ethAddress: ethAddress!,
-          amountLamports: BigInt(secondQuote.inputAmount.amountString),
+          amountLamports: BigInt(audioToTokenQuote.inputAmount.amountString),
           sdk,
           feePayer,
           instructions
@@ -560,7 +648,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       // Get swap instructions (AUDIO -> OutputToken)
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_SWAP_INSTRUCTIONS'
       const secondSwapRequestParams: SwapRequest = {
-        quoteResponse: secondQuote.quote,
+        quoteResponse: audioToTokenQuote.quote,
         userPublicKey: userPublicKey.toBase58(),
         destinationTokenAccount: preferredJupiterDestination,
         wrapAndUnwrapSol: wrapUnwrapSol,
@@ -606,7 +694,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       return {
         signature,
-        secondQuote
+        secondQuote: audioToTokenQuote,
+        outputAmount: {
+          amount: audioToTokenQuote.outputAmount.amount,
+          uiAmount: audioToTokenQuote.outputAmount.uiAmount
+        }
       }
     } catch (error: unknown) {
       throw new Error(
