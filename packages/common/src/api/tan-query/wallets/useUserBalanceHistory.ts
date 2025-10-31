@@ -75,9 +75,10 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
       const response = await sdk.users.getUserBalanceHistory(requestParams)
 
       // Map from SDK response format to our hook's return type (SDK uses camelCase)
+      // Convert timestamp from seconds to milliseconds for JavaScript Date
       return (
         response.data?.map((point) => ({
-          timestamp: point.timestamp,
+          timestamp: point.timestamp * 1000,
           balanceUsd: point.balanceUsd
         })) ?? []
       )
