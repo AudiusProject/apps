@@ -8,6 +8,9 @@ export type TransactionData = {
   isValid: boolean
   error: string | null
   isInsufficientBalance: boolean
+  exchangeRate?: number | null
+  exchangeRateError?: Error | null
+  isExchangeRateLoading?: boolean
 }
 
 // UI configuration options
