@@ -61,7 +61,10 @@ import { push } from 'utils/navigation'
 
 const { REWARDS_PAGE } = route
 
-const messages = coinDetailsMessages.coinInfo
+const messages = {
+  ...coinDetailsMessages.coinInfo,
+  balance: (balance: string, ticker?: string) => `${balance} $${ticker}`
+}
 const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
 
@@ -267,6 +270,17 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
   )
 }
 
+const formatBalance = (balance: number, coinDecimals: number) => {
+  const decimals = getTokenDecimalPlaces(balance)
+  const maxFractionDigits = Math.min(decimals, coinDecimals)
+  return new FixedDecimal(BigInt(balance), coinDecimals).toLocaleString(
+    'en-US',
+    {
+      maximumFractionDigits: maxFractionDigits
+    }
+  )
+}
+
 type ArtistVestingSectionProps = {
   coin: Coin
   handleClaimVestedCoinsClick: () => void
@@ -283,34 +297,23 @@ const ArtistVestingSection = ({
   const { data: currentUser } = useCurrentAccountUser()
   const isOwner = currentUser?.user_id === coin.ownerId
   const isMobile = useIsMobile()
-  const rewardsPoolBalance = new FixedDecimal(
-    BigInt(coin.rewardPool?.balance ?? 0),
+
+  const rewardsPoolBalance = formatBalance(
+    coin.rewardPool?.balance ?? 0,
     coin.decimals
-  ).toLocaleString('en-US', {
-    maximumFractionDigits: getTokenDecimalPlaces(coin.rewardPool?.balance ?? 0)
-  })
-  const lockedBalance = new FixedDecimal(
-    BigInt(coin.artistLocker?.locked ?? 0),
+  )
+  const lockedBalance = formatBalance(
+    coin.artistLocker?.locked ?? 0,
     coin.decimals
-  ).toLocaleString('en-US', {
-    maximumFractionDigits: getTokenDecimalPlaces(coin.artistLocker?.locked ?? 0)
-  })
-  const unlockedBalance = new FixedDecimal(
-    BigInt(coin.artistLocker?.unlocked ?? 0),
+  )
+  const unlockedBalance = formatBalance(
+    coin.artistLocker?.unlocked ?? 0,
     coin.decimals
-  ).toLocaleString('en-US', {
-    maximumFractionDigits: getTokenDecimalPlaces(
-      coin.artistLocker?.unlocked ?? 0
-    )
-  })
-  const claimableBalance = new FixedDecimal(
-    BigInt(coin.artistLocker?.claimable ?? 0),
+  )
+  const claimableBalance = formatBalance(
+    coin.artistLocker?.claimable ?? 0,
     coin.decimals
-  ).toLocaleString('en-US', {
-    maximumFractionDigits: getTokenDecimalPlaces(
-      coin.artistLocker?.claimable ?? 0
-    )
-  })
+  )
   return (
     <Flex column gap='m' w='100%'>
       <Divider orientation='horizontal' />
@@ -348,7 +351,7 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {lockedBalance} ${coin.ticker}
+          {messages.balance(lockedBalance, coin.ticker)}
         </Text>
       </Flex>
       <Flex
@@ -365,7 +368,7 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {unlockedBalance} ${coin.ticker}
+          {messages.balance(unlockedBalance, coin.ticker)}
         </Text>
       </Flex>
       {isOwner ? (
@@ -403,7 +406,7 @@ const ArtistVestingSection = ({
               </Flex>
             ) : null}
             <Text variant='body' size='s'>
-              {claimableBalance} ${coin.ticker}
+              {messages.balance(claimableBalance, coin.ticker)}
             </Text>
           </Flex>
         </Flex>
@@ -423,7 +426,7 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {rewardsPoolBalance} ${coin.ticker}
+          {messages.balance(rewardsPoolBalance, coin.ticker)}
         </Text>
       </Flex>
     </Flex>
