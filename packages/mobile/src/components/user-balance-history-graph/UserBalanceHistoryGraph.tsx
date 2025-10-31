@@ -1,13 +1,12 @@
 import { useCallback, useMemo } from 'react'
 
 import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
-import { StyleSheet, View } from 'react-native'
+import type { ID } from '@audius/common/models'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
-import { Text } from '@audius/harmony-native'
+import { Flex, Paper, Text, useTheme } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
-import { useThemeColors } from 'app/utils/theme'
 
 const messages = {
   loading: 'Loading balance history...',
@@ -15,17 +14,17 @@ const messages = {
 }
 
 type UserBalanceHistoryGraphProps = {
-  userId?: number
+  userId?: ID
   width?: number
   height?: number
 }
 
-const formatCurrency = (value: number): string => {
+const formatCurrency = (value: number, decimals: number = 0): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
   }).format(value)
 }
 
@@ -54,7 +53,8 @@ export const UserBalanceHistoryGraph = ({
   width = 350,
   height = 200
 }: UserBalanceHistoryGraphProps) => {
-  const { neutral, accentPurple, white } = useThemeColors()
+  const { color, spacing } = useTheme()
+  const secondary = color.secondary.secondary
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
   const {
@@ -81,37 +81,75 @@ export const UserBalanceHistoryGraph = ({
       const value = item.value
 
       return (
-        <View style={[styles.tooltip, { backgroundColor: accentPurple }]}>
-          <Text style={[styles.tooltipDate, { color: white }]}>
+        <Paper
+          ph='m'
+          pv='s'
+          borderRadius='m'
+          alignItems='center'
+          justifyContent='center'
+          style={{
+            backgroundColor: secondary,
+            minWidth: spacing.unit20
+          }}
+        >
+          <Text
+            variant='label'
+            size='xs'
+            strength='strong'
+            color='staticWhite'
+            style={{
+              letterSpacing: 0.5,
+              textAlign: 'center',
+              textTransform: 'uppercase'
+            }}
+          >
             {timestamp ? formatTooltipDate(timestamp).toUpperCase() : ''}
           </Text>
-          <Text style={[styles.tooltipValue, { color: white }]}>
+          <Text
+            variant='heading'
+            size='s'
+            color='staticWhite'
+            style={{
+              textAlign: 'center'
+            }}
+          >
             {formatCurrency(value)}
           </Text>
-        </View>
+        </Paper>
       )
     },
-    [historyData, white, accentPurple]
+    [historyData, secondary, spacing.unit20]
   )
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <LoadingSpinner style={styles.spinner} />
+      <Flex
+        direction='column'
+        alignItems='center'
+        justifyContent='center'
+        gap='m'
+        style={{ minHeight: 200 }}
+      >
+        <LoadingSpinner />
         <Text variant='body' size='s' strength='weak'>
           {messages.loading}
         </Text>
-      </View>
+      </Flex>
     )
   }
 
   if (isError || !historyData || historyData.length === 0) {
     return (
-      <View style={styles.errorContainer}>
+      <Flex
+        direction='column'
+        alignItems='center'
+        justifyContent='center'
+        style={{ minHeight: 200 }}
+      >
         <Text variant='body' size='m' strength='weak' color='danger'>
           {messages.error}
         </Text>
-      </View>
+      </Flex>
     )
   }
 
@@ -134,7 +172,7 @@ export const UserBalanceHistoryGraph = ({
   }
 
   return (
-    <View style={styles.chartWrapper}>
+    <Flex pv='xs'>
       <LineChart
         data={chartData}
         width={width - 48}
@@ -143,19 +181,19 @@ export const UserBalanceHistoryGraph = ({
         isAnimated
         animationDuration={800}
         // Line styling
-        color={accentPurple}
+        color={secondary}
         thickness={2}
         // Gradient fill
         areaChart
-        startFillColor={`${accentPurple}26`} // 15% opacity
-        endFillColor={`${accentPurple}0D`} // 5% opacity
+        startFillColor='rgba(126, 27, 204, 0.15)'
+        endFillColor='rgba(126, 27, 204, 0.05)'
         // Data points
         hideDataPoints
         // Focus/hover behavior
         focusEnabled
         showStripOnFocus
         showTextOnFocus
-        stripColor={`${accentPurple}4D`} // 30% opacity
+        stripColor={`${secondary}4D`} // 30% opacity
         stripHeight={height}
         stripWidth={2}
         // Axes
@@ -167,7 +205,7 @@ export const UserBalanceHistoryGraph = ({
         yAxisThickness={0}
         xAxisThickness={0}
         yAxisTextStyle={{
-          color: neutral,
+          color: color.neutral.n400,
           fontSize: 11,
           fontWeight: '500'
         }}
@@ -178,17 +216,17 @@ export const UserBalanceHistoryGraph = ({
         spacing={(width - 48) / Math.max(chartData.length - 1, 1)}
         initialSpacing={10}
         endSpacing={10}
-        yAxisLabelWidth={50}
+        yAxisLabelWidth={spacing.unit12 + spacing.unitHalf}
         yAxisLabelContainerStyle={{
-          paddingRight: 8
+          paddingRight: spacing.s
         }}
         // Pointer/tooltip config
         pointerConfig={{
           pointerStripHeight: height - 20,
-          pointerStripColor: accentPurple,
+          pointerStripColor: secondary,
           pointerStripWidth: 2,
           strokeDashArray: [4, 4],
-          pointerColor: accentPurple,
+          pointerColor: secondary,
           radius: 6,
           pointerLabelWidth: 140,
           pointerLabelHeight: 80,
@@ -199,60 +237,6 @@ export const UserBalanceHistoryGraph = ({
           activatePointersDelay: 100
         }}
       />
-    </View>
+    </Flex>
   )
 }
-
-const styles = StyleSheet.create({
-  chartWrapper: {
-    paddingVertical: 8
-  },
-  loadingContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    minHeight: 200
-  },
-  errorContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 200
-  },
-  spinner: {
-    width: 24,
-    height: 24
-  },
-  tooltip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 4,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tooltipDate: {
-    fontFamily: 'AvenirNextLTPro-Bold',
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-    letterSpacing: 0.5,
-    textAlign: 'center'
-  },
-  tooltipValue: {
-    fontFamily: 'AvenirNextLTPro-Bold',
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 24,
-    textAlign: 'center'
-  }
-})

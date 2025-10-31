@@ -1,25 +1,4 @@
-.container {
-  width: 100%;
-  padding: 24px;
-  background: var(--harmony-surface-1);
-  border-radius: 12px;
-}
-
-.chartContainer {
-  position: relative;
-  width: 100%;
-  height: 200px;
-}
-
-.loadingContainer,
-.errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: 200px;
-}
+/* Tooltip styles - used by custom Chart.js tooltip rendering */
 
 .tooltip {
   pointer-events: none;

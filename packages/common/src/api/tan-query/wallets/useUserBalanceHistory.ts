@@ -1,4 +1,7 @@
+import { Id, type GetUserBalanceHistoryGranularityEnum } from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
+
+import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import type { QueryKey, SelectableQueryOptions } from '../types'
@@ -10,10 +13,10 @@ export type BalanceHistoryDataPoint = {
 }
 
 export type UseUserBalanceHistoryParams = {
-  userId: string | number | null | undefined
+  userId: ID | null | undefined
   startTime?: string | Date
   endTime?: string | Date
-  granularity?: 'hourly' | 'daily'
+  granularity?: GetUserBalanceHistoryGranularityEnum
 }
 
 export const getUserBalanceHistoryQueryKey = (
@@ -51,9 +54,9 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
         id: string
         startTime?: Date
         endTime?: Date
-        granularity?: 'hourly' | 'daily'
+        granularity?: GetUserBalanceHistoryGranularityEnum
       } = {
-        id: String(params.userId)
+        id: Id.parse(params.userId)
       }
 
       if (params.startTime) {

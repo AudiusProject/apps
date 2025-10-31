@@ -12,6 +12,7 @@ import {
 } from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
 
+import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -20,27 +21,17 @@ type AccountBalanceProps = {
   userId?: number
 }
 
-const formatCurrency = (value: number): string => {
+const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)
-}
-
-const formatCurrencyLarge = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
   }).format(value)
 }
 
 const formatPercentage = (value: number): string => {
-  const sign = value >= 0 ? '+' : ''
-  return `${sign}${value.toFixed(2)}%`
+  return `${value.toFixed(2)}%`
 }
 
 const DesktopChangeIndicator = ({
@@ -54,12 +45,13 @@ const DesktopChangeIndicator = ({
 }) => {
   const Icon = isPositive ? IconCaretUp : IconCaretDown
   const theme = useTheme()
+  const changeColor = isPositive ? 'success' : 'default'
 
   return (
     <Flex gap='s' alignItems='center'>
       <Box
-        w={48}
-        h={48}
+        w='unit12'
+        h='unit12'
         css={css({
           position: 'relative',
           display: 'flex',
@@ -82,19 +74,16 @@ const DesktopChangeIndicator = ({
         <Icon
           css={css({ position: 'relative', zIndex: 1 })}
           size='l'
-          color={isPositive ? 'success' : 'default'}
+          color={changeColor}
         />
       </Box>
       <Flex column gap='2xs'>
         <Text variant='title' size='l'>
           {messages.changeLabel}
         </Text>
-        <Text
-          variant='body'
-          size='l'
-          color={isPositive ? 'success' : 'default'}
-        >
-          {formatCurrency(changeAmount)} ({formatPercentage(changePercentage)})
+        <Text variant='body' size='l' color={changeColor}>
+          {formatCurrency(Math.abs(changeAmount))} (
+          {formatPercentage(Math.abs(changePercentage))})
         </Text>
       </Flex>
     </Flex>
@@ -111,21 +100,23 @@ const MobileChangeIndicator = ({
   changePercentage: number
 }) => {
   const Icon = isPositive ? IconCaretUp : IconCaretDown
+  const changeColor = isPositive ? 'success' : 'default'
 
   return (
     <Flex gap='xs' alignItems='center'>
-      <Icon size='s' color={isPositive ? 'success' : 'default'} />
-      <Text variant='body' size='s' color={isPositive ? 'success' : 'default'}>
-        {formatCurrency(changeAmount)} ({formatPercentage(changePercentage)})
+      <Icon size='s' color={changeColor} />
+      <Text variant='body' size='s' color={changeColor}>
+        {formatCurrency(Math.abs(changeAmount))} (
+        {formatPercentage(Math.abs(changePercentage))})
       </Text>
       <Text variant='body' size='s' strength='weak'>
-        7D
+        {messages.timePeriod}
       </Text>
     </Flex>
   )
 }
 
-export const AccountBalance = ({ userId }: AccountBalanceProps) => {
+const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
@@ -205,7 +196,7 @@ export const AccountBalance = ({ userId }: AccountBalanceProps) => {
           </Text>
           {changeStats.balance !== null ? (
             <Text variant='display' size='s'>
-              {formatCurrencyLarge(changeStats.balance)}
+              {formatCurrency(changeStats.balance, 0)}
             </Text>
           ) : null}
           <ChangeIndicator
@@ -222,7 +213,7 @@ export const AccountBalance = ({ userId }: AccountBalanceProps) => {
             </Text>
             {changeStats.balance !== null ? (
               <Text variant='display' size='m'>
-                {formatCurrencyLarge(changeStats.balance)}
+                {formatCurrency(changeStats.balance, 0)}
               </Text>
             ) : null}
           </Flex>
@@ -235,18 +226,15 @@ export const AccountBalance = ({ userId }: AccountBalanceProps) => {
         </Flex>
       )}
 
-      <Box
-        css={css({
-          width: '100%',
-          '& > div': {
-            background: 'transparent',
-            border: 'none',
-            padding: 0
-          }
-        })}
-      >
-        <UserBalanceHistoryGraph userId={effectiveUserId ?? undefined} />
-      </Box>
+      <UserBalanceHistoryGraph userId={effectiveUserId ?? undefined} />
     </Paper>
   )
 }
+
+export const AccountBalance = componentWithErrorBoundary(
+  AccountBalanceContent,
+  {
+    name: 'AccountBalance',
+    fallback: null
+  }
+)

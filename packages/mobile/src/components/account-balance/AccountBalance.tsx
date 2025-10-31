@@ -19,27 +19,17 @@ type AccountBalanceProps = {
   height?: number
 }
 
-const formatCurrency = (value: number): string => {
+const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)
-}
-
-const formatCurrencyLarge = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
   }).format(value)
 }
 
 const formatPercentage = (value: number): string => {
-  const sign = value >= 0 ? '+' : ''
-  return `${sign}${value.toFixed(2)}%`
+  return `${value.toFixed(2)}%`
 }
 
 export const AccountBalance = ({
@@ -95,6 +85,7 @@ export const AccountBalance = ({
   }
 
   const Icon = changeStats.isPositive ? IconCaretUp : IconCaretDown
+  const changeColor = changeStats.isPositive ? 'success' : 'default'
 
   return (
     <Paper w='100%' p='m' direction='column' gap='m'>
@@ -104,26 +95,17 @@ export const AccountBalance = ({
         </Text>
         {changeStats.balance !== null ? (
           <Text variant='display' size='s'>
-            {formatCurrencyLarge(changeStats.balance)}
+            {formatCurrency(changeStats.balance, 0)}
           </Text>
         ) : null}
         <Flex row gap='xs' alignItems='center'>
-          <Icon
-            color={changeStats.isPositive ? 'success' : 'default'}
-            width={16}
-            height={16}
-          />
-          <Text
-            variant='body'
-            size='s'
-            strength='default'
-            color={changeStats.isPositive ? 'success' : 'default'}
-          >
-            {formatCurrency(changeStats.amount)} (
-            {formatPercentage(changeStats.percentage)})
+          <Icon color={changeColor} size='s' />
+          <Text variant='body' size='s' strength='default' color={changeColor}>
+            {formatCurrency(Math.abs(changeStats.amount))} (
+            {formatPercentage(Math.abs(changeStats.percentage))})
           </Text>
           <Text variant='body' size='s' strength='weak'>
-            7D
+            {messages.timePeriod}
           </Text>
         </Flex>
       </Flex>

@@ -5,7 +5,8 @@ import {
   useCurrentUserId,
   useUserBalanceHistory
 } from '@audius/common/api'
-import { Text } from '@audius/harmony'
+import type { ID } from '@audius/common/models'
+import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -18,15 +19,15 @@ const messages = {
 }
 
 type UserBalanceHistoryGraphProps = {
-  userId?: number
+  userId?: ID
 }
 
-const formatCurrency = (value: number): string => {
+const formatCurrency = (value: number, decimals: number = 0): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
   }).format(value)
 }
 
@@ -55,24 +56,28 @@ const formatTooltipDate = (timestamp: number): string => {
   })
 }
 
-const getChartData = (timestamps: number[], balances: number[]) => ({
+const getChartData = (
+  timestamps: number[],
+  balances: number[],
+  secondary: string
+) => ({
   labels: timestamps,
   datasets: [
     {
       fill: true,
       lineTension: 0.4,
       backgroundColor: 'rgba(126, 27, 204, 0.15)',
-      borderColor: 'rgba(126, 27, 204, 1)',
+      borderColor: secondary,
       borderWidth: 2,
       borderCapStyle: 'round' as const,
       borderDash: [],
       borderDashOffset: 0.0,
       borderJoinStyle: 'round' as const,
-      pointBorderColor: 'rgba(126, 27, 204, 1)',
-      pointBackgroundColor: 'rgba(126, 27, 204, 1)',
+      pointBorderColor: secondary,
+      pointBackgroundColor: secondary,
       pointBorderWidth: 0,
       pointHoverRadius: 4,
-      pointHoverBackgroundColor: 'rgba(126, 27, 204, 1)',
+      pointHoverBackgroundColor: secondary,
       pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
       pointHoverBorderWidth: 2,
       pointRadius: 0,
@@ -82,15 +87,19 @@ const getChartData = (timestamps: number[], balances: number[]) => ({
   ]
 })
 
-const getChartOptions = (chartId: string) => ({
+const getChartOptions = (
+  chartId: string,
+  neutralColor: string,
+  spacing: Record<string, number>
+) => ({
   maintainAspectRatio: false,
   responsive: true,
   layout: {
     padding: {
-      top: 20,
+      top: spacing.unit5,
       bottom: 0,
-      left: 8,
-      right: 8
+      left: spacing.s,
+      right: spacing.s
     }
   },
   scales: {
@@ -109,8 +118,8 @@ const getChartOptions = (chartId: string) => ({
         },
         ticks: {
           maxTicksLimit: 7,
-          padding: 12,
-          fontColor: 'rgba(158, 158, 167, 1)',
+          padding: spacing.m,
+          fontColor: neutralColor,
           fontFamily: 'Inter, sans-serif',
           fontSize: 11,
           fontStyle: '500',
@@ -134,9 +143,9 @@ const getChartOptions = (chartId: string) => ({
         },
         ticks: {
           maxTicksLimit: 3,
-          padding: 12,
+          padding: spacing.m,
           beginAtZero: false,
-          fontColor: 'rgba(158, 158, 167, 1)',
+          fontColor: neutralColor,
           fontFamily: 'Inter, sans-serif',
           fontSize: 11,
           fontStyle: '500',
@@ -211,6 +220,9 @@ export const UserBalanceHistoryGraph = ({
   userId
 }: UserBalanceHistoryGraphProps) => {
   const chartId = useRef(Math.random().toString(36).substring(7)).current
+  const { color, spacing } = useTheme()
+  const secondary = color.secondary.secondary
+  const neutralColor = color.neutral.n400
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
   const {
@@ -229,26 +241,38 @@ export const UserBalanceHistoryGraph = ({
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
+      <Flex p='2xl' backgroundColor='surface1' borderRadius='l' w='100%'>
+        <Flex
+          direction='column'
+          alignItems='center'
+          justifyContent='center'
+          gap='l'
+          css={{ minHeight: '200px' }}
+        >
           <LoadingSpinner />
           <Text variant='body' size='s' strength='weak'>
             {messages.loading}
           </Text>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     )
   }
 
   if (isError || !historyData || historyData.length === 0) {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorContainer}>
+      <Flex p='2xl' backgroundColor='surface1' borderRadius='l' w='100%'>
+        <Flex
+          direction='column'
+          alignItems='center'
+          justifyContent='center'
+          gap='l'
+          css={{ minHeight: '200px' }}
+        >
           <Text variant='body' size='m' strength='weak' color='danger'>
             {messages.error}
           </Text>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     )
   }
 
@@ -258,12 +282,18 @@ export const UserBalanceHistoryGraph = ({
   const balances = historyData.map((d: BalanceHistoryDataPoint) => d.balanceUsd)
 
   return (
-    <div className={styles.chartContainer}>
+    <Flex
+      css={{
+        position: 'relative',
+        width: '100%',
+        height: '200px'
+      }}
+    >
       <Line
-        data={getChartData(timestamps, balances)}
-        options={getChartOptions(chartId)}
+        data={getChartData(timestamps, balances, secondary)}
+        options={getChartOptions(chartId, neutralColor, spacing)}
         height={200}
       />
-    </div>
+    </Flex>
   )
 }
