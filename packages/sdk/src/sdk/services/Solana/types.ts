@@ -173,3 +173,23 @@ export type ClaimVestedCoinsRequest = {
 export type ClaimVestedCoinsResponse = {
   claimVestedCoinsTxs: Array<string> // base64 encoded serialized transaction
 }
+
+export type SwapCoinQuoteRequest = {
+  inputAmountUi: string // UI format amount of input token (e.g., "100" for 100 AUDIO)
+  outputMint: string // Mint address of the output token
+}
+
+export type SwapCoinQuoteResponse = {
+  outputAmount: string // Expected output amount in raw token format
+}
+
+export type SwapCoinRequest = {
+  inputAmountUi: string // UI format amount of input token (e.g., "100" for 100 AUDIO)
+  outputMint: string // Mint address of the output token
+  userPublicKey: PublicKey // Public key of the user initiating the swap
+}
+
+export type SwapCoinResponse = {
+  transaction: string // Base64-encoded serialized transaction
+  outputAmount: string // Expected output amount in raw token format
+}
