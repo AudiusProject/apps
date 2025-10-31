@@ -23,13 +23,13 @@ export const swapCoinQuote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { audioInputAmount, outputMint } = req.query
+    const { inputAmountUi, outputMint } = req.query
 
     // Validate required parameters
-    if (!audioInputAmount || typeof audioInputAmount !== 'string') {
+    if (!inputAmountUi || typeof inputAmountUi !== 'string') {
       res.status(400).json({
         error:
-          'audioInputAmount is required and must be a string representing the UI amount of AUDIO'
+          'inputAmountUi is required and must be a string representing the UI amount of AUDIO'
       })
       return
     }
@@ -54,7 +54,7 @@ export const swapCoinQuote = async (
 
     // Convert UI amount to big int version
     const audioAmountBN = new BN(
-      Math.floor(parseFloat(audioInputAmount) * Math.pow(10, AUDIO_DECIMALS))
+      Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
     )
 
     if (audioAmountBN.lte(new BN(0))) {
