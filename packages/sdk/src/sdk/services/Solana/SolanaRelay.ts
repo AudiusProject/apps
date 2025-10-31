@@ -422,7 +422,7 @@ export class SolanaRelay extends BaseAPI {
   }
 
   /**
-   * Gets a quote for swapping AUDIO to an artist coin using Meteora's DBC.
+   * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC.
    * Returns the expected output amount for a given input amount.
    */
   public async getSwapCoinQuote(
@@ -434,12 +434,13 @@ export class SolanaRelay extends BaseAPI {
     }
     const queryParameters: runtime.HTTPQuery = {
       inputAmountUi: params.inputAmountUi,
-      outputMint: params.outputMint
+      coinMint: params.coinMint,
+      swapDirection: params.swapDirection
     }
 
     const response = await this.request(
       {
-        path: '/coins/swap_coin_quote',
+        path: '/meteora/swap_coin_quote',
         method: 'GET',
         headers: headerParameters,
         query: queryParameters
@@ -458,7 +459,7 @@ export class SolanaRelay extends BaseAPI {
   }
 
   /**
-   * Creates a swap transaction for swapping AUDIO to an artist coin using Meteora's DBC.
+   * Creates a swap transaction for swapping AUDIO to/from an artist coin using Meteora's DBC.
    * Returns a base64-encoded transaction ready to be signed by the user.
    */
   public async swapCoin(
@@ -470,13 +471,17 @@ export class SolanaRelay extends BaseAPI {
     }
     const queryParameters: runtime.HTTPQuery = {
       inputAmountUi: params.inputAmountUi,
-      outputMint: params.outputMint,
-      userPublicKey: params.userPublicKey.toBase58()
+      coinMint: params.coinMint,
+      swapDirection: params.swapDirection,
+      userPublicKey: params.userPublicKey.toBase58(),
+      ...(params.isExternalWallet !== undefined && {
+        isExternalWallet: params.isExternalWallet.toString()
+      })
     }
 
     const response = await this.request(
       {
-        path: '/coins/swap_coin',
+        path: '/meteora/swap_coin',
         method: 'GET',
         headers: headerParameters,
         query: queryParameters
