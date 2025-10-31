@@ -149,6 +149,11 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
 
       const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
 
+      console.log(
+        'REED direct swap about to get quote with taker:',
+        userPublicKey.toBase58()
+      )
+
       // Get quote
       errorStage = 'DIRECT_SWAP_GET_QUOTE'
       const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
@@ -368,6 +373,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Get quote: InputToken -> AUDIO
       errorStage = 'INDIRECT_SWAP_STEP1_QUOTE'
+      console.log(
+        'REED indirect swap step 1 about to get quote with taker:',
+        userPublicKey.toBase58()
+      )
+
       const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
         outputMint: AUDIO_MINT,
