@@ -158,7 +158,8 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         outputDecimals: outputTokenConfig.decimals,
         amountUi,
         swapMode: 'ExactIn',
-        onlyDirectRoutes: false
+        onlyDirectRoutes: false,
+        taker: userPublicKey.toBase58()
       })
 
       // Prepare input token
@@ -197,7 +198,8 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
           outputTokenConfig,
           userPublicKey,
           feePayer,
-          instructions
+          instructions,
+          inputTokenConfig
         )
       const { swapInstruction, addressLookupTableAddresses } =
         swapInstructionsResult
@@ -373,7 +375,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         outputDecimals: AUDIO_DECIMALS,
         amountUi,
         swapMode: 'ExactIn',
-        onlyDirectRoutes: false
+        onlyDirectRoutes: false,
+        taker: userPublicKey.toBase58()
       })
 
       // Prepare input token
@@ -415,7 +418,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         audioTokenInfo,
         userPublicKey,
         feePayer,
-        instructions
+        instructions,
+        inputTokenConfig
       )
 
       const firstSwapInstructions = convertJupiterInstructions([
@@ -532,7 +536,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           outputDecimals: outputTokenConfig.decimals,
           amountUi: amountToSwap,
           swapMode: 'ExactIn',
-          onlyDirectRoutes: false
+          onlyDirectRoutes: false,
+          taker: userPublicKey.toBase58()
         }
       )
 
@@ -573,7 +578,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           outputTokenConfig,
           userPublicKey,
           feePayer,
-          instructions
+          instructions,
+          audioTokenInfo
         )
 
       const secondSwapInstructions = convertJupiterInstructions([

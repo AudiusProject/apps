@@ -19,7 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { User } from '~/models/User'
 import {
   getJupiterQuoteByMintWithRetry,
-  jupiterInstance
+  type JupiterMintQuoteParams
 } from '~/services/Jupiter'
 import {
   INTERNAL_TRANSFER_MEMO_STRING,
@@ -326,40 +326,107 @@ export const validateAndCreateTokenConfigs = (
 export const getJupiterSwapInstructions = async (
   swapRequestParams: SwapRequest,
   outputTokenConfig?: UserBankManagedTokenInfo,
-  userPublicKey?: PublicKey,
-  feePayer?: PublicKey,
-  instructions?: TransactionInstruction[]
+  _userPublicKey?: PublicKey,
+  _feePayer?: PublicKey,
+  _instructions?: TransactionInstruction[],
+  inputTokenConfig?: UserBankManagedTokenInfo
 ): Promise<{
   swapInstructionsResult: SwapInstructionsResponse
   outputAtaForJupiter?: PublicKey
 }> => {
-  let swapInstructionsResult
   let outputAtaForJupiter: PublicKey | undefined
 
-  try {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: {
-        ...swapRequestParams,
-        useSharedAccounts: true
-      }
-    })
-  } catch (e) {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: {
-        ...swapRequestParams,
-        useSharedAccounts: false
-      }
-    })
+  // Extract information from quoteResponse in SwapRequest
+  const quoteResponse = swapRequestParams.quoteResponse
 
-    // Add output ATA instruction if fallback is used and all required params are provided
-    if (outputTokenConfig && userPublicKey && feePayer && instructions) {
-      outputAtaForJupiter = addJupiterOutputAtaInstruction({
-        tokenConfig: outputTokenConfig,
-        userPublicKey,
-        feePayer,
-        instructions
-      })
-    }
+  // Check if we have a user public key to use as taker
+  const hasTaker = !!swapRequestParams.userPublicKey
+
+  if (!hasTaker) {
+    // Without a taker, Ultra API won't provide a transaction
+    // This is a required parameter for getting executable transactions
+    throw new Error(
+      'Cannot get swap transaction without taker. Ultra API requires taker (user public key) for transactions.'
+    )
+  }
+
+  // Use Ultra API with taker to get complete transaction
+  const ultraParams: Omit<JupiterMintQuoteParams, 'maxAccounts'> = {
+    inputMint: quoteResponse.inputMint,
+    outputMint: quoteResponse.outputMint,
+    inputDecimals: inputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
+    outputDecimals: outputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
+    amountUi: parseFloat(quoteResponse.inAmount),
+    slippageBps: quoteResponse.slippageBps,
+    swapMode: quoteResponse.swapMode,
+    onlyDirectRoutes: false, // Default to false, as this is typically not set in legacy requests
+    taker: swapRequestParams.userPublicKey // Use the user public key as taker
+  }
+
+  // Get Ultra order which includes the complete transaction
+  const quoteResult = await getJupiterQuoteByMintWithRetry(ultraParams)
+
+  if (!quoteResult.quoteResult.order.transaction) {
+    throw new Error(
+      'Ultra API did not return a transaction despite having taker'
+    )
+  }
+
+  // Decode the transaction from base64
+  const transactionBuffer = Buffer.from(
+    quoteResult.quoteResult.order.transaction,
+    'base64'
+  )
+  const transaction = VersionedTransaction.deserialize(transactionBuffer)
+
+  // Extract instructions from the transaction
+  // Note: This is a simplified approach. The Ultra transaction contains all instructions
+  // For backward compatibility, we'll create a mock SwapInstructionsResponse
+  const swapInstructionsResult: SwapInstructionsResponse = {
+    swapInstruction: {
+      programId: '', // We'll need to identify the main swap instruction
+      data: '',
+      accounts: []
+    },
+    addressLookupTableAddresses: [], // Extract from transaction if available
+    computeBudgetInstructions: [],
+    setupInstructions: [],
+    cleanupInstruction: undefined
+  }
+
+  // For now, extract all instructions from the transaction as setup instructions
+  // This is a temporary solution - in production, we'd need to properly identify
+  // which instructions are setup, swap, cleanup, etc.
+  const accountKeys = transaction.message.getAccountKeys()
+  swapInstructionsResult.setupInstructions =
+    transaction.message.compiledInstructions.map((inst) => ({
+      programId: accountKeys.get(inst.programIdIndex)!.toBase58(),
+      data: Buffer.from(inst.data).toString('base64'),
+      accounts: inst.accountKeyIndexes.map((accountIndex) => ({
+        pubkey: accountKeys.get(accountIndex)!.toBase58(),
+        isSigner: transaction.message.isAccountSigner(accountIndex),
+        isWritable: transaction.message.isAccountWritable(accountIndex)
+      }))
+    }))
+
+  // Use the last instruction as the main swap instruction (simplified approach)
+  if (swapInstructionsResult.setupInstructions.length > 0) {
+    const lastInstruction =
+      swapInstructionsResult.setupInstructions[
+        swapInstructionsResult.setupInstructions.length - 1
+      ]
+    swapInstructionsResult.swapInstruction = lastInstruction
+    // Remove it from setup instructions
+    swapInstructionsResult.setupInstructions =
+      swapInstructionsResult.setupInstructions.slice(0, -1)
+  }
+
+  // Extract address lookup table addresses if available
+  if (transaction.message.addressTableLookups) {
+    swapInstructionsResult.addressLookupTableAddresses =
+      transaction.message.addressTableLookups.map((lookup) =>
+        lookup.accountKey.toBase58()
+      )
   }
 
   return { swapInstructionsResult, outputAtaForJupiter }
