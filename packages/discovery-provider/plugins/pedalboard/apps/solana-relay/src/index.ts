@@ -15,6 +15,8 @@ import {
   discoveryNodeSignerRecoveryMiddleware
 } from './middleware/signerRecovery'
 import { cache } from './routes/cache'
+import { swapCoin } from './routes/coins/swap_coin'
+import { swapCoinQuote } from './routes/coins/swap_coin_quote'
 import { feePayer } from './routes/feePayer'
 import { health } from './routes/health/health'
 import { location } from './routes/instruction/location'
@@ -50,6 +52,8 @@ const main = async () => {
   app.get('/solana/launchpad/claim_fees', claimFees)
   app.get('/solana/launchpad/claim_vested_coins', claimVestedCoins)
   app.get('/solana/launchpad/first_buy_quote', firstBuyQuote)
+  app.get('/solana/coins/swap_coin_quote', swapCoinQuote)
+  app.get('/solana/coins/swap_coin', swapCoin)
   app.get('/solana/launchpad/config', getLaunchpadConfigRoute)
 
   // Apply middleware for routes that need user/discovery validation
