@@ -45,6 +45,7 @@ if (!AAO_AUTH_PASSWORD) {
 }
 
 const rewardAmountRatio = 10
+const skipRatioChallenges = ['dvl']
 
 const sdk = getAudiusSdk()
 
@@ -186,7 +187,10 @@ app.post('/attestation/:handle', async (c) => {
   )
 
   // Reward attestation proportional to user score confidence
-  if (userScore.overallScore < (amount as number) / rewardAmountRatio) {
+  if (
+    !skipRatioChallenges.includes(challengeId) &&
+    userScore.overallScore < (amount as number) / rewardAmountRatio
+  ) {
     return c.json({ error: 'denied' }, 400)
   }
 
