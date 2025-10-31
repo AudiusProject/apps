@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
@@ -15,6 +16,7 @@ const AUDIO_DECIMALS = 8
  * - inputAmountUi: Amount of AUDIO in UI format (human-readable, e.g., "100" for 100 AUDIO)
  * - outputMint: The mint address of the output token (artist coin)
  * - userPublicKey: The public key of the user initiating the swap
+ * - swapDirection: The direction of the swap (either "audioToCoin" or "coinToAudio")
  *
  * Returns:
  * - transaction: Base64-encoded serialized transaction ready to be signed by the user
@@ -22,7 +24,13 @@ const AUDIO_DECIMALS = 8
  */
 export const swapCoin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { inputAmountUi, outputMint, userPublicKey } = req.query
+    const {
+      inputAmountUi,
+      coinMint,
+      swapDirection,
+      userPublicKey,
+      isExternalWallet = false
+    } = req.query
 
     // Validate required parameters
     if (!inputAmountUi || typeof inputAmountUi !== 'string') {
@@ -33,9 +41,21 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    if (!outputMint || typeof outputMint !== 'string') {
+    if (
+      !swapDirection ||
+      typeof swapDirection !== 'string' ||
+      (swapDirection !== 'audioToCoin' && swapDirection !== 'coinToAudio')
+    ) {
       res.status(400).json({
-        error: 'outputMint is required and must be a valid mint address'
+        error:
+          'swapDirection is required and must be a string representing the direction of the swap'
+      })
+      return
+    }
+
+    if (!coinMint || typeof coinMint !== 'string') {
+      res.status(400).json({
+        error: 'coinMint is required and must be a valid mint address'
       })
       return
     }
@@ -48,10 +68,10 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Validate public keys
-    let outputMintPubkey: PublicKey
+    let coinMintPubkey: PublicKey
     let userPubkey: PublicKey
     try {
-      outputMintPubkey = new PublicKey(outputMint)
+      coinMintPubkey = new PublicKey(coinMint)
       userPubkey = new PublicKey(userPublicKey)
     } catch (e) {
       res.status(400).json({
@@ -61,11 +81,11 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Convert UI amount to bigint
-    const audioAmountBN = new BN(
+    const inputAmountBN = new BN(
       Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
     )
 
-    if (audioAmountBN.lte(new BN(0))) {
+    if (inputAmountBN.lte(new BN(0))) {
       res.status(400).json({
         error: 'inputAmountUi must be greater than 0'
       })
@@ -78,11 +98,11 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
     // Find the pool using the coin's mint
-    const dbcPool = await dbcClient.state.getPoolByBaseMint(outputMintPubkey)
+    const dbcPool = await dbcClient.state.getPoolByBaseMint(coinMintPubkey)
 
     if (!dbcPool) {
       res.status(404).json({
-        error: `DBC pool not found for mint: ${outputMint}`
+        error: `DBC pool not found for mint: ${coinMint}`
       })
       return
     }
@@ -98,18 +118,14 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    // Get current point based on activation type
-    // ActivationType: 0 = Slot, 1 = Timestamp
-    logger.info({ poolConfig: poolConfig.activationType })
     const currentPoint = await connection.getSlot()
 
     // Get swap quote
-    // swapBaseForQuote: false means we're swapping quote (AUDIO) for base (artist token)
     const swapQuote = await dbcClient.pool.swapQuote({
       virtualPool: dbcPool.account,
       config: poolConfig,
-      swapBaseForQuote: false,
-      amountIn: audioAmountBN,
+      swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
+      amountIn: inputAmountBN,
       hasReferral: false,
       currentPoint: new BN(currentPoint)
     })
@@ -117,16 +133,33 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     // Create the swap transaction
     const swapTx = await dbcClient.pool.swap({
       owner: userPubkey,
-      amountIn: audioAmountBN,
+      amountIn: inputAmountBN,
       minimumAmountOut: swapQuote.outputAmount,
-      swapBaseForQuote: false,
+      swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
       pool: dbcPool.publicKey,
       referralTokenAccount: null,
       payer: userPubkey
     })
 
-    // Set the fee payer and get recent blockhash
-    swapTx.feePayer = userPubkey
+    // Get a random fee payer
+    if (isExternalWallet) {
+      swapTx.feePayer = userPubkey
+    } else {
+      if (
+        !config.solanaFeePayerWallets ||
+        config.solanaFeePayerWallets.length === 0
+      ) {
+        res.status(500).json({
+          error: 'Relayer fee payer not configured.'
+        })
+        return
+      }
+      const index = Math.floor(
+        Math.random() * config.solanaFeePayerWallets.length
+      )
+      swapTx.feePayer = config.solanaFeePayerWallets[index].publicKey
+    }
+
     swapTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
 
     // Serialize the transaction

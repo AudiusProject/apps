@@ -9,11 +9,12 @@ import { getConnection } from '../../utils/connections'
 const AUDIO_DECIMALS = 8
 
 /**
- * Gets a quote for swapping AUDIO to an artist coin using Meteora's DBC
+ * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC
  *
  * Query params:
- * - audioInputAmount: Amount of AUDIO in UI format (human-readable, e.g., "100" for 100 AUDIO)
- * - outputMint: The mint address of the output token (artist coin)
+ * - inputAmountUi: Amount in UI format (human-readable, e.g., "100")
+ * - coinMint: The mint address of the artist coin
+ * - swapDirection: The direction of the swap (either "audioToCoin" or "coinToAudio")
  *
  * Returns:
  * - outputAmount: The quoted output amount in bigint format
@@ -23,43 +24,55 @@ export const swapCoinQuote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { inputAmountUi, outputMint } = req.query
+    const { inputAmountUi, coinMint, swapDirection } = req.query
 
     // Validate required parameters
     if (!inputAmountUi || typeof inputAmountUi !== 'string') {
       res.status(400).json({
         error:
-          'inputAmountUi is required and must be a string representing the UI amount of AUDIO'
+          'inputAmountUi is required and must be a string representing the UI amount'
       })
       return
     }
 
-    if (!outputMint || typeof outputMint !== 'string') {
+    if (
+      !swapDirection ||
+      typeof swapDirection !== 'string' ||
+      (swapDirection !== 'audioToCoin' && swapDirection !== 'coinToAudio')
+    ) {
       res.status(400).json({
-        error: 'outputMint is required and must be a valid mint address'
+        error:
+          'swapDirection is required and must be a string representing the direction of the swap'
       })
       return
     }
 
-    // Validate outputMint is a valid public key
-    let outputMintPubkey: PublicKey
+    if (!coinMint || typeof coinMint !== 'string') {
+      res.status(400).json({
+        error: 'coinMint is required and must be a valid mint address'
+      })
+      return
+    }
+
+    // Validate public keys
+    let coinMintPubkey: PublicKey
     try {
-      outputMintPubkey = new PublicKey(outputMint)
+      coinMintPubkey = new PublicKey(coinMint)
     } catch (e) {
       res.status(400).json({
-        error: 'outputMint must be a valid Solana public key'
+        error: 'coinMint must be a valid Solana public key'
       })
       return
     }
 
-    // Convert UI amount to big int version
-    const audioAmountBN = new BN(
+    // Convert UI amount to bigint
+    const inputAmountBN = new BN(
       Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
     )
 
-    if (audioAmountBN.lte(new BN(0))) {
+    if (inputAmountBN.lte(new BN(0))) {
       res.status(400).json({
-        error: 'audioInputAmount must be greater than 0'
+        error: 'inputAmountUi must be greater than 0'
       })
       return
     }
@@ -69,22 +82,12 @@ export const swapCoinQuote = async (
     const connection = getConnection()
     const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
-    // Get the pool using the output mint as the base mint
-    const virtualPoolAccount =
-      await dbcClient.state.getPoolByBaseMint(outputMintPubkey)
+    // Find the pool using the coin's mint
+    const dbcPool = await dbcClient.state.getPoolByBaseMint(coinMintPubkey)
 
-    if (!virtualPoolAccount) {
-      res.status(404).json({
-        error: `DBC pool not found for mint: ${outputMint}`
-      })
-      return
-    }
-
-    // Extract the actual pool data
-    const dbcPool = await dbcClient.state.getPoolByBaseMint(outputMintPubkey)
     if (!dbcPool) {
       res.status(404).json({
-        error: `DBC pool not found for mint: ${outputMint}`
+        error: `DBC pool not found for mint: ${coinMint}`
       })
       return
     }
@@ -102,12 +105,11 @@ export const swapCoinQuote = async (
     const currentPoint = await connection.getSlot()
 
     // Get swap quote
-    // swapBaseForQuote: false means we're swapping quote (AUDIO) for base (artist token)
     const quote = await dbcClient.pool.swapQuote({
       virtualPool: dbcPool.account,
       config: poolConfig,
-      swapBaseForQuote: false,
-      amountIn: audioAmountBN,
+      swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
+      amountIn: inputAmountBN,
       hasReferral: false,
       currentPoint: new BN(currentPoint)
     })
