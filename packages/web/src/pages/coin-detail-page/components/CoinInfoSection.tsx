@@ -18,7 +18,7 @@ import {
   route,
   shortenSPLAddress
 } from '@audius/common/utils'
-import { wAUDIO } from '@audius/fixed-decimal'
+import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
   IconCopy,
@@ -53,6 +53,7 @@ import { useClaimFees } from 'hooks/useClaimFees'
 import { useClaimVestedCoins } from 'hooks/useClaimVestedCoins'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
+import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -281,6 +282,35 @@ const ArtistVestingSection = ({
 }: ArtistVestingSectionProps) => {
   const { data: currentUser } = useCurrentAccountUser()
   const isOwner = currentUser?.user_id === coin.ownerId
+  const isMobile = useIsMobile()
+  const rewardsPoolBalance = new FixedDecimal(
+    BigInt(coin.rewardPool?.balance ?? 0),
+    coin.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: getTokenDecimalPlaces(coin.rewardPool?.balance ?? 0)
+  })
+  const lockedBalance = new FixedDecimal(
+    BigInt(coin.artistLocker?.locked ?? 0),
+    coin.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: getTokenDecimalPlaces(coin.artistLocker?.locked ?? 0)
+  })
+  const unlockedBalance = new FixedDecimal(
+    BigInt(coin.artistLocker?.unlocked ?? 0),
+    coin.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: getTokenDecimalPlaces(
+      coin.artistLocker?.unlocked ?? 0
+    )
+  })
+  const claimableBalance = new FixedDecimal(
+    BigInt(coin.artistLocker?.claimable ?? 0),
+    coin.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: getTokenDecimalPlaces(
+      coin.artistLocker?.claimable ?? 0
+    )
+  })
   return (
     <Flex column gap='m' w='100%'>
       <Divider orientation='horizontal' />
@@ -318,7 +348,7 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {coin.artistLocker?.locked?.toLocaleString()} ${coin.ticker}
+          {lockedBalance} ${coin.ticker}
         </Text>
       </Flex>
       <Flex
@@ -335,28 +365,30 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {coin.artistLocker?.unlocked?.toLocaleString()} ${coin.ticker}
+          {unlockedBalance} ${coin.ticker}
         </Text>
       </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.availableToClaim}
-          </Text>
-          <Tooltip
-            text={overflowMessages.tooltips.availableToClaim}
-            mount='body'
-          >
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        {isOwner ? (
+      {isOwner ? (
+        <Flex
+          alignItems='center'
+          justifyContent='space-between'
+          alignSelf='stretch'
+        >
           <Flex alignItems='center' gap='s'>
-            {coin.artistLocker?.claimable && coin.artistLocker.claimable > 0 ? (
+            <Text variant='body' size='s' strength='strong'>
+              {overflowMessages.availableToClaim}
+            </Text>
+            <Tooltip
+              text={overflowMessages.tooltips.availableToClaim}
+              mount='body'
+            >
+              <IconInfo size='s' color='subdued' />
+            </Tooltip>
+          </Flex>
+          <Flex alignItems='center' gap='s'>
+            {coin.artistLocker?.claimable &&
+            coin.artistLocker.claimable > 0 &&
+            !isMobile ? (
               <Flex gap='xs' alignItems='center'>
                 <TextLink
                   onClick={handleClaimVestedCoinsClick}
@@ -371,11 +403,11 @@ const ArtistVestingSection = ({
               </Flex>
             ) : null}
             <Text variant='body' size='s'>
-              {coin.artistLocker?.claimable?.toLocaleString()} ${coin.ticker}
+              {claimableBalance} ${coin.ticker}
             </Text>
           </Flex>
-        ) : null}
-      </Flex>
+        </Flex>
+      ) : null}
       <Divider orientation='horizontal' />
       <Flex
         alignItems='center'
@@ -391,7 +423,7 @@ const ArtistVestingSection = ({
           </Tooltip>
         </Flex>
         <Text variant='body' size='s'>
-          {coin.rewardPool?.balance?.toLocaleString()} ${coin.ticker}
+          {rewardsPoolBalance} ${coin.ticker}
         </Text>
       </Flex>
     </Flex>
@@ -406,6 +438,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
+  const isMobile = useIsMobile()
 
   const { onOpen: openClaimVestedCoinsModal } = useClaimVestedCoinsModal()
 
@@ -571,21 +604,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     }
   )
 
-  const { openAppKitModal: openAppKitModalForVestedCoins } =
-    useConnectExternalWallets(async () => {
-      const solanaAccount = appkitModal.getAccount('solana')
-      const connectedAddress = solanaAccount?.address
-
-      if (!coinCreatorWalletAddress) {
-        toast(toastMessages.vestedCoinsClaimFailed)
-        return
-      }
-      if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
-        toast(toastMessages.incorrectWalletLinked)
-      }
-      // Wallet is connected and verified, modal will handle the claim
-    })
-
   const handleClaimFeesClick = useCallback(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
@@ -665,6 +683,27 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     [handleClaimVestedCoins]
   )
 
+  const { openAppKitModal: openAppKitModalForVestedCoins } =
+    useConnectExternalWallets(async () => {
+      const solanaAccount = appkitModal.getAccount('solana')
+      const connectedAddress = solanaAccount?.address
+
+      if (!coinCreatorWalletAddress) {
+        toast(toastMessages.vestedCoinsClaimFailed)
+        return
+      }
+      if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
+        toast(toastMessages.incorrectWalletLinked)
+      }
+      openClaimVestedCoinsModal({
+        ticker: coin?.ticker ?? '',
+        isOpen: true,
+        claimable: coin?.artistLocker?.claimable ?? 0,
+        onClaim: handleConfirmClaim,
+        isClaimPending: isClaimVestedCoinsPending
+      })
+    })
+
   const handleClaimVestedCoinsClick = useCallback(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
@@ -706,15 +745,13 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         })
       )
       // Open the modal to let user choose allocation
-      if (coin) {
-        openClaimVestedCoinsModal({
-          ticker: coin.ticker ?? '',
-          isOpen: true,
-          claimable: coin.artistLocker?.claimable ?? 0,
-          onClaim: handleConfirmClaim,
-          isClaimPending: isClaimVestedCoinsPending
-        })
-      }
+      openClaimVestedCoinsModal({
+        ticker: coin?.ticker ?? '',
+        isOpen: true,
+        claimable: coin?.artistLocker?.claimable ?? 0,
+        onClaim: handleConfirmClaim,
+        isClaimPending: isClaimVestedCoinsPending
+      })
     }
   }, [
     openAppKitModalForVestedCoins,
@@ -912,7 +949,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                 </Tooltip>
               </Flex>
               <Flex alignItems='center' gap='s'>
-                {unclaimedFees >= MIN_CLAIMABLE_FEES ? (
+                {unclaimedFees >= MIN_CLAIMABLE_FEES && !isMobile ? (
                   <Flex gap='xs' alignItems='center'>
                     <TextLink
                       onClick={handleClaimFeesClick}

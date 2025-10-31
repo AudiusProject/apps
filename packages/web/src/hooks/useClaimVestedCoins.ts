@@ -1,8 +1,4 @@
 import { type Coin } from '@audius/common/adapters'
-import type {
-  ClaimVestedCoinsResponse,
-  UserCoinWithAccounts
-} from '@audius/sdk'
 import {
   getArtistCoinQueryKey,
   getUserCoinQueryKey,
@@ -11,6 +7,7 @@ import {
   QUERY_KEYS
 } from '@audius/common/api'
 import { Feature } from '@audius/common/models'
+import type { UserCoinWithAccounts } from '@audius/sdk'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import {
@@ -86,18 +83,17 @@ export const useClaimVestedCoins = (
       // This transaction will:
       // 1. Claim vested tokens to the external wallet (which must sign)
       // 2. Transfer tokens from external wallet to user bank (in same tx)
-      const claimVestedCoinsResponse =
-        await sdk.services.solanaRelay.claimVestedCoins({
-          tokenMint,
-          ownerWalletAddress: externalWalletAddress,
-          receiverWalletAddress: userBank.toString(),
-          rewardsPoolPercentage
-        })
-
-      // Cast to access additional fields that may not be in SDK types yet
-      const responseWithAmounts =
-        claimVestedCoinsResponse as typeof claimVestedCoinsResponse
-      const { claimVestedCoinsTxs: serializedTxs } = claimVestedCoinsResponse
+      const {
+        claimVestedCoinsTxs: serializedTxs,
+        availableAmount,
+        userClaimedAmount,
+        rewardsPoolClaimedAmount
+      } = await sdk.services.solanaRelay.claimVestedCoins({
+        tokenMint,
+        ownerWalletAddress: externalWalletAddress,
+        receiverWalletAddress: userBank.toString(),
+        rewardsPoolPercentage
+      })
 
       // Transaction is sent from the backend as a serialized base64 string
       const claimVestedCoinsTxs = serializedTxs.map((tx: string) =>
@@ -121,14 +117,13 @@ export const useClaimVestedCoins = (
 
       return {
         signature,
-        availableAmount: responseWithAmounts.availableAmount,
-        userClaimedAmount: responseWithAmounts.userClaimedAmount,
-        rewardsPoolClaimedAmount: responseWithAmounts.rewardsPoolClaimedAmount
+        availableAmount,
+        userClaimedAmount,
+        rewardsPoolClaimedAmount
       }
     },
     ...options,
     onError: (error, params) => {
-      // Call the original onError if provided
       reportToSentry({
         error,
         feature: Feature.ArtistCoins,
@@ -143,8 +138,6 @@ export const useClaimVestedCoins = (
       // Optimistically update the coin data with new locker amounts
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
       queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
-        console.log('REED existingCoin', existingCoin, data.availableAmount)
-
         if (
           !existingCoin ||
           !existingCoin.artistLocker ||
@@ -153,15 +146,6 @@ export const useClaimVestedCoins = (
           return existingCoin
 
         const claimedAmount = parseFloat(data.availableAmount)
-        console.log('REED claimedAmount', {
-          claimedAmount,
-          userClaimedAmount: data.userClaimedAmount,
-          rewardsPoolClaimedAmount: data.rewardsPoolClaimedAmount,
-          claimable: existingCoin.artistLocker.claimable,
-          unlocked: existingCoin.artistLocker.unlocked,
-          rewardPoolBalance: existingCoin.rewardPool?.balance
-        })
-
         return {
           ...existingCoin,
           artistLocker: {
@@ -205,13 +189,11 @@ export const useClaimVestedCoins = (
               balance: Number(
                 BigInt(existingUserCoin.balance.toString()) + claimedAmount
               )
-              // Also update balanceUsd if we had the price data, but for now we'll let it be recalculated
             }
           }
         )
       }
 
-      // Invalidate coin queries to refresh vested coin amounts
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.coins]
       })
@@ -221,7 +203,6 @@ export const useClaimVestedCoins = (
         queryKey: [QUERY_KEYS.userCoins]
       })
 
-      // Call the original onSuccess if provided
       options?.onSuccess?.(data, variables, context)
     }
   })

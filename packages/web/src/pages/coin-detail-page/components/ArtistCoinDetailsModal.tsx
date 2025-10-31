@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import type { Coin } from '@audius/common/adapters'
 import {
   useArtistCoin,
@@ -6,24 +8,32 @@ import {
   type CoinGeckoCoinResponse
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { formatCurrencyWithSubscript } from '@audius/common/utils'
+import { toast } from '@audius/common/src/store/ui/toast/slice'
+import {
+  formatCurrencyWithSubscript,
+  shortenSPLAddress
+} from '@audius/common/utils'
 import {
   Flex,
   Text,
   Divider,
   IconInfo,
   Button,
-  useTheme
+  useTheme,
+  IconCopy,
+  IconButton
 } from '@audius/harmony'
+import { useDispatch } from 'react-redux'
 
 import { env } from 'services/env'
+import { copyToClipboard } from 'utils/clipboardUtil'
 
 import { TokenIcon } from '../../../components/buy-sell-modal/TokenIcon'
 import ResponsiveModal from '../../../components/modal/ResponsiveModal'
 import { TokenInfoRow } from '../../artist-coins-launchpad-page/components/TokenInfoRow'
 import { LAUNCHPAD_COIN_DESCRIPTION } from '../../artist-coins-launchpad-page/constants'
 
-const { artistCoinDetails } = coinDetailsMessages
+const { artistCoinDetails, overflowMenu } = coinDetailsMessages
 
 type ArtistCoinDetailsModalProps = {
   /**
@@ -45,6 +55,7 @@ export const ArtistCoinDetailsModal = ({
   onClose,
   mint
 }: ArtistCoinDetailsModalProps) => {
+  const dispatch = useDispatch()
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const { spacing } = useTheme()
   const { data: artistCoin } = useArtistCoin(mint)
@@ -55,6 +66,13 @@ export const ArtistCoinDetailsModal = ({
     { coinId: 'audius' },
     { enabled: isAudio }
   )
+
+  const handleCopyRewardsPoolAddress = useCallback(() => {
+    if (artistCoin?.rewardPool?.address) {
+      copyToClipboard(artistCoin?.rewardPool?.address)
+      dispatch(toast({ content: overflowMenu.copiedToClipboard, type: 'info' }))
+    }
+  }, [artistCoin?.rewardPool?.address, dispatch])
 
   return (
     <ResponsiveModal
@@ -123,6 +141,29 @@ export const ArtistCoinDetailsModal = ({
           {...(isAudio
             ? convertCoinGeckoResponseToStatsDetailsProps(coingeckoResponse)
             : artistCoin)}
+        />
+
+        <Divider />
+
+        <TokenInfoRow
+          label={overflowMenu.rewardsPool}
+          value={
+            <Flex alignItems='center' gap='s'>
+              <Text userSelect='text'>
+                {shortenSPLAddress(artistCoin?.rewardPool?.address ?? '', 20)}
+              </Text>
+              <IconButton
+                aria-label='Copy rewards pool address'
+                size='s'
+                color='subdued'
+                icon={IconCopy}
+                onClick={handleCopyRewardsPoolAddress}
+              />
+            </Flex>
+          }
+          hasTooltip
+          tooltipContent={overflowMenu.tooltips.rewardsPool}
+          variant='block'
         />
 
         {/* Close Button */}
