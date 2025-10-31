@@ -28,7 +28,6 @@ type ProfileBioProps = {
   bio: string
   location: string
   website: string
-  donation: string
   created: string
   twitterHandle: string
   instagramHandle: string
@@ -44,7 +43,6 @@ export const ProfileBio = ({
   bio,
   location,
   website,
-  donation,
   created,
   twitterHandle,
   instagramHandle,
@@ -58,7 +56,6 @@ export const ProfileBio = ({
 
   const linkCount = [
     website,
-    donation,
     twitterHandle,
     instagramHandle,
     tikTokHandle
@@ -126,17 +123,6 @@ export const ProfileBio = ({
       })
     )
   }, [record, handle, website])
-  const onClickDonation = useCallback(
-    (event: { target: { href: string } }) => {
-      record(
-        make(Name.PROFILE_PAGE_CLICK_DONATION, {
-          handle: handle.replace('@', ''),
-          donation: event.target.href
-        })
-      )
-    },
-    [record, handle]
-  )
 
   const renderCollapsedContent = () =>
     hasSocial ? (
@@ -206,13 +192,6 @@ export const ProfileBio = ({
           type={Type.WEBSITE}
           link={website}
           onClick={onClickWebsite}
-        />
-      )}
-      {donation && (
-        <SocialLink
-          type={Type.DONATION}
-          link={donation}
-          onClick={onClickDonation}
         />
       )}
       <Text size='xs'>{location}</Text>

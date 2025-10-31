@@ -10,7 +10,7 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { YourCoins } from 'pages/pay-and-earn-page/components/YourCoins'
+import { WalletCoinsList } from 'pages/wallet-page/components/WalletCoinsList'
 
 import { LinkedWallets } from './components/LinkedWallets'
 
@@ -50,7 +50,7 @@ export const WalletPage = () => {
       }}
     >
       <AccountBalance />
-      <YourCoins />
+      <WalletCoinsList />
       <LinkedWallets />
     </Flex>
   )

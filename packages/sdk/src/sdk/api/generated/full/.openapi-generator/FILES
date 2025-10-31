@@ -251,6 +251,7 @@ models/TrackLibraryResponseFull.ts
 models/TrackMilestoneNotificationActionData.ts
 models/TrackRepostsResponseFull.ts
 models/TrackSegment.ts
+models/TracksCountResponse.ts
 models/TransactionDetails.ts
 models/TransactionHistoryCountResponse.ts
 models/TransactionHistoryResponse.ts

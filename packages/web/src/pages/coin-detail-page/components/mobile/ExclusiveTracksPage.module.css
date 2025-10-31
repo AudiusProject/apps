@@ -1,0 +1,15 @@
+.container {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--unit-2);
+  width: 100%;
+}
+
+.tracksContainer {
+  padding: var(--unit-3);
+}

@@ -7,30 +7,36 @@ import {
   Button,
   Flex,
   IconCloudDownload,
+  IconWallet,
   Paper,
   SelectablePill
 } from '@audius/harmony'
 
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
-
+import { CashWallet } from 'pages/pay-and-earn-page/components/CashWallet'
 import {
   PurchasesTab,
   usePurchases
-} from '../../pay-and-earn-page/components/PurchasesTab'
-import { SalesTab, useSales } from '../../pay-and-earn-page/components/SalesTab'
+} from 'pages/pay-and-earn-page/components/PurchasesTab'
+import { SalesTab, useSales } from 'pages/pay-and-earn-page/components/SalesTab'
 import {
   WithdrawalsTab,
   useWithdrawals
-} from '../../pay-and-earn-page/components/WithdrawalsTab'
-import { TableType, TransactionHistoryPageProps } from '../types'
+} from 'pages/pay-and-earn-page/components/WithdrawalsTab'
 
-export const messages = {
-  title: 'Transaction History',
+const messages = {
+  title: 'Cash',
   sales: 'Sales',
   purchases: 'Your Purchases',
   withdrawals: 'Withdrawal History',
   downloadCSV: 'Download CSV'
+}
+
+enum TableType {
+  SALES = 'sales',
+  PURCHASES = 'purchases',
+  WITHDRAWALS = 'withdrawals'
 }
 
 type TableMetadata = {
@@ -39,9 +45,7 @@ type TableMetadata = {
   isDownloadCSVButtonDisabled: boolean
 }
 
-export const TransactionHistoryPage = ({
-  tableView
-}: TransactionHistoryPageProps) => {
+export const CashPage = () => {
   const { data: isArtist } = useCurrentAccount({
     select: (account) => account?.hasTracks
   })
@@ -54,7 +58,7 @@ export const TransactionHistoryPage = ({
       ? [TableType.SALES, TableType.PURCHASES, TableType.WITHDRAWALS]
       : [TableType.PURCHASES, TableType.WITHDRAWALS]
     setTableOptions(tableOptions)
-    setSelectedTable(tableView ?? tableOptions[0])
+    setSelectedTable(tableOptions[0])
   })
 
   const { isEnabled: isOwnYourFansEnabled } = useFeatureFlag(
@@ -93,7 +97,7 @@ export const TransactionHistoryPage = ({
     downloadCSV: downloadWithdrawalsCSV
   } = useWithdrawals()
 
-  const header = <Header primary={messages.title} showBackButton />
+  const header = <Header primary={messages.title} icon={IconWallet} />
 
   const tables: Record<TableType, TableMetadata> = {
     [TableType.SALES]: {
@@ -124,74 +128,77 @@ export const TransactionHistoryPage = ({
 
   return (
     <Page title={messages.title} header={header}>
-      <Paper w='100%'>
-        <Flex direction='column' w='100%'>
-          <Flex
-            ph='xl'
-            pt='xl'
-            direction='row'
-            justifyContent='space-between'
-            w='100%'
-          >
-            <Flex gap='s'>
-              {tableOptions?.map((t) => (
-                <SelectablePill
-                  key={tables[t].label}
-                  label={tables[t].label}
-                  isSelected={selectedTable === t}
-                  onClick={() => handleSelectablePillClick(t)}
-                />
-              ))}
-            </Flex>
-            <Button
-              onClick={
-                selectedTable ? tables[selectedTable].downloadCSV : undefined
-              }
-              variant='secondary'
-              size='small'
-              iconLeft={IconCloudDownload}
-              disabled={
-                selectedTable
-                  ? tables[selectedTable].isDownloadCSVButtonDisabled
-                  : true
-              }
+      <Flex direction='column' gap='l' w='100%' mb='xl'>
+        <CashWallet />
+        <Paper w='100%'>
+          <Flex direction='column' w='100%'>
+            <Flex
+              ph='xl'
+              pt='xl'
+              direction='row'
+              justifyContent='space-between'
+              w='100%'
             >
-              {messages.downloadCSV}
-            </Button>
+              <Flex gap='s'>
+                {tableOptions?.map((t) => (
+                  <SelectablePill
+                    key={tables[t].label}
+                    label={tables[t].label}
+                    isSelected={selectedTable === t}
+                    onClick={() => handleSelectablePillClick(t)}
+                  />
+                ))}
+              </Flex>
+              <Button
+                onClick={
+                  selectedTable ? tables[selectedTable].downloadCSV : undefined
+                }
+                variant='secondary'
+                size='small'
+                iconLeft={IconCloudDownload}
+                disabled={
+                  selectedTable
+                    ? tables[selectedTable].isDownloadCSVButtonDisabled
+                    : true
+                }
+              >
+                {messages.downloadCSV}
+              </Button>
+            </Flex>
+            {selectedTable === 'withdrawals' ? (
+              <WithdrawalsTab
+                data={withdrawals}
+                count={withdrawalsCount}
+                isEmpty={isWithdrawalsEmpty}
+                isLoading={isWithdrawalsLoading}
+                onSort={onWithdrawalsSort}
+                onClickRow={onWithdrawalsClickRow}
+                fetchMore={fetchMoreWithdrawals}
+              />
+            ) : selectedTable === 'purchases' ? (
+              <PurchasesTab
+                data={purchases}
+                count={purchasesCount}
+                isEmpty={isPurchasesEmpty}
+                isLoading={isPurchasesLoading}
+                onSort={onPurchasesSort}
+                onClickRow={onPurchasesClickRow}
+                fetchMore={fetchMorePurchases}
+              />
+            ) : (
+              <SalesTab
+                data={sales}
+                count={salesCount}
+                isEmpty={isSalesEmpty}
+                isLoading={isSalesLoading}
+                onSort={onSalesSort}
+                onClickRow={onSalesClickRow}
+                fetchMore={fetchMoreSales}
+              />
+            )}
           </Flex>
-          {selectedTable === 'withdrawals' ? (
-            <WithdrawalsTab
-              data={withdrawals}
-              count={withdrawalsCount}
-              isEmpty={isWithdrawalsEmpty}
-              isLoading={isWithdrawalsLoading}
-              onSort={onWithdrawalsSort}
-              onClickRow={onWithdrawalsClickRow}
-              fetchMore={fetchMoreWithdrawals}
-            />
-          ) : selectedTable === 'purchases' ? (
-            <PurchasesTab
-              data={purchases}
-              count={purchasesCount}
-              isEmpty={isPurchasesEmpty}
-              isLoading={isPurchasesLoading}
-              onSort={onPurchasesSort}
-              onClickRow={onPurchasesClickRow}
-              fetchMore={fetchMorePurchases}
-            />
-          ) : (
-            <SalesTab
-              data={sales}
-              count={salesCount}
-              isEmpty={isSalesEmpty}
-              isLoading={isSalesLoading}
-              onSort={onSalesSort}
-              onClickRow={onSalesClickRow}
-              fetchMore={fetchMoreSales}
-            />
-          )}
-        </Flex>
-      </Paper>
+        </Paper>
+      </Flex>
     </Page>
   )
 }

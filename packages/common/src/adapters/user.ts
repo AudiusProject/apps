@@ -87,7 +87,6 @@ export const userMetadataFromSDK = (
     instagram_handle: input.instagramHandle ?? null,
     tiktok_handle: input.tiktokHandle ?? null,
     website: input.website ?? null,
-    donation: input.donation ?? null,
     profile_type: input.profileType === 'label' ? 'label' : null,
     cover_photo_sizes: input.coverPhotoSizes ?? null,
     creator_node_endpoint: input.creatorNodeEndpoint ?? null,
@@ -180,7 +179,6 @@ export const userMetadataToSdk = (
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,
-  donation: input.donation ?? undefined,
   artistPickTrackId: OptionalId.parse(input.artist_pick_track_id ?? undefined),
   events: {
     referrer: OptionalId.parse(input.events?.referrer ?? undefined),

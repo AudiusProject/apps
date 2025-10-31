@@ -6,7 +6,6 @@ import {
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
-import { TRANSACTION_HISTORY_PAGE } from '@audius/common/src/utils/route'
 import {
   WithdrawUSDCModalPages,
   useWithdrawUSDCModal,
@@ -140,16 +139,6 @@ export const CashWallet = () => {
             <PayoutWalletDisplay />
           </Flex>
         </Flex>
-
-        {/* Right Side - Transaction History Link */}
-        <TextLink
-          variant='visible'
-          size='m'
-          to={TRANSACTION_HISTORY_PAGE}
-          css={styles.transactionLink}
-        >
-          {walletMessages.transactionHistory}
-        </TextLink>
       </Flex>
 
       {/* Bottom Button Area */}

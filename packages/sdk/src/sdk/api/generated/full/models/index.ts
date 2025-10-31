@@ -237,6 +237,7 @@ export * from './TrackLibraryResponseFull';
 export * from './TrackMilestoneNotificationActionData';
 export * from './TrackRepostsResponseFull';
 export * from './TrackSegment';
+export * from './TracksCountResponse';
 export * from './TransactionDetails';
 export * from './TransactionHistoryCountResponse';
 export * from './TransactionHistoryResponse';

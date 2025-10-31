@@ -1,9 +1,10 @@
-import { Fragment, useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 
 import {
   UserCoin,
   useArtistCoin,
   useArtistOwnedCoin,
+  useCoinBalance,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
@@ -15,19 +16,25 @@ import {
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
-import { useBuySellModal } from '@audius/common/store'
+import {
+  TOKEN_LISTING_MAP,
+  useAddCashModal,
+  useWithdrawUSDCModal,
+  useBuySellModal
+} from '@audius/common/store'
 import { removeNullable, route } from '@audius/common/utils'
 import {
   Box,
   Button,
+  Divider,
   Flex,
   Paper,
   Text,
   useMedia,
   useTheme,
-  IconCaretRight
+  IconCaretRight,
+  IconLogoCircleUSDCPng
 } from '@audius/harmony'
-import type { CSSObject } from '@emotion/react'
 import { useNavigate } from 'react-router-dom-v5-compat'
 import { roundedHexClipPath } from '~harmony/icons/SVGDefs'
 
@@ -37,11 +44,37 @@ import { ToastContext } from 'components/toast/ToastContext'
 import Tooltip from 'components/tooltip/Tooltip'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
+import { env } from 'services/env'
 
 import { AudioCoinCard } from './AudioCoinCard'
-import { CoinCard } from './CoinCard'
+import { CoinRow } from './CoinCard'
 
-const { COINS_EXPLORE_PAGE } = route
+const { COINS_EXPLORE_PAGE, CASH_PAGE } = route
+
+const USDCCoinCard = () => {
+  const { data: currentUserId } = useCurrentUserId()
+  const navigate = useNavigate()
+
+  const { data: usdcBalance } = useCoinBalance({
+    mint: env.USDC_MINT_ADDRESS,
+    userId: currentUserId ?? undefined
+  })
+  const usdcBalanceFormatted = usdcBalance?.balance
+    ? `$${usdcBalance?.balance?.toLocaleString('en-US', {
+        maximumFractionDigits: 2
+      })}`
+    : '$0.00'
+  return (
+    <CoinRow
+      onClick={() => navigate(CASH_PAGE)}
+      name={messages.cash}
+      icon={<IconLogoCircleUSDCPng width={64} height={64} hex />}
+      symbol={TOKEN_LISTING_MAP.USDC.symbol}
+      heldValue={usdcBalanceFormatted}
+      dollarValue={usdcBalanceFormatted}
+    />
+  )
+}
 
 const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
   const { color } = useTheme()
@@ -69,50 +102,7 @@ const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
   )
 }
 
-// Helper function to determine if an item should have a right border
-const shouldShowRightBorder = (
-  index: number,
-  isSingleColumn: boolean,
-  shouldSpanFullWidth: boolean,
-  isOddCount: boolean,
-  totalItems: number
-): boolean => {
-  if (isSingleColumn || shouldSpanFullWidth) {
-    return false
-  }
-
-  const isEvenIndex = index % 2 === 0
-  const isItemBeforeFullWidth = isOddCount && index === totalItems - 2
-
-  return isEvenIndex && !isItemBeforeFullWidth
-}
-
-// Helper function to build CSS styles for a coin item
-const getCoinItemStyles = (
-  shouldSpanFullWidth: boolean,
-  shouldHaveRightBorder: boolean,
-  shouldHaveTopBorder: boolean,
-  borderColor: string
-): CSSObject => {
-  const baseStyles: CSSObject = {
-    position: 'relative',
-    padding: '0'
-  }
-
-  if (shouldSpanFullWidth) {
-    baseStyles.gridColumn = '1 / -1'
-    if (shouldHaveTopBorder) {
-      baseStyles.borderTop = `1px solid ${borderColor}`
-    }
-  } else if (shouldHaveRightBorder) {
-    baseStyles.borderRight = `1px solid ${borderColor}`
-    baseStyles.paddingRight = '0'
-  }
-
-  return baseStyles
-}
-
-const YourCoinsSkeleton = () => {
+const CoinsListSkeleton = () => {
   const { spacing } = useTheme()
   const { isMobile } = useMedia()
 
@@ -144,6 +134,8 @@ const YourCoinsSkeleton = () => {
 
 const messages = {
   ...buySellMessages,
+  withdrawCash: 'Withdraw Cash',
+  addCash: 'Add Cash',
   managedAccount: "You can't do that as a managed user",
   buySellNotSupported: 'This is not supported in your region'
 }
@@ -165,6 +157,16 @@ const YourCoinsHeader = ({
 
   const { isBuySellSupported } = useBuySellRegionSupport()
 
+  const { onOpen: openWithdrawUSDCModal } = useWithdrawUSDCModal()
+  const { onOpen: openAddCashModal } = useAddCashModal()
+  const handleWithdrawClick = useCallback(() => {
+    openWithdrawUSDCModal()
+  }, [openWithdrawUSDCModal])
+  const handleAddCashClick = useCallback(() => {
+    openAddCashModal()
+  }, [openAddCashModal])
+
+  const showCashButtons = !isMobile
   const handleBuySellClick = useCallback(() => {
     if (isManagedAccount) {
       toast(messages.managedAccount)
@@ -181,28 +183,49 @@ const YourCoinsHeader = ({
       borderBottom='default'
     >
       <Text variant='heading' size='m' color='heading'>
-        {messages.coins}
+        {messages.assets}
       </Text>
-      {isWalletUIBuySellEnabled && !isLoading ? (
-        <Tooltip
-          disabled={isBuySellSupported}
-          text={messages.buySellNotSupported}
-          color='secondary'
-          placement='left'
-          shouldWrapContent={false}
-        >
-          <Box>
+      <Flex gap='s'>
+        {showCashButtons ? (
+          <>
             <Button
               variant='secondary'
               size='small'
-              onClick={isMobile ? openOpenAppDrawer : handleBuySellClick}
-              disabled={!isBuySellSupported}
+              onClick={handleAddCashClick}
             >
-              {messages.buySell}
+              {messages.addCash}
             </Button>
-          </Box>
-        </Tooltip>
-      ) : null}
+            <Button
+              variant='secondary'
+              size='small'
+              onClick={handleWithdrawClick}
+            >
+              {messages.withdrawCash}
+            </Button>
+          </>
+        ) : null}
+
+        {isWalletUIBuySellEnabled && !isLoading ? (
+          <Tooltip
+            disabled={isBuySellSupported}
+            text={messages.buySellNotSupported}
+            color='secondary'
+            placement='left'
+            shouldWrapContent={false}
+          >
+            <Box>
+              <Button
+                variant='primary'
+                size='small'
+                onClick={isMobile ? openOpenAppDrawer : handleBuySellClick}
+                disabled={!isBuySellSupported}
+              >
+                {messages.buySell}
+              </Button>
+            </Box>
+          </Tooltip>
+        ) : null}
+      </Flex>
     </Flex>
   )
 }
@@ -235,7 +258,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
 
   return (
-    <CoinCard
+    <CoinRow
       icon={coinData?.logoUri}
       symbol={tokenSymbol ?? ''}
       balance={coinBalanceFormatted || ''}
@@ -248,12 +271,11 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
   )
 }
 
-export const YourCoins = () => {
+export const WalletCoinsList = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { env } = useQueryContext()
-  const { color } = useTheme()
   const navigate = useNavigate()
-  const { isMobile } = useMedia()
+  const isMobile = useIsMobile()
   const [isOpenAppDrawerOpen, setIsOpenAppDrawerOpen] = useState(false)
 
   const onOpenOpenAppDrawer = useCallback(() => {
@@ -284,15 +306,11 @@ export const YourCoins = () => {
     ...(otherCoins ?? [])
   ].filter(removeNullable)
 
-  const { isLarge } = useMedia()
-
   // Show audio coin card when no coins are available
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
   // Add discover artist coins card at the end
   const allCoins = [...coins, 'discover-artist-coins' as const]
-
-  const isSingleColumn = isLarge
 
   const handleDiscoverArtistCoins = useCallback(() => {
     navigate(COINS_EXPLORE_PAGE)
@@ -306,68 +324,26 @@ export const YourCoins = () => {
       />
       <Flex column>
         {isLoadingCoins || !currentUserId ? (
-          <YourCoinsSkeleton />
+          <CoinsListSkeleton />
         ) : (
-          <Box
-            css={{
-              display: 'grid',
-              gridTemplateColumns: isSingleColumn
-                ? 'minmax(0, 1fr)'
-                : 'minmax(0, 1fr) minmax(0, 1fr)',
-              gap: '0'
-            }}
-          >
-            {allCoins.map((item, index) => {
-              const key = typeof item === 'string' ? item : item.mint
-              const isLastItem = index === allCoins.length - 1
-              const isOddCount = !isSingleColumn && allCoins.length % 2 === 1
-              const shouldSpanFullWidth = isOddCount && isLastItem
-              const isLastInRow = isSingleColumn ? true : index % 2 === 1
-              const isLastRow =
-                index >= allCoins.length - (isSingleColumn ? 1 : 2)
-
-              // Use helper functions for cleaner logic
-              const shouldHaveRightBorder = shouldShowRightBorder(
-                index,
-                isSingleColumn,
-                shouldSpanFullWidth,
-                isOddCount,
-                allCoins.length
-              )
-
-              const itemStyles = getCoinItemStyles(
-                shouldSpanFullWidth,
-                shouldHaveRightBorder,
-                shouldSpanFullWidth, // Add top border when spanning full width (odd count last item)
-                color.border.default
-              )
-
-              return (
-                <Fragment key={key}>
-                  <Box css={itemStyles}>
-                    {item === 'discover-artist-coins' ? (
-                      <DiscoverArtistCoinsCard
-                        onClick={handleDiscoverArtistCoins}
-                      />
-                    ) : item === 'audio-coin' ? (
-                      <AudioCoinCard />
-                    ) : (
-                      <CoinCardWithBalance coin={item as UserCoin} />
-                    )}
-                  </Box>
-                  {/* Horizontal divider after each row except the last */}
-                  {!isLastRow && isLastInRow && (
-                    <Box
-                      css={{
-                        gridColumn: '1 / -1',
-                        borderBottom: `1px solid ${color.border.default}`
-                      }}
-                    />
-                  )}
-                </Fragment>
-              )
-            })}
-          </Box>
+          <>
+            <USDCCoinCard />
+            <Divider />
+            {allCoins.map((item, idx) => (
+              <Box key={typeof item === 'string' ? item : item.mint}>
+                {item === 'discover-artist-coins' ? (
+                  <DiscoverArtistCoinsCard
+                    onClick={handleDiscoverArtistCoins}
+                  />
+                ) : item === 'audio-coin' ? (
+                  <AudioCoinCard />
+                ) : (
+                  <CoinCardWithBalance coin={item as UserCoin} />
+                )}
+                {idx !== allCoins.length - 1 ? <Divider /> : null}
+              </Box>
+            ))}
+          </>
         )}
         {isMobile ? (
           <OpenAppDrawer

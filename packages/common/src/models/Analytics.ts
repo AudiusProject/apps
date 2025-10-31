@@ -291,7 +291,6 @@ export enum Name {
   PROFILE_PAGE_CLICK_TWITTER = 'Profile Page: Go To Twitter',
   PROFILE_PAGE_CLICK_TIKTOK = 'Profile Page: Go To TikTok',
   PROFILE_PAGE_CLICK_WEBSITE = 'ProfilePage: Go To Website',
-  PROFILE_PAGE_CLICK_DONATION = 'ProfilePage: Go To Donation',
   PROFILE_PAGE_SHOWN_ARTIST_RECOMMENDATIONS = 'ProfilePage: Shown Artist Recommendations',
 
   // Track page
@@ -1488,11 +1487,6 @@ type ProfilePageClickWebsite = {
   handle: string
   website: string
 }
-type ProfilePageClickDonation = {
-  eventName: Name.PROFILE_PAGE_CLICK_DONATION
-  handle: string
-  donation: string
-}
 type ProfilePageShownArtistRecommendations = {
   eventName: Name.PROFILE_PAGE_SHOWN_ARTIST_RECOMMENDATIONS
   userId: number
@@ -1527,7 +1521,8 @@ export enum PlaybackSource {
   EMBED_PLAYER = 'embed player',
   CHAT_TRACK = 'chat_track',
   CHAT_PLAYLIST_TRACK = 'chat_playlist_track',
-  SEARCH_PAGE = 'search page'
+  SEARCH_PAGE = 'search page',
+  EXCLUSIVE_TRACKS_PAGE = 'exclusive tracks page'
 }
 
 type PlaybackPlay = {
@@ -3261,7 +3256,6 @@ export type AllTrackingEvents =
   | ProfilePageClickTwitter
   | ProfilePageClickTikTok
   | ProfilePageClickWebsite
-  | ProfilePageClickDonation
   | ProfilePageShownArtistRecommendations
   | TrackPageDownload
   | TrackPagePlayMore

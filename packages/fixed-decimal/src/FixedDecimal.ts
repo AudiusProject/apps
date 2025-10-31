@@ -13,6 +13,24 @@ const parseFixedDecimalString = <T extends bigint>(
   value: string,
   decimalPlaces?: number
 ): FixedDecimalCtorArgs<T> => {
+  // Expand scientific notation using strings
+  if (value.includes('e')) {
+    const [coefficient, exponent] = value.split('e')
+    const exp = parseInt(exponent, 10)
+    if (exp > 0) {
+      let [cWhole, cDecimal] = coefficient.split('.')
+      cDecimal = cDecimal ?? ''
+      const whole = cWhole + cDecimal.substring(0, exp)
+      const decimal = cDecimal.substring(exp)
+      value = decimal.length > 0 ? `${whole}.${decimal}` : whole
+    }
+    if (exp < 0) {
+      let [cWhole, cDecimal] = coefficient.split('.')
+      cDecimal = cDecimal ?? ''
+      value = '0.' + cWhole.padStart(-exp, '0') + cDecimal
+    }
+  }
+
   let [whole, decimal] = value.split('.')
   decimal = decimal ?? ''
   if (decimalPlaces !== undefined) {
@@ -190,9 +208,6 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
       case 'number': {
         if (!Number.isFinite(value)) {
           throw new Error('Number must be finite')
-        }
-        if (value.toString() === value.toExponential()) {
-          throw new Error('Number must not be in scientific notation')
         }
         const parsed = parseFixedDecimalString<BigIntBrand>(
           value.toString(),

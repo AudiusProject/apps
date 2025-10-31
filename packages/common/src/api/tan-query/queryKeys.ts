@@ -128,5 +128,7 @@ export const QUERY_KEYS = {
   launchpadConfig: 'launchpadConfig',
   externalWalletBalance: 'externalWalletBalance',
   claimFee: 'claimFee',
-  userBalanceHistory: 'userBalanceHistory'
+  userBalanceHistory: 'userBalanceHistory',
+  exclusiveTracks: 'exclusiveTracks',
+  exclusiveTracksCount: 'exclusiveTracksCount'
 } as const

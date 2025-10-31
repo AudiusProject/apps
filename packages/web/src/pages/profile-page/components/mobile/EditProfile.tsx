@@ -1,10 +1,4 @@
-import {
-  IconLink,
-  IconTikTok,
-  IconX,
-  IconInstagram,
-  IconDonate
-} from '@audius/harmony'
+import { IconLink, IconTikTok, IconX, IconInstagram } from '@audius/harmony'
 
 import EditableRow, { Format } from 'components/groupable-list/EditableRow'
 import GroupableList from 'components/groupable-list/GroupableList'
@@ -23,7 +17,6 @@ type EditProfileProps = {
   instagramVerified: boolean
   tikTokVerified: boolean
   website: string
-  donation: string
 
   onUpdateName: (name: string) => void
   onUpdateBio: (bio: string) => void
@@ -32,7 +25,6 @@ type EditProfileProps = {
   onUpdateInstagramHandle: (handle: string) => void
   onUpdateTikTokHandle: (handle: string) => void
   onUpdateWebsite: (website: string) => void
-  onUpdateDonation: (donation: string) => void
 }
 
 const EditProfile = ({
@@ -46,15 +38,13 @@ const EditProfile = ({
   instagramVerified,
   tikTokVerified,
   website,
-  donation,
   onUpdateName,
   onUpdateBio,
   onUpdateLocation,
   onUpdateXHandle,
   onUpdateInstagramHandle,
   onUpdateTikTokHandle,
-  onUpdateWebsite,
-  onUpdateDonation
+  onUpdateWebsite
 }: EditProfileProps) => {
   return (
     <div className={styles.editProfile}>
@@ -114,14 +104,6 @@ const EditProfile = ({
             initialValue={website}
             onChange={onUpdateWebsite}
             maxLength={200}
-          />
-          <EditableRow
-            label={<IconDonate className={styles.icon} />}
-            format={Format.INPUT}
-            initialValue={donation}
-            onChange={onUpdateDonation}
-            stripLinksFromLength
-            maxLength={32}
           />
         </Grouping>
       </GroupableList>
