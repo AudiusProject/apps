@@ -26,6 +26,7 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
+import { CashScreen } from 'app/screens/cash-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
@@ -123,6 +124,7 @@ export type AppTabScreenParamList = {
     initialSortDirection?: GetCoinsSortDirectionEnum
   }
   wallet: undefined
+  CashScreen: undefined
   CoinDetailsScreen: { ticker: string }
   EditCoinDetailsScreen: { ticker: string }
   ExclusiveTracksScreen: { ticker: string }
@@ -237,6 +239,7 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='wallet' component={WalletScreen} />
+      <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
       <Stack.Screen
         name='EditCoinDetailsScreen'

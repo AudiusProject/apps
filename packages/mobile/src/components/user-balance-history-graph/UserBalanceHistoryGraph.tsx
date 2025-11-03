@@ -39,19 +39,21 @@ const formatShortCurrency = (value: number): string => {
 }
 
 const formatTooltipDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
+  const date = new Date(timestamp)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const hour = date
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true
+    })
+    .toLowerCase()
+  return `${weekday} ${hour}`.toUpperCase()
 }
 
 export const UserBalanceHistoryGraph = ({
   userId,
   width = 350,
-  height = 200
+  height = 191
 }: UserBalanceHistoryGraphProps) => {
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
@@ -68,6 +70,7 @@ export const UserBalanceHistoryGraph = ({
 
     return historyData.map((point) => ({
       value: point.balanceUsd,
+      timestamp: point.timestamp,
       dataPointLabelComponent: () => null
     }))
   }, [historyData])
@@ -77,48 +80,44 @@ export const UserBalanceHistoryGraph = ({
       if (!items || items.length === 0) return null
 
       const item = items[0]
-      const timestamp = historyData?.[item.index]?.timestamp
-      const value = item.value
+      const { timestamp, value } = item
 
       return (
         <Paper
+          gap='xs'
           ph='m'
           pv='s'
           borderRadius='m'
           alignItems='center'
           justifyContent='center'
+          backgroundColor='accent'
           style={{
-            backgroundColor: secondary,
             minWidth: spacing.unit20
           }}
         >
-          <Text
-            variant='label'
-            size='xs'
-            strength='strong'
-            color='staticWhite'
-            style={{
-              letterSpacing: 0.5,
-              textAlign: 'center',
-              textTransform: 'uppercase'
-            }}
-          >
-            {timestamp ? formatTooltipDate(timestamp).toUpperCase() : ''}
-          </Text>
+          {timestamp ? (
+            <Text
+              variant='label'
+              size='xs'
+              strength='strong'
+              color='staticWhite'
+              textAlign='center'
+            >
+              {formatTooltipDate(timestamp)}
+            </Text>
+          ) : null}
           <Text
             variant='heading'
             size='s'
             color='staticWhite'
-            style={{
-              textAlign: 'center'
-            }}
+            textAlign='center'
           >
             {formatCurrency(value)}
           </Text>
         </Paper>
       )
     },
-    [historyData, secondary, spacing.unit20]
+    [spacing.unit20]
   )
 
   if (isLoading) {
@@ -128,7 +127,7 @@ export const UserBalanceHistoryGraph = ({
         alignItems='center'
         justifyContent='center'
         gap='m'
-        style={{ minHeight: 200 }}
+        style={{ minHeight: height }}
       >
         <LoadingSpinner />
         <Text variant='body' size='s' strength='weak'>
@@ -141,10 +140,9 @@ export const UserBalanceHistoryGraph = ({
   if (isError || !historyData || historyData.length === 0) {
     return (
       <Flex
-        direction='column'
         alignItems='center'
         justifyContent='center'
-        style={{ minHeight: 200 }}
+        style={{ minHeight: height }}
       >
         <Text variant='body' size='m' strength='weak' color='danger'>
           {messages.error}
@@ -187,13 +185,15 @@ export const UserBalanceHistoryGraph = ({
         areaChart
         startFillColor='rgba(126, 27, 204, 0.15)'
         endFillColor='rgba(126, 27, 204, 0.05)'
+        startOpacity={0.15}
+        endOpacity={0.05}
         // Data points
         hideDataPoints
         // Focus/hover behavior
         focusEnabled
         showStripOnFocus
         showTextOnFocus
-        stripColor={`${secondary}4D`} // 30% opacity
+        stripColor='rgba(126, 27, 204, 0.3)'
         stripHeight={height}
         stripWidth={2}
         // Axes

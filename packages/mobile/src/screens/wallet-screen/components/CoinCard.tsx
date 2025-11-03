@@ -14,7 +14,7 @@ import {
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
-const ICON_SIZE = 64
+const ICON_SIZE = 48
 
 export const CoinCardSkeleton = () => {
   return (
@@ -89,6 +89,7 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
         p='l'
         pl='xl'
         row
+        h={96}
         justifyContent='space-between'
         alignItems='center'
       >

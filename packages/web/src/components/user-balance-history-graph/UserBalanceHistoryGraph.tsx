@@ -48,12 +48,15 @@ const formatDate = (timestamp: number): string => {
 }
 
 const formatTooltipDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
+  const date = new Date(timestamp)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const hour = date
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true
+    })
+    .toLowerCase()
+  return `${weekday} ${hour}`
 }
 
 const getChartData = (
