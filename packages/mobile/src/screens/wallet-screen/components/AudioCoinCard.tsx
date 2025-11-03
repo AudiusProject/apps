@@ -15,7 +15,7 @@ import {
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
-const ICON_SIZE = 64
+const ICON_SIZE = 48
 
 export const AudioCoinCardSkeleton = () => {
   return (
