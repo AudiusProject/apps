@@ -1,5 +1,5 @@
 import {
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCurrentAccountUser,
   useCurrentUserId,
   useArtistCoinMembersCount
@@ -355,7 +355,7 @@ const RemixCreatorsMessageField = () => {
 const CoinHoldersMessageField = () => {
   const { data: currentUserId } = useCurrentUserId()
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
-  const { data: coin } = useArtistOwnedCoin(currentUserId)
+  const { data: coin } = useArtistCreatedCoin(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS

@@ -1,6 +1,6 @@
 import { useCallback, useState, ChangeEvent } from 'react'
 
-import { useCurrentAccountUser, useUserCreatedCoins } from '@audius/common/api'
+import { useCurrentAccountUser, useArtistCreatedCoin } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
@@ -58,15 +58,13 @@ const DesktopArtistCoinsExplorePage = () => {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const { data: currentUser } = useCurrentAccountUser()
-  const { data: createdCoins, isPending: isLoadingCreatedCoins } =
-    useUserCreatedCoins({
-      userId: currentUser?.user_id
-    })
+  const { data: createdCoin, isPending: isLoadingCreatedCoin } =
+    useArtistCreatedCoin(currentUser?.user_id)
 
   const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
     FeatureFlags.LAUNCHPAD_VERIFICATION
   )
-  const hasExistingArtistCoin = (createdCoins?.length ?? 0) > 0
+  const hasExistingArtistCoin = !!createdCoin
 
   const handleGetStarted = useCallback(() => {
     navigate(COINS_CREATE_PAGE)
@@ -115,7 +113,7 @@ const DesktopArtistCoinsExplorePage = () => {
           </Box>
         </Flex>
 
-        {(!hasExistingArtistCoin && !isLoadingCreatedCoins) ||
+        {(!hasExistingArtistCoin && !isLoadingCreatedCoin) ||
         !isLaunchpadVerificationEnabled ? (
           <Paper p='xl' gap='xl' border='default' borderRadius='m'>
             <Flex gap='xl' w='100%' wrap='wrap'>

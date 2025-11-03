@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistOwnedCoin } from '@audius/common/api'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import { useBuySellInitialTab } from '@audius/common/hooks'
 
 import { Button, useTheme } from '@audius/harmony-native'
@@ -14,7 +14,7 @@ export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
   const { color } = useTheme()
   const navigation = useNavigation()
 
-  const { data: artistCoin } = useArtistOwnedCoin(userId)
+  const { data: artistCoin } = useArtistCreatedCoin(userId)
   const initialTab = useBuySellInitialTab()
 
   const handlePress = useCallback(() => {

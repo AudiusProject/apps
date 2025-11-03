@@ -5,7 +5,7 @@ import {
   getExternalWalletBalanceOptions,
   useCurrentAccountUser,
   useQueryContext,
-  useUserCreatedCoins
+  useArtistCreatedCoin
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
@@ -339,13 +339,11 @@ const LaunchpadPageContent = ({
 export const LaunchpadPage = () => {
   const { data: currentUser } = useCurrentAccountUser()
 
-  const { data: createdCoins } = useUserCreatedCoins({
-    userId: currentUser?.user_id
-  })
+  const { data: createdCoin } = useArtistCreatedCoin(currentUser?.user_id)
   const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
     FeatureFlags.LAUNCHPAD_VERIFICATION
   )
-  const hasExistingArtistCoin = (createdCoins?.length ?? 0) > 0
+  const hasExistingArtistCoin = !!createdCoin
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useContext(ToastContext)
