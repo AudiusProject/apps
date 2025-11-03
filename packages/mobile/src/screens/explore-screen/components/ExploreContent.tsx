@@ -43,7 +43,9 @@ export const ExploreContent = () => {
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
-      {isExploreArtistCoinTracksEnabled && <FeaturedArtistCoinTracks />}
+      {isExploreArtistCoinTracksEnabled && showTrackContent && (
+        <FeaturedArtistCoinTracks />
+      )}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}

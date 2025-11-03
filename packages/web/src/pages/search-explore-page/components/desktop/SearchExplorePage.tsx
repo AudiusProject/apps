@@ -328,7 +328,9 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent && (
               <RecommendedTracksSection />
             )}
-            {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
+            {isExploreArtistCoinTracksEnabled && showTrackContent && (
+              <ArtistCoinTracksSection />
+            )}
             {showTrackContent && showUserContextualContent && (
               <RecentlyPlayedSection />
             )}
