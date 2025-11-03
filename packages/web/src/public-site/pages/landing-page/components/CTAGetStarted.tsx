@@ -98,7 +98,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
             className={styles.ctaButton}
           >
             {messages.cta}
-            <IconCaretRight className={styles.iconCaretRight} color='accent' />
+            <IconCaretRight className={styles.iconCaretRight} />
           </button>
         </div>
       </div>

@@ -59,7 +59,7 @@
   justify-content: center;
   align-items: center;
 
-  color: #7e1bcc;
+  color: #D54F2C;
   font-size: 18px;
   font-weight: bold;
   letter-spacing: 0.2px;
@@ -80,6 +80,10 @@
   transform: scale3d(0.99, 0.99, 0.99);
   background-color: #f2f2f2;
   box-shadow: 0 0 2px -1px rgba(25, 0, 96, 0.5);
+}
+
+.ctaButton path {
+  fill: #D54F2C
 }
 
 .iconCaretRight {
