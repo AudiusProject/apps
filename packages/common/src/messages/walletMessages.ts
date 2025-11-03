@@ -142,5 +142,11 @@ export const walletMessages = {
     sortVolume: 'Volume',
     sortLaunchDate: 'Launch Date',
     sortHolders: 'Holders'
+  },
+
+  // Balance History messages
+  balanceHistory: {
+    loading: 'Loading balance history...',
+    error: 'Unable to load balance history'
   }
 }
