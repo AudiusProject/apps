@@ -6,10 +6,8 @@ import {
   useCurrentUserId,
   useRemixes
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { remixMessages as messages } from '@audius/common/messages'
 import { Name, Track, User } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { remixesPageLineupActions } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
 import {
@@ -56,12 +54,6 @@ const RemixesPage = nullGuard(({ title, originalTrack }) => {
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
   const updateIsContestEntryParam = useUpdateSearchParams('isContestEntry')
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
-  const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-  )
   const { data: currentUserId } = useCurrentUserId()
   const { data: contest } = useRemixContest(originalTrack?.track_id)
   const winnerCount = contest?.eventData?.winners?.length ?? 0
@@ -71,15 +63,12 @@ const RemixesPage = nullGuard(({ title, originalTrack }) => {
   })
   const remixCount = remixes?.pages[0]?.count ?? 0
 
-  const isRemixContest = isRemixContestEnabled && contest
+  const isRemixContest = !!contest
   const isTrackOwner = currentUserId === originalTrack.owner_id
   const isRemixContestEnded =
     isRemixContest && dayjs(contest.endDate).isBefore(dayjs())
   const showPickWinnersButton =
-    isRemixContestWinnersMilestoneEnabled &&
-    isTrackOwner &&
-    isRemixContestEnded &&
-    remixCount > 0
+    isTrackOwner && isRemixContestEnded && remixCount > 0
 
   const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
   const {
@@ -97,7 +86,7 @@ const RemixesPage = nullGuard(({ title, originalTrack }) => {
   } = useRemixesLineup({
     trackId: originalTrack?.track_id,
     includeOriginal: true,
-    includeWinners: isRemixContestWinnersMilestoneEnabled,
+    includeWinners: true,
     sortMethod,
     isCosign,
     isContestEntry
@@ -176,7 +165,7 @@ const RemixesPage = nullGuard(({ title, originalTrack }) => {
   )
 
   const delineatorMap =
-    isRemixContestWinnersMilestoneEnabled && winnerCount > 0
+    winnerCount > 0
       ? {
           0: winnersDelineator,
           [winnerCount]: remixesDelineator
@@ -185,13 +174,7 @@ const RemixesPage = nullGuard(({ title, originalTrack }) => {
           0: remixesDelineator
         }
 
-  const winnersMaxEntries =
-    count && winnerCount ? count + winnerCount + 1 : undefined
-  const defaultMaxEntries = count ? count + 1 : undefined
-
-  const maxEntries = isRemixContestWinnersMilestoneEnabled
-    ? winnersMaxEntries
-    : defaultMaxEntries
+  const maxEntries = count && winnerCount ? count + winnerCount + 1 : undefined
 
   return (
     <Page

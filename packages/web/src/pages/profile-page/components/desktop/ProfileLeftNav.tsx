@@ -1,7 +1,5 @@
 import { useArtistCreatedCoin } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import { Box, Flex, Text } from '@audius/harmony'
 
@@ -104,9 +102,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
   const { data: ownedCoin, isPending: isArtistCoinLoading } =
     useArtistCreatedCoin(userId)
 
-  const recentCommentsFlag = useFeatureFlag(FeatureFlags.RECENT_COMMENTS)
-  const isRecentCommentsEnabled =
-    recentCommentsFlag.isLoaded && recentCommentsFlag.isEnabled
   const showArtistCoinCTA = !isArtistCoinLoading && !!ownedCoin
 
   if (editMode) {
@@ -236,7 +231,7 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
         ) : !isArtistCoinLoading && !isOwner ? (
           <TipAudioButton />
         ) : null}
-        {isRecentCommentsEnabled ? <RecentComments userId={userId} /> : null}
+        <RecentComments userId={userId} />
         <SupportingList />
         <TopSupporters />
         <ProfileMutuals />

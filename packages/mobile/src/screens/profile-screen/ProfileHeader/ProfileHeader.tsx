@@ -6,8 +6,6 @@ import {
   useUserComments,
   useProfileUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { LayoutAnimation } from 'react-native'
@@ -77,16 +75,13 @@ export const ProfileHeader = memo(() => {
       .length > 1
   const isSupporting = supportingCount && supportingCount > 0
 
-  const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.RECENT_COMMENTS
-  )
   // Note: we also if the profile bio is longer than 3 lines, but that's handled in the Bio component.
   const shouldExpand =
     hasTier ||
     hasMutuals ||
     hasMultipleSocials ||
     isSupporting ||
-    (comments && comments?.length > 0 && isRecentCommentsEnabled)
+    (comments && comments?.length > 0)
 
   useEffect(() => {
     if (!isExpandable && shouldExpand) {

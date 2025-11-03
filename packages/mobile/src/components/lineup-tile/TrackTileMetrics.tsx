@@ -1,10 +1,8 @@
 import { useCallback } from 'react'
 
 import { useTrack } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 import { FavoriteType, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { LineupBaseActions } from '@audius/common/store'
 import {
   repostsUserListActions,
@@ -101,7 +99,6 @@ export const CommentMetric = (props: CommentMetricProps) => {
   const { trackId, actions, uid, showLeaveCommentText } = props
   const { open } = useCommentDrawer()
   const navigation = useNavigation()
-  const { isEnabled } = useFeatureFlag(FeatureFlags.COMMENTS_ENABLED)
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) => {
       return {
@@ -130,7 +127,7 @@ export const CommentMetric = (props: CommentMetricProps) => {
     )
   }, [open, trackId, navigation, uid, actions])
 
-  if (commentCount === undefined || !isEnabled || commentsDisabled) return null
+  if (commentCount === undefined || commentsDisabled) return null
 
   return (
     <VanityMetric icon={IconMessage} onPress={handlePress}>

@@ -10,12 +10,10 @@ import {
   useUserCoins
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   TOKEN_LISTING_MAP,
   useAddCashModal,
@@ -151,9 +149,6 @@ const YourCoinsHeader = ({
   const isMobile = useIsMobile()
   const isManagedAccount = useIsManagedAccount()
   const { toast } = useContext(ToastContext)
-  const { isEnabled: isWalletUIBuySellEnabled } = useFeatureFlag(
-    FeatureFlags.WALLET_UI_BUY_SELL
-  )
 
   const { isBuySellSupported } = useBuySellRegionSupport()
 
@@ -205,7 +200,7 @@ const YourCoinsHeader = ({
           </>
         ) : null}
 
-        {isWalletUIBuySellEnabled && !isLoading ? (
+        {!isLoading ? (
           <Tooltip
             disabled={isBuySellSupported}
             text={messages.buySellNotSupported}

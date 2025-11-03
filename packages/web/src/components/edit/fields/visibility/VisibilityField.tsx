@@ -1,8 +1,6 @@
 import { useCallback } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { visibilityMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   IconCalendarMonth,
   IconVisibilityHidden,
@@ -194,9 +192,6 @@ type VisibilityMenuFieldsProps = {
 }
 
 const VisibilityMenuFields = (props: VisibilityMenuFieldsProps) => {
-  const { isEnabled: isPaidScheduledEnabled } = useFeatureFlag(
-    FeatureFlags.PAID_SCHEDULED
-  )
   const { initiallyPublic, isPublishable = true, entityType } = props
   const [field] = useField<VisibilityType>('visibilityType')
 
@@ -217,8 +212,7 @@ const VisibilityMenuFields = (props: VisibilityMenuFieldsProps) => {
         description={messages.hiddenDescription}
       />
       {!initiallyPublic &&
-      (entityType === 'track' ||
-        (isPaidScheduledEnabled && entityType === 'album')) ? (
+      (entityType === 'track' || entityType === 'album') ? (
         <ModalRadioItem
           value='scheduled'
           label={messages.scheduledRelease}

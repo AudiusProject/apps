@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Paper,
   Text,
@@ -122,9 +120,6 @@ const SearchExplorePage = ({
     useCurrentUserId()
   const { motion } = useTheme()
   const { isLarge } = useMedia()
-  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
-    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
-  )
   const handleSearchTab = useCallback(
     (newTab: string) => {
       setCategory(newTab.toLowerCase() as CategoryView)
@@ -328,7 +323,7 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent && (
               <RecommendedTracksSection />
             )}
-            {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
+            {showTrackContent && <ArtistCoinTracksSection />}
             {showTrackContent && showUserContextualContent && (
               <RecentlyPlayedSection />
             )}
