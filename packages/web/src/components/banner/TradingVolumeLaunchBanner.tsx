@@ -13,7 +13,7 @@ const TRADING_VOLUME_BANNER_LOCAL_STORAGE_KEY =
 
 const messages = {
   pill: 'New',
-  text: 'Earn $AUDIO trading artist coins! Season 1 is live now. 🔥'
+  text: 'Collect Artist Coins to earn daily $AUDIO rewards! Season 1 is live now 🔥'
 }
 
 export const TradingVolumeLaunchBanner = () => {
@@ -30,8 +30,7 @@ export const TradingVolumeLaunchBanner = () => {
   }, [setIsDismissed])
 
   const handleAccept = useCallback(() => {
-    // Reuse existing event for simplicity; no new analytics name required
-    dispatch(make(Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED, {}))
+    dispatch(make(Name.BANNER_TRADING_VOLUME_LAUNCH_CLICKED, {}))
     window.open('https://season1.audius.co', '_blank')
     handleClose()
   }, [dispatch, handleClose])
