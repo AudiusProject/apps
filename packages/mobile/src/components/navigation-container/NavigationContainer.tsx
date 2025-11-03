@@ -181,6 +181,9 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         wallet: {
                           path: 'wallet'
                         },
+                        CashScreen: {
+                          path: 'cash'
+                        },
                         ArtistCoinsExplore: {
                           path: 'coins'
                         },

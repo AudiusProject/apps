@@ -3,12 +3,14 @@ import { useCallback, useMemo, useState } from 'react'
 import type { ConnectedWallet } from '@audius/common/api'
 import {
   useAssociatedWallets,
-  useRemoveAssociatedWallet
+  useRemoveAssociatedWallet,
+  useCurrentAccountUser
 } from '@audius/common/api'
-import { walletMessages } from '@audius/common/messages'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, WALLET_COUNT_LIMIT } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
+import { Image } from 'react-native'
 
 import {
   Button,
@@ -20,9 +22,9 @@ import {
   Paper,
   Text,
   Skeleton,
-  Divider,
   useTheme,
-  LoadingSpinner
+  LoadingSpinner,
+  Box
 } from '@audius/harmony-native'
 import ActionDrawer, {
   type ActionDrawerRow
@@ -31,7 +33,7 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
 
-const WALLET_ROW_HEIGHT = 52
+const WALLET_ROW_HEIGHT = 56
 
 type WalletRowProps = {
   address: string
@@ -67,15 +69,11 @@ const WalletRowContent = ({
     >
       <Flex row alignItems='center' gap='s'>
         {chain === Chain.Eth ? <IconLogoCircleETH /> : <IconLogoCircleSOL />}
-        <Text variant='body' size='m' strength='strong'>
-          {walletMessages.linkedWallets.linkedWallet(index)}
-        </Text>
-      </Flex>
-      <Flex flex={1}>
-        <Text variant='body' size='m' strength='strong' color='subdued'>
+        <Text variant='body' size='m' strength='default'>
           {shortenSPLAddress(address)}
         </Text>
       </Flex>
+      <Flex flex={1} />
       {isRemovingWallet ? (
         <LoadingSpinner />
       ) : (
@@ -186,13 +184,54 @@ const WalletRowsList = ({
   </>
 )
 
-const WalletEmptyState = () => (
-  <Flex p='l'>
-    <Text variant='body' size='m' color='subdued'>
-      {walletMessages.linkedWallets.linkWallet}
-    </Text>
-  </Flex>
-)
+const BuiltInWalletRow = () => {
+  const { data: currentUser } = useCurrentAccountUser()
+  const builtInWalletImage =
+    currentUser?.profile_picture?.['480x480'] ?? undefined
+
+  return (
+    <Flex
+      row
+      alignItems='center'
+      gap='m'
+      w='100%'
+      ph='l'
+      pv='m'
+      h={WALLET_ROW_HEIGHT}
+    >
+      <Flex row alignItems='center' gap='s'>
+        <Box
+          w={24}
+          h={24}
+          style={{
+            borderRadius: 9999,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: '#efeff1'
+          }}
+        >
+          {builtInWalletImage ? (
+            <Image
+              source={{ uri: builtInWalletImage }}
+              style={{ width: 24, height: 24 }}
+            />
+          ) : null}
+        </Box>
+        <Text variant='body' size='m' strength='default'>
+          {coinDetailsMessages.externalWallets.builtIn}
+        </Text>
+      </Flex>
+      <Flex flex={1} />
+      <IconButton
+        icon={IconKebabHorizontal}
+        onPress={() => {}}
+        ripple
+        disabled
+        style={{ opacity: 0 }}
+      />
+    </Flex>
+  )
+}
 
 export const LinkedWallets = () => {
   const navigation = useNavigation()
@@ -210,34 +249,24 @@ export const LinkedWallets = () => {
   return (
     <Paper>
       {/* Header Section */}
-      <Flex gap='xl' p='l'>
-        <Flex row alignItems='center' gap='s'>
-          <Text variant='heading' size='s' color='heading'>
-            {hasWallets
-              ? walletMessages.linkedWallets.titleHasWallets
-              : walletMessages.linkedWallets.titleNoWallets}
-          </Text>
-          {hasWallets && !isLoading ? (
-            <Text variant='heading' size='s' color='subdued'>
-              {walletMessages.linkedWallets.count(walletCount)}
-            </Text>
-          ) : null}
-        </Flex>
+      <Flex p='l' pb='m' borderBottom='default'>
+        <Text variant='heading' size='s' color='heading'>
+          {coinDetailsMessages.externalWallets.hasBalanceTitle}
+        </Text>
       </Flex>
-      <Divider />
 
-      {/* Wallet Stack Section */}
+      {/* Built-In Wallet Row */}
+      <BuiltInWalletRow />
+
+      {/* Linked Wallets Section */}
       {isLoading ? (
         <WalletLoadingState />
       ) : hasWallets ? (
         <WalletRowsList connectedWallets={connectedWallets} />
-      ) : (
-        <WalletEmptyState />
-      )}
-      <Divider />
+      ) : null}
 
       {/* Footer Section with Add Button */}
-      <Flex p='l'>
+      <Flex p='l' pt='m' borderTop='default'>
         <Button
           variant='secondary'
           size='small'

@@ -62,6 +62,7 @@ export const AudioCoinCard = () => {
         p='l'
         pl='xl'
         row
+        h={96}
         justifyContent='space-between'
         alignItems='center'
       >

@@ -89,6 +89,7 @@ export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
         p='l'
         pl='xl'
         row
+        h={96}
         justifyContent='space-between'
         alignItems='center'
       >

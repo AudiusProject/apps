@@ -39,13 +39,15 @@ const formatShortCurrency = (value: number): string => {
 }
 
 const formatTooltipDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
+  const date = new Date(timestamp)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const hour = date
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true
+    })
+    .toLowerCase()
+  return `${weekday} ${hour}`
 }
 
 export const UserBalanceHistoryGraph = ({
@@ -68,6 +70,7 @@ export const UserBalanceHistoryGraph = ({
 
     return historyData.map((point) => ({
       value: point.balanceUsd,
+      timestamp: point.timestamp,
       dataPointLabelComponent: () => null
     }))
   }, [historyData])
@@ -77,34 +80,37 @@ export const UserBalanceHistoryGraph = ({
       if (!items || items.length === 0) return null
 
       const item = items[0]
-      const timestamp = historyData?.[item.index]?.timestamp
-      const value = item.value
+      const { timestamp, value } = item
 
       return (
         <Paper
+          direction='column'
+          gap='xs'
           ph='m'
           pv='s'
           borderRadius='m'
           alignItems='center'
           justifyContent='center'
+          backgroundColor='accent'
           style={{
-            backgroundColor: secondary,
             minWidth: spacing.unit20
           }}
         >
-          <Text
-            variant='label'
-            size='xs'
-            strength='strong'
-            color='staticWhite'
-            style={{
-              letterSpacing: 0.5,
-              textAlign: 'center',
-              textTransform: 'uppercase'
-            }}
-          >
-            {timestamp ? formatTooltipDate(timestamp).toUpperCase() : ''}
-          </Text>
+          {timestamp ? (
+            <Text
+              variant='label'
+              size='xs'
+              strength='strong'
+              color='staticWhite'
+              style={{
+                letterSpacing: 0.5,
+                textAlign: 'center',
+                textTransform: 'uppercase'
+              }}
+            >
+              {formatTooltipDate(timestamp).toUpperCase()}
+            </Text>
+          ) : null}
           <Text
             variant='heading'
             size='s'
@@ -118,7 +124,7 @@ export const UserBalanceHistoryGraph = ({
         </Paper>
       )
     },
-    [historyData, secondary, spacing.unit20]
+    [spacing.unit20]
   )
 
   if (isLoading) {
@@ -187,13 +193,15 @@ export const UserBalanceHistoryGraph = ({
         areaChart
         startFillColor='rgba(126, 27, 204, 0.15)'
         endFillColor='rgba(126, 27, 204, 0.05)'
+        startOpacity={0.15}
+        endOpacity={0.05}
         // Data points
         hideDataPoints
         // Focus/hover behavior
         focusEnabled
         showStripOnFocus
         showTextOnFocus
-        stripColor={`${secondary}4D`} // 30% opacity
+        stripColor='rgba(126, 27, 204, 0.3)'
         stripHeight={height}
         stripWidth={2}
         // Axes
