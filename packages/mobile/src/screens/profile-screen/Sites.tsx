@@ -1,7 +1,7 @@
 import { useProfileUser } from '@audius/common/api'
 import { View, Text } from 'react-native'
 
-import { IconDonate, IconLink } from '@audius/harmony-native'
+import { IconLink } from '@audius/harmony-native'
 import { Link } from 'app/components/core'
 import { makeStyles } from 'app/styles'
 import { prependProtocol } from 'app/utils/prependProtocol'
@@ -32,9 +32,9 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
 export const Sites = () => {
   const styles = useStyles()
   const { neutral } = useThemeColors()
-  const { website, donation } =
+  const { website } =
     useProfileUser({
-      select: (user) => ({ website: user.website, donation: user.donation })
+      select: (user) => ({ website: user.website })
     }).user ?? {}
   const iconProps = {
     height: 20,
@@ -49,12 +49,6 @@ export const Sites = () => {
         <Link style={styles.site} url={prependProtocol(website)}>
           <IconLink {...iconProps} />
           <Text style={styles.siteText}>{website}</Text>
-        </Link>
-      ) : null}
-      {donation ? (
-        <Link style={styles.site} url={prependProtocol(donation)}>
-          <IconDonate {...iconProps} />
-          <Text style={styles.siteText}>{donation}</Text>
         </Link>
       ) : null}
     </View>

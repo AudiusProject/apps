@@ -7,7 +7,7 @@ import { IconTokenAUDIO } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 import { push } from 'redux-first-history'
 
-import { CoinCard } from './CoinCard'
+import { CoinRow } from './CoinCard'
 
 const DIMENSIONS = 64
 const COIN_NAME = TOKEN_LISTING_MAP.AUDIO.name
@@ -30,7 +30,7 @@ export const AudioCoinCard = () => {
   }, [dispatch])
 
   return (
-    <CoinCard
+    <CoinRow
       icon={<IconTokenAUDIO width={DIMENSIONS} height={DIMENSIONS} hex />}
       symbol={AUDIO_TICKER}
       balance={audioBalanceFormatted ?? ''}

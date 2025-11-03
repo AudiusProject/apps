@@ -3,7 +3,7 @@
   "productName": "Audius",
   "description": "The Audius web client reference implementation",
   "author": "Audius",
-  "version": "1.5.158",
+  "version": "1.5.159",
   "private": true,
   "scripts": {
     "DEV & BUILD========================================": "",

@@ -241,8 +241,7 @@
   margin-bottom: 8px;
 }
 
-.website,
-.donation {
+.website {
   margin-top: 12px;
   display: flex;
   justify-content: flex-start;
@@ -257,12 +256,8 @@
   align-items: center;
 }
 
-.donation {
-  align-items: flex-start;
-}
-
 .website .socialIcon,
-.donation .socialIcon {
+.socialIcon {
   margin-right: 8px;
 }
 
@@ -270,15 +265,4 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: hidden;
-}
-
-.donation > span {
-  width: 90%;
-  text-align: left;
-  text-overflow: ellipsis;
-  overflow-x: hidden;
-}
-
-.donation a {
-  color: var(--harmony-primary);
 }

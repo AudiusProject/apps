@@ -17,6 +17,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     staticWhite: primitives.static.staticWhite,
     warning: primitives.special.orange,
     danger: primitives.special.red,
+    success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
     artistCoin: primitives.special.coinGradient
@@ -36,6 +37,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     staticWhite: primitives.static.staticWhite,
     warning: primitives.special.orange,
     danger: primitives.special.red,
+    success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
     artistCoin: primitives.special.coinGradient

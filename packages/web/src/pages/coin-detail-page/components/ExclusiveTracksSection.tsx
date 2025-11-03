@@ -3,12 +3,13 @@ import {
   useExclusiveTracksCount,
   useArtistCoin
 } from '@audius/common/api'
+import { exclusiveTracksPageLineupActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { Flex, PlainButton, Skeleton, Text } from '@audius/harmony'
+import { Flex, PlainButton, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
-import { TrackTile } from 'components/track/desktop/TrackTile'
-import { TrackTileSize } from 'components/track/types'
+import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { LineupVariant } from 'components/lineup/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 const messages = {
@@ -31,9 +32,21 @@ export const ExclusiveTracksSection = ({
   const ownerId = coin?.ownerId
 
   // Fetch exclusive tracks (token-gated) for the coin owner
-  const { data: tracks, lineup } = useExclusiveTracks({
+  const {
+    data,
+    isFetching,
+    isPending,
+    isError,
+    hasNextPage,
+    play,
+    pause,
+    loadNextPage,
+    isPlaying,
+    lineup
+  } = useExclusiveTracks({
     userId: ownerId,
-    pageSize: MAX_PREVIEW_TRACKS
+    pageSize: MAX_PREVIEW_TRACKS,
+    initialPageSize: MAX_PREVIEW_TRACKS
   })
 
   const { data: totalCount = 0 } = useExclusiveTracksCount({
@@ -54,8 +67,6 @@ export const ExclusiveTracksSection = ({
 
   if (!shouldShowSection) return null
 
-  const isLoading = lineup.isMetadataLoading
-
   return (
     <Flex column gap='l' w='100%'>
       <Flex alignItems='center' justifyContent='space-between' w='100%'>
@@ -72,32 +83,24 @@ export const ExclusiveTracksSection = ({
         </PlainButton>
       </Flex>
 
-      {isLoading ? (
-        <Flex column gap='m'>
-          {Array.from({ length: MAX_PREVIEW_TRACKS }).map((_, index) => (
-            <Skeleton key={index} h={128} borderRadius='m' />
-          ))}
-        </Flex>
-      ) : (
-        <Flex column gap='s' w='100%'>
-          {tracks?.map((track, index) => (
-            <TrackTile
-              key={track.id}
-              uid={`track-${track.id}`}
-              id={track.id}
-              index={index}
-              size={TrackTileSize.SMALL}
-              statSize='small'
-              ordered={false}
-              togglePlay={() => {}}
-              isLoading={false}
-              hasLoaded={() => {}}
-              isTrending={false}
-              isFeed={false}
-            />
-          ))}
-        </Flex>
-      )}
+      <TanQueryLineup
+        data={data}
+        isFetching={isFetching}
+        isPending={isPending}
+        isError={isError}
+        hasNextPage={hasNextPage}
+        play={play}
+        pause={pause}
+        loadNextPage={loadNextPage}
+        isPlaying={isPlaying}
+        lineup={lineup}
+        actions={exclusiveTracksPageLineupActions}
+        pageSize={MAX_PREVIEW_TRACKS}
+        initialPageSize={MAX_PREVIEW_TRACKS}
+        variant={LineupVariant.SECTION}
+        shouldLoadMore={false}
+        maxEntries={MAX_PREVIEW_TRACKS}
+      />
     </Flex>
   )
 }

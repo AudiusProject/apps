@@ -53,7 +53,6 @@ export type UserMetadata = {
   verified_with_instagram: boolean
   verified_with_tiktok: boolean
   website: Nullable<string>
-  donation: Nullable<string>
   location: Nullable<string>
   name: string
   playlist_count: number

@@ -30,7 +30,7 @@ export type CoinCardProps = {
   icon: string | ReactNode
   name: string
   symbol: string
-  balance: string
+  balance?: string
   heldValue?: string | null
   dollarValue: string
   loading?: boolean
@@ -38,7 +38,7 @@ export type CoinCardProps = {
   onClick?: () => void
 }
 
-export const CoinCard = ({
+export const CoinRow = ({
   icon,
   name,
   symbol,
@@ -90,9 +90,15 @@ export const CoinCard = ({
                 {name}
               </Text>
               <Flex gap='xs' alignItems='center' css={{ flexWrap: 'wrap' }}>
-                <Text variant='title' size='l' css={{ wordWrap: 'break-word' }}>
-                  {balance}
-                </Text>
+                {balance !== undefined ? (
+                  <Text
+                    variant='title'
+                    size='l'
+                    css={{ wordWrap: 'break-word' }}
+                  >
+                    {balance}
+                  </Text>
+                ) : null}
                 <Text
                   variant='title'
                   size='l'

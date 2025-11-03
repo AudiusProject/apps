@@ -31,8 +31,7 @@ const messages = {
   location: 'Location',
   socialHandles: 'Social Handles',
   artistCoinFlair: 'Artist Coin Flair',
-  website: 'Website',
-  donate: 'Donate'
+  website: 'Website'
 }
 
 type ProfileLeftNavProps = {
@@ -53,8 +52,6 @@ type ProfileLeftNavProps = {
   onUpdateWebsite: (website: string) => void
   location: string
   onUpdateLocation: (location: string) => void
-  donation: string
-  onUpdateDonation: (donation: string) => void
   bio: string
   onUpdateBio: (bio: string) => void
   artistCoinBadge?: Nullable<{
@@ -94,8 +91,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     onUpdateWebsite,
     location,
     onUpdateLocation,
-    donation,
-    onUpdateDonation,
     bio,
     onUpdateBio,
     artistCoinBadge,
@@ -207,15 +202,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               type={Type.WEBSITE}
               onChange={onUpdateWebsite}
             />
-            <Text variant='title' color='white'>
-              {messages.donate}
-            </Text>
-            <SocialLinkInput
-              defaultValue={donation}
-              type={Type.DONATION}
-              onChange={onUpdateDonation}
-              textLimitMinusLinks={32}
-            />
           </Flex>
         </Flex>
       </Box>
@@ -239,7 +225,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
           bio={bio}
           location={location}
           website={website}
-          donation={donation}
           created={created}
           twitterHandle={twitterHandle}
           instagramHandle={instagramHandle}

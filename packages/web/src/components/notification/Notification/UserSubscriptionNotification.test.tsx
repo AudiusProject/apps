@@ -40,7 +40,6 @@ const mockUser = {
   verified_with_instagram: false,
   verified_with_tiktok: false,
   website: null,
-  donation: null,
   location: 'Austin, TX',
   name: 'awdawd123123123',
   playlist_count: 0,

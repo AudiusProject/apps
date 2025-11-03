@@ -11,7 +11,6 @@ export const BuySellTerms = () => {
       <TextLink href={TERMS_OF_SERVICE} variant='visible' isExternal>
         {buySellMessages.termsOfUse}
       </TextLink>
-      .
     </Text>
   )
 }

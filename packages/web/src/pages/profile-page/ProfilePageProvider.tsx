@@ -94,7 +94,6 @@ const INITIAL_UPDATE_FIELDS = {
   updatedInstagramHandle: null,
   updatedTikTokHandle: null,
   updatedWebsite: null,
-  updatedDonation: null,
   updatedArtistCoinBadge: null
 }
 
@@ -128,7 +127,6 @@ type ProfilePageState = {
   updatedInstagramHandle: string | null
   updatedTikTokHandle: string | null
   updatedWebsite: string | null
-  updatedDonation: string | null
   updatedArtistCoinBadge: Nullable<{
     mint: string
     logo_uri: string
@@ -414,12 +412,6 @@ class ProfilePageClassComponent extends PureComponent<
     })
   }
 
-  updateDonation = (donation: string) => {
-    this.setState({
-      updatedDonation: donation
-    })
-  }
-
   updateArtistCoinBadge = async (
     badge: Nullable<{
       mint: string
@@ -570,7 +562,6 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle: null,
       updatedTikTokHandle: null,
       updatedWebsite: null,
-      updatedDonation: null,
       updatedArtistCoinBadge: null
     })
   }
@@ -591,7 +582,6 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation,
       updatedArtistCoinBadge
     } = this.state
 
@@ -624,9 +614,6 @@ class ProfilePageClassComponent extends PureComponent<
     }
     if (updatedWebsite !== null) {
       updatedMetadata.website = updatedWebsite
-    }
-    if (updatedDonation !== null) {
-      updatedMetadata.donation = updatedDonation
     }
 
     // Always include coin_flair_mint in updates (consistent with other fields)
@@ -910,7 +897,6 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation,
       updatedArtistCoinBadge
     } = this.state
 
@@ -966,11 +952,6 @@ class ProfilePageClassComponent extends PureComponent<
         ? updatedWebsite
         : profile.website || ''
       : ''
-    const donation = profile
-      ? updatedDonation !== null
-        ? updatedDonation
-        : profile.donation || ''
-      : ''
 
     // Determine artist coin badge, considering coin_flair_mint
     let artistCoinBadge = null
@@ -1025,7 +1006,6 @@ class ProfilePageClassComponent extends PureComponent<
       instagramHandle,
       tikTokHandle,
       website,
-      donation,
       artistCoinBadge,
       hasProfilePicture,
       following,
@@ -1067,7 +1047,6 @@ class ProfilePageClassComponent extends PureComponent<
       updateInstagramHandle: this.updateInstagramHandle,
       updateTikTokHandle: this.updateTikTokHandle,
       updateWebsite: this.updateWebsite,
-      updateDonation: this.updateDonation,
       updateArtistCoinBadge: this.updateArtistCoinBadge,
       updateCoverPhoto: this.updateCoverPhoto,
       didChangeTabsFrom: this.didChangeTabsFrom,
@@ -1088,7 +1067,6 @@ class ProfilePageClassComponent extends PureComponent<
         updatedInstagramHandle !== null ||
         updatedTikTokHandle !== null ||
         updatedWebsite !== null ||
-        updatedDonation !== null ||
         updatedArtistCoinBadge !== null ||
         updatedCoverPhoto !== null ||
         updatedProfilePicture !== null,

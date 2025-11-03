@@ -39,7 +39,6 @@ import IconCreditCardSVG from '../assets/icons/CreditCard.svg'
 import IconCrownSVG from '../assets/icons/Crown.svg'
 import IconDashboardSVG from '../assets/icons/Dashboard.svg'
 import IconDesktopSVG from '../assets/icons/Desktop.svg'
-import IconDonateSVG from '../assets/icons/Donate.svg'
 import IconDragSVG from '../assets/icons/Drag.svg'
 import IconEarningsSVG from '../assets/icons/Earnings.svg'
 import IconEmailAddressSVG from '../assets/icons/EmailAddress.svg'
@@ -274,7 +273,6 @@ export const IconUserUnfollow = IconUserUnfollowSVG as IconComponent
 export const IconDesktop = IconDesktopSVG as IconComponent
 export const IconRadar = IconRadarSVG as IconComponent
 export const IconVisibilityHidden = IconVisibilityHiddenSVG as IconComponent
-export const IconDonate = IconDonateSVG as IconComponent
 export const IconReceive = IconReceiveSVG as IconComponent
 export const IconVisibilityPublic = IconVisibilityPublicSVG as IconComponent
 export const IconDrag = IconDragSVG as IconComponent

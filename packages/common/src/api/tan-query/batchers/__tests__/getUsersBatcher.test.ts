@@ -46,7 +46,6 @@ describe('getUsersBatcher', () => {
     instagramHandle: undefined,
     tiktokHandle: undefined,
     website: undefined,
-    donation: undefined,
     createdAt: '',
     updatedAt: '',
     splWallet: '',

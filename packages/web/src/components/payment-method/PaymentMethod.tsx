@@ -7,10 +7,10 @@ import {
   FilterButton,
   Flex,
   IconCreditCard,
-  IconDonate,
   IconInfo,
   IconPhantomPlain,
   IconQrCode,
+  IconReceive,
   Radio,
   RadioGroup,
   Text
@@ -85,7 +85,7 @@ export const PaymentMethod = ({
       ? {
           id: PurchaseMethod.BALANCE,
           label: messages.withExistingBalance,
-          icon: IconDonate,
+          icon: IconReceive,
           disabled: isExistingBalanceDisabled,
           value: (
             <Text

@@ -6,7 +6,6 @@ import { View } from 'react-native'
 
 import type { IconButtonProps } from '@audius/harmony-native'
 import {
-  IconDonate,
   IconInstagram,
   IconLink,
   IconTikTok,
@@ -210,22 +209,6 @@ export const WebsiteSocialLink = (props: Partial<SocialLinkProps>) => {
       url={prependProtocol(website)}
       text={website}
       icon={IconLink}
-      {...props}
-    />
-  )
-}
-
-export const DonationSocialLink = (props: Partial<SocialLinkProps>) => {
-  const { donation } =
-    useProfileUser({
-      select: (user) => ({ donation: user.donation })
-    }).user ?? {}
-
-  return (
-    <SocialLink
-      url={prependProtocol(donation)}
-      text={donation}
-      icon={IconDonate}
       {...props}
     />
   )

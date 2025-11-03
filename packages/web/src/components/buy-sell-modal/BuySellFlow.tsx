@@ -426,6 +426,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const isTransactionInvalid = !transactionData?.isValid
 
   const displayErrorMessage = useMemo(() => {
+    // Show exchange rate errors immediately as they prevent transactions
+    if (transactionData?.exchangeRateError) {
+      return messages.unableToFetchExchangeRate
+    }
     if (activeTab === 'sell' && !hasSufficientBalance) {
       return messages.insufficientAUDIOForSale
     }
@@ -551,7 +555,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
             isLoading={
               isContinueButtonLoading || transactionData?.isExchangeRateLoading
             }
-            disabled={transactionData?.isExchangeRateLoading || !userHasWallet}
+            disabled={
+              transactionData?.isExchangeRateLoading ||
+              !!transactionData?.exchangeRateError ||
+              !userHasWallet
+            }
             onClick={handleContinueClick}
           >
             {messages.continue}

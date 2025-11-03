@@ -99,7 +99,6 @@ export type ProfilePageProps = {
   instagramVerified: boolean
   tikTokVerified: boolean
   website: string
-  donation: string
   artistCoinBadge: Nullable<{
     mint: string
     logo_uri: string
@@ -141,7 +140,6 @@ export type ProfilePageProps = {
   updateInstagramHandle: (handle: string) => void
   updateTikTokHandle: (handle: string) => void
   updateWebsite: (website: string) => void
-  updateDonation: (donation: string) => void
   updateArtistCoinBadge: (
     badge: Nullable<{
       mint: string
@@ -217,7 +215,6 @@ const ProfilePage = ({
   updateInstagramHandle,
   updateTikTokHandle,
   updateWebsite,
-  updateDonation,
   updateArtistCoinBadge,
   updateProfilePicture,
   updateCoverPhoto,
@@ -265,7 +262,6 @@ const ProfilePage = ({
   instagramVerified,
   tikTokVerified,
   website,
-  donation,
   artistCoinBadge,
   updatedCoverPhoto,
   profilePictureSizes,
@@ -689,7 +685,6 @@ const ProfilePage = ({
                   instagramVerified={instagramVerified}
                   tikTokVerified={tikTokVerified}
                   website={website}
-                  donation={donation}
                   artistCoinBadge={artistCoinBadge}
                   created={created}
                   onUpdateBio={updateBio}
@@ -698,7 +693,6 @@ const ProfilePage = ({
                   onUpdateInstagramHandle={updateInstagramHandle}
                   onUpdateTikTokHandle={updateTikTokHandle}
                   onUpdateWebsite={updateWebsite}
-                  onUpdateDonation={updateDonation}
                   onUpdateArtistCoinBadge={updateArtistCoinBadge}
                 />
                 <Box flex='1 1 100%'>{body}</Box>

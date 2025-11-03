@@ -73,7 +73,8 @@ export const coinDetailsMessages = {
   },
   overflowMenu: {
     copyCoinAddress: 'Copy Coin Address',
-    unclaimedFees: 'Unclaimed Fees',
+    rewardsPool: 'Rewards Pool',
+    unclaimedEarnings: 'Unclaimed Earnings',
     artistEarnings: 'Artist Earnings',
     vestingSchedule: 'Unlock Schedule',
     vestingScheduleValue: '5 years (post-graduation)',
@@ -95,11 +96,13 @@ export const coinDetailsMessages = {
     ) =>
       `Check out @${artistHandle}'s artist coin $${coinTicker} on @Audius!\n\n${coinAddress}\n`,
     tooltips: {
+      rewardsPool:
+        'Artists can use this balance to incentivize challenges and reward loyal fans.',
       vestingSchedule:
         "Once an Artist Coin graduates into the open market, the artist's reserved Coins are unlocked daily over a 5-year period. Artists can claim their unlocked Coins every day, or let them accumulate over time.",
       artistEarnings:
         'The total revenue this artist has earned from the trading fees on their Artist Coin.',
-      unclaimedFees:
+      unclaimedEarnings:
         'The amount of trading fees you are currently able to claim.',
       locked:
         'The amount of your reserved Artist Coins that are still locked and not yet available to claim.',
@@ -159,11 +162,11 @@ export const coinDetailsMessages = {
     claim: 'Claim',
     tooltips: {
       rewardsPoolAllocation:
-        'Choose what percentage of your unlocked coins you want to allocate to the community rewards pool. The remaining percentage will be claimed directly to your wallet.',
+        'Choose what percentage of your unlocked coins you want to allocate to the community rewards pool. The remaining percentage will be claimed directly to your built-in wallet.',
       claimable:
         'The total amount of your reserved Artist Coins that have unlocked and are available to claim now.',
       yourShare:
-        'The amount of unlocked coins that will be claimed directly to your wallet based on your allocation percentage.',
+        'The amount of unlocked coins that will be claimed directly to your built-in wallet based on your allocation percentage.',
       rewardsPool:
         'The amount of unlocked coins that will be allocated to the community rewards pool based on your allocation percentage. These coins can be used to reward your community members.'
     }
