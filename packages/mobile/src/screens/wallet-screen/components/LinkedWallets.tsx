@@ -3,14 +3,12 @@ import { useCallback, useMemo, useState } from 'react'
 import type { ConnectedWallet } from '@audius/common/api'
 import {
   useAssociatedWallets,
-  useRemoveAssociatedWallet,
-  useCurrentAccountUser
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, WALLET_COUNT_LIMIT } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { Image } from 'react-native'
 
 import {
   Button,
@@ -19,12 +17,12 @@ import {
   IconKebabHorizontal,
   IconLogoCircleETH,
   IconLogoCircleSOL,
+  IconLogoWhiteBackground,
   Paper,
   Text,
   Skeleton,
   useTheme,
-  LoadingSpinner,
-  Box
+  LoadingSpinner
 } from '@audius/harmony-native'
 import ActionDrawer, {
   type ActionDrawerRow
@@ -69,9 +67,7 @@ const WalletRowContent = ({
     >
       <Flex row alignItems='center' gap='s'>
         {chain === Chain.Eth ? <IconLogoCircleETH /> : <IconLogoCircleSOL />}
-        <Text variant='body' size='m' strength='default'>
-          {shortenSPLAddress(address)}
-        </Text>
+        <Text>{shortenSPLAddress(address)}</Text>
       </Flex>
       <Flex flex={1} />
       {isRemovingWallet ? (
@@ -184,10 +180,16 @@ const WalletRowsList = ({
   </>
 )
 
+const WalletEmptyState = () => (
+  <Flex p='l'>
+    <Text variant='body' size='m' color='subdued'>
+      {walletMessages.linkedWallets.linkWallet}
+    </Text>
+  </Flex>
+)
+
 const BuiltInWalletRow = () => {
-  const { data: currentUser } = useCurrentAccountUser()
-  const builtInWalletImage =
-    currentUser?.profile_picture?.['480x480'] ?? undefined
+  const theme = useTheme()
 
   return (
     <Flex
@@ -200,35 +202,16 @@ const BuiltInWalletRow = () => {
       h={WALLET_ROW_HEIGHT}
     >
       <Flex row alignItems='center' gap='s'>
-        <Box
-          w={24}
-          h={24}
+        <IconLogoWhiteBackground
           style={{
-            borderRadius: 9999,
-            overflow: 'hidden',
-            borderWidth: 1,
-            borderColor: '#efeff1'
+            borderRadius: theme.cornerRadius.circle,
+            borderColor: theme.color.border.default,
+            height: theme.spacing.xl,
+            width: theme.spacing.xl
           }}
-        >
-          {builtInWalletImage ? (
-            <Image
-              source={{ uri: builtInWalletImage }}
-              style={{ width: 24, height: 24 }}
-            />
-          ) : null}
-        </Box>
-        <Text variant='body' size='m' strength='default'>
-          {coinDetailsMessages.externalWallets.builtIn}
-        </Text>
+        />
+        <Text>{coinDetailsMessages.externalWallets.builtIn}</Text>
       </Flex>
-      <Flex flex={1} />
-      <IconButton
-        icon={IconKebabHorizontal}
-        onPress={() => {}}
-        ripple
-        disabled
-        style={{ opacity: 0 }}
-      />
     </Flex>
   )
 }
@@ -263,7 +246,9 @@ export const LinkedWallets = () => {
         <WalletLoadingState />
       ) : hasWallets ? (
         <WalletRowsList connectedWallets={connectedWallets} />
-      ) : null}
+      ) : (
+        <WalletEmptyState />
+      )}
 
       {/* Footer Section with Add Button */}
       <Flex p='l' pt='m' borderTop='default'>

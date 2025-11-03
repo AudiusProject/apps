@@ -2,10 +2,9 @@ import { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
   useAssociatedWallets,
-  useRemoveAssociatedWallet,
-  ConnectedWallet
+  useRemoveAssociatedWallet
 } from '@audius/common/api'
-import { walletMessages } from '@audius/common/messages'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, WALLET_COUNT_LIMIT } from '@audius/common/utils'
 import {
@@ -17,6 +16,7 @@ import {
   IconKebabHorizontal,
   IconLogoCircleETH,
   IconLogoCircleSOL,
+  IconLogoWhiteBackground,
   Paper,
   PopupMenu,
   PopupMenuItem,
@@ -171,23 +171,6 @@ const WalletLoadingState = () => {
   )
 }
 
-const WalletRowsList = ({
-  connectedWallets
-}: {
-  connectedWallets?: ConnectedWallet[]
-}) => (
-  <Flex column gap='xl' w='100%' pv='l' ph='l'>
-    {connectedWallets?.map((wallet, index) => (
-      <WalletRow
-        key={wallet.address}
-        address={wallet.address}
-        chain={wallet.chain}
-        index={index}
-      />
-    ))}
-  </Flex>
-)
-
 const WalletEmptyState = ({
   openAppKitModal,
   isPending
@@ -212,6 +195,24 @@ const WalletEmptyState = ({
       >
         {walletMessages.linkedWallets.addWallet}
       </Button>
+    </Flex>
+  )
+}
+
+const BuiltInWalletRow = () => {
+  return (
+    <Flex alignItems='center' gap='s' w='100%'>
+      <IconLogoWhiteBackground
+        css={(theme) => ({
+          borderRadius: theme.cornerRadius.circle,
+          borderColor: theme.color.border.default,
+          height: theme.spacing.xl,
+          width: theme.spacing.xl
+        })}
+      />
+      <Text variant='body' size='m' strength='strong'>
+        {coinDetailsMessages.externalWallets.builtIn}
+      </Text>
     </Flex>
   )
 }
@@ -286,13 +287,31 @@ export const LinkedWallets = () => {
 
       {isLoading ? (
         <WalletLoadingState />
-      ) : hasWallets ? (
-        <WalletRowsList connectedWallets={connectedWallets} />
       ) : (
-        <WalletEmptyState
-          openAppKitModal={openAppKitModal}
-          isPending={isConnectingWallets}
-        />
+        <>
+          <Flex column gap='xl' w='100%' pv='l' ph='l'>
+            <BuiltInWalletRow />
+            {hasWallets
+              ? connectedWallets?.map((wallet, index) => (
+                  <WalletRow
+                    key={wallet.address}
+                    address={wallet.address}
+                    chain={wallet.chain}
+                    index={index}
+                  />
+                ))
+              : null}
+          </Flex>
+          {!hasWallets ? (
+            <>
+              <Divider css={{ width: '100%' }} />
+              <WalletEmptyState
+                openAppKitModal={openAppKitModal}
+                isPending={isConnectingWallets}
+              />
+            </>
+          ) : null}
+        </>
       )}
     </Paper>
   )

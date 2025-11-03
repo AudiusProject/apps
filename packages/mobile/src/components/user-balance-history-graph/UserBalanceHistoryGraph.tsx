@@ -47,7 +47,7 @@ const formatTooltipDate = (timestamp: number): string => {
       hour12: true
     })
     .toLowerCase()
-  return `${weekday} ${hour}`
+  return `${weekday} ${hour}`.toUpperCase()
 }
 
 export const UserBalanceHistoryGraph = ({
@@ -84,7 +84,6 @@ export const UserBalanceHistoryGraph = ({
 
       return (
         <Paper
-          direction='column'
           gap='xs'
           ph='m'
           pv='s'
@@ -102,22 +101,16 @@ export const UserBalanceHistoryGraph = ({
               size='xs'
               strength='strong'
               color='staticWhite'
-              style={{
-                letterSpacing: 0.5,
-                textAlign: 'center',
-                textTransform: 'uppercase'
-              }}
+              textAlign='center'
             >
-              {formatTooltipDate(timestamp).toUpperCase()}
+              {formatTooltipDate(timestamp)}
             </Text>
           ) : null}
           <Text
             variant='heading'
             size='s'
             color='staticWhite'
-            style={{
-              textAlign: 'center'
-            }}
+            textAlign='center'
           >
             {formatCurrency(value)}
           </Text>
@@ -147,7 +140,6 @@ export const UserBalanceHistoryGraph = ({
   if (isError || !historyData || historyData.length === 0) {
     return (
       <Flex
-        direction='column'
         alignItems='center'
         justifyContent='center'
         style={{ minHeight: height }}
