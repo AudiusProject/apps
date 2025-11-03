@@ -591,6 +591,7 @@ export enum Name {
 
   // Artist Coins
   BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+  BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
 
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
@@ -2347,6 +2348,10 @@ type BannerArtistCoinsLaunchClicked = {
   eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
 }
 
+type BannerTradingVolumeLaunchClicked = {
+  eventName: Name.BANNER_TRADING_VOLUME_LAUNCH_CLICKED
+}
+
 type RateCtaDisplayed = {
   eventName: Name.RATE_CTA_DISPLAYED
 }
@@ -3394,6 +3399,7 @@ export type AllTrackingEvents =
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
   | BannerArtistCoinsLaunchClicked
+  | BannerTradingVolumeLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
   | RateCtaResponseYes

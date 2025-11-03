@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useMutedUsers, useProfileUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { commentsMessages } from '@audius/common/messages'
 import { ShareSource } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   chatActions,
   chatSelectors,
@@ -33,9 +31,6 @@ export const ProfileActionsDrawer = () => {
   const userId = user?.user_id
   const blockeeList = useSelector(getBlockees)
   const isBlockee = userId ? blockeeList.includes(userId) : false
-  const { isEnabled: commentPostFlag = false } = useFeatureFlag(
-    FeatureFlags.COMMENT_POSTING_ENABLED
-  )
 
   const { data: mutedUsers } = useMutedUsers()
   const isMuted = mutedUsers?.some((user) => user.user_id === userId) ?? false
@@ -106,22 +101,17 @@ export const ProfileActionsDrawer = () => {
         text: isBlockee ? messages.unblockMessages : messages.blockMessages,
         callback: handleBlockMessagesPress
       },
-      ...(commentPostFlag
-        ? [
-            {
-              text: isMuted
-                ? commentsMessages.popups.unmuteUser.title
-                : commentsMessages.popups.muteUser.title,
-              callback: handleMuteCommentPress
-            }
-          ]
-        : [])
+      {
+        text: isMuted
+          ? commentsMessages.popups.unmuteUser.title
+          : commentsMessages.popups.muteUser.title,
+        callback: handleMuteCommentPress
+      }
     ],
     [
       handleShareProfilePress,
       isBlockee,
       handleBlockMessagesPress,
-      commentPostFlag,
       isMuted,
       handleMuteCommentPress
     ]

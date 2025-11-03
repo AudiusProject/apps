@@ -6,7 +6,7 @@ import {
   useTrack,
   useUser
 } from '@audius/common/api'
-import { useFeatureFlag, useGatedContentAccess } from '@audius/common/hooks'
+import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   ModalSource,
   isContentUSDCPurchaseGated,
@@ -15,7 +15,6 @@ import {
   ShareSource,
   RepostSource
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   usePremiumContentPurchaseModal,
   gatedContentActions,
@@ -47,7 +46,6 @@ import Menu from 'components/menu/Menu'
 import { OwnProps as TrackMenuProps } from 'components/menu/TrackMenu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileProps, TrackTileSize } from 'components/track/types'
-import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
 import { AppState } from 'store/types'
 import { isMatrix, shouldShowDark } from 'utils/theme/theme'
 
@@ -318,23 +316,6 @@ export const TrackTile = ({
     }
   }, [trackId, dispatch, setModalVisibility])
 
-  const onClickPillRequiresAccount = useRequiresAccountOnClick(() => {
-    if (isPurchase && trackId) {
-      openPremiumContentPurchaseModal(
-        { contentId: trackId, contentType: PurchaseableContentType.TRACK },
-        { source: source ?? ModalSource.TrackTile }
-      )
-    } else if (trackId && !hasStreamAccess) {
-      openLockedContentModal()
-    }
-  }, [
-    isPurchase,
-    trackId,
-    openPremiumContentPurchaseModal,
-    hasStreamAccess,
-    openLockedContentModal
-  ])
-
   const onClickPill = useCallback(() => {
     if (isPurchase && trackId) {
       openPremiumContentPurchaseModal(
@@ -352,10 +333,6 @@ export const TrackTile = ({
     source,
     openLockedContentModal
   ])
-
-  const { isEnabled: isGuestCheckoutEnabled } = useFeatureFlag(
-    FeatureFlags.GUEST_CHECKOUT
-  )
 
   useEffect(() => {
     if (!loading) {
@@ -489,9 +466,7 @@ export const TrackTile = ({
             onShare={onClickShare}
             onClickOverflow={onClickOverflowMenu}
             renderOverflow={renderOverflowMenu}
-            onClickGatedUnlockPill={
-              isGuestCheckoutEnabled ? onClickPill : onClickPillRequiresAccount
-            }
+            onClickGatedUnlockPill={onClickPill}
             isOwner={isOwner}
             readonly={isReadonly}
             isLoading={loading}

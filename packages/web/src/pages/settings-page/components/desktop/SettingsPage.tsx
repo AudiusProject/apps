@@ -4,7 +4,6 @@ import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -56,7 +55,6 @@ import Page from 'components/page/Page'
 import Toast from 'components/toast/Toast'
 import { ComponentPlacement } from 'components/types'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { env } from 'services/env'
 import {
@@ -361,10 +359,6 @@ export const SettingsPage = () => {
     return options
   }, [showMatrix])
 
-  const { isEnabled: isCommentsEnabled } = useFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
 
@@ -410,21 +404,19 @@ export const SettingsPage = () => {
             </Button>
           </SettingsCard>
         ) : null}
-        {isCommentsEnabled ? (
-          <SettingsCard
-            icon={<IconMessage />}
-            title={settingsMessages.commentSettingsCardTitle}
-            description={settingsMessages.commentSettingsCardDescription}
+        <SettingsCard
+          icon={<IconMessage />}
+          title={settingsMessages.commentSettingsCardTitle}
+          description={settingsMessages.commentSettingsCardDescription}
+        >
+          <Button
+            variant='secondary'
+            onClick={openCommentSettingsModal}
+            fullWidth
           >
-            <Button
-              variant='secondary'
-              onClick={openCommentSettingsModal}
-              fullWidth
-            >
-              {settingsMessages.commentSettingsButtonText}
-            </Button>
-          </SettingsCard>
-        ) : null}
+            {settingsMessages.commentSettingsButtonText}
+          </Button>
+        </SettingsCard>
         <SettingsCard
           icon={<IconNotification />}
           title={settingsMessages.notificationsCardTitle}

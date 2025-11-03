@@ -1,7 +1,6 @@
 import { Suspense, useCallback, useState } from 'react'
 
 import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SquareSizes,
   isContentUSDCPurchaseGated,
@@ -11,7 +10,6 @@ import {
   AccessConditions,
   isContentTokenGated
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { OverflowAction, PurchaseableContentType } from '@audius/common/store'
 import { Nullable, formatReleaseDate, dayjs } from '@audius/common/utils'
 import {
@@ -215,11 +213,8 @@ const TrackHeader = ({
   const albumInfo = album_backlink
   const shouldShowScheduledRelease =
     release_date && dayjs(release_date).isAfter(dayjs())
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
   const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = isRemixContestEnabled && !!remixContest
+  const isRemixContest = !!remixContest
 
   const imageElement = (
     <TrackArtwork

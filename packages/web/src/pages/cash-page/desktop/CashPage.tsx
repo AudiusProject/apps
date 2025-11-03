@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react'
 
 import { useCurrentAccount } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Button,
   Flex,
@@ -61,10 +59,6 @@ export const CashPage = () => {
     setSelectedTable(tableOptions[0])
   })
 
-  const { isEnabled: isOwnYourFansEnabled } = useFeatureFlag(
-    FeatureFlags.OWN_YOUR_FANS
-  )
-
   const {
     count: salesCount,
     data: sales,
@@ -73,7 +67,6 @@ export const CashPage = () => {
     onClickRow: onSalesClickRow,
     isEmpty: isSalesEmpty,
     isLoading: isSalesLoading,
-    downloadCSV: downloadSalesCSV,
     downloadSalesAsCSVFromJSON
   } = useSales()
   const {
@@ -102,9 +95,7 @@ export const CashPage = () => {
   const tables: Record<TableType, TableMetadata> = {
     [TableType.SALES]: {
       label: messages.sales,
-      downloadCSV: isOwnYourFansEnabled
-        ? downloadSalesAsCSVFromJSON
-        : downloadSalesCSV,
+      downloadCSV: downloadSalesAsCSVFromJSON,
       isDownloadCSVButtonDisabled: isSalesLoading || isSalesEmpty
     },
     [TableType.PURCHASES]: {

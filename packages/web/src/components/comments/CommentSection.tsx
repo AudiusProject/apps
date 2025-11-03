@@ -5,9 +5,7 @@ import {
   CommentSectionProvider,
   useCurrentCommentSection
 } from '@audius/common/context'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { trackPageSelectors } from '@audius/common/store'
 import { Divider, Flex, LoadingSpinner, Paper } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
@@ -54,10 +52,7 @@ const CommentSectionInner = (props: CommentSectionInnerProps) => {
   } = useCurrentCommentSection()
 
   const mainContentRef = useMainContentRef()
-  const { isEnabled: commentPostFlag = false } = useFeatureFlag(
-    FeatureFlags.COMMENT_POSTING_ENABLED
-  )
-  const commentPostAllowed = currentUserId !== undefined && commentPostFlag
+  const commentPostAllowed = currentUserId !== undefined
   const showCommentSortBar = commentIds.length > 1
 
   const [searchParams] = useSearchParams()

@@ -1,7 +1,5 @@
 import { useCurrentUserId, useTrack } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { ID, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { formatCount, isLongFormContent, pluralize } from '@audius/common/utils'
 import {
   Flex,
@@ -51,10 +49,6 @@ export const TrackStats = (props: TrackStatsProps) => {
   })
   const { data: currentUserId } = useCurrentUserId()
   const dispatch = useDispatch()
-  const { isEnabled: isCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-
   const comment_count = partialTrack?.comment_count ?? 0
 
   if (!partialTrack) return null
@@ -128,7 +122,7 @@ export const TrackStats = (props: TrackStatsProps) => {
           {formatCount(save_count)} {pluralize(messages.favorite, save_count)}
         </PlainButton>
       )}
-      {!isCommentsEnabled || comments_disabled || comment_count === 0 ? null : (
+      {comments_disabled || comment_count === 0 ? null : (
         <PlainButton
           iconLeft={IconMessage}
           onClick={handleClickComments}

@@ -1,13 +1,9 @@
 import React, { Fragment, useCallback, useState } from 'react'
 
 import { useStems, useTrack } from '@audius/common/api'
-import {
-  useDownloadableContentAccess,
-  useFeatureFlag
-} from '@audius/common/hooks'
+import { useDownloadableContentAccess } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 import { DownloadQuality, ModalSource } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   PurchaseableContentType,
   useDownloadTrackArchiveModal,
@@ -71,9 +67,6 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
     shouldDisplayDownloadFollowGated,
     shouldDisplayOwnerPremiumDownloads
   } = useDownloadableContentAccess({ trackId })
-  const { isEnabled: isDownloadAllTrackFilesEnabled } = useFeatureFlag(
-    FeatureFlags.DOWNLOAD_ALL_TRACK_FILES
-  )
 
   const formattedPrice = price ? USDC(price / 100).toLocaleString() : undefined
   const shouldHideDownload =
@@ -215,7 +208,7 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
             </Text>
           </Flex>
         ) : null}
-        {isDownloadAllTrackFilesEnabled && !shouldHideDownload ? (
+        {!shouldHideDownload ? (
           <Button
             variant='secondary'
             size='small'
