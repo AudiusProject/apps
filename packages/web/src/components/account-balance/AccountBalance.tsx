@@ -2,14 +2,7 @@ import { useMemo } from 'react'
 
 import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
-import {
-  Flex,
-  Text,
-  IconCaretUp,
-  IconCaretDown,
-  Box,
-  Paper
-} from '@audius/harmony'
+import { Flex, Text, IconArrowRight, Box, Paper } from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
@@ -43,9 +36,9 @@ const DesktopChangeIndicator = ({
   changeAmount: number
   changePercentage: number
 }) => {
-  const Icon = isPositive ? IconCaretUp : IconCaretDown
   const theme = useTheme()
   const changeColor = isPositive ? 'success' : 'default'
+  const rotation = isPositive ? -45 : 45
 
   return (
     <Flex gap='s' alignItems='center'>
@@ -71,8 +64,11 @@ const DesktopChangeIndicator = ({
               : theme.color.neutral.n400
           })}
         />
-        <Icon
-          css={css({ position: 'relative', zIndex: 1 })}
+        <IconArrowRight
+          css={css({
+            position: 'relative',
+            transform: `rotate(${rotation}deg)`
+          })}
           size='l'
           color={changeColor}
         />
@@ -99,12 +95,16 @@ const MobileChangeIndicator = ({
   changeAmount: number
   changePercentage: number
 }) => {
-  const Icon = isPositive ? IconCaretUp : IconCaretDown
   const changeColor = isPositive ? 'success' : 'default'
+  const rotation = isPositive ? -45 : 45
 
   return (
     <Flex gap='xs' alignItems='center'>
-      <Icon size='s' color={changeColor} />
+      <IconArrowRight
+        size='s'
+        color={changeColor}
+        css={css({ transform: `rotate(${rotation}deg)` })}
+      />
       <Text variant='body' size='s' color={changeColor}>
         {formatCurrency(Math.abs(changeAmount))} (
         {formatPercentage(Math.abs(changePercentage))})

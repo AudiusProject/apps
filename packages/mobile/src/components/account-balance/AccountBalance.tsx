@@ -3,13 +3,7 @@ import { useMemo } from 'react'
 import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 
-import {
-  Flex,
-  Text,
-  IconCaretUp,
-  IconCaretDown,
-  Paper
-} from '@audius/harmony-native'
+import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
@@ -84,8 +78,8 @@ export const AccountBalance = ({
     )
   }
 
-  const Icon = changeStats.isPositive ? IconCaretUp : IconCaretDown
   const changeColor = changeStats.isPositive ? 'success' : 'default'
+  const rotation = changeStats.isPositive ? -45 : 45
 
   return (
     <Paper w='100%' p='m' direction='column' gap='m'>
@@ -99,7 +93,9 @@ export const AccountBalance = ({
           </Text>
         ) : null}
         <Flex row gap='xs' alignItems='center'>
-          <Icon color={changeColor} size='s' />
+          <Box style={{ transform: [{ rotate: `${rotation}deg` }] }}>
+            <IconArrowRight color={changeColor} size='s' />
+          </Box>
           <Text variant='body' size='s' strength='default' color={changeColor}>
             {formatCurrency(Math.abs(changeStats.amount))} (
             {formatPercentage(Math.abs(changeStats.percentage))})
