@@ -131,7 +131,8 @@
     "valtio": "1.13.2"
   },
   "resolutions": {
-    "@babel/core": "7.25.2"
+    "@babel/core": "7.25.2",
+    "cipher-base": "1.0.7"
   },
   "overrides": {
     "@types/prop-types": "15.7.5",

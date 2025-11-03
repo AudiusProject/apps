@@ -68,7 +68,7 @@
     "borsh": "0.4.0",
     "browser-or-node": "^2.1.1",
     "bs58": "4.0.1",
-    "cipher-base": "1.0.4",
+    "cipher-base": "1.0.7",
     "crc-32": "1.2.2",
     "cross-fetch": "4.0.0",
     "elliptic": "6.6.1",
