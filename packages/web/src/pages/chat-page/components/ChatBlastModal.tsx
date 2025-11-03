@@ -363,6 +363,7 @@ const CoinHoldersMessageField = () => {
     mint: coin?.mint
   })
   const isDisabled = coinMembersCount === 0
+  if (!coin) return null
 
   return (
     <Flex

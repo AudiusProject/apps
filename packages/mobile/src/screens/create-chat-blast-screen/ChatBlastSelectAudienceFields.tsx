@@ -257,6 +257,8 @@ const CoinHoldersMessageField = () => {
   const coinSymbol = coin?.ticker ?? ''
   const isDisabled = coinMembersCount === 0
 
+  if (!coin) return null
+
   return (
     <ExpandableRadio
       value={ChatBlastAudience.COIN_HOLDERS}
