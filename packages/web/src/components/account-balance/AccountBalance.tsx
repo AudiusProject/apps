@@ -67,7 +67,6 @@ const DesktopChangeIndicator = ({
         <IconArrowRight
           css={css({
             position: 'relative',
-            zIndex: 1,
             transform: `rotate(${rotation}deg)`
           })}
           size='l'
