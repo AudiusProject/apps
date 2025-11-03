@@ -3,7 +3,7 @@ import { useCallback, useContext, useState } from 'react'
 import {
   UserCoin,
   useArtistCoin,
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCoinBalance,
   useCurrentUserId,
   useQueryContext,
@@ -289,7 +289,7 @@ export const WalletCoinsList = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistOwnedCoin(currentUserId)
+  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
   const audioCoin = artistCoins?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )

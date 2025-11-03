@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useMemo } from 'react'
 
-import { useUserCreatedCoins } from '@audius/common/api'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { useTheme } from '@audius/harmony'
@@ -44,8 +44,7 @@ const ProfilePicture = ({
   const [processing, setProcessing] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const { data: ownedCoins } = useUserCreatedCoins({ userId, limit: 1 })
-  const ownedCoin = ownedCoins?.[0]
+  const { data: ownedCoin } = useArtistCreatedCoin(userId)
   const navigate = useNavigate()
 
   const handleCoinClick = () => {

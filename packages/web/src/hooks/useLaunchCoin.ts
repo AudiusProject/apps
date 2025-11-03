@@ -1,8 +1,8 @@
 import {
   QUERY_KEYS,
+  getArtistCreatedCoinQueryKey,
   getConnectedWalletsQueryOptions,
   getCurrentAccountQueryKey,
-  getUserCreatedCoinsQueryKey,
   getUserQueryKey,
   useQueryContext
 } from '@audius/common/api'
@@ -220,7 +220,7 @@ export const useLaunchCoin = () => {
       // Invalidate our user - this will refresh their badge info
       // NOTE: this will eventually move to the users metadata
       queryClient.invalidateQueries({
-        queryKey: getUserCreatedCoinsQueryKey(params.userId)
+        queryKey: getArtistCreatedCoinQueryKey(params.userId)
       })
       // The confirmation call will associate the external wallet, so we need to invalidate the connected wallets query
       queryClient.invalidateQueries({

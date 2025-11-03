@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCurrentUserId,
   useUserComments,
   useProfileUser
@@ -67,7 +67,7 @@ export const ProfileHeader = memo(() => {
     pageSize: 1
   })
   const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistOwnedCoin(userId)
+    useArtistCreatedCoin(userId)
   const { tier } = useTierAndVerifiedForUser(userId)
   const hasTier = tier !== 'none'
   const isOwner = userId === accountId

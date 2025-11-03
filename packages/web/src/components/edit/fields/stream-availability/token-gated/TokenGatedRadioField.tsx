@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistOwnedCoin, useCurrentUserId } from '@audius/common/api'
+import { useArtistCreatedCoin, useCurrentUserId } from '@audius/common/api'
 import { useAccessAndRemixSettings, useHasNoTokens } from '@audius/common/hooks'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import { StreamTrackAvailabilityType } from '@audius/common/models'
@@ -24,7 +24,7 @@ type TokenGatedRadioFieldProps = {
 export const TokenGatedRadioField = (props: TokenGatedRadioFieldProps) => {
   const { isRemix, isUpload, isInitiallyUnlisted, isAlbum } = props
   const { data: userId } = useCurrentUserId()
-  const { data: coin } = useArtistOwnedCoin(userId)
+  const { data: coin } = useArtistCreatedCoin(userId)
 
   const [, , { setValue: setStreamConditionsValue }] =
     useField<AccessAndSaleFormValues[typeof STREAM_CONDITIONS]>(

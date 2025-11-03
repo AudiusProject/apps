@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
-import { useArtistOwnedCoin } from '@audius/common/api'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import {
   imageCoverPhotoBlank,
   imageProfilePicEmpty
@@ -218,7 +218,7 @@ const ProfileHeader = ({
 
   // Artist coin detection
   const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistOwnedCoin(userId)
+    useArtistCreatedCoin(userId)
 
   const record = useRecord()
 

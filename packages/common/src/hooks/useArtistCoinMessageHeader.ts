@@ -1,6 +1,6 @@
 import { ChatBlastAudience } from '@audius/sdk'
 
-import { useArtistOwnedCoin } from '~/api/tan-query/coins/useArtistOwnedCoin'
+import { useArtistCreatedCoin } from '~/api/tan-query/coins/useArtistCreatedCoin'
 import { ID } from '~/models'
 
 export const useArtistCoinMessageHeader = ({
@@ -10,7 +10,7 @@ export const useArtistCoinMessageHeader = ({
   userId: ID
   audience?: ChatBlastAudience
 }) => {
-  const { data: coin } = useArtistOwnedCoin(userId)
+  const { data: coin } = useArtistCreatedCoin(userId)
 
   if (!audience || audience !== ChatBlastAudience.COIN_HOLDERS) {
     return null

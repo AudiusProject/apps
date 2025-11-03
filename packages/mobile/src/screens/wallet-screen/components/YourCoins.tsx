@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 
 import {
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
@@ -97,7 +97,7 @@ export const YourCoins = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistOwnedCoin(currentUserId)
+  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
   const audioCoin = artistCoins?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
