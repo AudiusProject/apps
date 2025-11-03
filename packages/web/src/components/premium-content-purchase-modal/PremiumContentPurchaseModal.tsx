@@ -216,9 +216,6 @@ export const PremiumContentPurchaseModal = () => {
   const isUnlocking = !error && isContentPurchaseInProgress(stage)
   const presetValues = usePayExtraPresets()
   const { data: currentUser } = useCurrentAccountUser()
-  const { isEnabled: guestCheckoutEnabled } = useFeatureFlag(
-    FeatureFlags.GUEST_CHECKOUT
-  )
   const [, setGuestEmailInLocalStorage] = useLocalStorage(GUEST_EMAIL, '')
 
   const { data: guestEmail } = useCurrentAccount({
@@ -277,7 +274,6 @@ export const PremiumContentPurchaseModal = () => {
   )
 
   const showGuestCheckout =
-    guestCheckoutEnabled &&
     (!currentUser || (currentUser && !currentUser.handle)) &&
     initialValues.guestEmail === ''
 

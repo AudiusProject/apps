@@ -1,7 +1,6 @@
 import { useRemixContest } from '@audius/common/api'
-import { useFeatureFlag, useRemixCountdown } from '@audius/common/hooks'
+import { useRemixCountdown } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { formatDoubleDigit } from '@audius/common/utils'
 
 import { Text, Flex, Divider, Paper } from '@audius/harmony-native'
@@ -39,13 +38,10 @@ type RemixContestCountdownProps = {
 export const RemixContestCountdown = ({
   trackId
 }: RemixContestCountdownProps) => {
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
   const { data: remixContest } = useRemixContest(trackId)
   const timeLeft = useRemixCountdown(remixContest?.endDate)
 
-  if (!remixContest || !isRemixContestEnabled) return null
+  if (!remixContest) return null
 
   return (
     <Paper row pv='m' ph='l' borderRadius='l' backgroundColor='white'>

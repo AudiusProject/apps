@@ -1,8 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { advancedTrackMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   License,
   creativeCommons,
@@ -363,10 +361,6 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
 
   const licenseIcons = computeLicenseIcons(licenseType)
 
-  const { isEnabled: isCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-
   const [
     { value: coverOriginalSongTitle },
     ,
@@ -427,16 +421,12 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
           <Divider />
         </>
       ) : null}
-      {isCommentsEnabled ? (
-        <>
-          <SwitchRowField
-            name={COMMENTS_DISABLED}
-            header={messages.disableComments.header}
-            description={messages.disableComments.description}
-          />
-          <Divider />
-        </>
-      ) : null}
+      <SwitchRowField
+        name={COMMENTS_DISABLED}
+        header={messages.disableComments.header}
+        description={messages.disableComments.description}
+      />
+      <Divider />
       <div className={cn(layoutStyles.col, layoutStyles.gap6)}>
         <Text variant='title' size='l' tag='h3'>
           {messages.licenseType}
