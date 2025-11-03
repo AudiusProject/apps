@@ -4,16 +4,7 @@ import { useCallback } from 'react'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
-import artist2Hollis from 'assets/img/publicSite/Artist-2hollis.webp'
-import artistAlinaBaraz from 'assets/img/publicSite/Artist-AlinaBaraz.webp'
-import artistAluna from 'assets/img/publicSite/Artist-Aluna.webp'
-import artistColdbrew from 'assets/img/publicSite/Artist-Coldbrew.webp'
-import artistConnorPrice from 'assets/img/publicSite/Artist-ConnorPrice.webp'
-import artistDisclosure from 'assets/img/publicSite/Artist-Disclosure.webp'
-import artistKatoOnTheTrack from 'assets/img/publicSite/Artist-KatoOnTheTrack.webp'
-import artistMollyMcPhaul from 'assets/img/publicSite/Artist-MollyMcPhaul.webp'
-import artistRLGrime from 'assets/img/publicSite/Artist-RLGrime.webp'
-import artistSkrillex from 'assets/img/publicSite/Artist-Skrillex.webp'
+import artistTakeover from 'assets/img/publicSite/Artist-Takeover.webp'
 import useHasViewed from 'hooks/useHasViewed'
 
 import styles from './WhoUsesAudius.module.css'
@@ -65,58 +56,11 @@ const MobileArtist = (props: AristProps) => {
   )
 }
 
-const artists = [
-  {
-    name: 'Disclosure',
-    handle: 'disclosure',
-    imageUrl: artistDisclosure
-  },
-  {
-    name: 'Alina Baraz',
-    handle: 'alinabaraz',
-    imageUrl: artistAlinaBaraz
-  },
-  {
-    name: 'Skrillex',
-    handle: 'skrillex',
-    imageUrl: artistSkrillex
-  },
-  {
-    name: 'RL Grime',
-    handle: 'rlgrime',
-    imageUrl: artistRLGrime
-  },
-  {
-    name: 'Aluna',
-    handle: 'alunaaa',
-    imageUrl: artistAluna
-  },
-  {
-    name: '2Hollis',
-    handle: 'drippysoup',
-    imageUrl: artist2Hollis
-  },
-  {
-    name: 'Molly McPhaul',
-    handle: 'mollymcphaul',
-    imageUrl: artistMollyMcPhaul
-  },
-  {
-    name: 'Connor Price',
-    handle: 'connorprice_',
-    imageUrl: artistConnorPrice
-  },
-  {
-    name: 'Kato On The Track',
-    handle: 'katoproducer',
-    imageUrl: artistKatoOnTheTrack
-  },
-  {
-    name: 'Coldbrew',
-    handle: 'coldbrew',
-    imageUrl: artistColdbrew
-  }
-]
+const takeoverArtists = ['You', 'Already', 'Know', 'YAK'].map((name) => ({
+  name,
+  handle: 'handle', // TODO: add handle
+  imageUrl: artistTakeover
+}))
 
 type WhoUsesAudiusProps = {
   isMobile: boolean
@@ -155,9 +99,9 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
           </div>
         </div>
         <div className={styles.artistsContainer}>
-          {artists.map((artist, i) => (
+          {takeoverArtists.map((artist, i) => (
             <MobileArtist
-              key={artist.handle}
+              key={artist.name}
               {...artist}
               goToArtist={goToArtist}
             />
@@ -183,8 +127,8 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
           <h3 className={styles.subTitle}>{messages.subtitle}</h3>
         </animated.div>
         <div className={styles.artistsContainer}>
-          {artists.map((artist) => (
-            <Artist key={artist.handle} {...artist} goToArtist={goToArtist} />
+          {takeoverArtists.map((artist) => (
+            <Artist key={artist.name} {...artist} goToArtist={goToArtist} />
           ))}
         </div>
       </div>
