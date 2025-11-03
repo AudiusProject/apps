@@ -53,7 +53,7 @@ const formatTooltipDate = (timestamp: number): string => {
 export const UserBalanceHistoryGraph = ({
   userId,
   width = 350,
-  height = 200
+  height = 191
 }: UserBalanceHistoryGraphProps) => {
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
@@ -134,7 +134,7 @@ export const UserBalanceHistoryGraph = ({
         alignItems='center'
         justifyContent='center'
         gap='m'
-        style={{ minHeight: 200 }}
+        style={{ minHeight: height }}
       >
         <LoadingSpinner />
         <Text variant='body' size='s' strength='weak'>
@@ -150,7 +150,7 @@ export const UserBalanceHistoryGraph = ({
         direction='column'
         alignItems='center'
         justifyContent='center'
-        style={{ minHeight: 200 }}
+        style={{ minHeight: height }}
       >
         <Text variant='body' size='m' strength='weak' color='danger'>
           {messages.error}
