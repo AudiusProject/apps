@@ -16,9 +16,6 @@ import {
 } from '../../utils/transaction'
 import { verifySignatures } from '../../utils/verifySignatures'
 
-import { InvalidRelayInstructionError } from './InvalidRelayInstructionError'
-import { assertRelayAllowedInstructions } from './assertRelayAllowedInstructions'
-
 /**
  * Gets the specified fee payer's key pair from the config.
  * @param feePayerPublicKey the fee payer to find
@@ -92,19 +89,6 @@ export const relay = async (
       res.locals.logger.info(
         `Signing with fee payer '${feePayerKey.toBase58()}'`
       )
-      try {
-        // Only care about what the instructions are if signing/paying
-        await assertRelayAllowedInstructions(decompiled.instructions, {
-          user: res.locals.signerUser,
-          feePayer: feePayerKey.toBase58()
-        })
-      } catch (e) {
-        if (e instanceof InvalidRelayInstructionError) {
-          throw new BadRequestError('Invalid relay instructions', { cause: e })
-        } else {
-          throw e
-        }
-      }
       transaction.sign([feePayerKeyPair])
     } else if (verifySignatures(transaction)) {
       res.locals.logger.info(

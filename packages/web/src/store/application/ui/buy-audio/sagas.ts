@@ -1059,6 +1059,9 @@ function* doBuyAudio({
  * This function checks for the above conditions sequentially, and pops the modal as necessary.
  */
 function* recoverPurchaseIfNecessary() {
+  // Temporarily halt AUDIO recovery flow
+  return
+
   let provider = OnRampProvider.UNKNOWN
   let didNeedRecovery = false
   let userRootWallet = ''

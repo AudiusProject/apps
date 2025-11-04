@@ -353,6 +353,9 @@ function* doBuyUSDC({
 }
 
 function* recoverPurchaseIfNecessary() {
+  // Temporarily halt USDC recovery flow
+  return
+
   yield* waitForRead()
   const hasAccount = yield* call(queryHasAccount)
   if (!hasAccount) return
