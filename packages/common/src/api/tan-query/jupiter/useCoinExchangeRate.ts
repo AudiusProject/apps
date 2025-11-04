@@ -176,8 +176,6 @@ export const getIndirectQuoteViaAudio = async (
     params.outputMint,
     queryClient
   )
-  console.log('isInputDBC', isInputDBC)
-  console.log('isOutputDBC', isOutputDBC)
   // Get first quote: InputToken -> AUDIO
   let firstQuote: JupiterQuoteResult | undefined
   if (isInputDBC) {
@@ -385,7 +383,6 @@ export const useCoinExchangeRate = (
         params.inputMint,
         params.outputMint
       )
-      console.log('isDirectSwap', isDirectSwap)
       if (isDirectSwap) {
         return await getDirectQuote(
           {
