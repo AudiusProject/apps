@@ -88,13 +88,15 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       outputMintAddress = selectedPair.quoteToken.address ?? ''
     }
 
+    if (!baseCoin?.decimals || !quoteCoin?.decimals) return
+
     handleSwap({
       inputMint: inputMintAddress,
       outputMint: outputMintAddress,
       amountUi: inputAmount,
       slippageBps: SLIPPAGE_BPS,
-      inputDecimals: baseCoin?.decimals,
-      outputDecimals: quoteCoin?.decimals
+      inputDecimals: baseCoin.decimals,
+      outputDecimals: quoteCoin.decimals
     })
   }
 
