@@ -552,8 +552,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
   async executeMeteoraSwap(
     tokenMint: string, // Mint address of the token we're swapping (the one not AUDIO)
     swapDirection: 'audioToCoin' | 'coinToAudio',
-    inputAmountUi: number,
-    deleteOutputTokenAta: boolean = true
+    inputAmountUi: number
   ): Promise<SwapWithMeteoraDBCResult> {
     const { sdk, userPublicKey, keypair, ethAddress, feePayer } =
       this.dependencies
@@ -691,10 +690,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         .map((account) => account.key.toBase58())
 
       // Close the created ATA accounts (both input and output tokens)
-      const atasToClose: PublicKey[] = [inputTokenAta]
-      if (deleteOutputTokenAta) {
-        atasToClose.push(tempOutputTokenAta)
-      }
+      const atasToClose: PublicKey[] = [inputTokenAta, tempOutputTokenAta]
 
       for (const ataToClose of atasToClose) {
         instructions.push(
@@ -723,7 +719,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
             )
           }
         },
-        intermediateAudioAta: tempOutputTokenAta,
+        intermediateAudioAta: new PublicKey(destinationUserbank),
         inputAmount: {
           amount: Number(inputAmountFD.value),
           uiAmount: inputAmountUi
@@ -798,7 +794,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           `Invalid AUDIO balance in intermediate account: ${actualAudioBalance.uiAmount}`
         )
       }
-
+      // Use the predicted amount if we have enough, otherwise use actual balance
+      const predictedAmount = swapToAudioResult.firstQuote.outputAmount.uiAmount
       const predictedFixed = new FixedDecimal(predictedAmount, AUDIO_DECIMALS)
       const actualFixed = new FixedDecimal(
         actualAudioBalance.uiAmount,
