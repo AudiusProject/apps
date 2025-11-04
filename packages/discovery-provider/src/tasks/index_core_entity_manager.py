@@ -1,4 +1,5 @@
 import logging
+import time
 from logging import LoggerAdapter
 from typing import List, Optional
 
@@ -32,7 +33,21 @@ def index_core_entity_manager(
         if tx_type != "manage_entity":
             continue
 
-        logger.info(f"index_core manage entity {tx_hash} {block.blockhash}")
+        tx_logger = logging.LoggerAdapter(
+            logger=logger,
+            extra={
+                **(logger.extra or {}),
+                **{
+                    "tx_hash": tx_hash,
+                },
+            },
+        )
+
+        indexing_start_time = time.perf_counter()
+
+        tx_logger.info(
+            f"index_core manage entity {tx_hash} {block.blockhash}",
+        )
         manage_entity_tx = tx.manage_entity
         tx_receipt = {
             "args": AttributeDict(
@@ -81,6 +96,8 @@ def index_core_entity_manager(
             block_timestamp=block.timestamp.ToSeconds(),
             block_hash=block.blockhash,
         )
+        indexing_duration = time.perf_counter() - indexing_start_time
+        tx_logger.info(f"Entity manager tx indexed in {indexing_duration:.3f}s")
         return next_em_block
     except Exception as e:
         logger.error(f"entity manager error in core blocks {e}", exc_info=True)

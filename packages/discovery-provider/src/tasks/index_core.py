@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from datetime import datetime
 from logging import LoggerAdapter
 from typing import Optional, TypedDict, cast
@@ -234,9 +235,20 @@ def index_core(self):
                     f"mismatched chain id {block.chainid} given for block but indexing chain {core_chain_id}"
                 )
                 return
+            block_logger = logging.LoggerAdapter(
+                logger=logger,
+                extra={
+                    "indexer": "core",
+                    "chain_id": core_chain_id,
+                    "core_blockhash": block.blockhash,
+                    "core_block_height": block.height,
+                },
+            )
+
+            indexing_start_time = time.perf_counter()
 
             indexed_slot = index_core_plays(
-                logger=logger,
+                logger=block_logger,
                 session=session,
                 challenge_bus=challenge_bus,
                 latest_indexed_slot=latest_indexed_slot,
@@ -244,7 +256,7 @@ def index_core(self):
             )
 
             indexed_em_block = index_core_entity_manager(
-                logger=logger,
+                logger=block_logger,
                 update_task=self,
                 web3=web3,
                 session=session,
@@ -252,12 +264,15 @@ def index_core(self):
             )
 
             run_side_effects(
-                logger=logger,
+                logger=block_logger,
                 block=block,
                 session=session,
                 core=core,
                 challenge_bus=challenge_bus,
             )
+
+            indexing_duration = time.perf_counter() - indexing_start_time
+            block_logger.info(f"Core block indexed in {indexing_duration:.3f}s")
 
             # get block parenthash, in none case also use None
             # this would be the case in solana cutover where the previous
