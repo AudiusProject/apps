@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import type { AudiusSdk } from '@audius/sdk'
 import { QuoteResponse, SwapMode } from '@jup-ag/api'
-import { useQuery } from '@tanstack/react-query'
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
   getJupiterQuoteByMint,
@@ -16,6 +16,8 @@ import { convertBigIntToAmountObject } from '~/utils'
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryOptions, type QueryKey } from '../types'
 import { useQueryContext } from '../utils/QueryContext'
+
+import { getCoinPoolState, getIsDirectSwappable } from './utils'
 
 // AUDIO mint address for use as intermediary token in double swaps
 const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
@@ -104,25 +106,41 @@ export const createExchangeRateResponse = ({
 /**
  * Gets a direct quote between two tokens
  */
-export const getDirectQuote = async (params: {
-  inputMint: string
-  outputMint: string
-  inputDecimals: number
-  outputDecimals: number
-  amountUi: number
-  swapMode?: SwapMode
-}): Promise<CoinExchangeRateResponse> => {
-  const quoteResult = await getJupiterQuoteByMint({
-    inputMint: params.inputMint,
-    outputMint: params.outputMint,
-    inputDecimals: params.inputDecimals,
-    outputDecimals: params.outputDecimals,
-    amountUi: params.amountUi,
-    slippageBps: SLIPPAGE_BPS,
-    swapMode: params.swapMode ?? 'ExactIn',
-    onlyDirectRoutes: false,
-    maxAccounts: MAX_ALLOWED_ACCOUNTS
-  })
+export const getDirectQuote = async (
+  params: {
+    inputMint: string
+    outputMint: string
+    inputDecimals: number
+    outputDecimals: number
+    amountUi: number
+    swapMode?: SwapMode
+  },
+  queryClient: QueryClient,
+  sdk: AudiusSdk
+): Promise<CoinExchangeRateResponse> => {
+  const { isDBC: isInputDBC } = getCoinPoolState(params.inputMint, queryClient)
+  const { isDBC: isOutputDBC } = getCoinPoolState(
+    params.outputMint,
+    queryClient
+  )
+  let quoteResult: JupiterQuoteResult | undefined
+  if (isInputDBC || isOutputDBC) {
+    console.log('Getting quote via Meteora DBC')
+    quoteResult = await getQuoteViaMeteoraDBC(params, sdk)
+  } else {
+    console.log('Getting quote via Jupiter')
+    quoteResult = await getJupiterQuoteByMint({
+      inputMint: params.inputMint,
+      outputMint: params.outputMint,
+      inputDecimals: params.inputDecimals,
+      outputDecimals: params.outputDecimals,
+      amountUi: params.amountUi,
+      slippageBps: SLIPPAGE_BPS,
+      swapMode: params.swapMode ?? 'ExactIn',
+      onlyDirectRoutes: false,
+      maxAccounts: MAX_ALLOWED_ACCOUNTS
+    })
+  }
 
   const rate = calculateExchangeRate(
     quoteResult.outputAmount.uiAmount,
@@ -157,63 +175,59 @@ export const getIndirectQuoteViaAudio = async (
   // Get first quote: InputToken -> AUDIO
   let firstQuote: JupiterQuoteResult | undefined
   // Note: if the input mint is already audio, we don't need to get a quote for it
-  if (params.inputMint !== AUDIO_MINT) {
-    try {
-      firstQuote = await getJupiterQuoteByMint({
+  try {
+    firstQuote = await getJupiterQuoteByMint({
+      inputMint: params.inputMint,
+      outputMint: AUDIO_MINT,
+      inputDecimals: params.inputDecimals,
+      outputDecimals: AUDIO_DECIMALS,
+      amountUi: params.amountUi,
+      slippageBps: SLIPPAGE_BPS,
+      swapMode: params.swapMode ?? 'ExactIn',
+      onlyDirectRoutes: false,
+      maxAccounts: MAX_ALLOWED_ACCOUNTS
+    })
+  } catch (error) {
+    firstQuote = await getQuoteViaMeteoraDBC(
+      {
         inputMint: params.inputMint,
         outputMint: AUDIO_MINT,
         inputDecimals: params.inputDecimals,
         outputDecimals: AUDIO_DECIMALS,
         amountUi: params.amountUi,
-        slippageBps: SLIPPAGE_BPS,
-        swapMode: params.swapMode ?? 'ExactIn',
-        onlyDirectRoutes: false,
-        maxAccounts: MAX_ALLOWED_ACCOUNTS
-      })
-    } catch (error) {
-      firstQuote = await getQuoteViaMeteoraDBC(
-        {
-          inputMint: params.inputMint,
-          outputMint: AUDIO_MINT,
-          inputDecimals: params.inputDecimals,
-          outputDecimals: AUDIO_DECIMALS,
-          amountUi: params.amountUi,
-          swapMode: params.swapMode ?? 'ExactIn'
-        },
-        sdk
-      )
-    }
+        swapMode: params.swapMode ?? 'ExactIn'
+      },
+      sdk
+    )
   }
 
   // Get second quote: AUDIO -> OutputToken
   let secondQuote: JupiterQuoteResult | undefined
   // If the output mint is already audio, we don't need to get a quote for it
-  if (params.outputMint !== AUDIO_MINT) {
-    try {
-      secondQuote = await getJupiterQuoteByMint({
+  try {
+    secondQuote = await getJupiterQuoteByMint({
+      inputMint: AUDIO_MINT,
+      outputMint: params.outputMint,
+      inputDecimals: AUDIO_DECIMALS,
+      outputDecimals: params.outputDecimals,
+      amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
+      slippageBps: SLIPPAGE_BPS,
+      swapMode: params.swapMode ?? 'ExactIn',
+      onlyDirectRoutes: false,
+      maxAccounts: MAX_ALLOWED_ACCOUNTS
+    })
+  } catch (error) {
+    secondQuote = await getQuoteViaMeteoraDBC(
+      {
         inputMint: AUDIO_MINT,
         outputMint: params.outputMint,
         inputDecimals: AUDIO_DECIMALS,
         outputDecimals: params.outputDecimals,
         amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
-        slippageBps: SLIPPAGE_BPS,
-        swapMode: params.swapMode ?? 'ExactIn',
-        onlyDirectRoutes: false,
-        maxAccounts: MAX_ALLOWED_ACCOUNTS
-      })
-    } catch (error) {
-      secondQuote = await getQuoteViaMeteoraDBC(
-        {
-          inputMint: AUDIO_MINT,
-          outputMint: params.outputMint,
-          inputDecimals: AUDIO_DECIMALS,
-          outputDecimals: params.outputDecimals,
-          amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
-          swapMode: params.swapMode ?? 'ExactIn'
-        },
-        sdk
-      )
-    }
+        swapMode: params.swapMode ?? 'ExactIn'
+      },
+      sdk
+    )
   }
 
   // Calculate combined exchange rate
@@ -334,7 +348,7 @@ export const useCoinExchangeRate = (
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
-
+  const queryClient = useQueryClient()
   // Default to 1 unit of input token if no amount specified
   const inputAmount = params.inputAmount ?? 1
 
@@ -360,38 +374,38 @@ export const useCoinExchangeRate = (
       swapMode: params.swapMode
     }),
     queryFn: async () => {
-      try {
-        // Try direct route first
-        return await getDirectQuote({
-          inputMint: params.inputMint,
-          outputMint: params.outputMint,
-          inputDecimals: params.inputDecimals,
-          outputDecimals: params.outputDecimals,
-          amountUi: safeInputAmount,
-          swapMode: params.swapMode
-        })
-      } catch (directError) {
-        // Direct route failed, try indirect route via AUDIO
-        try {
-          const sdk = await audiusSdk()
-          return await getIndirectQuoteViaAudio(
-            {
-              inputMint: params.inputMint,
-              outputMint: params.outputMint,
-              inputDecimals: params.inputDecimals,
-              outputDecimals: params.outputDecimals,
-              amountUi: safeInputAmount,
-              swapMode: params.swapMode
-            },
-            sdk
-          )
-        } catch (indirectError) {
-          console.error('Both direct and indirect routes failed:', {
-            directError,
-            indirectError
-          })
-          throw indirectError
-        }
+      const sdk = await audiusSdk()
+      // If AUDIO is involved
+      const isDirectSwap = getIsDirectSwappable(
+        params.inputMint,
+        params.outputMint
+      )
+      console.log('isDirectSwap', isDirectSwap)
+      if (isDirectSwap) {
+        return await getDirectQuote(
+          {
+            inputMint: params.inputMint,
+            outputMint: params.outputMint,
+            inputDecimals: params.inputDecimals,
+            outputDecimals: params.outputDecimals,
+            amountUi: safeInputAmount,
+            swapMode: params.swapMode
+          },
+          queryClient,
+          sdk
+        )
+      } else {
+        return await getIndirectQuoteViaAudio(
+          {
+            inputMint: params.inputMint,
+            outputMint: params.outputMint,
+            inputDecimals: params.inputDecimals,
+            outputDecimals: params.outputDecimals,
+            amountUi: safeInputAmount,
+            swapMode: params.swapMode
+          },
+          sdk
+        )
       }
     },
     enabled: !!params.inputMint && !!params.outputMint,

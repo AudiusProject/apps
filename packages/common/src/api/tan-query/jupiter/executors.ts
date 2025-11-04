@@ -12,6 +12,7 @@ import {
   VersionedTransaction
 } from '@solana/web3.js'
 
+import { getArtistCoinQueryKey } from '~/api'
 import {
   convertJupiterInstructions,
   getJupiterQuoteByMintWithRetry,
@@ -307,11 +308,32 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
     try {
+      const inputCoinInfo = this.dependencies.queryClient.getQueryData(
+        getArtistCoinQueryKey(params.inputMint)
+      )
+      const isInputDBC =
+        inputCoinInfo?.dynamicBondingCurve?.address !== null &&
+        inputCoinInfo?.dynamicBondingCurve?.isMigrated === false
+      const outputCoinInfo = this.dependencies.queryClient.getQueryData(
+        getArtistCoinQueryKey(params.outputMint)
+      )
+      const isOutputDBC =
+        outputCoinInfo?.dynamicBondingCurve?.address !== null &&
+        outputCoinInfo?.dynamicBondingCurve?.isMigrated === false
+
+      const swapToAudioWithJupiter = async () => {
+        return await this.executeJupiterSwapToAudio(params)
+      }
+      const swapToAudioWithMeteora = async () => {
+        return await this.executeMeteoraSwap(
+          params.inputMint,
+          'coinToAudio',
+          params.amountUi
+        )
+      }
       // Execute first transaction with retries: InputToken -> AUDIO
       let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
-        async () => {
-          return await this.executeJupiterSwapToAudio(params)
-        },
+        isInputDBC ? swapToAudioWithMeteora : swapToAudioWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
@@ -319,20 +341,15 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       )
 
       if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
-        swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
-          async () => {
-            return await this.executeMeteoraSwap(
-              params.inputMint,
-              'coinToAudio',
-              params.amountUi,
-              false
-            )
-          },
-          async (_attemptNumber: number) => {
-            // Invalidate queries before retry
-            await this.invalidateQueries()
-          }
-        )
+        if (isInputDBC) {
+          swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
+            swapToAudioWithJupiter,
+            async (_attemptNumber: number) => {
+              // Invalidate queries before retry
+              await this.invalidateQueries()
+            }
+          )
+        }
         if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
           return {
             status: SwapStatus.ERROR,
