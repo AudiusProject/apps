@@ -251,7 +251,7 @@ describe('upload', () => {
 
     const mockWriteTrackUploadToChain = vitest.fn()
     // Mock successful first stem publish
-    mockWriteTrackUploadToChain.mockReturnValueOnce({
+    mockWriteTrackUploadToChain.mockResolvedValueOnce({
       trackId: 'ML51L'
     })
     // Mock failure for second stem
