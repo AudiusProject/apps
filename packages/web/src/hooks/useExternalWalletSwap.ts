@@ -11,18 +11,12 @@ import {
 } from '@audius/common/api'
 import { ErrorLevel, Feature } from '@audius/common/models'
 import {
-  convertJupiterInstructions,
   getJupiterQuoteByMintWithRetry,
   jupiterInstance
 } from '@audius/common/src/services/Jupiter'
-import { TOKEN_LISTING_MAP } from '@audius/common/store'
-import { removeNullable } from '@audius/common/utils'
+import { NON_ARTIST_COIN_MINTS, TOKEN_LISTING_MAP } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
-import {
-  QuoteResponse,
-  SwapInstructionsResponse,
-  SwapRequest
-} from '@jup-ag/api'
+import { QuoteResponse, SwapRequest } from '@jup-ag/api'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import {
   Connection,
@@ -59,6 +53,17 @@ type IndirectSwapParams = BaseSwapParams & {
   audioDecimals: number
   amountUi: number
   solanaConnection: Connection
+  solanaRelay: any
+}
+
+type MeteoraSwapParams = BaseSwapParams & {
+  inputMint: string
+  outputMint: string
+  inputDecimals: number
+  outputDecimals: number
+  amountUi: number
+  audioMint: string
+  audioDecimals: number
 }
 
 const getIndirectSwapTx = async ({
@@ -70,164 +75,149 @@ const getIndirectSwapTx = async ({
   audioDecimals,
   amountUi,
   walletAddress,
-  solanaConnection
+  solanaConnection,
+  solanaRelay
 }: IndirectSwapParams): Promise<{
   transaction: VersionedTransaction
   inputAmount: SwapAmount
   outputAmount: SwapAmount
 }> => {
-  // Get quote for first hop: input -> AUDIO
-  const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
-    inputMint,
-    outputMint: audioMint,
-    inputDecimals,
-    outputDecimals: audioDecimals,
-    amountUi,
-    swapMode: 'ExactIn',
-    onlyDirectRoutes: false
-  })
+  // Check if we should use Meteora for each leg
+  const isInputArtistCoin = isArtistCoinMint(inputMint)
+  const isOutputArtistCoin = isArtistCoinMint(outputMint)
 
-  // Use the output of first swap as input for second swap
-  const audioAmount = firstQuote.outputAmount.uiAmount
+  let firstLegTransaction: string
+  let firstLegOutputAmountRaw: string
+  let firstLegOutputAmountUi: number
+  let firstLegInputAmountRaw: string
 
-  // Get quote for second hop: AUDIO -> output
-  const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry({
-    inputMint: audioMint,
-    outputMint,
-    inputDecimals: audioDecimals,
-    outputDecimals,
-    amountUi: audioAmount,
-    swapMode: 'ExactIn',
-    onlyDirectRoutes: false
-  })
+  // First leg: input -> AUDIO
+  if (isInputArtistCoin) {
+    // Use Meteora for artist coin -> AUDIO
+    const rawInputAmount = BigInt(
+      Math.floor(amountUi * Math.pow(10, inputDecimals))
+    ).toString()
 
-  // Get instructions for both swaps
-  const swapRequest1: SwapRequest = {
-    quoteResponse: firstQuote.quote,
-    userPublicKey: walletAddress,
-    dynamicSlippage: true,
-    useSharedAccounts: false
+    const swapResult = await solanaRelay.swapCoin({
+      inputAmount: rawInputAmount,
+      coinMint: inputMint,
+      swapDirection: 'coinToAudio' as 'audioToCoin' | 'coinToAudio',
+      userPublicKey: new PublicKey(walletAddress),
+      isExternalWallet: true
+    })
+
+    firstLegTransaction = swapResult.transaction
+    firstLegOutputAmountRaw = swapResult.outputAmount
+    firstLegOutputAmountUi =
+      Number(BigInt(swapResult.outputAmount)) / Math.pow(10, audioDecimals)
+    firstLegInputAmountRaw = rawInputAmount
+  } else {
+    // Use Jupiter for non-artist coin -> AUDIO
+    const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
+      inputMint,
+      outputMint: audioMint,
+      inputDecimals,
+      outputDecimals: audioDecimals,
+      amountUi,
+      swapMode: 'ExactIn',
+      onlyDirectRoutes: false
+    })
+
+    const swapTx = await getDirectSwapTx(firstQuote.quote, walletAddress)
+    firstLegTransaction = swapTx.swapTransaction
+    firstLegOutputAmountRaw = firstQuote.outputAmount.amount.toString()
+    firstLegOutputAmountUi = firstQuote.outputAmount.uiAmount
+    firstLegInputAmountRaw = firstQuote.inputAmount.amount.toString()
   }
 
-  const swapRequest2: SwapRequest = {
-    quoteResponse: secondQuote.quote,
-    userPublicKey: walletAddress,
-    dynamicSlippage: true,
-    useSharedAccounts: false
+  // Second leg: AUDIO -> output (using first leg's output as input)
+  let secondLegTransaction: string
+  let secondLegOutputAmountRaw: string
+  let secondLegOutputAmountUi: number
+
+  if (isOutputArtistCoin) {
+    // Use Meteora for AUDIO -> artist coin
+    const swapResult = await solanaRelay.swapCoin({
+      inputAmount: firstLegOutputAmountRaw,
+      coinMint: outputMint,
+      swapDirection: 'audioToCoin' as 'audioToCoin' | 'coinToAudio',
+      userPublicKey: new PublicKey(walletAddress),
+      isExternalWallet: true
+    })
+
+    secondLegTransaction = swapResult.transaction
+    secondLegOutputAmountRaw = swapResult.outputAmount
+    secondLegOutputAmountUi =
+      Number(BigInt(swapResult.outputAmount)) / Math.pow(10, outputDecimals)
+  } else {
+    // Use Jupiter for AUDIO -> non-artist coin
+    const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry({
+      inputMint: audioMint,
+      outputMint,
+      inputDecimals: audioDecimals,
+      outputDecimals,
+      amountUi: firstLegOutputAmountUi,
+      swapMode: 'ExactIn',
+      onlyDirectRoutes: false
+    })
+
+    const swapTx = await getDirectSwapTx(secondQuote.quote, walletAddress)
+    secondLegTransaction = swapTx.swapTransaction
+    secondLegOutputAmountRaw = secondQuote.outputAmount.amount.toString()
+    secondLegOutputAmountUi = secondQuote.outputAmount.uiAmount
   }
 
-  let firstSwapInstructions: SwapInstructionsResponse
-  let secondSwapInstructions: SwapInstructionsResponse
-
-  try {
-    firstSwapInstructions = await jupiterInstance.swapInstructionsPost({
-      swapRequest: swapRequest1
-    })
-  } catch (e) {
-    // Retry without shared accounts if it fails
-    swapRequest1.useSharedAccounts = false
-    firstSwapInstructions = await jupiterInstance.swapInstructionsPost({
-      swapRequest: swapRequest1
-    })
-  }
-
-  try {
-    secondSwapInstructions = await jupiterInstance.swapInstructionsPost({
-      swapRequest: swapRequest2
-    })
-  } catch (e) {
-    // Retry without shared accounts if it fails
-    swapRequest2.useSharedAccounts = false
-    secondSwapInstructions = await jupiterInstance.swapInstructionsPost({
-      swapRequest: swapRequest2
-    })
-  }
-
-  // Convert instructions to TransactionInstructions
-  const firstSetupInstructions = convertJupiterInstructions(
-    firstSwapInstructions.setupInstructions ?? []
+  // Deserialize both transactions
+  const firstTx = VersionedTransaction.deserialize(
+    new Uint8Array(Buffer.from(firstLegTransaction, 'base64'))
   )
-  const firstSwapInstruction = convertJupiterInstructions([
-    firstSwapInstructions.swapInstruction
-  ])
-  const firstCleanupInstructions = convertJupiterInstructions(
-    firstSwapInstructions.cleanupInstruction
-      ? [firstSwapInstructions.cleanupInstruction]
-      : []
+  const secondTx = VersionedTransaction.deserialize(
+    new Uint8Array(Buffer.from(secondLegTransaction, 'base64'))
   )
 
-  const secondSetupInstructions = convertJupiterInstructions(
-    secondSwapInstructions.setupInstructions ?? []
-  )
-  const secondSwapInstruction = convertJupiterInstructions([
-    secondSwapInstructions.swapInstruction
-  ])
-  const secondCleanupInstructions = convertJupiterInstructions(
-    secondSwapInstructions.cleanupInstruction
-      ? [secondSwapInstructions.cleanupInstruction]
-      : []
-  )
-
-  // Combine all instructions
+  // Combine instructions from both transactions
   const allInstructions: TransactionInstruction[] = [
-    ...firstSetupInstructions,
-    ...firstSwapInstruction,
-    ...firstCleanupInstructions,
-    ...secondSetupInstructions,
-    ...secondSwapInstruction,
-    ...secondCleanupInstructions
-  ]
-
-  // Combine address lookup table addresses from both swaps
-  const lookupTableAddresses = [
-    ...(firstSwapInstructions.addressLookupTableAddresses ?? []),
-    ...(secondSwapInstructions.addressLookupTableAddresses ?? [])
+    ...firstTx.message.compiledInstructions.map((ix) => ({
+      programId: firstTx.message.staticAccountKeys[ix.programIdIndex],
+      keys: ix.accountKeyIndexes.map((keyIndex) => ({
+        pubkey: firstTx.message.staticAccountKeys[keyIndex],
+        isSigner: firstTx.message.isAccountSigner(keyIndex),
+        isWritable: firstTx.message.isAccountWritable(keyIndex)
+      })),
+      data: Buffer.from(ix.data)
+    })),
+    ...secondTx.message.compiledInstructions.map((ix) => ({
+      programId: secondTx.message.staticAccountKeys[ix.programIdIndex],
+      keys: ix.accountKeyIndexes.map((keyIndex) => ({
+        pubkey: secondTx.message.staticAccountKeys[keyIndex],
+        isSigner: secondTx.message.isAccountSigner(keyIndex),
+        isWritable: secondTx.message.isAccountWritable(keyIndex)
+      })),
+      data: Buffer.from(ix.data)
+    }))
   ]
 
   // Get recent blockhash
   const { blockhash } = await solanaConnection.getLatestBlockhash()
 
-  // Build the combined transaction
-  let message: ReturnType<TransactionMessage['compileToV0Message']>
-
-  if (lookupTableAddresses.length > 0) {
-    // Fetch lookup table accounts
-    const lookupTableAccounts = await Promise.all(
-      lookupTableAddresses.map(async (address) => {
-        const result = await solanaConnection.getAddressLookupTable(
-          new PublicKey(address)
-        )
-        return result.value
-      })
-    )
-
-    const filteredLookupTableAccounts =
-      lookupTableAccounts.filter(removeNullable)
-
-    message = new TransactionMessage({
-      payerKey: new PublicKey(walletAddress),
-      recentBlockhash: blockhash,
-      instructions: allInstructions
-    }).compileToV0Message(filteredLookupTableAccounts)
-  } else {
-    message = new TransactionMessage({
-      payerKey: new PublicKey(walletAddress),
-      recentBlockhash: blockhash,
-      instructions: allInstructions
-    }).compileToV0Message()
-  }
+  // Build combined transaction
+  const message = new TransactionMessage({
+    payerKey: new PublicKey(walletAddress),
+    recentBlockhash: blockhash,
+    instructions: allInstructions
+  }).compileToV0Message()
 
   const transaction = new VersionedTransaction(message)
 
   return {
     transaction,
     inputAmount: {
-      amount: firstQuote.inputAmount.amount,
+      amount: Number(BigInt(firstLegInputAmountRaw)),
       uiAmount: amountUi
     },
     outputAmount: {
-      amount: secondQuote.outputAmount.amount,
-      uiAmount: secondQuote.outputAmount.uiAmount
+      amount: Number(BigInt(secondLegOutputAmountRaw)),
+      uiAmount: secondLegOutputAmountUi
     }
   }
 }
@@ -241,6 +231,94 @@ const getDirectSwapTx = async (quote: QuoteResponse, walletAddress: string) => {
     useSharedAccounts: false // Shared accounts cant be used for AMM pool swaps
   }
   return await jupiterInstance.swapPost({ swapRequest })
+}
+
+/**
+ * Checks if a mint is an artist coin (not in NON_ARTIST_COIN_MINTS)
+ */
+const isArtistCoinMint = (mint: string): boolean => {
+  return !NON_ARTIST_COIN_MINTS.includes(mint)
+}
+
+/**
+ * Gets a Meteora swap transaction for artist coin swaps
+ * Meteora only supports swaps between AUDIO and artist coins
+ */
+const getMeteoraSwapTx = async ({
+  inputMint,
+  outputMint,
+  inputDecimals,
+  outputDecimals,
+  amountUi,
+  walletAddress,
+  audioMint,
+  audioDecimals,
+  solanaRelay
+}: MeteoraSwapParams & {
+  solanaRelay: any
+}): Promise<{
+  transaction: VersionedTransaction
+  inputAmount: SwapAmount
+  outputAmount: SwapAmount
+}> => {
+  // Determine which mint is the artist coin and which is AUDIO
+  const isInputAudio = inputMint === audioMint
+  const isOutputAudio = outputMint === audioMint
+
+  if (!isInputAudio && !isOutputAudio) {
+    throw new Error(
+      'Meteora swaps only support swaps between AUDIO and artist coins'
+    )
+  }
+
+  const artistCoinMint = isInputAudio ? outputMint : inputMint
+  const swapDirection = isInputAudio ? 'audioToCoin' : 'coinToAudio'
+
+  // Convert UI amount to raw amount (bigint string)
+  // For Meteora, we need the raw amount of the input token
+  const rawInputAmount = BigInt(
+    Math.floor(amountUi * Math.pow(10, inputDecimals))
+  ).toString()
+
+  // Get quote first
+  await solanaRelay.getSwapCoinQuote({
+    inputAmount: rawInputAmount,
+    coinMint: artistCoinMint,
+    swapDirection: swapDirection as 'audioToCoin' | 'coinToAudio'
+  })
+
+  // Get swap transaction
+  const swapResult = await solanaRelay.swapCoin({
+    inputAmount: rawInputAmount,
+    coinMint: artistCoinMint,
+    swapDirection: swapDirection as 'audioToCoin' | 'coinToAudio',
+    userPublicKey: new PublicKey(walletAddress),
+    isExternalWallet: true
+  })
+
+  // Deserialize the base64-encoded transaction
+  const decoded = Buffer.from(swapResult.transaction, 'base64')
+  const transaction = VersionedTransaction.deserialize(new Uint8Array(decoded))
+
+  // Convert raw amounts back to UI amounts
+  const rawInputAmountBigInt = BigInt(rawInputAmount)
+  const rawOutputAmountBigInt = BigInt(swapResult.outputAmount)
+
+  const inputAmount = {
+    amount: Number(rawInputAmountBigInt),
+    uiAmount: amountUi
+  }
+
+  const outputAmount = {
+    amount: Number(rawOutputAmountBigInt),
+    uiAmount: Number(rawOutputAmountBigInt) / Math.pow(10, outputDecimals)
+  }
+
+  return {
+    transaction,
+    inputAmount,
+    outputAmount
+  }
 }
 
 export const useExternalWalletSwap = () => {
@@ -281,65 +359,98 @@ export const useExternalWalletSwap = () => {
         let inputAmount: SwapAmount
         let outputAmount: SwapAmount
 
-        // Try direct swap first, fall back to indirect swap through AUDIO if it fails
-        try {
-          // Get jupiter quote first (allow indirect routes through AUDIO for DBC swaps)
-          const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
+        // Check if swap involves artist coins
+        const isInputArtistCoin = isArtistCoinMint(inputMint)
+        const isOutputArtistCoin = isArtistCoinMint(outputMint)
+
+        if (isInputArtistCoin || isOutputArtistCoin) {
+          // Use Meteora for artist coin swaps
+          // Meteora only supports swaps between AUDIO and artist coins
+          const meteoraResult = await getMeteoraSwapTx({
             inputMint,
             outputMint,
             inputDecimals,
             outputDecimals,
-            amountUi,
-            swapMode: 'ExactIn',
-            onlyDirectRoutes: false
-          })
-
-          hookProgress.receivedQuote = true
-
-          const swapTx = await getDirectSwapTx(quote.quote, walletAddress)
-          hookProgress.receivedSwapTx = true
-
-          // Deserialize the base64-encoded transaction
-          const decoded = Buffer.from(swapTx.swapTransaction, 'base64')
-          transaction = VersionedTransaction.deserialize(decoded)
-
-          inputAmount = {
-            amount: quote.inputAmount.amount,
-            uiAmount: amountUi
-          }
-          outputAmount = {
-            amount: quote.outputAmount.amount,
-            uiAmount: quote.outputAmount.uiAmount
-          }
-        } catch (directSwapError) {
-          console.warn(
-            'Direct swap failed, attempting indirect swap through AUDIO:',
-            directSwapError
-          )
-
-          // Reset progress flags for indirect swap attempt
-          hookProgress.receivedQuote = false
-          hookProgress.receivedSwapTx = false
-
-          // Attempt indirect swap: input -> AUDIO -> output
-          const indirectResult = await getIndirectSwapTx({
-            inputMint,
-            outputMint,
-            audioMint: env.WAUDIO_MINT_ADDRESS,
-            inputDecimals,
-            outputDecimals,
-            audioDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
             amountUi,
             walletAddress,
-            solanaConnection: sdk.services.solanaClient.connection
+            audioMint: env.WAUDIO_MINT_ADDRESS,
+            audioDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
+            solanaRelay: sdk.services.solanaRelay
           })
 
           hookProgress.receivedQuote = true
           hookProgress.receivedSwapTx = true
 
-          transaction = indirectResult.transaction
-          inputAmount = indirectResult.inputAmount
-          outputAmount = indirectResult.outputAmount
+          transaction = meteoraResult.transaction
+          inputAmount = meteoraResult.inputAmount
+          outputAmount = meteoraResult.outputAmount
+        } else {
+          // Use Jupiter for non-artist coin swaps
+          // Try direct swap first, fall back to indirect swap through AUDIO if it fails
+          try {
+            // Get jupiter quote first (allow indirect routes through AUDIO for DBC swaps)
+            const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry(
+              {
+                inputMint,
+                outputMint,
+                inputDecimals,
+                outputDecimals,
+                amountUi,
+                swapMode: 'ExactIn',
+                onlyDirectRoutes: false
+              }
+            )
+
+            hookProgress.receivedQuote = true
+
+            const swapTx = await getDirectSwapTx(quote.quote, walletAddress)
+            hookProgress.receivedSwapTx = true
+
+            // Deserialize the base64-encoded transaction
+            const decoded = Buffer.from(swapTx.swapTransaction, 'base64')
+            transaction = VersionedTransaction.deserialize(
+              new Uint8Array(decoded)
+            )
+
+            inputAmount = {
+              amount: quote.inputAmount.amount,
+              uiAmount: amountUi
+            }
+            outputAmount = {
+              amount: quote.outputAmount.amount,
+              uiAmount: quote.outputAmount.uiAmount
+            }
+          } catch (directSwapError) {
+            console.warn(
+              'Direct swap failed, attempting indirect swap through AUDIO:',
+              directSwapError
+            )
+
+            // Reset progress flags for indirect swap attempt
+            hookProgress.receivedQuote = false
+            hookProgress.receivedSwapTx = false
+
+            // Attempt indirect swap: input -> AUDIO -> output
+            const indirectResult = await getIndirectSwapTx({
+              inputMint,
+              outputMint,
+              audioMint: env.WAUDIO_MINT_ADDRESS,
+              inputDecimals,
+              outputDecimals,
+              audioDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
+              amountUi,
+              walletAddress,
+              solanaConnection: sdk.services.solanaClient.connection,
+              solanaRelay: sdk.services.solanaRelay
+            })
+
+            hookProgress.receivedQuote = true
+            hookProgress.receivedSwapTx = true
+
+            transaction = indirectResult.transaction
+            inputAmount = indirectResult.inputAmount
+            outputAmount = indirectResult.outputAmount
+          }
         }
 
         const signedTx = await appKitSolanaProvider.signTransaction(transaction)
