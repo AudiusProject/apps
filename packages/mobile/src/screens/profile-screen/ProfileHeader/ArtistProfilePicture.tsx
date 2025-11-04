@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useUserCreatedCoins } from '@audius/common/api'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import { css } from '@emotion/native'
 import { TouchableOpacity } from 'react-native'
 
@@ -20,11 +20,7 @@ export type ArtistProfilePictureProps = {
 export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   const navigation = useNavigation()
 
-  const { data: ownedCoins } = useUserCreatedCoins({
-    userId,
-    limit: 1
-  })
-  const ownedCoin = ownedCoins?.[0]
+  const { data: ownedCoin } = useArtistCreatedCoin(userId)
 
   const shouldShowArtistCoinBadge =
     !!ownedCoin?.mint &&

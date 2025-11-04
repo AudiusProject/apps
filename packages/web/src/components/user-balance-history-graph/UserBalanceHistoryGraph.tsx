@@ -5,6 +5,7 @@ import {
   useCurrentUserId,
   useUserBalanceHistory
 } from '@audius/common/api'
+import { walletMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
 import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
@@ -13,10 +14,7 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from './UserBalanceHistoryGraph.module.css'
 
-const messages = {
-  loading: 'Loading balance history...',
-  error: 'Unable to load balance history'
-}
+const messages = walletMessages.balanceHistory
 
 type UserBalanceHistoryGraphProps = {
   userId?: ID
@@ -48,12 +46,15 @@ const formatDate = (timestamp: number): string => {
 }
 
 const formatTooltipDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
+  const date = new Date(timestamp)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const hour = date
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true
+    })
+    .toLowerCase()
+  return `${weekday} ${hour}`
 }
 
 const getChartData = (
@@ -159,10 +160,16 @@ const getChartOptions = (
   legend: {
     display: false
   },
+  hover: {
+    mode: 'index',
+    intersect: false,
+    axis: 'x'
+  },
   tooltips: {
     enabled: false,
     mode: 'index',
     intersect: false,
+    axis: 'x',
     custom: function (tooltipModel: any) {
       let tooltipEl = document.getElementById(
         `balance-chart-tooltip-${chartId}`
@@ -250,7 +257,7 @@ export const UserBalanceHistoryGraph = ({
           css={{ minHeight: '200px' }}
         >
           <LoadingSpinner />
-          <Text variant='body' size='s' strength='weak'>
+          <Text variant='body' size='s'>
             {messages.loading}
           </Text>
         </Flex>
@@ -268,7 +275,7 @@ export const UserBalanceHistoryGraph = ({
           gap='l'
           css={{ minHeight: '200px' }}
         >
-          <Text variant='body' size='m' strength='weak' color='danger'>
+          <Text variant='body' size='m' color='danger'>
             {messages.error}
           </Text>
         </Flex>

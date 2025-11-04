@@ -125,10 +125,8 @@ export const getDirectQuote = async (
   )
   let quoteResult: JupiterQuoteResult | undefined
   if (isInputDBC || isOutputDBC) {
-    console.log('Getting quote via Meteora DBC')
     quoteResult = await getQuoteViaMeteoraDBC(params, sdk)
   } else {
-    console.log('Getting quote via Jupiter')
     quoteResult = await getJupiterQuoteByMint({
       inputMint: params.inputMint,
       outputMint: params.outputMint,
@@ -170,24 +168,19 @@ export const getIndirectQuoteViaAudio = async (
     amountUi: number
     swapMode?: SwapMode
   },
+  queryClient: QueryClient,
   sdk: AudiusSdk
 ): Promise<CoinExchangeRateResponse> => {
+  const { isDBC: isInputDBC } = getCoinPoolState(params.inputMint, queryClient)
+  const { isDBC: isOutputDBC } = getCoinPoolState(
+    params.outputMint,
+    queryClient
+  )
+  console.log('isInputDBC', isInputDBC)
+  console.log('isOutputDBC', isOutputDBC)
   // Get first quote: InputToken -> AUDIO
   let firstQuote: JupiterQuoteResult | undefined
-  // Note: if the input mint is already audio, we don't need to get a quote for it
-  try {
-    firstQuote = await getJupiterQuoteByMint({
-      inputMint: params.inputMint,
-      outputMint: AUDIO_MINT,
-      inputDecimals: params.inputDecimals,
-      outputDecimals: AUDIO_DECIMALS,
-      amountUi: params.amountUi,
-      slippageBps: SLIPPAGE_BPS,
-      swapMode: params.swapMode ?? 'ExactIn',
-      onlyDirectRoutes: false,
-      maxAccounts: MAX_ALLOWED_ACCOUNTS
-    })
-  } catch (error) {
+  if (isInputDBC) {
     firstQuote = await getQuoteViaMeteoraDBC(
       {
         inputMint: params.inputMint,
@@ -199,24 +192,24 @@ export const getIndirectQuoteViaAudio = async (
       },
       sdk
     )
-  }
-
-  // Get second quote: AUDIO -> OutputToken
-  let secondQuote: JupiterQuoteResult | undefined
-  // If the output mint is already audio, we don't need to get a quote for it
-  try {
-    secondQuote = await getJupiterQuoteByMint({
-      inputMint: AUDIO_MINT,
-      outputMint: params.outputMint,
-      inputDecimals: AUDIO_DECIMALS,
-      outputDecimals: params.outputDecimals,
-      amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
+  } else {
+    firstQuote = await getJupiterQuoteByMint({
+      inputMint: params.inputMint,
+      outputMint: AUDIO_MINT,
+      inputDecimals: params.inputDecimals,
+      outputDecimals: AUDIO_DECIMALS,
+      amountUi: params.amountUi,
       slippageBps: SLIPPAGE_BPS,
       swapMode: params.swapMode ?? 'ExactIn',
       onlyDirectRoutes: false,
       maxAccounts: MAX_ALLOWED_ACCOUNTS
     })
-  } catch (error) {
+  }
+
+  // Get second quote: AUDIO -> OutputToken
+  let secondQuote: JupiterQuoteResult | undefined
+
+  if (isOutputDBC) {
     secondQuote = await getQuoteViaMeteoraDBC(
       {
         inputMint: AUDIO_MINT,
@@ -228,6 +221,18 @@ export const getIndirectQuoteViaAudio = async (
       },
       sdk
     )
+  } else {
+    secondQuote = await getJupiterQuoteByMint({
+      inputMint: AUDIO_MINT,
+      outputMint: params.outputMint,
+      inputDecimals: AUDIO_DECIMALS,
+      outputDecimals: params.outputDecimals,
+      amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
+      slippageBps: SLIPPAGE_BPS,
+      swapMode: params.swapMode ?? 'ExactIn',
+      onlyDirectRoutes: false,
+      maxAccounts: MAX_ALLOWED_ACCOUNTS
+    })
   }
 
   // Calculate combined exchange rate
@@ -404,6 +409,7 @@ export const useCoinExchangeRate = (
             amountUi: safeInputAmount,
             swapMode: params.swapMode
           },
+          queryClient,
           sdk
         )
       }

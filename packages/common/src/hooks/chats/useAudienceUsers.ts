@@ -2,7 +2,7 @@ import { ChatBlast, ChatBlastAudience, OptionalHashId } from '@audius/sdk'
 
 import {
   useArtistCoinMembers,
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCurrentUserId,
   useFollowers,
   usePurchasers,
@@ -43,7 +43,7 @@ export const useAudienceUsers = (chat: ChatBlast, limit?: number) => {
     { enabled: chat.audience === ChatBlastAudience.REMIXERS }
   )
 
-  const { data: coin } = useArtistOwnedCoin(currentUserId, {
+  const { data: coin } = useArtistCreatedCoin(currentUserId, {
     enabled: chat.audience === ChatBlastAudience.COIN_HOLDERS
   })
   const mint = coin?.mint

@@ -32,7 +32,11 @@ import {
   setValueField,
   updateRouteOnCompletion
 } from 'common/store/pages/signon/actions'
-import { getRouteOnExit, getStatus } from 'common/store/pages/signon/selectors'
+import {
+  getRouteOnCompletion,
+  getRouteOnExit,
+  getStatus
+} from 'common/store/pages/signon/selectors'
 import { EditingStatus } from 'common/store/pages/signon/types'
 import { useMedia } from 'hooks/useMedia'
 import { SignInPage } from 'pages/sign-in-page'
@@ -316,6 +320,7 @@ export const SignOnPage = () => {
   const routeOnCompletion = searchParams.get('routeOnCompletion')
   const guestEmailParam = searchParams.get('guestEmail')
   const guestEmail = guestEmailLocalStorage || guestEmailParam
+  const completionRoute = useSelector(getRouteOnCompletion)
 
   useEffect(() => {
     if (rf) {
@@ -366,7 +371,7 @@ export const SignOnPage = () => {
   })
 
   if (signOnStatus === EditingStatus.SUCCESS) {
-    return <Redirect to={FEED_PAGE} />
+    return <Redirect to={completionRoute || FEED_PAGE} />
   }
 
   return (

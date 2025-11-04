@@ -5,7 +5,7 @@ import {
   useAssociatedWallets,
   useRemoveAssociatedWallet
 } from '@audius/common/api'
-import { walletMessages } from '@audius/common/messages'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { Chain } from '@audius/common/models'
 import { shortenSPLAddress, WALLET_COUNT_LIMIT } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
@@ -17,10 +17,10 @@ import {
   IconKebabHorizontal,
   IconLogoCircleETH,
   IconLogoCircleSOL,
+  IconLogoWhiteBackground,
   Paper,
   Text,
   Skeleton,
-  Divider,
   useTheme,
   LoadingSpinner
 } from '@audius/harmony-native'
@@ -31,7 +31,7 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
 
-const WALLET_ROW_HEIGHT = 52
+const WALLET_ROW_HEIGHT = 56
 
 type WalletRowProps = {
   address: string
@@ -67,15 +67,9 @@ const WalletRowContent = ({
     >
       <Flex row alignItems='center' gap='s'>
         {chain === Chain.Eth ? <IconLogoCircleETH /> : <IconLogoCircleSOL />}
-        <Text variant='body' size='m' strength='strong'>
-          {walletMessages.linkedWallets.linkedWallet(index)}
-        </Text>
+        <Text>{shortenSPLAddress(address)}</Text>
       </Flex>
-      <Flex flex={1}>
-        <Text variant='body' size='m' strength='strong' color='subdued'>
-          {shortenSPLAddress(address)}
-        </Text>
-      </Flex>
+      <Flex flex={1} />
       {isRemovingWallet ? (
         <LoadingSpinner />
       ) : (
@@ -194,6 +188,34 @@ const WalletEmptyState = () => (
   </Flex>
 )
 
+const BuiltInWalletRow = () => {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      row
+      alignItems='center'
+      gap='m'
+      w='100%'
+      ph='l'
+      pv='m'
+      h={WALLET_ROW_HEIGHT}
+    >
+      <Flex row alignItems='center' gap='s'>
+        <IconLogoWhiteBackground
+          style={{
+            borderRadius: theme.cornerRadius.circle,
+            borderColor: theme.color.border.default,
+            height: theme.spacing.xl,
+            width: theme.spacing.xl
+          }}
+        />
+        <Text>{coinDetailsMessages.externalWallets.builtIn}</Text>
+      </Flex>
+    </Flex>
+  )
+}
+
 export const LinkedWallets = () => {
   const navigation = useNavigation()
   const { data: connectedWallets, isLoading } = useAssociatedWallets()
@@ -210,23 +232,16 @@ export const LinkedWallets = () => {
   return (
     <Paper>
       {/* Header Section */}
-      <Flex gap='xl' p='l'>
-        <Flex row alignItems='center' gap='s'>
-          <Text variant='heading' size='s' color='heading'>
-            {hasWallets
-              ? walletMessages.linkedWallets.titleHasWallets
-              : walletMessages.linkedWallets.titleNoWallets}
-          </Text>
-          {hasWallets && !isLoading ? (
-            <Text variant='heading' size='s' color='subdued'>
-              {walletMessages.linkedWallets.count(walletCount)}
-            </Text>
-          ) : null}
-        </Flex>
+      <Flex p='l' pb='m' borderBottom='default'>
+        <Text variant='heading' size='s' color='heading'>
+          {coinDetailsMessages.externalWallets.hasBalanceTitle}
+        </Text>
       </Flex>
-      <Divider />
 
-      {/* Wallet Stack Section */}
+      {/* Built-In Wallet Row */}
+      <BuiltInWalletRow />
+
+      {/* Linked Wallets Section */}
       {isLoading ? (
         <WalletLoadingState />
       ) : hasWallets ? (
@@ -234,10 +249,9 @@ export const LinkedWallets = () => {
       ) : (
         <WalletEmptyState />
       )}
-      <Divider />
 
       {/* Footer Section with Add Button */}
-      <Flex p='l'>
+      <Flex p='l' pt='m' borderTop='default'>
         <Button
           variant='secondary'
           size='small'

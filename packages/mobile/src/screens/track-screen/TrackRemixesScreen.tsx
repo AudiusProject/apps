@@ -5,9 +5,7 @@ import {
   useRemixesLineup,
   useTrackByParams
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { remixMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { remixesPageLineupActions as tracksActions } from '@audius/common/store'
 import { pluralize, dayjs } from '@audius/common/utils'
 import { Text as RNText, View } from 'react-native'
@@ -63,21 +61,15 @@ export const TrackRemixesScreen = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { params } = useRoute<'TrackRemixes'>()
   const { data: track } = useTrackByParams(params)
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
-  const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-  )
   const trackId = track?.track_id
   const { data, count, isFetching, isPending, loadNextPage, lineup, pageSize } =
     useRemixesLineup({
       trackId: track?.track_id,
       includeOriginal: true,
-      includeWinners: isRemixContestWinnersMilestoneEnabled
+      includeWinners: true
     })
   const { data: contest } = useRemixContest(trackId)
-  const isRemixContest = isRemixContestEnabled && contest
+  const isRemixContest = !!contest
   const isRemixContestEnded =
     isRemixContest && dayjs(contest.endDate).isBefore(dayjs())
   const isTrackOwner = currentUserId === track?.owner_id
@@ -87,10 +79,7 @@ export const TrackRemixesScreen = () => {
   })
   const remixCount = remixes?.pages[0]?.count ?? 0
   const showPickWinnersButton =
-    isRemixContestWinnersMilestoneEnabled &&
-    isTrackOwner &&
-    isRemixContestEnded &&
-    remixCount > 0
+    isTrackOwner && isRemixContestEnded && remixCount > 0
   const winnerCount = contest?.eventData?.winners?.length ?? 0
 
   const styles = useStyles()
@@ -116,7 +105,7 @@ export const TrackRemixesScreen = () => {
   )
 
   const delineatorMap =
-    isRemixContestWinnersMilestoneEnabled && winnerCount > 0
+    winnerCount > 0
       ? {
           0: winnersDelineator,
           [winnerCount]: remixesDelineator
@@ -125,13 +114,7 @@ export const TrackRemixesScreen = () => {
           0: remixesDelineator
         }
 
-  const winnersMaxEntries =
-    count && winnerCount ? count + winnerCount + 1 : undefined
-  const defaultMaxEntries = count ? count + 1 : undefined
-
-  const maxEntries = isRemixContestWinnersMilestoneEnabled
-    ? winnersMaxEntries
-    : defaultMaxEntries
+  const maxEntries = count && winnerCount ? count + winnerCount + 1 : undefined
 
   return (
     <Screen>

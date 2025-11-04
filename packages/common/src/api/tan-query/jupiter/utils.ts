@@ -26,13 +26,10 @@ import {
   INTERNAL_TRANSFER_MEMO_STRING,
   MEMO_PROGRAM_ID
 } from '~/services/audius-backend/solana'
-import { TOKEN_LISTING_MAP } from '~/store'
 import { CoinInfo } from '~/store/ui/buy-sell/types'
 import {
   AUDIO_MINT,
-  BONK_MINT,
-  SOL_MINT,
-  USDC_MINT
+  NON_ARTIST_COIN_MINTS
 } from '~/store/ui/shared/tokenConstants'
 
 import { getArtistCoinQueryKey } from '../coins'
@@ -436,9 +433,8 @@ export const prepareOutputUserBank = async (
 }
 
 /**
- * Attempts to get a direct quote from Jupiter for the given token pair.
- * Returns true if a direct quote is available, false otherwise.
- */
+  @deprecated - We're moving away from Jupiter as the SO for stuff - use getIsDirectSwappable instead + meteora quotes if needed
+*/
 export const isDirectRouteAvailable = async (
   inputMint: string,
   outputMint: string,
@@ -477,7 +473,12 @@ export const isDirectRouteAvailable = async (
   }
 }
 
-const NON_ARTIST_COIN_MINTS = [AUDIO_MINT, SOL_MINT, USDC_MINT, BONK_MINT]
+/**
+ * Checks if a swap is direct swappable between two tokens.
+ * @param inputMint - The input mint address
+ * @param outputMint - The output mint address
+ * @returns True if the swap is direct swappable, false otherwise
+ */
 export const getIsDirectSwappable = (
   inputMint: string,
   outputMint: string
@@ -493,11 +494,16 @@ export const getIsDirectSwappable = (
   return inputMint === AUDIO_MINT || outputMint === AUDIO_MINT
 }
 
+/**
+ * Checks for pool
+ * @param mint - The mint address of the coin
+ * @param queryClient
+ * @returns { isDBC: boolean; isDAMM: boolean } - Whether the coin is a DBC or DAMM
+ */
 export const getCoinPoolState = (
   mint: string,
   queryClient: QueryClient
 ): { isDBC: boolean; isDAMM: boolean } => {
-  console.log('mint', mint)
   if (NON_ARTIST_COIN_MINTS.includes(mint)) {
     return {
       isDBC: false,

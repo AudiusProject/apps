@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 
-import { useArtistOwnedCoin, useCurrentUserId } from '@audius/common/api'
+import { useArtistCreatedCoin, useCurrentUserId } from '@audius/common/api'
 import { priceAndAudienceMessages } from '@audius/common/messages'
 import {
   isContentTokenGated,
@@ -30,7 +30,7 @@ export const TokenGatedRadioField = (props: TokenGatedRadioFieldProps) => {
   const { spacing } = useTheme()
 
   const { data: userId } = useCurrentUserId()
-  const { data: coin } = useArtistOwnedCoin(userId, {
+  const { data: coin } = useArtistCreatedCoin(userId, {
     enabled: !!userId
   })
 

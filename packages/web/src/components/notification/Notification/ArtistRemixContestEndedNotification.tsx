@@ -1,8 +1,6 @@
 import { useCallback } from 'react'
 
 import { useNotificationEntity, useRemixes } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import {
   ArtistRemixContestEndedNotification as ArtistRemixContestEndedNotificationType,
   TrackEntity
@@ -39,9 +37,6 @@ export const ArtistRemixContestEndedNotification = (
   const { notification } = props
   const { timeLabel, isViewed } = notification
   const dispatch = useDispatch()
-  const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-  )
 
   const entity = useNotificationEntity(notification) as TrackEntity | null
   const { data: remixes } = useRemixes({
@@ -67,12 +62,8 @@ export const ArtistRemixContestEndedNotification = (
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <Flex column gap='l'>
-        <NotificationBody>
-          {isRemixContestWinnersMilestoneEnabled
-            ? messages.pickWinnersDescription
-            : messages.description}
-        </NotificationBody>
-        {isRemixContestWinnersMilestoneEnabled && remixCount > 0 && (
+        <NotificationBody>{messages.pickWinnersDescription}</NotificationBody>
+        {remixCount > 0 && (
           <Button css={{ width: 'fit-content' }} size='small' asChild>
             <Link to={pickWinnersRoute} onClick={(e) => e.stopPropagation()}>
               Pick Winners

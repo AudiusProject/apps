@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { useCurrentAccountUser, useCurrentAccount } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { ChallengeName } from '@audius/common/src/models/AudioRewards'
 import {
   audioRewardsPageActions,
@@ -54,9 +52,6 @@ export const ChallengeRewardsTile = ({
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
   const [haveChallengesLoaded, setHaveChallengesLoaded] = useState(false)
-  const { isEnabled: isClaimAllRewardsEnabled } = useFeatureFlag(
-    FeatureFlags.CLAIM_ALL_REWARDS_TILE
-  )
 
   // The referred challenge only needs a tile if the user was referred
   const hideReferredTile = !userChallenges[ChallengeName.Referred]?.is_complete
@@ -99,7 +94,7 @@ export const ChallengeRewardsTile = ({
 
   return (
     <Flex column gap='l'>
-      {isClaimAllRewardsEnabled ? <ClaimAllRewardsPanel /> : null}
+      <ClaimAllRewardsPanel />
       <Tile className={wm(styles.rewardsTile, className)}>
         <Text variant='display' size='s' className={wm(styles.title)}>
           {messages.title}

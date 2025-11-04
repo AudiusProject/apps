@@ -452,7 +452,6 @@ function* createGuestAccount(
   action: ReturnType<typeof signOnActions.createGuestAccount>
 ) {
   const { guestEmail } = action
-  const getFeatureEnabled = yield* getContext('getFeatureEnabled')
   const reportToSentry = yield* getContext('reportToSentry')
   const localStorage = yield* getContext('localStorage')
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
@@ -463,14 +462,6 @@ function* createGuestAccount(
   const authService = yield* getContext('authService')
 
   // get user & user bank
-  const isGuestCheckoutEnabled = yield* call(
-    getFeatureEnabled,
-    FeatureFlags.GUEST_CHECKOUT
-  )
-
-  if (!isGuestCheckoutEnabled) {
-    return
-  }
   yield* put(
     confirmerActions.requestConfirmation(
       guestEmail,

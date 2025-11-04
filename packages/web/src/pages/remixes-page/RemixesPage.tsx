@@ -1,15 +1,10 @@
 import { RefObject } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/src/services/remote-config/feature-flags'
-
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import RemixesPageProvider from './RemixesPageProvider'
 import NewRemixesPageDesktopContent from './components/desktop/NewRemixesPage'
-import RemixesPageDesktopContent from './components/desktop/RemixesPage'
 import NewRemixesPageMobileContent from './components/mobile/NewRemixesPage'
-import RemixesPageMobileContent from './components/mobile/RemixesPage'
 
 type RemixesPageProps = {
   containerRef: RefObject<HTMLDivElement>
@@ -17,20 +12,14 @@ type RemixesPageProps = {
 
 const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const isMobile = useIsMobile()
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
 
-  let content = isMobile ? RemixesPageMobileContent : RemixesPageDesktopContent
+  const content = isMobile
+    ? NewRemixesPageMobileContent
+    : NewRemixesPageDesktopContent
 
-  if (isRemixContestEnabled) {
-    // @ts-ignore: These props match
-    content = isMobile
-      ? NewRemixesPageMobileContent
-      : NewRemixesPageDesktopContent
-  }
   return (
     <RemixesPageProvider containerRef={containerRef}>
+      {/* @ts-ignore: These props match */}
       {content}
     </RemixesPageProvider>
   )

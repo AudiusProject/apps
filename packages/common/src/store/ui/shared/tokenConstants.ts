@@ -45,6 +45,13 @@ export const SOL_MINT = 'So11111111111111111111111111111111111111112'
 export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 export const BONK_MINT = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
 
+export const NON_ARTIST_COIN_MINTS = [
+  AUDIO_MINT,
+  SOL_MINT,
+  USDC_MINT,
+  BONK_MINT
+]
+
 /**
  * Legacy token listing map with hardcoded addresses for backward compatibility
  */

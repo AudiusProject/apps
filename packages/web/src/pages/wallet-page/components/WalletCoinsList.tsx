@@ -3,19 +3,17 @@ import { useCallback, useContext, useState } from 'react'
 import {
   UserCoin,
   useArtistCoin,
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCoinBalance,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
 } from '@audius/common/api'
 import {
-  useFeatureFlag,
   useFormattedCoinBalance,
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   TOKEN_LISTING_MAP,
   useAddCashModal,
@@ -151,9 +149,6 @@ const YourCoinsHeader = ({
   const isMobile = useIsMobile()
   const isManagedAccount = useIsManagedAccount()
   const { toast } = useContext(ToastContext)
-  const { isEnabled: isWalletUIBuySellEnabled } = useFeatureFlag(
-    FeatureFlags.WALLET_UI_BUY_SELL
-  )
 
   const { isBuySellSupported } = useBuySellRegionSupport()
 
@@ -205,7 +200,7 @@ const YourCoinsHeader = ({
           </>
         ) : null}
 
-        {isWalletUIBuySellEnabled && !isLoading ? (
+        {!isLoading ? (
           <Tooltip
             disabled={isBuySellSupported}
             text={messages.buySellNotSupported}
@@ -289,7 +284,7 @@ export const WalletCoinsList = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistOwnedCoin(currentUserId)
+  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
   const audioCoin = artistCoins?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )

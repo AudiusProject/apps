@@ -7,10 +7,9 @@ import {
   useRemixContest,
   useRemixersCount
 } from '@audius/common/api'
-import { useCurrentTrack, useFeatureFlag } from '@audius/common/hooks'
+import { useCurrentTrack } from '@audius/common/hooks'
 import { remixMessages } from '@audius/common/messages'
 import { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   lineupSelectors,
   remixesPageLineupActions as tracksActions,
@@ -67,12 +66,9 @@ const RemixesPageProvider = ({
 }: RemixesPageProviderProps) => {
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
   const { data: originalTrack } = useTrack(originalTrackId)
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
   const { data: remixContest } = useRemixContest(originalTrackId)
   const { data: count = null } = useRemixersCount({ trackId: originalTrackId })
-  const isRemixContest = isRemixContestEnabled && remixContest
+  const isRemixContest = !!remixContest
 
   const { data: originalTrackByPermalink } = useTrackByPermalink(
     handle && slug ? `/${handle}/${slug}` : null
