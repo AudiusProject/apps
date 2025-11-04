@@ -497,9 +497,9 @@ export const getIsDirectSwappable = (
 }
 
 /**
- * Checks for pool 
+ * Checks for pool
  * @param mint - The mint address of the coin
- * @param queryClient 
+ * @param queryClient
  * @returns { isDBC: boolean; isDAMM: boolean } - Whether the coin is a DBC or DAMM
  */
 export const getCoinPoolState = (
