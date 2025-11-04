@@ -1,9 +1,8 @@
 import { USDC } from '@audius/fixed-decimal'
 import type { AudiusSdk } from '@audius/sdk'
-import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
+import { SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
-  createCloseAccountInstruction,
   createTransferCheckedInstruction,
   getAccount,
   getAssociatedTokenAddressSync
@@ -12,14 +11,16 @@ import type { Commitment, Keypair } from '@solana/web3.js'
 import {
   PublicKey,
   TransactionInstruction,
-  VersionedTransaction
+  VersionedTransaction,
+  Connection,
+  MessageV0
 } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 
 import type { User } from '~/models/User'
 import {
   getJupiterQuoteByMintWithRetry,
-  jupiterInstance
+  type JupiterMintQuoteParams
 } from '~/services/Jupiter'
 import {
   INTERNAL_TRANSFER_MEMO_STRING,
@@ -104,7 +105,6 @@ export async function addTransferToUserBankInstructions({
   tokenInfo,
   userPublicKey,
   ethAddress,
-  amountLamports,
   sourceAta,
   sdk,
   feePayer,
@@ -113,7 +113,6 @@ export async function addTransferToUserBankInstructions({
   tokenInfo: UserBankManagedTokenInfo
   userPublicKey: PublicKey
   ethAddress: string
-  amountLamports: bigint
   sourceAta: PublicKey
   sdk: AudiusSdk
   feePayer: PublicKey
@@ -126,6 +125,20 @@ export async function addTransferToUserBankInstructions({
       mint: tokenInfo.claimableTokenMint
     })
 
+  // Get the current balance of the ATA
+  const balance =
+    await sdk.services.solanaClient.connection.getTokenAccountBalance(sourceAta)
+  const amountLamports = BigInt(balance.value.amount)
+
+  console.log('REED Transferring from ATA:', {
+    sourceAta: sourceAta.toBase58(),
+    userBankAddress: userBankAddress.toBase58(),
+    balance: balance.value.amount,
+    amountLamports: amountLamports.toString(),
+    uiAmount: balance.value.uiAmount,
+    decimals: tokenInfo.decimals
+  })
+
   instructions.push(
     createTransferCheckedInstruction(
       sourceAta,
@@ -134,9 +147,11 @@ export async function addTransferToUserBankInstructions({
       userPublicKey,
       amountLamports,
       tokenInfo.decimals
-    ),
-    createCloseAccountInstruction(sourceAta, feePayer, userPublicKey)
+    )
   )
+
+  // Don't close the ATA in the same transaction as transfer
+  // Let the cleanup logic handle closing empty ATAs separately
   return userBankAddress
 }
 
@@ -326,75 +341,127 @@ export const validateAndCreateTokenConfigs = (
 export const getJupiterSwapInstructions = async (
   swapRequestParams: SwapRequest,
   outputTokenConfig?: UserBankManagedTokenInfo,
-  userPublicKey?: PublicKey,
-  feePayer?: PublicKey,
-  instructions?: TransactionInstruction[]
+  _userPublicKey?: PublicKey,
+  _feePayer?: PublicKey,
+  _instructions?: TransactionInstruction[],
+  inputTokenConfig?: UserBankManagedTokenInfo,
+  connection?: Connection
 ): Promise<{
-  swapInstructionsResult: SwapInstructionsResponse
+  transaction: VersionedTransaction
   outputAtaForJupiter?: PublicKey
 }> => {
-  let swapInstructionsResult
   let outputAtaForJupiter: PublicKey | undefined
 
-  try {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: {
-        ...swapRequestParams,
-        useSharedAccounts: true
-      }
-    })
-  } catch (e) {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: {
-        ...swapRequestParams,
-        useSharedAccounts: false
-      }
-    })
+  // Extract information from quoteResponse in SwapRequest
+  const quoteResponse = swapRequestParams.quoteResponse
 
-    // Add output ATA instruction if fallback is used and all required params are provided
-    if (outputTokenConfig && userPublicKey && feePayer && instructions) {
-      outputAtaForJupiter = addJupiterOutputAtaInstruction({
-        tokenConfig: outputTokenConfig,
-        userPublicKey,
-        feePayer,
-        instructions
-      })
-    }
-  }
+  // Check if we have a user public key to use as taker
+  const hasTaker = !!swapRequestParams.userPublicKey
 
-  return { swapInstructionsResult, outputAtaForJupiter }
-}
-
-export const buildAndSendTransaction = async (
-  sdk: AudiusSdk,
-  keypair: Keypair,
-  feePayer: PublicKey,
-  instructions: TransactionInstruction[],
-  addressLookupTableAddresses: string[],
-  commitment?: Commitment
-): Promise<string> => {
-  // Build transaction
-  const swapTx: VersionedTransaction =
-    await sdk.services.solanaClient.buildTransaction({
-      feePayer,
-      instructions,
-      addressLookupTables: addressLookupTableAddresses
-        .map((addr: string) => new PublicKey(addr))
-        .concat([SWAP_LOOKUP_TABLE_ADDRESS])
-    })
-
-  // Sign and send transaction
-  swapTx.sign([keypair])
-  const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
-
-  if (commitment) {
-    await sdk.services.solanaClient.connection.confirmTransaction(
-      signature,
-      commitment
+  if (!hasTaker) {
+    // Without a taker, Ultra API won't provide a transaction
+    // This is a required parameter for getting executable transactions
+    throw new Error(
+      'Cannot get swap transaction without taker. Ultra API requires taker (user public key) for transactions.'
     )
   }
 
-  return signature
+  // Use Ultra API with taker to get complete transaction
+  // Convert raw inAmount back to UI amount for the Ultra API call
+  const rawAmount = BigInt(quoteResponse.inAmount)
+  const uiAmount =
+    Number(rawAmount) / Math.pow(10, inputTokenConfig?.decimals ?? 6)
+
+  console.log('REED getJupiterSwapInstructions ultraParams:', {
+    quoteResponseInAmount: quoteResponse.inAmount,
+    rawAmount: rawAmount.toString(),
+    inputDecimals: inputTokenConfig?.decimals ?? 6,
+    calculatedUiAmount: uiAmount,
+    inputTokenConfig
+  })
+
+  const ultraParams: Omit<JupiterMintQuoteParams, 'maxAccounts'> = {
+    inputMint: quoteResponse.inputMint,
+    outputMint: quoteResponse.outputMint,
+    inputDecimals: inputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
+    outputDecimals: outputTokenConfig?.decimals ?? 6, // Default to 6 if not provided
+    amountUi: uiAmount,
+    slippageBps: quoteResponse.slippageBps,
+    swapMode: quoteResponse.swapMode,
+    onlyDirectRoutes: false, // Default to false, as this is typically not set in legacy requests
+    taker: swapRequestParams.userPublicKey // Use the user public key as taker
+  }
+
+  // Get Ultra order which includes the complete transaction
+  const quoteResult = await getJupiterQuoteByMintWithRetry(ultraParams)
+
+  if (!quoteResult.quoteResult.order.transaction) {
+    throw new Error(
+      'Ultra API did not return a transaction despite having taker'
+    )
+  }
+
+  // Decode the transaction from base64
+  const transactionBuffer = Buffer.from(
+    quoteResult.quoteResult.order.transaction,
+    'base64'
+  )
+  const transaction = VersionedTransaction.deserialize(transactionBuffer)
+
+  // Resolve Address Lookup Tables if present
+  let resolvedMessage = transaction.message
+  if (
+    transaction.message.addressTableLookups &&
+    transaction.message.addressTableLookups.length > 0
+  ) {
+    if (!connection) {
+      throw new Error('Connection required to resolve Address Lookup Tables')
+    }
+
+    try {
+      // Fetch lookup table accounts
+      const lookupTableAccounts = await Promise.all(
+        transaction.message.addressTableLookups.map(async (lookup) => {
+          const account = await connection.getAddressLookupTable(
+            lookup.accountKey
+          )
+          if (!account.value) {
+            throw new Error(
+              `Address Lookup Table ${lookup.accountKey.toBase58()} not found`
+            )
+          }
+          return account.value
+        })
+      )
+
+      // Try to resolve the address table lookups
+      const loadedAddresses = (
+        transaction.message as MessageV0
+      ).resolveAddressTableLookups(lookupTableAccounts)
+
+      // Create a new MessageV0 with loaded addresses
+      resolvedMessage = new MessageV0({
+        header: (transaction.message as MessageV0).header,
+        staticAccountKeys: (transaction.message as MessageV0).staticAccountKeys,
+        recentBlockhash: (transaction.message as MessageV0).recentBlockhash,
+        compiledInstructions: (transaction.message as MessageV0)
+          .compiledInstructions,
+        addressTableLookups: [] // Empty since we're providing loaded addresses
+      })
+
+      // Manually set the loaded addresses (this is an internal property)
+      Object.defineProperty(resolvedMessage, 'loadedAddresses', {
+        value: loadedAddresses,
+        writable: false
+      })
+    } catch (error) {
+      console.error('Failed to resolve Address Lookup Tables:', error)
+      // Fall back to using the original message - this may still fail but at least we tried
+    }
+  }
+
+  // Return the transaction directly - no need for backward compatibility
+  return { transaction, outputAtaForJupiter }
 }
 
 export const invalidateSwapQueries = async (
@@ -466,4 +533,36 @@ export const isDirectRouteAvailable = async (
     // If quote fails, there's no direct path available
     return false
   }
+}
+
+export const buildAndSendTransaction = async (
+  sdk: AudiusSdk,
+  keypair: Keypair,
+  feePayer: PublicKey,
+  instructions: TransactionInstruction[],
+  addressLookupTableAddresses: string[],
+  commitment?: Commitment
+): Promise<string> => {
+  // Build transaction
+  const swapTx: VersionedTransaction =
+    await sdk.services.solanaClient.buildTransaction({
+      feePayer,
+      instructions,
+      addressLookupTables: addressLookupTableAddresses
+        .map((addr: string) => new PublicKey(addr))
+        .concat([SWAP_LOOKUP_TABLE_ADDRESS])
+    })
+
+  // Sign and send transaction
+  swapTx.sign([keypair])
+  const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
+
+  if (commitment) {
+    await sdk.services.solanaClient.connection.confirmTransaction(
+      signature,
+      commitment
+    )
+  }
+
+  return signature
 }

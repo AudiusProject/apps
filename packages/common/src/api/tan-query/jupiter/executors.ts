@@ -1,10 +1,12 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { SwapRequest } from '@jup-ag/api'
-import { createCloseAccountInstruction } from '@solana/spl-token'
+import {
+  createCloseAccountInstruction,
+  getAssociatedTokenAddressSync
+} from '@solana/spl-token'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
 import {
-  convertJupiterInstructions,
   getJupiterQuoteByMintWithRetry,
   JupiterQuoteResult
 } from '~/services/Jupiter'
@@ -21,12 +23,11 @@ import {
 } from './types'
 import {
   addTransferFromUserBankInstructions,
-  buildAndSendTransaction,
+  addTransferToUserBankInstructions,
   createTokenConfig,
   findTokenByAddress,
   getJupiterSwapInstructions,
   invalidateSwapQueries,
-  prepareOutputUserBank,
   validateAndCreateTokenConfigs
 } from './utils'
 
@@ -149,6 +150,11 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
 
       const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
 
+      console.log(
+        'REED direct swap about to get quote with taker:',
+        userPublicKey.toBase58()
+      )
+
       // Get quote
       errorStage = 'DIRECT_SWAP_GET_QUOTE'
       const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
@@ -158,7 +164,8 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         outputDecimals: outputTokenConfig.decimals,
         amountUi,
         swapMode: 'ExactIn',
-        onlyDirectRoutes: false
+        onlyDirectRoutes: false,
+        taker: userPublicKey.toBase58()
       })
 
       // Prepare input token
@@ -173,67 +180,102 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         instructions
       })
 
-      // Prepare output destination
+      // For Ultra API, tokens go to user's ATA, then we transfer to user bank
       errorStage = 'DIRECT_SWAP_PREPARE_OUTPUT'
-      const preferredJupiterDestination = await prepareOutputUserBank(
-        sdk,
-        ethAddress!,
-        outputTokenConfig
+      const userOutputAta = getAssociatedTokenAddressSync(
+        new PublicKey(outputTokenConfig.mintAddress),
+        userPublicKey
       )
 
-      // Get swap instructions
+      // Get swap instructions (Ultra API doesn't support destinationTokenAccount)
       errorStage = 'DIRECT_SWAP_GET_INSTRUCTIONS'
       const swapRequestParams: SwapRequest = {
         quoteResponse: quote.quote,
         userPublicKey: userPublicKey.toBase58(),
-        destinationTokenAccount: preferredJupiterDestination,
+        // destinationTokenAccount not supported in Ultra API
         wrapAndUnwrapSol: wrapUnwrapSol,
         dynamicSlippage: true
       }
 
-      const { swapInstructionsResult, outputAtaForJupiter } =
-        await getJupiterSwapInstructions(
-          swapRequestParams,
-          outputTokenConfig,
-          userPublicKey,
-          feePayer,
-          instructions
-        )
-      const { swapInstruction, addressLookupTableAddresses } =
-        swapInstructionsResult
-
-      const jupiterInstructions = convertJupiterInstructions([swapInstruction])
-      instructions.push(...jupiterInstructions)
-
-      // Cleanup
-      errorStage = 'DIRECT_SWAP_CLEANUP'
-      const atasToClose: PublicKey[] = []
-      if (sourceAtaForJupiter) {
-        atasToClose.push(sourceAtaForJupiter)
-      }
-      if (outputAtaForJupiter) {
-        atasToClose.push(outputAtaForJupiter)
-      }
-
-      for (const ataToClose of atasToClose) {
-        instructions.push(
-          createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
-        )
-      }
-
-      // Build and send transaction
-      errorStage = 'DIRECT_SWAP_BUILD_TRANSACTION'
-      const signature = await buildAndSendTransaction(
-        sdk,
-        keypair,
+      const { transaction } = await getJupiterSwapInstructions(
+        swapRequestParams,
+        outputTokenConfig,
+        userPublicKey,
         feePayer,
         instructions,
-        addressLookupTableAddresses
+        inputTokenConfig,
+        this.dependencies.sdk.services.solanaClient.connection
       )
+
+      // Sign and send the Ultra transaction directly
+      transaction.sign([keypair])
+      const swapSignature =
+        await sdk.services.solanaClient.sendTransaction(transaction)
+
+      // Transfer swapped tokens from user's ATA to claimable tokens account
+      errorStage = 'DIRECT_SWAP_TRANSFER_TO_BANK'
+      const transferInstructions: TransactionInstruction[] = []
+
+      // Transfer all tokens from the ATA to user bank (function checks balance internally)
+      await addTransferToUserBankInstructions({
+        tokenInfo: outputTokenConfig,
+        userPublicKey,
+        ethAddress: ethAddress!,
+        sourceAta: userOutputAta,
+        sdk,
+        feePayer,
+        instructions: transferInstructions
+      })
+
+      // Send transfer transaction
+      const transferTx = await sdk.services.solanaClient.buildTransaction({
+        feePayer,
+        instructions: transferInstructions
+      })
+      transferTx.sign([keypair])
+      await sdk.services.solanaClient.sendTransaction(transferTx)
+
+      // Cleanup - only close ATAs that are actually empty
+      errorStage = 'DIRECT_SWAP_CLEANUP'
+      const cleanupInstructions: TransactionInstruction[] = []
+
+      // For direct swaps, only the source ATA should be empty (tokens were swapped out)
+      // The output ATA contains received tokens and should not be closed
+      const atasToCheck = sourceAtaForJupiter ? [sourceAtaForJupiter] : []
+
+      for (const ataToClose of atasToCheck) {
+        try {
+          // Check if the ATA balance is zero before trying to close it
+          const balance = await this.getTokenBalance(
+            ataToClose,
+            inputTokenConfig.decimals
+          )
+          if (balance.uiAmount === 0) {
+            cleanupInstructions.push(
+              createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+            )
+          }
+        } catch (error) {
+          // If we can't check the balance, skip this ATA (it's probably fine)
+          console.warn(
+            `Could not check balance for ATA ${ataToClose.toBase58()}, skipping cleanup`
+          )
+        }
+      }
+
+      // Send cleanup transaction if there are instructions to execute
+      if (cleanupInstructions.length > 0) {
+        const cleanupTx = await sdk.services.solanaClient.buildTransaction({
+          feePayer,
+          instructions: cleanupInstructions
+        })
+        cleanupTx.sign([keypair])
+        await sdk.services.solanaClient.sendTransaction(cleanupTx)
+      }
 
       return {
         status: SwapStatus.SUCCESS,
-        signature,
+        signature: swapSignature,
         inputAmount: quote.inputAmount,
         outputAmount: quote.outputAmount
       }
@@ -366,6 +408,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Get quote: InputToken -> AUDIO
       errorStage = 'INDIRECT_SWAP_STEP1_QUOTE'
+      console.log(
+        'REED indirect swap step 1 about to get quote with taker:',
+        userPublicKey.toBase58()
+      )
+
       const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
         outputMint: AUDIO_MINT,
@@ -373,7 +420,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         outputDecimals: AUDIO_DECIMALS,
         amountUi,
         swapMode: 'ExactIn',
-        onlyDirectRoutes: false
+        onlyDirectRoutes: false,
+        taker: userPublicKey.toBase58()
       })
 
       // Prepare input token
@@ -407,49 +455,64 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         dynamicSlippage: true
       }
 
-      const {
-        swapInstructionsResult,
-        outputAtaForJupiter: firstOutputAtaForJupiter
-      } = await getJupiterSwapInstructions(
-        firstSwapRequestParams,
-        audioTokenInfo,
-        userPublicKey,
-        feePayer,
-        instructions
-      )
-
-      const firstSwapInstructions = convertJupiterInstructions([
-        swapInstructionsResult.swapInstruction
-      ])
-      instructions.push(...firstSwapInstructions)
-
-      // Cleanup ATAs after first swap
-      errorStage = 'INDIRECT_SWAP_STEP1_CLEANUP'
-      const firstAtasToClose: PublicKey[] = [sourceAtaForJupiter]
-      if (firstOutputAtaForJupiter) {
-        firstAtasToClose.push(firstOutputAtaForJupiter)
-      }
-
-      for (const ataToClose of firstAtasToClose) {
-        instructions.push(
-          createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+      console.log('REED indirect swap step 1 executing Ultra transaction')
+      const { transaction: firstTransaction } =
+        await getJupiterSwapInstructions(
+          firstSwapRequestParams,
+          audioTokenInfo,
+          userPublicKey,
+          feePayer,
+          instructions,
+          inputTokenConfig,
+          this.dependencies.sdk.services.solanaClient.connection
         )
+
+      // Execute first swap: Input -> AUDIO
+      firstTransaction.sign([keypair])
+      const firstSwapSignature =
+        await sdk.services.solanaClient.sendTransaction(firstTransaction)
+
+      // Cleanup ATAs after first swap - only close ATAs that should be empty
+      errorStage = 'INDIRECT_SWAP_STEP1_CLEANUP'
+      const firstCleanupInstructions: TransactionInstruction[] = []
+
+      // Only close the source ATA (input token) - it should be empty after the swap
+      // Don't close the AUDIO ATA yet - it contains tokens needed for the second swap
+      const atasToCheck = [sourceAtaForJupiter]
+
+      for (const ataToClose of atasToCheck) {
+        try {
+          // Check if the ATA balance is zero before trying to close it
+          const balance = await this.getTokenBalance(
+            ataToClose,
+            inputTokenConfig.decimals
+          )
+          if (balance.uiAmount === 0) {
+            firstCleanupInstructions.push(
+              createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+            )
+          }
+        } catch (error) {
+          // If we can't check the balance, skip this ATA (it's probably fine)
+          console.warn(
+            `Could not check balance for ATA ${ataToClose.toBase58()}, skipping cleanup`
+          )
+        }
       }
 
-      // Build and send first transaction
-      errorStage = 'INDIRECT_SWAP_STEP1_BUILD_AND_SEND'
-      const signature = await buildAndSendTransaction(
-        sdk,
-        keypair,
-        feePayer,
-        instructions,
-        swapInstructionsResult.addressLookupTableAddresses,
-        'confirmed'
-      )
+      // Send cleanup transaction if there are instructions to execute
+      if (firstCleanupInstructions.length > 0) {
+        const cleanupTx = await sdk.services.solanaClient.buildTransaction({
+          feePayer,
+          instructions: firstCleanupInstructions
+        })
+        cleanupTx.sign([keypair])
+        await sdk.services.solanaClient.sendTransaction(cleanupTx)
+      }
 
       return {
         firstQuote,
-        signature,
+        signature: firstSwapSignature,
         intermediateAudioAta: audioUserBank
       }
     } catch (error: unknown) {
@@ -522,6 +585,17 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           ? predictedAmount
           : actualAudioBalance.uiAmount
 
+      console.log('REED indirect swap step 2 amounts:', {
+        predictedAmount,
+        actualAudioBalance: actualAudioBalance.uiAmount,
+        amountToSwap,
+        AUDIO_DECIMALS,
+        predictedFixedValue: predictedFixed.value.toString(),
+        actualFixedValue: actualFixed.value.toString(),
+        predictedAmountString: predictedAmount.toString(),
+        actualBalanceString: actualAudioBalance.uiAmount.toString()
+      })
+
       // Get quote: AUDIO -> OutputToken
       errorStage = 'INDIRECT_SWAP_STEP2_QUOTE'
       const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry(
@@ -532,7 +606,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           outputDecimals: outputTokenConfig.decimals,
           amountUi: amountToSwap,
           swapMode: 'ExactIn',
-          onlyDirectRoutes: false
+          onlyDirectRoutes: false,
+          taker: userPublicKey.toBase58()
         }
       )
 
@@ -549,63 +624,110 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           instructions
         })
 
-      // Prepare output destination
+      // For Ultra API, final output tokens go to user's ATA, then we transfer to user bank
       errorStage = 'INDIRECT_SWAP_STEP2_PREPARE_OUTPUT'
-      const preferredJupiterDestination = await prepareOutputUserBank(
-        sdk,
-        ethAddress!,
-        outputTokenConfig
+      const userFinalOutputAta = getAssociatedTokenAddressSync(
+        new PublicKey(outputTokenConfig.mintAddress),
+        userPublicKey
       )
 
-      // Get swap instructions (AUDIO -> OutputToken)
+      // Get swap instructions (AUDIO -> OutputToken) - Ultra API doesn't support destinationTokenAccount
       errorStage = 'INDIRECT_SWAP_STEP2_SWAP_INSTRUCTIONS'
       const secondSwapRequestParams: SwapRequest = {
         quoteResponse: secondQuote.quote,
         userPublicKey: userPublicKey.toBase58(),
-        destinationTokenAccount: preferredJupiterDestination,
+        // destinationTokenAccount not supported in Ultra API
         wrapAndUnwrapSol: wrapUnwrapSol,
         dynamicSlippage: true
       }
 
-      const { swapInstructionsResult, outputAtaForJupiter } =
+      const { transaction: secondTransaction } =
         await getJupiterSwapInstructions(
           secondSwapRequestParams,
           outputTokenConfig,
           userPublicKey,
           feePayer,
-          instructions
+          instructions,
+          audioTokenInfo,
+          this.dependencies.sdk.services.solanaClient.connection
         )
 
-      const secondSwapInstructions = convertJupiterInstructions([
-        swapInstructionsResult.swapInstruction
-      ])
-      instructions.push(...secondSwapInstructions)
+      // Execute second swap: AUDIO -> Output
+      secondTransaction.sign([keypair])
+      const secondSwapSignature =
+        await sdk.services.solanaClient.sendTransaction(secondTransaction)
 
-      // Cleanup
-      errorStage = 'INDIRECT_SWAP_STEP2_CLEANUP'
-      const atasToClose: PublicKey[] = [audioSourceAtaForJupiter]
-      if (outputAtaForJupiter) {
-        atasToClose.push(outputAtaForJupiter)
-      }
+      // Transfer final output tokens from user's ATA to claimable tokens account
+      errorStage = 'INDIRECT_SWAP_STEP2_TRANSFER_TO_BANK'
+      const finalTransferInstructions: TransactionInstruction[] = []
 
-      for (const ataToClose of atasToClose) {
-        instructions.push(
-          createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
-        )
-      }
-
-      // Build and send second transaction
-      errorStage = 'INDIRECT_SWAP_STEP2_BUILD_AND_SEND'
-      const signature = await buildAndSendTransaction(
+      // Transfer all tokens from the ATA to user bank (function checks balance internally)
+      await addTransferToUserBankInstructions({
+        tokenInfo: outputTokenConfig,
+        userPublicKey,
+        ethAddress: ethAddress!,
+        sourceAta: userFinalOutputAta,
         sdk,
-        keypair,
         feePayer,
-        instructions,
-        swapInstructionsResult.addressLookupTableAddresses
-      )
+        instructions: finalTransferInstructions
+      })
+
+      // Send transfer transaction
+      const finalTransferTx = await sdk.services.solanaClient.buildTransaction({
+        feePayer,
+        instructions: finalTransferInstructions
+      })
+      finalTransferTx.sign([keypair])
+      await sdk.services.solanaClient.sendTransaction(finalTransferTx)
+
+      // Cleanup - execute separately since swaps are already done
+      errorStage = 'INDIRECT_SWAP_STEP2_CLEANUP'
+      const cleanupInstructions: TransactionInstruction[] = []
+
+      // Check balances before closing ATAs
+      // audioSourceAtaForJupiter should be empty after the swap
+      // userFinalOutputAta was just transferred from, so it should be empty too
+      const atasToCheck = [audioSourceAtaForJupiter, userFinalOutputAta]
+
+      for (const ataToClose of atasToCheck) {
+        try {
+          // Determine decimals based on the ATA
+          let decimals: number
+          if (ataToClose.equals(audioSourceAtaForJupiter)) {
+            decimals = AUDIO_DECIMALS // AUDIO tokens
+          } else if (ataToClose.equals(userFinalOutputAta)) {
+            decimals = outputTokenConfig.decimals // Output tokens
+          } else {
+            continue // Skip unknown ATAs
+          }
+
+          // Check if the ATA balance is zero before trying to close it
+          const balance = await this.getTokenBalance(ataToClose, decimals)
+          if (balance.uiAmount === 0) {
+            cleanupInstructions.push(
+              createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+            )
+          }
+        } catch (error) {
+          // If we can't check the balance, skip this ATA (it's probably fine)
+          console.warn(
+            `Could not check balance for ATA ${ataToClose.toBase58()}, skipping cleanup`
+          )
+        }
+      }
+
+      // Send cleanup transaction if there are instructions to execute
+      if (cleanupInstructions.length > 0) {
+        const cleanupTx = await sdk.services.solanaClient.buildTransaction({
+          feePayer,
+          instructions: cleanupInstructions
+        })
+        cleanupTx.sign([keypair])
+        await sdk.services.solanaClient.sendTransaction(cleanupTx)
+      }
 
       return {
-        signature,
+        signature: secondSwapSignature,
         secondQuote
       }
     } catch (error: unknown) {

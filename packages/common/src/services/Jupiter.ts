@@ -1,12 +1,6 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
-import {
-  Configuration,
-  Instruction,
-  QuoteResponse,
-  SwapApi,
-  SwapMode
-} from '@jup-ag/api'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
+import type { QuoteResponse } from '@jup-ag/api'
 
 import { TOKEN_LISTING_MAP } from '~/store/ui/buy-audio/constants'
 import { convertBigIntToAmountObject, removeNullable } from '~/utils'
@@ -23,31 +17,38 @@ export type JupiterTokenSymbol = keyof typeof TOKEN_LISTING_MAP
 
 export const DEFAULT_MAX_ACCOUNTS = 20
 export const MAX_ALLOWED_ACCOUNTS = 64
-const JUP_BASE_PATH = 'https://jup.audius.co/swap/v1'
+const ULTRA_BASE_URL = 'https://jup.audius.co/ultra/v1'
 
-let _jup: SwapApi
+// Ultra API types
+export type SwapMode = 'ExactIn' | 'ExactOut'
 
-const initJupiter = () => {
-  try {
-    return new SwapApi(
-      new Configuration({
-        basePath: JUP_BASE_PATH
-      })
-    )
-  } catch (e) {
-    console.error('Jupiter failed to initialize', e)
-    throw e
-  }
+// Legacy instruction type for compatibility
+export interface Instruction {
+  programId: string
+  data: string
+  accounts: Array<{
+    pubkey: string
+    isSigner: boolean
+    isWritable: boolean
+  }>
 }
 
-const getInstance = () => {
-  if (!_jup) {
-    _jup = initJupiter()
-  }
-  return _jup
+export interface UltraOrderResponse extends QuoteResponse {
+  mode: string
+  transaction?: string
+  requestId?: string
 }
 
-export const jupiterInstance = getInstance()
+export interface UltraExecuteRequest {
+  requestId: string
+  userPublicKey: string
+  signature: string
+}
+
+export interface UltraExecuteResponse {
+  txid: string
+  status: string
+}
 
 export type JupiterQuoteParams = {
   inputTokenSymbol: JupiterTokenSymbol
@@ -69,6 +70,7 @@ export type JupiterMintQuoteParams = {
   swapMode?: SwapMode
   onlyDirectRoutes?: boolean
   maxAccounts?: number
+  taker?: string // User's wallet address for transaction execution
 }
 
 export type JupiterQuoteResult = {
@@ -90,11 +92,13 @@ export type JupiterQuoteResult = {
     uiAmount: number
     uiAmountString: string
   }
-  quote: QuoteResponse
+  order: UltraOrderResponse
+  // Keep quote for backward compatibility (maps to order for Ultra API)
+  quote: UltraOrderResponse
 }
 
 /**
- * Gets a quote from Jupiter using mint addresses directly
+ * Gets a quote from Jupiter Ultra API using mint addresses directly
  * This version is used by the useSwapCoins hook
  */
 export const getJupiterQuoteByMint = async ({
@@ -106,42 +110,91 @@ export const getJupiterQuoteByMint = async ({
   slippageBps,
   swapMode = 'ExactIn',
   onlyDirectRoutes = false,
-  maxAccounts = DEFAULT_MAX_ACCOUNTS
+  maxAccounts = DEFAULT_MAX_ACCOUNTS,
+  taker
 }: JupiterMintQuoteParams): Promise<JupiterQuoteResult> => {
   const amount =
     swapMode === 'ExactIn'
       ? Number(new FixedDecimal(amountUi, inputDecimals).value.toString())
       : Number(new FixedDecimal(amountUi, outputDecimals).value.toString())
 
-  const quote = await jupiterInstance.quoteGet({
+  console.log('REED Jupiter quote request:', {
     inputMint,
     outputMint,
-    amount,
-    slippageBps,
+    amountUi,
+    inputDecimals,
+    outputDecimals,
     swapMode,
-    onlyDirectRoutes,
-    maxAccounts,
-    dynamicSlippage: !slippageBps
+    calculatedAmount: amount,
+    amountAsString: amount.toString(),
+    taker
   })
 
-  if (!quote) {
-    throw new Error('Failed to get Jupiter quote')
-  }
+  // Build query parameters for Ultra API
+  const params = new URLSearchParams({
+    inputMint,
+    outputMint,
+    amount: amount.toString(),
+    swapMode,
+    ...(slippageBps && { slippageBps: slippageBps.toString() }),
+    ...(onlyDirectRoutes && { onlyDirectRoutes: 'true' }),
+    ...(maxAccounts && { maxAccounts: maxAccounts.toString() }),
+    ...(taker && { taker })
+  })
 
-  return {
-    inputAmount: convertBigIntToAmountObject(
-      BigInt(quote.inAmount),
-      inputDecimals
-    ),
-    outputAmount: convertBigIntToAmountObject(
-      BigInt(quote.outAmount),
-      outputDecimals
-    ),
-    otherAmountThreshold: convertBigIntToAmountObject(
-      BigInt(quote.otherAmountThreshold),
-      swapMode === 'ExactIn' ? outputDecimals : inputDecimals
-    ),
-    quote
+  const url = `${ULTRA_BASE_URL}/order?${params.toString()}`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+        // Note: Ultra API may require API key in production
+        // 'Authorization': `Bearer ${process.env.JUPITER_API_KEY}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Ultra API request failed: ${response.status} ${response.statusText}`
+      )
+    }
+
+    const order: UltraOrderResponse = await response.json()
+
+    if (!order) {
+      throw new Error('Failed to get Jupiter Ultra order')
+    }
+
+    // Add legacy compatibility properties
+    const enhancedOrder: UltraOrderResponse = {
+      ...order,
+      slippageBps: slippageBps || 50, // Default slippage
+      priceImpactPct: '0', // Ultra API doesn't provide this, default to 0
+      routePlan: [], // Ultra API doesn't provide route details
+      contextSlot: 0,
+      timeTaken: 0
+    }
+
+    return {
+      inputAmount: convertBigIntToAmountObject(
+        BigInt(order.inAmount),
+        inputDecimals
+      ),
+      outputAmount: convertBigIntToAmountObject(
+        BigInt(order.outAmount),
+        outputDecimals
+      ),
+      otherAmountThreshold: convertBigIntToAmountObject(
+        BigInt(order.otherAmountThreshold),
+        swapMode === 'ExactIn' ? outputDecimals : inputDecimals
+      ),
+      order: enhancedOrder,
+      quote: enhancedOrder // Backward compatibility
+    }
+  } catch (error) {
+    console.error('Ultra API error:', error)
+    throw error
   }
 }
 
@@ -151,9 +204,9 @@ export type JupiterQuoteWithRetryResult = {
 }
 
 /**
- * Gets a Jupiter quote with automatic retry logic for maxAccounts
- * Starts with DEFAULT_MAX_ACCOUNTS and increments by 10 until MAX_ALLOWED_ACCOUNTS
- * Returns the successful quote along with the maxAccounts value that worked
+ * Gets a Jupiter Ultra quote with automatic retry logic
+ * Uses the Ultra API with basic retry for transient failures
+ * Returns the successful quote result
  */
 export const getJupiterQuoteByMintWithRetry = async ({
   inputMint,
@@ -163,18 +216,18 @@ export const getJupiterQuoteByMintWithRetry = async ({
   amountUi,
   slippageBps,
   swapMode = 'ExactIn',
-  onlyDirectRoutes = false
+  onlyDirectRoutes = false,
+  taker
 }: Omit<
   JupiterMintQuoteParams,
   'maxAccounts'
 >): Promise<JupiterQuoteWithRetryResult> => {
-  let maxAccounts = DEFAULT_MAX_ACCOUNTS
-  let lastError
-  let quoteResult: JupiterQuoteResult | null = null
+  const MAX_RETRIES = 3
+  let lastError: Error | null = null
 
-  while (maxAccounts <= MAX_ALLOWED_ACCOUNTS) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      quoteResult = await getJupiterQuoteByMint({
+      const quoteResult = await getJupiterQuoteByMint({
         inputMint,
         outputMint,
         inputDecimals,
@@ -183,28 +236,105 @@ export const getJupiterQuoteByMintWithRetry = async ({
         slippageBps,
         swapMode,
         onlyDirectRoutes,
-        maxAccounts
+        maxAccounts: DEFAULT_MAX_ACCOUNTS,
+        taker
       })
-      break
+
+      return {
+        maxAccountsValue: DEFAULT_MAX_ACCOUNTS,
+        quoteResult
+      }
     } catch (err) {
-      lastError = err
-      maxAccounts += 10
-      if (maxAccounts > MAX_ALLOWED_ACCOUNTS) {
-        throw lastError
+      lastError = err as Error
+      console.warn(`Ultra API attempt ${attempt + 1} failed:`, err)
+
+      // If this is not the last attempt, wait before retrying
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (attempt + 1))
+        )
       }
     }
   }
 
-  if (quoteResult === null) {
-    throw lastError
-  }
+  throw (
+    lastError || new Error('Failed to get Jupiter Ultra quote after retries')
+  )
+}
 
-  return {
-    maxAccountsValue: maxAccounts,
-    quoteResult
+/**
+ * Executes a Jupiter Ultra swap transaction
+ */
+export const executeJupiterUltraSwap = async (
+  requestId: string,
+  userPublicKey: string,
+  signature: string
+): Promise<UltraExecuteResponse> => {
+  const url = `${ULTRA_BASE_URL}/execute`
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+        // Note: Ultra API may require API key in production
+        // 'Authorization': `Bearer ${process.env.JUPITER_API_KEY}`
+      },
+      body: JSON.stringify({
+        requestId,
+        userPublicKey,
+        signature
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Ultra API execute request failed: ${response.status} ${response.statusText}`
+      )
+    }
+
+    const result: UltraExecuteResponse = await response.json()
+    return result
+  } catch (error) {
+    console.error('Ultra API execute error:', error)
+    throw error
   }
 }
 
+// Create legacy Jupiter API instance for backward compatibility
+// This is used for swap instruction building while quotes use Ultra API
+let _legacyJupiter: any
+
+const getLegacyJupiterInstance = () => {
+  if (!_legacyJupiter) {
+    try {
+      // Dynamic import to avoid issues if @jup-ag/api is not available
+      const { SwapApi, Configuration } = require('@jup-ag/api')
+      _legacyJupiter = new SwapApi(
+        new Configuration({
+          basePath: 'https://jup.audius.co/swap/v1'
+        })
+      )
+    } catch (e) {
+      console.error('Legacy Jupiter failed to initialize', e)
+      throw e
+    }
+  }
+  return _legacyJupiter
+}
+
+// Export legacy jupiterInstance for backward compatibility
+export const jupiterInstance = {
+  swapInstructionsPost: (...args: any[]) => {
+    const instance = getLegacyJupiterInstance()
+    return instance.swapInstructionsPost(...args)
+  },
+  quoteGet: (..._args: any[]) => {
+    throw new Error(
+      'Jupiter has been migrated to Ultra API. Use getJupiterQuoteByMint instead.'
+    )
+  }
+}
 /**
  * Converts an array of Jupiter instructions to Solana TransactionInstructions
  * Filters out undefined instructions and handles the conversion
@@ -220,13 +350,15 @@ export const convertJupiterInstructions = (
     return {
       programId: new PublicKey(i.programId),
       data: Buffer.from(i.data, 'base64'),
-      keys: i.accounts.map((a) => {
-        return {
-          pubkey: new PublicKey(a.pubkey),
-          isSigner: a.isSigner,
-          isWritable: a.isWritable
+      keys: i.accounts.map(
+        (a: { pubkey: string; isSigner: boolean; isWritable: boolean }) => {
+          return {
+            pubkey: new PublicKey(a.pubkey),
+            isSigner: a.isSigner,
+            isWritable: a.isWritable
+          }
         }
-      })
+      )
     } as TransactionInstruction
   })
 }

@@ -56,8 +56,9 @@ export const useMintRecovery = (
       if (balance > BigInt(0)) {
         const isUsdc = mint === env.USDC_MINT_ADDRESS
 
+        // Temporarily halt USDC recovery flow
         if (isUsdc) {
-          dispatch(buyUSDCActions.startRecoveryIfNecessary())
+          // dispatch(buyUSDCActions.startRecoveryIfNecessary())
         }
       }
 
