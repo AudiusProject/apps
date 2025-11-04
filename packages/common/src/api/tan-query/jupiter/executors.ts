@@ -34,6 +34,7 @@ import {
   buildAndSendTransaction,
   createTokenConfig,
   findTokenByAddress,
+  getCoinPoolState,
   getJupiterSwapInstructions,
   invalidateSwapQueries,
   prepareOutputUserBank,
@@ -282,6 +283,11 @@ export interface SwapWithMeteoraDBCResult {
       uiAmount: number
     }
   }
+  secondQuote: {
+    outputAmount: {
+      uiAmount: number
+    }
+  }
   signature: string
   intermediateAudioAta: PublicKey
   inputAmount: {
@@ -308,19 +314,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
     try {
-      const inputCoinInfo = this.dependencies.queryClient.getQueryData(
-        getArtistCoinQueryKey(params.inputMint)
-      )
-      const isInputDBC =
-        inputCoinInfo?.dynamicBondingCurve?.address !== null &&
-        inputCoinInfo?.dynamicBondingCurve?.isMigrated === false
-      const outputCoinInfo = this.dependencies.queryClient.getQueryData(
-        getArtistCoinQueryKey(params.outputMint)
-      )
-      const isOutputDBC =
-        outputCoinInfo?.dynamicBondingCurve?.address !== null &&
-        outputCoinInfo?.dynamicBondingCurve?.isMigrated === false
-
       const swapToAudioWithJupiter = async () => {
         return await this.executeJupiterSwapToAudio(params)
       }
@@ -331,6 +324,14 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           params.amountUi
         )
       }
+      const { isDBC: isInputDBC } = getCoinPoolState(
+        params.inputMint,
+        this.dependencies.queryClient
+      )
+      const { isDBC: isOutputDBC } = getCoinPoolState(
+        params.outputMint,
+        this.dependencies.queryClient
+      )
       // Execute first transaction with retries: InputToken -> AUDIO
       let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
         isInputDBC ? swapToAudioWithMeteora : swapToAudioWithJupiter,
@@ -340,23 +341,26 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         }
       )
 
+      // attempt to fallback to jupiter swap if meteora swap fails
+      if (
+        isInputDBC &&
+        (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result)
+      ) {
+        swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
+          swapToAudioWithJupiter,
+          async (_attemptNumber: number) => {
+            // Invalidate queries before retry
+            await this.invalidateQueries()
+          }
+        )
+      }
+      // throw if the first swap failed
       if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
-        if (isInputDBC) {
-          swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
-            swapToAudioWithJupiter,
-            async (_attemptNumber: number) => {
-              // Invalidate queries before retry
-              await this.invalidateQueries()
-            }
-          )
-        }
-        if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
-          return {
-            status: SwapStatus.ERROR,
-            error: {
-              type: SwapErrorType.UNKNOWN,
-              message: `Step 1 failed after ${swapToAudioRetryResult.attemptsMade} attempts: ${swapToAudioRetryResult.error?.message || 'Unknown error'}`
-            }
+        return {
+          status: SwapStatus.ERROR,
+          error: {
+            type: SwapErrorType.UNKNOWN,
+            message: `Step 1 failed after ${swapToAudioRetryResult.attemptsMade} attempts: ${swapToAudioRetryResult.error?.message || 'Unknown error'}`
           }
         }
       }
@@ -364,60 +368,53 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const swapToAudioResult = swapToAudioRetryResult.result
 
       // Execute second transaction with retries: AUDIO -> OutputToken
-      let swapToTokenResult
-      const swapToTokenJupiterResult = await this.retryPolicy.executeWithRetry(
-        async () => {
-          return await this.executeJupiterSwapToToken(params, swapToAudioResult)
-        },
+      const swapToTokenWithJupiter = async () =>
+        await this.executeJupiterSwapToToken(params, swapToAudioResult)
+      const swapToTokenWithMeteora = async () =>
+        await this.executeMeteoraSwap(
+          params.outputMint,
+          'audioToCoin',
+          swapToAudioResult.firstQuote.outputAmount.uiAmount
+        )
+
+      let swapToTokenResult = await this.retryPolicy.executeWithRetry(
+        // Prioritize Meteora DBC swap if the token we're swapping is a DBC
+        // @ts-ignore
+        isOutputDBC ? swapToTokenWithMeteora : swapToTokenWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
         }
       )
 
+      // attempt to fallback to jupiter swap if meteora swap fails
       if (
-        !swapToTokenJupiterResult.success ||
-        !swapToTokenJupiterResult.result
+        isOutputDBC &&
+        (!swapToTokenResult.success || !swapToTokenResult.result)
       ) {
-        // If the 2nd swap fails, we fall back to swapping with Meteora DBC
-        // This flow could be triggered if Jupiter is having issues finding routes for our coins (due to liquidity issues)
-        const swapWithMeteoraDBCRetryResult =
-          await this.retryPolicy.executeWithRetry(
-            async () => {
-              return await this.executeMeteoraSwap(
-                params.outputMint,
-                'audioToCoin',
-                swapToAudioResult.firstQuote.outputAmount.uiAmount
-              )
-            },
-            async (_attemptNumber: number) => {
-              // Invalidate queries before retry
-              await this.invalidateQueries()
-            }
-          )
-        if (
-          !swapWithMeteoraDBCRetryResult.success ||
-          !swapWithMeteoraDBCRetryResult.result
-        ) {
-          return {
-            status: SwapStatus.ERROR,
-            error: {
-              type: SwapErrorType.UNKNOWN,
-              message: `Step 2 failed after both Jupiter and Meteora DBC swaps failed. DBC swap failed with error: ${swapWithMeteoraDBCRetryResult.error?.message || 'Unknown error'}`
-            }
+        swapToTokenResult = await this.retryPolicy.executeWithRetry(
+          swapToTokenWithJupiter,
+          async (_attemptNumber: number) => {
+            // Invalidate queries before retry
+            await this.invalidateQueries()
           }
-        } else {
-          swapToTokenResult = swapWithMeteoraDBCRetryResult.result
+        )
+      }
+      if (!swapToTokenResult.success || !swapToTokenResult.result) {
+        return {
+          status: SwapStatus.ERROR,
+          error: {
+            type: SwapErrorType.UNKNOWN,
+            message: `Step 2 failed after both Jupiter and Meteora DBC swaps failed. DBC swap failed with error: ${swapToTokenResult.error?.message || 'Unknown error'}`
+          }
         }
-      } else {
-        swapToTokenResult = swapToTokenJupiterResult.result
       }
 
       return {
         status: SwapStatus.SUCCESS,
-        signature: swapToTokenResult.signature,
+        signature: swapToTokenResult.result.signature,
         inputAmount: swapToAudioResult.inputAmount,
-        outputAmount: swapToTokenResult.outputAmount
+        outputAmount: swapToTokenResult.result.outputAmount
       }
     } catch (error: unknown) {
       return {
@@ -727,6 +724,16 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       return {
         signature,
         firstQuote: {
+          outputAmount: {
+            uiAmount: Number(
+              new FixedDecimal(
+                BigInt(outputAmount),
+                outputTokenInfo.decimals
+              ).toString()
+            )
+          }
+        },
+        secondQuote: {
           outputAmount: {
             uiAmount: Number(
               new FixedDecimal(
