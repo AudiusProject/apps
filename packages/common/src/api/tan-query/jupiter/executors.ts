@@ -14,7 +14,6 @@ import {
   VersionedTransaction
 } from '@solana/web3.js'
 
-import { getArtistCoinQueryKey } from '~/api'
 import {
   convertJupiterInstructions,
   getJupiterQuoteByMintWithRetry,
