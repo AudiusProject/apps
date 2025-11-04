@@ -28,10 +28,7 @@ import {
 import { CoinInfo } from '~/store/ui/buy-sell/types'
 import {
   AUDIO_MINT,
-  BONK_MINT,
-  NON_ARTIST_COIN_MINTS,
-  SOL_MINT,
-  USDC_MINT
+  NON_ARTIST_COIN_MINTS
 } from '~/store/ui/shared/tokenConstants'
 
 import { getArtistCoinQueryKey } from '../coins'
