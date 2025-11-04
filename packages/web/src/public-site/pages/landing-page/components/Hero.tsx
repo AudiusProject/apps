@@ -6,7 +6,10 @@ import cn from 'classnames'
 import { Parallax, useParallaxController } from 'react-scroll-parallax'
 
 import { useHistoryContext } from 'app/HistoryProvider'
-import HeroBackgroundTakeover from 'assets/img/publicSite/HeroBGTakeover.webp'
+import HeroBackgroundMobile from 'assets/img/publicSite/HeroBG.webp'
+import HeroBackground from 'assets/img/publicSite/HeroBG@2x.webp'
+import HeroBackgroundXL from 'assets/img/publicSite/HeroBG@3x.webp'
+import HeroForeground from 'assets/img/publicSite/ProductShot1.webp'
 import AppStoreBadge from 'assets/img/publicSite/app-store-badge.svg'
 import GlyphPattern1x from 'assets/img/publicSite/glyph-pattern@1x.png'
 import GlyphPattern2x from 'assets/img/publicSite/glyph-pattern@2x.png'
@@ -19,8 +22,8 @@ import styles from './Hero.module.css'
 const { APP_REDIRECT, TRENDING_PAGE, DOWNLOAD_START_LINK } = route
 
 const messages = {
-  title: 'You Already Know',
-  subtitle: 'Create the future of music, together. $YAK',
+  title: 'Music Done Right',
+  subtitle: 'Create the future of music, together.',
   cta: 'Listen Now',
   download: 'Download The App'
 }
@@ -49,10 +52,11 @@ const Hero = (props: HeroProps) => {
           <div className={styles.parallaxBg}> </div>
           <Parallax className={cn(styles.mobileBG)} translateY={[0, -30]}>
             <img
-              src={HeroBackgroundTakeover}
+              src={HeroBackgroundMobile}
+              sizes={'10vw'}
               className={styles.mobileImgBG}
               onLoad={onImgSet}
-              alt='Background Decoration'
+              alt='Background Purple Decoration'
             />
           </Parallax>
           <h1 className={styles.title}>{messages.title}</h1>
@@ -120,17 +124,29 @@ const Hero = (props: HeroProps) => {
       <div className={styles.bg}>
         <div className={styles.parallaxBg}> </div>
         <Parallax
+          className={cn(styles.background, styles.fgContainer)}
+          translateY={[51, -10]}
+          translateX={[44, 44]}
+        >
+          <img
+            src={HeroForeground}
+            className={styles.foregroundImg}
+            onLoad={onImgSet}
+            alt='Foreground Audius Web and Mobile Product Shot'
+          />
+        </Parallax>
+        <Parallax
           className={styles.background}
           translateY={[-10, -20]}
           translateX={[-25, -25]}
         >
           <img
-            srcSet={`${HeroBackgroundTakeover} 3840w, ${HeroBackgroundTakeover} 5500w`}
+            srcSet={`${HeroBackground} 3840w, ${HeroBackgroundXL} 5500w`}
             sizes={'(max-width: 3815px) 3840w, 5500w'}
-            src={HeroBackgroundTakeover}
+            src={HeroBackground}
             onLoad={onImgSet}
             className={styles.foreground}
-            alt='Background Decoration'
+            alt='Background Purple Decoration'
           />
         </Parallax>
         <Parallax

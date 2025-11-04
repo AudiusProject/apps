@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 
+import { Flex, IconButton, IconClose, Paper, Text } from '@audius/harmony'
 import cn from 'classnames'
 import { ParallaxProvider } from 'react-scroll-parallax'
 
 import { useHistoryContext } from 'app/HistoryProvider'
+import HeroBackgroundTakeover from 'assets/img/publicSite/HeroBGTakeover.webp'
 import { FanburstBanner } from 'components/banner/FanburstBanner'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
 import Footer from 'public-site/components/Footer'
@@ -22,6 +24,50 @@ import PlatformFeatures from './components/PlatformFeatures'
 import WhoUsesAudius from './components/WhoUsesAudius'
 
 const FANBURST_UTM_SOURCE = 'utm_source=fanburst'
+
+const messages = {
+  bannerTitle: 'You Already Know',
+  bannerSubtitle: '$YAK'
+}
+
+const ArtistTakeoverFloatingBanner = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <Paper
+      p='2xl'
+      css={{
+        position: 'fixed',
+        bottom: 24,
+        left: 48,
+        right: 48,
+        maxWidth: 1240,
+        margin: '0 auto',
+        zIndex: 1000,
+        backgroundImage: `url(${HeroBackgroundTakeover})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <Flex row alignItems='flex-start' justifyContent='space-between' flex='1'>
+        <Flex direction='column' gap='s'>
+          <Text variant='heading' size='l' color='staticWhite'>
+            {messages.bannerTitle}
+          </Text>
+          <Text variant='body' size='l' strength='strong' color='staticWhite'>
+            {messages.bannerSubtitle}
+          </Text>
+        </Flex>
+        <IconButton
+          aria-label='Close'
+          icon={IconClose}
+          color='staticWhite'
+          size='s'
+          onClick={onClose}
+        />
+      </Flex>
+    </Paper>
+  )
+}
 
 type LandingPageV2Props = {
   isMobile: boolean
@@ -73,6 +119,9 @@ const LandingPage = (props: LandingPageV2Props) => {
     setHasImageLoaded(true)
   }, [setHasImageLoaded])
 
+  const [showArtistTakeoverBanner, setShowArtistTakeoverBanner] = useState(true)
+  const onDismissArtistTakeoverBanner = () => setShowArtistTakeoverBanner(false)
+
   return (
     <ParallaxProvider>
       <div
@@ -94,6 +143,11 @@ const LandingPage = (props: LandingPageV2Props) => {
             onClose={onDismissFanburstBanner}
           />
         )}
+        {showArtistTakeoverBanner && !props.isMobile ? (
+          <ArtistTakeoverFloatingBanner
+            onClose={onDismissArtistTakeoverBanner}
+          />
+        ) : null}
         <NavBannerV2
           className={cn({
             [styles.hasBanner]: showFanburstBanner,
