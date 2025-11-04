@@ -1,4 +1,3 @@
-import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   PublicKey,
   SendTransactionError,
