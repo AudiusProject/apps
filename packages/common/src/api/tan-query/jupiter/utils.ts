@@ -14,7 +14,7 @@ import {
   TransactionInstruction,
   VersionedTransaction
 } from '@solana/web3.js'
-import { useQueryClient } from '@tanstack/react-query'
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
 
 import type { User } from '~/models/User'
 import {
@@ -26,7 +26,12 @@ import {
   MEMO_PROGRAM_ID
 } from '~/services/audius-backend/solana'
 import { CoinInfo } from '~/store/ui/buy-sell/types'
+import {
+  AUDIO_MINT,
+  NON_ARTIST_COIN_MINTS
+} from '~/store/ui/shared/tokenConstants'
 
+import { getArtistCoinQueryKey } from '../coins'
 import { QUERY_KEYS } from '../queryKeys'
 
 import {
@@ -427,9 +432,8 @@ export const prepareOutputUserBank = async (
 }
 
 /**
- * Attempts to get a direct quote from Jupiter for the given token pair.
- * Returns true if a direct quote is available, false otherwise.
- */
+  @deprecated - We're moving away from Jupiter as the SO for stuff - use getIsDirectSwappable instead + meteora quotes if needed
+*/
 export const isDirectRouteAvailable = async (
   inputMint: string,
   outputMint: string,
@@ -465,5 +469,49 @@ export const isDirectRouteAvailable = async (
   } catch (error) {
     // If quote fails, there's no direct path available
     return false
+  }
+}
+
+/**
+ * Checks if a swap is direct swappable between two tokens.
+ * @param inputMint - The input mint address
+ * @param outputMint - The output mint address
+ * @returns True if the swap is direct swappable, false otherwise
+ */
+export const getIsDirectSwappable = (
+  inputMint: string,
+  outputMint: string
+): boolean => {
+  // Check for direct swaps for non-artist coins
+  if (
+    NON_ARTIST_COIN_MINTS.includes(inputMint) &&
+    NON_ARTIST_COIN_MINTS.includes(outputMint)
+  ) {
+    return true
+  }
+  // At this point we know one of our mints is an artist coin - so to be a direct swap, the other mint must be AUDIO
+  return inputMint === AUDIO_MINT || outputMint === AUDIO_MINT
+}
+
+/**
+ * Checks for pool
+ * @param mint - The mint address of the coin
+ * @param queryClient
+ * @returns { isDBC: boolean; isDAMM: boolean } - Whether the coin is a DBC or DAMM
+ */
+export const getCoinPoolState = (
+  mint: string,
+  queryClient: QueryClient
+): { isDBC: boolean; isDAMM: boolean } => {
+  if (NON_ARTIST_COIN_MINTS.includes(mint)) {
+    return {
+      isDBC: false,
+      isDAMM: false
+    }
+  }
+  const coinInfo = queryClient.getQueryData(getArtistCoinQueryKey(mint))
+  return {
+    isDBC: coinInfo?.dynamicBondingCurve?.isMigrated === false,
+    isDAMM: coinInfo?.dynamicBondingCurve?.isMigrated === true
   }
 }

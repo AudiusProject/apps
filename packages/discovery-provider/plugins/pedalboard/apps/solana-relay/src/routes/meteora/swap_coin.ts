@@ -3,11 +3,8 @@ import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
-import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
-
-const AUDIO_DECIMALS = 8
 
 /**
  * Creates a swap transaction for swapping AUDIO to an artist coin using Meteora's DBC
@@ -19,6 +16,7 @@ const AUDIO_DECIMALS = 8
  * - outputMint: The mint address of the output token (artist coin)
  * - userPublicKey: The public key of the user initiating the swap
  * - swapDirection: The direction of the swap (either "audioToCoin" or "coinToAudio")
+ * - feePayer: Optional fee payer separate from the user public key
  *
  * Returns:
  * - transaction: Base64-encoded serialized transaction ready to be signed by the user
@@ -26,19 +24,14 @@ const AUDIO_DECIMALS = 8
  */
 export const swapCoin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      inputAmountUi,
-      coinMint,
-      swapDirection,
-      userPublicKey,
-      isExternalWallet = false
-    } = req.query
+    const { inputAmount, coinMint, swapDirection, userPublicKey, feePayer } =
+      req.query
 
     // Validate required parameters
-    if (!inputAmountUi || typeof inputAmountUi !== 'string') {
+    if (!inputAmount || typeof inputAmount !== 'string') {
       res.status(400).json({
         error:
-          'inputAmountUi is required and must be a string representing the UI amount of AUDIO'
+          'inputAmount is required and must be a string representing the big int number amount of input token'
       })
       return
     }
@@ -69,12 +62,25 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
+    if (feePayer && typeof feePayer !== 'string') {
+      res.status(400).json({
+        error: 'feePayer must be a valid public key'
+      })
+      return
+    }
+
     // Validate public keys
     let coinMintPubkey: PublicKey
     let userPubkey: PublicKey
+    let feePayerPubkey: PublicKey | undefined
     try {
       coinMintPubkey = new PublicKey(coinMint)
       userPubkey = new PublicKey(userPublicKey)
+      if (feePayer) {
+        feePayerPubkey = new PublicKey(feePayer)
+      } else {
+        feePayerPubkey = userPubkey
+      }
     } catch (e) {
       res.status(400).json({
         error: 'outputMint and userPublicKey must be valid Solana public keys'
@@ -83,13 +89,11 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Convert UI amount to bigint
-    const inputAmountBN = new BN(
-      Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
-    )
+    const inputAmountBN = new BN(inputAmount)
 
     if (inputAmountBN.lte(new BN(0))) {
       res.status(400).json({
-        error: 'inputAmountUi must be greater than 0'
+        error: 'inputAmount must be greater than 0'
       })
       return
     }
@@ -140,28 +144,10 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
       swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
       pool: dbcPool.publicKey,
       referralTokenAccount: null,
-      payer: userPubkey
+      payer: feePayerPubkey
     })
 
-    // Get a random fee payer
-    if (isExternalWallet) {
-      swapTx.feePayer = userPubkey
-    } else {
-      if (
-        !config.solanaFeePayerWallets ||
-        config.solanaFeePayerWallets.length === 0
-      ) {
-        res.status(500).json({
-          error: 'Relayer fee payer not configured.'
-        })
-        return
-      }
-      const index = Math.floor(
-        Math.random() * config.solanaFeePayerWallets.length
-      )
-      swapTx.feePayer = config.solanaFeePayerWallets[index].publicKey
-    }
-
+    swapTx.feePayer = feePayerPubkey
     swapTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
 
     // Serialize the transaction
