@@ -511,7 +511,6 @@ export const getCoinPoolState = (
     }
   }
   const coinInfo = queryClient.getQueryData(getArtistCoinQueryKey(mint))
-  console.log('coinInfo', coinInfo)
   return {
     isDBC: coinInfo?.dynamicBondingCurve?.isMigrated === false,
     isDAMM: coinInfo?.dynamicBondingCurve?.isMigrated === true
