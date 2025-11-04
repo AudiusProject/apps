@@ -1,6 +1,6 @@
 {
   "name": "@audius/sdk-legacy",
-  "version": "6.0.12",
+  "version": "6.0.13",
   "audius": {
     "releaseSHA": "f1d70a2a0643c5c84d8ab053f70c1e0a2ec3ad49"
   },
@@ -42,9 +42,9 @@
     "prepack": "turbo run build"
   },
   "dependencies": {
-    "@audius/fixed-decimal": "0.2.0",
+    "@audius/fixed-decimal": "0.2.1",
     "@audius/hedgehog": "3.0.0-alpha.1",
-    "@audius/sdk": "11.1.1",
+    "@audius/sdk": "11.1.2",
     "@audius/spl": "2.1.0",
     "@babel/core": "^7.23.7",
     "@babel/plugin-proposal-class-static-block": "7.21.0",
