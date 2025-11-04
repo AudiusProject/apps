@@ -93,8 +93,8 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       outputMint: outputMintAddress,
       amountUi: inputAmount,
       slippageBps: SLIPPAGE_BPS,
-      inputDecimals: baseCoin?.decimals,
-      outputDecimals: quoteCoin?.decimals
+      inputDecimals: baseCoin?.decimals ?? 0,
+      outputDecimals: quoteCoin?.decimals ?? 0
     })
   }
 
