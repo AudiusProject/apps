@@ -41,6 +41,19 @@ vi.mock('@audius/common/hooks', async () => {
   }
 })
 
+// Mock appkitModal
+vi.mock('app/ReownAppKitModal', async () => {
+  const actual = await vi.importActual<typeof import('app/ReownAppKitModal')>(
+    'app/ReownAppKitModal'
+  )
+  return {
+    ...actual,
+    appkitModal: {
+      getAccount: vi.fn(() => ({ address: '0xMockWalletAddress' }))
+    }
+  }
+})
+
 const { apiEndpoint } = developmentConfig.network
 
 // TODO: move these into a fixtures folder setup
@@ -130,19 +143,119 @@ const mockData = {
   userCoins: {
     data: [
       {
+        name: 'Test Coin',
+        ticker: 'TEST',
         mint: 'test-mint-123',
-        owner_id: artistUser.id, // Using the nonArtistUser.id
-        balance: '100',
-        ticker: 'TEST'
+        decimals: 9,
+        owner_id: artistUser.id,
+        logo_uri: 'https://example.com/logo.png',
+        has_discord: false,
+        created_at: '2024-01-01T00:00:00.000Z',
+        marketCap: 1000000,
+        fdv: 1000000,
+        liquidity: 50000,
+        lastTradeUnixTime: Date.now() / 1000,
+        lastTradeHumanTime: new Date().toISOString(),
+        price: 1.0,
+        history24hPrice: 1.0,
+        priceChange24hPercent: 0,
+        uniqueWallet24h: 10,
+        uniqueWalletHistory24h: 10,
+        uniqueWallet24hChangePercent: 0,
+        totalSupply: 1000000000,
+        circulatingSupply: 1000000000,
+        holder: 100,
+        trade24h: 50,
+        tradeHistory24h: 50,
+        sell24h: 25,
+        buy24h: 25,
+        v24h: 50000,
+        v24hUSD: 50000,
+        buyHistory24h: 25,
+        sellHistory24h: 25,
+        vHistory24h: 50000,
+        vHistory24hUSD: 50000,
+        trade24hChangePercent: 0,
+        sell24hChangePercent: 0,
+        buy24hChangePercent: 0,
+        v24hChangePercent: 0,
+        vBuy24h: 25000,
+        vBuy24hUSD: 25000,
+        vBuyHistory24h: 25000,
+        vBuyHistory24hUSD: 25000,
+        vSell24h: 25000,
+        vSell24hUSD: 25000,
+        vSellHistory24h: 25000,
+        vSellHistory24hUSD: 25000,
+        volumeBuyUSD: 25000,
+        volumeSellUSD: 25000,
+        totalTrade: 1000,
+        buy: 500,
+        sell: 500,
+        dynamicBondingCurve: {
+          isMigrated: false,
+          priceUSD: 1.0,
+          address: 'test-mint-123'
+        }
       }
     ]
   },
   artistCoin: {
     data: {
+      name: 'Test Coin',
       ticker: 'TEST',
       mint: 'test-mint-123',
+      decimals: 9,
+      owner_id: artistUser.id,
       logo_uri: 'https://example.com/logo.png',
-      owner_id: artistUser.id
+      has_discord: false,
+      created_at: '2024-01-01T00:00:00.000Z',
+      marketCap: 1000000,
+      fdv: 1000000,
+      liquidity: 50000,
+      lastTradeUnixTime: Date.now() / 1000,
+      lastTradeHumanTime: new Date().toISOString(),
+      price: 1.0,
+      history24hPrice: 1.0,
+      priceChange24hPercent: 0,
+      uniqueWallet24h: 10,
+      uniqueWalletHistory24h: 10,
+      uniqueWallet24hChangePercent: 0,
+      totalSupply: 1000000000,
+      circulatingSupply: 1000000000,
+      holder: 100,
+      trade24h: 50,
+      tradeHistory24h: 50,
+      sell24h: 25,
+      buy24h: 25,
+      v24h: 50000,
+      v24hUSD: 50000,
+      buyHistory24h: 25,
+      sellHistory24h: 25,
+      vHistory24h: 50000,
+      vHistory24hUSD: 50000,
+      trade24hChangePercent: 0,
+      sell24hChangePercent: 0,
+      buy24hChangePercent: 0,
+      v24hChangePercent: 0,
+      vBuy24h: 25000,
+      vBuy24hUSD: 25000,
+      vBuyHistory24h: 25000,
+      vBuyHistory24hUSD: 25000,
+      vSell24h: 25000,
+      vSell24hUSD: 25000,
+      vSellHistory24h: 25000,
+      vSellHistory24hUSD: 25000,
+      volumeBuyUSD: 25000,
+      volumeSellUSD: 25000,
+      totalTrade: 1000,
+      buy: 500,
+      sell: 500,
+      dynamicBondingCurve: {
+        isMigrated: false,
+        priceUSD: 1.0,
+        address: 'test-mint-123'
+      }
     }
   }
 }
@@ -190,8 +303,26 @@ export function renderProfilePage(overrides = {}, options?: RenderOptions) {
     http.get(`${apiEndpoint}/v1/events/entity`, () => {
       return HttpResponse.json(mockData.events)
     }),
-    // User coins API
-    http.get(`${apiEndpoint}/v1/coins`, () => {
+    // User coins API - handle ownerId query parameter
+    http.get(`${apiEndpoint}/v1/coins`, ({ request }) => {
+      const url = new URL(request.url)
+      const ownerIdParam = url.searchParams.get('ownerId')
+      const ownerIdArrayParam = url.searchParams.get('owner_id')
+
+      // Check both ownerId and owner_id parameters
+      const ownerParam = ownerIdParam || ownerIdArrayParam
+
+      // If querying by ownerId, check if it matches the artist user
+      if (ownerParam) {
+        // For the artist user who owns a coin, return the coins list
+        if (ownerParam.includes(artistUser.id)) {
+          return HttpResponse.json(mockData.userCoins)
+        }
+        // For non-artist users, return empty list
+        return HttpResponse.json({ data: [] })
+      }
+
+      // Default: return all coins (for pagination queries)
       return HttpResponse.json(mockData.userCoins)
     }),
     // Artist coin API
