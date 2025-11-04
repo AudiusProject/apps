@@ -171,10 +171,6 @@ export const getIndirectQuoteViaAudio = async (
         maxAccounts: MAX_ALLOWED_ACCOUNTS
       })
     } catch (error) {
-      console.log(
-        'Failed to get jupiter quote, using Meteora DBC',
-        params.amountUi
-      )
       firstQuote = await getQuoteViaMeteoraDBC(
         {
           inputMint: params.inputMint,
@@ -206,14 +202,6 @@ export const getIndirectQuoteViaAudio = async (
         maxAccounts: MAX_ALLOWED_ACCOUNTS
       })
     } catch (error) {
-      console.log({
-        inputMint: AUDIO_MINT,
-        outputMint: params.outputMint,
-        inputDecimals: AUDIO_DECIMALS,
-        outputDecimals: params.outputDecimals,
-        amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
-        swapMode: params.swapMode ?? 'ExactIn'
-      })
       secondQuote = await getQuoteViaMeteoraDBC(
         {
           inputMint: AUDIO_MINT,
@@ -386,7 +374,6 @@ export const useCoinExchangeRate = (
         // Direct route failed, try indirect route via AUDIO
         try {
           const sdk = await audiusSdk()
-          console.log('Getting indirect quote via AUDIO')
           return await getIndirectQuoteViaAudio(
             {
               inputMint: params.inputMint,
