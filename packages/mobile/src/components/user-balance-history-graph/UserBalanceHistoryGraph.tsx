@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import { walletMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
@@ -8,10 +9,7 @@ import type { lineDataItem } from 'react-native-gifted-charts'
 import { Flex, Paper, Text, useTheme } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 
-const messages = {
-  loading: 'Loading balance history...',
-  error: 'Unable to load balance history'
-}
+const messages = walletMessages.balanceHistory
 
 type UserBalanceHistoryGraphProps = {
   userId?: ID
@@ -130,7 +128,7 @@ export const UserBalanceHistoryGraph = ({
         style={{ minHeight: height }}
       >
         <LoadingSpinner />
-        <Text variant='body' size='s' strength='weak'>
+        <Text variant='body' size='s'>
           {messages.loading}
         </Text>
       </Flex>
@@ -144,7 +142,7 @@ export const UserBalanceHistoryGraph = ({
         justifyContent='center'
         style={{ minHeight: height }}
       >
-        <Text variant='body' size='m' strength='weak' color='danger'>
+        <Text variant='body' size='m' color='danger'>
           {messages.error}
         </Text>
       </Flex>
