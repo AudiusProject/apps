@@ -1,4 +1,5 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
+import { AudiusSdk } from '@audius/sdk'
 import { SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
@@ -7,6 +8,7 @@ import {
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
 import {
+  Keypair,
   PublicKey,
   TransactionInstruction,
   VersionedTransaction
@@ -64,6 +66,216 @@ export interface SwapExecutionResult {
   }
 }
 
+// Unlike other methods, this can go either way but one of the mints must be AUDIO
+async function executeMeteoraSwap(
+  tokenMint: string, // Mint address of the token we're swapping (the one not AUDIO)
+  swapDirection: 'audioToCoin' | 'coinToAudio',
+  inputAmountUi: number,
+  dependencies: {
+    sdk: AudiusSdk
+    userPublicKey: PublicKey
+    keypair: Keypair
+    ethAddress: string
+    feePayer: PublicKey
+    tokens: Record<string, CoinInfo>
+  }
+): Promise<SwapWithMeteoraDBCResult> {
+  const { sdk, userPublicKey, keypair, ethAddress, feePayer, tokens } =
+    dependencies
+  const instructions: TransactionInstruction[] = []
+
+  try {
+    const tokenConfigsResult = validateAndCreateTokenConfigs(
+      tokenMint,
+      AUDIO_MINT,
+      tokens
+    )
+
+    if ('error' in tokenConfigsResult) {
+      throw new Error(
+        `Output token validation failed: ${tokenConfigsResult.error.error?.message}`
+      )
+    }
+
+    // Which token are we swapping to? Artist coin for buys, audio for sells
+    const inputTokenInfo =
+      swapDirection === 'audioToCoin'
+        ? tokenConfigsResult.outputTokenConfig // audio
+        : tokenConfigsResult.inputTokenConfig // artist coin
+    const outputTokenInfo =
+      swapDirection === 'audioToCoin'
+        ? tokenConfigsResult.inputTokenConfig // artist coin
+        : tokenConfigsResult.outputTokenConfig // audio
+    const inputTokenDecimals =
+      swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
+    const inputAmountFD = new FixedDecimal(inputAmountUi, inputTokenDecimals)
+
+    // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
+    const inputTokenAta = await addTransferFromUserBankInstructions({
+      tokenInfo: inputTokenInfo,
+      userPublicKey,
+      ethAddress: ethAddress!,
+      amountLamports: BigInt(inputAmountFD.value),
+      sdk,
+      feePayer,
+      instructions
+    })
+
+    // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, artist coin for sells)
+    const userBankResult =
+      await sdk.services.claimableTokensClient.getOrCreateUserBank({
+        ethWallet: ethAddress,
+        mint: outputTokenInfo.claimableTokenMint
+      })
+    const destinationUserbank = userBankResult.userBank.toBase58()
+
+    // Get the address for a temporary token account
+    const tempOutputTokenAta = getAssociatedTokenAddressSync(
+      new PublicKey(outputTokenInfo.mintAddress),
+      userPublicKey,
+      true
+    )
+
+    // Create the temporary token account for our artist coin
+    instructions.push(
+      createAssociatedTokenAccountIdempotentInstruction(
+        feePayer,
+        tempOutputTokenAta,
+        userPublicKey,
+        new PublicKey(outputTokenInfo.mintAddress)
+      )
+    )
+
+    // Get dbc swap transaction
+    const { transaction, outputAmount } =
+      await sdk.services.solanaRelay.swapCoin({
+        inputAmount: inputAmountFD.value.toString(),
+        coinMint: tokenMint,
+        swapDirection,
+        userPublicKey,
+        feePayer
+      })
+    const swapTx = VersionedTransaction.deserialize(
+      Buffer.from(transaction, 'base64')
+    )
+
+    // Create a new transaction that combines our setup instructions with the swap instructions
+    const connection = sdk.services.solanaClient.connection
+
+    // Decompose the swap transaction to extract the DBC swap instruction
+    const swapMessage = swapTx.message
+    const accountKeys = swapMessage.staticAccountKeys
+
+    // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
+    // We only need the DBC swap instruction - so we find it by it's program ID
+    const dbcCompiledInstruction = swapMessage.compiledInstructions.find(
+      (ix) => accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID
+    )
+
+    if (!dbcCompiledInstruction) {
+      throw new Error('DBC swap instruction not found in transaction')
+    }
+
+    const dbcSwapInstruction: TransactionInstruction = {
+      programId: accountKeys[dbcCompiledInstruction.programIdIndex],
+      keys: dbcCompiledInstruction.accountKeyIndexes.map((index) => ({
+        pubkey: accountKeys[index],
+        isSigner: swapMessage.isAccountSigner(index),
+        isWritable: swapMessage.isAccountWritable(index)
+      })),
+      data: Buffer.from(dbcCompiledInstruction.data)
+    }
+
+    // Add the DBC swap instruction
+    instructions.push(dbcSwapInstruction)
+
+    // Transfer the output tokens from the temporary output token account to end user's user bank
+    instructions.push(
+      createTransferInstruction(
+        tempOutputTokenAta,
+        new PublicKey(destinationUserbank),
+        userPublicKey,
+        BigInt(outputAmount)
+      )
+    )
+
+    // Resolve address lookup table accounts if present
+    const lookupTableAccounts = await Promise.all(
+      swapMessage.addressTableLookups.map(async (lookup) => {
+        const result = await connection.getAddressLookupTable(lookup.accountKey)
+        return result.value
+      })
+    )
+    const validLookupTableAccounts = lookupTableAccounts
+      .filter(
+        (account): account is NonNullable<typeof account> => account !== null
+      )
+      .map((account) => account.key.toBase58())
+
+    // Close the created ATA accounts (both input and output tokens)
+    const atasToClose: PublicKey[] = [inputTokenAta, tempOutputTokenAta]
+
+    for (const ataToClose of atasToClose) {
+      instructions.push(
+        createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+      )
+    }
+
+    // Build and send transaction
+    const signature = await buildAndSendTransaction(
+      sdk,
+      keypair,
+      feePayer,
+      instructions,
+      validLookupTableAccounts
+    )
+
+    return {
+      signature,
+      status: SwapStatus.SUCCESS,
+      firstQuote: {
+        outputAmount: {
+          uiAmount: Number(
+            new FixedDecimal(
+              BigInt(outputAmount),
+              outputTokenInfo.decimals
+            ).toString()
+          )
+        }
+      },
+      secondQuote: {
+        outputAmount: {
+          uiAmount: Number(
+            new FixedDecimal(
+              BigInt(outputAmount),
+              outputTokenInfo.decimals
+            ).toString()
+          )
+        }
+      },
+      intermediateAudioAta: new PublicKey(destinationUserbank),
+      inputAmount: {
+        amount: Number(inputAmountFD.value),
+        uiAmount: inputAmountUi
+      },
+      outputAmount: {
+        amount: Number(
+          new FixedDecimal(outputAmount, outputTokenInfo.decimals).value
+        ),
+        uiAmount: Number(
+          new FixedDecimal(
+            BigInt(outputAmount),
+            outputTokenInfo.decimals
+          ).toString()
+        )
+      }
+    }
+  } catch (error: unknown) {
+    throw new Error(
+      `Meteora DBC swap failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+}
 export abstract class BaseSwapExecutor {
   protected dependencies: SwapDependencies
   protected tokens: Record<string, CoinInfo>
@@ -129,6 +341,29 @@ export abstract class BaseSwapExecutor {
 
 export class DirectSwapExecutor extends BaseSwapExecutor {
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
+    const { isDBC: isInputDBC } = getCoinPoolState(
+      params.inputMint,
+      this.dependencies.queryClient
+    )
+    const { isDBC: isOutputDBC } = getCoinPoolState(
+      params.outputMint,
+      this.dependencies.queryClient
+    )
+    if (isInputDBC || isOutputDBC) {
+      const swapDirection = isInputDBC ? 'coinToAudio' : 'audioToCoin'
+      return await executeMeteoraSwap(
+        swapDirection === 'coinToAudio' ? params.inputMint : params.outputMint,
+        swapDirection,
+        params.amountUi,
+        { ...this.dependencies, tokens: this.tokens }
+      )
+    }
+    return await this.executeDirectJupiterSwap(params)
+  }
+
+  async executeDirectJupiterSwap(
+    params: SwapTokensParams
+  ): Promise<SwapExecutionResult> {
     let errorStage = 'DIRECT_SWAP_UNKNOWN'
 
     try {
@@ -278,6 +513,7 @@ export interface IndirectSwapToAudioResult {
 }
 
 export interface SwapWithMeteoraDBCResult {
+  status: SwapStatus
   firstQuote: {
     outputAmount: {
       uiAmount: number
@@ -318,10 +554,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         return await this.executeJupiterSwapToAudio(params)
       }
       const swapToAudioWithMeteora = async () => {
-        return await this.executeMeteoraSwap(
+        return await executeMeteoraSwap(
           params.inputMint,
           'coinToAudio',
-          params.amountUi
+          params.amountUi,
+          { ...this.dependencies, tokens: this.tokens }
         )
       }
       const { isDBC: isInputDBC } = getCoinPoolState(
@@ -371,10 +608,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       const swapToTokenWithJupiter = async () =>
         await this.executeJupiterSwapToToken(params, swapToAudioResult)
       const swapToTokenWithMeteora = async () =>
-        await this.executeMeteoraSwap(
+        await executeMeteoraSwap(
           params.outputMint,
           'audioToCoin',
-          swapToAudioResult.firstQuote.outputAmount.uiAmount
+          swapToAudioResult.firstQuote.outputAmount.uiAmount,
+          { ...this.dependencies, tokens: this.tokens }
         )
 
       let swapToTokenResult = await this.retryPolicy.executeWithRetry(
@@ -558,211 +796,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     } catch (error: unknown) {
       throw new Error(
         `Indirect swap step 1 failed at stage ${errorStage}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  // Unlike other methods, this can go either way but one of the mints must be AUDIO
-  async executeMeteoraSwap(
-    tokenMint: string, // Mint address of the token we're swapping (the one not AUDIO)
-    swapDirection: 'audioToCoin' | 'coinToAudio',
-    inputAmountUi: number
-  ): Promise<SwapWithMeteoraDBCResult> {
-    const { sdk, userPublicKey, keypair, ethAddress, feePayer } =
-      this.dependencies
-
-    const instructions: TransactionInstruction[] = []
-
-    try {
-      const tokenConfigsResult = validateAndCreateTokenConfigs(
-        tokenMint,
-        AUDIO_MINT,
-        this.tokens
-      )
-
-      if ('error' in tokenConfigsResult) {
-        throw new Error(
-          `Output token validation failed: ${tokenConfigsResult.error.error?.message}`
-        )
-      }
-
-      // Which token are we swapping to? Artist coin for buys, audio for sells
-      const inputTokenInfo =
-        swapDirection === 'audioToCoin'
-          ? tokenConfigsResult.outputTokenConfig // audio
-          : tokenConfigsResult.inputTokenConfig // artist coin
-      const outputTokenInfo =
-        swapDirection === 'audioToCoin'
-          ? tokenConfigsResult.inputTokenConfig // artist coin
-          : tokenConfigsResult.outputTokenConfig // audio
-      const inputTokenDecimals =
-        swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
-      const inputAmountFD = new FixedDecimal(inputAmountUi, inputTokenDecimals)
-
-      // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
-      const inputTokenAta = await addTransferFromUserBankInstructions({
-        tokenInfo: inputTokenInfo,
-        userPublicKey,
-        ethAddress: ethAddress!,
-        amountLamports: BigInt(inputAmountFD.value),
-        sdk,
-        feePayer,
-        instructions
-      })
-
-      // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, artist coin for sells)
-      const userBankResult =
-        await sdk.services.claimableTokensClient.getOrCreateUserBank({
-          ethWallet: ethAddress,
-          mint: outputTokenInfo.claimableTokenMint
-        })
-      const destinationUserbank = userBankResult.userBank.toBase58()
-
-      // Get the address for a temporary token account
-      const tempOutputTokenAta = getAssociatedTokenAddressSync(
-        new PublicKey(outputTokenInfo.mintAddress),
-        userPublicKey,
-        true
-      )
-
-      // Create the temporary token account for our artist coin
-      instructions.push(
-        createAssociatedTokenAccountIdempotentInstruction(
-          feePayer,
-          tempOutputTokenAta,
-          userPublicKey,
-          new PublicKey(outputTokenInfo.mintAddress)
-        )
-      )
-
-      // Get dbc swap transaction
-      const { transaction, outputAmount } =
-        await sdk.services.solanaRelay.swapCoin({
-          inputAmount: inputAmountFD.value.toString(),
-          coinMint: tokenMint,
-          swapDirection,
-          userPublicKey,
-          feePayer
-        })
-      const swapTx = VersionedTransaction.deserialize(
-        Buffer.from(transaction, 'base64')
-      )
-
-      // Create a new transaction that combines our setup instructions with the swap instructions
-      const connection = sdk.services.solanaClient.connection
-
-      // Decompose the swap transaction to extract the DBC swap instruction
-      const swapMessage = swapTx.message
-      const accountKeys = swapMessage.staticAccountKeys
-
-      // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
-      // We only need the DBC swap instruction - so we find it by it's program ID
-      const dbcCompiledInstruction = swapMessage.compiledInstructions.find(
-        (ix) => accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID
-      )
-
-      if (!dbcCompiledInstruction) {
-        throw new Error('DBC swap instruction not found in transaction')
-      }
-
-      const dbcSwapInstruction: TransactionInstruction = {
-        programId: accountKeys[dbcCompiledInstruction.programIdIndex],
-        keys: dbcCompiledInstruction.accountKeyIndexes.map((index) => ({
-          pubkey: accountKeys[index],
-          isSigner: swapMessage.isAccountSigner(index),
-          isWritable: swapMessage.isAccountWritable(index)
-        })),
-        data: Buffer.from(dbcCompiledInstruction.data)
-      }
-
-      // Add the DBC swap instruction
-      instructions.push(dbcSwapInstruction)
-
-      // Transfer the output tokens from the temporary output token account to end user's user bank
-      instructions.push(
-        createTransferInstruction(
-          tempOutputTokenAta,
-          new PublicKey(destinationUserbank),
-          userPublicKey,
-          BigInt(outputAmount)
-        )
-      )
-
-      // Resolve address lookup table accounts if present
-      const lookupTableAccounts = await Promise.all(
-        swapMessage.addressTableLookups.map(async (lookup) => {
-          const result = await connection.getAddressLookupTable(
-            lookup.accountKey
-          )
-          return result.value
-        })
-      )
-      const validLookupTableAccounts = lookupTableAccounts
-        .filter(
-          (account): account is NonNullable<typeof account> => account !== null
-        )
-        .map((account) => account.key.toBase58())
-
-      // Close the created ATA accounts (both input and output tokens)
-      const atasToClose: PublicKey[] = [inputTokenAta, tempOutputTokenAta]
-
-      for (const ataToClose of atasToClose) {
-        instructions.push(
-          createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
-        )
-      }
-
-      // Build and send transaction
-      const signature = await buildAndSendTransaction(
-        sdk,
-        keypair,
-        feePayer,
-        instructions,
-        validLookupTableAccounts
-      )
-
-      return {
-        signature,
-        firstQuote: {
-          outputAmount: {
-            uiAmount: Number(
-              new FixedDecimal(
-                BigInt(outputAmount),
-                outputTokenInfo.decimals
-              ).toString()
-            )
-          }
-        },
-        secondQuote: {
-          outputAmount: {
-            uiAmount: Number(
-              new FixedDecimal(
-                BigInt(outputAmount),
-                outputTokenInfo.decimals
-              ).toString()
-            )
-          }
-        },
-        intermediateAudioAta: new PublicKey(destinationUserbank),
-        inputAmount: {
-          amount: Number(inputAmountFD.value),
-          uiAmount: inputAmountUi
-        },
-        outputAmount: {
-          amount: Number(
-            new FixedDecimal(outputAmount, outputTokenInfo.decimals).value
-          ),
-          uiAmount: Number(
-            new FixedDecimal(
-              BigInt(outputAmount),
-              outputTokenInfo.decimals
-            ).toString()
-          )
-        }
-      }
-    } catch (error: unknown) {
-      throw new Error(
-        `Meteora DBC swap failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
