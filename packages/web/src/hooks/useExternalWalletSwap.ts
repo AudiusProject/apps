@@ -362,10 +362,17 @@ export const useExternalWalletSwap = () => {
         // Check if swap involves artist coins
         const isInputArtistCoin = isArtistCoinMint(inputMint)
         const isOutputArtistCoin = isArtistCoinMint(outputMint)
+        const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
+        const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
 
-        if (isInputArtistCoin || isOutputArtistCoin) {
-          // Use Meteora for artist coin swaps
-          // Meteora only supports swaps between AUDIO and artist coins
+        // Use Meteora for direct swaps between AUDIO and artist coins
+        // For artist-coin to artist-coin, we need an indirect swap through AUDIO
+        const isDirectMeteoraSwap =
+          (isInputArtistCoin && isOutputAudio) ||
+          (isInputAudio && isOutputArtistCoin)
+
+        if (isDirectMeteoraSwap) {
+          // Direct Meteora swap: AUDIO ↔ artist-coin
           const meteoraResult = await getMeteoraSwapTx({
             inputMint,
             outputMint,
@@ -384,6 +391,27 @@ export const useExternalWalletSwap = () => {
           transaction = meteoraResult.transaction
           inputAmount = meteoraResult.inputAmount
           outputAmount = meteoraResult.outputAmount
+        } else if (isInputArtistCoin || isOutputArtistCoin) {
+          // Indirect swap through AUDIO (artist-coin → AUDIO → artist-coin, or artist-coin → AUDIO → other token)
+          const indirectResult = await getIndirectSwapTx({
+            inputMint,
+            outputMint,
+            audioMint: env.WAUDIO_MINT_ADDRESS,
+            inputDecimals,
+            outputDecimals,
+            audioDecimals: TOKEN_LISTING_MAP.AUDIO.decimals,
+            amountUi,
+            walletAddress,
+            solanaConnection: sdk.services.solanaClient.connection,
+            solanaRelay: sdk.services.solanaRelay
+          })
+
+          hookProgress.receivedQuote = true
+          hookProgress.receivedSwapTx = true
+
+          transaction = indirectResult.transaction
+          inputAmount = indirectResult.inputAmount
+          outputAmount = indirectResult.outputAmount
         } else {
           // Use Jupiter for non-artist coin swaps
           // Try direct swap first, fall back to indirect swap through AUDIO if it fails
