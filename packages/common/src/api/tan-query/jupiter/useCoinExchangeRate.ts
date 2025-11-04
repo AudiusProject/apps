@@ -113,7 +113,10 @@ export const getDirectQuote = async (params: {
     slippageBps: SLIPPAGE_BPS,
     swapMode: params.swapMode ?? 'ExactIn',
     onlyDirectRoutes: false,
-    maxAccounts: MAX_ALLOWED_ACCOUNTS
+    maxAccounts: MAX_ALLOWED_ACCOUNTS,
+    taker: undefined,
+    payer: undefined,
+    closeAuthority: undefined
   })
 
   const rate = calculateExchangeRate(
@@ -153,7 +156,10 @@ export const getIndirectQuoteViaAudio = async (params: {
     slippageBps: SLIPPAGE_BPS,
     swapMode: params.swapMode ?? 'ExactIn',
     onlyDirectRoutes: false,
-    maxAccounts: MAX_ALLOWED_ACCOUNTS
+    maxAccounts: MAX_ALLOWED_ACCOUNTS,
+    taker: undefined,
+    payer: undefined,
+    closeAuthority: undefined
   })
 
   // Get second quote: AUDIO -> OutputToken
@@ -166,7 +172,10 @@ export const getIndirectQuoteViaAudio = async (params: {
     slippageBps: SLIPPAGE_BPS,
     swapMode: params.swapMode ?? 'ExactIn',
     onlyDirectRoutes: false,
-    maxAccounts: MAX_ALLOWED_ACCOUNTS
+    maxAccounts: MAX_ALLOWED_ACCOUNTS,
+    taker: undefined,
+    payer: undefined,
+    closeAuthority: undefined
   })
 
   // Calculate combined exchange rate

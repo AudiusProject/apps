@@ -165,7 +165,9 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         amountUi,
         swapMode: 'ExactIn',
         onlyDirectRoutes: false,
-        taker: userPublicKey.toBase58()
+        taker: userPublicKey.toBase58(),
+        payer: feePayer.toBase58(),
+        closeAuthority: feePayer.toBase58()
       })
 
       // Prepare input token
@@ -223,7 +225,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         ethAddress: ethAddress!,
         sourceAta: userOutputAta,
         sdk,
-        feePayer,
         instructions: transferInstructions
       })
 
@@ -421,7 +422,9 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         amountUi,
         swapMode: 'ExactIn',
         onlyDirectRoutes: false,
-        taker: userPublicKey.toBase58()
+        taker: userPublicKey.toBase58(),
+        payer: feePayer.toBase58(),
+        closeAuthority: feePayer.toBase58()
       })
 
       // Prepare input token
@@ -607,7 +610,9 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           amountUi: amountToSwap,
           swapMode: 'ExactIn',
           onlyDirectRoutes: false,
-          taker: userPublicKey.toBase58()
+          taker: userPublicKey.toBase58(),
+          payer: feePayer.toBase58(),
+          closeAuthority: feePayer.toBase58()
         }
       )
 
@@ -668,7 +673,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         ethAddress: ethAddress!,
         sourceAta: userFinalOutputAta,
         sdk,
-        feePayer,
         instructions: finalTransferInstructions
       })
 

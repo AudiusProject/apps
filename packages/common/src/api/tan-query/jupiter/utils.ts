@@ -107,7 +107,6 @@ export async function addTransferToUserBankInstructions({
   ethAddress,
   sourceAta,
   sdk,
-  feePayer,
   instructions
 }: {
   tokenInfo: UserBankManagedTokenInfo
@@ -115,7 +114,6 @@ export async function addTransferToUserBankInstructions({
   ethAddress: string
   sourceAta: PublicKey
   sdk: AudiusSdk
-  feePayer: PublicKey
   instructions: TransactionInstruction[]
 }): Promise<PublicKey> {
   const mint = new PublicKey(tokenInfo.mintAddress)

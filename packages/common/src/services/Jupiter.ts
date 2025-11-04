@@ -19,6 +19,13 @@ export const DEFAULT_MAX_ACCOUNTS = 20
 export const MAX_ALLOWED_ACCOUNTS = 64
 const ULTRA_BASE_URL = 'https://jup.audius.co/ultra/v1'
 
+// Audius referral account for Jupiter Ultra fees
+const AUDIUS_REFERRAL_ACCOUNT = '7E15cKRzTfQ4is9eNwPfLgfpZUFnWomj2Zyv9txPMA8a'
+// SOL mint address for collecting referral fees
+const SOL_MINT = 'So11111111111111111111111111111111111111112'
+// Referral fee in basis points
+const AUDIUS_REFERRAL_FEE = 50
+
 // Ultra API types
 export type SwapMode = 'ExactIn' | 'ExactOut'
 
@@ -37,6 +44,7 @@ export interface UltraOrderResponse extends QuoteResponse {
   mode: string
   transaction?: string
   requestId?: string
+  feeMint?: string
 }
 
 export interface UltraExecuteRequest {
@@ -71,6 +79,11 @@ export type JupiterMintQuoteParams = {
   onlyDirectRoutes?: boolean
   maxAccounts?: number
   taker?: string // User's wallet address for transaction execution
+  payer?: string // Transaction fee payer
+  closeAuthority?: string // Authority for closing accounts
+  referralAccount?: string // Referral account for collecting fees
+  referralMint?: string // Mint address for collecting referral fees
+  referralFee?: number // Referral fee in basis points (50-255)
 }
 
 export type JupiterQuoteResult = {
@@ -111,7 +124,12 @@ export const getJupiterQuoteByMint = async ({
   swapMode = 'ExactIn',
   onlyDirectRoutes = false,
   maxAccounts = DEFAULT_MAX_ACCOUNTS,
-  taker
+  taker,
+  payer,
+  closeAuthority,
+  referralAccount,
+  referralMint,
+  referralFee
 }: JupiterMintQuoteParams): Promise<JupiterQuoteResult> => {
   const amount =
     swapMode === 'ExactIn'
@@ -127,7 +145,12 @@ export const getJupiterQuoteByMint = async ({
     swapMode,
     calculatedAmount: amount,
     amountAsString: amount.toString(),
-    taker
+    taker,
+    payer,
+    closeAuthority,
+    referralAccount,
+    referralMint,
+    referralFee
   })
 
   // Build query parameters for Ultra API
@@ -139,7 +162,12 @@ export const getJupiterQuoteByMint = async ({
     ...(slippageBps && { slippageBps: slippageBps.toString() }),
     ...(onlyDirectRoutes && { onlyDirectRoutes: 'true' }),
     ...(maxAccounts && { maxAccounts: maxAccounts.toString() }),
-    ...(taker && { taker })
+    ...(taker && { taker }),
+    ...(payer && { payer }),
+    ...(closeAuthority && { closeAuthority }),
+    ...(referralAccount && { referralAccount }),
+    ...(referralMint && { referralMint }),
+    ...(referralFee !== undefined && { referralFee: referralFee.toString() })
   })
 
   const url = `${ULTRA_BASE_URL}/order?${params.toString()}`
@@ -217,7 +245,12 @@ export const getJupiterQuoteByMintWithRetry = async ({
   slippageBps,
   swapMode = 'ExactIn',
   onlyDirectRoutes = false,
-  taker
+  taker,
+  payer,
+  closeAuthority,
+  referralAccount = AUDIUS_REFERRAL_ACCOUNT,
+  referralMint = SOL_MINT,
+  referralFee = AUDIUS_REFERRAL_FEE
 }: Omit<
   JupiterMintQuoteParams,
   'maxAccounts'
@@ -237,7 +270,12 @@ export const getJupiterQuoteByMintWithRetry = async ({
         swapMode,
         onlyDirectRoutes,
         maxAccounts: DEFAULT_MAX_ACCOUNTS,
-        taker
+        taker,
+        payer,
+        closeAuthority,
+        referralAccount,
+        referralMint,
+        referralFee
       })
 
       return {
@@ -268,7 +306,8 @@ export const getJupiterQuoteByMintWithRetry = async ({
 export const executeJupiterUltraSwap = async (
   requestId: string,
   userPublicKey: string,
-  signature: string
+  signature: string,
+  feeMint?: string
 ): Promise<UltraExecuteResponse> => {
   const url = `${ULTRA_BASE_URL}/execute`
 
@@ -283,7 +322,8 @@ export const executeJupiterUltraSwap = async (
       body: JSON.stringify({
         requestId,
         userPublicKey,
-        signature
+        signature,
+        ...(feeMint && { feeMint })
       })
     })
 
