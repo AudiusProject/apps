@@ -131,7 +131,9 @@ export const FinishProfilePage = () => {
   const handleSubmit = useCallback(
     ({ coverPhoto, profileImage, displayName }: FinishProfileValues) => {
       dispatch(setValueField('name', displayName))
-      dispatch(setField('profileImage', profileImage))
+      if (profileImage) {
+        dispatch(setField('profileImage', profileImage))
+      }
       if (coverPhoto) {
         dispatch(setField('coverPhoto', coverPhoto))
       }

@@ -8,7 +8,6 @@ import { route } from '@audius/common/utils'
 import {
   Box,
   Button,
-  Divider,
   Flex,
   IconArrowRight,
   IconAudiusLogoHorizontalColor,
@@ -24,34 +23,18 @@ import { useWindowSize } from 'react-use'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import audiusLogoColored from 'assets/img/audiusLogoColored.png'
-import {
-  resetSignOn,
-  setLinkedSocialOnFirstPage,
-  setValueField,
-  startSignUp
-} from 'common/store/pages/signon/actions'
-import {
-  getEmailField,
-  getLinkedSocialOnFirstPage
-} from 'common/store/pages/signon/selectors'
+import { setValueField, startSignUp } from 'common/store/pages/signon/actions'
+import { getEmailField } from 'common/store/pages/signon/selectors'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
-import { SocialMediaLoginOptions } from 'pages/sign-up-page/components/SocialMediaLoginOptions'
 import { identify } from 'services/analytics'
 
 import { ExternalWalletSignUpModal } from '../components/ExternalWalletSignUpModal'
 import { NewEmailField } from '../components/NewEmailField'
-import { SocialMediaLoading } from '../components/SocialMediaLoading'
 import { Heading, Page } from '../components/layout'
-import { useSocialMediaLoader } from '../hooks/useSocialMediaLoader'
 
-const {
-  SIGN_IN_PAGE,
-  SIGN_UP_CREATE_LOGIN_DETAILS,
-  SIGN_UP_PASSWORD_PAGE,
-  SIGN_UP_REVIEW_HANDLE_PAGE
-} = route
+const { SIGN_IN_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 
 const smallDesktopWindowHeight = 900
 
@@ -69,7 +52,6 @@ export const CreateEmailPage = () => {
   const { onOpen: openExternalWalletSignUpModal } =
     useExternalWalletSignUpModal()
   const existingEmailValue = useSelector(getEmailField)
-  const alreadyLinkedSocial = useSelector(getLinkedSocialOnFirstPage)
   const queryContext = useQueryContext()
   const queryClient = useQueryClient()
 
@@ -81,31 +63,6 @@ export const CreateEmailPage = () => {
   const initialValues = {
     email: existingEmailValue.value ?? ''
   }
-
-  const {
-    isWaitingForSocialLogin,
-    handleStartSocialMediaLogin,
-    handleErrorSocialMediaLogin
-  } = useSocialMediaLoader({
-    resetAction: resetSignOn,
-    linkedSocialOnThisPagePreviously: alreadyLinkedSocial,
-    page: 'create-email'
-  })
-
-  const handleCompleteSocialMediaLogin = useCallback(
-    (result: { requiresReview: boolean; handle: string }) => {
-      const { handle, requiresReview } = result
-      dispatch(startSignUp())
-      dispatch(setLinkedSocialOnFirstPage(true))
-      dispatch(setValueField('handle', handle))
-      navigate(
-        requiresReview
-          ? SIGN_UP_REVIEW_HANDLE_PAGE
-          : SIGN_UP_CREATE_LOGIN_DETAILS
-      )
-    },
-    [dispatch, navigate]
-  )
 
   const handleSubmit = useCallback(
     async (values: SignUpEmailValues) => {
@@ -130,9 +87,7 @@ export const CreateEmailPage = () => {
     </TextLink>
   )
 
-  return isWaitingForSocialLogin ? (
-    <SocialMediaLoading />
-  ) : (
+  return (
     <Formik
       initialValues={initialValues}
       onSubmit={handleSubmit}
@@ -164,16 +119,6 @@ export const CreateEmailPage = () => {
           />
           <Flex direction='column' gap='l'>
             <NewEmailField />
-            <Divider>
-              <Text variant='body' size={isMobile ? 's' : 'm'} color='subdued'>
-                {createEmailPageMessages.socialsDividerText}
-              </Text>
-            </Divider>
-            <SocialMediaLoginOptions
-              onError={handleErrorSocialMediaLogin}
-              onStart={handleStartSocialMediaLogin}
-              onCompleteSocialMediaLogin={handleCompleteSocialMediaLogin}
-            />
           </Flex>
           <Flex direction='column' gap='l'>
             <Button
