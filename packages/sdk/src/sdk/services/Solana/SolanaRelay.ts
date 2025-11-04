@@ -1,3 +1,4 @@
+import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   PublicKey,
   SendTransactionError,
@@ -432,8 +433,9 @@ export class SolanaRelay extends BaseAPI {
     const headerParameters: runtime.HTTPHeaders = {
       'Content-Type': 'application/json'
     }
+
     const queryParameters: runtime.HTTPQuery = {
-      inputAmountUi: params.inputAmountUi,
+      inputAmount: params.inputAmount,
       coinMint: params.coinMint,
       swapDirection: params.swapDirection
     }
@@ -470,12 +472,15 @@ export class SolanaRelay extends BaseAPI {
       'Content-Type': 'application/json'
     }
     const queryParameters: runtime.HTTPQuery = {
-      inputAmountUi: params.inputAmountUi,
+      inputAmount: params.inputAmount,
       coinMint: params.coinMint,
       swapDirection: params.swapDirection,
       userPublicKey: params.userPublicKey.toBase58(),
       ...(params.isExternalWallet !== undefined && {
         isExternalWallet: params.isExternalWallet.toString()
+      }),
+      ...(params.feePayer !== undefined && {
+        feePayer: params.feePayer.toBase58()
       })
     }
 

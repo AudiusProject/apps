@@ -1,6 +1,11 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { SwapRequest } from '@jup-ag/api'
-import { createCloseAccountInstruction } from '@solana/spl-token'
+import {
+  createAssociatedTokenAccountIdempotentInstruction,
+  createCloseAccountInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddressSync
+} from '@solana/spl-token'
 import {
   PublicKey,
   TransactionInstruction,
@@ -36,6 +41,8 @@ import {
 
 const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
 const AUDIO_DECIMALS = TOKEN_LISTING_MAP.AUDIO.decimals
+const TOKEN_DECIMALS = 9
+const DBC_PROGRAM_ID = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
 
 export interface SwapExecutionResult {
   status: SwapStatus
@@ -255,7 +262,11 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
 }
 
 export interface IndirectSwapToAudioResult {
-  firstQuote: JupiterQuoteResult
+  firstQuote: {
+    outputAmount: {
+      uiAmount: number
+    }
+  }
   signature: string
   intermediateAudioAta: PublicKey
   inputAmount: {
@@ -265,7 +276,17 @@ export interface IndirectSwapToAudioResult {
 }
 
 export interface SwapWithMeteoraDBCResult {
+  firstQuote: {
+    outputAmount: {
+      uiAmount: number
+    }
+  }
   signature: string
+  intermediateAudioAta: PublicKey
+  inputAmount: {
+    amount: number
+    uiAmount: number
+  }
   outputAmount: {
     amount: number
     uiAmount: number
@@ -287,9 +308,9 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
     try {
       // Execute first transaction with retries: InputToken -> AUDIO
-      const swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
+      let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
         async () => {
-          return await this.executeSwapToAudio(params)
+          return await this.executeJupiterSwapToAudio(params)
         },
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
@@ -298,11 +319,27 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       )
 
       if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
-        return {
-          status: SwapStatus.ERROR,
-          error: {
-            type: SwapErrorType.UNKNOWN,
-            message: `Step 1 failed after ${swapToAudioRetryResult.attemptsMade} attempts: ${swapToAudioRetryResult.error?.message || 'Unknown error'}`
+        swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
+          async () => {
+            return await this.executeMeteoraSwap(
+              params.inputMint,
+              'coinToAudio',
+              params.amountUi,
+              false
+            )
+          },
+          async (_attemptNumber: number) => {
+            // Invalidate queries before retry
+            await this.invalidateQueries()
+          }
+        )
+        if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
+          return {
+            status: SwapStatus.ERROR,
+            error: {
+              type: SwapErrorType.UNKNOWN,
+              message: `Step 1 failed after ${swapToAudioRetryResult.attemptsMade} attempts: ${swapToAudioRetryResult.error?.message || 'Unknown error'}`
+            }
           }
         }
       }
@@ -311,9 +348,9 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Execute second transaction with retries: AUDIO -> OutputToken
       let swapToTokenResult
-      const swapToTokenRetryResult = await this.retryPolicy.executeWithRetry(
+      const swapToTokenJupiterResult = await this.retryPolicy.executeWithRetry(
         async () => {
-          return await this.executeSwapToToken(params, swapToAudioResult)
+          return await this.executeJupiterSwapToToken(params, swapToAudioResult)
         },
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
@@ -321,13 +358,20 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         }
       )
 
-      if (!swapToTokenRetryResult.success || !swapToTokenRetryResult.result) {
+      if (
+        !swapToTokenJupiterResult.success ||
+        !swapToTokenJupiterResult.result
+      ) {
         // If the 2nd swap fails, we fall back to swapping with Meteora DBC
         // This flow could be triggered if Jupiter is having issues finding routes for our coins (due to liquidity issues)
         const swapWithMeteoraDBCRetryResult =
           await this.retryPolicy.executeWithRetry(
             async () => {
-              return await this.executeSwapWithMeteoraDBC(params)
+              return await this.executeMeteoraSwap(
+                params.outputMint,
+                'audioToCoin',
+                swapToAudioResult.firstQuote.outputAmount.uiAmount
+              )
             },
             async (_attemptNumber: number) => {
               // Invalidate queries before retry
@@ -349,7 +393,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           swapToTokenResult = swapWithMeteoraDBCRetryResult.result
         }
       } else {
-        swapToTokenResult = swapToTokenRetryResult.result
+        swapToTokenResult = swapToTokenJupiterResult.result
       }
 
       return {
@@ -369,7 +413,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  async executeSwapToAudio(
+  // Swap from any token -> AUDIO
+  async executeJupiterSwapToAudio(
     params: SwapTokensParams
   ): Promise<IndirectSwapToAudioResult> {
     let errorStage = 'INDIRECT_SWAP_TO_AUDIO_UNKNOWN'
@@ -503,42 +548,196 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  /**
-   *
-   * @param params
-   * @param sdk
-   */
-  async executeSwapWithMeteoraDBC(
-    params: Pick<SwapTokensParams, 'amountUi' | 'outputMint'>
+  // Unlike other methods, this can go either way but one of the mints must be AUDIO
+  async executeMeteoraSwap(
+    tokenMint: string, // Mint address of the token we're swapping (the one not AUDIO)
+    swapDirection: 'audioToCoin' | 'coinToAudio',
+    inputAmountUi: number,
+    deleteOutputTokenAta: boolean = true
   ): Promise<SwapWithMeteoraDBCResult> {
-    const { sdk, userPublicKey, keypair } = this.dependencies
+    const { sdk, userPublicKey, keypair, ethAddress, feePayer } =
+      this.dependencies
+
+    const instructions: TransactionInstruction[] = []
 
     try {
-      console.log('Doing swap with meteora DBC')
-      const { transaction } = await sdk.services.solanaRelay.swapCoin({
-        inputAmountUi: params.amountUi.toString(),
-        outputMint: params.outputMint,
-        userPublicKey
+      const tokenConfigsResult = validateAndCreateTokenConfigs(
+        tokenMint,
+        AUDIO_MINT,
+        this.tokens
+      )
+
+      if ('error' in tokenConfigsResult) {
+        throw new Error(
+          `Output token validation failed: ${tokenConfigsResult.error.error?.message}`
+        )
+      }
+
+      // Which token are we swapping to? Artist coin for buys, audio for sells
+      const inputTokenInfo =
+        swapDirection === 'audioToCoin'
+          ? tokenConfigsResult.outputTokenConfig // audio
+          : tokenConfigsResult.inputTokenConfig // artist coin
+      const outputTokenInfo =
+        swapDirection === 'audioToCoin'
+          ? tokenConfigsResult.inputTokenConfig // artist coin
+          : tokenConfigsResult.outputTokenConfig // audio
+      const inputTokenDecimals =
+        swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
+      const inputAmountFD = new FixedDecimal(inputAmountUi, inputTokenDecimals)
+
+      // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
+      const inputTokenAta = await addTransferFromUserBankInstructions({
+        tokenInfo: inputTokenInfo,
+        userPublicKey,
+        ethAddress: ethAddress!,
+        amountLamports: BigInt(inputAmountFD.value),
+        sdk,
+        feePayer,
+        instructions
       })
+
+      // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, artist coin for sells)
+      const userBankResult =
+        await sdk.services.claimableTokensClient.getOrCreateUserBank({
+          ethWallet: ethAddress,
+          mint: outputTokenInfo.claimableTokenMint
+        })
+      const destinationUserbank = userBankResult.userBank.toBase58()
+
+      // Get the address for a temporary token account
+      const tempOutputTokenAta = getAssociatedTokenAddressSync(
+        new PublicKey(outputTokenInfo.mintAddress),
+        userPublicKey,
+        true
+      )
+
+      // Create the temporary token account for our artist coin
+      instructions.push(
+        createAssociatedTokenAccountIdempotentInstruction(
+          feePayer,
+          tempOutputTokenAta,
+          userPublicKey,
+          new PublicKey(outputTokenInfo.mintAddress)
+        )
+      )
+
+      // Get dbc swap transaction
+      const { transaction, outputAmount } =
+        await sdk.services.solanaRelay.swapCoin({
+          inputAmount: inputAmountFD.value.toString(),
+          coinMint: tokenMint,
+          swapDirection,
+          userPublicKey,
+          feePayer
+        })
       const swapTx = VersionedTransaction.deserialize(
         Buffer.from(transaction, 'base64')
       )
-      // Sign and send transaction
-      swapTx.sign([keypair])
-      const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
 
-      await sdk.services.solanaClient.connection.confirmTransaction(
-        signature,
-        'confirmed'
+      // Create a new transaction that combines our setup instructions with the swap instructions
+      const connection = sdk.services.solanaClient.connection
+
+      // Decompose the swap transaction to extract the DBC swap instruction
+      const swapMessage = swapTx.message
+      const accountKeys = swapMessage.staticAccountKeys
+
+      // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
+      // We only need the DBC swap instruction - so we find it by it's program ID
+      const dbcCompiledInstruction = swapMessage.compiledInstructions.find(
+        (ix) => accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID
       )
-      console.log('meteora DBC swap successful')
+
+      if (!dbcCompiledInstruction) {
+        throw new Error('DBC swap instruction not found in transaction')
+      }
+
+      const dbcSwapInstruction: TransactionInstruction = {
+        programId: accountKeys[dbcCompiledInstruction.programIdIndex],
+        keys: dbcCompiledInstruction.accountKeyIndexes.map((index) => ({
+          pubkey: accountKeys[index],
+          isSigner: swapMessage.isAccountSigner(index),
+          isWritable: swapMessage.isAccountWritable(index)
+        })),
+        data: Buffer.from(dbcCompiledInstruction.data)
+      }
+
+      // Add the DBC swap instruction
+      instructions.push(dbcSwapInstruction)
+
+      // Transfer the output tokens from the temporary output token account to end user's user bank
+      instructions.push(
+        createTransferInstruction(
+          tempOutputTokenAta,
+          new PublicKey(destinationUserbank),
+          userPublicKey,
+          BigInt(outputAmount)
+        )
+      )
+
+      // Resolve address lookup table accounts if present
+      const lookupTableAccounts = await Promise.all(
+        swapMessage.addressTableLookups.map(async (lookup) => {
+          const result = await connection.getAddressLookupTable(
+            lookup.accountKey
+          )
+          return result.value
+        })
+      )
+      const validLookupTableAccounts = lookupTableAccounts
+        .filter(
+          (account): account is NonNullable<typeof account> => account !== null
+        )
+        .map((account) => account.key.toBase58())
+
+      // Close the created ATA accounts (both input and output tokens)
+      const atasToClose: PublicKey[] = [inputTokenAta]
+      if (deleteOutputTokenAta) {
+        atasToClose.push(tempOutputTokenAta)
+      }
+
+      for (const ataToClose of atasToClose) {
+        instructions.push(
+          createCloseAccountInstruction(ataToClose, feePayer, userPublicKey)
+        )
+      }
+
+      // Build and send transaction
+      const signature = await buildAndSendTransaction(
+        sdk,
+        keypair,
+        feePayer,
+        instructions,
+        validLookupTableAccounts
+      )
+
       return {
         signature,
+        firstQuote: {
+          outputAmount: {
+            uiAmount: Number(
+              new FixedDecimal(
+                BigInt(outputAmount),
+                outputTokenInfo.decimals
+              ).toString()
+            )
+          }
+        },
+        intermediateAudioAta: tempOutputTokenAta,
+        inputAmount: {
+          amount: Number(inputAmountFD.value),
+          uiAmount: inputAmountUi
+        },
         outputAmount: {
           amount: Number(
-            new FixedDecimal(params.amountUi, AUDIO_DECIMALS).value
+            new FixedDecimal(outputAmount, outputTokenInfo.decimals).value
           ),
-          uiAmount: params.amountUi
+          uiAmount: Number(
+            new FixedDecimal(
+              BigInt(outputAmount),
+              outputTokenInfo.decimals
+            ).toString()
+          )
         }
       }
     } catch (error: unknown) {
@@ -548,7 +747,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  async executeSwapToToken(
+  // Swap from AUDIO -> any token
+  async executeJupiterSwapToToken(
     params: SwapTokensParams,
     swapToAudioResult: IndirectSwapToAudioResult
   ): Promise<IndirectSwapToTokenResult> {
@@ -599,8 +799,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         )
       }
 
-      // Use the predicted amount if we have enough, otherwise use actual balance
-      const predictedAmount = swapToAudioResult.firstQuote.outputAmount.uiAmount
       const predictedFixed = new FixedDecimal(predictedAmount, AUDIO_DECIMALS)
       const actualFixed = new FixedDecimal(
         actualAudioBalance.uiAmount,

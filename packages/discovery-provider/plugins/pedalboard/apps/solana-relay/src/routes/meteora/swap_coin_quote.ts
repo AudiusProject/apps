@@ -6,8 +6,6 @@ import { Request, Response } from 'express'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
-const AUDIO_DECIMALS = 8
-
 /**
  * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC
  *
@@ -26,13 +24,13 @@ export const swapCoinQuote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { inputAmountUi, coinMint, swapDirection } = req.query
+    const { inputAmount, coinMint, swapDirection } = req.query
 
     // Validate required parameters
-    if (!inputAmountUi || typeof inputAmountUi !== 'string') {
+    if (!inputAmount || typeof inputAmount !== 'string') {
       res.status(400).json({
         error:
-          'inputAmountUi is required and must be a string representing the UI amount'
+          'inputAmount is required and must be a string representing the big int number amount'
       })
       return
     }
@@ -68,9 +66,7 @@ export const swapCoinQuote = async (
     }
 
     // Convert UI amount to bigint
-    const inputAmountBN = new BN(
-      Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
-    )
+    const inputAmountBN = new BN(inputAmount)
 
     if (inputAmountBN.lte(new BN(0))) {
       res.status(400).json({

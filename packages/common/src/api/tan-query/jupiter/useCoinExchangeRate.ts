@@ -158,17 +158,35 @@ export const getIndirectQuoteViaAudio = async (
   let firstQuote: JupiterQuoteResult | undefined
   // Note: if the input mint is already audio, we don't need to get a quote for it
   if (params.inputMint !== AUDIO_MINT) {
-    firstQuote = await getJupiterQuoteByMint({
-      inputMint: params.inputMint,
-      outputMint: AUDIO_MINT,
-      inputDecimals: params.inputDecimals,
-      outputDecimals: AUDIO_DECIMALS,
-      amountUi: params.amountUi,
-      slippageBps: SLIPPAGE_BPS,
-      swapMode: params.swapMode ?? 'ExactIn',
-      onlyDirectRoutes: false,
-      maxAccounts: MAX_ALLOWED_ACCOUNTS
-    })
+    try {
+      firstQuote = await getJupiterQuoteByMint({
+        inputMint: params.inputMint,
+        outputMint: AUDIO_MINT,
+        inputDecimals: params.inputDecimals,
+        outputDecimals: AUDIO_DECIMALS,
+        amountUi: params.amountUi,
+        slippageBps: SLIPPAGE_BPS,
+        swapMode: params.swapMode ?? 'ExactIn',
+        onlyDirectRoutes: false,
+        maxAccounts: MAX_ALLOWED_ACCOUNTS
+      })
+    } catch (error) {
+      console.log(
+        'Failed to get jupiter quote, using Meteora DBC',
+        params.amountUi
+      )
+      firstQuote = await getQuoteViaMeteoraDBC(
+        {
+          inputMint: params.inputMint,
+          outputMint: AUDIO_MINT,
+          inputDecimals: params.inputDecimals,
+          outputDecimals: AUDIO_DECIMALS,
+          amountUi: params.amountUi,
+          swapMode: params.swapMode ?? 'ExactIn'
+        },
+        sdk
+      )
+    }
   }
 
   // Get second quote: AUDIO -> OutputToken
@@ -188,6 +206,14 @@ export const getIndirectQuoteViaAudio = async (
         maxAccounts: MAX_ALLOWED_ACCOUNTS
       })
     } catch (error) {
+      console.log({
+        inputMint: AUDIO_MINT,
+        outputMint: params.outputMint,
+        inputDecimals: AUDIO_DECIMALS,
+        outputDecimals: params.outputDecimals,
+        amountUi: firstQuote?.outputAmount?.uiAmount ?? params.amountUi,
+        swapMode: params.swapMode ?? 'ExactIn'
+      })
       secondQuote = await getQuoteViaMeteoraDBC(
         {
           inputMint: AUDIO_MINT,
@@ -241,10 +267,14 @@ export const getQuoteViaMeteoraDBC = async (
   const { inputMint, outputMint, inputDecimals, outputDecimals, amountUi } =
     params
 
-  // Get the quote from Meteora DBC via the solana relay
+  const direction = inputMint === AUDIO_MINT ? 'audioToCoin' : 'coinToAudio'
+  const coinMint = inputMint === AUDIO_MINT ? outputMint : inputMint
+
+  // Get a quote from the Meteora DBC via solana relay
   const { outputAmount } = await sdk.services.solanaRelay.getSwapCoinQuote({
-    inputAmountUi: amountUi.toString(),
-    outputMint
+    inputAmount: new FixedDecimal(amountUi, inputDecimals).value.toString(),
+    coinMint,
+    swapDirection: direction
   })
 
   // Convert the output amount string to BigInt
@@ -255,8 +285,7 @@ export const getQuoteViaMeteoraDBC = async (
     new FixedDecimal(amountUi, inputDecimals).value.toString()
   )
 
-  // Create a mock QuoteResponse for compatibility with JupiterQuoteResult
-  // Since Meteora DBC doesn't provide the same level of detail as Jupiter
+  // Match the same format as Jupiter quotes, but there's not as much detail as Jupiter
   const mockQuote: QuoteResponse = {
     inputMint,
     inAmount: inputAmountBigInt.toString(),
@@ -357,6 +386,7 @@ export const useCoinExchangeRate = (
         // Direct route failed, try indirect route via AUDIO
         try {
           const sdk = await audiusSdk()
+          console.log('Getting indirect quote via AUDIO')
           return await getIndirectQuoteViaAudio(
             {
               inputMint: params.inputMint,

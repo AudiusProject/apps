@@ -181,7 +181,7 @@ export type ClaimVestedCoinsResponse = {
 }
 
 export type SwapCoinQuoteRequest = {
-  inputAmountUi: string // UI format amount of input token (e.g., "100")
+  inputAmount: string // Stringified version of big int number amount of input token (e.g., "1000000000000000000")
   coinMint: string // Mint address of the artist coin
   swapDirection: 'audioToCoin' | 'coinToAudio' // Direction of the swap
 }
@@ -191,11 +191,12 @@ export type SwapCoinQuoteResponse = {
 }
 
 export type SwapCoinRequest = {
-  inputAmountUi: string // UI format amount of input token (e.g., "100")
+  inputAmount: string // Stringified version of big int number amount of input token (e.g., "1000000000000000000")
   coinMint: string // Mint address of the artist coin
   swapDirection: 'audioToCoin' | 'coinToAudio' // Direction of the swap
   userPublicKey: PublicKey // Public key of the user initiating the swap
   isExternalWallet?: boolean // Whether the user is using an external wallet (optional)
+  feePayer?: PublicKey // Public key of the fee payer (optional)
 }
 
 export type SwapCoinResponse = {
