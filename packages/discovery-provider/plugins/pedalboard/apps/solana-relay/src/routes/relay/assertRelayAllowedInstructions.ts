@@ -36,6 +36,7 @@ import { isUserAbusive } from './antiAbuse'
 import { getAllowedMints } from './getAllowedMints'
 
 const MEMO_PROGRAM_ID = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo'
+const DBC_PROGRAM_ID = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
 const MEMO_V2_PROGRAM_ID = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
 const PAYOUT_WALLET_MEMO = 'Payout Wallet'
 const PREPARE_WITHDRAWAL_MEMO = 'Prepare Withdrawal'
@@ -560,6 +561,7 @@ export const assertRelayAllowedInstructions = async (
         assertValidSecp256k1ProgramInstruction(i, instruction)
         break
       case PAYMENT_ROUTER_PROGRAM_ID:
+      case DBC_PROGRAM_ID:
       case MEMO_PROGRAM_ID:
       case MEMO_V2_PROGRAM_ID:
       case TRACK_LISTEN_COUNT_PROGRAM_ID:
