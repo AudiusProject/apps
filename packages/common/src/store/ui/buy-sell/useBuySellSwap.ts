@@ -32,6 +32,8 @@ type SwapParams = {
   outputMint: string
   amountUi: number
   slippageBps: number
+  inputDecimals: number
+  outputDecimals: number
 }
 
 type UseBuySellSwapProps = {
@@ -90,7 +92,9 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       inputMint: inputMintAddress,
       outputMint: outputMintAddress,
       amountUi: inputAmount,
-      slippageBps: SLIPPAGE_BPS
+      slippageBps: SLIPPAGE_BPS,
+      inputDecimals: baseCoin?.decimals,
+      outputDecimals: quoteCoin?.decimals
     })
   }
 

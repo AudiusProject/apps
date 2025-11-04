@@ -8,8 +8,9 @@ import {
   getAccount,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
-import type { Commitment, Keypair } from '@solana/web3.js'
 import {
+  Commitment,
+  Keypair,
   PublicKey,
   TransactionInstruction,
   VersionedTransaction
