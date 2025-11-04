@@ -1,10 +1,13 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { SwapRequest } from '@jup-ag/api'
 import {
   createCloseAccountInstruction,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
-import { PublicKey, TransactionInstruction } from '@solana/web3.js'
+import {
+  PublicKey,
+  TransactionInstruction,
+  VersionedTransaction
+} from '@solana/web3.js'
 
 import {
   getJupiterQuoteByMintWithRetry,
@@ -26,7 +29,6 @@ import {
   addTransferToUserBankInstructions,
   createTokenConfig,
   findTokenByAddress,
-  getJupiterSwapInstructions,
   invalidateSwapQueries,
   validateAndCreateTokenConfigs
 } from './utils'
@@ -125,7 +127,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         outputMint: outputMintUiAddress,
         amountUi
       } = params
-      const wrapUnwrapSol = params.wrapUnwrapSol ?? true
 
       const { sdk, keypair, userPublicKey, feePayer, ethAddress } =
         this.dependencies
@@ -149,11 +150,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
       }
 
       const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
-
-      console.log(
-        'REED direct swap about to get quote with taker:',
-        userPublicKey.toBase58()
-      )
 
       // Get quote
       errorStage = 'DIRECT_SWAP_GET_QUOTE'
@@ -189,24 +185,13 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         userPublicKey
       )
 
-      // Get swap instructions (Ultra API doesn't support destinationTokenAccount)
-      errorStage = 'DIRECT_SWAP_GET_INSTRUCTIONS'
-      const swapRequestParams: SwapRequest = {
-        quoteResponse: quote.quote,
-        userPublicKey: userPublicKey.toBase58(),
-        // destinationTokenAccount not supported in Ultra API
-        wrapAndUnwrapSol: wrapUnwrapSol,
-        dynamicSlippage: true
-      }
+      // Just deserialize the transaction from the Jupiter order response
+      const transactionBuffer = Buffer.from(quote.order.transaction!, 'base64')
+      const transaction = VersionedTransaction.deserialize(transactionBuffer)
 
-      const { transaction } = await getJupiterSwapInstructions(
-        swapRequestParams,
-        outputTokenConfig,
-        userPublicKey,
-        feePayer,
-        instructions,
-        inputTokenConfig,
-        this.dependencies.sdk.services.solanaClient.connection
+      console.log(
+        'REED Transaction fee payer:',
+        transaction.message.getAccountKeys().get(0)?.toBase58()
       )
 
       // Sign and send the Ultra transaction directly
@@ -379,7 +364,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
     try {
       const { inputMint: inputMintUiAddress, amountUi } = params
-      const wrapUnwrapSol = params.wrapUnwrapSol ?? true
 
       const { sdk, keypair, userPublicKey, feePayer, ethAddress } =
         this.dependencies
@@ -409,10 +393,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Get quote: InputToken -> AUDIO
       errorStage = 'INDIRECT_SWAP_STEP1_QUOTE'
-      console.log(
-        'REED indirect swap step 1 about to get quote with taker:',
-        userPublicKey.toBase58()
-      )
 
       const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
@@ -448,33 +428,29 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         })
       const audioUserBank = audioUserBankResult.userBank
 
-      // Get swap instructions (InputToken -> AUDIO)
-      errorStage = 'INDIRECT_SWAP_STEP1_SWAP_INSTRUCTIONS'
-      const firstSwapRequestParams: SwapRequest = {
-        quoteResponse: firstQuote.quote,
-        userPublicKey: userPublicKey.toBase58(),
-        destinationTokenAccount: audioUserBank.toBase58(),
-        wrapAndUnwrapSol: wrapUnwrapSol,
-        dynamicSlippage: true
-      }
+      // Just deserialize the transaction from the Jupiter order response
+      const firstTransactionBuffer = Buffer.from(
+        firstQuote.order.transaction!,
+        'base64'
+      )
+      const firstTransaction = VersionedTransaction.deserialize(
+        new Uint8Array(firstTransactionBuffer)
+      )
 
-      console.log('REED indirect swap step 1 executing Ultra transaction')
-      const { transaction: firstTransaction } =
-        await getJupiterSwapInstructions(
-          firstSwapRequestParams,
-          audioTokenInfo,
-          userPublicKey,
-          feePayer,
-          instructions,
-          inputTokenConfig,
-          this.dependencies.sdk.services.solanaClient.connection
-        )
+      // console.log(
+      //   'REED First transaction fee payer:',
+      //   firstTransaction.message.getAccountKeys().get(0)?.toBase58()
+      // )
 
       // Execute first swap: Input -> AUDIO
       firstTransaction.sign([keypair])
       const firstSwapSignature =
         await sdk.services.solanaClient.sendTransaction(firstTransaction)
 
+      console.log('REED: ', {
+        firstSwapSignature,
+        firstTx: firstTransaction.message.compiledInstructions
+      })
       // Cleanup ATAs after first swap - only close ATAs that should be empty
       errorStage = 'INDIRECT_SWAP_STEP1_CLEANUP'
       const firstCleanupInstructions: TransactionInstruction[] = []
@@ -533,7 +509,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
     try {
       const { outputMint: outputMintUiAddress } = params
-      const wrapUnwrapSol = params.wrapUnwrapSol ?? true
 
       const { sdk, keypair, userPublicKey, feePayer, ethAddress } =
         this.dependencies
@@ -588,17 +563,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           ? predictedAmount
           : actualAudioBalance.uiAmount
 
-      console.log('REED indirect swap step 2 amounts:', {
-        predictedAmount,
-        actualAudioBalance: actualAudioBalance.uiAmount,
-        amountToSwap,
-        AUDIO_DECIMALS,
-        predictedFixedValue: predictedFixed.value.toString(),
-        actualFixedValue: actualFixed.value.toString(),
-        predictedAmountString: predictedAmount.toString(),
-        actualBalanceString: actualAudioBalance.uiAmount.toString()
-      })
-
       // Get quote: AUDIO -> OutputToken
       errorStage = 'INDIRECT_SWAP_STEP2_QUOTE'
       const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry(
@@ -612,7 +576,8 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           onlyDirectRoutes: false,
           taker: userPublicKey.toBase58(),
           payer: feePayer.toBase58(),
-          closeAuthority: feePayer.toBase58()
+          closeAuthority: feePayer.toBase58(),
+          referralMint: TOKEN_LISTING_MAP.USDC.address
         }
       )
 
@@ -638,30 +603,29 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // Get swap instructions (AUDIO -> OutputToken) - Ultra API doesn't support destinationTokenAccount
       errorStage = 'INDIRECT_SWAP_STEP2_SWAP_INSTRUCTIONS'
-      const secondSwapRequestParams: SwapRequest = {
-        quoteResponse: secondQuote.quote,
-        userPublicKey: userPublicKey.toBase58(),
-        // destinationTokenAccount not supported in Ultra API
-        wrapAndUnwrapSol: wrapUnwrapSol,
-        dynamicSlippage: true
-      }
+      // Just deserialize the transaction from the Jupiter order response
+      const secondTransactionBuffer = Buffer.from(
+        secondQuote.order.transaction!,
+        'base64'
+      )
+      const secondTransaction = VersionedTransaction.deserialize(
+        secondTransactionBuffer
+      )
 
-      const { transaction: secondTransaction } =
-        await getJupiterSwapInstructions(
-          secondSwapRequestParams,
-          outputTokenConfig,
-          userPublicKey,
-          feePayer,
-          instructions,
-          audioTokenInfo,
-          this.dependencies.sdk.services.solanaClient.connection
-        )
+      console.log(
+        'REED Second transaction fee payer:',
+        secondTransaction.message.getAccountKeys().get(0)?.toBase58()
+      )
 
       // Execute second swap: AUDIO -> Output
       secondTransaction.sign([keypair])
       const secondSwapSignature =
         await sdk.services.solanaClient.sendTransaction(secondTransaction)
 
+      console.log('REED: ', {
+        secondSwapSignature,
+        secondTx: secondTransaction.message.compiledInstructions
+      })
       // Transfer final output tokens from user's ATA to claimable tokens account
       errorStage = 'INDIRECT_SWAP_STEP2_TRANSFER_TO_BANK'
       const finalTransferInstructions: TransactionInstruction[] = []

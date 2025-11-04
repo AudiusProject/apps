@@ -128,15 +128,6 @@ export async function addTransferToUserBankInstructions({
     await sdk.services.solanaClient.connection.getTokenAccountBalance(sourceAta)
   const amountLamports = BigInt(balance.value.amount)
 
-  console.log('REED Transferring from ATA:', {
-    sourceAta: sourceAta.toBase58(),
-    userBankAddress: userBankAddress.toBase58(),
-    balance: balance.value.amount,
-    amountLamports: amountLamports.toString(),
-    uiAmount: balance.value.uiAmount,
-    decimals: tokenInfo.decimals
-  })
-
   instructions.push(
     createTransferCheckedInstruction(
       sourceAta,
@@ -336,6 +327,53 @@ export const validateAndCreateTokenConfigs = (
   return { inputTokenConfig, outputTokenConfig }
 }
 
+/**
+ * Modifies the fee payer of a VersionedTransaction
+ * @param transaction The original transaction from Jupiter
+ * @param newFeePayer The new fee payer public key
+ * @returns A new VersionedTransaction with the updated fee payer
+ */
+export const modifyTransactionFeePayer = (
+  transaction: VersionedTransaction,
+  newFeePayer: PublicKey
+): VersionedTransaction => {
+  // For MessageV0, we need to modify the static account keys
+  if (transaction.message.version === 0) {
+    const messageV0 = transaction.message as MessageV0
+
+    // Create new static account keys with the new fee payer first
+    const newStaticAccountKeys = [
+      newFeePayer,
+      ...messageV0.staticAccountKeys.slice(1)
+    ]
+
+    // Create new message with updated static account keys
+    const newMessageV0 = new MessageV0({
+      header: {
+        ...messageV0.header,
+        numRequiredSignatures: messageV0.header.numRequiredSignatures,
+        numReadonlySignedAccounts: messageV0.header.numReadonlySignedAccounts,
+        numReadonlyUnsignedAccounts:
+          messageV0.header.numReadonlyUnsignedAccounts
+      },
+      staticAccountKeys: newStaticAccountKeys,
+      recentBlockhash: messageV0.recentBlockhash,
+      compiledInstructions: messageV0.compiledInstructions,
+      addressTableLookups: messageV0.addressTableLookups
+    })
+
+    // Create new transaction with the modified message
+    return new VersionedTransaction(newMessageV0)
+  }
+
+  // For legacy transactions, the approach would be different
+  // For now, return the original transaction unchanged
+  console.warn(
+    'modifyTransactionFeePayer: Legacy transaction format not supported for fee payer modification'
+  )
+  return transaction
+}
+
 export const getJupiterSwapInstructions = async (
   swapRequestParams: SwapRequest,
   outputTokenConfig?: UserBankManagedTokenInfo,
@@ -370,14 +408,6 @@ export const getJupiterSwapInstructions = async (
   const uiAmount =
     Number(rawAmount) / Math.pow(10, inputTokenConfig?.decimals ?? 6)
 
-  console.log('REED getJupiterSwapInstructions ultraParams:', {
-    quoteResponseInAmount: quoteResponse.inAmount,
-    rawAmount: rawAmount.toString(),
-    inputDecimals: inputTokenConfig?.decimals ?? 6,
-    calculatedUiAmount: uiAmount,
-    inputTokenConfig
-  })
-
   const ultraParams: Omit<JupiterMintQuoteParams, 'maxAccounts'> = {
     inputMint: quoteResponse.inputMint,
     outputMint: quoteResponse.outputMint,
@@ -387,7 +417,9 @@ export const getJupiterSwapInstructions = async (
     slippageBps: quoteResponse.slippageBps,
     swapMode: quoteResponse.swapMode,
     onlyDirectRoutes: false, // Default to false, as this is typically not set in legacy requests
-    taker: swapRequestParams.userPublicKey // Use the user public key as taker
+    taker: swapRequestParams.userPublicKey, // Use the user public key as taker
+    payer: _feePayer?.toBase58(),
+    closeAuthority: _feePayer?.toBase58()
   }
 
   // Get Ultra order which includes the complete transaction
@@ -404,6 +436,11 @@ export const getJupiterSwapInstructions = async (
     quoteResult.quoteResult.order.transaction,
     'base64'
   )
+
+  console.log('REED: ', {
+    transactionBuffer: transactionBuffer,
+    transactionBuffer64: transactionBuffer.toString('base64')
+  })
   const transaction = VersionedTransaction.deserialize(transactionBuffer)
 
   // Resolve Address Lookup Tables if present
@@ -458,8 +495,20 @@ export const getJupiterSwapInstructions = async (
     }
   }
 
+  // Modify the fee payer if one is specified
+  let finalTransaction = transaction
+  if (_feePayer) {
+    console.log(
+      'REED Modifying transaction fee payer from',
+      transaction.message.getAccountKeys().get(0)?.toBase58(),
+      'to',
+      _feePayer.toBase58()
+    )
+    finalTransaction = modifyTransactionFeePayer(transaction, _feePayer)
+  }
+
   // Return the transaction directly - no need for backward compatibility
-  return { transaction, outputAtaForJupiter }
+  return { transaction: finalTransaction, outputAtaForJupiter }
 }
 
 export const invalidateSwapQueries = async (
