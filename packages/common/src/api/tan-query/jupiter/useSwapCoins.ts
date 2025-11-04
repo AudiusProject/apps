@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getUserCoinQueryKey,
   getUserQueryKey,
+  getArtistCoinQueryKey,
   updateAudioBalanceOptimistically,
   useCurrentAccountUser,
   useQueryContext
@@ -135,6 +136,7 @@ export const optimisticallyUpdateSwapBalances = (
       }
     )
   }
+
   if (outputMint && !isOutputAudio) {
     queryClient.setQueryData(
       getUserCoinQueryKey(outputMint, user?.user_id),
@@ -172,6 +174,18 @@ export const optimisticallyUpdateSwapBalances = (
       queryClient,
       splWallet: user.spl_wallet,
       changeLamports: netChangeLamports
+    })
+  }
+
+  // Invalidate artist coin queries to refresh fee claiming and graduation progress
+  if (inputMint && !isInputAudio) {
+    queryClient.invalidateQueries({
+      queryKey: getArtistCoinQueryKey(inputMint)
+    })
+  }
+  if (outputMint && !isOutputAudio) {
+    queryClient.invalidateQueries({
+      queryKey: getArtistCoinQueryKey(outputMint)
     })
   }
 

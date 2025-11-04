@@ -29,6 +29,8 @@ export enum SwapErrorType {
 export type SwapTokensParams = {
   inputMint: string
   outputMint: string
+  inputDecimals: number
+  outputDecimals: number
   amountUi: number
   slippageBps?: number
   wrapUnwrapSol?: boolean
