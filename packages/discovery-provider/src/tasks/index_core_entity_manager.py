@@ -68,6 +68,9 @@ def index_core_entity_manager(
         # suppress typechecker as this is what tests do
         tx_receipts.append(tx_receipt)  # type: ignore[arg-type]
 
+        indexing_duration = time.perf_counter() - indexing_start_time
+        tx_logger.info(f"Entity manager tx indexed in {indexing_duration:.3f}s")
+
     try:
         latest_indexed_block_record = (
             session.query(Block).filter(Block.is_current == True).first()
@@ -96,8 +99,6 @@ def index_core_entity_manager(
             block_timestamp=block.timestamp.ToSeconds(),
             block_hash=block.blockhash,
         )
-        indexing_duration = time.perf_counter() - indexing_start_time
-        tx_logger.info(f"Entity manager tx indexed in {indexing_duration:.3f}s")
         return next_em_block
     except Exception as e:
         logger.error(f"entity manager error in core blocks {e}", exc_info=True)
