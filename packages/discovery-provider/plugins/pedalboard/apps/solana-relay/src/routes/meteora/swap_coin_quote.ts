@@ -1,13 +1,122 @@
+import { CpAmm } from '@meteora-ag/cp-amm-sdk'
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { PublicKey } from '@solana/web3.js'
+import { initializeDiscoveryDb } from '@pedalboard/basekit'
+import {
+  SolMeteoraDammV2Pools,
+  SolMeteoraDbcPools,
+  Table
+} from '@pedalboard/storage'
+import { getMint } from '@solana/spl-token'
+import { Connection, PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
+import { AUDIO_MINT } from '../launchpad/constants'
 
-const AUDIO_DECIMALS = 8
+const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
+const getDBCPoolQuote = async (
+  dbcPool: SolMeteoraDbcPools,
+  connection: Connection,
+  inputAmountBN: BN,
+  coinMintPubkey: PublicKey,
+  swapDirection: string,
+  res: Response
+) => {
+  const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
+
+  if (!dbcPool || !dbcPool.account) {
+    res.status(404).json({
+      error: `No DBC pool found in db for coin mint: ${coinMintPubkey.toString()}`
+    })
+    return
+  }
+
+  const dbcPoolState = await dbcClient.state.getPool(
+    new PublicKey(dbcPool.account)
+  )
+
+  if (!dbcPool) {
+    res.status(404).json({
+      error: `Unable to get DBC pool state from Meteora. Pool address: ${dbcPool.account}`
+    })
+    return
+  }
+  // Get the pool configuration
+  const poolConfig = await dbcClient.state.getPoolConfig(dbcPool.config)
+  if (!poolConfig) {
+    res.status(404).json({
+      error: `Unable to get DBC pool config from Meteora. Pool address: ${dbcPool.account}`
+    })
+    return
+  }
+
+  const currentPoint = await connection.getSlot()
+
+  // Get swap quote
+  const quote = await dbcClient.pool.swapQuote({
+    virtualPool: dbcPoolState,
+    config: poolConfig,
+    swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
+    amountIn: inputAmountBN,
+    hasReferral: false,
+    currentPoint: new BN(currentPoint)
+  })
+  return quote.outputAmount.toString()
+}
+
+const getDammPoolQuote = async (
+  dammPoolRecord: SolMeteoraDammV2Pools,
+  connection: Connection,
+  inputAmountBN: BN,
+  coinMintPubkey: PublicKey,
+  swapDirection: string,
+  res: Response
+) => {
+  const cpAmm = new CpAmm(connection)
+  const poolState = await cpAmm.fetchPoolState(
+    new PublicKey(dammPoolRecord.account)
+  )
+  if (!poolState) {
+    res.status(404).json({
+      error: `Unable to fetch damm pool state from Meteora. Pool address: ${dammPoolRecord.account}`
+    })
+    return
+  }
+
+  // Fetch token mint information to get decimals
+  const tokenAMintInfo = await getMint(connection, poolState.tokenAMint)
+  const tokenBMintInfo = await getMint(connection, poolState.tokenBMint)
+
+  const currentEpoch = (await connection.getEpochInfo()).epoch
+  const audioMintPubkey = new PublicKey(AUDIO_MINT)
+  const inputTokenMint =
+    swapDirection === 'audioToCoin' ? audioMintPubkey : coinMintPubkey
+
+  const quote = await cpAmm.getQuote({
+    inAmount: inputAmountBN,
+    inputTokenMint,
+    slippage: 0.5,
+    poolState,
+    currentTime: new Date().getTime(),
+    currentSlot: await connection.getSlot(),
+    inputTokenInfo: {
+      mint: tokenAMintInfo,
+      currentEpoch
+    },
+    outputTokenInfo: {
+      mint: tokenBMintInfo,
+      currentEpoch
+    },
+    tokenADecimal: tokenAMintInfo.decimals,
+    tokenBDecimal: tokenBMintInfo.decimals
+  })
+
+  return quote.swapOutAmount.toString()
+}
 /**
  * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC
  *
@@ -26,13 +135,13 @@ export const swapCoinQuote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { inputAmountUi, coinMint, swapDirection } = req.query
+    const { inputAmount, coinMint, swapDirection } = req.query
 
     // Validate required parameters
-    if (!inputAmountUi || typeof inputAmountUi !== 'string') {
+    if (!inputAmount || typeof inputAmount !== 'string') {
       res.status(400).json({
         error:
-          'inputAmountUi is required and must be a string representing the UI amount'
+          'inputAmount is required and must be a string representing the big int number amount'
       })
       return
     }
@@ -67,10 +176,26 @@ export const swapCoinQuote = async (
       return
     }
 
-    // Convert UI amount to bigint
-    const inputAmountBN = new BN(
-      Math.floor(parseFloat(inputAmountUi) * Math.pow(10, AUDIO_DECIMALS))
+    // Find the pool using the coin's mint from the database
+    const dbcPoolRecord = await db<SolMeteoraDbcPools>(Table.SolMeteoraDbcPools)
+      .where('base_mint', coinMintPubkey.toString())
+      .first()
+
+    const dammPoolRecord = await db<SolMeteoraDammV2Pools>(
+      Table.SolMeteoraDammV2Pools
     )
+      .where('token_a_mint', coinMintPubkey.toString())
+      .first()
+
+    if (!dbcPoolRecord && !dammPoolRecord) {
+      res.status(404).json({
+        error: `No DBC or DAMM pool found for coin mint: ${coinMintPubkey.toString()}`
+      })
+      return
+    }
+
+    // Convert UI amount to bigint
+    const inputAmountBN = new BN(inputAmount)
 
     if (inputAmountBN.lte(new BN(0))) {
       res.status(400).json({
@@ -82,43 +207,42 @@ export const swapCoinQuote = async (
 
     // Initialize Solana connection and DBC client
     const connection = getConnection()
-    const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
-    // Find the pool using the coin's mint
-    const dbcPool = await dbcClient.state.getPoolByBaseMint(coinMintPubkey)
-
-    if (!dbcPool) {
+    // If a DAMM entry was found, its always a DAMM pool
+    const isDamm = !!dammPoolRecord
+    // If a DBC entry was found, we also have to ensure it's not supposed to be migrated
+    const isDBC = !isDamm && dbcPoolRecord && !dbcPoolRecord.is_migrated
+    let outputAmount: string | undefined
+    if (isDBC) {
+      outputAmount = await getDBCPoolQuote(
+        dbcPoolRecord,
+        connection,
+        inputAmountBN,
+        coinMintPubkey,
+        swapDirection,
+        res
+      )
+    }
+    if (isDamm) {
+      outputAmount = await getDammPoolQuote(
+        dammPoolRecord,
+        connection,
+        inputAmountBN,
+        coinMintPubkey,
+        swapDirection,
+        res
+      )
+    }
+    if (!isDBC && !isDamm) {
       res.status(404).json({
-        error: `DBC pool not found for mint: ${coinMint}`
+        error: `Unable to determine if a DBC or DAMM pool exists for coin mint: ${coinMintPubkey.toString()}`
       })
       return
     }
-    // Get the pool configuration
-    const poolConfig = await dbcClient.state.getPoolConfig(
-      dbcPool.account.config
-    )
-    if (!poolConfig) {
-      res.status(404).json({
-        error: `Pool config not found for pool: ${dbcPool.account.config.toString()}`
-      })
-      return
-    }
-
-    const currentPoint = await connection.getSlot()
-
-    // Get swap quote
-    const quote = await dbcClient.pool.swapQuote({
-      virtualPool: dbcPool.account,
-      config: poolConfig,
-      swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
-      amountIn: inputAmountBN,
-      hasReferral: false,
-      currentPoint: new BN(currentPoint)
-    })
 
     // Return the output amount in bigint format
     res.status(200).json({
-      outputAmount: quote.outputAmount.toString()
+      outputAmount
     })
   } catch (error) {
     logger.error(error)
