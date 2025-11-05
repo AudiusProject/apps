@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 
 import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
@@ -8,7 +12,6 @@ import LoadingSpinner from 'app/components/loading-spinner'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 type AccountBalanceProps = {
-  userId?: number
   width?: number
   height?: number
 }
@@ -27,17 +30,21 @@ const formatPercentage = (value: number): string => {
 }
 
 export const AccountBalance = ({
-  userId,
   width = 350,
   height = 204
 }: AccountBalanceProps) => {
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -45,17 +52,19 @@ export const AccountBalance = ({
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = historyData[historyData.length - 1].balanceUsd
-    const change = lastBalance - firstBalance
+    const change = currentBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
     return {
-      balance: lastBalance,
+      balance: currentBalance,
       amount: change,
       percentage,
       isPositive: change >= 0
     }
-  }, [historyData])
+  }, [historyData, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   if (isLoading) {
     return (
@@ -106,11 +115,7 @@ export const AccountBalance = ({
         </Flex>
       </Flex>
 
-      <UserBalanceHistoryGraph
-        userId={effectiveUserId ?? undefined}
-        width={width}
-        height={height}
-      />
+      <UserBalanceHistoryGraph width={width} height={height} />
     </Paper>
   )
 }

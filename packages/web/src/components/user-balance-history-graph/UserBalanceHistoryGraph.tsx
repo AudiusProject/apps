@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import {
   type BalanceHistoryDataPoint,
   useCurrentUserId,
-  useUserBalanceHistory
+  useUserBalanceHistory,
+  useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import type { ID } from '@audius/common/models'
 import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
@@ -15,10 +15,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import styles from './UserBalanceHistoryGraph.module.css'
 
 const messages = walletMessages.balanceHistory
-
-type UserBalanceHistoryGraphProps = {
-  userId?: ID
-}
 
 const formatCurrency = (value: number, decimals: number = 0): string => {
   return new Intl.NumberFormat('en-US', {
@@ -223,20 +219,42 @@ const getChartOptions = (
   }
 })
 
-export const UserBalanceHistoryGraph = ({
-  userId
-}: UserBalanceHistoryGraphProps) => {
+export const UserBalanceHistoryGraph = () => {
   const chartId = useRef(Math.random().toString(36).substring(7)).current
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
   const neutralColor = color.neutral.n400
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
-    data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    data: historyDataFetched,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
+
+  const historyData = useMemo(() => {
+    if (!historyDataFetched || historyDataFetched.length === 0) {
+      return historyDataFetched
+    }
+
+    const currentTimestamp = Date.now()
+    return [
+      ...historyDataFetched,
+      {
+        timestamp: currentTimestamp,
+        balanceUsd: currentBalance
+      }
+    ]
+  }, [historyDataFetched, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
+
   useEffect(() => {
     return () => {
       const tooltipEl = document.getElementById(

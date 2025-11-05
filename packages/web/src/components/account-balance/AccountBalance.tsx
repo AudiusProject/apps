@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 import { Flex, Text, IconArrowRight, Box, Paper } from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
@@ -9,10 +13,6 @@ import { componentWithErrorBoundary } from 'components/error-wrapper/componentWi
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
-
-type AccountBalanceProps = {
-  userId?: number
-}
 
 const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
@@ -116,15 +116,20 @@ const MobileChangeIndicator = ({
   )
 }
 
-const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
+const AccountBalanceContent = () => {
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -132,17 +137,19 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = historyData[historyData.length - 1].balanceUsd
-    const change = lastBalance - firstBalance
+    const change = currentBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
     return {
-      balance: lastBalance,
+      balance: currentBalance,
       amount: change,
       percentage,
       isPositive: change >= 0
     }
-  }, [historyData])
+  }, [historyData, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   const padding = isMobile ? 'm' : 'l'
   const gap = isMobile ? 'm' : 'l'
@@ -226,7 +233,7 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
         </Flex>
       )}
 
-      <UserBalanceHistoryGraph userId={effectiveUserId ?? undefined} />
+      <UserBalanceHistoryGraph />
     </Paper>
   )
 }
