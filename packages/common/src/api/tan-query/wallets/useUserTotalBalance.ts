@@ -2,16 +2,10 @@ import { useMemo } from 'react'
 
 import { USDC } from '@audius/fixed-decimal'
 
-import type { ID } from '~/models'
-
 import { useUserCoins } from '../coins/useUserCoins'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { useUSDCBalance } from './useUSDCBalance'
-
-type UseUserTotalBalanceParams = {
-  userId?: ID | null
-}
 
 type UseUserTotalBalanceResult = {
   totalBalance: number
@@ -20,34 +14,28 @@ type UseUserTotalBalanceResult = {
 }
 
 /**
- * Hook to get the total USD balance for a user including all coins and USDC.
+ * Hook to get the total USD balance for the current user including all coins and USDC.
  * Combines balances from:
  * - Artist coins (via useUserCoins)
  * - AUDIO (via useUserCoins)
- * - USDC (via useUSDCBalance, only for current user)
+ * - USDC (via useUSDCBalance)
  *
- * @param params - Parameters including optional userId
  * @returns Object with totalBalance, isLoading, and isError
  */
-export const useUserTotalBalance = ({
-  userId
-}: UseUserTotalBalanceParams = {}): UseUserTotalBalanceResult => {
+export const useUserTotalBalance = (): UseUserTotalBalanceResult => {
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
 
   const {
     data: userCoins,
     isLoading: isCoinsLoading,
     isError: isCoinsError
-  } = useUserCoins({ userId: effectiveUserId })
+  } = useUserCoins({ userId: currentUserId })
 
-  // Only fetch USDC balance when viewing own profile (it only works for current user)
-  const isOwnProfile = !userId || effectiveUserId === currentUserId
   const {
     data: usdcBalance,
     isLoading: isUsdcLoading,
     error: usdcError
-  } = useUSDCBalance({ enabled: isOwnProfile })
+  } = useUSDCBalance()
 
   const totalBalance = useMemo(() => {
     let total = 0
@@ -65,8 +53,8 @@ export const useUserTotalBalance = ({
     return total
   }, [userCoins, usdcBalance])
 
-  const isLoading = isCoinsLoading || (isOwnProfile && isUsdcLoading)
-  const isError = isCoinsError || (isOwnProfile && !!usdcError)
+  const isLoading = isCoinsLoading || isUsdcLoading
+  const isError = isCoinsError || !!usdcError
 
   return {
     totalBalance,

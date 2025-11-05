@@ -14,10 +14,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
 
-type AccountBalanceProps = {
-  userId?: number
-}
-
 const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -120,21 +116,20 @@ const MobileChangeIndicator = ({
   )
 }
 
-const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
+const AccountBalanceContent = () => {
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+  } = useUserBalanceHistory({ userId: currentUserId })
 
   const {
     totalBalance: currentBalance,
     isLoading: isBalanceLoading,
     isError: isBalanceError
-  } = useUserTotalBalance({ userId: effectiveUserId })
+  } = useUserTotalBalance()
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -142,12 +137,11 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = currentBalance
-    const change = lastBalance - firstBalance
+    const change = currentBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
     return {
-      balance: lastBalance,
+      balance: currentBalance,
       amount: change,
       percentage,
       isPositive: change >= 0
@@ -239,7 +233,7 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
         </Flex>
       )}
 
-      <UserBalanceHistoryGraph userId={effectiveUserId ?? undefined} />
+      <UserBalanceHistoryGraph />
     </Paper>
   )
 }

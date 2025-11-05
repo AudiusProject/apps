@@ -6,7 +6,6 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import type { ID } from '@audius/common/models'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
@@ -16,7 +15,6 @@ import LoadingSpinner from 'app/components/loading-spinner'
 const messages = walletMessages.balanceHistory
 
 type UserBalanceHistoryGraphProps = {
-  userId?: ID
   width?: number
   height?: number
 }
@@ -53,25 +51,23 @@ const formatTooltipDate = (timestamp: number): string => {
 }
 
 export const UserBalanceHistoryGraph = ({
-  userId,
   width = 350,
   height = 191
 }: UserBalanceHistoryGraphProps) => {
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyDataFetched,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+  } = useUserBalanceHistory({ userId: currentUserId })
 
   const {
     totalBalance: currentBalance,
     isLoading: isBalanceLoading,
     isError: isBalanceError
-  } = useUserTotalBalance({ userId: effectiveUserId })
+  } = useUserTotalBalance()
 
   const historyData = useMemo(() => {
     if (!historyDataFetched || historyDataFetched.length === 0) {
