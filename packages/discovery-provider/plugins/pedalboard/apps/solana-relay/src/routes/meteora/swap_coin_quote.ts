@@ -9,7 +9,7 @@ import {
 import { getMint } from '@solana/spl-token'
 import { Connection, PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 
 import { config } from '../../config'
 import { logger } from '../../logger'
@@ -23,42 +23,38 @@ const getDBCPoolQuote = async (
   connection: Connection,
   inputAmountBN: BN,
   coinMintPubkey: PublicKey,
-  swapDirection: string,
-  res: Response
+  swapDirection: string
 ) => {
   const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
 
   if (!dbcPool || !dbcPool.account) {
-    res.status(404).json({
-      error: `No DBC pool found in db for coin mint: ${coinMintPubkey.toString()}`
-    })
-    return
+    throw new Error(
+      `No DBC pool found in db for coin mint: ${coinMintPubkey.toString()}`
+    )
   }
 
-  const dbcPoolState = await dbcClient.state.getPool(
+  const virtualPoolState = await dbcClient.state.getPool(
     new PublicKey(dbcPool.account)
   )
 
-  if (!dbcPool) {
-    res.status(404).json({
-      error: `Unable to get DBC pool state from Meteora. Pool address: ${dbcPool.account}`
-    })
-    return
-  }
-  // Get the pool configuration
-  const poolConfig = await dbcClient.state.getPoolConfig(dbcPool.config)
-  if (!poolConfig) {
-    res.status(404).json({
-      error: `Unable to get DBC pool config from Meteora. Pool address: ${dbcPool.account}`
-    })
-    return
+  if (!virtualPoolState) {
+    throw new Error(
+      `Unable to get DBC pool state from Meteora. Pool address: ${dbcPool.account}`
+    )
   }
 
+  // Convert snake_case keys to camelCase for SDK compatibility
+  const poolConfig = await dbcClient.state.getPoolConfig(dbcPool.config)
+  if (!poolConfig) {
+    throw new Error(
+      `Unable to get DBC pool config from Meteora. Pool address: ${dbcPool.account}`
+    )
+  }
   const currentPoint = await connection.getSlot()
 
   // Get swap quote
   const quote = await dbcClient.pool.swapQuote({
-    virtualPool: dbcPoolState,
+    virtualPool: virtualPoolState,
     config: poolConfig,
     swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
     amountIn: inputAmountBN,
@@ -73,18 +69,16 @@ const getDammPoolQuote = async (
   connection: Connection,
   inputAmountBN: BN,
   coinMintPubkey: PublicKey,
-  swapDirection: string,
-  res: Response
+  swapDirection: string
 ) => {
   const cpAmm = new CpAmm(connection)
   const poolState = await cpAmm.fetchPoolState(
     new PublicKey(dammPoolRecord.account)
   )
   if (!poolState) {
-    res.status(404).json({
-      error: `Unable to fetch damm pool state from Meteora. Pool address: ${dammPoolRecord.account}`
-    })
-    return
+    throw new Error(
+      `Unable to fetch damm pool state from Meteora. Pool address: ${dammPoolRecord.account}`
+    )
   }
 
   // Fetch token mint information to get decimals
@@ -132,7 +126,8 @@ const getDammPoolQuote = async (
  */
 export const swapCoinQuote = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { inputAmount, coinMint, swapDirection } = req.query
@@ -213,25 +208,30 @@ export const swapCoinQuote = async (
     // If a DBC entry was found, we also have to ensure it's not supposed to be migrated
     const isDBC = !isDamm && dbcPoolRecord && !dbcPoolRecord.is_migrated
     let outputAmount: string | undefined
-    if (isDBC) {
-      outputAmount = await getDBCPoolQuote(
-        dbcPoolRecord,
-        connection,
-        inputAmountBN,
-        coinMintPubkey,
-        swapDirection,
-        res
-      )
-    }
-    if (isDamm) {
-      outputAmount = await getDammPoolQuote(
-        dammPoolRecord,
-        connection,
-        inputAmountBN,
-        coinMintPubkey,
-        swapDirection,
-        res
-      )
+    try {
+      if (isDBC) {
+        outputAmount = await getDBCPoolQuote(
+          dbcPoolRecord,
+          connection,
+          inputAmountBN,
+          coinMintPubkey,
+          swapDirection
+        )
+      }
+      if (isDamm) {
+        outputAmount = await getDammPoolQuote(
+          dammPoolRecord,
+          connection,
+          inputAmountBN,
+          coinMintPubkey,
+          swapDirection
+        )
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+      return
     }
     if (!isDBC && !isDamm) {
       res.status(404).json({
@@ -244,6 +244,7 @@ export const swapCoinQuote = async (
     res.status(200).json({
       outputAmount
     })
+    next()
   } catch (error) {
     logger.error(error)
     res.status(500).json({
