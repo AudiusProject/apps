@@ -131,11 +131,14 @@ export const swapCoinQuote = async (
 ): Promise<void> => {
   try {
     const { inputAmount, coinMint, swapDirection } = req.query
+    const { inputAmount, coinMint, swapDirection } = req.query
 
     // Validate required parameters
     if (!inputAmount || typeof inputAmount !== 'string') {
+    if (!inputAmount || typeof inputAmount !== 'string') {
       res.status(400).json({
         error:
+          'inputAmount is required and must be a string representing the big int number amount'
           'inputAmount is required and must be a string representing the big int number amount'
       })
       return
@@ -190,6 +193,7 @@ export const swapCoinQuote = async (
     }
 
     // Convert UI amount to bigint
+    const inputAmountBN = new BN(inputAmount)
     const inputAmountBN = new BN(inputAmount)
 
     if (inputAmountBN.lte(new BN(0))) {

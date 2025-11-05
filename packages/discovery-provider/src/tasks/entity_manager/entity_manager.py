@@ -225,7 +225,9 @@ def entity_manager_update(
 
             # process in tx order and populate records_to_save
             for tx_receipt in entity_manager_txs:
+                indexing_start_time = time.perf_counter()
                 txhash = to_hex(tx_receipt["transactionHash"])
+                logger.set_context("tx_hash", txhash)
                 entity_manager_event_tx = get_entity_manager_events_tx(
                     update_task, tx_receipt
                 )
@@ -496,6 +498,9 @@ def entity_manager_update(
                         )
                         create_and_raise_indexing_error(indexing_error, session)
                         logger.error(f"skipping transaction hash {indexing_error}")
+
+                indexing_duration = time.perf_counter() - indexing_start_time
+                logger.info(f"Entity manager tx indexed in {indexing_duration:.3f}s")
 
             # compile records_to_save
             save_new_records(
