@@ -236,12 +236,13 @@ def index_core(self):
                 )
                 return
             block_logger = logging.LoggerAdapter(
-                logger=logger,
+                logger=root_logger,
                 extra={
-                    "indexer": "core",
-                    "chain_id": core_chain_id,
-                    "core_blockhash": block.blockhash,
-                    "core_block_height": block.height,
+                    **(logger.extra or {}),
+                    **{
+                        "core_blockhash": block.blockhash,
+                        "core_block_height": block.height,
+                    },
                 },
             )
 
