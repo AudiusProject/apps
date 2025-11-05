@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import {
   type BalanceHistoryDataPoint,
   useCurrentUserId,
-  useUserBalanceHistory
+  useUserBalanceHistory,
+  useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
@@ -233,10 +234,35 @@ export const UserBalanceHistoryGraph = ({
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
   const {
-    data: historyData,
-    isLoading,
-    isError
+    data: historyDataFetched,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
   } = useUserBalanceHistory({ userId: effectiveUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance({ userId: effectiveUserId })
+
+  const historyData = useMemo(() => {
+    if (!historyDataFetched || historyDataFetched.length === 0) {
+      return historyDataFetched
+    }
+
+    const currentTimestamp = Date.now()
+    return [
+      ...historyDataFetched,
+      {
+        timestamp: currentTimestamp,
+        balanceUsd: currentBalance
+      }
+    ]
+  }, [historyDataFetched, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
+
   useEffect(() => {
     return () => {
       const tooltipEl = document.getElementById(

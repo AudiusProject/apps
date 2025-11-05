@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 import { Flex, Text, IconArrowRight, Box, Paper } from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
@@ -122,9 +126,15 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
   const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
-    isLoading,
-    isError
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
   } = useUserBalanceHistory({ userId: effectiveUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance({ userId: effectiveUserId })
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -132,7 +142,7 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = historyData[historyData.length - 1].balanceUsd
+    const lastBalance = currentBalance
     const change = lastBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
@@ -142,7 +152,10 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
       percentage,
       isPositive: change >= 0
     }
-  }, [historyData])
+  }, [historyData, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   const padding = isMobile ? 'm' : 'l'
   const gap = isMobile ? 'm' : 'l'

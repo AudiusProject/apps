@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
 import { LineChart } from 'react-native-gifted-charts'
@@ -58,10 +62,34 @@ export const UserBalanceHistoryGraph = ({
   const { data: currentUserId } = useCurrentUserId()
   const effectiveUserId = userId ?? currentUserId
   const {
-    data: historyData,
-    isLoading,
-    isError
+    data: historyDataFetched,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
   } = useUserBalanceHistory({ userId: effectiveUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance({ userId: effectiveUserId })
+
+  const historyData = useMemo(() => {
+    if (!historyDataFetched || historyDataFetched.length === 0) {
+      return historyDataFetched
+    }
+
+    const currentTimestamp = Date.now()
+    return [
+      ...historyDataFetched,
+      {
+        timestamp: currentTimestamp,
+        balanceUsd: currentBalance
+      }
+    ]
+  }, [historyDataFetched, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   const chartData = useMemo((): lineDataItem[] => {
     if (!historyData || historyData.length === 0) return []
