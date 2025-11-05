@@ -46,6 +46,7 @@ const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
 const AUDIO_DECIMALS = TOKEN_LISTING_MAP.AUDIO.decimals
 const TOKEN_DECIMALS = 9
 const DBC_PROGRAM_ID = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
+const DAMM_V2_PROGRAM_ID = 'cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG'
 
 export interface SwapExecutionResult {
   status: SwapStatus
@@ -167,26 +168,28 @@ async function executeMeteoraSwap(
 
     // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
     // We only need the DBC swap instruction - so we find it by it's program ID
-    const dbcCompiledInstruction = swapMessage.compiledInstructions.find(
-      (ix) => accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID
+    const poolSwapInstruction = swapMessage.compiledInstructions.find(
+      (ix) =>
+        accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID ||
+        accountKeys[ix.programIdIndex].toBase58() === DAMM_V2_PROGRAM_ID
     )
 
-    if (!dbcCompiledInstruction) {
+    if (!poolSwapInstruction) {
       throw new Error('DBC swap instruction not found in transaction')
     }
 
-    const dbcSwapInstruction: TransactionInstruction = {
-      programId: accountKeys[dbcCompiledInstruction.programIdIndex],
-      keys: dbcCompiledInstruction.accountKeyIndexes.map((index) => ({
+    const swapInstruction: TransactionInstruction = {
+      programId: accountKeys[poolSwapInstruction.programIdIndex],
+      keys: poolSwapInstruction.accountKeyIndexes.map((index) => ({
         pubkey: accountKeys[index],
         isSigner: swapMessage.isAccountSigner(index),
         isWritable: swapMessage.isAccountWritable(index)
       })),
-      data: Buffer.from(dbcCompiledInstruction.data)
+      data: Buffer.from(poolSwapInstruction.data)
     }
 
     // Add the DBC swap instruction
-    instructions.push(dbcSwapInstruction)
+    instructions.push(swapInstruction)
 
     // Transfer the output tokens from the temporary output token account to end user's user bank
     instructions.push(
