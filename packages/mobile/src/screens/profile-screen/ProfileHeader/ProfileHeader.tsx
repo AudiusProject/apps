@@ -1,13 +1,11 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistOwnedCoin,
+  useArtistCreatedCoin,
   useCurrentUserId,
   useUserComments,
   useProfileUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { LayoutAnimation } from 'react-native'
@@ -44,7 +42,6 @@ export const ProfileHeader = memo(() => {
     does_current_user_follow: doesCurrentUserFollow,
     current_user_followee_follow_count: currentUserFolloweeFollowCount,
     website,
-    donation,
     twitter_handle: twitterHandle,
     instagram_handle: instagramHandle,
     tiktok_handle: tikTokHandle,
@@ -56,7 +53,6 @@ export const ProfileHeader = memo(() => {
       current_user_followee_follow_count:
         user.current_user_followee_follow_count,
       website: user.website,
-      donation: user.donation,
       twitter_handle: user.twitter_handle,
       instagram_handle: user.instagram_handle,
       tiktok_handle: user.tiktok_handle,
@@ -69,27 +65,23 @@ export const ProfileHeader = memo(() => {
     pageSize: 1
   })
   const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistOwnedCoin(userId)
+    useArtistCreatedCoin(userId)
   const { tier } = useTierAndVerifiedForUser(userId)
   const hasTier = tier !== 'none'
   const isOwner = userId === accountId
   const hasMutuals = !isOwner && (currentUserFolloweeFollowCount ?? 0) > 0
   const hasMultipleSocials =
-    [website, donation, twitterHandle, instagramHandle, tikTokHandle].filter(
-      Boolean
-    ).length > 1
+    [website, twitterHandle, instagramHandle, tikTokHandle].filter(Boolean)
+      .length > 1
   const isSupporting = supportingCount && supportingCount > 0
 
-  const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.RECENT_COMMENTS
-  )
   // Note: we also if the profile bio is longer than 3 lines, but that's handled in the Bio component.
   const shouldExpand =
     hasTier ||
     hasMutuals ||
     hasMultipleSocials ||
     isSupporting ||
-    (comments && comments?.length > 0 && isRecentCommentsEnabled)
+    (comments && comments?.length > 0)
 
   useEffect(() => {
     if (!isExpandable && shouldExpand) {

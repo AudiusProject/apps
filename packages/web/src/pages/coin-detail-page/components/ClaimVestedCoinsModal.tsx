@@ -1,7 +1,9 @@
 import { useState } from 'react'
 
+import { useArtistCoinByTicker } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
+import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
   Divider,
@@ -22,18 +24,31 @@ const DEFAULT_REWARDS_POOL_PERCENT = 50
 export const ClaimVestedCoinsModal = () => {
   const { isOpen, onClose, data } = useClaimVestedCoinsModal()
   const { ticker, claimable, onClaim, isClaimPending } = data ?? {}
-
+  const { data: coin } = useArtistCoinByTicker({ ticker: data?.ticker })
   const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(
     DEFAULT_REWARDS_POOL_PERCENT
   )
 
+  const claimableAmount = new FixedDecimal(
+    BigInt(claimable),
+    coin?.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: 2
+  })
+
   const yourSharePercentage = 100 - rewardsPoolPercentage
-  const yourShareAmount = claimable
-    ? Math.floor((claimable * yourSharePercentage) / 100)
-    : 0
-  const rewardsPoolAmount = claimable
-    ? Math.floor((claimable * rewardsPoolPercentage) / 100)
-    : 0
+  const yourShareAmount = new FixedDecimal(
+    BigInt(Math.round((claimable * yourSharePercentage) / 100)),
+    coin?.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: 2
+  })
+  const rewardsPoolAmount = new FixedDecimal(
+    BigInt(Math.round((claimable * rewardsPoolPercentage) / 100)),
+    coin?.decimals
+  ).toLocaleString('en-US', {
+    maximumFractionDigits: 2
+  })
 
   const handlePercentageChange = (value: string) => {
     // Remove % symbol if present and any non-digit characters
@@ -52,6 +67,7 @@ export const ClaimVestedCoinsModal = () => {
 
   const handleClaim = () => {
     onClaim?.(rewardsPoolPercentage)
+    onClose()
   }
 
   if (!ticker || !claimable || !onClaim) {
@@ -116,7 +132,7 @@ export const ClaimVestedCoinsModal = () => {
             </Tooltip>
           </Flex>
           <Text variant='body' size='s' color='default'>
-            {claimable.toLocaleString()} ${ticker}
+            {claimableAmount} ${ticker}
           </Text>
         </Flex>
 
@@ -135,7 +151,7 @@ export const ClaimVestedCoinsModal = () => {
               ({yourSharePercentage}%)
             </Text>
             <Text variant='body' size='s' color='default'>
-              {yourShareAmount.toLocaleString()} ${ticker}
+              {yourShareAmount} ${ticker}
             </Text>
           </Flex>
         </Flex>
@@ -155,7 +171,7 @@ export const ClaimVestedCoinsModal = () => {
               ({rewardsPoolPercentage}%)
             </Text>
             <Text variant='body' size='s' color='default'>
-              {rewardsPoolAmount.toLocaleString()} ${ticker}
+              {rewardsPoolAmount} ${ticker}
             </Text>
           </Flex>
         </Flex>

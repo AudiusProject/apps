@@ -1,8 +1,6 @@
 import React from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 
 import { Flex } from '@audius/harmony-native'
 import { RecentSearches } from 'app/screens/search-screen/RecentSearches'
@@ -30,9 +28,6 @@ export const ExploreContent = () => {
   const [category] = useSearchCategory()
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
-  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
-    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
-  )
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = category === 'tracks' || category === 'all'
@@ -43,7 +38,7 @@ export const ExploreContent = () => {
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
-      {isExploreArtistCoinTracksEnabled && <FeaturedArtistCoinTracks />}
+      {showTrackContent && <FeaturedArtistCoinTracks />}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}

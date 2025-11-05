@@ -44,6 +44,7 @@ import type {
   TopGenreUsersResponseFull,
   TopUsersResponseFull,
   TrackLibraryResponseFull,
+  TracksCountResponse,
   TransactionHistoryCountResponse,
   TransactionHistoryResponse,
   UserAccountResponseFull,
@@ -107,6 +108,8 @@ import {
     TopUsersResponseFullToJSON,
     TrackLibraryResponseFullFromJSON,
     TrackLibraryResponseFullToJSON,
+    TracksCountResponseFromJSON,
+    TracksCountResponseToJSON,
     TransactionHistoryCountResponseFromJSON,
     TransactionHistoryCountResponseToJSON,
     TransactionHistoryResponseFromJSON,
@@ -386,6 +389,7 @@ export interface GetTracksByUserRequest {
     sortMethod?: GetTracksByUserSortMethodEnum;
     sortDirection?: GetTracksByUserSortDirectionEnum;
     filterTracks?: GetTracksByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksByUserGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -400,6 +404,15 @@ export interface GetTracksByUserHandleRequest {
     sortMethod?: GetTracksByUserHandleSortMethodEnum;
     sortDirection?: GetTracksByUserHandleSortDirectionEnum;
     filterTracks?: GetTracksByUserHandleFilterTracksEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetTracksCountByUserRequest {
+    id: string;
+    userId?: string;
+    filterTracks?: GetTracksCountByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksCountByUserGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -2100,6 +2113,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['filter_tracks'] = params.filterTracks;
         }
 
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
@@ -2196,6 +2213,57 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getTracksByUserHandle(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullTracks> {
         const response = await this.getTracksByUserHandleRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the count of tracks created by a user
+     */
+    async getTracksCountByUserRaw(params: GetTracksCountByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getTracksCountByUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.filterTracks !== undefined) {
+            queryParameters['filter_tracks'] = params.filterTracks;
+        }
+
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/tracks/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of tracks created by a user
+     */
+    async getTracksCountByUser(params: GetTracksCountByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksCountResponse> {
+        const response = await this.getTracksCountByUserRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -3029,6 +3097,18 @@ export type GetTracksByUserFilterTracksEnum = typeof GetTracksByUserFilterTracks
 /**
  * @export
  */
+export const GetTracksByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksByUserGateConditionEnum = typeof GetTracksByUserGateConditionEnum[keyof typeof GetTracksByUserGateConditionEnum];
+/**
+ * @export
+ */
 export const GetTracksByUserHandleSortEnum = {
     Date: 'date',
     Plays: 'plays'
@@ -3066,6 +3146,27 @@ export const GetTracksByUserHandleFilterTracksEnum = {
     Unlisted: 'unlisted'
 } as const;
 export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandleFilterTracksEnum[keyof typeof GetTracksByUserHandleFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksCountByUserFilterTracksEnum = {
+    All: 'all',
+    Public: 'public',
+    Unlisted: 'unlisted'
+} as const;
+export type GetTracksCountByUserFilterTracksEnum = typeof GetTracksCountByUserFilterTracksEnum[keyof typeof GetTracksCountByUserFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksCountByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksCountByUserGateConditionEnum = typeof GetTracksCountByUserGateConditionEnum[keyof typeof GetTracksCountByUserGateConditionEnum];
 /**
  * @export
  */

@@ -1,7 +1,5 @@
-import { useUserCreatedCoins } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import { Box, Flex, Text } from '@audius/harmony'
 
@@ -31,8 +29,7 @@ const messages = {
   location: 'Location',
   socialHandles: 'Social Handles',
   artistCoinFlair: 'Artist Coin Flair',
-  website: 'Website',
-  donate: 'Donate'
+  website: 'Website'
 }
 
 type ProfileLeftNavProps = {
@@ -53,8 +50,6 @@ type ProfileLeftNavProps = {
   onUpdateWebsite: (website: string) => void
   location: string
   onUpdateLocation: (location: string) => void
-  donation: string
-  onUpdateDonation: (donation: string) => void
   bio: string
   onUpdateBio: (bio: string) => void
   artistCoinBadge?: Nullable<{
@@ -94,8 +89,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     onUpdateWebsite,
     location,
     onUpdateLocation,
-    donation,
-    onUpdateDonation,
     bio,
     onUpdateBio,
     artistCoinBadge,
@@ -106,13 +99,9 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     isOwner
   } = props
 
-  const { data: ownedCoins, isPending: isArtistCoinLoading } =
-    useUserCreatedCoins({ userId, limit: 1 })
-  const ownedCoin = ownedCoins?.[0]
+  const { data: ownedCoin, isPending: isArtistCoinLoading } =
+    useArtistCreatedCoin(userId)
 
-  const recentCommentsFlag = useFeatureFlag(FeatureFlags.RECENT_COMMENTS)
-  const isRecentCommentsEnabled =
-    recentCommentsFlag.isLoaded && recentCommentsFlag.isEnabled
   const showArtistCoinCTA = !isArtistCoinLoading && !!ownedCoin
 
   if (editMode) {
@@ -207,15 +196,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               type={Type.WEBSITE}
               onChange={onUpdateWebsite}
             />
-            <Text variant='title' color='white'>
-              {messages.donate}
-            </Text>
-            <SocialLinkInput
-              defaultValue={donation}
-              type={Type.DONATION}
-              onChange={onUpdateDonation}
-              textLimitMinusLinks={32}
-            />
           </Flex>
         </Flex>
       </Box>
@@ -239,7 +219,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
           bio={bio}
           location={location}
           website={website}
-          donation={donation}
           created={created}
           twitterHandle={twitterHandle}
           instagramHandle={instagramHandle}
@@ -252,7 +231,7 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
         ) : !isArtistCoinLoading && !isOwner ? (
           <TipAudioButton />
         ) : null}
-        {isRecentCommentsEnabled ? <RecentComments userId={userId} /> : null}
+        <RecentComments userId={userId} />
         <SupportingList />
         <TopSupporters />
         <ProfileMutuals />

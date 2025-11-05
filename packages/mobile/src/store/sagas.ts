@@ -28,6 +28,7 @@ import changePasswordSagas from 'common/store/change-password/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
+import exclusiveTracksSagas from 'common/store/pages/exclusive-tracks/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
 import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
@@ -126,6 +127,7 @@ export default function* rootSaga() {
     ...rewardsPageSagas(),
     ...settingsSagas(),
     ...premiumTracksSagas(),
+    ...exclusiveTracksSagas(),
     ...searchTracksLineupSagas(),
 
     // Cast

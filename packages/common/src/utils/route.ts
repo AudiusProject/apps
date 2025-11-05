@@ -70,11 +70,12 @@ export const PAYMENTS_PAGE = '/payments'
 export const PURCHASES_PAGE = '/payments/purchases'
 export const SALES_PAGE = '/payments/sales'
 export const WITHDRAWALS_PAGE = '/payments/withdrawals'
-export const TRANSACTION_HISTORY_PAGE = '/wallet/transaction-history'
 export const COIN_DETAIL_PAGE = '/coins/:ticker'
+export const COIN_EXCLUSIVE_TRACKS_PAGE = '/coins/:ticker/exclusive-tracks'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
 export const WALLET_GUIDE_PAGE = '/wallet/guide'
+export const CASH_PAGE = '/cash'
 export const COINS_CREATE_PAGE = '/coins/create'
 export const COINS_EXPLORE_PAGE = '/coins'
 export const PRIVATE_KEY_EXPORTER_SETTINGS_PAGE = '/settings/export-private-key'
@@ -154,6 +155,8 @@ export const FOLLOWING_USERS_ROUTE = '/following'
 export const FOLLOWERS_USERS_ROUTE = '/followers'
 export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
 export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
+export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
+  '/coins/:ticker/exclusive-tracks/mobile'
 export const SUPPORTING_USERS_ROUTE = '/supporting'
 export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
@@ -239,7 +242,8 @@ export const authenticatedRoutes = [
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
   COINS_CREATE_PAGE,
-  WALLET_GUIDE_PAGE
+  WALLET_GUIDE_PAGE,
+  CASH_PAGE
 ]
 
 export const guestRoutes = [
@@ -294,6 +298,7 @@ export const orderedRoutes = [
   COIN_DETAIL_PAGE,
   EDIT_COIN_DETAILS_PAGE,
   WALLET_PAGE,
+  CASH_PAGE,
   COINS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
@@ -344,9 +349,12 @@ export const staticRoutes = new Set([
   DASHBOARD_PAGE,
   PAYMENTS_PAGE,
   AUDIO_PAGE,
+  WALLET_PAGE,
   WALLET_GUIDE_PAGE,
+  COINS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
+  CASH_PAGE,
   REWARDS_PAGE,
   TRACK_EDIT_PAGE,
   UPLOAD_PAGE,

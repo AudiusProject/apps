@@ -1,6 +1,6 @@
 {
   "name": "@audius/fixed-decimal",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A data structure to represent fixed precision decimals",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -29,6 +29,6 @@
   "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/fixed-decimal",
   "devDependencies": {
     "eslint": "8.56.0",
-    "vitest": "0.34.6"
+    "vitest": "2.1.1"
   }
 }

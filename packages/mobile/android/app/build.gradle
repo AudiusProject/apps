@@ -132,7 +132,7 @@ android {
         // versionCode is automatically incremented in CI
         versionCode 1
         // Make sure this is above the currently released Android version in the play store if your changes touch native code:
-        versionName "1.1.510"
+        versionName "1.1.511"
         resValue "string", "build_config_package", "co.audius.app"
         resConfigs "en"
     }

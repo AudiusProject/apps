@@ -34,7 +34,6 @@ import {
   RenderOptions,
   mswServer,
   render,
-  saveDomToFile,
   screen,
   within
 } from 'test/test-utils'
@@ -383,7 +382,6 @@ describe('CoinDetailPage', () => {
   afterEach(() => {
     mswServer.resetHandlers()
     vi.clearAllMocks()
-    saveDomToFile('coin-detail-page.html')
   })
 
   beforeAll(() => {

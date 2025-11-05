@@ -184,7 +184,7 @@ const LockedGatedContentSection = ({
 
   const { onOpen: openBuySellModal } = useBuySellModal()
 
-  const handlePurchaseToken = useRequiresAccountCallback(() => {
+  const handlePurchaseToken = useCallback(() => {
     if (!coin?.ticker) return
     openBuySellModal({ isOpen: true, ticker: coin.ticker })
 

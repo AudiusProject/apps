@@ -1,4 +1,4 @@
-import { useArtistCoin } from '@audius/common/api'
+import { useArtistCoin, useExternalWalletBalance } from '@audius/common/api'
 import { useBuySellInitialTab } from '@audius/common/hooks'
 import { useBuySellModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -6,6 +6,8 @@ import { Button, Flex, Paper, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
+import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
+import { env } from 'services/env'
 
 const messages = {
   buyCoins: 'Buy Coins'
@@ -15,7 +17,19 @@ export const BuyArtistCoinCard = ({ mint }: { mint: string }) => {
   const { data: artistCoin, isLoading } = useArtistCoin(mint)
   const { onOpen: openBuySellModal } = useBuySellModal()
   const navigate = useNavigate()
-  const initialTab = useBuySellInitialTab()
+  const externalWalletAddress = useExternalWalletAddress()
+  const { data: externalUsdcBalance } = useExternalWalletBalance({
+    mint: env.USDC_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const { data: externalAudioBalance } = useExternalWalletBalance({
+    mint: env.WAUDIO_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const initialTab = useBuySellInitialTab({
+    externalUsdcBalance,
+    externalAudioBalance
+  })
 
   const handleBuyCoins = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering Paper's onClick

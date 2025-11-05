@@ -4,6 +4,7 @@ import { Coin } from '@audius/common/adapters'
 import {
   makeLoadNextPage,
   useArtistCoins,
+  useExternalWalletBalance,
   useQueryContext
 } from '@audius/common/api'
 import { useBuySellInitialTab } from '@audius/common/hooks'
@@ -31,7 +32,7 @@ import { Cell } from 'react-table'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
-import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 import styles from './ArtistCoinsTable.module.css'
@@ -307,7 +308,19 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   const { onOpen: openBuySellModal } = useBuySellModal()
   const { env } = useQueryContext()
   const tableRef = useRef<HTMLDivElement | null>(null)
-  const initialTab = useBuySellInitialTab()
+  const externalWalletAddress = useExternalWalletAddress()
+  const { data: externalUsdcBalance } = useExternalWalletBalance({
+    mint: env.USDC_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const { data: externalAudioBalance } = useExternalWalletBalance({
+    mint: env.WAUDIO_MINT_ADDRESS,
+    walletAddress: externalWalletAddress
+  })
+  const initialTab = useBuySellInitialTab({
+    externalUsdcBalance,
+    externalAudioBalance
+  })
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -400,7 +413,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     [sortMethod, sortDirection]
   )
 
-  const handleBuy = useRequiresAccountCallback(
+  const handleBuy = useCallback(
     (ticker: string) => {
       openBuySellModal({
         ticker,

@@ -45,9 +45,6 @@ export const PriceAndAudienceMenuFields = (
   const { isEnabled: isUdscPurchaseEnabled } = useFeatureFlag(
     FeatureFlags.USDC_PURCHASES
   )
-  const { isEnabled: isTokenGatingEnabled } = useFeatureFlag(
-    FeatureFlags.TOKEN_GATING
-  )
 
   const [availabilityField] = useField({ name: STREAM_AVAILABILITY_TYPE })
 
@@ -102,7 +99,7 @@ export const PriceAndAudienceMenuFields = (
             )}
           />
         ) : null}
-        {!isAlbum && isTokenGatingEnabled ? (
+        {!isAlbum ? (
           <TokenGatedRadioField
             isRemix={isRemix}
             isUpload={isUpload}

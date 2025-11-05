@@ -35,12 +35,12 @@ export const ArtistCoinFlairSelector = ({
   // Filter to only owned coins
   const { ownedCoins } = useOwnedCoins(allCoins)
 
-  // Create special "Default" and "None" coin options
+  // Create special "Highest Balance" and "None" coin options
   const specialOptions: CoinInfo[] = useMemo(() => {
     return [
       {
         symbol: 'DEFAULT',
-        name: 'Default',
+        name: 'Highest Balance',
         address: DEFAULT_OPTION_VALUE,
         decimals: 0,
         balance: null,
@@ -59,13 +59,13 @@ export const ArtistCoinFlairSelector = ({
     ]
   }, [])
 
-  // Combine special options with owned coins
+  // Combine special options with owned coins, sorted by balance
   const availableCoins = useMemo(() => {
     const coins = [...specialOptions, ...ownedCoins]
 
     // Add currently selected coin if it's not already in the list
     // This ensures the previously selected coin appears in the dropdown
-    // even after switching to Default or None
+    // even after switching to Highest Balance or None
     if (
       selectedBadge &&
       selectedBadge.mint !== DEFAULT_OPTION_VALUE &&
@@ -91,7 +91,7 @@ export const ArtistCoinFlairSelector = ({
 
   // Convert selectedBadge to CoinInfo format for TokenSelectButton
   const selectedCoin: CoinInfo = useMemo(() => {
-    // If no badge is selected, default to the first option (Default)
+    // If no badge is selected, default to the first option (Highest Balance)
     if (!selectedBadge) {
       return specialOptions[0]
     }

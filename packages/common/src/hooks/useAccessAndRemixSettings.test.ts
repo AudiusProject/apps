@@ -15,7 +15,7 @@ vi.mock('react-redux', () => {
 vi.mock('~/api/', () => ({
   useCurrentUserId: () => ({ data: 123 }),
   useHasNoTokens: () => ({ data: false }),
-  useArtistOwnedCoin: () => ({
+  useArtistCreatedCoin: () => ({
     data: [
       {
         name: 'dank coin',

@@ -291,7 +291,6 @@ export enum Name {
   PROFILE_PAGE_CLICK_TWITTER = 'Profile Page: Go To Twitter',
   PROFILE_PAGE_CLICK_TIKTOK = 'Profile Page: Go To TikTok',
   PROFILE_PAGE_CLICK_WEBSITE = 'ProfilePage: Go To Website',
-  PROFILE_PAGE_CLICK_DONATION = 'ProfilePage: Go To Donation',
   PROFILE_PAGE_SHOWN_ARTIST_RECOMMENDATIONS = 'ProfilePage: Shown Artist Recommendations',
 
   // Track page
@@ -592,6 +591,7 @@ export enum Name {
 
   // Artist Coins
   BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+  BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
 
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
@@ -1488,11 +1488,6 @@ type ProfilePageClickWebsite = {
   handle: string
   website: string
 }
-type ProfilePageClickDonation = {
-  eventName: Name.PROFILE_PAGE_CLICK_DONATION
-  handle: string
-  donation: string
-}
 type ProfilePageShownArtistRecommendations = {
   eventName: Name.PROFILE_PAGE_SHOWN_ARTIST_RECOMMENDATIONS
   userId: number
@@ -1527,7 +1522,8 @@ export enum PlaybackSource {
   EMBED_PLAYER = 'embed player',
   CHAT_TRACK = 'chat_track',
   CHAT_PLAYLIST_TRACK = 'chat_playlist_track',
-  SEARCH_PAGE = 'search page'
+  SEARCH_PAGE = 'search page',
+  EXCLUSIVE_TRACKS_PAGE = 'exclusive tracks page'
 }
 
 type PlaybackPlay = {
@@ -2352,6 +2348,10 @@ type BannerArtistCoinsLaunchClicked = {
   eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
 }
 
+type BannerTradingVolumeLaunchClicked = {
+  eventName: Name.BANNER_TRADING_VOLUME_LAUNCH_CLICKED
+}
+
 type RateCtaDisplayed = {
   eventName: Name.RATE_CTA_DISPLAYED
 }
@@ -3045,6 +3045,7 @@ export type LaunchpadClaimFeesClicked = {
 
 export type LaunchpadClaimFeesSuccess = {
   eventName: Name.LAUNCHPAD_CLAIM_FEES_SUCCESS
+  signatures: string[]
   walletAddress: string
   coinSymbol?: string
   mintAddress?: string
@@ -3095,6 +3096,7 @@ export type LaunchpadClaimVestedCoinsConnectWallet = {
 
 export type LaunchpadClaimVestedCoinsSuccess = {
   eventName: Name.LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS
+  signature: string
   walletAddress: string
   coinSymbol?: string
   mintAddress?: string
@@ -3261,7 +3263,6 @@ export type AllTrackingEvents =
   | ProfilePageClickTwitter
   | ProfilePageClickTikTok
   | ProfilePageClickWebsite
-  | ProfilePageClickDonation
   | ProfilePageShownArtistRecommendations
   | TrackPageDownload
   | TrackPagePlayMore
@@ -3398,6 +3399,7 @@ export type AllTrackingEvents =
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
   | BannerArtistCoinsLaunchClicked
+  | BannerTradingVolumeLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
   | RateCtaResponseYes

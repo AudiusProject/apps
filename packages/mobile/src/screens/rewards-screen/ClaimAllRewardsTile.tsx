@@ -2,10 +2,8 @@ import { useCallback } from 'react'
 
 import {
   formatCooldownChallenges,
-  useChallengeCooldownSchedule,
-  useFeatureFlag
+  useChallengeCooldownSchedule
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { modalsActions } from '@audius/common/store'
 import { Image, View } from 'react-native'
 import { useDispatch } from 'react-redux'
@@ -76,7 +74,6 @@ const useStyles = makeStyles(({ spacing, typography }) => ({
 export const ClaimAllRewardsTile = () => {
   const styles = useStyles()
   const dispatch = useDispatch()
-  const { isEnabled } = useFeatureFlag(FeatureFlags.CLAIM_ALL_REWARDS_TILE)
   const { cooldownChallenges, cooldownAmount, claimableAmount, isEmpty } =
     useChallengeCooldownSchedule({ multiple: true })
 
@@ -84,7 +81,7 @@ export const ClaimAllRewardsTile = () => {
     dispatch(setVisibility({ modal: 'ClaimAllRewards', visible: true }))
   }, [dispatch])
 
-  if (isEmpty || !isEnabled) return null
+  if (isEmpty) return null
 
   return (
     <Paper shadow='near' border='strong' p='l' gap='l'>

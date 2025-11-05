@@ -26,6 +26,8 @@ import {
 } from './routes/launchpad/first_buy_quote'
 import { confirmLaunchCoin, launchCoin } from './routes/launchpad/launch_coin'
 import { listen } from './routes/listen/listen'
+import { swapCoin } from './routes/meteora/swap_coin'
+import { swapCoinQuote } from './routes/meteora/swap_coin_quote'
 import { relay } from './routes/relay/relay'
 
 process.on('unhandledRejection', (reason, promise) => {
@@ -50,6 +52,8 @@ const main = async () => {
   app.get('/solana/launchpad/claim_fees', claimFees)
   app.get('/solana/launchpad/claim_vested_coins', claimVestedCoins)
   app.get('/solana/launchpad/first_buy_quote', firstBuyQuote)
+  app.get('/solana/meteora/swap_coin_quote', swapCoinQuote)
+  app.get('/solana/meteora/swap_coin', swapCoin)
   app.get('/solana/launchpad/config', getLaunchpadConfigRoute)
 
   // Apply middleware for routes that need user/discovery validation

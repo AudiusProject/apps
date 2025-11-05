@@ -13,6 +13,7 @@ import {
   beforeEach
 } from 'vitest'
 
+import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 import {
   mockUserByHandle,
@@ -21,7 +22,8 @@ import {
   mockRelatedUsers,
   mockUserConnectedWallets,
   mockNfts,
-  mockEvents
+  mockEvents,
+  mockUserCreatedCoin
 } from 'test/msw/mswMocks'
 import {
   RenderOptions,
@@ -32,6 +34,14 @@ import {
 } from 'test/test-utils'
 
 import ProfilePage from './ProfilePage'
+
+// Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
+vi.mock('app/ReownAppKitModal', () => ({
+  appkitModal: {
+    getAccount: vi.fn().mockReturnValue(undefined)
+  },
+  wagmiAdapter: {}
+}))
 
 // Need to mock the main content scroll element - otherwise things break
 const mockScrollElement = {
@@ -218,6 +228,8 @@ describe('ProfilePage', () => {
   })
 
   it('shows buy coin UI when the profile belongs to an artist with an owned coin', async () => {
+    mswServer.use(mockUserCreatedCoin(artistUser.id, mockArtistCoin))
+
     // Mock a different current user to simulate viewing another user's profile
     renderProfilePage(
       artistUser, // Use the artistUser who owns the coin
@@ -238,7 +250,7 @@ describe('ProfilePage', () => {
     // Verify that coin-related elements are present when user has coins
     const buyButton = await screen.findByRole('button', { name: 'Buy Coins' })
     expect(buyButton).toBeInTheDocument()
-    expect(await screen.findByText('$TEST')).toBeInTheDocument()
+    expect(await screen.findByText('$MOCK')).toBeInTheDocument()
     expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()
   })
 })

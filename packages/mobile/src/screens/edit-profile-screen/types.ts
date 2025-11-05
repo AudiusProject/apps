@@ -16,7 +16,6 @@ export type ProfileValues = {
   instagram_handle: Nullable<string>
   tiktok_handle: Nullable<string>
   website: Nullable<string>
-  donation: Nullable<string>
   artist_coin_badge: Nullable<ArtistCoinBadge>
   cover_photo: Image
   profile_picture: Image

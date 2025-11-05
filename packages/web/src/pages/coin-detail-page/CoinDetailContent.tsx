@@ -4,6 +4,7 @@ import { BalanceSection } from './components/BalanceSection'
 import { CoinInfoSection } from './components/CoinInfoSection'
 import { CoinInsights } from './components/CoinInsights'
 import { CoinLeaderboardCard } from './components/CoinLeaderboardCard'
+import { ExclusiveTracksSection } from './components/ExclusiveTracksSection'
 
 const LEFT_SECTION_WIDTH = '704px'
 const RIGHT_SECTION_WIDTH = '360px'
@@ -66,6 +67,7 @@ export const CoinDetailContent = ({ mint }: CoinDetailContentProps) => {
       <Flex css={styles.rightSection}>
         <CoinInsights mint={mint} />
         <CoinLeaderboardCard mint={mint} />
+        <ExclusiveTracksSection mint={mint} />
       </Flex>
     </Flex>
   )

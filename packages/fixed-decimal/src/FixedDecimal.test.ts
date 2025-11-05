@@ -65,9 +65,27 @@ describe('FixedDecimal', function () {
       )
     })
 
-    it('throws if using a number that uses scientific notation', function () {
-      expect(() => new FixedDecimal(0.00000000000000001).toString()).toThrow(
-        'Number must not be in scientific notation'
+    it('constructs properly using scientific notation (negative exp)', function () {
+      expect(new FixedDecimal(0.1234567890123456).toString()).toBe(
+        '0.1234567890123456'
+      )
+      expect(new FixedDecimal(1.234567890123456e-20).toString()).toBe(
+        '0.00000000000000000001234567890123456'
+      )
+      expect(new FixedDecimal(-1.234567890123456e-4, 5).toString()).toBe(
+        '-0.00012'
+      )
+    })
+
+    it('constructs properly using scientific notation (positive exp)', function () {
+      expect(new FixedDecimal(10000000000000000).toString()).toBe(
+        '10000000000000000'
+      )
+      expect(new FixedDecimal(1.234567890123456e20).toString()).toBe(
+        '123456789012345600000'
+      )
+      expect(new FixedDecimal(-1.234567890123456e4, 2).toString()).toBe(
+        '-12345.67'
       )
     })
 

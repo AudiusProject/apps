@@ -45,6 +45,7 @@ if (!AAO_AUTH_PASSWORD) {
 }
 
 const rewardAmountRatio = 10
+const skipValidationChallenges = ['dvl']
 
 const sdk = getAudiusSdk()
 
@@ -179,25 +180,26 @@ app.post('/attestation/:handle', async (c) => {
   }
   const user = users[0]!
 
-  // pass / fail
-  const userScore = await getUserNormalizedScore(
-    HashId.parse(user.id),
-    user.wallet
-  )
+  if (!skipValidationChallenges.includes(challengeId)) {
+    // pass / fail
+    const userScore = await getUserNormalizedScore(
+      HashId.parse(user.id),
+      user.wallet
+    )
 
-  // Reward attestation proportional to user score confidence
-  if (userScore.overallScore < (amount as number) / rewardAmountRatio) {
-    return c.json({ error: 'denied' }, 400)
-  }
-
-  // Custom rules for specific challenges
-  if (challengeId === 'e') {
-    if (user.totalAudioBalance < 50) {
+    // Reward attestation proportional to user score confidence
+    if (userScore.overallScore < (amount as number) / rewardAmountRatio) {
       return c.json({ error: 'denied' }, 400)
     }
-  }
-  console.log('userScore', userScore, user)
 
+    // Custom rules for specific challenges
+    if (challengeId === 'e') {
+      if (user.totalAudioBalance < 50) {
+        return c.json({ error: 'denied' }, 400)
+      }
+    }
+    console.log('userScore', userScore, user)
+  }
   try {
     const bnAmount = SolanaUtils.uiAudioToBNWaudio(amount)
     const identifier = SolanaUtils.constructTransferId(

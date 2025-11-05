@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react'
 
 import {
+  useArtistCreatedCoin,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
 } from '@audius/common/api'
-import { ownedCoinsFilter } from '@audius/common/hooks'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { AUDIO_TICKER } from '@audius/common/store'
+import { removeNullable } from '@audius/common/utils'
 import { TouchableOpacity } from 'react-native'
 
 import {
@@ -22,10 +23,12 @@ import {
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { AudioCoinCard } from './AudioCoinCard'
+import { CashCard } from './CashCard'
 import { CoinCard, CoinCardSkeleton, HexagonalSkeleton } from './CoinCard'
 
 const messages = {
-  ...buySellMessages
+  ...buySellMessages,
+  assets: 'Assets'
 }
 
 const YourCoinsSkeleton = () => {
@@ -59,7 +62,7 @@ const YourCoinsHeader = () => {
       borderBottom='default'
     >
       <Text variant='heading' size='s' color='heading'>
-        {messages.coins}
+        {messages.assets}
       </Text>
       <Button variant='secondary' size='small' onPress={handleBuySell}>
         {messages.buySell}
@@ -96,16 +99,28 @@ export const YourCoins = () => {
   const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-
-  const filteredCoins =
-    artistCoins?.filter(ownedCoinsFilter(env.WAUDIO_MINT_ADDRESS)) ?? []
+  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
+  const audioCoin = artistCoins?.find(
+    (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
+  )
+  const otherCoins = artistCoins?.filter(
+    (coin) =>
+      coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
+      coin?.mint !== artistOwnedCoin?.mint &&
+      coin?.balance > 0
+  )
+  const orderedCoins = [
+    audioCoin,
+    artistOwnedCoin,
+    ...(otherCoins ?? [])
+  ].filter(removeNullable)
 
   // Show audio coin card when no coins are available
   const coins =
-    filteredCoins.length === 0 ? ['audio-coin' as const] : filteredCoins
+    orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
 
-  // Add discover artist coins card at the end
-  const cards = [...coins, 'discover-artist-coins' as const]
+  // Add cash card at the beginning, and discover artist coins card at the end
+  const cards = ['cash' as const, ...coins, 'discover-artist-coins' as const]
 
   const handleDiscoverArtistCoins = useCallback(() => {
     navigation.navigate('ArtistCoinsExplore')
@@ -120,7 +135,9 @@ export const YourCoins = () => {
         ) : (
           cards.map((item, idx) => (
             <Box key={typeof item === 'string' ? item : item.mint}>
-              {item === 'discover-artist-coins' ? (
+              {item === 'cash' ? (
+                <CashCard />
+              ) : item === 'discover-artist-coins' ? (
                 <DiscoverArtistCoinsCard onPress={handleDiscoverArtistCoins} />
               ) : item === 'audio-coin' ? (
                 <AudioCoinCard />

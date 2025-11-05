@@ -18,6 +18,7 @@ import * as runtime from '../runtime';
 import type {
   AlbumsResponse,
   AuthorizedApps,
+  BalanceHistoryResponse,
   CollectiblesResponse,
   ConnectedWalletsResponse,
   DeveloperApps,
@@ -56,6 +57,8 @@ import {
     AlbumsResponseToJSON,
     AuthorizedAppsFromJSON,
     AuthorizedAppsToJSON,
+    BalanceHistoryResponseFromJSON,
+    BalanceHistoryResponseToJSON,
     CollectiblesResponseFromJSON,
     CollectiblesResponseToJSON,
     ConnectedWalletsResponseFromJSON,
@@ -311,12 +314,23 @@ export interface GetTracksByUserRequest {
     sortMethod?: GetTracksByUserSortMethodEnum;
     sortDirection?: GetTracksByUserSortDirectionEnum;
     filterTracks?: GetTracksByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksByUserGateConditionEnum>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
 
 export interface GetUserRequest {
     id: string;
+}
+
+export interface GetUserBalanceHistoryRequest {
+    id: string;
+    startTime?: Date;
+    endTime?: Date;
+    granularity?: GetUserBalanceHistoryGranularityEnum;
+    userId?: string;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
 }
 
 export interface GetUserByHandleRequest {
@@ -1544,6 +1558,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['filter_tracks'] = params.filterTracks;
         }
 
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
@@ -1600,6 +1618,61 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getUser(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponse> {
         const response = await this.getUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get the user\'s historical portfolio balance data
+     */
+    async getUserBalanceHistoryRaw(params: GetUserBalanceHistoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BalanceHistoryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserBalanceHistory.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.startTime !== undefined) {
+            queryParameters['start_time'] = (params.startTime as any).toISOString();
+        }
+
+        if (params.endTime !== undefined) {
+            queryParameters['end_time'] = (params.endTime as any).toISOString();
+        }
+
+        if (params.granularity !== undefined) {
+            queryParameters['granularity'] = params.granularity;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/balance/history`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => BalanceHistoryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the user\'s historical portfolio balance data
+     */
+    async getUserBalanceHistory(params: GetUserBalanceHistoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BalanceHistoryResponse> {
+        const response = await this.getUserBalanceHistoryRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -2275,6 +2348,26 @@ export const GetTracksByUserFilterTracksEnum = {
     Unlisted: 'unlisted'
 } as const;
 export type GetTracksByUserFilterTracksEnum = typeof GetTracksByUserFilterTracksEnum[keyof typeof GetTracksByUserFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksByUserGateConditionEnum = typeof GetTracksByUserGateConditionEnum[keyof typeof GetTracksByUserGateConditionEnum];
+/**
+ * @export
+ */
+export const GetUserBalanceHistoryGranularityEnum = {
+    Hourly: 'hourly',
+    Daily: 'daily'
+} as const;
+export type GetUserBalanceHistoryGranularityEnum = typeof GetUserBalanceHistoryGranularityEnum[keyof typeof GetUserBalanceHistoryGranularityEnum];
 /**
  * @export
  */

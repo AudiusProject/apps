@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
@@ -103,9 +101,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
 
-  const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_REPLACE_DOWNLOADS
-  )
   const initiallyHidden = initialValues.is_unlisted
   const isInitiallyScheduled = initialValues.is_scheduled_release
   const usersMayLoseAccess = !isUpload && !initiallyHidden && values.is_unlisted
@@ -381,11 +376,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
         isOpen={isOverflowMenuOpen}
         onClose={handleOverflowMenuClose}
         onReplace={handleReplace}
-        onDownload={
-          !isUpload && isTrackReplaceDownloadsEnabled
-            ? handleDownload
-            : undefined
-        }
+        onDownload={!isUpload ? handleDownload : undefined}
       />
     </>
   )

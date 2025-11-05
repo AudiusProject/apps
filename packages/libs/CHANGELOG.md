@@ -1,5 +1,14 @@
 # @audius/sdk
 
+## 6.0.13
+
+### Patch Changes
+
+- Updated dependencies [98da331]
+- Updated dependencies [0aef321]
+  - @audius/sdk@11.1.2
+  - @audius/fixed-decimal@0.2.1
+
 ## 6.0.12
 
 ### Patch Changes

@@ -1,7 +1,6 @@
 import { useProfileUser } from '@audius/common/src/api/tan-query/users/useProfileUser'
 import { formatCount } from '@audius/common/src/utils/decimal'
 import BadgeArtist from '@audius/harmony/src/assets/icons/ArtistBadge.svg'
-import IconDonate from '@audius/harmony/src/assets/icons/Donate.svg'
 import IconLink from '@audius/harmony/src/assets/icons/Link.svg'
 import { Box } from '@audius/harmony/src/components/layout/Box'
 import { Flex } from '@audius/harmony/src/components/layout/Flex'
@@ -34,12 +33,11 @@ export const MobileServerProfilePage = () => {
     playlist_count,
     follower_count,
     followee_count,
-    donation,
     website
   } = user
 
   const isArtist = track_count > 0
-  const hasEllipsis = donation || website
+  const hasEllipsis = website
   const isDescriptionMinimized = true
 
   return (
@@ -214,19 +212,6 @@ export const MobileServerProfilePage = () => {
               >
                 <IconLink size='m' color='default' />
                 <span>{website}</span>
-              </Flex>
-            ) : null}
-            {donation ? (
-              <Flex
-                justifyContent='flex-start'
-                gap='m'
-                mt='m'
-                css={{ lineHeight: '19px' }}
-              >
-                <IconDonate size='m' color='default' />
-                <ServerUserGeneratedText size='s'>
-                  {donation}
-                </ServerUserGeneratedText>
               </Flex>
             ) : null}
           </Flex>

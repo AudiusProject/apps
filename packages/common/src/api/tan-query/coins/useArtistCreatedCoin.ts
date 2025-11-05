@@ -10,10 +10,10 @@ import { useQueryContext } from '../utils/QueryContext'
 
 import { getArtistCoinQueryKey } from './useArtistCoin'
 
-export const getArtistOwnedCoinQueryKey = (ownerId: ID | null | undefined) =>
-  [QUERY_KEYS.coins, 'owned', ownerId] as unknown as QueryKey<Coin | null>
+export const getArtistCreatedCoinQueryKey = (ownerId: ID | null | undefined) =>
+  [QUERY_KEYS.coins, 'created', ownerId] as unknown as QueryKey<Coin | null>
 
-export const useArtistOwnedCoin = <TResult = Coin | null>(
+export const useArtistCreatedCoin = <TResult = Coin | null>(
   ownerId: ID | null | undefined,
   options?: SelectableQueryOptions<Coin | null, TResult>
 ) => {
@@ -21,7 +21,7 @@ export const useArtistOwnedCoin = <TResult = Coin | null>(
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: getArtistOwnedCoinQueryKey(ownerId),
+    queryKey: getArtistCreatedCoinQueryKey(ownerId),
     queryFn: async () => {
       if (!ownerId) {
         return null

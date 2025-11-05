@@ -154,6 +154,21 @@ export const mockCoinMembersList = (
   http.get(`${apiEndpoint}/v1/coins/${mint}/members`, () =>
     HttpResponse.json({ data: members })
   )
+export const mockUserCreatedCoin = (
+  userId: string,
+  coin: typeof mockArtistCoin
+) => {
+  return http.get(`${apiEndpoint}/v1/coins`, ({ request }) => {
+    const url = new URL(request.url)
+    const ownerId = url.searchParams.get('owner_id')
+
+    if (ownerId && ownerId === userId) {
+      return HttpResponse.json({ data: [coin] })
+    }
+
+    return HttpResponse.json({ data: [] })
+  })
+}
 
 /**
  * Collections

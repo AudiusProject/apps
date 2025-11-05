@@ -384,7 +384,9 @@ export const claimVestedCoins = async (
       remainingLocked: totalAmount
         .sub(escrowState.totalClaimedAmount)
         .sub(availableAmount)
-        .toString()
+        .toString(),
+      userClaimedAmount: userAmount.toString(),
+      rewardsPoolClaimedAmount: rewardsPoolAmount.toString()
     })
   } catch (e) {
     logger.error(e)

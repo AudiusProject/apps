@@ -1,6 +1,6 @@
 {
   "name": "@audius/sdk",
-  "version": "11.1.1",
+  "version": "11.1.2",
   "audius": {
     "releaseSHA": "f1d70a2a0643c5c84d8ab053f70c1e0a2ec3ad49"
   },
@@ -74,7 +74,7 @@
   },
   "dependencies": {
     "@audius/eth": "0.1.0",
-    "@audius/fixed-decimal": "0.2.0",
+    "@audius/fixed-decimal": "0.2.1",
     "@audius/hedgehog": "3.0.0-alpha.1",
     "@audius/spl": "2.1.0",
     "@babel/runtime": "7.18.3",

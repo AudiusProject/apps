@@ -136,6 +136,7 @@ export const optimisticallyUpdateSwapBalances = (
       }
     )
   }
+
   if (outputMint && !isOutputAudio) {
     queryClient.setQueryData(
       getUserCoinQueryKey(outputMint, user?.user_id),
