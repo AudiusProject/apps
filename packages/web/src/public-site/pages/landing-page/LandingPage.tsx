@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
+import { coinPage } from '@audius/common/src/utils/route'
 import { Flex, IconButton, IconClose, Paper, Text } from '@audius/harmony'
 import cn from 'classnames'
 import { ParallaxProvider } from 'react-scroll-parallax'
@@ -10,6 +11,7 @@ import { FanburstBanner } from 'components/banner/FanburstBanner'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
 import Footer from 'public-site/components/Footer'
 import NavBannerV2 from 'public-site/components/NavBanner'
+import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
 import { getPathname } from 'utils/route'
 
@@ -30,15 +32,41 @@ const messages = {
   bannerSubtitle: '$YAK'
 }
 
-const ArtistTakeoverFloatingBanner = ({ onClose }: { onClose: () => void }) => {
+const ArtistTakeoverFloatingBanner = ({
+  onClose,
+  isMobile,
+  setRenderPublicSite
+}: {
+  onClose: () => void
+  isMobile: boolean
+  setRenderPublicSite: (shouldRender: boolean) => void
+}) => {
+  const { history } = useHistoryContext()
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation()
+      handleClickRoute(coinPage('YAK'), setRenderPublicSite, history)()
+    },
+    [setRenderPublicSite, history]
+  )
+
+  const handleClose = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation()
+      onClose()
+    },
+    [onClose]
+  )
+
   return (
     <Paper
-      p='2xl'
+      p={isMobile ? 'l' : '2xl'}
       css={{
         position: 'fixed',
         bottom: 24,
-        left: 48,
-        right: 48,
+        left: isMobile ? 16 : 48,
+        right: isMobile ? 16 : 48,
         maxWidth: 1240,
         margin: '0 auto',
         zIndex: 1000,
@@ -47,13 +75,23 @@ const ArtistTakeoverFloatingBanner = ({ onClose }: { onClose: () => void }) => {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}
+      onClick={handleClick}
     >
       <Flex row alignItems='flex-start' justifyContent='space-between' flex='1'>
         <Flex direction='column' gap='s'>
-          <Text variant='heading' size='l' color='staticWhite'>
+          <Text
+            variant='heading'
+            size={isMobile ? 's' : 'l'}
+            color='staticWhite'
+          >
             {messages.bannerTitle}
           </Text>
-          <Text variant='body' size='l' strength='strong' color='staticWhite'>
+          <Text
+            variant='body'
+            size={isMobile ? 's' : 'l'}
+            strength='strong'
+            color='staticWhite'
+          >
             {messages.bannerSubtitle}
           </Text>
         </Flex>
@@ -62,7 +100,7 @@ const ArtistTakeoverFloatingBanner = ({ onClose }: { onClose: () => void }) => {
           icon={IconClose}
           color='staticWhite'
           size='s'
-          onClick={onClose}
+          onClick={handleClose}
         />
       </Flex>
     </Paper>
@@ -143,9 +181,11 @@ const LandingPage = (props: LandingPageV2Props) => {
             onClose={onDismissFanburstBanner}
           />
         )}
-        {showArtistTakeoverBanner && !props.isMobile ? (
+        {showArtistTakeoverBanner ? (
           <ArtistTakeoverFloatingBanner
+            isMobile={props.isMobile}
             onClose={onDismissArtistTakeoverBanner}
+            setRenderPublicSite={props.setRenderPublicSite}
           />
         ) : null}
         <NavBannerV2
@@ -163,7 +203,10 @@ const LandingPage = (props: LandingPageV2Props) => {
           setRenderPublicSite={props.setRenderPublicSite}
         />
         <Description isMobile={props.isMobile} />
-        <WhoUsesAudius isMobile={props.isMobile} />
+        <WhoUsesAudius
+          isMobile={props.isMobile}
+          setRenderPublicSite={props.setRenderPublicSite}
+        />
         <PlatformFeatures isMobile={props.isMobile} />
         <ArtistInvestors isMobile={props.isMobile} />
         <CTAGetStarted

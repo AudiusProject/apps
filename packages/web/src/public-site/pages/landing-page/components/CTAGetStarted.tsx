@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 
+import { coinPage } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
 import { IconCaretRight } from '@audius/harmony'
 import cn from 'classnames'
@@ -91,7 +92,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
           <div className={styles.title}>{messages.title}</div>
           <button
             onClick={handleClickRoute(
-              TRENDING_PAGE,
+              coinPage('YAK'),
               props.setRenderPublicSite,
               history
             )}

@@ -1,11 +1,14 @@
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useCallback } from 'react'
 
+import { coinPage } from '@audius/common/src/utils/route'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
+import { useHistoryContext } from 'app/HistoryProvider'
 import artistTakeover from 'assets/img/publicSite/Artist-Takeover.webp'
 import useHasViewed from 'hooks/useHasViewed'
+import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import styles from './WhoUsesAudius.module.css'
 
@@ -64,9 +67,12 @@ const takeoverArtists = ['You', 'Already', 'Know', 'YAK'].map((name) => ({
 
 type WhoUsesAudiusProps = {
   isMobile: boolean
+  setRenderPublicSite: (shouldRender: boolean) => void
 }
 
 const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
+  const { history } = useHistoryContext()
+
   // Animate in the title and subtitle text
   const [hasViewed, refInView] = useHasViewed()
   const titleStyles = useSpring({
@@ -75,9 +81,14 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
     x: hasViewed ? 0 : 120
   })
 
-  const goToArtist = useCallback((handle: string) => {
-    window.open(`https://audius.co/${handle}`, '_blank')
-  }, [])
+  // const goToArtist = useCallback((handle: string) => {
+  //   window.open(`https://audius.co/${handle}`, '_blank')
+  // }, [])
+
+  const goToCoinPage = useCallback(() => {
+    // NOTE: Curried function
+    handleClickRoute(coinPage('YAK'), props.setRenderPublicSite, history)()
+  }, [history, props.setRenderPublicSite])
 
   if (props.isMobile) {
     return (
@@ -103,7 +114,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
             <MobileArtist
               key={artist.name}
               {...artist}
-              goToArtist={goToArtist}
+              goToArtist={goToCoinPage}
             />
           ))}
         </div>
@@ -128,7 +139,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
         </animated.div>
         <div className={styles.artistsContainer}>
           {takeoverArtists.map((artist) => (
-            <Artist key={artist.name} {...artist} goToArtist={goToArtist} />
+            <Artist key={artist.name} {...artist} goToArtist={goToCoinPage} />
           ))}
         </div>
       </div>

@@ -65,9 +65,13 @@ const features: Array<Omit<FeatureProps, 'iconPosition'>> = [
   }
 ]
 
-const Feature = (props: FeatureProps) => {
+type PlatformFeaturesProps = {
+  isMobile: boolean
+}
+
+const Feature = (props: FeatureProps & PlatformFeaturesProps) => {
   return (
-    <div className={styles.feature}>
+    <div className={cn(styles.feature, { [styles.isMobile]: props.isMobile })}>
       {props.icon}
       <div className={styles.featureText}>
         <div className={styles.featureTitle}>{props.title}</div>
@@ -75,10 +79,6 @@ const Feature = (props: FeatureProps) => {
       </div>
     </div>
   )
-}
-
-type PlatformFeaturesProps = {
-  isMobile: boolean
 }
 
 const PlatformFeatures = (props: PlatformFeaturesProps) => {
@@ -140,7 +140,7 @@ const PlatformFeatures = (props: PlatformFeaturesProps) => {
           ) : null}
           <div className={styles.features}>
             {features.map((feature) => (
-              <Feature key={feature.title} {...feature} />
+              <Feature key={feature.title} {...props} {...feature} />
             ))}
           </div>
         </div>

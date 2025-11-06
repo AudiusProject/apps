@@ -97,6 +97,10 @@
   gap: 24px;
 }
 
+.isMobile.feature {
+  min-width: auto;
+}
+
 .featureIconContainer {
   min-width: 52px;
   height: 52px;

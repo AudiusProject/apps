@@ -73,7 +73,7 @@
 .ctaButton:hover {
   transform: scale3d(1.03, 1.03, 1.03);
   background-color: #f7f7f7;
-  box-shadow: 0 10px 20px -1px rgba(25, 0, 96, 0.5);
+  box-shadow: 0 10px 20px -1px rgba(96, 25, 0, 0.5);
 }
 
 .ctaButton:active {
