@@ -35,6 +35,15 @@ import {
 
 import ProfilePage from './ProfilePage'
 
+// Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
+vi.mock('app/ReownAppKitModal', () => ({
+  appkitModal: {
+    getAccount: vi.fn().mockReturnValue(undefined),
+    subscribeEvents: vi.fn().mockReturnValue(() => {})
+  },
+  wagmiAdapter: {}
+}))
+
 // Need to mock the main content scroll element - otherwise things break
 const mockScrollElement = {
   addEventListener: vi.fn(),
