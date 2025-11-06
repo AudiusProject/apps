@@ -40,6 +40,15 @@ import {
 
 import { CoinDetailPage } from './CoinDetailPage'
 
+// Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
+vi.mock('app/ReownAppKitModal', () => ({
+  appkitModal: {
+    getAccount: vi.fn().mockReturnValue(undefined),
+    subscribeEvents: vi.fn().mockReturnValue(() => {})
+  },
+  wagmiAdapter: {}
+}))
+
 export function renderCoinDetailPage(
   coin: typeof mockArtistCoin = mockArtistCoin,
   options?: RenderOptions
@@ -356,7 +365,7 @@ const assertCoinInfoSection = async ({
       within(coinInfoSection).getByTestId('unclaimed-fees')
     expect(unclaimedFeesRow).toBeInTheDocument()
     expect(
-      within(unclaimedFeesRow).getByText(/unclaimed fees/i)
+      within(unclaimedFeesRow).getByText(/unclaimed earnings/i)
     ).toBeInTheDocument()
 
     // Check for Claim link within the unclaimed fees row
