@@ -35,8 +35,6 @@ import {
 
 import ProfilePage from './ProfilePage'
 
-
-
 // Need to mock the main content scroll element - otherwise things break
 const mockScrollElement = {
   addEventListener: vi.fn(),
