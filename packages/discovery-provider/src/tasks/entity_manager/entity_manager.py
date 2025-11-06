@@ -225,7 +225,9 @@ def entity_manager_update(
 
             # process in tx order and populate records_to_save
             for tx_receipt in entity_manager_txs:
+                indexing_start_time = time.perf_counter()
                 txhash = to_hex(tx_receipt["transactionHash"])
+                logger.set_context("tx_hash", txhash)
                 entity_manager_event_tx = get_entity_manager_events_tx(
                     update_task, tx_receipt
                 )
@@ -496,6 +498,9 @@ def entity_manager_update(
                         )
                         create_and_raise_indexing_error(indexing_error, session)
                         logger.error(f"skipping transaction hash {indexing_error}")
+
+                indexing_duration = time.perf_counter() - indexing_start_time
+                logger.info(f"Entity manager tx indexed in {indexing_duration:.3f}s")
 
             # compile records_to_save
             save_new_records(
@@ -1024,10 +1029,13 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
             .all()
         )
         existing_entities[EntityType.ASSOCIATED_WALLET] = {
-            wallet.wallet: wallet for wallet, _ in associated_wallets
+            wallet.wallet: [wallet for wallet, _ in associated_wallets]
+            for wallet, _ in associated_wallets
         }
         existing_entities_in_json[EntityType.ASSOCIATED_WALLET] = {
-            (wallet_json["wallet"]): wallet_json
+            wallet_json["wallet"]: [
+                wallet_json for _, wallet_json in associated_wallets
+            ]
             for _, wallet_json in associated_wallets
         }
 
@@ -1394,7 +1402,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReaction,
                 literal_column(f"row_to_json({CommentReaction.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentReaction.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.COMMENT_REACTION] = {
@@ -1441,7 +1449,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentMention,
                 literal_column(f"row_to_json({CommentMention.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentMention.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
 
@@ -1473,7 +1481,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 MutedUser,
                 literal_column(f"row_to_json({MutedUser.__tablename__})"),
             )
-            .filter(or_(*or_queries), MutedUser.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.MUTED_USER] = {
@@ -1506,7 +1514,7 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
                 CommentReport,
                 literal_column(f"row_to_json({CommentReport.__tablename__})"),
             )
-            .filter(or_(*or_queries), CommentReport.is_delete == False)
+            .filter(or_(*or_queries))
             .all()
         )
         existing_entities[EntityType.COMMENT_REPORT] = {

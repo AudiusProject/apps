@@ -3,8 +3,7 @@ import { MouseEvent, useCallback, useState } from 'react'
 import { useFileSizes, useStems, useTrack } from '@audius/common/api'
 import {
   useDownloadableContentAccess,
-  useUploadingStems,
-  useFeatureFlag
+  useUploadingStems
 } from '@audius/common/hooks'
 import {
   Name,
@@ -13,7 +12,6 @@ import {
   ID,
   StemCategory
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
@@ -96,10 +94,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
     (s) => !stemTracks.find((t) => t.orig_filename === s.name)
   )
   const isUploadingStems = filteredUploadingStems.length > 0
-
-  const { isEnabled: isDownloadAllTrackFilesEnabled } = useFeatureFlag(
-    FeatureFlags.DOWNLOAD_ALL_TRACK_FILES
-  )
 
   const downloadQuality = DownloadQuality.ORIGINAL
   const shouldHideDownload =
@@ -211,7 +205,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   )
 
   const renderDownloadAllButton = () => {
-    if (shouldHideDownload || !isDownloadAllTrackFilesEnabled) {
+    if (shouldHideDownload) {
       return null
     }
 

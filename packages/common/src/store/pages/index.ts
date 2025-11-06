@@ -77,15 +77,6 @@ export {
 } from './remixes/slice'
 export * as remixesPageSelectors from './remixes/selectors'
 
-export {
-  default as aiPageLineupReducer,
-  initialState as aiPageLineupInitialState
-} from './ai/lineup/reducer'
-export { tracksActions as aiPageLineupActions } from './ai/lineup/actions'
-export { default as aiPageReducer, actions as aiPageActions } from './ai/slice'
-export type { FetchAiUserAction } from './ai/slice'
-export * as aiPageSelectors from './ai/selectors'
-
 export { default as profilePageFeedLineupReducer } from './profile/lineups/feed/reducer'
 export { feedActions as profilePageFeedLineupActions } from './profile/lineups/feed/actions'
 export { default as profilePageTracksLineupReducer } from './profile/lineups/tracks/reducer'
@@ -128,3 +119,14 @@ export * from './chat'
 export { default as premiumTracksPageLineupReducer } from './premium-tracks/lineup/reducer'
 export * as premiumTracksPageLineupSelectors from './premium-tracks/lineup/selectors'
 export { premiumTracksActions as premiumTracksPageLineupActions } from './premium-tracks/lineup/actions'
+
+export {
+  default as exclusiveTracksPageLineupReducer,
+  initialState as exclusiveTracksPageLineupInitialState
+} from './exclusive-tracks/lineup/reducer'
+export { tracksActions as exclusiveTracksPageLineupActions } from './exclusive-tracks/lineup/actions'
+export {
+  default as exclusiveTracksPageReducer,
+  actions as exclusiveTracksPageActions
+} from './exclusive-tracks/slice'
+export * as exclusiveTracksPageSelectors from './exclusive-tracks/selectors'

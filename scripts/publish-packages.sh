@@ -3,9 +3,6 @@
 
 set -e
 
-echo "Installing playwright..."
-npx playwright install
-
 echo "Running build, lint, typecheck, and test..."
 # Ensure that all public packages are in this list,
 # otherwise they won't get built/linted/tested before being published

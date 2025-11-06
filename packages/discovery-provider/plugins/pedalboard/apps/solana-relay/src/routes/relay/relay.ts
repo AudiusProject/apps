@@ -18,7 +18,6 @@ import { verifySignatures } from '../../utils/verifySignatures'
 
 import { InvalidRelayInstructionError } from './InvalidRelayInstructionError'
 import { assertRelayAllowedInstructions } from './assertRelayAllowedInstructions'
-import { associateExternalWallet } from './associateExternalWallet'
 
 /**
  * Gets the specified fee payer's key pair from the config.
@@ -108,13 +107,6 @@ export const relay = async (
       }
       transaction.sign([feePayerKeyPair])
     } else if (verifySignatures(transaction)) {
-      if (res.locals.signerUser?.user_id) {
-        res.locals.logger.info('Associating external wallet...')
-        await associateExternalWallet(
-          transaction,
-          res.locals.signerUser?.user_id
-        )
-      }
       res.locals.logger.info(
         `Transaction already signed by '${feePayerKey.toBase58()}'`
       )

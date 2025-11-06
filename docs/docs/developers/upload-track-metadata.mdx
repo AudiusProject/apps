@@ -25,7 +25,6 @@ Contains required and optional fields for uploading a track.
   releaseDate?: Date; // Should not be in the future. Defaults to today's date.
   tags?: string; // Comma separated list of tags
   remixOf?: { tracks: Array<{ parentTrackId: string }> }; // For specifying the track(s) that your track is a remix of
-  aiAttributionUserId?: string; // Audius user ID of the artist whom your AI-generated track was trained on. Note: Only artists who have opted into AI attribution can be used.
   isStreamGated?: boolean; // Whether streaming your track is only available to users who meet certain criteria, which must be specified by `streamConditions`.
   streamConditions?: AccessConditions; // See "Specifying Stream Conditions" section below
   isDownloadGated?: boolean; // Whether downloading your track is only available to users who meet certain criteria, which must be specified by `downloadConditions`. Note that stream gated tracks are automatically download gated, whereas the reverse is not true.
@@ -70,7 +69,6 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     releaseDate: new Date('2022-09-30'),
     tags: 'plantlife,love,monstera',
     remixOf: { tracks: [{ parentTrackId: 'KVx2xpO' }] },
-    aiAttributionUserId: '3aE1p',
     isStreamGated: true,
     streamConditions: {
       tipUserId: '7eP5n', // Require tipping user to unlock track for streaming

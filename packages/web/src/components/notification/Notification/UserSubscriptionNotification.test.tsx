@@ -40,7 +40,6 @@ const mockUser = {
   verified_with_instagram: false,
   verified_with_tiktok: false,
   website: null,
-  donation: null,
   location: 'Austin, TX',
   name: 'awdawd123123123',
   playlist_count: 0,
@@ -77,7 +76,6 @@ const mockUser = {
   profile_picture_sizes: '01JWEPE58J4MS4JJXE720W939N',
   profile_picture_cids: null,
   profile_picture_legacy: null,
-  allow_ai_attribution: false,
   artist_pick_track_id: null,
   profile_picture: {
     '150x150':
@@ -148,7 +146,6 @@ const mockTrack = {
   is_delete: false,
   cover_art: null,
   is_available: true,
-  ai_attribution_user_id: null,
   allowed_api_keys: null,
   audio_upload_id: '01JWH4AVTKEZTA3P5B7744EKXW',
   preview_start_seconds: null,

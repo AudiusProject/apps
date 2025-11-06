@@ -125,7 +125,8 @@ export const UpdateProfileSchema = z
         twitterHandle: z.optional(z.string()),
         instagramHandle: z.optional(z.string()),
         tiktokHandle: z.optional(z.string()),
-        splUsdcPayoutWallet: z.optional(SolanaAddressSchema).nullable()
+        splUsdcPayoutWallet: z.optional(SolanaAddressSchema).nullable(),
+        coinFlairMint: z.optional(z.string().nullable())
       })
       .strict()
   })

@@ -1,5 +1,3 @@
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { formatCount } from '@audius/common/utils'
 import {
   Flex,
@@ -40,9 +38,6 @@ const StatsButtonRow = ({
   onClickComments,
   listenCount = 0
 }: StatsButtonRowProps) => {
-  const { isEnabled: isCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
   if (!showListenCount && !showFavoriteCount && !showRepostCount) return null
 
   const renderListenCount = () => (
@@ -72,7 +67,7 @@ const StatsButtonRow = ({
       {showListenCount ? renderListenCount() : null}
       {showRepostCount ? renderRepostCount() : null}
       {showFavoriteCount ? renderFavoriteCount() : null}
-      {isCommentsEnabled && showCommentCount ? renderCommentCount() : null}
+      {showCommentCount ? renderCommentCount() : null}
     </Flex>
   )
 }

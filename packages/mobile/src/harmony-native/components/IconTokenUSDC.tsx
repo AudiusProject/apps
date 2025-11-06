@@ -1,7 +1,7 @@
 import type { ImageProps } from 'react-native'
 import { Image } from 'react-native'
 
-import LogoCircleUSDC from 'app/assets/images/LogoCircleUSDC.png'
+import LogoCircleUSDC from 'app/assets/images/LogoCircleUSDC.jpg'
 
 import { iconSizes, type IconSize } from '../foundations'
 

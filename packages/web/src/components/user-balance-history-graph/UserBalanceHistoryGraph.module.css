@@ -1,0 +1,38 @@
+/* Tooltip styles - used by custom Chart.js tooltip rendering */
+
+.tooltip {
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.tooltipContent {
+  background: var(--harmony-secondary);
+  color: var(--harmony-white);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow:
+    0px 2px 4px rgba(0, 0, 0, 0.08),
+    0px 0px 6px rgba(0, 0, 0, 0.02);
+  text-align: center;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tooltipDate {
+  font-family: 'Avenir Next LT Pro', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tooltipValue {
+  font-family: 'Avenir Next LT Pro', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}

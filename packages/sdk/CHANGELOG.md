@@ -1,5 +1,19 @@
 # @audius/sdk
 
+## 11.1.2
+
+### Patch Changes
+
+- 98da331: Claim vested coins
+- Updated dependencies [0aef321]
+  - @audius/fixed-decimal@0.2.1
+
+## 11.1.1
+
+### Patch Changes
+
+- 40e5b07: Update hompeage URL
+
 ## 11.1.0
 
 ### Minor Changes

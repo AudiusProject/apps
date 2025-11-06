@@ -68,21 +68,12 @@ export const priceAndAudienceMessages = {
 export const advancedTrackMessages = {
   title: 'Advanced',
   description: 'Share metadata to help manage your music.',
-  isAiGenerated: 'AI-Generated',
   bpm: {
     header: 'Tempo',
     label: 'BPM',
     validError: 'Must be a valid decimal number'
   },
   musicalKey: 'Key',
-  aiGenerated: {
-    header: 'AI Generated',
-    description: 'Mark this track as AI generated',
-    tooltip:
-      'If your AI-generated track was trained on an existing Audius artist, you can give them credit here. Only users who have opted-in will appear in this list.',
-    placeholder: 'Search for Users',
-    requiredError: 'Valid user must be selected.'
-  },
   apiAllowed: {
     header: 'Disallow Streaming via the API',
     description:

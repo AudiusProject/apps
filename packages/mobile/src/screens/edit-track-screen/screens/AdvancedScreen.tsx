@@ -1,6 +1,4 @@
-import { useFeatureFlag } from '@audius/common/hooks'
 import { advancedTrackMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { useField } from 'formik'
 
 import { IconIndent } from '@audius/harmony-native'
@@ -19,12 +17,6 @@ import { KeyBpmField } from '../fields/KeyBpmField'
 export const AdvancedScreen = () => {
   const [{ value: isUpload }] = useField('isUpload')
   const [{ value: isUnlisted }] = useField('is_unlisted')
-  const { isEnabled: isCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-  const { isEnabled: isRightsAndCoversEnabled } = useFeatureFlag(
-    FeatureFlags.RIGHTS_AND_COVERS
-  )
 
   return (
     <FormScreen
@@ -36,18 +28,14 @@ export const AdvancedScreen = () => {
       <SubmenuList>
         {isUnlisted ? <></> : <ReleaseDateField />}
         {isUpload ? <></> : <KeyBpmField />}
-        {isCommentsEnabled ? (
-          <SwitchRowField
-            name='comments_disabled'
-            label={messages.disableComments.header}
-            description={messages.disableComments.description}
-          />
-        ) : (
-          <></>
-        )}
+        <SwitchRowField
+          name='comments_disabled'
+          label={messages.disableComments.header}
+          description={messages.disableComments.description}
+        />
         <LicenseTypeField />
         <IsrcField />
-        {isRightsAndCoversEnabled ? <CoverAttributionField /> : <></>}
+        <CoverAttributionField />
       </SubmenuList>
     </FormScreen>
   )

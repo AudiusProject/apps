@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
@@ -103,12 +101,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
 
-  const { isEnabled: isTrackReplaceEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_AUDIO_REPLACE
-  )
-  const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_REPLACE_DOWNLOADS
-  )
   const initiallyHidden = initialValues.is_unlisted
   const isInitiallyScheduled = initialValues.is_scheduled_release
   const usersMayLoseAccess = !isUpload && !initiallyHidden && values.is_unlisted
@@ -345,23 +337,21 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
           <>
             <KeyboardAwareScrollView>
               <Tile style={styles.tile}>
-                {isTrackReplaceEnabled ? (
-                  <Flex pt='l' ph='l'>
-                    <FileReplaceContainer
-                      fileName={
-                        selectedTrack?.file.name ||
-                        origFilename ||
-                        values.title ||
-                        messages.untitled
-                      }
-                      // @ts-ignore
-                      filePath={selectedTrackFile || streamUrl || ''}
-                      trackId={values.track_id}
-                      isUpload={isUpload}
-                      onMenuButtonPress={handleOverflowMenuOpen}
-                    />
-                  </Flex>
-                ) : null}
+                <Flex pt='l' ph='l'>
+                  <FileReplaceContainer
+                    fileName={
+                      selectedTrack?.file.name ||
+                      origFilename ||
+                      values.title ||
+                      messages.untitled
+                    }
+                    // @ts-ignore
+                    filePath={selectedTrackFile || streamUrl || ''}
+                    trackId={values.track_id}
+                    isUpload={isUpload}
+                    onMenuButtonPress={handleOverflowMenuOpen}
+                  />
+                </Flex>
                 <PickArtworkField name='artwork' isUpload={isUpload} />
                 <TextField name='title' label={messages.trackName} required />
                 <SubmenuList>
@@ -386,11 +376,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
         isOpen={isOverflowMenuOpen}
         onClose={handleOverflowMenuClose}
         onReplace={handleReplace}
-        onDownload={
-          !isUpload && isTrackReplaceDownloadsEnabled
-            ? handleDownload
-            : undefined
-        }
+        onDownload={!isUpload ? handleDownload : undefined}
       />
     </>
   )

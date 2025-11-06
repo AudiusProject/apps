@@ -1,7 +1,6 @@
 import { Suspense, useCallback, useState } from 'react'
 
 import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SquareSizes,
   isContentUSDCPurchaseGated,
@@ -11,7 +10,6 @@ import {
   AccessConditions,
   isContentTokenGated
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { OverflowAction, PurchaseableContentType } from '@audius/common/store'
 import { Nullable, formatReleaseDate, dayjs } from '@audius/common/utils'
 import {
@@ -27,7 +25,6 @@ import {
   IconArtistCoin
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
-import IconRobot from '@audius/harmony/src/assets/icons/Robot.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
 import IconVisibilityHidden from '@audius/harmony/src/assets/icons/VisibilityHidden.svg'
 import cn from 'classnames'
@@ -36,7 +33,6 @@ import { useDispatch } from 'react-redux'
 import { DownloadMobileAppDrawer } from 'components/download-mobile-app-drawer/DownloadMobileAppDrawer'
 import { UserLink } from 'components/link'
 import { SearchTag } from 'components/search-bar/SearchTag'
-import { AiTrackSection } from 'components/track/AiTrackSection'
 import { GatedContentSection } from 'components/track/GatedContentSection'
 import { TrackArtwork } from 'components/track/TrackArtwork'
 import { TrackDogEar } from 'components/track/TrackDogEar'
@@ -134,7 +130,6 @@ type TrackHeaderProps = {
   isRemix: boolean
   fieldVisibility: FieldVisibility
   coSign: Remix | null
-  aiAttributedUserId: Nullable<ID>
   onClickMobileOverflow: (
     trackId: ID,
     overflowActions: OverflowAction[]
@@ -174,7 +169,6 @@ const TrackHeader = ({
   commentCount,
   commentsDisabled,
   tags,
-  aiAttributedUserId,
   onPlay,
   onPreview,
   onShare,
@@ -219,11 +213,8 @@ const TrackHeader = ({
   const albumInfo = album_backlink
   const shouldShowScheduledRelease =
     release_date && dayjs(release_date).isAfter(dayjs())
-  const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST
-  )
   const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = isRemixContestEnabled && !!remixContest
+  const isRemixContest = !!remixContest
 
   const imageElement = (
     <TrackArtwork
@@ -348,11 +339,6 @@ const TrackHeader = ({
       <Flex column gap='l' alignItems='center'>
         <Flex gap='s' column>
           {renderHeaderText()}
-          {aiAttributedUserId ? (
-            <MusicBadge icon={IconRobot} color='lightGreen' size='s'>
-              {messages.generatedWithAi}
-            </MusicBadge>
-          ) : null}
           {trendingRank ? (
             <MusicBadge color='blue' icon={IconTrending} size='s'>
               {trendingRank}
@@ -442,13 +428,6 @@ const TrackHeader = ({
           onClickReposts={onClickReposts}
           onClickComments={onClickComments}
         />
-        {aiAttributedUserId ? (
-          <AiTrackSection
-            attributedUserId={aiAttributedUserId}
-            className={cn(styles.aiSection, styles.withSectionDivider)}
-            descriptionClassName={styles.aiSectionDescription}
-          />
-        ) : null}
 
         {description ? (
           <TrackDescription

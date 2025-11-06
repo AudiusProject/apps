@@ -102,6 +102,7 @@ export enum WalletChain {
 }
 
 export enum Table {
+  SequelizeMeta = "SequelizeMeta",
   AccessKeys = "access_keys",
   AggregateDailyAppNameMetrics = "aggregate_daily_app_name_metrics",
   AggregateDailyTotalUsersMetrics = "aggregate_daily_total_users_metrics",
@@ -123,6 +124,7 @@ export enum Table {
   ApiMetricsRoutes = "api_metrics_routes",
   AppNameMetrics = "app_name_metrics",
   ArtistCoinPools = "artist_coin_pools",
+  ArtistCoinPrices = "artist_coin_prices",
   ArtistCoinStats = "artist_coin_stats",
   ArtistCoins = "artist_coins",
   AssociatedWallets = "associated_wallets",
@@ -152,12 +154,18 @@ export enum Table {
   CoreAppState = "core_app_state",
   CoreBlocks = "core_blocks",
   CoreDbMigrations = "core_db_migrations",
+  CoreDeals = "core_deals",
   CoreErn = "core_ern",
   CoreIndexedBlocks = "core_indexed_blocks",
   CoreMead = "core_mead",
+  CoreParties = "core_parties",
   CorePie = "core_pie",
+  CoreReleases = "core_releases",
+  CoreResources = "core_resources",
+  CoreRewards = "core_rewards",
   CoreTransactions = "core_transactions",
   CoreTxStats = "core_tx_stats",
+  CoreUploads = "core_uploads",
   CoreValidators = "core_validators",
   Countries = "countries",
   DashboardWalletUsers = "dashboard_wallet_users",
@@ -180,17 +188,18 @@ export enum Table {
   ManagementKeys = "management_keys",
   Milestones = "milestones",
   MutedUsers = "muted_users",
+  NewTracks = "new_tracks",
   Notification = "notification",
   NotificationSeen = "notification_seen",
   PaymentRouterTxs = "payment_router_txs",
   PgStatStatements = "pg_stat_statements",
-  PgStatStatementsInfo = "pg_stat_statements_info",
   PlaylistRoutes = "playlist_routes",
   PlaylistSeen = "playlist_seen",
   PlaylistTracks = "playlist_tracks",
   PlaylistTrendingScores = "playlist_trending_scores",
   Playlists = "playlists",
   Plays = "plays",
+  Pubkeys = "pubkeys",
   Reactions = "reactions",
   RelatedArtists = "related_artists",
   Remixes = "remixes",
@@ -202,26 +211,41 @@ export enum Table {
   RpcCursor = "rpc_cursor",
   RpcError = "rpc_error",
   RpcLog = "rpc_log",
+  Rpclog = "rpclog",
   Saves = "saves",
   SchemaMigrations = "schema_migrations",
   SchemaVersion = "schema_version",
   Shares = "shares",
   SkippedTransactions = "skipped_transactions",
-  SlaAuditorVersionData = "sla_auditor_version_data",
   SlaNodeReports = "sla_node_reports",
   SlaRollups = "sla_rollups",
   SolClaimableAccountTransfers = "sol_claimable_account_transfers",
   SolClaimableAccounts = "sol_claimable_accounts",
   SolKeypairs = "sol_keypairs",
+  SolLockerVestingEscrows = "sol_locker_vesting_escrows",
+  SolMeteoraDammV2PoolBaseFees = "sol_meteora_damm_v2_pool_base_fees",
+  SolMeteoraDammV2PoolDynamicFees = "sol_meteora_damm_v2_pool_dynamic_fees",
+  SolMeteoraDammV2PoolFees = "sol_meteora_damm_v2_pool_fees",
+  SolMeteoraDammV2PoolMetrics = "sol_meteora_damm_v2_pool_metrics",
+  SolMeteoraDammV2Pools = "sol_meteora_damm_v2_pools",
+  SolMeteoraDammV2PositionMetrics = "sol_meteora_damm_v2_position_metrics",
+  SolMeteoraDammV2Positions = "sol_meteora_damm_v2_positions",
+  SolMeteoraDbcConfigFees = "sol_meteora_dbc_config_fees",
+  SolMeteoraDbcConfigVestings = "sol_meteora_dbc_config_vestings",
+  SolMeteoraDbcConfigs = "sol_meteora_dbc_configs",
+  SolMeteoraDbcMigrations = "sol_meteora_dbc_migrations",
+  SolMeteoraDbcPoolMetrics = "sol_meteora_dbc_pool_metrics",
+  SolMeteoraDbcPoolVolatilityTrackers = "sol_meteora_dbc_pool_volatility_trackers",
+  SolMeteoraDbcPools = "sol_meteora_dbc_pools",
   SolPayments = "sol_payments",
   SolPurchases = "sol_purchases",
+  SolRetryQueue = "sol_retry_queue",
   SolRewardDisbursements = "sol_reward_disbursements",
+  SolRewardManagerInits = "sol_reward_manager_inits",
   SolSlotCheckpoints = "sol_slot_checkpoints",
-  SolSwaps = "sol_swaps",
   SolTokenAccountBalanceChanges = "sol_token_account_balance_changes",
   SolTokenAccountBalances = "sol_token_account_balances",
   SolTokenTransfers = "sol_token_transfers",
-  SolUnprocessedTxs = "sol_unprocessed_txs",
   SolUserBalances = "sol_user_balances",
   SoundRecordings = "sound_recordings",
   SplTokenTx = "spl_token_tx",
@@ -242,21 +266,27 @@ export enum Table {
   UsdcTransactionsHistory = "usdc_transactions_history",
   UsdcUserBankAccounts = "usdc_user_bank_accounts",
   UserBalanceChanges = "user_balance_changes",
+  UserBalanceHistory = "user_balance_history",
   UserBalances = "user_balances",
   UserBankAccounts = "user_bank_accounts",
   UserBankTxs = "user_bank_txs",
   UserChallenges = "user_challenges",
   UserDelistStatuses = "user_delist_statuses",
+  UserDistinctPlayHours = "user_distinct_play_hours",
+  UserDistinctPlayTracks = "user_distinct_play_tracks",
   UserEvents = "user_events",
   UserListeningHistory = "user_listening_history",
   UserPayoutWalletHistory = "user_payout_wallet_history",
   UserPubkeys = "user_pubkeys",
+  UserScoreFeatures = "user_score_features",
   UserTips = "user_tips",
   Users = "users",
   ValidatorHistory = "validator_history",
+  VolumeLeaderExclusions = "volume_leader_exclusions",
 }
 
 export type Tables = {
+  "SequelizeMeta": SequelizeMeta,
   "access_keys": AccessKeys,
   "aggregate_daily_app_name_metrics": AggregateDailyAppNameMetrics,
   "aggregate_daily_total_users_metrics": AggregateDailyTotalUsersMetrics,
@@ -278,6 +308,7 @@ export type Tables = {
   "api_metrics_routes": ApiMetricsRoutes,
   "app_name_metrics": AppNameMetrics,
   "artist_coin_pools": ArtistCoinPools,
+  "artist_coin_prices": ArtistCoinPrices,
   "artist_coin_stats": ArtistCoinStats,
   "artist_coins": ArtistCoins,
   "associated_wallets": AssociatedWallets,
@@ -307,12 +338,18 @@ export type Tables = {
   "core_app_state": CoreAppState,
   "core_blocks": CoreBlocks,
   "core_db_migrations": CoreDbMigrations,
+  "core_deals": CoreDeals,
   "core_ern": CoreErn,
   "core_indexed_blocks": CoreIndexedBlocks,
   "core_mead": CoreMead,
+  "core_parties": CoreParties,
   "core_pie": CorePie,
+  "core_releases": CoreReleases,
+  "core_resources": CoreResources,
+  "core_rewards": CoreRewards,
   "core_transactions": CoreTransactions,
   "core_tx_stats": CoreTxStats,
+  "core_uploads": CoreUploads,
   "core_validators": CoreValidators,
   "countries": Countries,
   "dashboard_wallet_users": DashboardWalletUsers,
@@ -335,17 +372,18 @@ export type Tables = {
   "management_keys": ManagementKeys,
   "milestones": Milestones,
   "muted_users": MutedUsers,
+  "new_tracks": NewTracks,
   "notification": Notification,
   "notification_seen": NotificationSeen,
   "payment_router_txs": PaymentRouterTxs,
   "pg_stat_statements": PgStatStatements,
-  "pg_stat_statements_info": PgStatStatementsInfo,
   "playlist_routes": PlaylistRoutes,
   "playlist_seen": PlaylistSeen,
   "playlist_tracks": PlaylistTracks,
   "playlist_trending_scores": PlaylistTrendingScores,
   "playlists": Playlists,
   "plays": Plays,
+  "pubkeys": Pubkeys,
   "reactions": Reactions,
   "related_artists": RelatedArtists,
   "remixes": Remixes,
@@ -357,26 +395,41 @@ export type Tables = {
   "rpc_cursor": RpcCursor,
   "rpc_error": RpcError,
   "rpc_log": RpcLog,
+  "rpclog": Rpclog,
   "saves": Saves,
   "schema_migrations": SchemaMigrations,
   "schema_version": SchemaVersion,
   "shares": Shares,
   "skipped_transactions": SkippedTransactions,
-  "sla_auditor_version_data": SlaAuditorVersionData,
   "sla_node_reports": SlaNodeReports,
   "sla_rollups": SlaRollups,
   "sol_claimable_account_transfers": SolClaimableAccountTransfers,
   "sol_claimable_accounts": SolClaimableAccounts,
   "sol_keypairs": SolKeypairs,
+  "sol_locker_vesting_escrows": SolLockerVestingEscrows,
+  "sol_meteora_damm_v2_pool_base_fees": SolMeteoraDammV2PoolBaseFees,
+  "sol_meteora_damm_v2_pool_dynamic_fees": SolMeteoraDammV2PoolDynamicFees,
+  "sol_meteora_damm_v2_pool_fees": SolMeteoraDammV2PoolFees,
+  "sol_meteora_damm_v2_pool_metrics": SolMeteoraDammV2PoolMetrics,
+  "sol_meteora_damm_v2_pools": SolMeteoraDammV2Pools,
+  "sol_meteora_damm_v2_position_metrics": SolMeteoraDammV2PositionMetrics,
+  "sol_meteora_damm_v2_positions": SolMeteoraDammV2Positions,
+  "sol_meteora_dbc_config_fees": SolMeteoraDbcConfigFees,
+  "sol_meteora_dbc_config_vestings": SolMeteoraDbcConfigVestings,
+  "sol_meteora_dbc_configs": SolMeteoraDbcConfigs,
+  "sol_meteora_dbc_migrations": SolMeteoraDbcMigrations,
+  "sol_meteora_dbc_pool_metrics": SolMeteoraDbcPoolMetrics,
+  "sol_meteora_dbc_pool_volatility_trackers": SolMeteoraDbcPoolVolatilityTrackers,
+  "sol_meteora_dbc_pools": SolMeteoraDbcPools,
   "sol_payments": SolPayments,
   "sol_purchases": SolPurchases,
+  "sol_retry_queue": SolRetryQueue,
   "sol_reward_disbursements": SolRewardDisbursements,
+  "sol_reward_manager_inits": SolRewardManagerInits,
   "sol_slot_checkpoints": SolSlotCheckpoints,
-  "sol_swaps": SolSwaps,
   "sol_token_account_balance_changes": SolTokenAccountBalanceChanges,
   "sol_token_account_balances": SolTokenAccountBalances,
   "sol_token_transfers": SolTokenTransfers,
-  "sol_unprocessed_txs": SolUnprocessedTxs,
   "sol_user_balances": SolUserBalances,
   "sound_recordings": SoundRecordings,
   "spl_token_tx": SplTokenTx,
@@ -397,18 +450,27 @@ export type Tables = {
   "usdc_transactions_history": UsdcTransactionsHistory,
   "usdc_user_bank_accounts": UsdcUserBankAccounts,
   "user_balance_changes": UserBalanceChanges,
+  "user_balance_history": UserBalanceHistory,
   "user_balances": UserBalances,
   "user_bank_accounts": UserBankAccounts,
   "user_bank_txs": UserBankTxs,
   "user_challenges": UserChallenges,
   "user_delist_statuses": UserDelistStatuses,
+  "user_distinct_play_hours": UserDistinctPlayHours,
+  "user_distinct_play_tracks": UserDistinctPlayTracks,
   "user_events": UserEvents,
   "user_listening_history": UserListeningHistory,
   "user_payout_wallet_history": UserPayoutWalletHistory,
   "user_pubkeys": UserPubkeys,
+  "user_score_features": UserScoreFeatures,
   "user_tips": UserTips,
   "users": Users,
   "validator_history": ValidatorHistory,
+  "volume_leader_exclusions": VolumeLeaderExclusions,
+};
+
+export type SequelizeMeta = {
+  name: string;
 };
 
 export type AccessKeys = {
@@ -515,7 +577,7 @@ export type AggregateUser = {
   dominant_genre: string | null;
   dominant_genre_count: number | null;
   score: number | null;
-  total_track_count: string | null;
+  total_track_count: number | null;
   track_share_count: number | null;
 };
 
@@ -601,10 +663,16 @@ export type ArtistCoinPools = {
   is_migrated: boolean | null;
   created_at: Date;
   updated_at: Date;
-  claimed_creator_base_fee: string | null;
-  claimed_creator_quote_fee: string | null;
   total_trading_quote_fee: string | null;
   creator_wallet_address: string | null;
+};
+
+export type ArtistCoinPrices = {
+  mint: string | null;
+  damm_v2_price: number | null;
+  dbc_price: number | null;
+  stats_price: number | null;
+  price: number | null;
 };
 
 export type ArtistCoinStats = {
@@ -650,6 +718,15 @@ export type ArtistCoinStats = {
   number_markets: number | null;
   created_at: Date;
   updated_at: Date;
+  total_volume: number | null;
+  total_volume_usd: number | null;
+  volume_buy: number | null;
+  volume_buy_usd: number | null;
+  volume_sell: number | null;
+  volume_sell_usd: number | null;
+  buy: number | null;
+  sell: number | null;
+  total_trade: number | null;
 };
 
 export type ArtistCoins = {
@@ -667,14 +744,15 @@ export type ArtistCoins = {
   link_2: string | null;
   link_3: string | null;
   link_4: string | null;
+  damm_v2_pool: string | null;
 };
 
 export type AssociatedWallets = {
   id: number;
   user_id: number;
   wallet: string;
-  blockhash?: string | null;
-  blocknumber?: number | null;
+  blockhash: string | null;
+  blocknumber: number | null;
   is_current: boolean;
   is_delete: boolean;
   chain: WalletChain;
@@ -909,6 +987,16 @@ export type CoreDbMigrations = {
   applied_at: Date | null;
 };
 
+export type CoreDeals = {
+  address: string;
+  ern_address: string;
+  entity_type: string;
+  entity_index: number;
+  tx_hash: string;
+  block_height: string;
+  created_at: Date | null;
+};
+
 export type CoreErn = {
   id: string;
   address: string;
@@ -916,10 +1004,6 @@ export type CoreErn = {
   tx_hash: string;
   sender: string;
   message_control_type: number;
-  party_addresses: string[] | null;
-  resource_addresses: string[] | null;
-  release_addresses: string[] | null;
-  deal_addresses: string[] | null;
   raw_message: Buffer;
   raw_acknowledgment: Buffer;
   block_height: string;
@@ -947,6 +1031,16 @@ export type CoreMead = {
   block_height: string;
 };
 
+export type CoreParties = {
+  address: string;
+  ern_address: string;
+  entity_type: string;
+  entity_index: number;
+  tx_hash: string;
+  block_height: string;
+  created_at: Date | null;
+};
+
 export type CorePie = {
   id: string;
   address: string;
@@ -957,6 +1051,42 @@ export type CorePie = {
   raw_message: Buffer;
   raw_acknowledgment: Buffer;
   block_height: string;
+};
+
+export type CoreReleases = {
+  address: string;
+  ern_address: string;
+  entity_type: string;
+  entity_index: number;
+  tx_hash: string;
+  block_height: string;
+  created_at: Date | null;
+};
+
+export type CoreResources = {
+  address: string;
+  ern_address: string;
+  entity_type: string;
+  entity_index: number;
+  tx_hash: string;
+  block_height: string;
+  created_at: Date | null;
+};
+
+export type CoreRewards = {
+  id: string;
+  address: string;
+  index: string;
+  tx_hash: string;
+  sender: string;
+  reward_id: string;
+  name: string;
+  amount: string;
+  claim_authorities: string[] | null;
+  raw_message: Buffer;
+  block_height: string;
+  created_at: Date | null;
+  updated_at: Date | null;
 };
 
 export type CoreTransactions = {
@@ -974,6 +1104,19 @@ export type CoreTxStats = {
   tx_hash: string;
   block_height: string;
   created_at: Date | null;
+};
+
+export type CoreUploads = {
+  id: string;
+  uploader_address: string;
+  cid: string;
+  transcoded_cid: string;
+  upid: string;
+  upload_signature: string;
+  validator_address: string;
+  validator_signature: string;
+  tx_hash: string;
+  block_height: string;
 };
 
 export type CoreValidators = {
@@ -1180,6 +1323,51 @@ export type MutedUsers = {
   blocknumber: number | null;
 };
 
+export type NewTracks = {
+  blockhash: string | null;
+  track_id: number | null;
+  is_current: boolean | null;
+  is_delete: boolean | null;
+  owner_id: number | null;
+  title: string | null;
+  cover_art: string | null;
+  tags: string | null;
+  genre: string | null;
+  mood: string | null;
+  credits_splits: string | null;
+  create_date: string | null;
+  file_type: string | null;
+  metadata_multihash: string | null;
+  blocknumber: number | null;
+  created_at: Date | null;
+  description: string | null;
+  isrc: string | null;
+  iswc: string | null;
+  license: string | null;
+  updated_at: Date | null;
+  cover_art_sizes: string | null;
+  download: unknown | null;
+  is_unlisted: boolean | null;
+  field_visibility: unknown | null;
+  route_id: string | null;
+  stem_of: unknown | null;
+  remix_of: unknown | null;
+  txhash: string | null;
+  slot: number | null;
+  is_available: boolean | null;
+  is_premium: boolean | null;
+  premium_conditions: unknown | null;
+  track_cid: string | null;
+  is_playlist_upload: boolean | null;
+  duration: number | null;
+  ai_attribution_user_id: number | null;
+  preview_cid: string | null;
+  audio_upload_id: string | null;
+  preview_start_seconds: number | null;
+  release_date: Date | null;
+  track_segments: unknown | null;
+};
+
 export type Notification = {
   id: number;
   specifier: string;
@@ -1210,21 +1398,14 @@ export type PaymentRouterTxs = {
 export type PgStatStatements = {
   userid: unknown | null;
   dbid: unknown | null;
-  toplevel: boolean | null;
   queryid: string | null;
   query: string | null;
-  plans: string | null;
-  total_plan_time: number | null;
-  min_plan_time: number | null;
-  max_plan_time: number | null;
-  mean_plan_time: number | null;
-  stddev_plan_time: number | null;
   calls: string | null;
-  total_exec_time: number | null;
-  min_exec_time: number | null;
-  max_exec_time: number | null;
-  mean_exec_time: number | null;
-  stddev_exec_time: number | null;
+  total_time: number | null;
+  min_time: number | null;
+  max_time: number | null;
+  mean_time: number | null;
+  stddev_time: number | null;
   rows: string | null;
   shared_blks_hit: string | null;
   shared_blks_read: string | null;
@@ -1238,24 +1419,6 @@ export type PgStatStatements = {
   temp_blks_written: string | null;
   blk_read_time: number | null;
   blk_write_time: number | null;
-  temp_blk_read_time: number | null;
-  temp_blk_write_time: number | null;
-  wal_records: string | null;
-  wal_fpi: string | null;
-  wal_bytes: string | null;
-  jit_functions: string | null;
-  jit_generation_time: number | null;
-  jit_inlining_count: string | null;
-  jit_inlining_time: number | null;
-  jit_optimization_count: string | null;
-  jit_optimization_time: number | null;
-  jit_emission_count: string | null;
-  jit_emission_time: number | null;
-};
-
-export type PgStatStatementsInfo = {
-  dealloc: string | null;
-  stats_reset: Date | null;
 };
 
 export type PlaylistRoutes = {
@@ -1343,6 +1506,11 @@ export type Plays = {
   city: string | null;
   region: string | null;
   country: string | null;
+};
+
+export type Pubkeys = {
+  wallet: string;
+  pubkey: string | null;
 };
 
 export type Reactions = {
@@ -1436,6 +1604,14 @@ export type RpcLog = {
   applied_at: Date;
 };
 
+export type Rpclog = {
+  cuid: string;
+  wallet: string | null;
+  method: string | null;
+  params: unknown | null;
+  jetstream_seq: number | null;
+};
+
 export type Saves = {
   blockhash: string | null;
   blocknumber: number | null;
@@ -1478,17 +1654,7 @@ export type SkippedTransactions = {
   txhash: string;
   created_at: Date;
   updated_at: Date;
-  level: Skippedtransactionlevel;
-};
-
-export type SlaAuditorVersionData = {
-  id: number;
-  nodeEndpoint: string;
-  nodeVersion: string;
-  minVersion: string;
-  owner: string;
-  ok: boolean;
-  timestamp: Date | null;
+  level: Skippedtransactionlevel | null;
 };
 
 export type SlaNodeReports = {
@@ -1530,6 +1696,284 @@ export type SolKeypairs = {
   private_key: Buffer;
 };
 
+export type SolLockerVestingEscrows = {
+  account: string;
+  slot: string;
+  recipient: string;
+  token_mint: string;
+  creator: string;
+  base: string;
+  escrow_bump: number;
+  update_recipient_mode: number;
+  cancel_mode: number;
+  token_program_flag: number;
+  cliff_time: string;
+  frequency: string;
+  cliff_unlock_amount: string;
+  amount_per_period: string;
+  number_of_period: string;
+  total_claimed_amount: string;
+  vesting_start_time: string;
+  cancelled_at: string;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+export type SolMeteoraDammV2PoolBaseFees = {
+  pool: string;
+  slot: string;
+  cliff_fee_numerator: string;
+  fee_scheduler_mode: number;
+  number_of_period: number;
+  period_frequency: string;
+  reduction_factor: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2PoolDynamicFees = {
+  pool: string;
+  slot: string;
+  initialized: number;
+  max_volatility_accumulator: number;
+  variable_fee_control: number;
+  bin_step: number;
+  filter_period: number;
+  decay_period: number;
+  reduction_factor: number;
+  last_update_timestamp: string;
+  bin_step_u128: string;
+  sqrt_price_reference: string;
+  volatility_accumulator: string;
+  volatility_reference: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2PoolFees = {
+  pool: string;
+  slot: string;
+  protocol_fee_percent: number;
+  partner_fee_percent: number;
+  referral_fee_percent: number;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2PoolMetrics = {
+  pool: string;
+  slot: string;
+  total_lp_a_fee: string;
+  total_lp_b_fee: string;
+  total_protocol_a_fee: string;
+  total_protocol_b_fee: string;
+  total_partner_a_fee: string;
+  total_partner_b_fee: string;
+  total_position: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2Pools = {
+  account: string;
+  slot: string;
+  token_a_mint: string;
+  token_b_mint: string;
+  token_a_vault: string;
+  token_b_vault: string;
+  whitelisted_vault: string;
+  partner: string;
+  liquidity: string;
+  protocol_a_fee: string;
+  protocol_b_fee: string;
+  partner_a_fee: string;
+  partner_b_fee: string;
+  sqrt_min_price: string;
+  sqrt_max_price: string;
+  sqrt_price: string;
+  activation_point: string;
+  activation_type: number;
+  pool_status: number;
+  token_a_flag: number;
+  token_b_flag: number;
+  collect_fee_mode: number;
+  pool_type: number;
+  version: number;
+  fee_a_per_liquidity: string;
+  fee_b_per_liquidity: string;
+  permanent_lock_liquidity: string;
+  creator: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2PositionMetrics = {
+  position: string;
+  slot: string;
+  total_claimed_a_fee: string;
+  total_claimed_b_fee: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDammV2Positions = {
+  account: string;
+  slot: string;
+  pool: string;
+  nft_mint: string;
+  fee_a_per_token_checkpoint: string;
+  fee_b_per_token_checkpoint: string;
+  fee_a_pending: string;
+  fee_b_pending: string;
+  unlocked_liquidity: string;
+  vested_liquidity: string;
+  permanent_locked_liquidity: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDbcConfigFees = {
+  config: string;
+  slot: string;
+  base_fee_cliff_fee_numerator: string | null;
+  base_fee_period_frequency: string | null;
+  base_fee_reduction_factor: string | null;
+  base_fee_number_of_period: number | null;
+  base_fee_fee_scheduler_mode: number | null;
+  dynamic_fee_initialized: number | null;
+  dynamic_fee_max_volatility_accumulator: number | null;
+  dynamic_fee_variable_fee_control: number | null;
+  dynamic_fee_bin_step: number | null;
+  dynamic_fee_filter_period: number | null;
+  dynamic_fee_decay_period: number | null;
+  dynamic_fee_reduction_factor: number | null;
+  dynamic_fee_bin_step_u128: string | null;
+  protocol_fee_percent: number | null;
+  referral_fee_percent: number | null;
+};
+
+export type SolMeteoraDbcConfigVestings = {
+  config: string;
+  slot: string;
+  amount_per_period: string | null;
+  cliff_duration_from_migration_time: string | null;
+  frequency: string | null;
+  number_of_period: string | null;
+  cliff_unlock_amount: string | null;
+};
+
+export type SolMeteoraDbcConfigs = {
+  account: string;
+  slot: string;
+  quote_mint: string;
+  fee_claimer: string;
+  leftover_receiver: string;
+  collect_fee_mode: number;
+  migration_option: number;
+  activation_type: number | null;
+  token_decimal: number | null;
+  version: number | null;
+  token_type: number | null;
+  quote_token_flag: number | null;
+  partner_locked_lp_percentage: number | null;
+  partner_lp_percentage: number | null;
+  creator_locked_lp_percentage: number | null;
+  creator_lp_percentage: number | null;
+  migration_fee_option: number | null;
+  fixed_token_supply_flag: number | null;
+  creator_trading_fee_percentage: number | null;
+  token_update_authority: number | null;
+  migration_fee_percentage: number | null;
+  creator_migration_fee_percentage: number | null;
+  swap_base_amount: string | null;
+  migration_quote_threshold: string | null;
+  migration_base_threshold: string | null;
+  migration_sqrt_price: string | null;
+  pre_migration_token_supply: string | null;
+  post_migration_token_supply: string | null;
+  migrated_collect_fee_mode: number | null;
+  migrated_dynamic_fee: number | null;
+  migrated_pool_fee_bps: number | null;
+  sqrt_start_price: string | null;
+  curve: unknown | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+export type SolMeteoraDbcMigrations = {
+  signature: string;
+  instruction_index: number;
+  slot: string;
+  dbc_pool: string;
+  migration_metadata: string;
+  config: string;
+  dbc_pool_authority: string;
+  damm_v2_pool: string;
+  first_position_nft_mint: string;
+  first_position_nft_account: string;
+  first_position: string;
+  second_position_nft_mint: string;
+  second_position_nft_account: string;
+  second_position: string;
+  damm_pool_authority: string;
+  base_mint: string;
+  quote_mint: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDbcPoolMetrics = {
+  pool: string;
+  slot: string;
+  total_protocol_base_fee: string;
+  total_protocol_quote_fee: string;
+  total_trading_base_fee: string;
+  total_trading_quote_fee: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDbcPoolVolatilityTrackers = {
+  pool: string;
+  slot: string;
+  last_update_timestamp: string;
+  volatility_accumulator: string;
+  volatility_reference: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type SolMeteoraDbcPools = {
+  account: string;
+  slot: string;
+  config: string;
+  creator: string;
+  base_mint: string;
+  base_vault: string;
+  quote_vault: string;
+  base_reserve: string;
+  quote_reserve: string;
+  protocol_base_fee: string;
+  protocol_quote_fee: string;
+  partner_base_fee: string;
+  partner_quote_fee: string;
+  sqrt_price: string;
+  activation_point: string;
+  pool_type: number;
+  is_migrated: number;
+  is_partner_withdraw_surplus: number;
+  is_protocol_withdraw_surplus: number;
+  migration_progress: number;
+  is_withdraw_leftover: number;
+  is_creator_withdraw_surplus: number;
+  migration_fee_withdraw_status: number;
+  finish_curve_timestamp: string;
+  creator_base_fee: string;
+  creator_quote_fee: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type SolPayments = {
   signature: string;
   instruction_index: number;
@@ -1556,6 +2000,15 @@ export type SolPurchases = {
   country: string | null;
 };
 
+export type SolRetryQueue = {
+  id: string;
+  indexer: string;
+  update_message: unknown;
+  error: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type SolRewardDisbursements = {
   signature: string;
   instruction_index: number;
@@ -1564,6 +2017,19 @@ export type SolRewardDisbursements = {
   user_bank: string;
   challenge_id: string;
   specifier: string;
+  recipient_eth_address: string | null;
+};
+
+export type SolRewardManagerInits = {
+  signature: string;
+  instruction_index: number;
+  slot: string;
+  min_votes: number;
+  reward_manager_state: string;
+  token_source: string;
+  mint: string;
+  manager: string;
+  authority: string;
 };
 
 export type SolSlotCheckpoints = {
@@ -1574,18 +2040,7 @@ export type SolSlotCheckpoints = {
   subscription: unknown;
   updated_at: Date;
   created_at: Date;
-};
-
-export type SolSwaps = {
-  signature: string;
-  instruction_index: number;
-  slot: string;
-  from_mint: string;
-  from_account: string;
-  from_amount: string;
-  to_mint: string;
-  to_account: string;
-  to_amount: string;
+  name: string | null;
 };
 
 export type SolTokenAccountBalanceChanges = {
@@ -1599,6 +2054,7 @@ export type SolTokenAccountBalanceChanges = {
   updated_at: Date;
   created_at: Date;
   block_timestamp: Date;
+  fee_payer: string | null;
 };
 
 export type SolTokenAccountBalances = {
@@ -1618,14 +2074,6 @@ export type SolTokenTransfers = {
   slot: string;
   from_account: string;
   to_account: string;
-};
-
-export type SolUnprocessedTxs = {
-  signature: string;
-  error_message: string | null;
-  created_at: Date;
-  updated_at: Date;
-  slot: string;
 };
 
 export type SolUserBalances = {
@@ -1796,6 +2244,7 @@ export type Tracks = {
   is_original_available: boolean;
   orig_file_cid: string | null;
   orig_filename: string | null;
+  collections_containing_track: number[] | null;
   playlists_containing_track: number[];
   placement_hosts: string | null;
   ddex_app: string | null;
@@ -1884,6 +2333,15 @@ export type UserBalanceChanges = {
   updated_at: Date;
 };
 
+export type UserBalanceHistory = {
+  user_id: number;
+  mint: string;
+  timestamp: Date;
+  balance: string;
+  balance_usd: number;
+  created_at: Date;
+};
+
 export type UserBalances = {
   user_id: number;
   balance: string;
@@ -1926,6 +2384,18 @@ export type UserDelistStatuses = {
   reason: DelistUserReason;
 };
 
+export type UserDistinctPlayHours = {
+  user_id: number;
+  hours_with_play: number;
+  updated_at: Date;
+};
+
+export type UserDistinctPlayTracks = {
+  user_id: number;
+  track_count: number;
+  updated_at: Date;
+};
+
 export type UserEvents = {
   id: number;
   blockhash: string | null;
@@ -1953,6 +2423,12 @@ export type UserPayoutWalletHistory = {
 export type UserPubkeys = {
   user_id: number;
   pubkey_base64: string;
+};
+
+export type UserScoreFeatures = {
+  user_id: number;
+  challenge_count: number | null;
+  updated_at: Date;
 };
 
 export type UserTips = {
@@ -2009,6 +2485,7 @@ export type Users = {
   website: string | null;
   donation: string | null;
   profile_type: ProfileTypeEnum | null;
+  coin_flair_mint: string | null;
 };
 
 export type ValidatorHistory = {
@@ -2021,5 +2498,10 @@ export type ValidatorHistory = {
   event_type: ValidatorEvent;
   event_time: Date;
   event_block: string;
+};
+
+export type VolumeLeaderExclusions = {
+  address: string;
+  description: string | null;
 };
 

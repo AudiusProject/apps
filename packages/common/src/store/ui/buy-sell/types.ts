@@ -79,6 +79,7 @@ export type TransactionData = {
   isValid: boolean
   error?: string | null
   exchangeRate?: number | null
+  exchangeRateError?: Error | null
   isExchangeRateLoading?: boolean
 } | null
 

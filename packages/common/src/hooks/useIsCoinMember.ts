@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useUserCoins, useArtistOwnedCoin } from '~/api'
+import { useUserCoins, useArtistCreatedCoin } from '~/api'
 import { ID } from '~/models'
 
 /**
@@ -13,7 +13,7 @@ export const useIsCoinMember = (
   userId: ID | null | undefined,
   artistId: ID | null | undefined
 ) => {
-  const { data: artistCoin } = useArtistOwnedCoin(artistId)
+  const { data: artistCoin } = useArtistCreatedCoin(artistId)
   const { data: userCoins } = useUserCoins(
     { userId },
     { enabled: !!userId && !!artistCoin }

@@ -1,5 +1,17 @@
 # create-audius-app
 
+## 2.1.1
+
+### Patch Changes
+
+- 804b90b: Update dependencies
+
+## 2.1.0
+
+### Minor Changes
+
+- 82c9bbd: Update @audius/sdk version to 11.0.0
+
 ## 2.0.0
 
 ### Major Changes

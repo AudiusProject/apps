@@ -203,6 +203,20 @@ export const getWalletPageSEOFields = () => {
   }
 }
 
+export const getCashPageSEOFields = () => {
+  const pageTitle = 'Cash'
+  const pageDescription =
+    'Manage your Audius Cash. View your balance, transaction history, and cash-enabled features.'
+  const canonicalUrl = 'https://audius.co/cash'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
 export const getDefaultSEOFields = () => ({
   title: 'Audius - Empowering Creators',
   description:

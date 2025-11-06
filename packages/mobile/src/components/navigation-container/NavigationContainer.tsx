@@ -181,11 +181,17 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         wallet: {
                           path: 'wallet'
                         },
+                        CashScreen: {
+                          path: 'cash'
+                        },
                         ArtistCoinsExplore: {
                           path: 'coins'
                         },
                         CoinDetailsScreen: {
                           path: 'coins/:ticker'
+                        },
+                        ExclusiveTracksScreen: {
+                          path: 'coins/:ticker/exclusive-tracks'
                         }
                       }
                     },

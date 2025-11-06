@@ -39,7 +39,6 @@ import IconCreditCardSVG from '../assets/icons/CreditCard.svg'
 import IconCrownSVG from '../assets/icons/Crown.svg'
 import IconDashboardSVG from '../assets/icons/Dashboard.svg'
 import IconDesktopSVG from '../assets/icons/Desktop.svg'
-import IconDonateSVG from '../assets/icons/Donate.svg'
 import IconDragSVG from '../assets/icons/Drag.svg'
 import IconEarningsSVG from '../assets/icons/Earnings.svg'
 import IconEmailAddressSVG from '../assets/icons/EmailAddress.svg'
@@ -102,7 +101,6 @@ import IconRemixSVG from '../assets/icons/Remix.svg'
 import IconRemoveSVG from '../assets/icons/Remove.svg'
 import IconRepeatOffSVG from '../assets/icons/RepeatOff.svg'
 import IconRepostSVG from '../assets/icons/Repost.svg'
-import IconRobotSVG from '../assets/icons/Robot.svg'
 import IconRocketSVG from '../assets/icons/Rocket.svg'
 import IconSaveSVG from '../assets/icons/Save.svg'
 import IconSearchSVG from '../assets/icons/Search.svg'
@@ -275,7 +273,6 @@ export const IconUserUnfollow = IconUserUnfollowSVG as IconComponent
 export const IconDesktop = IconDesktopSVG as IconComponent
 export const IconRadar = IconRadarSVG as IconComponent
 export const IconVisibilityHidden = IconVisibilityHiddenSVG as IconComponent
-export const IconDonate = IconDonateSVG as IconComponent
 export const IconReceive = IconReceiveSVG as IconComponent
 export const IconVisibilityPublic = IconVisibilityPublicSVG as IconComponent
 export const IconDrag = IconDragSVG as IconComponent
@@ -294,7 +291,6 @@ export const IconError = IconErrorSVG as IconComponent
 export const IconRepost = IconRepostSVG as IconComponent
 export const IconWallet = IconWalletSVG as IconComponent
 export const IconExplore = IconExploreSVG as IconComponent
-export const IconRobot = IconRobotSVG as IconComponent
 export const IconWand = IconWandSVG as IconComponent
 export const IconExternalLink = IconExternalLinkSVG as IconComponent
 export const IconRocket = IconRocketSVG as IconComponent

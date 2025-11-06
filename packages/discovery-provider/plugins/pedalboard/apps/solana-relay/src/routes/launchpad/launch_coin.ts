@@ -248,7 +248,7 @@ export const launchCoin = async (
       configKeypair: configKeypair.publicKey.toBase58()
     })
     const rewardPoolTokenAuthority = RewardManagerProgram.deriveAuthority({
-      programId: RewardManagerProgram.programId,
+      programId: new PublicKey(config.rewardsManagerProgramId),
       rewardManagerState: rewardManagerState.publicKey
     })
     const createConfigTx = await dbcClient.partner.createConfig(

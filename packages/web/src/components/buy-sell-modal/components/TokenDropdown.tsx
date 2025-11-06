@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useState } from 'react'
+import { useMemo, useCallback, useRef, useState, ReactNode } from 'react'
 
 import type { CoinInfo } from '@audius/common/store'
 import {
@@ -30,6 +30,9 @@ type TokenDropdownProps = {
   availableTokens: CoinInfo[]
   onTokenChange?: (token: CoinInfo) => void
   disabled?: boolean
+  anchorOriginHorizontal?: 'left' | 'right'
+  customTrigger?: ReactNode
+  sortAlphabetically?: boolean
 }
 
 // Used to close the dropdown when clicking outside of it, but still inside of the modal
@@ -88,14 +91,16 @@ const CustomOption = (props: OptionProps<TokenOption>) => {
           >
             {props.data.tokenInfo.name}
           </Text>
-          <Text
-            variant='body'
-            size='s'
-            strength='strong'
-            color={isSelected ? 'staticWhite' : 'subdued'}
-          >
-            {`$${props.data.tokenInfo.symbol}`}
-          </Text>
+          {props.data.tokenInfo.symbol ? (
+            <Text
+              variant='body'
+              size='s'
+              strength='strong'
+              color={isSelected ? 'staticWhite' : 'subdued'}
+            >
+              {`$${props.data.tokenInfo.symbol}`}
+            </Text>
+          ) : null}
         </Flex>
       </Flex>
     </components.Option>
@@ -126,7 +131,10 @@ export const TokenDropdown = ({
   selectedToken,
   availableTokens,
   onTokenChange,
-  disabled = false
+  disabled = false,
+  anchorOriginHorizontal = 'right',
+  customTrigger,
+  sortAlphabetically = true
 }: TokenDropdownProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { color, spacing } = useTheme()
@@ -143,19 +151,21 @@ export const TokenDropdown = ({
   )
 
   const options: TokenOption[] = useMemo(() => {
-    return availableTokens
-      .map((token) => ({
-        value: token.symbol,
-        label: token.name ?? token.symbol,
-        tokenInfo: token
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label))
-  }, [availableTokens])
+    const mapped = availableTokens.map((token) => ({
+      value: token.address,
+      label: token.name ?? token.symbol,
+      tokenInfo: token
+    }))
+
+    return sortAlphabetically
+      ? mapped.sort((a, b) => a.label.localeCompare(b.label))
+      : mapped
+  }, [availableTokens, sortAlphabetically])
 
   const selectedOption = useMemo(
     () =>
-      options.find((option) => option.value === selectedToken.symbol) || {
-        value: selectedToken.symbol,
+      options.find((option) => option.value === selectedToken.address) || {
+        value: selectedToken.address,
         label: selectedToken.name ?? selectedToken.symbol,
         tokenInfo: selectedToken
       },
@@ -164,43 +174,56 @@ export const TokenDropdown = ({
 
   return (
     <Box css={{ position: 'relative', width: '100%' }}>
-      <Flex
-        ref={wrapperRef}
-        direction='column'
-        alignItems='flex-start'
-        justifyContent='center'
-        gap='xs'
-        flex={1}
-        alignSelf='stretch'
-        border='default'
-        pv='s'
-        borderRadius='s'
-        onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        css={{
-          height: spacing.unit16,
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.5 : 1,
-          '&:hover': !disabled
-            ? {
-                backgroundColor: color.background.surface2
-              }
-            : undefined
-        }}
-      >
-        <Flex
-          gap='s'
-          alignItems='center'
-          css={{ paddingLeft: spacing.m, paddingRight: spacing.m }}
+      {customTrigger ? (
+        <Box
+          ref={wrapperRef}
+          onClick={() => !disabled && setIsOpen((prev) => !prev)}
+          css={{
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.5 : 1
+          }}
         >
-          <TokenIcon
-            logoURI={selectedToken.logoURI}
-            icon={selectedToken.icon}
-            size='2xl'
-            hex
-          />
-          <IconCaretDown size='s' color='default' />
+          {customTrigger}
+        </Box>
+      ) : (
+        <Flex
+          ref={wrapperRef}
+          direction='column'
+          alignItems='flex-start'
+          justifyContent='center'
+          gap='xs'
+          flex={1}
+          alignSelf='stretch'
+          border='default'
+          pv='s'
+          borderRadius='s'
+          onClick={() => !disabled && setIsOpen((prev) => !prev)}
+          css={{
+            height: spacing.unit16,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.5 : 1,
+            '&:hover': !disabled
+              ? {
+                  backgroundColor: color.background.surface2
+                }
+              : undefined
+          }}
+        >
+          <Flex
+            gap='s'
+            alignItems='center'
+            css={{ paddingLeft: spacing.m, paddingRight: spacing.m }}
+          >
+            <TokenIcon
+              logoURI={selectedToken.logoURI}
+              icon={selectedToken.icon}
+              size='2xl'
+              hex
+            />
+            <IconCaretDown size='s' color='default' />
+          </Flex>
         </Flex>
-      </Flex>
+      )}
       <Menu
         isVisible={isOpen}
         anchorRef={wrapperRef}
@@ -212,8 +235,14 @@ export const TokenDropdown = ({
           backgroundColor: 'transparent',
           width: 300
         }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: anchorOriginHorizontal
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: anchorOriginHorizontal
+        }}
       >
         <Select<TokenOption>
           autoFocus

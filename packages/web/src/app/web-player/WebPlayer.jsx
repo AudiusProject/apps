@@ -30,8 +30,8 @@ import AnimatedSwitch from 'components/animated-switch/AnimatedSwitch'
 import AppRedirectListener from 'components/app-redirect-popover/AppRedirectListener'
 import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
-import { ArtistCoinsLaunchBanner } from 'components/banner/ArtistCoinsLaunchBanner'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
+import { TradingVolumeLaunchBanner } from 'components/banner/TradingVolumeLaunchBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
 import { ChatListener } from 'components/chat-listener/ChatListener'
@@ -50,14 +50,16 @@ import TrendingGenreSelectionPage from 'components/trending-genre-selection/Tren
 import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceFetcher'
 import { useEnvironment } from 'hooks/useEnvironment'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
-import { AiAttributedTracksPage } from 'pages/ai-attributed-tracks-page'
 import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
 import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
 import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
 import { AudioPage } from 'pages/audio-page/AudioPage'
+import { CashPage } from 'pages/cash-page'
 import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
 import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
+import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
 import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
+import { ExclusiveTracksPage as MobileExclusiveTracksPage } from 'pages/coin-detail-page/components/mobile/ExclusiveTracksPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -93,7 +95,6 @@ import SupportingPage from 'pages/supporting-page/SupportingPage'
 import TopSupportersPage from 'pages/top-supporters-page/TopSupportersPage'
 import { TrackCommentsPage } from 'pages/track-page/TrackCommentsPage'
 import TrackPage from 'pages/track-page/TrackPage'
-import { TransactionHistoryPage } from 'pages/transaction-history-page/TransactionHistoryPage'
 import TrendingPage from 'pages/trending-page/TrendingPage'
 import TrendingPlaylistsPage from 'pages/trending-playlists/TrendingPlaylistPage'
 import TrendingUndergroundPage from 'pages/trending-underground/TrendingUndergroundPage'
@@ -167,6 +168,8 @@ const {
   PROFILE_PAGE_PLAYLISTS,
   PROFILE_PAGE_REPOSTS,
   TRENDING_UNDERGROUND_PAGE,
+  COIN_EXCLUSIVE_TRACKS_PAGE,
+  COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE,
   CHECK_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   DEACTIVATE_PAGE,
@@ -174,13 +177,11 @@ const {
   TOP_SUPPORTERS_USERS_ROUTE,
   publicSiteRoutes,
   CHAT_PAGE,
-  PROFILE_PAGE_AI_ATTRIBUTED_TRACKS,
   PROFILE_PAGE_COMMENTS,
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
   PURCHASES_PAGE,
   SALES_PAGE,
-  TRANSACTION_HISTORY_PAGE,
   AUTHORIZED_APPS_SETTINGS_PAGE,
   ACCOUNTS_MANAGING_YOU_SETTINGS_PAGE,
   ACCOUNTS_YOU_MANAGE_SETTINGS_PAGE,
@@ -191,6 +192,7 @@ const {
   EDIT_ALBUM_PAGE,
   AIRDROP_PAGE,
   WALLET_PAGE,
+  CASH_PAGE,
   COINS_CREATE_PAGE,
   COINS_EXPLORE_PAGE,
   EDIT_COIN_DETAILS_PAGE,
@@ -489,7 +491,7 @@ const WebPlayer = (props) => {
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
         {/* <TermsOfServiceUpdateBanner /> */}
-        <ArtistCoinsLaunchBanner />
+        <TradingVolumeLaunchBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
@@ -698,12 +700,6 @@ const WebPlayer = (props) => {
               />
               <Route
                 exact
-                path={TRANSACTION_HISTORY_PAGE}
-                isMobile={isMobile}
-                component={TransactionHistoryPage}
-              />
-              <Route
-                exact
                 path={COINS_EXPLORE_PAGE}
                 isMobile={isMobile}
                 component={ArtistCoinsExplorePage}
@@ -743,6 +739,20 @@ const WebPlayer = (props) => {
                   return <CoinDetailPage {...props} />
                 }}
               />
+              <DesktopRoute
+                exact
+                path={COIN_EXCLUSIVE_TRACKS_PAGE}
+                isMobile={isMobile}
+                component={ExclusiveTracksPage}
+              />
+              <Route
+                exact
+                path={COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE}
+                render={(props) => {
+                  const ticker = props.match.params.ticker
+                  return <MobileExclusiveTracksPage ticker={ticker} />
+                }}
+              />
               <Route
                 exact
                 path={EDIT_COIN_DETAILS_PAGE}
@@ -766,6 +776,12 @@ const WebPlayer = (props) => {
                 path={WALLET_PAGE}
                 isMobile={isMobile}
                 component={WalletPage}
+              />
+              <Route
+                exact
+                path={CASH_PAGE}
+                isMobile={isMobile}
+                component={CashPage}
               />
               <Route
                 exact
@@ -891,11 +907,6 @@ const WebPlayer = (props) => {
                 exact
                 path={PROFILE_PAGE_COMMENTS}
                 component={CommentHistoryPage}
-              />
-              <Route
-                exact
-                path={PROFILE_PAGE_AI_ATTRIBUTED_TRACKS}
-                component={AiAttributedTracksPage}
               />
               <Route exact path={TRACK_PAGE} component={TrackPage} />
               <MobileRoute

@@ -1,7 +1,5 @@
 import { useRemixContest, useRemixesLineup } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { Box, Flex, Text, IconTrophy } from '@audius/harmony'
 
 import useTabs from 'hooks/useTabs/useTabs'
@@ -35,14 +33,8 @@ export const RemixContestSection = ({
     trackId,
     isContestEntry: true
   })
-  const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-  )
-
   const hasPrizeInfo = !!remixContest?.eventData?.prizeInfo
-  const hasWinners =
-    isRemixContestWinnersMilestoneEnabled &&
-    (remixContest?.eventData?.winners?.length ?? 0) > 0
+  const hasWinners = (remixContest?.eventData?.winners?.length ?? 0) > 0
 
   const tabs = [
     {

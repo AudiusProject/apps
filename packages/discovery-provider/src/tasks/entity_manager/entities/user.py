@@ -457,14 +457,21 @@ def add_associated_wallet(
 
         # Check if wallet already exists, and remove it from other users
         existing_wallet = None
-        for _, wallet in params.existing_records["AssociatedWallet"].items():
-            if wallet.chain == chain and wallet.wallet == wallet_address:
-                if wallet.user_id == user_id:
-                    existing_wallet = wallet
-                else:
-                    session.delete(wallet)
+        for _, wallets in params.existing_records["AssociatedWallet"].items():
+            for wallet in wallets:
+                if wallet.chain == chain and wallet.wallet == wallet_address:
+                    if wallet.user_id == user_id:
+                        existing_wallet = wallet
+                    else:
+                        session.delete(wallet)
 
-        if not existing_wallet:
+        existing_wallet_in_session = (
+            session.query(AssociatedWallet)
+            .filter_by(user_id=user_id, wallet=wallet_address, chain=chain)
+            .first()
+        )
+
+        if not existing_wallet and not existing_wallet_in_session:
             # Create new wallet association only if it doesn't exist for this user
             associated_wallet_entry = AssociatedWallet(
                 user_id=user_id,
@@ -497,14 +504,15 @@ def remove_associated_wallet(params: ManageEntityParameters):
     try:
         # Find the wallet to remove
         wallet_to_remove = None
-        for _, wallet in params.existing_records["AssociatedWallet"].items():
-            if (
-                wallet.chain == chain
-                and wallet.user_id == user_id
-                and wallet.wallet == wallet_address
-            ):
-                wallet_to_remove = wallet
-                break
+        for _, wallets in params.existing_records["AssociatedWallet"].items():
+            for wallet in wallets:
+                if (
+                    wallet.chain == chain
+                    and wallet.user_id == user_id
+                    and wallet.wallet == wallet_address
+                ):
+                    wallet_to_remove = wallet
+                    break
 
         if wallet_to_remove:
             session.delete(wallet_to_remove)

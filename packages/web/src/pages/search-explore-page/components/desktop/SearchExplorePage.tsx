@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Paper,
   Text,
@@ -25,6 +23,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'
+import Page from 'components/page/Page'
 import useTabs from 'hooks/useTabs/useTabs'
 import { filters } from 'pages/search-page/SearchFilters'
 import { SearchResults } from 'pages/search-page/SearchResults'
@@ -121,9 +120,6 @@ const SearchExplorePage = ({
     useCurrentUserId()
   const { motion } = useTheme()
   const { isLarge } = useMedia()
-  const { isEnabled: isExploreArtistCoinTracksEnabled } = useFeatureFlag(
-    FeatureFlags.EXPLORE_ARTIST_COIN_TRACKS
-  )
   const handleSearchTab = useCallback(
     (newTab: string) => {
       setCategory(newTab.toLowerCase() as CategoryView)
@@ -211,146 +207,153 @@ const SearchExplorePage = ({
   const showAlbumContent = categoryKey === 'albums' || categoryKey === 'all'
 
   return (
-    <Flex
-      justifyContent='center'
-      css={{
-        minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH
-      }}
+    <Page
+      title={pageTitle}
+      description={description}
+      size='large'
+      variant='flush'
     >
       <Flex
-        direction='column'
-        pv='3xl'
-        ph='unit15'
-        gap='3xl'
-        alignItems='stretch'
+        justifyContent='center'
         css={{
-          minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH,
-          maxWidth: isLarge ? '100%' : NORMAL_WIDTH
+          minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH
         }}
       >
-        {/* Header Section */}
-        <Paper
-          alignItems='center'
-          direction='column'
-          gap='xl'
-          pv='xl'
-          ph='unit14'
-          css={{
-            backgroundImage: `url(${BackgroundWaves})`,
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            opacity: bannerIsVisible ? 1 : 0,
-            transition: `opacity ${motion.quick}`
-          }}
-          borderRadius='l'
-          alignSelf='stretch'
-        >
-          <Text variant='display' size='s' color='staticWhite'>
-            {messages.explore}
-          </Text>
-          <Text
-            variant='heading'
-            size='s'
-            color='staticWhite'
-            textAlign='center'
-          >
-            {messages.description}
-          </Text>
-          <Flex w='100%' css={{ maxWidth: 400 }}>
-            <TextInput
-              ref={searchBarRef}
-              label={messages.searchPlaceholder}
-              value={inputValue}
-              startIcon={IconSearch}
-              size={TextInputSize.SMALL}
-              onChange={handleSearch}
-              onClear={handleClearSearch}
-            />
-          </Flex>
-        </Paper>
-
-        {/* Tabs and Filters */}
-        <Flex direction='column' gap='l'>
-          <Flex direction='column'>
-            <Flex alignSelf='flex-start'>{tabs}</Flex>
-            <Divider orientation='horizontal' />
-          </Flex>
-          {filterKeys.length ? (
-            <Flex
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
-              css={{ flexWrap: 'wrap' }}
-            >
-              <Flex direction='row' gap='s' mv='m' css={{ flexWrap: 'wrap' }}>
-                {filterKeys.map((filterKey) => {
-                  const FilterComponent =
-                    filters[filterKey as keyof typeof filters]
-                  return <FilterComponent key={filterKey} />
-                })}
-              </Flex>
-              <Flex gap='s'>
-                <SortMethodFilterButton />
-                {categoryKey === CategoryView.TRACKS ? (
-                  <FilterButton
-                    value={tracksLayout}
-                    variant='replaceLabel'
-                    optionsLabel={messages.layoutOptionsLabel}
-                    onChange={setTracksLayout}
-                    options={viewLayoutOptions}
-                  />
-                ) : null}
-              </Flex>
-            </Flex>
-          ) : null}
-        </Flex>
-
-        {/* Content Section */}
-        {inputValue || showSearchResults ? (
-          <SearchResults
-            tracksLayout={tracksLayout}
-            handleSearchTab={handleSearchTab}
-          />
-        ) : null}
         <Flex
           direction='column'
+          pv='3xl'
+          ph='unit15'
           gap='3xl'
-          css={{ display: showSearchResults ? 'none' : undefined }}
+          alignItems='stretch'
+          css={{
+            minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH,
+            maxWidth: isLarge ? '100%' : NORMAL_WIDTH
+          }}
         >
-          {showTrackContent && showUserContextualContent && (
-            <RecommendedTracksSection />
-          )}
-          {isExploreArtistCoinTracksEnabled && <ArtistCoinTracksSection />}
-          {showTrackContent && showUserContextualContent && (
-            <RecentlyPlayedSection />
-          )}
-          {showTrackContent && <QuickSearchGrid />}
-          {showPlaylistContent && <FeaturedPlaylistsSection />}
-          {showTrackContent && <FeaturedRemixContestsSection />}
-          {showTrackContent && <UndergroundTrendingTracksSection />}
-          {showUserContent && <ArtistSpotlightSection />}
-          {showUserContent && <LabelSpotlightSection />}
-          {showTrackContent && (
-            <>
-              <ActiveDiscussionsSection />
-              <DownloadsAvailableSection />
-            </>
-          )}
-          {(showTrackContent || showAlbumContent || showPlaylistContent) && (
-            <MoodGrid />
-          )}
-          {showPlaylistContent && <TrendingPlaylistsSection />}
-          {showTrackContent && <MostSharedSection />}
-          {(showTrackContent || showAlbumContent) && <BestSellingSection />}
-          {showTrackContent && <RecentPremiumTracksSection />}
-          {showTrackContent && showUserContextualContent && (
-            <FeelingLuckySection />
-          )}
-          {showUserContextualContent && <RecentSearchesSection />}
+          {/* Header Section */}
+          <Paper
+            alignItems='center'
+            direction='column'
+            gap='xl'
+            pv='xl'
+            ph='unit14'
+            css={{
+              backgroundImage: `url(${BackgroundWaves})`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              opacity: bannerIsVisible ? 1 : 0,
+              transition: `opacity ${motion.quick}`
+            }}
+            borderRadius='l'
+            alignSelf='stretch'
+          >
+            <Text variant='display' size='s' color='staticWhite'>
+              {messages.explore}
+            </Text>
+            <Text
+              variant='heading'
+              size='s'
+              color='staticWhite'
+              textAlign='center'
+            >
+              {messages.description}
+            </Text>
+            <Flex w='100%' css={{ maxWidth: 400 }}>
+              <TextInput
+                ref={searchBarRef}
+                label={messages.searchPlaceholder}
+                value={inputValue}
+                startIcon={IconSearch}
+                size={TextInputSize.SMALL}
+                onChange={handleSearch}
+                onClear={handleClearSearch}
+              />
+            </Flex>
+          </Paper>
+
+          {/* Tabs and Filters */}
+          <Flex direction='column' gap='l'>
+            <Flex direction='column'>
+              <Flex alignSelf='flex-start'>{tabs}</Flex>
+              <Divider orientation='horizontal' />
+            </Flex>
+            {filterKeys.length ? (
+              <Flex
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                css={{ flexWrap: 'wrap' }}
+              >
+                <Flex direction='row' gap='s' mv='m' css={{ flexWrap: 'wrap' }}>
+                  {filterKeys.map((filterKey) => {
+                    const FilterComponent =
+                      filters[filterKey as keyof typeof filters]
+                    return <FilterComponent key={filterKey} />
+                  })}
+                </Flex>
+                <Flex gap='s'>
+                  <SortMethodFilterButton />
+                  {categoryKey === CategoryView.TRACKS ? (
+                    <FilterButton
+                      value={tracksLayout}
+                      variant='replaceLabel'
+                      optionsLabel={messages.layoutOptionsLabel}
+                      onChange={setTracksLayout}
+                      options={viewLayoutOptions}
+                    />
+                  ) : null}
+                </Flex>
+              </Flex>
+            ) : null}
+          </Flex>
+
+          {/* Content Section */}
+          {inputValue || showSearchResults ? (
+            <SearchResults
+              tracksLayout={tracksLayout}
+              handleSearchTab={handleSearchTab}
+            />
+          ) : null}
+          <Flex
+            direction='column'
+            gap='3xl'
+            css={{ display: showSearchResults ? 'none' : undefined }}
+          >
+            {showTrackContent && showUserContextualContent && (
+              <RecommendedTracksSection />
+            )}
+            {showTrackContent && <ArtistCoinTracksSection />}
+            {showTrackContent && showUserContextualContent && (
+              <RecentlyPlayedSection />
+            )}
+            {showTrackContent && <QuickSearchGrid />}
+            {showPlaylistContent && <FeaturedPlaylistsSection />}
+            {showTrackContent && <FeaturedRemixContestsSection />}
+            {showTrackContent && <UndergroundTrendingTracksSection />}
+            {showUserContent && <ArtistSpotlightSection />}
+            {showUserContent && <LabelSpotlightSection />}
+            {showTrackContent && (
+              <>
+                <ActiveDiscussionsSection />
+                <DownloadsAvailableSection />
+              </>
+            )}
+            {(showTrackContent || showAlbumContent || showPlaylistContent) && (
+              <MoodGrid />
+            )}
+            {showPlaylistContent && <TrendingPlaylistsSection />}
+            {showTrackContent && <MostSharedSection />}
+            {(showTrackContent || showAlbumContent) && <BestSellingSection />}
+            {showTrackContent && <RecentPremiumTracksSection />}
+            {showTrackContent && showUserContextualContent && (
+              <FeelingLuckySection />
+            )}
+            {showUserContextualContent && <RecentSearchesSection />}
+          </Flex>
         </Flex>
       </Flex>
-    </Flex>
+    </Page>
   )
 }
 

@@ -53,7 +53,6 @@ const trackMetadataSchema = {
   isrc: null,
   iswc: null,
   is_playlist_upload: false,
-  ai_attribution_user_id: null,
   ddex_release_ids: null,
   ddex_app: null,
   artists: null,
@@ -137,7 +136,6 @@ export const newCollectionMetadata = (fields?: any, validate = false) => {
 }
 
 const userMetadataSchema = {
-  allow_ai_attribution: false,
   wallet: '',
   name: null,
   handle: '',
@@ -152,13 +150,13 @@ const userMetadataSchema = {
   instagram_handle: null,
   tiktok_handle: null,
   website: null,
-  donation: null,
   creator_node_endpoint: null,
   updated_at: null,
   playlist_library: null,
   events: null,
   is_deactivated: false,
   artist_pick_track_id: null,
+  coin_flair_mint: null,
   spl_usdc_payout_wallet: null
 }
 

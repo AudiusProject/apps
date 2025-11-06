@@ -1,9 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
 import { TrackMetadataFormSchema } from '@audius/common/schemas'
-import { FeatureFlags } from '@audius/common/services'
 import {
   TrackForUpload,
   TrackMetadataForUpload,
@@ -54,7 +52,6 @@ import { make, track as trackEvent } from 'services/analytics'
 import { removeNullable } from 'utils/typeUtils'
 
 import styles from './EditTrackForm.module.css'
-import { PreviewButton } from './components/PreviewButton'
 import { getTrackFieldName } from './hooks'
 import { TrackEditFormValues } from './types'
 
@@ -202,13 +199,6 @@ const TrackEditForm = (
   useUnmount(() => {
     stopPreview()
   })
-
-  const { isEnabled: isTrackAudioReplaceEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_AUDIO_REPLACE
-  )
-  const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_REPLACE_DOWNLOADS
-  )
 
   const [, , { setValue: setTrackValue }] = useField(`tracks.${trackIdx}`)
   const [, { touched: isTitleDirty }, { setValue: setTitle }] = useField(
@@ -372,16 +362,14 @@ const TrackEditForm = (
               layoutStyles.gap4
             )}
           >
-            {isTrackAudioReplaceEnabled ? (
-              <FileReplaceContainer
-                fileName={fileName || messages.untitled}
-                onTogglePlay={handleTogglePreview}
-                isPlaying={isPreviewPlaying}
-                onClickReplace={onClickReplace}
-                onClickDownload={onClickDownload}
-                downloadEnabled={!isUpload && isTrackReplaceDownloadsEnabled}
-              />
-            ) : null}
+            <FileReplaceContainer
+              fileName={fileName || messages.untitled}
+              onTogglePlay={handleTogglePreview}
+              isPlaying={isPreviewPlaying}
+              onClickReplace={onClickReplace}
+              onClickDownload={onClickDownload}
+              downloadEnabled={!isUpload}
+            />
             <TrackMetadataFields />
             <div className={cn(layoutStyles.col, layoutStyles.gap4)}>
               <VisibilityField entityType='track' isUpload={isUpload} />
@@ -401,14 +389,6 @@ const TrackEditForm = (
               />
               <RemixSettingsField isUpload={isUpload} />
             </div>
-            {!isTrackAudioReplaceEnabled && isUpload ? (
-              <PreviewButton
-                // Since edit form is a single component, render a different preview for each track
-                key={trackIdx}
-                className={styles.previewButton}
-                index={trackIdx}
-              />
-            ) : null}
           </div>
           {isMultiTrack ? <MultiTrackFooter /> : null}
         </div>

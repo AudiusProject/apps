@@ -4,7 +4,6 @@ import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -32,7 +31,6 @@ import {
   IconMessages,
   IconNotificationOn as IconNotification,
   IconReceive,
-  IconRobot,
   IconSettings,
   IconSignOut,
   IconVerified,
@@ -57,7 +55,6 @@ import Page from 'components/page/Page'
 import Toast from 'components/toast/Toast'
 import { ComponentPlacement } from 'components/types'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { env } from 'services/env'
 import {
@@ -159,9 +156,6 @@ export const SettingsPage = () => {
   )
   const [, setIsInboxSettingsModalVisible] = useModalState('InboxSettings')
   const [, setIsCommentSettingsModalVisible] = useModalState('CommentSettings')
-  const [, setIsAIAttributionSettingsModalVisible] = useModalState(
-    'AiAttributionSettings'
-  )
 
   useEffect(() => {
     dispatch(getNotificationSettings())
@@ -245,10 +239,6 @@ export const SettingsPage = () => {
   const openCommentSettingsModal = useCallback(() => {
     setIsCommentSettingsModalVisible(true)
   }, [setIsCommentSettingsModalVisible])
-
-  const openAiAttributionSettingsModal = useCallback(() => {
-    setIsAIAttributionSettingsModalVisible(true)
-  }, [setIsAIAttributionSettingsModalVisible])
 
   const onTwitterLogin = useCallback(
     (uuid: string, profile: TwitterProfile) =>
@@ -369,13 +359,6 @@ export const SettingsPage = () => {
     return options
   }, [showMatrix])
 
-  const { data: allowAiAttribution } = useCurrentAccountUser({
-    select: (user) => user?.allow_ai_attribution
-  })
-  const { isEnabled: isCommentsEnabled } = useFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
 
@@ -421,21 +404,19 @@ export const SettingsPage = () => {
             </Button>
           </SettingsCard>
         ) : null}
-        {isCommentsEnabled ? (
-          <SettingsCard
-            icon={<IconMessage />}
-            title={settingsMessages.commentSettingsCardTitle}
-            description={settingsMessages.commentSettingsCardDescription}
+        <SettingsCard
+          icon={<IconMessage />}
+          title={settingsMessages.commentSettingsCardTitle}
+          description={settingsMessages.commentSettingsCardDescription}
+        >
+          <Button
+            variant='secondary'
+            onClick={openCommentSettingsModal}
+            fullWidth
           >
-            <Button
-              variant='secondary'
-              onClick={openCommentSettingsModal}
-              fullWidth
-            >
-              {settingsMessages.commentSettingsButtonText}
-            </Button>
-          </SettingsCard>
-        ) : null}
+            {settingsMessages.commentSettingsButtonText}
+          </Button>
+        </SettingsCard>
         <SettingsCard
           icon={<IconNotification />}
           title={settingsMessages.notificationsCardTitle}
@@ -517,24 +498,6 @@ export const SettingsPage = () => {
         <LabelAccountSettingsCard />
         <AccountsManagingYouSettingsCard />
         <AccountsYouManageSettingsCard />
-        <SettingsCard
-          icon={<IconRobot />}
-          title={settingsMessages.aiGeneratedCardTitle}
-          description={settingsMessages.aiGeneratedCardDescription}
-        >
-          {allowAiAttribution ? (
-            <span className={styles.aiAttributionEnabled}>
-              {settingsMessages.aiGeneratedEnabled}
-            </span>
-          ) : null}
-          <Button
-            onClick={openAiAttributionSettingsModal}
-            variant='secondary'
-            fullWidth
-          >
-            {settingsMessages.aiGeneratedButtonText}
-          </Button>
-        </SettingsCard>
         {isDownloadDesktopEnabled ? (
           <SettingsCard
             icon={<IconReceive />}

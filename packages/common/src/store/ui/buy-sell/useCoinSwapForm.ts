@@ -50,6 +50,7 @@ export type CoinSwapFormProps = {
     error: string | null
     isInsufficientBalance: boolean
     exchangeRate?: number | null
+    exchangeRateError?: Error | null
   }) => void
   /**
    * Initial value for the input field
@@ -253,6 +254,7 @@ export const useCoinSwapForm = ({
       error,
       isInsufficientBalance,
       exchangeRate: currentExchangeRate,
+      exchangeRateError,
       isExchangeRateLoading
     }),
     [
@@ -262,6 +264,7 @@ export const useCoinSwapForm = ({
       error,
       isInsufficientBalance,
       currentExchangeRate,
+      exchangeRateError,
       isExchangeRateLoading
     ]
   )

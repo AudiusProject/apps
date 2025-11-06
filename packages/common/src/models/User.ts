@@ -19,12 +19,12 @@ export type SocialPlatform = 'x' | 'instagram' | 'tiktok'
 
 export type UserMetadata = {
   album_count: number
-  allow_ai_attribution?: boolean
   artist_coin_badge?: Nullable<{
     mint: string
     logo_uri: string
     ticker: string
   }>
+  coin_flair_mint?: Nullable<string>
   artist_pick_track_id: Nullable<number>
   associated_wallets_balance?: Nullable<StringWei>
   balance?: Nullable<StringWei>
@@ -53,7 +53,6 @@ export type UserMetadata = {
   verified_with_instagram: boolean
   verified_with_tiktok: boolean
   website: Nullable<string>
-  donation: Nullable<string>
   location: Nullable<string>
   name: string
   playlist_count: number

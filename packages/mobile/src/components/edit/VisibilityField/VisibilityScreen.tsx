@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { visibilityMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import dayjs from 'dayjs'
 import { useFormikContext } from 'formik'
 
@@ -22,9 +20,6 @@ import { ScheduledReleaseDateField } from './ScheduledReleaseDateField'
 type VisibilityType = 'scheduled' | 'public' | 'hidden'
 
 export const VisibilityScreen = () => {
-  const { isEnabled: isPaidScheduledEnabled } = useFeatureFlag(
-    FeatureFlags.PAID_SCHEDULED
-  )
   const { values, initialValues, setValues } = useFormikContext<FormValues>()
   const { entityType } = values
   const hiddenKey = entityType === 'track' ? 'is_unlisted' : 'is_private'
@@ -120,8 +115,7 @@ export const VisibilityScreen = () => {
           description={messages.hiddenDescription}
         />
         {!initiallyPublic &&
-        (entityType === 'track' ||
-          (isPaidScheduledEnabled && entityType === 'album')) ? (
+        (entityType === 'track' || entityType === 'album') ? (
           <ExpandableRadio
             value='scheduled'
             label={messages.scheduledRelease}

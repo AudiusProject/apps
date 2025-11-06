@@ -163,7 +163,6 @@ const TrackPage = ({
             hasDownloadAccess={hasDownloadAccess}
             isRemix={!!defaults.remixParentTrackId}
             fieldVisibility={defaults.fieldVisibility}
-            aiAttributedUserId={defaults.aiAttributionUserId}
             goToFavoritesPage={goToFavoritesPage}
             goToRepostsPage={goToRepostsPage}
           />

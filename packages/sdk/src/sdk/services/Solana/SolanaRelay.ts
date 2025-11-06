@@ -19,7 +19,13 @@ import {
   FirstBuyQuoteRequest,
   LaunchpadConfigResponse,
   ClaimFeesRequest,
-  ClaimFeesResponse
+  ClaimFeesResponse,
+  ClaimVestedCoinsRequest,
+  ClaimVestedCoinsResponse,
+  SwapCoinQuoteRequest,
+  SwapCoinQuoteResponse,
+  SwapCoinRequest,
+  SwapCoinResponse
 } from './types'
 
 /**
@@ -379,6 +385,125 @@ export class SolanaRelay extends BaseAPI {
 
     return await new runtime.JSONApiResponse(response, (json) => {
       return json as ClaimFeesResponse
+    }).value()
+  }
+
+  /**
+   * Claims vested/unlocked artist coins from the vesting schedule.
+   * After an artist coin graduates, the artist's reserved coins unlock daily over a 5-year period.
+   */
+  public async claimVestedCoins(
+    params: ClaimVestedCoinsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<ClaimVestedCoinsResponse> {
+    const headerParameters: runtime.HTTPHeaders = {
+      'Content-Type': 'application/json'
+    }
+    const queryParameters: runtime.HTTPQuery = {
+      tokenMint: params.tokenMint,
+      ownerWalletAddress: params.ownerWalletAddress,
+      receiverWalletAddress: params.receiverWalletAddress,
+      rewardsPoolPercentage: params.rewardsPoolPercentage
+    }
+
+    const response = await this.request(
+      {
+        path: '/launchpad/claim_vested_coins',
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (json) => {
+      return json as ClaimVestedCoinsResponse
+    }).value()
+  }
+
+  /**
+   * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC.
+   * Returns the expected output amount for a given input amount.
+   */
+  public async getSwapCoinQuote(
+    params: SwapCoinQuoteRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<SwapCoinQuoteResponse> {
+    const headerParameters: runtime.HTTPHeaders = {
+      'Content-Type': 'application/json'
+    }
+
+    const queryParameters: runtime.HTTPQuery = {
+      inputAmount: params.inputAmount,
+      coinMint: params.coinMint,
+      swapDirection: params.swapDirection
+    }
+
+    const response = await this.request(
+      {
+        path: '/meteora/swap_coin_quote',
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (json) => {
+      if (!runtime.exists(json, 'outputAmount')) {
+        throw new Error('outputAmount missing from response')
+      }
+      return {
+        outputAmount: json.outputAmount as string
+      }
+    }).value()
+  }
+
+  /**
+   * Creates a swap transaction for swapping AUDIO to/from an artist coin using Meteora's DBC.
+   * Returns a base64-encoded transaction ready to be signed by the user.
+   */
+  public async swapCoin(
+    params: SwapCoinRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<SwapCoinResponse> {
+    const headerParameters: runtime.HTTPHeaders = {
+      'Content-Type': 'application/json'
+    }
+    const queryParameters: runtime.HTTPQuery = {
+      inputAmount: params.inputAmount,
+      coinMint: params.coinMint,
+      swapDirection: params.swapDirection,
+      userPublicKey: params.userPublicKey.toBase58(),
+      ...(params.isExternalWallet !== undefined && {
+        isExternalWallet: params.isExternalWallet.toString()
+      }),
+      ...(params.feePayer !== undefined && {
+        feePayer: params.feePayer.toBase58()
+      })
+    }
+
+    const response = await this.request(
+      {
+        path: '/meteora/swap_coin',
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (json) => {
+      if (!runtime.exists(json, 'transaction')) {
+        throw new Error('transaction missing from response')
+      }
+      if (!runtime.exists(json, 'outputAmount')) {
+        throw new Error('outputAmount missing from response')
+      }
+      return {
+        transaction: json.transaction as string,
+        outputAmount: json.outputAmount as string
+      }
     }).value()
   }
 }

@@ -66,7 +66,6 @@ describe('getCollectionsBatcher', () => {
       verifiedWithInstagram: false,
       verifiedWithTiktok: false,
       website: '',
-      donation: '',
       location: '',
       name: 'Test User',
       playlistCount: 0,

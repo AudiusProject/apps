@@ -1,6 +1,11 @@
 import { ComponentProps, ComponentType, PureComponent, RefObject } from 'react'
 
-import { useCurrentAccountUser, useProfileUser } from '@audius/common/api'
+import {
+  useCurrentAccountUser,
+  useProfileUser,
+  getUserQueryKey,
+  useQueryContext
+} from '@audius/common/api'
 import { useCurrentTrack, useIsArtist } from '@audius/common/hooks'
 import {
   Name,
@@ -40,6 +45,7 @@ import {
   playerSelectors
 } from '@audius/common/store'
 import { getErrorMessage, Nullable, route } from '@audius/common/utils'
+import { useQueryClient } from '@tanstack/react-query'
 import { UnregisterCallback } from 'history'
 import moment from 'moment'
 import { connect } from 'react-redux'
@@ -88,7 +94,7 @@ const INITIAL_UPDATE_FIELDS = {
   updatedInstagramHandle: null,
   updatedTikTokHandle: null,
   updatedWebsite: null,
-  updatedDonation: null
+  updatedArtistCoinBadge: null
 }
 
 type OwnProps = {
@@ -121,7 +127,11 @@ type ProfilePageState = {
   updatedInstagramHandle: string | null
   updatedTikTokHandle: string | null
   updatedWebsite: string | null
-  updatedDonation: string | null
+  updatedArtistCoinBadge: Nullable<{
+    mint: string
+    logo_uri: string
+    ticker: string
+  }>
   tracksLineupOrder: TracksSortMode
   areArtistRecommendationsVisible: boolean
   showBlockUserConfirmationModal: boolean
@@ -402,10 +412,108 @@ class ProfilePageClassComponent extends PureComponent<
     })
   }
 
-  updateDonation = (donation: string) => {
+  updateArtistCoinBadge = async (
+    badge: Nullable<{
+      mint: string
+      logo_uri: string
+      ticker: string
+    }>
+  ) => {
+    const {
+      profile: { profile },
+      queryClient,
+      env
+    } = this.props
+
     this.setState({
-      updatedDonation: donation
+      updatedArtistCoinBadge: badge
     })
+
+    // Optimistically update the user cache
+    if (profile?.user_id && queryClient) {
+      // If setting to "default", compute which coin should be shown
+      let optimisticBadge = badge
+      if (badge?.mint === '__default__') {
+        // Fetch user's coins to determine the most held coin
+        try {
+          const userCoinsData = queryClient.getQueryData([
+            'userCoins',
+            { userId: profile.user_id }
+          ]) as any
+
+          if (userCoinsData) {
+            // API returns coins sorted: owned first, then by balance
+            const excludedMints = [
+              env.WAUDIO_MINT_ADDRESS,
+              env.USDC_MINT_ADDRESS
+            ]
+
+            // First check for owned coin (even with zero balance)
+            const ownedCoin = userCoinsData.find(
+              (coin: any) =>
+                coin.ownerId === profile.user_id &&
+                !excludedMints.includes(coin.mint)
+            )
+
+            // Otherwise, get first coin with balance > 0
+            const mostHeldCoin = userCoinsData.find(
+              (coin: any) =>
+                coin.balance > 0 && !excludedMints.includes(coin.mint)
+            )
+
+            const firstEligibleCoin = ownedCoin ?? mostHeldCoin
+
+            if (firstEligibleCoin) {
+              optimisticBadge = {
+                mint: firstEligibleCoin.mint,
+                logo_uri: firstEligibleCoin.logoUri,
+                ticker: firstEligibleCoin.ticker
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error computing default coin badge:', error)
+        }
+      }
+
+      queryClient.setQueryData(
+        getUserQueryKey(profile.user_id),
+        (prevUser: any) => {
+          if (!prevUser) return undefined
+
+          // Convert badge to coin_flair_mint and artist_coin_badge format
+          let artistCoinBadge = null
+          let coinFlairMint = null
+
+          if (optimisticBadge) {
+            if (optimisticBadge.mint === '__default__') {
+              // Default selected - coin_flair_mint = null, but show the computed badge
+              coinFlairMint = null
+              // Keep badge as null since we couldn't compute it
+              artistCoinBadge = null
+            } else if (optimisticBadge.mint === '__none__') {
+              // None selected - coin_flair_mint = '', no badge
+              coinFlairMint = ''
+              artistCoinBadge = null
+            } else {
+              // Specific coin selected
+              coinFlairMint = optimisticBadge.mint
+              artistCoinBadge = {
+                mint: optimisticBadge.mint,
+                logo_uri: optimisticBadge.logo_uri,
+                ticker: optimisticBadge.ticker
+              }
+            }
+          }
+
+          return {
+            ...prevUser,
+            coin_flair_mint: coinFlairMint,
+            artist_coin_badge: artistCoinBadge
+          }
+        }
+      )
+    }
   }
 
   changeTab = (tab: ProfilePageTabs) => {
@@ -454,7 +562,7 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle: null,
       updatedTikTokHandle: null,
       updatedWebsite: null,
-      updatedDonation: null
+      updatedArtistCoinBadge: null
     })
   }
 
@@ -474,7 +582,7 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation
+      updatedArtistCoinBadge
     } = this.state
 
     const updatedMetadata = newUserMetadata({ ...profile })
@@ -507,8 +615,49 @@ class ProfilePageClassComponent extends PureComponent<
     if (updatedWebsite !== null) {
       updatedMetadata.website = updatedWebsite
     }
-    if (updatedDonation !== null) {
-      updatedMetadata.donation = updatedDonation
+
+    // Always include coin_flair_mint in updates (consistent with other fields)
+    // Determine artist coin badge, considering coin_flair_mint
+    let artistCoinBadge = null
+    if (profile) {
+      if (updatedArtistCoinBadge !== null) {
+        artistCoinBadge = updatedArtistCoinBadge
+      } else {
+        // Check coin_flair_mint to determine the correct badge state
+        if (profile.coin_flair_mint === '') {
+          // Empty string means "None" was explicitly selected
+          artistCoinBadge = {
+            mint: '__none__',
+            logo_uri: '',
+            ticker: ''
+          }
+        } else if (profile.coin_flair_mint === null) {
+          // null means "Default"
+          artistCoinBadge = {
+            mint: '__default__',
+            logo_uri: '',
+            ticker: ''
+          }
+        } else {
+          // Specific coin is selected
+          artistCoinBadge = profile.artist_coin_badge || null
+        }
+      }
+    }
+
+    if (artistCoinBadge) {
+      // Map badge to coin_flair_mint field
+      // null = auto/default, '' = none, 'mint' = specific coin
+      if (artistCoinBadge.mint === '__default__') {
+        updatedMetadata.coin_flair_mint = null
+      } else if (artistCoinBadge.mint === '__none__') {
+        updatedMetadata.coin_flair_mint = ''
+      } else {
+        updatedMetadata.coin_flair_mint = artistCoinBadge.mint
+      }
+    } else {
+      // If no badge selected, ensure we send null to clear it
+      updatedMetadata.coin_flair_mint = null
     }
     this.props.updateProfile(updatedMetadata)
     this.setState({
@@ -531,7 +680,8 @@ class ProfilePageClassComponent extends PureComponent<
       updatedCoverPhoto: null,
       updatedProfilePicture: null,
       updatedBio: null,
-      updatedLocation: null
+      updatedLocation: null,
+      updatedArtistCoinBadge: null
     })
   }
 
@@ -747,7 +897,7 @@ class ProfilePageClassComponent extends PureComponent<
       updatedInstagramHandle,
       updatedTikTokHandle,
       updatedWebsite,
-      updatedDonation
+      updatedArtistCoinBadge
     } = this.state
 
     const isArtist = this.getIsArtist()
@@ -802,11 +952,35 @@ class ProfilePageClassComponent extends PureComponent<
         ? updatedWebsite
         : profile.website || ''
       : ''
-    const donation = profile
-      ? updatedDonation !== null
-        ? updatedDonation
-        : profile.donation || ''
-      : ''
+
+    // Determine artist coin badge, considering coin_flair_mint
+    let artistCoinBadge = null
+    if (profile) {
+      if (updatedArtistCoinBadge !== null) {
+        artistCoinBadge = updatedArtistCoinBadge
+      } else {
+        // Check coin_flair_mint to determine the correct badge state
+        if (profile.coin_flair_mint === '') {
+          // Empty string means "None" was explicitly selected
+          artistCoinBadge = {
+            mint: '__none__',
+            logo_uri: '',
+            ticker: ''
+          }
+        } else if (profile.coin_flair_mint === null) {
+          // null means "Default"
+          artistCoinBadge = {
+            mint: '__default__',
+            logo_uri: '',
+            ticker: ''
+          }
+        } else {
+          // Specific coin is selected
+          artistCoinBadge = profile.artist_coin_badge || null
+        }
+      }
+    }
+
     const hasProfilePicture = profile
       ? !!profile.profile_picture ||
         !!profile.profile_picture_sizes ||
@@ -832,7 +1006,7 @@ class ProfilePageClassComponent extends PureComponent<
       instagramHandle,
       tikTokHandle,
       website,
-      donation,
+      artistCoinBadge,
       hasProfilePicture,
       following,
       mode,
@@ -873,7 +1047,7 @@ class ProfilePageClassComponent extends PureComponent<
       updateInstagramHandle: this.updateInstagramHandle,
       updateTikTokHandle: this.updateTikTokHandle,
       updateWebsite: this.updateWebsite,
-      updateDonation: this.updateDonation,
+      updateArtistCoinBadge: this.updateArtistCoinBadge,
       updateCoverPhoto: this.updateCoverPhoto,
       didChangeTabsFrom: this.didChangeTabsFrom,
       onMessage: this.onMessage,
@@ -893,7 +1067,7 @@ class ProfilePageClassComponent extends PureComponent<
         updatedInstagramHandle !== null ||
         updatedTikTokHandle !== null ||
         updatedWebsite !== null ||
-        updatedDonation !== null ||
+        updatedArtistCoinBadge !== null ||
         updatedCoverPhoto !== null ||
         updatedProfilePicture !== null,
       onClickMobileOverflow: this.props.clickOverflow
@@ -1123,9 +1297,13 @@ type HookStateProps = {
   accountUserId?: ID | undefined
   isArtist?: boolean
   chatPermissions?: ReturnType<typeof useCanCreateChat>
+  queryClient: ReturnType<typeof useQueryClient>
+  env: ReturnType<typeof useQueryContext>['env']
 }
 const hookStateToProps = (Component: typeof ProfilePage) => {
   return (props: ProfilePageProps) => {
+    const queryClient = useQueryClient()
+    const { env } = useQueryContext()
     const isArtist = useIsArtist({ id: props.profile?.profile?.user_id })
     const { data: accountData } = useCurrentAccountUser({
       select: (user) => ({
@@ -1135,10 +1313,12 @@ const hookStateToProps = (Component: typeof ProfilePage) => {
     const chatPermissions = useCanCreateChat(props.profile?.profile?.user_id)
     return (
       <ProfilePage
-        {...(accountData as HookStateProps)}
+        {...props}
+        accountUserId={accountData?.accountUserId}
         isArtist={isArtist}
         chatPermissions={chatPermissions}
-        {...props}
+        queryClient={queryClient}
+        env={env}
       />
     )
   }

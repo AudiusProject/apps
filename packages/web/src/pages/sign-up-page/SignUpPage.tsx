@@ -1,7 +1,9 @@
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
+import { useSelector } from 'react-redux'
 import { Redirect, Route, RouteProps, Switch } from 'react-router-dom'
 
+import { getRouteOnCompletion } from 'common/store/pages/signon/selectors'
 import { useDetermineAllowedRoute } from 'pages/sign-up-page/utils/useDetermineAllowedRoutes'
 
 import { CreateEmailPage } from './pages/CreateEmailPage'
@@ -65,6 +67,8 @@ function SignUpRoute({ children, ...rest }: RouteProps) {
 }
 
 export const SignUpPage = () => {
+  const completionRoute = useSelector(getRouteOnCompletion)
+
   return (
     <RouteContextProvider>
       <Helmet>
@@ -104,7 +108,7 @@ export const SignUpPage = () => {
           <LoadingAccountPage />
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_COMPLETED_REDIRECT}>
-          <Redirect to={FEED_PAGE} />
+          <Redirect to={completionRoute || FEED_PAGE} />
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_REFERRER_COMPLETED_REDIRECT}>
           <Redirect to={TRENDING_PAGE} />

@@ -68,7 +68,6 @@ export type ProfilePageProps = {
   instagramVerified: boolean
   tikTokVerified: boolean
   website: string
-  donation: string
   coverPhotoSizes: CoverPhotoSizes | null
   profilePictureSizes: ProfilePictureSizes | null
   hasProfilePicture: boolean
@@ -118,7 +117,6 @@ export type ProfilePageProps = {
   updateInstagramHandle: (handle: string) => void
   updateTikTokHandle: (handle: string) => void
   updateWebsite: (website: string) => void
-  updateDonation: (donation: string) => void
   updateProfilePicture: (
     selectedFiles: any,
     source: 'original' | 'unsplash' | 'url'
@@ -227,7 +225,6 @@ const ProfilePage = g(
     instagramVerified,
     tikTokVerified,
     website,
-    donation,
     artistTracks,
     userFeed,
     getLineupProps,
@@ -258,7 +255,6 @@ const ProfilePage = g(
     updateInstagramHandle,
     updateTikTokHandle,
     updateWebsite,
-    updateDonation,
     updateProfilePicture,
     updateCoverPhoto,
     didChangeTabsFrom,
@@ -331,7 +327,6 @@ const ProfilePage = g(
           instagramVerified={instagramVerified}
           tikTokVerified={tikTokVerified}
           website={website}
-          donation={donation}
           onUpdateName={updateName}
           onUpdateBio={updateBio}
           onUpdateLocation={updateLocation}
@@ -339,7 +334,6 @@ const ProfilePage = g(
           onUpdateInstagramHandle={updateInstagramHandle}
           onUpdateTikTokHandle={updateTikTokHandle}
           onUpdateWebsite={updateWebsite}
-          onUpdateDonation={updateDonation}
         />
       )
     } else {
@@ -497,7 +491,6 @@ const ProfilePage = g(
             instagramHandle={instagramHandle}
             tikTokHandle={tikTokHandle}
             website={website}
-            donation={donation}
             followers={followers}
             following={following}
             onFollow={onFollow}

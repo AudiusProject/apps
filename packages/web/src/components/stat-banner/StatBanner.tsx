@@ -1,9 +1,8 @@
 import { useRef } from 'react'
 
 import { useCurrentUserId, useUser } from '@audius/common/api'
-import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { ID, statusIsNotFinalized } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { chatSelectors } from '@audius/common/store'
 import {
   IconMessageBlock,
@@ -115,11 +114,8 @@ const StatsPopupMenu = ({
           }
     )
   }
-  const { isEnabled: commentPostFlag = false } = useFeatureFlag(
-    FeatureFlags.COMMENT_POSTING_ENABLED
-  )
 
-  if (accountUserId && commentPostFlag) {
+  if (accountUserId) {
     menuItems.push(
       isMuted
         ? {

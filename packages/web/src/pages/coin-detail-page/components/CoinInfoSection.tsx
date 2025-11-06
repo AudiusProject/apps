@@ -10,6 +10,7 @@ import {
 import { useDiscordOAuthLink, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { Feature, Name, WidthSizes } from '@audius/common/models'
+import { useClaimVestedCoinsModal } from '@audius/common/store'
 import {
   formatCurrencyWithSubscript,
   getTokenDecimalPlaces,
@@ -17,7 +18,7 @@ import {
   route,
   shortenSPLAddress
 } from '@audius/common/utils'
-import { wAUDIO } from '@audius/fixed-decimal'
+import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
   IconCopy,
@@ -34,7 +35,8 @@ import {
   PlainButton,
   Text,
   TextLink,
-  useTheme
+  useTheme,
+  Divider
 } from '@audius/harmony'
 import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
@@ -48,14 +50,21 @@ import Tooltip from 'components/tooltip/Tooltip'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
+import { useClaimVestedCoins } from 'hooks/useClaimVestedCoins'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
+import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
 
-const messages = coinDetailsMessages.coinInfo
+const { REWARDS_PAGE } = route
+
+const messages = {
+  ...coinDetailsMessages.coinInfo,
+  balance: (balance: string, ticker?: string) => `${balance} $${ticker}`
+}
 const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
 
@@ -261,18 +270,182 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
   )
 }
 
+const formatBalance = (balance: number, coinDecimals: number) => {
+  const decimals = getTokenDecimalPlaces(balance)
+  const maxFractionDigits = Math.min(decimals, coinDecimals)
+  return new FixedDecimal(BigInt(balance), coinDecimals).toLocaleString(
+    'en-US',
+    {
+      maximumFractionDigits: maxFractionDigits
+    }
+  )
+}
+
+type ArtistVestingSectionProps = {
+  coin: Coin
+  handleClaimVestedCoinsClick: () => void
+  isClaimVestedCoinsDisabled: boolean
+  isClaimVestedCoinsPending: boolean
+}
+
+const ArtistVestingSection = ({
+  coin,
+  handleClaimVestedCoinsClick,
+  isClaimVestedCoinsDisabled,
+  isClaimVestedCoinsPending
+}: ArtistVestingSectionProps) => {
+  const { data: currentUser } = useCurrentAccountUser()
+  const isOwner = currentUser?.user_id === coin.ownerId
+  const isMobile = useIsMobile()
+
+  const rewardsPoolBalance = formatBalance(
+    coin.rewardPool?.balance ?? 0,
+    coin.decimals
+  )
+  const lockedBalance = formatBalance(
+    coin.artistLocker?.locked ?? 0,
+    coin.decimals
+  )
+  const unlockedBalance = formatBalance(
+    coin.artistLocker?.unlocked ?? 0,
+    coin.decimals
+  )
+  const claimableBalance = formatBalance(
+    coin.artistLocker?.claimable ?? 0,
+    coin.decimals
+  )
+  return (
+    <Flex column gap='m' w='100%'>
+      <Divider orientation='horizontal' />
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.vestingSchedule}
+          </Text>
+          <Tooltip
+            text={overflowMessages.tooltips.vestingSchedule}
+            mount='body'
+          >
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s'>
+          {overflowMessages.vestingScheduleValue}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.locked}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.locked} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s'>
+          {messages.balance(lockedBalance, coin.ticker)}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.unlocked}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.unlocked} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s'>
+          {messages.balance(unlockedBalance, coin.ticker)}
+        </Text>
+      </Flex>
+      {isOwner ? (
+        <Flex
+          alignItems='center'
+          justifyContent='space-between'
+          alignSelf='stretch'
+        >
+          <Flex alignItems='center' gap='s'>
+            <Text variant='body' size='s' strength='strong'>
+              {overflowMessages.availableToClaim}
+            </Text>
+            <Tooltip
+              text={overflowMessages.tooltips.availableToClaim}
+              mount='body'
+            >
+              <IconInfo size='s' color='subdued' />
+            </Tooltip>
+          </Flex>
+          <Flex alignItems='center' gap='s'>
+            {coin.artistLocker?.claimable &&
+            coin.artistLocker.claimable > 0 &&
+            !isMobile ? (
+              <Flex gap='xs' alignItems='center'>
+                <TextLink
+                  onClick={handleClaimVestedCoinsClick}
+                  variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
+                  disabled={isClaimVestedCoinsDisabled}
+                >
+                  {overflowMessages.claim}
+                </TextLink>
+                {isClaimVestedCoinsPending ? (
+                  <LoadingSpinner size='s' color='subdued' />
+                ) : null}
+              </Flex>
+            ) : null}
+            <Text variant='body' size='s'>
+              {messages.balance(claimableBalance, coin.ticker)}
+            </Text>
+          </Flex>
+        </Flex>
+      ) : null}
+      <Divider orientation='horizontal' />
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        alignSelf='stretch'
+      >
+        <Flex alignItems='center' gap='s'>
+          <Text variant='body' size='s' strength='strong'>
+            {overflowMessages.rewardsPool}
+          </Text>
+          <Tooltip text={overflowMessages.tooltips.rewardsPool} mount='body'>
+            <IconInfo size='s' color='subdued' />
+          </Tooltip>
+        </Flex>
+        <Text variant='body' size='s'>
+          {messages.balance(rewardsPoolBalance, coin.ticker)}
+        </Text>
+      </Flex>
+    </Flex>
+  )
+}
+
 type CoinInfoSectionProps = {
   mint: string
 }
-
-const { REWARDS_PAGE } = route
 
 export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
+  const isMobile = useIsMobile()
 
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { onOpen: openClaimVestedCoinsModal } = useClaimVestedCoinsModal()
+
+  const { data: coin, isLoading: isArtistCoinLoading } = useArtistCoin(mint)
 
   const { data: currentUser } = useCurrentAccountUser()
   const { data: userCoins } = useUserCoins({ userId: currentUser?.user_id })
@@ -284,12 +457,15 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   const discordOAuthLink = useDiscordOAuthLink(userToken?.ticker)
   const { balance: userTokenBalance } = userToken ?? {}
 
+  const isManagerMode = useIsManagedAccount()
+
   // Claim fee hook
   const { mutate: claimFees, isPending: isClaimFeesPending } = useClaimFees({
     onSuccess: (data) => {
       toast(toastMessages.feesClaimed)
       record(
         make(Name.LAUNCHPAD_CLAIM_FEES_SUCCESS, {
+          signatures: data.signatures,
           walletAddress: coinCreatorWalletAddress ?? '',
           coinSymbol: coin?.ticker,
           mintAddress: mint,
@@ -322,6 +498,45 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     }
   })
 
+  // Claim vested coins hook
+  const { mutate: claimVestedCoins, isPending: isClaimVestedCoinsPending } =
+    useClaimVestedCoins({
+      onSuccess: (data) => {
+        toast(toastMessages.vestedCoinsClaimed)
+        record(
+          make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_SUCCESS, {
+            signature: data.signature,
+            walletAddress: coinCreatorWalletAddress ?? '',
+            coinSymbol: coin?.ticker,
+            mintAddress: mint,
+            claimedAmount:
+              coin?.artistLocker?.claimable?.toLocaleString() ?? '0'
+          })
+        )
+      },
+      onError: (error) => {
+        reportToSentry({
+          error,
+          feature: Feature.ArtistCoins,
+          name: 'Failed to claim vested artist coins',
+          additionalInfo: {
+            coin,
+            tokenMint: mint
+          }
+        })
+        console.error(error)
+        toast(toastMessages.vestedCoinsClaimFailed)
+        record(
+          make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE, {
+            walletAddress: coinCreatorWalletAddress ?? '',
+            coinSymbol: coin?.ticker,
+            mintAddress: mint,
+            error: error instanceof Error ? error.message : String(error)
+          })
+        )
+      }
+    })
+
   const formatFeeNumber = (input: number) => {
     const value = wAUDIO(BigInt(input))
     const decimalPlaces = getTokenDecimalPlaces(Number(value.toString()))
@@ -342,7 +557,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     () => formatFeeNumber(Math.trunc(totalArtistEarnings)),
     [totalArtistEarnings]
   )
-  const descriptionParagraphs = coin?.description?.split('\n') ?? []
+  const descriptionParagraphs: string[] = coin?.description?.split('\n') ?? []
 
   const openDiscord = () => {
     window.open(discordOAuthLink, '_blank')
@@ -373,22 +588,24 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     [mint, claimFees]
   )
 
-  const { openAppKitModal } = useConnectExternalWallets(async () => {
-    const solanaAccount = appkitModal.getAccount('solana')
-    const connectedAddress = solanaAccount?.address
+  const { openAppKitModal: openAppKitModalForFees } = useConnectExternalWallets(
+    async () => {
+      const solanaAccount = appkitModal.getAccount('solana')
+      const connectedAddress = solanaAccount?.address
 
-    if (!coinCreatorWalletAddress) {
-      // If we hit this block the user has not launched the coin
-      toast(toastMessages.feesClaimFailed)
-      return
+      if (!coinCreatorWalletAddress) {
+        // If we hit this block the user has not launched the coin
+        toast(toastMessages.feesClaimFailed)
+        return
+      }
+      if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
+        // If we hit this block the user has not connected the wallet they used to launch the coin
+        toast(toastMessages.incorrectWalletLinked)
+        return
+      }
+      handleClaimFees(connectedAddress)
     }
-    if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
-      // If we hit this block the user has not connected the wallet they used to launch the coin
-      toast(toastMessages.incorrectWalletLinked)
-      return
-    }
-    handleClaimFees(connectedAddress)
-  })
+  )
 
   const handleClaimFeesClick = useCallback(async () => {
     const solanaAccount = appkitModal.getAccount('solana')
@@ -411,7 +628,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
           mintAddress: mint
         })
       )
-      openAppKitModal('solana')
+      openAppKitModalForFees('solana')
     } else if (connectedAddress !== coinCreatorWalletAddress) {
       // If we hit this block the user has not connected the wallet they used to launch the coin
       // Disconnect the current Solana wallet to allow connecting a different one
@@ -424,7 +641,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         })
       )
       await appkitModal.disconnect('solana')
-      openAppKitModal('solana')
+      openAppKitModalForFees('solana')
     } else {
       // appkit wallet is connected with the correct address,
       // can just initiate claim fees flow immediately
@@ -438,7 +655,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       handleClaimFees(connectedAddress)
     }
   }, [
-    openAppKitModal,
+    openAppKitModalForFees,
     handleClaimFees,
     coinCreatorWalletAddress,
     record,
@@ -446,9 +663,120 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     mint
   ])
 
-  const isManagerMode = useIsManagedAccount()
+  const handleClaimVestedCoins = useCallback(
+    (walletAddress: string, rewardsPoolPercentage: number) => {
+      claimVestedCoins({
+        tokenMint: mint,
+        externalWalletAddress: walletAddress,
+        rewardsPoolPercentage
+      })
+    },
+    [mint, claimVestedCoins]
+  )
 
-  if (isLoading || !coin) {
+  const handleConfirmClaim = useCallback(
+    (rewardsPoolPercentage: number) => {
+      const solanaAccount = appkitModal.getAccount('solana')
+      const connectedAddress = solanaAccount?.address
+      if (connectedAddress) {
+        // Pass the rewards pool percentage to the claim function
+        handleClaimVestedCoins(connectedAddress, rewardsPoolPercentage)
+      }
+    },
+    [handleClaimVestedCoins]
+  )
+
+  const { openAppKitModal: openAppKitModalForVestedCoins } =
+    useConnectExternalWallets(async () => {
+      const solanaAccount = appkitModal.getAccount('solana')
+      const connectedAddress = solanaAccount?.address
+
+      if (!coinCreatorWalletAddress) {
+        toast(toastMessages.vestedCoinsClaimFailed)
+        return
+      }
+      if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
+        toast(toastMessages.incorrectWalletLinked)
+      }
+      openClaimVestedCoinsModal({
+        ticker: coin?.ticker ?? '',
+        isOpen: true,
+        claimable: coin?.artistLocker?.claimable ?? 0,
+        onClaim: handleConfirmClaim,
+        isClaimPending: isClaimVestedCoinsPending
+      })
+    })
+
+  const handleClaimVestedCoinsClick = useCallback(async () => {
+    const solanaAccount = appkitModal.getAccount('solana')
+    const connectedAddress = solanaAccount?.address
+    record(
+      make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_CLICKED, {
+        walletAddress: connectedAddress ?? '',
+        coinSymbol: coin?.ticker,
+        mintAddress: mint
+      })
+    )
+
+    // appkit wallet is not connected, need to prompt connect flow first
+    if (!connectedAddress) {
+      record(
+        make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET, {
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
+      openAppKitModalForVestedCoins('solana')
+    } else if (connectedAddress !== coinCreatorWalletAddress) {
+      // Disconnect the current Solana wallet to allow connecting a different one
+      record(
+        make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET, {
+          currentWalletAddress: connectedAddress,
+          expectedWalletAddress: coinCreatorWalletAddress ?? '',
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
+      await appkitModal.disconnect('solana')
+      openAppKitModalForVestedCoins('solana')
+    } else {
+      record(
+        make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_WALLET_CONNECTED, {
+          walletAddress: connectedAddress,
+          coinSymbol: coin?.ticker,
+          mintAddress: mint
+        })
+      )
+      // Open the modal to let user choose allocation
+      openClaimVestedCoinsModal({
+        ticker: coin?.ticker ?? '',
+        isOpen: true,
+        claimable: coin?.artistLocker?.claimable ?? 0,
+        onClaim: handleConfirmClaim,
+        isClaimPending: isClaimVestedCoinsPending
+      })
+    }
+  }, [
+    openAppKitModalForVestedCoins,
+    coinCreatorWalletAddress,
+    openClaimVestedCoinsModal,
+    coin,
+    mint,
+    record,
+    isClaimVestedCoinsPending,
+    handleConfirmClaim
+  ])
+
+  // Get vesting information from the coin's dynamic bonding curve data
+  const hasGraduated = coin?.dynamicBondingCurve?.isMigrated ?? false
+
+  const isClaimVestedCoinsDisabled =
+    isClaimVestedCoinsPending ||
+    isManagerMode ||
+    coin?.artistLocker === null ||
+    coin?.artistLocker?.claimable === 0
+
+  if (isArtistCoinLoading || !coin) {
     return <CoinInfoSectionSkeleton />
   }
 
@@ -562,6 +890,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         justifyContent='space-between'
         alignSelf='stretch'
         p='l'
+        ph='xl'
         borderTop='default'
       >
         <PlainButton
@@ -592,26 +921,6 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
           >
             <Flex alignItems='center' gap='s'>
               <Text variant='body' size='s' strength='strong'>
-                {overflowMessages.vestingSchedule}
-              </Text>
-              <Tooltip
-                text={overflowMessages.tooltips.vestingSchedule}
-                mount='body'
-              >
-                <IconInfo size='s' color='subdued' />
-              </Tooltip>
-            </Flex>
-            <Text variant='body' size='s' color='subdued'>
-              {overflowMessages.vestingScheduleValue}
-            </Text>
-          </Flex>
-          <Flex
-            alignItems='center'
-            justifyContent='space-between'
-            alignSelf='stretch'
-          >
-            <Flex alignItems='center' gap='s'>
-              <Text variant='body' size='s' strength='strong'>
                 {overflowMessages.artistEarnings}
               </Text>
               <Tooltip
@@ -621,7 +930,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                 <IconInfo size='s' color='subdued' />
               </Tooltip>
             </Flex>
-            <Text variant='body' size='s' color='subdued'>
+            <Text variant='body' size='s'>
               {formattedTotalArtistEarnings} {overflowMessages.$audio}
             </Text>
           </Flex>
@@ -633,17 +942,17 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             >
               <Flex alignItems='center' gap='s'>
                 <Text variant='body' size='s' strength='strong'>
-                  {overflowMessages.unclaimedFees}
+                  {overflowMessages.unclaimedEarnings}
                 </Text>
                 <Tooltip
-                  text={overflowMessages.tooltips.unclaimedFees}
+                  text={overflowMessages.tooltips.unclaimedEarnings}
                   mount='body'
                 >
                   <IconInfo size='s' color='subdued' />
                 </Tooltip>
               </Flex>
               <Flex alignItems='center' gap='s'>
-                {unclaimedFees >= MIN_CLAIMABLE_FEES ? (
+                {unclaimedFees >= MIN_CLAIMABLE_FEES && !isMobile ? (
                   <Flex gap='xs' alignItems='center'>
                     <TextLink
                       onClick={handleClaimFeesClick}
@@ -658,11 +967,19 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                   </Flex>
                 ) : null}
 
-                <Text variant='body' size='s' color='subdued'>
+                <Text variant='body' size='s'>
                   {formattedUnclaimedFees} {overflowMessages.$audio}
                 </Text>
               </Flex>
             </Flex>
+          ) : null}
+          {!isManagerMode && hasGraduated && coin.artistLocker ? (
+            <ArtistVestingSection
+              coin={coin}
+              handleClaimVestedCoinsClick={handleClaimVestedCoinsClick}
+              isClaimVestedCoinsDisabled={isClaimVestedCoinsDisabled}
+              isClaimVestedCoinsPending={isClaimVestedCoinsPending}
+            />
           ) : null}
         </Flex>
       ) : null}

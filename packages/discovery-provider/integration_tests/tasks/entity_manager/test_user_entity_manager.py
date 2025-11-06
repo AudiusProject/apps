@@ -1752,6 +1752,166 @@ def test_add_existing_associated_wallet(app, mocker):
         redis_mock.sadd.assert_not_called()
 
 
+def test_reassociate_wallet_to_different_user(app, mocker):
+    """Tests that when a wallet is associated with a new user, it's removed from the previous user"""
+    bus_mock = set_patches(mocker)
+
+    redis_mock = mocker.Mock()
+    redis_mock.sadd = mocker.Mock()
+
+    with app.app_context():
+        db = get_db()
+        web3 = Web3()
+        update_task = UpdateTask(web3, bus_mock, redis=redis_mock)
+
+    eth_wallet = "0x1234567890123456789012345678901234567890"
+    eth_signature = "0xvalid_signature"
+
+    user2_metadata = {
+        "chain": "eth",
+        "wallet_address": eth_wallet,
+        "signature": eth_signature,
+    }
+
+    tx_receipts = {
+        "User2AssociateWalletTx": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": "",
+                        "_entityType": "AssociatedWallet",
+                        "_userId": 2,
+                        "_action": "Create",
+                        "_metadata": json.dumps({"cid": "", "data": user2_metadata}),
+                        "_signer": "user2wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    entity_manager_txs = [
+        AttributeDict({"transactionHash": update_task.web3.to_bytes(text=tx_receipt)})
+        for tx_receipt in tx_receipts
+    ]
+
+    def get_events_side_effect(_, tx_receipt):
+        return tx_receipts[tx_receipt["transactionHash"].decode("utf-8")]
+
+    mocker.patch(
+        "src.tasks.entity_manager.entity_manager.get_entity_manager_events_tx",
+        side_effect=get_events_side_effect,
+        autospec=True,
+    )
+
+    mocker.patch(
+        "src.tasks.entity_manager.entities.user.validate_signature",
+        return_value=True,
+    )
+
+    entities = {
+        "users": [
+            {
+                "user_id": 1,
+                "handle": "user-1",
+                "wallet": "user1wallet",
+            },
+            {
+                "user_id": 2,
+                "handle": "user-2",
+                "wallet": "user2wallet",
+            },
+        ],
+        "associated_wallets": [
+            {
+                "user_id": 1,
+                "wallet": eth_wallet,
+                "chain": "eth",
+                "is_current": True,
+                "is_delete": False,
+                "blocknumber": 0,
+                "blockhash": hex(0),
+            },
+            # Wallet is deleted but still associated with user 3 (PE-7263)
+            {
+                "user_id": 3,
+                "wallet": eth_wallet,
+                "chain": "eth",
+                "is_current": True,
+                "is_delete": True,
+                "blocknumber": 0,
+                "blockhash": hex(0),
+            },
+        ],
+    }
+    populate_mock_db(db, entities)
+
+    with db.scoped_session() as session:
+        initial_wallet_user1 = (
+            session.query(AssociatedWallet)
+            .filter(
+                AssociatedWallet.user_id == 1,
+                AssociatedWallet.wallet == eth_wallet,
+                AssociatedWallet.chain == "eth",
+            )
+            .first()
+        )
+        assert initial_wallet_user1 is not None
+        assert initial_wallet_user1.is_current
+        assert not initial_wallet_user1.is_delete
+
+        # User 2 should not have wallet X associated initially
+        initial_wallet_user2 = (
+            session.query(AssociatedWallet)
+            .filter(
+                AssociatedWallet.user_id == 2,
+                AssociatedWallet.wallet == eth_wallet,
+                AssociatedWallet.chain == "eth",
+            )
+            .first()
+        )
+        assert initial_wallet_user2 is None
+
+        # User 2 associates wallet (should remove from User 1 and associate with User 2)
+        total_changes, _ = entity_manager_update(
+            update_task,
+            session,
+            entity_manager_txs,  # User2AssociateWalletTx
+            block_number=1,
+            block_timestamp=BLOCK_DATETIME.timestamp(),
+            block_hash=hex(1),
+        )
+
+        # Verify final state: wallet is no longer associated with User 1
+        final_wallet_user1 = (
+            session.query(AssociatedWallet)
+            .filter(
+                AssociatedWallet.user_id == 1,
+                AssociatedWallet.wallet == eth_wallet,
+                AssociatedWallet.chain == "eth",
+            )
+            .first()
+        )
+        assert final_wallet_user1 is None  # Should be deleted
+
+        # Verify final state: wallet is now associated with User 2
+        final_wallet_user2 = (
+            session.query(AssociatedWallet)
+            .filter(
+                AssociatedWallet.user_id == 2,
+                AssociatedWallet.wallet == eth_wallet,
+                AssociatedWallet.chain == "eth",
+            )
+            .first()
+        )
+        assert final_wallet_user2 is not None
+        assert final_wallet_user2.is_current
+        assert not final_wallet_user2.is_delete
+
+        # Verify balance refresh was called for User 2
+        redis_mock.sadd.assert_called_with(IMMEDIATE_REFRESH_REDIS_PREFIX, 2)
+
+
 def test_remove_associated_wallet(app, mocker):
     """Tests removing existing associated wallets (ETH and SOL)"""
     bus_mock = set_patches(mocker)
@@ -1767,6 +1927,7 @@ def test_remove_associated_wallet(app, mocker):
 
     eth_wallet = "0x1234567890123456789012345678901234567890"
     sol_wallet = "DxMWXrYWxYGgAqNxqzwCd5zyGFn9bGF1pBBCDrQArYox"
+    sol_wallet_2 = "GX5QC2zU4ouewAxiR33p9zV7S5Vs8mu2UjRj8u8R4ugR"
 
     remove_eth_metadata = {
         "chain": "eth",
@@ -1776,6 +1937,11 @@ def test_remove_associated_wallet(app, mocker):
     remove_sol_metadata = {
         "chain": "sol",
         "wallet_address": sol_wallet,
+    }
+
+    remove_sol_2_metadata = {
+        "chain": "sol",
+        "wallet_address": sol_wallet_2,
     }
 
     tx_receipts = {
@@ -1811,6 +1977,22 @@ def test_remove_associated_wallet(app, mocker):
                 )
             },
         ],
+        "RemoveSol2WalletTx": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": "",
+                        "_entityType": "AssociatedWallet",
+                        "_userId": 2,
+                        "_action": "Delete",
+                        "_metadata": json.dumps(
+                            {"cid": "", "data": remove_sol_2_metadata}
+                        ),
+                        "_signer": "user2wallet",
+                    }
+                )
+            },
+        ],
     }
 
     entity_manager_txs = [
@@ -1835,6 +2017,11 @@ def test_remove_associated_wallet(app, mocker):
                 "handle": "user-1",
                 "wallet": "user1wallet",
             },
+            {
+                "user_id": 2,
+                "handle": "user-2",
+                "wallet": "user2wallet",
+            },
         ],
         "associated_wallets": [
             {
@@ -1852,6 +2039,24 @@ def test_remove_associated_wallet(app, mocker):
                 "chain": "sol",
                 "is_current": True,
                 "is_delete": False,
+                "blocknumber": 0,
+                "blockhash": hex(0),
+            },
+            {
+                "user_id": 2,
+                "wallet": sol_wallet_2,
+                "chain": "sol",
+                "is_current": True,
+                "is_delete": False,
+                "blocknumber": 0,
+                "blockhash": hex(0),
+            },
+            {
+                "user_id": 3,
+                "wallet": sol_wallet_2,
+                "chain": "sol",
+                "is_current": True,
+                "is_delete": True,
                 "blocknumber": 0,
                 "blockhash": hex(0),
             },
@@ -1920,12 +2125,26 @@ def test_remove_associated_wallet(app, mocker):
         )
         assert removed_sol_wallet is None
 
+        # Verify sol wallet 2 was removed even though the wallet is also
+        # associated with user 3, but is marked is_delete=True (PE-7263)
+        removed_sol_2_wallet = (
+            session.query(AssociatedWallet)
+            .filter(
+                AssociatedWallet.user_id == 2,
+                AssociatedWallet.wallet == sol_wallet_2,
+                AssociatedWallet.chain == "sol",
+            )
+            .first()
+        )
+        assert removed_sol_2_wallet is None
+
         # Verify balance refresh was called exactly once for each removal
-        assert redis_mock.sadd.call_count == 2
+        assert redis_mock.sadd.call_count == 3
         redis_mock.sadd.assert_has_calls(
             [
                 mock.call(IMMEDIATE_REFRESH_REDIS_PREFIX, 1),
                 mock.call(IMMEDIATE_REFRESH_REDIS_PREFIX, 1),
+                mock.call(IMMEDIATE_REFRESH_REDIS_PREFIX, 2),
             ]
         )
 

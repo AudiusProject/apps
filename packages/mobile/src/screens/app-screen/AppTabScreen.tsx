@@ -24,16 +24,17 @@ import { FilterButtonScreen } from '@audius/harmony-native'
 import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
-import { AiGeneratedTracksScreen } from 'app/screens/ai-generated-tracks-screen'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
+import { CashScreen } from 'app/screens/cash-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
 import {
   CoinDetailsScreen,
-  EditCoinDetailsScreen
+  EditCoinDetailsScreen,
+  ExclusiveTracksScreen
 } from 'app/screens/coin-details-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
@@ -93,7 +94,6 @@ export type AppTabScreenParamList = {
   Followers: { userId: ID }
   Following: { userId: ID }
   Mutuals: { userId: ID }
-  AiGeneratedTracks: { userId: ID }
   RelatedArtists: { userId: ID }
   SupportingUsers: { userId: ID }
   TopSupporters: { userId: ID; source: TipSource }
@@ -124,8 +124,10 @@ export type AppTabScreenParamList = {
     initialSortDirection?: GetCoinsSortDirectionEnum
   }
   wallet: undefined
+  CashScreen: undefined
   CoinDetailsScreen: { ticker: string }
   EditCoinDetailsScreen: { ticker: string }
+  ExclusiveTracksScreen: { ticker: string }
   Upload: {
     initialMetadata?: Partial<TrackMetadataForUpload>
   }
@@ -222,10 +224,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         <Stack.Screen name='Followers' component={FollowersScreen} />
         <Stack.Screen name='Following' component={FollowingScreen} />
         <Stack.Screen name='Favorited' component={FavoritedScreen} />
-        <Stack.Screen
-          name='AiGeneratedTracks'
-          component={AiGeneratedTracksScreen}
-        />
         <Stack.Screen name='Mutuals' component={MutualsScreen} />
         <Stack.Screen name='RelatedArtists' component={RelatedArtistsScreen} />
         <Stack.Screen
@@ -241,10 +239,15 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='wallet' component={WalletScreen} />
+      <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
       <Stack.Screen
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
+      />
+      <Stack.Screen
+        name='ExclusiveTracksScreen'
+        component={ExclusiveTracksScreen}
       />
       <Stack.Screen
         name='ArtistCoinsExplore'

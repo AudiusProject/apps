@@ -16,7 +16,6 @@ import musicConfettiReducer, {
   MusicConfettiState
 } from './music-confetti/slice'
 import { HistoryPageState, LibraryPageState } from './pages'
-import ai from './pages/ai/slice'
 import audioRewardsSlice from './pages/audio-rewards/slice'
 import { chatReducer } from './pages/chat'
 import collection from './pages/collection/reducer'
@@ -25,6 +24,7 @@ import {
   deactivateAccountReducer,
   DeactivateAccountState
 } from './pages/deactivate-account'
+import exclusiveTracks from './pages/exclusive-tracks/slice'
 import feed from './pages/feed/reducer'
 import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
@@ -178,7 +178,6 @@ export const reducers = (storage: Storage, history?: History) => ({
 
   // Pages
   pages: combineReducers({
-    ai,
     audioRewards: audioRewardsSlice.reducer,
     chat: chatReducer,
     collection,
@@ -197,6 +196,7 @@ export const reducers = (storage: Storage, history?: History) => ({
     trendingUnderground,
     settings,
     remixes,
+    exclusiveTracks,
     premiumTracks
   }),
   search: searchReducer(storage),
@@ -285,7 +285,6 @@ export type CommonState = {
   }
 
   pages: {
-    ai: ReturnType<typeof ai>
     audioRewards: ReturnType<typeof audioRewardsSlice.reducer>
     chat: ReturnType<typeof chatReducer>
     collection: CollectionsPageState
@@ -304,6 +303,7 @@ export type CommonState = {
     trendingPlaylists: ReturnType<typeof trendingPlaylists>
     trendingUnderground: ReturnType<typeof trendingUnderground>
     remixes: ReturnType<typeof remixes>
+    exclusiveTracks: ReturnType<typeof exclusiveTracks>
     premiumTracks: ReturnType<typeof premiumTracks>
   }
   search: SearchState

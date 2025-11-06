@@ -1,7 +1,5 @@
 import { useCallback } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { Box, Checkbox, Flex, Text } from '@audius/harmony'
 import { css } from '@emotion/react'
 import { useField } from 'formik'
@@ -21,9 +19,6 @@ const messages = {
 }
 
 export const RightsDeclaration = () => {
-  const { isEnabled: isRightsAndCoversEnabled } = useFeatureFlag(
-    FeatureFlags.RIGHTS_AND_COVERS
-  )
   const [
     { value: isFullyOwnedByUser },
     _ignored1,
@@ -33,10 +28,6 @@ export const RightsDeclaration = () => {
   const handleBoxClick = useCallback(() => {
     setIsFullyOwnedByUser(!isFullyOwnedByUser)
   }, [isFullyOwnedByUser, setIsFullyOwnedByUser])
-
-  if (!isRightsAndCoversEnabled) {
-    return null
-  }
 
   return (
     <Box onClick={handleBoxClick}>

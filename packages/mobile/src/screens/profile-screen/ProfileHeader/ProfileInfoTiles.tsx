@@ -11,10 +11,8 @@ import {
   useUsers,
   useProfileUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { UserMetadata } from '@audius/common/models'
 import { Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { View, ScrollView } from 'react-native'
 import Animated, {
   FadeIn,
@@ -24,7 +22,6 @@ import Animated, {
 
 import {
   IconUserFollowing,
-  IconRobot,
   IconUserGroup,
   Text,
   IconTrophy,
@@ -77,7 +74,6 @@ const useInfoTileStyles = makeStyles(({ spacing }) => ({
 }))
 
 const messages = {
-  aiGeneratedTracks: 'AI Generated Tracks',
   comments: 'Comments',
   mutuals: 'Mutuals',
   relatedArtists: 'Related Artists',
@@ -326,22 +322,17 @@ export const ProfileInfoTiles = () => {
     user_id,
     current_user_followee_follow_count,
     supporting_count,
-    allow_ai_attribution: hasAiAttribution,
     supporter_count
-  } = useProfileUser({
-    select: (user) => ({
-      supporting_count: user.supporting_count,
-      supporter_count: user.supporter_count,
-      current_user_followee_follow_count:
-        user.current_user_followee_follow_count,
-      user_id: user.user_id,
-      allow_ai_attribution: user.allow_ai_attribution
-    })
-  }).user ?? {}
-
-  const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.RECENT_COMMENTS
-  )
+  } =
+    useProfileUser({
+      select: (user) => ({
+        supporting_count: user.supporting_count,
+        supporter_count: user.supporter_count,
+        current_user_followee_follow_count:
+          user.current_user_followee_follow_count,
+        user_id: user.user_id
+      })
+    }).user ?? {}
 
   const [isRecentCommentsDrawerOpen, setIsRecentCommentsDrawerOpen] =
     useState(false)
@@ -401,7 +392,7 @@ export const ProfileInfoTiles = () => {
       >
         <ProfileTierTile />
         <LayoutAnimationConfig skipEntering={!shouldAnimate}>
-          {isRecentCommentsEnabled && recentComments.length > 0 && (
+          {recentComments.length > 0 && (
             <Animated.View entering={fadeInAnimation}>
               <ProfileInfoTile
                 onPress={onOpenRecentCommentsDrawer}
@@ -433,18 +424,6 @@ export const ProfileInfoTiles = () => {
             ) : null}
 
             <RelatedArtistsTile userId={user_id} />
-            {hasAiAttribution ? (
-              <ProfileInfoTile
-                screen='AiGeneratedTracks'
-                icon={IconRobot}
-                title={messages.aiGeneratedTracks}
-                content={
-                  <Text variant='body' size='s' color='subdued'>
-                    {messages.viewAll}
-                  </Text>
-                }
-              />
-            ) : null}
           </Animated.View>
         </LayoutAnimationConfig>
       </ScrollView>

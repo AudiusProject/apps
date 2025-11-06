@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
-import { IconRobot } from '@audius/harmony-native'
+import { IconTrending } from '@audius/harmony-native'
 
 import type { MusicBadgeProps } from './MusicBadge'
 import { MusicBadge } from './MusicBadge'
@@ -17,7 +17,7 @@ const meta: Meta<MusicBadgeProps> = {
     color: {
       description: 'Color',
       control: { type: 'radio' },
-      options: ['aiGreen', 'trendingBlue']
+      options: ['trendingBlue']
     }
   },
   render: (props) => <MusicBadge {...props} />
@@ -29,7 +29,7 @@ type Story = StoryObj<MusicBadgeProps>
 
 export const Default: Story = {
   args: {
-    icon: IconRobot,
+    icon: IconTrending,
     children: 'Example Badge'
   }
 }
@@ -37,15 +37,15 @@ export const Default: Story = {
 export const Accent: Story = {
   args: {
     variant: 'accent',
-    icon: IconRobot,
+    icon: IconTrending,
     children: 'Example Badge'
   }
 }
 
 export const Color: Story = {
   args: {
-    color: 'aiGreen',
-    icon: IconRobot,
+    color: 'trendingBlue',
+    icon: IconTrending,
     children: 'Example Badge'
   }
 }
