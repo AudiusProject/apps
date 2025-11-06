@@ -7,8 +7,14 @@ import {
 } from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 
-import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
-import LoadingSpinner from 'app/components/loading-spinner'
+import {
+  Flex,
+  Text,
+  IconArrowRight,
+  Paper,
+  Box,
+  LoadingSpinner
+} from '@audius/harmony-native'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 type AccountBalanceProps = {
@@ -68,21 +74,56 @@ export const AccountBalance = ({
 
   if (isLoading) {
     return (
-      <Paper w='100%' p='m' direction='column' alignItems='center' gap='s'>
-        <LoadingSpinner />
-        <Text variant='body' size='s' strength='weak'>
+      <Paper
+        w='100%'
+        h={300}
+        pv='xl'
+        ph='m'
+        direction='column'
+        alignItems='center'
+        justifyContent='center'
+        gap='l'
+        border='default'
+      >
+        <LoadingSpinner color='subdued' style={{ height: 24, width: 24 }} />
+        <Text variant='body' size='l' color='subdued'>
           {messages.loading}
         </Text>
       </Paper>
     )
   }
 
-  if (isError || !historyData || historyData.length === 0) {
+  if (isError) {
     return (
-      <Paper w='100%' p='m' direction='column' alignItems='center'>
+      <Paper
+        w='100%'
+        p='m'
+        direction='column'
+        alignItems='center'
+        border='default'
+      >
         <Text variant='body' size='m' strength='weak' color='danger'>
           {messages.error}
         </Text>
+      </Paper>
+    )
+  }
+
+  // Show zero balance state without graph when balance is 0 or no history
+  const hasZeroBalance =
+    currentBalance === 0 || !historyData || historyData.length === 0
+
+  if (hasZeroBalance) {
+    return (
+      <Paper w='100%' p='m' direction='column' gap='m' border='default'>
+        <Flex column gap='s'>
+          <Text variant='heading' size='s' color='default'>
+            {messages.title}
+          </Text>
+          <Text variant='display' size='s'>
+            {formatCurrency(0, 2)}
+          </Text>
+        </Flex>
       </Paper>
     )
   }
@@ -91,14 +132,14 @@ export const AccountBalance = ({
   const rotation = changeStats.isPositive ? -45 : 45
 
   return (
-    <Paper w='100%' p='m' direction='column' gap='m'>
+    <Paper w='100%' p='m' direction='column' gap='m' border='default'>
       <Flex column gap='xs'>
-        <Text variant='heading' size='s'>
+        <Text variant='heading' size='s' color='default'>
           {messages.title}
         </Text>
         {changeStats.balance !== null ? (
           <Text variant='display' size='s'>
-            {formatCurrency(changeStats.balance, 0)}
+            {formatCurrency(changeStats.balance, 2)}
           </Text>
         ) : null}
         <Flex row gap='xs' alignItems='center'>

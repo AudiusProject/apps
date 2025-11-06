@@ -6,11 +6,17 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
-import { Flex, Text, IconArrowRight, Box, Paper } from '@audius/harmony'
+import {
+  Flex,
+  Text,
+  IconArrowRight,
+  Box,
+  Paper,
+  LoadingSpinner
+} from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
 
@@ -158,22 +164,24 @@ const AccountBalanceContent = () => {
     return (
       <Paper
         w='100%'
-        p={padding}
+        h={isMobile ? 300 : 400}
+        pv={isMobile ? 'xl' : '3xl'}
+        ph={padding}
         direction='column'
         alignItems='center'
         justifyContent='center'
-        gap='s'
-        css={css({ minHeight: 400 })}
+        gap='l'
+        border='default'
       >
-        <LoadingSpinner />
-        <Text variant='body' size='s' strength='weak'>
+        <LoadingSpinner size='3xl' color='subdued' />
+        <Text variant='body' size='l' color='subdued'>
           {messages.loading}
         </Text>
       </Paper>
     )
   }
 
-  if (isError || !historyData || historyData.length === 0) {
+  if (isError) {
     return (
       <Paper
         w='100%'
@@ -182,10 +190,30 @@ const AccountBalanceContent = () => {
         alignItems='center'
         justifyContent='center'
         css={css({ minHeight: 400 })}
+        border='default'
       >
         <Text variant='body' size='m' strength='weak' color='danger'>
           {messages.error}
         </Text>
+      </Paper>
+    )
+  }
+
+  // Show zero balance state without graph when balance is 0 or no history
+  const hasZeroBalance =
+    currentBalance === 0 || !historyData || historyData.length === 0
+
+  if (hasZeroBalance) {
+    return (
+      <Paper w='100%' p={padding} direction='column' gap={gap} border='default'>
+        <Flex column gap='s'>
+          <Text variant='heading' size={isMobile ? 's' : 'm'} color='default'>
+            {messages.title}
+          </Text>
+          <Text variant='display' size={isMobile ? 's' : 'm'}>
+            {formatCurrency(0, 2)}
+          </Text>
+        </Flex>
       </Paper>
     )
   }
@@ -195,15 +223,15 @@ const AccountBalanceContent = () => {
     : DesktopChangeIndicator
 
   return (
-    <Paper w='100%' p={padding} direction='column' gap={gap}>
+    <Paper w='100%' p={padding} direction='column' gap={gap} border='default'>
       {isMobile ? (
         <Flex column gap='xs'>
-          <Text variant='heading' size='s'>
+          <Text variant='heading' size='s' color='default'>
             {messages.title}
           </Text>
           {changeStats.balance !== null ? (
             <Text variant='display' size='s'>
-              {formatCurrency(changeStats.balance, 0)}
+              {formatCurrency(changeStats.balance, 2)}
             </Text>
           ) : null}
           <ChangeIndicator
@@ -215,12 +243,12 @@ const AccountBalanceContent = () => {
       ) : (
         <Flex justifyContent='space-between' alignItems='flex-start'>
           <Flex column gap='s'>
-            <Text variant='heading' size='m'>
+            <Text variant='heading' size='m' color='default'>
               {messages.title}
             </Text>
             {changeStats.balance !== null ? (
               <Text variant='display' size='m'>
-                {formatCurrency(changeStats.balance, 0)}
+                {formatCurrency(changeStats.balance, 2)}
               </Text>
             ) : null}
           </Flex>

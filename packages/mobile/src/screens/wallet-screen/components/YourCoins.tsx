@@ -61,7 +61,7 @@ const YourCoinsHeader = () => {
       pb='s'
       borderBottom='default'
     >
-      <Text variant='heading' size='s' color='heading'>
+      <Text variant='heading' size='s' color='default'>
         {messages.assets}
       </Text>
       <Button variant='secondary' size='small' onPress={handleBuySell}>
@@ -127,7 +127,7 @@ export const YourCoins = () => {
   }, [navigation])
 
   return (
-    <Paper>
+    <Paper border='default'>
       <YourCoinsHeader />
       <Flex column>
         {isLoadingCoins || !currentUserId ? (

@@ -253,11 +253,12 @@ export const LinkedWallets = () => {
       alignItems='flex-start'
       backgroundColor='white'
       borderRadius='m'
+      border='default'
     >
       <Flex column pv='l' ph='l' w='100%'>
         <Flex alignItems='center' justifyContent='space-between' w='100%'>
           <Flex alignItems='center' gap='s'>
-            <Text variant='heading' size='m' color='heading'>
+            <Text variant='heading' size='m' color='default'>
               {hasWallets
                 ? walletMessages.linkedWallets.titleHasWallets
                 : walletMessages.linkedWallets.titleNoWallets}
