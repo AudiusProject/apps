@@ -118,13 +118,16 @@ export const getDirectQuote = async (
   queryClient: QueryClient,
   sdk: AudiusSdk
 ): Promise<CoinExchangeRateResponse> => {
-  const { isDBC: isInputDBC } = getCoinPoolState(params.inputMint, queryClient)
-  const { isDBC: isOutputDBC } = getCoinPoolState(
+  const { hasPool: inputHasPool } = getCoinPoolState(
+    params.inputMint,
+    queryClient
+  )
+  const { hasPool: outputHasPool } = getCoinPoolState(
     params.outputMint,
     queryClient
   )
   let quoteResult: JupiterQuoteResult | undefined
-  if (isInputDBC || isOutputDBC) {
+  if (inputHasPool || outputHasPool) {
     quoteResult = await getQuoteViaMeteoraDBC(params, sdk)
   } else {
     quoteResult = await getJupiterQuoteByMint({
@@ -171,14 +174,17 @@ export const getIndirectQuoteViaAudio = async (
   queryClient: QueryClient,
   sdk: AudiusSdk
 ): Promise<CoinExchangeRateResponse> => {
-  const { isDBC: isInputDBC } = getCoinPoolState(params.inputMint, queryClient)
-  const { isDBC: isOutputDBC } = getCoinPoolState(
+  const { hasPool: inputHasPool } = getCoinPoolState(
+    params.inputMint,
+    queryClient
+  )
+  const { hasPool: outputHasPool } = getCoinPoolState(
     params.outputMint,
     queryClient
   )
   // Get first quote: InputToken -> AUDIO
   let firstQuote: JupiterQuoteResult | undefined
-  if (isInputDBC) {
+  if (inputHasPool) {
     firstQuote = await getQuoteViaMeteoraDBC(
       {
         inputMint: params.inputMint,
@@ -207,7 +213,7 @@ export const getIndirectQuoteViaAudio = async (
   // Get second quote: AUDIO -> OutputToken
   let secondQuote: JupiterQuoteResult | undefined
 
-  if (isOutputDBC) {
+  if (outputHasPool) {
     secondQuote = await getQuoteViaMeteoraDBC(
       {
         inputMint: AUDIO_MINT,
