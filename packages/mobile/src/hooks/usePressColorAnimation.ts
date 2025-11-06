@@ -1,8 +1,7 @@
 import { useCallback, useRef } from 'react'
 
+import { convertHexToRGBA } from '@audius/common/utils'
 import { Animated } from 'react-native'
-
-import { convertHexToRGBA } from 'app/utils/convertHexToRGBA'
 
 export const useColorAnimation = (...colors: string[]) => {
   const colorAnim = useRef(new Animated.Value(0)).current

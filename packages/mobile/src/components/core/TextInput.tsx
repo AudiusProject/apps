@@ -8,6 +8,7 @@ import {
   useEffect
 } from 'react'
 
+import { convertHexToRGBA } from '@audius/common/utils'
 import { BlurView } from '@react-native-community/blur'
 import type {
   NativeSyntheticEvent,
@@ -40,7 +41,6 @@ import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
-import { convertHexToRGBA } from 'app/utils/convertHexToRGBA'
 import { mergeRefs } from 'app/utils/mergeRefs'
 import { Theme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 

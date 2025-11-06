@@ -6,12 +6,12 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
+import { convertHexToRGBA } from '@audius/common/utils'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
 import { Flex, Paper, Text, useTheme } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
-import { convertHexToRGBA } from 'app/utils/convertHexToRGBA'
 
 const messages = walletMessages.balanceHistory
 

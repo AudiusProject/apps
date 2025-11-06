@@ -7,11 +7,11 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
+import { convertHexToRGBA } from '@audius/common/utils'
 import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
-import { convertHexToRGBA } from 'utils/convertHexToRGBA'
 
 import styles from './UserBalanceHistoryGraph.module.css'
 
