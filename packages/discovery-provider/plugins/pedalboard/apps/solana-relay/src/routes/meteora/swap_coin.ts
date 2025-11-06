@@ -87,8 +87,7 @@ const getDammSwapTx = async (
   coinMintPubkey: PublicKey,
   swapDirection: string,
   inputAmountBN: BN,
-  userPubkey: PublicKey,
-  feePayerPubkey: PublicKey
+  userPubkey: PublicKey
 ) => {
   const cpAmm = new CpAmm(connection)
   const poolState = await cpAmm.fetchPoolState(
@@ -289,8 +288,7 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
           coinMintPubkey,
           swapDirection,
           inputAmountBN,
-          userPubkey,
-          feePayerPubkey
+          userPubkey
         )
       swapTx = dammSwapTx
       outputAmount = dammOutputAmount
