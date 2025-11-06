@@ -22,7 +22,8 @@ const webStyles = `
   const className = css({
      filter: shadow ? theme.shadows.drop : undefined,
      minHeight: height,
-     minWidth: width
+     minWidth: width,
+     clipPath: hex ? 'url(#rounded-hex-clip-path)' : undefined
   })
   other.className = cx(className, classNameProp)
 
@@ -76,6 +77,7 @@ const ${variables.componentName} = forwardRef((${variables.props}, ref) => {
     width: widthProp,
     shadow,
     animatedProps,
+    hex,
     ...other
   } = props
 

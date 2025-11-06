@@ -65,7 +65,7 @@ export const challengeRewardsConfig: Record<
     description: (challenge) =>
       `Link your verified social media accounts to earn ${challenge?.amount} $AUDIO.`,
     fullDescription: () =>
-      'Get verified on Audius by linking your verified Twitter or Instagram account!',
+      'Get verified on Audius by linking your verified X or TikTok account!',
     progressLabel: 'Not Linked',
     panelButtonText: 'Verify Your Account'
   },
@@ -75,7 +75,7 @@ export const challengeRewardsConfig: Record<
     description: (challenge) =>
       `Link your verified social media accounts to earn ${challenge?.amount} $AUDIO.`,
     fullDescription: () =>
-      'Get verified on Audius by linking your verified Twitter or Instagram account!',
+      'Get verified on Audius by linking your verified X or TikTok account!',
     progressLabel: 'Not Linked',
     panelButtonText: 'Link Verified Account'
   },
@@ -94,9 +94,9 @@ export const challengeRewardsConfig: Record<
     id: ChallengeName.ListenStreakEndless,
     title: 'Listening Streak',
     description: () =>
-      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening.',
+      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening (Silver Tier Required).',
     fullDescription: () =>
-      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening.',
+      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening (Silver Tier Required).',
     progressLabel: '%0/%1 Days',
     completedLabel: 'Keep Listening',
     panelButtonText: 'Trending on Audius'
@@ -312,9 +312,9 @@ export const challengeRewardsConfig: Record<
     id: ChallengeName.PlayCount250,
     title: '250 Plays',
     description: () =>
-      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (Verified Required).`,
     fullDescription: () =>
-      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 250 plays across all of your tracks to earn an $AUDIO Reward (Verified Required).`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'
