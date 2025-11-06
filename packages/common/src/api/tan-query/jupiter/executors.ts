@@ -343,21 +343,24 @@ export abstract class BaseSwapExecutor {
 
 export class DirectSwapExecutor extends BaseSwapExecutor {
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
-    const { isDBC: isInputDBC } = getCoinPoolState(
+    const { hasPool: inputHasPool } = getCoinPoolState(
       params.inputMint,
       this.dependencies.queryClient
     )
-    const { isDBC: isOutputDBC } = getCoinPoolState(
+    const { hasPool: outputHasPool } = getCoinPoolState(
       params.outputMint,
       this.dependencies.queryClient
     )
-    if (isInputDBC || isOutputDBC) {
-      const swapDirection = isInputDBC ? 'coinToAudio' : 'audioToCoin'
+    if (inputHasPool || outputHasPool) {
+      const swapDirection = inputHasPool ? 'coinToAudio' : 'audioToCoin'
       return await executeMeteoraSwap(
-        swapDirection === 'coinToAudio' ? params.inputMint : params.outputMint,
+        params.inputMint,
         swapDirection,
         params.amountUi,
-        { ...this.dependencies, tokens: this.tokens }
+        {
+          ...this.dependencies,
+          tokens: this.tokens
+        }
       )
     }
     return await this.executeDirectJupiterSwap(params)
@@ -563,17 +566,17 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           { ...this.dependencies, tokens: this.tokens }
         )
       }
-      const { isDBC: isInputDBC } = getCoinPoolState(
+      const { hasPool: inputHasPool } = getCoinPoolState(
         params.inputMint,
         this.dependencies.queryClient
       )
-      const { isDBC: isOutputDBC } = getCoinPoolState(
+      const { hasPool: outputHasPool } = getCoinPoolState(
         params.outputMint,
         this.dependencies.queryClient
       )
       // Execute first transaction with retries: InputToken -> AUDIO
       let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
-        isInputDBC ? swapToAudioWithMeteora : swapToAudioWithJupiter,
+        inputHasPool ? swapToAudioWithMeteora : swapToAudioWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
@@ -582,7 +585,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // attempt to fallback to jupiter swap if meteora swap fails
       if (
-        isInputDBC &&
+        inputHasPool &&
         (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result)
       ) {
         swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
@@ -620,7 +623,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       let swapToTokenResult = await this.retryPolicy.executeWithRetry(
         // Prioritize Meteora DBC swap if the token we're swapping is a DBC
         // @ts-ignore
-        isOutputDBC ? swapToTokenWithMeteora : swapToTokenWithJupiter,
+        outputHasPool ? swapToTokenWithMeteora : swapToTokenWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
@@ -629,7 +632,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // attempt to fallback to jupiter swap if meteora swap fails
       if (
-        isOutputDBC &&
+        outputHasPool &&
         (!swapToTokenResult.success || !swapToTokenResult.result)
       ) {
         swapToTokenResult = await this.retryPolicy.executeWithRetry(

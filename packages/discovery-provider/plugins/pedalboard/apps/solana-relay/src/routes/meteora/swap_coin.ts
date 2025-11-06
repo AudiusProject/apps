@@ -130,7 +130,7 @@ const getDammSwapTx = async (
     tokenBDecimal: tokenBMintInfo.decimals
   })
   const swapTx = await cpAmm.swap({
-    payer: feePayerPubkey,
+    payer: userPubkey,
     pool: new PublicKey(dammPoolRecord.account),
     inputTokenMint,
     outputTokenMint,
