@@ -7,6 +7,7 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
+import { convertHexToRGBA } from '@audius/common/utils'
 import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
@@ -63,7 +64,7 @@ const getChartData = (
     {
       fill: true,
       lineTension: 0.4,
-      backgroundColor: 'rgba(126, 27, 204, 0.15)',
+      backgroundColor: convertHexToRGBA(secondary, 0.15),
       borderColor: secondary,
       borderWidth: 2,
       borderCapStyle: 'round' as const,
@@ -87,7 +88,8 @@ const getChartData = (
 const getChartOptions = (
   chartId: string,
   neutralColor: string,
-  spacing: Record<string, number>
+  spacing: Record<string, number>,
+  borderColor: string
 ) => ({
   maintainAspectRatio: false,
   responsive: true,
@@ -133,8 +135,8 @@ const getChartOptions = (
         gridLines: {
           display: true,
           drawBorder: false,
-          color: 'rgba(243, 243, 245, 1)',
-          zeroLineColor: 'rgba(243, 243, 245, 1)',
+          color: borderColor,
+          zeroLineColor: borderColor,
           borderDash: [4, 4],
           lineWidth: 1
         },
@@ -224,6 +226,7 @@ export const UserBalanceHistoryGraph = () => {
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
   const neutralColor = color.neutral.n400
+  const borderColor = color.border.default
   const { data: currentUserId } = useCurrentUserId()
   const {
     data: historyDataFetched,
@@ -316,7 +319,7 @@ export const UserBalanceHistoryGraph = () => {
     >
       <Line
         data={getChartData(timestamps, balances, secondary)}
-        options={getChartOptions(chartId, neutralColor, spacing)}
+        options={getChartOptions(chartId, neutralColor, spacing, borderColor)}
         height={200}
       />
     </Flex>

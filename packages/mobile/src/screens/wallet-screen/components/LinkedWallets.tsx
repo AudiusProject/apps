@@ -230,11 +230,11 @@ export const LinkedWallets = () => {
   const isAtOrAboveLimit = walletCount >= WALLET_COUNT_LIMIT
 
   return (
-    <Paper>
+    <Paper border='default'>
       {/* Header Section */}
       <Flex p='l' pb='m' borderBottom='default'>
-        <Text variant='heading' size='s' color='heading'>
-          {coinDetailsMessages.externalWallets.hasBalanceTitle}
+        <Text variant='heading' size='s' color='default'>
+          {walletMessages.linkedWallets.titleHasWallets}
         </Text>
       </Flex>
 

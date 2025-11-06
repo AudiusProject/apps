@@ -90,7 +90,9 @@ export const CashPage = () => {
     downloadCSV: downloadWithdrawalsCSV
   } = useWithdrawals()
 
-  const header = <Header primary={messages.title} icon={IconWallet} />
+  const header = (
+    <Header primary={messages.title} icon={IconWallet} showBackButton />
+  )
 
   const tables: Record<TableType, TableMetadata> = {
     [TableType.SALES]: {

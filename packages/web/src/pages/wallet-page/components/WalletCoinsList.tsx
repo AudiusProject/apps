@@ -105,7 +105,13 @@ const CoinsListSkeleton = () => {
   const { isMobile } = useMedia()
 
   return (
-    <Paper column shadow='far' borderRadius='l' css={{ overflow: 'hidden' }}>
+    <Paper
+      column
+      shadow='far'
+      borderRadius='l'
+      border='default'
+      css={{ overflow: 'hidden' }}
+    >
       <Flex
         alignItems='center'
         justifyContent='space-between'
@@ -177,7 +183,7 @@ const YourCoinsHeader = ({
       p='l'
       borderBottom='default'
     >
-      <Text variant='heading' size='m' color='heading'>
+      <Text variant='heading' size='m' color='default'>
         {messages.assets}
       </Text>
       <Flex gap='s'>
@@ -312,7 +318,13 @@ export const WalletCoinsList = () => {
   }, [navigate])
 
   return (
-    <Paper column shadow='far' borderRadius='l' css={{ overflow: 'hidden' }}>
+    <Paper
+      column
+      shadow='far'
+      borderRadius='l'
+      border='default'
+      css={{ overflow: 'hidden' }}
+    >
       <YourCoinsHeader
         isLoading={isLoadingCoins}
         openOpenAppDrawer={onOpenOpenAppDrawer}

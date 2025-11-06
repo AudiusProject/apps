@@ -6,6 +6,7 @@ import {
   useUserTotalBalance
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
+import { convertHexToRGBA } from '@audius/common/utils'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
@@ -56,6 +57,7 @@ export const UserBalanceHistoryGraph = ({
 }: UserBalanceHistoryGraphProps) => {
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
+  const borderColor = color.border.default
   const { data: currentUserId } = useCurrentUserId()
   const {
     data: historyDataFetched,
@@ -205,8 +207,8 @@ export const UserBalanceHistoryGraph = ({
         thickness={2}
         // Gradient fill
         areaChart
-        startFillColor='rgba(126, 27, 204, 0.15)'
-        endFillColor='rgba(126, 27, 204, 0.05)'
+        startFillColor={convertHexToRGBA(secondary, 0.15)}
+        endFillColor={convertHexToRGBA(secondary, 0.05)}
         startOpacity={0.15}
         endOpacity={0.05}
         // Data points
@@ -215,11 +217,11 @@ export const UserBalanceHistoryGraph = ({
         focusEnabled
         showStripOnFocus
         showTextOnFocus
-        stripColor='rgba(126, 27, 204, 0.3)'
+        stripColor={convertHexToRGBA(secondary, 0.3)}
         stripHeight={height}
         stripWidth={2}
         // Axes
-        hideRules
+        rulesColor={borderColor}
         noOfVerticalLines={0}
         noOfSections={2}
         yAxisColor='transparent'
