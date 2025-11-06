@@ -223,8 +223,7 @@ describe('upload', () => {
     )
   })
 
-  // Skipped - PE-7304
-  it.skip('does not upload parent if stem fails and deletes orphaned stems', () => {
+  it('does not upload parent if stem fails and deletes orphaned stems', () => {
     const stem1: StemUploadWithFile = {
       file: new File(['abcdefghijklmnopqrstuvwxyz'], 'test stem1'),
       metadata: { ...emptyMetadata, track_id: 2, title: 'stem1' },
@@ -252,7 +251,7 @@ describe('upload', () => {
 
     const mockWriteTrackUploadToChain = vitest.fn()
     // Mock successful first stem publish
-    mockWriteTrackUploadToChain.mockResolvedValueOnce({
+    mockWriteTrackUploadToChain.mockReturnValueOnce({
       trackId: 'ML51L'
     })
     // Mock failure for second stem
