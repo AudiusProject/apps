@@ -177,8 +177,6 @@ export const SummaryTable = ({
                       {label}
                     </Text>
                   </Flex>
-                  {'hello'}
-                  {value}
                   <Text variant='body' size='m' color={color}>
                     {value}
                   </Text>
