@@ -223,7 +223,7 @@ describe('upload', () => {
     )
   })
 
-  it('does not upload parent if stem fails and deletes orphaned stems', async () => {
+  it('does not upload parent if stem fails and deletes orphaned stems', () => {
     const stem1: StemUploadWithFile = {
       file: new File(['abcdefghijklmnopqrstuvwxyz'], 'test stem1'),
       metadata: { ...emptyMetadata, track_id: 2, title: 'stem1' },
@@ -263,84 +263,87 @@ describe('upload', () => {
     mockUploadTrackFiles.mockReturnValueOnce(camelcaseKeys(stem1.metadata))
     mockUploadTrackFiles.mockReturnValueOnce(camelcaseKeys(stem2.metadata))
 
-    await expectSaga(handleUploads, { tracks: [testTrack], kind: 'tracks' })
-      .provide([
-        [call.fn(waitForWrite), undefined],
-        [call.fn(queryAccountUser), {}],
-        [call.fn(queryCurrentUserId), 12345],
-        [call.fn(addPremiumMetadata), testTrack.metadata],
-        [
-          getContext('audiusSdk'),
-          () => {
-            return {
-              tracks: {
-                uploadTrackFiles: mockUploadTrackFiles,
-                writeTrackToChain: mockWriteTrackUploadToChain
+    return (
+      expectSaga(handleUploads, { tracks: [testTrack], kind: 'tracks' })
+        .provide([
+          [call.fn(waitForWrite), undefined],
+          [call.fn(queryAccountUser), {}],
+          [call.fn(queryCurrentUserId), 12345],
+          [call.fn(addPremiumMetadata), testTrack.metadata],
+          [
+            getContext('audiusSdk'),
+            () => {
+              return {
+                tracks: {
+                  uploadTrackFiles: mockUploadTrackFiles,
+                  writeTrackToChain: mockWriteTrackUploadToChain
+                }
               }
             }
-          }
-        ],
-        [
-          getContext('queryClient'),
-          {
-            setQueryData: () => {},
-            invalidateQueries: () => {}
-          }
-        ],
-        [call.fn(confirmTransaction), true],
-        [call.fn(waitForAccount), undefined],
-        [call.fn(queryTracks), [testTrack.metadata]],
-        [call.fn(deleteTracks), undefined]
-      ])
-      // Reports to sentry
-      .call(reportToSentry, {
-        name: 'UploadWorker',
-        error: mockError,
-        additionalInfo: {
-          trackId: 3,
-          metadata: stem2.metadata,
-          fileSize: stem2.file.size,
-          trackIndex: 0,
-          stemIndex: 1,
-          trackCount: 1,
-          stemCount: 2,
-          phase: 'publish',
-          kind: 'tracks'
-        },
-        feature: Feature.Upload
-      })
-      // Fails the parent too
-      .call.like({
-        fn: reportToSentry,
-        args: [
-          {
-            name: 'UploadWorker',
-            additionalInfo: {
-              trackId: 1,
-              metadata: testTrack.metadata,
-              fileSize: testTrack.file.size,
-              trackIndex: 0,
-              stemIndex: null,
-              trackCount: 1,
-              stemCount: 2,
-              phase: 'publish',
-              kind: 'tracks'
-            },
-            feature: Feature.Upload
-          }
-        ]
-      })
-      // Delete the stem that was successfully published
-      .call(deleteTracks, [2])
-      // Expect the saga to throw since no tracks succeeded
-      .throws(Error)
-      .run()
-
-    // Never published the parent track
-    expect(mockWriteTrackUploadToChain).not.toBeCalledWith(
-      testTrack.metadata,
-      EntityManagerAction.CREATE,
-      1
+          ],
+          [
+            getContext('queryClient'),
+            {
+              setQueryData: () => {},
+              invalidateQueries: () => {}
+            }
+          ],
+          [call.fn(confirmTransaction), true],
+          [call.fn(waitForAccount), undefined],
+          [call.fn(queryTracks), [testTrack.metadata]],
+          [call.fn(deleteTracks), undefined]
+        ])
+        // Reports to sentry
+        .call(reportToSentry, {
+          name: 'UploadWorker',
+          error: mockError,
+          additionalInfo: {
+            trackId: 3,
+            metadata: stem2.metadata,
+            fileSize: stem2.file.size,
+            trackIndex: 0,
+            stemIndex: 1,
+            trackCount: 1,
+            stemCount: 2,
+            phase: 'publish',
+            kind: 'tracks'
+          },
+          feature: Feature.Upload
+        })
+        // Fails the parent too
+        .call.like({
+          fn: reportToSentry,
+          args: [
+            {
+              name: 'UploadWorker',
+              additionalInfo: {
+                trackId: 1,
+                metadata: testTrack.metadata,
+                fileSize: testTrack.file.size,
+                trackIndex: 0,
+                stemIndex: null,
+                trackCount: 1,
+                stemCount: 2,
+                phase: 'publish',
+                kind: 'tracks'
+              },
+              feature: Feature.Upload
+            }
+          ]
+        })
+        // Delete the stem that was successfully published
+        .call(deleteTracks, [2])
+        // Expect the saga to throw since no tracks succeeded
+        .throws(Error)
+        .run()
+        .then(() => {
+          // Never published the parent track
+          expect(mockWriteTrackUploadToChain).not.toBeCalledWith(
+            testTrack.metadata,
+            EntityManagerAction.CREATE,
+            1
+          )
+        })
     )
   })
 })
