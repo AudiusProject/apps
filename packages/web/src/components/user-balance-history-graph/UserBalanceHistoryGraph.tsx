@@ -11,6 +11,7 @@ import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
+import { convertHexToRGBA } from 'utils/convertHexToRGBA'
 
 import styles from './UserBalanceHistoryGraph.module.css'
 
@@ -53,13 +54,6 @@ const formatTooltipDate = (timestamp: number): string => {
   return `${weekday} ${hour}`
 }
 
-const hexToRgba = (hex: string, alpha: number): string => {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
 const getChartData = (
   timestamps: number[],
   balances: number[],
@@ -70,7 +64,7 @@ const getChartData = (
     {
       fill: true,
       lineTension: 0.4,
-      backgroundColor: hexToRgba(secondary, 0.15),
+      backgroundColor: convertHexToRGBA(secondary, 0.15),
       borderColor: secondary,
       borderWidth: 2,
       borderCapStyle: 'round' as const,
