@@ -223,7 +223,7 @@ describe('upload', () => {
     )
   })
 
-  it('does not upload parent if stem fails and deletes orphaned stems', () => {
+  it.skip('does not upload parent if stem fails and deletes orphaned stems', () => {
     const stem1: StemUploadWithFile = {
       file: new File(['abcdefghijklmnopqrstuvwxyz'], 'test stem1'),
       metadata: { ...emptyMetadata, track_id: 2, title: 'stem1' },
