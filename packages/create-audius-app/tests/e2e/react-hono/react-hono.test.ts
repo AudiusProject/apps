@@ -33,14 +33,11 @@ test('auths, fetches tracks, and favorites a track', async ({
   await page.getByRole('button', { name: 'Get Tracks' }).click()
 
   // Set up block_confirmation response listener
-  const responsePromise = page.waitForResponse(async (response) => {
-    if (
-      response.url().includes('favorite') ||
-      response.url().includes('unfavorite')
-    ) {
-      const json = await response.json()
-      return json.trackId
-    }
+  // The SDK makes requests to relay and then polls block_confirmation
+  const responsePromise = page.waitForResponse((response) => {
+    return (
+      response.url().includes('block_confirmation') && response.status() === 200
+    )
   })
 
   const favoriteButton = page
