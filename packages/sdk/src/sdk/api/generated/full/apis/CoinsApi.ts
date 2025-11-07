@@ -16,16 +16,22 @@
 
 import * as runtime from '../runtime';
 import type {
+  ClaimRewardsResponse,
   CoinMembersCountResponse,
   CoinResponse,
   CoinsResponse,
   CoinsVolumeLeadersResponse,
   CreateCoinRequest,
   CreateCoinResponse,
+  RedeemAmountResponse,
+  RewardCodeErrorResponse,
+  RewardCodeResponse,
   UpdateCoinRequest,
   UpdateCoinResponse,
 } from '../models';
 import {
+    ClaimRewardsResponseFromJSON,
+    ClaimRewardsResponseToJSON,
     CoinMembersCountResponseFromJSON,
     CoinMembersCountResponseToJSON,
     CoinResponseFromJSON,
@@ -38,11 +44,28 @@ import {
     CreateCoinRequestToJSON,
     CreateCoinResponseFromJSON,
     CreateCoinResponseToJSON,
+    RedeemAmountResponseFromJSON,
+    RedeemAmountResponseToJSON,
+    RewardCodeErrorResponseFromJSON,
+    RewardCodeErrorResponseToJSON,
+    RewardCodeResponseFromJSON,
+    RewardCodeResponseToJSON,
     UpdateCoinRequestFromJSON,
     UpdateCoinRequestToJSON,
     UpdateCoinResponseFromJSON,
     UpdateCoinResponseToJSON,
 } from '../models';
+
+export interface ClaimCoinRewardRequest {
+    mint: string;
+    userId: string;
+}
+
+export interface ClaimCoinRewardCodeRequest {
+    mint: string;
+    code: string;
+    userId: string;
+}
 
 export interface CreateCoinOperationRequest {
     userId: string;
@@ -61,6 +84,10 @@ export interface GetCoinMembersCountRequest {
     mint: string;
 }
 
+export interface GetCoinRedeemAmountRequest {
+    mint: string;
+}
+
 export interface GetCoinsRequest {
     ticker?: Array<string>;
     mint?: Array<string>;
@@ -70,6 +97,11 @@ export interface GetCoinsRequest {
     query?: string;
     sortMethod?: GetCoinsSortMethodEnum;
     sortDirection?: GetCoinsSortDirectionEnum;
+}
+
+export interface GetRewardCodeRequest {
+    mint: string;
+    code: string;
 }
 
 export interface GetVolumeLeadersRequest {
@@ -89,6 +121,88 @@ export interface UpdateCoinOperationRequest {
  * 
  */
 export class CoinsApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Claims a coin reward for a given mint
+     */
+    async claimCoinRewardRaw(params: ClaimCoinRewardRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClaimRewardsResponse>> {
+        if (params.mint === null || params.mint === undefined) {
+            throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling claimCoinReward.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling claimCoinReward.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/{mint}/redeem`.replace(`{${"mint"}}`, encodeURIComponent(String(params.mint))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClaimRewardsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Claims a coin reward for a given mint
+     */
+    async claimCoinReward(params: ClaimCoinRewardRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClaimRewardsResponse> {
+        const response = await this.claimCoinRewardRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Claims a coin reward using a given code
+     */
+    async claimCoinRewardCodeRaw(params: ClaimCoinRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClaimRewardsResponse>> {
+        if (params.mint === null || params.mint === undefined) {
+            throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling claimCoinRewardCode.');
+        }
+
+        if (params.code === null || params.code === undefined) {
+            throw new runtime.RequiredError('code','Required parameter params.code was null or undefined when calling claimCoinRewardCode.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling claimCoinRewardCode.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/{mint}/redeem/{code}`.replace(`{${"mint"}}`, encodeURIComponent(String(params.mint))).replace(`{${"code"}}`, encodeURIComponent(String(params.code))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClaimRewardsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Claims a coin reward using a given code
+     */
+    async claimCoinRewardCode(params: ClaimCoinRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClaimRewardsResponse> {
+        const response = await this.claimCoinRewardCodeRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -227,6 +341,37 @@ export class CoinsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the availability indicator for reward codes for a specific coin
+     */
+    async getCoinRedeemAmountRaw(params: GetCoinRedeemAmountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RedeemAmountResponse>> {
+        if (params.mint === null || params.mint === undefined) {
+            throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling getCoinRedeemAmount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/{mint}/redeem`.replace(`{${"mint"}}`, encodeURIComponent(String(params.mint))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RedeemAmountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the availability indicator for reward codes for a specific coin
+     */
+    async getCoinRedeemAmount(params: GetCoinRedeemAmountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RedeemAmountResponse> {
+        const response = await this.getCoinRedeemAmountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets a list of coins with optional filtering
      */
     async getCoinsRaw(params: GetCoinsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CoinsResponse>> {
@@ -281,6 +426,41 @@ export class CoinsApi extends runtime.BaseAPI {
      */
     async getCoins(params: GetCoinsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinsResponse> {
         const response = await this.getCoinsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets information about a specific reward code for a coin
+     */
+    async getRewardCodeRaw(params: GetRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RewardCodeResponse>> {
+        if (params.mint === null || params.mint === undefined) {
+            throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling getRewardCode.');
+        }
+
+        if (params.code === null || params.code === undefined) {
+            throw new runtime.RequiredError('code','Required parameter params.code was null or undefined when calling getRewardCode.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/coins/{mint}/redeem/{code}`.replace(`{${"mint"}}`, encodeURIComponent(String(params.mint))).replace(`{${"code"}}`, encodeURIComponent(String(params.code))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RewardCodeResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets information about a specific reward code for a coin
+     */
+    async getRewardCode(params: GetRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RewardCodeResponse> {
+        const response = await this.getRewardCodeRaw(params, initOverrides);
         return await response.value();
     }
 

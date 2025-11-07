@@ -8,6 +8,7 @@ export * from './ExploreApi';
 export * from './NotificationsApi';
 export * from './PlaylistsApi';
 export * from './ReactionsApi';
+export * from './RewardsApi';
 export * from './SearchApi';
 export * from './TipsApi';
 export * from './TracksApi';
