@@ -223,8 +223,7 @@ describe('upload', () => {
     )
   })
 
-  // Skipped - PE-7304
-  it.skip('does not upload parent if stem fails and deletes orphaned stems', () => {
+  it('does not upload parent if stem fails and deletes orphaned stems', () => {
     const stem1: StemUploadWithFile = {
       file: new File(['abcdefghijklmnopqrstuvwxyz'], 'test stem1'),
       metadata: { ...emptyMetadata, track_id: 2, title: 'stem1' },
@@ -336,7 +335,7 @@ describe('upload', () => {
         .call(deleteTracks, [2])
         // Expect the saga to throw since no tracks succeeded
         .throws(Error)
-        .run()
+        .silentRun()
         .then(() => {
           // Never published the parent track
           expect(mockWriteTrackUploadToChain).not.toBeCalledWith(
