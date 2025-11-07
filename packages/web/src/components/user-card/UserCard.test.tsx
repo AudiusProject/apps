@@ -1,10 +1,10 @@
 import { Text } from '@audius/harmony'
 import { Route, Routes } from 'react-router-dom-v5-compat'
-import { describe, expect, it, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { artistUser } from 'test/mocks/fixtures/users'
 import { mockUsers } from 'test/msw/mswMocks'
-import { RenderOptions, mswServer, render, screen } from 'test/test-utils'
+import { RenderOptions, mswServer, render, screen, it } from 'test/test-utils'
 
 import { UserCard } from './UserCard'
 

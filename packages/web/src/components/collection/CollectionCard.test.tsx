@@ -2,11 +2,11 @@ import { Text } from '@audius/harmony'
 import { developmentConfig } from '@audius/sdk'
 import { setupServer } from 'msw/node'
 import { Routes, Route } from 'react-router-dom-v5-compat'
-import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testCollection } from 'test/mocks/fixtures/collections'
 import { mockCollectionById } from 'test/msw/mswMocks'
-import { render, screen } from 'test/test-utils'
+import { render, screen, it } from 'test/test-utils'
 
 import { CollectionCard } from './CollectionCard'
 

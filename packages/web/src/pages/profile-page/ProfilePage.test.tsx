@@ -5,7 +5,6 @@ import { Navigate, Route, Routes } from 'react-router-dom-v5-compat'
 import {
   describe,
   expect,
-  it,
   beforeAll,
   afterEach,
   afterAll,
@@ -30,7 +29,8 @@ import {
   mswServer,
   render,
   screen,
-  within
+  within,
+  it
 } from 'test/test-utils'
 
 import ProfilePage from './ProfilePage'
@@ -116,7 +116,9 @@ describe('ProfilePage', () => {
       await screen.findByRole('heading', { name: nonArtistUser.name })
     ).toBeInTheDocument()
     expect(
-      await screen.findByRole('heading', { name: `@${nonArtistUser.handle}` })
+      await screen.findByRole('heading', {
+        name: `@${nonArtistUser.handle}`
+      })
     ).toBeInTheDocument()
 
     // Profile and cover photos
@@ -249,7 +251,9 @@ describe('ProfilePage', () => {
     ).toBeInTheDocument()
 
     // Verify that coin-related elements are present when user has coins
-    const buyButton = await screen.findByRole('button', { name: 'Buy Coins' })
+    const buyButton = await screen.findByRole('button', {
+      name: 'Buy Coins'
+    })
     expect(buyButton).toBeInTheDocument()
     expect(await screen.findByText('$MOCK')).toBeInTheDocument()
     expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()

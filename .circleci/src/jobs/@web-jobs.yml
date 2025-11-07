@@ -115,6 +115,9 @@ web-test:
     - store_test_results:
         path: packages/web/report.xml
         when: always
+    - store_artifacts:
+        path: packages/web/test-output
+        when: always
 
 web-build-production:
   working_directory: ~/apps

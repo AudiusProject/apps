@@ -1,9 +1,9 @@
 import { Route, Routes } from 'react-router-dom-v5-compat'
-import { describe, expect, it, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { mockTrackById, mockEvents } from 'test/msw/mswMocks'
-import { mswServer, render, screen } from 'test/test-utils'
+import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { TrackTileSize } from '../types'
 
