@@ -205,7 +205,7 @@ type BannerSectionProps = {
   mint: string
 }
 
-const BannerSection = ({ mint }: BannerSectionProps) => {
+export const BannerSection = ({ mint }: BannerSectionProps) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const theme = useTheme()
   const { ownerId: ownerIdRaw } = coin ?? {}
