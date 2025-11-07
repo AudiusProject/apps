@@ -67,7 +67,7 @@ const getPlatformIcon = (platform: string) => {
   }
 }
 
-const BannerSection = ({ mint }: { mint: string }) => {
+export const BannerSection = ({ mint }: { mint: string }) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const { ownerId } = coin ?? {}
 

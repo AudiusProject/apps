@@ -36,7 +36,7 @@ export const useCoinRedeemAmount = (
         return coinAmountResponse
       } catch (error) {
         // Handle 400 errors
-        // Tells us if the coin is not redeemable anymore
+        // Tells us if disburements for the coin have ended
         if (error instanceof ResponseError) {
           return { error: 'ended' }
         }

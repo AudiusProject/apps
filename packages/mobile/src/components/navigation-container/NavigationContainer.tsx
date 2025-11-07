@@ -190,6 +190,9 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         CoinDetailsScreen: {
                           path: 'coins/:ticker'
                         },
+                        CoinRedeemScreen: {
+                          path: 'coins/:ticker/redeem/:code?'
+                        },
                         ExclusiveTracksScreen: {
                           path: 'coins/:ticker/exclusive-tracks'
                         }
@@ -367,9 +370,23 @@ const NavigationContainer = (props: NavigationContainerProps) => {
 
       if (path.match(/^\/coins/)) {
         const ticker = pathPart(path)(2)
+        const coinRoute = pathPart(path)(3)
+        const redeemCode = pathPart(path)(4)
+
         if (ticker && ticker !== 'create') {
           // Normalize ticker to uppercase
           const normalizedTicker = ticker.toUpperCase()
+
+          if (coinRoute === 'redeem') {
+            return createFeedStackState({
+              name: 'CoinRedeemScreen',
+              params: {
+                ticker: normalizedTicker,
+                code: redeemCode ?? undefined
+              }
+            })
+          }
+
           return createFeedStackState({
             name: 'CoinDetailsScreen',
             params: { ticker: normalizedTicker }

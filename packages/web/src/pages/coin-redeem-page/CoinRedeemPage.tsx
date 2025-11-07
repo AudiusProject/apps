@@ -1,13 +1,17 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
   useArtistCoinByTicker,
   useCoinRedeemAmount,
   useCoinRedeemCodeAmount,
-  useCurrentUserId
+  useCurrentUserId,
+  useRedeemCoin,
+  useRedeemCoinCode
 } from '@audius/common/api'
+import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
+  coinPage,
   COINS_EXPLORE_PAGE,
   NOT_FOUND_PAGE
 } from '@audius/common/src/utils/route'
@@ -20,6 +24,7 @@ import {
   Text,
   TextLink
 } from '@audius/harmony'
+import { useDispatch } from 'react-redux'
 import { Redirect, useParams } from 'react-router-dom'
 
 import { SignOnLink } from 'components/SignOnLink'
@@ -28,6 +33,8 @@ import { Header } from 'components/header/desktop/Header'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { useNavigateToPage } from 'hooks/useNavigateToPage'
+import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { BannerSection } from 'pages/coin-detail-page/components/CoinInfoSection'
 
 const messages = {
@@ -37,6 +44,7 @@ const messages = {
   signIn: 'Sign In',
   toClaimReward: ' to claim your reward.',
   claim: 'Claim',
+  claiming: 'Claiming',
 
   // Error messages
   error: {
@@ -46,24 +54,49 @@ const messages = {
   }
 }
 
-type ContentProps = {
-  ticker: string
+type PageContentProps = {
   coin: Coin | undefined
   coinPending: boolean
+  code: string | undefined
   rewardAmount: number
   rewardAmountError: string | null
   rewardAmountPending: boolean
 }
 
-const CommonContent = ({
+const PageContent = ({
+  code,
   coin,
   rewardAmount,
   rewardAmountError,
   rewardAmountPending
-}: ContentProps) => {
+}: PageContentProps) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigateToPage()
   const { data: currentUserId } = useCurrentUserId()
+  const { mutate: redeemCoin, isPending: isRedeemingCoin } = useRedeemCoin()
+  const { mutate: redeemCoinCode, isPending: isRedeemingCoinCode } =
+    useRedeemCoinCode()
+
   const isSignedIn = !!currentUserId
-  const isClaimDisabled = !isSignedIn || !!rewardAmountError
+  const isClaiming = isRedeemingCoin || isRedeemingCoinCode
+  const isClaimDisabled = !isSignedIn || !!rewardAmountError || isClaiming
+  const mint = coin?.mint
+
+  const onSuccess = useCallback(() => {
+    // Show toast and navigate to the coin detail page
+    dispatch(toast({ content: 'Reward claimed successfully' }))
+    if (coin?.ticker) navigate(coinPage(coin.ticker))
+  }, [coin?.ticker, dispatch, navigate])
+
+  const handleClaim = useRequiresAccountCallback(() => {
+    if (!mint) return
+
+    if (code) {
+      redeemCoinCode({ mint, code }, { onSuccess })
+    } else {
+      redeemCoin({ mint }, { onSuccess })
+    }
+  }, [mint, code, redeemCoinCode, onSuccess, redeemCoin])
 
   return (
     <>
@@ -86,8 +119,13 @@ const CommonContent = ({
           ) : null}
         </Flex>
         <Flex column p='l' ph='xl' w='100%' gap='s'>
-          <Button onClick={() => {}} fullWidth disabled={isClaimDisabled}>
-            {messages.claim}
+          <Button
+            onClick={handleClaim}
+            fullWidth
+            disabled={isClaimDisabled}
+            isLoading={isClaiming}
+          >
+            {isClaiming ? messages.claiming : messages.claim}
           </Button>
           {!isSignedIn ? (
             <Text variant='body' size='l' textAlign='center'>
@@ -132,53 +170,8 @@ const CommonContent = ({
   )
 }
 
-const WebContent = (props: ContentProps) => {
-  const { ticker, coinPending } = props
-  const header = <Header primary={messages.title(ticker)} showBackButton />
-
-  return (
-    <Page title={messages.title(ticker)} header={header}>
-      {coinPending ? (
-        <Flex
-          justifyContent='center'
-          alignItems='center'
-          css={{ minHeight: '100px' }}
-        >
-          <LoadingSpinner />
-        </Flex>
-      ) : (
-        <Flex row alignItems='flex-start' wrap='wrap' gap='l'>
-          <CommonContent {...props} />
-        </Flex>
-      )}
-    </Page>
-  )
-}
-
-const MobileContent = (props: ContentProps) => {
-  const { coinPending, ticker } = props
-
-  return (
-    <MobilePageContainer title={messages.title(ticker)}>
-      {coinPending ? (
-        <Flex
-          justifyContent='center'
-          alignItems='center'
-          css={{ minHeight: '100px' }}
-        >
-          <LoadingSpinner />
-        </Flex>
-      ) : (
-        <Flex wrap='wrap' gap='l' pv='2xl' ph='s'>
-          <CommonContent {...props} />
-        </Flex>
-      )}
-    </MobilePageContainer>
-  )
-}
-
 export const CoinRedeemPage = () => {
-  const { ticker, code } = useParams<{ ticker: string; code: string }>()
+  const { ticker, code } = useParams<{ ticker: string; code?: string }>()
   const isMobile = useIsMobile()
 
   const {
@@ -214,16 +207,49 @@ export const CoinRedeemPage = () => {
     return <Redirect to={NOT_FOUND_PAGE} />
   }
 
-  const Content = isMobile ? MobileContent : WebContent
-
-  return (
-    <Content
-      ticker={ticker}
+  const header = <Header primary={messages.title(ticker)} showBackButton />
+  const Content = () => (
+    <PageContent
+      code={code}
       coin={coin}
       coinPending={coinPending}
       rewardAmount={rewardAmount}
       rewardAmountError={rewardAmountError}
       rewardAmountPending={rewardAmountPending}
     />
+  )
+
+  return isMobile ? (
+    <MobilePageContainer title={messages.title(ticker)}>
+      {coinPending ? (
+        <Flex
+          justifyContent='center'
+          alignItems='center'
+          css={{ minHeight: '100px' }}
+        >
+          <LoadingSpinner />
+        </Flex>
+      ) : (
+        <Flex wrap='wrap' gap='l' pv='2xl' ph='s'>
+          <Content />
+        </Flex>
+      )}
+    </MobilePageContainer>
+  ) : (
+    <Page title={messages.title(ticker)} header={header}>
+      {coinPending ? (
+        <Flex
+          justifyContent='center'
+          alignItems='center'
+          css={{ minHeight: '100px' }}
+        >
+          <LoadingSpinner />
+        </Flex>
+      ) : (
+        <Flex row alignItems='flex-start' wrap='wrap' gap='l'>
+          <Content />
+        </Flex>
+      )}
+    </Page>
   )
 }
