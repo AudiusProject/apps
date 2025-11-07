@@ -9,9 +9,8 @@ test('auths, fetches tracks, and favorites a track', async ({
   // Set entropy so we don't need to do OTP
   const entropy = process.env.CREATE_AUDIUS_APP_TEST_ENTROPY ?? ''
   await context.addInitScript((entropy) => {
-    if (window.location.hostname === 'audius.co') {
-      window.localStorage.setItem('hedgehog-entropy-key', entropy)
-    }
+    // Set entropy for both audius.co (OAuth) and localhost (app)
+    window.localStorage.setItem('hedgehog-entropy-key', entropy)
   }, entropy)
 
   await page.goto('localhost:4173')
