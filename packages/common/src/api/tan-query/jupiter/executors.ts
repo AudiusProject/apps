@@ -46,7 +46,6 @@ const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
 const AUDIO_DECIMALS = TOKEN_LISTING_MAP.AUDIO.decimals
 const TOKEN_DECIMALS = 9
 const DBC_PROGRAM_ID = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
-const DAMM_V2_PROGRAM_ID = 'cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG'
 
 export interface SwapExecutionResult {
   status: SwapStatus
@@ -168,28 +167,26 @@ async function executeMeteoraSwap(
 
     // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
     // We only need the DBC swap instruction - so we find it by it's program ID
-    const poolSwapInstruction = swapMessage.compiledInstructions.find(
-      (ix) =>
-        accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID ||
-        accountKeys[ix.programIdIndex].toBase58() === DAMM_V2_PROGRAM_ID
+    const dbcCompiledInstruction = swapMessage.compiledInstructions.find(
+      (ix) => accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID
     )
 
-    if (!poolSwapInstruction) {
+    if (!dbcCompiledInstruction) {
       throw new Error('DBC swap instruction not found in transaction')
     }
 
-    const swapInstruction: TransactionInstruction = {
-      programId: accountKeys[poolSwapInstruction.programIdIndex],
-      keys: poolSwapInstruction.accountKeyIndexes.map((index) => ({
+    const dbcSwapInstruction: TransactionInstruction = {
+      programId: accountKeys[dbcCompiledInstruction.programIdIndex],
+      keys: dbcCompiledInstruction.accountKeyIndexes.map((index) => ({
         pubkey: accountKeys[index],
         isSigner: swapMessage.isAccountSigner(index),
         isWritable: swapMessage.isAccountWritable(index)
       })),
-      data: Buffer.from(poolSwapInstruction.data)
+      data: Buffer.from(dbcCompiledInstruction.data)
     }
 
     // Add the DBC swap instruction
-    instructions.push(swapInstruction)
+    instructions.push(dbcSwapInstruction)
 
     // Transfer the output tokens from the temporary output token account to end user's user bank
     instructions.push(
@@ -343,24 +340,21 @@ export abstract class BaseSwapExecutor {
 
 export class DirectSwapExecutor extends BaseSwapExecutor {
   async execute(params: SwapTokensParams): Promise<SwapExecutionResult> {
-    const { hasPool: inputHasPool } = getCoinPoolState(
+    const { isDBC: isInputDBC } = getCoinPoolState(
       params.inputMint,
       this.dependencies.queryClient
     )
-    const { hasPool: outputHasPool } = getCoinPoolState(
+    const { isDBC: isOutputDBC } = getCoinPoolState(
       params.outputMint,
       this.dependencies.queryClient
     )
-    if (inputHasPool || outputHasPool) {
-      const swapDirection = inputHasPool ? 'coinToAudio' : 'audioToCoin'
+    if (isInputDBC || isOutputDBC) {
+      const swapDirection = isInputDBC ? 'coinToAudio' : 'audioToCoin'
       return await executeMeteoraSwap(
-        params.inputMint,
+        swapDirection === 'coinToAudio' ? params.inputMint : params.outputMint,
         swapDirection,
         params.amountUi,
-        {
-          ...this.dependencies,
-          tokens: this.tokens
-        }
+        { ...this.dependencies, tokens: this.tokens }
       )
     }
     return await this.executeDirectJupiterSwap(params)
@@ -566,17 +560,17 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           { ...this.dependencies, tokens: this.tokens }
         )
       }
-      const { hasPool: inputHasPool } = getCoinPoolState(
+      const { isDBC: isInputDBC } = getCoinPoolState(
         params.inputMint,
         this.dependencies.queryClient
       )
-      const { hasPool: outputHasPool } = getCoinPoolState(
+      const { isDBC: isOutputDBC } = getCoinPoolState(
         params.outputMint,
         this.dependencies.queryClient
       )
       // Execute first transaction with retries: InputToken -> AUDIO
       let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
-        inputHasPool ? swapToAudioWithMeteora : swapToAudioWithJupiter,
+        isInputDBC ? swapToAudioWithMeteora : swapToAudioWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
@@ -585,7 +579,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // attempt to fallback to jupiter swap if meteora swap fails
       if (
-        inputHasPool &&
+        isInputDBC &&
         (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result)
       ) {
         swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
@@ -623,7 +617,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       let swapToTokenResult = await this.retryPolicy.executeWithRetry(
         // Prioritize Meteora DBC swap if the token we're swapping is a DBC
         // @ts-ignore
-        outputHasPool ? swapToTokenWithMeteora : swapToTokenWithJupiter,
+        isOutputDBC ? swapToTokenWithMeteora : swapToTokenWithJupiter,
         async (_attemptNumber: number) => {
           // Invalidate queries before retry
           await this.invalidateQueries()
@@ -632,7 +626,7 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       // attempt to fallback to jupiter swap if meteora swap fails
       if (
-        outputHasPool &&
+        isOutputDBC &&
         (!swapToTokenResult.success || !swapToTokenResult.result)
       ) {
         swapToTokenResult = await this.retryPolicy.executeWithRetry(

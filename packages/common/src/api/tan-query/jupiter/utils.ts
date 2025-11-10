@@ -503,20 +503,16 @@ export const getIsDirectSwappable = (
 export const getCoinPoolState = (
   mint: string,
   queryClient: QueryClient
-): { isDBC: boolean; isDAMM: boolean; hasPool: boolean } => {
+): { isDBC: boolean; isDAMM: boolean } => {
   if (NON_ARTIST_COIN_MINTS.includes(mint)) {
     return {
       isDBC: false,
-      isDAMM: false,
-      hasPool: false
+      isDAMM: false
     }
   }
   const coinInfo = queryClient.getQueryData(getArtistCoinQueryKey(mint))
-  const isDBC = coinInfo?.dynamicBondingCurve?.isMigrated === false
-  const isDAMM = coinInfo?.dynamicBondingCurve?.isMigrated === true
   return {
-    isDBC,
-    isDAMM,
-    hasPool: isDBC || isDAMM
+    isDBC: coinInfo?.dynamicBondingCurve?.isMigrated === false,
+    isDAMM: coinInfo?.dynamicBondingCurve?.isMigrated === true
   }
 }
