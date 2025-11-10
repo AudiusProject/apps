@@ -1,8 +1,11 @@
+import { useCallback } from 'react'
+
 import type { AnnouncementNotification as AnnouncementNotificationType } from '@audius/common/store'
 import { View } from 'react-native'
 import Markdown from 'react-native-markdown-display'
 
 import { IconAudiusLogo } from '@audius/harmony-native'
+import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
 import { makeStyles } from 'app/styles'
 
 import {
@@ -41,8 +44,14 @@ export const AnnouncementNotification = (
   const { title, shortDescription } = notification
   const styles = useStyles()
 
+  const navigation = useNotificationNavigation()
+
+  const handlePress = useCallback(() => {
+    navigation.navigate(notification)
+  }, [navigation, notification])
+
   return (
-    <NotificationTile notification={notification}>
+    <NotificationTile notification={notification} onPress={handlePress}>
       <NotificationHeader icon={IconAudiusLogo}>
         <NotificationTitle>
           <View>

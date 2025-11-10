@@ -64,7 +64,8 @@ describe('Announcement Notification', () => {
           push_body:
             'This is some information about the announcement we need to display',
           short_description:
-            'This is some information about the announcement we need to display'
+            'This is some information about the announcement we need to display',
+          route: '/coins/BONK'
         },
         user_ids: [1, 2]
       }
@@ -86,7 +87,13 @@ describe('Announcement Notification', () => {
         body: 'This is some information about the announcement we need to display',
         data: {
           id: 'timestamp:1589373217:group_id:announcement:blocknumber:1',
-          type: 'Announcement'
+          type: 'Announcement',
+          title: 'This is an announcement',
+          push_body:
+            'This is some information about the announcement we need to display',
+          short_description:
+            'This is some information about the announcement we need to display',
+          route: '/coins/BONK'
         }
       }
     )
