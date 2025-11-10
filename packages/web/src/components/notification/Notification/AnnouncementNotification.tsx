@@ -5,7 +5,6 @@ import {
   AnnouncementNotification as AnnouncementNotificationType,
   useAnnouncementModal
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
@@ -35,8 +34,14 @@ export const AnnouncementNotification = (
 ) => {
   const dispatch = useDispatch()
   const { notification } = props
-  const { title, shortDescription, longDescription, timeLabel, isViewed } =
-    notification
+  const {
+    title,
+    shortDescription,
+    longDescription,
+    timeLabel,
+    isViewed,
+    route: notificationRoute
+  } = notification
   const record = useRecord()
   const { onOpen } = useAnnouncementModal()
 
@@ -45,14 +50,16 @@ export const AnnouncementNotification = (
   }, [notification, onOpen])
 
   const handleClick = useCallback(() => {
-    dispatch(pushRoute(route.COINS_EXPLORE_PAGE))
+    if (!notificationRoute) return
+
+    dispatch(pushRoute(notificationRoute))
     record(
       make(Name.NOTIFICATIONS_CLICK_TILE, {
         kind: 'announcement',
-        link_to: route.COINS_EXPLORE_PAGE
+        link_to: notificationRoute
       })
     )
-  }, [dispatch, record])
+  }, [dispatch, record, notificationRoute])
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>

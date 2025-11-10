@@ -417,6 +417,7 @@ export const notificationFromSDK = (
         title: data.title,
         shortDescription: data.shortDescription,
         longDescription: data.longDescription,
+        route: data.route,
         ...formatBaseNotification(notification)
       }
     }

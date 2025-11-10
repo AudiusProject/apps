@@ -44,6 +44,12 @@ export interface AnnouncementNotificationActionData {
      * @memberof AnnouncementNotificationActionData
      */
     longDescription: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementNotificationActionData
+     */
+    route: string;
 }
 
 /**
@@ -55,6 +61,7 @@ export function instanceOfAnnouncementNotificationActionData(value: object): val
     isInstance = isInstance && "pushBody" in value && value["pushBody"] !== undefined;
     isInstance = isInstance && "shortDescription" in value && value["shortDescription"] !== undefined;
     isInstance = isInstance && "longDescription" in value && value["longDescription"] !== undefined;
+    isInstance = isInstance && "route" in value && value["route"] !== undefined;
 
     return isInstance;
 }
@@ -73,6 +80,7 @@ export function AnnouncementNotificationActionDataFromJSONTyped(json: any, ignor
         'pushBody': json['push_body'],
         'shortDescription': json['short_description'],
         'longDescription': json['long_description'],
+        'route': json['route'],
     };
 }
 
@@ -89,6 +97,7 @@ export function AnnouncementNotificationActionDataToJSON(value?: AnnouncementNot
         'push_body': value.pushBody,
         'short_description': value.shortDescription,
         'long_description': value.longDescription,
+        'route': value.route,
     };
 }
 

@@ -46,7 +46,8 @@ import type {
   CommentNotification,
   CommentMentionNotification,
   CommentThreadNotification,
-  CommentReactionNotification
+  CommentReactionNotification,
+  AnnouncementPushNotification
 } from '@audius/common/store'
 import {
   NotificationType,
@@ -57,6 +58,7 @@ import {
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
 import type { AppState } from '@audius/web/src/store/types'
+import { useLinkTo } from '@react-navigation/native'
 import { useDispatch, useStore } from 'react-redux'
 
 import { useNavigation } from './useNavigation'
@@ -72,6 +74,7 @@ export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const store = useStore<AppState>()
+  const linkTo = useLinkTo()
 
   const socialActionHandler = useCallback(
     (
@@ -228,6 +231,19 @@ export const useNotificationNavigation = () => {
     [navigation]
   )
 
+  const announcementHandler = useCallback(
+    (notification: AnnouncementNotification | AnnouncementPushNotification) => {
+      if (!notification.route) {
+        // fallback to linking to the coins explore screen
+        // TODO: Update this later, this will eventually be a bug
+        navigation.navigate('CoinExploreScreen')
+      } else {
+        linkTo(notification.route)
+      }
+    },
+    [navigation, linkTo]
+  )
+
   const notificationTypeHandlerMap = useMemo(
     () => ({
       [NotificationType.AddTrackToPlaylist]: (
@@ -242,11 +258,8 @@ export const useNotificationNavigation = () => {
               : notification.metadata.playlistId
         })
       },
-      [NotificationType.Announcement]: (
-        notification: AnnouncementNotification
-      ) => {
-        navigation.navigate('ArtistCoinsExploreScreen')
-      },
+      // Will handle NotificationType.Announcement and PushNotificationType.Announcement
+      [NotificationType.Announcement]: announcementHandler,
       [NotificationType.ChallengeReward]: (
         notification: ChallengeRewardNotification
       ) => {
@@ -367,15 +380,16 @@ export const useNotificationNavigation = () => {
       [NotificationType.ArtistRemixContestEnded]: entityHandler
     }),
     [
-      dispatch,
-      milestoneHandler,
-      navigation,
-      profileHandler,
+      announcementHandler,
       socialActionHandler,
       entityHandler,
-      messagesHandler,
+      milestoneHandler,
+      profileHandler,
       userIdHandler,
-      store
+      messagesHandler,
+      navigation,
+      store,
+      dispatch
     ]
   )
 

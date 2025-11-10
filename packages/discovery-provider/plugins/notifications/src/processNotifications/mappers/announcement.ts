@@ -118,6 +118,7 @@ export class Announcement extends BaseNotification<AnnouncementNotificationRow> 
     return {}
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   formatEmailProps(resources: Resources) {
     return {
       type: this.notification.type,
@@ -189,7 +190,8 @@ export class Announcement extends BaseNotification<AnnouncementNotificationRow> 
                 id: `timestamp:${this.getNotificationTimestamp()}:group_id:${
                   this.notification.group_id
                 }`,
-                type: 'Announcement'
+                type: 'Announcement',
+                ...this.notification.data
               }
             }
           )
