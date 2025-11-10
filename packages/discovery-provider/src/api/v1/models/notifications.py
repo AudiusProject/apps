@@ -931,6 +931,7 @@ announcement_notification_action_data = ns.model(
         "push_body": fields.String(required=True),
         "short_description": fields.String(required=True),
         "long_description": fields.String(required=True),
+        "route": fields.String(required=True),
     },
 )
 announcement_notification_action = ns.clone(

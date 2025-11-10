@@ -132,6 +132,7 @@ export type AnnouncementNotification = BaseNotification & {
   title: string
   shortDescription: string
   longDescription?: string
+  route: string
 }
 
 export type UserSubscriptionNotification = BaseNotification & {
