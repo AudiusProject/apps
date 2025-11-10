@@ -34,6 +34,7 @@ import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
 import { TradingVolumeLaunchBanner } from 'components/banner/TradingVolumeLaunchBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
+import { YakCoinLaunchBanner } from 'components/banner/YakCoinLaunchBanner'
 import { ChatListener } from 'components/chat-listener/ChatListener'
 import CookieBanner from 'components/cookie-banner/CookieBanner'
 import { DevModeMananger } from 'components/dev-mode-manager/DevModeManager'
@@ -494,6 +495,7 @@ const WebPlayer = (props) => {
         {/* Re-enable for ToS updates */}
         {/* <TermsOfServiceUpdateBanner /> */}
         <TradingVolumeLaunchBanner />
+        <YakCoinLaunchBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
