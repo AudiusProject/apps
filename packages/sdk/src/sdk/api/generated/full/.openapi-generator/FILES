@@ -7,6 +7,7 @@ apis/ExploreApi.ts
 apis/NotificationsApi.ts
 apis/PlaylistsApi.ts
 apis/ReactionsApi.ts
+apis/RewardsApi.ts
 apis/SearchApi.ts
 apis/TipsApi.ts
 apis/TracksApi.ts
@@ -46,6 +47,8 @@ models/ChallengeRewardNotificationAction.ts
 models/ChallengeRewardNotificationActionData.ts
 models/CidData.ts
 models/CidDataResponse.ts
+models/ClaimRewardsResponse.ts
+models/ClaimRewardsResponseDataInner.ts
 models/ClaimableRewardNotification.ts
 models/ClaimableRewardNotificationAction.ts
 models/ClaimableRewardNotificationActionData.ts
@@ -87,6 +90,8 @@ models/CreateNotification.ts
 models/CreateNotificationAction.ts
 models/CreateNotificationActionData.ts
 models/CreatePlaylistNotificationActionData.ts
+models/CreateRewardCodeRequest.ts
+models/CreateRewardCodeResponse.ts
 models/CreateTrackNotificationActionData.ts
 models/DataAndType.ts
 models/ExtendedTokenGate.ts
@@ -179,6 +184,7 @@ models/Reactions.ts
 models/ReceiveTipNotification.ts
 models/ReceiveTipNotificationAction.ts
 models/ReceiveTipNotificationActionData.ts
+models/RedeemAmountResponse.ts
 models/Related.ts
 models/RelatedArtistResponseFull.ts
 models/RemixNotification.ts
@@ -200,6 +206,8 @@ models/RepostOfRepostNotificationActionData.ts
 models/RequestManagerNotification.ts
 models/RequestManagerNotificationAction.ts
 models/RequestManagerNotificationActionData.ts
+models/RewardCodeErrorResponse.ts
+models/RewardCodeResponse.ts
 models/SaveNotification.ts
 models/SaveNotificationAction.ts
 models/SaveNotificationActionData.ts
