@@ -1,4 +1,5 @@
 import { OptionalId } from '@audius/sdk'
+import type { full } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
@@ -14,7 +15,7 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 type GetTracksByUserHandleArgs = {
   handle: string | null | undefined
-  filterTracks?: 'public' | 'unlisted' | 'all'
+  filterTracks?: full.GetTracksByUserHandleFilterTracksEnum
   sort?: 'date' | 'plays'
   limit?: number
   offset?: number
