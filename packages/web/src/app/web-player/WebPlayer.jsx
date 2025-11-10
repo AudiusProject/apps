@@ -60,6 +60,7 @@ import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
 import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
 import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
 import { ExclusiveTracksPage as MobileExclusiveTracksPage } from 'pages/coin-detail-page/components/mobile/ExclusiveTracksPage'
+import { CoinRedeemPage } from 'pages/coin-redeem-page/CoinRedeemPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -126,6 +127,7 @@ const {
   DASHBOARD_PAGE,
   AUDIO_PAGE,
   COIN_DETAIL_PAGE,
+  COIN_REDEEM_PAGE,
   REWARDS_PAGE,
   UPLOAD_PAGE,
   UPLOAD_ALBUM_PAGE,
@@ -738,6 +740,12 @@ const WebPlayer = (props) => {
                   }
                   return <CoinDetailPage {...props} />
                 }}
+              />
+              <Route
+                exact
+                path={COIN_REDEEM_PAGE}
+                isMobile={isMobile}
+                component={CoinRedeemPage}
               />
               <DesktopRoute
                 exact

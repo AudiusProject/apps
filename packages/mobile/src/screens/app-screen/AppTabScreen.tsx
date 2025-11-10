@@ -36,6 +36,7 @@ import {
   EditCoinDetailsScreen,
   ExclusiveTracksScreen
 } from 'app/screens/coin-details-screen'
+import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
@@ -126,6 +127,7 @@ export type AppTabScreenParamList = {
   wallet: undefined
   CashScreen: undefined
   CoinDetailsScreen: { ticker: string }
+  CoinRedeemScreen: { ticker: string; code?: string }
   EditCoinDetailsScreen: { ticker: string }
   ExclusiveTracksScreen: { ticker: string }
   Upload: {
@@ -241,6 +243,7 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
+      <Stack.Screen name='CoinRedeemScreen' component={CoinRedeemScreen} />
       <Stack.Screen
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
