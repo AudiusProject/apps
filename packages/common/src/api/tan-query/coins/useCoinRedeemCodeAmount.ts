@@ -44,7 +44,7 @@ export const useCoinRedeemCodeAmount = (
       } catch (error) {
         // Handle 400 errors
         // Tells us if the code is invalid or already redeemed
-        if (error instanceof ResponseError) {
+        if (error instanceof ResponseError && error.response.status === 400) {
           const res = await error.response.json()
           return res
         }
