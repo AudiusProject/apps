@@ -8,8 +8,8 @@ import {
 } from '@audius/common/schemas'
 import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { Button, Flex, Paper, Text, useTheme } from '@audius/harmony'
-import { Formik, Form, useField, useFormikContext } from 'formik'
+import { Button, Flex, Paper, Text } from '@audius/harmony'
+import { Formik, Form, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
@@ -197,16 +197,10 @@ export const FinishProfilePage = () => {
               })}
             />
           </Paper>
-          {isMobile ? null : <UploadProfilePhotoHelperText />}
           <PageFooter
             centered
             sticky
             buttonProps={{ disabled: !isValid }}
-            prefix={
-              isMobile && !isFastReferral ? (
-                <UploadProfilePhotoHelperText />
-              ) : null
-            }
             postfix={
               isMobile || isSocialConnected ? null : (
                 <Button variant='secondary' fullWidth onClick={history.goBack}>
@@ -218,25 +212,5 @@ export const FinishProfilePage = () => {
         </Page>
       )}
     </Formik>
-  )
-}
-
-const UploadProfilePhotoHelperText = () => {
-  const [{ value: displayName }, { touched }] = useField('displayName')
-  const [{ value: profileImage }] = useField('profileImage')
-  const isVisible = displayName && touched && !profileImage
-  const { motion } = useTheme()
-
-  return (
-    <Text
-      variant='body'
-      textAlign='center'
-      css={{
-        opacity: isVisible ? 1 : 0,
-        transition: `opacity ${motion.calm}`
-      }}
-    >
-      {finishProfilePageMessages.uploadProfilePhoto}
-    </Text>
   )
 }
