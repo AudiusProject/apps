@@ -403,7 +403,7 @@ export const PickWinnersPage = () => {
                     uid={uid}
                     id={winnerId}
                     index={index}
-                    order={index}
+                    order={index + 1}
                     ordered={false}
                     size={TrackTileSize.LARGE}
                     isLoading={false}
