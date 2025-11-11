@@ -354,7 +354,7 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
     if (inputHasPool || outputHasPool) {
       const swapDirection = inputHasPool ? 'coinToAudio' : 'audioToCoin'
       return await executeMeteoraSwap(
-        params.inputMint,
+        swapDirection === 'coinToAudio' ? params.inputMint : params.outputMint,
         swapDirection,
         params.amountUi,
         {
