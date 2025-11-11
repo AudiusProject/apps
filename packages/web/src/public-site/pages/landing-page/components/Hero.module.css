@@ -201,7 +201,7 @@
 }
 
 .ctaButton path {
-  fill: #7e1bcc;
+  fill: #7e1bcc
 }
 
 .mobileContainer .ctaButton {
@@ -300,7 +300,8 @@
   min-height: calc(134vh + 100px);
   min-width: 100%;
   width: 300%;
-  margin: 0px -125% 0px;
+  margin: 0px -110% 0px;
+  object-fit: cover;
 }
 
 .mobileContainer .content {

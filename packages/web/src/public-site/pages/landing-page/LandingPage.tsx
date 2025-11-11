@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 
+import { coinPage } from '@audius/common/src/utils/route'
+import { Flex, IconButton, IconClose, Paper, Text } from '@audius/harmony'
 import cn from 'classnames'
 import { ParallaxProvider } from 'react-scroll-parallax'
 
 import { useHistoryContext } from 'app/HistoryProvider'
+import HeroBackgroundTakeover from 'assets/img/publicSite/HeroBGTakeover.webp'
 import { FanburstBanner } from 'components/banner/FanburstBanner'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
 import Footer from 'public-site/components/Footer'
 import NavBannerV2 from 'public-site/components/NavBanner'
+import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
 import { getPathname } from 'utils/route'
 
@@ -22,6 +26,86 @@ import PlatformFeatures from './components/PlatformFeatures'
 import WhoUsesAudius from './components/WhoUsesAudius'
 
 const FANBURST_UTM_SOURCE = 'utm_source=fanburst'
+
+const messages = {
+  bannerTitle: 'You Already Know',
+  bannerSubtitle: '$YAK'
+}
+
+const ArtistTakeoverFloatingBanner = ({
+  onClose,
+  isMobile,
+  setRenderPublicSite
+}: {
+  onClose: () => void
+  isMobile: boolean
+  setRenderPublicSite: (shouldRender: boolean) => void
+}) => {
+  const { history } = useHistoryContext()
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation()
+      handleClickRoute(coinPage('YAK'), setRenderPublicSite, history)()
+    },
+    [setRenderPublicSite, history]
+  )
+
+  const handleClose = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation()
+      onClose()
+    },
+    [onClose]
+  )
+
+  return (
+    <Paper
+      p={isMobile ? 'l' : '2xl'}
+      css={{
+        position: 'fixed',
+        bottom: 24,
+        left: isMobile ? 16 : 48,
+        right: isMobile ? 16 : 48,
+        maxWidth: 1240,
+        margin: '0 auto',
+        zIndex: 1000,
+        backgroundImage: `url(${HeroBackgroundTakeover})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+      onClick={handleClick}
+    >
+      <Flex row alignItems='flex-start' justifyContent='space-between' flex='1'>
+        <Flex direction='column' gap='s'>
+          <Text
+            variant='heading'
+            size={isMobile ? 's' : 'l'}
+            color='staticWhite'
+          >
+            {messages.bannerTitle}
+          </Text>
+          <Text
+            variant='body'
+            size={isMobile ? 's' : 'l'}
+            strength='strong'
+            color='staticWhite'
+          >
+            {messages.bannerSubtitle}
+          </Text>
+        </Flex>
+        <IconButton
+          aria-label='Close'
+          icon={IconClose}
+          color='staticWhite'
+          size='s'
+          onClick={handleClose}
+        />
+      </Flex>
+    </Paper>
+  )
+}
 
 type LandingPageV2Props = {
   isMobile: boolean
@@ -73,6 +157,9 @@ const LandingPage = (props: LandingPageV2Props) => {
     setHasImageLoaded(true)
   }, [setHasImageLoaded])
 
+  const [showArtistTakeoverBanner, setShowArtistTakeoverBanner] = useState(true)
+  const onDismissArtistTakeoverBanner = () => setShowArtistTakeoverBanner(false)
+
   return (
     <ParallaxProvider>
       <div
@@ -94,6 +181,13 @@ const LandingPage = (props: LandingPageV2Props) => {
             onClose={onDismissFanburstBanner}
           />
         )}
+        {showArtistTakeoverBanner ? (
+          <ArtistTakeoverFloatingBanner
+            isMobile={props.isMobile}
+            onClose={onDismissArtistTakeoverBanner}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+        ) : null}
         <NavBannerV2
           className={cn({
             [styles.hasBanner]: showFanburstBanner,
@@ -109,7 +203,10 @@ const LandingPage = (props: LandingPageV2Props) => {
           setRenderPublicSite={props.setRenderPublicSite}
         />
         <Description isMobile={props.isMobile} />
-        <WhoUsesAudius isMobile={props.isMobile} />
+        <WhoUsesAudius
+          isMobile={props.isMobile}
+          setRenderPublicSite={props.setRenderPublicSite}
+        />
         <PlatformFeatures isMobile={props.isMobile} />
         <ArtistInvestors isMobile={props.isMobile} />
         <CTAGetStarted

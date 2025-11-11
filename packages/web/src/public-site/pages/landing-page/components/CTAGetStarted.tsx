@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 
+import { coinPage } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
 import { IconCaretRight } from '@audius/harmony'
 import cn from 'classnames'
@@ -8,9 +9,7 @@ import { Parallax } from 'react-scroll-parallax'
 import { useChain, useTrail, animated } from 'react-spring'
 
 import { useHistoryContext } from 'app/HistoryProvider'
-import ctaSection from 'assets/img/publicSite/CTASection.webp'
-import ctaSection2 from 'assets/img/publicSite/CTASection@2x.webp'
-import ctaSection3 from 'assets/img/publicSite/CTASection@3x.webp'
+import ctaSectionTakeover from 'assets/img/publicSite/CTASectionTakeover.webp'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { useMatchesBreakpoint } from 'utils/useMatchesBreakpoint'
 
@@ -21,7 +20,7 @@ const { TRENDING_PAGE } = route
 const MOBILE_WIDTH_MEDIA_QUERY = window.matchMedia('(max-width: 1150px)')
 
 const messages = {
-  title: 'Artists Deserve More',
+  title: 'You Already Know',
   cta: 'Get Started'
 }
 
@@ -80,11 +79,11 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
             <img
               className={styles.mobileBackground}
               srcSet={`
-              ${ctaSection} 1x,
-              ${ctaSection2} 2x,
-              ${ctaSection3} 3x,
+              ${ctaSectionTakeover} 1x,
+              ${ctaSectionTakeover} 2x,
+              ${ctaSectionTakeover} 3x,
               `}
-              src={ctaSection}
+              src={ctaSectionTakeover}
               alt='Audius Audio Set'
             />
           </Parallax>
@@ -93,14 +92,14 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
           <div className={styles.title}>{messages.title}</div>
           <button
             onClick={handleClickRoute(
-              TRENDING_PAGE,
+              coinPage('YAK'),
               props.setRenderPublicSite,
               history
             )}
             className={styles.ctaButton}
           >
             {messages.cta}
-            <IconCaretRight className={styles.iconCaretRight} color='accent' />
+            <IconCaretRight className={styles.iconCaretRight} />
           </button>
         </div>
       </div>
@@ -155,11 +154,11 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
           <img
             className={styles.background}
             srcSet={`
-            ${ctaSection} 1x,
-            ${ctaSection2} 2x,
-            ${ctaSection3} 3x,
+            ${ctaSectionTakeover} 1x,
+            ${ctaSectionTakeover} 2x,
+            ${ctaSectionTakeover} 3x,
             `}
-            src={ctaSection}
+            src={ctaSectionTakeover}
             alt='Audius Audio Set'
           />
         </Parallax>

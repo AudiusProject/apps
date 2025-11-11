@@ -59,7 +59,7 @@
   justify-content: center;
   align-items: center;
 
-  color: #7e1bcc;
+  color: #D54F2C;
   font-size: 18px;
   font-weight: bold;
   letter-spacing: 0.2px;
@@ -73,13 +73,17 @@
 .ctaButton:hover {
   transform: scale3d(1.03, 1.03, 1.03);
   background-color: #f7f7f7;
-  box-shadow: 0 10px 20px -1px rgba(25, 0, 96, 0.5);
+  box-shadow: 0 10px 20px -1px rgba(96, 25, 0, 0.5);
 }
 
 .ctaButton:active {
   transform: scale3d(0.99, 0.99, 0.99);
   background-color: #f2f2f2;
   box-shadow: 0 0 2px -1px rgba(25, 0, 96, 0.5);
+}
+
+.ctaButton path {
+  fill: #D54F2C
 }
 
 .iconCaretRight {
