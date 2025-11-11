@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 
 import { coinPage } from '@audius/common/src/utils/route'
-import { route } from '@audius/common/utils'
 import { IconCaretRight } from '@audius/harmony'
 import cn from 'classnames'
 import { Parallax } from 'react-scroll-parallax'
@@ -14,8 +13,6 @@ import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { useMatchesBreakpoint } from 'utils/useMatchesBreakpoint'
 
 import styles from './CTAGetStarted.module.css'
-
-const { TRENDING_PAGE } = route
 
 const MOBILE_WIDTH_MEDIA_QUERY = window.matchMedia('(max-width: 1150px)')
 
@@ -137,7 +134,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
           </div>
           <button
             onClick={handleClickRoute(
-              TRENDING_PAGE,
+              coinPage('YAK'),
               props.setRenderPublicSite,
               history
             )}
