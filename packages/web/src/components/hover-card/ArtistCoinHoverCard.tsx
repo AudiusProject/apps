@@ -9,6 +9,7 @@ import {
   HoverCard,
   HoverCardProps,
   IconArrowRight,
+  Skeleton,
   PlainButton,
   Text,
   useTheme
@@ -70,11 +71,12 @@ export const ArtistCoinHoverCard = ({
   })
 
   // Only fetch token balance when hovered and we have the mint address
-  const { data: tokenBalance } = useCoinBalance({
-    mint: artistCoinBadge?.mint ?? '',
-    userId,
-    enabled: isHovered && !!artistCoinBadge?.mint
-  })
+  const { data: tokenBalance, isPending: isTokenBalancePending } =
+    useCoinBalance({
+      mint: artistCoinBadge?.mint ?? '',
+      userId,
+      enabled: isHovered && !!artistCoinBadge?.mint
+    })
 
   // Determine if the user whose badge we're showing is the creator of this coin
   const isCreator = userId === coinData?.ownerId
@@ -101,14 +103,14 @@ export const ArtistCoinHoverCard = ({
   return (
     <HoverCard
       content={
-        <>
+        <Flex column w={320}>
           {/* Custom Header */}
           <Flex
             w='100%'
             alignSelf='stretch'
             backgroundColor='surface1'
             borderBottom='default'
-            p='xs'
+            p='s'
             alignItems='center'
             justifyContent='space-between'
           >
@@ -136,7 +138,7 @@ export const ArtistCoinHoverCard = ({
           </Flex>
 
           {/* Custom Body */}
-          <Flex w='100%' p='xs' pr='4xl' column gap='xs'>
+          <Flex w='100%' column gap='xs' p='s'>
             <Flex gap='xs' alignItems='center' w='100%'>
               {/* Token Icon */}
               {artistCoinBadge?.logo_uri ? (
@@ -156,22 +158,15 @@ export const ArtistCoinHoverCard = ({
                 css={{ flex: 1, minWidth: 0 }}
               >
                 {/* Coin Name */}
-                <Text
-                  variant='title'
-                  size='m'
-                  color='default'
-                  css={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
+                <Text variant='title' size='m' color='default' ellipses>
                   {coinName}
                 </Text>
 
                 {/* Balance and Ticker */}
                 <Flex gap='xs' alignItems='center' css={{ flexWrap: 'wrap' }}>
-                  {formattedBalance ? (
+                  {isHovered && isTokenBalancePending ? (
+                    <Skeleton w={64} h='unit5' />
+                  ) : formattedBalance ? (
                     <Text variant='title' size='s' color='default'>
                       {formattedBalance}
                     </Text>
@@ -188,7 +183,7 @@ export const ArtistCoinHoverCard = ({
               </Flex>
             </Flex>
           </Flex>
-        </>
+        </Flex>
       }
       anchorOrigin={anchorOrigin}
       transformOrigin={transformOrigin}
