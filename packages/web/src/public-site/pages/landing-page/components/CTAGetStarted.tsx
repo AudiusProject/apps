@@ -137,7 +137,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
           </div>
           <button
             onClick={handleClickRoute(
-              TRENDING_PAGE,
+              coinPage('YAK'),
               props.setRenderPublicSite,
               history
             )}
