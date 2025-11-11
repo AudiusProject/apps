@@ -3,7 +3,7 @@ import { matchPath, generatePath } from 'react-router'
 
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
-import { encodeUrlName } from './formatUtil'
+import { encodeUrlName, formatTickerForUrl } from './formatUtil'
 import { convertGenreLabelToValue, Genre } from './genres'
 
 // External Routes
@@ -473,4 +473,7 @@ export const searchPage = (searchOptions: SearchOptions) => {
 }
 
 export const coinPage = (ticker: string) =>
-  `/coins/${ticker.startsWith('$') ? ticker.slice(1) : ticker}`
+  `/coins/${formatTickerForUrl(ticker)}`
+
+export const coinRedeemPage = (ticker: string, code?: string) =>
+  `/coins/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`

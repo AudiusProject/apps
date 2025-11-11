@@ -12,9 +12,11 @@ import {
 import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   coinPage,
+  coinRedeemPage,
   COINS_EXPLORE_PAGE,
   NOT_FOUND_PAGE
 } from '@audius/common/src/utils/route'
+import { formatTickerForUrl } from '@audius/common/utils'
 import {
   Button,
   Flex,
@@ -173,6 +175,7 @@ const PageContent = ({
 export const CoinRedeemPage = () => {
   const { ticker, code } = useParams<{ ticker: string; code?: string }>()
   const isMobile = useIsMobile()
+  const formattedTicker = formatTickerForUrl(ticker)
 
   const {
     data: coin,
@@ -201,6 +204,10 @@ export const CoinRedeemPage = () => {
 
   if (!ticker) {
     return <Redirect to={COINS_EXPLORE_PAGE} />
+  }
+
+  if (ticker !== formattedTicker) {
+    return <Redirect to={coinRedeemPage(formattedTicker, code)} />
   }
 
   if (isError || (isSuccess && !coin)) {
