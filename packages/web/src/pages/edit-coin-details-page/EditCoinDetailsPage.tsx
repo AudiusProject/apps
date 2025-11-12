@@ -296,6 +296,7 @@ export const EditCoinDetailsPage = () => {
 
                     <TextAreaField
                       name='description'
+                      css={{ height: 200 }}
                       placeholder={
                         coinDetailsMessages.editCoinDetails
                           .descriptionPlaceholder
