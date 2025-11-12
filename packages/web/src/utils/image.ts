@@ -1,4 +1,4 @@
-export const preload = (url: string, timeoutMs: number = 10000) => {
+export const preload = (url: string, timeoutMs: number = 5000) => {
   return new Promise<void>((resolve, reject) => {
     const img = new Image()
     img.src = url
