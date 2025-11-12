@@ -54,7 +54,7 @@ export const useImageSize = <
   artwork?: ArtworkType
   targetSize: SizeType
   defaultImage?: string
-  preloadImageFn?: (url: string) => Promise<void>
+  preloadImageFn?: (url: string, timeoutMs?: number) => Promise<void>
 }) => {
   const [imageUrl, setImageUrl] = useState<Maybe<string>>(undefined)
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())

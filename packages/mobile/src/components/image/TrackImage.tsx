@@ -55,9 +55,7 @@ export const useTrackImage = ({
     artwork,
     targetSize: size,
     defaultImage: '',
-    preloadImageFn: async (url: string) => {
-      preload([{ uri: url }])
-    }
+    preloadImageFn: preload
   })
 
   if (imageUrl === '') {

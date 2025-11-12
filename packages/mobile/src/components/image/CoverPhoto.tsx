@@ -46,9 +46,7 @@ export const useCoverPhoto = ({
     artwork: coverPhoto,
     targetSize: size,
     defaultImage: '',
-    preloadImageFn: async (url: string) => {
-      preload([{ uri: url }])
-    }
+    preloadImageFn: preload
   })
 
   const isDefaultCover = imageUrl === ''

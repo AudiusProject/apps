@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { useImageSize } from '@audius/common/hooks'
+import { preload } from 'app/utils/image'
 import type { SquareSizes, ID } from '@audius/common/models'
 import { pick } from 'lodash'
 import { Image } from 'react-native'
@@ -34,9 +35,7 @@ export const useProfilePicture = ({
     artwork: profile_picture,
     targetSize: size,
     defaultImage: '',
-    preloadImageFn: async (url: string) => {
-      Image.prefetch(url)
-    }
+    preloadImageFn: preload
   })
 
   if (imageUrl === '') {
