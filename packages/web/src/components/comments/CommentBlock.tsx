@@ -107,7 +107,8 @@ const CommentBlockInternal = (
       css={{
         opacity: isTombstone ? 0.5 : 1,
         animation: `${fadeIn} ${motion.calm}`,
-        paddingInline: parentCommentId ? 80 : 24,
+        paddingRight: 24,
+        paddingLeft: parentCommentId ? 80 : 24,
         '&::before': {
           content: highlightedCommentId === commentId ? '""' : 'none',
           position: 'absolute',
