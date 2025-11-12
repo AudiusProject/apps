@@ -1,5 +1,11 @@
 # create-audius-app
 
+## 2.1.3
+
+### Patch Changes
+
+- 7d181ea: Bump
+
 ## 2.1.2
 
 ### Patch Changes

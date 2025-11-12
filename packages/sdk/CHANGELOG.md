@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 11.2.0
+
+### Minor Changes
+
+- e7bcadf: adds coin reward code API methods
+
 ## 11.1.2
 
 ### Patch Changes
