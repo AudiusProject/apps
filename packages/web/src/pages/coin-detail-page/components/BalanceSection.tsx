@@ -54,23 +54,25 @@ type BalanceStateProps = {
 
 const BalanceSectionSkeletonContent = () => {
   return (
-    <Flex column gap='l' w='100%'>
-      <Flex gap='s' alignItems='center'>
-        <Skeleton width='64px' height='64px' />
-        <Skeleton width='120px' height='24px' />
-      </Flex>
-      <Flex gap='s'>
+    <Flex ph='xl' pv='l' w='100%'>
+      <Flex column gap='l' w='100%'>
+        <Flex gap='s' alignItems='center'>
+          <Skeleton width='64px' height='64px' />
+          <Skeleton width='120px' height='24px' />
+        </Flex>
+        <Flex gap='s'>
+          <Skeleton width='100%' height='40px' />
+          <Skeleton width='100%' height='40px' />
+        </Flex>
         <Skeleton width='100%' height='40px' />
-        <Skeleton width='100%' height='40px' />
       </Flex>
-      <Skeleton width='100%' height='40px' />
     </Flex>
   )
 }
 
 const BalanceSectionSkeleton = () => {
   return (
-    <Paper ph='xl' pv='l'>
+    <Paper>
       <BalanceSectionSkeletonContent />
     </Paper>
   )
