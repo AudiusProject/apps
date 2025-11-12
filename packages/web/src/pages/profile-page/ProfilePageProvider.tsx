@@ -442,7 +442,7 @@ class ProfilePageClassComponent extends PureComponent<
           ]) as any
 
           if (userCoinsData) {
-            // API returns coins sorted: owned first, then by balance
+            // API returns coins sorted: owned first, then by value
             const excludedMints = [
               env.WAUDIO_MINT_ADDRESS,
               env.USDC_MINT_ADDRESS
