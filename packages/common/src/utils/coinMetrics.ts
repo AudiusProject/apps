@@ -101,13 +101,15 @@ export const createAudioCoinMetrics = (
   if (coingeckoResponse === null || coingeckoResponse === undefined) {
     return []
   }
+
   return [
     createMetric({
       value: formatCurrencyWithSubscript(
         coingeckoResponse.market_data.current_price.usd
       ),
       label: messages.pricePerCoin,
-      changePercent: coingeckoResponse.market_data.price_change_percentage_24h
+      changePercent: coingeckoResponse.market_data.price_change_percentage_24h,
+      rawValue: formatCurrency(coingeckoResponse.market_data.current_price.usd)
     }),
     createMetric({
       value: `$${formatCount(coingeckoResponse.market_data.market_cap.usd, 2)}`,
