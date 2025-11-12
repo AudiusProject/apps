@@ -8,11 +8,11 @@ jobs:
         - Vercel
       requires:
         - harmony-init
-  # - harmony-test-storybook:
-  #     context:
-  #       - Vercel
-  #     requires:
-  #       - harmony-build-storybook
+  - harmony-test-storybook:
+      context:
+        - Vercel
+      requires:
+        - harmony-build-storybook
   - harmony-deploy-storybook:
       context: Audius Client
       requires:
