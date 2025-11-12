@@ -55,7 +55,9 @@ export const useCollectionImage = ({
     artwork,
     targetSize: size,
     defaultImage: '',
-    preloadImageFn: preload
+    preloadImageFn: async (url: string) => {
+      preload([{ uri: url }])
+    }
   })
 
   if (imageUrl === '') {

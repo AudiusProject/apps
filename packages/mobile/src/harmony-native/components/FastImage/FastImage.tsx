@@ -33,23 +33,4 @@ export const FastImage = (props: FastImageProps) => {
   return <RNFastImage source={imageSource} {...other} />
 }
 
-export const preload = (
-  url: string,
-  timeoutMs: number = 5000
-): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`Failed to load (timeout) ${url}`))
-    }, timeoutMs)
-
-    try {
-      RNFastImage.preload([{ uri: url }])
-      // No completion callback, so we can only resolve immediately
-      clearTimeout(timer)
-      resolve()
-    } catch (err) {
-      clearTimeout(timer)
-      reject(new Error(`Failed to load ${url}: ${err instanceof Error ? err.message : String(err)}`))
-    }
-  })
-}
+export const preload = RNFastImage.preload
