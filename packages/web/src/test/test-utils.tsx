@@ -196,10 +196,10 @@ export function saveDomToFile(
 }
 
 /**
- * Wrapper around vitest's it() that automatically captures DOM snapshots on test failure.
+ * Wrapper around vitest's it() to add a feature that automatically capture DOM snapshots on test failure.
  * The snapshot filename is based on the test name (sanitized for filesystem).
  */
-function createItWrapper() {
+function createItWrapper(): typeof vitestIt {
   const itWrapper = (
     name: string,
     fn?: () => void | Promise<void>,
@@ -225,16 +225,33 @@ function createItWrapper() {
     return vitestIt(name, wrappedFn, timeout)
   }
 
-  // Support vitest it() function modifiers
-  // Not exhaustive atm but easy to add as needed
-  itWrapper.skip = vitestIt.skip
-  itWrapper.only = vitestIt.only
-  itWrapper.todo = vitestIt.todo
-  itWrapper.concurrent = vitestIt.concurrent
-  itWrapper.fails = vitestIt.fails
-  itWrapper.each = vitestIt.each
-
-  return itWrapper
+  // Use a Proxy to forward all property access to vitestIt
+  // This ensures all methods (skip, only, todo, concurrent, fails, each, withContext, etc.) are available
+  return new Proxy(itWrapper, {
+    get(target, prop) {
+      // If the property exists on our wrapper function, return it
+      if (prop in target) {
+        return (target as any)[prop]
+      }
+      // Otherwise, forward to vitestIt
+      return (vitestIt as any)[prop]
+    },
+    has(target, prop) {
+      return prop in target || prop in vitestIt
+    },
+    ownKeys(target) {
+      // Combine keys from both target and vitestIt
+      const targetKeys = Reflect.ownKeys(target)
+      const vitestKeys = Reflect.ownKeys(vitestIt)
+      return Array.from(new Set([...targetKeys, ...vitestKeys]))
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      if (prop in target) {
+        return Reflect.getOwnPropertyDescriptor(target, prop)
+      }
+      return Reflect.getOwnPropertyDescriptor(vitestIt, prop)
+    }
+  }) as typeof vitestIt
 }
 
 export const it = createItWrapper()
