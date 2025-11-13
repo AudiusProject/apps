@@ -85,7 +85,6 @@ export const AccountBalance = ({
         gap='l'
         border='default'
       >
-        <LoadingSpinner color='subdued' style={{ height: 24, width: 24 }} />
         <Text variant='body' size='l' color='subdued'>
           {messages.loading}
         </Text>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import {
   useCurrentUserId,
@@ -7,11 +7,13 @@ import {
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { convertHexToRGBA } from '@audius/common/utils'
+import { View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
 import { Flex, Paper, Text, useTheme } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
+import { useNavigation } from 'app/hooks/useNavigation'
 
 const messages = walletMessages.balanceHistory
 
@@ -56,6 +58,14 @@ export const UserBalanceHistoryGraph = ({
   height = 191
 }: UserBalanceHistoryGraphProps) => {
   const { color, spacing } = useTheme()
+  const navigation = useNavigation()
+  useEffect(() => {
+    navigation.setOptions({ fullScreenGestureEnabled: false })
+    return () => {
+      navigation.setOptions({ fullScreenGestureEnabled: true })
+    }
+  }, [navigation])
+
   const secondary = color.secondary.secondary
   const borderColor = color.border.default
   const { data: currentUserId } = useCurrentUserId()
@@ -186,6 +196,19 @@ export const UserBalanceHistoryGraph = ({
   const minValue = Math.min(...values)
   const valueRange = maxValue - minValue
 
+  const chartHorizontalPadding = 48
+  const chartInitialSpacing = 10
+  const chartEndSpacing = 10
+  const chartWidth = Math.max(width - chartHorizontalPadding, 0)
+  const spacingBetweenPoints =
+    chartData.length > 1
+      ? Math.max(
+          (chartWidth - chartInitialSpacing - chartEndSpacing) /
+            (chartData.length - 1),
+          0
+        )
+      : 0
+
   // Format Y label - library expects (label: string) => string
   const formatYLabelWrapper = (label: string): string => {
     const value = Number.parseFloat(label)
@@ -195,72 +218,74 @@ export const UserBalanceHistoryGraph = ({
 
   return (
     <Flex pv='xs'>
-      <LineChart
-        data={chartData}
-        width={width - 48}
-        height={height}
-        curved
-        isAnimated
-        animationDuration={800}
-        // Line styling
-        color={secondary}
-        thickness={2}
-        // Gradient fill
-        areaChart
-        startFillColor={convertHexToRGBA(secondary, 0.15)}
-        endFillColor={convertHexToRGBA(secondary, 0.05)}
-        startOpacity={0.15}
-        endOpacity={0.05}
-        // Data points
-        hideDataPoints
-        // Focus/hover behavior
-        focusEnabled
-        showStripOnFocus
-        showTextOnFocus
-        stripColor={convertHexToRGBA(secondary, 0.3)}
-        stripHeight={height}
-        stripWidth={2}
-        // Axes
-        rulesColor={borderColor}
-        noOfVerticalLines={0}
-        noOfSections={2}
-        yAxisColor='transparent'
-        xAxisColor='transparent'
-        yAxisThickness={0}
-        xAxisThickness={0}
-        yAxisTextStyle={{
-          color: color.neutral.n400,
-          fontSize: 11,
-          fontWeight: '500'
-        }}
-        // Y-axis formatting
-        formatYLabel={formatYLabelWrapper}
-        yAxisOffset={minValue - valueRange * 0.1}
-        // Spacing
-        spacing={(width - 48) / Math.max(chartData.length - 1, 1)}
-        initialSpacing={10}
-        endSpacing={10}
-        yAxisLabelWidth={spacing.unit12 + spacing.unitHalf}
-        yAxisLabelContainerStyle={{
-          paddingRight: spacing.s
-        }}
-        // Pointer/tooltip config
-        pointerConfig={{
-          pointerStripHeight: height - 20,
-          pointerStripColor: secondary,
-          pointerStripWidth: 2,
-          strokeDashArray: [4, 4],
-          pointerColor: secondary,
-          radius: 6,
-          pointerLabelWidth: 140,
-          pointerLabelHeight: 80,
-          activatePointersOnLongPress: false,
-          autoAdjustPointerLabelPosition: true,
-          pointerLabelComponent: renderTooltip,
-          pointerVanishDelay: 4000,
-          activatePointersDelay: 100
-        }}
-      />
+      <View>
+        <LineChart
+          data={chartData}
+          width={chartWidth}
+          height={height}
+          curved
+          isAnimated
+          animationDuration={800}
+          // Line styling
+          color={secondary}
+          thickness={2}
+          // Gradient fill
+          areaChart
+          startFillColor={convertHexToRGBA(secondary, 0.15)}
+          endFillColor={convertHexToRGBA(secondary, 0.05)}
+          startOpacity={0.15}
+          endOpacity={0.05}
+          // Data points
+          hideDataPoints
+          // Focus/hover behavior
+          focusEnabled
+          showStripOnFocus
+          showTextOnFocus
+          stripColor={convertHexToRGBA(secondary, 0.3)}
+          stripHeight={height}
+          stripWidth={2}
+          // Axes
+          rulesColor={borderColor}
+          noOfVerticalLines={0}
+          noOfSections={2}
+          yAxisColor='transparent'
+          xAxisColor='transparent'
+          yAxisThickness={0}
+          xAxisThickness={0}
+          yAxisTextStyle={{
+            color: color.neutral.n400,
+            fontSize: 11,
+            fontWeight: '500'
+          }}
+          // Y-axis formatting
+          formatYLabel={formatYLabelWrapper}
+          yAxisOffset={minValue - valueRange * 0.1}
+          // Spacing
+          spacing={spacingBetweenPoints}
+          initialSpacing={chartInitialSpacing}
+          endSpacing={chartEndSpacing}
+          yAxisLabelWidth={spacing.unit12 + spacing.unitHalf}
+          yAxisLabelContainerStyle={{
+            paddingRight: spacing.s
+          }}
+          // Pointer/tooltip config
+          pointerConfig={{
+            pointerStripHeight: height - 20,
+            pointerStripColor: secondary,
+            pointerStripWidth: 2,
+            strokeDashArray: [4, 4],
+            pointerColor: secondary,
+            radius: 6,
+            pointerLabelWidth: 140,
+            pointerLabelHeight: 80,
+            activatePointersOnLongPress: false,
+            autoAdjustPointerLabelPosition: true,
+            pointerLabelComponent: renderTooltip,
+            pointerVanishDelay: 4000,
+            activatePointersDelay: 100
+          }}
+        />
+      </View>
     </Flex>
   )
 }
