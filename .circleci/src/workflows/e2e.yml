@@ -4,7 +4,6 @@ when: false
 jobs:
   - e2e-init:
       context: Vercel
-  TODO: PE-7331 - Skipping e2e-test job for now
   - e2e-test:
       context: Vercel
       requires:
