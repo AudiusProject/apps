@@ -350,6 +350,22 @@ export const challengeRewardsConfig: Record<
       'Win a remix contest hosted by a verified artist, and you may earn a reward!',
     progressLabel: 'Active',
     panelButtonText: 'More Info'
+  },
+  'connect-verified': {
+    id: ChallengeName.ConnectVerified,
+    title: '',
+    description: () => '',
+    fullDescription: () => '',
+    progressLabel: '',
+    panelButtonText: ''
+  },
+  [ChallengeName.ConnectVerified]: {
+    id: ChallengeName.ConnectVerified,
+    title: '',
+    description: () => '',
+    fullDescription: () => '',
+    progressLabel: '',
+    panelButtonText: ''
   }
 }
 

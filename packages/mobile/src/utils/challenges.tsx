@@ -80,261 +80,266 @@ export type MobileChallengeConfig = {
   }
 }
 
-const mobileChallengeConfig: Record<ChallengeRewardID, MobileChallengeConfig> =
-  {
-    'listen-streak': {
-      icon: Headphone,
-      buttonInfo: {
-        navigation: {
-          screen: 'trending'
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    [ChallengeName.ListenStreak]: {
-      icon: Headphone,
-      buttonInfo: {
-        navigation: {
-          screen: 'trending'
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    'mobile-install': {
-      icon: MobilePhoneWithArrow
-    },
-    [ChallengeName.MobileInstall]: {
-      icon: MobilePhoneWithArrow
-    },
-    'profile-completion': {
-      icon: BallotBoxTick
-    },
-    [ChallengeName.ProfileCompletion]: {
-      icon: BallotBoxTick
-    },
-    [ChallengeName.Referrals]: {
-      icon: IncomingEnvelope
-    },
-    [ChallengeName.ReferralsVerified]: {
-      icon: IncomingEnvelope
-    },
-    [ChallengeName.Referred]: {
-      icon: LoveLetter
-    },
-    'track-upload': {
-      icon: MultipleMusicalNotes,
-      buttonInfo: {
-        iconRight: IconCloudUpload
-      }
-    },
-    [ChallengeName.TrackUpload]: {
-      icon: MultipleMusicalNotes,
-      buttonInfo: {
-        iconRight: IconCloudUpload
-      }
-    },
-    'send-first-tip': {
-      icon: MoneyWings,
-      title:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipTitleAlt
-          : messages.sendFirstTipTitle,
-      description: () =>
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipDescriptionAlt
-          : messages.sendFirstTipDescription,
-      shortDescription:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipShortDescriptionAlt
-          : messages.sendFirstTipShortDescription,
-      panelButtonText:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipButtonAlt
-          : messages.sendFirstTipButton,
-      completedLabel:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipCompletedLabelAlt
-          : undefined,
-      buttonInfo: {
-        navigation: {
-          screen: 'library'
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    [ChallengeName.FirstTip]: {
-      icon: MoneyWings,
-      title:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipTitleAlt
-          : messages.sendFirstTipTitle,
-      description: () =>
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipDescriptionAlt
-          : messages.sendFirstTipDescription,
-      shortDescription:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipShortDescriptionAlt
-          : messages.sendFirstTipShortDescription,
-      panelButtonText:
-        Platform.OS === 'ios'
-          ? messages.sendFirstTipButtonAlt
-          : messages.sendFirstTipButton,
-      buttonInfo: {
-        navigation: {
-          screen: 'library'
-        }
-      }
-    },
-    'first-playlist': {
-      icon: TrebleClef,
-      buttonInfo: {
-        navigation: {
-          screen: 'explore',
-          params: { screen: 'Explore' }
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    [ChallengeName.FirstPlaylist]: {
-      icon: TrebleClef,
-      buttonInfo: {
-        navigation: {
-          screen: 'explore',
-          params: { screen: 'Explore' }
-        }
-      }
-    },
-    'trending-playlist': {
-      icon: ArrowUp,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    tp: {
-      icon: ArrowUp,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    'trending-track': {
-      icon: ChartIncreasing,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    tt: {
-      icon: ChartIncreasing,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    'top-api': {
-      icon: Gear,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    'verified-upload': {
-      title: 'First Upload With Your Verified Account',
-      icon: ChartIncreasing,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    'trending-underground': {
-      icon: BarChart,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    tut: {
-      icon: BarChart,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-
-    [ChallengeName.AudioMatchingBuy]: {
-      icon: Cart,
-      buttonInfo: {
-        navigation: {
-          screen: 'explore',
-          params: { screen: 'PremiumTracks' }
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    [ChallengeName.AudioMatchingSell]: {
-      icon: Cart,
-      buttonInfo: {
-        navigation: {
-          screen: 'Upload'
-        },
-        iconRight: IconArrowRight
-      }
-    },
-    [ChallengeName.OneShot]: {
-      icon: Parachute,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.ListenStreakEndless]: {
-      icon: Fire,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.FirstWeeklyComment]: {
-      icon: SpeechBalloon,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.PlayCount250]: {
-      icon: IconPlaybackPause,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.PlayCount1000]: {
-      icon: IconPlaybackPause,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.PlayCount10000]: {
-      icon: IconPlaybackPause,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.Tastemaker]: {
-      icon: SmilingFaceLickingLips,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.CommentPin]: {
-      icon: SpeechBalloon,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.Cosign]: {
-      icon: Recycle,
-      buttonInfo: {
-        iconRight: IconCheck
-      }
-    },
-    [ChallengeName.RemixContestWinner]: {
-      icon: Trophy,
-      buttonInfo: {
-        iconRight: IconCheck
+const mobileChallengeConfig: Record<
+  Exclude<
+    ChallengeRewardID,
+    'connect-verified' | ChallengeName.ConnectVerified
+  >,
+  MobileChallengeConfig
+> = {
+  'listen-streak': {
+    icon: Headphone,
+    buttonInfo: {
+      navigation: {
+        screen: 'trending'
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  [ChallengeName.ListenStreak]: {
+    icon: Headphone,
+    buttonInfo: {
+      navigation: {
+        screen: 'trending'
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  'mobile-install': {
+    icon: MobilePhoneWithArrow
+  },
+  [ChallengeName.MobileInstall]: {
+    icon: MobilePhoneWithArrow
+  },
+  'profile-completion': {
+    icon: BallotBoxTick
+  },
+  [ChallengeName.ProfileCompletion]: {
+    icon: BallotBoxTick
+  },
+  [ChallengeName.Referrals]: {
+    icon: IncomingEnvelope
+  },
+  [ChallengeName.ReferralsVerified]: {
+    icon: IncomingEnvelope
+  },
+  [ChallengeName.Referred]: {
+    icon: LoveLetter
+  },
+  'track-upload': {
+    icon: MultipleMusicalNotes,
+    buttonInfo: {
+      iconRight: IconCloudUpload
+    }
+  },
+  [ChallengeName.TrackUpload]: {
+    icon: MultipleMusicalNotes,
+    buttonInfo: {
+      iconRight: IconCloudUpload
+    }
+  },
+  'send-first-tip': {
+    icon: MoneyWings,
+    title:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipTitleAlt
+        : messages.sendFirstTipTitle,
+    description: () =>
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipDescriptionAlt
+        : messages.sendFirstTipDescription,
+    shortDescription:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipShortDescriptionAlt
+        : messages.sendFirstTipShortDescription,
+    panelButtonText:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipButtonAlt
+        : messages.sendFirstTipButton,
+    completedLabel:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipCompletedLabelAlt
+        : undefined,
+    buttonInfo: {
+      navigation: {
+        screen: 'library'
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  [ChallengeName.FirstTip]: {
+    icon: MoneyWings,
+    title:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipTitleAlt
+        : messages.sendFirstTipTitle,
+    description: () =>
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipDescriptionAlt
+        : messages.sendFirstTipDescription,
+    shortDescription:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipShortDescriptionAlt
+        : messages.sendFirstTipShortDescription,
+    panelButtonText:
+      Platform.OS === 'ios'
+        ? messages.sendFirstTipButtonAlt
+        : messages.sendFirstTipButton,
+    buttonInfo: {
+      navigation: {
+        screen: 'library'
       }
     }
+  },
+  'first-playlist': {
+    icon: TrebleClef,
+    buttonInfo: {
+      navigation: {
+        screen: 'explore',
+        params: { screen: 'Explore' }
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  [ChallengeName.FirstPlaylist]: {
+    icon: TrebleClef,
+    buttonInfo: {
+      navigation: {
+        screen: 'explore',
+        params: { screen: 'Explore' }
+      }
+    }
+  },
+  'trending-playlist': {
+    icon: ArrowUp,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  tp: {
+    icon: ArrowUp,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  'trending-track': {
+    icon: ChartIncreasing,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  tt: {
+    icon: ChartIncreasing,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  'top-api': {
+    icon: Gear,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  'verified-upload': {
+    title: 'First Upload With Your Verified Account',
+    icon: ChartIncreasing,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  'trending-underground': {
+    icon: BarChart,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  tut: {
+    icon: BarChart,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+
+  [ChallengeName.AudioMatchingBuy]: {
+    icon: Cart,
+    buttonInfo: {
+      navigation: {
+        screen: 'explore',
+        params: { screen: 'PremiumTracks' }
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  [ChallengeName.AudioMatchingSell]: {
+    icon: Cart,
+    buttonInfo: {
+      navigation: {
+        screen: 'Upload'
+      },
+      iconRight: IconArrowRight
+    }
+  },
+  [ChallengeName.OneShot]: {
+    icon: Parachute,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.ListenStreakEndless]: {
+    icon: Fire,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.FirstWeeklyComment]: {
+    icon: SpeechBalloon,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.PlayCount250]: {
+    icon: IconPlaybackPause,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.PlayCount1000]: {
+    icon: IconPlaybackPause,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.PlayCount10000]: {
+    icon: IconPlaybackPause,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.Tastemaker]: {
+    icon: SmilingFaceLickingLips,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.CommentPin]: {
+    icon: SpeechBalloon,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.Cosign]: {
+    icon: Recycle,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
+  },
+  [ChallengeName.RemixContestWinner]: {
+    icon: Trophy,
+    buttonInfo: {
+      iconRight: IconCheck
+    }
   }
+}
 
 export const getChallengeConfig = (id: ChallengeRewardID) => ({
   ...challengeRewardsConfig[id],
