@@ -28,10 +28,7 @@ import { push } from 'utils/navigation'
 import styles from './AccountSettingsPage.module.css'
 import settingsPageStyles from './SettingsPage.module.css'
 
-const {
-  CHANGE_EMAIL_SETTINGS_PAGE,
-  CHANGE_PASSWORD_SETTINGS_PAGE
-} = route
+const { CHANGE_EMAIL_SETTINGS_PAGE, CHANGE_PASSWORD_SETTINGS_PAGE } = route
 
 const messages = {
   title: 'Account',

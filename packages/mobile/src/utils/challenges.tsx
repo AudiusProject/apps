@@ -24,7 +24,6 @@ import Fire from 'app/assets/images/emojis/fire.png'
 import Gear from 'app/assets/images/emojis/gear.png'
 import Headphone from 'app/assets/images/emojis/headphone.png'
 import IncomingEnvelope from 'app/assets/images/emojis/incoming-envelope.png'
-import IconLink from 'app/assets/images/emojis/link-symbol.png'
 import LoveLetter from 'app/assets/images/emojis/love-letter.png'
 import MobilePhoneWithArrow from 'app/assets/images/emojis/mobile-phone-with-arrow.png'
 import MoneyWings from 'app/assets/images/emojis/money-with-wings.png'
@@ -83,12 +82,6 @@ export type MobileChallengeConfig = {
 
 const mobileChallengeConfig: Record<ChallengeRewardID, MobileChallengeConfig> =
   {
-    'connect-verified': {
-      icon: IconLink
-    },
-    [ChallengeName.ConnectVerified]: {
-      icon: IconLink
-    },
     'listen-streak': {
       icon: Headphone,
       buttonInfo: {

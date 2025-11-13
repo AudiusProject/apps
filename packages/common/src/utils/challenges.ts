@@ -59,26 +59,6 @@ export const challengeRewardsConfig: Record<
     progressLabel: 'Not Earned',
     panelButtonText: 'More Info'
   },
-  'connect-verified': {
-    id: 'connect-verified',
-    title: 'Link Verified Accounts',
-    description: (challenge) =>
-      `Link your verified social media accounts to earn ${challenge?.amount} $AUDIO.`,
-    fullDescription: () =>
-      'Get verified on Audius by linking your verified X or TikTok account!',
-    progressLabel: 'Not Linked',
-    panelButtonText: 'Verify Your Account'
-  },
-  [ChallengeName.ConnectVerified]: {
-    id: ChallengeName.ConnectVerified,
-    title: 'Link Verified Accounts',
-    description: (challenge) =>
-      `Link your verified social media accounts to earn ${challenge?.amount} $AUDIO.`,
-    fullDescription: () =>
-      'Get verified on Audius by linking your verified X or TikTok account!',
-    progressLabel: 'Not Linked',
-    panelButtonText: 'Link Verified Account'
-  },
   'listen-streak': {
     id: 'listen-streak',
     title: 'Listening Streak: 7 Days',
