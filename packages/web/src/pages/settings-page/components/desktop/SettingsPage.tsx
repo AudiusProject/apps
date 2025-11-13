@@ -84,6 +84,7 @@ import { PayoutWalletSettingsCard } from './PayoutWallet/PayoutWalletSettingsCar
 import SettingsCard from './SettingsCard'
 import styles from './SettingsPage.module.css'
 import VerificationModal from './VerificationModal'
+import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard'
 
 const { show } = musicConfettiActions
 const { signOut: signOutAction } = signOutActions
@@ -526,6 +527,7 @@ export const SettingsPage = () => {
         <DeveloperAppsSettingsCard />
         <ListeningHistorySettingsCard />
         <PayoutWalletSettingsCard />
+        <WormholeConversionSettingsCard />
       </div>
       <div className={styles.version}>
         <Button
