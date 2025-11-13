@@ -7,14 +7,7 @@ import {
 } from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 
-import {
-  Flex,
-  Text,
-  IconArrowRight,
-  Paper,
-  Box,
-  LoadingSpinner
-} from '@audius/harmony-native'
+import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 type AccountBalanceProps = {
