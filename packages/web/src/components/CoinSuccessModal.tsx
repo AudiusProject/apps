@@ -1,5 +1,10 @@
+import { useCallback } from 'react'
+
 import { launchpadMessages } from '@audius/common/messages'
-import { useCoinSuccessModal } from '@audius/common/store'
+import {
+  TrackMetadataForUpload,
+  useCoinSuccessModal
+} from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Artwork,
@@ -14,28 +19,49 @@ import {
   Paper,
   Text
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
 
 import { AddressTile } from 'components/address-tile'
 import ConnectedMusicConfetti from 'components/music-confetti/ConnectedMusicConfetti'
+import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { openXLink } from 'utils/xShare'
 
 export const CoinSuccessModal = () => {
   const { isOpen, data: coinData, onClose, onClosed } = useCoinSuccessModal()
-  const navigate = useNavigate()
+  const navigate = useNavigateToPage()
 
-  const handleUploadCoinGatedTrack = () => {
-    navigate(route.UPLOAD_PAGE)
+  const handleUploadCoinGatedTrack = useCallback(() => {
+    const state:
+      | { initialMetadata: Partial<TrackMetadataForUpload> }
+      | undefined = coinData?.mint
+      ? {
+          initialMetadata: {
+            download_conditions: {
+              token_gate: {
+                token_amount: 1,
+                token_mint: coinData.mint
+              }
+            },
+            stream_conditions: {
+              token_gate: {
+                token_amount: 1,
+                token_mint: coinData.mint
+              }
+            }
+          }
+        }
+      : undefined
+
+    navigate(route.UPLOAD_PAGE, state)
     onClose()
-  }
+  }, [coinData, navigate, onClose])
 
-  const handleShareToX = () => {
+  const handleShareToX = useCallback(() => {
     if (!coinData?.ticker || !coinData?.mint) return
 
     const coinUrl = `https://audius.co${route.coinPage(coinData.ticker)}`
     const shareText = `My artist coin $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
     openXLink(coinUrl, shareText)
-  }
+  }, [coinData])
 
   if (!coinData) return null
 
