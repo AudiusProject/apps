@@ -6,13 +6,13 @@ const nodeTypeParam = 'nodeType'
 
 export function useEnvironmentSelection(): [
   'staging' | 'prod' | 'dev',
-  'content' | 'discovery' | 'core'
+  'content' | 'core'
 ] {
   let [searchParams] = useSearchParams()
 
   const isStage = !!searchParams.get(isStageParam)
   const isDev = !!searchParams.get(isDevParam)
-  const nodeType = (searchParams.get(nodeTypeParam) as 'content' | 'discovery' | 'core') || 'discovery'
+  const nodeType = (searchParams.get(nodeTypeParam) as 'content' |  'core') || 'core'
 
   if (isDev) {
     return [
@@ -32,7 +32,7 @@ export function EnvironmentSelector() {
 
   const isStage = !!searchParams.get(isStageParam)
   const isDev = !!searchParams.get(isDevParam)
-  const nodeType = searchParams.get(nodeTypeParam) || 'discovery'
+  const nodeType = searchParams.get(nodeTypeParam) || 'core'
 
   function toggleParam(name: string, value: '0' | '1') {
     setSearchParams((p) => {
@@ -42,10 +42,9 @@ export function EnvironmentSelector() {
     })
   }
 
-  function setNodeParam(value: 'content' | 'discovery' | 'core') {
+  function setNodeParam(value: 'content' | 'core') {
     setSearchParams((p) => {
-      if (value == 'discovery') p.delete(nodeTypeParam)
-      else p.set(nodeTypeParam, value)
+      p.set(nodeTypeParam, value)
       return p
     })
   }
@@ -84,22 +83,16 @@ export function EnvironmentSelector() {
       </div>
       <div className="flex">
         <button
-          className={`px-4 py-2 ${nodeType == 'discovery' ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
-          onClick={() => setNodeParam('discovery')}
+          className={`px-4 py-2 ${nodeType == 'core' ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
+          onClick={() => setNodeParam('core')}
         >
-          Discovery
+          Core
         </button>
         <button
           className={`px-4 py-2 ${nodeType == 'content' ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
           onClick={() => setNodeParam('content')}
         >
           Content
-        </button>
-        <button
-          className={`px-4 py-2 ${nodeType == 'core' ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
-          onClick={() => setNodeParam('core')}
-        >
-          Core
         </button>
       </div>
     </div>

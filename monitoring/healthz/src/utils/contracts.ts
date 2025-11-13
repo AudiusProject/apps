@@ -43,16 +43,13 @@ const StageProvider = new WebSocketProvider(
   'wss://eth-sepolia.g.alchemy.com/v2/J1Pj86H-g87FqUZVMUbLGgnyoaQTHP1P'
 )
 
-// `${env}-${type}` => SPs
+// `${env}` => SPs
 const spCache: Map<string, SP[]> = new Map()
 
 export const getRegisteredNodes = async (
-  env: string,
-  nodeType: string
+  env: string
 ): Promise<SP[]> => {
-  const type = `${nodeType}-node`
-
-  const cacheKey = `${env}-${type}`
+  const cacheKey = `${env}`
   const cached = spCache.get(cacheKey)
   if (cached) {
     return cached
@@ -96,7 +93,6 @@ export const getRegisteredNodes = async (
 
   for (const serviceType of serviceTypes) {
     if (!isAcceptedServiceType(serviceType)) continue
-    if (type !== hexToUtf8(serviceType)) continue
     const serviceProviderIds =
       await serviceProviderFactory.getTotalServiceTypeProviders(serviceType)
     for (let spid = BigInt(0); spid <= serviceProviderIds; spid++) {
@@ -107,6 +103,7 @@ export const getRegisteredNodes = async (
         3: delegateOwnerWallet,
       } = await serviceProviderFactory.getServiceEndpointInfo(serviceType, spid)
       if (owner === ZeroAddress) continue
+      const type = hexToUtf8(serviceType)
       sps.push({
         delegateOwnerWallet,
         endpoint,
