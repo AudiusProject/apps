@@ -93,7 +93,7 @@ const getDammPoolQuote = async (
   const quote = await cpAmm.getQuote({
     inAmount: inputAmountBN,
     inputTokenMint,
-    slippage: 0.5,
+    slippage: 2,
     poolState,
     currentTime: new Date().getTime(),
     currentSlot: await connection.getSlot(),
