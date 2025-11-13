@@ -57,7 +57,6 @@ export const messages = {
 
 export type ChallengesParamList = {
   trending: undefined
-  AccountVerificationScreen: undefined
   explore: undefined
   library: undefined
   Upload: undefined
@@ -85,22 +84,10 @@ export type MobileChallengeConfig = {
 const mobileChallengeConfig: Record<ChallengeRewardID, MobileChallengeConfig> =
   {
     'connect-verified': {
-      icon: IconLink,
-      buttonInfo: {
-        navigation: {
-          screen: 'AccountVerificationScreen'
-        },
-        iconRight: IconCheck
-      }
+      icon: IconLink
     },
     [ChallengeName.ConnectVerified]: {
-      icon: IconLink,
-      buttonInfo: {
-        navigation: {
-          screen: 'AccountVerificationScreen'
-        },
-        iconRight: IconCheck
-      }
+      icon: IconLink
     },
     'listen-streak': {
       icon: Headphone,

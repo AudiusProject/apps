@@ -1,8 +1,0 @@
-.spinner {
-  width: var(--harmony-unit-10);
-  height: var(--harmony-unit-10);
-}
-
-.spinner g path {
-  stroke: var(--harmony-n-800);
-}

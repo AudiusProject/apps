@@ -17,7 +17,6 @@ import {
   OPEN_SIGN_ON,
   NEXT_PAGE,
   PREVIOUS_PAGE,
-  UNSET_SOCIAL_PROFILE,
   GO_TO_PAGE,
   SET_STATUS,
   SIGN_UP,
@@ -269,23 +268,6 @@ const actionsMap = {
       tikTokScreenName: action.profile.display_name,
       profileImage: action.profileImage || null,
       verified: action.profile.is_verified
-    }
-  },
-  [UNSET_SOCIAL_PROFILE](state) {
-    return {
-      ...state,
-      tikTokId: initialState.tikTokId,
-      tikTokProfile: initialState.tikTokProfile,
-      tikTokScreenName: initialState.tikTokScreenName,
-      instagramId: initialState.instagramId,
-      instagramScreenName: initialState.instagramScreenName,
-      twitterId: initialState.twitterId,
-      coverPhoto: initialState.coverPhoto,
-      twitterScreenName: initialState.twitterScreenName,
-      name: initialState.name,
-      handle: initialState.handle,
-      profileImage: initialState.profileImage,
-      verified: initialState.verified
     }
   },
   [VALIDATE_EMAIL](state, action) {

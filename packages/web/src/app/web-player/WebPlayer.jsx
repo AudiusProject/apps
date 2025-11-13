@@ -152,7 +152,6 @@ const {
   ACCOUNT_SETTINGS_PAGE,
   CHANGE_PASSWORD_SETTINGS_PAGE,
   CHANGE_EMAIL_SETTINGS_PAGE,
-  ACCOUNT_VERIFICATION_SETTINGS_PAGE,
   LABEL_ACCOUNT_SETTINGS_PAGE,
   NOTIFICATION_SETTINGS_PAGE,
   ABOUT_SETTINGS_PAGE,
@@ -830,12 +829,6 @@ const WebPlayer = (props) => {
                 path={ACCOUNT_SETTINGS_PAGE}
                 isMobile={isMobile}
                 render={() => <SettingsPage subPage={SubPage.ACCOUNT} />}
-              />
-              <MobileRoute
-                exact
-                path={ACCOUNT_VERIFICATION_SETTINGS_PAGE}
-                isMobile={isMobile}
-                render={() => <SettingsPage subPage={SubPage.VERIFICATION} />}
               />
               <MobileRoute
                 exact

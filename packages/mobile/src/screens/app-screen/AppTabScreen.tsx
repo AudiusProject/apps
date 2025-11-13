@@ -44,7 +44,6 @@ import { RewardsScreen } from 'app/screens/rewards-screen'
 import {
   AboutScreen,
   AccountSettingsScreen,
-  AccountVerificationScreen,
   ListeningHistoryScreen,
   DownloadSettingsScreen,
   InboxSettingsScreen,
@@ -109,7 +108,6 @@ export type AppTabScreenParamList = {
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
   AccountSettingsScreen: undefined
-  AccountVerificationScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined
   InboxSettingsScreen: undefined
@@ -285,10 +283,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         <Stack.Screen
           name='NotificationSettingsScreen'
           component={NotificationSettingsScreen}
-        />
-        <Stack.Screen
-          name='AccountVerificationScreen'
-          component={AccountVerificationScreen}
         />
         <Stack.Screen name='ChangeEmail' component={ChangeEmailModalScreen} />
       </Stack.Group>

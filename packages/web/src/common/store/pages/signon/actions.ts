@@ -56,7 +56,6 @@ export const SET_INSTAGRAM_PROFILE = 'SIGN_ON/SET_INSTAGRAM_PROFILE'
 export const SET_INSTAGRAM_PROFILE_ERROR = 'SIGN_ON/SET_INSTAGRAM_PROFILE_ERROR'
 export const SET_TIKTOK_PROFILE = 'SIGN_ON/SET_TIKTOK_PROFILE'
 export const SET_TIKTOK_PROFILE_ERROR = 'SIGN_ON/SET_TIKTOK_PROFILE_ERROR'
-export const UNSET_SOCIAL_PROFILE = 'SIGN_ON/UNSET_SOCIAL_PROFILE'
 
 export const SET_STATUS = 'SIGN_ON/SET_STATUS'
 export const USING_EXTERNAL_WALLET = 'SIGN_ON/USING_EXTERNAL_WALLET'
@@ -263,12 +262,6 @@ export function setLinkedSocialOnFirstPage(linkedSocialOnFirstPage: boolean) {
   return {
     type: SET_LINKED_SOCIAL_ON_FIRST_PAGE,
     linkedSocialOnFirstPage
-  }
-}
-
-export function unsetSocialProfile() {
-  return {
-    type: UNSET_SOCIAL_PROFILE
   }
 }
 

@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { Name, SocialPlatform } from '@audius/common/models'
+import { SocialPlatform } from '@audius/common/models'
 import { useDispatch } from 'react-redux'
 import { AnyAction } from 'redux'
-
-import { make } from 'common/store/analytics/actions'
 
 export const useSocialMediaLoader = ({
   linkedSocialOnThisPagePreviously,
   resetAction,
-  page
+  page: _page
 }: {
   linkedSocialOnThisPagePreviously: boolean
   resetAction?: () => AnyAction
@@ -28,68 +26,17 @@ export const useSocialMediaLoader = ({
   }, [dispatch])
 
   const handleStartSocialMediaLogin = useCallback(
-    (platform: SocialPlatform) => {
+    (_platform?: SocialPlatform) => {
       setIsWaitingForSocialLogin(true)
-      if (platform === 'instagram') {
-        dispatch(make(Name.CREATE_ACCOUNT_START_INSTAGRAM, { page }))
-      }
-      if (platform === 'x') {
-        dispatch(make(Name.CREATE_ACCOUNT_START_TWITTER, { page }))
-      }
-      if (platform === 'tiktok') {
-        dispatch(make(Name.CREATE_ACCOUNT_START_TIKTOK, { page }))
-      }
     },
-    [dispatch, page]
+    []
   )
 
   const handleErrorSocialMediaLogin = useCallback(
-    (error: Error, platform: SocialPlatform) => {
-      // We track the user closes differently since these arent technically "system errors"
-      const isUserClose = error.message?.includes(
-        'Popup has been closed by user'
-      )
-
-      if (platform === 'instagram') {
-        if (isUserClose) {
-          dispatch(make(Name.CREATE_ACCOUNT_CLOSED_INSTAGRAM, { page }))
-        } else {
-          dispatch(
-            make(Name.CREATE_ACCOUNT_INSTAGRAM_ERROR, {
-              page,
-              error: error?.message ?? 'Unknown Error'
-            })
-          )
-        }
-      }
-      if (platform === 'x') {
-        if (isUserClose) {
-          dispatch(make(Name.CREATE_ACCOUNT_CLOSED_TWITTER, { page }))
-        } else {
-          dispatch(
-            make(Name.CREATE_ACCOUNT_TWITTER_ERROR, {
-              page,
-              error: error?.message ?? 'Unknown Error'
-            })
-          )
-        }
-      }
-      if (platform === 'tiktok') {
-        if (isUserClose) {
-          dispatch(make(Name.CREATE_ACCOUNT_CLOSED_TIKTOK, { page }))
-        } else {
-          dispatch(
-            make(Name.CREATE_ACCOUNT_TIKTOK_ERROR, {
-              page,
-              error: error?.message ?? 'Unknown Error'
-            })
-          )
-        }
-      }
-
+    (_error?: Error, _platform?: SocialPlatform) => {
       setIsWaitingForSocialLogin(false)
     },
-    [dispatch, page]
+    []
   )
 
   return {

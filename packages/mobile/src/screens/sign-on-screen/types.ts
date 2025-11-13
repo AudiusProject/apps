@@ -13,7 +13,6 @@ export type SignOnScreenParamList = {
   SelectGenre: undefined
   SelectArtists: undefined
   ReviewHandle: undefined
-  CreateLoginDetails: undefined
   AccountLoading: undefined
 
   // For leaving signup

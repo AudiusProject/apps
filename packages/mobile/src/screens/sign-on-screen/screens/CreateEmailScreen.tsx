@@ -1,27 +1,17 @@
 import { useCallback, useMemo } from 'react'
 
 import { useQueryContext } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { createEmailPageMessages } from '@audius/common/messages'
 import { emailSchema } from '@audius/common/schemas'
-import { FeatureFlags } from '@audius/common/services'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-  setLinkedSocialOnFirstPage,
-  setValueField,
-  startSignUp
-} from 'common/store/pages/signon/actions'
-import {
-  getEmailField,
-  getLinkedSocialOnFirstPage
-} from 'common/store/pages/signon/selectors'
+import { setValueField, startSignUp } from 'common/store/pages/signon/actions'
+import { getEmailField } from 'common/store/pages/signon/selectors'
 import { Formik } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import {
   Button,
-  Divider,
   Flex,
   IconArrowRight,
   Text,
@@ -29,13 +19,9 @@ import {
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { identify } from 'app/services/analytics'
-import { resetOAuthState } from 'app/store/oauth/actions'
 
 import { NewEmailField } from '../components/NewEmailField'
-import { SocialMediaLoading } from '../components/SocialMediaLoading'
-import { SocialMediaSignUpButtons } from '../components/SocialMediaSignUpButtons'
 import { Heading } from '../components/layout'
-import { useSocialMediaLoader } from '../components/useSocialMediaLoader'
 import type { SignOnScreenParamList } from '../types'
 import { useTrackScreen } from '../utils/useTrackScreen'
 
@@ -50,7 +36,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
   const dispatch = useDispatch()
   const navigation = useNavigation<SignOnScreenParamList>()
   const existingEmailValue = useSelector(getEmailField)
-  const alreadyLinkedSocial = useSelector(getLinkedSocialOnFirstPage)
   const queryContext = useQueryContext()
   const queryClient = useQueryClient()
 
@@ -63,10 +48,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
 
   useTrackScreen('CreateEmail')
 
-  const { isEnabled: isSocialSignupEnabled } = useFeatureFlag(
-    FeatureFlags.SOCIAL_SIGNUP
-  )
-
   const handleSubmit = useCallback(
     (values: SignUpEmailValues) => {
       const { email } = values
@@ -76,32 +57,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
       navigation.navigate('CreatePassword')
     },
     [dispatch, navigation]
-  )
-
-  const {
-    isWaitingForSocialLogin,
-    handleStartSocialMediaLogin,
-    handleErrorSocialMediaLogin,
-    handleCloseSocialMediaLogin,
-    handleCompleteSocialMediaLogin
-  } = useSocialMediaLoader({
-    resetAction: resetOAuthState,
-    linkedSocialOnThisPagePreviously: alreadyLinkedSocial
-  })
-
-  const handleSocialMediaLoginSuccess = useCallback(
-    (result: { requiresReview: boolean; handle: string }) => {
-      const { handle, requiresReview } = result
-      dispatch(startSignUp())
-      handleCompleteSocialMediaLogin()
-      dispatch(setLinkedSocialOnFirstPage(true))
-      dispatch(setValueField('handle', handle))
-
-      navigation.navigate(
-        requiresReview ? 'ReviewHandle' : 'CreateLoginDetails'
-      )
-    },
-    [dispatch, handleCompleteSocialMediaLogin, navigation]
   )
 
   return (
@@ -115,9 +70,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
     >
       {({ handleSubmit }) => (
         <>
-          {isWaitingForSocialLogin ? (
-            <SocialMediaLoading onClose={handleCloseSocialMediaLogin} />
-          ) : null}
           <Flex style={{ zIndex: 1 }} gap='l'>
             <Heading heading={createEmailPageMessages.title} centered />
             <Flex direction='column' gap='l'>
@@ -126,22 +78,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
                 label={createEmailPageMessages.emailLabel}
                 onChangeScreen={onChangeScreen}
               />
-              {isSocialSignupEnabled ? (
-                <>
-                  <Divider>
-                    <Text variant='body' size='s' color='subdued'>
-                      {createEmailPageMessages.socialsDividerText}
-                    </Text>
-                  </Divider>
-                  <SocialMediaSignUpButtons
-                    onError={handleErrorSocialMediaLogin}
-                    onStart={handleStartSocialMediaLogin}
-                    onCompleteSocialMediaLogin={handleSocialMediaLoginSuccess}
-                    onClose={handleCloseSocialMediaLogin}
-                    page='create-email'
-                  />
-                </>
-              ) : null}
             </Flex>
             <Flex direction='column' gap='l'>
               <Button

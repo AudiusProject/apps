@@ -45,10 +45,6 @@ const messages = {
   recoveryButtonTitle: 'Resend Recovery Email',
   recoveryEmailSent: 'Recovery Email Sent!',
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
-  verifyTitle: 'Verification',
-  verifyDescription:
-    'Verify your Audius profile by linking a verified account from Twitter, Instagram, or TikTok.',
-  verifyButtonTitle: 'Get Verified!',
   emailTitle: 'Change Email',
   emailDescription: 'Change the email you use to sign in and receive emails.',
   emailButtonTitle: 'Change Email',
@@ -105,10 +101,6 @@ export const AccountSettingsScreen = () => {
     }
   }, [recoveryEmailStatus, toast])
 
-  // const handlePressVerification = useCallback(() => {
-  //   navigation.push('AccountVerificationScreen')
-  // }, [navigation])
-
   const handlePressChangeEmail = useCallback(() => {
     navigation.push('ChangeEmail')
   }, [navigation])
@@ -153,13 +145,6 @@ export const AccountSettingsScreen = () => {
             buttonTitle={messages.recoveryButtonTitle}
             onPress={handlePressRecoveryEmail}
           />
-          {/* <AccountSettingsItem
-            title={messages.verifyTitle}
-            titleIcon={IconVerified}
-            description={messages.verifyDescription}
-            buttonTitle={messages.verifyButtonTitle}
-            onPress={handlePressVerification}
-          /> */}
           <AccountSettingsItem
             title={messages.emailTitle}
             titleIcon={IconEmailAddress}

@@ -60,14 +60,7 @@ export const pickHandlePageMessages = {
   description:
     'This is how others find and tag you. It is totally unique to you & cannot be changed later.',
   handle: 'Handle',
-  or: 'or',
-  claimHandleHeaderPrefix: 'Claim Your Verified',
-  claimHandleDescription:
-    'Verify your Audius account by linking a verified social media account.',
-  claimHandleHeadsUp:
-    'Heads up! 👋 Picking a handle that doesn’t match your verified account cannot be undone later.',
-  handleAvailable: 'Handle available!',
-  linkToClaim: 'Link to claim.'
+  handleAvailable: 'Handle available!'
 }
 
 export const finishProfilePageMessages = {
@@ -94,16 +87,6 @@ export const reviewHandlePageMessages = {
   handle: 'Handle',
   description:
     "We've connected your social account but need your help with an issue we encountered. "
-}
-
-export const createLoginDetailsPageMessages = {
-  title: 'Create Login Details',
-  description: 'Enter your email and create a password.',
-  emailLabel: 'Email',
-  handleLabel: 'Handle',
-  passwordLabel: 'Password',
-  confirmPasswordLabel: 'Confirm Password',
-  signIn: 'Sign In'
 }
 
 export const selectArtistsPageMessages = {

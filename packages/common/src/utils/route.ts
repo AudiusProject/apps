@@ -89,7 +89,6 @@ export const COIN_API_MOCKS_PAGE = '/dev-tools/coin-api-mocks'
 export enum SignUpPath {
   createEmail = 'create-email',
   createPassword = 'create-password',
-  createLoginDetails = 'create-login-details',
   pickHandle = 'pick-handle',
   reviewHandle = 'review-handle',
   finishProfile = 'finish-profile',
@@ -103,7 +102,6 @@ export enum SignUpPath {
 export const SIGN_UP_EMAIL_PAGE = `/signup/${SignUpPath.createEmail}`
 export const SIGN_UP_START_PAGE = SIGN_UP_EMAIL_PAGE // entry point for sign up if needing to redirect to the beginning
 export const SIGN_UP_PASSWORD_PAGE = `/signup/${SignUpPath.createPassword}`
-export const SIGN_UP_CREATE_LOGIN_DETAILS = `/signup/${SignUpPath.createLoginDetails}`
 export const SIGN_UP_HANDLE_PAGE = `/signup/${SignUpPath.pickHandle}`
 export const SIGN_UP_REVIEW_HANDLE_PAGE = `/signup/${SignUpPath.reviewHandle}`
 export const SIGN_UP_FINISH_PROFILE_PAGE = `/signup/${SignUpPath.finishProfile}`
@@ -161,8 +159,6 @@ export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
 export const SUPPORTING_USERS_ROUTE = '/supporting'
 export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
-export const ACCOUNT_VERIFICATION_SETTINGS_PAGE =
-  '/settings/account/verification'
 export const NOTIFICATION_SETTINGS_PAGE = '/settings/notifications'
 export const ABOUT_SETTINGS_PAGE = '/settings/about'
 export const CHANGE_EMAIL_SETTINGS_PAGE = '/settings/change-email'
@@ -370,7 +366,6 @@ export const staticRoutes = new Set([
   ...SIGN_ON_ALIASES,
   SIGN_UP_EMAIL_PAGE,
   SIGN_UP_PASSWORD_PAGE,
-  SIGN_UP_CREATE_LOGIN_DETAILS,
   SIGN_UP_HANDLE_PAGE,
   SIGN_UP_REVIEW_HANDLE_PAGE,
   SIGN_UP_FINISH_PROFILE_PAGE,

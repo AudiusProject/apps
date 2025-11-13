@@ -1,7 +1,6 @@
 export * from './SettingsScreen'
 export * from './AboutScreen'
 export * from './AccountSettingsScreen'
-export * from './AccountVerificationScreen'
 export * from './DownloadSettingsScreen'
 export * from './InboxSettingsScreen'
 export * from './CommentSettingsScreen'
