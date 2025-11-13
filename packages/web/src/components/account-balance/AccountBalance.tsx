@@ -192,7 +192,7 @@ const AccountBalanceContent = () => {
         css={css({ minHeight: 400 })}
         border='default'
       >
-        <Text variant='body' size='m' strength='weak' color='danger'>
+        <Text variant='body' size='m' strength='weak' color='subdued'>
           {messages.error}
         </Text>
       </Paper>
