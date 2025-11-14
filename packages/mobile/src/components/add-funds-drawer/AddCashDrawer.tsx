@@ -30,16 +30,19 @@ const messages = {
 export const AddCashDrawer = () => {
   const dispatch = useDispatch()
   const purchaseVendorState = useSelector(getPurchaseVendor)
-  const {
-    isOpen,
-    onClose,
-    onClosed,
-    data: { portalHostName }
-  } = useAddCashModal()
+  const { isOpen, onClose, onClosed, data } = useAddCashModal()
+  const portalHostName = data?.portalHostName
 
   const [selectedPurchaseMethod, setSelectedPurchaseMethod] =
     useState<PurchaseMethod>(PurchaseMethod.CARD)
   const [page, setPage] = useState<AddCashDrawerPage>(AddCashDrawerPage.MAIN)
+
+  const handleClose = useCallback(() => {
+    dispatch(resetPurchaseMethod())
+    setPage(AddCashDrawerPage.MAIN)
+    setSelectedPurchaseMethod(PurchaseMethod.CARD)
+    onClose()
+  }, [dispatch, onClose, setPage, setSelectedPurchaseMethod])
 
   const openCardFlow = useCallback(() => {
     dispatch(
@@ -47,10 +50,11 @@ export const AddCashDrawer = () => {
         vendor: purchaseVendorState ?? PurchaseVendor.STRIPE,
         purchaseInfo: {
           desiredAmount: DEFAULT_PURCHASE_AMOUNT_CENTS
-        }
+        },
+        portalHostName
       })
     )
-  }, [dispatch, purchaseVendorState])
+  }, [dispatch, purchaseVendorState, portalHostName])
 
   const onContinuePress = useCallback(() => {
     if (selectedPurchaseMethod === PurchaseMethod.CARD) {
@@ -60,13 +64,6 @@ export const AddCashDrawer = () => {
       setPage(AddCashDrawerPage.TRANSFER)
     }
   }, [selectedPurchaseMethod, openCardFlow, handleClose])
-
-  const handleClose = useCallback(() => {
-    dispatch(resetPurchaseMethod())
-    setPage(AddCashDrawerPage.MAIN)
-    setSelectedPurchaseMethod(PurchaseMethod.CARD)
-    onClose()
-  }, [dispatch, onClose, setPage, setSelectedPurchaseMethod])
 
   const content = (
     <Drawer isOpen={isOpen} onClose={handleClose} onClosed={onClosed}>

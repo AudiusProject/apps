@@ -59,6 +59,7 @@ export type StripeModalState = {
   stripeSessionData?: StripeSessionData
   stripeSessionStatus?: StripeSessionStatus
   stripeClientSecret?: string
+  portalHostName?: string
 }
 
 export type StripeSessionCreationErrorResponseData = {
