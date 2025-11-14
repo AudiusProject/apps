@@ -46,8 +46,8 @@ export type CoinExchangeRateResponse = {
   quote: QuoteResponse
 }
 
-// Default slippage is 50 basis points (0.5%)
-export const SLIPPAGE_BPS = 50
+// Default slippage is 200 basis points (2%)
+export const SLIPPAGE_BPS = 200
 
 // Maximum safe amount for exchange rate queries to prevent API errors
 // This corresponds to 1 trillion tokens, which is well above any realistic amount

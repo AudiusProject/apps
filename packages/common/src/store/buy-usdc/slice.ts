@@ -42,6 +42,7 @@ const slice = createSlice({
       action: PayloadAction<{
         purchaseInfo: PurchaseInfo
         vendor: PurchaseVendor
+        portalHostName?: string
       }>
     ) => {
       state.stage = BuyUSDCStage.START

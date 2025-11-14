@@ -4,6 +4,7 @@ import {
   stripeModalUIActions,
   stripeModalUISelectors
 } from '@audius/common/store'
+import { Portal } from '@gorhom/portal'
 import { TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -62,13 +63,14 @@ const StripeOnrampDrawerHeader = ({ onClose }: { onClose: () => void }) => {
 export const StripeOnrampDrawer = () => {
   const styles = useStyles()
   const dispatch = useDispatch()
-  const { stripeSessionStatus } = useSelector(getStripeModalState)
+  const { stripeSessionStatus, portalHostName } =
+    useSelector(getStripeModalState)
 
   const handleClose = useCallback(() => {
     dispatch(cancelStripeOnramp())
   }, [dispatch])
 
-  return (
+  const drawer = (
     <AppDrawer
       blockClose={stripeSessionStatus === 'fulfillment_processing'}
       drawerHeader={StripeOnrampDrawerHeader}
@@ -82,5 +84,11 @@ export const StripeOnrampDrawer = () => {
         <StripeOnrampEmbed />
       </View>
     </AppDrawer>
+  )
+
+  return portalHostName ? (
+    <Portal hostName={portalHostName}>{drawer}</Portal>
+  ) : (
+    drawer
   )
 }

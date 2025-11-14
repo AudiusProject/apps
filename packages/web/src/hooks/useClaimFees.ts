@@ -107,7 +107,16 @@ export const useClaimFees = (
     onSuccess: async (data, variables, context) => {
       // Invalidate the artist coin query to refetch the updated fees
       const queryKey = getArtistCoinQueryKey(variables.tokenMint)
-      await queryClient.invalidateQueries({ queryKey })
+      await queryClient.setQueryData(queryKey, (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          artistFees: {
+            ...oldData.artistFees,
+            unclaimedFees: 0
+          }
+        }
+      })
 
       // Call the original onSuccess if provided
       options?.onSuccess?.(data, variables, context)
