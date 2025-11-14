@@ -26,6 +26,7 @@ export const FIELDS = {
   receiveAmount: 'receiveAmount',
   usdcValue: 'usdcValue',
   wantsToBuy: 'wantsToBuy',
+  setupConfirmation: 'setupConfirmation',
   termsAgreed: 'termsAgreed'
 }
 
@@ -145,6 +146,12 @@ export const setupFormSchema = ({
       }),
       [FIELDS.payAmount]: z.string().optional(),
       [FIELDS.receiveAmount]: z.string().optional(),
+      [FIELDS.setupConfirmation]: z
+        .boolean()
+        .refine((val) => val === true, {
+          message:
+            'You must confirm you have the rights to use this Coin Name, Ticker Symbol, and Image'
+        }),
       [FIELDS.termsAgreed]: z.boolean().refine((val) => val === true, {
         message:
           'You must agree to the terms of service and Artist Coins terms to continue'

@@ -66,6 +66,64 @@ const messages = {
   }
 }
 
+const stripHandle = (handle?: string | null) =>
+  handle?.trim().replace(/^@/, '') ?? ''
+
+const ensureUrl = (rawUrl?: string | null) => {
+  if (!rawUrl) {
+    return null
+  }
+  let url = rawUrl.trim()
+  if (!url) {
+    return null
+  }
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`
+  }
+  try {
+    const parsed = new URL(url)
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return null
+    }
+    return parsed.toString()
+  } catch {
+    return null
+  }
+}
+
+const getArtistSocialLinks = (user?: User | null) => {
+  if (!user) {
+    return []
+  }
+
+  const links: string[] = []
+  const pushLink = (link: string | null) => {
+    const normalized = ensureUrl(link)
+    if (normalized && !links.includes(normalized)) {
+      links.push(normalized)
+    }
+  }
+
+  const xHandle = stripHandle(user.twitter_handle)
+  if (xHandle) {
+    pushLink(`https://x.com/${xHandle}`)
+  }
+
+  const instagramHandle = stripHandle(user.instagram_handle)
+  if (instagramHandle) {
+    pushLink(`https://instagram.com/${instagramHandle}`)
+  }
+
+  const tiktokHandle = stripHandle(user.tiktok_handle)
+  if (tiktokHandle) {
+    pushLink(`https://tiktok.com/@${tiktokHandle}`)
+  }
+
+  pushLink(user.website ?? null)
+
+  return links.slice(0, 4)
+}
+
 const LaunchpadPageContent = ({
   submitErrorText,
   submitButtonText
@@ -613,6 +671,7 @@ export const LaunchpadPage = () => {
         receiveAmount: '',
         usdcValue: '',
         wantsToBuy: 'no',
+        setupConfirmation: false,
         termsAgreed: false
       }}
       validationSchema={validationSchema}
