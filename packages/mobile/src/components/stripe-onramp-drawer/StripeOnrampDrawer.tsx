@@ -4,11 +4,11 @@ import {
   stripeModalUIActions,
   stripeModalUISelectors
 } from '@audius/common/store'
+import { Portal } from '@gorhom/portal'
 import { TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { IconCloseAlt } from '@audius/harmony-native'
-import { Portal } from '@gorhom/portal'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
