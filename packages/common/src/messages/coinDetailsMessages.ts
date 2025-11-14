@@ -73,6 +73,8 @@ export const coinDetailsMessages = {
   },
   overflowMenu: {
     copyCoinAddress: 'Copy Coin Address',
+    copyLink: 'Copy Link',
+    editCoin: 'Edit Coin',
     rewardsPool: 'Rewards Pool',
     unclaimedEarnings: 'Unclaimed Earnings',
     artistEarnings: 'Artist Earnings',
@@ -86,6 +88,7 @@ export const coinDetailsMessages = {
     openBirdeye: 'Open Birdeye',
     details: 'Details',
     copiedToClipboard: 'Copied Coin Address To Clipboard!',
+    copiedLinkToClipboard: 'Copied Link To Clipboard!',
     shareToX: 'Share to X',
     shareToXArtistCopy: (coinTicker: string, coinAddress: string) =>
       `My artist coin $${coinTicker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinAddress}\n`,
