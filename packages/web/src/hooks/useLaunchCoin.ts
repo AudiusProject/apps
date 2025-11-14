@@ -29,6 +29,7 @@ export type LaunchCoinParams = {
   walletPublicKey: string
   initialBuyAmountAudio?: string
   image: Blob
+  socialLinks?: string[]
 }
 
 export const LAUNCHPAD_COIN_DECIMALS = 9 // All our launched coins will have 9 decimals
@@ -49,7 +50,8 @@ export const useLaunchCoin = () => {
       description,
       walletPublicKey: walletPublicKeyStr,
       initialBuyAmountAudio,
-      image
+      image,
+      socialLinks
     }: LaunchCoinParams): Promise<LaunchCoinResponse> => {
       const symbolUpper = symbol.toUpperCase()
       const errorMetadata: LaunchCoinErrorMetadata = {
@@ -164,6 +166,23 @@ export const useLaunchCoin = () => {
          * its in a separate try/catch because it's technically non-blocking
          */
         try {
+          const sanitizedLinks = Array.from(
+            new Set(
+              (socialLinks ?? [])
+                .map((link) => link?.trim())
+                .filter((link): link is string => Boolean(link))
+                .map((link) => {
+                  try {
+                    const url = new URL(link)
+                    return url.toString()
+                  } catch {
+                    return null
+                  }
+                })
+                .filter((link): link is string => Boolean(link))
+            )
+          ).slice(0, 4)
+
           // Create coin in Audius database
           await sdk.coins.createCoin({
             userId: Id.parse(userId),
@@ -172,7 +191,11 @@ export const useLaunchCoin = () => {
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,
               name,
-              logoUri: imageUri
+              logoUri: imageUri,
+              link1: sanitizedLinks[0],
+              link2: sanitizedLinks[1],
+              link3: sanitizedLinks[2],
+              link4: sanitizedLinks[3]
               // intentionally don't send description to prevent the Artist Coin page from referencing itself
             }
           })

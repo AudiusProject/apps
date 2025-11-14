@@ -9,7 +9,7 @@ import {
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
-import { Chain, Feature, Name } from '@audius/common/models'
+import { Chain, Feature, Name, type User } from '@audius/common/models'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
@@ -569,6 +569,7 @@ export const LaunchpadPage = () => {
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
+        const socialLinks = getArtistSocialLinks(currentUser)
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -579,7 +580,8 @@ export const LaunchpadPage = () => {
             formValues.coinSymbol
           ),
           walletPublicKey: connectedWalletAddress,
-          initialBuyAmountAudio
+          initialBuyAmountAudio,
+          socialLinks
         })
       }
     },
