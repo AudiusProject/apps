@@ -1,7 +1,12 @@
+import { useEffect } from 'react'
+
+import { modalsSelectors } from '@audius/common/store'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@gorhom/portal'
-import { useRoute } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import type { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { useSelector } from 'react-redux'
 
 import { ModalScreen } from 'app/components/core'
 
@@ -18,6 +23,17 @@ const screenOptionOverrides = { headerRight: () => null }
 export const BuySellModalScreen = () => {
   const screenOptions = useAppScreenOptions(screenOptionOverrides)
   const { params } = useRoute()
+  const navigation = useNavigation<NavigationProp<ParamListBase>>()
+  const stripeModalState = useSelector((state) =>
+    modalsSelectors.getModalVisibility(state, 'StripeOnRamp')
+  )
+  const isStripeModalVisible = stripeModalState === true
+
+  useEffect(() => {
+    if (isStripeModalVisible && navigation.canGoBack()) {
+      navigation.goBack()
+    }
+  }, [isStripeModalVisible, navigation])
 
   return (
     <ModalScreen>

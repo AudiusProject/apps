@@ -55,15 +55,18 @@ export const AddCashDrawer = () => {
   const onContinuePress = useCallback(() => {
     if (selectedPurchaseMethod === PurchaseMethod.CARD) {
       openCardFlow()
+      handleClose()
     } else if (selectedPurchaseMethod === PurchaseMethod.CRYPTO) {
       setPage(AddCashDrawerPage.TRANSFER)
     }
-  }, [selectedPurchaseMethod, openCardFlow])
+  }, [selectedPurchaseMethod, openCardFlow, handleClose])
 
   const handleClose = useCallback(() => {
     dispatch(resetPurchaseMethod())
+    setPage(AddCashDrawerPage.MAIN)
+    setSelectedPurchaseMethod(PurchaseMethod.CARD)
     onClose()
-  }, [dispatch, onClose])
+  }, [dispatch, onClose, setPage, setSelectedPurchaseMethod])
 
   const content = (
     <Drawer isOpen={isOpen} onClose={handleClose} onClosed={onClosed}>
