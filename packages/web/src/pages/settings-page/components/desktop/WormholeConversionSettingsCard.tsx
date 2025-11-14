@@ -2,14 +2,12 @@ import { useCallback } from 'react'
 
 import {
   useCurrentUserId,
+  useTransferEthToSol,
   useUser,
   useWalletAudioBalance
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import {
-  wormholeConversionActions,
-  wormholeConversionSelectors
-} from '@audius/common/store'
+import { toastActions } from '@audius/common/store'
 import { AUDIO } from '@audius/fixed-decimal'
 import {
   Button,
@@ -17,12 +15,11 @@ import {
   IconLogoCircleETH,
   Text
 } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 import SettingsCard from './SettingsCard'
 
-const { startConversion } = wormholeConversionActions
-const { getConversionStatus } = wormholeConversionSelectors
+const { toast } = toastActions
 
 const messages = {
   title: 'Convert AUDIO to Solana',
@@ -32,13 +29,13 @@ const messages = {
   buttonTextConverting: 'Converting...',
   ethBalance: 'ETH AUDIO Balance',
   noBalance: 'No ETH AUDIO to convert',
-  loading: 'Loading...'
+  loading: 'Loading...',
+  success: 'Successfully converted AUDIO to Solana',
+  error: 'Conversion failed'
 }
 
 export const WormholeConversionSettingsCard = () => {
   const dispatch = useDispatch()
-  const conversionStatus = useSelector(getConversionStatus)
-
   const { data: currentUserId } = useCurrentUserId()
   const { data: user } = useUser(currentUserId)
 
@@ -51,14 +48,36 @@ export const WormholeConversionSettingsCard = () => {
       { enabled: !!user?.erc_wallet }
     )
 
-  const isConverting = conversionStatus === 'CONVERTING'
+  const { mutate: transferEthToSol, isPending: isConverting } =
+    useTransferEthToSol()
+
   const hasBalance = ethBalance && ethBalance > BigInt(0)
 
   const handleConvert = useCallback(() => {
-    if (hasBalance && !isConverting) {
-      dispatch(startConversion())
-    }
-  }, [dispatch, hasBalance, isConverting])
+    if (!hasBalance || isConverting || !user?.erc_wallet) return
+
+    transferEthToSol(
+      { ethAddress: user.erc_wallet },
+      {
+        onSuccess: () => {
+          dispatch(
+            toast({
+              content: messages.success,
+              type: 'info'
+            })
+          )
+        },
+        onError: (error) => {
+          dispatch(
+            toast({
+              content: `${messages.error}: ${error instanceof Error ? error.message : String(error)}`,
+              type: 'error'
+            })
+          )
+        }
+      }
+    )
+  }, [dispatch, hasBalance, isConverting, user?.erc_wallet, transferEthToSol])
 
   const formattedBalance = ethBalance
     ? AUDIO(ethBalance).toLocaleString('en-US', { maximumFractionDigits: 2 })

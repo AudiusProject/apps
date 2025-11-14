@@ -63,8 +63,6 @@ import searchReducer from './search/slice'
 import { SearchState } from './search/types'
 import stemsUpload from './stems-upload/slice'
 import tippingReducer from './tipping/slice'
-import wormholeConversionReducer from './wormhole-conversion/slice'
-import { WormholeConversionState } from './wormhole-conversion/types'
 import {
   searchUsersModalReducer,
   SearchUsersModalState,
@@ -207,9 +205,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   // Tipping
   tipping: tippingReducer,
 
-  // Wormhole Conversion
-  wormholeConversion: wormholeConversionReducer,
-
   // Gated content
   buyUSDC: buyUSDCReducer,
   gatedContent,
@@ -320,9 +315,6 @@ export type CommonState = {
 
   // Tipping
   tipping: ReturnType<typeof tippingReducer>
-
-  // Wormhole Conversion
-  wormholeConversion: WormholeConversionState
 
   // Gated content
   purchaseContent: ReturnType<typeof purchaseContentReducer>
