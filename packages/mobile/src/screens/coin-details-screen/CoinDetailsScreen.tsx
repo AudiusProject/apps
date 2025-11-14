@@ -26,6 +26,7 @@ export const CoinDetailsScreen = () => {
     <IconButton
       icon={IconKebabHorizontal}
       onPress={handleOpenOverflowMenu}
+      color='subdued'
       ripple
     />
   )
