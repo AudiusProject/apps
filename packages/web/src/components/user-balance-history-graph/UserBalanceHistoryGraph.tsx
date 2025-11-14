@@ -296,7 +296,7 @@ export const UserBalanceHistoryGraph = () => {
           gap='l'
           css={{ minHeight: '200px' }}
         >
-          <Text variant='body' size='m' color='danger'>
+          <Text variant='body' size='m' color='subdued'>
             {messages.error}
           </Text>
         </Flex>
