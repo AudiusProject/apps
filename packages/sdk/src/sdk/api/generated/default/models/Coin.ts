@@ -88,6 +88,12 @@ export interface Coin {
      */
     logoUri?: string;
     /**
+     * URL to the coin's banner image
+     * @type {string}
+     * @memberof Coin
+     */
+    bannerImageUrl?: string;
+    /**
      * A longform description about the coin
      * @type {string}
      * @memberof Coin
@@ -534,6 +540,7 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'decimals': json['decimals'],
         'ownerId': json['owner_id'],
         'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
+        'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'website': !exists(json, 'website') ? undefined : json['website'],
         'link1': !exists(json, 'link_1') ? undefined : json['link_1'],
@@ -615,6 +622,7 @@ export function CoinToJSON(value?: Coin | null): any {
         'decimals': value.decimals,
         'owner_id': value.ownerId,
         'logo_uri': value.logoUri,
+        'banner_image_url': value.bannerImageUrl,
         'description': value.description,
         'website': value.website,
         'link_1': value.link1,

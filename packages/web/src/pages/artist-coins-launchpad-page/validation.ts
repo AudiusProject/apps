@@ -22,6 +22,7 @@ export const FIELDS = {
   coinName: 'coinName',
   coinSymbol: 'coinSymbol',
   coinImage: 'coinImage',
+  bannerImage: 'bannerImage',
   payAmount: 'payAmount',
   receiveAmount: 'receiveAmount',
   usdcValue: 'usdcValue',
@@ -70,6 +71,12 @@ const coinImageSchema = z.object({
     .union([z.null(), z.instanceof(File), z.instanceof(Blob)])
     .refine((file) => file !== null, coinImageErrorMessages.missingImageError)
 })
+
+const optionalImageSchema = z.union([
+  z.null(),
+  z.instanceof(File),
+  z.instanceof(Blob)
+])
 
 export const firstBuyMessages = {
   insufficientBalance: 'Insufficient AUDIO balance',
@@ -140,6 +147,7 @@ export const setupFormSchema = ({
         }
       ),
       [FIELDS.coinImage]: coinImageSchema.shape.coinImage,
+      [FIELDS.bannerImage]: optionalImageSchema.optional(),
       [FIELDS.wantsToBuy]: z.enum(['yes', 'no'], {
         required_error: 'Please select an option'
       }),

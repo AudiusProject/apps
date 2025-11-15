@@ -51,6 +51,12 @@ export interface CreateCoinRequest {
      */
     logoUri?: string;
     /**
+     * The URI for the coin's banner image
+     * @type {string}
+     * @memberof CreateCoinRequest
+     */
+    bannerImageUrl?: string;
+    /**
      * The description of the coin
      * @type {string}
      * @memberof CreateCoinRequest
@@ -110,6 +116,7 @@ export function CreateCoinRequestFromJSONTyped(json: any, ignoreDiscriminator: b
         'decimals': json['decimals'],
         'name': json['name'],
         'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
+        'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'link1': !exists(json, 'link_1') ? undefined : json['link_1'],
         'link2': !exists(json, 'link_2') ? undefined : json['link_2'],
@@ -132,6 +139,7 @@ export function CreateCoinRequestToJSON(value?: CreateCoinRequest | null): any {
         'decimals': value.decimals,
         'name': value.name,
         'logo_uri': value.logoUri,
+        'banner_image_url': value.bannerImageUrl,
         'description': value.description,
         'link_1': value.link1,
         'link_2': value.link2,

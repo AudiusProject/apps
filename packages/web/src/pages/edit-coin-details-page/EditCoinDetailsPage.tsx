@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   createContext,
   useCallback,
+  useEffect,
   useRef,
   useState
 } from 'react'
@@ -20,8 +21,10 @@ import { coinDetailsMessages } from '@audius/common/messages'
 import { route, removeNullable } from '@audius/common/utils'
 import {
   Box,
+  Button,
   Divider,
   Flex,
+  IconCloudUpload,
   IconInstagram,
   IconLink,
   IconPlus,
@@ -30,9 +33,11 @@ import {
   LoadingSpinner,
   PlainButton,
   spacing,
-  Text
+  Text,
+  useTheme
 } from '@audius/harmony'
 import { Form, Formik, useFormikContext } from 'formik'
+import ReactDropzone from 'react-dropzone'
 import { Redirect, useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
@@ -42,6 +47,12 @@ import { TextAreaField, TextField } from 'components/form-fields'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { reportToSentry } from 'store/errors/reportToSentry'
+import {
+  ALLOWED_IMAGE_FILE_TYPES,
+  resizeImage
+} from 'utils/imageProcessingUtil'
+
+import { MAX_IMAGE_SIZE } from '../artist-coins-launchpad-page/constants'
 
 // Local scroll context for the coin details form
 const EditFormScrollContext = createContext(() => {})
@@ -150,6 +161,173 @@ const SocialLinksSection = () => {
   )
 }
 
+const bannerMessages = {
+  title: coinDetailsMessages.editCoinDetails.bannerImage,
+  description: coinDetailsMessages.editCoinDetails.bannerDescription,
+  dragDrop: coinDetailsMessages.editCoinDetails.bannerDragDrop,
+  upload: coinDetailsMessages.editCoinDetails.bannerUpload,
+  change: coinDetailsMessages.editCoinDetails.bannerChange,
+  remove: coinDetailsMessages.editCoinDetails.bannerRemove,
+  emptyState: coinDetailsMessages.editCoinDetails.bannerEmptyState,
+  errors: coinDetailsMessages.editCoinDetails.bannerErrors
+}
+
+type BannerImageSectionProps = {
+  bannerImageUrl: string | null
+  fileInputRef: React.RefObject<HTMLInputElement>
+  onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onFileSelect: () => void
+  onDropAccepted: (files: File[]) => void
+  onDropRejected: (files: File[]) => void
+  onRemove: () => void
+  isProcessing: boolean
+  error?: string | null
+}
+
+const BannerImageSection = ({
+  bannerImageUrl,
+  fileInputRef,
+  onFileInputChange,
+  onFileSelect,
+  onDropAccepted,
+  onDropRejected,
+  onRemove,
+  isProcessing,
+  error
+}: BannerImageSectionProps) => {
+  const theme = useTheme()
+  const [isDragActive, setIsDragActive] = useState(false)
+  const hasBanner = Boolean(bannerImageUrl)
+
+  const borderStyle = {
+    border: `1px dashed ${
+      isDragActive ? theme.color.border.accent : theme.color.border.default
+    }`,
+    transition: `border-color ${theme.motion.hover}, background-color ${theme.motion.hover}`,
+    cursor: isProcessing ? 'default' : 'pointer',
+    ':hover': {
+      borderColor: isProcessing
+        ? theme.color.border.default
+        : theme.color.border.strong
+    }
+  }
+
+  return (
+    <Flex column gap='l' m='xl'>
+      <Flex alignItems='center' gap='s'>
+        <Text variant='title' size='l'>
+          {bannerMessages.title}
+        </Text>
+        <Text variant='body' size='m' color='subdued'>
+          {coinDetailsMessages.editCoinDetails.optional}
+        </Text>
+      </Flex>
+      <Text variant='body' size='m' color='subdued'>
+        {bannerMessages.description}
+      </Text>
+
+      <input
+        type='file'
+        ref={fileInputRef}
+        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
+        style={{ display: 'none' }}
+        onChange={onFileInputChange}
+      />
+
+      <Flex
+        as={ReactDropzone}
+        // @ts-ignore - ReactDropzone props
+        multiple={false}
+        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
+        onDropAccepted={(files: File[]) => {
+          setIsDragActive(false)
+          onDropAccepted(files)
+        }}
+        onDropRejected={(files: File[]) => {
+          setIsDragActive(false)
+          onDropRejected(files)
+        }}
+        onDragEnter={() => setIsDragActive(true)}
+        onDragLeave={() => setIsDragActive(false)}
+        disableClick
+        disabled={isProcessing}
+        direction='column'
+        gap='l'
+      >
+        <Box
+          w='100%'
+          h={240}
+          borderRadius='m'
+          backgroundColor='white'
+          css={{
+            ...borderStyle,
+            backgroundImage: hasBanner
+              ? `linear-gradient(0deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url("${bannerImageUrl}")`
+              : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {isProcessing ? (
+            <LoadingSpinner />
+          ) : hasBanner ? null : (
+            <Flex
+              direction='column'
+              alignItems='center'
+              justifyContent='center'
+              gap='s'
+            >
+              <IconCloudUpload color='default' />
+              <Text variant='body' size='m' color='subdued' textAlign='center'>
+                {bannerMessages.dragDrop}
+              </Text>
+              <Text variant='body' size='s' color='subdued' textAlign='center'>
+                {bannerMessages.emptyState}
+              </Text>
+            </Flex>
+          )}
+        </Box>
+        <Flex gap='s' alignItems='center'>
+          <Button
+            variant='secondary'
+            size='small'
+            type='button'
+            disabled={isProcessing}
+            onClick={(e) => {
+              e.stopPropagation()
+              onFileSelect()
+            }}
+          >
+            {hasBanner ? bannerMessages.change : bannerMessages.upload}
+          </Button>
+          {hasBanner ? (
+            <PlainButton
+              type='button'
+              disabled={isProcessing}
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+            >
+              {bannerMessages.remove}
+            </PlainButton>
+          ) : null}
+        </Flex>
+      </Flex>
+      {error ? (
+        <Text color='danger' size='s' variant='body'>
+          {error}
+        </Text>
+      ) : null}
+    </Flex>
+  )
+}
+
 export const EditCoinDetailsPage = () => {
   const { ticker } = useParams<{ ticker: string }>()
   const { data: currentUserId } = useCurrentUserId()
@@ -171,24 +349,126 @@ export const EditCoinDetailsPage = () => {
 
   const updateCoinMutation = useUpdateArtistCoin()
 
+  const bannerFileInputRef = useRef<HTMLInputElement>(null)
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null)
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
+  const [isProcessingBanner, setIsProcessingBanner] = useState(false)
+  const [bannerError, setBannerError] = useState<string | null>(null)
+  const [shouldRemoveBanner, setShouldRemoveBanner] = useState(false)
+
+  useEffect(() => {
+    if (coin && !bannerImageFile && !shouldRemoveBanner) {
+      setBannerPreviewUrl(coin.bannerImageUrl ?? null)
+    }
+  }, [coin, bannerImageFile, shouldRemoveBanner])
+
+  useEffect(() => {
+    return () => {
+      if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(bannerPreviewUrl)
+      }
+    }
+  }, [bannerPreviewUrl])
+
+  const handleBannerFileSelect = () => {
+    bannerFileInputRef.current?.click()
+  }
+
+  const handleBannerFileInputChange = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      await processBannerFile(file)
+    }
+    event.target.value = ''
+  }
+
+  const handleBannerDropAccepted = async (files: File[]) => {
+    const file = files[0]
+    if (file) {
+      await processBannerFile(file)
+    }
+  }
+
+  const handleBannerDropRejected = (files: File[]) => {
+    const file = files[0]
+    if (!file) return
+    if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
+      setBannerError(bannerMessages.errors.invalidFileType)
+    } else if (file.size > MAX_IMAGE_SIZE) {
+      setBannerError(bannerMessages.errors.fileTooLarge)
+    } else {
+      setBannerError(bannerMessages.errors.processingError)
+    }
+  }
+
+  const processBannerFile = async (file: File) => {
+    setBannerError(null)
+
+    if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
+      setBannerError(bannerMessages.errors.invalidFileType)
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setBannerError(bannerMessages.errors.fileTooLarge)
+      return
+    }
+
+    setIsProcessingBanner(true)
+    try {
+      const processedFile = await resizeImage(file, 2000, false)
+      setBannerImageFile(processedFile)
+      setShouldRemoveBanner(false)
+      const previewUrl = URL.createObjectURL(processedFile)
+      setBannerPreviewUrl(previewUrl)
+    } catch (error) {
+      reportToSentry({
+        error: error instanceof Error ? error : new Error(error as string),
+        name: 'Coin Banner Upload Processing Error'
+      })
+      setBannerError(bannerMessages.errors.processingError)
+    } finally {
+      setIsProcessingBanner(false)
+    }
+  }
+
+  const handleBannerRemove = () => {
+    setBannerImageFile(null)
+    setBannerPreviewUrl(null)
+    setBannerError(null)
+    setShouldRemoveBanner(true)
+  }
+
   const handleSubmit = async (values: any) => {
     if (!coin) return
     // Clear any previous errors
     setSubmitError(undefined)
 
     // Transform social links array for API - include empty strings to indicate deletion
+    const links = values.socialLinks.filter(
+      (link: string) => link !== null && link !== undefined
+    )
+
     const transformedValues = {
       description: values.description,
-      links: values.socialLinks.filter(
-        (link: string) => link !== null && link !== undefined
-      )
+      links,
+      bannerImageFile: bannerImageFile ?? undefined,
+      removeBanner: shouldRemoveBanner && !bannerImageFile
     }
 
     try {
-      await updateCoinMutation.mutateAsync({
+      const result = await updateCoinMutation.mutateAsync({
         mint: coin.mint,
         updateCoinRequest: transformedValues
       })
+      if (result?.bannerImageUrl !== undefined) {
+        setBannerPreviewUrl(result.bannerImageUrl || null)
+      }
+      setBannerImageFile(null)
+      setShouldRemoveBanner(false)
+      setBannerError(null)
       navigate(route.coinPage(coin?.ticker ?? ''))
     } catch (e) {
       const errorMessage =
@@ -288,6 +568,20 @@ export const EditCoinDetailsPage = () => {
                   {/* Divider */}
                   <Divider />
 
+                  <BannerImageSection
+                    bannerImageUrl={bannerPreviewUrl}
+                    fileInputRef={bannerFileInputRef}
+                    onFileInputChange={handleBannerFileInputChange}
+                    onFileSelect={handleBannerFileSelect}
+                    onDropAccepted={handleBannerDropAccepted}
+                    onDropRejected={handleBannerDropRejected}
+                    onRemove={handleBannerRemove}
+                    isProcessing={isProcessingBanner}
+                    error={bannerError}
+                  />
+
+                  <Divider />
+
                   {/* Description Section */}
                   <Flex column gap='l' m='xl'>
                     <Text variant='title' size='l'>
@@ -314,7 +608,7 @@ export const EditCoinDetailsPage = () => {
               </Flex>
               <AnchoredSubmitRowEdit
                 errorText={submitError}
-                isSubmitting={isSubmitting}
+                isSubmitting={isSubmitting || isProcessingBanner}
               />
             </EditFormScrollContext.Provider>
           </Form>

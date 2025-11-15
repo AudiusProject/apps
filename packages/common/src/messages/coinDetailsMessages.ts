@@ -152,7 +152,19 @@ export const coinDetailsMessages = {
     optional: '(Optional)',
     descriptionPlaceholder:
       'Tell fans what makes your artist coin special — think early listens, exclusive drops, or fun perks for your biggest supporters.',
-    pasteLink: 'Paste a link'
+    pasteLink: 'Paste a link',
+    bannerImage: 'Banner Image',
+    bannerDescription: 'Recommended 2000 x 500 JPG, PNG, or WebP (max 15MB).',
+    bannerUpload: 'Upload Banner Image',
+    bannerChange: 'Change Banner Image',
+    bannerRemove: 'Remove Banner',
+    bannerDragDrop: 'Drag-and-drop a banner image (Max 15 MB)',
+    bannerEmptyState: 'Add a banner to showcase your artist coin.',
+    bannerErrors: {
+      invalidFileType: 'Please select a JPEG, PNG, or WebP image file',
+      fileTooLarge: 'File size must be less than 15MB',
+      processingError: 'Unable to process this file. Please try another image.'
+    }
   },
   claimVestedCoinsModal: {
     title: 'Claim',

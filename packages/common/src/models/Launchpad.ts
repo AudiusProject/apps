@@ -33,6 +33,7 @@ export type LaunchpadFormValues = {
   coinName: string
   coinSymbol: string
   coinImage: File | null
+  bannerImage: File | null
   payAmount: string
   receiveAmount: string
   usdcValue: string

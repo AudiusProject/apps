@@ -1,12 +1,45 @@
 import { useCallback, useMemo } from 'react'
 
 import { useAnalytics } from '@audius/common/hooks'
-import { Name, LaunchCoinResponse } from '@audius/common/models'
-import type { LaunchpadFormValues } from '@audius/common/models'
+import {
+  Name,
+  LaunchCoinResponse,
+  type LaunchpadFormValues,
+  WidthSizes
+} from '@audius/common/models'
 import { useFormikContext } from 'formik'
-import { omit } from 'lodash'
 
 import { make } from 'services/analytics'
+
+type LaunchpadAnalyticsValues = Omit<
+  LaunchpadFormValues,
+  'coinImage' | 'bannerImage'
+>
+
+const sanitizeFormValues = (
+  values: LaunchpadFormValues
+): LaunchpadAnalyticsValues => {
+  const {
+    coinImage: _coinImageIgnored,
+    bannerImage: _bannerImageIgnored,
+    ...rest
+  } = values
+  return rest
+}
+
+const sanitizeOptionalFormValues = (
+  values?: LaunchpadFormValues | null
+): LaunchpadAnalyticsValues | undefined =>
+  values ? sanitizeFormValues(values) : undefined
+
+type CoverPhotoSource = {
+  cover_photo?: Partial<Record<WidthSizes, string | null>> | null
+}
+
+export const getDefaultBannerImageUrl = (user?: CoverPhotoSource | null) =>
+  user?.cover_photo?.[WidthSizes.SIZE_2000] ??
+  user?.cover_photo?.[WidthSizes.SIZE_640] ??
+  undefined
 
 export const useLaunchpadAnalytics = (params?: {
   externalWalletAddress?: string
@@ -16,9 +49,11 @@ export const useLaunchpadAnalytics = (params?: {
   const { values: formValues, errors } =
     useFormikContext<LaunchpadFormValues>() ?? {}
   const formValuesForAnalytics = useMemo(() => {
+    const sanitizedValues = sanitizeOptionalFormValues(formValues)
     return {
-      ...omit(formValues, 'coinImage'), // dont want to upload the entire blob
+      ...(sanitizedValues ?? {}),
       hasImage: !!formValues?.coinImage,
+      hasBannerImage: !!formValues?.bannerImage,
       formErrors: errors,
       externalWalletAddress
     }
@@ -148,10 +183,11 @@ export const useLaunchpadAnalytics = (params?: {
   // Coin creation events
   const trackCoinCreationStarted = useCallback(
     (walletAddress: string, formValues: LaunchpadFormValues) => {
+      const sanitizedValues = sanitizeFormValues(formValues)
       track(
         make({
           eventName: Name.LAUNCHPAD_COIN_CREATION_STARTED,
-          ...formValues,
+          ...sanitizedValues,
           walletAddress
         })
       )
@@ -167,7 +203,7 @@ export const useLaunchpadAnalytics = (params?: {
       track(
         make({
           eventName: Name.LAUNCHPAD_COIN_CREATION_SUCCESS,
-          ...formValues,
+          ...sanitizeFormValues(formValues),
           launchCoinResponse
         })
       )

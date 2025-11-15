@@ -51,6 +51,12 @@ export interface Coin {
      */
     logoUri?: string;
     /**
+     * The URI for the coin's banner image
+     * @type {string}
+     * @memberof Coin
+     */
+    bannerImageUrl?: string;
+    /**
      * The description of the coin
      * @type {string}
      * @memberof Coin
@@ -159,6 +165,7 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'decimals': json['decimals'],
         'name': json['name'],
         'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
+        'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'xHandle': !exists(json, 'x_handle') ? undefined : json['x_handle'],
         'instagramHandle': !exists(json, 'instagram_handle') ? undefined : json['instagram_handle'],
@@ -189,6 +196,7 @@ export function CoinToJSON(value?: Coin | null): any {
         'decimals': value.decimals,
         'name': value.name,
         'logo_uri': value.logoUri,
+        'banner_image_url': value.bannerImageUrl,
         'description': value.description,
         'x_handle': value.xHandle,
         'instagram_handle': value.instagramHandle,

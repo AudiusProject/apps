@@ -217,6 +217,7 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
     userId: ownerId,
     size: WidthSizes.SIZE_640
   })
+  const bannerImage = coin?.bannerImageUrl ?? coverPhoto
 
   if (isLoading || !coin || !owner) {
     return (
@@ -252,7 +253,7 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
       alignSelf='stretch'
       h={BANNER_HEIGHT}
       css={{
-        background: `linear-gradient(90deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.02) 20%, rgba(0, 0, 0, 0.01) 30%, rgba(0, 0, 0, 0) 45%), url("${coverPhoto}")`,
+        background: `linear-gradient(90deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.02) 20%, rgba(0, 0, 0, 0.01) 30%, rgba(0, 0, 0, 0) 45%), url("${bannerImage ?? ''}")`,
         backgroundSize: 'auto, cover',
         backgroundPosition: '0% 0%, 50% 50%',
         backgroundRepeat: 'repeat, no-repeat',

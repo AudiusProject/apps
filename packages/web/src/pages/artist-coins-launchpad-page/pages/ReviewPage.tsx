@@ -1,9 +1,14 @@
 import { useMemo } from 'react'
 
-import { useArtistCoin, useQueryContext } from '@audius/common/api'
+import {
+  useArtistCoin,
+  useCurrentAccountUser,
+  useQueryContext
+} from '@audius/common/api'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
 import {
+  Box,
   Artwork,
   Flex,
   Hint,
@@ -22,6 +27,7 @@ import { StepHeader } from '../components/StepHeader'
 import { TokenInfoRow } from '../components/TokenInfoRow'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS } from '../constants'
+import { getDefaultBannerImageUrl } from '../utils'
 
 const messages = {
   stepInfo: `STEP 2 of ${AMOUNT_OF_STEPS}`,
@@ -130,9 +136,16 @@ const useStyles = makeResponsiveStyles(({ theme }) => ({
 export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
   const { values } = useFormikContext<LaunchpadFormValues>()
   const imageUrl = useFormImageUrl(values.coinImage)
+  const bannerImageUrl = useFormImageUrl(values.bannerImage)
   const styles = useStyles()
   const { env } = useQueryContext()
   const { data: audioCoinData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
+  const { data: currentUser } = useCurrentAccountUser()
+  const defaultBannerImageUrl = useMemo(
+    () => getDefaultBannerImageUrl(currentUser),
+    [currentUser]
+  )
+  const bannerPreviewUrl = bannerImageUrl ?? defaultBannerImageUrl ?? null
 
   // Calculate market caps with fixed AUDIO amounts and current AUDIO price
   const coinDetails = useMemo(() => {
@@ -177,6 +190,18 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
             borderRadius='m'
             css={{ overflow: 'hidden' }}
           >
+            {bannerPreviewUrl ? (
+              <Box
+                h={200}
+                w='100%'
+                css={{
+                  backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("${bannerPreviewUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
+            ) : null}
+
             {/* Token Info Header */}
             <Flex
               alignItems='center'

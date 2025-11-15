@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import {
   ConnectedWallet,
@@ -55,7 +55,7 @@ import {
 } from './components/LaunchpadModals'
 import { LAUNCHPAD_COIN_DESCRIPTION, MIN_SOL_BALANCE, Phase } from './constants'
 import { BuyCoinPage, ReviewPage, SetupPage, SplashPage } from './pages'
-import { useLaunchpadAnalytics } from './utils'
+import { getDefaultBannerImageUrl, useLaunchpadAnalytics } from './utils'
 import { useLaunchpadFormSchema } from './validation'
 
 const messages = {
@@ -75,6 +75,17 @@ const messages = {
 }
 
 const getArtistSocialLinks = getUserSocialLinks
+
+const sanitizeFormValuesForLogging = (
+  values: LaunchpadFormValues
+): Omit<LaunchpadFormValues, 'coinImage' | 'bannerImage'> => {
+  const {
+    coinImage: _coinImageIgnored,
+    bannerImage: _bannerImageIgnored,
+    ...rest
+  } = values
+  return rest
+}
 
 const LaunchpadPageContent = ({
   submitErrorText,
@@ -410,6 +421,11 @@ export const LaunchpadPage = () => {
   const isSwapRetryError = swapData?.error !== undefined
   const isSwapRetrySuccess = isSwapRetryFinished && !isSwapRetryError
 
+  const defaultBannerImageUrl = useMemo(
+    () => getDefaultBannerImageUrl(currentUser),
+    [currentUser]
+  )
+
   // Overall success, pending, and error states account for both hooks
   const isSuccess =
     (isLaunchCoinFinished && !isLaunchCoinError) || isSwapRetrySuccess
@@ -528,7 +544,7 @@ export const LaunchpadPage = () => {
           additionalInfo: {
             currentUser,
             connectedWalletAddress,
-            formValues
+            formValues: sanitizeFormValuesForLogging(formValues)
           }
         })
         throw new Error('No user or connected wallet found')
@@ -573,13 +589,14 @@ export const LaunchpadPage = () => {
             feature: Feature.ArtistCoins,
             additionalInfo: {
               errorMetadata,
-              formValues
+              formValues: sanitizeFormValuesForLogging(formValues)
             }
           })
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
         const socialLinks = getArtistSocialLinks(currentUser)
+        const bannerImageFile = formValues.bannerImage ?? undefined
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -591,7 +608,9 @@ export const LaunchpadPage = () => {
           ),
           walletPublicKey: connectedWalletAddress,
           initialBuyAmountAudio,
-          socialLinks
+          socialLinks,
+          bannerImageFile,
+          bannerImageUrl: bannerImageFile ? undefined : defaultBannerImageUrl
         })
       }
     },
@@ -605,7 +624,8 @@ export const LaunchpadPage = () => {
       trackFirstBuyRetry,
       swapTokens,
       trackCoinCreationStarted,
-      launchCoin
+      launchCoin,
+      defaultBannerImageUrl
     ]
   )
 
@@ -621,6 +641,7 @@ export const LaunchpadPage = () => {
         coinName: '',
         coinSymbol: '',
         coinImage: null as File | null,
+        bannerImage: null as File | null,
         payAmount: '',
         receiveAmount: '',
         usdcValue: '',
