@@ -307,11 +307,11 @@ export const claimVestedCoins = async (
     let rewardsPoolAddress: PublicKey | null = null
     // Transfer rewards pool portion to rewards pool token account if provided
     if (rewardsPoolAmount.gt(new BN(0))) {
-      const rewardsPoolAddressResult = await db.raw<{
-        rows: Array<{ token_source: string }>
+      const rewardsPoolAuthorityResult = await db.raw<{
+        rows: Array<{ authority: string }>
       }>(
         `
-      SELECT token_source 
+      SELECT authority 
       FROM sol_meteora_dbc_migrations m 
       JOIN artist_coins ac ON ac.mint = m.base_mint 
       JOIN sol_reward_manager_inits r ON r.mint = ac.mint
@@ -321,24 +321,29 @@ export const claimVestedCoins = async (
       )
 
       if (
-        !rewardsPoolAddressResult.rows ||
-        rewardsPoolAddressResult.rows.length === 0
+        !rewardsPoolAuthorityResult.rows ||
+        rewardsPoolAuthorityResult.rows.length === 0
       ) {
         throw new Error(
           `Could not find rewards pool address for mint: ${mintPublicKey.toBase58()}`
         )
       }
 
-      rewardsPoolAddress = new PublicKey(
-        rewardsPoolAddressResult.rows[0].token_source
+      const rewardsPoolAuthority = new PublicKey(
+        rewardsPoolAuthorityResult.rows[0].authority
+      )
+
+      rewardsPoolAddress = getAssociatedTokenAddressSync(
+        mintPublicKey,
+        rewardsPoolAuthority,
+        true
       )
       // Check if rewards pool ATA exists - it should already exist
       const rewardsPoolAccountInfo =
         await connection.getAccountInfo(rewardsPoolAddress)
       if (!rewardsPoolAccountInfo) {
         throw new Error(
-          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}. ` +
-            `Expected rewards pool wallet: ${rewardsPoolAddress.toBase58()}`
+          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}, got ${rewardsPoolAccountInfo}`
         )
       }
 
