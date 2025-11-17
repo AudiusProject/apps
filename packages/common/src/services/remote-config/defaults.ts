@@ -8,8 +8,8 @@ export const MIN_USDC_PURCHASE_AMOUNT_CENTS = 100
 export const MAX_USDC_PURCHASE_AMOUNT_CENTS = 150000
 export const MIN_CONTENT_PRICE_CENTS = 100
 export const MAX_CONTENT_PRICE_CENTS = 150000
-export const BUY_TOKEN_VIA_SOL_SLIPPAGE_BPS = 50
-export const BUY_SOL_VIA_TOKEN_SLIPPAGE_BPS = 50
+export const BUY_TOKEN_VIA_SOL_SLIPPAGE_BPS = 200
+export const BUY_SOL_VIA_TOKEN_SLIPPAGE_BPS = 200
 
 export const remoteConfigIntDefaults: { [key in IntKeys]: number | null } = {
   [IntKeys.IMAGE_QUICK_FETCH_TIMEOUT_MS]: 5000,
@@ -38,7 +38,7 @@ export const remoteConfigIntDefaults: { [key in IntKeys]: number | null } = {
   [IntKeys.BUY_TOKEN_WALLET_POLL_DELAY_MS]: 1000,
   [IntKeys.BUY_TOKEN_WALLET_POLL_MAX_RETRIES]: 120,
   [IntKeys.BUY_TOKEN_VIA_SOL_SLIPPAGE_BPS]: BUY_TOKEN_VIA_SOL_SLIPPAGE_BPS,
-  [IntKeys.BUY_AUDIO_SLIPPAGE]: 30,
+  [IntKeys.BUY_AUDIO_SLIPPAGE]: 200,
   [IntKeys.GATED_TRACK_POLL_INTERVAL_MS]: 1000,
   [IntKeys.CACHE_ENTRY_TTL]: DEFAULT_ENTRY_TTL,
   [IntKeys.HANDLE_VERIFICATION_TIMEOUT_MILLIS]:

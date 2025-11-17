@@ -13,6 +13,7 @@ type InitializeStripeModalPayload = {
   onrampFailed: StripeModalState['onrampFailed']
   onrampSucceeded: StripeModalState['onrampSucceeded']
   onrampCanceled: StripeModalState['onrampCanceled']
+  portalHostName?: string
 }
 
 const initialState: StripeModalState = {}
@@ -31,6 +32,7 @@ const slice = createSlice({
       state.onrampFailed = action.payload.onrampFailed
       state.onrampSucceeded = action.payload.onrampSucceeded
       state.onrampCanceled = action.payload.onrampCanceled
+      state.portalHostName = action.payload.portalHostName
     },
     stripeSessionCreated: (
       state,

@@ -9,11 +9,19 @@ import {
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
-import { Chain, Feature, Name } from '@audius/common/models'
-import type { LaunchpadFormValues } from '@audius/common/models'
+import {
+  Chain,
+  Feature,
+  Name,
+  LaunchpadFormValues
+} from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
-import { route, shortenSPLAddress } from '@audius/common/utils'
+import {
+  getUserSocialLinks,
+  route,
+  shortenSPLAddress
+} from '@audius/common/utils'
 import { wAUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
@@ -64,64 +72,6 @@ const messages = {
     failedToCheckWalletBalance:
       'Failed to check wallet balance. Please try again.'
   }
-}
-
-const stripHandle = (handle?: string | null) =>
-  handle?.trim().replace(/^@/, '') ?? ''
-
-const ensureUrl = (rawUrl?: string | null) => {
-  if (!rawUrl) {
-    return null
-  }
-  let url = rawUrl.trim()
-  if (!url) {
-    return null
-  }
-  if (!/^https?:\/\//i.test(url)) {
-    url = `https://${url}`
-  }
-  try {
-    const parsed = new URL(url)
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      return null
-    }
-    return parsed.toString()
-  } catch {
-    return null
-  }
-}
-
-const getArtistSocialLinks = (user?: User | null) => {
-  if (!user) {
-    return []
-  }
-
-  const links: string[] = []
-  const pushLink = (link: string | null) => {
-    const normalized = ensureUrl(link)
-    if (normalized && !links.includes(normalized)) {
-      links.push(normalized)
-    }
-  }
-
-  const xHandle = stripHandle(user.twitter_handle)
-  if (xHandle) {
-    pushLink(`https://x.com/${xHandle}`)
-  }
-
-  const instagramHandle = stripHandle(user.instagram_handle)
-  if (instagramHandle) {
-    pushLink(`https://instagram.com/${instagramHandle}`)
-  }
-
-  const tiktokHandle = stripHandle(user.tiktok_handle)
-  if (tiktokHandle) {
-    pushLink(`https://tiktok.com/@${tiktokHandle}`)
-  }
-
-  pushLink(user.website ?? null)
-
-  return links.slice(0, 4)
 }
 
 const LaunchpadPageContent = ({
@@ -627,6 +577,7 @@ export const LaunchpadPage = () => {
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
+        const socialLinks = getUserSocialLinks(currentUser)
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -637,7 +588,8 @@ export const LaunchpadPage = () => {
             formValues.coinSymbol
           ),
           walletPublicKey: connectedWalletAddress,
-          initialBuyAmountAudio
+          initialBuyAmountAudio,
+          socialLinks
         })
       }
     },

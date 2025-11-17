@@ -213,7 +213,8 @@ function* transferStep({
 function* doBuyUSDC({
   payload: {
     vendor,
-    purchaseInfo: { desiredAmount }
+    purchaseInfo: { desiredAmount },
+    portalHostName
   }
 }: ReturnType<typeof onrampOpened>) {
   const reportToSentry = yield* getContext('reportToSentry')
@@ -258,7 +259,8 @@ function* doBuyUSDC({
             destinationWallet: rootAccount.publicKey.toString(),
             onrampCanceled: onrampCanceled(),
             onrampFailed: onrampFailed({}),
-            onrampSucceeded: onrampSucceeded()
+            onrampSucceeded: onrampSucceeded(),
+            portalHostName
           })
         )
 
