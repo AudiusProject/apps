@@ -6,6 +6,7 @@ import {
   useQueryContext
 } from '@audius/common/api'
 import type { LaunchpadFormValues } from '@audius/common/models'
+import { WidthSizes } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
 import {
   Box,
@@ -19,6 +20,7 @@ import {
 } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
+import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
 
 import { AgreeToTerms } from '../components/AgreeToTerms'
@@ -27,7 +29,6 @@ import { StepHeader } from '../components/StepHeader'
 import { TokenInfoRow } from '../components/TokenInfoRow'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS } from '../constants'
-import { getDefaultBannerImageUrl } from '../utils'
 
 const messages = {
   stepInfo: `STEP 2 of ${AMOUNT_OF_STEPS}`,
@@ -43,7 +44,8 @@ const messages = {
   vesting: 'Unlocking',
   tradingFees: 'Trading Fees',
   back: 'Back',
-  hintMessage: "Remember! You can't change these details later."
+  hintMessage:
+    'Remember! This is your one and only coin and its details can’t be changed later.'
 }
 
 // Helper functions for market cap calculations
@@ -136,16 +138,15 @@ const useStyles = makeResponsiveStyles(({ theme }) => ({
 export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
   const { values } = useFormikContext<LaunchpadFormValues>()
   const imageUrl = useFormImageUrl(values.coinImage)
-  const bannerImageUrl = useFormImageUrl(values.bannerImage)
   const styles = useStyles()
   const { env } = useQueryContext()
   const { data: audioCoinData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
   const { data: currentUser } = useCurrentAccountUser()
-  const defaultBannerImageUrl = useMemo(
-    () => getDefaultBannerImageUrl(currentUser),
-    [currentUser]
-  )
-  const bannerPreviewUrl = bannerImageUrl ?? defaultBannerImageUrl ?? null
+  const { image: defaultBannerImageUrl } = useCoverPhoto({
+    userId: currentUser?.user_id,
+    size: WidthSizes.SIZE_2000
+  })
+  const bannerPreviewUrl = defaultBannerImageUrl ?? null
 
   // Calculate market caps with fixed AUDIO amounts and current AUDIO price
   const coinDetails = useMemo(() => {

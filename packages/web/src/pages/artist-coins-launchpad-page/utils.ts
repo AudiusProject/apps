@@ -11,19 +11,12 @@ import { useFormikContext } from 'formik'
 
 import { make } from 'services/analytics'
 
-type LaunchpadAnalyticsValues = Omit<
-  LaunchpadFormValues,
-  'coinImage' | 'bannerImage'
->
+type LaunchpadAnalyticsValues = Omit<LaunchpadFormValues, 'coinImage'>
 
 const sanitizeFormValues = (
   values: LaunchpadFormValues
 ): LaunchpadAnalyticsValues => {
-  const {
-    coinImage: _coinImageIgnored,
-    bannerImage: _bannerImageIgnored,
-    ...rest
-  } = values
+  const { coinImage: _coinImageIgnored, ...rest } = values
   return rest
 }
 
@@ -33,13 +26,23 @@ const sanitizeOptionalFormValues = (
   values ? sanitizeFormValues(values) : undefined
 
 type CoverPhotoSource = {
-  cover_photo?: Partial<Record<WidthSizes, string | null>> | null
+  cover_photo?:
+    | (Partial<Record<WidthSizes, string | null>> & {
+        mirrors?: string[] | undefined
+      })
+    | null
 }
 
 export const getDefaultBannerImageUrl = (user?: CoverPhotoSource | null) =>
   user?.cover_photo?.[WidthSizes.SIZE_2000] ??
   user?.cover_photo?.[WidthSizes.SIZE_640] ??
   undefined
+
+export const getDefaultBannerImageMirrors = (
+  user?: CoverPhotoSource | null
+): string[] | undefined => {
+  return user?.cover_photo?.mirrors
+}
 
 export const useLaunchpadAnalytics = (params?: {
   externalWalletAddress?: string
@@ -53,7 +56,6 @@ export const useLaunchpadAnalytics = (params?: {
     return {
       ...(sanitizedValues ?? {}),
       hasImage: !!formValues?.coinImage,
-      hasBannerImage: !!formValues?.bannerImage,
       formErrors: errors,
       externalWalletAddress
     }

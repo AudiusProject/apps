@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import {
   ConnectedWallet,
@@ -11,9 +11,11 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
 import {
   Chain,
+  ErrorLevel,
   Feature,
   Name,
-  LaunchpadFormValues
+  LaunchpadFormValues,
+  WidthSizes
 } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
@@ -43,6 +45,7 @@ import Page from 'components/page/Page'
 import { ToastContext } from 'components/toast/ToastContext'
 import { AlreadyAssociatedError } from 'hooks/useConnectAndAssociateWallets'
 import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
+import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
 import { make, track } from 'services/analytics'
@@ -55,7 +58,7 @@ import {
 } from './components/LaunchpadModals'
 import { LAUNCHPAD_COIN_DESCRIPTION, MIN_SOL_BALANCE, Phase } from './constants'
 import { BuyCoinPage, ReviewPage, SetupPage, SplashPage } from './pages'
-import { getDefaultBannerImageUrl, useLaunchpadAnalytics } from './utils'
+import { useLaunchpadAnalytics } from './utils'
 import { useLaunchpadFormSchema } from './validation'
 
 const messages = {
@@ -76,13 +79,37 @@ const messages = {
 
 const sanitizeFormValuesForLogging = (
   values: LaunchpadFormValues
-): Omit<LaunchpadFormValues, 'coinImage' | 'bannerImage'> => {
-  const {
-    coinImage: _coinImageIgnored,
-    bannerImage: _bannerImageIgnored,
-    ...rest
-  } = values
+): Omit<LaunchpadFormValues, 'coinImage'> => {
+  const { coinImage: _coinImageIgnored, ...rest } = values
   return rest
+}
+
+/**
+ * Fetches an image from a URL and converts it to a File object
+ * Used to copy the user's cover photo for the coin banner
+ * Note: The URL should already be resolved with mirror fallback (e.g., from useCoverPhoto)
+ * @param imageUrl - The URL of the image to fetch
+ * @returns A File object representing the image, or null if fetch fails
+ */
+const fetchImageAsFile = async (imageUrl: string): Promise<File | null> => {
+  try {
+    const response = await fetch(imageUrl, {
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`)
+    }
+    const blob = await response.blob()
+    // Extract filename from URL or use a default
+    const urlParts = imageUrl.split('/')
+    const filename = urlParts[urlParts.length - 1] || 'banner-image.jpg'
+    // Determine content type from blob or URL
+    const contentType = blob.type || 'image/jpeg'
+    return new File([blob], filename, { type: contentType })
+  } catch (error) {
+    console.error('Error fetching image:', error)
+    return null
+  }
 }
 
 const LaunchpadPageContent = ({
@@ -419,10 +446,10 @@ export const LaunchpadPage = () => {
   const isSwapRetryError = swapData?.error !== undefined
   const isSwapRetrySuccess = isSwapRetryFinished && !isSwapRetryError
 
-  const defaultBannerImageUrl = useMemo(
-    () => getDefaultBannerImageUrl(currentUser),
-    [currentUser]
-  )
+  const { image: defaultBannerImageUrl } = useCoverPhoto({
+    userId: currentUser?.user_id,
+    size: WidthSizes.SIZE_2000
+  })
 
   // Overall success, pending, and error states account for both hooks
   const isSuccess =
@@ -594,7 +621,43 @@ export const LaunchpadPage = () => {
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
         const socialLinks = getUserSocialLinks(currentUser)
-        const bannerImageFile = formValues.bannerImage ?? undefined
+
+        // Copy the user's cover image to ensure it's independent of profile changes
+        // useCoverPhoto already handles mirror fallback, so we just need to fetch the resolved URL
+        let bannerImageFile: File | null = null
+        if (defaultBannerImageUrl) {
+          try {
+            bannerImageFile = await fetchImageAsFile(defaultBannerImageUrl)
+            if (!bannerImageFile) {
+              console.warn(
+                'Failed to copy banner image, coin will be created without banner'
+              )
+              reportToSentry({
+                error: new Error(
+                  'Failed to copy banner image from cover photo'
+                ),
+                name: 'Failed to Copy Banner Image',
+                feature: Feature.ArtistCoins,
+                level: ErrorLevel.Warning,
+                additionalInfo: {
+                  bannerImageUrl: defaultBannerImageUrl
+                }
+              })
+            }
+          } catch (error) {
+            console.warn('Error copying banner image:', error)
+            reportToSentry({
+              error: error instanceof Error ? error : new Error(String(error)),
+              name: 'Error Copying Banner Image',
+              feature: Feature.ArtistCoins,
+              level: ErrorLevel.Warning,
+              additionalInfo: {
+                bannerImageUrl: defaultBannerImageUrl
+              }
+            })
+          }
+        }
+
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -607,8 +670,8 @@ export const LaunchpadPage = () => {
           walletPublicKey: connectedWalletAddress,
           initialBuyAmountAudio,
           socialLinks,
-          bannerImageFile,
-          bannerImageUrl: bannerImageFile ? undefined : defaultBannerImageUrl
+          bannerImageFile: bannerImageFile ?? undefined,
+          bannerImageUrl: undefined
         })
       }
     },
@@ -639,7 +702,6 @@ export const LaunchpadPage = () => {
         coinName: '',
         coinSymbol: '',
         coinImage: null as File | null,
-        bannerImage: null as File | null,
         payAmount: '',
         receiveAmount: '',
         usdcValue: '',

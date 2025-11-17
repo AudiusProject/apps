@@ -10,7 +10,8 @@ import {
 import {
   useArtistCoinByTicker,
   useUpdateArtistCoin,
-  useCurrentUserId
+  useCurrentUserId,
+  useCurrentAccountUser
 } from '@audius/common/api'
 import {
   MAX_COIN_DESCRIPTION_LENGTH,
@@ -18,13 +19,14 @@ import {
   type EditCoinDetailsFormValues
 } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
+import { WidthSizes } from '@audius/common/models'
 import { route, removeNullable } from '@audius/common/utils'
 import {
   Box,
   Button,
   Divider,
   Flex,
-  IconCloudUpload,
+  IconImage,
   IconInstagram,
   IconLink,
   IconPlus,
@@ -33,11 +35,9 @@ import {
   LoadingSpinner,
   PlainButton,
   spacing,
-  Text,
-  useTheme
+  Text
 } from '@audius/harmony'
 import { Form, Formik, useFormikContext } from 'formik'
-import ReactDropzone from 'react-dropzone'
 import { Redirect, useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
@@ -46,6 +46,7 @@ import { AnchoredSubmitRowEdit } from 'components/edit/AnchoredSubmitRowEdit'
 import { TextAreaField, TextField } from 'components/form-fields'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
+import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import {
   ALLOWED_IMAGE_FILE_TYPES,
@@ -162,70 +163,34 @@ const SocialLinksSection = () => {
 }
 
 const bannerMessages = {
-  title: coinDetailsMessages.editCoinDetails.bannerImage,
-  description: coinDetailsMessages.editCoinDetails.bannerDescription,
-  dragDrop: coinDetailsMessages.editCoinDetails.bannerDragDrop,
-  upload: coinDetailsMessages.editCoinDetails.bannerUpload,
   change: coinDetailsMessages.editCoinDetails.bannerChange,
-  remove: coinDetailsMessages.editCoinDetails.bannerRemove,
-  emptyState: coinDetailsMessages.editCoinDetails.bannerEmptyState,
   errors: coinDetailsMessages.editCoinDetails.bannerErrors
 }
 
 type BannerImageSectionProps = {
   bannerImageUrl: string | null
+  defaultBannerImageUrl: string | null
   fileInputRef: React.RefObject<HTMLInputElement>
   onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
   onFileSelect: () => void
-  onDropAccepted: (files: File[]) => void
-  onDropRejected: (files: File[]) => void
-  onRemove: () => void
   isProcessing: boolean
   error?: string | null
 }
 
 const BannerImageSection = ({
   bannerImageUrl,
+  defaultBannerImageUrl,
   fileInputRef,
   onFileInputChange,
   onFileSelect,
-  onDropAccepted,
-  onDropRejected,
-  onRemove,
   isProcessing,
   error
 }: BannerImageSectionProps) => {
-  const theme = useTheme()
-  const [isDragActive, setIsDragActive] = useState(false)
-  const hasBanner = Boolean(bannerImageUrl)
-
-  const borderStyle = {
-    border: `1px dashed ${
-      isDragActive ? theme.color.border.accent : theme.color.border.default
-    }`,
-    transition: `border-color ${theme.motion.hover}, background-color ${theme.motion.hover}`,
-    cursor: isProcessing ? 'default' : 'pointer',
-    ':hover': {
-      borderColor: isProcessing
-        ? theme.color.border.default
-        : theme.color.border.strong
-    }
-  }
+  const displayBannerUrl = bannerImageUrl ?? defaultBannerImageUrl
+  const hasBanner = Boolean(displayBannerUrl)
 
   return (
-    <Flex column gap='l' m='xl'>
-      <Flex alignItems='center' gap='s'>
-        <Text variant='title' size='l'>
-          {bannerMessages.title}
-        </Text>
-        <Text variant='body' size='m' color='subdued'>
-          {coinDetailsMessages.editCoinDetails.optional}
-        </Text>
-      </Flex>
-      <Text variant='body' size='m' color='subdued'>
-        {bannerMessages.description}
-      </Text>
-
+    <>
       <input
         type='file'
         ref={fileInputRef}
@@ -234,103 +199,74 @@ const BannerImageSection = ({
         onChange={onFileInputChange}
       />
 
-      <Flex
-        as={ReactDropzone}
-        // @ts-ignore - ReactDropzone props
-        multiple={false}
-        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
-        onDropAccepted={(files: File[]) => {
-          setIsDragActive(false)
-          onDropAccepted(files)
+      <Box
+        w='100%'
+        h={140}
+        css={{
+          position: 'relative',
+          backgroundImage: hasBanner
+            ? `linear-gradient(0deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("${displayBannerUrl}")`
+            : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          overflow: 'hidden',
+          backgroundColor: hasBanner ? undefined : 'white',
+          border: hasBanner ? 'none' : '1px solid var(--border-default)'
         }}
-        onDropRejected={(files: File[]) => {
-          setIsDragActive(false)
-          onDropRejected(files)
-        }}
-        onDragEnter={() => setIsDragActive(true)}
-        onDragLeave={() => setIsDragActive(false)}
-        disableClick
-        disabled={isProcessing}
-        direction='column'
-        gap='l'
       >
-        <Box
-          w='100%'
-          h={240}
-          borderRadius='m'
-          backgroundColor='white'
-          css={{
-            ...borderStyle,
-            backgroundImage: hasBanner
-              ? `linear-gradient(0deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url("${bannerImageUrl}")`
-              : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isProcessing ? (
+        {isProcessing ? (
+          <Flex alignItems='center' justifyContent='center' h='100%' w='100%'>
             <LoadingSpinner />
-          ) : hasBanner ? null : (
-            <Flex
-              direction='column'
-              alignItems='center'
-              justifyContent='center'
-              gap='s'
-            >
-              <IconCloudUpload color='default' />
-              <Text variant='body' size='m' color='subdued' textAlign='center'>
-                {bannerMessages.dragDrop}
-              </Text>
-              <Text variant='body' size='s' color='subdued' textAlign='center'>
-                {bannerMessages.emptyState}
-              </Text>
-            </Flex>
-          )}
-        </Box>
-        <Flex gap='s' alignItems='center'>
-          <Button
-            variant='secondary'
-            size='small'
-            type='button'
-            disabled={isProcessing}
-            onClick={(e) => {
-              e.stopPropagation()
-              onFileSelect()
+          </Flex>
+        ) : (
+          <Flex
+            alignItems='flex-start'
+            justifyContent='flex-end'
+            p='l'
+            h='100%'
+            w='100%'
+            css={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0
             }}
           >
-            {hasBanner ? bannerMessages.change : bannerMessages.upload}
-          </Button>
-          {hasBanner ? (
-            <PlainButton
+            <Button
+              variant='tertiary'
+              size='small'
               type='button'
               disabled={isProcessing}
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
+              onClick={onFileSelect}
+              iconLeft={IconImage}
             >
-              {bannerMessages.remove}
-            </PlainButton>
-          ) : null}
-        </Flex>
-      </Flex>
+              {bannerMessages.change}
+            </Button>
+          </Flex>
+        )}
+      </Box>
       {error ? (
-        <Text color='danger' size='s' variant='body'>
+        <Text
+          color='danger'
+          size='s'
+          variant='body'
+          css={(theme) => ({
+            margin: theme.spacing.xl,
+            marginTop: theme.spacing.l
+          })}
+        >
           {error}
         </Text>
       ) : null}
-    </Flex>
+    </>
   )
 }
 
 export const EditCoinDetailsPage = () => {
   const { ticker } = useParams<{ ticker: string }>()
   const { data: currentUserId } = useCurrentUserId()
+  const { data: currentUser } = useCurrentAccountUser()
   const navigate = useNavigate()
 
   const {
@@ -339,6 +275,11 @@ export const EditCoinDetailsPage = () => {
     isSuccess,
     isError
   } = useArtistCoinByTicker({ ticker })
+
+  const { image: defaultBannerImageUrl } = useCoverPhoto({
+    userId: currentUser?.user_id,
+    size: WidthSizes.SIZE_2000
+  })
 
   const [submitError, setSubmitError] = useState<string | undefined>(undefined)
 
@@ -354,13 +295,12 @@ export const EditCoinDetailsPage = () => {
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
   const [isProcessingBanner, setIsProcessingBanner] = useState(false)
   const [bannerError, setBannerError] = useState<string | null>(null)
-  const [shouldRemoveBanner, setShouldRemoveBanner] = useState(false)
 
   useEffect(() => {
-    if (coin && !bannerImageFile && !shouldRemoveBanner) {
+    if (coin && !bannerImageFile) {
       setBannerPreviewUrl(coin.bannerImageUrl ?? null)
     }
-  }, [coin, bannerImageFile, shouldRemoveBanner])
+  }, [coin, bannerImageFile])
 
   useEffect(() => {
     return () => {
@@ -384,25 +324,6 @@ export const EditCoinDetailsPage = () => {
     event.target.value = ''
   }
 
-  const handleBannerDropAccepted = async (files: File[]) => {
-    const file = files[0]
-    if (file) {
-      await processBannerFile(file)
-    }
-  }
-
-  const handleBannerDropRejected = (files: File[]) => {
-    const file = files[0]
-    if (!file) return
-    if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
-      setBannerError(bannerMessages.errors.invalidFileType)
-    } else if (file.size > MAX_IMAGE_SIZE) {
-      setBannerError(bannerMessages.errors.fileTooLarge)
-    } else {
-      setBannerError(bannerMessages.errors.processingError)
-    }
-  }
-
   const processBannerFile = async (file: File) => {
     setBannerError(null)
 
@@ -420,7 +341,6 @@ export const EditCoinDetailsPage = () => {
     try {
       const processedFile = await resizeImage(file, 2000, false)
       setBannerImageFile(processedFile)
-      setShouldRemoveBanner(false)
       const previewUrl = URL.createObjectURL(processedFile)
       setBannerPreviewUrl(previewUrl)
     } catch (error) {
@@ -432,13 +352,6 @@ export const EditCoinDetailsPage = () => {
     } finally {
       setIsProcessingBanner(false)
     }
-  }
-
-  const handleBannerRemove = () => {
-    setBannerImageFile(null)
-    setBannerPreviewUrl(null)
-    setBannerError(null)
-    setShouldRemoveBanner(true)
   }
 
   const handleSubmit = async (values: any) => {
@@ -454,8 +367,7 @@ export const EditCoinDetailsPage = () => {
     const transformedValues = {
       description: values.description,
       links,
-      bannerImageFile: bannerImageFile ?? undefined,
-      removeBanner: shouldRemoveBanner && !bannerImageFile
+      bannerImageFile: bannerImageFile ?? undefined
     }
 
     try {
@@ -467,7 +379,6 @@ export const EditCoinDetailsPage = () => {
         setBannerPreviewUrl(result.bannerImageUrl || null)
       }
       setBannerImageFile(null)
-      setShouldRemoveBanner(false)
       setBannerError(null)
       navigate(route.coinPage(coin?.ticker ?? ''))
     } catch (e) {
@@ -546,7 +457,26 @@ export const EditCoinDetailsPage = () => {
           <Form>
             <EditFormScrollContext.Provider value={scrollToTop}>
               <Flex ref={scrollRef} column w='100%'>
-                <Box backgroundColor='white' borderRadius='m' border='default'>
+                <Box
+                  backgroundColor='white'
+                  borderRadius='m'
+                  border='default'
+                  css={{ overflow: 'hidden' }}
+                >
+                  {/* Banner Image Section */}
+                  <BannerImageSection
+                    bannerImageUrl={bannerPreviewUrl}
+                    defaultBannerImageUrl={defaultBannerImageUrl ?? null}
+                    fileInputRef={bannerFileInputRef}
+                    onFileInputChange={handleBannerFileInputChange}
+                    onFileSelect={handleBannerFileSelect}
+                    isProcessing={isProcessingBanner}
+                    error={bannerError}
+                  />
+
+                  {/* Divider */}
+                  <Divider />
+
                   {/* Token Details Section */}
                   <Flex gap='s' m='xl'>
                     <TokenIcon
@@ -566,20 +496,6 @@ export const EditCoinDetailsPage = () => {
                   </Flex>
 
                   {/* Divider */}
-                  <Divider />
-
-                  <BannerImageSection
-                    bannerImageUrl={bannerPreviewUrl}
-                    fileInputRef={bannerFileInputRef}
-                    onFileInputChange={handleBannerFileInputChange}
-                    onFileSelect={handleBannerFileSelect}
-                    onDropAccepted={handleBannerDropAccepted}
-                    onDropRejected={handleBannerDropRejected}
-                    onRemove={handleBannerRemove}
-                    isProcessing={isProcessingBanner}
-                    error={bannerError}
-                  />
-
                   <Divider />
 
                   {/* Description Section */}

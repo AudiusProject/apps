@@ -1,22 +1,9 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
-import { useCurrentAccountUser } from '@audius/common/api'
-import { coinDetailsMessages } from '@audius/common/messages'
 import { ErrorLevel, Feature, LaunchpadFormValues } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import {
-  Box,
-  Button,
-  Flex,
-  IconCloudUpload,
-  LoadingSpinner,
-  Paper,
-  PlainButton,
-  Text,
-  useTheme
-} from '@audius/harmony'
+import { Flex, Paper, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
-import ReactDropzone from 'react-dropzone'
 
 import { ExternalTextLink } from 'components/link'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
@@ -32,7 +19,7 @@ import { ImageUploadArea } from '../components/ImageUploadArea'
 import { SetupConfirmation } from '../components/SetupConfirmation'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS, MAX_IMAGE_SIZE } from '../constants'
-import { getDefaultBannerImageUrl, useLaunchpadAnalytics } from '../utils'
+import { useLaunchpadAnalytics } from '../utils'
 
 const messages = {
   stepInfo: `STEP 1 of ${AMOUNT_OF_STEPS}`,
@@ -47,171 +34,6 @@ const messages = {
   }
 }
 
-const bannerMessages = {
-  title: coinDetailsMessages.editCoinDetails.bannerImage,
-  description: coinDetailsMessages.editCoinDetails.bannerDescription,
-  dragDrop: coinDetailsMessages.editCoinDetails.bannerDragDrop,
-  upload: coinDetailsMessages.editCoinDetails.bannerUpload,
-  change: coinDetailsMessages.editCoinDetails.bannerChange,
-  remove: coinDetailsMessages.editCoinDetails.bannerRemove,
-  emptyState: coinDetailsMessages.editCoinDetails.bannerEmptyState,
-  errors: coinDetailsMessages.editCoinDetails.bannerErrors
-}
-
-type BannerUploadAreaProps = {
-  fileInputRef: React.RefObject<HTMLInputElement>
-  previewUrl: string | null
-  onFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onFileSelect: () => void
-  onDropAccepted: (files: File[]) => void
-  onDropRejected: (files: File[]) => void
-  onRemove: () => void
-  isProcessing: boolean
-  error?: string | null
-}
-
-const BannerUploadArea = ({
-  fileInputRef,
-  previewUrl,
-  onFileInputChange,
-  onFileSelect,
-  onDropAccepted,
-  onDropRejected,
-  onRemove,
-  isProcessing,
-  error
-}: BannerUploadAreaProps) => {
-  const theme = useTheme()
-  const [isDragActive, setIsDragActive] = useState(false)
-  const hasBanner = Boolean(previewUrl)
-
-  return (
-    <Flex direction='column' gap='l'>
-      <Flex alignItems='center' gap='s'>
-        <Text variant='title' size='l'>
-          {bannerMessages.title}
-        </Text>
-        <Text variant='body' size='m' color='subdued'>
-          {coinDetailsMessages.editCoinDetails.optional}
-        </Text>
-      </Flex>
-      <Text variant='body' size='m' color='subdued'>
-        {bannerMessages.description}
-      </Text>
-
-      <input
-        type='file'
-        ref={fileInputRef}
-        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
-        style={{ display: 'none' }}
-        onChange={onFileInputChange}
-      />
-
-      <Flex
-        as={ReactDropzone}
-        // @ts-ignore
-        multiple={false}
-        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
-        onDropAccepted={(files: File[]) => {
-          setIsDragActive(false)
-          onDropAccepted(files)
-        }}
-        onDropRejected={(files: File[]) => {
-          setIsDragActive(false)
-          onDropRejected(files)
-        }}
-        onDragEnter={() => setIsDragActive(true)}
-        onDragLeave={() => setIsDragActive(false)}
-        disableClick
-        disabled={isProcessing}
-        direction='column'
-        gap='l'
-      >
-        <Box
-          w='100%'
-          h={240}
-          borderRadius='m'
-          backgroundColor='white'
-          css={{
-            border: `1px dashed ${
-              isDragActive
-                ? theme.color.border.accent
-                : theme.color.border.default
-            }`,
-            transition: `border-color ${theme.motion.hover}, background-color ${theme.motion.hover}`,
-            cursor: isProcessing ? 'default' : 'pointer',
-            backgroundImage: hasBanner
-              ? `linear-gradient(0deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url("${previewUrl}")`
-              : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            ':hover': {
-              borderColor: isProcessing
-                ? theme.color.border.default
-                : theme.color.border.strong
-            }
-          }}
-        >
-          {isProcessing ? (
-            <LoadingSpinner />
-          ) : hasBanner ? null : (
-            <Flex
-              direction='column'
-              alignItems='center'
-              justifyContent='center'
-              gap='s'
-            >
-              <IconCloudUpload color='default' />
-              <Text variant='body' size='m' color='subdued' textAlign='center'>
-                {bannerMessages.dragDrop}
-              </Text>
-              <Text variant='body' size='s' color='subdued' textAlign='center'>
-                {bannerMessages.emptyState}
-              </Text>
-            </Flex>
-          )}
-        </Box>
-        <Flex gap='s' alignItems='center'>
-          <Button
-            variant='secondary'
-            size='small'
-            type='button'
-            disabled={isProcessing}
-            onClick={(e) => {
-              e.stopPropagation()
-              onFileSelect()
-            }}
-          >
-            {hasBanner ? bannerMessages.change : bannerMessages.upload}
-          </Button>
-          {hasBanner ? (
-            <PlainButton
-              type='button'
-              disabled={isProcessing}
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
-            >
-              {bannerMessages.remove}
-            </PlainButton>
-          ) : null}
-        </Flex>
-      </Flex>
-      {error ? (
-        <Text color='danger' size='s' variant='body'>
-          {error}
-        </Text>
-      ) : null}
-    </Flex>
-  )
-}
-
 type SetupPageProps = PhasePageProps
 
 export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
@@ -220,20 +42,10 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
   const [imageError, setImageError] = useState<string | null>(null)
   const { handleSubmit, setFieldValue, values, errors, touched } =
     useFormikContext<LaunchpadFormValues>()
-  const { data: currentUser } = useCurrentAccountUser()
 
   const { trackFormInputChange } = useLaunchpadAnalytics()
 
   const imageUrl = useFormImageUrl(values.coinImage)
-  const bannerFileInputRef = useRef<HTMLInputElement>(null)
-  const [isProcessingBanner, setIsProcessingBanner] = useState(false)
-  const [bannerError, setBannerError] = useState<string | null>(null)
-  const bannerImageUrl = useFormImageUrl(values.bannerImage)
-  const defaultBannerImageUrl = useMemo(
-    () => getDefaultBannerImageUrl(currentUser),
-    [currentUser]
-  )
-  const bannerPreviewUrl = bannerImageUrl ?? defaultBannerImageUrl ?? null
 
   const handleBack = () => {
     onBack?.()
@@ -276,77 +88,6 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
         setImageError(messages.errors.processingError)
       }
     }
-  }
-
-  const handleBannerFileSelect = () => {
-    bannerFileInputRef.current?.click()
-  }
-
-  const handleBannerFileInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      await processBannerFile(file)
-      trackFormInputChange('bannerImage', file.name)
-    }
-    event.target.value = ''
-  }
-
-  const handleBannerDropAccepted = async (files: File[]) => {
-    const file = files[0]
-    if (file) {
-      await processBannerFile(file)
-      trackFormInputChange('bannerImage', file.name)
-    }
-  }
-
-  const handleBannerDropRejected = (files: File[]) => {
-    const file = files[0]
-    if (file) {
-      if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
-        setBannerError(bannerMessages.errors.invalidFileType)
-      } else if (file.size > MAX_IMAGE_SIZE) {
-        setBannerError(bannerMessages.errors.fileTooLarge)
-      } else {
-        setBannerError(bannerMessages.errors.processingError)
-      }
-    }
-  }
-
-  const processBannerFile = async (file: File) => {
-    setBannerError(null)
-
-    if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
-      setBannerError(bannerMessages.errors.invalidFileType)
-      return
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      setBannerError(bannerMessages.errors.fileTooLarge)
-      return
-    }
-
-    setIsProcessingBanner(true)
-    try {
-      const processedFile = await resizeImage(file, 2000, false)
-      setFieldValue('bannerImage', processedFile)
-    } catch (error) {
-      reportToSentry({
-        error: error instanceof Error ? error : new Error(error as string),
-        name: 'Launchpad Banner Upload Processing Error',
-        feature: Feature.ArtistCoins,
-        level: ErrorLevel.Warning
-      })
-      setBannerError(bannerMessages.errors.processingError)
-    } finally {
-      setIsProcessingBanner(false)
-    }
-  }
-
-  const handleBannerRemove = () => {
-    setFieldValue('bannerImage', null)
-    setBannerError(null)
   }
 
   const processFile = async (file: File) => {
@@ -435,17 +176,6 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
                 }
                 isProcessing={isProcessingImage}
               />
-              <BannerUploadArea
-                fileInputRef={bannerFileInputRef}
-                previewUrl={bannerPreviewUrl}
-                onFileInputChange={handleBannerFileInputChange}
-                onFileSelect={handleBannerFileSelect}
-                onDropAccepted={handleBannerDropAccepted}
-                onDropRejected={handleBannerDropRejected}
-                onRemove={handleBannerRemove}
-                isProcessing={isProcessingBanner}
-                error={bannerError}
-              />
               <SetupConfirmation />
             </Flex>
           </form>
@@ -458,8 +188,6 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
           !errors.coinName &&
           !errors.coinSymbol &&
           !errors.coinImage &&
-          !isProcessingBanner &&
-          !bannerError &&
           values.setupConfirmation
         }
       />
