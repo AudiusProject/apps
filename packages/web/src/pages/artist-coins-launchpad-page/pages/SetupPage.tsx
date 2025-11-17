@@ -29,6 +29,7 @@ import {
 import { ArtistCoinsSubmitRow } from '../components/ArtistCoinsSubmitRow'
 import { CoinFormFields } from '../components/CoinFormFields'
 import { ImageUploadArea } from '../components/ImageUploadArea'
+import { SetupConfirmation } from '../components/SetupConfirmation'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS, MAX_IMAGE_SIZE } from '../constants'
 import { getDefaultBannerImageUrl, useLaunchpadAnalytics } from '../utils'
@@ -434,7 +435,6 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
                 }
                 isProcessing={isProcessingImage}
               />
-
               <BannerUploadArea
                 fileInputRef={bannerFileInputRef}
                 previewUrl={bannerPreviewUrl}
@@ -446,6 +446,7 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
                 isProcessing={isProcessingBanner}
                 error={bannerError}
               />
+              <SetupConfirmation />
             </Flex>
           </form>
         </Paper>
@@ -458,7 +459,8 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
           !errors.coinSymbol &&
           !errors.coinImage &&
           !isProcessingBanner &&
-          !bannerError
+          !bannerError &&
+          values.setupConfirmation
         }
       />
     </>

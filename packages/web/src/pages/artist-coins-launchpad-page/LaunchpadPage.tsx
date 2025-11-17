@@ -74,8 +74,6 @@ const messages = {
   }
 }
 
-const getArtistSocialLinks = getUserSocialLinks
-
 const sanitizeFormValuesForLogging = (
   values: LaunchpadFormValues
 ): Omit<LaunchpadFormValues, 'coinImage' | 'bannerImage'> => {
@@ -595,7 +593,7 @@ export const LaunchpadPage = () => {
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
-        const socialLinks = getArtistSocialLinks(currentUser)
+        const socialLinks = getUserSocialLinks(currentUser)
         const bannerImageFile = formValues.bannerImage ?? undefined
         launchCoin({
           userId: currentUser.user_id,
@@ -646,6 +644,7 @@ export const LaunchpadPage = () => {
         receiveAmount: '',
         usdcValue: '',
         wantsToBuy: 'no',
+        setupConfirmation: false,
         termsAgreed: false
       }}
       validationSchema={validationSchema}

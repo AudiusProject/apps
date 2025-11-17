@@ -4,6 +4,7 @@ import {
   deriveEscrow
 } from '@meteora-ag/dynamic-bonding-curve-sdk'
 import { LockClient } from '@meteora-ag/met-lock-sdk'
+import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync
@@ -12,8 +13,11 @@ import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
+
+const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 interface ClaimVestedCoinsRequestBody {
   tokenMint: string
@@ -148,7 +152,8 @@ export const claimVestedCoins = async (
       message: 'Claim vested coins request',
       tokenMint,
       ownerWalletAddress: ownerWallet.toBase58(),
-      receiverWalletAddress: receiverWallet.toBase58()
+      receiverWalletAddress: receiverWallet.toBase58(),
+      rewardsPoolPercentage
     })
 
     // Initialize clients
@@ -166,29 +171,6 @@ export const claimVestedCoins = async (
     logger.info({
       message: 'Found DBC pool',
       poolAddress: originalDbcPool.publicKey.toBase58()
-    })
-
-    // Derive the rewards pool address from the DBC pool config
-    const poolConfig = await dbcClient.state.getPoolConfig(
-      originalDbcPool.account.config
-    )
-    const rewardsPoolWallet = poolConfig.leftoverReceiver
-
-    if (!rewardsPoolWallet) {
-      throw new Error('Could not find rewards pool wallet from DBC pool config')
-    }
-
-    // Derive rewards pool token account address
-    const rewardsPoolAddress = getAssociatedTokenAddressSync(
-      mintPublicKey,
-      rewardsPoolWallet,
-      true // allowOwnerOffCurve - rewardsPoolWallet is a PDA (leftoverReceiver)
-    )
-
-    logger.info({
-      message: 'Derived rewards pool address',
-      rewardsPoolWallet: rewardsPoolWallet.toBase58(),
-      rewardsPoolAddress: rewardsPoolAddress.toBase58()
     })
 
     // Get the pool state to access the config
@@ -322,15 +304,46 @@ export const claimVestedCoins = async (
       claimTx.add(userTransferInstruction)
     }
 
+    let rewardsPoolAddress: PublicKey | null = null
     // Transfer rewards pool portion to rewards pool token account if provided
-    if (rewardsPoolAddress && rewardsPoolAmount.gt(new BN(0))) {
+    if (rewardsPoolAmount.gt(new BN(0))) {
+      const rewardsPoolAuthorityResult = await db.raw<{
+        rows: Array<{ authority: string }>
+      }>(
+        `
+      SELECT authority 
+      FROM sol_meteora_dbc_migrations m 
+      JOIN artist_coins ac ON ac.mint = m.base_mint 
+      JOIN sol_reward_manager_inits r ON r.mint = ac.mint
+      WHERE m.base_mint = ?
+      `,
+        [mintPublicKey.toBase58()]
+      )
+
+      if (
+        !rewardsPoolAuthorityResult.rows ||
+        rewardsPoolAuthorityResult.rows.length === 0
+      ) {
+        throw new Error(
+          `Could not find rewards pool address for mint: ${mintPublicKey.toBase58()}`
+        )
+      }
+
+      const rewardsPoolAuthority = new PublicKey(
+        rewardsPoolAuthorityResult.rows[0].authority
+      )
+
+      rewardsPoolAddress = getAssociatedTokenAddressSync(
+        mintPublicKey,
+        rewardsPoolAuthority,
+        true
+      )
       // Check if rewards pool ATA exists - it should already exist
       const rewardsPoolAccountInfo =
         await connection.getAccountInfo(rewardsPoolAddress)
       if (!rewardsPoolAccountInfo) {
         throw new Error(
-          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}. ` +
-            `Expected rewards pool wallet: ${rewardsPoolWallet.toBase58()}`
+          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}, got ${rewardsPoolAccountInfo}`
         )
       }
 
