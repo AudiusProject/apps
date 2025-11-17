@@ -146,12 +146,10 @@ export const setupFormSchema = ({
       }),
       [FIELDS.payAmount]: z.string().optional(),
       [FIELDS.receiveAmount]: z.string().optional(),
-      [FIELDS.setupConfirmation]: z
-        .boolean()
-        .refine((val) => val === true, {
-          message:
-            'You must confirm you have the rights to use this Coin Name, Ticker Symbol, and Image'
-        }),
+      [FIELDS.setupConfirmation]: z.boolean().refine((val) => val === true, {
+        message:
+          "You must confirm that you've reviewed and understand before continuing."
+      }),
       [FIELDS.termsAgreed]: z.boolean().refine((val) => val === true, {
         message:
           'You must agree to the terms of service and Artist Coins terms to continue'
