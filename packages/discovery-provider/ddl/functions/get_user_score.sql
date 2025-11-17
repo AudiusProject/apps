@@ -54,6 +54,7 @@ create or replace function get_user_score(target_user_id integer) returns table(
             coalesce(au.following_count, 0) as following_count,
             coalesce(au.follower_count, 0) as follower_count,
             coalesce(cb.block_count, 0) as chat_block_count,
+            (u.profile_picture_sizes is not null) as has_profile_picture,
             case
                 when (
                     u.handle_lc ilike '%audius%'
@@ -100,7 +101,8 @@ select a.*,
         a.following_count,
         a.is_audius_impersonator,
         a.distinct_tracks_played,
-        a.karma
+        a.karma,
+        a.has_profile_picture
     ) as score
 from aggregate_scores a;
 $function$;

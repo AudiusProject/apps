@@ -59,8 +59,11 @@ export const ArtistCoinDetailsModal = ({
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const { spacing } = useTheme()
   const { data: artistCoin } = useArtistCoin(mint)
+
   const { data: artistHandle } = useUser(artistCoin?.ownerId, {
-    select: (user) => user.handle
+    select: (user) => {
+      return user.handle
+    }
   })
   const { data: coingeckoResponse } = useCoinGeckoCoin(
     { coinId: 'audius' },

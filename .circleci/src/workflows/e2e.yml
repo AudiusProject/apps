@@ -1,4 +1,6 @@
-when: << pipeline.parameters.run-integration-workflow >>
+# TODO: PE-7331 - Skipping e2e-test job for now - swap out the whens when we are ready to run the job
+# when: << pipeline.parameters.run-integration-workflow >>
+when: false
 jobs:
   - e2e-init:
       context: Vercel

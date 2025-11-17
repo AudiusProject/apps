@@ -9,9 +9,8 @@ test('auths, fetches tracks, and favorites a track', async ({
   // Set entropy so we don't need to do OTP
   const entropy = process.env.CREATE_AUDIUS_APP_TEST_ENTROPY ?? ''
   await context.addInitScript((entropy) => {
-    if (window.location.hostname === 'audius.co') {
-      window.localStorage.setItem('hedgehog-entropy-key', entropy)
-    }
+    // Set entropy for both audius.co (OAuth) and localhost (app)
+    window.localStorage.setItem('hedgehog-entropy-key', entropy)
   }, entropy)
 
   await page.goto('localhost:4173')
@@ -33,14 +32,11 @@ test('auths, fetches tracks, and favorites a track', async ({
   await page.getByRole('button', { name: 'Get Tracks' }).click()
 
   // Set up block_confirmation response listener
-  const responsePromise = page.waitForResponse(async (response) => {
-    if (
-      response.url().includes('favorite') ||
-      response.url().includes('unfavorite')
-    ) {
-      const json = await response.json()
-      return json.trackId
-    }
+  // The SDK makes requests to relay and then polls block_confirmation
+  const responsePromise = page.waitForResponse((response) => {
+    return (
+      response.url().includes('block_confirmation') && response.status() === 200
+    )
   })
 
   const favoriteButton = page

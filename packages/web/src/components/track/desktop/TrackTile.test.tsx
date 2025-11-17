@@ -1,71 +1,16 @@
-import { developmentConfig, Id } from '@audius/sdk'
-import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router-dom-v5-compat'
-import { describe, expect, it, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
-import { mswServer, render, screen } from 'test/test-utils'
+import { testTrack } from 'test/mocks/fixtures/tracks'
+import { mockTrackById, mockEvents } from 'test/msw/mswMocks'
+import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { TrackTileSize } from '../types'
 
 import { TrackTile } from './TrackTile'
 
-const { apiEndpoint } = developmentConfig.network
-
-const testUser = {
-  id: Id.parse(2),
-  handle: 'test-user',
-  name: 'Test User',
-  is_verified: false,
-  is_deactivated: false,
-  artist_pick_track_id: null
-}
-
-const testTrack = {
-  id: Id.parse(1),
-  track_id: Id.parse(1),
-  user_id: Id.parse(2),
-  genre: 'Electronic',
-  title: 'Test Track',
-  user: testUser,
-  duration: 180,
-  repost_count: 5,
-  favorite_count: 10,
-  comment_count: 15,
-  permalink: '/test-user/test-track',
-  is_delete: false,
-  is_stream_gated: false,
-  is_unlisted: false,
-  has_current_user_reposted: false,
-  has_current_user_saved: false,
-  preview_cid: 'QmTestPreviewCid',
-  _co_sign: null,
-  is_owned_by_user: false,
-  is_scheduled_release: false,
-  is_available: true,
-  is_downloadable: true,
-  play_count: 1,
-  artwork: null,
-  followee_reposts: [],
-  followee_favorites: [],
-  track_segments: [],
-  field_visibility: {}
-  // Add any other required fields with default values
-}
-
 function renderTrackTile(overrides = {}) {
-  mswServer.use(
-    http.get(`${apiEndpoint}/v1/full/tracks`, ({ request }) => {
-      const url = new URL(request.url)
-      const id = url.searchParams.get('id')
-      if (id === Id.parse(1)) {
-        return HttpResponse.json({ data: [{ ...testTrack, ...overrides }] })
-      }
-      return new HttpResponse(null, { status: 404 })
-    }),
-    http.get(`${apiEndpoint}/v1/events/entity`, () => {
-      return HttpResponse.json({ data: [] })
-    })
-  )
+  mswServer.use(mockTrackById({ ...testTrack, ...overrides }), mockEvents())
 
   return render(
     <Routes>

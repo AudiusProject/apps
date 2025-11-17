@@ -47,10 +47,6 @@
   flex: 1 1 100%;
 }
 
-.iconVerified path:nth-child(2) {
-  fill: var(--harmony-static-white);
-}
-
 .showPrivateKey {
   line-height: var(--harmony-unit-5);
 }

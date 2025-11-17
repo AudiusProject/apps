@@ -116,6 +116,7 @@ const GraduationProgressMetricRowComponent = ({
       pv='m'
       ph='l'
       w='100%'
+      data-testid={`metric-row-Graduation Progress`}
     >
       <Flex alignItems='center' justifyContent='space-between' w='100%'>
         <Text variant='heading' size='xl'>
@@ -169,11 +170,18 @@ const MetricRowComponent = ({
       pv='m'
       ph='l'
       w='100%'
+      data-testid={`metric-row-${metric.label}`}
     >
       <Flex column alignItems='flex-start' gap='xs' flex={1}>
-        <Text variant='heading' size='xl'>
-          {metric.value}
-        </Text>
+        <Tooltip
+          text={metric.rawValue}
+          disabled={!metric.rawValue || metric.rawValue === metric.value}
+          mount='body'
+        >
+          <Text variant='heading' size='xl'>
+            {metric.value}
+          </Text>
+        </Tooltip>
         <Text variant='title' size='m' color='subdued'>
           {metric.label}
         </Text>

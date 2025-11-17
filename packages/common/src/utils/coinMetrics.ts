@@ -1,10 +1,15 @@
 import { Coin } from '~/adapters/coin'
 import type { CoinGeckoCoinResponse } from '~/api'
 
-import { formatCurrencyWithSubscript, formatCount } from './decimal'
+import {
+  formatCurrencyWithSubscript,
+  formatCount,
+  formatCurrency
+} from './decimal'
 
 export type MetricData = {
   value: string
+  rawValue?: string
   label: string
   change?: {
     value: string
@@ -36,15 +41,22 @@ const createChangeData = (changePercent: number | undefined) => {
   }
 }
 
-const createMetric = (
-  value: string,
-  label: string,
+const createMetric = ({
+  value,
+  label,
+  changePercent,
+  rawValue
+}: {
+  value: string
+  label: string
   changePercent?: number
-): MetricData | null => {
+  rawValue?: string
+}): MetricData | null => {
   try {
     return {
       value,
       label,
+      rawValue,
       change: createChangeData(changePercent)
     }
   } catch {
@@ -54,24 +66,28 @@ const createMetric = (
 
 export const createCoinMetrics = (coin: Coin): MetricData[] => {
   const potentialMetrics = [
-    createMetric(
-      formatCurrencyWithSubscript(coin.displayPrice),
-      messages.pricePerCoin,
-      coin.priceChange24hPercent
-    ),
-    createMetric(
-      `$${formatCount(coin.displayMarketCap, 2)}`,
-      messages.marketCap
-    ),
-    createMetric(
-      `$${formatCount(coin.totalVolumeUSD, 2)}`,
-      messages.totalVolume
-    ),
-    createMetric(formatCount(coin.holder), messages.uniqueHolders),
-    createMetric(
-      `${Math.round((coin.dynamicBondingCurve?.curveProgress ?? 0) * 100)}%`,
-      messages.graduationProgress
-    )
+    createMetric({
+      value: formatCurrencyWithSubscript(coin.displayPrice),
+      label: messages.pricePerCoin,
+      changePercent: coin.priceChange24hPercent,
+      rawValue: formatCurrency(coin.displayPrice)
+    }),
+    createMetric({
+      value: `$${formatCount(coin.displayMarketCap, 2)}`,
+      label: messages.marketCap
+    }),
+    createMetric({
+      value: `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      label: messages.totalVolume
+    }),
+    createMetric({
+      value: formatCount(coin.holder),
+      label: messages.uniqueHolders
+    }),
+    createMetric({
+      value: `${Math.round((coin.dynamicBondingCurve?.curveProgress ?? 0) * 100)}%`,
+      label: messages.graduationProgress
+    })
   ]
 
   return potentialMetrics.filter(
@@ -85,21 +101,23 @@ export const createAudioCoinMetrics = (
   if (coingeckoResponse === null || coingeckoResponse === undefined) {
     return []
   }
+
   return [
-    createMetric(
-      formatCurrencyWithSubscript(
+    createMetric({
+      value: formatCurrencyWithSubscript(
         coingeckoResponse.market_data.current_price.usd
       ),
-      messages.pricePerCoin,
-      coingeckoResponse.market_data.price_change_percentage_24h
-    ),
-    createMetric(
-      `$${formatCount(coingeckoResponse.market_data.market_cap.usd, 2)}`,
-      messages.marketCap
-    ),
-    createMetric(
-      `$${formatCount(coingeckoResponse.market_data.total_volume.usd, 2)}`,
-      messages.volume24h
-    )
+      label: messages.pricePerCoin,
+      changePercent: coingeckoResponse.market_data.price_change_percentage_24h,
+      rawValue: formatCurrency(coingeckoResponse.market_data.current_price.usd)
+    }),
+    createMetric({
+      value: `$${formatCount(coingeckoResponse.market_data.market_cap.usd, 2)}`,
+      label: messages.marketCap
+    }),
+    createMetric({
+      value: `$${formatCount(coingeckoResponse.market_data.total_volume.usd, 2)}`,
+      label: messages.volume24h
+    })
   ].filter((metric): metric is MetricData => metric !== null)
 }

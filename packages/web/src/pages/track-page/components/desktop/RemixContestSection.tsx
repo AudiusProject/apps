@@ -6,9 +6,7 @@ import {
   useTrack,
   useUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { ID, Name, SquareSizes } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { UPLOAD_PAGE } from '@audius/common/src/utils/route'
 import { TrackMetadataForUpload } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
@@ -69,9 +67,6 @@ export const RemixContestSection = ({
   const { data: originalTrack } = useTrack(trackId)
   const { data: originalUser } = useUser(originalTrack?.owner_id)
   const { data: remixContest } = useRemixContest(trackId)
-  const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-    FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-  )
   const { data: remixes, count: remixCount = 0 } = useRemixesLineup({
     trackId,
     isContestEntry: true
@@ -80,9 +75,7 @@ export const RemixContestSection = ({
   const [contentHeight, setContentHeight] = useState(0)
   const hasPrizeInfo = !!remixContest?.eventData?.prizeInfo
   const isContestEnded = dayjs(remixContest?.endDate).isBefore(dayjs())
-  const hasWinners =
-    isRemixContestWinnersMilestoneEnabled &&
-    (remixContest?.eventData?.winners?.length ?? 0) > 0
+  const hasWinners = (remixContest?.eventData?.winners?.length ?? 0) > 0
 
   const handleHeightChange = useCallback((height: number) => {
     setContentHeight(height)
@@ -250,10 +243,7 @@ export const RemixContestSection = ({
                   {messages.uploadRemixButtonText}
                 </Button>
               </Flex>
-            ) : isOwner &&
-              isContestEnded &&
-              isRemixContestWinnersMilestoneEnabled &&
-              remixCount > 0 ? (
+            ) : isOwner && isContestEnded && remixCount > 0 ? (
               <Flex mb='m'>
                 <Button
                   variant={hasWinners ? 'secondary' : 'primary'}

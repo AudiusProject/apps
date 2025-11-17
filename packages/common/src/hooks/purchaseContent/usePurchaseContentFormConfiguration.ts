@@ -10,7 +10,6 @@ import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 import { UserCollectionMetadata } from '~/models'
 import { PurchaseMethod, PurchaseVendor } from '~/models/PurchaseContent'
 import { UserTrackMetadata } from '~/models/Track'
-import { FeatureFlags } from '~/services'
 import {
   PurchaseableContentType,
   PurchaseContentPage,
@@ -19,8 +18,6 @@ import {
   purchaseContentSelectors
 } from '~/store/purchase-content'
 import { isContentCollection, isContentTrack } from '~/utils'
-
-import { useFeatureFlag } from '../useFeatureFlag'
 
 import {
   AMOUNT_PRESET,
@@ -72,13 +69,8 @@ export const usePurchaseContentFormConfiguration = ({
     select: (account) => account?.guestEmail
   })
   const { data: currentUser } = useCurrentAccountUser()
-  const { isEnabled: guestCheckoutEnabled } = useFeatureFlag(
-    FeatureFlags.GUEST_CHECKOUT
-  )
 
-  const isGuestCheckout =
-    guestCheckoutEnabled &&
-    (!currentUser || (currentUser && !currentUser.handle))
+  const isGuestCheckout = !currentUser || (currentUser && !currentUser.handle)
 
   useEffect(() => {
     // check if feature flag loaded to set the page

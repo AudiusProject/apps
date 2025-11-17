@@ -1,20 +1,16 @@
 import { useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 
-import {
-  Flex,
-  Text,
-  IconCaretUp,
-  IconCaretDown,
-  Paper
-} from '@audius/harmony-native'
-import LoadingSpinner from 'app/components/loading-spinner'
+import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 type AccountBalanceProps = {
-  userId?: number
   width?: number
   height?: number
 }
@@ -33,17 +29,21 @@ const formatPercentage = (value: number): string => {
 }
 
 export const AccountBalance = ({
-  userId,
   width = 350,
   height = 204
 }: AccountBalanceProps) => {
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -51,55 +51,93 @@ export const AccountBalance = ({
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = historyData[historyData.length - 1].balanceUsd
-    const change = lastBalance - firstBalance
+    const change = currentBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
     return {
-      balance: lastBalance,
+      balance: currentBalance,
       amount: change,
       percentage,
       isPositive: change >= 0
     }
-  }, [historyData])
+  }, [historyData, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   if (isLoading) {
     return (
-      <Paper w='100%' p='m' direction='column' alignItems='center' gap='s'>
-        <LoadingSpinner />
-        <Text variant='body' size='s' strength='weak'>
+      <Paper
+        w='100%'
+        h={300}
+        pv='xl'
+        ph='m'
+        direction='column'
+        alignItems='center'
+        justifyContent='center'
+        gap='l'
+        border='default'
+      >
+        <Text variant='body' size='l' color='subdued'>
           {messages.loading}
         </Text>
       </Paper>
     )
   }
 
-  if (isError || !historyData || historyData.length === 0) {
+  if (isError) {
     return (
-      <Paper w='100%' p='m' direction='column' alignItems='center'>
-        <Text variant='body' size='m' strength='weak' color='danger'>
+      <Paper
+        w='100%'
+        p='m'
+        direction='column'
+        alignItems='center'
+        border='default'
+      >
+        <Text variant='body' size='m' strength='weak' color='subdued'>
           {messages.error}
         </Text>
       </Paper>
     )
   }
 
-  const Icon = changeStats.isPositive ? IconCaretUp : IconCaretDown
+  // Show zero balance state without graph when balance is 0 or no history
+  const hasZeroBalance =
+    currentBalance === 0 || !historyData || historyData.length === 0
+
+  if (hasZeroBalance) {
+    return (
+      <Paper w='100%' p='m' direction='column' gap='m' border='default'>
+        <Flex column gap='s'>
+          <Text variant='heading' size='s' color='default'>
+            {messages.title}
+          </Text>
+          <Text variant='display' size='s'>
+            {formatCurrency(0, 2)}
+          </Text>
+        </Flex>
+      </Paper>
+    )
+  }
+
   const changeColor = changeStats.isPositive ? 'success' : 'default'
+  const rotation = changeStats.isPositive ? -45 : 45
 
   return (
-    <Paper w='100%' p='m' direction='column' gap='m'>
+    <Paper w='100%' p='m' direction='column' gap='m' border='default'>
       <Flex column gap='xs'>
-        <Text variant='heading' size='s'>
+        <Text variant='heading' size='s' color='default'>
           {messages.title}
         </Text>
         {changeStats.balance !== null ? (
           <Text variant='display' size='s'>
-            {formatCurrency(changeStats.balance, 0)}
+            {formatCurrency(changeStats.balance, 2)}
           </Text>
         ) : null}
         <Flex row gap='xs' alignItems='center'>
-          <Icon color={changeColor} size='s' />
+          <Box style={{ transform: [{ rotate: `${rotation}deg` }] }}>
+            <IconArrowRight color={changeColor} size='s' />
+          </Box>
           <Text variant='body' size='s' strength='default' color={changeColor}>
             {formatCurrency(Math.abs(changeStats.amount))} (
             {formatPercentage(Math.abs(changeStats.percentage))})
@@ -110,11 +148,7 @@ export const AccountBalance = ({
         </Flex>
       </Flex>
 
-      <UserBalanceHistoryGraph
-        userId={effectiveUserId ?? undefined}
-        width={width}
-        height={height}
-      />
+      <UserBalanceHistoryGraph width={width} height={height} />
     </Paper>
   )
 }

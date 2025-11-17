@@ -41,7 +41,6 @@ import { ChangeEmailMobilePage } from './ChangeEmailPage'
 import { ChangePasswordMobilePage } from './ChangePasswordPage'
 import NotificationsSettingsPage from './NotificationsSettingsPage'
 import styles from './SettingsPage.module.css'
-import VerificationPage from './VerificationPage'
 
 const {
   getNotificationSettings: getNotificationSettingsAction,
@@ -65,7 +64,6 @@ export enum SubPage {
   ACCOUNT = 'account',
   NOTIFICATIONS = 'notifications',
   ABOUT = 'about',
-  VERIFICATION = 'verification',
   CHANGE_PASSWORD = 'change password',
   CHANGE_EMAIL = 'change email'
 }
@@ -93,7 +91,6 @@ const SubPages = {
   [SubPage.ACCOUNT]: AccountSettingsPage as FC<SettingsPageProps>,
   [SubPage.ABOUT]: AboutSettingsPage as FC<SettingsPageProps>,
   [SubPage.NOTIFICATIONS]: NotificationsSettingsPage as FC<SettingsPageProps>,
-  [SubPage.VERIFICATION]: VerificationPage as FC<SettingsPageProps>,
   [SubPage.CHANGE_PASSWORD]: ChangePasswordMobilePage as FC<SettingsPageProps>,
   [SubPage.CHANGE_EMAIL]: ChangeEmailMobilePage as FC<SettingsPageProps>
 }

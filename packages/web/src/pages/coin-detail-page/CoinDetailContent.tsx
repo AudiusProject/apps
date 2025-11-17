@@ -45,7 +45,7 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
         flex: hasEnoughSpaceForTwoColumns ? '0 0 auto' : '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.m
+        gap: theme.spacing.xl
       }
     }
   }
@@ -65,8 +65,10 @@ export const CoinDetailContent = ({ mint }: CoinDetailContentProps) => {
         <CoinInfoSection mint={mint} />
       </Flex>
       <Flex css={styles.rightSection}>
-        <CoinInsights mint={mint} />
-        <CoinLeaderboardCard mint={mint} />
+        <Flex column gap='m'>
+          <CoinInsights mint={mint} />
+          <CoinLeaderboardCard mint={mint} />
+        </Flex>
         <ExclusiveTracksSection mint={mint} />
       </Flex>
     </Flex>

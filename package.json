@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "1.5.159",
+  "version": "1.5.161",
   "workspaces": [
     "packages/*",
     "packages/discovery-provider/plugins/pedalboard/apps/*",
@@ -131,7 +131,8 @@
     "valtio": "1.13.2"
   },
   "resolutions": {
-    "@babel/core": "7.25.2"
+    "@babel/core": "7.25.2",
+    "cipher-base": "1.0.7"
   },
   "overrides": {
     "@types/prop-types": "15.7.5",

@@ -2,26 +2,14 @@ import { ReactNode } from 'react'
 
 import { ChallengeName, ChallengeRewardID } from '@audius/common/models'
 import { Nullable, challengeRewardsConfig, route } from '@audius/common/utils'
-import {
-  IconArrowRight,
-  IconCheck,
-  IconCloudUpload,
-  IconComponent
-} from '@audius/harmony'
+import { IconArrowRight, IconCloudUpload, IconComponent } from '@audius/harmony'
 
-const {
-  EXPLORE_PAGE,
-  LIBRARY_PAGE,
-  SETTINGS_PAGE,
-  TRENDING_PAGE,
-  UPLOAD_PAGE,
-  profilePage
-} = route
+const { EXPLORE_PAGE, LIBRARY_PAGE, TRENDING_PAGE, UPLOAD_PAGE, profilePage } =
+  route
 
 type LinkButtonType =
   | 'trackUpload'
   | 'profile'
-  | 'verifyAccount'
   | 'trendingTracks'
   | 'sendFirstTip'
   | 'firstPlaylist'
@@ -47,12 +35,6 @@ const linkButtonMap: Record<LinkButtonType, LinkButtonInfo> = {
     leftIcon: null,
     rightIcon: IconArrowRight,
     link: (handle: Nullable<string>) => (handle ? profilePage(handle) : null)
-  },
-  verifyAccount: {
-    label: 'Verify Your Account',
-    leftIcon: null,
-    rightIcon: IconCheck,
-    link: () => SETTINGS_PAGE
   },
   trendingTracks: {
     label: 'Trending Tracks',
@@ -104,22 +86,6 @@ const webChallengesConfig: Record<ChallengeRewardID, WebChallengeInfo> = {
   },
   [ChallengeName.Referred]: {
     icon: <i className='emoji large love-letter' />
-  },
-  'connect-verified': {
-    icon: <i className='emoji large link-symbol' />,
-    modalButtonInfo: {
-      incomplete: linkButtonMap.verifyAccount,
-      inProgress: linkButtonMap.verifyAccount,
-      complete: linkButtonMap.profile
-    }
-  },
-  [ChallengeName.ConnectVerified]: {
-    icon: <i className='emoji large link-symbol' />,
-    modalButtonInfo: {
-      incomplete: linkButtonMap.verifyAccount,
-      inProgress: linkButtonMap.verifyAccount,
-      complete: linkButtonMap.profile
-    }
   },
   'listen-streak': {
     icon: <i className='emoji large headphone' />,
@@ -281,6 +247,12 @@ const webChallengesConfig: Record<ChallengeRewardID, WebChallengeInfo> = {
   },
   [ChallengeName.RemixContestWinner]: {
     icon: <i className='emoji large trophy' />
+  },
+  [ChallengeName.ConnectVerified]: {
+    icon: null
+  },
+  'connect-verified': {
+    icon: null
   }
 }
 

@@ -1,25 +1,24 @@
 import { useMemo } from 'react'
 
-import { useCurrentUserId, useUserBalanceHistory } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserBalanceHistory,
+  useUserTotalBalance
+} from '@audius/common/api'
 import { accountBalanceMessages as messages } from '@audius/common/messages'
 import {
   Flex,
   Text,
-  IconCaretUp,
-  IconCaretDown,
+  IconArrowRight,
   Box,
-  Paper
+  Paper,
+  LoadingSpinner
 } from '@audius/harmony'
 import { css, useTheme } from '@emotion/react'
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
-
-type AccountBalanceProps = {
-  userId?: number
-}
 
 const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
@@ -43,9 +42,9 @@ const DesktopChangeIndicator = ({
   changeAmount: number
   changePercentage: number
 }) => {
-  const Icon = isPositive ? IconCaretUp : IconCaretDown
   const theme = useTheme()
   const changeColor = isPositive ? 'success' : 'default'
+  const rotation = isPositive ? -45 : 45
 
   return (
     <Flex gap='s' alignItems='center'>
@@ -71,8 +70,11 @@ const DesktopChangeIndicator = ({
               : theme.color.neutral.n400
           })}
         />
-        <Icon
-          css={css({ position: 'relative', zIndex: 1 })}
+        <IconArrowRight
+          css={css({
+            position: 'relative',
+            transform: `rotate(${rotation}deg)`
+          })}
           size='l'
           color={changeColor}
         />
@@ -99,12 +101,16 @@ const MobileChangeIndicator = ({
   changeAmount: number
   changePercentage: number
 }) => {
-  const Icon = isPositive ? IconCaretUp : IconCaretDown
   const changeColor = isPositive ? 'success' : 'default'
+  const rotation = isPositive ? -45 : 45
 
   return (
     <Flex gap='xs' alignItems='center'>
-      <Icon size='s' color={changeColor} />
+      <IconArrowRight
+        size='s'
+        color={changeColor}
+        css={css({ transform: `rotate(${rotation}deg)` })}
+      />
       <Text variant='body' size='s' color={changeColor}>
         {formatCurrency(Math.abs(changeAmount))} (
         {formatPercentage(Math.abs(changePercentage))})
@@ -116,15 +122,20 @@ const MobileChangeIndicator = ({
   )
 }
 
-const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
+const AccountBalanceContent = () => {
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
     data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
 
   const changeStats = useMemo(() => {
     if (!historyData || historyData.length === 0) {
@@ -132,17 +143,19 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     }
 
     const firstBalance = historyData[0].balanceUsd
-    const lastBalance = historyData[historyData.length - 1].balanceUsd
-    const change = lastBalance - firstBalance
+    const change = currentBalance - firstBalance
     const percentage = firstBalance !== 0 ? (change / firstBalance) * 100 : 0
 
     return {
-      balance: lastBalance,
+      balance: currentBalance,
       amount: change,
       percentage,
       isPositive: change >= 0
     }
-  }, [historyData])
+  }, [historyData, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
 
   const padding = isMobile ? 'm' : 'l'
   const gap = isMobile ? 'm' : 'l'
@@ -151,22 +164,24 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     return (
       <Paper
         w='100%'
-        p={padding}
+        h={isMobile ? 300 : 400}
+        pv={isMobile ? 'xl' : '3xl'}
+        ph={padding}
         direction='column'
         alignItems='center'
         justifyContent='center'
-        gap='s'
-        css={css({ minHeight: 400 })}
+        gap='l'
+        border='default'
       >
-        <LoadingSpinner />
-        <Text variant='body' size='s' strength='weak'>
+        <LoadingSpinner size='3xl' color='subdued' />
+        <Text variant='body' size='l' color='subdued'>
           {messages.loading}
         </Text>
       </Paper>
     )
   }
 
-  if (isError || !historyData || historyData.length === 0) {
+  if (isError) {
     return (
       <Paper
         w='100%'
@@ -175,10 +190,30 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
         alignItems='center'
         justifyContent='center'
         css={css({ minHeight: 400 })}
+        border='default'
       >
-        <Text variant='body' size='m' strength='weak' color='danger'>
+        <Text variant='body' size='m' strength='weak' color='subdued'>
           {messages.error}
         </Text>
+      </Paper>
+    )
+  }
+
+  // Show zero balance state without graph when balance is 0 or no history
+  const hasZeroBalance =
+    currentBalance === 0 || !historyData || historyData.length === 0
+
+  if (hasZeroBalance) {
+    return (
+      <Paper w='100%' p={padding} direction='column' gap={gap} border='default'>
+        <Flex column gap='s'>
+          <Text variant='heading' size={isMobile ? 's' : 'm'} color='default'>
+            {messages.title}
+          </Text>
+          <Text variant='display' size={isMobile ? 's' : 'm'}>
+            {formatCurrency(0, 2)}
+          </Text>
+        </Flex>
       </Paper>
     )
   }
@@ -188,15 +223,15 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
     : DesktopChangeIndicator
 
   return (
-    <Paper w='100%' p={padding} direction='column' gap={gap}>
+    <Paper w='100%' p={padding} direction='column' gap={gap} border='default'>
       {isMobile ? (
         <Flex column gap='xs'>
-          <Text variant='heading' size='s'>
+          <Text variant='heading' size='s' color='default'>
             {messages.title}
           </Text>
           {changeStats.balance !== null ? (
             <Text variant='display' size='s'>
-              {formatCurrency(changeStats.balance, 0)}
+              {formatCurrency(changeStats.balance, 2)}
             </Text>
           ) : null}
           <ChangeIndicator
@@ -208,12 +243,12 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
       ) : (
         <Flex justifyContent='space-between' alignItems='flex-start'>
           <Flex column gap='s'>
-            <Text variant='heading' size='m'>
+            <Text variant='heading' size='m' color='default'>
               {messages.title}
             </Text>
             {changeStats.balance !== null ? (
               <Text variant='display' size='m'>
-                {formatCurrency(changeStats.balance, 0)}
+                {formatCurrency(changeStats.balance, 2)}
               </Text>
             ) : null}
           </Flex>
@@ -226,7 +261,7 @@ const AccountBalanceContent = ({ userId }: AccountBalanceProps) => {
         </Flex>
       )}
 
-      <UserBalanceHistoryGraph userId={effectiveUserId ?? undefined} />
+      <UserBalanceHistoryGraph />
     </Paper>
   )
 }

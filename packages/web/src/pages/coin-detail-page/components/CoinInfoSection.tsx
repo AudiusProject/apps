@@ -205,7 +205,7 @@ type BannerSectionProps = {
   mint: string
 }
 
-const BannerSection = ({ mint }: BannerSectionProps) => {
+export const BannerSection = ({ mint }: BannerSectionProps) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const theme = useTheme()
   const { ownerId: ownerIdRaw } = coin ?? {}
@@ -258,6 +258,7 @@ const BannerSection = ({ mint }: BannerSectionProps) => {
         backgroundRepeat: 'repeat, no-repeat',
         position: 'relative'
       }}
+      data-testid='coin-cover-photo'
     >
       <Flex column alignItems='flex-start' alignSelf='stretch' p='l' gap='s'>
         <Text variant='label' size='m' color='staticWhite' shadow='emphasis'>
@@ -794,6 +795,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       column
       alignItems='flex-start'
       border='default'
+      data-testid='coin-info-section'
     >
       <BannerSection mint={mint} />
 
@@ -918,6 +920,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
             alignItems='center'
             justifyContent='space-between'
             alignSelf='stretch'
+            data-testid='artist-earnings'
           >
             <Flex alignItems='center' gap='s'>
               <Text variant='body' size='s' strength='strong'>
@@ -939,6 +942,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
               alignItems='center'
               justifyContent='space-between'
               alignSelf='stretch'
+              data-testid='unclaimed-fees'
             >
               <Flex alignItems='center' gap='s'>
                 <Text variant='body' size='s' strength='strong'>

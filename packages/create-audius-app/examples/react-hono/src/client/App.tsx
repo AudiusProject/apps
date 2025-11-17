@@ -17,10 +17,11 @@ import { hc } from 'hono/client'
 import { css } from '@emotion/react'
 import { useSdk } from './hooks/useSdk'
 import { useAuth } from './contexts/AuthProvider'
-import { AppType } from '..'
+import type { AppType } from '..'
 import { Status } from './contexts/types'
 
-const client = hc<AppType>('/')
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const client = hc<AppType>('/') as any
 
 export default function App() {
   const { sdk } = useSdk()
@@ -82,12 +83,12 @@ export default function App() {
     const { data: tracks } = await res.json()
     setTracks(tracks ?? [])
 
-    const trackFavorites = (tracks ?? []).reduce<Record<string, boolean>>(
-      (result, track) => ({
+    const trackFavorites = (tracks ?? []).reduce(
+      (result: Record<string, boolean>, track: FullSdk.TrackFull) => ({
         ...result,
         [track.id]: track.hasCurrentUserSaved
       }),
-      {}
+      {} as Record<string, boolean>
     )
 
     setFavorites(trackFavorites)
@@ -109,7 +110,7 @@ export default function App() {
 
   /**
    * Favorite or unfavorite a track. This requires a user to be authenticated and granted
-   * write permissions to the app
+   * write permissions to the app. Uses the client-side SDK with hedgehog wallet for signing.
    */
   const favoriteTrack =
     (trackId: string, favorite = true): MouseEventHandler<HTMLButtonElement> =>
@@ -119,18 +120,14 @@ export default function App() {
         setFavorites((prev) => ({ ...prev, [trackId]: favorite }))
         try {
           if (favorite) {
-            await client.favorite.$post({
-              json: {
-                userId: user.id,
-                trackId
-              }
+            await sdk.tracks.favoriteTrack({
+              userId: user.id,
+              trackId
             })
           } else {
-            await client.unfavorite.$post({
-              json: {
-                userId: user.id,
-                trackId
-              }
+            await sdk.tracks.unfavoriteTrack({
+              userId: user.id,
+              trackId
             })
           }
         } catch (e) {

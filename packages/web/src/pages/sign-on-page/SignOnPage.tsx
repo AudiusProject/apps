@@ -32,7 +32,11 @@ import {
   setValueField,
   updateRouteOnCompletion
 } from 'common/store/pages/signon/actions'
-import { getRouteOnExit, getStatus } from 'common/store/pages/signon/selectors'
+import {
+  getRouteOnCompletion,
+  getRouteOnExit,
+  getStatus
+} from 'common/store/pages/signon/selectors'
 import { EditingStatus } from 'common/store/pages/signon/types'
 import { useMedia } from 'hooks/useMedia'
 import { SignInPage } from 'pages/sign-in-page'
@@ -45,7 +49,6 @@ const {
   SIGN_IN_CONFIRM_EMAIL_PAGE,
   SIGN_IN_PAGE,
   SIGN_UP_APP_CTA_PAGE,
-  SIGN_UP_CREATE_LOGIN_DETAILS,
   SIGN_UP_EMAIL_PAGE,
   SIGN_UP_LOADING_PAGE,
   SIGN_UP_PAGE,
@@ -88,7 +91,6 @@ const DesktopSignOnRoot = (props: RootProps) => {
       SIGN_UP_EMAIL_PAGE,
       SIGN_UP_PASSWORD_PAGE,
       SIGN_UP_REVIEW_HANDLE_PAGE,
-      SIGN_UP_CREATE_LOGIN_DETAILS,
       SIGN_UP_APP_CTA_PAGE
     ],
     exact: true
@@ -316,6 +318,7 @@ export const SignOnPage = () => {
   const routeOnCompletion = searchParams.get('routeOnCompletion')
   const guestEmailParam = searchParams.get('guestEmail')
   const guestEmail = guestEmailLocalStorage || guestEmailParam
+  const completionRoute = useSelector(getRouteOnCompletion)
 
   useEffect(() => {
     if (rf) {
@@ -366,7 +369,7 @@ export const SignOnPage = () => {
   })
 
   if (signOnStatus === EditingStatus.SUCCESS) {
-    return <Redirect to={FEED_PAGE} />
+    return <Redirect to={completionRoute || FEED_PAGE} />
   }
 
   return (

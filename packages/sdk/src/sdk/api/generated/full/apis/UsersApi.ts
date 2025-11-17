@@ -2959,8 +2959,7 @@ export type GetAIAttributedTracksByUserHandleSortDirectionEnum = typeof GetAIAtt
  */
 export const GetAIAttributedTracksByUserHandleFilterTracksEnum = {
     All: 'all',
-    Public: 'public',
-    Unlisted: 'unlisted'
+    Public: 'public'
 } as const;
 export type GetAIAttributedTracksByUserHandleFilterTracksEnum = typeof GetAIAttributedTracksByUserHandleFilterTracksEnum[keyof typeof GetAIAttributedTracksByUserHandleFilterTracksEnum];
 /**
@@ -3090,8 +3089,7 @@ export type GetTracksByUserSortDirectionEnum = typeof GetTracksByUserSortDirecti
  */
 export const GetTracksByUserFilterTracksEnum = {
     All: 'all',
-    Public: 'public',
-    Unlisted: 'unlisted'
+    Public: 'public'
 } as const;
 export type GetTracksByUserFilterTracksEnum = typeof GetTracksByUserFilterTracksEnum[keyof typeof GetTracksByUserFilterTracksEnum];
 /**
@@ -3142,8 +3140,7 @@ export type GetTracksByUserHandleSortDirectionEnum = typeof GetTracksByUserHandl
  */
 export const GetTracksByUserHandleFilterTracksEnum = {
     All: 'all',
-    Public: 'public',
-    Unlisted: 'unlisted'
+    Public: 'public'
 } as const;
 export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandleFilterTracksEnum[keyof typeof GetTracksByUserHandleFilterTracksEnum];
 /**
@@ -3151,8 +3148,7 @@ export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandle
  */
 export const GetTracksCountByUserFilterTracksEnum = {
     All: 'all',
-    Public: 'public',
-    Unlisted: 'unlisted'
+    Public: 'public'
 } as const;
 export type GetTracksCountByUserFilterTracksEnum = typeof GetTracksCountByUserFilterTracksEnum[keyof typeof GetTracksCountByUserFilterTracksEnum];
 /**

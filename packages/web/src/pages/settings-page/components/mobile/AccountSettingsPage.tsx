@@ -5,7 +5,6 @@ import { Name, SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import {
   Button,
-  IconVerified,
   IconRecoveryEmail,
   IconEmailAddress,
   IconKey,
@@ -29,11 +28,7 @@ import { push } from 'utils/navigation'
 import styles from './AccountSettingsPage.module.css'
 import settingsPageStyles from './SettingsPage.module.css'
 
-const {
-  ACCOUNT_VERIFICATION_SETTINGS_PAGE,
-  CHANGE_EMAIL_SETTINGS_PAGE,
-  CHANGE_PASSWORD_SETTINGS_PAGE
-} = route
+const { CHANGE_EMAIL_SETTINGS_PAGE, CHANGE_PASSWORD_SETTINGS_PAGE } = route
 
 const messages = {
   title: 'Account',
@@ -44,11 +39,6 @@ const messages = {
   recoveryButtonTitle: 'Resend Recovery Email',
   recoveryEmailSent: 'Recovery Email Sent!',
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
-  verifyTitle: 'Verify Your Account',
-  verifyDescription:
-    'Verify your Audius profile by linking a verified account from Twitter, Instagram, or TikTok.',
-  verifyButtonTitle: 'Get Verified!',
-  verifyButtonTitleDisabled: `You're Verified!`,
   emailTitle: 'Change Email',
   emailDescription: 'Change the email you use to sign in and receive emails.',
   emailButtonTitle: 'Change Email',
@@ -135,11 +125,10 @@ const AccountSettingsPage = () => {
     select: (user) => ({
       handle: user?.handle,
       userId: user?.user_id,
-      name: user?.name,
-      isVerified: user?.is_verified
+      name: user?.name
     })
   })
-  const { userId, handle, name, isVerified } = accountData ?? {}
+  const { userId, handle, name } = accountData ?? {}
   const [showModalSignOut, setShowModalSignOut] = useState(false)
   const { toast } = useContext(ToastContext)
 
@@ -173,10 +162,6 @@ const AccountSettingsPage = () => {
     [authService, identityService, toast, record]
   )
 
-  const goToVerificationPage = useCallback(() => {
-    goToRoute(ACCOUNT_VERIFICATION_SETTINGS_PAGE)
-  }, [goToRoute])
-
   const goToChangePasswordSettingsPage = useCallback(() => {
     goToRoute(CHANGE_PASSWORD_SETTINGS_PAGE)
   }, [goToRoute])
@@ -208,18 +193,6 @@ const AccountSettingsPage = () => {
           description={messages.recoveryDescription}
           buttonTitle={messages.recoveryButtonTitle}
           onClick={onClickRecover}
-        />
-        <AccountSettingsItem
-          icon={IconVerified}
-          title={messages.verifyTitle}
-          description={messages.verifyDescription}
-          buttonTitle={
-            !isVerified
-              ? messages.verifyButtonTitle
-              : messages.verifyButtonTitleDisabled
-          }
-          disabled={isVerified}
-          onClick={goToVerificationPage}
         />
         <AccountSettingsItem
           icon={IconEmailAddress}

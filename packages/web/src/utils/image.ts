@@ -1,8 +1,21 @@
-export const preload = (url: string) => {
+export const preload = (url: string, timeoutMs: number = 5000) => {
   return new Promise<void>((resolve, reject) => {
     const img = new Image()
     img.src = url
-    img.onload = () => resolve()
-    img.onerror = () => reject(new Error(`Failed to load ${url}`))
+
+    const timer = setTimeout(() => {
+      img.src = '' // stop loading if still in progress
+      reject(new Error(`Failed to load (timeout) ${url}`))
+    }, timeoutMs)
+
+    img.onload = () => {
+      clearTimeout(timer)
+      resolve()
+    }
+
+    img.onerror = () => {
+      clearTimeout(timer)
+      reject(new Error(`Failed to load ${url}`))
+    }
   })
 }

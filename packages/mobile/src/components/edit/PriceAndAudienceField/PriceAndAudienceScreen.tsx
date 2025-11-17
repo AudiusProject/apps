@@ -54,9 +54,6 @@ export const PriceAndAudienceScreen = () => {
   const { isEnabled: isUsdcEnabled } = useFeatureFlag(
     FeatureFlags.USDC_PURCHASES
   )
-  const { isEnabled: isTokenGatingEnabled } = useFeatureFlag(
-    FeatureFlags.TOKEN_GATING
-  )
 
   const initialStreamConditions = initialValues?.stream_conditions ?? null
   const initialAvailability = useMemo(() => {
@@ -214,7 +211,7 @@ export const PriceAndAudienceScreen = () => {
             previousStreamConditions={previousStreamConditions}
           />
         ) : null}
-        {entityType === 'track' && isTokenGatingEnabled ? (
+        {entityType === 'track' ? (
           <TokenGatedRadioField
             disabled={disableTokenGate || disableTokenGateFields}
             previousStreamConditions={previousStreamConditions}

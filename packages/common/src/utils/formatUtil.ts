@@ -191,7 +191,17 @@ export const formatDoubleDigit = (value: number) =>
   value.toString().padStart(2, '0')
 
 /**
+ * Formats a ticker to be uppercase and trimmed
+ */
+export const formatTicker = (ticker?: string) =>
+  ticker?.trim().toUpperCase() ?? ''
+
+/**
  * Formats a ticker to be url friendly
  */
-export const formatTickerForUrl = (ticker: string) =>
-  ticker.startsWith('$') ? ticker.slice(1) : ticker
+export const formatTickerForUrl = (ticker: string) => {
+  const formattedTicker = formatTicker(ticker)
+  return formattedTicker.startsWith('$')
+    ? formattedTicker.slice(1)
+    : formattedTicker
+}

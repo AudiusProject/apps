@@ -1,9 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
 import { TrackMetadataFormSchema } from '@audius/common/schemas'
-import { FeatureFlags } from '@audius/common/services'
 import {
   TrackForUpload,
   TrackMetadataForUpload,
@@ -202,10 +200,6 @@ const TrackEditForm = (
     stopPreview()
   })
 
-  const { isEnabled: isTrackReplaceDownloadsEnabled } = useFeatureFlag(
-    FeatureFlags.TRACK_REPLACE_DOWNLOADS
-  )
-
   const [, , { setValue: setTrackValue }] = useField(`tracks.${trackIdx}`)
   const [, { touched: isTitleDirty }, { setValue: setTitle }] = useField(
     getTrackFieldName(trackIdx, 'title')
@@ -374,7 +368,7 @@ const TrackEditForm = (
               isPlaying={isPreviewPlaying}
               onClickReplace={onClickReplace}
               onClickDownload={onClickDownload}
-              downloadEnabled={!isUpload && isTrackReplaceDownloadsEnabled}
+              downloadEnabled={!isUpload}
             />
             <TrackMetadataFields />
             <div className={cn(layoutStyles.col, layoutStyles.gap4)}>

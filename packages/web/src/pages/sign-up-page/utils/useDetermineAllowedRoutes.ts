@@ -59,8 +59,8 @@ export const useDetermineAllowedRoute = () => {
     let allowedRoutes: string[] = [SignUpPath.createEmail]
 
     if (signUpState.linkedSocialOnFirstPage) {
-      allowedRoutes.push(SignUpPath.createLoginDetails)
       allowedRoutes.push(SignUpPath.reviewHandle)
+      allowedRoutes.push(SignUpPath.finishProfile)
     }
 
     if (pastAccountPhase) {

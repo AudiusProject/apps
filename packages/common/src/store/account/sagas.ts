@@ -14,6 +14,7 @@ import {
   queryAccountUser,
   getCurrentAccountQueryKey,
   queryCurrentUserId,
+  primeUserData,
   getUserQueryKey,
   getWalletAccountSaga
 } from '~/api'
@@ -357,6 +358,10 @@ function* fetchLocalAccountAsync() {
     wallet &&
     !cachedAccountUser.is_deactivated
   ) {
+    primeUserData({
+      users: [cachedAccountUser],
+      queryClient
+    })
     queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
     yield* put(fetchAccountSucceeded(cachedAccount))
   }

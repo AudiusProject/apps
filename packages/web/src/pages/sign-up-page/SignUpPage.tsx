@@ -1,11 +1,12 @@
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
+import { useSelector } from 'react-redux'
 import { Redirect, Route, RouteProps, Switch } from 'react-router-dom'
 
+import { getRouteOnCompletion } from 'common/store/pages/signon/selectors'
 import { useDetermineAllowedRoute } from 'pages/sign-up-page/utils/useDetermineAllowedRoutes'
 
 import { CreateEmailPage } from './pages/CreateEmailPage'
-import { CreateLoginDetailsPage } from './pages/CreateLoginDetailsPage'
 import { CreatePasswordPage } from './pages/CreatePasswordPage'
 import { FinishProfilePage } from './pages/FinishProfilePage'
 import { LoadingAccountPage } from './pages/LoadingAccountPage'
@@ -23,7 +24,6 @@ const {
   SIGN_UP_ARTISTS_PAGE,
   SIGN_UP_COMPLETED_REDIRECT,
   SIGN_UP_COMPLETED_REFERRER_REDIRECT: SIGN_UP_REFERRER_COMPLETED_REDIRECT,
-  SIGN_UP_CREATE_LOGIN_DETAILS,
   SIGN_UP_EMAIL_PAGE,
   SIGN_UP_FINISH_PROFILE_PAGE,
   SIGN_UP_GENRES_PAGE,
@@ -65,6 +65,8 @@ function SignUpRoute({ children, ...rest }: RouteProps) {
 }
 
 export const SignUpPage = () => {
+  const completionRoute = useSelector(getRouteOnCompletion)
+
   return (
     <RouteContextProvider>
       <Helmet>
@@ -78,9 +80,6 @@ export const SignUpPage = () => {
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_PASSWORD_PAGE}>
           <CreatePasswordPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_CREATE_LOGIN_DETAILS}>
-          <CreateLoginDetailsPage />
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_HANDLE_PAGE}>
           <PickHandlePage />
@@ -104,7 +103,7 @@ export const SignUpPage = () => {
           <LoadingAccountPage />
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_COMPLETED_REDIRECT}>
-          <Redirect to={FEED_PAGE} />
+          <Redirect to={completionRoute || FEED_PAGE} />
         </SignUpRoute>
         <SignUpRoute exact path={SIGN_UP_REFERRER_COMPLETED_REDIRECT}>
           <Redirect to={TRENDING_PAGE} />

@@ -32,6 +32,7 @@ export const UserTokenBadge = ({ userId }: UserTokenBadgeProps) => {
         backgroundColor='white'
         borderRadius='circle'
         border='default'
+        data-testid='user-token-badge'
         css={{
           transition: `all ${motion.hover}`,
           '&:hover': {

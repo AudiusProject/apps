@@ -1,5 +1,7 @@
 import { useState, useRef, useMemo } from 'react'
 
+import type { SocialPlatform } from '@audius/common/models'
+import { sanitizeSocialHandle } from '@audius/common/utils'
 import {
   IconLink,
   IconTikTok,
@@ -28,28 +30,10 @@ const socialLinkPlaceholders = {
   [Type.WEBSITE]: 'Website'
 }
 
-const sanitizeHandle = (handle: string) => {
-  if (handle.startsWith('http')) {
-    if (handle.includes('x')) {
-      const split = handle.split('x.com/')[1]
-      if (split) {
-        return split.split('/')[0]
-      }
-    }
-    if (handle.includes('instagram')) {
-      const split = handle.split('instagram.com/')[1]
-      if (split) {
-        return split.split('/')[0]
-      }
-    }
-    if (handle.includes('tiktok')) {
-      const split = handle.split('tiktok.com/')[1]
-      if (split) {
-        return split.split('/')[0]
-      }
-    }
-  }
-  return handle
+const platformByType: Partial<Record<Type, SocialPlatform>> = {
+  [Type.X]: 'x',
+  [Type.INSTAGRAM]: 'instagram',
+  [Type.TIKTOK]: 'tiktok'
 }
 
 type SocialLinkInputProps = {
@@ -86,17 +70,15 @@ const SocialLinkInput = ({
 
     let sanitized: string
     if (isHandle) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => {
-        if (text.startsWith('@')) {
-          setValue((value) => value.slice(1))
-          onChange(value.slice(1))
-        }
-      }, 600)
       setValue(text)
-      sanitized = sanitizeHandle(text)
+      const platform = platformByType[type]
+      const sanitizedHandle = platform
+        ? sanitizeSocialHandle(text, platform)
+        : text
+      sanitized = sanitizedHandle ?? ''
+      clearTimeout(timeoutRef.current)
       if (sanitized !== text) {
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           setValue(sanitized)
           onChange(sanitized)
         }, 300)

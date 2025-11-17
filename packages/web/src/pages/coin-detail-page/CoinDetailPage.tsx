@@ -4,7 +4,8 @@ import {
   useUser
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { route } from '@audius/common/utils'
+import { coinPage } from '@audius/common/src/utils/route'
+import { formatTickerForUrl, route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
 import { Redirect, useParams } from 'react-router-dom'
 
@@ -91,13 +92,14 @@ export const CoinDetailPage = () => {
   const { ticker } = useParams<{ ticker: string }>()
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
+  const formattedTicker = formatTickerForUrl(ticker)
 
   const {
     data: coin,
     isPending: coinPending,
     isError,
     isSuccess
-  } = useArtistCoinByTicker({ ticker })
+  } = useArtistCoinByTicker({ ticker: formattedTicker })
 
   const { data: owner } = useUser(coin?.ownerId, {
     enabled: !!coin?.ownerId
@@ -105,6 +107,10 @@ export const CoinDetailPage = () => {
 
   if (!ticker) {
     return <Redirect to='/coins' />
+  }
+
+  if (ticker !== formattedTicker) {
+    return <Redirect to={coinPage(formattedTicker)} />
   }
 
   if (isError || (isSuccess && !coin)) {

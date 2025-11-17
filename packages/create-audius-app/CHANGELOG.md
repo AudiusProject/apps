@@ -1,5 +1,30 @@
 # create-audius-app
 
+## 2.1.4
+
+### Patch Changes
+
+- 54cf1d1: bump
+
+## 2.1.3
+
+### Patch Changes
+
+- 7d181ea: Bump
+
+## 2.1.2
+
+### Patch Changes
+
+- 7d7dace: Bump
+- 2d9ea7a: Update react-hono example
+
+## 2.1.1
+
+### Patch Changes
+
+- 804b90b: Update dependencies
+
 ## 2.1.0
 
 ### Minor Changes

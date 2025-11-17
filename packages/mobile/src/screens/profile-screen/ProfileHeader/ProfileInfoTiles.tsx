@@ -11,10 +11,8 @@ import {
   useUsers,
   useProfileUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { UserMetadata } from '@audius/common/models'
 import { Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { View, ScrollView } from 'react-native'
 import Animated, {
   FadeIn,
@@ -336,10 +334,6 @@ export const ProfileInfoTiles = () => {
       })
     }).user ?? {}
 
-  const { isEnabled: isRecentCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.RECENT_COMMENTS
-  )
-
   const [isRecentCommentsDrawerOpen, setIsRecentCommentsDrawerOpen] =
     useState(false)
   const onCloseRecentCommentsDrawer = useCallback(() => {
@@ -398,7 +392,7 @@ export const ProfileInfoTiles = () => {
       >
         <ProfileTierTile />
         <LayoutAnimationConfig skipEntering={!shouldAnimate}>
-          {isRecentCommentsEnabled && recentComments.length > 0 && (
+          {recentComments.length > 0 && (
             <Animated.View entering={fadeInAnimation}>
               <ProfileInfoTile
                 onPress={onOpenRecentCommentsDrawer}

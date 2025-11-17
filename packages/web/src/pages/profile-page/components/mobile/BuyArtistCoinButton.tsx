@@ -1,4 +1,4 @@
-import { useArtistOwnedCoin } from '@audius/common/api'
+import { useArtistCreatedCoin } from '@audius/common/api'
 import { useBuySellModal } from '@audius/common/store'
 import { Button } from '@audius/harmony'
 
@@ -12,7 +12,7 @@ type BuyArtistCoinButtonProps = {
 
 export const BuyArtistCoinButton = ({ userId }: BuyArtistCoinButtonProps) => {
   const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistOwnedCoin(userId)
+    useArtistCreatedCoin(userId)
   const { onOpen: openBuySellModal } = useBuySellModal()
 
   const handleBuyCoins = () => {

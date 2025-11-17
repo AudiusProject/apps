@@ -13,7 +13,6 @@ import { setValueField } from 'common/store/pages/signon/actions'
 import {
   getCoverPhotoField,
   getHandleField,
-  getLinkedSocialOnFirstPage,
   getProfileImageField
 } from 'common/store/pages/signon/selectors'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
@@ -24,7 +23,7 @@ import { AccountHeader } from '../components/AccountHeader'
 import { HandleField } from '../components/HandleField'
 import { Heading, Page, PageFooter } from '../components/layout'
 
-const { SIGN_UP_CREATE_LOGIN_DETAILS, SIGN_UP_FINISH_PROFILE_PAGE } = route
+const { SIGN_UP_FINISH_PROFILE_PAGE } = route
 
 const messages = {
   heading: 'Review Your Handle',
@@ -41,7 +40,6 @@ export const ReviewHandlePage = () => {
   const dispatch = useDispatch()
   const { spacing } = useTheme()
 
-  const isLinkingSocialOnFirstPage = useSelector(getLinkedSocialOnFirstPage)
   const { value: handle } = useSelector(getHandleField)
 
   const coverPhoto = useSelector(getCoverPhotoField)
@@ -60,13 +58,9 @@ export const ReviewHandlePage = () => {
     (values: ReviewHandleValues) => {
       const { handle } = values
       dispatch(setValueField('handle', handle))
-      navigate(
-        isLinkingSocialOnFirstPage
-          ? SIGN_UP_CREATE_LOGIN_DETAILS
-          : SIGN_UP_FINISH_PROFILE_PAGE
-      )
+      navigate(SIGN_UP_FINISH_PROFILE_PAGE)
     },
-    [dispatch, navigate, isLinkingSocialOnFirstPage]
+    [dispatch, navigate]
   )
 
   const initialValues = {

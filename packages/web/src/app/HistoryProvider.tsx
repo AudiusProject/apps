@@ -45,8 +45,10 @@ const getHistoryForEnvironment = () => {
 }
 
 export const HistoryContextProvider = memo(
-  (props: { children: JSX.Element }) => {
-    const [history] = useState(() => getHistoryForEnvironment())
+  (props: { children: JSX.Element; historyOverride?: History }) => {
+    const [history] = useState(
+      () => props.historyOverride ?? getHistoryForEnvironment()
+    )
     return (
       <HistoryContext.Provider value={{ history }}>
         {props.children}

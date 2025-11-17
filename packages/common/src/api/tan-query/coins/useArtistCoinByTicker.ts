@@ -10,6 +10,7 @@ import {
   useQueryContext,
   type QueryContextType
 } from '~/api/tan-query/utils/QueryContext'
+import { formatTicker } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { combineQueryStatuses } from '../utils'
@@ -32,7 +33,7 @@ export const fetchCoinTickerAvailability = async (
   const sdk = await audiusSdk()
   try {
     // Use getCoinByTicker - if it returns a coin, the ticker is taken
-    await sdk.coins.getCoinByTicker({ ticker })
+    await sdk.coins.getCoinByTicker({ ticker: formatTicker(ticker) })
     // If we get a coin back, the ticker is not available
     return { available: false }
   } catch (error: any) {
@@ -66,8 +67,9 @@ const getArtistCoinByTickerQueryFn =
     const [_ignored, ticker] = queryKey
     const { audiusSdk } = context
     const sdk = await audiusSdk()
+    // NOTE: Might not need to format the ticker here, but being safe
     const response = await sdk.coins.getCoinByTicker({
-      ticker
+      ticker: formatTicker(ticker)
     })
     const coin = coinFromSdk(response.data)
 
@@ -88,7 +90,7 @@ export const getArtistCoinByTickerOptions = (
   { ticker }: UseArtistCoinByTickerParams
 ) => {
   return queryOptions({
-    queryKey: getArtistCoinByTickerQueryKey(ticker),
+    queryKey: getArtistCoinByTickerQueryKey(formatTicker(ticker)),
     queryFn: getArtistCoinByTickerQueryFn(context),
     enabled: !!ticker
   })
@@ -103,7 +105,10 @@ export const useArtistCoinByTicker = (
 
   const mintQuery = useQuery({
     ...options,
-    ...getArtistCoinByTickerOptions({ ...context, queryClient }, params)
+    ...getArtistCoinByTickerOptions(
+      { ...context, queryClient },
+      { ...params, ticker: formatTicker(params.ticker) }
+    )
   })
 
   const coinQuery = useArtistCoin(mintQuery.data!)

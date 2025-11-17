@@ -1,9 +1,10 @@
-import { useArtistCoinByTicker, useCurrentUserId } from '@audius/common/api'
+import { useArtistCoinByTicker } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import { useRoute, useNavigation } from '@react-navigation/native'
+import { useRoute } from '@react-navigation/native'
 
-import { Flex, IconCompose, IconButton } from '@audius/harmony-native'
+import { Flex, IconButton, IconKebabHorizontal } from '@audius/harmony-native'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import { useDrawer } from 'app/hooks/useDrawer'
 
 import { BalanceCard } from './components/BalanceCard'
 import { CoinInfoCard } from './components/CoinInfoCard'
@@ -14,27 +15,21 @@ import { ExclusiveTracksSection } from './components/ExclusiveTracksSection'
 export const CoinDetailsScreen = () => {
   const { ticker } = useRoute().params as { ticker: string }
   const { data: coin } = useArtistCoinByTicker({ ticker })
-  const navigation = useNavigation()
-  const { data: currentUserId } = useCurrentUserId()
+  const { onOpen } = useDrawer('CoinInsightsOverflowMenu')
   const mint = coin?.mint ?? ''
-  const ownerId = coin?.ownerId ?? ''
 
-  const isOwner = currentUserId === ownerId
-
-  const handleEditPress = () => {
-    if (ticker) {
-      ;(navigation as any).navigate('EditCoinDetailsScreen', { ticker })
-    }
+  const handleOpenOverflowMenu = () => {
+    onOpen({ mint })
   }
 
-  const topbarRight = isOwner ? (
+  const topbarRight = (
     <IconButton
-      icon={IconCompose}
+      icon={IconKebabHorizontal}
+      onPress={handleOpenOverflowMenu}
       color='subdued'
-      size='l'
-      onPress={handleEditPress}
+      ripple
     />
-  ) : undefined
+  )
 
   return (
     <Screen

@@ -113,7 +113,6 @@ export const DefaultChallengeContent = ({
         contents.push(<ProfileChecks key='profile-checks' />)
         break
       case ChallengeName.MobileInstall:
-      case ChallengeName.ConnectVerified:
         contents.push(<MobileInstallContent key='mobile-install' />)
         break
       default:

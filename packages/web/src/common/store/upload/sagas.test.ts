@@ -251,7 +251,7 @@ describe('upload', () => {
 
     const mockWriteTrackUploadToChain = vitest.fn()
     // Mock successful first stem publish
-    mockWriteTrackUploadToChain.mockReturnValueOnce({
+    mockWriteTrackUploadToChain.mockResolvedValueOnce({
       trackId: 'ML51L'
     })
     // Mock failure for second stem
@@ -335,7 +335,7 @@ describe('upload', () => {
         .call(deleteTracks, [2])
         // Expect the saga to throw since no tracks succeeded
         .throws(Error)
-        .run()
+        .silentRun()
         .then(() => {
           // Never published the parent track
           expect(mockWriteTrackUploadToChain).not.toBeCalledWith(

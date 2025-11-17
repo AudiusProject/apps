@@ -89,7 +89,7 @@ export const ArtistCoinDetailsDrawer = () => {
         {/* On-Chain Description */}
         {artistCoin?.description ? (
           <Flex direction='column' gap='xs'>
-            <Text variant='label' size='s' color='subdued'>
+            <Text variant='label' size='s'>
               {artistCoinDetails.onChainDescription}
             </Text>
             <Text variant='body' size='s'>

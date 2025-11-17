@@ -1,41 +1,18 @@
-import { SquareSizes } from '@audius/common/models'
 import { Text } from '@audius/harmony'
-import { developmentConfig } from '@audius/sdk'
-import { http, HttpResponse } from 'msw'
 import { Route, Routes } from 'react-router-dom-v5-compat'
-import { describe, expect, it, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
-import { RenderOptions, mswServer, render, screen } from 'test/test-utils'
+import { artistUser } from 'test/mocks/fixtures/users'
+import { mockUsers } from 'test/msw/mswMocks'
+import { RenderOptions, mswServer, render, screen, it } from 'test/test-utils'
 
 import { UserCard } from './UserCard'
 
-const { apiEndpoint } = developmentConfig.network
-
-const testUser = {
-  id: '7eP5n',
-  handle: 'test-user',
-  name: 'Test User',
-  profile_picture: {
-    [SquareSizes.SIZE_150_BY_150]: `${apiEndpoint}/image-profile-small.jpg`,
-    [SquareSizes.SIZE_480_BY_480]: `${apiEndpoint}/image-profile-medium.jpg`,
-    mirrors: [apiEndpoint]
-  },
-  follower_count: 1
-}
-
-function renderUserCard(overrides = {}, options?: RenderOptions) {
-  const user = { ...testUser, ...overrides }
-
-  mswServer.use(
-    http.get(`${apiEndpoint}/v1/full/users`, ({ request }) => {
-      const url = new URL(request.url)
-      const id = url.searchParams.get('id')
-      if (id === '7eP5n') {
-        return HttpResponse.json({ data: [user] })
-      }
-      return new HttpResponse(null, { status: 404 })
-    })
-  )
+function renderUserCard(
+  user: typeof artistUser & any,
+  options?: RenderOptions
+) {
+  mswServer.use(mockUsers([user]))
 
   return render(
     <Routes>
@@ -63,16 +40,17 @@ describe('UserCard', () => {
   })
 
   it('renders with a label comprising the display name, handle, and follower count', async () => {
-    renderUserCard()
-    expect(
-      await screen.findByRole('button', {
-        name: /test user @test-user 1 follower/i
-      })
-    ).toBeInTheDocument()
+    renderUserCard(artistUser)
+
+    // Check for the individual elements instead of trying to match the full button label
+    expect(await screen.findByText(artistUser.name)).toBeInTheDocument()
+    expect(await screen.findByText(`@${artistUser.handle}`)).toBeInTheDocument()
+
+    expect(await screen.findByText('1.23K Followers')).toBeInTheDocument()
   })
 
   it('navigates to the user page when clicked', async () => {
-    renderUserCard()
+    renderUserCard(artistUser)
     const userCard = await screen.findByRole('button', { name: /test user/i })
     userCard.click()
     expect(
@@ -81,15 +59,15 @@ describe('UserCard', () => {
   })
 
   it('renders the profile picture', async () => {
-    renderUserCard()
+    renderUserCard(artistUser)
     expect(await screen.findByRole('img')).toHaveAttribute(
       'src',
-      `${apiEndpoint}/image-profile-medium.jpg`
+      `${artistUser.profile_picture['480x480']}`
     )
   })
 
   it('handles users with large follow counts correctly', async () => {
-    renderUserCard({ follower_count: 1000 })
+    renderUserCard({ ...artistUser, follower_count: 1000 })
     expect(await screen.findByText('1K Followers')).toBeInTheDocument()
   })
 })

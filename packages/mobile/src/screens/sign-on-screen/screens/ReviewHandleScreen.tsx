@@ -7,7 +7,6 @@ import { setValueField } from '@audius/web/src/common/store/pages/signon/actions
 import {
   getCoverPhotoField,
   getHandleField,
-  getLinkedSocialOnFirstPage,
   getProfileImageField
 } from '@audius/web/src/common/store/pages/signon/selectors'
 import { useQueryClient } from '@tanstack/react-query'
@@ -42,7 +41,6 @@ export const ReviewHandleScreen = () => {
   const queryContext = useQueryContext()
   const queryClient = useQueryClient()
   const navigation = useNavigation<SignOnScreenParamList>()
-  const isLinkingSocialOnFirstPage = useSelector(getLinkedSocialOnFirstPage)
 
   const validationSchema = useMemo(() => {
     return toFormikValidationSchema(
@@ -56,11 +54,9 @@ export const ReviewHandleScreen = () => {
     (values: ReviewHandleValues) => {
       const { handle } = values
       dispatch(setValueField('handle', handle))
-      navigation.navigate(
-        isLinkingSocialOnFirstPage ? 'CreateLoginDetails' : 'FinishProfile'
-      )
+      navigation.navigate('FinishProfile')
     },
-    [dispatch, navigation, isLinkingSocialOnFirstPage]
+    [dispatch, navigation]
   )
 
   return (

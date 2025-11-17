@@ -106,7 +106,7 @@ export const ArtistCoinDetailsPage = () => {
 
           {/* On-Chain Description */}
           <Flex direction='column' gap='xs'>
-            <Text variant='label' size='s' color='subdued'>
+            <Text variant='label' size='s'>
               {messages.onChainDescription}
             </Text>
             <UserGeneratedTextV2 variant='body' size='s' color='default'>

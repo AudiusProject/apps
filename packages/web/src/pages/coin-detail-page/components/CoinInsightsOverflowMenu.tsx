@@ -12,7 +12,8 @@ import {
   IconButton,
   IconKebabHorizontal,
   IconInfo,
-  IconX
+  IconX,
+  IconLink
 } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom-v5-compat'
 
@@ -21,7 +22,11 @@ import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 
-import { copyToClipboard } from '../../../utils/clipboardUtil'
+import {
+  copyLinkToClipboard,
+  copyToClipboard,
+  getCopyableLink
+} from '../../../utils/clipboardUtil'
 import { openXLink } from '../../../utils/xShare'
 
 import { ArtistCoinDetailsModal } from './ArtistCoinDetailsModal'
@@ -63,6 +68,13 @@ export const CoinInsightsOverflowMenu = ({
     }
   }
 
+  const onCopyLink = () => {
+    if (artistCoin?.ticker) {
+      copyLinkToClipboard(route.coinPage(artistCoin.ticker))
+      toast(messages.copiedLinkToClipboard)
+    }
+  }
+
   const onOpenBirdeye = () => {
     if (artistCoin?.mint) {
       window.open(
@@ -90,7 +102,7 @@ export const CoinInsightsOverflowMenu = ({
     if (!artistCoin?.ticker || !artistCoin?.mint || !artist?.handle) return
 
     const isArtistOwner = currentUserId === artistCoin.ownerId
-    const coinUrl = window.location.origin + route.coinPage(artistCoin.ticker)
+    const coinUrl = getCopyableLink(route.coinPage(artistCoin.ticker))
 
     const shareText = isArtistOwner
       ? messages.shareToXArtistCopy(artistCoin.ticker, artistCoin.mint)
@@ -134,7 +146,12 @@ export const CoinInsightsOverflowMenu = ({
             icon: <IconX color='default' />,
             onClick: onShareToX
           }
-        ])
+        ]),
+    {
+      text: messages.copyLink,
+      icon: <IconLink color='default' />,
+      onClick: onCopyLink
+    }
   ]
 
   // Don't render if no artist coin data

@@ -30,10 +30,10 @@ import AnimatedSwitch from 'components/animated-switch/AnimatedSwitch'
 import AppRedirectListener from 'components/app-redirect-popover/AppRedirectListener'
 import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
-import { ArtistCoinsLaunchBanner } from 'components/banner/ArtistCoinsLaunchBanner'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
 import { Web3ErrorBanner } from 'components/banner/Web3ErrorBanner'
+import { YakCoinLaunchBanner } from 'components/banner/YakCoinLaunchBanner'
 import { ChatListener } from 'components/chat-listener/ChatListener'
 import CookieBanner from 'components/cookie-banner/CookieBanner'
 import { DevModeMananger } from 'components/dev-mode-manager/DevModeManager'
@@ -60,6 +60,7 @@ import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
 import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
 import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
 import { ExclusiveTracksPage as MobileExclusiveTracksPage } from 'pages/coin-detail-page/components/mobile/ExclusiveTracksPage'
+import { CoinRedeemPage } from 'pages/coin-redeem-page/CoinRedeemPage'
 import CollectionPage from 'pages/collection-page/CollectionPage'
 import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
 import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
@@ -126,6 +127,7 @@ const {
   DASHBOARD_PAGE,
   AUDIO_PAGE,
   COIN_DETAIL_PAGE,
+  COIN_REDEEM_PAGE,
   REWARDS_PAGE,
   UPLOAD_PAGE,
   UPLOAD_ALBUM_PAGE,
@@ -149,7 +151,6 @@ const {
   ACCOUNT_SETTINGS_PAGE,
   CHANGE_PASSWORD_SETTINGS_PAGE,
   CHANGE_EMAIL_SETTINGS_PAGE,
-  ACCOUNT_VERIFICATION_SETTINGS_PAGE,
   LABEL_ACCOUNT_SETTINGS_PAGE,
   NOTIFICATION_SETTINGS_PAGE,
   ABOUT_SETTINGS_PAGE,
@@ -491,7 +492,7 @@ const WebPlayer = (props) => {
         <DownloadAppBanner />
         {/* Re-enable for ToS updates */}
         {/* <TermsOfServiceUpdateBanner /> */}
-        <ArtistCoinsLaunchBanner />
+        <YakCoinLaunchBanner />
         <Web3ErrorBanner />
         {showWebUpdateBanner ? (
           <UpdateAppBanner
@@ -739,6 +740,12 @@ const WebPlayer = (props) => {
                   return <CoinDetailPage {...props} />
                 }}
               />
+              <Route
+                exact
+                path={COIN_REDEEM_PAGE}
+                isMobile={isMobile}
+                component={CoinRedeemPage}
+              />
               <DesktopRoute
                 exact
                 path={COIN_EXCLUSIVE_TRACKS_PAGE}
@@ -820,12 +827,6 @@ const WebPlayer = (props) => {
                 path={ACCOUNT_SETTINGS_PAGE}
                 isMobile={isMobile}
                 render={() => <SettingsPage subPage={SubPage.ACCOUNT} />}
-              />
-              <MobileRoute
-                exact
-                path={ACCOUNT_VERIFICATION_SETTINGS_PAGE}
-                isMobile={isMobile}
-                render={() => <SettingsPage subPage={SubPage.VERIFICATION} />}
               />
               <MobileRoute
                 exact

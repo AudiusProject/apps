@@ -11,14 +11,11 @@ import {
   Flex,
   IconCaretDown,
   IconCaretUp,
-  IconButton,
   Paper,
   Text,
-  IconKebabHorizontal,
   spacing
 } from '@audius/harmony-native'
 import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
-import { useDrawer } from 'app/hooks/useDrawer'
 import { env } from 'app/services/env'
 import { isIos } from 'app/utils/os'
 
@@ -171,12 +168,6 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
   const isPending = isCoinPending || (isAudio && isCoingeckoPending)
   const isError = isCoinError || (isAudio && isCoingeckoError)
 
-  const { onOpen } = useDrawer('CoinInsightsOverflowMenu')
-
-  const handleOpenOverflowMenu = () => {
-    onOpen({ mint })
-  }
-
   if (isPending || !coin) {
     return null
   }
@@ -205,11 +196,6 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
-        <IconButton
-          icon={IconKebabHorizontal}
-          onPress={handleOpenOverflowMenu}
-          ripple
-        />
       </Flex>
 
       {isError || !coin ? (

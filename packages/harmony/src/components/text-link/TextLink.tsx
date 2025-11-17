@@ -57,6 +57,7 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
 
   return (
     <Text
+      role={asChild ? undefined : props.href ? 'link' : 'button'}
       ref={ref}
       asChild
       onClick={onClick}

@@ -130,5 +130,7 @@ export const QUERY_KEYS = {
   claimFee: 'claimFee',
   userBalanceHistory: 'userBalanceHistory',
   exclusiveTracks: 'exclusiveTracks',
-  exclusiveTracksCount: 'exclusiveTracksCount'
+  exclusiveTracksCount: 'exclusiveTracksCount',
+  coinRedeemAmount: 'coinRedeemAmount',
+  coinRedeemCodeAmount: 'coinRedeemCodeAmount'
 } as const

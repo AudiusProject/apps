@@ -3,7 +3,7 @@ import { matchPath, generatePath } from 'react-router'
 
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
-import { encodeUrlName } from './formatUtil'
+import { encodeUrlName, formatTickerForUrl } from './formatUtil'
 import { convertGenreLabelToValue, Genre } from './genres'
 
 // External Routes
@@ -71,6 +71,7 @@ export const PURCHASES_PAGE = '/payments/purchases'
 export const SALES_PAGE = '/payments/sales'
 export const WITHDRAWALS_PAGE = '/payments/withdrawals'
 export const COIN_DETAIL_PAGE = '/coins/:ticker'
+export const COIN_REDEEM_PAGE = '/coins/:ticker/redeem/:code?'
 export const COIN_EXCLUSIVE_TRACKS_PAGE = '/coins/:ticker/exclusive-tracks'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
@@ -88,7 +89,6 @@ export const COIN_API_MOCKS_PAGE = '/dev-tools/coin-api-mocks'
 export enum SignUpPath {
   createEmail = 'create-email',
   createPassword = 'create-password',
-  createLoginDetails = 'create-login-details',
   pickHandle = 'pick-handle',
   reviewHandle = 'review-handle',
   finishProfile = 'finish-profile',
@@ -102,7 +102,6 @@ export enum SignUpPath {
 export const SIGN_UP_EMAIL_PAGE = `/signup/${SignUpPath.createEmail}`
 export const SIGN_UP_START_PAGE = SIGN_UP_EMAIL_PAGE // entry point for sign up if needing to redirect to the beginning
 export const SIGN_UP_PASSWORD_PAGE = `/signup/${SignUpPath.createPassword}`
-export const SIGN_UP_CREATE_LOGIN_DETAILS = `/signup/${SignUpPath.createLoginDetails}`
 export const SIGN_UP_HANDLE_PAGE = `/signup/${SignUpPath.pickHandle}`
 export const SIGN_UP_REVIEW_HANDLE_PAGE = `/signup/${SignUpPath.reviewHandle}`
 export const SIGN_UP_FINISH_PROFILE_PAGE = `/signup/${SignUpPath.finishProfile}`
@@ -160,8 +159,6 @@ export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
 export const SUPPORTING_USERS_ROUTE = '/supporting'
 export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
-export const ACCOUNT_VERIFICATION_SETTINGS_PAGE =
-  '/settings/account/verification'
 export const NOTIFICATION_SETTINGS_PAGE = '/settings/notifications'
 export const ABOUT_SETTINGS_PAGE = '/settings/about'
 export const CHANGE_EMAIL_SETTINGS_PAGE = '/settings/change-email'
@@ -349,7 +346,9 @@ export const staticRoutes = new Set([
   DASHBOARD_PAGE,
   PAYMENTS_PAGE,
   AUDIO_PAGE,
+  WALLET_PAGE,
   WALLET_GUIDE_PAGE,
+  COINS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
   CASH_PAGE,
@@ -367,7 +366,6 @@ export const staticRoutes = new Set([
   ...SIGN_ON_ALIASES,
   SIGN_UP_EMAIL_PAGE,
   SIGN_UP_PASSWORD_PAGE,
-  SIGN_UP_CREATE_LOGIN_DETAILS,
   SIGN_UP_HANDLE_PAGE,
   SIGN_UP_REVIEW_HANDLE_PAGE,
   SIGN_UP_FINISH_PROFILE_PAGE,
@@ -470,4 +468,7 @@ export const searchPage = (searchOptions: SearchOptions) => {
 }
 
 export const coinPage = (ticker: string) =>
-  `/coins/${ticker.startsWith('$') ? ticker.slice(1) : ticker}`
+  `/coins/${formatTickerForUrl(ticker)}`
+
+export const coinRedeemPage = (ticker: string, code?: string) =>
+  `/coins/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`

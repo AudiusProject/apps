@@ -4,14 +4,10 @@ import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
   EmailFrequency,
-  InstagramProfile,
-  TikTokProfile,
-  TwitterProfile,
   accountActions,
   settingsPageActions,
   settingsPageSelectors,
@@ -34,7 +30,6 @@ import {
   IconReceive,
   IconSettings,
   IconSignOut,
-  IconVerified,
   Modal,
   ModalContent,
   ModalContentText,
@@ -56,7 +51,6 @@ import Page from 'components/page/Page'
 import Toast from 'components/toast/Toast'
 import { ComponentPlacement } from 'components/types'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useFlag } from 'hooks/useRemoteConfig'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { env } from 'services/env'
 import {
@@ -67,7 +61,6 @@ import {
   Permission
 } from 'utils/browserNotifications'
 import { isElectron } from 'utils/clientUtil'
-import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
 import { THEME_KEY } from 'utils/theme/theme'
 
@@ -83,7 +76,6 @@ import NotificationSettingsModal from './NotificationSettingsModal'
 import { PayoutWalletSettingsCard } from './PayoutWallet/PayoutWalletSettingsCard'
 import SettingsCard from './SettingsCard'
 import styles from './SettingsPage.module.css'
-import VerificationModal from './VerificationModal'
 import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard'
 
 const { show } = musicConfettiActions
@@ -101,7 +93,7 @@ const {
   getNotificationSettings,
   updateEmailFrequency: updateEmailFrequencyAction
 } = settingsPageActions
-const { subscribeBrowserPushNotifications, instagramLogin } = accountActions
+const { subscribeBrowserPushNotifications } = accountActions
 
 const {
   DOWNLOAD_LINK,
@@ -128,12 +120,10 @@ export const SettingsPage = () => {
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
-      userId: user?.user_id,
-      name: user?.name,
-      isVerified: user?.is_verified
+      userId: user?.user_id
     })
   })
-  const { handle, name, userId, isVerified } = accountData ?? {}
+  const { handle, userId } = accountData ?? {}
   const theme = useSelector(getTheme)
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
@@ -242,22 +232,6 @@ export const SettingsPage = () => {
   const openCommentSettingsModal = useCallback(() => {
     setIsCommentSettingsModalVisible(true)
   }, [setIsCommentSettingsModalVisible])
-
-  const onTwitterLogin = useCallback(
-    (uuid: string, profile: TwitterProfile) =>
-      dispatch(accountActions.twitterLogin({ uuid, profile })),
-    [dispatch]
-  )
-  const onInstagramLogin = useCallback(
-    (uuid: string, profile: InstagramProfile) =>
-      dispatch(instagramLogin({ uuid, profile })),
-    [dispatch]
-  )
-  const onTikTokLogin = useCallback(
-    (uuid: string, profile: TikTokProfile) =>
-      dispatch(accountActions.tikTokLogin({ uuid, profile })),
-    [dispatch]
-  )
   const toggleNotificationSetting = useCallback(
     (notificationType: BrowserNotificationSetting, isOn: boolean) => {
       dispatch(toggleNotificationSettingAction(notificationType, isOn))
@@ -268,10 +242,6 @@ export const SettingsPage = () => {
     (frequency: EmailFrequency) => {
       dispatch(updateEmailFrequencyAction(frequency))
     },
-    [dispatch]
-  )
-  const goToRoute = useCallback(
-    (route: string) => dispatch(push(route)),
     [dispatch]
   )
   const record = useRecord()
@@ -362,10 +332,6 @@ export const SettingsPage = () => {
     return options
   }, [showMatrix])
 
-  const { isEnabled: isCommentsEnabled } = useFlag(
-    FeatureFlags.COMMENTS_ENABLED
-  )
-
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
 
@@ -411,21 +377,19 @@ export const SettingsPage = () => {
             </Button>
           </SettingsCard>
         ) : null}
-        {isCommentsEnabled ? (
-          <SettingsCard
-            icon={<IconMessage />}
-            title={settingsMessages.commentSettingsCardTitle}
-            description={settingsMessages.commentSettingsCardDescription}
+        <SettingsCard
+          icon={<IconMessage />}
+          title={settingsMessages.commentSettingsCardTitle}
+          description={settingsMessages.commentSettingsCardDescription}
+        >
+          <Button
+            variant='secondary'
+            onClick={openCommentSettingsModal}
+            fullWidth
           >
-            <Button
-              variant='secondary'
-              onClick={openCommentSettingsModal}
-              fullWidth
-            >
-              {settingsMessages.commentSettingsButtonText}
-            </Button>
-          </SettingsCard>
-        ) : null}
+            {settingsMessages.commentSettingsButtonText}
+          </Button>
+        </SettingsCard>
         <SettingsCard
           icon={<IconNotification />}
           title={settingsMessages.notificationsCardTitle}
@@ -458,22 +422,6 @@ export const SettingsPage = () => {
             </Toast>
           </SettingsCard>
         ) : null}
-        <SettingsCard
-          icon={<IconVerified className={styles.iconVerified} size='l' />}
-          title={settingsMessages.verificationCardTitle}
-          description={settingsMessages.verificationCardDescription}
-        >
-          <VerificationModal
-            userId={userId}
-            handle={handle}
-            name={name}
-            goToRoute={goToRoute}
-            isVerified={isVerified}
-            onInstagramLogin={onInstagramLogin}
-            onTwitterLogin={onTwitterLogin}
-            onTikTokLogin={onTikTokLogin}
-          />
-        </SettingsCard>
         {!isManagedAccount ? (
           <SettingsCard
             icon={<IconEmailAddress />}

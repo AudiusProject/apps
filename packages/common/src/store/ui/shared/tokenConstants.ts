@@ -40,23 +40,35 @@ const BASE_TOKEN_METADATA = {
   }
 } as const
 
+export const AUDIO_MINT = '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'
+export const SOL_MINT = 'So11111111111111111111111111111111111111112'
+export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+export const BONK_MINT = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+
+export const NON_ARTIST_COIN_MINTS = [
+  AUDIO_MINT,
+  SOL_MINT,
+  USDC_MINT,
+  BONK_MINT
+]
+
 /**
  * Legacy token listing map with hardcoded addresses for backward compatibility
  */
 export const TOKEN_LISTING_MAP: Record<string, JupiterTokenListing> = {
   AUDIO: {
     ...BASE_TOKEN_METADATA.AUDIO,
-    address: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'
+    address: AUDIO_MINT
   },
   SOL: {
     ...BASE_TOKEN_METADATA.SOL
   },
   USDC: {
     ...BASE_TOKEN_METADATA.USDC,
-    address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+    address: USDC_MINT
   },
   BONK: {
     ...BASE_TOKEN_METADATA.BONK,
-    address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+    address: BONK_MINT
   }
 }

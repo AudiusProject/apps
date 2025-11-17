@@ -5,15 +5,23 @@ import {
   getExternalWalletBalanceOptions,
   useCurrentAccountUser,
   useQueryContext,
-  useUserCreatedCoins
+  useArtistCreatedCoin
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
-import { Chain, Feature, Name } from '@audius/common/models'
-import type { LaunchpadFormValues } from '@audius/common/models'
+import {
+  Chain,
+  Feature,
+  Name,
+  LaunchpadFormValues
+} from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
-import { route, shortenSPLAddress } from '@audius/common/utils'
+import {
+  getUserSocialLinks,
+  route,
+  shortenSPLAddress
+} from '@audius/common/utils'
 import { wAUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
@@ -65,6 +73,8 @@ const messages = {
       'Failed to check wallet balance. Please try again.'
   }
 }
+
+const getArtistSocialLinks = getUserSocialLinks
 
 const LaunchpadPageContent = ({
   submitErrorText,
@@ -339,13 +349,11 @@ const LaunchpadPageContent = ({
 export const LaunchpadPage = () => {
   const { data: currentUser } = useCurrentAccountUser()
 
-  const { data: createdCoins } = useUserCreatedCoins({
-    userId: currentUser?.user_id
-  })
+  const { data: createdCoin } = useArtistCreatedCoin(currentUser?.user_id)
   const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
     FeatureFlags.LAUNCHPAD_VERIFICATION
   )
-  const hasExistingArtistCoin = (createdCoins?.length ?? 0) > 0
+  const hasExistingArtistCoin = !!createdCoin
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useContext(ToastContext)
@@ -571,6 +579,7 @@ export const LaunchpadPage = () => {
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
+        const socialLinks = getArtistSocialLinks(currentUser)
         launchCoin({
           userId: currentUser.user_id,
           name: formValues.coinName,
@@ -581,7 +590,8 @@ export const LaunchpadPage = () => {
             formValues.coinSymbol
           ),
           walletPublicKey: connectedWalletAddress,
-          initialBuyAmountAudio
+          initialBuyAmountAudio,
+          socialLinks
         })
       }
     },

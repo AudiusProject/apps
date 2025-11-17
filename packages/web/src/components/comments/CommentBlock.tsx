@@ -69,7 +69,7 @@ const CommentBlockInternal = (
     mentions = []
   } = comment
 
-  const { color, motion } = useTheme()
+  const { color, motion, spacing } = useTheme()
   const isPinned = track.pinned_comment_id === commentId
   const isTombstone = 'isTombstone' in comment ? !!comment.isTombstone : false
   const createdAtDate = useMemo(
@@ -107,7 +107,8 @@ const CommentBlockInternal = (
       css={{
         opacity: isTombstone ? 0.5 : 1,
         animation: `${fadeIn} ${motion.calm}`,
-        paddingInline: parentCommentId ? 80 : 24,
+        paddingRight: spacing.xl,
+        paddingLeft: parentCommentId ? spacing.unit20 : spacing.xl,
         '&::before': {
           content: highlightedCommentId === commentId ? '""' : 'none',
           position: 'absolute',

@@ -94,7 +94,7 @@ const { getBuyAudioFlowStage, getFeesCache, getBuyAudioProvider } =
   buyAudioSelectors
 const { fetchTransactionDetailsSucceeded } = transactionDetailsActions
 
-const DEFAULT_SLIPPAGE_BPS = 30 // The default slippage amount to allow for exchanges, overridden in optimizely
+const DEFAULT_SLIPPAGE_BPS = 200 // 2% default slippage allowance for exchanges, overridden in optimizely
 const BUY_AUDIO_LOCAL_STORAGE_KEY = 'buy-audio-transaction-details'
 const NUM_TRANSFER_TRANSACTIONS = 3
 

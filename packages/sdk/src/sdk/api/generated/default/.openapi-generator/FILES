@@ -60,6 +60,8 @@ models/CoverPhoto.ts
 models/CreateCoinRequest.ts
 models/CreateCoinResponse.ts
 models/CreateCoinResponseData.ts
+models/CreateRewardCodeRequest.ts
+models/CreateRewardCodeResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
 models/DecodedUserToken.ts
@@ -99,12 +101,15 @@ models/PlaylistTracksResponse.ts
 models/PlaylistsResponse.ts
 models/ProfilePicture.ts
 models/PurchasersResponse.ts
+models/RedeemAmountResponse.ts
 models/RelatedArtistResponse.ts
 models/RemixParent.ts
 models/RemixedTrackAggregate.ts
 models/RemixersResponse.ts
 models/ReplyComment.ts
 models/Reposts.ts
+models/RewardCodeErrorResponse.ts
+models/RewardCodeResponse.ts
 models/SaleJson.ts
 models/SalesAggregate.ts
 models/SalesAggregateResponse.ts

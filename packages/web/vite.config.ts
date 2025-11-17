@@ -182,7 +182,7 @@ export default defineConfig(async ({ mode }) => {
       port
     },
     test: {
-      environment: 'jsdom',
+      environment: 'happy-dom',
       setupFiles: ['./src/test/vitest-setup.ts'],
       deps: {
         optimizer: {

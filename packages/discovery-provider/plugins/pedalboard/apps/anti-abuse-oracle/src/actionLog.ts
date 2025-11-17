@@ -149,6 +149,7 @@ export async function getUserNormalizedScore(userId: number, wallet: string) {
     following_count,
     chat_block_count,
     is_audius_impersonator,
+    has_profile_picture,
     score: shadowban_score,
     is_blocked
   } = rows[0]
@@ -185,6 +186,7 @@ export async function getUserNormalizedScore(userId: number, wallet: string) {
     chatBlockCount: chat_block_count,
     fingerprintCount: numberOfUserWithFingerprint,
     isAudiusImpersonator: is_audius_impersonator,
+    hasProfilePicture: has_profile_picture,
     isEmailDeliverable,
     isBlocked: is_blocked,
     shadowbanScore,

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { Id } from '@audius/sdk'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
@@ -6,7 +6,10 @@ import { usePrevious } from 'react-use'
 
 import { notificationFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
+import { useRemoteVar } from '~/hooks'
+import { ChallengeRewardID } from '~/models'
 import { ID } from '~/models/Identifiers'
+import { StringKeys } from '~/services'
 import {
   Entity,
   NotificationType,
@@ -195,6 +198,17 @@ export const useNotifications = (options?: QueryOptions) => {
   const { data: unreadCount } = useNotificationUnreadCount()
   const prevUnreadCount = usePrevious(unreadCount)
 
+  // Get whitelisted challenge reward IDs from remote config
+  const challengeRewardIdsString = useRemoteVar(StringKeys.CHALLENGE_REWARD_IDS)
+  const whitelistedChallengeIds = useMemo(() => {
+    if (!challengeRewardIdsString) return new Set<ChallengeRewardID>()
+    return new Set(
+      challengeRewardIdsString
+        .split(',')
+        .map((id) => id.trim()) as ChallengeRewardID[]
+    )
+  }, [challengeRewardIdsString])
+
   const query = useInfiniteQuery({
     queryKey: getNotificationsQueryKey({
       currentUserId,
@@ -210,10 +224,18 @@ export const useNotifications = (options?: QueryOptions) => {
         groupId: pageParam?.groupId
       })
 
-      return transformAndCleanList(
+      const notifications = transformAndCleanList(
         data?.notifications,
         notificationFromSDK
       ) as Notification[]
+
+      // Filter out challenge reward notifications that aren't whitelisted
+      return notifications.filter((notification) => {
+        if (notification.type === NotificationType.ChallengeReward) {
+          return whitelistedChallengeIds.has(notification.challengeId)
+        }
+        return true
+      })
     },
     getNextPageParam: (lastPage: Notification[]) => {
       const lastNotification = lastPage[lastPage.length - 1]

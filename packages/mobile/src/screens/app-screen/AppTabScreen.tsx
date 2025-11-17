@@ -26,6 +26,7 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
+import { CashScreen } from 'app/screens/cash-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
@@ -35,6 +36,7 @@ import {
   EditCoinDetailsScreen,
   ExclusiveTracksScreen
 } from 'app/screens/coin-details-screen'
+import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
@@ -42,7 +44,6 @@ import { RewardsScreen } from 'app/screens/rewards-screen'
 import {
   AboutScreen,
   AccountSettingsScreen,
-  AccountVerificationScreen,
   ListeningHistoryScreen,
   DownloadSettingsScreen,
   InboxSettingsScreen,
@@ -107,7 +108,6 @@ export type AppTabScreenParamList = {
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
   AccountSettingsScreen: undefined
-  AccountVerificationScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined
   InboxSettingsScreen: undefined
@@ -123,7 +123,9 @@ export type AppTabScreenParamList = {
     initialSortDirection?: GetCoinsSortDirectionEnum
   }
   wallet: undefined
+  CashScreen: undefined
   CoinDetailsScreen: { ticker: string }
+  CoinRedeemScreen: { ticker: string; code?: string }
   EditCoinDetailsScreen: { ticker: string }
   ExclusiveTracksScreen: { ticker: string }
   Upload: {
@@ -237,7 +239,9 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='wallet' component={WalletScreen} />
+      <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
+      <Stack.Screen name='CoinRedeemScreen' component={CoinRedeemScreen} />
       <Stack.Screen
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
@@ -279,10 +283,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         <Stack.Screen
           name='NotificationSettingsScreen'
           component={NotificationSettingsScreen}
-        />
-        <Stack.Screen
-          name='AccountVerificationScreen'
-          component={AccountVerificationScreen}
         />
         <Stack.Screen name='ChangeEmail' component={ChangeEmailModalScreen} />
       </Stack.Group>

@@ -1,10 +1,8 @@
 import { useEffect, useContext } from 'react'
 
 import { useRemixContest, useRemixesLineup } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { remixMessages as messages } from '@audius/common/messages'
 import { Track, User } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { remixesPageLineupActions } from '@audius/common/store'
 import {
   Flex,
@@ -42,12 +40,6 @@ const nullGuard = withNullGuard(
 const RemixesPage = nullGuard(
   ({ title, originalTrack, user, goToTrackPage, goToArtistPage }) => {
     useSubPageHeader()
-    const { isEnabled: isRemixContestEnabled } = useFeatureFlag(
-      FeatureFlags.REMIX_CONTEST
-    )
-    const { isEnabled: isRemixContestWinnersMilestoneEnabled } = useFeatureFlag(
-      FeatureFlags.REMIX_CONTEST_WINNERS_MILESTONE
-    )
 
     const {
       data,
@@ -65,11 +57,11 @@ const RemixesPage = nullGuard(
     } = useRemixesLineup({
       trackId: originalTrack?.track_id,
       includeOriginal: true,
-      includeWinners: isRemixContestWinnersMilestoneEnabled
+      includeWinners: true
     })
 
     const { data: contest } = useRemixContest(originalTrack?.track_id)
-    const isRemixContest = isRemixContestEnabled && contest
+    const isRemixContest = !!contest
     const winnerCount = contest?.eventData?.winners?.length ?? 0
 
     const { setHeader } = useContext(HeaderContext)
@@ -119,7 +111,7 @@ const RemixesPage = nullGuard(
     )
 
     const delineatorMap =
-      isRemixContestWinnersMilestoneEnabled && winnerCount > 0
+      winnerCount > 0
         ? {
             0: winnersDelineator,
             [winnerCount]: remixesDelineator
@@ -128,13 +120,8 @@ const RemixesPage = nullGuard(
             0: remixesDelineator
           }
 
-    const winnersMaxEntries =
+    const maxEntries =
       count && winnerCount ? count + winnerCount + 1 : undefined
-    const defaultMaxEntries = count ? count + 1 : undefined
-
-    const maxEntries = isRemixContestWinnersMilestoneEnabled
-      ? winnersMaxEntries
-      : defaultMaxEntries
 
     return (
       <MobilePageContainer

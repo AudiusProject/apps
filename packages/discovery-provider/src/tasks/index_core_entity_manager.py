@@ -32,7 +32,6 @@ def index_core_entity_manager(
         if tx_type != "manage_entity":
             continue
 
-        logger.info(f"index_core manage entity {tx_hash} {block.blockhash}")
         manage_entity_tx = tx.manage_entity
         tx_receipt = {
             "args": AttributeDict(

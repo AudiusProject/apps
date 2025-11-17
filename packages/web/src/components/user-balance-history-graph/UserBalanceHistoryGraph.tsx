@@ -1,11 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import {
   type BalanceHistoryDataPoint,
   useCurrentUserId,
-  useUserBalanceHistory
+  useUserBalanceHistory,
+  useUserTotalBalance
 } from '@audius/common/api'
-import type { ID } from '@audius/common/models'
+import { walletMessages } from '@audius/common/messages'
+import { convertHexToRGBA } from '@audius/common/utils'
 import { Flex, Text, useTheme } from '@audius/harmony'
 import { Line } from 'react-chartjs-2'
 
@@ -13,14 +15,7 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from './UserBalanceHistoryGraph.module.css'
 
-const messages = {
-  loading: 'Loading balance history...',
-  error: 'Unable to load balance history'
-}
-
-type UserBalanceHistoryGraphProps = {
-  userId?: ID
-}
+const messages = walletMessages.balanceHistory
 
 const formatCurrency = (value: number, decimals: number = 0): string => {
   return new Intl.NumberFormat('en-US', {
@@ -48,12 +43,15 @@ const formatDate = (timestamp: number): string => {
 }
 
 const formatTooltipDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
+  const date = new Date(timestamp)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const hour = date
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true
+    })
+    .toLowerCase()
+  return `${weekday} ${hour}`
 }
 
 const getChartData = (
@@ -66,7 +64,7 @@ const getChartData = (
     {
       fill: true,
       lineTension: 0.4,
-      backgroundColor: 'rgba(126, 27, 204, 0.15)',
+      backgroundColor: convertHexToRGBA(secondary, 0.15),
       borderColor: secondary,
       borderWidth: 2,
       borderCapStyle: 'round' as const,
@@ -90,7 +88,8 @@ const getChartData = (
 const getChartOptions = (
   chartId: string,
   neutralColor: string,
-  spacing: Record<string, number>
+  spacing: Record<string, number>,
+  borderColor: string
 ) => ({
   maintainAspectRatio: false,
   responsive: true,
@@ -136,8 +135,8 @@ const getChartOptions = (
         gridLines: {
           display: true,
           drawBorder: false,
-          color: 'rgba(243, 243, 245, 1)',
-          zeroLineColor: 'rgba(243, 243, 245, 1)',
+          color: borderColor,
+          zeroLineColor: borderColor,
           borderDash: [4, 4],
           lineWidth: 1
         },
@@ -159,10 +158,16 @@ const getChartOptions = (
   legend: {
     display: false
   },
+  hover: {
+    mode: 'index',
+    intersect: false,
+    axis: 'x'
+  },
   tooltips: {
     enabled: false,
     mode: 'index',
     intersect: false,
+    axis: 'x',
     custom: function (tooltipModel: any) {
       let tooltipEl = document.getElementById(
         `balance-chart-tooltip-${chartId}`
@@ -216,20 +221,43 @@ const getChartOptions = (
   }
 })
 
-export const UserBalanceHistoryGraph = ({
-  userId
-}: UserBalanceHistoryGraphProps) => {
+export const UserBalanceHistoryGraph = () => {
   const chartId = useRef(Math.random().toString(36).substring(7)).current
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
   const neutralColor = color.neutral.n400
+  const borderColor = color.border.default
   const { data: currentUserId } = useCurrentUserId()
-  const effectiveUserId = userId ?? currentUserId
   const {
-    data: historyData,
-    isLoading,
-    isError
-  } = useUserBalanceHistory({ userId: effectiveUserId })
+    data: historyDataFetched,
+    isLoading: isHistoryLoading,
+    isError: isHistoryError
+  } = useUserBalanceHistory({ userId: currentUserId })
+
+  const {
+    totalBalance: currentBalance,
+    isLoading: isBalanceLoading,
+    isError: isBalanceError
+  } = useUserTotalBalance()
+
+  const historyData = useMemo(() => {
+    if (!historyDataFetched || historyDataFetched.length === 0) {
+      return historyDataFetched
+    }
+
+    const currentTimestamp = Date.now()
+    return [
+      ...historyDataFetched,
+      {
+        timestamp: currentTimestamp,
+        balanceUsd: currentBalance
+      }
+    ]
+  }, [historyDataFetched, currentBalance])
+
+  const isLoading = isHistoryLoading || isBalanceLoading
+  const isError = isHistoryError || isBalanceError
+
   useEffect(() => {
     return () => {
       const tooltipEl = document.getElementById(
@@ -250,7 +278,7 @@ export const UserBalanceHistoryGraph = ({
           css={{ minHeight: '200px' }}
         >
           <LoadingSpinner />
-          <Text variant='body' size='s' strength='weak'>
+          <Text variant='body' size='s'>
             {messages.loading}
           </Text>
         </Flex>
@@ -268,7 +296,7 @@ export const UserBalanceHistoryGraph = ({
           gap='l'
           css={{ minHeight: '200px' }}
         >
-          <Text variant='body' size='m' strength='weak' color='danger'>
+          <Text variant='body' size='m' color='danger'>
             {messages.error}
           </Text>
         </Flex>
@@ -291,7 +319,7 @@ export const UserBalanceHistoryGraph = ({
     >
       <Line
         data={getChartData(timestamps, balances, secondary)}
-        options={getChartOptions(chartId, neutralColor, spacing)}
+        options={getChartOptions(chartId, neutralColor, spacing, borderColor)}
         height={200}
       />
     </Flex>

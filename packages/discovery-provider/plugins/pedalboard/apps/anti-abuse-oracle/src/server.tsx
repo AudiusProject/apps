@@ -194,7 +194,7 @@ app.post('/attestation/:handle', async (c) => {
 
     // Custom rules for specific challenges
     if (challengeId === 'e') {
-      if (user.totalAudioBalance < 50) {
+      if (user.totalAudioBalance < 100) {
         return c.json({ error: 'denied' }, 400)
       }
     }
@@ -415,6 +415,7 @@ app.get('/attestation/ui/user', async (c) => {
               <th class='text-left'>Fast Challenge Count</th>
               <th class='text-left'>Following Count</th>
               <th class='text-left'>Chat Block Count</th>
+              <th class='text-left'>Has Profile Picture</th>
               <th class='text-left'>Audius Impersonator</th>
             </tr>
           </thead>
@@ -446,6 +447,16 @@ app.get('/attestation/ui/user', async (c) => {
                 }
               >
                 {userScore.chatBlockCount}
+              </td>
+              <td
+                class={
+                  !userScore.hasProfilePicture
+                    ? 'text-red-500'
+                    : 'text-green-500'
+                }
+              >
+                {userScore.hasProfilePicture.toString()}{' '}
+                {!userScore.hasProfilePicture ? '(-100)' : ''}
               </td>
               <td
                 class={

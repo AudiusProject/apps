@@ -1,5 +1,11 @@
 # @audius/fixed-decimal
 
+## 0.2.1
+
+### Patch Changes
+
+- 0aef321: Allow scientific notation in constructor
+
 ## 0.2.0
 
 ### Minor Changes

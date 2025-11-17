@@ -53,7 +53,19 @@ vi.mock('@reown/appkit/react', () => {
   // See https://github.com/orgs/WalletConnect/discussions/5729#discussioncomment-12770662
   return {
     createAppKit: vi.fn().mockReturnValue({
-      getUniversalProvider: vi.fn()
+      getUniversalProvider: vi.fn(),
+      subscribeEvents: vi.fn().mockReturnValue(() => {}), // Return unsubscribe function
+      getState: vi.fn().mockReturnValue({ selectedNetworkId: null }),
+      switchNetwork: vi.fn()
+    }),
+    useAppKit: vi.fn().mockReturnValue({
+      open: vi.fn()
+    }),
+    useAppKitState: vi.fn().mockReturnValue({
+      open: false
+    }),
+    useDisconnect: vi.fn().mockReturnValue({
+      disconnect: vi.fn()
     })
   }
 })
@@ -70,9 +82,13 @@ vi.mock('redux-first-history', async (importOriginal) => {
 })
 
 window.matchMedia = vi.fn().mockReturnValue({
-  matches: [],
+  matches: false,
+  media: '',
   addListener: vi.fn(),
-  removeListener: vi.fn()
+  removeListener: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn()
 })
 
 afterEach(() => {

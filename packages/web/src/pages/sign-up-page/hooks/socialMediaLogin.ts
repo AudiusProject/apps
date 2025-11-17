@@ -1,5 +1,4 @@
 import { useQueryContext } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import { pickHandleSchema } from '@audius/common/schemas'
 import {
   formatTwitterProfile,
@@ -14,7 +13,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
 import {
   setInstagramProfile,
   setTikTokProfile,
@@ -55,12 +53,6 @@ export const useSetProfileFromTwitter = () => {
 
     const requiresReview = !handleTooLong && !validationResult.success
     dispatch(setTwitterProfile(uuid, profile, profileImage, profileBanner))
-    dispatch(
-      make(Name.CREATE_ACCOUNT_COMPLETE_TWITTER, {
-        isVerified: !!profile.verified,
-        handle: profile.screen_name || 'unknown'
-      })
-    )
     return { requiresReview, handle: profile.screen_name }
   }
 }
@@ -98,12 +90,6 @@ export const useSetProfileFromInstagram = () => {
     const requiresReview = !handleTooLong && !validationResult.success
 
     dispatch(setInstagramProfile(uuid, profile, profileImage))
-    dispatch(
-      make(Name.CREATE_ACCOUNT_COMPLETE_INSTAGRAM, {
-        isVerified: !!profile.is_verified,
-        handle: profile.username || 'unknown'
-      })
-    )
     return { requiresReview, handle: profile.username }
   }
 }
@@ -136,12 +122,6 @@ export const useSetProfileFromTikTok = () => {
 
     const requiresReview = !handleTooLong && !validationResult.success
     dispatch(setTikTokProfile(uuid, profile, profileImage))
-    dispatch(
-      make(Name.CREATE_ACCOUNT_COMPLETE_TIKTOK, {
-        isVerified: !!profile.is_verified,
-        handle: profile.username || 'unknown'
-      })
-    )
     return { requiresReview, handle: profile.username }
   }
 }
