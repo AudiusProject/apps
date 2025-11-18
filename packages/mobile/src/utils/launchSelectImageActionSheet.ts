@@ -18,17 +18,6 @@ export const launchSelectImageActionSheet = (
   const theme = selectSystemTheme(store.getState())
   const { primary, secondary } = theme
 
-  const baseOptions: Options = {
-    cropping: true,
-    mediaType: 'photo',
-    includeBase64: true,
-    cropperActiveWidgetColor: secondary,
-    cropperStatusBarColor: secondary,
-    cropperToolbarColor: secondary,
-    cropperChooseColor: primary,
-    cropperCancelColor: secondary
-  }
-
   const handleSelectImage = (image: CropPickerImage) => {
     const { path, filename, mime } = image
     return onSelectImage({
@@ -37,19 +26,41 @@ export const launchSelectImageActionSheet = (
     })
   }
 
+  // When freeStyleCropEnabled is used, we must disable includeBase64 to avoid "Cannot find image data" error
+  const hasFreeStyleCrop =
+    options && 'freeStyleCropEnabled' in options && options.freeStyleCropEnabled
+
+  const baseOptions: Options = {
+    cropping: true,
+    mediaType: 'photo',
+    // Disable includeBase64 when freeStyleCropEnabled is used (it causes "Cannot find image data" error)
+    includeBase64: !hasFreeStyleCrop,
+    cropperActiveWidgetColor: secondary,
+    cropperStatusBarColor: secondary,
+    cropperToolbarColor: secondary,
+    cropperChooseColor: primary,
+    cropperCancelColor: secondary
+  }
+
   const selectPhotoFromLibrary = () => {
-    openPicker({
+    const finalOptions = {
       ...baseOptions,
       ...options,
       testID
-    }).then(handleSelectImage)
+    }
+    openPicker(finalOptions)
+      .then(handleSelectImage)
+      .catch((error) => {
+        console.error('error selecting photo from library', error)
+      })
   }
 
   const takePhoto = () => {
-    openCamera({
+    const finalOptions = {
       ...baseOptions,
       ...options
-    }).then(handleSelectImage)
+    }
+    openCamera(finalOptions).then(handleSelectImage)
   }
 
   if (Platform.OS === 'ios') {

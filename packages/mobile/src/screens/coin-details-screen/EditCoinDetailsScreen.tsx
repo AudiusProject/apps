@@ -13,12 +13,13 @@ import {
 } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
+import type { Image } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { useFormikContext, Formik } from 'formik'
-import { Image, View, StyleSheet } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
+import { Image as RNImage, View, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import LinearGradient from 'react-native-linear-gradient'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
 import {
@@ -37,7 +38,6 @@ import {
   Button,
   LoadingSpinner
 } from '@audius/harmony-native'
-import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import {
   TokenIcon,
   Screen,
@@ -46,7 +46,7 @@ import {
 } from 'app/components/core'
 import { TextAreaField } from 'app/components/fields/TextAreaField'
 import { TextField } from 'app/components/fields/TextField'
-import type { Image as ImageType } from 'app/types/image'
+import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { launchSelectImageActionSheet } from 'app/utils/launchSelectImageActionSheet'
 
 // Helper function to detect platform from URL
@@ -104,10 +104,13 @@ const BannerImageSection = ({
   const hasBanner = Boolean(displayBannerUrl)
 
   return (
-    <View style={{ position: 'relative', height: BANNER_HEIGHT, width: '100%' }}>
+    <View
+      style={{ position: 'relative', height: BANNER_HEIGHT, width: '100%' }}
+    >
       {hasBanner && displayBannerUrl ? (
         <>
-          <Image
+          <RNImage
+            key={displayBannerUrl}
             source={{ uri: displayBannerUrl }}
             style={StyleSheet.absoluteFill}
             resizeMode='cover'
@@ -259,13 +262,15 @@ export const EditCoinDetailsScreen = () => {
     size: WidthSizes.SIZE_2000
   })
   const defaultBannerImageUrl =
-    defaultBannerImageSource && 'uri' in defaultBannerImageSource
+    defaultBannerImageSource &&
+    typeof defaultBannerImageSource === 'object' &&
+    'uri' in defaultBannerImageSource
       ? defaultBannerImageSource.uri
       : null
 
   const updateCoinMutation = useUpdateArtistCoin()
 
-  const [bannerImageFile, setBannerImageFile] = useState<ImageType | null>(null)
+  const [bannerImageFile, setBannerImageFile] = useState<Image | null>(null)
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
   const [isProcessingBanner, setIsProcessingBanner] = useState(false)
   const [bannerError, setBannerError] = useState<string | null>(null)
@@ -277,15 +282,28 @@ export const EditCoinDetailsScreen = () => {
   }, [coin, bannerImageFile])
 
   const handleBannerFileSelect = useCallback(() => {
-    const handleImageSelected = (image: ImageType) => {
+    const handleImageSelected = (image: Image) => {
       setBannerError(null)
+      setIsProcessingBanner(true)
       setBannerImageFile(image)
-      setBannerPreviewUrl(image.url)
+      // Use the file URI for preview (React Native format)
+      // image.file can be string | File | { uri, name, type } from launchSelectImageActionSheet
+      let previewUri = image.url
+      if (image.file) {
+        if (typeof image.file === 'object' && 'uri' in image.file) {
+          previewUri = image.file.uri
+        } else if (typeof image.file === 'string') {
+          previewUri = image.file
+        }
+      }
+      setBannerPreviewUrl(previewUri)
+      setIsProcessingBanner(false)
     }
+
+    // Use same dimensions as cover photo: width 2000, height 1000 (aspect ratio 2:1)
     launchSelectImageActionSheet(handleImageSelected, {
       width: 2000,
-      height: 2000,
-      cropping: false
+      height: 1000
     })
   }, [])
 
@@ -298,7 +316,13 @@ export const EditCoinDetailsScreen = () => {
       links: values.socialLinks.filter(
         (link: string) => link !== null && link !== undefined
       ),
-      bannerImageFile: bannerImageFile?.file ?? undefined
+      // SDK uploadFile accepts both web File objects and React Native file objects with { uri, name, type }
+      bannerImageFile:
+        bannerImageFile?.file &&
+        typeof bannerImageFile.file === 'object' &&
+        'uri' in bannerImageFile.file
+          ? (bannerImageFile.file as any) // SDK handles React Native file format at runtime
+          : undefined
     }
 
     try {
@@ -383,7 +407,7 @@ export const EditCoinDetailsScreen = () => {
                 {/* Banner Image Section */}
                 <BannerImageSection
                   bannerImageUrl={bannerPreviewUrl}
-                  defaultBannerImageUrl={defaultBannerImageUrl}
+                  defaultBannerImageUrl={defaultBannerImageUrl ?? null}
                   onFileSelect={handleBannerFileSelect}
                   isProcessing={isProcessingBanner}
                   error={bannerError}
