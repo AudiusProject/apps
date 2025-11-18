@@ -204,11 +204,12 @@ const BannerImageSection = ({
         h={140}
         css={{
           position: 'relative',
-          backgroundImage: hasBanner
-            ? `linear-gradient(0deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("${displayBannerUrl}")`
+          background: hasBanner
+            ? `linear-gradient(90deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.02) 20%, rgba(0, 0, 0, 0.01) 30%, rgba(0, 0, 0, 0) 45%), url("${displayBannerUrl}")`
             : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: hasBanner ? 'auto, cover' : undefined,
+          backgroundPosition: hasBanner ? '0% 0%, 50% 50%' : undefined,
+          backgroundRepeat: hasBanner ? 'repeat, no-repeat' : undefined,
           overflow: 'hidden',
           backgroundColor: hasBanner ? undefined : 'white',
           border: hasBanner ? 'none' : '1px solid var(--border-default)'

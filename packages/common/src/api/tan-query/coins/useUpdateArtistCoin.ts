@@ -45,39 +45,21 @@ export const useUpdateArtistCoin = () => {
           file: updateCoinRequest.bannerImageFile,
           template: 'img_backdrop'
         })
-        const rawUrl = getBannerImageUrl(uploadResponse.results)
-        if (!rawUrl) {
+        const cid = getBannerImageUrl(uploadResponse.results)
+        if (!cid) {
           throw new Error('Failed to process banner image upload')
         }
 
-        // Check if rawUrl is already a full URL (starts with http:// or https://)
-        // If not, it's likely a CID and we need to convert it to a content node URL
-        if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
-          // Already a full URL, validate and use it
-          try {
-            const url = new URL(rawUrl)
-            bannerImageUrl = url.toString()
-          } catch (error) {
-            throw new Error(
-              `Invalid banner image URL format: ${rawUrl}. URL must be absolute with scheme and host.`
-            )
-          }
-        } else {
-          // It's a CID, convert to content node URL
-          // Get a content node endpoint from the storage service
-          const contentNodeEndpoint = await (
-            sdk.services.storage as any
-          ).storageNodeSelector?.getSelectedNode()
+        // Convert CID to content node URL (same pattern as logo_uri from relay service)
+        const contentNodeEndpoint = await (
+          sdk.services.storage as any
+        ).storageNodeSelector?.getSelectedNode()
 
-          if (!contentNodeEndpoint) {
-            throw new Error(
-              'No content node available to construct banner image URL'
-            )
-          }
-
-          // Construct the URL: content nodes serve images at /content/{cid}
-          bannerImageUrl = `${contentNodeEndpoint}/content/${rawUrl}`
+        if (!contentNodeEndpoint) {
+          throw new Error('No content node available')
         }
+
+        bannerImageUrl = `${contentNodeEndpoint}/content/${cid}`
       } else if (updateCoinRequest.removeBanner) {
         bannerImageUrl = ''
       }

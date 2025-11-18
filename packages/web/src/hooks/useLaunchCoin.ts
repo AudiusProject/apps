@@ -193,10 +193,21 @@ export const useLaunchCoin = () => {
               file: bannerImageFile,
               template: 'img_backdrop'
             })
-            resolvedBannerImageUrl = getBannerImageUrl(uploadResponse.results)
-            if (!resolvedBannerImageUrl) {
+            const cid = getBannerImageUrl(uploadResponse.results)
+            if (!cid) {
               throw new Error('Failed to process banner image upload')
             }
+
+            // Convert CID to content node URL
+            const contentNodeEndpoint = await (
+              sdk.services.storage as any
+            ).storageNodeSelector?.getSelectedNode()
+
+            if (!contentNodeEndpoint) {
+              throw new Error('No content node available')
+            }
+
+            resolvedBannerImageUrl = `${contentNodeEndpoint}/content/${cid}`
           }
 
           // Create coin in Audius database
