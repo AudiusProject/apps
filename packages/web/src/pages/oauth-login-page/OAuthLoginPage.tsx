@@ -190,11 +190,12 @@ export const OAuthLoginPage = () => {
     let signInResponse: SignInResponse
     try {
       const fpResponse = await fingerprintClient.identify(emailInput, 'web')
+      const sanitizedOtp = otpInput ? otpInput.replace(/\s/g, '') : undefined
       signInResponse = await authService.signIn(
         emailInput,
         passwordInput,
         fpResponse?.visitorId,
-        otpInput || undefined
+        sanitizedOtp
       )
 
       const sdk = await audiusSdk()
