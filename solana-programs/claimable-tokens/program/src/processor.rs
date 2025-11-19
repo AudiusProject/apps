@@ -55,6 +55,13 @@ pub struct SecpSignatureOffsets {
     pub message_instruction_index: u8,
 }
 
+
+const ETH_ADDRESS_OFFSET: usize = 12;
+// signature_offset = ETH_ADDRESS_OFFSET (12) + eth_pubkey.len (20) = 32
+const SIGNATURE_OFFSET: usize = 32;
+// ETH_ADDRESS_OFFSET (12) + address (20) + signature (65) = 97
+const MESSAGE_DATA_OFFSET: usize = 97;
+
 /// Program state handler.
 pub struct Processor;
 
@@ -365,6 +372,8 @@ impl Processor {
             return Err(ClaimableProgramError::Secp256InstructionLosing.into());
         }
 
+        Self::validate_secp_instruction_offsets(instruction.data.clone(), secp_program_index as u8)?;
+
         // Parse the secp256k1 instruction
         let offsets = SecpSignatureOffsets::try_from_slice(
             &instruction.data[1..(1 + SIGNATURE_OFFSETS_SERIALIZED_SIZE)],
@@ -390,6 +399,12 @@ impl Processor {
 
         if !blockhash_found {
             msg!("Blockhash is not recent");
+            return Err(ClaimableProgramError::InvalidSignatureData.into());
+        }
+
+        // Check that the account being acted on matches the signed account
+        if *token_account_info.key != signed_data.account_pubkey {
+            msg!("Token account mismatch");
             return Err(ClaimableProgramError::InvalidSignatureData.into());
         }
 
@@ -615,23 +630,41 @@ impl Processor {
         secp_instruction_data: Vec<u8>,
         instruction_index: u8,
     ) -> Result<TransferInstructionData, ProgramError> {
+        Self::validate_secp_instruction_offsets(secp_instruction_data.clone(), instruction_index)?;
+        let instruction_signer = secp_instruction_data
+            [ETH_ADDRESS_OFFSET..ETH_ADDRESS_OFFSET + size_of::<EthereumAddress>()]
+            .to_vec();
+        if instruction_signer != expected_signer {
+            return Err(ClaimableProgramError::SignatureVerificationFailed.into());
+        }
+
+        let instruction_message = secp_instruction_data[MESSAGE_DATA_OFFSET..].to_vec();
+        let decoded_instr_data =
+            TransferInstructionData::try_from_slice(&instruction_message).unwrap();
+
+        if decoded_instr_data.target_pubkey.to_bytes() != *expected_message {
+            return Err(ClaimableProgramError::SignatureVerificationFailed.into());
+        }
+
+        Ok(decoded_instr_data)
+    }
+
+    fn validate_secp_instruction_offsets(
+        secp_instruction_data: Vec<u8>,
+        instruction_index: u8,
+    ) -> Result<(), ProgramError> { 
         // Only single recovery expected
         if secp_instruction_data[0] != 1 {
             return Err(ClaimableProgramError::SignatureVerificationFailed.into());
         }
 
-        // Assert instruction_index = 1
+        // Get the first (only) set of offsets
         let start = 1;
         let end = start + (SIGNATURE_OFFSETS_SERIALIZED_SIZE as usize);
         let sig_offsets_struct =
             SecpSignatureOffsets::try_from_slice(&secp_instruction_data[start..end])
                 .map_err(|_| ClaimableProgramError::SignatureVerificationFailed)?;
 
-        let eth_address_offset = 12;
-        // signature_offset = eth_address_offset (12) + eth_pubkey.len (20) = 32
-        let signature_offset = 32;
-        // eth_address_offset (12) + address (20) + signature (65) = 97
-        let message_data_offset = 97;
 
         // Validate the index of this instruction matches expected value
         if sig_offsets_struct.message_instruction_index != instruction_index
@@ -642,28 +675,12 @@ impl Processor {
         }
 
         // Validate each offset is as expected
-        if sig_offsets_struct.eth_address_offset != (eth_address_offset as u16)
-            || sig_offsets_struct.signature_offset != (signature_offset as u16)
-            || sig_offsets_struct.message_data_offset != (message_data_offset as u16)
+        if sig_offsets_struct.eth_address_offset != (ETH_ADDRESS_OFFSET as u16)
+            || sig_offsets_struct.signature_offset != (SIGNATURE_OFFSET as u16)
+            || sig_offsets_struct.message_data_offset != (MESSAGE_DATA_OFFSET as u16)
         {
             return Err(ClaimableProgramError::SignatureVerificationFailed.into());
         }
-
-        let instruction_signer = secp_instruction_data
-            [eth_address_offset..eth_address_offset + size_of::<EthereumAddress>()]
-            .to_vec();
-        if instruction_signer != expected_signer {
-            return Err(ClaimableProgramError::SignatureVerificationFailed.into());
-        }
-
-        let instruction_message = secp_instruction_data[message_data_offset..].to_vec();
-        let decoded_instr_data =
-            TransferInstructionData::try_from_slice(&instruction_message).unwrap();
-
-        if decoded_instr_data.target_pubkey.to_bytes() != *expected_message {
-            return Err(ClaimableProgramError::SignatureVerificationFailed.into());
-        }
-
-        Ok(decoded_instr_data)
+        Ok(())
     }
 }

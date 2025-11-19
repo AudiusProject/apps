@@ -26,6 +26,8 @@ pub struct SignedSetAuthorityData {
     pub blockhash: Hash,
     /// The instruction data as a serialized byte array
     pub instruction: Vec<u8>,
+    /// The account to act on behalf of
+    pub account_pubkey: Pubkey,
 }
 
 /// Current program version
