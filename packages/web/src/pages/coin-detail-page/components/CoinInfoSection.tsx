@@ -578,6 +578,8 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     toast(overflowMessages.copiedToClipboard)
   }, [mint, toast])
 
+  // In some cases a custom-made coin will not have a dbc, so we should use the escrow recipient instead.
+  // It's possible to transfer the recipient however, so this isn't a perfect solution.
   const coinCreatorWalletAddress =
     !!coin?.dynamicBondingCurve?.creatorWalletAddress &&
     coin?.dynamicBondingCurve?.creatorWalletAddress !== ''
