@@ -82,6 +82,12 @@ export interface Coin {
      */
     ownerId: string;
     /**
+     * The escrow recipient address for custom-created coins without DBCs
+     * @type {string}
+     * @memberof Coin
+     */
+    escrowRecipient?: string;
+    /**
      * URL to the coin's logo image
      * @type {string}
      * @memberof Coin
@@ -539,6 +545,7 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'mint': json['mint'],
         'decimals': json['decimals'],
         'ownerId': json['owner_id'],
+        'escrowRecipient': !exists(json, 'escrow_recipient') ? undefined : json['escrow_recipient'],
         'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
         'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'description': !exists(json, 'description') ? undefined : json['description'],
@@ -621,6 +628,7 @@ export function CoinToJSON(value?: Coin | null): any {
         'mint': value.mint,
         'decimals': value.decimals,
         'owner_id': value.ownerId,
+        'escrow_recipient': value.escrowRecipient,
         'logo_uri': value.logoUri,
         'banner_image_url': value.bannerImageUrl,
         'description': value.description,

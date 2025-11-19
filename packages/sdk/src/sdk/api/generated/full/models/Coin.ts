@@ -134,6 +134,12 @@ export interface Coin {
      * @memberof Coin
      */
     ownerId?: string;
+    /**
+     * The escrow recipient address for custom-created coins without DBCs
+     * @type {string}
+     * @memberof Coin
+     */
+    escrowRecipient?: string;
 }
 
 /**
@@ -179,6 +185,7 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'createdAt': (new Date(json['created_at'])),
         'updatedAt': !exists(json, 'updated_at') ? undefined : (new Date(json['updated_at'])),
         'ownerId': !exists(json, 'owner_id') ? undefined : json['owner_id'],
+        'escrowRecipient': !exists(json, 'escrow_recipient') ? undefined : json['escrow_recipient'],
     };
 }
 
@@ -210,6 +217,7 @@ export function CoinToJSON(value?: Coin | null): any {
         'created_at': (value.createdAt.toISOString()),
         'updated_at': value.updatedAt === undefined ? undefined : (value.updatedAt.toISOString()),
         'owner_id': value.ownerId,
+        'escrow_recipient': value.escrowRecipient,
     };
 }
 

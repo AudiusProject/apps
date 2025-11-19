@@ -579,7 +579,11 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   }, [mint, toast])
 
   const coinCreatorWalletAddress =
-    coin?.dynamicBondingCurve?.creatorWalletAddress
+    !!coin?.dynamicBondingCurve?.creatorWalletAddress &&
+    coin?.dynamicBondingCurve?.creatorWalletAddress !== ''
+      ? coin?.dynamicBondingCurve?.creatorWalletAddress
+      : coin?.escrowRecipient
+
   const handleClaimFees = useCallback(
     (walletAddress: string) => {
       claimFees({
@@ -699,6 +703,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
       }
       if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
         toast(toastMessages.incorrectWalletLinked)
+        return
       }
       openClaimVestedCoinsModal({
         ticker: coin?.ticker ?? '',
