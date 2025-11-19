@@ -51,6 +51,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
             </intent-filter>
+            <!-- Deep link intent filter for audius.co and redirect.audius.co
+                 Note: OAuth routes (/oauth/*) are excluded from deep linking via
+                 code-level filtering in NavigationContainer.tsx -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
