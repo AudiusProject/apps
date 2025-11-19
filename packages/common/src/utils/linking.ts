@@ -6,6 +6,7 @@ export const externalLinkAllowList = new Set([
   'x.com',
   'blog.audius.co',
   'link.audius.co',
+  'yak.audius.co',
   'audius.co',
   'discord.gg',
   'solscan.io',
@@ -15,7 +16,12 @@ export const externalLinkAllowList = new Set([
 
 export const isAllowedExternalLink = (link: string) => {
   try {
-    let hostname = new URL(link).hostname
+    // Add protocol if missing to allow URL parsing
+    const urlWithProtocol =
+      link.startsWith('http://') || link.startsWith('https://')
+        ? link
+        : `https://${link}`
+    let hostname = new URL(urlWithProtocol).hostname
     hostname = hostname.replace(/^www\./, '')
     return externalLinkAllowList.has(hostname)
   } catch (e) {

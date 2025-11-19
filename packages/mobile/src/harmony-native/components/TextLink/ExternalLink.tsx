@@ -42,10 +42,16 @@ export const useExternalLinkHandlePress = ({
       onPress?.(e)
 
       try {
-        const supported = await Linking.canOpenURL(url)
+        // Ensure URL has a protocol for Linking.openURL
+        const urlWithProtocol =
+          url.startsWith('http://') || url.startsWith('https://')
+            ? url
+            : `https://${url}`
+
+        const supported = await Linking.canOpenURL(urlWithProtocol)
         if (supported) {
           if (isAllowedExternalLink(url)) {
-            await Linking.openURL(url)
+            await Linking.openURL(urlWithProtocol)
           } else {
             openLeavingAudiusModal({ link: url })
           }
