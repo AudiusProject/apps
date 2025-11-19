@@ -176,9 +176,9 @@ export const claimVestedCoins = async (
         number_of_period,
         total_claimed_amount
       FROM sol_locker_vesting_escrows
-      WHERE token_mint = ?
+      WHERE token_mint = ? AND recipient = ?
       `,
-      [mintPublicKey.toBase58()]
+      [mintPublicKey.toBase58(), ownerWallet.toBase58()]
     )
 
     if (!vestingResult.rows || vestingResult.rows.length === 0) {
@@ -214,13 +214,6 @@ export const claimVestedCoins = async (
       cliffUnlockAmount: new BN(vestingData.cliff_unlock_amount),
       totalClaimedAmount: new BN(vestingData.total_claimed_amount),
       recipient: escrowRecipient
-    }
-
-    // Verify that the owner is the recipient
-    if (!escrowRecipient.equals(ownerWallet)) {
-      throw new Error(
-        `You are not the recipient of this vesting escrow. Escrow recipient: ${escrowRecipient.toBase58()}, Your wallet: ${ownerWallet.toBase58()}`
-      )
     }
 
     // Calculate total amount and available amount
