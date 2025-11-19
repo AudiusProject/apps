@@ -54,7 +54,7 @@ class MainActivity : ReactActivity() {
     CastContext.getSharedInstance(this)
   }
 
-  override fun onNewIntent(intent: Intent?) {
+  override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     
     // Check if this is an oauth deep link and redirect to browser
