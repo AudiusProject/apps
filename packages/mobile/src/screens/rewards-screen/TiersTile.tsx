@@ -61,7 +61,7 @@ export const TiersTile = () => {
   const discordOAuthLink = useDiscordOAuthLink()
 
   const onPressLaunchDiscord = async () => {
-    Linking.openURL(discordOAuthLink)
+    // Linking.openURL(discordOAuthLink)
   }
 
   return (

@@ -1,6 +1,14 @@
 import { useMemo } from 'react'
 
-import { UserCoin, useCurrentUserId, useUserCoins } from '~/api'
+import { AudiusSdk } from '@audius/sdk'
+
+import {
+  UserCoin,
+  useCurrentUserId,
+  useQueryContext,
+  useUserCoins
+} from '~/api'
+import { AudiusBackend } from '~/services'
 import { getTierForUserNonWei } from '~/store'
 import { AUDIUS_DISCORD_OAUTH_LINK } from '~/utils/route'
 
@@ -9,13 +17,28 @@ const COIN_TIER_MAP = {
   AUDIO: getTierForUserNonWei
 }
 
+const getSignableData = () => {
+  const vals = 'abcdefghijklmnopqrstuvwxyz123456789'
+  return vals.charAt(Math.floor(Math.random() * vals.length))
+}
+
 // Returns a json string of the user's coin tiers
 // e.g. { AUDIO: 'bronze', BONK: 'holder' }
 // The discord bot looks at this to determine what roles to give everyone
-const makeDiscordOauthStateString = (
+const makeDiscordOauthStateString = async (
   userCoins: UserCoin[],
-  currentCoin: string = '$AUDIO' // uses ticker strings
+  currentCoin: string = '$AUDIO', // uses ticker strings
+  sdk: AudiusSdk,
+  audiusBackend: AudiusBackend
 ) => {
+  const data = getSignableData()
+  const { signature } = await audiusBackend.getSignature({
+    data,
+    sdk
+  })
+
+  console.log('signature', signature, data)
+
   const coinTiers = userCoins.reduce(
     (acc, coin) => {
       const cleanTicker = coin.ticker.replace('$', '')
@@ -38,15 +61,19 @@ const makeDiscordOauthStateString = (
   return JSON.stringify(coinTiers)
 }
 
-export const useDiscordOAuthLink = (currentCoin?: string) => {
+export const useDiscordOAuthLink = async (currentCoin?: string) => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: userCoins } = useUserCoins({ userId: currentUserId })
+  const { audiusSdk, audiusBackend } = useQueryContext()
 
-  return useMemo(() => {
+  return useMemo(async () => {
+    const sdk = await audiusSdk()
     const tierStateString = makeDiscordOauthStateString(
       userCoins ?? [],
-      currentCoin
+      currentCoin,
+      sdk,
+      audiusBackend
     )
     return `${AUDIUS_DISCORD_OAUTH_LINK}&state=${tierStateString}`
-  }, [userCoins, currentCoin])
+  }, [userCoins, currentCoin, audiusSdk, audiusBackend])
 }

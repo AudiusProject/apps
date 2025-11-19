@@ -316,6 +316,7 @@ const Tiers = () => {
   }, [])
 
   const onClickDiscord = useCallback(() => {
+    console.log('discord link', discordOAuthLink)
     window.open(discordOAuthLink, '_blank')
   }, [discordOAuthLink])
 

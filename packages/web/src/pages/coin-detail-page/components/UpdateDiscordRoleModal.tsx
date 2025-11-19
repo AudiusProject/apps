@@ -33,6 +33,7 @@ export const UpdateDiscordRoleModal = ({
 }) => {
   const { data: discordCode } = useDiscordCode(mint)
   const handleDiscordClick = () => {
+    console.log('discord link', AUDIUS_DISCORD_LINK)
     window.open(AUDIUS_DISCORD_LINK, '_blank')
   }
 
