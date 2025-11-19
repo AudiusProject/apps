@@ -142,8 +142,6 @@ const mapDispatchToProps = (dispatch) => ({
   setFeedInView: (inView) => dispatch(feedActions.setInView(inView)),
   loadMoreFeed: (offset, limit, overwrite) => {
     dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
-    const trackEvent = make(Name.FEED_PAGINATE, { offset, limit })
-    dispatch(trackEvent)
   },
   refreshFeedInView: (overwrite, limit) =>
     dispatch(feedActions.refreshInView(overwrite, null, limit)),

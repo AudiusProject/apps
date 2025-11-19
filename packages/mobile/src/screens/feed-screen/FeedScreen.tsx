@@ -36,7 +36,6 @@ export const FeedScreen = () => {
   const loadMore = useCallback(
     (offset: number, limit: number, overwrite: boolean) => {
       dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
-      track(make({ eventName: Name.FEED_PAGINATE, offset, limit }))
     },
     [dispatch]
   )

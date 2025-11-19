@@ -97,8 +97,6 @@ export const useTrendingActions = (): TrendingActionsReturn => {
             overwrite
           )
         )
-        const trackEvent = make(Name.TRENDING_PAGINATE, { offset, limit })
-        dispatch(trackEvent)
       }
     },
     [dispatch]

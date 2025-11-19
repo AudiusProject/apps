@@ -4,7 +4,6 @@ const { SlackReporter } = require('./slackReporter')
 const RewardEventNames = {
   REWARDS_CLAIM_SUCCESS: 'Rewards Claim: Success',
   REWARDS_CLAIM_RETRY: 'Rewards Claim: Retry',
-  REWARDS_CLAIM_FAILURE: 'Rewards Claim: Failure',
   REWARDS_CLAIM_OTHER: 'Rewards Claim: Other',
   REWARDS_CLAIM_BLOCKED: 'Rewards Claim: Blocked'
 }
@@ -121,22 +120,6 @@ class RewardsReporter {
       const slackMessage = this.errorReporter.getJsonSlackMessage(report)
       await this.errorReporter.postToSlack({ message: slackMessage })
       this.childLogger.info(report, `Rewards Reporter`)
-
-      if (this.shouldReportAnalytics) {
-        this.analyticsProvider.track(
-          RewardEventNames.REWARDS_CLAIM_FAILURE,
-          userId,
-          {
-            userId,
-            challengeId,
-            amount,
-            specifier,
-            error,
-            phase,
-            source: this.source
-          }
-        )
-      }
     } catch (e) {
       console.error(`Report failure error: ${JSON.stringify(e)}`)
     }

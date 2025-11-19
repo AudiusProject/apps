@@ -257,11 +257,9 @@ export enum Name {
 
   // Trending
   TRENDING_CHANGE_VIEW = 'Trending: Change view',
-  TRENDING_PAGINATE = 'Trending: Fetch next page',
 
   // Feed
   FEED_CHANGE_VIEW = 'Feed: Change view',
-  FEED_PAGINATE = 'Feed: Fetch next page',
 
   // Notifications
   NOTIFICATIONS_OPEN = 'Notifications: Open',
@@ -381,7 +379,6 @@ export enum Name {
   REWARDS_CLAIM_ALL_BLOCKED = 'Rewards Claim All: Blocked',
   REWARDS_CLAIM_REQUEST = 'Rewards Claim: Request',
   REWARDS_CLAIM_SUCCESS = 'Rewards Claim: Success',
-  REWARDS_CLAIM_FAILURE = 'Rewards Claim: Failure',
   REWARDS_CLAIM_BLOCKED = 'Rewards Claim: Blocked',
 
   // Tipping
@@ -1367,21 +1364,11 @@ type TrendingChangeView = {
   timeframe: TimeRange
   genre: string
 }
-type TrendingPaginate = {
-  eventName: Name.TRENDING_PAGINATE
-  offset: number
-  limit: number
-}
 
 // Feed
 type FeedChangeView = {
   eventName: Name.FEED_CHANGE_VIEW
   view: FeedFilter
-}
-type FeedPaginate = {
-  eventName: Name.FEED_PAGINATE
-  offset: number
-  limit: number
 }
 
 // Notifications
@@ -1815,16 +1802,6 @@ type RewardsClaimSuccess = {
   challengeId: string
   specifier: string
   amount: number
-}
-
-type RewardsClaimFailure = {
-  eventName: Name.REWARDS_CLAIM_FAILURE
-  challengeId: string
-  specifier: string
-  amount: number
-  url?: string
-  error: string
-  instruction?: string
 }
 
 type RewardsClaimBlocked = {
@@ -3237,9 +3214,7 @@ export type AllTrackingEvents =
   | FollowGatedDownloadTrackUnlocked
   | TokenGatedDownloadTrackUnlocked
   | TrendingChangeView
-  | TrendingPaginate
   | FeedChangeView
-  | FeedPaginate
   | NotificationsOpen
   | NotificationsClickTile
   | NotificationsClickMilestone
@@ -3319,7 +3294,6 @@ export type AllTrackingEvents =
   | RewardsClaimDetailsOpened
   | RewardsClaimRequest
   | RewardsClaimSuccess
-  | RewardsClaimFailure
   | RewardsClaimBlocked
   | RewardsClaimAllRequest
   | RewardsClaimAllSuccess
