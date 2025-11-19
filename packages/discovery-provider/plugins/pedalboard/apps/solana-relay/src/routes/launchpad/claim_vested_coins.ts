@@ -305,10 +305,9 @@ export const claimVestedCoins = async (
       }>(
         `
       SELECT authority 
-      FROM sol_meteora_dbc_migrations m 
-      JOIN artist_coins ac ON ac.mint = m.base_mint 
+      FROM artist_coins ac 
       JOIN sol_reward_manager_inits r ON r.mint = ac.mint
-      WHERE m.base_mint = ?
+      WHERE ac.mint = ?
       `,
         [mintPublicKey.toBase58()]
       )
