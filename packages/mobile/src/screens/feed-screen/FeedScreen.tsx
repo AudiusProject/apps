@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 
-import { Name } from '@audius/common/models'
 import {
   lineupSelectors,
   feedPageLineupActions as feedActions,
@@ -15,7 +14,6 @@ import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { SuggestedFollows } from 'app/components/suggested-follows'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
-import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
 const { getDiscoverFeedLineup } = feedPageSelectors
