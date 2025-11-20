@@ -68,12 +68,7 @@ export const WormholeConversionSettingsCard = () => {
           )
         },
         onError: (error) => {
-          dispatch(
-            toast({
-              content: `${messages.error}: ${error instanceof Error ? error.message : String(error)}`,
-              type: 'error'
-            })
-          )
+          console.error('Error converting AUDIO to Solana:', error)
         }
       }
     )
