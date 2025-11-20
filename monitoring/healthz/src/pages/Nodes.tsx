@@ -27,7 +27,7 @@ const discprovWhitelist = [
 
 export default function Nodes() {
   const [env, nodeType] = useEnvironmentSelection()
-  let { data: sps, error } = useServiceProviders(env, nodeType)
+  let { data: sps, error } = useServiceProviders(env)
 
   if (error) return <div className="text-red-600 dark:text-red-400">Error</div>
   if (!sps) return <div className="text-gray-600 dark:text-gray-300">Loading...</div>
@@ -102,19 +102,12 @@ function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
   const totalCoreBlocks = consoleHealth?.totalBlocks
   const totalCoreTxs = consoleHealth?.totalBlocks
 
-  // API response doesn't include isRegistered
-  if (sp.isRegistered !== false) {
-    sp.isRegistered = true
-  }
   const coreHealth = health?.core?.health
 
   if (!health) {
     let healthStatus = 'loading'
     let healthStatusClass = ''
-    if (!sp.isRegistered) {
-      healthStatus = 'Unregistered'
-      healthStatusClass = 'is-unregistered'
-    } else if (dataError) {
+    if (dataError) {
       healthStatus = 'error'
       healthStatusClass = 'is-unhealthy'
     }
@@ -207,10 +200,7 @@ function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
 
   let healthStatus = 'Healthy'
   let healthStatusClass = ''
-  if (!sp.isRegistered) {
-    healthStatus = 'Unregistered'
-    healthStatusClass = 'is-unregistered'
-  } else if (!isHealthy) {
+  if (!isHealthy) {
     healthStatus = 'Unhealthy'
     healthStatusClass = 'is-unhealthy'
   }

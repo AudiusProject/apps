@@ -1,25 +1,16 @@
 import { useSearchParams } from 'react-router-dom'
 
 const isStageParam = 'isStaging'
-const isDevParam = 'isDev'
 const nodeTypeParam = 'nodeType'
 
 export function useEnvironmentSelection(): [
-  'staging' | 'prod' | 'dev',
+  'staging' | 'prod',
   'content' | 'core'
 ] {
   let [searchParams] = useSearchParams()
 
   const isStage = !!searchParams.get(isStageParam)
-  const isDev = !!searchParams.get(isDevParam)
   const nodeType = (searchParams.get(nodeTypeParam) as 'content' |  'core') || 'core'
-
-  if (isDev) {
-    return [
-      'dev',
-      nodeType
-    ]
-  }
 
   return [
     isStage ? 'staging' : 'prod',
@@ -31,7 +22,6 @@ export function EnvironmentSelector() {
   let [searchParams, setSearchParams] = useSearchParams()
 
   const isStage = !!searchParams.get(isStageParam)
-  const isDev = !!searchParams.get(isDevParam)
   const nodeType = searchParams.get(nodeTypeParam) || 'core'
 
   function toggleParam(name: string, value: '0' | '1') {
@@ -56,29 +46,17 @@ export function EnvironmentSelector() {
           className={`px-4 py-2 ${isStage ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
           onClick={() => {
             toggleParam(isStageParam, '1')
-            toggleParam(isDevParam, '0')
           }}
         >
           Stage
         </button>
         <button
-          className={`px-4 py-2 ${isStage || isDev ? 'bg-gray-200 text-black' : 'bg-purple-300 text-white'}`}
+          className={`px-4 py-2 ${isStage ? 'bg-gray-200 text-black' : 'bg-purple-300 text-white'}`}
           onClick={() => {
             toggleParam(isStageParam, '0')
-            toggleParam(isDevParam, '0')
           }}
         >
           Prod
-        </button>
-        <button
-          className={`px-4 py-2 ${isDev ? 'bg-purple-300 text-white' : 'bg-gray-200 text-black'}`}
-          onClick={() => {
-            toggleParam(isStageParam, '0')
-            toggleParam(isDevParam, '1')
-          }
-          }
-        >
-          Dev
         </button>
       </div>
       <div className="flex">
