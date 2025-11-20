@@ -143,7 +143,6 @@ pub enum Instructions {
     ///   8. `[]` Sysvar rent
     ///   9. `[]` Token program id
     ///  10. `[]` System program id
-    ///  11. `[writable]` Token mint (optional: if burning)
     EvaluateAttestations(EvaluateAttestationsArgs),
 }
 

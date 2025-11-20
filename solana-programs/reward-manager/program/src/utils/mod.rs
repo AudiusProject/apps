@@ -217,7 +217,7 @@ pub fn spl_token_burn<'a>(
     )?;
     invoke_signed(
         &tx,
-        &[source.clone(), authority.clone(), mint.clone()],
+        &[source.clone(), mint.clone(), authority.clone()],
         signers,
     )
 }
