@@ -204,7 +204,6 @@ async function executeMeteoraSwap(
     instructions.push(swapInstruction)
 
     // Transfer the actual received output tokens from the temporary output token account to end user's user bank
-    // outputAmount comes from the completed swap transaction result
     instructions.push(
       createTransferInstruction(
         tempOutputTokenAta,
