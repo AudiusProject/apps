@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import React from 'react'
 
 import { useAudioBalance } from '@audius/common/api'
-import { useDiscordOAuthLink } from '@audius/common/hooks'
+import { useGetDiscordOAuthLink } from '@audius/common/hooks'
 import type { AudioTiers, StringWei } from '@audius/common/models'
 import {
   featureMessages,
@@ -58,10 +58,11 @@ export const TiersTile = () => {
     totalBalance?.toString() as StringWei
   )
 
-  const discordOAuthLink = useDiscordOAuthLink()
+  const getDiscordAuthLink = useGetDiscordOAuthLink('AUDIO')
 
   const onPressLaunchDiscord = async () => {
-    // Linking.openURL(discordOAuthLink)
+    const discordOauthLink = await getDiscordAuthLink()
+    Linking.openURL(discordOauthLink)
   }
 
   return (
@@ -194,7 +195,7 @@ export const TiersTile = () => {
         <Button
           variant='secondary'
           iconLeft={IconDiscord}
-          onPress={onPressLaunchDiscord}
+          onPress={handleDiscordOauthFlow}
           fullWidth
         >
           {messages.launchDiscord}

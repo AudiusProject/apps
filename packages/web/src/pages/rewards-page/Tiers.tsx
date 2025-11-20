@@ -1,7 +1,7 @@
 import { ReactElement, useCallback, useEffect, useMemo } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useDiscordOAuthLink } from '@audius/common/hooks'
+import { useGetDiscordOAuthLink } from '@audius/common/hooks'
 import {
   AudioTiers,
   BadgeTier,
@@ -305,7 +305,7 @@ const TierTable = ({
 /** Tile with multiple tiers */
 const Tiers = () => {
   const { data: accountUserId } = useCurrentUserId()
-  const discordOAuthLink = useDiscordOAuthLink()
+  const getDiscordOAuthLink = useGetDiscordOAuthLink('AUDIO')
   const userId = accountUserId ?? 0
   const { tier } = useTierAndVerifiedForUser(userId)
 
@@ -315,10 +315,10 @@ const Tiers = () => {
     window.open(LEARN_MORE_URL, '_blank')
   }, [])
 
-  const onClickDiscord = useCallback(() => {
-    console.log('discord link', discordOAuthLink)
-    window.open(discordOAuthLink, '_blank')
-  }, [discordOAuthLink])
+  const onClickDiscord = useCallback(async () => {
+    const discordLink = await getDiscordOAuthLink()
+    window.open(discordLink, '_blank')
+  }, [getDiscordOAuthLink])
 
   const showConfetti = useShowConfetti(tier)
   useEffect(() => {

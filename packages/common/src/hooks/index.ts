@@ -34,7 +34,7 @@ export * from './useChangePasswordFormConfiguration'
 export * from './useChangeEmailFormConfiguration'
 export * from './useCanSendChatBlast'
 export * from './useAudioRewards'
-export * from './useDiscordOAuthLink'
+export * from './useGetDiscordOAuthLink'
 
 export * from './useAccountSwitcher'
 export * from './useAccountHasClaimableRewards'

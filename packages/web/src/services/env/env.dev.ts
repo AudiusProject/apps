@@ -79,5 +79,6 @@ export const env: Env = {
   WAUDIO_MINT_ADDRESS: '37RCjhgV1qGV2Q54EHFScdxZ22ydRMdKMtVgod47fDP3',
   BONK_MINT_ADDRESS: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
   WORMHOLE_ADDRESS: null,
-  WORMHOLE_RPC_HOSTS: null
+  WORMHOLE_RPC_HOSTS: null,
+  DISCORD_BOT_SERVER: 'http://localhost:8081'
 }

@@ -85,5 +85,6 @@ export const env: Env = {
     'https://wormhole-v2-mainnet-api.certus.one,https://wormhole.inotel.ro,https://wormhole-v2-mainnet-api.mcf.rocks,https://wormhole-v2-mainnet-api.chainlayer.network,https://wormhole-v2-mainnet-api.staking.fund,https://wormhole-v2-mainnet-api.chainlayer.network',
   EMAIL_ENCRYPTION_UUID: 61969424,
   EMAIL_ENCRYPTION_PUBLIC_KEY:
-    'BMpaZ9tHeeNXvmEL1bqxbcJfi0HOcp+Zf1HARJ+N5ZPUwqYuUU67td1GgE1NjX+hb2j39OwI9wjfBmnfagHKMqk='
+    'BMpaZ9tHeeNXvmEL1bqxbcJfi0HOcp+Zf1HARJ+N5ZPUwqYuUU67td1GgE1NjX+hb2j39OwI9wjfBmnfagHKMqk=',
+  DISCORD_BOT_SERVER: 'http://discord.audius.co:8081'
 }

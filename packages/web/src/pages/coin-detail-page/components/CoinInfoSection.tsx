@@ -7,7 +7,10 @@ import {
   useUserCoins,
   useCurrentAccountUser
 } from '@audius/common/api'
-import { useDiscordOAuthLink, useIsManagedAccount } from '@audius/common/hooks'
+import {
+  useGetDiscordOAuthLink,
+  useIsManagedAccount
+} from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { Feature, Name, WidthSizes } from '@audius/common/models'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
@@ -455,7 +458,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     [userCoins, mint]
   )
   const isCoinCreator = coin?.ownerId === currentUser?.user_id
-  const discordOAuthLink = useDiscordOAuthLink(userToken?.ticker)
+  const getDiscordOAuthLink = useGetDiscordOAuthLink(coin?.ticker)
   const { balance: userTokenBalance } = userToken ?? {}
 
   const isManagerMode = useIsManagedAccount()
@@ -560,9 +563,10 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
   )
   const descriptionParagraphs: string[] = coin?.description?.split('\n') ?? []
 
-  const openDiscord = () => {
-    window.open(discordOAuthLink, '_blank')
-  }
+  const openDiscord = useCallback(async () => {
+    const discordLink = await getDiscordOAuthLink()
+    window.open(discordLink, '_blank')
+  }, [getDiscordOAuthLink])
 
   const handleLearnMore = () => {
     window.open(coin?.website, '_blank')
