@@ -145,9 +145,12 @@ web-distribute:
         # Generally should not take an hour though.
         no_output_timeout: 1h
         # If node_modules exists in cache, run postinstall. Otherwise, run npm ci
+        # Set dummy ANDROID_HOME to prevent React Native packages from failing during install
         command: |
-          [[ ! -d node_modules ]] || CI=true SKIP_POD_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm run postinstall
-          [[ -d node_modules ]] || CI=true SKIP_POD_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm ci
+          mkdir -p /tmp/android-sdk-dummy
+          export ANDROID_HOME=/tmp/android-sdk-dummy
+          [[ ! -d node_modules ]] || CI=true SKIP_POD_INSTALL=true SKIP_ANDROID_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm run postinstall
+          [[ -d node_modules ]] || CI=true SKIP_POD_INSTALL=true SKIP_ANDROID_INSTALL=true NODE_OPTIONS="--max-old-space-size=8192" npm ci
 
     - save_cache:
         key: cache-{{ checksum "package-lock.json" }}-{{ checksum "combined-patch-file.txt" }}-{{ arch }}
