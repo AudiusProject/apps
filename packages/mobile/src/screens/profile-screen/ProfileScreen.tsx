@@ -27,6 +27,7 @@ import { OfflinePlaceholder } from 'app/components/offline-placeholder'
 import { useRoute } from 'app/hooks/useRoute'
 import { makeStyles } from 'app/styles'
 
+import { DeactivatedProfileTombstone } from './DeactivatedProfileTombstone'
 import { ProfileHeader } from './ProfileHeader'
 import { ProfileScreenSkeleton } from './ProfileScreenSkeleton'
 import { ProfileTabNavigator } from './ProfileTabs/ProfileTabNavigator'
@@ -51,7 +52,8 @@ export const ProfileScreen = () => {
       user_id: user.user_id,
       handle: user.handle,
       track_count: user.track_count,
-      does_current_user_follow: user.does_current_user_follow
+      does_current_user_follow: user.does_current_user_follow,
+      is_deactivated: user.is_deactivated
     })
   })
   const handle =
@@ -139,6 +141,8 @@ export const ProfileScreen = () => {
       <ScreenContent isOfflineCapable>
         {!profile ? (
           <ProfileScreenSkeleton />
+        ) : !profile.is_deactivated ? (
+          <DeactivatedProfileTombstone />
         ) : (
           <>
             <View style={styles.navigator}>
