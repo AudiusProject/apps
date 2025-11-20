@@ -110,12 +110,33 @@ async function executeMeteoraSwap(
       swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
     const inputAmountFD = new FixedDecimal(inputAmountUi, inputTokenDecimals)
 
+    // Get dbc swap transaction first to know exact amount needed
+    const swapResult = await sdk.services.solanaRelay.swapCoin({
+      inputAmount: inputAmountFD.value.toString(),
+      coinMint: tokenMint,
+      swapDirection,
+      userPublicKey,
+      feePayer
+    })
+
+    // Use actual consumed amount for display, not the full user input
+    const actualConsumedAmount = swapResult.includedFeeInputAmount
+      ? BigInt(swapResult.includedFeeInputAmount)
+      : BigInt(inputAmountFD.value)
+
+    const { transaction, outputAmount, includedFeeInputAmount } = swapResult
+
     // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
+    // Use exact consumed amount from quote to avoid leftovers
+    const transferAmount = includedFeeInputAmount
+      ? BigInt(includedFeeInputAmount)
+      : BigInt(inputAmountFD.value)
+
     const inputTokenAta = await addTransferFromUserBankInstructions({
       tokenInfo: inputTokenInfo,
       userPublicKey,
       ethAddress: ethAddress!,
-      amountLamports: BigInt(inputAmountFD.value),
+      amountLamports: transferAmount,
       sdk,
       feePayer,
       instructions
@@ -146,15 +167,6 @@ async function executeMeteoraSwap(
       )
     )
 
-    // Get dbc swap transaction
-    const { transaction, outputAmount } =
-      await sdk.services.solanaRelay.swapCoin({
-        inputAmount: inputAmountFD.value.toString(),
-        coinMint: tokenMint,
-        swapDirection,
-        userPublicKey,
-        feePayer
-      })
     const swapTx = VersionedTransaction.deserialize(
       Buffer.from(transaction, 'base64')
     )
@@ -191,7 +203,8 @@ async function executeMeteoraSwap(
     // Add the DBC swap instruction
     instructions.push(swapInstruction)
 
-    // Transfer the output tokens from the temporary output token account to end user's user bank
+    // Transfer the actual received output tokens from the temporary output token account to end user's user bank
+    // outputAmount comes from the completed swap transaction result
     instructions.push(
       createTransferInstruction(
         tempOutputTokenAta,
@@ -257,8 +270,10 @@ async function executeMeteoraSwap(
       },
       intermediateAudioAta: new PublicKey(destinationUserbank),
       inputAmount: {
-        amount: Number(inputAmountFD.value),
-        uiAmount: inputAmountUi
+        amount: Number(actualConsumedAmount),
+        uiAmount: Number(
+          new FixedDecimal(actualConsumedAmount, inputTokenDecimals).toString()
+        )
       },
       outputAmount: {
         amount: Number(

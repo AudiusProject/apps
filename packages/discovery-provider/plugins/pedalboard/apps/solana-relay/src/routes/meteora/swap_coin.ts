@@ -1,5 +1,8 @@
 import { CpAmm } from '@meteora-ag/cp-amm-sdk'
-import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
+import {
+  DynamicBondingCurveClient,
+  SwapMode
+} from '@meteora-ag/dynamic-bonding-curve-sdk'
 import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   SolMeteoraDammV2Pools,
@@ -58,27 +61,34 @@ const getDBCSwapTx = async (
   }
   const currentPoint = await connection.getSlot()
 
-  // Get swap quote
-  const swapQuote = await dbcClient.pool.swapQuote({
+  // Get swap quote using swapQuote2 with PartialFill mode for proper slippage handling
+  const swapQuote = dbcClient.pool.swapQuote2({
     virtualPool: virtualPoolState,
     config: poolConfig,
     swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
-    amountIn: inputAmountBN,
     hasReferral: false,
-    currentPoint: new BN(currentPoint)
+    currentPoint: new BN(currentPoint),
+    slippageBps: 500, // 5% slippage tolerance for partial fills
+    swapMode: SwapMode.PartialFill,
+    amountIn: inputAmountBN
+  })
+  // Create the swap transaction
+  const swapTx = await dbcClient.pool.swap2({
+    owner: userPubkey,
+    pool: new PublicKey(dbcPool.account),
+    swapBaseForQuote: swapDirection === 'coinToAudio',
+    referralTokenAccount: null,
+    payer: feePayerPubkey,
+    swapMode: SwapMode.PartialFill,
+    amountIn: inputAmountBN,
+    minimumAmountOut: swapQuote.outputAmount
   })
 
-  // Create the swap transaction
-  const swapTx = await dbcClient.pool.swap({
-    owner: userPubkey,
-    amountIn: inputAmountBN,
-    minimumAmountOut: swapQuote.outputAmount,
-    swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
-    pool: new PublicKey(dbcPool.account),
-    referralTokenAccount: null,
-    payer: feePayerPubkey
-  })
-  return { swapTx, outputAmount: swapQuote.outputAmount.toString() }
+  return {
+    swapTx,
+    outputAmount: swapQuote.outputAmount.toString(),
+    includedFeeInputAmount: swapQuote.includedFeeInputAmount?.toString()
+  }
 }
 
 const getDammSwapTx = async (
@@ -267,19 +277,24 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
 
     let swapTx: Transaction | undefined
     let outputAmount: string | undefined
+    let includedFeeInputAmount: string | undefined
     if (isDBC) {
-      const { swapTx: dbcSwapTx, outputAmount: dbcOutputAmount } =
-        await getDBCSwapTx(
-          connection,
-          dbcPoolRecord,
-          coinMintPubkey,
-          swapDirection,
-          inputAmountBN,
-          userPubkey,
-          feePayerPubkey
-        )
+      const {
+        swapTx: dbcSwapTx,
+        outputAmount: dbcOutputAmount,
+        includedFeeInputAmount: dbcIncludedFeeInputAmount
+      } = await getDBCSwapTx(
+        connection,
+        dbcPoolRecord,
+        coinMintPubkey,
+        swapDirection,
+        inputAmountBN,
+        userPubkey,
+        feePayerPubkey
+      )
       swapTx = dbcSwapTx
       outputAmount = dbcOutputAmount
+      includedFeeInputAmount = dbcIncludedFeeInputAmount
     } else if (isDamm) {
       const { swapTx: dammSwapTx, outputAmount: dammOutputAmount } =
         await getDammSwapTx(
@@ -314,9 +329,11 @@ export const swapCoin = async (req: Request, res: Response): Promise<void> => {
     ).toString('base64')
 
     // Return the transaction and expected output amount
+    logger.info(`Returning includedFeeInputAmount: ${includedFeeInputAmount}`)
     res.status(200).json({
       transaction: serializedTx,
-      outputAmount
+      outputAmount,
+      ...(includedFeeInputAmount && { includedFeeInputAmount })
     })
   } catch (error) {
     logger.error(error)

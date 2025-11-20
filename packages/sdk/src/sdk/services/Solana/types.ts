@@ -202,4 +202,5 @@ export type SwapCoinRequest = {
 export type SwapCoinResponse = {
   transaction: string // Base64-encoded serialized transaction
   outputAmount: string // Expected output amount in raw token format
+  includedFeeInputAmount?: string // Exact input amount consumed (including fees)
 }

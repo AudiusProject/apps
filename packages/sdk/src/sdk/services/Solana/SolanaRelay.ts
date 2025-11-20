@@ -502,7 +502,10 @@ export class SolanaRelay extends BaseAPI {
       }
       return {
         transaction: json.transaction as string,
-        outputAmount: json.outputAmount as string
+        outputAmount: json.outputAmount as string,
+        includedFeeInputAmount: json.includedFeeInputAmount as
+          | string
+          | undefined
       }
     }).value()
   }
