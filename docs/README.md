@@ -38,8 +38,7 @@ Edit the commented fields to suit your needs
 ```js
 config: {
  api: {
-   specPath: 'docs/developers/swagger.json', // path or URL to the OpenAPI spec, this one downloaded from 'https://discoveryprovider.audius.co/v1/swagger.json'
-   // specPath: 'https://discoveryprovider.audius.co/v1/swagger.json', // path or URL to the OpenAPI spec
+   specPath: 'docs/developers/openapi.yaml', // synced from https://api.audius.co/v1/swagger.yaml
    outputDir: 'docs/developers/api', // output directory for generated *.mdx and sidebar.js files
    sidebarOptions: {
      groupPathsBy: 'tag', // generate a sidebar.js slice that groups operations by tag
@@ -50,22 +49,24 @@ config: {
 
 > [!NOTE]
 >
-> Currently, you will need to update the `basePath` value to
-> `https://discoveryprovider.audius.co/v1` instead of the default `"basePath": "/v1"`
+> Use `npm run gen:api-docs` (below) to sync the live spec and keep the base URL set to `https://api.audius.co/v1`.
 
-### First Time Run
+### Updating the Live API Docs
 
-from the root `docs` directory, run:
+1. From the repo root, run:
 
 ```sh
-npm run-script docusaurus gen-api-docs all
+npm run gen:api-docs
 ```
 
-Copy the contents of `apisidebar` found in the generated `<OUTPUTDIR>/sidebar.ts` file to the root
-level `/sidebars.js`
+This script:
 
-> More info is available at the
-> [plugin repo](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs)
+- Downloads `https://api.audius.co/v1/swagger.yaml`
+- Rewrites any legacy `discoveryprovider.audius.co` hosts to `api.audius.co`
+- Saves the patched spec to `docs/developers/openapi.yaml`
+- Regenerates every API doc (and `docs/developers/api/sidebar.ts`) from the live spec
+
+> Powered by [docusaurus-plugin-openapi-docs](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs)
 
 ---
 

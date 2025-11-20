@@ -13,7 +13,7 @@
   },
   "Query, stream, and search Arists, Tracks, and Playlists from your own app, game, or project": {
     "message": "Query, stream, and search Arists, Tracks, and Playlists from your own app, game, or project",
-    "description": "rest-api"
+    "description": "api"
   },
   "🎧 $AUDIO": {
     "message": "🎧 $AUDIO",
@@ -264,6 +264,6 @@
   },
   "Query, stream, and search Artists, Tracks, and Playlists from your own app, game, or project": {
     "message": "Query, stream, and search Artists, Tracks, and Playlists from your own app, game, or project",
-    "description": "rest-api"
+    "description": "api"
   }
 }

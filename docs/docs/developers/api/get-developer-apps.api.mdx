@@ -1,155 +1,213 @@
 ---
 id: get-developer-apps
-title: 'Get Developer Apps'
-description: 'Gets the developer apps that the user owns'
-sidebar_label: 'Get Developer Apps by User'
+title: "Get Developer Apps"
+description: "Gets the developer apps that the user owns"
+sidebar_label: "Get Developer Apps"
 hide_title: true
 hide_table_of_contents: true
-api: eJyVVE1v2zAM/SuGThsQxMmwXXzL0KHIbdjWXYIgYCw2VudYmkR7Cwz/95FSmubDLbBTHD1SJN97VK8IdkEVK9UG9EGtJ0pjKL1xZGyjCnWPFDKqMNPYYW0d+gyckyOgeC55mf3TBDVRAoMkLnVKze5OWQvO4hAHHvZIUqtY9arhPxxqNENG6jmgSl03scgepMryjhGPv1vjkQuQb3GiQlnhHlTRKzo4uSuQN81ODcNagoOzTcAg+IfZTH4ur/7eliUG6ay0DWFDEsIT1qaMk+RPQeL62zp2+4QlyUheBiSTqmig8yjwHg4yHOE+4i/9rxRo7VPxyMMkirBhMrj1t6s8Z96O/XLJGJb4HgEuWBnBzR52uGl9PcY0d2uolqOTSzbMISOvQUEwBj+OafIZdCY0YaALXSTh06iI6Dv2B3pv/VUGp7DdKiuG3GEkUhxWqDwaPu+NHvKr1thU8cJk0TizqohcKPJcm1Baxg6sR2c0+im02rRhWtq8mysxnWkebWTpOPji6/LW0TEp+znPEirVEjKfzoRvZwPtIWpx3JHRdbqS7TT5/+3tUU/Cv5S7GngRxUZJ60TX8/swUUXc1SvGeOqKG5a4vt9CwAdfD4Mcs4r+wOf82YE3sBVKmFXmUb5ZlkeoA74xybtvx415n52/A6M9Py9dIyvXQd3KP/78hYf0ygxrjqoQWLjYRgIW/AY4Oku5eQBE15OP7r/8YPv+A1vNyS0=
-sidebar_class_name: 'get api-method'
+api: eJyVVE1v2zAM/SuGTisQxMmwXXzL0KHIbdjWXYIgYCw2VutYmkRnCwz/95FSkubDLbCTbT1SJB/fc6cINkEVC9UG9EEtR0pjKL1xZGyjCvWAFDKqMNO4w9o69Bk4J0dA8VzyMvunCWqkBAZJnOuUmt2fsmacxSEOPGyRpFax6FTDHxxqNENG6jmgSl03Mcsepcr8nhGPv1vjkQuQb3GkQlnhFlTRKdo7uSuQN81G9f1SgoOzTcAg+MfJRB6XV/9oyxKDdFbahrAhCeEJa1PGSfLnIHHdbR27fsaSZCQvA5JJVTTQeRR4D3sZjnAb8df+Fwq09ql45GEUl7BiMrj196scM2/Hfr1kCEt8DwAXrAzgZgsbXLW+HmKauzVUy9FJJSvmkJG3oCAYg5+GdvIFdCY0YaCLvUjC58Elot+xPtB7668yOIXlVlkR5AYjkaKwQuVR8HlndJ9ftcaiihcmicaZVUXkQpHn4MwYWm3aMC5tvpsqkZlpnmzk5TDq7Nv8VsMxKfs1zRIq9ydkOp4Iw84G2kJk/+CKQQNdLeo06/859bBBwr+UuxrYeiKctN1E0PGPMFJFdOcVRzx1xQ1LXNetIeCjr/tejnlvfs/n/LoDb2AtlDCP2gR550U8QR3wnUk+fD945C47d/5gz0ebNWKyHdStfPHrC+7Tf6VfclSFoNHHNhIwY9c7Oku5sbzs9aSch68/WbD/ANAqwyQ=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Developer Apps'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Developer Apps"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/developer_apps'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/developer_apps"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets the developer apps that the user owns
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'address'}
+                              name={"address"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'user_id'}
+                              name={"user_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'name'}
+                              name={"name"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'description'}
+                              name={"description"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'image_url'}
+                              name={"image_url"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -159,28 +217,49 @@ Gets the developer apps that the user owns
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "address": "0x9a7a2e7ae18ca6ecfb502f80c668b1ef712143cc",\n      "user_id": "AAWJg3g",\n      "name": "InterviewApp",\n      "description": "An app for interview prep!",\n      "image_url": null\n    },\n    {\n      "address": "0xbc4f021bb9338d1a5603210eb13097c288006bef",\n      "user_id": "AAWJg3g",\n      "name": "audius-cast-local",\n      "description": "audius cast local",\n      "image_url": null\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"address\": \"string\",\n      \"user_id\": \"string\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"image_url\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

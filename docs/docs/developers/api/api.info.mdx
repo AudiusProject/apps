@@ -1,21 +1,81 @@
 ---
 id: api
 title: 'API'
-description: 'Audius V1 API'
+description: 'Audius V1 REST API Documentation'
 sidebar_label: Introduction
 sidebar_position: 0
-hide_title: true
+hide_title: false
 custom_edit_url: null
+slug: /api
 ---
 
-import ApiLogo from '@theme/ApiLogo'
-import Heading from '@theme/Heading'
-import SchemaTabs from '@theme/SchemaTabs'
-import TabItem from '@theme/TabItem'
-import Export from '@theme/ApiExplorer/Export'
+# Audius API
 
-<span className={'theme-doc-version-badge badge badge--secondary'} children={'Version: 1.0'}></span>
+The Audius REST API provides programmatic access to one of the largest open music catalogs on the
+internet. Query, stream, and search for tracks, users, and playlists across the
+[Open Audio Protocol](https://openaudio.org) using the Audius API.
 
-<Heading as={'h1'} className={'openapi__heading'} children={'API'}></Heading>
+## API Endpoints
 
-Audius V1 API
+We provide two API versions:
+
+### Basic API
+
+The **Basic API** (`https://api.audius.co/v1`) provides all essential endpoints for querying tracks,
+users, playlists, and more. This is the recommended starting point for most integrations.
+
+**View Basic API:** [Interactive Swagger UI](https://api.audius.co/v1) |
+[Swagger YAML](https://api.audius.co/v1/swagger.yaml)
+
+### Full API
+
+The **Full API** (`https://api.audius.co/v1/full`) includes additional data for advanced use cases.
+Every basic API endpoint also has a full version available. Fields in the full API may change over
+time and are not guaranteed to be backwards compatible.
+
+**View Full API:** [Interactive Swagger UI](https://api.audius.co/v1/full) |
+[Swagger YAML](https://api.audius.co/v1/full/swagger.yaml)
+
+:::tip
+
+If you're developing with AI, upload the swagger.yaml file to your development environment.
+
+:::
+
+## Usage
+
+### 1. Include App Name
+
+Always include the `app_name` parameter in your requests to identify your application:
+
+```bash
+curl "https://api.audius.co/v1/tracks/trending?app_name=MyAwesomeApp"
+```
+
+You may also create a developer app on audius.co/settings and provide that instead of your app name
+
+```bash
+curl "https://api.audius.co/v1/tracks/trending?api_key=8acf5eb7436ea403ee536a7334faa5e9ada4b50f"
+```
+
+### 2. Rate Limits
+
+The Audius API is **free to use with zero rate limits**. We ask that you respect artist rights and
+proper attribution.
+
+### 3. Authentication
+
+Most endpoints are public and don't require authentication. For operations that require
+authentication (like uploading content or managing your profile), refer to the [SDK Docs](/sdk).
+
+---
+
+## Interactive Documentation
+
+All endpoints below are automatically generated from our live API specification. Each endpoint
+includes:
+
+- Request parameters and schemas
+- Example requests in multiple languages (cURL, Python, JavaScript, Go)
+- Response schemas and examples
+- Try-it-out functionality (where applicable)

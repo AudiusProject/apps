@@ -1,164 +1,250 @@
 ---
 id: inspect-track
-title: 'Inspects the details of the file for a track'
-description: 'Inspect a track'
-sidebar_label: 'Get Track Details'
+title: "Inspects the details of the file for a track"
+description: "Inspect a track"
+sidebar_label: "Inspects the details of the file for a track"
 hide_title: true
 hide_table_of_contents: true
-api: eJylVMtu2zAQ/BWCpxZwI6doL74laFH41KJNewkMYy2tLCaMyJAro66gf+8uJT8UCwGKnmxxHzM7nGWrCbZRL+41Bcgfo17NdIExD8aTcbVe6GUdPeakQKUMPdPOYwCJLouz+N0Q9RDgCQmDdG11zR+clWrXpuAEI109UKVfQt30TdTyE4cCPjcmIENQaHCmY17hE+hFq2nvpWWkYOqt7rrZEcUFszU12APKc4NhfwHzNf0Bq94pU6qIpMgpAVGmnyUqqlAdmqnnBqyhvSqNRT1BZOOcRagTTgmNJb0owUbsupWMEb2rI0YpeD+fy8+Yzo8mzzFGLs9dTViTpID31uRJ5ewhSl57Cew2D8xWNA9yJ2R6lAIoZZ0UvD+0XqdKnsH8Qbnq1xulrBOc4RZbDLqbjdtNXYkmQzaJY91mberSjU4HO/Ryc0RiH6bEuYVCyRwYaSSQFHycVBPDDoPCEFx4UcElbMzKiWu3mMYVFy501ns/aw8u7bIDNZYqNezN3ATL6RWRj4ssK0zMHcf2rNrOFBiuoClME69yl+2utdx+Glz0Gea++ba8dH0qUr+uVR8VtD5yfTUXsb2L9ATJAoPPl+c+LZDA2KhcmT7Fpap04WxhR3jtSZOJ3R4ukvA3Zd4CbxETSGO3g1rHl2Imm3m21b1gPHTFfCWvbTcQ8WewXSfH/TKKjCwcbKwYM+3JKwT/c1Unp3nE/fip2IFtJC3d2A6CEXL/SPTN92HZ3qrRKzbJYDiEen+OfmB2FLVbcW6FwM5KbPrwDb8Wns4KL54KGeNo9C+f73i//gIeCgWg
-sidebar_class_name: 'get api-method'
+api: eJylVMGO00AM/ZXRnEAKTYvg0tuuQKgnECxcVlXlJk4zu9PMdMapKFH+nfEkaZNttRLi1GZsP9vPz24kwc7L5aMkB9mzl+tE5ugzpywpU8mlXFXeYkYCRPSQiTQWHbB1lY/sD73VgoM9EjpGbWQVPoJXjN2oPDgoRrVApXyZ6q4DEatPweTwUCuHIQW5GhPpsxL3IJeNpJNlSE9OVTvZtsk5i3FqpyrQQ5ZDje50leZr/ANavBOqEB5JkBGcRKiuFy+oRDGAiUJpFIcatCIGuypka4xGqGKeAmpNclmA9ti2a27DW1N59Bzwfj7nn2k5P+osQ+9DeGYqworYBazVKossp0+e/ZrrxGb7FKplzh3PhFSXJQeKXhcGHwfoTYwMPag/yKN+HSh6XdKpALFDJ9tkCndrJJIU6UiONtuNqgozee3l0NEdLGz7cIuce8gF94GeJgRxwMebbKI7ohPonHEvIkJIEGZpWLU7jO2yCpcy7bSfNoNK23QoLVAVATsx104H95LI+mWaglUzqHNV+1lm0uNC8rxjq8xI3+ndt9W1zmOQ+LUQnZXxO8tiNmd6rfG0hzj0XtmrsTJzJFDaC1PEz6jPwrjRik7yNRcWbmxzPzrC35RaDWFvQgGx0abn53wbEt7F0R53FIWmy1Av+zXNFjz+dLpt+blbPyYuVx62mqUYN+OVAv9zOW9284yn6XE4gq7ZLU7sCE5xcf9Y6Jvv/Xq9FZO7dbOC/hGq0zj7UNmZ1HYdfEuEPGwZV9OZ78J9sDQKvDoO3MZZ2l8+P4SN+guFqP+I
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
 <Heading
-  as={'h1'}
-  className={'openapi__heading'}
-  children={'Inspects the details of the file for a track'}
-></Heading>
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Inspects the details of the file for a track"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/tracks/{track_id}/inspect'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/inspect"}
+>
+  
+</MethodEndpoint>
+
+
 
 Inspect a track
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'track_id',
-          in: 'path',
-          description: 'A Track ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'original',
-          in: 'query',
-          description: 'Optional - if set to true inspects the original quality file',
-          schema: { type: 'boolean', default: false },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"original","in":"query","description":"Optional - if set to true inspects the original file quality","schema":{"type":"boolean","default":false}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <SchemaItem
                               collapsible={false}
-                              name={'size'}
+                              name={"size"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'content_type'}
+                              name={"content_type"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
                           </div>
                         </details>
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={'{\n  "data": {\n    "size": 9148931,\n    "content_type": "audio/mpeg"\n  }\n}'}
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": {\n    \"size\": 0,\n    \"content_type\": \"string\"\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

@@ -1,0 +1,285 @@
+---
+id: get-user-email-key
+title: "Get User Email Key"
+description: "Gets the encrypted key for email access between the receiving user and granting user."
+sidebar_label: "Get User Email Key"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1VU1v2zAM/SuCThsQxOmwXXzrsKIIdhm2dZcgMBibidW6kibJ6QLD/32k7HzaLbYOuySx+Ug+Pn6kkQE2XqYLWXt0Xi4nskCfO2WDMlqm8haDF6FEgTp3OxuwEA+4E2vjBD6CqgTkOXovVhieEHWEOsxRbZXeCA4qQBdi40CH/ZupnEhj0QHnmBddFnHH2JsY8zPuCGLBwSMGppUuGqnpgaCH4BmHylRBSMVMLYRSXtKffxJm3dE4sjolTh4Of9bKIfEIrsaJ9HlJCJk2Muwsp/TBkZts28mBRazHuL/lcJDh1RSWDPbWaI+e7e9mM/46z/it3gfOjQ6oA0PA2krlUfPk3jOuGeYxq3vMA4vvuENBdVkKCBF15LmQuUOgcciA4bGezDxpPNXkMDPZQ+zoiGrxw2dKq6CgilIM+1vbYp+K6n+ZKjkcy1FU/QadbMcZjgKHBEZhl7WMJz0TYNjOs9qP5pUxFYJm+4nKY+4nyozNqwwqVPyqq76ft+cM2X6yCMGY92Oz9REKwWOAPpzNFzt8GB1GdFsafXTOuAsPcqEFLw2fgA3GXvICpTKJ1yhpBr1ok0iYTBf6t0k3Yj5m6y5G7UhUWYZgfZokYNUU6kLVfpqbZHsleZeUXpuoXC/H9Zf5YH+vo5P4cSU6K8fvLFfTGTfBGh8eIS5Ufx5G79lZ1OYoxH+7sf04BPwVEluBigMVRWl6ofdnfyLTsb3rtGbrcHNZbhKwpNo5TtOswOOdq9qWX9N8OBr4Bf3cglOwYnWpJYXy/JsavobK4wuivPna35q34k+O+Git/UvQLP8Wqpqfeu5j/yR84P+V4XMn/hUEL0Vvl+RSIhR0XFjMDnVNGWw48R8ceh70w57d3nyn9f4N0jjGGA==
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User Email Key"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{receiving_user_id}/emails/{grantor_user_id}/key"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets the encrypted key for email access between the receiving user and granting user.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"receiving_user_id","in":"path","description":"ID of user receiving email access","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"grantor_user_id","in":"path","description":"ID of user granting email access","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"id"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"email_owner_user_id"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"receiving_user_id"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"grantor_user_id"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"encrypted_key"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"is_initial"}
+                              required={true}
+                              schemaName={"boolean"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"created_at"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"updated_at"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": {\n    \"id\": 0,\n    \"email_owner_user_id\": 0,\n    \"receiving_user_id\": 0,\n    \"grantor_user_id\": 0,\n    \"encrypted_key\": \"string\",\n    \"is_initial\": true,\n    \"created_at\": \"string\",\n    \"updated_at\": \"string\"\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

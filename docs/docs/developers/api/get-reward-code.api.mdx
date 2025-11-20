@@ -1,0 +1,248 @@
+---
+id: get-reward-code
+title: "Get Reward Code"
+description: "Gets information about a specific reward code for a coin"
+sidebar_label: "Get Reward Code"
+hide_title: true
+hide_table_of_contents: true
+api: eJylVG1P2zAQ/iuWP21SR9qCtNFvDBBCG9IEbBpDFbom18QsiV3b6QhR/vvunBSoWkCCT4l9z909fu6lkR5SJyfXMtaqdHI6kNqgBa90eZrIiTxBL87xH9hEHOoE5UAm6GKrDCM6uxOqnGtbBCcBM115AcIZjNVcxcJ23jF5C4KRiVNRIAMWCvRoOX8jSzpQwEKVnoyKgxvw2UbGywwFgwQkiUXnhJ4LT3d9VIuLSlkk7t5WOJAuzrAAOWmkrw0ncN6qMiUk3kFhcr7a/35/eLY4Si+/Xd3vH9n7RWlSxN2LE/iyX5ldGO99rs3Z7fjOLs5k2w4eyMadJC+TfSqA13QkArjEN3L9ffVnNN4lFlP2d0aXDh27jIdD/qznv6jimDSiCLEuPZK0BAFjchWHckW3jnHNZmo9u8XYr5G8Xr0XCl1RKGJgLLeLVx2FYN7C/kVNtr7uIcdjNCo5pmi3huvA3AmhjfvwmIhZTb2h3Eai0XBIdZRe+ZC2w98w6mYlKknMkL1tsn6FRLAu6Lz4FAZDKB6DJeQqEdzkuUVIalE5Eu4d4q/ri9Zq+7rAxwwTBdUdUiJWJiFfmYp/Wd2PChGOoSy1FzMuRoJYBKKPleiZY1kVXPn+2D9RTp9TL1Bc15CQNOaZ5nWSYngVj8pERqFYUcPT3EYdi6jhMC2BHNrlajdUNid85r1xkygCo3agSlTldmIdLUeSZ4F3UJCmJ3Xw43RDmIPgJH6NRGfl+J1ltDPkpjPa+QJCTfoJf2X/NY+lfc8q7Ovp8c5HJge6IzLh0U0v1mpBD+Sk35CdXnwRmpskyIg9I5tmBg5/2rxt+Zra1NZ0T79LsApmrA+JmijH/1SWOeQOX3jZh/N+B3wUr2zfrQ/pL6GsWXPIKz7R71+sVwufd+qb+Ty/YN9AJ4jZTgmX0QTTvmGpOtMB7VLjnzhtzDI34kOvnxxfUv//By3shNY=
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Reward Code"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/coins/{mint}/redeem/{code}"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets information about a specific reward code for a coin
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"code","in":"path","description":"The reward code to retrieve","required":true,"schema":{"type":"string","example":"XYZ123"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"code"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The reward code","example":"XYZ123"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"amount"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer","description":"The amount of coins rewarded by this code","example":100}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"code\": \"XYZ123\",\n  \"amount\": 100\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request - Code is invalid or already used
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"error"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={"**Possible values:** [`used`, `invalid`]"}
+                        schema={{"type":"string","description":"Error message indicating why the code cannot be redeemed","example":"used","enum":["used","invalid"]}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"error\": \"used\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

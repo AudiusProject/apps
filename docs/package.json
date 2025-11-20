@@ -14,7 +14,9 @@
     "prepare:translations": "sh scripts/prepare-translations.sh",
     "write-heading-ids": "docusaurus write-heading-ids",
     "pages:dev": "wrangler pages dev --compatibility-date=2024-02-23 --proxy 3000 -- npm run start",
-    "pages:deploy": "npm run build && wrangler pages deploy ./build"
+    "pages:deploy": "npm run build && wrangler pages deploy ./build",
+    "sync:api-spec": "node scripts/sync-openapi.cjs",
+    "gen:api-docs": "npm run sync:api-spec && npm run docusaurus -- gen-api-docs api && node scripts/patch-api-sidebar.cjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.5.2",
