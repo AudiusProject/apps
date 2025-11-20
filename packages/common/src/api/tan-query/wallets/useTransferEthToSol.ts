@@ -17,7 +17,7 @@ export const useTransferEthToSol = () => {
         audiusSdk,
         env
       })
-      await walletClient.transferTokensFromEthToSol({ ethAddress })
+      return await walletClient.transferTokensFromEthToSol({ ethAddress })
     }
   })
 }

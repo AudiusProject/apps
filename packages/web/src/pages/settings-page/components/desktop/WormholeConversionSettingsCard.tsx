@@ -10,29 +10,37 @@ import { Chain } from '@audius/common/models'
 import { toastActions } from '@audius/common/store'
 import { AUDIO } from '@audius/fixed-decimal'
 import {
+  Box,
   Button,
   IconArrowRight,
   IconLogoCircleETH,
   Text
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
+import { useLocalStorage } from 'react-use'
+
+import { Tooltip } from 'components/tooltip'
 
 import SettingsCard from './SettingsCard'
 
 const { toast } = toastActions
 
 const messages = {
-  title: 'Convert AUDIO to Solana',
+  title: 'MIGRATE $AUDIO TO SOLANA',
   description:
-    'Convert your Ethereum AUDIO tokens to Solana wAUDIO. This is a one-time conversion. Audius covers all fees.',
-  buttonText: 'Convert to Solana',
-  buttonTextConverting: 'Converting...',
-  ethBalance: 'ETH AUDIO Balance',
-  noBalance: 'No ETH AUDIO to convert',
+    'Migrate your built-in $AUDIO tokens from Ethereum to Solana to regain access to in-app features and Buy/Sell/Send functionality with your balance. This is a one-time conversion for users with a built-in ERC-20 $AUDIO balance prior to February 2022.',
+  buttonText: 'Migrate to Solana',
+  buttonTextConverting: 'Migrating…',
+  ethBalance: 'ERC-20 $AUDIO Balance',
+  noBalance: 'No ERC-20 $AUDIO to migrate',
   loading: 'Loading...',
-  success: 'Successfully converted AUDIO to Solana',
-  error: 'Conversion failed'
+  success: 'Migration transaction sent!',
+  error: 'Migration failed, please try again',
+  tooltip:
+    'The migration process usually takes 60 minutes to complete. You can navigate away, and your balance will automatically return to your built-in wallet upon completion.'
 }
+
+const WORMHOLE_MIGRATION_COMPLETED_KEY = 'wormholeMigrationCompleted'
 
 export const WormholeConversionSettingsCard = () => {
   const dispatch = useDispatch()
@@ -51,6 +59,11 @@ export const WormholeConversionSettingsCard = () => {
   const { mutate: transferEthToSol, isPending: isConverting } =
     useTransferEthToSol()
 
+  const [isMigrationCompleted, setIsMigrationCompleted] = useLocalStorage(
+    WORMHOLE_MIGRATION_COMPLETED_KEY,
+    false
+  )
+
   const hasBalance = ethBalance && ethBalance > BigInt(0)
 
   const handleConvert = useCallback(() => {
@@ -66,19 +79,38 @@ export const WormholeConversionSettingsCard = () => {
               type: 'info'
             })
           )
+          setIsMigrationCompleted(true)
         },
         onError: (error) => {
-          console.error('Error converting AUDIO to Solana:', error)
+          dispatch(
+            toast({
+              content: messages.error,
+              type: 'error'
+            })
+          )
+          console.error('Error converting AUDIO to Solana', error)
         }
       }
     )
-  }, [dispatch, hasBalance, isConverting, user?.erc_wallet, transferEthToSol])
+  }, [
+    hasBalance,
+    isConverting,
+    user?.erc_wallet,
+    transferEthToSol,
+    dispatch,
+    setIsMigrationCompleted
+  ])
 
   const formattedBalance = ethBalance
     ? AUDIO(ethBalance).toLocaleString('en-US', { maximumFractionDigits: 2 })
     : '0'
 
-  const isButtonDisabled = !hasBalance || isConverting || isBalanceLoading
+  const isButtonDisabled =
+    !hasBalance || isConverting || isBalanceLoading || isMigrationCompleted
+
+  if (!hasBalance && !isMigrationCompleted) {
+    return null
+  }
 
   return (
     <SettingsCard
@@ -86,7 +118,7 @@ export const WormholeConversionSettingsCard = () => {
       title={messages.title}
       description={messages.description}
     >
-      <div>
+      <Box>
         {isBalanceLoading ? (
           <Text variant='body' strength='weak'>
             {messages.loading}
@@ -96,16 +128,26 @@ export const WormholeConversionSettingsCard = () => {
             {messages.ethBalance}: {formattedBalance} $AUDIO
           </Text>
         )}
-      </div>
-      <Button
-        variant='primary'
-        onClick={handleConvert}
-        fullWidth
-        disabled={isButtonDisabled}
-        iconRight={isConverting ? undefined : IconArrowRight}
-      >
-        {isConverting ? messages.buttonTextConverting : messages.buttonText}
-      </Button>
+      </Box>
+      <Tooltip text={messages.tooltip} placement='top'>
+        <Box>
+          <Button
+            variant='secondary'
+            onClick={handleConvert}
+            fullWidth
+            disabled={isButtonDisabled}
+            iconRight={
+              isConverting || isMigrationCompleted ? undefined : IconArrowRight
+            }
+          >
+            {isConverting
+              ? messages.buttonTextConverting
+              : isMigrationCompleted
+                ? messages.success
+                : messages.buttonText}
+          </Button>
+        </Box>
+      </Tooltip>
     </SettingsCard>
   )
 }

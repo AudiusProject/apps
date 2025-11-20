@@ -99,7 +99,7 @@ export class WalletClient {
     ethAddress
   }: {
     ethAddress: string
-  }): Promise<void> {
+  }): Promise<string> {
     const sdk = await this.audiusSdk()
     const account = await getUserbankAccountInfo(sdk, {
       ethAddress,
@@ -147,15 +147,23 @@ export class WalletClient {
       // The recurring jobs box will index the AudiusWormhole contract and
       // auto-redeem the transfer.
 
-      await pollForTokenBalanceChange(sdk, {
+      // Start polling in the background but don't wait for it
+      pollForTokenBalanceChange(sdk, {
         commitment: 'finalized',
         tokenAccount: account?.address,
         initialBalance: account?.amount,
         mint: 'wAUDIO',
         retryDelayMs: 10000,
         maxRetryCount: 360 /* 60 minutes */
+      }).catch((error) => {
+        console.error('Polling for token balance change failed:', error)
       })
+
+      // Return the transfer transaction hash immediately
+      return transferTxHash
     }
+
+    throw new Error('No ERC-20 AUDIO balance to transfer')
   }
 
   /** Get total balance of external wallets connected to the user's account. Returns null on failure. */
