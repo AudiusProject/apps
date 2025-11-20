@@ -7,7 +7,6 @@ module.exports = {
       label: 'Introduction',
       items: [
         'developers/introduction/overview',
-        'developers/guides/create-audius-app',
         // 'developers/introduction/resources'
       ],
       collapsed: false,
@@ -16,19 +15,12 @@ module.exports = {
       type: 'category',
       label: 'Guides',
       items: [
+        'developers/introduction/overview',
+        'developers/guides/create-audius-app',
         'developers/guides/log-in-with-audius',
         'developers/guides/hedgehog',
         'developers/getting-started/link-audius-account-to-protocol-dashboard',
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'The Graph',
-      items: [
         'developers/subgraph/overview',
-        'developers/subgraph/entities',
-        'developers/subgraph/queries',
       ],
       collapsed: false,
     },

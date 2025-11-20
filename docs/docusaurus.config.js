@@ -92,23 +92,22 @@ const config = {
             activeBasePath: 'learn',
           },
           {
-            label: 'Developers',
+            label: 'API',
+            to: '/api',
+            position: 'right',
+            activeBasePath: 'api',
+          },
+          {
+            label: 'SDK',
+            to: '/sdk',
+            position: 'right',
+            activeBasePath: 'sdk',
+          },
+          {
+            label: 'Guides',
+            to: '/developers/introduction/overview',
             position: 'right',
             activeBasePath: 'developers',
-            items: [
-              {
-                label: 'Getting Started',
-                to: '/developers/introduction/overview',
-              },
-              {
-                label: 'SDK',
-                to: '/sdk',
-              },
-              {
-                label: 'API',
-                to: '/api',
-              },
-            ],
           },
           {
             label: 'Distributors',
