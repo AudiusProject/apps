@@ -1,9 +1,4 @@
-import {
-  DynamicBondingCurveClient,
-  deriveBaseKeyForLocker,
-  deriveEscrow
-} from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { LockClient } from '@meteora-ag/met-lock-sdk'
+import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync
@@ -12,8 +7,12 @@ import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Request, Response } from 'express'
 
+import { LockClient } from '@meteora-ag/met-lock-sdk'
+import { config } from '../../config'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
+
+const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 interface ClaimVestedCoinsRequestBody {
   tokenMint: string
@@ -138,82 +137,66 @@ export const claimVestedCoins = async (
       )
     }
 
-    const connection = getConnection()
-
     const ownerWallet = new PublicKey(ownerWalletAddress)
     const receiverWallet = new PublicKey(receiverWalletAddress)
     const mintPublicKey = new PublicKey(tokenMint)
+    const connection = getConnection()
 
     logger.info({
       message: 'Claim vested coins request',
       tokenMint,
       ownerWalletAddress: ownerWallet.toBase58(),
-      receiverWalletAddress: receiverWallet.toBase58()
+      receiverWalletAddress: receiverWallet.toBase58(),
+      rewardsPoolPercentage
     })
 
-    // Initialize clients
-    const dbcClient = new DynamicBondingCurveClient(connection, 'confirmed')
-    const lockClient = new LockClient(connection, 'confirmed')
-
-    // Find the original DBC pool using the mint address
-    const originalDbcPool =
-      await dbcClient.state.getPoolByBaseMint(mintPublicKey)
-
-    if (!originalDbcPool) {
-      throw new Error('Could not find DBC pool for the given mint address')
-    }
-
-    logger.info({
-      message: 'Found DBC pool',
-      poolAddress: originalDbcPool.publicKey.toBase58()
-    })
-
-    // Derive the rewards pool address from the DBC pool config
-    const poolConfig = await dbcClient.state.getPoolConfig(
-      originalDbcPool.account.config
-    )
-    const rewardsPoolWallet = poolConfig.leftoverReceiver
-
-    if (!rewardsPoolWallet) {
-      throw new Error('Could not find rewards pool wallet from DBC pool config')
-    }
-
-    // Derive rewards pool token account address
-    const rewardsPoolAddress = getAssociatedTokenAddressSync(
-      mintPublicKey,
-      rewardsPoolWallet,
-      true // allowOwnerOffCurve - rewardsPoolWallet is a PDA (leftoverReceiver)
+    // Get all vesting information from database
+    const vestingResult = await db.raw<{
+      rows: Array<{
+        escrow_account: string
+        recipient: string
+        vesting_start_time: string
+        cliff_time: string
+        frequency: string
+        cliff_unlock_amount: string
+        amount_per_period: string
+        number_of_period: string
+        total_claimed_amount: string
+      }>
+    }>(
+      `
+      SELECT
+        account as escrow_account,
+        recipient,
+        vesting_start_time,
+        cliff_time,
+        frequency,
+        cliff_unlock_amount,
+        amount_per_period,
+        number_of_period,
+        total_claimed_amount
+      FROM sol_locker_vesting_escrows
+      WHERE token_mint = ? AND recipient = ?
+      `,
+      [mintPublicKey.toBase58(), ownerWallet.toBase58()]
     )
 
-    logger.info({
-      message: 'Derived rewards pool address',
-      rewardsPoolWallet: rewardsPoolWallet.toBase58(),
-      rewardsPoolAddress: rewardsPoolAddress.toBase58()
-    })
-
-    // Get the pool state to access the config
-    const dbcPoolState = await dbcClient.state.getPool(
-      originalDbcPool.publicKey
-    )
-    if (!dbcPoolState) {
-      throw new Error('Could not fetch DBC pool state')
-    }
-    // Check if user is authorized to claim (is the pool creator)
-    if (!dbcPoolState.creator.equals(ownerWallet)) {
+    if (!vestingResult.rows || vestingResult.rows.length === 0) {
       throw new Error(
-        `You are not the pool creator. Pool creator: ${dbcPoolState.creator.toBase58()}, Your wallet: ${ownerWallet.toBase58()}`
+        `No vesting escrow found for mint: ${mintPublicKey.toBase58()}`
       )
     }
 
-    // Derive the locker addresses
-    const base = deriveBaseKeyForLocker(originalDbcPool.publicKey)
-    const escrow = deriveEscrow(base)
+    const vestingData = vestingResult.rows[0]
 
     logger.info({
-      message: 'Derived locker addresses',
-      base: base.toBase58(),
-      escrow: escrow.toBase58()
+      message: 'Found vesting data from database',
+      escrowAccount: vestingData.escrow_account,
+      recipient: vestingData.recipient
     })
+
+    const escrow = new PublicKey(vestingData.escrow_account)
+    const escrowRecipient = new PublicKey(vestingData.recipient)
 
     // Check if escrow account exists
     const escrowAccount = await connection.getAccountInfo(escrow)
@@ -221,25 +204,16 @@ export const claimVestedCoins = async (
       throw new Error('Escrow account does not exist')
     }
 
-    // Get escrow state
-    const escrowState = await lockClient.getEscrow(escrow)
-
-    logger.info({
-      message: 'Escrow state retrieved',
-      vestingStartTime: escrowState.vestingStartTime.toString(),
-      cliffTime: escrowState.cliffTime.toString(),
-      frequency: escrowState.frequency.toString(),
-      amountPerPeriod: escrowState.amountPerPeriod.toString(),
-      numberOfPeriod: escrowState.numberOfPeriod.toString(),
-      totalClaimedAmount: escrowState.totalClaimedAmount.toString(),
-      recipient: escrowState.recipient.toBase58()
-    })
-
-    // Verify that the owner is the recipient
-    if (!escrowState.recipient.equals(ownerWallet)) {
-      throw new Error(
-        `You are not the recipient of this vesting escrow. Escrow recipient: ${escrowState.recipient.toBase58()}, Your wallet: ${ownerWallet.toBase58()}`
-      )
+    // Create escrow state object from database data
+    const escrowState: EscrowState = {
+      vestingStartTime: new BN(vestingData.vesting_start_time),
+      cliffTime: new BN(vestingData.cliff_time),
+      frequency: new BN(vestingData.frequency),
+      amountPerPeriod: new BN(vestingData.amount_per_period),
+      numberOfPeriod: new BN(vestingData.number_of_period),
+      cliffUnlockAmount: new BN(vestingData.cliff_unlock_amount),
+      totalClaimedAmount: new BN(vestingData.total_claimed_amount),
+      recipient: escrowRecipient
     }
 
     // Calculate total amount and available amount
@@ -279,6 +253,7 @@ export const claimVestedCoins = async (
     // Create the claim transaction using Meteora Lock SDK claimV2
     // NOTE: recipient must be a signer, so we claim to ownerWallet (root wallet)
     // Then immediately transfer to the user bank in the same transaction
+    const lockClient = new LockClient(connection, 'confirmed')
     const claimTx = await lockClient.claimV2({
       escrow: escrow,
       recipient: ownerWallet,
@@ -322,15 +297,45 @@ export const claimVestedCoins = async (
       claimTx.add(userTransferInstruction)
     }
 
+    let rewardsPoolAddress: PublicKey | null = null
     // Transfer rewards pool portion to rewards pool token account if provided
-    if (rewardsPoolAddress && rewardsPoolAmount.gt(new BN(0))) {
+    if (rewardsPoolAmount.gt(new BN(0))) {
+      const rewardsPoolAuthorityResult = await db.raw<{
+        rows: Array<{ authority: string }>
+      }>(
+        `
+      SELECT authority 
+      FROM artist_coins ac 
+      JOIN sol_reward_manager_inits r ON r.mint = ac.mint
+      WHERE ac.mint = ?
+      `,
+        [mintPublicKey.toBase58()]
+      )
+
+      if (
+        !rewardsPoolAuthorityResult.rows ||
+        rewardsPoolAuthorityResult.rows.length === 0
+      ) {
+        throw new Error(
+          `Could not find rewards pool address for mint: ${mintPublicKey.toBase58()}`
+        )
+      }
+
+      const rewardsPoolAuthority = new PublicKey(
+        rewardsPoolAuthorityResult.rows[0].authority
+      )
+
+      rewardsPoolAddress = getAssociatedTokenAddressSync(
+        mintPublicKey,
+        rewardsPoolAuthority,
+        true
+      )
       // Check if rewards pool ATA exists - it should already exist
       const rewardsPoolAccountInfo =
         await connection.getAccountInfo(rewardsPoolAddress)
       if (!rewardsPoolAccountInfo) {
         throw new Error(
-          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}. ` +
-            `Expected rewards pool wallet: ${rewardsPoolWallet.toBase58()}`
+          `Rewards pool token account does not exist: ${rewardsPoolAddress.toBase58()}`
         )
       }
 

@@ -35,7 +35,7 @@ import { TokenPicker } from './TokenPicker'
 const messages = {
   title: 'Payment Options',
   existingBalance: 'Balance (USDC)',
-  withCard: 'Credit/Debit/Bank Account',
+  withCard: 'Card/Bank Account',
   withCrypto: 'USDC Transfer',
   withAnything: 'Pay with Anything',
   withAnyToken: 'Pay with any Solana token',

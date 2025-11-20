@@ -26,7 +26,7 @@ import { env } from 'services/env'
 const messages = {
   tradeWith: 'Trade with',
   builtInWallet: 'Built-in Wallet',
-  builtInWalletNotAvailable: 'Built-in wallet not available',
+  noWalletAvailable: 'No wallet available',
   connect: 'Connect',
   disconnect: 'Disconnect',
   available: 'Available'
@@ -175,9 +175,7 @@ export const CurrentWalletBanner = ({
       <Flex direction='column' gap='xs'>
         <Flex gap='xs' alignItems='center'>
           <Text variant='body' size='l'>
-            {userHasWallet
-              ? messages.tradeWith
-              : messages.builtInWalletNotAvailable}
+            {userHasWallet ? messages.tradeWith : messages.noWalletAvailable}
           </Text>
           {/* Wallet pill */}
           {userHasWallet ? (

@@ -7,14 +7,8 @@ import {
   useParams,
   useRoutes,
 } from 'react-router-dom'
-import { DiscoveryFeed } from './pages/DiscoveryFeed'
-import { DiscoverySearch } from './pages/DiscoverySearch'
-import { DiscoveryTrending } from './pages/DiscoveryTrending'
-import { DiscoveryPlugins } from './pages/DiscoveryPlugins'
 import { IdTranslator } from './pages/IdTranslator'
-import { DMs } from './pages/DMs'
 import { EnvironmentSelector } from './components/EnvironmentSelector'
-import { DMMatrix } from './pages/DMMatrix'
 import { UptimeMatrix } from './pages/UptimeMatrix'
 import { Rendezvous } from './pages/Rendezvous'
 import Nodes from './pages/Nodes'
@@ -32,28 +26,7 @@ const routeList: RouteObject[] = [
     element: <Layout />,
     children: [
       { path: 'nodes', element: <Nodes /> },
-      {
-        path: 'views/trending',
-        element: <DiscoveryTrending trendingEndpoint="/v1/tracks/trending" />,
-      },
-      {
-        path: 'views/trending_underground',
-        element: (
-          <DiscoveryTrending trendingEndpoint="/v1/tracks/trending/underground" />
-        ),
-      },
-      {
-        path: 'views/trending_playlists',
-        element: (
-          <DiscoveryTrending trendingEndpoint="/v1/playlists/trending" />
-        ),
-      },
-      { path: 'views/feed', element: <DiscoveryFeed /> },
-      { path: 'views/search', element: <DiscoverySearch /> },
-      { path: 'views/dms', element: <DMs /> },
-      { path: 'views/dm_matrix', element: <DMMatrix /> },
       { path: 'views/uptime_matrix', element: <UptimeMatrix /> },
-      { path: 'views/plugins', element: <DiscoveryPlugins /> },
 
       { path: 'utils/id', element: <IdTranslator /> },
       { path: 'utils/rendezvous', element: <Rendezvous /> },
@@ -95,50 +68,10 @@ const utils = [
 
 const views = [
   {
-    name: 'Feed',
-    description: "Each node's view of the feed",
-    href: '/views/feed',
-  },
-  {
-    name: 'Search',
-    description: "Each node's view of a search",
-    href: '/views/search',
-  },
-  {
-    name: 'DMs',
-    description: 'Debugging info about each node for DMs',
-    href: '/views/dms',
-  },
-  {
-    name: 'DM Matrix',
-    description: 'DMs matrix on a given day',
-    href: '/views/dm_matrix',
-  },
-  {
     name: 'Uptime Matrix',
     description: 'Matrix of uptime for each node in the last hour',
     href: '/views/uptime_matrix',
-  },
-  {
-    name: 'Plugins',
-    description: 'Plugins running on each node',
-    href: '/views/plugins',
-  },
-  {
-    name: 'Trending',
-    description: "Each node's view of trending",
-    href: '/views/trending',
-  },
-  {
-    name: 'Trending Underground',
-    description: "Each node's view of trending underground",
-    href: '/views/trending_underground',
-  },
-  {
-    name: 'Trending Playlists',
-    description: "Each node's view of trending playlists",
-    href: '/views/trending_playlists',
-  },
+  }
 ]
 
 function classNames(...classes: string[]) {

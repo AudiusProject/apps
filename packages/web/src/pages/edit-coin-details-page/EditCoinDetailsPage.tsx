@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   createContext,
   useCallback,
+  useEffect,
   useRef,
   useState
 } from 'react'
@@ -9,7 +10,8 @@ import {
 import {
   useArtistCoinByTicker,
   useUpdateArtistCoin,
-  useCurrentUserId
+  useCurrentUserId,
+  useCurrentAccountUser
 } from '@audius/common/api'
 import {
   MAX_COIN_DESCRIPTION_LENGTH,
@@ -17,11 +19,14 @@ import {
   type EditCoinDetailsFormValues
 } from '@audius/common/hooks'
 import { coinDetailsMessages } from '@audius/common/messages'
+import { WidthSizes } from '@audius/common/models'
 import { route, removeNullable } from '@audius/common/utils'
 import {
   Box,
+  Button,
   Divider,
   Flex,
+  IconImage,
   IconInstagram,
   IconLink,
   IconPlus,
@@ -41,7 +46,14 @@ import { AnchoredSubmitRowEdit } from 'components/edit/AnchoredSubmitRowEdit'
 import { TextAreaField, TextField } from 'components/form-fields'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
+import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { reportToSentry } from 'store/errors/reportToSentry'
+import {
+  ALLOWED_IMAGE_FILE_TYPES,
+  resizeImage
+} from 'utils/imageProcessingUtil'
+
+import { MAX_IMAGE_SIZE } from '../artist-coins-launchpad-page/constants'
 
 // Local scroll context for the coin details form
 const EditFormScrollContext = createContext(() => {})
@@ -150,9 +162,112 @@ const SocialLinksSection = () => {
   )
 }
 
+const bannerMessages = {
+  change: coinDetailsMessages.editCoinDetails.bannerChange,
+  errors: coinDetailsMessages.editCoinDetails.bannerErrors
+}
+
+type BannerImageSectionProps = {
+  bannerImageUrl: string | null
+  defaultBannerImageUrl: string | null
+  fileInputRef: React.RefObject<HTMLInputElement>
+  onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onFileSelect: () => void
+  isProcessing: boolean
+  error?: string | null
+}
+
+const BannerImageSection = ({
+  bannerImageUrl,
+  defaultBannerImageUrl,
+  fileInputRef,
+  onFileInputChange,
+  onFileSelect,
+  isProcessing,
+  error
+}: BannerImageSectionProps) => {
+  const displayBannerUrl = bannerImageUrl ?? defaultBannerImageUrl
+  const hasBanner = Boolean(displayBannerUrl)
+
+  return (
+    <>
+      <input
+        type='file'
+        ref={fileInputRef}
+        accept={ALLOWED_IMAGE_FILE_TYPES.join(',')}
+        style={{ display: 'none' }}
+        onChange={onFileInputChange}
+      />
+
+      <Box
+        w='100%'
+        h={140}
+        css={{
+          position: 'relative',
+          background: hasBanner
+            ? `linear-gradient(90deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.02) 20%, rgba(0, 0, 0, 0.01) 30%, rgba(0, 0, 0, 0) 45%), url("${displayBannerUrl}")`
+            : undefined,
+          backgroundSize: hasBanner ? 'auto, cover' : undefined,
+          backgroundPosition: hasBanner ? '0% 0%, 50% 50%' : undefined,
+          backgroundRepeat: hasBanner ? 'repeat, no-repeat' : undefined,
+          overflow: 'hidden',
+          backgroundColor: hasBanner ? undefined : 'white',
+          border: hasBanner ? 'none' : '1px solid var(--border-default)'
+        }}
+      >
+        {isProcessing ? (
+          <Flex alignItems='center' justifyContent='center' h='100%' w='100%'>
+            <LoadingSpinner />
+          </Flex>
+        ) : (
+          <Flex
+            alignItems='flex-start'
+            justifyContent='flex-end'
+            p='l'
+            h='100%'
+            w='100%'
+            css={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0
+            }}
+          >
+            <Button
+              variant='tertiary'
+              size='small'
+              type='button'
+              disabled={isProcessing}
+              onClick={onFileSelect}
+              iconLeft={IconImage}
+            >
+              {bannerMessages.change}
+            </Button>
+          </Flex>
+        )}
+      </Box>
+      {error ? (
+        <Text
+          color='danger'
+          size='s'
+          variant='body'
+          css={(theme) => ({
+            margin: theme.spacing.xl,
+            marginTop: theme.spacing.l
+          })}
+        >
+          {error}
+        </Text>
+      ) : null}
+    </>
+  )
+}
+
 export const EditCoinDetailsPage = () => {
   const { ticker } = useParams<{ ticker: string }>()
   const { data: currentUserId } = useCurrentUserId()
+  const { data: currentUser } = useCurrentAccountUser()
   const navigate = useNavigate()
 
   const {
@@ -161,6 +276,11 @@ export const EditCoinDetailsPage = () => {
     isSuccess,
     isError
   } = useArtistCoinByTicker({ ticker })
+
+  const { image: defaultBannerImageUrl } = useCoverPhoto({
+    userId: currentUser?.user_id,
+    size: WidthSizes.SIZE_2000
+  })
 
   const [submitError, setSubmitError] = useState<string | undefined>(undefined)
 
@@ -171,24 +291,96 @@ export const EditCoinDetailsPage = () => {
 
   const updateCoinMutation = useUpdateArtistCoin()
 
+  const bannerFileInputRef = useRef<HTMLInputElement>(null)
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null)
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
+  const [isProcessingBanner, setIsProcessingBanner] = useState(false)
+  const [bannerError, setBannerError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (coin && !bannerImageFile) {
+      setBannerPreviewUrl(coin.bannerImageUrl ?? null)
+    }
+  }, [coin, bannerImageFile])
+
+  useEffect(() => {
+    return () => {
+      if (bannerPreviewUrl && bannerPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(bannerPreviewUrl)
+      }
+    }
+  }, [bannerPreviewUrl])
+
+  const handleBannerFileSelect = () => {
+    bannerFileInputRef.current?.click()
+  }
+
+  const handleBannerFileInputChange = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      await processBannerFile(file)
+    }
+    event.target.value = ''
+  }
+
+  const processBannerFile = async (file: File) => {
+    setBannerError(null)
+
+    if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
+      setBannerError(bannerMessages.errors.invalidFileType)
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setBannerError(bannerMessages.errors.fileTooLarge)
+      return
+    }
+
+    setIsProcessingBanner(true)
+    try {
+      const processedFile = await resizeImage(file, 2000, false)
+      setBannerImageFile(processedFile)
+      const previewUrl = URL.createObjectURL(processedFile)
+      setBannerPreviewUrl(previewUrl)
+    } catch (error) {
+      reportToSentry({
+        error: error instanceof Error ? error : new Error(error as string),
+        name: 'Coin Banner Upload Processing Error'
+      })
+      setBannerError(bannerMessages.errors.processingError)
+    } finally {
+      setIsProcessingBanner(false)
+    }
+  }
+
   const handleSubmit = async (values: any) => {
     if (!coin) return
     // Clear any previous errors
     setSubmitError(undefined)
 
     // Transform social links array for API - include empty strings to indicate deletion
+    const links = values.socialLinks.filter(
+      (link: string) => link !== null && link !== undefined
+    )
+
     const transformedValues = {
       description: values.description,
-      links: values.socialLinks.filter(
-        (link: string) => link !== null && link !== undefined
-      )
+      links,
+      bannerImageFile: bannerImageFile ?? undefined
     }
 
     try {
-      await updateCoinMutation.mutateAsync({
+      const result = await updateCoinMutation.mutateAsync({
         mint: coin.mint,
         updateCoinRequest: transformedValues
       })
+      if (result?.bannerImageUrl !== undefined) {
+        setBannerPreviewUrl(result.bannerImageUrl || null)
+      }
+      setBannerImageFile(null)
+      setBannerError(null)
       navigate(route.coinPage(coin?.ticker ?? ''))
     } catch (e) {
       const errorMessage =
@@ -266,7 +458,26 @@ export const EditCoinDetailsPage = () => {
           <Form>
             <EditFormScrollContext.Provider value={scrollToTop}>
               <Flex ref={scrollRef} column w='100%'>
-                <Box backgroundColor='white' borderRadius='m' border='default'>
+                <Box
+                  backgroundColor='white'
+                  borderRadius='m'
+                  border='default'
+                  css={{ overflow: 'hidden' }}
+                >
+                  {/* Banner Image Section */}
+                  <BannerImageSection
+                    bannerImageUrl={bannerPreviewUrl}
+                    defaultBannerImageUrl={defaultBannerImageUrl ?? null}
+                    fileInputRef={bannerFileInputRef}
+                    onFileInputChange={handleBannerFileInputChange}
+                    onFileSelect={handleBannerFileSelect}
+                    isProcessing={isProcessingBanner}
+                    error={bannerError}
+                  />
+
+                  {/* Divider */}
+                  <Divider />
+
                   {/* Token Details Section */}
                   <Flex gap='s' m='xl'>
                     <TokenIcon
@@ -314,7 +525,7 @@ export const EditCoinDetailsPage = () => {
               </Flex>
               <AnchoredSubmitRowEdit
                 errorText={submitError}
-                isSubmitting={isSubmitting}
+                isSubmitting={isSubmitting || isProcessingBanner}
               />
             </EditFormScrollContext.Provider>
           </Form>

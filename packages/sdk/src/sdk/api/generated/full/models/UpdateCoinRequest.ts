@@ -27,6 +27,12 @@ export interface UpdateCoinRequest {
      */
     description?: string;
     /**
+     * URL for the coin's banner image
+     * @type {string}
+     * @memberof UpdateCoinRequest
+     */
+    bannerImageUrl?: string;
+    /**
      * Generic link URL for the coin
      * @type {string}
      * @memberof UpdateCoinRequest
@@ -72,6 +78,7 @@ export function UpdateCoinRequestFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'description': !exists(json, 'description') ? undefined : json['description'],
+        'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'link1': !exists(json, 'link_1') ? undefined : json['link_1'],
         'link2': !exists(json, 'link_2') ? undefined : json['link_2'],
         'link3': !exists(json, 'link_3') ? undefined : json['link_3'],
@@ -89,6 +96,7 @@ export function UpdateCoinRequestToJSON(value?: UpdateCoinRequest | null): any {
     return {
         
         'description': value.description,
+        'banner_image_url': value.bannerImageUrl,
         'link_1': value.link1,
         'link_2': value.link2,
         'link_3': value.link3,

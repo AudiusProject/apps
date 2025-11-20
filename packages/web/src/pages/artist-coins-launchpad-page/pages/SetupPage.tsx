@@ -16,6 +16,7 @@ import {
 import { ArtistCoinsSubmitRow } from '../components/ArtistCoinsSubmitRow'
 import { CoinFormFields } from '../components/CoinFormFields'
 import { ImageUploadArea } from '../components/ImageUploadArea'
+import { SetupConfirmation } from '../components/SetupConfirmation'
 import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS, MAX_IMAGE_SIZE } from '../constants'
 import { useLaunchpadAnalytics } from '../utils'
@@ -33,7 +34,9 @@ const messages = {
   }
 }
 
-export const SetupPage = ({ onContinue, onBack }: PhasePageProps) => {
+type SetupPageProps = PhasePageProps
+
+export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
@@ -173,6 +176,7 @@ export const SetupPage = ({ onContinue, onBack }: PhasePageProps) => {
                 }
                 isProcessing={isProcessingImage}
               />
+              <SetupConfirmation />
             </Flex>
           </form>
         </Paper>
@@ -180,7 +184,12 @@ export const SetupPage = ({ onContinue, onBack }: PhasePageProps) => {
       <ArtistCoinsSubmitRow
         onContinue={handleContinue}
         onBack={handleBack}
-        isValid={!errors.coinName && !errors.coinSymbol && !errors.coinImage}
+        isValid={
+          !errors.coinName &&
+          !errors.coinSymbol &&
+          !errors.coinImage &&
+          values.setupConfirmation
+        }
       />
     </>
   )

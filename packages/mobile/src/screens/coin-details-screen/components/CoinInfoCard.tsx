@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import { useArtistCoin } from '@audius/common/api'
@@ -6,10 +6,10 @@ import { coinDetailsMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
 import { shortenSPLAddress } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { Image, Linking } from 'react-native'
+import { Image, Linking, StyleSheet, View } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 
 import {
-  Box,
   Divider,
   Flex,
   IconCopy,
@@ -25,6 +25,7 @@ import {
 } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
+import { primitiveToImageSource } from 'app/components/image/primitiveToImageSource'
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
@@ -71,10 +72,18 @@ export const BannerSection = ({ mint }: { mint: string }) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const { ownerId } = coin ?? {}
 
-  const { source } = useCoverPhoto({
+  const { source: coverPhotoSource } = useCoverPhoto({
     userId: ownerId,
     size: WidthSizes.SIZE_640
   })
+
+  // Use banner image if available, otherwise fall back to cover photo
+  const bannerImageSource = useMemo(() => {
+    if (coin?.bannerImageUrl) {
+      return primitiveToImageSource(coin.bannerImageUrl)
+    }
+    return coverPhotoSource
+  }, [coin?.bannerImageUrl, coverPhotoSource])
 
   if (isLoading || !coin) {
     // TODO: Add loading state
@@ -84,32 +93,36 @@ export const BannerSection = ({ mint }: { mint: string }) => {
   const bannerHeight = 120
 
   return (
-    <Flex h={bannerHeight}>
+    <View
+      style={{
+        position: 'relative',
+        height: bannerHeight,
+        width: '100%',
+        overflow: 'hidden'
+      }}
+    >
       {/* Background Image */}
-      {source && (
+      {bannerImageSource && (
         <Image
-          source={source}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%'
-          }}
+          source={bannerImageSource}
+          style={StyleSheet.absoluteFill}
           resizeMode='cover'
         />
       )}
 
-      {/* Background Overlay */}
-      <Box
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          height: '100%',
-          width: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.25)'
-        }}
+      {/* Gradient overlay matching coin details page - horizontal gradient from left to right */}
+      <LinearGradient
+        colors={[
+          'rgba(0, 0, 0, 0.05)',
+          'rgba(0, 0, 0, 0.05)',
+          'rgba(0, 0, 0, 0.02)',
+          'rgba(0, 0, 0, 0.01)',
+          'rgba(0, 0, 0, 0)'
+        ]}
+        locations={[0, 0.1, 0.2, 0.3, 0.45]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={StyleSheet.absoluteFill}
       />
 
       {/* Content */}
@@ -120,6 +133,14 @@ export const BannerSection = ({ mint }: { mint: string }) => {
         p='l'
         ph='xl'
         gap='s'
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1
+        }}
       >
         <Text variant='label' size='m' color='staticWhite' shadow='emphasis'>
           {messages.createdBy}
@@ -141,7 +162,7 @@ export const BannerSection = ({ mint }: { mint: string }) => {
           </Flex>
         ) : null}
       </Flex>
-    </Flex>
+    </View>
   )
 }
 

@@ -37,5 +37,6 @@ export type LaunchpadFormValues = {
   receiveAmount: string
   usdcValue: string
   wantsToBuy: 'yes' | 'no'
+  setupConfirmation: boolean
   termsAgreed: boolean
 }

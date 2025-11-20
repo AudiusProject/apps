@@ -152,7 +152,13 @@ export const coinDetailsMessages = {
     optional: '(Optional)',
     descriptionPlaceholder:
       'Tell fans what makes your artist coin special — think early listens, exclusive drops, or fun perks for your biggest supporters.',
-    pasteLink: 'Paste a link'
+    pasteLink: 'Paste a link',
+    bannerChange: 'Change Banner',
+    bannerErrors: {
+      invalidFileType: 'Please select a JPEG, PNG, or WebP image file',
+      fileTooLarge: 'File size must be less than 15MB',
+      processingError: 'Unable to process this file. Please try another image.'
+    }
   },
   claimVestedCoinsModal: {
     title: 'Claim',

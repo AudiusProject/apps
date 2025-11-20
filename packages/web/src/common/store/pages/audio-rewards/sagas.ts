@@ -288,37 +288,11 @@ async function claimRewardsForChallenge({
               })
             )
           } else if (isResponseError(error)) {
-            await track(
-              make({
-                eventName: Name.REWARDS_CLAIM_FAILURE,
-                challengeId,
-                specifier: specifierWithAmount.specifier,
-                amount: specifierWithAmount.amount,
-                url: error.response.url,
-                error: await error.response.clone().text()
-              })
-            )
+            // Error handling - tracking removed
           } else if (error instanceof RewardManagerError) {
-            await track(
-              make({
-                eventName: Name.REWARDS_CLAIM_FAILURE,
-                challengeId,
-                specifier: specifierWithAmount.specifier,
-                amount: specifierWithAmount.amount,
-                error: error.customErrorName ?? 'Unknown',
-                instruction: error.instructionName
-              })
-            )
+            // Error handling - tracking removed
           } else {
-            await track(
-              make({
-                eventName: Name.REWARDS_CLAIM_FAILURE,
-                challengeId,
-                specifier: specifierWithAmount.specifier,
-                amount: specifierWithAmount.amount,
-                error: (error as any).toString()
-              })
-            )
+            // Error handling - tracking removed
           }
           return {
             ...specifierWithAmount,

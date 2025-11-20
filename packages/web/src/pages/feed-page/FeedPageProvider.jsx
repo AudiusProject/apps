@@ -2,7 +2,6 @@ import { PureComponent } from 'react'
 
 import { useHasAccount } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import { Name } from '@audius/common/models'
 import {
   lineupSelectors,
   feedPageLineupActions as feedActions,
@@ -16,7 +15,6 @@ import { connect } from 'react-redux'
 import { withRouter, matchPath } from 'react-router-dom'
 
 import { HistoryContext } from 'app/HistoryProvider'
-import { make } from 'common/store/analytics/actions'
 import { openSignOn } from 'common/store/pages/signon/actions'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { push, replace } from 'utils/navigation'
@@ -142,8 +140,6 @@ const mapDispatchToProps = (dispatch) => ({
   setFeedInView: (inView) => dispatch(feedActions.setInView(inView)),
   loadMoreFeed: (offset, limit, overwrite) => {
     dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
-    const trackEvent = make(Name.FEED_PAGINATE, { offset, limit })
-    dispatch(trackEvent)
   },
   refreshFeedInView: (overwrite, limit) =>
     dispatch(feedActions.refreshInView(overwrite, null, limit)),

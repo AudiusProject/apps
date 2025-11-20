@@ -1,11 +1,9 @@
 import { useCallback } from 'react'
 
-import { Name } from '@audius/common/models'
 import { trendingPageActions } from '@audius/common/store'
 import { route, Genre } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
 import { openSignOn } from 'common/store/pages/signon/actions'
 import { push as pushRoute, replace as replaceRoute } from 'utils/navigation'
 
@@ -97,8 +95,6 @@ export const useTrendingActions = (): TrendingActionsReturn => {
             overwrite
           )
         )
-        const trackEvent = make(Name.TRENDING_PAGINATE, { offset, limit })
-        dispatch(trackEvent)
       }
     },
     [dispatch]

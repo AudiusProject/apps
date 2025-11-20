@@ -130,22 +130,11 @@ export const UserBalanceHistoryGraph = ({
           }}
         >
           {timestamp ? (
-            <Text
-              variant='label'
-              size='xs'
-              strength='strong'
-              color='staticWhite'
-              textAlign='center'
-            >
+            <Text variant='label' size='xs' textAlign='center' color='white'>
               {formatTooltipDate(timestamp)}
             </Text>
           ) : null}
-          <Text
-            variant='heading'
-            size='s'
-            color='staticWhite'
-            textAlign='center'
-          >
+          <Text variant='heading' size='s' textAlign='center' color='white'>
             {formatCurrency(value)}
           </Text>
         </Paper>
@@ -178,7 +167,7 @@ export const UserBalanceHistoryGraph = ({
         justifyContent='center'
         style={{ minHeight: height }}
       >
-        <Text variant='body' size='m' color='danger'>
+        <Text variant='body' size='m' color='subdued'>
           {messages.error}
         </Text>
       </Flex>

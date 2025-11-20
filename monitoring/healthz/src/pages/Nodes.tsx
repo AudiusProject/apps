@@ -29,23 +29,10 @@ export default function Nodes() {
   const [env, nodeType] = useEnvironmentSelection()
   let { data: sps, error } = useServiceProviders(env, nodeType)
 
-  const isContent = nodeType == 'content'
-  const isDiscovery = nodeType == 'discovery'
-
   if (error) return <div className="text-red-600 dark:text-red-400">Error</div>
   if (!sps) return <div className="text-gray-600 dark:text-gray-300">Loading...</div>
 
-  // Filter out un-whitelisted dns
-  if (isDiscovery && sps) {
-    sps = sps.filter(
-      sp => discprovWhitelist.reduce(
-        (isWhitelisted, li) => isWhitelisted || sp.endpoint.endsWith(li),
-        false,
-      )
-    )
-  }
-
-  if (isContent || isDiscovery) {  // legacy healthcheck
+  if (nodeType == 'content') { // legacy healthcheck
     return (
       <div className="space-y-4 p-4 mt-8 rounded-lg w-full shadow-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
         <div className="overflow-x-auto overflow-y-clip">
@@ -55,25 +42,20 @@ export default function Nodes() {
                 <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">
                   Host
                 </th>
-                {isDiscovery && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Node Health</th>}
-                {isDiscovery && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Block Diff</th>}
                 <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Version</th>
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Storage</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Fast Repair (checked, pulled, deleted)</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Full Repair (checked, pulled, deleted)</th>}
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Storage</th>
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Fast Repair (checked, pulled, deleted)</th>
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Full Repair (checked, pulled, deleted)</th>
                 <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">DB Size</th>
-                {isDiscovery && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Core Health</th>}
-                {isDiscovery && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Core Block</th>}
-                {isDiscovery && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Indexed Core Block</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Started</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Uploads</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Healthy Peers {'<'}2m</th>}
-                {isContent && <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Discovery Listens Enabled</th>}
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Started</th>
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Uploads</th>
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Healthy Peers {'<'}2m</th>
+                <th scope="col" className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200">Discovery Listens Enabled</th>
               </tr >
             </thead >
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {sps.map((sp) => (
-                <HealthRow key={sp.endpoint} isContent={isContent} sp={sp} isStaging={env === 'staging'} />
+                <HealthRow key={sp.endpoint} sp={sp} isStaging={env === 'staging'} />
               ))}
             </tbody>
           </table >
@@ -109,8 +91,8 @@ export default function Nodes() {
   }
 }
 
-function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, isStaging: boolean }) {
-  const path = isContent ? '/health_check' : '/health_check?enforce_block_diff=true&healthy_block_diff=250&plays_count_max_drift=720'
+function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
+  const path = '/health_check'
   const { data, error: dataError } = useSWR(sp.endpoint + path, fetcher)
   const { data: metrics } = useSWR(sp.endpoint + '/internal/metrics', fetcher)
   const { data: consoleHealth } = useSWR(sp.endpoint + "/console/health_check", fetcher)
@@ -143,20 +125,18 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
             {sp.endpoint.replace('https://', '')}
           </a>
         </td>
-        {!isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{healthStatus}</td>} {/* Node Health */}
-        {!isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Block Diff */}
         <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Version */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Storage */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Fast Repair (checked, pulled, deleted) */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Full Repair (checked, pulled, deleted) */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Storage */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Fast Repair (checked, pulled, deleted) */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Full Repair (checked, pulled, deleted) */}
         <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* DB Size */}
         <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Your IP */}
-        {!isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* ACDC Health */}
-        {!isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Producing */}
-        {!isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* ACDC Block */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Started */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Uploads */}
-        {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td>} {/* Healthy Peers */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* ACDC Health */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Producing */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* ACDC Block */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Started */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Uploads */}
+        <td className="whitespace-nowrap px-3 py-5 text-sm">{dataError ? 'error' : 'loading'}</td> {/* Healthy Peers */}
       </tr>
     )
   }
@@ -175,7 +155,7 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
     }
   }
 
-  const isHealthy = isContent ? health.healthy : health.discovery_provider_healthy
+  const isHealthy = health.healthy
   const unreachablePeers = health.unreachablePeers?.join(', ')
   const peerReachabilityClass = health?.failsPeerReachability ? 'is-unhealthy' : ''
 
@@ -243,8 +223,6 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
           {sp.endpoint.replace('https://', '')}
         </a>
       </td>
-      {!isContent && (<td className="whitespace-nowrap px-3 py-5 text-sm">{`${healthStatus}${healthStatus === 'Unhealthy' ? ': ' + health.errors : ''}`}</td>)}
-      {!isContent && <td className={isBehind}>{health.block_difference}</td>}
       <td className="whitespace-nowrap px-3 py-5 text-sm flex flex-col">
         <div className="flex items-center">
           <span className="h-5 w-5 flex-shrink-0">
@@ -260,7 +238,7 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
           </span>
           <span className="w-px" /><span className="w-px" />
           <a
-            href={`https://github.com/AudiusProject/${isContent ? 'audiusd' : 'apps'}/commits/${health.git}`}
+            href={`https://github.com/OpenAudio/go-openaudio/commits/${health.git}`}
             target="_blank"
             className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
           >
@@ -293,80 +271,55 @@ function HealthRow({ isContent, sp, isStaging }: { isContent: boolean; sp: SP, i
           </div>
         )}
       </td>
-      {isContent && (
-        <td className="whitespace-nowrap px-3 py-5 text-sm">
-          <a
-            href={`${sp.endpoint}/internal/logs/storageAndDb`}
-            target="_blank"
-            className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
-          >
-            <StorageProgressBar
-              progress={totalMediorumUsed === '?' ? 0 : totalMediorumUsed}
-              max={totalMediorumSize}
-            />
-            <div className="mt-3 flex">
-              {getStorageBackendIcon(health.blobStorePrefix)} <span className="w-[10px]" /> {totalMediorumUsed} / {totalMediorumUsed === '?' ? '?' : Math.max(totalMediorumSize, totalMediorumUsed)} GB
-            </div>
-          </a>
-        </td>
-      )}
-      {isContent && (
-        <td className="whitespace-nowrap px-3 py-5 text-sm">
-          <a href={sp.endpoint + '/internal/logs/repair'} target="_blank" className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
-            {timeSince(health.lastSuccessfulRepair?.FinishedAt) === null || health.lastSuccessfulRepair.CleanupMode
-              ? "repairing..."
-              : (
-                <>
-                  <span>{`(${prettyNumber(health.lastSuccessfulRepair?.Counters?.total_checked ?? 0)}, ${prettyNumber((health.lastSuccessfulRepair?.Counters?.pull_mine_needed ?? 0) + (health.lastSuccessfulRepair?.Counters?.pull_under_replicated_needed ?? 0))}, ${prettyNumber(health.lastSuccessfulRepair?.Counters?.delete_over_replicated_needed ?? 0)})`}</span>
-                  <div className="mt-2">done <RelTime date={new Date(health.lastSuccessfulRepair.FinishedAt)} />{`, took ${nanosToReadableDuration(health.lastSuccessfulRepair?.Duration || 0)}`}</div>
-                </>)}
-          </a>
-        </td>
-      )}
-      {isContent && (
-        <td className="whitespace-nowrap px-3 py-5 text-sm">
-          <a href={sp.endpoint + '/internal/logs/repair'} target="_blank" className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
-            {timeSince(health.lastSuccessfulCleanup?.FinishedAt) === null
-              ? "repairing..."
-              : (
-                <>
-                  <span>{`(${prettyNumber(health.lastSuccessfulCleanup?.Counters?.total_checked ?? 0)}, ${prettyNumber((health.lastSuccessfulCleanup?.Counters?.pull_mine_needed ?? 0) + (health.lastSuccessfulCleanup?.Counters?.pull_under_replicated_needed ?? 0))}, ${prettyNumber(health.lastSuccessfulCleanup?.Counters?.delete_over_replicated_needed ?? 0)})`}</span>
-                  <div className="mt-2">done <RelTime date={new Date(health.lastSuccessfulCleanup.FinishedAt)} />{`, took ${nanosToReadableDuration(health.lastSuccessfulCleanup?.Duration || 0)}`}</div>
-                </>)}
-          </a>
-        </td>
-      )}
+      <td className="whitespace-nowrap px-3 py-5 text-sm">
+        <a
+          href={`${sp.endpoint}/internal/logs/storageAndDb`}
+          target="_blank"
+          className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
+        >
+          <StorageProgressBar
+            progress={totalMediorumUsed === '?' ? 0 : totalMediorumUsed}
+            max={totalMediorumSize}
+          />
+          <div className="mt-3 flex">
+            {getStorageBackendIcon(health.blobStorePrefix)} <span className="w-[10px]" /> {totalMediorumUsed} / {totalMediorumUsed === '?' ? '?' : Math.max(totalMediorumSize, totalMediorumUsed)} GB
+          </div>
+        </a>
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-sm">
+        <a href={sp.endpoint + '/internal/logs/repair'} target="_blank" className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
+          {timeSince(health.lastSuccessfulRepair?.FinishedAt) === null || health.lastSuccessfulRepair.CleanupMode
+            ? "repairing..."
+            : (
+              <>
+                <span>{`(${prettyNumber(health.lastSuccessfulRepair?.Counters?.total_checked ?? 0)}, ${prettyNumber((health.lastSuccessfulRepair?.Counters?.pull_mine_needed ?? 0) + (health.lastSuccessfulRepair?.Counters?.pull_under_replicated_needed ?? 0))}, ${prettyNumber(health.lastSuccessfulRepair?.Counters?.delete_over_replicated_needed ?? 0)})`}</span>
+                <div className="mt-2">done <RelTime date={new Date(health.lastSuccessfulRepair.FinishedAt)} />{`, took ${nanosToReadableDuration(health.lastSuccessfulRepair?.Duration || 0)}`}</div>
+              </>)}
+        </a>
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-sm">
+        <a href={sp.endpoint + '/internal/logs/repair'} target="_blank" className="text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
+          {timeSince(health.lastSuccessfulCleanup?.FinishedAt) === null
+            ? "repairing..."
+            : (
+              <>
+                <span>{`(${prettyNumber(health.lastSuccessfulCleanup?.Counters?.total_checked ?? 0)}, ${prettyNumber((health.lastSuccessfulCleanup?.Counters?.pull_mine_needed ?? 0) + (health.lastSuccessfulCleanup?.Counters?.pull_under_replicated_needed ?? 0))}, ${prettyNumber(health.lastSuccessfulCleanup?.Counters?.delete_over_replicated_needed ?? 0)})`}</span>
+                <div className="mt-2">done <RelTime date={new Date(health.lastSuccessfulCleanup.FinishedAt)} />{`, took ${nanosToReadableDuration(health.lastSuccessfulCleanup?.Duration || 0)}`}</div>
+              </>)}
+        </a>
+      </td>
       <td className="whitespace-nowrap px-3 py-5 text-sm">{isDbLocalhost && <span>{'\u2713'} </span>}{`${dbSize} GB`}</td>
-      {!isContent && (<td className="whitespace-nowrap px-3 py-5 text-sm">{health.chain_health?.status}</td>)}
-      {!isContent &&
-        <td className="whitespace-nowrap px-3 py-5 text-sm">
-          <a href={sp.endpoint + "/console/block/" + totalCoreBlocks} target="_blank" className="text-sm text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
-            {totalCoreBlocks}
-          </a>
-        </td>
-      }
-      {!isContent &&
-        <td className="whitespace-nowrap px-3 py-5 text-sm">
-          <a href={sp.endpoint + "/console/block/" + coreHealth?.latest_indexed_block} target="_blank" className="text-sm text-gray-900 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400">
-            {coreHealth?.latest_indexed_block}
-          </a>
-        </td>
-      }
-      {isContent && (<td className="whitespace-nowrap px-3 py-5 text-sm">
+      <td className="whitespace-nowrap px-3 py-5 text-sm">
         <RelTime date={health?.startedAt} />
-      </td>)}
-      {isContent && <td className="whitespace-nowrap px-3 py-5 text-sm">{metrics?.uploads}</td>}
-      {isContent && (
-        <td className={`whitespace-nowrap px-3 py-5 text-sm unreachable-peers ${peerReachabilityClass}`}>
-          {healthyPeers2m}
-          {unreachablePeers && <div>{`Can't reach: ${unreachablePeers}`}</div>}
-        </td>
-      )}
-      {isContent && (
-        <td className={"whitespace-nowrap px-3 py-5 text-sm"}>
-          {JSON.stringify(health?.isDiscoveryListensEnabled === undefined ? false : health?.isDiscoveryListensEnabled)}
-        </td>
-      )}
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-sm">{metrics?.uploads}</td>
+      <td className={`whitespace-nowrap px-3 py-5 text-sm unreachable-peers ${peerReachabilityClass}`}>
+        {healthyPeers2m}
+        {unreachablePeers && <div>{`Can't reach: ${unreachablePeers}`}</div>}
+      </td>
+      <td className={"whitespace-nowrap px-3 py-5 text-sm"}>
+        {JSON.stringify(health?.isDiscoveryListensEnabled === undefined ? false : health?.isDiscoveryListensEnabled)}
+      </td>
     </tr>
   )
 }

@@ -3,14 +3,15 @@ import {
   instanceOfTipGate,
   instanceOfFollowGate,
   instanceOfPurchaseGate,
-  instanceOfTokenGate
+  instanceOfTokenGate,
+  instanceOfNftGate
 } from '@audius/sdk/src/sdk/api/generated/full'
 
 import { AccessConditions } from '~/models'
 
 export const accessConditionsFromSDK = (
   input: full.AccessGate
-): AccessConditions => {
+): AccessConditions | null => {
   if (instanceOfFollowGate(input)) {
     return { follow_user_id: input.followUserId }
   } else if (instanceOfPurchaseGate(input)) {
@@ -24,7 +25,9 @@ export const accessConditionsFromSDK = (
         token_amount: input.tokenGate.tokenAmount
       }
     }
+  } else if (instanceOfNftGate(input)) {
+    return null
   } else {
-    throw new Error(`Unsupported access gate type: ${input}`)
+    throw new Error(`Unsupported access gate type: ${JSON.stringify(input)}`)
   }
 }

@@ -55,6 +55,17 @@ export type TokenGatedConditions = {
   }
 }
 
+export type NftGatedConditions = {
+  nft_collection: {
+    chain: 'eth' | 'sol'
+    standard?: 'ERC721' | 'ERC1155'
+    address: string
+    name: string
+    imageUrl?: string | null
+    externalLink?: string | null
+  }
+}
+
 export type USDCPurchaseConditions = {
   usdc_purchase: {
     price: number
@@ -68,6 +79,7 @@ export type AccessConditions =
   | TipGatedConditions
   | USDCPurchaseConditions
   | TokenGatedConditions
+  | NftGatedConditions
 
 export type AccessPermissions = {
   stream: boolean
@@ -102,6 +114,11 @@ export const isContentTokenGated = (
   gatedConditions?: Nullable<AccessConditions>
 ): gatedConditions is TokenGatedConditions =>
   !!gatedConditions && 'token_gate' in (gatedConditions ?? {})
+
+export const isContentNftGated = (
+  gatedConditions?: Nullable<AccessConditions>
+): gatedConditions is NftGatedConditions =>
+  !!gatedConditions && 'nft_collection' in (gatedConditions ?? {})
 
 export const isContentSpecialAccess = (
   gatedConditions?: Nullable<AccessConditions>

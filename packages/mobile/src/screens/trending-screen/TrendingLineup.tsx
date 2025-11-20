@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
-import { Name, TimeRange } from '@audius/common/models'
+import { TimeRange } from '@audius/common/models'
 import {
   lineupSelectors,
   trendingPageLineupActions,
@@ -12,7 +12,6 @@ import { useDispatch } from 'react-redux'
 
 import { Lineup } from 'app/components/lineup'
 import type { LineupProps } from 'app/components/lineup/types'
-import { make, track } from 'app/services/analytics'
 const {
   getDiscoverTrendingAllTimeLineup,
   getDiscoverTrendingMonthLineup,
@@ -71,7 +70,6 @@ export const TrendingLineup = (props: TrendingLineupProps) => {
   const handleLoadMore = useCallback(
     (offset: number, limit: number, overwrite: boolean) => {
       dispatch(trendingActions.fetchLineupMetadatas(offset, limit, overwrite))
-      track(make({ eventName: Name.TRENDING_PAGINATE, offset, limit }))
     },
     [dispatch, trendingActions]
   )

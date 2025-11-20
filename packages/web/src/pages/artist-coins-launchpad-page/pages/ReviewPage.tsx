@@ -1,9 +1,15 @@
 import { useMemo } from 'react'
 
-import { useArtistCoin, useQueryContext } from '@audius/common/api'
+import {
+  useArtistCoin,
+  useCurrentAccountUser,
+  useQueryContext
+} from '@audius/common/api'
 import type { LaunchpadFormValues } from '@audius/common/models'
+import { WidthSizes } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
 import {
+  Box,
   Artwork,
   Flex,
   Hint,
@@ -14,6 +20,7 @@ import {
 } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
+import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
 
 import { AgreeToTerms } from '../components/AgreeToTerms'
@@ -37,7 +44,8 @@ const messages = {
   vesting: 'Unlocking',
   tradingFees: 'Trading Fees',
   back: 'Back',
-  hintMessage: "Remember! You can't change these details later."
+  hintMessage:
+    'Remember! This is your one and only coin and its details can’t be changed later.'
 }
 
 // Helper functions for market cap calculations
@@ -133,6 +141,12 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
   const styles = useStyles()
   const { env } = useQueryContext()
   const { data: audioCoinData } = useArtistCoin(env.WAUDIO_MINT_ADDRESS)
+  const { data: currentUser } = useCurrentAccountUser()
+  const { image: defaultBannerImageUrl } = useCoverPhoto({
+    userId: currentUser?.user_id,
+    size: WidthSizes.SIZE_2000
+  })
+  const bannerPreviewUrl = defaultBannerImageUrl ?? null
 
   // Calculate market caps with fixed AUDIO amounts and current AUDIO price
   const coinDetails = useMemo(() => {
@@ -177,6 +191,18 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
             borderRadius='m'
             css={{ overflow: 'hidden' }}
           >
+            {bannerPreviewUrl ? (
+              <Box
+                h={200}
+                w='100%'
+                css={{
+                  backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("${bannerPreviewUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
+            ) : null}
+
             {/* Token Info Header */}
             <Flex
               alignItems='center'
