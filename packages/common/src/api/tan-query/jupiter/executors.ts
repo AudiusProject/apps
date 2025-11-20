@@ -119,11 +119,6 @@ async function executeMeteoraSwap(
       feePayer
     })
 
-    // Use actual consumed amount for display, not the full user input
-    const actualConsumedAmount = swapResult.includedFeeInputAmount
-      ? BigInt(swapResult.includedFeeInputAmount)
-      : BigInt(inputAmountFD.value)
-
     const { transaction, outputAmount, includedFeeInputAmount } = swapResult
 
     // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
@@ -269,9 +264,9 @@ async function executeMeteoraSwap(
       },
       intermediateAudioAta: new PublicKey(destinationUserbank),
       inputAmount: {
-        amount: Number(actualConsumedAmount),
+        amount: Number(transferAmount),
         uiAmount: Number(
-          new FixedDecimal(actualConsumedAmount, inputTokenDecimals).toString()
+          new FixedDecimal(transferAmount, inputTokenDecimals).toString()
         )
       },
       outputAmount: {

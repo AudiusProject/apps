@@ -19,6 +19,8 @@ import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 import { AUDIO_MINT } from '../launchpad/constants'
 
+import { SWAP_SLIPPAGE_BPS } from './constants'
+
 const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 const getDBCPoolQuote = async (
@@ -62,7 +64,7 @@ const getDBCPoolQuote = async (
     swapBaseForQuote: swapDirection === 'coinToAudio', // Base = coin, quote = audio
     hasReferral: false,
     currentPoint: new BN(currentPoint),
-    slippageBps: 500, // 5% slippage tolerance for partial fills
+    slippageBps: SWAP_SLIPPAGE_BPS, // 2% slippage tolerance for partial fills
     swapMode: SwapMode.PartialFill,
     amountIn: inputAmountBN
   })
