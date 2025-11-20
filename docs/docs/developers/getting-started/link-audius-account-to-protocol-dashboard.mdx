@@ -1,0 +1,103 @@
+---
+id: link-audius-account-to-protocol-dashboard
+title: Link Audius Account to Protocol Dashboard
+pagination_label: Link Audius Account
+sidebar_label: Link Audius Account
+description: Audius Protocol Documentation
+---
+
+import useBaseUrl from '@docusaurus/useBaseUrl'
+
+> Help other users identify you by connecting your [Audius][audius-co] account to the [Audius
+> Protocol Dashboard][protocol-dashboard].
+
+Once you've linked your Audius account, your Profile Picture and Display Name will be visible to
+users throughout the protocol dashboard.
+
+## Connect to Protocol Dashboard
+
+1. Navigate to the [Audius Protocol Dashboard][protocol-dashboard]
+2. Click the "Connect Wallet" button on the upper right
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/wallet-connect-button.png')} />
+  <figcaption>Wallet Connect Button</figcaption>
+</figure>
+
+3. Select your web3 wallet in the wallet selection modal and sign in.
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/wallet-selector.png')} />
+  <figcaption>Wallet Selection Modal</figcaption>
+</figure>
+
+4. By default, a Gravatar style icon will be used to represent the wallet across the Dashboard.
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/wallet-connected.png')} />
+  <figcaption>Protocol Dashboard default profile icon</figcaption>
+</figure>
+
+---
+
+## Connect to Audius Profile
+
+To connect your Audius profile to the Dashboard,
+
+1. Click the "Connect Audius Profile" button in the upper right corner.
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/wallet-connected.png')} />
+  <figcaption>Protocol Dashboard "Connect Audius Profile" button</figcaption>
+</figure>
+
+2. In the modal, confirm your understanding and proceed by clicking the "Connect Profile" button.
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/connect-profile-modal.png')} />
+  <figcaption>Review and confirm the next step by clicking "Connect Profile" in the modal.</figcaption>
+</figure>
+
+3. In the pop over, enter the credentials of the Audius account you want to connect to your Protocol
+   Dashboard account and click "Sign In & Authorize App"
+
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/authorize-app.png')} />
+  <figcaption>Sign in with your Audius account to continue</figcaption>
+</figure>
+
+::::tip Already signed in?
+
+If you are already signed in to an Audius account it will be chosen as the default. If you would
+like to use a different Audius account, be sure to sign out and sign in with the correct account
+before clicking "Authorize App".
+
+If you are not currently signed in to an Audius account, you will be prompted to do so.
+
+::::
+
+4. Your wallet app will present a signature request to confirm the account connection. Sign this
+   message to complete the link.
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/connect-audius-metamask.png')} />
+  <figcaption>Using MetaMask as an example, sign the request.</figcaption>
+</figure>
+
+5. Complete! Now your Audius account profile image will be shown on the Audius Protocol Dashboard!
+
+<!-- prettier-ignore -->
+<figure className="screensnippet-wrapper">
+  <img src={useBaseUrl('/img/dashboard-account/audius-profile-linked.png')} />
+  <figcaption>Account icon when an Audius account is connected to the Protocol Dashboard.</figcaption>
+</figure>
+
+<!-- prettier-ignore -->
+[audius-co]: https://audius.co/
+[protocol-dashboard]: https://dashboard.audius.org/

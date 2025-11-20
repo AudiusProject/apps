@@ -86,7 +86,7 @@ const config = {
         },
         items: [
           {
-            label: 'Learn',
+            label: 'Welcome',
             to: '/',
             position: 'right',
             activeBasePath: 'learn',
@@ -111,22 +111,10 @@ const config = {
             ],
           },
           {
-            label: 'Staking',
-            to: '/node-operator/overview',
-            position: 'right',
-            activeBasePath: 'staking',
-          },
-          {
             label: 'Distributors',
             to: '/distributors/introduction/overview',
             position: 'right',
             activeBasePath: 'distributors',
-          },
-          {
-            label: 'Reference',
-            to: '/reference/overview',
-            position: 'right',
-            activeBasePath: 'reference',
           },
           {
             'aria-label': 'Discord',

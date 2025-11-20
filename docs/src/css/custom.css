@@ -175,6 +175,10 @@ code {
 
 img.welcomeBanner {
   width: 100%;
+  max-width: 820px;
+  height: clamp(120px, 18vw, 240px);
+  object-fit: cover;
+  object-position: center;
   margin-bottom: 20px;
   border-radius: 24px;
 }
@@ -353,6 +357,62 @@ html[data-theme='dark'] .navbar__items > a:nth-child(1):hover {
 
 /* list elements */
 
+/* Learn page layout */
+.learnCentered {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.downloadBadges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.downloadBadges a {
+  text-decoration: none;
+}
+
+.storeBadge {
+  height: 40px;
+  width: auto;
+  display: block;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.storeLink:hover .storeBadge {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: var(--secondary);
+  color: var(--white) !important;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none !important;
+  box-shadow: 0 2px 10px #19006040;
+  border: 1px solid #19006040;
+  transition: all 300ms ease;
+  border: none;
+  gap: 10px;
+}
+
+.ctaButton:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.ctaButton svg path {
+  fill: currentColor;
+}
 .markdown li {
   margin-bottom: 12px;
 }

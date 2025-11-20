@@ -1,30 +1,5 @@
 module.exports = {
-  learn: [
-    {
-      type: 'category',
-      label: 'Introduction',
-      items: ['learn/introduction/getting-started'],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'Core Concepts',
-      items: [
-        'learn/concepts/token',
-        'learn/concepts/protocol',
-        'learn/architecture/content-node',
-        'learn/architecture/discovery-node',
-        'learn/concepts/staking-and-delegating',
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'Contributing',
-      items: ['learn/contributing/overview', 'learn/contributing/governance'],
-      collapsed: false,
-    },
-  ],
+  learn: [],
 
   developers: [
     {
@@ -40,7 +15,11 @@ module.exports = {
     {
       type: 'category',
       label: 'Guides',
-      items: ['developers/guides/log-in-with-audius', 'developers/guides/hedgehog'],
+      items: [
+        'developers/guides/log-in-with-audius',
+        'developers/guides/hedgehog',
+        'developers/getting-started/link-audius-account-to-protocol-dashboard',
+      ],
       collapsed: false,
     },
     {
@@ -125,16 +104,6 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Staking',
-      items: [
-        'node-operator/staking/stake',
-        'node-operator/staking/delegate',
-        'node-operator/staking/claim',
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
       label: 'Run a Node',
       items: [
         'node-operator/setup/overview',
@@ -158,26 +127,7 @@ module.exports = {
     },
   ],
 
-  reference: [
-    {
-      type: 'category',
-      label: 'Introduction',
-      items: ['reference/overview', 'reference/whitepaper'],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'Protocol Dashboard',
-      items: ['reference/protocol-dashboard/link-profile'],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'Contracts and Programs',
-      items: ['reference/eth-contracts', 'reference/solana-programs'],
-      collapsed: false,
-    },
-  ],
+  reference: [],
 
   api: [
     ['developers/api/api'],
