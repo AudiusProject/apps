@@ -325,6 +325,7 @@ fn set_authority(
     let message = SignedSetAuthorityData {
         blockhash: recent_blockhash,
         instruction: signed_instruction.pack(),
+        account_pubkey: pair.derive.address,
     };
 
     let signature_instr = secp256k1_instruction::new_secp256k1_instruction(
@@ -522,12 +523,12 @@ fn main() -> anyhow::Result<()> {
                     .validator(is_pubkey)
                     .value_name("NEW_AUTHORITY")
                     .takes_value(true)
-                    .required(false)
+                    .required(true)
                     .help("New authority to set for the token account."),
                 Arg::with_name("authority_type")
                     .value_name("AUTHORITY_TYPE")
                     .takes_value(true)
-                    .required(false)
+                    .required(true)
                     .help("Type of authority to set for the token account."),
             ])
                 .help("Set a new authority for the token account associated with the specified Ethereum address and mint."),

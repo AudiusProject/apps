@@ -123,7 +123,7 @@ pub fn transfer(
     })
 }
 
-/// Create `TransferOwnership` instruction
+/// Create `SetAuthority` instruction
 /// 
 /// NOTE: Instruction must followed after `new_secp256k1_instruction`
 /// with params: current owner ethereum private key and bank token account public key.
@@ -159,7 +159,7 @@ pub fn close(
     let data = ClaimableProgramInstruction::Close(eth_address)
         .try_to_vec()
         .unwrap();
-    let mut accounts = vec![
+    let accounts = vec![
         AccountMeta::new(*token_account, false),
         AccountMeta::new_readonly(*authority, false),
         AccountMeta::new(*destination_account, false),
