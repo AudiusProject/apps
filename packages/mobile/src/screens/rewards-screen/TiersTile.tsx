@@ -195,7 +195,7 @@ export const TiersTile = () => {
         <Button
           variant='secondary'
           iconLeft={IconDiscord}
-          onPress={handleDiscordOauthFlow}
+          onPress={onPressLaunchDiscord}
           fullWidth
         >
           {messages.launchDiscord}
