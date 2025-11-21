@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
+import { useCurrentUserId, useUserCoins } from '@audius/common/api'
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
 import { removeNullable } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
@@ -37,10 +38,7 @@ const messages = {
   existingBalance: 'Balance (USDC)',
   withCard: 'Card/Bank Account',
   withCrypto: 'USDC Transfer',
-  withAnything: 'Pay with Anything',
-  withAnyToken: 'Pay with any Solana token',
-  showAdvanced: 'Show advanced options',
-  hideAdvanced: 'Hide advanced options'
+  withArtistCoin: 'Balance (Artist Coin)'
 }
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -79,9 +77,8 @@ type PaymentMethodProps = {
   isExistingBalanceDisabled?: boolean
   showExistingBalance?: boolean
   isCoinflowEnabled?: boolean
-  isPayWithAnythingEnabled?: boolean
   showVendorChoice?: boolean
-  showExtraItemsToggle?: boolean
+  totalPriceInCents?: number
 }
 
 export const PaymentMethod = ({
@@ -93,9 +90,8 @@ export const PaymentMethod = ({
   isExistingBalanceDisabled,
   showExistingBalance,
   isCoinflowEnabled,
-  isPayWithAnythingEnabled,
   showVendorChoice,
-  showExtraItemsToggle = true
+  totalPriceInCents
 }: PaymentMethodProps) => {
   const styles = useStyles()
   const neutral = useColor('neutral')
@@ -107,6 +103,12 @@ export const PaymentMethod = ({
     isCoinflowEnabled ? PurchaseVendor.COINFLOW : null,
     PurchaseVendor.STRIPE
   ].filter(removeNullable)
+
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: userCoins } = useUserCoins({ userId: currentUserId })
+  const hasCoinBalanceAbovePrice = userCoins?.some(
+    (coin) => coin.balanceUsd * 100 >= (totalPriceInCents ?? 0)
+  )
 
   // Set initial state if coinflow is enabled
   useEffect(() => {
@@ -127,6 +129,12 @@ export const PaymentMethod = ({
             selectedVendor={purchaseVendor ?? vendorOptions[0]}
           />
         ) : null
+    },
+    {
+      id: PurchaseMethod.CRYPTO,
+      value: PurchaseMethod.CRYPTO,
+      label: <Text size='m'>{messages.withCrypto}</Text>,
+      icon: IconQrCode
     }
   ]
   if (showExistingBalance) {
@@ -165,34 +173,25 @@ export const PaymentMethod = ({
   }
 
   const handleOpenTokenPicker = useCallback(() => {
-    setSelectedMethod(PurchaseMethod.WALLET)
+    setSelectedMethod(PurchaseMethod.ARTIST_COIN)
   }, [setSelectedMethod])
-
-  const extraItems = [
-    {
-      id: PurchaseMethod.CRYPTO,
-      value: PurchaseMethod.CRYPTO,
-      label: <Text size='m'>{messages.withCrypto}</Text>,
-      icon: IconQrCode
-    }
-  ]
 
   const navigation = useNavigation()
 
   if (
-    isPayWithAnythingEnabled &&
     selectedPurchaseMethodMintAddress &&
     setSelectedPurchaseMethodMintAddress
   ) {
-    extraItems.push({
-      id: PurchaseMethod.WALLET,
-      value: PurchaseMethod.WALLET,
+    items.push({
+      id: PurchaseMethod.ARTIST_COIN,
+      value: PurchaseMethod.ARTIST_COIN,
+      disabled: !hasCoinBalanceAbovePrice,
       label: (
         <Flex flex={1} gap='m'>
           <Flex direction='row' justifyContent='space-between'>
-            <Text>{messages.withAnything}</Text>
+            <Text>{messages.withArtistCoin}</Text>
           </Flex>
-          {selectedMethod === PurchaseMethod.WALLET ? (
+          {selectedMethod === PurchaseMethod.ARTIST_COIN ? (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('TokenPicker')
@@ -203,18 +202,19 @@ export const PaymentMethod = ({
               <Flex gap='s'>
                 <Flex
                   direction='row'
-                  justifyContent='space-between'
                   alignItems='center'
+                  justifyContent='flex-end'
+                  gap='s'
                 >
-                  <Text strength='strong'>{messages.withAnyToken}</Text>
-                  <IconCaretRight color='subdued' size='m' />
-                </Flex>
-                <Flex direction='row' justifyContent='space-between'>
                   <TokenPicker
                     selectedTokenAddress={selectedPurchaseMethodMintAddress}
                     onChange={setSelectedPurchaseMethodMintAddress}
                     onOpen={handleOpenTokenPicker}
+                    minUsdValue={
+                      totalPriceInCents ? totalPriceInCents / 100 : undefined
+                    }
                   />
+                  <IconCaretRight color='subdued' size='m' />
                 </Flex>
               </Flex>
             </TouchableOpacity>
@@ -224,12 +224,6 @@ export const PaymentMethod = ({
       icon: IconPhantomPlain
     })
   }
-
-  // NEW: If showExtraItemsToggle is false, append extraItems to items
-  const summaryTableItems = showExtraItemsToggle
-    ? items
-    : [...items, ...extraItems]
-  const summaryTableExtraItems = showExtraItemsToggle ? extraItems : undefined
 
   const renderItem = ({ item }) => {
     const { label, value, icon: Icon, content, disabled } = item
@@ -257,15 +251,7 @@ export const PaymentMethod = ({
   return (
     <SummaryTable
       title={messages.title}
-      items={summaryTableItems}
-      extraItems={summaryTableExtraItems}
-      showExtraItemsCopy={messages.showAdvanced}
-      disableExtraItemsToggle={
-        showExtraItemsToggle &&
-        (selectedMethod === PurchaseMethod.WALLET ||
-          selectedMethod === PurchaseMethod.CRYPTO)
-      }
-      hideExtraItemsCopy={messages.hideAdvanced}
+      items={items}
       renderBody={(items: SummaryTableItem[]) => (
         <FlatList
           renderItem={renderItem}

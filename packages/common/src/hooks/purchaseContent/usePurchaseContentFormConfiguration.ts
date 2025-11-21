@@ -5,7 +5,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
-import { useCurrentAccount, useCurrentAccountUser, useUSDCBalance } from '~/api'
+import {
+  SLIPPAGE_BPS,
+  SwapStatus,
+  useCurrentAccount,
+  useCurrentAccountUser,
+  useSwapCoins,
+  useUSDCBalance
+} from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 import { UserCollectionMetadata } from '~/models'
 import { PurchaseMethod, PurchaseVendor } from '~/models/PurchaseContent'
@@ -15,8 +22,15 @@ import {
   PurchaseContentPage,
   isContentPurchaseInProgress,
   purchaseContentActions,
-  purchaseContentSelectors
+  purchaseContentSelectors,
+  PurchaseContentError,
+  PurchaseErrorCode
 } from '~/store/purchase-content'
+import {
+  artistCoinPurchaseFlowError,
+  startArtistCoinPurchaseFlow
+} from '~/store/purchase-content/slice'
+import { AUDIO_MINT, USDC_MINT } from '~/store/ui/shared/tokenConstants'
 import { isContentCollection, isContentTrack } from '~/utils'
 
 import {
@@ -39,8 +53,6 @@ const {
   getPurchaseContentError,
   getPurchaseContentPage
 } = purchaseContentSelectors
-
-const USDC_TOKEN_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 export const usePurchaseContentFormConfiguration = ({
   metadata,
@@ -69,6 +81,7 @@ export const usePurchaseContentFormConfiguration = ({
     select: (account) => account?.guestEmail
   })
   const { data: currentUser } = useCurrentAccountUser()
+  const { mutate: performSwap } = useSwapCoins()
 
   const isGuestCheckout = !currentUser || (currentUser && !currentUser.handle)
 
@@ -89,7 +102,7 @@ export const usePurchaseContentFormConfiguration = ({
     [PURCHASE_VENDOR]: purchaseVendor ?? PurchaseVendor.STRIPE,
     [GUEST_CHECKOUT]: isGuestCheckout,
     [GUEST_EMAIL]: guestEmail ?? undefined,
-    [PURCHASE_METHOD_MINT_ADDRESS]: USDC_TOKEN_ADDRESS
+    [PURCHASE_METHOD_MINT_ADDRESS]: AUDIO_MINT
   }
 
   const contentId = isAlbum
@@ -131,6 +144,78 @@ export const usePurchaseContentFormConfiguration = ({
         guestEmail !== ''
       ) {
         dispatch(setPurchasePage({ page: PurchaseContentPage.PURCHASE }))
+      } else if (purchaseMethod === PurchaseMethod.ARTIST_COIN) {
+        // Swap token to USDC then purchase
+        if (!purchaseMethodMintAddress) {
+          throw new Error('Missing purchase method mint address')
+        }
+        const extraAmount = getExtraAmount({
+          amountPreset,
+          presetValues,
+          customAmount
+        })
+
+        console.log({
+          metadata,
+          extraAmount,
+          amountPreset,
+          customAmount,
+          presetValues,
+          purchaseMethod,
+          purchaseVendor,
+          purchaseMethodMintAddress
+        })
+
+        // TODO: Uncomment this later when testing is finished
+        // Need this to make the button say purchasing when the swap is in progress
+        // dispatch(startArtistCoinPurchaseFlow())
+
+        // TODO: Need to get the amount of artist coins to swap to USDC
+        // Need to get the price of the content + the extra amount and then convert from USDC to artist coins
+        // Need to convert the USDC required amount into the amount of artist coins to swap and then put that in amountUi field
+
+        performSwap(
+          {
+            inputMint: purchaseMethodMintAddress,
+            outputMint: USDC_MINT,
+            // TODO: Get the correct amount to swap
+            amountUi: 1,
+            slippageBps: SLIPPAGE_BPS
+          },
+          {
+            onSettled: (result) => {
+              if (result?.status === SwapStatus.SUCCESS) {
+                console.log('success swapping artist coin to USDC', { result })
+                // Swap Successful, Purchase the content
+                dispatch(
+                  startPurchaseContentFlow({
+                    purchaseMethod: PurchaseMethod.ARTIST_COIN,
+                    purchaseVendor,
+                    purchaseMethodMintAddress: USDC_MINT,
+                    extraAmount,
+                    extraAmountPreset: amountPreset,
+                    contentId,
+                    contentType: isAlbum
+                      ? PurchaseableContentType.ALBUM
+                      : PurchaseableContentType.TRACK,
+                    guestEmail
+                  })
+                )
+              } else {
+                // Swap Failed, Handle error
+                console.log('error', { result })
+                dispatch(
+                  artistCoinPurchaseFlowError({
+                    error: new PurchaseContentError(
+                      PurchaseErrorCode.SwapFailed,
+                      'Error swapping artist coin to USDC'
+                    )
+                  })
+                )
+              }
+            }
+          }
+        )
       } else {
         const extraAmount = getExtraAmount({
           amountPreset,
@@ -153,7 +238,16 @@ export const usePurchaseContentFormConfiguration = ({
         )
       }
     },
-    [isUnlocking, contentId, page, dispatch, presetValues, isAlbum]
+    [
+      isUnlocking,
+      contentId,
+      page,
+      dispatch,
+      presetValues,
+      metadata,
+      performSwap,
+      isAlbum
+    ]
   )
 
   return {

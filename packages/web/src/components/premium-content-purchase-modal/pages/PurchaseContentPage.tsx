@@ -46,7 +46,6 @@ export const PurchaseContentPage = (props: PurchaseContentPageProps) => {
   const { isEnabled: isCoinflowEnabled } = useFeatureFlag(
     FeatureFlags.BUY_WITH_COINFLOW
   )
-  const isPayWithAnythingEnabled = !!window.solana
 
   const [{ value: purchaseMethod }, , { setValue: setPurchaseMethod }] =
     useField(PURCHASE_METHOD)
@@ -156,8 +155,8 @@ export const PurchaseContentPage = (props: PurchaseContentPageProps) => {
             isExistingBalanceDisabled={isExistingBalanceDisabled}
             showExistingBalance={!!(balanceWei && balanceWei > BigInt(0))}
             isCoinflowEnabled={showCoinflow}
-            isPayWithAnythingEnabled={isPayWithAnythingEnabled}
             showVendorChoice={false}
+            totalPriceInCents={totalPriceInCents}
           />
         )}
         {isUnlocking || isPurchased ? null : <PayToUnlockInfo />}

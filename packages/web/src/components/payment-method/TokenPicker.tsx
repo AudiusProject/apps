@@ -1,35 +1,51 @@
 import { useCallback } from 'react'
 
-import { Flex, FilterButton } from '@audius/harmony'
-import { useAsync } from 'react-use'
+import {
+  useArtistCoin,
+  useCurrentUserId,
+  useUserCoins
+} from '@audius/common/api'
+import { Flex, FilterButton, Text } from '@audius/harmony'
 
-const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'
-
-type Asset = {
-  address: string
-  name: string
-  logoURI: string
-  symbol: string
-}
+import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 
 const messages = {
   searchToken: 'Search Token'
 }
 
+const HelperText = ({ mint }: { mint: string }) => {
+  const { data: coinInfo } = useArtistCoin(mint)
+
+  return (
+    <Text
+      variant='body'
+      color='subdued'
+      ellipses
+      textAlign='left'
+      css={{ flex: '1 1 0' }}
+    >
+      {coinInfo?.name ?? ''}
+    </Text>
+  )
+}
+
 export const TokenPicker = ({
   selectedTokenAddress,
   onChange,
-  onOpen
+  onOpen,
+  minUsdValue
 }: {
   selectedTokenAddress: string
   onChange: (address: string) => void
   onOpen: () => void
+  minUsdValue?: number
 }) => {
-  const assets = useAsync(async () => {
-    const res = await fetch(TOKEN_LIST_URL)
-    const json = await res.json()
-    return json as Asset[]
-  }, [])
+  const { data: currentUserId } = useCurrentUserId()
+  const {
+    data: coins,
+    isLoading: isCoinsLoading,
+    error: coinsError
+  } = useUserCoins({ userId: currentUserId })
 
   const handleChange = useCallback(
     (address: string) => {
@@ -38,23 +54,16 @@ export const TokenPicker = ({
     [onChange]
   )
 
-  if (assets.loading || assets.error) {
-    return null
-  }
+  if (isCoinsLoading || coinsError) return null
 
-  const options = (assets.value ?? []).map((asset) => ({
-    label: asset.symbol,
-    value: asset.address,
-    helperText:
-      asset.name.length > 15 ? asset.name.slice(0, 12) + '...' : asset.name,
+  const options = (coins ?? []).map((coin) => ({
+    label: `$${coin.ticker}`,
+    value: coin.mint,
+    disabled: (minUsdValue ?? 0) > coin.balanceUsd,
+    helperText: <HelperText mint={coin.mint} />,
     leadingElement: (
       <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-        <img height={20} width={20} src={asset.logoURI} loading='lazy' />
-      </Flex>
-    ),
-    labelLeadingElement: (
-      <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-        <img height={20} width={20} src={asset.logoURI} />
+        <TokenIcon hex logoURI={coin.logoUri ?? ''} size='l' />
       </Flex>
     )
   }))

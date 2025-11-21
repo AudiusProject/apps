@@ -1,5 +1,6 @@
 export enum PurchaseMethod {
   BALANCE = 'balance',
+  ARTIST_COIN = 'artist_coin',
   CARD = 'card',
   CRYPTO = 'crypto',
   WALLET = 'wallet'

@@ -115,8 +115,8 @@ export const SelectionItemList = ({
 
       if (disabled) {
         return (
-          <View style={styles.listItem}>
-            <View style={styles.listItemContent}>
+          <View style={[styles.listItem, itemStyles]}>
+            <View style={[styles.listItemContent, itemContentStyles]}>
               <RadioButton
                 checked={isSelected}
                 disabled={disabled}

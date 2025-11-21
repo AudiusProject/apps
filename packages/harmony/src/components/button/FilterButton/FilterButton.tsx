@@ -268,7 +268,7 @@ export const FilterButton = forwardRef(function FilterButton<
         ) : (
           <MenuContent
             maxHeight={menuProps?.maxHeight}
-            width={menuProps?.width}
+            width='100%'
             scrollRef={scrollRef}
             MenuListProps={menuProps?.MenuListProps}
             aria-label={selectedLabel ?? label ?? props['aria-label']}

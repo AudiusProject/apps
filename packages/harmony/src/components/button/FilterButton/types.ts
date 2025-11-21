@@ -30,7 +30,15 @@ export type FilterButtonOptionType<Value extends string> = {
   /**
    * Text to display after the element
    */
-  helperText?: string
+  helperText?: string | JSX.Element
+  /**
+   * Whether the option is disabled
+   */
+  disabled?: boolean
+  /**
+   * Tooltip to display when the option is disabled
+   */
+  disabledTooltip?: string | JSX.Element
 }
 
 type ChildrenProps<Value> = {

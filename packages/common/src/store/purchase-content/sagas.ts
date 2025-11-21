@@ -13,7 +13,15 @@ import bs58 from 'bs58'
 import { sumBy } from 'lodash'
 import { takeLatest } from 'redux-saga/effects'
 import nacl, { BoxKeyPair } from 'tweetnacl'
-import { call, put, race, select, take, takeEvery } from 'typed-redux-saga'
+import {
+  call,
+  delay,
+  put,
+  race,
+  select,
+  take,
+  takeEvery
+} from 'typed-redux-saga'
 
 import { userTrackMetadataFromSDK } from '~/adapters'
 import {
@@ -717,6 +725,13 @@ function* doStartPurchaseContentFlow({
       usdcConfig.minUSDCPurchaseAmountCents
     )
 
+    console.log({
+      balanceNeeded,
+      totalAmountDueCentsWei,
+      initialBalance,
+      minCents: usdcConfig.minUSDCPurchaseAmountCents
+    })
+
     switch (purchaseMethod) {
       case PurchaseMethod.BALANCE:
       case PurchaseMethod.CRYPTO: {
@@ -745,6 +760,49 @@ function* doStartPurchaseContentFlow({
             includeNetworkCut: isNetworkCutEnabled
           })
         }
+        break
+      }
+      case PurchaseMethod.ARTIST_COIN: {
+        // TODO: This is a loop to test when the users balance is updated from the swap
+        // The code here should basically do what is in the PurchaseMethod.BALANCE case
+        // Update when testing is finished and we find out how to get the updated balance from the swap
+
+        console.log('In the artist coin purchase method')
+
+        let loopCount = 0
+        // same as balanceNeeded, just renamed for the loop
+        let missingBalance = balanceNeeded
+
+        console.log({ missingBalance, loopCount })
+
+        while (missingBalance === balanceNeeded && loopCount < 10) {
+          loopCount++
+
+          const tokenAccountInfo = yield* call(pollForTokenAccountInfo, {
+            tokenAccount: userBank
+          })
+
+          const { amount: currentBalance } = tokenAccountInfo ?? { amount: 0 }
+
+          missingBalance = getBalanceNeeded(
+            totalAmountDueCentsWei,
+            BigInt(currentBalance) as UsdcWei,
+            usdcConfig.minUSDCPurchaseAmountCents
+          )
+
+          yield* call(delay, 1000)
+
+          console.log({ missingBalance, loopCount, currentBalance })
+        }
+
+        if (missingBalance === balanceNeeded) {
+          console.log('TEST TEST TEST - Balance did not change')
+        } else {
+          console.log('TEST TEST TEST - Balance changed, nice!')
+        }
+
+        // TODO: Return from here for testing
+        // Replace with break again later when testing is finished
         break
       }
       case PurchaseMethod.WALLET: {
@@ -930,6 +988,206 @@ const getJupiterInstance = async () => {
   return jup
 }
 
+function* buildPurchaseTransaction({
+  sdk,
+  sourceWallet,
+  inputMint,
+  totalAmountWithDecimals,
+  purchaserUserId,
+  contentId,
+  contentType,
+  price,
+  extraAmount,
+  isNetworkCutEnabled
+}: {
+  sdk: AudiusSdk
+  sourceWallet: PublicKey
+  inputMint: string
+  totalAmountWithDecimals: number
+  purchaserUserId: ID
+  contentId: ID
+  contentType: PurchaseableContentType
+  price: number
+  extraAmount?: number
+  isNetworkCutEnabled: boolean
+}): Generator<
+  any,
+  {
+    transaction: VersionedTransaction
+    addressLookupTableAccounts: AddressLookupTableAccount[] | undefined
+  },
+  any
+> {
+  const connection = sdk.services.solanaClient.connection
+
+  let transaction: VersionedTransaction
+  let message: TransactionMessage
+  let addressLookupTableAccounts: AddressLookupTableAccount[] | undefined
+
+  if (inputMint === TOKEN_LISTING_MAP.USDC.address) {
+    // Direct USDC transfer
+    const instruction = yield* call(
+      [
+        sdk.services.paymentRouterClient,
+        sdk.services.paymentRouterClient.createTransferInstruction
+      ],
+      {
+        sourceWallet,
+        total: BigInt(totalAmountWithDecimals),
+        mint: 'USDC'
+      }
+    )
+    transaction = yield* call(
+      [sdk.services.solanaClient, sdk.services.solanaClient.buildTransaction],
+      {
+        feePayer: sourceWallet,
+        instructions: [instruction]
+      }
+    )
+    message = TransactionMessage.decompile(transaction.message)
+  } else {
+    // Swap via Jupiter
+    const paymentRouterTokenAccount = yield* call(
+      [
+        sdk.services.paymentRouterClient,
+        sdk.services.paymentRouterClient.getOrCreateProgramTokenAccount
+      ],
+      {
+        mint: 'USDC'
+      }
+    )
+    const externalTokenAccountPublicKey = getAssociatedTokenAddressSync(
+      new PublicKey(inputMint),
+      sourceWallet
+    )
+
+    const jup = yield* call(getJupiterInstance)
+    let quote: QuoteResponse
+    try {
+      quote = yield* call([jup, jup.quoteGet], {
+        inputMint,
+        outputMint: TOKEN_LISTING_MAP.USDC.address,
+        amount: totalAmountWithDecimals,
+        swapMode: 'ExactOut'
+      })
+      if (!quote) {
+        throw new Error()
+      }
+    } catch (e) {
+      throw new PurchaseContentError(
+        PurchaseErrorCode.NoQuote,
+        `Failed to get Jupiter quote for ${inputMint} => USDC`
+      )
+    }
+
+    // Make sure user has enough funds to purchase content
+    let hasEnoughTokens = false
+    try {
+      const { amount } = yield* call(
+        getAccount,
+        connection,
+        externalTokenAccountPublicKey
+      )
+      hasEnoughTokens = amount >= BigInt(quote.inAmount)
+    } catch (e) {
+      hasEnoughTokens = false
+    }
+
+    if (!hasEnoughTokens) {
+      // For wrapped SOL, check SOL balance as well since jupiter will handle the wrapping
+      if (inputMint === TOKEN_LISTING_MAP.SOL.address) {
+        const amount = yield* call(
+          [connection, connection.getBalance],
+          sourceWallet
+        )
+        hasEnoughTokens = amount >= BigInt(quote.inAmount)
+      }
+    }
+    if (!hasEnoughTokens) {
+      throw new PurchaseContentError(
+        PurchaseErrorCode.InsufficientExternalTokenBalance,
+        `You do not have enough funds for ${inputMint} to complete this purchase.`
+      )
+    }
+
+    // Get the payment router address and swap directly into it
+    const { swapTransaction } = yield* call([jup, jup.swapPost], {
+      swapRequest: {
+        quoteResponse: quote,
+        userPublicKey: sourceWallet.toString(),
+        destinationTokenAccount: paymentRouterTokenAccount.address.toString()
+      }
+    })
+    const decoded = Buffer.from(swapTransaction, 'base64')
+    transaction = VersionedTransaction.deserialize(decoded)
+
+    // Get address lookup table accounts
+    const getLUTs = async () => {
+      return await Promise.all(
+        transaction.message.addressTableLookups.map(async (lookup) => {
+          return new AddressLookupTableAccount({
+            key: lookup.accountKey,
+            state: AddressLookupTableAccount.deserialize(
+              await connection
+                .getAccountInfo(lookup.accountKey)
+                .then((res: any) => res.data)
+            )
+          })
+        })
+      )
+    }
+    addressLookupTableAccounts = yield* call(getLUTs)
+    // Decompile transaction message and add transfer instruction
+    message = TransactionMessage.decompile(transaction.message, {
+      addressLookupTableAccounts
+    })
+  }
+
+  // Add purchase instructions
+  if (contentType === PurchaseableContentType.TRACK) {
+    const {
+      instructions: {
+        routeInstruction,
+        memoInstruction,
+        locationMemoInstruction
+      }
+    } = yield* call([sdk.tracks, sdk.tracks.getPurchaseTrackInstructions], {
+      userId: Id.parse(purchaserUserId),
+      trackId: Id.parse(contentId),
+      price: price / 100.0,
+      extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
+      includeNetworkCut: isNetworkCutEnabled
+    })
+    message.instructions.push(routeInstruction, memoInstruction)
+    if (locationMemoInstruction) {
+      message.instructions.push(locationMemoInstruction)
+    }
+  } else {
+    const {
+      instructions: {
+        routeInstruction,
+        memoInstruction,
+        locationMemoInstruction
+      }
+    } = yield* call([sdk.albums, sdk.albums.getPurchaseAlbumInstructions], {
+      userId: Id.parse(purchaserUserId),
+      albumId: Id.parse(contentId),
+      price: price / 100.0,
+      extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
+      includeNetworkCut: isNetworkCutEnabled
+    })
+    message.instructions.push(routeInstruction, memoInstruction)
+    if (locationMemoInstruction) {
+      message.instructions.push(locationMemoInstruction)
+    }
+  }
+
+  // Compile the message and update the transaction
+  transaction.message = message.compileToV0Message(addressLookupTableAccounts)
+
+  return { transaction, addressLookupTableAccounts }
+}
+
 function* purchaseWithAnything({
   purchaserUserId,
   contentId,
@@ -950,7 +1208,6 @@ function* purchaseWithAnything({
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
-    const connection = sdk.services.solanaClient.connection
     const getFeatureEnabled = yield* getContext('getFeatureEnabled')
     const isNetworkCutEnabled = yield* call(
       getFeatureEnabled,
@@ -966,6 +1223,7 @@ function* purchaseWithAnything({
       throw new Error('Failed to fetch USDC user bank token account info')
     }
 
+    // Connect to external wallet provider
     let sourceWallet: PublicKey
 
     const isNativeMobile = yield* getContext('isNativeMobile')
@@ -994,173 +1252,27 @@ function* purchaseWithAnything({
       )
     }
 
-    let transaction: VersionedTransaction
-    let message: TransactionMessage
-    let addressLookupTableAccounts: AddressLookupTableAccount[] | undefined
-    if (inputMint === TOKEN_LISTING_MAP.USDC.address) {
-      const instruction = yield* call(
-        [
-          sdk.services.paymentRouterClient,
-          sdk.services.paymentRouterClient.createTransferInstruction
-        ],
-        {
-          sourceWallet,
-          total: BigInt(totalAmountWithDecimals),
-          mint: 'USDC'
-        }
-      )
-      transaction = yield* call(
-        [sdk.services.solanaClient, sdk.services.solanaClient.buildTransaction],
-        {
-          feePayer: sourceWallet,
-          instructions: [instruction]
-        }
-      )
-      message = TransactionMessage.decompile(transaction.message)
-    } else {
-      const paymentRouterTokenAccount = yield* call(
-        [
-          sdk.services.paymentRouterClient,
-          sdk.services.paymentRouterClient.getOrCreateProgramTokenAccount
-        ],
-        {
-          mint: 'USDC'
-        }
-      )
-      const externalTokenAccountPublicKey = getAssociatedTokenAddressSync(
-        new PublicKey(inputMint),
-        sourceWallet
-      )
-
-      const jup = yield* call(getJupiterInstance)
-      let quote: QuoteResponse
-      try {
-        quote = yield* call([jup, jup.quoteGet], {
-          inputMint,
-          outputMint: TOKEN_LISTING_MAP.USDC.address,
-          amount: totalAmountWithDecimals,
-          swapMode: 'ExactOut'
-        })
-        if (!quote) {
-          throw new Error()
-        }
-      } catch (e) {
-        throw new PurchaseContentError(
-          PurchaseErrorCode.NoQuote,
-          `Failed to get Jupiter quote for ${inputMint} => USDC`
-        )
-      }
-
-      // Make sure user has enough funds to purchase content
-      let hasEnoughTokens = false
-      try {
-        const { amount } = yield* call(
-          getAccount,
-          connection,
-          externalTokenAccountPublicKey
-        )
-        hasEnoughTokens = amount >= BigInt(quote.inAmount)
-      } catch (e) {
-        hasEnoughTokens = false
-      }
-
-      if (!hasEnoughTokens) {
-        // For wrapped SOL, check SOL balance as well since jupiter will handle the wrapping
-        if (inputMint === TOKEN_LISTING_MAP.SOL.address) {
-          const amount = yield* call(
-            [connection, connection.getBalance],
-            sourceWallet
-          )
-          hasEnoughTokens = amount >= BigInt(quote.inAmount)
-        }
-      }
-      if (!hasEnoughTokens) {
-        throw new PurchaseContentError(
-          PurchaseErrorCode.InsufficientExternalTokenBalance,
-          `You do not have enough funds for ${inputMint} to complete this purchase.`
-        )
-      }
-
-      // Get the payment router address and swap directly into it
-      const { swapTransaction } = yield* call([jup, jup.swapPost], {
-        swapRequest: {
-          quoteResponse: quote,
-          userPublicKey: sourceWallet.toString(),
-          destinationTokenAccount: paymentRouterTokenAccount.address.toString()
-        }
-      })
-      const decoded = Buffer.from(swapTransaction, 'base64')
-      transaction = VersionedTransaction.deserialize(decoded)
-
-      // Get address lookup table accounts
-      const getLUTs = async () => {
-        return await Promise.all(
-          transaction.message.addressTableLookups.map(async (lookup) => {
-            return new AddressLookupTableAccount({
-              key: lookup.accountKey,
-              state: AddressLookupTableAccount.deserialize(
-                await connection
-                  .getAccountInfo(lookup.accountKey)
-                  .then((res: any) => res.data)
-              )
-            })
-          })
-        )
-      }
-      addressLookupTableAccounts = yield* call(getLUTs)
-      // Decompile transaction message and add transfer instruction
-      message = TransactionMessage.decompile(transaction.message, {
-        addressLookupTableAccounts
-      })
-    }
-
-    if (contentType === PurchaseableContentType.TRACK) {
-      const {
-        instructions: {
-          routeInstruction,
-          memoInstruction,
-          locationMemoInstruction
-        }
-      } = yield* call([sdk.tracks, sdk.tracks.getPurchaseTrackInstructions], {
-        userId: Id.parse(purchaserUserId),
-        trackId: Id.parse(contentId),
-        price: price / 100.0,
-        extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-        includeNetworkCut: isNetworkCutEnabled
-      })
-      message.instructions.push(routeInstruction, memoInstruction)
-      if (locationMemoInstruction) {
-        message.instructions.push()
-      }
-    } else {
-      const {
-        instructions: {
-          routeInstruction,
-          memoInstruction,
-          locationMemoInstruction
-        }
-      } = yield* call([sdk.albums, sdk.albums.getPurchaseAlbumInstructions], {
-        userId: Id.parse(purchaserUserId),
-        albumId: Id.parse(contentId),
-        price: price / 100.0,
-        extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-        includeNetworkCut: isNetworkCutEnabled
-      })
-      message.instructions.push(routeInstruction, memoInstruction)
-      if (locationMemoInstruction) {
-        message.instructions.push()
-      }
-    }
     console.info(
       `Purchasing ${
         contentType === PurchaseableContentType.TRACK ? 'track' : 'album'
       } with id ${contentId}...`
     )
 
-    // Compile the message and update the transaction
-    transaction.message = message.compileToV0Message(addressLookupTableAccounts)
+    // Build the transaction with swap/transfer and purchase instructions
+    const { transaction } = yield* call(buildPurchaseTransaction, {
+      sdk,
+      sourceWallet,
+      inputMint,
+      totalAmountWithDecimals,
+      purchaserUserId,
+      contentId,
+      contentType,
+      price,
+      extraAmount,
+      isNetworkCutEnabled
+    })
 
-    // Execute the swap by signing and sending the transaction
+    // Execute the swap by signing and sending the transaction with external provider
     if (isNativeMobile && mobileWalletActions) {
       const { signAndSendTransaction } = mobileWalletActions
       const getWalletConnectState = (state: any) => state.walletConnect

@@ -1,45 +1,41 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import type { UserCoin } from '@audius/common/api'
+import { useCurrentUserId, useUserCoins } from '@audius/common/api'
 import { Portal } from '@gorhom/portal'
-import { Image } from 'react-native'
 import { SvgUri } from 'react-native-svg'
-import { useAsync } from 'react-use'
 
 import { Text, Flex, FilterButton } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { ListSelectionScreen } from 'app/screens/list-selection-screen'
 
-const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'
+import { TokenIcon } from '../core'
 
 const messages = {
-  asset: 'Select Asset'
-}
-
-type Asset = {
-  address: string
-  name: string
-  logoURI: string
-  symbol: string
+  asset: 'Select Token'
 }
 
 export const TokenPicker = ({
   selectedTokenAddress,
   onChange,
-  onOpen
+  onOpen,
+  minUsdValue
 }: {
   selectedTokenAddress: string
   onChange: (address: string) => void
   onOpen: () => void
+  minUsdValue?: number
 }) => {
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>(
     selectedTokenAddress
   )
 
-  const assets = useAsync(async () => {
-    const res = await fetch(TOKEN_LIST_URL)
-    const json = await res.json()
-    return json as Asset[]
-  }, [])
+  const { data: currentUserId } = useCurrentUserId()
+  const {
+    data: coins,
+    isLoading: isCoinsLoading,
+    error: coinsError
+  } = useUserCoins({ userId: currentUserId })
 
   const handleSubmit = useCallback(() => {
     if (selectedAddress) {
@@ -54,22 +50,23 @@ export const TokenPicker = ({
     navigation.navigate('TokenPicker')
   }, [navigation, onOpen])
 
-  const optionsMap: { [key: string]: Asset } = useMemo(
+  const optionsMap: { [key: string]: UserCoin } = useMemo(
     () =>
-      (assets.value ?? []).reduce((acc, cur) => {
-        acc[cur.address] = cur
+      (coins ?? []).reduce((acc, cur) => {
+        acc[cur.mint] = cur
         return acc
       }, {}),
-    [assets.value]
+    [coins]
   )
 
   const options = useMemo(
     () =>
-      (assets.value ?? []).map((asset) => ({
-        label: asset.symbol,
-        value: asset.address
+      (coins ?? []).map((coin) => ({
+        label: coin.ticker,
+        value: coin.mint,
+        disabled: minUsdValue ? coin.balanceUsd < (minUsdValue ?? 0) : false
       })),
-    [assets.value]
+    [coins, minUsdValue]
   )
 
   const selectedOption = useMemo(
@@ -77,7 +74,7 @@ export const TokenPicker = ({
     [selectedAddress, options]
   )
 
-  if (assets.loading || assets.error) {
+  if (isCoinsLoading || coinsError) {
     return null
   }
 
@@ -92,17 +89,16 @@ export const TokenPicker = ({
         leadingElement={
           selectedOption ? (
             <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-              {optionsMap[selectedOption?.value].logoURI.endsWith('svg') ? (
+              {optionsMap[selectedOption?.value]?.logoUri?.endsWith('svg') ? (
                 <SvgUri
-                  uri={optionsMap[selectedOption?.value].logoURI}
+                  uri={optionsMap[selectedOption?.value]?.logoUri ?? ''}
                   width={20}
                   height={20}
                 />
               ) : (
-                <Image
-                  source={{ uri: optionsMap[selectedOption?.value].logoURI }}
-                  width={20}
-                  height={20}
+                <TokenIcon
+                  logoURI={optionsMap[selectedOption?.value]?.logoUri ?? ''}
+                  size='l'
                 />
               )}
             </Flex>
@@ -116,29 +112,28 @@ export const TokenPicker = ({
           itemContentStyles={{ flexGrow: 1 }}
           searchText='Search for tokens'
           renderItem={({ item }) => {
-            const asset = optionsMap[item.value]
+            const coin = optionsMap[item.value]
             return (
-              <Flex direction='row' alignItems='center' gap='s' flex={1}>
-                <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-                  {asset.logoURI.endsWith('svg') ? (
-                    <SvgUri uri={asset.logoURI} width={20} height={20} />
+              <Flex
+                direction='row'
+                alignItems='center'
+                gap='s'
+                flex={1}
+                style={{ opacity: item.disabled ? 0.5 : 1 }}
+              >
+                <Flex
+                  borderRadius='s'
+                  style={{
+                    overflow: 'hidden'
+                  }}
+                >
+                  {coin?.logoUri?.endsWith('svg') ? (
+                    <SvgUri uri={coin?.logoUri ?? ''} width={20} height={20} />
                   ) : (
-                    <Image
-                      source={{ uri: asset.logoURI }}
-                      width={20}
-                      height={20}
-                    />
+                    <TokenIcon logoURI={coin?.logoUri ?? ''} size='l' />
                   )}
                 </Flex>
                 <Text>{item.label}</Text>
-                <Text
-                  style={{ flex: 1 }}
-                  color='subdued'
-                  numberOfLines={1}
-                  ellipsizeMode='tail'
-                >
-                  {`(${asset.name})`}
-                </Text>
               </Flex>
             )
           }}

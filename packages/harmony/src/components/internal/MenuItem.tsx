@@ -78,6 +78,7 @@ export const MenuItem = forwardRef(function <Value extends string>(
     width: '100%',
     borderRadius: cornerRadius.s,
     justifyContent: 'flex-start',
+    opacity: other.disabled ? 0.6 : 1,
 
     '&:hover': activeOptionCss,
     '&:active': {
@@ -121,6 +122,7 @@ export const MenuItem = forwardRef(function <Value extends string>(
       {typeof label === 'string' ? (
         <Text
           variant='body'
+          color={other.disabled ? 'subdued' : 'default'}
           size={variant === 'option' ? 'l' : 'm'}
           strength={variant === 'button' ? 'strong' : 'default'}
         >

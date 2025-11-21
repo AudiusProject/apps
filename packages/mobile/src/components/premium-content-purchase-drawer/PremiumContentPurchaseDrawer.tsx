@@ -372,8 +372,8 @@ const RenderForm = ({
                     isExistingBalanceDisabled={isExistingBalanceDisabled}
                     showExistingBalance={!!(balance && balance !== BigInt(0))}
                     isCoinflowEnabled={showCoinflow}
-                    isPayWithAnythingEnabled
                     showVendorChoice={false}
+                    totalPriceInCents={totalPriceInCents}
                   />
                 )}
               </View>

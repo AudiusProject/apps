@@ -1,14 +1,14 @@
 import { CSSProperties, ChangeEvent, useCallback } from 'react'
 
+import { useCurrentUserId, useUserCoins } from '@audius/common/api'
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
 import {
   FilterButton,
   Flex,
+  IconArtistCoin,
   IconCreditCard,
-  IconInfo,
-  IconPhantomPlain,
   IconQrCode,
   IconReceive,
   Radio,
@@ -18,7 +18,6 @@ import {
 
 import { MobileFilterButton } from 'components/mobile-filter-button/MobileFilterButton'
 import { SummaryTable, SummaryTableItem } from 'components/summary-table'
-import { Tooltip } from 'components/tooltip'
 import { useIsMobile } from 'hooks/useIsMobile'
 import zIndex from 'utils/zIndex'
 
@@ -32,7 +31,8 @@ const messages = {
   withAnything: 'Pay with Anything',
   withAnythingHelperText: 'Pay with any Solana (SPL) token',
   showAdvanced: 'Advanced Payment Options',
-  hideAdvanced: 'Advanced Payment Options'
+  hideAdvanced: 'Advanced Payment Options',
+  withArtistCoin: 'Balance (Artist Coin)'
 }
 
 type PaymentMethodProps = {
@@ -48,7 +48,7 @@ type PaymentMethodProps = {
   isPayWithAnythingEnabled?: boolean
   showExistingBalance?: boolean
   showVendorChoice?: boolean
-  showExtraItemsToggle?: boolean
+  totalPriceInCents?: number
 }
 
 export const PaymentMethod = ({
@@ -62,9 +62,8 @@ export const PaymentMethod = ({
   isExistingBalanceDisabled,
   showExistingBalance,
   isCoinflowEnabled,
-  isPayWithAnythingEnabled,
   showVendorChoice,
-  showExtraItemsToggle = true
+  totalPriceInCents
 }: PaymentMethodProps) => {
   const isMobile = useIsMobile()
   const balanceFormatted = USDC(balance ?? 0).toShorthand()
@@ -78,6 +77,16 @@ export const PaymentMethod = ({
       setSelectedVendor(label as PurchaseVendor)
     },
     [setSelectedVendor]
+  )
+
+  const handleOpenTokenPicker = useCallback(() => {
+    setSelectedMethod(PurchaseMethod.ARTIST_COIN)
+  }, [setSelectedMethod])
+
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: userCoins } = useUserCoins({ userId: currentUserId })
+  const hasCoinBalanceAbovePrice = userCoins?.some(
+    (coin) => coin.balanceUsd * 100 >= (totalPriceInCents ?? 0)
   )
 
   const options = [
@@ -98,6 +107,25 @@ export const PaymentMethod = ({
               ${balanceFormatted}
             </Text>
           )
+        }
+      : null,
+    selectedPurchaseMethodMintAddress && setSelectedPurchaseMethodMintAddress
+      ? {
+          id: PurchaseMethod.ARTIST_COIN,
+          disabled: !hasCoinBalanceAbovePrice,
+          label: messages.withArtistCoin,
+          icon: IconArtistCoin,
+          value:
+            selectedMethod === PurchaseMethod.ARTIST_COIN ? (
+              <TokenPicker
+                selectedTokenAddress={selectedPurchaseMethodMintAddress}
+                onChange={setSelectedPurchaseMethodMintAddress}
+                onOpen={handleOpenTokenPicker}
+                minUsdValue={
+                  totalPriceInCents ? totalPriceInCents / 100 : undefined
+                }
+              />
+            ) : null
         }
       : null,
     {
@@ -123,50 +151,13 @@ export const PaymentMethod = ({
             />
           )
         ) : null
-    }
-  ].filter(Boolean) as SummaryTableItem[]
-
-  const handleOpenTokenPicker = useCallback(() => {
-    setSelectedMethod(PurchaseMethod.WALLET)
-  }, [setSelectedMethod])
-
-  const extraOptions: SummaryTableItem[] = [
+    },
     {
       id: PurchaseMethod.CRYPTO,
       label: messages.withCrypto,
       icon: IconQrCode
     }
-  ]
-  if (
-    isPayWithAnythingEnabled &&
-    selectedPurchaseMethodMintAddress &&
-    setSelectedPurchaseMethodMintAddress
-  ) {
-    extraOptions.push({
-      id: PurchaseMethod.WALLET,
-      label: (
-        <Flex alignItems='center' gap='xs'>
-          <Text>{messages.withAnything}</Text>
-          <Tooltip text={messages.withAnythingHelperText}>
-            <IconInfo color='subdued' height={16} width={16} />
-          </Tooltip>
-        </Flex>
-      ),
-      icon: IconPhantomPlain,
-      value:
-        selectedMethod === PurchaseMethod.WALLET ? (
-          <TokenPicker
-            selectedTokenAddress={selectedPurchaseMethodMintAddress}
-            onChange={setSelectedPurchaseMethodMintAddress}
-            onOpen={handleOpenTokenPicker}
-          />
-        ) : null
-    })
-  }
-
-  if (!showExtraItemsToggle) {
-    options.push(...extraOptions)
-  }
+  ].filter(Boolean) as SummaryTableItem[]
 
   const handleRadioChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,15 +165,6 @@ export const PaymentMethod = ({
     },
     [setSelectedMethod]
   )
-
-  const handleHideExtraItems = useCallback(() => {
-    if (
-      selectedMethod === PurchaseMethod.CRYPTO ||
-      selectedMethod === PurchaseMethod.WALLET
-    ) {
-      setSelectedMethod(PurchaseMethod.CARD)
-    }
-  }, [selectedMethod, setSelectedMethod])
 
   const renderBody = (items: SummaryTableItem[]) => {
     const getFlexProps = (id: PurchaseMethod) => {
@@ -201,6 +183,7 @@ export const PaymentMethod = ({
         justifyContent: 'space-between'
       }
     }
+
     return (
       <RadioGroup
         name={`summaryTable-label-${messages.paymentMethod}`}
@@ -214,7 +197,10 @@ export const PaymentMethod = ({
             {...getFlexProps(id as PurchaseMethod)}
             pv='s'
             ph='xl'
-            css={{ opacity: disabled ? 0.5 : 1 }}
+            css={{
+              opacity: disabled ? 0.5 : 1,
+              pointerEvents: disabled ? 'none' : 'auto'
+            }}
             borderTop='default'
           >
             <Flex
@@ -253,14 +239,6 @@ export const PaymentMethod = ({
     <SummaryTable
       title={messages.paymentMethod}
       items={options}
-      onHideExtraItems={showExtraItemsToggle ? handleHideExtraItems : undefined}
-      extraItems={showExtraItemsToggle ? extraOptions : undefined}
-      showExtraItemsCopy={messages.showAdvanced}
-      disableExtraItemsToggle={
-        selectedMethod === PurchaseMethod.WALLET ||
-        selectedMethod === PurchaseMethod.CRYPTO
-      }
-      hideExtraItemsCopy={messages.hideAdvanced}
       renderBody={renderBody}
     />
   )

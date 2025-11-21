@@ -78,6 +78,16 @@ const slice = createSlice({
       state.guestEmail = action.payload.guestEmail
       state.purchaseMethodMintAddress = action.payload.purchaseMethodMintAddress
     },
+    startArtistCoinPurchaseFlow: (state) => {
+      state.stage = PurchaseContentStage.START
+    },
+    artistCoinPurchaseFlowError: (
+      state,
+      action: PayloadAction<{ error: PurchaseContentError }>
+    ) => {
+      state.stage = PurchaseContentStage.IDLE
+      state.error = action.payload.error
+    },
     buyUSDC: (state) => {
       state.stage = PurchaseContentStage.BUY_USDC
     },
@@ -121,6 +131,8 @@ const slice = createSlice({
 
 export const {
   startPurchaseContentFlow,
+  startArtistCoinPurchaseFlow,
+  artistCoinPurchaseFlowError,
   buyUSDC,
   usdcBalanceSufficient,
   purchaseSucceeded,

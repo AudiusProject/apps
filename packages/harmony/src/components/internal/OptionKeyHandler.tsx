@@ -8,7 +8,7 @@ type OptionType<Value extends string> = {
    * The label to display. If not provided, uses the value.
    */
   label?: string
-  helperText?: string
+  helperText?: string | JSX.Element
   icon?: IconComponent
   /**
    * A leading element to display before the option label. Useful for icons/emojis

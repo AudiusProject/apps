@@ -70,7 +70,6 @@ export const AddCash = ({
         <CashBalanceSection />
         <PaymentMethod
           showVendorChoice
-          showExtraItemsToggle={false}
           selectedVendor={selectedPurchaseVendor ?? null}
           selectedMethod={selectedPurchaseMethod}
           setSelectedMethod={setSelectedPurchaseMethod}
