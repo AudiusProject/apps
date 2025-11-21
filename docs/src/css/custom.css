@@ -305,6 +305,45 @@ html[data-theme='dark'] .alert a {
   --ifm-code-background: unset;
 }
 
+.alert.alert--success {
+  background: #e6f7ec;
+  color: #134d2a;
+  border: 1px solid #c6e8d0;
+}
+
+.alert.alert--success .admonition-heading,
+.alert.alert--success strong {
+  color: #0f3d21;
+}
+
+.alert.alert--success a {
+  color: #0b7537;
+  text-decoration: underline;
+}
+
+.alert.alert--success :is(.admonition-icon, [class*='admonitionIcon']) svg {
+  fill: currentColor !important;
+}
+
+html[data-theme='dark'] .alert.alert--success {
+  background: #0f3820;
+  color: #e2f5e8;
+  border-color: #1d6a3a;
+}
+
+html[data-theme='dark'] .alert.alert--success .admonition-heading,
+html[data-theme='dark'] .alert.alert--success strong {
+  color: #c6f0d5;
+}
+
+html[data-theme='dark'] .alert.alert--success a {
+  color: #7ee3a2;
+}
+
+html[data-theme='dark'] .alert.alert--success :is(.admonition-icon, [class*='admonitionIcon']) svg {
+  fill: currentColor !important;
+}
+
 /* padding between navbar and body */
 article {
   padding-left: 1.5rem;
