@@ -6,15 +6,6 @@ module.exports = {
   developers: [
     {
       type: 'category',
-      label: 'Introduction',
-      items: [
-        'developers/introduction/overview',
-        // 'developers/introduction/resources'
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
       label: 'Guides',
       items: [
         'developers/introduction/overview',
