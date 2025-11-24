@@ -10,7 +10,7 @@ if [[ -z "$TAG" ]]; then
   echo "Usage: $0 <tag> <service> [sha]"
   echo "  tag: prerelease|edge|current|__version__"
   echo "  service: discovery-provider|identity-service|all"
-  echo "  sha: optional commit SHA to tag (falls back to CIRCLE_SHA1 if not provided)"
+  echo "  sha: optional commit SHA to tag (falls back to CIRCLE_SHA1 or git rev-parse HEAD if not provided)"
   exit 2
 fi
 
@@ -19,6 +19,8 @@ if [[ -n "${SHA_ARG:-}" ]]; then
   SHA="$SHA_ARG"
 elif [[ -n "${CIRCLE_SHA1:-}" ]]; then
   SHA="$CIRCLE_SHA1"
+elif git rev-parse --verify HEAD >/dev/null 2>&1; then
+  SHA=$(git rev-parse HEAD)
 else
   echo "Error: commit SHA not provided. Pass as third argument or set CIRCLE_SHA1 in env." >&2
   exit 3
