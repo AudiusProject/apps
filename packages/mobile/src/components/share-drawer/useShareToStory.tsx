@@ -178,12 +178,16 @@ export const useShareToStory = ({
   }, [viewShotRef])
 
   const toggleProgressDrawer = useCallback(
-    (open: boolean, platform?: ShareToStoryPlatform) => {
+    (
+      open: boolean,
+      platform?: ShareToStoryPlatform,
+      reopenShareModal = true
+    ) => {
       if (open && platform) {
         dispatch(setPlatform(platform))
       }
       dispatch(setVisibility({ drawer: 'ShareToStoryProgress', visible: open }))
-      if (!open) {
+      if (!open && reopenShareModal) {
         dispatch(modalsActions.setVisibility({ modal: 'Share', visible: true }))
       }
     },
@@ -191,12 +195,15 @@ export const useShareToStory = ({
   )
 
   // Actions that should always be taken once the story generation is finished (cancelled, errored, or successful):
-  const cleanup = useCallback(() => {
-    deactivateKeepAwake()
-    dispatch(reset())
-    toggleProgressDrawer(false)
-    setSelectedPlatform(null)
-  }, [dispatch, toggleProgressDrawer])
+  const cleanup = useCallback(
+    (reopenShareModal = true) => {
+      deactivateKeepAwake()
+      dispatch(reset())
+      toggleProgressDrawer(false, undefined, reopenShareModal)
+      setSelectedPlatform(null)
+    },
+    [dispatch, toggleProgressDrawer]
+  )
 
   const handleError = useCallback(
     (platform: ShareToStoryPlatform, error: Error, name?: string) => {
@@ -272,16 +279,16 @@ export const useShareToStory = ({
     []
   )
 
-  const pasteToTikTokApp = useCallback((videoUri: string) => {
-    TikTokShare.share([videoUri], false)
-      .then(() => {
-        // Video shared successfully
-      })
-      .catch((error) => {
-        // Handle error
-        console.error('TikTok share error:', error)
-      })
-  }, [])
+  const pasteToTikTokApp = useCallback(
+    async (videoPath: string, platform: ShareToStoryPlatform) => {
+      // On Android, TikTok SDK expects file path (not file:// URI)
+      // The SDK will handle Content URI conversion via FileProvider internally
+      const pathToShare =
+        Platform.OS === 'android' ? videoPath : `file://${videoPath}`
+      await TikTokShare.share([pathToShare], false)
+    },
+    []
+  )
 
   const generateStory = useCallback(
     async (platform: ShareToStoryPlatform) => {
@@ -435,7 +442,31 @@ export const useShareToStory = ({
         const videoUri = `file://${storyVideoPath}`
         try {
           if (platform === 'instagram') {
-            await pasteToInstagramApp(videoUri, stickerUri)
+            // On Android, don't await Instagram share to prevent app from coming back to foreground
+            // react-native-share resolves too quickly before Instagram fully opens
+            if (Platform.OS === 'android') {
+              pasteToInstagramApp(videoUri, stickerUri).catch((error) => {
+                // Only handle errors, don't block on success
+                handleError(platform, error, 'Error at share to app step')
+              })
+              // Give Instagram time to open before cleanup
+              setTimeout(() => {
+                deactivateKeepAwake()
+                dispatch(reset())
+                toggleProgressDrawer(false, undefined, false)
+                setSelectedPlatform(null)
+                track(
+                  make({
+                    eventName: SUCCESS_EVENT_NAMES_MAP[platform],
+                    title: content.track.title,
+                    artist: content.artist.handle
+                  })
+                )
+              }, 1500)
+              return
+            } else {
+              await pasteToInstagramApp(videoUri, stickerUri)
+            }
           } else if (platform === 'snapchat') {
             await pasteToSnapchatApp(
               videoUri,
@@ -443,14 +474,14 @@ export const useShareToStory = ({
               encodeURI(getTrackRoute(content.track, true))
             )
           } else if (platform === 'tiktok') {
-            pasteToTikTokApp(`${storyVideoPath}`)
+            // Pass the file path (pasteToTikTokApp will format it appropriately)
+            await pasteToTikTokApp(storyVideoPath, platform)
           }
         } catch (error) {
           handleError(platform, error, 'Error at share to app step')
           return
-        } finally {
-          cleanup()
         }
+
         track(
           make({
             eventName: SUCCESS_EVENT_NAMES_MAP[platform],
@@ -458,6 +489,21 @@ export const useShareToStory = ({
             artist: content.artist.handle
           })
         )
+
+        // On Android, delay cleanup for Snapchat/TikTok to allow them to fully open
+        // On iOS, cleanup immediately
+        if (Platform.OS === 'android') {
+          // Delay cleanup on Android to prevent app from coming back to foreground
+          setTimeout(() => {
+            deactivateKeepAwake()
+            dispatch(reset())
+            toggleProgressDrawer(false, undefined, false)
+            setSelectedPlatform(null)
+          }, 1000)
+        } else {
+          // On iOS, cleanup immediately and reopen Share modal
+          cleanup(true)
+        }
       }
     },
     [
