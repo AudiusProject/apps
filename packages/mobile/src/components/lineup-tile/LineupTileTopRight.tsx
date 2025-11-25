@@ -4,7 +4,7 @@ import { formatLineupTileDuration } from '@audius/common/utils'
 import { StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
-import { IconCheck } from '@audius/harmony-native'
+import { IconCheck, IconPin, IconText } from '@audius/harmony-native'
 import Text from 'app/components/text'
 import { useThemeColors } from 'app/utils/theme'
 
@@ -14,7 +14,8 @@ const { getTrackPosition } = playbackPositionSelectors
 
 const messages = {
   timeLeft: 'left',
-  played: 'Played'
+  played: 'Played',
+  artistPick: 'Artist Pick'
 }
 
 const styles = StyleSheet.create({
@@ -41,13 +42,18 @@ type Props = {
    * Whether or not the track is long-form content (podcast/audiobook/etc)
    */
   isLongFormContent?: boolean
+  /**
+   * Whether or not this track is the artist pick
+   */
+  isArtistPick?: boolean
 }
 
 export const LineupTileTopRight = ({
   duration,
   trackId,
   isCollection,
-  isLongFormContent
+  isLongFormContent,
+  isArtistPick = false
 }: Props) => {
   const { secondary } = useThemeColors()
   const trackTileStyles = useTrackTileStyles()
@@ -72,6 +78,13 @@ export const LineupTileTopRight = ({
   return (
     <View style={styles.topRight}>
       <View style={trackTileStyles.statTextContainer}>
+        {isArtistPick ? (
+          <View style={{ marginRight: 8 }}>
+            <IconText icons={[{ icon: IconPin }]}>
+              {messages.artistPick}
+            </IconText>
+          </View>
+        ) : null}
         <Text
           style={[
             trackTileStyles.statText,

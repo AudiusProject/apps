@@ -81,6 +81,7 @@ export const TrackTile = (props: TrackTileProps) => {
       track_id: track.track_id,
       genre: track.genre,
       stream_conditions: track.stream_conditions,
+
       ddex_app: track.ddex_app,
       is_unlisted: track.is_unlisted,
       album_backlink: track.album_backlink,
@@ -275,6 +276,7 @@ export const TrackTile = (props: TrackTileProps) => {
   const isOwner = currentUserId === track.owner_id
   const hideShare = !isOwner && track.field_visibility?.share === false
   const isReadonly = variant === 'readonly'
+  const isArtistPick = user?.artist_pick_track_id === track.track_id
 
   return (
     <Paper onPress={handlePress} style={style}>
@@ -291,6 +293,7 @@ export const TrackTile = (props: TrackTileProps) => {
         isLongFormContent={
           track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
         }
+        isArtistPick={isArtistPick}
       />
       <TrackTileStats
         trackId={track.track_id}

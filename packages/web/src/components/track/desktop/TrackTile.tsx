@@ -25,7 +25,9 @@ import {
   Paper,
   Box,
   IconButton,
-  IconVolumeLevel2 as IconVolume
+  IconVolumeLevel2 as IconVolume,
+  IconPin,
+  IconText
 } from '@audius/harmony'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -45,6 +47,7 @@ import { TrackDogEar } from '../TrackDogEar'
 import { TrackTileStats } from '../TrackTileStats'
 import { ViewerActionButtons } from '../ViewerActionButtons'
 import { getTrackWithFallback, getUserWithFallback } from '../helpers'
+import { messages } from '../trackTileMessages'
 import { TrackTileSize } from '../types'
 
 import { TrackTileDuration } from './TrackTileDuration'
@@ -128,6 +131,8 @@ export const TrackTile = ({
     has_current_user_reposted: isReposted,
     has_current_user_saved: isFavorited
   } = trackWithFallback
+
+  const isArtistPick = partialUser?.artist_pick_track_id === trackId
 
   const { isFetchingNFTAccess, hasStreamAccess, isPreviewable } =
     useGatedContentAccess(trackWithFallback)
@@ -360,7 +365,10 @@ export const TrackTile = ({
                       disabled={disableActions}
                       ellipses
                     >
-                      <Text ellipses>{title}</Text>
+                      <Text ellipses>
+                        {title}
+                        {title}
+                      </Text>
                       {isTrackPlaying ? <IconVolume size='m' /> : null}
                     </TextLink>
                   )}
@@ -376,7 +384,14 @@ export const TrackTile = ({
                     />
                   )}
                 </Flex>
-                <TrackTileDuration trackId={trackId} isLoading={isLoading} />
+                <Flex gap='s' alignItems='center'>
+                  {isArtistPick ? (
+                    <IconText icons={[{ icon: IconPin }]}>
+                      {messages.artistPick}
+                    </IconText>
+                  ) : null}
+                  <TrackTileDuration trackId={trackId} isLoading={isLoading} />
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
