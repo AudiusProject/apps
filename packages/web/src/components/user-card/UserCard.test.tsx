@@ -1,5 +1,6 @@
+import { PROFILE_PAGE } from '@audius/common/src/utils/route'
 import { Text } from '@audius/harmony'
-import { Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { artistUser } from 'test/mocks/fixtures/users'
@@ -15,14 +16,16 @@ function renderUserCard(
   mswServer.use(mockUsers([user]))
 
   return render(
-    <Routes>
-      <Route path='/' element={<UserCard id={1} size='s' />} />
-      <Route
-        path='/test-user'
-        element={<Text variant='heading'>Test User Page</Text>}
-      />
-    </Routes>,
-    options
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path='/' element={<UserCard id={1} size='s' />} />
+        <Route
+          path={PROFILE_PAGE}
+          element={<Text variant='heading'>Test User Page</Text>}
+        />
+      </Routes>
+    </MemoryRouter>,
+    { ...options, skipRouter: true }
   )
 }
 

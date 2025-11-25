@@ -1,8 +1,12 @@
+import { useEffect } from 'react'
+
+import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
 import { Notification as NotificationObjectType } from '@audius/common/store'
 import { Text } from '@audius/harmony'
-import { Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 
+import { setNavigateRef } from 'store/navigationMiddleware'
 import { mockNotification } from 'test/mocks/fixtures/notifications'
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser } from 'test/mocks/fixtures/users'
@@ -11,17 +15,47 @@ import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { Notification } from './Notification'
 
+// Component to set up navigation ref for MemoryRouter
+const MemoryRouterNavigationSetup = ({
+  children
+}: {
+  children: React.ReactNode
+}) => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setNavigateRef(navigate)
+    return () => {
+      setNavigateRef(null as any)
+    }
+  }, [navigate])
+
+  return <>{children}</>
+}
+
 const renderNotification = (notification: NotificationObjectType) => {
   mswServer.use(mockUsers([artistUser]), mockTracks([testTrack]))
 
   return render(
-    <Routes>
-      <Route path='/' element={<Notification notification={notification} />} />
-      <Route
-        path={testTrack.permalink}
-        element={<Text variant='heading'>{testTrack.title} page</Text>}
-      />
-    </Routes>
+    <MemoryRouter initialEntries={['/']}>
+      <MemoryRouterNavigationSetup>
+        <Routes>
+          <Route
+            path='/'
+            element={<Notification notification={notification} />}
+          />
+          <Route
+            path={TRACK_PAGE}
+            element={<Text variant='heading'>{testTrack.title} page</Text>}
+          />
+          <Route
+            path={PROFILE_PAGE}
+            element={<Text variant='heading'>{artistUser.name} page</Text>}
+          />
+        </Routes>
+      </MemoryRouterNavigationSetup>
+    </MemoryRouter>,
+    { skipRouter: true }
   )
 }
 

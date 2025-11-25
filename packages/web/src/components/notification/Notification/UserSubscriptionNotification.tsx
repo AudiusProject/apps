@@ -7,10 +7,9 @@ import {
   UserSubscriptionNotification as UserSubscriptionNotificationType
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { make, useRecord } from 'common/store/analytics/actions'
-import { push } from 'utils/navigation'
 
 import styles from './UserSubscriptionNotification.module.css'
 import { EntityLink } from './components/EntityLink'
@@ -45,18 +44,18 @@ export const UserSubscriptionNotification = (
   const uploadCount = entityIds.length
   const isSingleUpload = uploadCount === 1
 
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const record = useRecord()
 
   const handleClick = useCallback(() => {
     if (entityType === Entity.Track && !isSingleUpload) {
       if (user) {
-        dispatch(push(profilePage(user.handle)))
+        navigate(profilePage(user.handle))
       }
     } else {
       if (entities) {
         const entityLink = getEntityLink(entities[0])
-        dispatch(push(entityLink))
+        navigate(entityLink)
         record(
           make(Name.NOTIFICATIONS_CLICK_TILE, {
             kind: type,
@@ -65,7 +64,7 @@ export const UserSubscriptionNotification = (
         )
       }
     }
-  }, [entityType, isSingleUpload, user, entities, dispatch, record, type])
+  }, [entityType, isSingleUpload, user, entities, navigate, record, type])
 
   if (!user || !entities) return null
 

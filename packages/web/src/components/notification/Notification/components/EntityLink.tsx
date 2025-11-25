@@ -9,10 +9,9 @@ import {
 import { Entity, useNotificationModal } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { OptionalId } from '@audius/sdk'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { make, useRecord } from 'common/store/analytics/actions'
-import { push } from 'utils/navigation'
 
 import { getEntityLink } from '../utils'
 
@@ -33,7 +32,7 @@ export const useGoToEntity = (
   goToComments?: boolean,
   commentId?: number
 ) => {
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const record = useRecord()
   const { onClose } = useNotificationModal()
 
@@ -55,7 +54,7 @@ export const useGoToEntity = (
       const newLink = `${link}?${urlParams.toString()}`
 
       onClose()
-      dispatch(push(newLink))
+      navigate(newLink)
       record(
         make(Name.NOTIFICATIONS_CLICK_TILE, {
           kind: entityType,
@@ -63,7 +62,7 @@ export const useGoToEntity = (
         })
       )
     },
-    [commentId, dispatch, entity, entityType, goToComments, onClose, record]
+    [commentId, navigate, entity, entityType, goToComments, onClose, record]
   )
   return handleClick
 }

@@ -3,12 +3,11 @@ import { MouseEventHandler, useCallback } from 'react'
 import { SquareSizes, User } from '@audius/common/models'
 import { useNotificationModal } from '@audius/common/store'
 import cn from 'classnames'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useProfilePicture } from 'hooks/useProfilePicture'
-import { push } from 'utils/navigation'
 
 import styles from './ProfilePicture.module.css'
 
@@ -31,7 +30,7 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
     stopPropagation
   } = props
   const { user_id, handle } = user
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { onClose } = useNotificationModal()
   const profilePicture = useProfilePicture({
     userId: user_id,
@@ -44,10 +43,10 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
         e.stopPropagation()
       }
       if (!disableClick) {
-        dispatch(push(`/${handle}`))
+        navigate(`/${handle}`)
       }
     },
-    [stopPropagation, disableClick, dispatch, handle]
+    [stopPropagation, disableClick, navigate, handle]
   )
 
   const profilePictureElement = (

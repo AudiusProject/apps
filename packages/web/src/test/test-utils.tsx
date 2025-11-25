@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react'
+import { ReactElement, ReactNode, useEffect } from 'react'
 
 import fs from 'fs'
 import path from 'path'
@@ -11,7 +11,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { render, RenderOptions, configure } from '@testing-library/react'
 import { setupServer } from 'msw/node'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { PartialDeep } from 'type-fest'
 import { it as vitestIt } from 'vitest'
 import { WagmiProvider, createConfig, http } from 'wagmi'
@@ -24,6 +24,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env/env.dev'
 import { queryClient } from 'services/query-client'
 import { configureStore } from 'store/configureStore'
+import { setNavigateRef } from 'store/navigationMiddleware'
 import { AppState } from 'store/types'
 
 import { createMockAppContext } from './mocks/app-context'
@@ -45,6 +46,7 @@ const mockWagmiConfig = createConfig({
 type TestOptions = {
   reduxState?: PartialDeep<AppState>
   featureFlags?: Partial<Record<FeatureFlags, boolean>>
+  skipRouter?: boolean // If true, don't wrap in BrowserRouter (useful when using MemoryRouter in test)
 }
 
 type ReduxProviderProps = {
@@ -70,15 +72,37 @@ type TestProvidersProps = {
   children: ReactNode
 }
 
+// Component to set up navigation ref for middleware when using BrowserRouter
+const NavigationSetup = ({ children }: { children: ReactNode }) => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setNavigateRef(navigate)
+    return () => {
+      setNavigateRef(null as any)
+    }
+  }, [navigate])
+
+  return <>{children}</>
+}
+
 const TestProviders =
   (options?: TestOptions) => (props: TestProvidersProps) => {
     const { children } = props
-    const { reduxState, featureFlags } = options ?? {}
+    const { reduxState, featureFlags, skipRouter } = options ?? {}
     const mockAppContext = createMockAppContext(featureFlags)
     const queryContext = {
       audiusSdk,
       env
     } as unknown as QueryContextType
+
+    const content = (
+      <RouterContextProvider>
+        <AppContext.Provider value={mockAppContext}>
+          <ToastContextProvider>{children}</ToastContextProvider>
+        </AppContext.Provider>
+      </RouterContextProvider>
+    )
 
     return (
       <WagmiProvider config={mockWagmiConfig}>
@@ -87,13 +111,13 @@ const TestProviders =
             <QueryContext.Provider value={queryContext}>
               <ThemeProvider theme='day'>
                 <ReduxProvider initialStoreState={reduxState}>
-                  <BrowserRouter>
-                    <RouterContextProvider>
-                      <AppContext.Provider value={mockAppContext}>
-                        <ToastContextProvider>{children}</ToastContextProvider>
-                      </AppContext.Provider>
-                    </RouterContextProvider>
-                  </BrowserRouter>
+                  {skipRouter ? (
+                    content
+                  ) : (
+                    <BrowserRouter>
+                      <NavigationSetup>{content}</NavigationSetup>
+                    </BrowserRouter>
+                  )}
                 </ReduxProvider>
               </ThemeProvider>
             </QueryContext.Provider>

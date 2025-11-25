@@ -4,13 +4,12 @@ import { Name, User } from '@audius/common/models'
 import { Notification, useNotificationModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { push } from 'utils/navigation'
 
 import styles from './UserNameLink.module.css'
 const { profilePage } = route
@@ -28,7 +27,7 @@ type UserNameLinkProps = {
 
 export const UserNameLink = (props: UserNameLinkProps) => {
   const { className, notification, user, isOwner } = props
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const isMobile = useIsMobile()
 
   const record = useRecord()
@@ -43,7 +42,7 @@ export const UserNameLink = (props: UserNameLinkProps) => {
       event.stopPropagation()
       event.preventDefault()
       onClose()
-      dispatch(push(profilePage(handle)))
+      navigate(profilePage(handle))
       record(
         make(Name.NOTIFICATIONS_CLICK_TILE, {
           kind: type,
@@ -51,7 +50,7 @@ export const UserNameLink = (props: UserNameLinkProps) => {
         })
       )
     },
-    [onClose, dispatch, handle, record, type, profileLink]
+    [onClose, navigate, handle, record, type, profileLink]
   )
 
   const rootClassName = cn(styles.root, className)

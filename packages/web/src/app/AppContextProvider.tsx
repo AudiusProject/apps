@@ -26,7 +26,8 @@ export const AppContextProvider = (props: AppContextProviderProps) => {
       imageUtils: {
         generatePlaylistArtwork
       },
-      getHostUrl: () => window.location.origin,
+      getHostUrl: () =>
+        typeof window !== 'undefined' ? window.location.origin : '',
       audiusSdk: sdk,
       audiusBackend: audiusBackendInstance,
       remoteConfig: remoteConfigInstance,

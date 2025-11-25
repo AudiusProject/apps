@@ -1,7 +1,8 @@
+import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
 import { Text } from '@audius/harmony'
 import { developmentConfig } from '@audius/sdk'
 import { setupServer } from 'msw/node'
-import { Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testCollection } from 'test/mocks/fixtures/collections'
@@ -17,17 +18,20 @@ const renderCollectionCard = (collection: typeof testCollection & any) => {
   server.use(mockCollectionById(collection))
 
   return render(
-    <Routes>
-      <Route path='/' element={<CollectionCard id={1} size='s' />} />
-      <Route
-        path='/test-user/test-collection'
-        element={<Text variant='heading'>Test Collection Page</Text>}
-      />
-      <Route
-        path='/test-user'
-        element={<Text variant='heading'>Test User Page</Text>}
-      />
-    </Routes>
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path='/' element={<CollectionCard id={1} size='s' />} />
+        <Route
+          path={TRACK_PAGE}
+          element={<Text variant='heading'>Test Collection Page</Text>}
+        />
+        <Route
+          path={PROFILE_PAGE}
+          element={<Text variant='heading'>Test User Page</Text>}
+        />
+      </Routes>
+    </MemoryRouter>,
+    { skipRouter: true }
   )
 }
 

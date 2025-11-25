@@ -43,7 +43,7 @@ export const EditTrackPage = (props: EditPageProps) => {
   const { handle } = params
   const dispatch = useDispatch()
   useRequiresAccount()
-  useIsUnauthorizedForHandleRedirect(handle)
+  useIsUnauthorizedForHandleRedirect(handle ?? '')
   const { onOpen: openReplaceTrackConfirmation } =
     useReplaceTrackConfirmationModal()
   const { onOpen: openReplaceTrackProgress } = useReplaceTrackProgressModal()

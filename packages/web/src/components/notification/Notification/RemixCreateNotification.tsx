@@ -3,11 +3,10 @@ import { useCallback, useMemo } from 'react'
 import { useTrack, useUser } from '@audius/common/api'
 import { Name, TrackMetadata } from '@audius/common/models'
 import { RemixCreateNotification as RemixCreateNotificationType } from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 import { make } from 'common/store/analytics/actions'
 import { XShareButton } from 'components/x-share-button/XShareButton'
-import { push } from 'utils/navigation'
 
 import { EntityLink } from './components/EntityLink'
 import { NotificationBody } from './components/NotificationBody'
@@ -36,7 +35,7 @@ export const RemixCreateNotification = (
   const { notification } = props
   const { entityType, timeLabel, isViewed, childTrackId, parentTrackId } =
     notification
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { data: user } = useUser(notification.userId)
 
   // useNotificationEntities is not used here because the ids are not in the
@@ -58,9 +57,9 @@ export const RemixCreateNotification = (
 
   const handleClick = useCallback(() => {
     if (childTrackEntity) {
-      dispatch(push(getEntityLink(childTrackEntity)))
+      navigate(getEntityLink(childTrackEntity))
     }
-  }, [childTrackEntity, dispatch])
+  }, [childTrackEntity, navigate])
 
   const handleShare = useCallback(
     (twitterHandle: string) => {

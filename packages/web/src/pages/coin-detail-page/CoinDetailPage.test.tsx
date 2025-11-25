@@ -1,5 +1,5 @@
-import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { Route, Routes } from 'react-router-dom'
+import { COIN_DETAIL_PAGE, coinPage } from '@audius/common/src/utils/route'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import {
   describe,
   expect,
@@ -67,11 +67,15 @@ export function renderCoinDetailPage(
   mswServer.use(mockUsers([nonArtistUser, artistUser, ...randomUsers]))
   mswServer.use(mockCoinByTicker(coin))
 
+  const initialPath = coinPage(coin.ticker)
+
   return render(
-    <Routes>
-      <Route path={COIN_DETAIL_PAGE} element={<CoinDetailPage />} />
-    </Routes>,
-    options
+    <MemoryRouter initialEntries={[initialPath]}>
+      <Routes>
+        <Route path={COIN_DETAIL_PAGE} element={<CoinDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+    { ...options, skipRouter: true }
   )
 }
 

@@ -1,8 +1,10 @@
-import { Route, Routes } from 'react-router-dom'
+import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testTrack } from 'test/mocks/fixtures/tracks'
-import { mockTrackById, mockEvents } from 'test/msw/mswMocks'
+import { artistUser } from 'test/mocks/fixtures/users'
+import { mockTrackById, mockEvents, mockUsers } from 'test/msw/mswMocks'
 import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { TrackTileSize } from '../types'
@@ -10,31 +12,38 @@ import { TrackTileSize } from '../types'
 import { TrackTile } from './TrackTile'
 
 function renderTrackTile(overrides = {}) {
-  mswServer.use(mockTrackById({ ...testTrack, ...overrides }), mockEvents())
+  mswServer.use(
+    mockTrackById({ ...testTrack, ...overrides }),
+    mockEvents(),
+    mockUsers([artistUser])
+  )
 
   return render(
-    <Routes>
-      <Route
-        path='/'
-        element={
-          <TrackTile
-            uid='test-uid'
-            id={1}
-            index={0}
-            size={TrackTileSize.SMALL}
-            statSize='small'
-            ordered={false}
-            togglePlay={() => {}}
-            isLoading={false}
-            hasLoaded={() => {}}
-            isTrending={false}
-            isFeed={false}
-          />
-        }
-      />
-      <Route path='/test-user/test-track' element={<h1>Mock Track Page</h1>} />
-      <Route path='/test-user' element={<h1>Mock User Page</h1>} />
-    </Routes>
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route
+          path='/'
+          element={
+            <TrackTile
+              uid='test-uid'
+              id={1}
+              index={0}
+              size={TrackTileSize.SMALL}
+              statSize='small'
+              ordered={false}
+              togglePlay={() => {}}
+              isLoading={false}
+              hasLoaded={() => {}}
+              isTrending={false}
+              isFeed={false}
+            />
+          }
+        />
+        <Route path={TRACK_PAGE} element={<h1>Mock Track Page</h1>} />
+        <Route path={PROFILE_PAGE} element={<h1>Mock User Page</h1>} />
+      </Routes>
+    </MemoryRouter>,
+    { skipRouter: true }
   )
 }
 

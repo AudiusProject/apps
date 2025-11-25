@@ -191,9 +191,31 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
 export const mockTrackById = (track: typeof testTrack & any) =>
   http.get(`${apiEndpoint}/v1/full/tracks`, ({ request }) => {
     const url = new URL(request.url)
-    const id = url.searchParams.get('id')
+    // Handle both single ID param and array params (id[]=1&id[]=2)
+    const idParam = url.searchParams.get('id')
+    const idArrayParams = url.searchParams.getAll('id[]')
+    const ids =
+      idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
 
-    if (id && id === track.id.toString()) {
+    // Get track IDs in various formats for comparison
+    const trackIdStr = track.id?.toString()
+    const trackTrackIdStr = track.track_id?.toString()
+    const trackIdNum = track.id
+    const trackTrackIdNum = track.track_id
+
+    // Check if any requested ID matches the track
+    const matches = ids.some((id) => {
+      const idNum = Number(id)
+      return (
+        id === trackIdStr ||
+        id === trackTrackIdStr ||
+        (!isNaN(idNum) &&
+          (idNum === Number(trackIdNum) || idNum === Number(trackTrackIdNum)))
+      )
+    })
+
+    // If no IDs specified or we have a match, return the track
+    if (ids.length === 0 || matches) {
       return HttpResponse.json({ data: [track] })
     }
 
