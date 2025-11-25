@@ -20,8 +20,7 @@ import {
   spacing,
   Text
 } from '@audius/harmony'
-import { Link } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'

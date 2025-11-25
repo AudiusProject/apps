@@ -1,6 +1,5 @@
 import { Client } from '@audius/common/models'
 import cn from 'classnames'
-import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 import { getClient } from 'utils/clientUtil'
@@ -13,11 +12,9 @@ interface OwnProps {
   className?: string
 }
 
-type NavigatorProps = OwnProps & RouteComponentProps
-
 // Navigation component that renders the NavBar for mobile
 // and LeftNav for desktop
-const Navigator = ({ className }: NavigatorProps) => {
+const Navigator = ({ className }: OwnProps) => {
   const client = getClient()
   const isMobile = useIsMobile()
 
@@ -39,4 +36,4 @@ const Navigator = ({ className }: NavigatorProps) => {
   )
 }
 
-export default withRouter(Navigator)
+export default Navigator

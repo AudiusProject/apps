@@ -39,7 +39,7 @@ export const EditFormScrollContext = createContext(() => {})
 
 export const EditTrackPage = (props: EditPageProps) => {
   const { scrollToTop } = props
-  const params = useParams<{ handle: string; slug: string }>()
+  const params = useParams<{ handle?: string; slug?: string }>()
   const { handle } = params
   const dispatch = useDispatch()
   useRequiresAccount()

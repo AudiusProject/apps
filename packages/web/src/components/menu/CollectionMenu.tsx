@@ -13,7 +13,7 @@ import {
 import { route } from '@audius/common/utils'
 import { PopupMenuItem } from '@audius/harmony'
 import { connect } from 'react-redux'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import * as embedModalActions from 'components/embed-modal/store/actions'

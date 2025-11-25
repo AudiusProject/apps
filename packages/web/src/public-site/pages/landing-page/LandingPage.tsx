@@ -3,9 +3,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { coinPage } from '@audius/common/src/utils/route'
 import { Flex, IconButton, IconClose, Paper, Text } from '@audius/harmony'
 import cn from 'classnames'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ParallaxProvider } from 'react-scroll-parallax'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import HeroBackgroundTakeover from 'assets/img/publicSite/HeroBGTakeover.webp'
 import { FanburstBanner } from 'components/banner/FanburstBanner'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
@@ -41,14 +41,14 @@ const ArtistTakeoverFloatingBanner = ({
   isMobile: boolean
   setRenderPublicSite: (shouldRender: boolean) => void
 }) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation()
-      handleClickRoute(coinPage('YAK'), setRenderPublicSite, history)()
+      handleClickRoute(coinPage('YAK'), setRenderPublicSite, navigate)()
     },
-    [setRenderPublicSite, history]
+    [setRenderPublicSite, navigate]
   )
 
   const handleClose = useCallback(
@@ -114,7 +114,8 @@ type LandingPageV2Props = {
 }
 
 const LandingPage = (props: LandingPageV2Props) => {
-  const { history } = useHistoryContext()
+  const location = useLocation()
+
   useEffect(() => {
     document.documentElement.style.height = 'auto'
     return () => {
@@ -143,13 +144,13 @@ const LandingPage = (props: LandingPageV2Props) => {
       window.location.search.includes(FANBURST_UTM_SOURCE)
     ) {
       if (window.history && window.history.pushState) {
-        window.history.pushState('', '/', getPathname(history.location))
+        window.history.pushState('', '/', getPathname(location))
       } else {
         window.location.hash = ''
       }
       setShowFanburstBanner(true)
     }
-  }, [setShowFanburstBanner, history])
+  }, [location])
   const onDismissFanburstBanner = () => setShowFanburstBanner(false)
 
   const [hasImageLoaded, setHasImageLoaded] = useState(false)

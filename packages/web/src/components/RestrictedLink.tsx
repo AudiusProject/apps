@@ -1,4 +1,4 @@
-import { Link as RouterLink, LinkProps } from 'react-router-dom-v5-compat'
+import { Link as RouterLink, LinkProps } from 'react-router-dom'
 
 import {
   RestrictionType,

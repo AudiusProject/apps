@@ -38,7 +38,7 @@ export const ScrollProvider = memo((props: { children: JSX.Element }) => {
     (route: string, scroll: number) => {
       let inBlacklist = false
       SCROLL_PRESERVATION_BLACKLIST.forEach((path) => {
-        const match = matchPath(route, { path })
+        const match = matchPath(path, route)
         if (match) {
           inBlacklist = true
         }

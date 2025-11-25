@@ -1,11 +1,10 @@
-// eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useCallback } from 'react'
 
 import { coinPage } from '@audius/common/src/utils/route'
+import { useNavigate } from 'react-router-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import artistTakeover from 'assets/img/publicSite/Artist-Takeover.webp'
 import useHasViewed from 'hooks/useHasViewed'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
@@ -71,7 +70,7 @@ type WhoUsesAudiusProps = {
 }
 
 const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
 
   // Animate in the title and subtitle text
   const [hasViewed, refInView] = useHasViewed()
@@ -87,8 +86,8 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
 
   const goToCoinPage = useCallback(() => {
     // NOTE: Curried function
-    handleClickRoute(coinPage('YAK'), props.setRenderPublicSite, history)()
-  }, [history, props.setRenderPublicSite])
+    handleClickRoute(coinPage('YAK'), props.setRenderPublicSite, navigate)()
+  }, [props.setRenderPublicSite, navigate])
 
   if (props.isMobile) {
     return (

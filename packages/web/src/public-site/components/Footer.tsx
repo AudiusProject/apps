@@ -7,8 +7,7 @@ import {
   IconX
 } from '@audius/harmony'
 import cn from 'classnames'
-
-import { useHistoryContext } from 'app/HistoryProvider'
+import { useNavigate } from 'react-router-dom'
 
 import styles from './Footer.module.css'
 import { handleClickRoute } from './handleClickRoute'
@@ -107,7 +106,7 @@ type FooterProps = {
 }
 
 const Footer = (props: FooterProps) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   return (
     <div
       className={cn(styles.container, {
@@ -121,7 +120,7 @@ const Footer = (props: FooterProps) => {
             onClick={handleClickRoute(
               HOME_PAGE,
               props.setRenderPublicSite,
-              history
+              navigate
             )}
           />
           <div className={styles.siteLinksContainer}>
@@ -131,7 +130,7 @@ const Footer = (props: FooterProps) => {
                 onClick={handleClickRoute(
                   TRENDING_PAGE,
                   props.setRenderPublicSite,
-                  history
+                  navigate
                 )}
                 className={cn(styles.siteLink, styles.link)}
               >
@@ -202,7 +201,7 @@ const Footer = (props: FooterProps) => {
                   onClick={handleClickRoute(
                     link,
                     props.setRenderPublicSite,
-                    history
+                    navigate
                   )}
                 >
                   {text}

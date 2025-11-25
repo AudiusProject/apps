@@ -27,7 +27,7 @@ import {
   TextLink
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Redirect, useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 
 import { SignOnLink } from 'components/SignOnLink'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
@@ -173,16 +173,16 @@ const PageContent = ({
 }
 
 export const CoinRedeemPage = () => {
-  const { ticker, code } = useParams<{ ticker: string; code?: string }>()
+  const { ticker, code } = useParams<{ ticker?: string; code?: string }>()
   const isMobile = useIsMobile()
-  const formattedTicker = formatTickerForUrl(ticker)
+  const formattedTicker = formatTickerForUrl(ticker ?? '')
 
   const {
     data: coin,
     isPending: coinPending,
     isError,
     isSuccess
-  } = useArtistCoinByTicker({ ticker })
+  } = useArtistCoinByTicker({ ticker: formattedTicker })
 
   const { data: coinRedeemAmount, isPending: coinRedeemAmountPending } =
     useCoinRedeemAmount({ mint: coin?.mint })
@@ -203,15 +203,15 @@ export const CoinRedeemPage = () => {
     : coinRedeemAmountPending
 
   if (!ticker) {
-    return <Redirect to={COINS_EXPLORE_PAGE} />
+    return <Navigate to={COINS_EXPLORE_PAGE} />
   }
 
   if (ticker !== formattedTicker) {
-    return <Redirect to={coinRedeemPage(formattedTicker, code)} />
+    return <Navigate to={coinRedeemPage(formattedTicker, code)} />
   }
 
   if (isError || (isSuccess && !coin)) {
-    return <Redirect to={NOT_FOUND_PAGE} />
+    return <Navigate to={NOT_FOUND_PAGE} />
   }
 
   const header = <Header primary={messages.title(ticker)} showBackButton />

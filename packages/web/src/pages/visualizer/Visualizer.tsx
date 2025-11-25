@@ -7,7 +7,7 @@ import { getIsVisible } from './store/selectors'
 import { closeVisualizer, toggleVisibility } from './store/slice'
 
 import styles from './Visualizer.module.css'
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useHotkeys } from '@audius/harmony'
 import { route } from '@audius/common/utils'
 
@@ -28,7 +28,7 @@ const Visualizer = ({
   toggleVisibility,
   closeVisualizer
 }: VisualizerProps) => {
-  const { location } = useHistory()
+  const location = useLocation()
   const { pathname } = location
   const [isLoaded, setIsLoaded] = useState(false)
 

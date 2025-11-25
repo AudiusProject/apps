@@ -1,7 +1,6 @@
 import { modalsSelectors, playerSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { connect } from 'react-redux'
-import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 import NowPlayingDrawer from 'components/now-playing/NowPlayingDrawer'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -16,9 +15,7 @@ type OwnProps = {
   isMobile: boolean
 }
 
-type PlayBarProviderProps = OwnProps &
-  ReturnType<typeof mapStateToProps> &
-  RouteComponentProps
+type PlayBarProviderProps = OwnProps & ReturnType<typeof mapStateToProps>
 
 const PlayBarProvider = ({
   playingUid,
@@ -54,4 +51,4 @@ function mapStateToProps(state: AppState) {
   }
 }
 
-export default withRouter(connect(mapStateToProps)(PlayBarProvider))
+export default connect(mapStateToProps)(PlayBarProvider)

@@ -2,11 +2,11 @@ import { lazy, Suspense, useState, useCallback, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { ThemeProvider } from '@audius/harmony'
-import { Router, Route } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import LoadingSpinnerFullPage from 'components/loading-spinner-full-page/LoadingSpinnerFullPage'
 import NavScreen from 'public-site/components/NavOverlay'
+import { env } from 'services/env'
 
 import { AppContextProvider } from '../app/AppContextProvider'
 
@@ -45,6 +45,14 @@ const MOBILE_WIDTH_MEDIA_QUERY = window.matchMedia(
   `(max-width: ${MOBILE_MAX_WIDTH}px)`
 )
 
+// Component to handle external URL redirects
+const ExternalRedirect = ({ to }: { to: string }) => {
+  useEffect(() => {
+    window.location.href = to
+  }, [to])
+  return null
+}
+
 type PublicSiteProps = {
   isMobile: boolean
   setRenderPublicSite: (shouldRender: boolean) => void
@@ -53,7 +61,6 @@ type PublicSiteProps = {
 export const PublicSite = (props: PublicSiteProps) => {
   const { isMobile, setRenderPublicSite } = props
   const [isMobileOrNarrow, setIsMobileOrNarrow] = useState(isMobile)
-  const { history } = useHistoryContext()
   const handleMobileMediaQuery = useCallback(() => {
     if (MOBILE_WIDTH_MEDIA_QUERY.matches) setIsMobileOrNarrow(true)
     else setIsMobileOrNarrow(isMobile)
@@ -106,103 +113,101 @@ export const PublicSite = (props: PublicSiteProps) => {
       <Suspense fallback={<div style={{ width: '100vw', height: '100vh' }} />}>
         <ThemeProvider theme='day'>
           <AppContextProvider>
-            <Router history={history}>
-              <NavScreen
-                closeNavScreen={closeNavScreen}
-                isOpen={isNavScreenOpen}
-                setRenderPublicSite={setRenderPublicSite}
-              />
-              <Route
-                exact
-                path={'/legal/terms-of-use'}
-                render={() => (
-                  <TermsOfUsePage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
+            {(() => {
+              const RouterComponent = env.USE_HASH_ROUTING
+                ? HashRouter
+                : BrowserRouter
+              const basename = env.BASENAME || undefined
+              return (
+                <RouterComponent basename={basename}>
+                  <NavScreen
+                    closeNavScreen={closeNavScreen}
+                    isOpen={isNavScreenOpen}
                     setRenderPublicSite={setRenderPublicSite}
                   />
-                )}
-              />
-              <Route
-                exact
-                path={'/legal/privacy-policy'}
-                render={() => (
-                  <PrivacyPolicyPage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/legal/artist-coin-terms'}
-                render={() => (
-                  <ArtistCoinTermsPage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/legal/artist-coin-acceptable-use'}
-                render={() => (
-                  <ArtistCoinAcceptableUsePage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/legal/api-terms'}
-                render={() => (
-                  <ApiTermsPage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/press'}
-                render={() => {
-                  window.location.href = AUDIUS_PRESS_LINK
-                  return null
-                }}
-              />
-              <Route
-                exact
-                path={'/download'}
-                render={() => (
-                  <DownloadPage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/'}
-                render={() => (
-                  <LandingPage
-                    isMobile={isMobileOrNarrow}
-                    openNavScreen={openNavScreen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                )}
-              />
-              <Route
-                exact
-                path={'/auth-redirect'}
-                render={() => <LoadingSpinnerFullPage />}
-              />
-            </Router>
+                  <Routes>
+                    <Route
+                      path='/legal/terms-of-use'
+                      element={
+                        <TermsOfUsePage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/legal/privacy-policy'
+                      element={
+                        <PrivacyPolicyPage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/legal/artist-coin-terms'
+                      element={
+                        <ArtistCoinTermsPage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/legal/artist-coin-acceptable-use'
+                      element={
+                        <ArtistCoinAcceptableUsePage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/legal/api-terms'
+                      element={
+                        <ApiTermsPage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/press'
+                      element={<ExternalRedirect to={AUDIUS_PRESS_LINK} />}
+                    />
+                    <Route
+                      path='/download'
+                      element={
+                        <DownloadPage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/'
+                      element={
+                        <LandingPage
+                          isMobile={isMobileOrNarrow}
+                          openNavScreen={openNavScreen}
+                          setRenderPublicSite={setRenderPublicSite}
+                        />
+                      }
+                    />
+                    <Route
+                      path='/auth-redirect'
+                      element={<LoadingSpinnerFullPage />}
+                    />
+                  </Routes>
+                </RouterComponent>
+              )
+            })()}
           </AppContextProvider>
         </ThemeProvider>
       </Suspense>

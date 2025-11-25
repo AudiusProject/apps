@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useSearchParams as useParams } from 'react-router-dom-v5-compat'
+import { useSearchParams as useParams } from 'react-router-dom'
 
 export type RemixSortMethod = 'likes' | 'plays' | 'recent'
 

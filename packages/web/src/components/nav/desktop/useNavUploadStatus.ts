@@ -8,7 +8,7 @@ import { IconCloudUpload, IconArrowRight } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from '~/store/ui/toast/slice'
 
-import { useRouteMatch } from 'utils/route'
+import { useMatch } from 'utils/route'
 
 const { UPLOAD_PAGE } = route
 
@@ -24,7 +24,7 @@ export const useNavUploadStatus = () => {
   const isUploading = useSelector(getIsUploading)
   const uploadSuccess = useSelector(getUploadSuccess)
   const dispatch = useDispatch()
-  const isOnUploadPage = useRouteMatch(UPLOAD_PAGE)
+  const isOnUploadPage = useMatch(UPLOAD_PAGE)
   const { data: accountHandle } = useCurrentAccountUser({
     select: (user) => user?.handle
   })

@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
-import { Link, LinkProps, useLocation } from 'react-router-dom-v5-compat'
+import { Link, LinkProps, useLocation } from 'react-router-dom'
 
 import {
   updateRouteOnCompletion,

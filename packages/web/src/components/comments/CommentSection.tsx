@@ -10,10 +10,9 @@ import { trackPageSelectors } from '@audius/common/store'
 import { Divider, Flex, LoadingSpinner, Paper } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useSelector } from 'react-redux'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom'
 import { tracksActions } from '~/store/pages/track/lineup/actions'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 import { CommentForm } from './CommentForm'
@@ -58,7 +57,8 @@ const CommentSectionInner = (props: CommentSectionInnerProps) => {
   const [searchParams] = useSearchParams()
   const showComments = searchParams.get('showComments')
   const [hasScrolledIntoView, setHasScrolledIntoView] = useState(false)
-  const { history } = useHistoryContext()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const highlightedComment = useHighlightedComment()
   const highlightedCommentId =
@@ -75,15 +75,15 @@ const CommentSectionInner = (props: CommentSectionInnerProps) => {
   }, [commentSectionLoading, isFirstLoad])
 
   const handleScrollEnd = useCallback(() => {
-    const searchParams = new URLSearchParams(history.location.search)
-    searchParams.delete('showComments')
-    history.replace({ search: searchParams.toString() })
+    const newSearchParams = new URLSearchParams(location.search)
+    newSearchParams.delete('showComments')
+    navigate({ search: newSearchParams.toString() }, { replace: true })
 
     // replacing history scrolls to top, so we need to scroll to the comment section
     commentSectionRef.current?.scrollIntoView()
     setHasScrolledIntoView(true)
     mainContentRef.current?.removeEventListener('scrollend', handleScrollEnd)
-  }, [history, mainContentRef, commentSectionRef])
+  }, [location.search, navigate, mainContentRef, commentSectionRef])
 
   useEffect(() => {
     if (
@@ -106,7 +106,6 @@ const CommentSectionInner = (props: CommentSectionInnerProps) => {
     showComments,
     hasScrolledIntoView,
     commentSectionRef,
-    history,
     handleScrollEnd,
     mainContentRef,
     highlightedCommentId

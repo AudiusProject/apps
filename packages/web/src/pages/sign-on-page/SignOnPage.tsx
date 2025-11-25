@@ -14,13 +14,14 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import {
   Link,
-  Redirect,
+  Navigate,
   Route,
-  Switch,
-  useRouteMatch,
-  useHistory
+  Routes,
+  useLocation,
+  useNavigate,
+  matchPath,
+  useSearchParams
 } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom-v5-compat'
 import { useEffectOnce, useLocalStorage, useMeasure } from 'react-use'
 
 import djBackground from 'assets/img/2-DJ-4-3.jpg'
@@ -72,28 +73,29 @@ const DesktopSignOnRoot = (props: RootProps) => {
   const { spacing, motion, color } = useTheme()
 
   const routeOnExit = useSelector(getRouteOnExit)
+  const location = useLocation()
 
-  const hideCloseButton = useRouteMatch({
-    path: [
-      SIGN_UP_GENRES_PAGE,
-      SIGN_UP_ARTISTS_PAGE,
-      SIGN_UP_APP_CTA_PAGE,
-      SIGN_UP_LOADING_PAGE
-    ],
-    exact: true
+  const hideCloseButton = [
+    SIGN_UP_GENRES_PAGE,
+    SIGN_UP_ARTISTS_PAGE,
+    SIGN_UP_APP_CTA_PAGE,
+    SIGN_UP_LOADING_PAGE
+  ].some((path) => {
+    const match = matchPath(path, location.pathname)
+    return match && match.pathname === location.pathname
   })
 
-  const collapsedDesktopPageMatch = useRouteMatch({
-    path: [
-      SIGN_IN_PAGE,
-      SIGN_IN_CONFIRM_EMAIL_PAGE,
-      SIGN_UP_PAGE,
-      SIGN_UP_EMAIL_PAGE,
-      SIGN_UP_PASSWORD_PAGE,
-      SIGN_UP_REVIEW_HANDLE_PAGE,
-      SIGN_UP_APP_CTA_PAGE
-    ],
-    exact: true
+  const collapsedDesktopPageMatch = [
+    SIGN_IN_PAGE,
+    SIGN_IN_CONFIRM_EMAIL_PAGE,
+    SIGN_UP_PAGE,
+    SIGN_UP_EMAIL_PAGE,
+    SIGN_UP_PASSWORD_PAGE,
+    SIGN_UP_REVIEW_HANDLE_PAGE,
+    SIGN_UP_APP_CTA_PAGE
+  ].some((path) => {
+    const match = matchPath(path, location.pathname)
+    return match && match.pathname === location.pathname
   })
 
   const isExpanded = !collapsedDesktopPageMatch
@@ -157,15 +159,31 @@ const DesktopSignOnRoot = (props: RootProps) => {
             backgroundPosition: 'center'
           }}
         >
-          <Switch>
-            <Route exact path={SIGN_UP_APP_CTA_PAGE}>
-              {/* @ts-ignore box type incorrect */}
-              <Box as='img' w='100%' src={imagePhone} />
-            </Route>
-            <Route path={[SIGN_IN_PAGE, SIGN_UP_PAGE]}>
-              {isExpanded ? null : <AudiusValues />}
-            </Route>
-          </Switch>
+          <Routes>
+            <Route
+              path='signup/app-cta'
+              element={
+                /* @ts-ignore box type incorrect */
+                <Box as='img' w='100%' src={imagePhone} />
+              }
+            />
+            <Route
+              path='signin'
+              element={isExpanded ? null : <AudiusValues />}
+            />
+            <Route
+              path='signup'
+              element={isExpanded ? null : <AudiusValues />}
+            />
+            <Route
+              path='signup/*'
+              element={isExpanded ? null : <AudiusValues />}
+            />
+            <Route
+              path='signin/*'
+              element={isExpanded ? null : <AudiusValues />}
+            />
+          </Routes>
         </Flex>
       </Paper>
     </Flex>
@@ -185,9 +203,14 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
   const [ref, { height: panelHeight }] = useMeasure<HTMLDivElement>()
   const collapsedPanelHeight = useRef(panelHeight)
 
-  const collapsedMobilePageMatch = useRouteMatch({
-    path: [SIGN_IN_PAGE, SIGN_UP_PAGE, SIGN_UP_EMAIL_PAGE],
-    exact: true
+  const location = useLocation()
+  const collapsedMobilePageMatch = [
+    SIGN_IN_PAGE,
+    SIGN_UP_PAGE,
+    SIGN_UP_EMAIL_PAGE
+  ].some((path) => {
+    const match = matchPath(path, location.pathname)
+    return match && match.pathname === location.pathname
   })
 
   const shouldPageExpand = !collapsedMobilePageMatch
@@ -257,34 +280,72 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
           backgroundPosition: 'bottom'
         }}
       >
-        <Switch>
-          <Route path={SIGN_UP_PAGE}>
-            <AudiusValues
-              css={{
-                margin: 'auto',
-                opacity: isLoaded ? 1 : 0,
-                transition: `opacity ${motion.expressive} 1s`
-              }}
-            />
-          </Route>
-          <Route path={SIGN_IN_PAGE}>
-            <Text
-              variant='title'
-              strength='weak'
-              color='white'
-              css={{
-                marginTop: 'auto',
-                opacity: isLoaded ? 1 : 0,
-                transition: `opacity ${motion.expressive} 1s`
-              }}
-            >
-              {messages.newToAudius}{' '}
-              <TextLink variant='inverted' showUnderline asChild>
-                <Link to={SIGN_UP_PAGE}>{messages.createAccount}</Link>
-              </TextLink>
-            </Text>
-          </Route>
-        </Switch>
+        <Routes>
+          <Route
+            path='signup'
+            element={
+              <AudiusValues
+                css={{
+                  margin: 'auto',
+                  opacity: isLoaded ? 1 : 0,
+                  transition: `opacity ${motion.expressive} 1s`
+                }}
+              />
+            }
+          />
+          <Route
+            path='signup/*'
+            element={
+              <AudiusValues
+                css={{
+                  margin: 'auto',
+                  opacity: isLoaded ? 1 : 0,
+                  transition: `opacity ${motion.expressive} 1s`
+                }}
+              />
+            }
+          />
+          <Route
+            path='signin'
+            element={
+              <Text
+                variant='title'
+                strength='weak'
+                color='white'
+                css={{
+                  marginTop: 'auto',
+                  opacity: isLoaded ? 1 : 0,
+                  transition: `opacity ${motion.expressive} 1s`
+                }}
+              >
+                {messages.newToAudius}{' '}
+                <TextLink variant='inverted' showUnderline asChild>
+                  <Link to={SIGN_UP_PAGE}>{messages.createAccount}</Link>
+                </TextLink>
+              </Text>
+            }
+          />
+          <Route
+            path='signin/*'
+            element={
+              <Text
+                variant='title'
+                strength='weak'
+                color='white'
+                css={{
+                  marginTop: 'auto',
+                  opacity: isLoaded ? 1 : 0,
+                  transition: `opacity ${motion.expressive} 1s`
+                }}
+              >
+                {messages.newToAudius}{' '}
+                <TextLink variant='inverted' showUnderline asChild>
+                  <Link to={SIGN_UP_PAGE}>{messages.createAccount}</Link>
+                </TextLink>
+              </Text>
+            }
+          />
+        </Routes>
       </Flex>
     </Flex>
   )
@@ -295,7 +356,7 @@ export const SignOnPage = () => {
   const signOnStatus = useSelector(getStatus)
   const routeOnExit = useSelector(getRouteOnExit)
   const dispatch = useDispatch()
-  const history = useHistory()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [guestEmailLocalStorage] = useLocalStorage('guestEmail', '')
 
@@ -303,7 +364,7 @@ export const SignOnPage = () => {
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && routeOnExit) {
-        history.push(routeOnExit)
+        navigate(routeOnExit)
       }
     }
 
@@ -311,7 +372,7 @@ export const SignOnPage = () => {
     return () => {
       window.removeEventListener('keydown', handleEscKey)
     }
-  }, [history, routeOnExit])
+  }, [navigate, routeOnExit])
 
   const rf = searchParams.get('rf')
   const ref = searchParams.get('ref')
@@ -363,26 +424,21 @@ export const SignOnPage = () => {
 
   const [isLoaded, setIsLoaded] = useState(false)
   const SignOnRoot = isMobile ? MobileSignOnRoot : DesktopSignOnRoot
+  const location = useLocation()
+  const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
 
   useEffectOnce(() => {
     setIsLoaded(true)
   })
 
   if (signOnStatus === EditingStatus.SUCCESS) {
-    return <Redirect to={completionRoute || FEED_PAGE} />
+    return <Navigate to={completionRoute || FEED_PAGE} />
   }
 
   return (
     <SignOnRoot isLoaded={isLoaded}>
       <NavHeader />
-      <Switch>
-        <Route path={SIGN_IN_PAGE}>
-          <SignInPage />
-        </Route>
-        <Route path={SIGN_UP_PAGE}>
-          <SignUpPage />
-        </Route>
-      </Switch>
+      {isSignUp ? <SignUpPage /> : <SignInPage />}
     </SignOnRoot>
   )
 }

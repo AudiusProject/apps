@@ -3,7 +3,6 @@ import type { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Location } from 'history'
 import { matchPath, useLocation } from 'react-router'
-import { push } from 'redux-first-history'
 
 import { env } from 'services/env'
 
@@ -95,10 +94,14 @@ export const doesMatchRoute = (
   route: string,
   exact = true
 ) => {
-  return matchPath(getPathname(location), {
-    path: route,
-    exact
-  })
+  // In React Router v6, matchPath takes (pattern, pathname)
+  // For exact matching, we need to ensure the pattern matches the full pathname
+  const pathname = getPathname(location)
+  const match = matchPath(route, pathname)
+  if (exact) {
+    return match && match.pathname === pathname
+  }
+  return match
 }
 
 export const stripBaseUrl = (url: string) => url.replace(BASE_URL, '')
@@ -147,11 +150,15 @@ export const pushWindowRoute = (route: string) => {
 
 /**
  * Only calls push route if unique (not current route)
+ * Note: This function is deprecated. Use useNavigate hook instead.
+ * @deprecated Use useNavigate from react-router-dom
  */
 export const pushUniqueRoute = (location: Location, route: string) => {
   const pathname = getPathname(location)
   if (route !== pathname) {
-    return push(route)
+    // This function is deprecated - use useNavigate hook instead
+    // Returning empty action for backwards compatibility
+    return { type: '' }
   }
   return { type: '' }
 }
@@ -172,7 +179,7 @@ export const matchesRoute = ({
 /**
  * Hook to check if the current route matches a target route
  */
-export const useRouteMatch = (targetRoute: string) => {
+export const useMatch = (targetRoute: string) => {
   const location = useLocation()
   return matchesRoute({ current: location.pathname, target: targetRoute })
 }

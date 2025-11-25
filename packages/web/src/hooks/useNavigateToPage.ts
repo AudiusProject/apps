@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
-import { useDispatch } from 'react-redux'
-import { push } from 'redux-first-history'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Wraps page navigation.
@@ -13,11 +12,11 @@ import { push } from 'redux-first-history'
  * ```
  */
 export const useNavigateToPage = () => {
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
   return useCallback(
     (route: string, state?: any) => {
-      dispatch(push(route, state))
+      navigate(route, { state })
     },
-    [dispatch]
+    [navigate]
   )
 }

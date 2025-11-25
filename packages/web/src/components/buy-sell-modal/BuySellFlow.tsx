@@ -119,12 +119,9 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
 
   const location = useLocation()
   const pathname = getPathname(location)
-  const match = matchPath<{ ticker: string }>(pathname, {
-    path: COIN_DETAIL_PAGE,
-    exact: true
-  })
+  const match = matchPath(COIN_DETAIL_PAGE, pathname)
   const { data: selectedPair } = useCoinPair({
-    baseSymbol: initialTicker ?? match?.params.ticker ?? '',
+    baseSymbol: initialTicker ?? match?.params?.ticker ?? '',
     quoteSymbol: 'USDC'
   })
 

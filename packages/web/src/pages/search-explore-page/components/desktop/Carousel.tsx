@@ -9,7 +9,7 @@ import {
   PlainButton,
   useMedia
 } from '@audius/harmony'
-import { Link } from 'react-router-dom-v5-compat'
+import { Link } from 'react-router-dom'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 

@@ -9,11 +9,10 @@ import {
   Text
 } from '@audius/harmony'
 import cn from 'classnames'
-import { Location } from 'history'
-import { Prompt } from 'react-router-dom'
+import type { Location } from 'history'
+import { useBlocker } from 'react-router-dom'
 
 import layoutStyles from 'components/layout/layout.module.css'
-import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import styles from './NavigationPrompt.module.css'
 
@@ -34,42 +33,35 @@ interface Props {
 export const NavigationPrompt = (props: Props) => {
   const { when, shouldBlockNavigation, messages } = props
   const [modalVisible, setModalVisible] = useState(false)
-  const [lastLocation, setLastLocation] = useState<Location | null>(null)
-  const [confirmedNavigation, setConfirmedNavigation] = useState(false)
-  const navigate = useNavigateToPage()
+
+  // useBlocker replaces Prompt in React Router v6
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      when === true &&
+      (!shouldBlockNavigation ||
+        shouldBlockNavigation(nextLocation as Location))
+  )
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setModalVisible(true)
+    }
+  }, [blocker.state])
 
   const closeModal = () => {
     setModalVisible(false)
-  }
-
-  // Returning false blocks navigation; true allows it
-  const handleBlockedNavigation = (nextLocation: Location): boolean => {
-    if (
-      !confirmedNavigation &&
-      (!shouldBlockNavigation || shouldBlockNavigation(nextLocation))
-    ) {
-      setModalVisible(true)
-      setLastLocation(nextLocation)
-      return false
-    }
-    return true
+    // Reset the blocker to allow navigation to be cancelled
+    blocker?.reset?.()
   }
 
   const handleConfirmNavigationClick = () => {
     setModalVisible(false)
-    setConfirmedNavigation(true)
+    // Reset the blocker to allow the blocked navigation to proceed
+    blocker?.reset?.()
   }
-
-  useEffect(() => {
-    if (confirmedNavigation && lastLocation) {
-      // Navigate to the previous blocked location with your navigate function
-      navigate(lastLocation.pathname)
-    }
-  }, [confirmedNavigation, lastLocation, navigate])
 
   return (
     <>
-      <Prompt when={when} message={handleBlockedNavigation} />
       <Modal isOpen={modalVisible} onClose={closeModal} size='small'>
         <ModalHeader>
           <ModalTitle title={messages.title} />

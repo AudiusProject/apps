@@ -1,4 +1,4 @@
-import { ChangeEvent, Component, ComponentType } from 'react'
+import { ChangeEvent, Component, ComponentProps, ComponentType } from 'react'
 
 import {
   useCollectionByParams,
@@ -62,9 +62,10 @@ import {
 import { formatUrlName, Uid, Nullable, route } from '@audius/common/utils'
 import { UnregisterCallback } from 'history'
 import { connect } from 'react-redux'
-import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
+import { useHistoryContext } from 'app/HistoryProvider'
 import { TrackEvent, make } from 'common/store/analytics/actions'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import {
@@ -123,8 +124,9 @@ type OwnProps = {
 
 type CollectionPageProps = OwnProps &
   ReturnType<ReturnType<typeof makeMapStateToProps>> &
-  ReturnType<typeof mapDispatchToProps> &
-  RouteComponentProps & {
+  ReturnType<typeof mapDispatchToProps> & {
+    location: ReturnType<typeof useLocation>
+    history: ReturnType<typeof useHistoryContext>['history']
     userId?: number | null | undefined
     userPlaylists?: AccountCollection[] | undefined
     user?: User | undefined
@@ -1033,6 +1035,23 @@ function mapDispatchToProps(dispatch: Dispatch) {
   }
 }
 
-export default withRouter(
-  connect(makeMapStateToProps, mapDispatchToProps)(CollectionPage)
-)
+const ConnectedCollectionPage = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(CollectionPage)
+
+const CollectionPageProviderWrapper = (
+  props: Omit<
+    ComponentProps<typeof ConnectedCollectionPage>,
+    'location' | 'history'
+  >
+) => {
+  const location = useLocation()
+  const { history } = useHistoryContext()
+
+  return (
+    <ConnectedCollectionPage {...props} location={location} history={history} />
+  )
+}
+
+export default CollectionPageProviderWrapper

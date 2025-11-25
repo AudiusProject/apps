@@ -15,24 +15,27 @@ export type TrackRouteParams =
  * If the route is a hash id route, track title and handle are not returned, and vice versa
  * @param route
  */
-export const parseTrackRoute = (route: string): TrackRouteParams => {
-  const trackIdPageMatch = matchPath<{ id: string }>(route, {
-    path: TRACK_ID_PAGE,
-    exact: true
-  })
-  if (trackIdPageMatch) {
+export const parseTrackRoute = (
+  route: string | undefined | null
+): TrackRouteParams => {
+  if (!route || typeof route !== 'string') return null
+
+  const trackIdPageMatch = matchPath(TRACK_ID_PAGE, route)
+  if (trackIdPageMatch?.params?.id) {
     const trackId = OptionalHashId.parse(trackIdPageMatch.params.id)
     if (!trackId) return null
     return { slug: null, trackId, handle: null }
   }
 
-  const trackPageMatch = matchPath<{ slug: string; handle: string }>(route, {
-    path: TRACK_PAGE,
-    exact: true
-  })
-  if (trackPageMatch) {
-    const { handle, slug } = trackPageMatch.params
-    return { slug, trackId: null, handle }
+  const trackPageMatch = matchPath(TRACK_PAGE, route)
+  if (trackPageMatch?.params) {
+    const { handle, slug } = trackPageMatch.params as {
+      handle?: string
+      slug?: string
+    }
+    if (handle && slug) {
+      return { slug, trackId: null, handle }
+    }
   }
 
   return null

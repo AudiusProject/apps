@@ -7,7 +7,7 @@ import {
   useContext
 } from 'react'
 
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { useInstanceVar } from 'hooks/useInstanceVar'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -44,7 +44,7 @@ export const HeaderContextProvider = memo(
 )
 
 export const HeaderContextConsumer = () => {
-  const { location } = useHistory()
+  const location = useLocation()
   const { pathname } = location
   const [getPreviousPathname, setPreviousPathname] = useInstanceVar(pathname)
   const { header, setHeader } = useContext(HeaderContext)

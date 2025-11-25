@@ -2,8 +2,8 @@ import { ReactNode } from 'react'
 
 import { Flex, IconComponent, Text } from '@audius/harmony'
 import cn from 'classnames'
+import { useNavigate } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { BackButton } from 'components/back-button/BackButton'
 import { HeaderGutter } from 'components/header/desktop/HeaderGutter'
 
@@ -26,6 +26,7 @@ export type HeaderProps = {
 }
 
 export const Header = (props: HeaderProps) => {
+  const navigate = useNavigate()
   const {
     primary,
     secondary = null,
@@ -41,8 +42,6 @@ export const Header = (props: HeaderProps) => {
     headerContainerRef,
     icon: Icon
   } = props
-
-  const { history } = useHistoryContext()
 
   return (
     <>
@@ -73,7 +72,7 @@ export const Header = (props: HeaderProps) => {
             gap='m'
           >
             {showBackButton ? (
-              <BackButton onClick={onClickBack ?? history.goBack} />
+              <BackButton onClick={onClickBack ?? (() => navigate(-1))} />
             ) : null}
             <Flex alignItems='center' gap='m'>
               {Icon ? <Icon size='2xl' color='heading' /> : null}

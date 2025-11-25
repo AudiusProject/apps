@@ -20,7 +20,7 @@ import { Nullable } from '@audius/common/utils'
 import { IconCamera } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { connect, useDispatch } from 'react-redux'
-import { useHistory, useParams, useRouteMatch } from 'react-router-dom'
+import { useParams, useMatch, useNavigate } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
@@ -74,12 +74,12 @@ const g = withNullGuard((props: EditCollectionPageProps) => {
 const EditCollectionPage = g(
   ({ removeTrack, editPlaylist, orderPlaylist, refreshLineup }) => {
     const { handle, slug } = useParams<EditCollectionPageParams>()
-    const isAlbum = Boolean(useRouteMatch('/:handle/album/:slug/edit'))
-    const permalink = `/${handle}/${isAlbum ? 'album' : 'playlist'}/${slug}`
+    const isAlbum = Boolean(useMatch('/:handle/album/:slug/edit'))
+    const permalink = `/${handle ?? ''}/${isAlbum ? 'album' : 'playlist'}/${slug ?? ''}`
     const dispatch = useDispatch()
-    const history = useHistory()
+    const navigate = useNavigate()
     useRequiresAccount()
-    useIsUnauthorizedForHandleRedirect(handle)
+    useIsUnauthorizedForHandleRedirect(handle ?? '')
 
     const { data: collection } = useCollectionByPermalink(permalink)
     const { data: tracks } = useTracks(collection?.trackIds ?? [])
@@ -329,7 +329,7 @@ const EditCollectionPage = g(
           <TextElement
             text='Cancel'
             type={Type.SECONDARY}
-            onClick={history.goBack}
+            onClick={() => navigate(-1)}
           />
         ),
         center: messages.editPlaylist,
@@ -342,7 +342,7 @@ const EditCollectionPage = g(
           />
         )
       }),
-      [formFields.playlist_name, messages.editPlaylist, history, onSave]
+      [formFields.playlist_name, messages.editPlaylist, navigate, onSave]
     )
 
     useTemporaryNavContext(setters)

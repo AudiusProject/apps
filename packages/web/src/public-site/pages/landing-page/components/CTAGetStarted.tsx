@@ -3,11 +3,11 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { coinPage } from '@audius/common/src/utils/route'
 import { IconCaretRight } from '@audius/harmony'
 import cn from 'classnames'
+import { useNavigate } from 'react-router-dom'
 import { Parallax } from 'react-scroll-parallax'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useChain, useTrail, animated } from 'react-spring'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import ctaSectionTakeover from 'assets/img/publicSite/CTASectionTakeover.webp'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { useMatchesBreakpoint } from 'utils/useMatchesBreakpoint'
@@ -29,7 +29,7 @@ type CTAGetStartedProps = {
 }
 
 const CTAGetStarted = (props: CTAGetStartedProps) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   const isNarrow = useMatchesBreakpoint({
     initialValue: props.isMobile,
     mediaQuery: MOBILE_WIDTH_MEDIA_QUERY
@@ -91,7 +91,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
             onClick={handleClickRoute(
               coinPage('YAK'),
               props.setRenderPublicSite,
-              history
+              navigate
             )}
             className={styles.ctaButton}
           >
@@ -136,7 +136,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
             onClick={handleClickRoute(
               coinPage('YAK'),
               props.setRenderPublicSite,
-              history
+              navigate
             )}
             className={styles.ctaButton}
           >

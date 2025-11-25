@@ -3,22 +3,21 @@ import { useCallback, useState } from 'react'
 import { selectIsGuestAccount, useCurrentAccountUser } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
-import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import {
   openSignOn,
   showRequiresAccountToast
 } from 'common/store/pages/signon/actions'
 import BottomBar from 'components/bottom-bar/BottomBar'
-import { push } from 'utils/navigation'
 import { getPathname } from 'utils/route'
 import { isDarkMode, isMatrix } from 'utils/theme/theme'
 const { FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, profilePage, LIBRARY_PAGE } =
   route
 
-type ConnectedBottomBarProps = RouteComponentProps<any>
-
-const ConnectedBottomBar = ({ history }: ConnectedBottomBarProps) => {
+const ConnectedBottomBar = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
@@ -37,7 +36,7 @@ const ConnectedBottomBar = ({ history }: ConnectedBottomBarProps) => {
   ])
 
   const [lastNavRoute, setNavRoute] = useState(FEED_PAGE)
-  const currentRoute = getPathname(history.location)
+  const currentRoute = getPathname(location)
 
   if (lastNavRoute !== currentRoute) {
     // If the current route isn't what we memoized, check if it's a nav route
@@ -49,9 +48,9 @@ const ConnectedBottomBar = ({ history }: ConnectedBottomBarProps) => {
 
   const goToRoute = useCallback(
     (route: string) => {
-      dispatch(push(route))
+      navigate(route)
     },
-    [dispatch]
+    [navigate]
   )
 
   const handleOpenSignOn = useCallback(() => {
@@ -106,4 +105,4 @@ const ConnectedBottomBar = ({ history }: ConnectedBottomBarProps) => {
   )
 }
 
-export default withRouter(ConnectedBottomBar)
+export default ConnectedBottomBar

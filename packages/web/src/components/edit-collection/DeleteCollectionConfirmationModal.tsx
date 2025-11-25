@@ -3,12 +3,12 @@ import { useCallback } from 'react'
 import { useCurrentAccount, useDeleteCollection } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useHistory } from 'react-router-dom'
-import { useLastLocation } from 'react-router-last-location'
+import { useNavigate } from 'react-router-dom'
 import { SetRequired } from 'type-fest'
 
 import { DeleteConfirmationModal } from 'components/delete-confirmation'
 import { DeleteConfirmationModalProps } from 'components/delete-confirmation/DeleteConfirmationModal'
+import { useLastLocation } from 'hooks/useLastLocation'
 
 const { FEED_PAGE } = route
 
@@ -35,7 +35,7 @@ type DeleteCollectionConfirmationModalProps = SetRequired<
 export const DeleteCollectionConfirmationModal = (
   props: DeleteCollectionConfirmationModalProps
 ) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const lastLocation = useLastLocation()
   const { collectionId, visible, onCancel, onDelete } = props
   const { data: accountCollection } = useCurrentAccount({
@@ -54,7 +54,7 @@ export const DeleteCollectionConfirmationModal = (
       onDelete?.()
 
       if (lastLocation?.pathname === permalink) {
-        history.replace(FEED_PAGE)
+        navigate(FEED_PAGE, { replace: true })
       }
     } catch (error) {
       console.error('Failed to delete collection:', error)
@@ -66,7 +66,7 @@ export const DeleteCollectionConfirmationModal = (
     onDelete,
     lastLocation?.pathname,
     permalink,
-    history
+    navigate
   ])
 
   const entity = is_album ? messages.type.album : messages.type.playlist

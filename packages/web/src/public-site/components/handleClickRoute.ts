@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react'
 
 import { route } from '@audius/common/utils'
-import { History } from 'history'
+import { NavigateFunction } from 'react-router-dom'
 
 import { pushWindowRoute } from 'utils/route'
 
@@ -37,7 +37,7 @@ export const handleClickRoute =
   (
     route: string,
     setRenderPublicSite: (shouldRender: boolean) => void,
-    history: History
+    navigate: NavigateFunction
   ) =>
   (e?: MouseEvent) => {
     e?.preventDefault()
@@ -48,6 +48,6 @@ export const handleClickRoute =
       pushWindowRoute(route)
     } else {
       setRenderPublicSite(false)
-      history.push(route)
+      navigate(route)
     }
   }

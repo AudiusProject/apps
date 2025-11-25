@@ -12,7 +12,7 @@ import {
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { Draggable } from 'components/dragndrop'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
@@ -36,7 +36,7 @@ const AnimatedPaper = animated(Paper)
 
 export const NowPlayingArtworkTile = () => {
   const dispatch = useDispatch()
-  const { location } = useHistory()
+  const location = useLocation()
   const { pathname } = location
   const { color, spacing, motion } = useTheme()
 

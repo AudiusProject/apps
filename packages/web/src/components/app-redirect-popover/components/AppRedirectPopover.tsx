@@ -2,12 +2,11 @@ import { Fragment, useState, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { Button } from '@audius/harmony'
-import { matchPath } from 'react-router-dom'
+import { matchPath, useLocation } from 'react-router-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, useTransition } from 'react-spring'
 import { useSessionStorage } from 'react-use'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import AppIcon from 'assets/img/appIcon240.png'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { getPathname } from 'utils/route'
@@ -96,7 +95,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
     onBeforeClickApp = () => {},
     onBeforeClickDismissed = () => {}
   } = props
-  const { history } = useHistoryContext()
+  const location = useLocation()
   const isMobile = useIsMobile()
   const [isDismissed, setIsDismissed] = useSessionStorage(
     'app-redirect-popover',
@@ -109,7 +108,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
   }, [])
 
   const shouldShow =
-    !matchPath(history.location.pathname, { path: '/', exact: true }) &&
+    !(matchPath('/', location.pathname)?.pathname === location.pathname) &&
     animDelay &&
     !isDismissed &&
     isMobile
@@ -132,14 +131,15 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
 
   const onClick = () => {
     onBeforeClickApp()
-    const pathname = getPathname(history.location)
+    const pathname = getPathname(location)
     const newHref = `https://redirect.audius.co${APP_REDIRECT}${pathname}`
 
     // If we're on the signup page, copy the URL to clipboard on app redirect
     // The app can then read the URL on load, persisting through install, to associate referrals
     if (
       window.isSecureContext &&
-      matchPath(window.location.pathname, { path: SIGN_UP_PAGE, exact: true })
+      matchPath(SIGN_UP_PAGE, window.location.pathname)?.pathname ===
+        window.location.pathname
     ) {
       navigator.clipboard.writeText(window.location.href)
     }

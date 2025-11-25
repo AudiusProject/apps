@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom-v5-compat'
+import { Route, Routes } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testTrack } from 'test/mocks/fixtures/tracks'

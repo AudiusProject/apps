@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { MobileOS } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { getMobileOS } from 'utils/clientUtil'
@@ -29,8 +29,8 @@ const EMBED_HASH = '#embed'
  *   page. These correspond to links from the AppRedirectPopover.
  */
 const AppRedirectListener = ({ goToRoute }: AppRedirectListenerProps) => {
-  const history = useHistory()
-  const { pathname } = history.location
+  const location = useLocation()
+  const { pathname } = location
 
   useEffect(() => {
     // If we're not in the redirect route, abort.

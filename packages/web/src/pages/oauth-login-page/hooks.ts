@@ -10,7 +10,7 @@ import {
 import { Id } from '@audius/sdk'
 import * as queryString from 'query-string'
 import { useDispatch } from 'react-redux'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { audiusSdk } from 'services/audius-sdk'
@@ -170,7 +170,6 @@ export const useOAuthSetup = ({
   onReceiveTransactionApproval: () => void
 }) => {
   const record = useRecord()
-  const history = useHistory()
   const dispatch = useDispatch()
 
   const {
@@ -283,7 +282,7 @@ export const useOAuthSetup = ({
     } else {
       setUserEmail(null)
     }
-  }, [history, isLoggedIn, dispatch])
+  }, [isLoggedIn, dispatch])
 
   useEffect(() => {
     const verifyValidWalletIfApplicable = async () => {
@@ -420,7 +419,6 @@ export const useOAuthSetup = ({
     accountUserId,
     apiKey,
     formResponseAndRedirect,
-    history,
     isLoggedIn,
     queryParamsError,
     scope,

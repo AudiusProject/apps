@@ -22,8 +22,12 @@ import Input from 'antd/lib/input'
 import type { InputRef } from 'antd/lib/input'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
-import { useHistory, useLocation, matchPath } from 'react-router-dom'
-import { useNavigate, useSearchParams } from 'react-router-dom-v5-compat'
+import {
+  useLocation,
+  matchPath,
+  useNavigate,
+  useSearchParams
+} from 'react-router-dom'
 import { useDebounce, usePrevious } from 'react-use'
 
 import { searchResultsPage } from 'utils/route'
@@ -108,9 +112,9 @@ export const DesktopSearchBar = () => {
   )
 
   const inputRef = useRef<InputRef>(null)
-  const history = useHistory()
+  const navigate = useNavigate()
 
-  const isSearchPage = !!matchPath(location.pathname, { path: SEARCH_PAGE })
+  const isSearchPage = !!matchPath(SEARCH_PAGE, location.pathname)
 
   const { data, isLoading } = useSearchAutocomplete(
     { query: debouncedValue, limit: DEFAULT_LIMIT },
@@ -151,13 +155,13 @@ export const DesktopSearchBar = () => {
           newParams.set('query', debouncedValue)
           setSearchParams(newParams)
         } else {
-          history.push(searchResultsPage('all', inputValue))
+          navigate(searchResultsPage('all', inputValue))
         }
       }
     },
     [
       debouncedValue,
-      history,
+      navigate,
       inputValue,
       isSearchPage,
       searchParams,

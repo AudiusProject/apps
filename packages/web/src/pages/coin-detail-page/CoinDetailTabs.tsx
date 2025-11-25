@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { EDIT_COIN_DETAILS_PAGE } from '@audius/common/src/utils/route'
 import { Button } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import useTabs from 'hooks/useTabs/useTabs'
 import { AudioWalletTransactions } from 'pages/audio-page/AudioWalletTransactions'

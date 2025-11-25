@@ -29,7 +29,7 @@ import {
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'

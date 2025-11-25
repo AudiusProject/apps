@@ -1,8 +1,8 @@
 import { route } from '@audius/common/utils'
 import { IconCaretRight } from '@audius/harmony'
+import { useNavigate } from 'react-router-dom'
 import { Parallax } from 'react-scroll-parallax'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import footerBackgroundMobile from 'assets/img/publicSite/Footer-Background-mobile@2x.jpg'
 import footerBackground from 'assets/img/publicSite/Footer-Background@2x.jpg'
 import footerForeground from 'assets/img/publicSite/Footer-Foreground@2x.png'
@@ -24,7 +24,7 @@ type CTAStartListeningProps = {
 }
 
 const CTAStartListening = (props: CTAStartListeningProps) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   if (props.isMobile) {
     return (
       <div className={styles.mobileContainer}>
@@ -48,7 +48,7 @@ const CTAStartListening = (props: CTAStartListeningProps) => {
           onClick={handleClickRoute(
             TRENDING_PAGE,
             props.setRenderPublicSite,
-            history
+            navigate
           )}
           className={styles.ctaButton}
         >
@@ -67,7 +67,7 @@ const CTAStartListening = (props: CTAStartListeningProps) => {
           onClick={handleClickRoute(
             TRENDING_PAGE,
             props.setRenderPublicSite,
-            history
+            navigate
           )}
           className={styles.ctaButton}
         >

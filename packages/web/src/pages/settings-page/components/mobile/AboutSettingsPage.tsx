@@ -91,7 +91,7 @@ const AboutSettingsPage = () => {
             <Row
               prefix={<IconCareers className={styles.icon} />}
               title={messages.careers}
-              href={AUDIUS_CAREERS_LINK}
+              to={AUDIUS_CAREERS_LINK}
             />
           </Grouping>
           <Grouping>

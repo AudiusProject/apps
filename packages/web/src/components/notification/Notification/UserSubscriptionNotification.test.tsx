@@ -1,6 +1,6 @@
 import { Notification as NotificationObjectType } from '@audius/common/store'
 import { Text } from '@audius/harmony'
-import { Routes, Route } from 'react-router-dom-v5-compat'
+import { Routes, Route } from 'react-router-dom'
 import { describe, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 
 import { mockNotification } from 'test/mocks/fixtures/notifications'

@@ -1,7 +1,9 @@
+import { ReactNode } from 'react'
+
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
 import { useSelector } from 'react-redux'
-import { Redirect, Route, RouteProps, Switch } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import { getRouteOnCompletion } from 'common/store/pages/signon/selectors'
 import { useDetermineAllowedRoute } from 'pages/sign-up-page/utils/useDetermineAllowedRoutes'
@@ -42,26 +44,27 @@ const messages = {
 /**
  * <Route> wrapper that handles redirecting through the sign up page flow
  */
-function SignUpRoute({ children, ...rest }: RouteProps) {
+function SignUpRoute({
+  children,
+  path
+}: {
+  children?: ReactNode
+  path: string
+}) {
+  const location = useLocation()
   const determineAllowedRoute = useDetermineAllowedRoute()
 
-  return (
-    <Route
-      {...rest}
-      render={({ location }) => {
-        // Check if the route is allowed, if not we redirect accordingly
-        const { isAllowedRoute, correctedRoute } = determineAllowedRoute(
-          location.pathname
-        )
-
-        return isAllowedRoute ? (
-          <>{children}</>
-        ) : (
-          <Redirect to={correctedRoute} />
-        )
-      }}
-    />
+  // Check if the route is allowed, if not we redirect accordingly
+  // useDetermineAllowedRoute expects the full pathname, not a trimmed one
+  const { isAllowedRoute, correctedRoute } = determineAllowedRoute(
+    location.pathname
   )
+
+  if (!isAllowedRoute) {
+    return <Navigate to={correctedRoute} replace />
+  }
+
+  return <>{children}</>
 }
 
 export const SignUpPage = () => {
@@ -73,43 +76,112 @@ export const SignUpPage = () => {
         <title>{messages.metaTitle}</title>
         <meta name='description' content={messages.metaDescription} />
       </Helmet>
-      <Switch>
-        <SignUpRoute exact path={SIGN_UP_PAGE} />
-        <SignUpRoute exact path={SIGN_UP_EMAIL_PAGE}>
-          <CreateEmailPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_PASSWORD_PAGE}>
-          <CreatePasswordPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_HANDLE_PAGE}>
-          <PickHandlePage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_REVIEW_HANDLE_PAGE}>
-          <ReviewHandlePage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_FINISH_PROFILE_PAGE}>
-          <FinishProfilePage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_GENRES_PAGE}>
-          <SelectGenresPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_ARTISTS_PAGE}>
-          <SelectArtistsPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_APP_CTA_PAGE}>
-          <MobileAppCtaPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_LOADING_PAGE}>
-          <LoadingAccountPage />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_COMPLETED_REDIRECT}>
-          <Redirect to={completionRoute || FEED_PAGE} />
-        </SignUpRoute>
-        <SignUpRoute exact path={SIGN_UP_REFERRER_COMPLETED_REDIRECT}>
-          <Redirect to={TRENDING_PAGE} />
-        </SignUpRoute>
-        <SignUpRoute path='*' />
-      </Switch>
+      <Routes>
+        <Route
+          path='/'
+          element={
+            <SignUpRoute path={SIGN_UP_PAGE}>
+              <Navigate to={SIGN_UP_EMAIL_PAGE} replace />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='create-email'
+          element={
+            // <SignUpRoute path={SIGN_UP_EMAIL_PAGE}>
+            <CreateEmailPage />
+            // </SignUpRoute>
+          }
+        />
+        <Route
+          path='create-password'
+          element={
+            <SignUpRoute path={SIGN_UP_PASSWORD_PAGE}>
+              <CreatePasswordPage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='pick-handle'
+          element={
+            <SignUpRoute path={SIGN_UP_HANDLE_PAGE}>
+              <PickHandlePage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='review-handle'
+          element={
+            <SignUpRoute path={SIGN_UP_REVIEW_HANDLE_PAGE}>
+              <ReviewHandlePage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='finish-profile'
+          element={
+            <SignUpRoute path={SIGN_UP_FINISH_PROFILE_PAGE}>
+              <FinishProfilePage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='select-genres'
+          element={
+            <SignUpRoute path={SIGN_UP_GENRES_PAGE}>
+              <SelectGenresPage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='select-artists'
+          element={
+            <SignUpRoute path={SIGN_UP_ARTISTS_PAGE}>
+              <SelectArtistsPage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='app-cta'
+          element={
+            <SignUpRoute path={SIGN_UP_APP_CTA_PAGE}>
+              <MobileAppCtaPage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='loading'
+          element={
+            <SignUpRoute path={SIGN_UP_LOADING_PAGE}>
+              <LoadingAccountPage />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='completed'
+          element={
+            <SignUpRoute path={SIGN_UP_COMPLETED_REDIRECT}>
+              <Navigate to={completionRoute || FEED_PAGE} replace />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='completed-referrer'
+          element={
+            <SignUpRoute path={SIGN_UP_REFERRER_COMPLETED_REDIRECT}>
+              <Navigate to={TRENDING_PAGE} replace />
+            </SignUpRoute>
+          }
+        />
+        <Route
+          path='*'
+          element={
+            <SignUpRoute path='*'>
+              <Navigate to={SIGN_UP_EMAIL_PAGE} replace />
+            </SignUpRoute>
+          }
+        />
+      </Routes>
     </RouteContextProvider>
   )
 }

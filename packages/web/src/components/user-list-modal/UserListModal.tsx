@@ -20,8 +20,7 @@ import {
 } from '@audius/harmony'
 import { ChatBlastAudience } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
-import { useRouteMatch } from 'react-router-dom'
-import { useLocation } from 'react-router-dom-v5-compat'
+import { useMatch, useLocation } from 'react-router-dom'
 
 import { CoinLeaderboardUserList } from 'components/user-list/lists/CoinLeaderboardUserList'
 import { FavoritesUserList } from 'components/user-list/lists/FavoritesUserList'
@@ -78,11 +77,9 @@ export const UserListModal = () => {
     }
   }, [location.pathname, isOpen, onClose])
 
-  const match = useRouteMatch<{ audience_type: string }>(
-    '/messages/:audience_type'
-  )
+  const match = useMatch('/messages/:audience_type')
   const isChatBlastPath =
-    match?.params.audience_type &&
+    match?.params?.audience_type &&
     Object.values(ChatBlastAudience).includes(
       match.params.audience_type as ChatBlastAudience
     )

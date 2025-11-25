@@ -4,7 +4,7 @@ import {
   reducers as clientStoreReducers
 } from '@audius/common/store'
 import localForage from 'localforage'
-import { combineReducers, Reducer } from 'redux'
+import { combineReducers } from 'redux'
 
 import backend from 'common/store/backend/reducer'
 import signOnReducer from 'common/store/pages/signon/reducer'
@@ -24,7 +24,7 @@ import userListModal from 'store/application/ui/userListModal/slice'
 import dragndrop from 'store/dragndrop/slice'
 import error from 'store/errors/reducers'
 
-const createRootReducer = (routerReducer: Reducer) => {
+const createRootReducer = () => {
   const commonStoreReducers = clientStoreReducers(localForage)
 
   return combineReducers({
@@ -36,9 +36,6 @@ const createRootReducer = (routerReducer: Reducer) => {
     searchAiBar,
 
     // (End common store)
-
-    // Router
-    router: routerReducer,
 
     // Account
     passwordReset,

@@ -17,53 +17,45 @@ type UserRouteParams =
  * Parses a user route into handle or id
  * @param route
  */
-export const parseUserRoute = (route: string): UserRouteParams => {
-  if (staticRoutes.has(route)) return null
+export const parseUserRoute = (
+  route: string | undefined | null
+): UserRouteParams => {
+  if (!route || typeof route !== 'string' || staticRoutes.has(route))
+    return null
 
-  const userIdPageMatch = matchPath<{ id: string }>(route, {
-    path: USER_ID_PAGE,
-    exact: true
-  })
-  if (userIdPageMatch) {
+  const userIdPageMatch = matchPath(USER_ID_PAGE, route)
+  if (userIdPageMatch?.params?.id) {
     const userId = OptionalHashId.parse(userIdPageMatch.params.id)
     if (!userId) return null
     return { userId, handle: null, tab: null }
   }
 
-  const profilePageMatch = matchPath<{ handle: string }>(route, {
-    path: PROFILE_PAGE,
-    exact: true
-  })
-  if (profilePageMatch) {
+  const profilePageMatch = matchPath(PROFILE_PAGE, route)
+  if (profilePageMatch?.params?.handle) {
     const { handle } = profilePageMatch.params
     return { handle, userId: null, tab: null }
   }
 
-  const commentHistoryMatch = matchPath<{ handle: string }>(route, {
-    path: PROFILE_PAGE_COMMENTS,
-    exact: true
-  })
-  if (commentHistoryMatch) {
+  const commentHistoryMatch = matchPath(PROFILE_PAGE_COMMENTS, route)
+  if (commentHistoryMatch?.params?.handle) {
     const { handle } = commentHistoryMatch.params
     return { handle, userId: null, tab: null }
   }
 
-  const profilePageTabMatch = matchPath<{
-    handle: string
-    tab: ProfilePageTabRoute
-  }>(route, {
-    path: `${PROFILE_PAGE}/:tab`,
-    exact: true
-  })
-  if (profilePageTabMatch) {
-    const { handle, tab } = profilePageTabMatch.params
+  const profilePageTabMatch = matchPath(`${PROFILE_PAGE}/:tab`, route)
+  if (profilePageTabMatch?.params) {
+    const { handle, tab } = profilePageTabMatch.params as {
+      handle?: string
+      tab?: string
+    }
     if (
-      tab === 'tracks' ||
-      tab === 'albums' ||
-      tab === 'playlists' ||
-      tab === 'reposts'
+      handle &&
+      (tab === 'tracks' ||
+        tab === 'albums' ||
+        tab === 'playlists' ||
+        tab === 'reposts')
     ) {
-      return { handle, userId: null, tab }
+      return { handle, userId: null, tab: tab as ProfilePageTabRoute }
     }
   }
 

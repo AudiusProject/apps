@@ -4,8 +4,8 @@ import { useInstanceVar } from '@audius/common/hooks'
 import { playerSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { connect } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { MetaTags, MetaTagsProps } from 'components/meta-tags/MetaTags'
 import { ScrollContext } from 'components/scroll-provider/ScrollProvider'
 import { AppState } from 'store/types'
@@ -73,9 +73,9 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
     structuredData,
     title
   } = props
-  const { history } = useHistoryContext()
+  const location = useLocation()
   const { getScrollForRoute, setScrollForRoute } = useContext(ScrollContext)!
-  const [getInitialPathname] = useInstanceVar(getPathname(history.location))
+  const [getInitialPathname] = useInstanceVar(getPathname(location))
   const [getLastScroll, setLastScroll] = useInstanceVar(0)
 
   // On mount, restore the last scroll position
@@ -88,7 +88,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
   useEffect(() => {
     // Store Y scroll in instance var as we scroll
     const onScroll = () => {
-      const path = getPathname(history.location)
+      const path = getPathname(location)
       // We can stay mounted after switching
       // paths, so check for this case
       if (path === getInitialPathname()) {
@@ -108,7 +108,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
     getInitialPathname,
     setScrollForRoute,
     getLastScroll,
-    history
+    location
   ])
 
   const paddingBottom = `${

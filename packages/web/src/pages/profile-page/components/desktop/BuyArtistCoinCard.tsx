@@ -3,7 +3,7 @@ import { useBuySellInitialTab } from '@audius/common/hooks'
 import { useBuySellModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Button, Flex, Paper, Text } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'

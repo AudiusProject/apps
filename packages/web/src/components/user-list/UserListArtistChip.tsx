@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import ArtistChip, { ArtistChipProps } from 'components/artist/ArtistChip'
 import { MountPlacement } from 'components/types'

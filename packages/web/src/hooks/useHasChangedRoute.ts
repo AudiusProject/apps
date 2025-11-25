@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 /**
  * Custom hook that fires a callback when the route changes
@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom'
  * @param {function} onRouteChange the callback fired when the route changes
  */
 const useHasChangedRoute = (onRouteChange: () => void) => {
-  const { location } = useHistory()
+  const location = useLocation()
   const { pathname } = location
   const [getCurrentRoute, setCurrentRoute] = useInstanceVar(pathname)
   useEffect(() => {

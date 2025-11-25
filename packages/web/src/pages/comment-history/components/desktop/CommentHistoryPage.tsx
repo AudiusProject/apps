@@ -22,7 +22,7 @@ import {
 } from '@audius/harmony'
 import dayjs from 'dayjs'
 import InfiniteScroll from 'react-infinite-scroller'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { Avatar } from 'components/avatar'
 import { CommentBlockSkeletons } from 'components/comments/CommentSkeletons'

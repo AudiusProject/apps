@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { Button, IconShieldCheck } from '@audius/harmony'
+import { useLocation } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { doesMatchRoute } from 'utils/route'
 
 import SettingsCard from '../SettingsCard'
@@ -21,17 +21,14 @@ const messages = {
 
 export const AuthorizedAppsSettingsCard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { history } = useHistoryContext()
+  const location = useLocation()
 
   useEffect(() => {
-    const match = doesMatchRoute(
-      history.location,
-      AUTHORIZED_APPS_SETTINGS_PAGE
-    )
+    const match = doesMatchRoute(location, AUTHORIZED_APPS_SETTINGS_PAGE)
     if (match) {
       setIsModalOpen(true)
     }
-  }, [history.location])
+  }, [location])
 
   const handleOpen = useCallback(() => {
     setIsModalOpen(true)

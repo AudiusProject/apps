@@ -11,8 +11,7 @@ import {
 import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router'
-import { useRouteMatch } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useMatch, useSearchParams } from 'react-router-dom'
 
 import { EditCollectionForm } from 'components/edit-collection/EditCollectionForm'
 import { Header } from 'components/header/desktop/Header'
@@ -39,13 +38,13 @@ const messages = {
 
 export const EditCollectionPage = () => {
   const { handle, slug } = useParams<EditCollectionPageParams>()
-  const isAlbum = Boolean(useRouteMatch('/:handle/album/:slug/edit'))
+  const isAlbum = Boolean(useMatch('/:handle/album/:slug/edit'))
   const [searchParams] = useSearchParams()
   const focus = searchParams.get('focus')
-  const permalink = `/${handle}/${isAlbum ? 'album' : 'playlist'}/${slug}`
+  const permalink = `/${handle ?? ''}/${isAlbum ? 'album' : 'playlist'}/${slug ?? ''}`
   const dispatch = useDispatch()
   useRequiresAccount()
-  useIsUnauthorizedForHandleRedirect(handle)
+  useIsUnauthorizedForHandleRedirect(handle ?? '')
 
   const { data: collection, isLoading: isCollectionLoading } =
     useCollectionByPermalink(permalink)

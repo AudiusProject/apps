@@ -5,10 +5,13 @@ import { route } from '@audius/common/utils'
 import { Genre, Mood } from '@audius/sdk'
 import { isEmpty } from 'lodash'
 import { flushSync } from 'react-dom'
-import { generatePath, useRouteMatch } from 'react-router-dom'
-import { useSearchParams as useParams } from 'react-router-dom-v5-compat'
+import {
+  generatePath,
+  useMatch,
+  useNavigate,
+  useSearchParams as useRouterSearchParams
+} from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { useIsMobile } from 'hooks/useIsMobile'
 
@@ -18,8 +21,9 @@ import { urlSearchParamsToObject } from './utils'
 const { SEARCH_BASE_ROUTE, SEARCH_PAGE } = route
 
 export const useShowSearchResults = () => {
+  const searchParamsResult = useSearchParams()
   const { query, genre, mood, isPremium, hasDownloads, isVerified, bpm, key } =
-    useSearchParams()
+    searchParamsResult
 
   return (
     query ||
@@ -35,13 +39,13 @@ export const useShowSearchResults = () => {
 
 export const useSearchCategory = () => {
   const isMobile = useIsMobile()
-  const routeMatch = useRouteMatch<{ category: string }>(SEARCH_PAGE)
-  const categoryParam = routeMatch?.params.category as CategoryView
+  const routeMatch = useMatch(SEARCH_PAGE)
+  const categoryParam = routeMatch?.params?.category as CategoryView | undefined
 
   const category = isMobile ? (categoryParam ?? 'all') : categoryParam
 
-  const { history } = useHistoryContext()
-  const searchParams = useSearchParams()
+  const [searchParams] = useRouterSearchParams()
+  const navigate = useNavigate()
   const { setStackReset } = useContext(RouterContext)
 
   const setCategory = useCallback(
@@ -63,22 +67,17 @@ export const useSearchCategory = () => {
           ? generatePath(SEARCH_BASE_ROUTE)
           : generatePath(SEARCH_PAGE, { category: newCategory })
 
-      history.push({
-        pathname,
-        search: !isEmpty(commonFilterParams)
-          ? new URLSearchParams(
-              Object.fromEntries(
-                Object.entries(commonFilterParams).map(([k, v]) => [
-                  k,
-                  String(v)
-                ])
-              )
-            ).toString()
-          : undefined,
-        state: {}
-      })
+      const search = !isEmpty(commonFilterParams)
+        ? new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(commonFilterParams).map(([k, v]) => [k, String(v)])
+            )
+          ).toString()
+        : ''
+
+      navigate(`${pathname}${search ? `?${search}` : ''}`)
     },
-    [searchParams, history, setStackReset, isMobile]
+    [searchParams, navigate, setStackReset, isMobile]
   )
 
   return [category || CategoryView.ALL, setCategory] as const
@@ -96,7 +95,7 @@ type UseSearchParamsResult = {
   sortMethod?: SearchSortMethod
 }
 export const useSearchParams = (): UseSearchParamsResult => {
-  const [urlSearchParams] = useParams()
+  const [urlSearchParams] = useRouterSearchParams()
 
   const query = urlSearchParams.get('query')
   const sortMethod = urlSearchParams.get('sortMethod') as SearchSortMethod
@@ -137,7 +136,7 @@ export const useSearchParams = (): UseSearchParamsResult => {
 }
 
 export const useUpdateSearchParams = (key: string) => {
-  const [searchParams, setUrlSearchParams] = useParams()
+  const [searchParams, setUrlSearchParams] = useRouterSearchParams()
   return (value: string) => {
     if (value) {
       setUrlSearchParams({

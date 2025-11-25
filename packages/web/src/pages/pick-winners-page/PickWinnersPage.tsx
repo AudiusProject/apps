@@ -35,9 +35,8 @@ import {
 import { ClassNames } from '@emotion/react'
 import { isEqual } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router'
+import { useParams, useNavigate } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { Droppable } from 'components/dragndrop'
 import { Header } from 'components/header/desktop/Header'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
@@ -69,7 +68,7 @@ const MAX_WINNERS = 5
 export const PickWinnersPage = () => {
   const { data: currentUserId } = useCurrentUserId()
   const dispatch = useDispatch()
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   const { color, cornerRadius, motion } = useTheme()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
   const { data: originalTrack } = useTrackByPermalink(
@@ -146,12 +145,12 @@ export const PickWinnersPage = () => {
       // Navigate back to the track remixes page for the original track
       const pathname = trackRemixesPage(originalTrack?.permalink ?? '')
       const search = new URLSearchParams({ isContestEntry: 'true' }).toString()
-      history.push({ pathname, search })
+      navigate(`${pathname}?${search}`)
     }
   }, [
     canFinalize,
     currentUserId,
-    history,
+    navigate,
     originalTrack?.permalink,
     originalTrack?.track_id,
     remixContest,
@@ -174,8 +173,8 @@ export const PickWinnersPage = () => {
   const handleBack = useCallback(() => {
     const pathname = trackRemixesPage(originalTrack?.permalink ?? '')
     const search = new URLSearchParams({ isContestEntry: 'true' }).toString()
-    history.push({ pathname, search })
-  }, [history, originalTrack?.permalink])
+    navigate(`${pathname}?${search}`)
+  }, [navigate, originalTrack?.permalink])
 
   const pageHeader = (
     <Header

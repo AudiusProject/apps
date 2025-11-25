@@ -15,7 +15,7 @@ import {
   useTheme
 } from '@audius/harmony'
 import { css } from '@emotion/css'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useSearchParams } from 'react-router-dom'
 
 import { useBpmMaskedInput } from 'hooks/useBpmMaskedInput'
 

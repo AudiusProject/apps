@@ -6,11 +6,11 @@ import {
 } from '@audius/common/adapters'
 import { route } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
+import { useNavigate } from 'react-router-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 import { useAsync } from 'react-use'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import IconLines from 'assets/img/publicSite/Lines.svg'
 import IconListenOnAudius from 'assets/img/publicSite/listen-on-audius.svg'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -103,7 +103,7 @@ type FeaturedContentProps = {
 }
 
 const FeaturedContent = (props: FeaturedContentProps) => {
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   const { value: featuredPlaylists, loading } = useAsync(async () => {
     const response = await fetch(env.EXPLORE_CONTENT_URL)
     const json = await response.json()
@@ -163,7 +163,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
                     p.is_album
                   ),
                   props.setRenderPublicSite,
-                  history
+                  navigate
                 )}
               />
             ))
@@ -207,7 +207,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
                     p.is_album
                   ),
                   props.setRenderPublicSite,
-                  history
+                  navigate
                 )}
               />
             ))

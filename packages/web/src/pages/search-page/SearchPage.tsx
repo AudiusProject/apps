@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 
 import { SearchCategory } from '@audius/common/api'
 import { Flex, useTheme } from '@audius/harmony'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useSearchParams } from 'react-router-dom'
 
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {

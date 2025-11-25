@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { settingsMessages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Button, IconUserList } from '@audius/harmony'
-import { useMatch } from 'react-router-dom-v5-compat'
+import { useMatch } from 'react-router-dom'
 
 import { useModalState } from 'common/hooks/useModalState'
 

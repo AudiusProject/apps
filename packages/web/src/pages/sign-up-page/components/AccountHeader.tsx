@@ -14,7 +14,7 @@ import {
   useTheme
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { make } from 'common/store/analytics/actions'
 import {
@@ -109,7 +109,7 @@ export const AccountHeader = (props: AccountHeaderProps) => {
 
   const isEditing = mode === 'editing'
   const { spacing } = useTheme()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const displayName = formDisplayName || displayNameField || accountDisplayName
   const handle = handleField || accountHandle
@@ -134,9 +134,7 @@ export const AccountHeader = (props: AccountHeaderProps) => {
           <PlainButton
             iconLeft={IconArrowLeft}
             variant='inverted'
-            onClick={() => {
-              history.goBack()
-            }}
+            onClick={() => navigate(-1)}
           >
             {backButtonText}
           </PlainButton>

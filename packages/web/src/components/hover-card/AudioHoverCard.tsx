@@ -17,7 +17,7 @@ import {
   IconTokenSilver,
   useTheme
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { env } from 'services/env'
 

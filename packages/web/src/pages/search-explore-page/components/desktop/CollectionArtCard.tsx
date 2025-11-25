@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { useCollection, useUser } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { Flex } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { CollectionImage } from 'components/collection/CollectionImage'
 import { CollectionLink } from 'components/link/CollectionLink'

@@ -3,9 +3,9 @@ import { useCallback } from 'react'
 import { route } from '@audius/common/utils'
 import { IconCaretRight, IconCloudDownload } from '@audius/harmony'
 import cn from 'classnames'
+import { useNavigate } from 'react-router-dom'
 import { Parallax, useParallaxController } from 'react-scroll-parallax'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import HeroBackgroundMobile from 'assets/img/publicSite/HeroBG.webp'
 import HeroBackground from 'assets/img/publicSite/HeroBG@2x.webp'
 import HeroBackgroundXL from 'assets/img/publicSite/HeroBG@3x.webp'
@@ -38,7 +38,7 @@ const iOSDownloadLink = getIOSAppLink()
 
 const Hero = (props: HeroProps) => {
   const parallaxController = useParallaxController()
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   const { onImageLoad, isMobile } = props
   const onImgSet = useCallback(() => {
     if (!isMobile) parallaxController?.update()
@@ -67,7 +67,7 @@ const Hero = (props: HeroProps) => {
             onClick={handleClickRoute(
               TRENDING_PAGE,
               props.setRenderPublicSite,
-              history
+              navigate
             )}
             className={styles.ctaButton}
           >
@@ -78,7 +78,7 @@ const Hero = (props: HeroProps) => {
             onClick={handleClickRoute(
               APP_REDIRECT,
               props.setRenderPublicSite,
-              history
+              navigate
             )}
             className={styles.downloadButton}
           >
@@ -167,7 +167,7 @@ const Hero = (props: HeroProps) => {
               onClick={handleClickRoute(
                 TRENDING_PAGE,
                 props.setRenderPublicSite,
-                history
+                navigate
               )}
               className={styles.ctaButton}
             >
@@ -178,7 +178,7 @@ const Hero = (props: HeroProps) => {
               onClick={handleClickRoute(
                 DOWNLOAD_START_LINK,
                 props.setRenderPublicSite,
-                history
+                navigate
               )}
               className={styles.downloadButton}
             >

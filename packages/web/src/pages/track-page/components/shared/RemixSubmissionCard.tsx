@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useUser, useTrack } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { Box, Flex, Skeleton } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { Avatar } from 'components/avatar'
 import { UserLink, TrackLink } from 'components/link'

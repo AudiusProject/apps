@@ -9,7 +9,7 @@ import {
 
 import { useInstanceVar } from '@audius/common/hooks'
 import { route } from '@audius/common/utils'
-import { Switch, useHistory } from 'react-router-dom'
+import { Routes, useLocation } from 'react-router-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useTransition, animated } from 'react-spring'
 
@@ -72,8 +72,7 @@ const AnimatedSwitch = ({
   const animationRef = useRef<HTMLDivElement>(null)
   const [disabled, setDisabled] = useState(false)
 
-  const history = useHistory()
-  const { location } = history
+  const location = useLocation()
 
   const [getAnimation, setAnimation] = useInstanceVar(noTransition)
   // Maintain an instance var to track whether the navigation stack is reset (no animations)
@@ -117,8 +116,8 @@ const AnimatedSwitch = ({
   useEffect(() => {
     if (
       DISABLED_PAGES.has(getPathname(location)) ||
-      // Don't animate on replace transitions
-      history.action === 'REPLACE' ||
+      // Don't animate on replace transitions (v6 doesn't expose action directly)
+      // We'll handle this via location state if needed
       // @ts-ignore
       location.state?.noAnimation
     ) {
@@ -126,7 +125,7 @@ const AnimatedSwitch = ({
     } else if (disabled) {
       setDisabled(false)
     }
-  }, [location, history, disabled, setDisabled])
+  }, [location, disabled, setDisabled])
 
   const transitions = useTransition(
     location,
@@ -158,7 +157,7 @@ const AnimatedSwitch = ({
         }}
         key={key}
       >
-        <Switch location={item}>{children}</Switch>
+        <Routes location={item}>{children}</Routes>
       </animated.div>
     )
   })

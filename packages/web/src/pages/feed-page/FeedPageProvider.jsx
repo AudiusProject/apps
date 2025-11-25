@@ -12,12 +12,11 @@ import {
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { withRouter, matchPath } from 'react-router-dom'
+import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 
 import { HistoryContext } from 'app/HistoryProvider'
 import { openSignOn } from 'common/store/pages/signon/actions'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { push, replace } from 'utils/navigation'
 import { getPathname } from 'utils/route'
 const { TRENDING_PAGE } = route
 const { getSource } = queueSelectors
@@ -39,9 +38,7 @@ class FeedPageProvider extends PureComponent {
   static contextType = HistoryContext
 
   goToTrending = () => {
-    this.props.history.push({
-      pathname: TRENDING_PAGE
-    })
+    this.props.goToRoute(TRENDING_PAGE)
   }
 
   goToSignUp = () => {
@@ -49,9 +46,7 @@ class FeedPageProvider extends PureComponent {
   }
 
   matchesRoute = (route) => {
-    return matchPath(getPathname(this.context.history.location), {
-      path: route
-    })
+    return matchPath(route, getPathname(this.props.location))
   }
 
   componentWillUnmount() {
@@ -132,8 +127,6 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch,
   openSignOn: (signIn) => dispatch(openSignOn(signIn)),
   resetFeedLineup: () => dispatch(feedActions.reset()),
-  goToRoute: (route) => dispatch(push(route)),
-  replaceRoute: (route) => dispatch(replace(route)),
   setFeedFilter: (filter) => dispatch(discoverPageAction.setFeedFilter(filter)),
 
   // Feed Lineup Actions
@@ -151,16 +144,22 @@ const FeedPageProviderWrapper = (props) => {
   const isMobile = useIsMobile()
   const currentTrack = useCurrentTrack()
   const hasAccount = useHasAccount()
+  const location = useLocation()
+  const navigate = useNavigate()
   return (
     <FeedPageProvider
       isMobile={isMobile}
       currentTrack={currentTrack}
       hasAccount={hasAccount}
+      location={location}
+      goToRoute={(route) => navigate(route)}
+      replaceRoute={(route) => navigate(route, { replace: true })}
       {...props}
     />
   )
 }
 
-export default withRouter(
-  connect(makeMapStateToProps, mapDispatchToProps)(FeedPageProviderWrapper)
-)
+export default connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(FeedPageProviderWrapper)

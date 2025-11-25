@@ -28,8 +28,7 @@ import {
   TextInputSize
 } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
-import { useLocation } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useDebounce } from 'react-use'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'

@@ -38,7 +38,6 @@ import { route } from '@audius/common/utils'
 import { full } from '@audius/sdk'
 import { debounce } from 'lodash'
 import { connect } from 'react-redux'
-import { RouteComponentProps, withRouter } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { TrackEvent, make } from 'common/store/analytics/actions'
@@ -87,8 +86,7 @@ type OwnProps = {
 
 type LibraryPageProps = OwnProps &
   ReturnType<ReturnType<typeof makeMapStateToProps>> &
-  ReturnType<typeof mapDispatchToProps> &
-  RouteComponentProps & {
+  ReturnType<typeof mapDispatchToProps> & {
     account?:
       | (AccountState & {
           playlists: AccountCollection[]
@@ -606,6 +604,7 @@ const withHook = (Component: typeof LibraryPage) => {
   }
 }
 
-export default withRouter(
-  connect(makeMapStateToProps, mapDispatchToProps)(withHook(LibraryPage))
-)
+export default connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(withHook(LibraryPage))

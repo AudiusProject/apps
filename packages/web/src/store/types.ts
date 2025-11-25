@@ -27,7 +27,6 @@ import DeletedPageReducer from 'pages/deleted-page/store/slice'
 import VisualizerReducer from 'pages/visualizer/store/slice'
 import AppCTAModalReducer from 'store/application/ui/app-cta-modal/slice'
 import { ErrorState } from 'store/errors/reducers'
-import type { RouterState } from 'utils/navigation'
 
 import { BackendState } from '../common/store/backend/types'
 
@@ -90,9 +89,6 @@ export type AppState = CommonState & {
 
   // Playback
   queue: ReturnType<typeof QueueReducer>
-
-  // Misc
-  router: RouterState
 
   // Remote Config + Flags
   remoteConfig: ReturnType<typeof RemoteConfigReducer>

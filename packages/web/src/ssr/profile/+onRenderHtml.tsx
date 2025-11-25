@@ -26,7 +26,7 @@ type TrackPageContext = PageContextServer & {
 }
 
 export default function render(pageContext: TrackPageContext) {
-  const { pageProps, userAgent } = pageContext
+  const { pageProps, userAgent, urlPathname } = pageContext
   const { user } = pageProps
   const { user_id, name, bio } = user
   // Use lower case since cache lookup by handle will lowercase it
@@ -43,6 +43,7 @@ export default function render(pageContext: TrackPageContext) {
   const pageHtml = renderToString(
     <ServerWebPlayer
       isMobile={isMobile}
+      location={urlPathname}
       initialState={{
         // todo: prefill this in the query client
         // users: {

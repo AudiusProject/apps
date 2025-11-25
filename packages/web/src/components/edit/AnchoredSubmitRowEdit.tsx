@@ -1,17 +1,14 @@
 import { useContext } from 'react'
 
-import { route } from '@audius/common/utils'
 import { Button, Flex, IconError, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
+import { useNavigate } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { Frosted } from 'components/frosted/Frosted'
-import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import { EditFormScrollContext } from '../../pages/edit-page/EditTrackPage'
 
 import styles from './AnchoredSubmitRowEdit.module.css'
-const { FEED_PAGE } = route
 
 const messages = {
   save: 'Save Changes',
@@ -31,8 +28,7 @@ export const AnchoredSubmitRowEdit = ({
   const scrollToTop = useContext(EditFormScrollContext)
   const { isValid } = useFormikContext()
 
-  const { history } = useHistoryContext()
-  const navigate = useNavigateToPage()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -42,9 +38,7 @@ export const AnchoredSubmitRowEdit = ({
             variant='secondary'
             size='default'
             disabled={isSubmitting}
-            onClick={() =>
-              history.length > 0 ? history.goBack() : navigate(FEED_PAGE)
-            }
+            onClick={() => navigate(-1)}
           >
             {messages.cancel}
           </Button>

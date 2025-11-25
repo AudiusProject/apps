@@ -5,7 +5,7 @@ import { useChallengeCooldownSchedule } from '@audius/common/hooks'
 import { Name, Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
@@ -22,14 +22,11 @@ import NavBar from './NavBar'
 const { NOTIFICATION_PAGE } = route
 
 type ConnectedNavBarProps = ReturnType<typeof mapStateToProps> &
-  ReturnType<typeof mapDispatchToProps> &
-  RouteComponentProps<any>
+  ReturnType<typeof mapDispatchToProps>
 
-const ConnectedNavBar = ({
-  goToRoute,
-  history,
-  goBack
-}: ConnectedNavBarProps) => {
+const ConnectedNavBar = ({ goToRoute, goBack }: ConnectedNavBarProps) => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const { data: accountStatus } = useAccountStatus()
   const hasAccount = useHasAccount()
   const { setStackReset, setSlideDirection } = useContext(RouterContext)
@@ -38,10 +35,9 @@ const ConnectedNavBar = ({
   })
 
   const search = (query: string) => {
-    history.push({
-      pathname: history.location.pathname,
-      search: query ? new URLSearchParams({ query }).toString() : undefined,
-      state: {}
+    navigate({
+      pathname: location.pathname,
+      search: query ? new URLSearchParams({ query }).toString() : undefined
     })
   }
 
@@ -69,7 +65,6 @@ const ConnectedNavBar = ({
       goToNotificationPage={goToNotificationPage}
       search={search}
       goBack={goBack}
-      history={history}
     />
   )
 }
@@ -85,6 +80,4 @@ function mapDispatchToProps(dispatch: Dispatch) {
   }
 }
 
-export default withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(ConnectedNavBar)
-)
+export default connect(mapStateToProps, mapDispatchToProps)(ConnectedNavBar)

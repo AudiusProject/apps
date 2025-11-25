@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import queryString from 'query-string'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 /** Picks the given query param out of the URL and optionally replaces the path.
  * Will only pick once per mount.
@@ -16,7 +16,7 @@ export const useQueryParamConsumer = ({
   const [value, setValue] = useState<string | null>(null)
   const [hasConsumed, setHasConsumed] = useState(false)
   const { search, pathname, state: locationState } = useLocation()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Only consume once per mount
@@ -34,14 +34,14 @@ export const useQueryParamConsumer = ({
       const newPath = `${replacementRoute ?? pathname}?${queryString.stringify(
         restParams
       )}`
-      history.replace(newPath, locationState)
+      navigate(newPath, { replace: true, state: locationState })
     }
   }, [
     hasConsumed,
     pathname,
     search,
     locationState,
-    history,
+    navigate,
     paramName,
     replacementRoute
   ])

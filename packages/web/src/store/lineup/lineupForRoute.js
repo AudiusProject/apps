@@ -40,11 +40,9 @@ const { getCurrentDiscoverTrendingLineup } = trendingPageSelectors
 
 export const getLineupSelectorForRoute = (location) => {
   const matchPage = (path) => {
-    const match = matchPath(getPathname(location), {
-      path,
-      exact: true
-    })
-    return !!match
+    const pathname = getPathname(location)
+    const match = matchPath(path, pathname)
+    return match && match.pathname === pathname
   }
 
   if (

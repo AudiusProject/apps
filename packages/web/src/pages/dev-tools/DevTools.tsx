@@ -14,7 +14,7 @@ import {
   makeResponsiveStyles
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { Header } from 'components/header/desktop/Header'
 import { Page } from 'components/page/Page'
@@ -90,7 +90,7 @@ const DevToolCard = (props: DevToolCardProps) => {
 
 export const DevTools = () => {
   const dispatch = useDispatch()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const handleOpenFeatureFlags = () => {
     dispatch(
@@ -116,7 +116,7 @@ export const DevTools = () => {
   }
 
   const handleOpenSolanaTools = () => {
-    history.push('/dev-tools/solana')
+    navigate('/dev-tools/solana')
   }
 
   const handleOpenAAOUI = () => {
@@ -128,7 +128,7 @@ export const DevTools = () => {
   }
 
   const handleOpenUserIdParser = () => {
-    history.push(USER_ID_PARSER_PAGE)
+    navigate(USER_ID_PARSER_PAGE)
   }
 
   return (

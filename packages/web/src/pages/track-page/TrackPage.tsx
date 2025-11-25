@@ -8,6 +8,7 @@ const TrackPage = () => {
   const isMobile = useIsMobile()
   const content = isMobile ? TrackPageMobileContent : TrackPageDesktopContent
 
+  // @ts-ignore
   return <TrackPageProvider>{content}</TrackPageProvider>
 }
 

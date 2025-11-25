@@ -24,9 +24,9 @@ import {
   useTheme
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 import { useEffectOnce } from 'react-use'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { make, track } from 'services/analytics'
 import { doesMatchRoute } from 'utils/route'
 
@@ -60,7 +60,7 @@ export const RewardPanel = ({
   const userChallenges = useSelector((state: CommonState) =>
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
-  const { history } = useHistoryContext()
+  const location = useLocation()
 
   const openRewardModal = () => {
     openModal(id)
@@ -69,7 +69,7 @@ export const RewardPanel = ({
     )
   }
   useEffectOnce(() => {
-    const match = doesMatchRoute(history.location, AIRDROP_PAGE)
+    const match = doesMatchRoute(location, AIRDROP_PAGE)
     if (match) {
       openModal(ChallengeName.OneShot)
     }

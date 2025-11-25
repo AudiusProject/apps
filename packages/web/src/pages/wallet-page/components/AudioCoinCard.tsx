@@ -4,8 +4,7 @@ import { useFormattedAudioBalance } from '@audius/common/hooks'
 import { AUDIO_TICKER, TOKEN_LISTING_MAP } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { IconTokenAUDIO } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
-import { push } from 'redux-first-history'
+import { useNavigate } from 'react-router-dom'
 
 import { CoinRow } from './CoinCard'
 
@@ -13,7 +12,7 @@ const DIMENSIONS = 64
 const COIN_NAME = TOKEN_LISTING_MAP.AUDIO.name
 
 export const AudioCoinCard = () => {
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const {
     audioBalanceFormatted,
@@ -26,8 +25,8 @@ export const AudioCoinCard = () => {
   const isLoading = isAudioBalanceLoading || isAudioPriceLoading
 
   const handleCoinClick = useCallback(() => {
-    dispatch(push(route.coinPage(AUDIO_TICKER)))
-  }, [dispatch])
+    navigate(route.coinPage(AUDIO_TICKER))
+  }, [navigate])
 
   return (
     <CoinRow

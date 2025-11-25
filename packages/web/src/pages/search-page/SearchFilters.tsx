@@ -13,7 +13,7 @@ import {
   FilterButton
 } from '@audius/harmony'
 import { Mood } from '@audius/sdk'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useSearchParams } from 'react-router-dom'
 
 import { BpmFilter } from './BpmFilter'
 import { useUpdateSearchParams } from './hooks'

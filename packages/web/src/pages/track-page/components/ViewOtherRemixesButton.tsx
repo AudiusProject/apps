@@ -2,7 +2,7 @@ import { useTrack } from '@audius/common/api'
 import { trackPageMessages as messages } from '@audius/common/messages'
 import { ID } from '@audius/common/models'
 import { Button, ButtonProps, IconArrowRight } from '@audius/harmony'
-import { Link } from 'react-router-dom-v5-compat'
+import { Link } from 'react-router-dom'
 
 import { trackRemixesPage } from 'utils/route'
 

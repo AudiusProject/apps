@@ -2,9 +2,7 @@ import { Name, ErrorLevel } from '@audius/common/models'
 import { chatMiddleware } from '@audius/common/store'
 import { composeWithDevToolsLogOnlyInProduction } from '@redux-devtools/extension'
 import { configureScope, addBreadcrumb } from '@sentry/browser'
-import { History } from 'history'
 import { createStore, applyMiddleware, Action, Store } from 'redux'
-import { createReduxHistoryContext } from 'redux-first-history'
 import { persistStore } from 'redux-persist'
 import createSagaMiddleware from 'redux-saga'
 import createSentryMiddleware from 'redux-sentry-middleware'
@@ -19,6 +17,7 @@ import { reportToSentry } from 'store/errors/reportToSentry'
 import createRootReducer from 'store/reducers'
 import rootSaga, { testRootSaga } from 'store/sagas'
 
+import { navigationMiddleware } from './navigationMiddleware'
 import { buildStoreContext } from './storeContext'
 import { AppState } from './types'
 
@@ -53,10 +52,7 @@ const statePruner = (state: AppState) => {
         userId: currentProfile.userId
       }
     },
-    router: {
-      action: state.router.action,
-      location: state.router.location
-    },
+    // Router state removed - using react-router-dom directly now
     signOn: {
       accountReady: state.signOn.accountReady,
       email: state.signOn.email,
@@ -96,19 +92,14 @@ const sentryMiddleware = createSentryMiddleware(
 )
 
 export const configureStore = ({
-  history,
   isMobile,
   initialStoreState,
   isTest
 }: {
-  history: History
   isMobile: boolean
   initialStoreState?: PartialDeep<AppState>
   isTest?: boolean
 }) => {
-  const { createReduxHistory, routerMiddleware, routerReducer } =
-    createReduxHistoryContext({ history })
-
   const onSagaError = (
     error: Error,
     errorInfo: {
@@ -146,10 +137,10 @@ export const configureStore = ({
 
   // For tests, only use basic middleware without sagas
   const middlewares = isTest
-    ? applyMiddleware(routerMiddleware, thunk, sagaMiddleware!)
+    ? applyMiddleware(navigationMiddleware, thunk, sagaMiddleware!)
     : applyMiddleware(
+        navigationMiddleware,
         chatMiddleware(audiusSdk, queryClient),
-        routerMiddleware,
         // Don't run sagas serverside
         ...(typeof window !== 'undefined' ? [sagaMiddleware!] : []),
         sentryMiddleware,
@@ -163,7 +154,7 @@ export const configureStore = ({
   })
 
   const store = createStore(
-    createRootReducer(routerReducer),
+    createRootReducer(),
     // @ts-ignore - Initial state is just for test mocking purposes
     initialStoreState,
     composeEnhancers(middlewares)
@@ -174,8 +165,7 @@ export const configureStore = ({
     sagaMiddleware.run(isTest ? testRootSaga : rootSaga)
   }
 
-  const reduxHistory = createReduxHistory(store)
   const persistor = persistStore(store)
 
-  return { store, history: reduxHistory, persistor }
+  return { store, persistor }
 }

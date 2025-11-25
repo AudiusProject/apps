@@ -10,9 +10,9 @@ import Page from 'components/page/Page'
 const PAGE_SIZE = 100
 
 export const ExclusiveTracksPage = () => {
-  const { ticker } = useParams<{ ticker: string }>()
+  const { ticker } = useParams<{ ticker?: string }>()
 
-  const { data: coin } = useArtistCoinByTicker({ ticker })
+  const { data: coin } = useArtistCoinByTicker({ ticker: ticker ?? '' })
   const ownerId = coin?.ownerId
   const coinName = coin?.name ?? ticker
 

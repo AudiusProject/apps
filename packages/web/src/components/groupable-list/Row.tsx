@@ -18,6 +18,7 @@ type RowProps = {
   includeSpacing?: boolean
   // Adds an arrow to the row component if `onClick` is provided
   onClick?: () => void
+  href?: string
 } & Omit<Partial<LinkProps>, 'prefix'>
 
 /**

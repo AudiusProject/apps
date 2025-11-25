@@ -1,6 +1,6 @@
 import { IconSpeaker } from '@audius/harmony'
 
-import { matchesRoute, useRouteMatch } from 'utils/route'
+import { matchesRoute, useMatch } from 'utils/route'
 
 type NavSpeakerIconProps = {
   playingFromRoute: string | null
@@ -11,7 +11,7 @@ export const NavSpeakerIcon = ({
   playingFromRoute,
   targetRoute
 }: NavSpeakerIconProps) => {
-  const isSelected = useRouteMatch(targetRoute)
+  const isSelected = useMatch(targetRoute)
   const isPlayingFromRoute = matchesRoute({
     current: playingFromRoute,
     target: targetRoute

@@ -1,5 +1,5 @@
 import { OptionalHashId } from '@audius/sdk'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { useSearchParams } from 'react-router-dom'
 
 import { useComment } from './useComment'
 

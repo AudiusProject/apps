@@ -1,18 +1,16 @@
 // @refresh reset
-import { Suspense, lazy, useEffect } from 'react'
+import { Suspense, lazy } from 'react'
 
 import { route } from '@audius/common/utils'
 import { CoinflowPurchaseProtection } from '@coinflowlabs/react'
-import { Redirect, Route, Switch } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppModal } from 'pages/modals/AppModal'
 import { SomethingWrong } from 'pages/something-wrong/SomethingWrong'
 import { env } from 'services/env'
-import { initWebVitals } from 'services/webVitals'
 
 import { AppErrorBoundary } from './AppErrorBoundary'
 import { AppProviders } from './AppProviders'
-import { useHistoryContext } from './HistoryProvider'
 import WebPlayer from './web-player/WebPlayer'
 
 const {
@@ -35,15 +33,6 @@ const MERCHANT_ID = env.COINFLOW_MERCHANT_ID
 const IS_PRODUCTION = env.ENVIRONMENT === 'production'
 
 export const App = () => {
-  // TODO: These web vitals events are costly in amplitude, is there a better way to track this with a different tool?
-  const { history } = useHistoryContext()
-
-  useEffect(() => {
-    if (!IS_PRODUCTION) {
-      initWebVitals(history.location)
-    }
-  }, [history])
-
   return (
     <AppProviders>
       <SomethingWrong />
@@ -52,30 +41,39 @@ export const App = () => {
           merchantId={MERCHANT_ID || ''}
           coinflowEnv={IS_PRODUCTION ? 'prod' : 'sandbox'}
         />
-        <Switch>
+        <Routes>
           {SIGN_ON_ALIASES.map((a) => (
-            <Redirect key={a} from={a} to={SIGN_IN_PAGE} />
-          ))}
-          <Route path={[SIGN_IN_PAGE, SIGN_UP_PAGE]}>
-            <SignOnPage />
-          </Route>
-          <Route exact path='/oauth/auth'>
-            <OAuthLoginPage />
-          </Route>
-          <Route path={PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}>
-            <PrivateKeyExporterPage />
-            <AppModal
-              key='PrivateKeyExporter'
-              name='PrivateKeyExporter'
-              modal={PrivateKeyExporterModal}
+            <Route
+              key={a}
+              path={a}
+              element={<Navigate to={SIGN_IN_PAGE} replace />}
             />
-          </Route>
-          <Route path='/'>
-            <AppErrorBoundary>
-              <WebPlayer />
-            </AppErrorBoundary>
-          </Route>
-        </Switch>
+          ))}
+          <Route path={`${SIGN_IN_PAGE}/*`} element={<SignOnPage />} />
+          <Route path={`${SIGN_UP_PAGE}/*`} element={<SignOnPage />} />
+          <Route path='/oauth/auth' element={<OAuthLoginPage />} />
+          <Route
+            path={`${PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}/*`}
+            element={
+              <>
+                <PrivateKeyExporterPage />
+                <AppModal
+                  key='PrivateKeyExporter'
+                  name='PrivateKeyExporter'
+                  modal={PrivateKeyExporterModal}
+                />
+              </>
+            }
+          />
+          <Route
+            path='/*'
+            element={
+              <AppErrorBoundary>
+                <WebPlayer />
+              </AppErrorBoundary>
+            }
+          />
+        </Routes>
       </Suspense>
     </AppProviders>
   )

@@ -1,13 +1,11 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { MediaProvider } from '@audius/harmony/src/contexts'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Provider as ReduxProvider } from 'react-redux'
-import { Router } from 'react-router-dom'
-import { CompatRouter } from 'react-router-dom-v5-compat'
-import { LastLocationProvider } from 'react-router-last-location'
+import { BrowserRouter, HashRouter, useNavigate } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
 import { WagmiProvider } from 'wagmi'
 
@@ -18,14 +16,15 @@ import { ScrollProvider } from 'components/scroll-provider/ScrollProvider'
 import { ToastContextProvider } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { MainContentContextProvider } from 'pages/MainContentContext'
+import { env } from 'services/env'
 import { localStorage } from 'services/local-storage'
 import { queryClient } from 'services/query-client'
 import { configureStore } from 'store/configureStore'
+import { setNavigateRef } from 'store/navigationMiddleware'
 import { getSystemAppearance, getTheme } from 'utils/theme/theme'
 
 import { AppContextProvider } from './AppContextProvider'
 import { AudiusQueryProvider } from './AudiusQueryProvider'
-import { useHistoryContext } from './HistoryProvider'
 import { wagmiAdapter } from './ReownAppKitModal'
 import { ThemeProvider } from './ThemeProvider'
 
@@ -34,10 +33,9 @@ type AppProvidersProps = {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
-  const { history } = useHistoryContext()
   const isMobile = useIsMobile()
 
-  const [{ store, storeHistory, persistor }] = useState(() => {
+  const [{ store, persistor }] = useState(() => {
     const initialStoreState = {
       ui: {
         theme: {
@@ -47,17 +45,31 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
       }
     }
 
-    const {
-      store,
-      history: storeHistory,
-      persistor
-    } = configureStore({ history, isMobile, initialStoreState })
+    const { store, persistor } = configureStore({ isMobile, initialStoreState })
     // Mount store to window for easy access
     if (typeof window !== 'undefined' && !window.store) {
       window.store = store
     }
-    return { store, storeHistory, persistor }
+    return { store, persistor }
   })
+
+  // Use HashRouter or BrowserRouter based on environment
+  const RouterComponent = env.USE_HASH_ROUTING ? HashRouter : BrowserRouter
+  const basename = env.BASENAME || undefined
+
+  // Component to set up navigation ref for middleware
+  const NavigationSetup = ({ children }: { children: ReactNode }) => {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+      setNavigateRef(navigate)
+      return () => {
+        setNavigateRef(null as any)
+      }
+    }, [navigate])
+
+    return <>{children}</>
+  }
 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
@@ -65,35 +77,33 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         <MediaProvider>
           <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <Router history={storeHistory}>
-                <CompatRouter>
-                  <LastLocationProvider>
-                    <RouterContextProvider>
-                      <HeaderContextProvider>
-                        <NavProvider>
-                          <ScrollProvider>
-                            <ThemeProvider>
-                              <ToastContextProvider>
-                                <AppContextProvider>
-                                  <AudiusQueryProvider>
-                                    <MainContentContextProvider>
-                                      <SyncLocalStorageUserProvider
-                                        localStorage={localStorage}
-                                      >
-                                        {children}
-                                      </SyncLocalStorageUserProvider>
-                                    </MainContentContextProvider>
-                                  </AudiusQueryProvider>
-                                </AppContextProvider>
-                              </ToastContextProvider>
-                            </ThemeProvider>
-                          </ScrollProvider>
-                        </NavProvider>
-                      </HeaderContextProvider>
-                    </RouterContextProvider>
-                  </LastLocationProvider>
-                </CompatRouter>
-              </Router>
+              <RouterComponent basename={basename}>
+                <NavigationSetup>
+                  <RouterContextProvider>
+                    <HeaderContextProvider>
+                      <NavProvider>
+                        <ScrollProvider>
+                          <ThemeProvider>
+                            <ToastContextProvider>
+                              <AppContextProvider>
+                                <AudiusQueryProvider>
+                                  <MainContentContextProvider>
+                                    <SyncLocalStorageUserProvider
+                                      localStorage={localStorage}
+                                    >
+                                      {children}
+                                    </SyncLocalStorageUserProvider>
+                                  </MainContentContextProvider>
+                                </AudiusQueryProvider>
+                              </AppContextProvider>
+                            </ToastContextProvider>
+                          </ThemeProvider>
+                        </ScrollProvider>
+                      </NavProvider>
+                    </HeaderContextProvider>
+                  </RouterContextProvider>
+                </NavigationSetup>
+              </RouterComponent>
             </PersistGate>
           </ReduxProvider>
         </MediaProvider>

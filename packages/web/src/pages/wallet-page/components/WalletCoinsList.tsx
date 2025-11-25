@@ -33,7 +33,7 @@ import {
   IconCaretRight,
   IconLogoCircleUSDCPng
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 import { roundedHexClipPath } from '~harmony/icons/SVGDefs'
 
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'

@@ -5,7 +5,7 @@ import {
   IconUser,
   IconUserFollow
 } from '@audius/harmony'
-import { useRouteMatch } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { SteppedProgress } from 'components/stepped-progress/SteppedProgress'
 
@@ -35,10 +35,11 @@ const STEPS: {
 ]
 
 export const ProgressHeader = () => {
-  const match = useRouteMatch()
+  const location = useLocation()
   let activeStep: ProgressHeaderStep
 
-  switch (match.path) {
+  const pathname = location.pathname
+  switch (pathname) {
     case SIGN_UP_HANDLE_PAGE:
     case SIGN_UP_FINISH_PROFILE_PAGE:
       activeStep = 'customize'

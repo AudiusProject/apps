@@ -16,9 +16,8 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import ReactDOM from 'react-dom'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import HeroBackground from 'assets/img/publicSite/HeroBG@2x.webp'
 
 import styles from './NavOverlay.module.css'
@@ -129,7 +128,7 @@ const useModalRoot = () => {
 
 const NavOverlay = (props: NavOverlayProps) => {
   const modalRoot = useModalRoot()
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
 
   return (
     modalRoot &&
@@ -164,7 +163,7 @@ const NavOverlay = (props: NavOverlayProps) => {
                   onClick={handleClickRoute(
                     link,
                     props.setRenderPublicSite,
-                    history
+                    navigate
                   )}
                   className={styles.dappLink}
                   href={link}
@@ -185,7 +184,7 @@ const NavOverlay = (props: NavOverlayProps) => {
                 onClick={handleClickRoute(
                   link,
                   props.setRenderPublicSite,
-                  history
+                  navigate
                 )}
               >
                 <Icon className={styles.icon} />

@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { APP_REDIRECT } from '@audius/common/src/utils/route'
 import { Box, Button, Flex, Text } from '@audius/harmony'
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import Drawer from 'components/drawer/Drawer'
 import { getPathname } from 'utils/route'
@@ -20,13 +20,13 @@ const messages = {
 }
 
 export const OpenAppDrawer = ({ isOpen, onClose }: OpenAppDrawerProps) => {
-  const history = useHistory()
+  const location = useLocation()
 
   const handleOpenAppClick = useCallback(() => {
-    const pathname = getPathname(history.location)
+    const pathname = getPathname(location)
     const redirectHref = `https://redirect.audius.co${APP_REDIRECT}${pathname}`
     window.location.href = redirectHref
-  }, [history.location])
+  }, [location])
 
   return (
     <Drawer

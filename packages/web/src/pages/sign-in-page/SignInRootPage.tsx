@@ -3,7 +3,7 @@ import { signInPageMessages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
 import { useSelector } from 'react-redux'
-import { Redirect, Route, Switch } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { useFirstMountState } from 'react-use'
 
 import { getEmailField, getIsGuest } from 'common/store/pages/signon/selectors'
@@ -11,8 +11,7 @@ import { getEmailField, getIsGuest } from 'common/store/pages/signon/selectors'
 import { ConfirmEmailPage } from './ConfirmEmailPage'
 import { SignInPage } from './SignInPage'
 
-const { SIGN_IN_PAGE, SIGN_IN_CONFIRM_EMAIL_PAGE, SIGN_UP_PASSWORD_PAGE } =
-  route
+const { SIGN_IN_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 
 export const SignInRootPage = () => {
   // Redirect users from confirm-email page on first mount
@@ -29,24 +28,21 @@ export const SignInRootPage = () => {
         <title>{signInPageMessages.metaTitle}</title>
         <meta name='description' content={signInPageMessages.metaDescription} />
       </Helmet>
-      <Switch>
-        <Route exact path={SIGN_IN_PAGE}>
-          <SignInPage />
-        </Route>
+      <Routes>
+        <Route path='/' element={<SignInPage />} />
         {isGuest && currentAccountEmail === emailFromSignOn ? (
-          <Redirect to={SIGN_UP_PASSWORD_PAGE} />
+          <Route
+            path='*'
+            element={<Navigate to={SIGN_UP_PASSWORD_PAGE} replace />}
+          />
         ) : isGuest && currentAccountEmail !== emailFromSignOn ? (
-          <Route exact path={SIGN_IN_CONFIRM_EMAIL_PAGE}>
-            <ConfirmEmailPage />
-          </Route>
+          <Route path='confirm-email' element={<ConfirmEmailPage />} />
         ) : isFirstMount ? (
-          <Redirect to={SIGN_IN_PAGE} />
+          <Route path='*' element={<Navigate to={SIGN_IN_PAGE} replace />} />
         ) : (
-          <Route exact path={SIGN_IN_CONFIRM_EMAIL_PAGE}>
-            <ConfirmEmailPage />
-          </Route>
+          <Route path='confirm-email' element={<ConfirmEmailPage />} />
         )}
-      </Switch>
+      </Routes>
     </>
   )
 }

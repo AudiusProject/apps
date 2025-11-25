@@ -1,7 +1,7 @@
 import { memo, useCallback, useContext, useState, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
-import { useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import ExploreButton from 'components/bottom-bar/buttons/ExploreButton'
@@ -47,7 +47,7 @@ const BottomBar = ({
     setTempCurrentPage(currentPage)
   }, [currentPage, setTempCurrentPage])
 
-  const { location } = useHistory()
+  const location = useLocation()
   const { pathname } = location
 
   const onClick = useCallback(

@@ -9,22 +9,15 @@ import { FeatureFlags } from '@audius/common/services'
 import { MediaProvider, ThemeProvider } from '@audius/harmony'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, RenderOptions, configure } from '@testing-library/react'
-import { History } from 'history'
 import { setupServer } from 'msw/node'
 import { Provider } from 'react-redux'
-import { Router } from 'react-router-dom'
-import { CompatRouter } from 'react-router-dom-v5-compat'
+import { BrowserRouter } from 'react-router-dom'
 import { PartialDeep } from 'type-fest'
 import { it as vitestIt } from 'vitest'
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 import { mock } from 'wagmi/connectors'
 
-import {
-  HistoryContext,
-  HistoryContextProvider,
-  useHistoryContext
-} from 'app/HistoryProvider'
 import { RouterContextProvider } from 'components/animated-switch/RouterContextProvider'
 import { ToastContextProvider } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -52,7 +45,6 @@ const mockWagmiConfig = createConfig({
 type TestOptions = {
   reduxState?: PartialDeep<AppState>
   featureFlags?: Partial<Record<FeatureFlags, boolean>>
-  customHistory?: History
 }
 
 type ReduxProviderProps = {
@@ -64,10 +56,8 @@ export const ReduxProvider = ({
   children,
   initialStoreState
 }: ReduxProviderProps) => {
-  const { history } = useHistoryContext()
   const isMobile = useIsMobile()
   const { store } = configureStore({
-    history,
     isMobile,
     initialStoreState,
     isTest: true
@@ -83,7 +73,7 @@ type TestProvidersProps = {
 const TestProviders =
   (options?: TestOptions) => (props: TestProvidersProps) => {
     const { children } = props
-    const { reduxState, featureFlags, customHistory } = options ?? {}
+    const { reduxState, featureFlags } = options ?? {}
     const mockAppContext = createMockAppContext(featureFlags)
     const queryContext = {
       audiusSdk,
@@ -92,33 +82,23 @@ const TestProviders =
 
     return (
       <WagmiProvider config={mockWagmiConfig}>
-        <HistoryContextProvider historyOverride={customHistory}>
-          <MediaProvider>
-            <QueryClientProvider client={queryClient}>
-              <QueryContext.Provider value={queryContext}>
-                <ThemeProvider theme='day'>
-                  <ReduxProvider initialStoreState={reduxState}>
+        <MediaProvider>
+          <QueryClientProvider client={queryClient}>
+            <QueryContext.Provider value={queryContext}>
+              <ThemeProvider theme='day'>
+                <ReduxProvider initialStoreState={reduxState}>
+                  <BrowserRouter>
                     <RouterContextProvider>
                       <AppContext.Provider value={mockAppContext}>
-                        <ToastContextProvider>
-                          <HistoryContext.Consumer>
-                            {({ history }) => {
-                              return (
-                                <Router history={history}>
-                                  <CompatRouter>{children}</CompatRouter>
-                                </Router>
-                              )
-                            }}
-                          </HistoryContext.Consumer>
-                        </ToastContextProvider>
+                        <ToastContextProvider>{children}</ToastContextProvider>
                       </AppContext.Provider>
                     </RouterContextProvider>
-                  </ReduxProvider>
-                </ThemeProvider>
-              </QueryContext.Provider>
-            </QueryClientProvider>
-          </MediaProvider>
-        </HistoryContextProvider>
+                  </BrowserRouter>
+                </ReduxProvider>
+              </ThemeProvider>
+            </QueryContext.Provider>
+          </QueryClientProvider>
+        </MediaProvider>
       </WagmiProvider>
     )
   }

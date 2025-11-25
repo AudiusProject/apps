@@ -12,7 +12,6 @@ import {
   IconKebabHorizontal
 } from '@audius/harmony'
 import cn from 'classnames'
-import { History } from 'history'
 import { Link } from 'react-router-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 
@@ -40,7 +39,6 @@ interface NavBarProps {
   goToNotificationPage: () => void
   search: (term: string) => void
   goBack: () => void
-  history: History<any>
 }
 
 const messages = {
@@ -55,10 +53,7 @@ const NavBar = ({
   search,
   signUp,
   goToNotificationPage,
-  goBack,
-  history: {
-    location: { pathname }
-  }
+  goBack
 }: NavBarProps) => {
   const { leftElement, centerElement, rightElement } = useContext(NavContext)!
   const { data: notificationCount = 0 } = useNotificationUnreadCount()

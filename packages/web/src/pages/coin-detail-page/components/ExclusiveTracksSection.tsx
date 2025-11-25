@@ -6,7 +6,7 @@ import {
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Flex, PlainButton, Text } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { useNavigate } from 'react-router-dom'
 
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'

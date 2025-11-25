@@ -23,7 +23,7 @@ import {
 } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useRouteMatch } from 'react-router-dom'
+import { Link, useMatch } from 'react-router-dom'
 
 import { Avatar } from 'components/avatar'
 import { UserLink } from 'components/link'
@@ -297,8 +297,8 @@ export const RecentSearches = () => {
   const searchItems = useSelector(getSearchHistory)
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
-  const routeMatch = useRouteMatch<{ category: string }>(SEARCH_PAGE)
-  const category = routeMatch?.params.category
+  const routeMatch = useMatch(SEARCH_PAGE)
+  const category = routeMatch?.params?.category
 
   const categoryKind: Kind | null = category
     ? itemKindByCategory[category as CategoryView]

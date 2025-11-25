@@ -1,6 +1,5 @@
 import { COIN_DETAIL_PAGE } from '@audius/common/src/utils/route'
-import { createMemoryHistory } from 'history'
-import { Switch, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import {
   describe,
   expect,
@@ -68,22 +67,11 @@ export function renderCoinDetailPage(
   mswServer.use(mockUsers([nonArtistUser, artistUser, ...randomUsers]))
   mswServer.use(mockCoinByTicker(coin))
 
-  const history = createMemoryHistory({
-    initialEntries: [`/coins/${coin.ticker}`]
-  })
-
   return render(
-    <Switch>
-      <Route
-        path={COIN_DETAIL_PAGE}
-        // @ts-expect-error
-        render={(props) => <CoinDetailPage {...props} />}
-      />
-    </Switch>,
-    {
-      ...options,
-      customHistory: history
-    }
+    <Routes>
+      <Route path={COIN_DETAIL_PAGE} element={<CoinDetailPage />} />
+    </Routes>,
+    options
   )
 }
 

@@ -38,8 +38,7 @@ import {
   Text
 } from '@audius/harmony'
 import { Form, Formik, useFormikContext } from 'formik'
-import { Redirect, useParams } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom-v5-compat'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { AnchoredSubmitRowEdit } from 'components/edit/AnchoredSubmitRowEdit'
@@ -275,7 +274,7 @@ export const EditCoinDetailsPage = () => {
     isPending,
     isSuccess,
     isError
-  } = useArtistCoinByTicker({ ticker })
+  } = useArtistCoinByTicker({ ticker: ticker ?? '' })
 
   const { image: defaultBannerImageUrl } = useCoverPhoto({
     userId: currentUser?.user_id,
@@ -440,7 +439,7 @@ export const EditCoinDetailsPage = () => {
     isError ||
     (isSuccess && !coin)
   ) {
-    return <Redirect to='/coins' />
+    return <Navigate to='/coins' replace />
   }
 
   if (isPending) {

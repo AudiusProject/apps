@@ -40,16 +40,15 @@ import {
 import { formatDate, route } from '@audius/common/utils'
 import { QueryStatus } from '@tanstack/react-query'
 import { connect } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { TrackEvent, make } from 'common/store/analytics/actions'
 import * as unfollowConfirmationActions from 'components/unfollow-confirmation-modal/store/actions'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { SsrContext } from 'ssr/SsrContext'
-import { getLocationPathname } from 'store/routing/selectors'
 import { AppState } from 'store/types'
-import { push, replace } from 'utils/navigation'
-import { trackRemixesPage } from 'utils/route'
+import { trackRemixesPage, getPathname } from 'utils/route'
 import { parseTrackRoute, TrackRouteParams } from 'utils/route/trackRouteParser'
 import { getTrackPageSEOFields } from 'utils/seo'
 
@@ -84,7 +83,10 @@ type OwnProps = {
 type mapStateProps = ReturnType<typeof makeMapStateToProps>
 type TrackPageProviderProps = OwnProps &
   ReturnType<mapStateProps> &
-  ReturnType<typeof mapDispatchToProps>
+  ReturnType<typeof mapDispatchToProps> & {
+    goToRoute: (route: string) => void
+    replaceRoute: (route: string) => void
+  }
 
 type TrackPageProviderState = {
   pathname: string
@@ -492,7 +494,7 @@ const shouldRedirectTrack = (trackId: ID) =>
 function makeMapStateToProps() {
   const getMoreByArtistLineup = makeGetLineupMetadatas(getLineup)
 
-  const mapStateToProps = (state: AppState) => {
+  const mapStateToProps = (state: AppState, props: { pathname?: string }) => {
     return {
       source: getSourceSelector(state),
       trackPermalink: getTrackPermalink(state),
@@ -500,7 +502,7 @@ function makeMapStateToProps() {
 
       playing: getPlaying(state),
       previewing: getPreviewing(state),
-      pathname: getLocationPathname(state)
+      pathname: props.pathname ?? '' // Get pathname from props instead of Redux
     }
   }
   return mapStateToProps
@@ -516,8 +518,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
     makeTrackPublic: (trackId: ID) =>
       dispatch(trackPageActions.makeTrackPublic(trackId)),
 
-    goToRoute: (route: string) => dispatch(push(route)),
-    replaceRoute: (route: string) => dispatch(replace(route)),
+    // goToRoute and replaceRoute removed - use useNavigate hook instead
     reset: (source?: string) => dispatch(tracksActions.reset(source)),
     play: (uid?: string, options: { isPreview?: boolean } = {}) =>
       dispatch(tracksActions.play(uid, options)),
@@ -570,7 +571,26 @@ function mapDispatchToProps(dispatch: Dispatch) {
   }
 }
 
-export default connect(
+const ConnectedTrackPageProvider = connect(
   makeMapStateToProps,
   mapDispatchToProps
 )(TrackPageProviderWrapper)
+
+// Wrapper to provide pathname from useLocation and navigation functions
+const TrackPageProviderWithLocation = (
+  props: Omit<TrackPageProviderProps, 'pathname' | 'goToRoute' | 'replaceRoute'>
+) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const pathname = getPathname(location)
+  return (
+    <ConnectedTrackPageProvider
+      {...props}
+      pathname={pathname}
+      goToRoute={(route: string) => navigate(route)}
+      replaceRoute={(route: string) => navigate(route, { replace: true })}
+    />
+  )
+}
+
+export default TrackPageProviderWithLocation

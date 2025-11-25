@@ -46,10 +46,9 @@ import {
 } from '@audius/common/store'
 import { getErrorMessage, Nullable, route } from '@audius/common/utils'
 import { useQueryClient } from '@tanstack/react-query'
-import { UnregisterCallback } from 'history'
 import moment from 'moment'
 import { connect } from 'react-redux'
-import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Dispatch } from 'redux'
 
 import { make, TrackEvent } from 'common/store/analytics/actions'
@@ -60,7 +59,6 @@ import {
 import { ProfileMode } from 'components/stat-banner/StatBanner'
 import { StatProps } from 'components/stats/Stats'
 import * as unfollowConfirmationActions from 'components/unfollow-confirmation-modal/store/actions'
-import { getLocationPathname } from 'store/routing/selectors'
 import { AppState } from 'store/types'
 import { verifiedHandleWhitelist } from 'utils/handleWhitelist'
 import { resizeImage } from 'utils/imageProcessingUtil'
@@ -111,8 +109,9 @@ type OwnProps = {
 type ProfilePageProps = OwnProps &
   ReturnType<ReturnType<typeof makeMapStateToProps>> &
   ReturnType<typeof mapDispatchToProps> &
-  RouteComponentProps &
-  HookStateProps
+  HookStateProps & {
+    location: ReturnType<typeof useLocation>
+  }
 
 type ProfilePageState = {
   activeTab: ProfilePageTabs | null
@@ -162,40 +161,14 @@ class ProfilePageClassComponent extends PureComponent<
     ...INITIAL_UPDATE_FIELDS
   }
 
-  unlisten!: UnregisterCallback
-
   componentDidMount() {
     // If routing from a previous profile page
     // the lineups must be reset to refetch & update for new user
     this.fetchProfile(getPathname(this.props.location))
-
-    // Switching from profile page => profile page
-    this.unlisten = this.props.history.listen((location, action) => {
-      // If changing pages or "POP" on router (with goBack, the pathnames are equal)
-      if (
-        getPathname(this.props.location) !== getPathname(location) ||
-        action === 'POP'
-      ) {
-        const params = parseUserRoute(getPathname(location))
-        if (params) {
-          // Fetch profile if this is a new profile page
-          this.fetchProfile(getPathname(location))
-        }
-        this.setState({
-          activeTab: null,
-          ...INITIAL_UPDATE_FIELDS
-        })
-      }
-    })
   }
 
   componentWillUnmount() {
-    if (this.unlisten) {
-      // Push unlisten to end of event loop. On some browsers, the back button
-      // will cause the component to unmount and remove the unlisten faster than
-      // the history listener will run. See [AUD-403].
-      setImmediate(this.unlisten)
-    }
+    // No longer needed - using componentDidUpdate to detect location changes
   }
 
   componentDidUpdate(prevProps: ProfilePageProps, prevState: ProfilePageState) {
@@ -204,10 +177,26 @@ class ProfilePageClassComponent extends PureComponent<
       profile,
       artistTracks,
       goToRoute,
+      location,
       accountUserId,
       isArtist
     } = this.props
     const { editMode, activeTab } = this.state
+
+    // Detect location changes (replaces history.listen functionality)
+    const prevPathname = getPathname(prevProps.location)
+    const currentPathname = getPathname(location)
+    if (prevPathname !== currentPathname) {
+      const params = parseUserRoute(currentPathname)
+      if (params) {
+        // Fetch profile if this is a new profile page
+        this.fetchProfile(currentPathname)
+      }
+      this.setState({
+        activeTab: null,
+        ...INITIAL_UPDATE_FIELDS
+      })
+    }
 
     if (!this.getIsOwner(prevProps) && this.getIsOwner()) {
       this.props.fetchAccountHasTracks()
@@ -1124,7 +1113,10 @@ class ProfilePageClassComponent extends PureComponent<
 function makeMapStateToProps() {
   const getCurrentQueueItem = makeGetCurrent()
 
-  const mapStateToProps = (state: AppState, props: RouteComponentProps) => {
+  const mapStateToProps = (
+    state: AppState,
+    props: { location: ReturnType<typeof useLocation> }
+  ) => {
     const { location } = props
     const pathname = getPathname(location)
     const params = parseUserRoute(pathname)
@@ -1136,7 +1128,7 @@ function makeMapStateToProps() {
       currentQueueItem: getCurrentQueueItem(state),
       playing: getPlaying(state),
       buffering: getBuffering(state),
-      pathname: getLocationPathname(state),
+      pathname, // Use pathname from location prop instead of Redux
 
       blockeeList: getBlockees(state),
       blockerList: getBlockers(state)
@@ -1145,7 +1137,10 @@ function makeMapStateToProps() {
   return mapStateToProps
 }
 
-function mapDispatchToProps(dispatch: Dispatch, props: RouteComponentProps) {
+function mapDispatchToProps(
+  dispatch: Dispatch,
+  props: { location: ReturnType<typeof useLocation> }
+) {
   const { location } = props
   const pathname = getPathname(location)
   const params = parseUserRoute(pathname)
@@ -1324,21 +1319,21 @@ const hookStateToProps = (Component: typeof ProfilePage) => {
   }
 }
 
-const ProfilePageInner = withRouter(
-  connect(
-    makeMapStateToProps,
-    mapDispatchToProps
-  )(hookStateToProps(ProfilePage))
-)
+const ProfilePageInner = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(hookStateToProps(ProfilePage))
 
 const ProfilePageProviderWrapper = (
-  props: Omit<ComponentProps<typeof ProfilePageInner>, 'profile'>
+  props: Omit<ComponentProps<typeof ProfilePageInner>, 'profile' | 'location'>
 ) => {
   const profile = useProfileUser()
+  const location = useLocation()
 
   return (
     <ProfilePageInner
       {...props}
+      location={location}
       profile={{ profile: profile.user, status: profile.status }}
     />
   )

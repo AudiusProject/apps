@@ -18,11 +18,9 @@ import {
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom-v5-compat'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { tracksActions } from '~/store/pages/track/lineup/actions'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import { push as pushRoute } from 'utils/navigation'
 
 import { CommentBlock } from './CommentBlock'
@@ -139,21 +137,28 @@ export const CommentPreview = (props: CommentPreviewProps) => {
   const [searchParams] = useSearchParams()
   const showComments = searchParams.get('showComments')
   const commentId = searchParams.get('commentId')
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
   const lineup = useSelector(getLineup)
   const uid = lineup?.entries?.[0]?.uid
 
   // Show the comment screen if the showComments or commentId query param is present
   useEffect(() => {
     if ((showComments || commentId) && trackPermalink) {
-      history.replace({ search: '' })
+      navigate({ search: '' }, { replace: true })
       dispatch(
         pushRoute(
           `${trackPermalink}/comments${commentId ? `?commentId=${commentId}` : ''}`
         )
       )
     }
-  }, [showComments, commentId, trackPermalink, dispatch, searchParams, history])
+  }, [
+    showComments,
+    commentId,
+    trackPermalink,
+    dispatch,
+    searchParams,
+    navigate
+  ])
 
   return (
     <CommentSectionProvider

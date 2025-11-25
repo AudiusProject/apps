@@ -7,7 +7,7 @@ import { coinDetailsMessages } from '@audius/common/messages'
 import { coinPage } from '@audius/common/src/utils/route'
 import { formatTickerForUrl, route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
-import { Redirect, useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 
 import { Header } from 'components/header/desktop/Header'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -89,10 +89,10 @@ const MobileCoinDetailPageContent = ({
 }
 
 export const CoinDetailPage = () => {
-  const { ticker } = useParams<{ ticker: string }>()
+  const { ticker } = useParams<{ ticker?: string }>()
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
-  const formattedTicker = formatTickerForUrl(ticker)
+  const formattedTicker = formatTickerForUrl(ticker ?? '')
 
   const {
     data: coin,
@@ -106,15 +106,15 @@ export const CoinDetailPage = () => {
   })
 
   if (!ticker) {
-    return <Redirect to='/coins' />
+    return <Navigate to='/coins' replace />
   }
 
   if (ticker !== formattedTicker) {
-    return <Redirect to={coinPage(formattedTicker)} />
+    return <Navigate to={coinPage(formattedTicker)} replace />
   }
 
   if (isError || (isSuccess && !coin)) {
-    return <Redirect to={NOT_FOUND_PAGE} />
+    return <Navigate to={NOT_FOUND_PAGE} replace />
   }
 
   if (coinPending) {

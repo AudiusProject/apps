@@ -437,7 +437,7 @@ export const getHash = (str: string) =>
 /** Given a pathname, finds a matching route */
 export const findRoute = (pathname: string) => {
   for (const route of orderedRoutes) {
-    const match = matchPath(pathname, { path: route, exact: true })
+    const match = matchPath(route, pathname)
     if (match) {
       return route
     }
@@ -462,7 +462,7 @@ export const searchPage = (searchOptions: SearchOptions) => {
   }
 
   return qs.stringifyUrl({
-    url: generatePath(SEARCH_PAGE, { category }),
+    url: generatePath(SEARCH_PAGE, { category: category ?? null }),
     query: searchParams
   })
 }
