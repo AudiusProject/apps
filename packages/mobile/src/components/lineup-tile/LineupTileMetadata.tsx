@@ -48,6 +48,7 @@ type Props = {
   trackId: ID
   duration: number
   isLongFormContent: boolean
+  isArtistPick?: boolean
 }
 
 export const LineupTileMetadata = ({
@@ -59,7 +60,8 @@ export const LineupTileMetadata = ({
   type,
   trackId,
   duration,
-  isLongFormContent
+  isLongFormContent,
+  isArtistPick = false
 }: Props) => {
   const styles = useStyles()
   const tileStyles = useTileStyles()
@@ -129,6 +131,7 @@ export const LineupTileMetadata = ({
         trackId={trackId}
         isLongFormContent={isLongFormContent}
         isCollection={false}
+        isArtistPick={isArtistPick}
       />
     </View>
   )

@@ -35,7 +35,9 @@ import {
   Flex,
   Box,
   IconButton,
-  IconKebabHorizontal
+  IconKebabHorizontal,
+  IconPin,
+  IconText
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
@@ -112,7 +114,8 @@ export const TrackTile = ({
       handle: user?.handle,
       name: user?.name,
       is_verified: user?.is_verified,
-      is_deactivated: user?.is_deactivated
+      is_deactivated: user?.is_deactivated,
+      artist_pick_track_id: user?.artist_pick_track_id
     })
   })
   const { user_id, handle, name, is_deactivated } =
@@ -168,6 +171,7 @@ export const TrackTile = ({
   } = trackWithFallback
 
   const isOwner = user_id === currentUserId
+  const isArtistPick = partialUser?.artist_pick_track_id === track_id
 
   const { isFetchingNFTAccess, hasStreamAccess } =
     useGatedContentAccess(trackWithFallback)
@@ -380,20 +384,25 @@ export const TrackTile = ({
     >
       <TrackDogEar trackId={track_id} hideUnlocked />
       <div className={styles.mainContent} onClick={handleClick}>
-        <Text
-          variant='body'
-          size='xs'
-          className={cn(styles.topRight, styles.statText)}
-        >
-          <div className={cn(styles.duration, fadeIn)}>
+        <div className={cn(styles.topRight, styles.statText)}>
+          <Flex
+            gap='s'
+            alignItems='center'
+            className={cn(styles.duration, fadeIn)}
+          >
+            {isArtistPick ? (
+              <IconText icons={[{ icon: IconPin }]}>
+                {messages.artistPick}
+              </IconText>
+            ) : null}
             {duration
               ? formatLineupTileDuration(
                   duration,
                   genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
                 )
               : null}
-          </div>
-        </Text>
+          </Flex>
+        </div>
         <div className={styles.metadata}>
           <TrackTileArt
             id={track_id}

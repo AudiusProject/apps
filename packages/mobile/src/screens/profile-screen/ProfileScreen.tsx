@@ -141,7 +141,7 @@ export const ProfileScreen = () => {
       <ScreenContent isOfflineCapable>
         {!profile ? (
           <ProfileScreenSkeleton />
-        ) : !profile.is_deactivated ? (
+        ) : profile.is_deactivated ? (
           <DeactivatedProfileTombstone />
         ) : (
           <>
