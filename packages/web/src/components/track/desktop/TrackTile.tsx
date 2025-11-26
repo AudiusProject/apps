@@ -365,10 +365,7 @@ export const TrackTile = ({
                       disabled={disableActions}
                       ellipses
                     >
-                      <Text ellipses>
-                        {title}
-                        {title}
-                      </Text>
+                      <Text ellipses>{title}</Text>
                       {isTrackPlaying ? <IconVolume size='m' /> : null}
                     </TextLink>
                   )}
