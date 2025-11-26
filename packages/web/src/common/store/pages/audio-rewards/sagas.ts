@@ -31,7 +31,6 @@ import {
 } from '@audius/common/store'
 import {
   isResponseError,
-  route,
   waitForValue,
   isPlayCountChallenge
 } from '@audius/common/utils'

@@ -86,3 +86,10 @@ export const TOKEN_LISTING_MAP: Record<string, JupiterTokenListing> = {
 }
 
 export type JupiterTokenSymbol = keyof typeof TOKEN_LISTING_MAP
+
+export type AmountObject = {
+  amount: number
+  amountString: string
+  uiAmount: number
+  uiAmountString: string
+}

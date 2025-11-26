@@ -1,4 +1,5 @@
 export * as addToCollectionUISelectors from './add-to-collection/selectors'
+
 export * as addToCollectionUIActions from './add-to-collection/actions'
 export { default as addToCollectionUIReducer } from './add-to-collection/reducer'
 
@@ -64,7 +65,6 @@ export * as toastSelectors from './toast/selectors'
 export * from './toast/types'
 export { default as toastSagas } from './toast/sagas'
 
-
 export {
   default as withdrawUSDCReducer,
   actions as withdrawUSDCActions
@@ -98,4 +98,8 @@ export {
   USDC_MINT,
   BONK_MINT
 } from './shared/tokenConstants'
-export type { JupiterTokenListing, JupiterTokenSymbol } from './shared/tokenConstants'
+export type {
+  AmountObject,
+  JupiterTokenListing,
+  JupiterTokenSymbol
+} from './shared/tokenConstants'

@@ -2,12 +2,13 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 
 import { useWalletAudioBalance } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
-import { Chain } from '@audius/common/models'
-import { Name } from '@audius/common/src/models/Analytics'
-import { TOKEN_LISTING_MAP } from '@audius/common/src/store/ui/shared/tokenConstants'
-import { CoinInfo } from '@audius/common/src/store/ui/buy-sell/types'
-import { useCoinSwapForm } from '@audius/common/src/store/ui/buy-sell/useCoinSwapForm'
-import { useCoinAmountFormatting } from '@audius/common/store'
+import { Chain, Name } from '@audius/common/models'
+import {
+  TOKEN_LISTING_MAP,
+  useCoinSwapForm,
+  CoinInfo,
+  useCoinAmountFormatting
+} from '@audius/common/store'
 import {
   Button,
   Flex,
@@ -28,12 +29,12 @@ import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/reac
 import { FormikProvider, useFormikContext } from 'formik'
 import { usePrevious } from 'react-use'
 
-import { IconAUDIO } from 'components/shared-icons/Icons'
 import { WALLET_GUIDE_URL } from 'components/buy-sell-modal'
 import { SwapBalanceSection } from 'components/buy-sell-modal/SwapBalanceSection'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { TransactionSuccessScreen } from 'components/buy-sell-modal/TransactionSuccessScreen'
 import { TokenDropdown } from 'components/buy-sell-modal/components/TokenDropdown'
+import { IconAUDIO } from 'components/shared-icons/Icons'
 import { ToastContext } from 'components/toast/ToastContext'
 import { Tooltip } from 'components/tooltip'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'

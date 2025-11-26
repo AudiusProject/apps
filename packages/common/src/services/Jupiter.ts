@@ -8,10 +8,7 @@ import {
 } from '@jup-ag/api'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
-import {
-  TOKEN_LISTING_MAP,
-  JupiterTokenSymbol
-} from '~/store/ui/shared/tokenConstants'
+import { JupiterTokenSymbol } from '~/store/ui/shared/tokenConstants'
 import { convertBigIntToAmountObject, removeNullable } from '~/utils'
 
 /**

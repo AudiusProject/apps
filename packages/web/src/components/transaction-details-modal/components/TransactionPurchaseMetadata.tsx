@@ -2,11 +2,7 @@ import { InAppAudioPurchaseMetadata } from '@audius/common/store'
 import { makeSolanaTransactionLink, Nullable } from '@audius/common/utils'
 import { IconExternalLink } from '@audius/harmony'
 
-import {
-  IconUSD,
-  IconSOL,
-  IconAUDIO
-} from 'components/shared-icons/Icons'
+import { IconUSD, IconSOL, IconAUDIO } from 'components/shared-icons/Icons'
 
 import { BlockContainer, Block } from './Block'
 import styles from './TransactionPurchaseMetadata.module.css'

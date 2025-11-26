@@ -2,7 +2,6 @@ import { cloneElement, useCallback, useState } from 'react'
 
 import { useAudioBalance } from '@audius/common/api'
 import { BadgeTier, StringAudio, StringWei } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   tippingSelectors,
   tippingActions,
@@ -42,7 +41,7 @@ const messages = {
   tooltip: '$AUDIO held in linked wallets cannot be used for tipping',
   inputLabel: 'Amount to tip',
   inputPlaceholder: 'Enter an amount',
-  inputTokenLabel: '$AUDIO',
+  inputTokenLabel: '$AUDIO'
 }
 
 export const SendTip = () => {

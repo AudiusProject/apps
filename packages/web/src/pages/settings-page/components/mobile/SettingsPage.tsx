@@ -13,12 +13,7 @@ import { route } from '@audius/common/utils'
 import {
   SegmentedControl,
   IconAudiusLogoHorizontalColor,
-  IconLogoCircleUSDCPng,
-  IconTokenNoTier,
-  IconTokenBronze,
-  IconTokenSilver,
-  IconTokenGold,
-  IconTokenPlatinum
+  IconLogoCircleUSDCPng
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
@@ -184,14 +179,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
       />
     )
   }
-
-  const TierIcon = {
-    none: IconTokenNoTier,
-    bronze: IconTokenBronze,
-    silver: IconTokenSilver,
-    gold: IconTokenGold,
-    platinum: IconTokenPlatinum
-  }[tier]
 
   return (
     <Page
