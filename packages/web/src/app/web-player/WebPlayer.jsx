@@ -573,7 +573,7 @@ const WebPlayer = (props) => {
     return <RequiresUpdate isUpdating={isUpdating} onUpdate={acceptWebUpdate} />
 
   const SwitchComponent = context.isMobile ? AnimatedSwitch : Routes
-  const noScroll = matchPath(currentRoute, CHAT_PAGE)
+  const noScroll = matchPath(CHAT_PAGE, currentRoute)
 
   return (
     <div className={styles.root}>

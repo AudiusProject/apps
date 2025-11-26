@@ -56,8 +56,8 @@ export const NavigationPrompt = (props: Props) => {
 
   const handleConfirmNavigationClick = () => {
     setModalVisible(false)
-    // Reset the blocker to allow the blocked navigation to proceed
-    blocker?.reset?.()
+    // Proceed with the blocked navigation
+    blocker?.proceed?.()
   }
 
   return (
