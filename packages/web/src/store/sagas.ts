@@ -61,7 +61,6 @@ import deletedSagas from 'pages/deleted-page/store/sagas'
 import settingsSagas from 'pages/settings-page/store/sagas'
 import accountSagas from 'store/account/sagas'
 import webAnalyticsSagas from 'store/analytics/sagas'
-import buyAudioSagas from 'store/application/ui/buy-audio/sagas'
 import chatWebSagas from 'store/application/ui/chat/sagas'
 import cookieBannerSagas from 'store/application/ui/cookieBanner/sagas'
 import scrollLockSagas from 'store/application/ui/scrollLock/sagas'
@@ -134,7 +133,6 @@ export default function* rootSaga() {
 
     // Application
     addToCollectionSagas(),
-    buyAudioSagas(),
     changePasswordSagas(),
     chatWebSagas(),
     deactivateAccountSagas(),

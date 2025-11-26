@@ -1,6 +1,18 @@
 import TokenAUDIOPng from '@audius/harmony/src/assets/icons/TokenAUDIO.png'
 
-import { JupiterTokenListing } from '../buy-audio/types'
+/**
+ * From Jupiter API documentation:
+ * https://docs.jup.ag/jupiter-core/jupiter-sdk/v2/full-guide
+ * "6. Configure the input token, output token"
+ */
+export type JupiterTokenListing = {
+  chainId: number // 101,
+  address: string // 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  symbol: string // 'USDC',
+  name: string // 'Wrapped USDC',
+  decimals: number // 6,
+  logoURI: string // 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW/logo.png',
+}
 
 /**
  * Base token metadata without environment-specific addresses
@@ -72,3 +84,5 @@ export const TOKEN_LISTING_MAP: Record<string, JupiterTokenListing> = {
     address: BONK_MINT
   }
 }
+
+export type JupiterTokenSymbol = keyof typeof TOKEN_LISTING_MAP

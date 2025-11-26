@@ -1,8 +1,0 @@
-.modal {
-  width: 520px;
-}
-
-/** Allow conversion notice to be flush with the bottom of the modal **/
-.modalContent {
-  padding-bottom: 0;
-}

@@ -6,7 +6,7 @@ import {
   IconUSD,
   IconSOL,
   IconAUDIO
-} from 'components/buy-audio-modal/components/Icons'
+} from 'components/shared-icons/Icons'
 
 import { BlockContainer, Block } from './Block'
 import styles from './TransactionPurchaseMetadata.module.css'

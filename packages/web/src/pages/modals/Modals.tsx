@@ -9,8 +9,6 @@ import { AlbumTrackRemoveConfirmationModal } from 'components/album-track-remove
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import { ArtistPickModal } from 'components/artist-pick-modal/ArtistPickModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
-import { BuyAudioModal } from 'components/buy-audio-modal/BuyAudioModal'
-import { BuyAudioRecoveryModal } from 'components/buy-audio-modal/BuyAudioRecoveryModal'
 import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
@@ -103,8 +101,6 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   PublishConfirmation: PublishConfirmationModal,
   HideContentConfirmation: HideContentConfirmationModal,
   AlbumTrackRemoveConfirmation: AlbumTrackRemoveConfirmationModal,
-  BuyAudio: BuyAudioModal,
-  BuyAudioRecovery: BuyAudioRecoveryModal,
   TransactionDetails: TransactionDetailsModal,
   InboxSettings: InboxSettingsModal,
   CommentSettings: CommentSettingsModal,

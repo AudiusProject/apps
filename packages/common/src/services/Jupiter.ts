@@ -8,7 +8,10 @@ import {
 } from '@jup-ag/api'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
-import { TOKEN_LISTING_MAP } from '~/store/ui/buy-audio/constants'
+import {
+  TOKEN_LISTING_MAP,
+  JupiterTokenSymbol
+} from '~/store/ui/shared/tokenConstants'
 import { convertBigIntToAmountObject, removeNullable } from '~/utils'
 
 /**
@@ -17,9 +20,6 @@ import { convertBigIntToAmountObject, removeNullable } from '~/utils'
  * @see https://station.jup.ag/docs/additional-topics/troubleshooting#swap-execution
  */
 export const SLIPPAGE_TOLERANCE_EXCEEDED_ERROR = 6001
-
-// Define JupiterTokenSymbol type here since we can't import it directly
-export type JupiterTokenSymbol = keyof typeof TOKEN_LISTING_MAP
 
 export const DEFAULT_MAX_ACCOUNTS = 20
 export const MAX_ALLOWED_ACCOUNTS = 64

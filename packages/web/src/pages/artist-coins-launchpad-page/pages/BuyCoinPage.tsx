@@ -23,7 +23,7 @@ import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/reac
 import { useFormikContext } from 'formik'
 import { usePrevious } from 'react-use'
 
-import { IconAUDIO } from 'components/buy-audio-modal/components/Icons'
+import { IconAUDIO } from 'components/shared-icons/Icons'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
 import { useLaunchpadConfig } from 'hooks/useLaunchpadConfig'
 

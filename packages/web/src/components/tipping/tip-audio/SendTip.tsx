@@ -6,9 +6,7 @@ import { FeatureFlags } from '@audius/common/services'
 import {
   tippingSelectors,
   tippingActions,
-  getTierAndNumberForBalance,
-  buyAudioActions,
-  OnRampProvider
+  getTierAndNumberForBalance
 } from '@audius/common/store'
 import { isNullOrUndefined } from '@audius/common/utils'
 import { AUDIO, AudioWei } from '@audius/fixed-decimal'
@@ -24,11 +22,9 @@ import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import IconNoTierBadge from 'assets/img/tokenBadgePurple16@2x.webp'
-import { OnRampButton } from 'components/on-ramp-button'
 import Skeleton from 'components/skeleton/Skeleton'
 import Tooltip from 'components/tooltip/Tooltip'
 import { audioTierMap } from 'components/user-badges/UserBadges'
-import { useFlag } from 'hooks/useRemoteConfig'
 
 import { ProfileInfo } from '../../profile-info/ProfileInfo'
 
@@ -36,8 +32,7 @@ import { SupporterPrompt } from './SupporterPrompt'
 import styles from './TipAudio.module.css'
 
 const { getSendUser } = tippingSelectors
-const { beginTip, resetSend, sendTip } = tippingActions
-const { startBuyAudioFlow } = buyAudioActions
+const { sendTip } = tippingActions
 
 const messages = {
   availableToSend: 'AVAILABLE TO SEND',
@@ -48,7 +43,6 @@ const messages = {
   inputLabel: 'Amount to tip',
   inputPlaceholder: 'Enter an amount',
   inputTokenLabel: '$AUDIO',
-  buyAudioPrefix: 'Buy $AUDIO using '
 }
 
 export const SendTip = () => {
@@ -72,10 +66,6 @@ export const SendTip = () => {
   )
   const audioBadge = audioTierMap[tier as BadgeTier]
 
-  const { isEnabled: isStripeBuyAudioEnabled } = useFlag(
-    FeatureFlags.BUY_AUDIO_STRIPE_ENABLED
-  )
-
   const handleTipAmountChange = useCallback<TokenAmountInputChangeHandler>(
     (value, valueBigInt) => {
       setTipAmount(value as StringAudio)
@@ -88,21 +78,8 @@ export const SendTip = () => {
     dispatch(sendTip({ amount: tipAmount }))
   }, [dispatch, tipAmount])
 
-  const handleBuyWithStripeClicked = useCallback(() => {
-    dispatch(
-      startBuyAudioFlow({
-        provider: OnRampProvider.STRIPE,
-        onSuccess: {
-          action: beginTip({ user: receiver, source: 'buyAudio' })
-        }
-      })
-    )
-    dispatch(resetSend())
-  }, [dispatch, receiver])
-
   const isDisabled =
     !tipAmount || tipAmountWei <= BigInt(0) || tipAmountWei > accountBalance
-  const showBuyAudioButton = isStripeBuyAudioEnabled && isDisabled
 
   const renderAvailableAmount = () => (
     <div className={styles.amountAvailableContainer}>
@@ -150,24 +127,10 @@ export const SendTip = () => {
     >
       <div
         className={cn(styles.container, {
-          [styles.containerFill]: true,
-          [styles.containerDense]: showBuyAudioButton
+          [styles.containerFill]: true
         })}
       >
         <SupporterPrompt receiverId={receiver.user_id} />
-        {showBuyAudioButton ? (
-          <>
-            <OnRampButton
-              buttonPrefix={messages.buyAudioPrefix}
-              provider={OnRampProvider.STRIPE}
-              css={(theme) => ({
-                paddingVertical: theme.spacing.s
-              })}
-              onClick={handleBuyWithStripeClicked}
-            />
-            <div className={styles.divider} />
-          </>
-        ) : null}
         <ProfileInfo user={receiver} />
         <div className={styles.amountToSend}>
           <TokenAmountInput

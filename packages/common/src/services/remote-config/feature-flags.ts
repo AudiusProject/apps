@@ -2,8 +2,6 @@ import { Environment } from '../env'
 
 /* FeatureFlags must be lowercase snake case */
 export enum FeatureFlags {
-  BUY_AUDIO_COINBASE_ENABLED = 'buy_audio_coinbase_enabled',
-  BUY_AUDIO_STRIPE_ENABLED = 'buy_audio_stripe_enabled',
   VERIFY_HANDLE_WITH_TIKTOK = 'verify_handle_with_tiktok',
   VERIFY_HANDLE_WITH_TWITTER = 'verify_handle_with_twitter',
   VERIFY_HANDLE_WITH_INSTAGRAM = 'verify_handle_with_instagram',
@@ -34,8 +32,6 @@ export const environmentFlagDefaults: Record<
  * If optimizely errors, these default values are used.
  */
 export const flagDefaults: FlagDefaults = {
-  [FeatureFlags.BUY_AUDIO_COINBASE_ENABLED]: false,
-  [FeatureFlags.BUY_AUDIO_STRIPE_ENABLED]: false,
   [FeatureFlags.VERIFY_HANDLE_WITH_TIKTOK]: false,
   [FeatureFlags.VERIFY_HANDLE_WITH_TWITTER]: false,
   [FeatureFlags.VERIFY_HANDLE_WITH_INSTAGRAM]: false,

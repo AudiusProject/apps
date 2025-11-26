@@ -35,8 +35,6 @@ export const initialState: BasicModalsState = {
   DeleteTrackConfirmation: { isOpen: false },
   DuplicateAddConfirmation: { isOpen: false },
   FeatureFlagOverride: { isOpen: false },
-  BuyAudio: { isOpen: false },
-  BuyAudioRecovery: { isOpen: false },
   TransactionDetails: { isOpen: false },
   StripeOnRamp: { isOpen: false },
   InboxSettings: { isOpen: false },

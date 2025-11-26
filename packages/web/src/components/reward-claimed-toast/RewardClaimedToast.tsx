@@ -14,7 +14,7 @@ import { getLocationPathname } from 'store/routing/selectors'
 import { CLAIM_REWARD_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 
 import styles from './RewardClaimedToast.module.css'
-const { AUDIO_PAGE } = route
+const { REWARDS_PAGE } = route
 const { getShowRewardClaimedToast } = audioRewardsPageSelectors
 const { resetRewardClaimedToast } = audioRewardsPageActions
 
@@ -36,16 +36,12 @@ export const RewardClaimedToast = () => {
           <span className={styles.rewardClaimedToastIcon}>
             <i className='emoji face-with-party-horn-and-party-hat' />
           </span>
-          {pathname === AUDIO_PAGE ? (
-            messages.challengeCompleted
-          ) : (
-            <ToastLinkContent
-              text={messages.challengeCompleted}
-              linkText={messages.seeMore}
-              link={AUDIO_PAGE}
-              linkIcon={<IconCaretRight className={styles.seeMoreCaret} />}
-            />
-          )}
+          <ToastLinkContent
+            text={messages.challengeCompleted}
+            linkText={messages.seeMore}
+            link={REWARDS_PAGE}
+            linkIcon={<IconCaretRight className={styles.seeMoreCaret} />}
+          />
         </div>
       )
 

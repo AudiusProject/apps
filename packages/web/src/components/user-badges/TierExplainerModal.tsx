@@ -27,7 +27,7 @@ import { push } from 'utils/navigation'
 
 import styles from './TierExplainerModal.module.css'
 
-const { AUDIO_PAGE } = route
+const { REWARDS_PAGE } = route
 
 export const messages = {
   title: '$AUDIO VIP Tiers',
@@ -113,7 +113,8 @@ const TierExplainerModal = () => {
 
   const onClickLearnMore = useCallback(() => {
     handleDismiss()
-    dispatch(push(AUDIO_PAGE))
+    // Audio page removed - redirect to rewards page instead
+    dispatch(push(REWARDS_PAGE))
   }, [dispatch, handleDismiss])
 
   return (

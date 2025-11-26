@@ -54,7 +54,6 @@ const {
   HISTORY_PAGE,
   ABOUT_SETTINGS_PAGE,
   NOTIFICATION_SETTINGS_PAGE,
-  AUDIO_PAGE,
   PAYMENTS_PAGE
 } = route
 
@@ -232,11 +231,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
               prefix={<IconLogoCircleUSDCPng size='s' />}
               title={messages.usdcWallets}
               to={PAYMENTS_PAGE}
-            />
-            <Row
-              prefix={<TierIcon size='s' />}
-              title={messages.audioWallet}
-              to={AUDIO_PAGE}
             />
           </Grouping>
           <Grouping>

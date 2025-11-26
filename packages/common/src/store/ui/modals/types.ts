@@ -70,8 +70,6 @@ export type Modals =
   | 'ReplaceTrackConfirmation'
   | 'ReplaceTrackProgress'
   | 'FeatureFlagOverride'
-  | 'BuyAudio'
-  | 'BuyAudioRecovery'
   | 'TransactionDetails'
   | 'StripeOnRamp'
   | 'CoinflowOnramp'

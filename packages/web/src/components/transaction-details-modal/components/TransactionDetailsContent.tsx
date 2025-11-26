@@ -18,7 +18,6 @@ import {
 import { wAUDIO } from '@audius/fixed-decimal'
 import {
   IconExternalLink,
-  IconLogoCoinbasePay,
   IconLogoLinkByStripe as LogoStripeLink
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -243,13 +242,7 @@ export const TransactionDetailsContent = ({
 
           {transactionDetails.transactionType === TransactionType.PURCHASE ? (
             <Block className={styles.header} header={messages.method}>
-              {transactionDetails.method === TransactionMethod.COINBASE ? (
-                <IconLogoCoinbasePay
-                  className={styles.coinbaseLogo}
-                  width={155}
-                  height={20}
-                />
-              ) : transactionDetails.method === TransactionMethod.STRIPE ? (
+              {transactionDetails.method === TransactionMethod.STRIPE ? (
                 <LogoStripeLink
                   width={145}
                   height={32}

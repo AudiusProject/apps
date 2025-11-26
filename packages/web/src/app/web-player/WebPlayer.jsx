@@ -58,7 +58,6 @@ import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
 import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
 import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
 import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
-import { AudioPage } from 'pages/audio-page/AudioPage'
 import { CashPage } from 'pages/cash-page'
 import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
 import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
@@ -130,7 +129,6 @@ const {
   LIBRARY_PAGE,
   HISTORY_PAGE,
   DASHBOARD_PAGE,
-  AUDIO_PAGE,
   COIN_DETAIL_PAGE,
   COIN_REDEEM_PAGE,
   REWARDS_PAGE,
@@ -782,7 +780,6 @@ const WebPlayer = (props) => {
                 element={<EditCoinDetailsPage />}
               />
               <Route path={PAYMENTS_PAGE} element={<WalletPage />} />
-              <Route path={AUDIO_PAGE} element={<AudioPage />} />
               <Route path={WALLET_PAGE} element={<WalletPage />} />
               <Route path={CASH_PAGE} element={<CashPage />} />
               <Route path={REWARDS_PAGE} element={<RewardsPage />} />

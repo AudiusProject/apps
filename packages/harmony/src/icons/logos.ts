@@ -8,14 +8,11 @@ import IconAudiusLogoHorizontalColorNewSVG from '../assets/icons/AudiusLogoHoriz
 import IconAudiusLogoHorizontalNewSVG from '../assets/icons/AudiusLogoHorizontalNew.svg'
 import IconAudiusLogoVerticalSVG from '../assets/icons/AudiusLogoVertical.svg'
 import IconLogoWhiteBackgroundPng from '../assets/icons/AudiusLogoWhiteBg.png'
-import IconLogoCoinbaseSVG from '../assets/icons/Coinbase.svg'
-import IconLogoCoinbasePaySVG from '../assets/icons/CoinbasePay.svg'
 import IconDiscordSVG from '../assets/icons/Discord.svg'
 import IconFacebookSVG from '../assets/icons/Facebook.svg'
 import IconInstagramSVG from '../assets/icons/Instagram.svg'
 import IconLogoLinkByStripeSVG from '../assets/icons/LinkByStripe.svg'
 import IconLogoCircleSVG from '../assets/icons/LogoCircle.svg'
-import IconLogoCircleCoinbaseSVG from '../assets/icons/LogoCircleCoinbase.svg'
 import IconLogoCircleETHSVG from '../assets/icons/LogoCircleETH.svg'
 import IconLogoCircleSOLSVG from '../assets/icons/LogoCircleSOL.svg'
 import IconLogoCircleSTRSVG from '../assets/icons/LogoCircleSTR.svg'
@@ -44,14 +41,11 @@ export const IconAudiusLogoHorizontalNew =
 export const IconAudiusLogoHorizontalColorNew =
   IconAudiusLogoHorizontalColorNewSVG as IconComponent
 export const IconAudiusLogoVertical = IconAudiusLogoVerticalSVG as IconComponent
-export const IconLogoCoinbase = IconLogoCoinbaseSVG as IconComponent
-export const IconLogoCoinbasePay = IconLogoCoinbasePaySVG as IconComponent
 export const IconDiscord = IconDiscordSVG as IconComponent
 export const IconFacebook = IconFacebookSVG as IconComponent
 export const IconInstagram = IconInstagramSVG as IconComponent
 export const IconLogoLinkByStripe = IconLogoLinkByStripeSVG as IconComponent
 export const IconLogoCircle = IconLogoCircleSVG as IconComponent
-export const IconLogoCircleCoinbase = IconLogoCircleCoinbaseSVG as IconComponent
 export const IconLogoCircleETH = IconLogoCircleETHSVG as IconComponent
 export const IconLogoCircleSOL = IconLogoCircleSOLSVG as IconComponent
 export const IconLogoCircleSTR = IconLogoCircleSTRSVG as IconComponent
