@@ -167,7 +167,7 @@
     "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/sdk"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=22.0.0"
   },
   "author": "Audius",
   "license": "Apache-2.0",

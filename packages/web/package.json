@@ -234,7 +234,7 @@
     "base64url": "3.0.1",
     "browserify-zlib": "0.2.0",
     "buffer": "6.0.3",
-    "bundlesize": "0.18.2",
+    "bundlesize": "1.0.0-beta.2",
     "commander": "2.20.3",
     "constants-browserify": "^1.0.0",
     "crypto-browserify": "^3.12.0",

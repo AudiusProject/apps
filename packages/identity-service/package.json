@@ -126,7 +126,6 @@
     "prettier": "3.4.2",
     "prettier-config-standard": "7.0.0",
     "rimraf": "3.0.0",
-    "safari-push-notifications": "0.4.0",
     "sequelize-cli": "5.3.0",
     "sinon": "7.0.0",
     "standard": "17.0.0",

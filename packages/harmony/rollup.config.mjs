@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module'
+import { readFileSync } from 'node:fs'
 
 import alias from '@rollup/plugin-alias'
 import image from '@rollup/plugin-image'
@@ -7,9 +8,8 @@ import svgr from '@svgr/rollup'
 import postcss from 'rollup-plugin-postcss'
 import rollupTypescript from 'rollup-plugin-typescript2'
 
-import pkg from './package.json' assert { type: 'json' }
-
 const cjsRequire = createRequire(import.meta.url)
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 const tspCompiler = cjsRequire('ts-patch/compiler')
 
 const external = [
