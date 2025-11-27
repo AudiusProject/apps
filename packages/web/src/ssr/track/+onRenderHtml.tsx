@@ -20,39 +20,30 @@ const { extractCriticalToChunks, constructStyleTagsFromChunks } =
 
 type TrackPageContext = PageContextServer & {
   pageProps: {
-    track: Track
+    track: Track & { id: string }
     user: User
   }
-  userAgent: string
 }
 
 export default function render(pageContext: TrackPageContext) {
-  const { pageProps, userAgent, urlPathname } = pageContext
+  const { pageProps, headers, urlPathname } = pageContext
   const { track, user } = pageProps
-  const { track_id, title, permalink, release_date, created_at } = track
+  const { id, title, permalink, release_date, created_at } = track
   const { name: userName } = user
 
+  const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
   const seoMetadata = getTrackPageSEOFields({
     title,
     permalink,
     userName,
-    releaseDate: release_date || created_at
+    releaseDate: release_date || created_at,
+    hashId: id
   })
 
   const pageHtml = renderToString(
-    <ServerWebPlayer
-      isMobile={isMobile}
-      location={urlPathname}
-      initialState={{
-        // todo: prefill this in the query client
-        // users: { entries: { [user_id]: { metadata: user } } },
-        pages: {
-          track: { trackId: track_id, trackPermalink: permalink }
-        }
-      }}
-    >
+    <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
       <>
         <MetaTags {...seoMetadata} />
         {isMobile ? (

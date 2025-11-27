@@ -7,6 +7,7 @@ import {
   CollectionTrack,
   CollectionsPageType
 } from '@audius/common/store'
+import { Id } from '@audius/sdk'
 
 import CollectionHeader from 'components/collection/mobile/CollectionHeader'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
@@ -89,7 +90,7 @@ const CollectionPage = ({
   playing,
   previewing,
   type,
-  collection: { status, metadata, user },
+  collection,
   tracks,
   userId,
   isQueued,
@@ -103,6 +104,7 @@ const CollectionPage = ({
   onClickFavorites,
   onClickReposts
 }: CollectionPageProps) => {
+  const { status, metadata, user } = collection
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     if (metadata) {
@@ -202,7 +204,7 @@ const CollectionPage = ({
       canonicalUrl={canonicalUrl}
       structuredData={structuredData}
       entityType='collection'
-      entityId={playlistId}
+      hashId={playlistId ? Id.parse(playlistId) : undefined}
     >
       <div className={styles.collectionContent}>
         <div>

@@ -14,12 +14,12 @@ export const getUserPageSEOFields = ({
   handle,
   userName,
   bio,
-  userId
+  hashId
 }: {
   handle: string
   userName: string
   bio: string
-  userId?: number
+  hashId?: string
 }) => {
   const pageTitle = userName
   const pageDescription = createSeoDescription(
@@ -57,7 +57,7 @@ export const getUserPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'user' as const,
-    entityId: userId
+    hashId
   }
 }
 
@@ -66,13 +66,13 @@ export const getTrackPageSEOFields = ({
   userName,
   permalink,
   releaseDate,
-  trackId
+  hashId
 }: {
   title?: string
   userName?: string
   permalink?: string
   releaseDate?: string
-  trackId?: number
+  hashId?: string
 }) => {
   if (!title || !userName || !permalink) return {}
   const pageTitle = `${title} by ${userName}`
@@ -108,7 +108,7 @@ export const getTrackPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'track' as const,
-    entityId: trackId
+    hashId
   }
 }
 
@@ -118,7 +118,8 @@ export const getCollectionPageSEOFields = ({
   userName,
   userHandle,
   isAlbum,
-  permalink
+  permalink,
+  hashId
 }: {
   playlistName?: string
   playlistId?: number
@@ -126,6 +127,7 @@ export const getCollectionPageSEOFields = ({
   userHandle?: string
   isAlbum?: boolean
   permalink?: string
+  hashId?: string
 }) => {
   if (!playlistName || !playlistId || !userName || !userHandle) return {}
 
@@ -171,7 +173,7 @@ export const getCollectionPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'collection' as const,
-    entityId: playlistId
+    hashId
   }
 }
 

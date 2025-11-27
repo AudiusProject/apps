@@ -1,7 +1,5 @@
-import { useUser } from '@audius/common/src/api/tan-query/users/useUser'
-import { Collection } from '@audius/common/src/models/Collection'
+import { type Collection, type User } from '@audius/common/models'
 import { formatCount } from '@audius/common/src/utils/decimal'
-import { profilePage } from '@audius/common/src/utils/route'
 import IconHeart from '@audius/harmony/src/assets/icons/Heart.svg'
 import IconKebabHorizontal from '@audius/harmony/src/assets/icons/KebabHorizontal.svg'
 import IconPlay from '@audius/harmony/src/assets/icons/Play.svg'
@@ -19,21 +17,19 @@ import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
 
 import { ServerUserGeneratedText } from 'components/user-generated-text/ServerUserGeneratedText'
+import { profilePage } from 'utils/route'
 
 type DesktopServerCollectionPageProps = {
   collection: Collection
+  user: User
 }
 
-export const DesktopServerCollectionPage = (
-  props: DesktopServerCollectionPageProps
-) => {
-  const { collection } = props
-  const { data: user } = useUser(collection?.playlist_owner_id)
-
-  if (!collection || !user) return null
-
+export const DesktopServerCollectionPage = ({
+  collection,
+  user
+}: DesktopServerCollectionPageProps) => {
   const {
-    cover_art,
+    artwork,
     is_album,
     playlist_name,
     repost_count,
@@ -48,7 +44,12 @@ export const DesktopServerCollectionPage = (
       <Box w='100%' css={{ maxWidth: 1096 }} pt={112} ph='l' alignSelf='center'>
         <Paper direction='column' w='100%'>
           <Flex p='l' direction='row' gap='xl'>
-            <Artwork src={cover_art!} h={270} w={270} isLoading={false} />
+            <Artwork
+              src={artwork?.['480x480']}
+              h={270}
+              w={270}
+              isLoading={false}
+            />
             <Flex direction='column' justifyContent='space-between'>
               <Flex direction='column' gap='xl' pt='s'>
                 <Text variant='label' color='subdued'>

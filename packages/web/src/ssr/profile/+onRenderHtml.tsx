@@ -20,47 +20,37 @@ const { extractCriticalToChunks, constructStyleTagsFromChunks } =
 
 type TrackPageContext = PageContextServer & {
   pageProps: {
-    user: User
+    user: User & { id: string }
   }
-  userAgent: string
 }
 
 export default function render(pageContext: TrackPageContext) {
-  const { pageProps, userAgent, urlPathname } = pageContext
+  const { pageProps, headers, urlPathname } = pageContext
   const { user } = pageProps
-  const { user_id, name, bio } = user
+  const { id, name, bio } = user ?? {}
   // Use lower case since cache lookup by handle will lowercase it
-  const handle = user.handle.toLowerCase()
-
+  const handle = user?.handle?.toLowerCase() ?? ''
+  const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
   const seoMetadata = getUserPageSEOFields({
     handle,
     userName: name,
-    bio: bio ?? ''
+    bio: bio ?? '',
+    hashId: id
   })
 
   const pageHtml = renderToString(
-    <ServerWebPlayer
-      isMobile={isMobile}
-      location={urlPathname}
-      initialState={{
-        // todo: prefill this in the query client
-        // users: {
-        //   handles: { [handle]: user_id },
-        //   entries: { [user_id]: { metadata: user } }
-        // },
-        pages: {
-          profile: {
-            currentUser: handle,
-            entries: { [user_id]: { userId: user_id, handle } }
-          }
-        }
-      }}
-    >
+    <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
       <>
         <MetaTags {...seoMetadata} />
-        {isMobile ? <MobileServerProfilePage /> : <DesktopServerProfilePage />}
+        {user ? (
+          isMobile ? (
+            <MobileServerProfilePage user={user} />
+          ) : (
+            <DesktopServerProfilePage user={user} />
+          )
+        ) : null}
       </>
     </ServerWebPlayer>
   )

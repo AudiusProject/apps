@@ -1,1 +1,1 @@
-export const passToClient = ['pageProps', 'urlPathname', 'userAgent']
+export const passToClient = ['pageProps', 'urlPathname']

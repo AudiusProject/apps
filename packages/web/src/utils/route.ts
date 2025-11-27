@@ -1,6 +1,5 @@
 import { SearchCategory } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { route } from '@audius/common/utils'
 import { Location } from 'history'
 import { matchPath, useLocation } from 'react-router'
 
@@ -8,7 +7,33 @@ import { env } from 'services/env'
 
 import { encodeUrlName } from './urlUtils'
 
-const { SIGN_UP_PAGE, profilePage, collectionPage } = route
+// Local route functions to avoid importing from @audius/common/src/utils/route which pulls in formatUtil/dayjs
+const SIGN_UP_PAGE = '/signup'
+
+export const profilePage = (handle: string | null | undefined) => {
+  return `/${encodeUrlName(handle ?? '')}`
+}
+
+const collectionPage = (
+  handle?: string | null,
+  playlistName?: string | null,
+  playlistId?: ID | null,
+  permalink?: string | null,
+  isAlbum?: boolean
+) => {
+  // Prioritize permalink if available. If not, default to legacy routing
+  if (permalink) {
+    return permalink
+  } else if (playlistName && playlistId && handle) {
+    const collectionType = isAlbum ? 'album' : 'playlist'
+    return `/${encodeUrlName(handle)}/${collectionType}/${encodeUrlName(
+      playlistName
+    )}-${playlistId}`
+  } else {
+    console.error('Missing required arguments to get PlaylistPage route.')
+    return ''
+  }
+}
 
 const USE_HASH_ROUTING = env.USE_HASH_ROUTING
 

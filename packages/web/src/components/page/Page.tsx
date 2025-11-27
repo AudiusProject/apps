@@ -68,7 +68,7 @@ export const Page = (props: PageProps) => {
     containerRef,
     contentClassName,
     description,
-    entityId,
+    hashId,
     entityType,
     fadeDuration = 200,
     fromOpacity = 0.2,
@@ -94,7 +94,7 @@ export const Page = (props: PageProps) => {
     structuredData,
     noIndex,
     entityType,
-    entityId
+    hashId
   }
   const springProps = useSpring({
     from: { opacity: fromOpacity },

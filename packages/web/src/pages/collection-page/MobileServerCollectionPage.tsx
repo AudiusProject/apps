@@ -1,7 +1,5 @@
-import { useUser } from '@audius/common/src/api/tan-query/users/useUser'
-import { Collection } from '@audius/common/src/models/Collection'
+import type { Collection, User } from '@audius/common/models'
 import { formatCount } from '@audius/common/src/utils/decimal'
-import { profilePage } from '@audius/common/src/utils/route'
 import IconHeart from '@audius/harmony/src/assets/icons/Heart.svg'
 import IconKebabHorizontal from '@audius/harmony/src/assets/icons/KebabHorizontal.svg'
 import IconPlay from '@audius/harmony/src/assets/icons/Play.svg'
@@ -19,23 +17,21 @@ import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
 
 import { ServerUserGeneratedText } from 'components/user-generated-text/ServerUserGeneratedText'
+import { profilePage } from 'utils/route'
 
 import { ServerTrackList } from './components/ServerTrackList'
 
 type MobileServerCollectionPageProps = {
   collection: Collection
+  user: User
 }
 
-export const MobileServerCollectionPage = (
-  props: MobileServerCollectionPageProps
-) => {
-  const { collection } = props
-  const { data: user } = useUser(collection?.playlist_owner_id)
-
-  if (!collection || !user) return null
-
+export const MobileServerCollectionPage = ({
+  collection,
+  user
+}: MobileServerCollectionPageProps) => {
   const {
-    cover_art,
+    artwork,
     is_album,
     playlist_name,
     repost_count,
@@ -52,7 +48,12 @@ export const MobileServerCollectionPage = (
           <Text variant='label' color='subdued'>
             {is_album ? 'Album' : 'Playlist'}
           </Text>
-          <Artwork src={cover_art!} isLoading={false} h={224} w={224} />
+          <Artwork
+            src={artwork?.['480x480']}
+            isLoading={false}
+            h={224}
+            w={224}
+          />
           <Flex direction='column' gap='s'>
             <Text variant='heading' size='s'>
               {playlist_name}

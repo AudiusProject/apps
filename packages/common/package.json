@@ -45,7 +45,7 @@
     "@tanstack/react-query": "5.62.7",
     "@yornaath/batshit": "0.10.1",
     "async-retry": "1.3.3",
-    "dayjs": "1.10.7",
+    "dayjs": "^1.11.19",
     "formik": "2.4.6",
     "fxa-common-password-list": "0.0.2",
     "hashids": "2.2.1",

@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactElement } from 'react'
+import { ReactElement } from 'react'
 
 import imageProfilePicEmpty from '@audius/common/src/assets/img/imageProfilePicEmpty2X.png'
 import '@audius/harmony/dist/harmony.css'
@@ -17,44 +17,8 @@ import { Flex } from '@audius/harmony/src/components/layout/Flex'
 import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
 import { ThemeProvider } from '@audius/harmony/src/foundations/theme/ThemeProvider'
-import { QueryClientProvider } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { StaticRouter } from 'react-router-dom/server'
-import { PartialDeep } from 'type-fest'
-
-import { queryClient } from 'services/query-client'
-import { SsrContextProvider } from 'ssr/SsrContext'
-import { AppState } from 'store/types'
-
-import { AppContextProvider } from '../AppContextProvider'
-import { AudiusQueryProvider } from '../AudiusQueryProvider'
-import { ServerReduxProvider } from '../ServerReduxProvider'
-
-type ServerProviderProps = PropsWithChildren<{
-  initialState: PartialDeep<AppState>
-  isMobile: boolean
-  location: string
-}>
-
-const ServerProviders = (props: ServerProviderProps) => {
-  const { initialState, isMobile, children, location } = props
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ServerReduxProvider initialState={initialState}>
-        <AudiusQueryProvider>
-          <AppContextProvider>
-            <StaticRouter location={location}>
-              <SsrContextProvider value={{ isMobile, isServerSide: true }}>
-                <ThemeProvider theme='day'>{children}</ThemeProvider>
-              </SsrContextProvider>
-            </StaticRouter>
-          </AppContextProvider>
-        </AudiusQueryProvider>
-      </ServerReduxProvider>
-    </QueryClientProvider>
-  )
-}
 
 type WebPlayerContentProps = {
   children: ReactElement
@@ -251,27 +215,26 @@ const WebPlayerContent = (props: WebPlayerContentProps) => {
           </Flex>
         </Flex>
       </Flex>
-      {children}
+      <Flex w='100%' direction='column' css={{ flex: 1, overflow: 'hidden' }}>
+        {children}
+      </Flex>
     </Flex>
   )
 }
 
 type ServerWebPlayerProps = {
-  initialState: PartialDeep<AppState>
   isMobile: boolean
   location: string
   children: ReactElement
 }
 
 export const ServerWebPlayer = (props: ServerWebPlayerProps) => {
-  const { initialState, isMobile, location, children } = props
+  const { isMobile, location, children } = props
   return (
-    <ServerProviders
-      initialState={initialState}
-      isMobile={isMobile}
-      location={location}
-    >
-      <WebPlayerContent isMobile={isMobile}>{children}</WebPlayerContent>
-    </ServerProviders>
+    <StaticRouter location={location}>
+      <ThemeProvider theme='day'>
+        <WebPlayerContent isMobile={isMobile}>{children}</WebPlayerContent>
+      </ThemeProvider>
+    </StaticRouter>
   )
 }

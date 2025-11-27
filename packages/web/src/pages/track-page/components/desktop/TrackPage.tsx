@@ -4,6 +4,7 @@ import { useToggleFavoriteTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { ID, Track, User, FavoriteSource } from '@audius/common/models'
 import { Box, Flex } from '@audius/harmony'
+import { Id } from '@audius/sdk'
 
 import { CommentSection } from 'components/comments/CommentSection'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
@@ -161,7 +162,7 @@ const TrackPage = ({
       canonicalUrl={canonicalUrl}
       structuredData={structuredData}
       entityType='track'
-      entityId={heroTrack?.track_id}
+      hashId={heroTrack?.track_id ? Id.parse(heroTrack.track_id) : undefined}
       variant='flush'
       scrollableSearch
       fromOpacity={1}

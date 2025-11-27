@@ -23,6 +23,7 @@ import {
   IconPlaylists,
   IconRepost as IconReposts
 } from '@audius/harmony'
+import { Id } from '@audius/sdk'
 import cn from 'classnames'
 
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
@@ -465,7 +466,7 @@ const ProfilePage = g(
           canonicalUrl={canonicalUrl}
           structuredData={structuredData}
           entityType='user'
-          entityId={userId!}
+          hashId={profile?.user_id ? Id.parse(profile.user_id) : undefined}
           containerClassName={styles.container}
         >
           <ProfileHeader

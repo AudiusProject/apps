@@ -1,4 +1,4 @@
-import { useProfileUser } from '@audius/common/src/api/tan-query/users/useProfileUser'
+import type { User } from '@audius/common/models'
 import { formatCount } from '@audius/common/src/utils/decimal'
 import BadgeArtist from '@audius/harmony/src/assets/icons/ArtistBadge.svg'
 import IconLink from '@audius/harmony/src/assets/icons/Link.svg'
@@ -19,10 +19,13 @@ const messages = {
   profilePicAltText: 'User Profile Picture'
 }
 
-export const MobileServerProfilePage = () => {
-  const { user } = useProfileUser()
-  if (!user) return null
+type MobileServerProfilePageProps = {
+  user: User
+}
 
+export const MobileServerProfilePage = ({
+  user
+}: MobileServerProfilePageProps) => {
   const {
     bio,
     name,
@@ -40,6 +43,11 @@ export const MobileServerProfilePage = () => {
   const hasEllipsis = website
   const isDescriptionMinimized = true
 
+  // Use profile picture with blur as fallback if cover photo is not available
+  const coverPhotoUrl =
+    cover_photo?.['2000x'] ?? profile_picture?.['1000x1000'] ?? null
+  const useBlurFallback = !cover_photo?.['2000x'] && profile_picture
+
   return (
     <Flex direction='column' backgroundColor='default'>
       <Flex
@@ -50,14 +58,27 @@ export const MobileServerProfilePage = () => {
         alignItems='center'
         css={{ overflow: 'hidden' }}
       >
-        {/* @ts-ignore */}
-        <Box as='img' src={cover_photo!} w='100%' />
+        {coverPhotoUrl ? (
+          <Box
+            as='img'
+            // @ts-ignore
+            src={coverPhotoUrl}
+            w='100%'
+            css={{
+              filter: useBlurFallback ? 'blur(20px)' : undefined,
+              transform: useBlurFallback ? 'scale(1.1)' : undefined
+            }}
+          />
+        ) : (
+          <Box w='100%' h={96} backgroundColor='surface1' />
+        )}
         {isArtist && !user.is_deactivated ? (
           <BadgeArtist
             css={{
               position: 'absolute',
               top: 21,
               right: 13,
+              fill: 'white',
               boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.3)'
             }}
           />

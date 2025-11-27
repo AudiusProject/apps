@@ -30,14 +30,14 @@
     "@types/react-dom": "18.3.1",
     "@typescript-eslint/eslint-plugin": "6.0.0",
     "@typescript-eslint/parser": "6.0.0",
-    "@vitejs/plugin-react": "4.0.3",
+    "@vitejs/plugin-react": "5.1.1",
     "env-cmd": "10.1.0",
     "eslint": "8.56.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-react-refresh": "0.4.3",
     "vite-plugin-node-polyfills": "0.17.0",
     "typescript": "5.0.2",
-    "vite": "4.4.5",
+    "vite": "7.2.4",
     "wrangler": "3.30.1"
   }
 }

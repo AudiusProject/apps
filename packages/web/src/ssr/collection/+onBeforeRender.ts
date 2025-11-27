@@ -1,45 +1,39 @@
-import {
-  userCollectionMetadataFromSDK,
-  userMetadataFromSDK
-} from '@audius/common/adapters'
-import { FullPlaylistResponseFromJSON } from '@audius/sdk/src/sdk/api/generated/full/models/FullPlaylistResponse'
 import type { PageContextServer } from 'vike/types'
 
-import { env } from 'services/env'
+// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
+const getApiUrl = () => {
+  const env = process.env.VITE_ENVIRONMENT || 'development'
+  switch (env) {
+    case 'production':
+      return 'https://api.audius.co'
+    case 'staging':
+      return 'https://api.staging.audius.co'
+    case 'development':
+    default:
+      return process.env.VITE_API_URL || 'http://audius-api'
+  }
+}
 
 export async function onBeforeRender(pageContext: PageContextServer) {
   const { handle, slug } = pageContext.routeParams
 
-  // Fetching directly from API rather than using the sdk because
-  // including the sdk increases bundle size and creates substantial cold start times
-  const requestPath = `v1/full/playlists/by_permalink/${handle}/${slug}`
-  const requestUrl = `${env.API_URL}/${requestPath}`
-
-  const res = await fetch(requestUrl)
-  if (res.status !== 200) {
-    throw new Error(requestUrl)
-  }
-
-  const { data } = FullPlaylistResponseFromJSON(await res.json())
-  if (!data || data.length === 0) {
-    throw new Error(
-      `Parsed SDK response returned no playlists for ${requestUrl}`
-    )
-  }
-  const [apiCollection] = data
-  const collection = {
-    ...userCollectionMetadataFromSDK(apiCollection),
-    cover_art: apiCollection.artwork?._1000x1000
-  }
-
-  const { user: apiUser } = apiCollection
-  const user = {
-    ...userMetadataFromSDK(apiUser),
-    cover_photo: apiUser.coverPhoto?._2000x,
-    profile_picture: apiUser.profilePicture?._1000x1000
-  }
-
   try {
+    const requestPath = `v1/full/playlists/by_permalink/${handle}/${slug}`
+    const requestUrl = `${getApiUrl()}/${requestPath}`
+
+    const res = await fetch(requestUrl)
+    if (res.status !== 200) {
+      throw new Error(requestUrl)
+    }
+
+    const json = await res.json()
+    if (!json.data || json.data.length === 0) {
+      throw new Error(`No playlist found for handle: ${handle}, slug: ${slug}`)
+    }
+    const apiCollection = json.data[0]
+
+    const { user, ...collection } = apiCollection
+
     return {
       pageContext: {
         pageProps: {

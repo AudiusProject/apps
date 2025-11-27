@@ -1,4 +1,4 @@
-import type { Collection, Track, User } from '@audius/common/models'
+import type { Collection, User } from '@audius/common/models'
 import createEmotionServer from '@emotion/server/create-instance'
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
@@ -18,21 +18,20 @@ import { getIndexHtml } from '../getIndexHtml'
 const { extractCriticalToChunks, constructStyleTagsFromChunks } =
   createEmotionServer(harmonyCache)
 
-type TrackPageContext = PageContextServer & {
+type CollectionPageContext = PageContextServer & {
   pageProps: {
-    collection: Collection
+    collection: Collection & { id: string }
     user: User
-    tracks: Track[]
   }
-  userAgent: string
 }
 
-export default function render(pageContext: TrackPageContext) {
-  const { pageProps, userAgent, urlPathname } = pageContext
+export default function render(pageContext: CollectionPageContext) {
+  const { pageProps, headers, urlPathname } = pageContext
   const { collection, user } = pageProps
-  const { playlist_id, playlist_name, permalink, is_album } = collection
+  const { id, playlist_id, playlist_name, permalink, is_album } = collection
   const { name: userName, handle: userHandle } = user
 
+  const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
   const seoMetadata = getCollectionPageSEOFields({
@@ -41,30 +40,18 @@ export default function render(pageContext: TrackPageContext) {
     userName,
     userHandle,
     isAlbum: is_album,
-    permalink
+    permalink,
+    hashId: id
   })
 
   const pageHtml = renderToString(
-    <ServerWebPlayer
-      isMobile={isMobile}
-      location={urlPathname}
-      initialState={{
-        // todo: prefill this in the query client
-        // users: { entries: { [user_id]: { metadata: user } } },
-        pages: {
-          collection: {
-            collectionId: playlist_id,
-            collectionPermalink: permalink
-          }
-        }
-      }}
-    >
+    <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
       <>
         <MetaTags {...seoMetadata} />
         {isMobile ? (
-          <MobileServerCollectionPage collection={collection} />
+          <MobileServerCollectionPage collection={collection} user={user} />
         ) : (
-          <DesktopServerCollectionPage collection={collection} />
+          <DesktopServerCollectionPage collection={collection} user={user} />
         )}
       </>
     </ServerWebPlayer>

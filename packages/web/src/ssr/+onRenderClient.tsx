@@ -20,12 +20,9 @@ window.process = { ...processBrowser, env: process.env }
 // Useful for testing the SSR output
 const HYDRATE_CLIENT = true
 
-export default async function render(
-  pageContext: PageContextClient & {
-    userAgent: string
-  }
-) {
-  const { userAgent } = pageContext
+export default async function render(pageContext: PageContextClient) {
+  // On client-side, get userAgent from navigator directly
+  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : ''
   const isCrawler = checkIsCrawler(userAgent)
   const isMobile = getIsMobile()
 

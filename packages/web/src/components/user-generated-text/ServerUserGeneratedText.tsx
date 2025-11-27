@@ -1,6 +1,5 @@
 import { Ref, forwardRef } from 'react'
 
-import { squashNewLines } from '@audius/common/src/utils/formatUtil'
 import { Text, TextProps } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
 import Linkify from 'linkify-react'
@@ -23,6 +22,24 @@ const renderLink = ({ attributes, content }: IntermediateRepresentation) => {
       {content}
     </TextLink>
   )
+}
+
+// Simple squashNewLines implementation to avoid importing formatUtil which pulls in dayjs
+const squashNewLines = (
+  str: string | null | undefined,
+  newlineMax: number = 2
+) => {
+  return str
+    ? str
+        .replace(
+          new RegExp(
+            `\\n\\s*(\\n\\s*){${Math.max(newlineMax - 2, 1)}}\\n`,
+            'g'
+          ),
+          '\n'.repeat(newlineMax)
+        )
+        .trim()
+    : str
 }
 
 type ServerUserGeneratedTextProps = TextProps

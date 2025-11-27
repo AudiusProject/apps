@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+// import { Id } from '@audius/sdk'
 import { Helmet } from 'react-helmet'
 
 import { env } from 'services/env'
@@ -28,9 +28,9 @@ export type MetaTagsProps = {
    */
   entityType?: 'user' | 'collection' | 'track'
   /**
-   * Entity ID for OG URL generation (will be converted to hash-id)
+   * Hash ID for OG URL generation (id field from entities)
    */
-  entityId?: number
+  hashId?: string
 }
 
 /**
@@ -38,9 +38,9 @@ export type MetaTagsProps = {
  */
 const generateOgUrl = (
   entityType?: 'user' | 'collection' | 'track',
-  entityId?: number
+  hashId?: string
 ): string | undefined => {
-  if (!entityType || !entityId) {
+  if (!entityType || !hashId) {
     return undefined
   }
 
@@ -49,9 +49,6 @@ const generateOgUrl = (
     env.ENVIRONMENT === 'staging'
       ? 'https://og.staging.audius.co'
       : 'https://og.audius.co'
-
-  // Convert entity ID to hash-id
-  const hashId = Id.parse(entityId)
 
   // Generate the path based on entity type
   const path = `/${entityType}/${hashId}`
@@ -74,15 +71,15 @@ export const MetaTags = (props: MetaTagsProps) => {
     structuredData,
     noIndex = false,
     entityType,
-    entityId
+    hashId
   } = props
 
   const formattedTitle = title
     ? `${title} ${messages.dotAudius}`
     : messages.audius
 
-  // Generate OG URL if entity type and ID are provided
-  const ogUrl = generateOgUrl(entityType, entityId)
+  // Generate OG URL if entity type and hash ID are provided
+  const ogUrl = generateOgUrl(entityType, hashId)
 
   return (
     <>

@@ -1,35 +1,36 @@
-import { userMetadataFromSDK } from '@audius/common/adapters'
-import { FullUserResponseFromJSON } from '@audius/sdk/src/sdk/api/generated/full/models/FullUserResponse'
 import type { PageContextServer } from 'vike/types'
 
-import { env } from 'services/env'
+// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
+const getApiUrl = () => {
+  const env = process.env.VITE_ENVIRONMENT || 'development'
+  switch (env) {
+    case 'production':
+      return 'https://api.audius.co'
+    case 'staging':
+      return 'https://api.staging.audius.co'
+    case 'development':
+    default:
+      return process.env.VITE_API_URL || 'http://audius-api'
+  }
+}
 
 export async function onBeforeRender(pageContext: PageContextServer) {
   const { handle } = pageContext.routeParams
 
   try {
-    // Fetching directly from API rather than using the sdk because
-    // including the sdk increases bundle size and creates substantial cold start times
     const requestPath = `v1/full/users/handle/${handle}`
-    const requestUrl = `${env.API_URL}/${requestPath}`
+    const requestUrl = `${getApiUrl()}/${requestPath}`
 
     const res = await fetch(requestUrl)
     if (res.status !== 200) {
       throw new Error(requestUrl)
     }
 
-    const { data } = FullUserResponseFromJSON(await res.json())
-    if (!data || data.length === 0) {
-      throw new Error(`Parsed SDK response returned no users for ${requestUrl}`)
+    const json = await res.json()
+    if (!json.data || json.data.length === 0) {
+      throw new Error(`No user found for handle: ${handle}`)
     }
-    const apiUser = data[0]
-
-    // Include api user images.
-    const user = {
-      ...userMetadataFromSDK(apiUser),
-      cover_photo: apiUser.coverPhoto?._2000x,
-      profile_picture: apiUser.profilePicture?._1000x1000
-    }
+    const user = json.data[0]
 
     return {
       pageContext: {

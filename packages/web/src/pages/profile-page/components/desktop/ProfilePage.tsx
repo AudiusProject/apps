@@ -32,6 +32,7 @@ import {
   Hint,
   IconQuestionCircle
 } from '@audius/harmony'
+import { Id } from '@audius/sdk'
 import cn from 'classnames'
 
 import { ConfirmationModal } from 'components/confirmation-modal'
@@ -496,7 +497,7 @@ const ProfilePage = ({
       canonicalUrl={canonicalUrl}
       structuredData={structuredData}
       entityType='user'
-      entityId={userId!}
+      hashId={profile?.user_id ? Id.parse(profile.user_id) : undefined}
       variant='flush'
       scrollableSearch
       fromOpacity={1}

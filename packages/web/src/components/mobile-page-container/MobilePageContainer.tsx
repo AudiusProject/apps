@@ -61,7 +61,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
     className,
     containerClassName,
     description,
-    entityId,
+    hashId,
     entityType,
     fullHeight = false,
     hasDefaultHeader = false,
@@ -127,7 +127,7 @@ const MobilePageContainer = (props: MobilePageContainerProps) => {
     canonicalUrl,
     structuredData,
     noIndex,
-    entityId,
+    hashId,
     entityType
   }
 

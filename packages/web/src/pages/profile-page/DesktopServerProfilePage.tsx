@@ -1,4 +1,4 @@
-import { useProfileUser } from '@audius/common/src/api/tan-query/users/useProfileUser'
+import type { User } from '@audius/common/models'
 import BadgeArtist from '@audius/harmony/src/assets/icons/ArtistBadge.svg'
 import { Box } from '@audius/harmony/src/components/layout/Box'
 import { Flex } from '@audius/harmony/src/components/layout/Flex'
@@ -11,10 +11,13 @@ const messages = {
   following: 'Following'
 }
 
-export const DesktopServerProfilePage = () => {
-  const { user } = useProfileUser()
-  if (!user) return null
+type DesktopServerProfilePageProps = {
+  user: User
+}
 
+export const DesktopServerProfilePage = ({
+  user
+}: DesktopServerProfilePageProps) => {
   const {
     cover_photo,
     handle,
@@ -28,16 +31,30 @@ export const DesktopServerProfilePage = () => {
 
   const isArtist = track_count > 0
 
+  // Use profile picture with blur as fallback if cover photo is not available
+  const coverPhotoUrl =
+    cover_photo?.['2000x'] ?? profile_picture?.['1000x1000'] ?? null
+  const useBlurFallback = !cover_photo?.['2000x'] && profile_picture
+
   return (
-    <Flex w='100%' direction='column'>
-      <Box
-        as='img'
-        // @ts-ignore
-        src={cover_photo}
-        w='100%'
-        h={376}
-        css={{ objectFit: 'cover' }}
-      />
+    <Flex w='100%' direction='column' css={{ overflow: 'hidden' }}>
+      {coverPhotoUrl ? (
+        <Box
+          as='img'
+          // @ts-ignore
+          src={coverPhotoUrl}
+          w='100%'
+          h={376}
+          css={{
+            objectFit: 'cover',
+            filter: useBlurFallback ? 'blur(40px)' : undefined,
+            transform: useBlurFallback ? 'scale(1.1)' : undefined,
+            position: 'relative'
+          }}
+        />
+      ) : (
+        <Box w='100%' h={376} backgroundColor='surface1' />
+      )}
       <Box
         w='100%'
         ph='l'
@@ -65,7 +82,7 @@ export const DesktopServerProfilePage = () => {
               w='100%'
               as='img'
               // @ts-ignore
-              src={profile_picture}
+              src={profile_picture['480x480']}
               css={{ border: '4px solid var(--harmony-n-25)' }}
               borderRadius='circle'
             />
@@ -83,6 +100,7 @@ export const DesktopServerProfilePage = () => {
           >
             <BadgeArtist
               css={{
+                fill: 'white',
                 filter: 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3))',
                 visibility: isArtist ? 'visible' : 'hidden'
               }}
