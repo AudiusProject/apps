@@ -52,9 +52,6 @@ parameters:
   run-embed-workflow:
     type: boolean
     default: false
-  run-harmony-workflow:
-    type: boolean
-    default: false
   run-protocol-dashboard-workflow:
     type: boolean
     default: false
