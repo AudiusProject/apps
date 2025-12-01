@@ -13,7 +13,7 @@
     "start:dev": "npm run configure-local-env && ./node_modules/.bin/env-cmd -f .env.dev.local turbo run start",
     "start:stage": "npm run configure-stage-env && ./node_modules/.bin/env-cmd -f .env.stage.local turbo run start",
     "start:prod": "npm run configure-prod-env && ./node_modules/.bin/env-cmd -f .env.prod.local turbo run start",
-    "build": "NODE_OPTIONS=--max_old_space_size=8192 tsc -p ./tsconfig.node.json && vite build",
+    "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
     "build:stage": "npm run configure-stage-env && ./node_modules/.bin/env-cmd -f .env.stage.local turbo run build",
     "build:prod": "npm run configure-prod-env && ./node_modules/.bin/env-cmd -f .env.prod.local turbo run build",
     "deploy:stage": "wrangler deploy --env staging",
