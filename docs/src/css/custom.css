@@ -349,20 +349,20 @@ article {
   padding-left: 1.5rem;
 }
 
-/* force first navbar link to not highlight */
-.navbar__items > a:nth-child(1) {
+/* force first navbar link to not highlight (but allow active state) */
+.navbar__items > a:nth-child(1):not(.navbar__link--active) {
   color: #4d535a;
 }
 
-.navbar__items > a:nth-child(1):hover {
+.navbar__items > a:nth-child(1):hover:not(.navbar__link--active) {
   color: var(--ifm-navbar-link-hover-color);
 }
 
-html[data-theme='dark'] .navbar__items > a:nth-child(1) {
+html[data-theme='dark'] .navbar__items > a:nth-child(1):not(.navbar__link--active) {
   color: #e0e6fa;
 }
 
-html[data-theme='dark'] .navbar__items > a:nth-child(1):hover {
+html[data-theme='dark'] .navbar__items > a:nth-child(1):hover:not(.navbar__link--active) {
   color: var(--ifm-navbar-link-hover-color);
 }
 

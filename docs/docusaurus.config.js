@@ -89,7 +89,7 @@ const config = {
             label: 'Welcome',
             to: '/',
             position: 'right',
-            activeBasePath: 'learn',
+            activeBaseRegex: '^/$|^$',
           },
           {
             label: 'API',
