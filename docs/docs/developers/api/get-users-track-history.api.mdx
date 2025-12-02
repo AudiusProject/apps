@@ -1,0 +1,291 @@
+---
+id: get-users-track-history
+title: "Get User's Track History"
+description: "Get the tracks the user recently listened to."
+sidebar_label: "Get User's Track History"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFWUuP2zYQ/iuCLkkKZ+1Nk6LwLUXSNIc+0CS9BAuBliibsSQqJOVHDP/3zpCUTEmU5I0L9LDZpTjkPPjNx+HkFCqyluHyc1hJKmT4MAsTKmPBSsV4ES7Dd1QFakMDJUi8lfpPlAwEjWmhsmOQMaloQZNA8btwFvKSCoJr3yd29ScQfyKDj7hB8BtIc3EEwZIIklOFSpefT2EBA1jAEphiqLgkahN2rXmtdwvev4EZQb9WTFBQo0RFZ6GMNzQn4fIUqmOJe0klWLEOz+dZsz1PU0lVreJrRbUpbR0fwcWiylegh6cBUzQHt3kgt6y8Q/VplQUpF0FJ1qzQrgZP4e9m0Q8QkpypZ6HHJFYouqaiZZOW/i6TUqrizbVq6p0n1KQsgzMJaoFrgiq5UBEc5YYn0/ujcNAID20/Cyn4i7BUTGUUxkQogE6kVeLZZ5RIGiVE4TAjMGWAWH8iSUKTelBm5Cj1spJLhX9JsqP4O+fNShmtjhFiO3zoeZcA0GLtxXUOuvLTPhIZ263aqtGYiF0R1MokBYKjSdCcbEGLHmOmUKmuPM63Rcwhds/fEEWe/06lBGzXJmwoSSBAPhsg1AS0ERXsiQwkWyMnrI4XgzBn8DNRlUCbYr67HmMtoz7Uu1xh1kUjBAdtnKE1yfdY84AAkiUvJEAH5l8sFvirrfNDFccQM9go5pCFhUIRUpYZizVXzL9IlDv19fDVF8AMolUgiSpmtKDNjhQRgug0RhLQe2fZn6mm0Ashfg5jSAlpxeyvSO8wg4zKAQwkL5Hsx3VfRPvhcDf1YfsAyzL8pG8ON6PtGJMSMw8wb+2cigUAwjrmw0qYMDyIHEmZCxSxi49/GAyZpeeZ5RSIJaTojqljiEBzo9eL2mSkboqFGwDXDOC8PRdbjaU8ByxFMa8KVJ5U5pKFP1Oy4wJWN3NrWpjM0MQho4Tvi4yThKw0kcIXkMerK4vIjrDMfgdncpKxoj6aZj9Dms2wJmTDlFNxqV2YhPn9q8UBfrxAe/nz4gA/3rn7xQIWLha+WeeodaCj2ppzhyk8+5ooemGfeD8bDfHAbCnojtH94DweSQR3L52WMIzoM8x7shfJFedwaxYomnPu19K6WP1KRDywMmeHiKfTR21KyTFOc5MA6kREvgkvxGYSct0FV+ACnMb0ghlnyjhkdjMOOnngqbV6qeiVaWeyV8RU5D6IGcs8MzoZu+yRraq8SVsq4mgPd4WuflOeZXxPL5xhP4jmw4YUSeayiEsVSCpUkyegxM7D7clSpke2Rqv5fYhIZJldLMJBJRPHRlmVJZRSjk32C7h8ISOuEOxVwni0IhkpYn3DmVS0MrVl0Z6pTcQKuNDW8PTozSi2VXzb/wz/Kl1cWNOmOc8JvPeAbS1bMrByBKazcMW497suVqJywxWfTrefXi4O3l1eIHWOp4er6NzDjT8J2lDyylh0PYJdXYR5Gc0eUzS2dX30Y0IGBWMSfnh4jRqC3hXCFo1eyT1dSTbAzwk3b1LvZMbj4cnBe6WTyN4TBcjp2wswrQvz//u+79pzFX+7vOEV6BCf93BaXOmVcKjY56HDi0PTLlOOypTkyCs1KtqhWa/fPeb1h89Dxl7BIXOGnrZPZPAWnpGCVnlg1gbwvIe3mNTPOJhiIiCxMc1Fgb4Wz065PHiqbo3sPTSnJPYnQFM+D9AXDCjJhxUkCT1E8FAcTUEZ4auSsAKPwjweRsqofjcoLFkB7/KorkJabOveUPoKW8H+tUutkqzzVNDkoAuFZqTJZLpUcxb7o9razxuZkbi7T722Q+6Ubkxi6ffQey4070NXfmNamFHdC8BZJC1fN+AXkjjdl0tHwCy47y/4VJBKbaCK/KZLqe6KH/srfuVixQA8RU/8lbc/QQVcNAEVgovOCnwXmMbcEp4/+rSwB7sM57o3PD+x5Dy33s9tEQ/coDc0TdxKZBggpUq5nM9Jye6QDSp5F/P57j7ECLMiNTWLjebrv973u7x6UfDPfWBmcX8zc3+30IcORJ4Tnc62PzTSaO689BqPH93atuhS9KDmAEym01a7fLKRqrvos3Cp02HTGGHDBQHYgO0oeTqt4KH1SWTnM342zT0MYsIksgScQkoySUcc+A871V7ftvQYOj3zHckqFNLtkputrJvXI5rrzvgNijvt7BFltcgNytq97RFd7Y75rRrdZvOUUlf2Br1XN5xH7Ll0ty+GPOBAMHNLPioXnv5tL6hngfufRF799X1ZtM67tgtMOmNHzjaVH5+S398JH4nWQFf+Fuw8tjN+rXVue75ln5F9Hce0dNO61x1HGDQ30bu3H+GG/ReBX/Tx
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User's Track History"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/history/tracks"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get the tracks the user recently listened to.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"query","in":"query","description":"The filter query","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"sort_method","in":"query","description":"The sort method","schema":{"type":"string","enum":["title","artist_name","release_date","last_listen_date","added_date","plays","reposts","saves","most_listens_by_user"]}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"sort_direction","in":"query","description":"The sort direction","schema":{"type":"string","enum":["asc","desc"]}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Header Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Message","in":"header","description":"The data that was signed by the user for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Signature","in":"header","description":"The signature of data, used for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={false}
+                        schemaName={"object[]"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"array","items":{"allOf":[{"required":["class","item","item_type","timestamp"],"type":"object","properties":{"timestamp":{"type":"string"},"item_type":{"type":"string","example":"track","enum":["track","playlist"]},"item":{"type":"object","properties":{}},"class":{"type":"string"}},"discriminator":{"propertyName":"class"},"title":"activity"},{"required":["item","item_type"],"type":"object","properties":{"item_type":{"type":"string","example":"track","enum":["track"]},"item":{"required":["artwork","comment_count","duration","favorite_count","genre","id","is_downloadable","is_original_available","permalink","play_count","repost_count","title","user"],"type":"object","properties":{"artwork":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"}},"title":"track_artwork"},"description":{"type":"string"},"genre":{"type":"string"},"id":{"type":"string"},"track_cid":{"type":"string"},"preview_cid":{"type":"string"},"orig_file_cid":{"type":"string"},"orig_filename":{"type":"string"},"is_original_available":{"type":"boolean"},"mood":{"type":"string"},"release_date":{"type":"string"},"isrc":{"type":"string"},"remix_of":{"type":"object","properties":{"tracks":{"type":"array","items":{"required":["parent_track_id"],"type":"object","properties":{"parent_track_id":{"type":"string"}},"title":"track_element"}}},"title":"remix_parent"},"repost_count":{"type":"integer"},"favorite_count":{"type":"integer"},"comment_count":{"type":"integer"},"tags":{"type":"string"},"title":{"type":"string"},"user":{"required":["album_count","erc_wallet","followee_count","follower_count","handle","id","is_available","is_deactivated","is_verified","name","playlist_count","repost_count","spl_wallet","spl_usdc_wallet","supporter_count","supporting_count","total_audio_balance","track_count","verified_with_instagram","verified_with_tiktok","verified_with_twitter","wallet"],"type":"object","properties":{"album_count":{"type":"integer"},"artist_pick_track_id":{"type":"string"},"bio":{"type":"string"},"cover_photo":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"}},"title":"cover_photo"},"followee_count":{"type":"integer"},"follower_count":{"type":"integer"},"handle":{"type":"string"},"id":{"type":"string"},"is_verified":{"type":"boolean"},"twitter_handle":{"type":"string"},"instagram_handle":{"type":"string"},"tiktok_handle":{"type":"string"},"verified_with_twitter":{"type":"boolean"},"verified_with_instagram":{"type":"boolean"},"verified_with_tiktok":{"type":"boolean"},"website":{"type":"string"},"donation":{"type":"string"},"location":{"type":"string"},"name":{"type":"string"},"playlist_count":{"type":"integer"},"profile_picture":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"}},"title":"profile_picture"},"repost_count":{"type":"integer"},"track_count":{"type":"integer"},"is_deactivated":{"type":"boolean"},"is_available":{"type":"boolean"},"erc_wallet":{"type":"string"},"spl_wallet":{"type":"string"},"spl_usdc_wallet":{"type":"string"},"spl_usdc_payout_wallet":{"type":"string"},"supporter_count":{"type":"integer"},"supporting_count":{"type":"integer"},"total_audio_balance":{"type":"integer"},"wallet":{"type":"string","description":"The user's Ethereum wallet address for their account"}},"title":"user"},"duration":{"type":"integer"},"is_downloadable":{"type":"boolean"},"play_count":{"type":"integer"},"permalink":{"type":"string"},"is_streamable":{"type":"boolean"},"ddex_app":{"type":"string"},"playlists_containing_track":{"type":"array","items":{"type":"integer"}},"pinned_comment_id":{"type":"integer"},"album_backlink":{"required":["permalink","playlist_id","playlist_name"],"type":"object","properties":{"playlist_id":{"type":"integer"},"playlist_name":{"type":"string"},"permalink":{"type":"string"}},"title":"album_backlink"}},"title":"Track"}}}],"title":"track_activity"}}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": [\n    {\n      \"timestamp\": \"string\",\n      \"item_type\": \"track\",\n      \"item\": {\n        \"artwork\": {\n          \"150x150\": \"string\",\n          \"480x480\": \"string\",\n          \"1000x1000\": \"string\"\n        },\n        \"description\": \"string\",\n        \"genre\": \"string\",\n        \"id\": \"string\",\n        \"track_cid\": \"string\",\n        \"preview_cid\": \"string\",\n        \"orig_file_cid\": \"string\",\n        \"orig_filename\": \"string\",\n        \"is_original_available\": true,\n        \"mood\": \"string\",\n        \"release_date\": \"string\",\n        \"isrc\": \"string\",\n        \"remix_of\": {\n          \"tracks\": [\n            {\n              \"parent_track_id\": \"string\"\n            }\n          ]\n        },\n        \"repost_count\": 0,\n        \"favorite_count\": 0,\n        \"comment_count\": 0,\n        \"tags\": \"string\",\n        \"title\": \"string\",\n        \"user\": {\n          \"album_count\": 0,\n          \"artist_pick_track_id\": \"string\",\n          \"bio\": \"string\",\n          \"cover_photo\": {\n            \"640x\": \"string\",\n            \"2000x\": \"string\"\n          },\n          \"followee_count\": 0,\n          \"follower_count\": 0,\n          \"handle\": \"string\",\n          \"id\": \"string\",\n          \"is_verified\": true,\n          \"twitter_handle\": \"string\",\n          \"instagram_handle\": \"string\",\n          \"tiktok_handle\": \"string\",\n          \"verified_with_twitter\": true,\n          \"verified_with_instagram\": true,\n          \"verified_with_tiktok\": true,\n          \"website\": \"string\",\n          \"donation\": \"string\",\n          \"location\": \"string\",\n          \"name\": \"string\",\n          \"playlist_count\": 0,\n          \"profile_picture\": {\n            \"150x150\": \"string\",\n            \"480x480\": \"string\",\n            \"1000x1000\": \"string\"\n          },\n          \"repost_count\": 0,\n          \"track_count\": 0,\n          \"is_deactivated\": true,\n          \"is_available\": true,\n          \"erc_wallet\": \"string\",\n          \"spl_wallet\": \"string\",\n          \"spl_usdc_wallet\": \"string\",\n          \"spl_usdc_payout_wallet\": \"string\",\n          \"supporter_count\": 0,\n          \"supporting_count\": 0,\n          \"total_audio_balance\": 0,\n          \"wallet\": \"string\"\n        },\n        \"duration\": 0,\n        \"is_downloadable\": true,\n        \"play_count\": 0,\n        \"permalink\": \"string\",\n        \"is_streamable\": true,\n        \"ddex_app\": \"string\",\n        \"playlists_containing_track\": [\n          0\n        ],\n        \"pinned_comment_id\": 0,\n        \"album_backlink\": {\n          \"playlist_id\": 0,\n          \"playlist_name\": \"string\",\n          \"permalink\": \"string\"\n        }\n      },\n      \"class\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"403"}
+        value={"403"}
+      >
+        <div>
+          
+          
+          Forbidden
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

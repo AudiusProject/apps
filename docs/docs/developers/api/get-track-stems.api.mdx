@@ -1,171 +1,231 @@
 ---
 id: get-track-stems
-title: 'Get Track Stems'
-description: 'Get the remixable stems of a track'
-sidebar_label: 'Get Track Stems'
+title: "Get Track Stems"
+description: "Get the remixable stems of a track"
+sidebar_label: "Get Track Stems"
 hide_title: true
 hide_table_of_contents: true
-api: eJyNVE1v2zAM/SuGTisQxMmOuQXYUOQ2rO0uQRAwMmOrsS1VooMGhv/7SNn5zopdbFmPFB+fHt0qgjyo2VKRB70LajVSGQbtjSNjazVTz0gJFZh4rMwnbEpMAmEVErtNIIlJaqSsQw+SsMiGlFdBkhcJZdyBhwoJvZRqVc0fHBez1ybjACOlHFChbuvPh6MWPxjy+NEYj1yEfIMjFXSBFahZq+jg5MhA3tS56rqVBAdn64BB8O+Tibyuz35ptMYgBLWtCWuSEHCuNDp2k74HiWvv69jNO2qSzrz0TqavkgFdRoH3cJDuogy8f+a/VJvS6l3dVBv0QgAIc+slWveKyMN6k6+3psSoWNSRWfaSNQG9rLjTr0lxzL1Al2c9Qk98HoL/SDpSeoRdtnvGDcue80532+uDK+U+DZX9Fla8cbMT1scbF0xQtlxhxZE5RlnEXzOV9lZP26P/ujQMPmX++6NJG19ycEHkwixNMxO0ZezA2u5Nhn4MTWaaMNY23U+V+M3UWxt5D5zmvxb3bo5JyZ9p0qNSrUem40m8FRuogmi6YUrup+nqyPbs3f+b1UFWwk9KXQk8eXJz0mw7KHT6GYxkzk4z2ovEjRbMUaLadgMB33zZdbL90aD4ZcnLPXgj9aOQLJ2s+R62UAb8gv+338N8PCVXY/+Q8nHGapmZPZSNfPFyh4fLf0u34tgCIRPfMZsenvPgO7pIvJt6udGTf55/vrKn/gJsaMNb
-sidebar_class_name: 'get api-method'
+api: eJyNVE2P2jAQ/SuRT10JEeiRG1KrFbequ9sLQmhwhsRLEnvtCVoU5b93xgnfdNULGM/Xm+f3aBVBHtRsqciD3gW1GqkMg/bGkbG1mqlnpIQKTDxW5hM2JSaBsAqJ3SaQxCI1UtahBylYZEPJq0SSF0nluAMPFRJ6GdWqmn9wXqxem4wTjIxyQIW6nT8fWi1+cMjjR2M88hDyDY5U0AVWoGatooOTloG8qXPVdStJDs7WAYPEv08m8nXd+6XRGoMA1LYmrElSwLnS6LhN+h4kr72fYzfvqEk287I7mX5KBnSZBd7DQbaLNPD9Gf9SbUqrd3VTbdALACDMrZds3TMiH9abfL01JUbGIo+MsqesCejlxJt+DYpz7gm67PUoesLzMPiPoiOkR7HLdc9xw7TnfNPd7vrgSXlPQ2V/hRVf3NyE9fHFJSZRllxhRZE5RlpEXzOV9lJP26P+ujQMOmX8+6NIG19yckHkwixNwZkxNJlpwljbdD9VojBTb21EOqCY/1rc6zcWJX+mSR+V/n1kOp7Ed7CBKogyG3xx75+rlu1Zrf/nzoFIwk9KXQnsNXkrWa8dODnZfyTOOrmyp4UXLRijZLXtBgK++bLr5PqjQVHIko978EbmR+oyE+TMzG+hDPgF/m+/B0c8JVdGfwj56KpaXLKHspFffNzh4fLfpFtxboGQidIYTR+es9UdXRTe+Vxe9KSY55+vrKK/MWS9Ug==
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Track Stems'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Track Stems"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/tracks/{track_id}/stems'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/stems"}
+>
+  
+</MethodEndpoint>
+
+
 
 Get the remixable stems of a track
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'track_id',
-          in: 'path',
-          description: 'A Track ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'id'}
+                              name={"id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'parent_id'}
+                              name={"parent_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'category'}
+                              name={"category"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'cid'}
+                              name={"cid"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'user_id'}
+                              name={"user_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'blocknumber'}
+                              name={"blocknumber"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'orig_filename'}
+                              name={"orig_filename"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -175,14 +235,16 @@ Get the remixable stems of a track
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "id": "xdJZNpY",\n      "parent_id": "v25ZN2R",\n      "category": "MELODIC_LEAD",\n      "cid": "baeaaaiqsedgkbn7jmmtttawlbtmb5f3afmdih6mbcnvysygvnkmlk5xf4rga6",\n      "user_id": "ZOpkv5E",\n      "blocknumber": 50600949,\n      "orig_filename": "FREE LOOP #3 - Melodic_Lead.mp3"\n    },\n    {\n      "id": "85odkNO",\n      "parent_id": "v25ZN2R",\n      "category": "MELODIC_LEAD",\n      "cid": "baeaaaiqsec3eyvrxmdshoesvn7yjcd5ac6fgrcuvxnme4ujeobkrbojbmhe46",\n      "user_id": "ZOpkv5E",\n      "blocknumber": 50600939,\n      "orig_filename": "FREE LOOP #3 - Melodic_Lead 2.mp3"\n    },\n    {\n      "id": "K76mw9y",\n      "parent_id": "v25ZN2R",\n      "category": "OTHER",\n      "cid": "baeaaaiqsebep5eua6hx66o5qtyxwjbyi24gxnkn7zbd3sz7az7bqo3puosk64",\n      "user_id": "ZOpkv5E",\n      "blocknumber": 50600949,\n      "orig_filename": "FREE LOOP #3 - Other.mp3"\n    },\n    {\n      "id": "gbJ05Y2",\n      "parent_id": "v25ZN2R",\n      "category": "PERCUSSION",\n      "cid": "baeaaaiqsea7wgy4x6bwul2rzk6hdrpcutqvc2gtsa25zxmhvdgyuipvjph5rm",\n      "user_id": "ZOpkv5E",\n      "blocknumber": 50600962,\n      "orig_filename": "FREE LOOP #3 - Percussion.mp3"\n    },\n    {\n      "id": "K9jqwQB",\n      "parent_id": "v25ZN2R",\n      "category": "PERCUSSION",\n      "cid": "baeaaaiqseaawhqubgorf7zn2ntxm3ehwnupgb5khqa7lcakvzl6uhijmeiq6o",\n      "user_id": "ZOpkv5E",\n      "blocknumber": 50600945,\n      "orig_filename": "FREE LOOP #3 - Percussion 2.mp3"\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"id\": \"string\",\n      \"parent_id\": \"string\",\n      \"category\": \"string\",\n      \"cid\": \"string\",\n      \"user_id\": \"string\",\n      \"blocknumber\": 0,\n      \"orig_filename\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
@@ -192,3 +254,4 @@ Get the remixable stems of a track
     </ApiTabs>
   </div>
 </div>
+      

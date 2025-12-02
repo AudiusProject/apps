@@ -1,0 +1,212 @@
+---
+id: get-user-i-ds-by-addresses
+title: "Get User IDs by Addresses"
+description: "Gets User IDs from any Ethereum wallet address or Solana account address associated with their Audius account."
+sidebar_label: "Get User IDs by Addresses"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9VNtu00AQ/ZXVPoEUxUkKheYt0KhErRBQCkhVFE3scbyt7d3ujnORlX9nx5e6aQriiSdrfc7OzJk5s6UkWDk5vpWFQ+vkvCcjdKFVhpTO5VheIDlx4zExO3citjoTkO/ElBK0WGRiA2mKJCCKLDontBXXOoUcBIShLvIOAed0qIAwEhtFifABlBWTIlKFa8l92ZPaoAVOPovq9F325U5M6mjoPNOAhQyJyx7fljL3B3+jyedxxfU/FGh38rmqnwdVe9jiQ6Es+pRkC+xJR7uUo8XaZh7GrUl1hC2KW8gM47dysB2OTt68PX33/mwAyzDC+E9nH2Y6uvq4vIz06OpE3dNwdXlqNmZozq+KZBJ/+vA5Po2nX3+ZyYONz3gULkwwAzkuJe1MJc5aYDWKMHNP/juyKl/J/X4/Zy3O6Jx75AmjwYA/h/KvizCsdYc6J8yJKWBMqsKq9cGdY155XIBe3mFI3HzLgyJVZ4mA/qXMx9tdu2vjLVTk/7bjmD8P31KOBXeXXmhGT5KiaoxNgEVL3r8AuhZFt2hbyESmepslmv24wko8UOIPQbUzQecif1y3dixs6ikJkXHjIACj+lB5vR/qYD2UPCiVx7qquylk8mV25NRmQX4MRY1y/BoZ9ges32hHGVTTajag2xlxvDQH0ctu/v9/0ZtpEW4pMCn4bfVqqq6VTYPbR+nAGYnXy1BZLsHhjU33e/5d7zk3PlIOlil7K4bU4V8kv/rW2PC1OHoQXqzuHncHL8wa0oJZ1TTXYBUn9kXMPTdBiNBWFdXXJn7nDD25dbRwHOXRaRfT7959vwEo1uvc
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User IDs by Addresses"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/address"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets User IDs from any Ethereum wallet address or Solana account address associated with their Audius account.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"address","in":"query","description":"Wallet address","required":true,"style":"form","explode":true,"example":["0x1234567890abcdef1234567890abcdef12345678","E2LCbKdo2L3ikt1gK6pwp1pDLuhAfHBNf6fEQXpAqrf9"],"schema":{"type":"array","items":{"type":"string"}}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                              >
+                                Array [
+                              </div>
+                            </li><SchemaItem
+                              collapsible={false}
+                              name={"user_id"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"address"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                              >
+                                ]
+                              </div>
+                            </li>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": [\n    {\n      \"user_id\": \"string\",\n      \"address\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

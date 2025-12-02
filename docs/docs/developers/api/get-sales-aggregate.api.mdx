@@ -1,212 +1,258 @@
 ---
 id: get-sales-aggregate
-title: 'Get Sales Aggregate'
-description: 'Gets the aggregated sales data for the user'
-sidebar_label: 'Get Sales Aggregate'
+title: "Get Sales Aggregate"
+description: "Gets the aggregated sales data for the user"
+sidebar_label: "Get Sales Aggregate"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVcFuozAQ/RXLp3ZFQ7tHbpFaVT2stNq2e6miyAEDbgFTe5zdCOXfd8aEQBoSJe2eEpix35uZx5uGg8gsj164s9JYPgt4Im1sVA1KVzzi9xIsg1wykWVGZgJkwqwopGWJAMFSbXyUTvOA61oaQScfkvYse/S50+4w5tTCiFICoUUvDa/wAXNVgiFFiLWAnH+kMWXPiMAebjFi5LtTRiICGCcDbuNcloJHDYdVTXdZMKrK+HodbK/XaWoldBDvTprVHsYT1lG5coE4OmUKZImVa2bfVD0h+NQVvt5aZKryVbIL/L899I0VqlRwyUcoqQpkhi0acvLZn6KUSojzU2FoNPO+vYeBXNthQupGykrxhq30z9R2aWEMdqThd1WsE5lc3aJKrn5Ia7FRHYVcisTLZZ+DFxXkAtgfYZlVWYV6W6x6QjQAei3AGeIU62Vbz9mkHrtbTqDVI2JziGNAbJLPsJmRgG2tKystxb9fX9PPLuaji2PsGV4UaxxpBZQi6rpQsRde+Gopr9nH0YtXGdOQakMfI6gWhTgPsoQxgmh6RdH7/pt66SBbzXQP/iDe6kycCyvnsXbICos5jrtzfL8bwRBsLPwBb1TpHBQU/hh5zXxrVBg7HJx3Q6AsykNLyjW5VuZ9wrtQxENvi2GjknXobwjFwMowtux8zJmCNARQ2ygME2VbLWA7lgplNREuUc5OYh0ubzipQFWp9gVtCE5/Puzbnj/Eft+wNkpobeRmcu37oy2Uwktho/Fx0925tulVdaa/b5oP8i+EdSHws0EOvvJm07FukQQ88vrxd+Fv3zYsPUfWlNo0C5ztsynWa3rdWhM1E9snFgXJMRWFlUf4/0fTHi3uTa6G62MpCkdJnFzlyyw7Hz+C3C2JLwCf7OtHaPRLpCcyowejiMmZQ7v4tbGbSzZc7KP4nWNVqyF4xwsprWeYtfHu87Xz+YVzpFsHlt8XZnj2AjqV3XAL7vBrc6e4h+qh/vaWEMlg6533d0/op/8AjTmM7w==
-sidebar_class_name: 'get api-method'
+api: eJytVUtv2kAQ/iurPSUVwUmP3JASRTlUqpqklwihwV7bm9jezT5okcV/78waYxMMgqQnsOfxffPwNzV3kFk+eeHeCmP5bMQTYWMjtZOq4hN+L5xlLhcMssyIDJxImIVCWJaAA5YqE6wUzUdcaWGAIh+SJpY9Bt9pG4w+GgyUwhHa5KXmFT6gr0zQJAlRg8v5RxpT9owI7OEWLUa8e2kEIjjjxYjbOBcl8EnN3UpTLuuMrDK+Xo+26VWaWuFaiHcvzGoP4wnrqHy5QByVMulEiZUrZt+kHhN86otQr4ZMVqFKdoH/t0HfWCFL6S75ACVZOZFhi/qcgvenKKXCxfmpMDSaedfew0C+6TAhtSNlJbxhK8MztV1YNwQ70PC7KlaJSK5ucUuufghrsVEthVxAEtZln0NYKpeDY3/AMiuzCvdtseoI0QDoNThviFOslk09Z5N6bLOcQKtDxOYQxxGxST7DZkYLbLWqrLBk/359TT+7mI8+jrFnmChWONLKkQtoXcg4LF70asmv3sdRi1cR05C0oY/RyQaFOPe8wBggmmGj6H33Tb20kM3OtA8hELN6E+dgxTxWHllhMcdxd8L3uzHqgw2ZP+ANbjp30hUhjLRmvhUqtB02ztshkBf5oSTlilQrCzoRVGjCoyCLUS2TdRQyRNCTMrQtWx3zpqAdck7bSRSBlmPwifR2HKtoecNp7rJKVShhQ2n682Ff6EIQ+33DGivlbyw34+vQEWVdCWH4m60eltmdtHW3R2cq+qbdTvx1kS4APxTkEGqtNz1qT8eIT8LGhFz42zUKS8+RNbnW9QKn+WyK9ZpeN2JE7UukhUVBC5hCYcUR/v9RpgeLexOr/sFYQuHJiZOOfJllq9xHkNuz8AXgk5X8CI3ubHREZvRgJDE5c2gXvzYCc8n6p3wQv9WoatUHb3khpfUMvTZqff7ufP7EHOnWgXP3hRmefXJOZde/ezv8Gt8pXh7d37+9s0NrsFXL+7snVNB/rY2G5g==
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Sales Aggregate'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Sales Aggregate"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/sales/aggregate'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/sales/aggregate"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets the aggregated sales data for the user
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'offset',
-          in: 'query',
-          description: 'The number of items to skip. Useful for pagination (page number * limit)',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'limit',
-          in: 'query',
-          description: 'The number of items to fetch',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Header Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Header Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'Encoded-Data-Message',
-          in: 'header',
-          description: 'The data that was signed by the user for signature recovery',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'Encoded-Data-Signature',
-          in: 'header',
-          description: 'The signature of data, used for signature recovery',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Message","in":"header","description":"The data that was signed by the user for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Signature","in":"header","description":"The signature of data, used for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'content_type'}
+                              name={"content_type"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'content_id'}
+                              name={"content_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'purchase_count'}
+                              name={"purchase_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -216,14 +262,16 @@ Gets the aggregated sales data for the user
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "content_type": "string",\n      "content_id": "string",\n      "purchase_count": 0\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"content_type\": \"string\",\n      \"content_id\": \"string\",\n      \"purchase_count\": 0\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
@@ -233,3 +281,4 @@ Gets the aggregated sales data for the user
     </ApiTabs>
   </div>
 </div>
+      

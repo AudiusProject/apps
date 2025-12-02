@@ -1,129 +1,154 @@
 ---
 id: download-purchases-as-csv
-title: 'Download Purchases as CSV'
-description: 'Downloads the purchases the user has made as a CSV file'
-sidebar_label: 'Download Purchases as CSV'
+title: "Download Purchases as CSV"
+description: "Downloads the purchases the user has made as a CSV file"
+sidebar_label: "Download Purchases as CSV"
 hide_title: true
 hide_table_of_contents: true
-api: eJyllE1v2zAMhv+KoNMGuHGyY27BUgw5DCiWtpehGFiLiYU6kqsPd4Hh/z7SsfO1rIi7kyOJefnwFalaOvSlNR69nNbyy3jMH4U+c7oM2ho5lcuYZei9bJrk7GRu30xhQXkRchRldFkOpNSuokcnaCk2oFDQF8TX5aNY6QJlIm2JDlhloY50xN1egv5A4RRZgoMNBnQE+LOWhhb0D63oSDNDCSGn3w5fo3ZIasFFPAediQfGWcwp0mc5boDLDNuStXxw2qy5vL08w/865HiN6LbyXPS+r3IxF3Z1KHoDL6TXrpkKfbgy663JrEJ1M4cAN9/Jclhjj5Aj2eguMigKp2wQxBu55vXaoBLP2wPQyrp2G0J0zJTZalfPYKhlr3IF1iEjmcOMCdOoj9A8JTLAmhugvRkvaYN6IrfcPGsMbZtQG0xl2p6ntVZNuu/HVHX9xUnQVX0vRVdwCSGUfpqmSvsdSulspamqEUSlox9lNq0mkiG0WdmWT4eCAWd3C5JkvV3Zk9H4LytmrYh4nAiOphEqrQ8bMKzTWfxe+5+I1TKzJqAJ/zV7nbsBf4e0LIDukahaL+rOxt7mRE7bIdirM1DvJfmRUykcXdfPdPrgiqbh7d24sMPkKTwXPJUrKPz5WB6XM2iYLlbwgtuTya2giBzV3lwFTjPJQKpPP7pn5bM4fkIu5u82wWyPk/dchNQ8UVQ3MMPN+fiUv+PWP16cg3XJUMzBU38t3fHTc3K1+4fg2+09vRV/AOodVGY=
-sidebar_class_name: 'get api-method'
+api: eJyllMFu2zAMhl9F0GkD3DjZ0bdiKYYcBhRL20sRDIzFxEIdyZXkdIHhdx/p2HHSZkHcnQyZFPnxF8lKBlh7mTzL0qPzchFJhT51ugjaGpnIqX0zuQXlRchQFKVLM/C4P/EVQUexAYWCviC+z5/ESucoI2kLdMBRZuoojrg/hKAL5E6eBTjYYOD8yXMlDR3ohlZk0sxQQMjke7Bb8cjpZ1OyOHwttUPKE1yJkfRphhuQSSXDruBYPjht1rKuo0N4hv/d53gt0e0+JHnoqpxNhV31RW/gheI1Z86NPsjrst6Z1CpUN1MIcPMTvYc1dggZkozuLIMid8oGQbyRal6vDSqx3PVAK+ua3xBKx0yp3e7rGQw176JcgdVnJHGYMWIa9RmaBb+iL6yhzmD7t/GYP6c552WakmYUKLUmoAnkUlMlkrons9xmawxNQ1HDJDJuejqutKrjQ+fGqu1ExkG37bqudDkXG0LhkziGQo+gVLr0o9TG24lkQG1WtmHXIWf42/vZx7ZsLomnidhbOf7eMhmNJaEW1ocNGI7Tyn9pNE6CV33Z/zGXrfIB/4S4yIHemKia6qtWuG4ZRDJpBuQQnYE69UiPjEph76pakvXR5XXNv/ejxJoq7WGZ81yuIPd4oZxBg3a2ghfcnUz1FvKSvZqX24LTTDKQ6suvdrF8Fcfr5mz+9ieY3XHyjouQ6gV5tcM0XJzPb4ALav1jG/XSRUMxB2+Ea+mO19LJ0x5G/8fdA+2Rv7WeUvo=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Markdown from '@theme/Markdown'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Download Purchases as CSV'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Download Purchases as CSV"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/purchases/download'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/purchases/download"}
+>
+  
+</MethodEndpoint>
+
+
 
 Downloads the purchases the user has made as a CSV file
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          required: true,
-          description: 'A User ID',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Header Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Header Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'Encoded-Data-Message',
-          in: 'header',
-          description: 'The data that was signed by the user for signature recovery',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'Encoded-Data-Signature',
-          in: 'header',
-          description: 'The signature of data, used for signature recovery',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Message","in":"header","description":"The data that was signed by the user for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Signature","in":"header","description":"The signature of data, used for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
-        <div></div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

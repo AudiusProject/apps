@@ -1,206 +1,258 @@
 ---
 id: get-reposts
-title: 'Get Reposts'
+title: "Get Reposts"
 description: "Gets the given user's reposts"
-sidebar_label: 'Get Reposts'
+sidebar_label: "Get Reposts"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVctu2zAQ/BWClyaFYSVFe/EtRYsgl6JIk16CIKCllcVYEhlyZUQQ9O/dpSRLrl0nbXqyyH3M7IPjRqJaebm4k5UH5+X9TCbgY6ctalPKhbwE9AIzECu9gVKw1zsvHFjj0cuZNBacYt+rpPMW11ubVU4VgJx3cdfIkg7koxMyac5tFWbyd8ALcUsY4uoLWRw8VdoBZUZXwUz6OINCyUUjsbacy6PT5Uq27Wyb3qSpBxwgnipw9R7GDdVTVsWScEwqNEJBNRrh19rOGT6tcpEaJ6xa6TJUJ07oexv0XuS60HgqD1DSJcIK3A6n4P1PlFLAOHstDA/nYWzvn4GqrsOMhMOxUGtqZThz28HjIdhtw+95Ot6a0oNn+4ezM/7ZxfpRxTF4XoXYEN8S2UVZm+s4dDV69OzX7OOY5SPEzMA63jDUHUqicOqlnFNcYWgX348LcyfjXAVoNvY/DyFuJlEXVJ8qLO/7ccTRdb8J06R71pmEZwrL+Qqditd8QxNmasPZ5qrONXX6vs/1Ygdo3H1hhx6BTDS3v+ClNY5d+uD6W7chXWjLHcDATMWoNxprip7cDs+7DbcfD432s0omezKOlwM+HdwFcBtaM3COmO1GUAjJRGZYQVbh7QZlWMgoiFLU6KSNRsnxIVOnKZXLyS9DtH4RRVy+IVtNZW90Am6uqkRXfh6baHMueWl1mZpurl2pF9+v9iUoBImf56KzMlpnOZ+fcfeYSaHC5vZPb1f4dtI1Y60vqmk/UYRnjGg56BkTWqix6XsyCPVMLsJLH2KptIw+2KFplsrDrcvblq87GeBmUXvUMufXkarcwxGe/1EgD5a0hnoq1RuVV+wkWczezHLQzCPIgyC/AfjVGnqExijYI5F7PjjNTP5yaCfXvfqdiumf6EH8QUDLego+8CJKLUtSBooeUaDRGS5Iz+20cXtizvy3j/ny6w1pyC/rDtxS
-sidebar_class_name: 'get api-method'
+api: eJytVclu2zAQ/RWClyaFYSVFe/HNRYsgl6JIk14CI6ClkcVYC0OOjAiC/r0zlGTJteqkTU82Oct7s/Cplqg2Ti7uZenAOrmayQhcaLVBXeRyIa8AncAExEbvIBfs9c4JC6Zw6ORMFgasYt/rqPUWN3ubUVZlgJx3cV/LnA7koyMyac5tFCbyd8CluCMMcf2FLBaeSm2BMqMtYSZdmECm5KKWWBnO5dDqfCObZrZPX8SxA+whnkqw1RHGLdWTl9macIpYaISMaiyE22ozZ/i4TEVcWGHURue+OnFG//dB70WqM43ncoKSzhE2YA84ee9/ohQDhslrYXg4D0N7/wxUth1mJOyPmdpSK/2Z2w4Op2D3DV/xdJwpcgeO7R8uLvjnEOtHGYbgeBXCgvjmyC7KmFSHvqvBo2O/+hinWD9CyAyM5Q1D3aJECsdeylrFFfp28f2wMPcyTJWHZmP38+DjZhJ1RvWpzPC+n0YcXI+bME56ZJ1JeKawlK/QqnDLNzRhptafTaqqVFOnV12uFztA4+4Km3oEMtLc/oyXtrDs0gVX39oNaUMb7gB6ZipEvdNYUfTotn/ejb/9ODXazyoa7ckwXg74NLkLYHe0ZmAtMTuMoBCSiaRgBdn4t+uVYSEDL0pBraMmGCTH+UytppQ2Jb8E0bhFECij56qMdOnmYRHsLiWvqc7jop1kW9zy+/Wx6Pgg8fNStFbO31ou5xfcL8bOlN/V7rEdSt1Bunqo7kX97GaI8IwBrQM9XELzVdVdF3ppnsmFf9t9LJWW0B92qOu1cnBn06bh6/bhc3toH9Q65fcQq9TBCZ7/URInS9pCNRbnnUpLdpIsX29m2avkCeRegt8A/GrVPEFjkOiByIoPVjOTvxza2U2nd+di/NmcxO8lM6/G4D0votSwCCWgIvqqMI3WsCQFN+PGHck3898/36uvt6QavwBcPdZJ
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Reposts'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Reposts"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/reposts'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/reposts"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets the given user's reposts
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'offset',
-          in: 'query',
-          description: 'The number of items to skip. Useful for pagination (page number * limit)',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'limit',
-          in: 'query',
-          description: 'The number of items to fetch',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'timestamp'}
+                              name={"timestamp"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'item_type'}
+                              name={"item_type"}
                               required={true}
-                              schemaName={'string'}
-                              qualifierMessage={'**Possible values:** [`track`, `playlist`]'}
-                              schema={{
-                                type: 'string',
-                                example: 'track',
-                                enum: ['track', 'playlist'],
-                              }}
-                            ></SchemaItem>
-                            <SchemaItem collapsible={true} className={'schemaItem'}>
-                              <details style={{}} className={'openapi-markdown__details'}>
-                                <summary style={{}}>
-                                  <span className={'openapi-schema__container'}>
-                                    <strong className={'openapi-schema__property'}>item</strong>
-                                    <span className={'openapi-schema__name'}>object</span>
-                                    <span className={'openapi-schema__divider'}></span>
-                                    <span className={'openapi-schema__required'}>required</span>
+                              schemaName={"string"}
+                              qualifierMessage={"**Possible values:** [`track`, `playlist`]"}
+                              schema={{"type":"string","example":"track","enum":["track","playlist"]}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      item
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span><span
+                                      className={"openapi-schema__divider"}
+                                    >
+                                      
+                                    </span><span
+                                      className={"openapi-schema__required"}
+                                    >
+                                      required
+                                    </span>
                                   </span>
-                                </summary>
-                                <div style={{ marginLeft: '1rem' }}>
-                                  <SchemaItem
-                                    collapsible={false}
-                                    name={''}
-                                    required={false}
-                                    schemaName={'object'}
-                                    qualifierMessage={undefined}
-                                    schema={{}}
-                                  ></SchemaItem>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
+                                  
                                 </div>
                               </details>
-                            </SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'class'}
-                              required={true}
-                              schemaName={'string'}
-                              qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <li>
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -210,28 +262,49 @@ Gets the given user's reposts
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "timestamp": "2021-05-03 02:48:00",\n      "item_type": "track",\n      "item": {\n        "artwork": {\n          "150x150": "https://creatornode3.audius.co/content/QmWGQf6CnFJJ4he13eDF2vZwDyoaWcHL3HziQyaSPwVFd3/150x150.jpg",\n          "480x480": "https://creatornode3.audius.co/content/QmWGQf6CnFJJ4he13eDF2vZwDyoaWcHL3HziQyaSPwVFd3/480x480.jpg",\n          "1000x1000": "https://creatornode3.audius.co/content/QmWGQf6CnFJJ4he13eDF2vZwDyoaWcHL3HziQyaSPwVFd3/1000x1000.jpg"\n        },\n        "description": null,\n        "genre": "Electronic",\n        "id": "y7XX7",\n        "track_cid": "QmXFnuP57woE7ZZ3HTkWggXuzZL13SJVLiL7rVE9qSFTyf",\n        "mood": "Other",\n        "release_date": "Sun Mar 28 2021 11:52:35 GMT-0700",\n        "remix_of": {\n          "tracks": null\n        },\n        "repost_count": 46,\n        "favorite_count": 100,\n        "tags": null,\n        "title": "PAULINE HERR @ BROWNIES & LEMONADE OPEN AUX 1/30",\n        "user": {\n          "album_count": 1,\n          "artist_pick_track_id": "JbQN0",\n          "bio": "producer, singer, human\\n\\nsocials: @paulineherr",\n          "cover_photo": {\n            "640x": "https://creatornode3.audius.co/content/QmZXwdQDq5QDJW3W17g4n4zXVjaDGDbvuzsMWqhis61W7h/640x.jpg",\n            "2000x": "https://creatornode3.audius.co/content/QmZXwdQDq5QDJW3W17g4n4zXVjaDGDbvuzsMWqhis61W7h/2000x.jpg"\n          },\n          "followee_count": 144,\n          "follower_count": 41573,\n          "does_follow_current_user": false,\n          "handle": "paulineherr",\n          "id": "eGEam",\n          "is_verified": true,\n          "location": "Burbank, CA",\n          "name": "Pauline Herr",\n          "playlist_count": 1,\n          "profile_picture": {\n            "150x150": "https://creatornode3.audius.co/content/QmbqwCk1axAdXk9iFfeU48iu1P73ChUA3kxpeg7PJBRHsC/150x150.jpg",\n            "480x480": "https://creatornode3.audius.co/content/QmbqwCk1axAdXk9iFfeU48iu1P73ChUA3kxpeg7PJBRHsC/480x480.jpg",\n            "1000x1000": "https://creatornode3.audius.co/content/QmbqwCk1axAdXk9iFfeU48iu1P73ChUA3kxpeg7PJBRHsC/1000x1000.jpg"\n          },\n          "repost_count": 155,\n          "track_count": 35,\n          "is_deactivated": false,\n          "is_available": true,\n          "erc_wallet": "0xf568ab060acd91fe4861e52136deb08ca1f26574",\n          "spl_wallet": "3DeyiqjmCAtqPUzGX6MQP2C62kKRANy7LFvcBzUEHqPc",\n          "supporter_count": 8,\n          "supporting_count": 0,\n          "total_audio_balance": 131\n        },\n        "duration": 1708,\n        "downloadable": false,\n        "play_count": 958,\n        "permalink": "/paulineherr/pauline-herr-brownies-lemonade-open-aux-130-316935",\n        "is_streamable": true\n      }\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"timestamp\": \"string\",\n      \"item_type\": \"track\",\n      \"item\": {},\n      \"class\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

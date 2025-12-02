@@ -1,0 +1,161 @@
+---
+id: get-coin-redeem-amount
+title: "Get Coin Redeem Amount"
+description: "Gets the availability indicator for reward codes for a specific coin"
+sidebar_label: "Get Coin Redeem Amount"
+hide_title: true
+hide_table_of_contents: true
+api: eJytU1Fr2zAQ/itCTy2EuGkHW/MW2lHKFhhNNhillIt8idXZliKd07rG/313trO2ZGx72EOIfPp039333TWaYBP19FYbZ8uo70baeQxA1pXXqZ7qKyR1wVfqBlPEQs0KV5WkRzrFaIL1AuxhUVGGCnZgc1jZ3FKtbJlaA+SCWvMv4COEVBnHT7sAqOjR2LU1Stg5qYcABRIGKanRJX9w8sJ2jFaIPFB2wL5kYgEpSNOAMSq37ooZsgbcVjYgt0OhwpGOJsMC9LTRVHshiBRsuWEkPkHhcwmdf36+mG8vN8tP35/PL8PztvQbxLPFFXw4r/wZnL57X/v5w+lT2M51294JS/SujBgl8enJify9LXNRGcPVMY9xJSE3xRDwPheRGJI8RME1hwW61QMaetPKrYbeCqb2QUwj23MP8ZfXrAxuMBzItiCmNarHvzLrCPJHqKOaHL+WZNK2I02WOnlCNw33/dP7fessRCsotjBzMj0bpM5V9myqk27EkkacapM+A99GDLu94VXIGZgR+ThNEvB2DFVqqzg2LtlNtMhsy7XrehsqmX25Pmhs1j1S3yaqv5X8/c1kfKK5QO8iFdBpPczYv8158+Lc/xr5wSPCJ0p8Dhzj+jodmkG4/W6O9HTYhEE7ViPjRgTRNCuI+DXkbSvhbYWh5jgfdxAsrEQq1je1Uc5szRryiH/o7uhmmLRj9Zft+m0DQxDKWuSHvJIvPv7Aer/Q7R3jMoSUJ1Nq669mvCKeXj062A8Zgl8DdvVxyUP3E10hons=
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Coin Redeem Amount"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/coins/{mint}/redeem"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets the availability indicator for reward codes for a specific coin
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"amount"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer","description":"Static amount indicator (always 1)","example":1}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"amount\": 1\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

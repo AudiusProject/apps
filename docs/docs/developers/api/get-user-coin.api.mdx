@@ -1,0 +1,336 @@
+---
+id: get-user-coin
+title: "Get User Coin"
+description: "Gets information about a specific coin owned by the user and their wallets"
+sidebar_label: "Get User Coin"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFVm1vGjkQ/iuWddK1EhfeQhL4xoW8KY2uSqBtLqqQ2TWsw65tbC8E0P73m9kXYANq0yrS8QWvPZ7nmRfPzJo6NrG080Rjy42l3yvU59YzQjuhJO3QK+4sEXKsTMRwi7CRih1hxGruibHwiKeEJGohuU9GS+ICTlAVYdLHD2HIgoUhaKEVqplhEXcI1HlaUwkfACF8OBIIppkL6GsGXTJAfTc9ODF8FgvDfdpxJuYVar2AR4x21tQtNeqyzgg5oUlS2aiPhHQ/BOgDZRQizPcNt5aocWoGGvYLmBXKX1ikQ9zq8VV90ho3g+Pn1vQkPI3OZFvVdH3WME177Frxyfx0cfbSXtZWwBWcrjQ3qX9v/MzpmdHnBQWrlbTcImqjVsO/sg0PsecBdZD1lHQcLAYRpnUovFRt9dmi3HqfvRo9cw8dpA2ScCJD8Zk7KLX1xlPhWSe8KTepWz0RsRBZjFjIpMe3q2FsMczM81QsXZpoZcBU2QGn7scqTbjdgJVc3/60Or+b9Sb928dVu2dWM6knnDcfrthZO9ZN1jg+Xeq758aLmd3RZMP+7ch2GY1UWML8ozvo3fyD2jYu2OoDonyS++e1QhlHIwgzJFxxkcBL282+DcgZaA/VRA1jIw6xlXEYshFKZmlaBhvcfyJObRT/aQnqIgA54SVTAue07VSr+c6Rp6Iqih5pfFbbwL7NPqccC0l+Z/ddQUnZlAogk6cF+QDbCy4+7lKq14pfUs6mLYXMje/CAHYHD70S/lGjmexk7haWGcOWWFocj+zPHkt+H3axVpofvBFhh0IO4fEOs8q5/1YKXW9KWqemXG7sO/RkzvvLy0l8ddKeLh7Nato4/twcxH/PH+vmvsVc3J6OGw8n3y4W3cHZN8yBzIA3gaeieQcovF8iVCJyvfq3eXHbPR9dA9y1bbXvXZ35X1aD23nL6/cu2qr9+PWS3QULffnryfh/puE7JOBeWmyBR0qFnMk95K8BB4Ssnmz021fAQv4FSvMY7eJiHUnSCunS6KD8EJkPi9glh48XwgXDzXs5LFO0NNSBEjAWBAp73yQlkTbqDq2mU0l1LfykitdgiYU/AQk4mBeDRGzCndLFtDhisS9iC9WrOq9TbLA4wqQey5l0P9/sTxrpJfKlTrJT1J+d1I9qmG9aWRextI/mw8XrTl1SuN424/edo/KwO/7iqjpkgAzkUiesc88V81yFdtLxKnUefqVtFvwRgCkotl6PmOUDEyYJbs9ibpawD8s5MyJrKOBhX1hcQ4DG0KRet5ddQz/c50XvI9md3A5SLuqoxCo6Z2GMX7Cc8mU2F+IY91vQP5npfoNN6rjkO8gFnPlY/8At2VEXZi/tdi7tDV6YgZsMv7roQ9b/B1db5y4=
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User Coin"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/coins/{mint}"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets information about a specific coin owned by the user and their wallets
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"Dez1g5f3h4j5k6l7m8n9o0p1q2r3s4t5u6v7w8x9y0z"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"mint"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The coin mint address","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"ticker"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The coin symbol","example":"$AUDIO"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"decimals"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer","description":"The number of decimals for the coin","example":8}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"logo_uri"}
+                              required={false}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","nullable":true,"description":"URL to the coin's logo image","example":"https://example.com/logo.png"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"balance"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer","description":"The total balance of the coin in the user's account (in wei)","example":1000000000}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"balance_usd"}
+                              required={true}
+                              schemaName={"number"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"number","description":"The total balance of the coin in the user's account in USD","example":1.23}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      accounts
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object[]
+                                    </span><span
+                                      className={"openapi-schema__divider"}
+                                    >
+                                      
+                                    </span><span
+                                      className={"openapi-schema__required"}
+                                    >
+                                      required
+                                    </span>
+                                  </span>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
+                                  <li>
+                                    <div
+                                      style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                                    >
+                                      Array [
+                                    </div>
+                                  </li><SchemaItem
+                                    collapsible={false}
+                                    name={"account"}
+                                    required={true}
+                                    schemaName={"string"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"string","description":"The token account address","example":"CTyFguG69kwYrzk24P3UuBvY1rR5atu9kf2S6XEwAU8X"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"owner"}
+                                    required={true}
+                                    schemaName={"string"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"string","description":"The owner wallet of the token account","example":"HzZ3EKACbH6XEHs59Rt1adVzUKv5cTDE9o9YWFaMhwpF"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"balance"}
+                                    required={true}
+                                    schemaName={"integer"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"integer","description":"The balance of the coin in the user's account (in wei)","example":1000000000}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"balance_usd"}
+                                    required={true}
+                                    schemaName={"number"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"number","description":"The balance of the coin in the user's account in USD","example":1.23}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"is_in_app_wallet"}
+                                    required={true}
+                                    schemaName={"boolean"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"boolean","description":"Whether the account is in the user's in-app wallet","example":true}}
+                                  >
+                                    
+                                  </SchemaItem><li>
+                                    <div
+                                      style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                                    >
+                                      ]
+                                    </div>
+                                  </li>
+                                </div>
+                              </details>
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": {\n    \"mint\": \"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM\",\n    \"ticker\": \"$AUDIO\",\n    \"decimals\": 8,\n    \"logo_uri\": \"https://example.com/logo.png\",\n    \"balance\": 1000000000,\n    \"balance_usd\": 1.23,\n    \"accounts\": [\n      {\n        \"account\": \"CTyFguG69kwYrzk24P3UuBvY1rR5atu9kf2S6XEwAU8X\",\n        \"owner\": \"HzZ3EKACbH6XEHs59Rt1adVzUKv5cTDE9o9YWFaMhwpF\",\n        \"balance\": 1000000000,\n        \"balance_usd\": 1.23,\n        \"is_in_app_wallet\": true\n      }\n    ]\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

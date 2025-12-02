@@ -1,454 +1,577 @@
 ---
 id: search-users
-title: 'Search Users'
-description: 'Search for users that match the given query'
-sidebar_label: 'Search Users'
+title: "Search Users"
+description: "Search for users that match the given query"
+sidebar_label: "Search Users"
 hide_title: true
 hide_table_of_contents: true
-api: eJylVk2PGzcM/SvCXHox1t4iKYq9bYCgyKkFmvSyMAa0ht5RVh5NJMprw/B/L6kZ22Nbns22B39IpMhH8oniriB4DsXDUxED+lDMJ0WFQXvTknFN8VD8jeB1rZbOq6ShqAZSKyDepBrVs1ljo35E9NtiUrgWPcjJL9Xp7LdkeVK04GGFJIuHp13R8IKVDkdNM1icY/jKfkJn66AQdI0rKB52BW1bMRPIm+a52O8nR8vP2Hh823JS47icWhrL6NQiOaCtFSMc+IqXuGmtq3iDfMSMe/AeUhSEq5CDNcAVnKeSE1G76ifiZmV1VL4VNgNs4krK6NHiGhqSfLs2WvD8z6NG3poPUZhQrtGbpcE3UPzZ2K0yjbaxQnU40pPBNIkEslCcxGgpjBZnLlhC65qAKUu/zmbyc0G5qDUGMaRdQwKcVaBtrdGJW9PvQfR2137c4jvqFLoXJpLpvFRAo7Xy+CMaz3ng/IFdxFWpXUwpRK/LV7AWZbF01rpXxKO03/DHjRqayibKpZyGEtZgLCy6vVBWCJrMGgh7+aACqSyM3MLWmkBHmx5bN1iG1p4Qhdi2zI8Bgn6Hs33cIkdgS4iVceUCLDRa/JAH/XLUOeAoXw3VpWkCdwW+rFcSMi/kXq63+ZtR8H4Pjes8XpJhmk+VMVzuZ7azn3CRSLLQGkbZYeWcXjNqUiyMy+5rxxjLtnbk3mbIbx9mm6wVJmhWwiIylDrE0NH+iiXZ4C6Ik9XpuZQDdSMTQz6d5AvnLEIjCn2ZyjHTh9KPKXUsGNPI0yML6hb1fkK5Z2NW8xUXgS94Fl3lGuh6TUZonb4t7HpnRnBxbbMVZcrxC4PCaYoe32bl/cfZhj9Zhx9+n234k5XdC2nla5y4l3j2F80mG8Swb2QVLtpctjhnnTGrMWi8uQgHXfCWOIZKly1sXaRR1YsWmo3pqqvmU5NptFnFW3By7788rb8E9ZmfWY9xpbqzCqqKH9KQ5jIWGa9Ad9CGFZbDafY42ym7WUoEQqTcE/wJKiWvIgY6e4blwMfsm42e76ZC752/OMFH+vlFRrLEcqCaF9M0Q0x7NJzlZKMbDqO3rFETteFhOq1MSF12y5Rdmwr9nWQ5hjvtpuv7QsYK0yy7Pt8H+vjXl6t8PqZD6p971UnFWye5v5ulG8rkX0G6+v2UdDHCntnbncJ855jcl51wQ1PuHCZRPoW865NzmMclKyk9HGLN6ESy2y0g4Ddv93vZ7oxK0jhNcqM40UuwAUfgZibqLKYX3A7mwjXYKDqFjJHvc5Yfskd8Hob3/+HzfHQe8XU+kP9Hj+8fk0cQnY+GJ0RzWXjT9c2nuYwJCJU8rVz+7ugjD88tDU5dTc5i5Xgj//j8lRvBv75047E=
-sidebar_class_name: 'get api-method'
+api: eJytV0uPIjkM/itRXfYh1MBqZjXi1iuNVnPalXZmL61WyVQZKkOoZPKgQYj/vnaqCgoIRc/0HngkduzPjzj2PvOwdNnsKQsOrcueR1mJrrDSeKnrbJb9g2CLSiy0FZFD+Aq8WIOnTV+hWMoN1uJbQLvLRpk2aIFPfipPZ79EyaPMgIU1el7MnvZZTQti0ouFQ09kyeo6QecgPpOiOqznaIVeCOlxTTi0cCtpHlj8IqiI0MBS1lG/+Jn+Hw/9KpRcS/8LCXZFhWvIZvvM7wzrl7XHJdrscBgdMUXuH4K0QHLMa9V0ku+ocY0bO4Yr0c5bWS/PJC+xtnhfcmRrcEtFgRHzqMDvFAshj65piVujdEkb3gZMqAdrIVrBPkjB6uFy2vqccqDS5SvsJmZxZL5lNgGkOHAGW1S4gZoDZ7QJCiz9s1ggbT33UUiXb9DKhcQ7KP6q1U7IulChRNEdae+BrGP+80KQE4PybjA4z4zFGV07jF76bTLhn4vbFooCHQsqNCUMAScWMEbJIqb1+Ktjvv21Hj3/ikU03fIl9LLRUoIfjJXFb0Fa8gP5D9Q8rPNCh+hCtEX+AkrFu7nQSukXxCO13bDHjQrqUsWUiz51OWxAKpg3ey4vEQovN+CxpfciEMNCyBXslHT+KNOi0b2lM+qEiBfBlT2MLhhDGdPD1O6Q/49bXntQOYRS6nwOCuqCNXsLxerI0yHLX6Svclk7KpFUua4oXq68Xl1v0zehoP0WGkV+OEh9xycqxojC5tkvRhLKBit5+TrHRtlc6uR+oQljbirt9f2c+f3dZJuUQimbpBDJSx9rRl/R4SpvksZdpFKSp82uFKgbnuhn2Ik+11oh1MzQhikfEt2FfoipyYIhjnR6JEHdSr1XMLfZmOR8wbmjK59EV+rmxUwSlS5uE5tqmiBcXORkRCnl6M1BzmkfLN7Pyun7yZY+SYXvPky29EnSppy0/DWcuJd4DhflJ2lEv24kGS4KXzI4Z7UyydErxSkLe3XxFrlfKQd5DOx08IOsF2U2afdV5U27L1GMk4y34KS6Bn6Qf3LiIz3OFsNaNGcFlCU9vy62iUSSVkDRQOtnAR+OHcvZTt50YEzgZEs93H9AKfgtRefPHm8+8D750qOl+yvQWm0vTtCRtuvhRi7eBPAVLcax8xi3aMjLUUbTTQeriKPy3rjZeAxGPrBfg3so9Hgzzbj9kPWiqf6taY9/f7ry4GM8JP6diobK8hvK9GES7y1diTXEgtB2Uxdd/pm8/cmw75wk2kB73Pox1RMZL0I0ct+6oxtZ2A/RIWRiReiYst/PweEXqw4H3m6EsptK6fiekWsXoBwOwP0fZ46kLSvc9aefDajATBn3qW9G2Y0hA5q7GecNii8GkwFlHcsblKVnlQGd3Qz0FgPPJpABXedzzQ9q/P5pYwDReYd9QvTMCyubx+bpmXsrhJL7EbodzdFHmkFMPzWuBhCWcixRf378TJXxPyXYqSg=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Search Users'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Search Users"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/search'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/search"}
+>
+  
+</MethodEndpoint>
+
+
 
 Search for users that match the given query
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'query',
-          in: 'query',
-          description: 'The search query',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'genre',
-          in: 'query',
-          description: 'The genres to filter by',
-          style: 'form',
-          explode: true,
-          schema: { type: 'array', items: { type: 'string' } },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'sort_method',
-          in: 'query',
-          description: 'The sort method',
-          schema: { type: 'string', enum: ['relevant', 'popular', 'recent'] },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'is_verified',
-          in: 'query',
-          description: 'Only include verified users in the user results',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"query","in":"query","description":"The search query","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"genre","in":"query","description":"The genres to filter by","style":"form","explode":true,"schema":{"type":"array","items":{"type":"string"}}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"sort_method","in":"query","description":"The sort method","schema":{"type":"string","enum":["relevant","popular","recent"]}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"is_verified","in":"query","description":"Only include verified users in the user results","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'album_count'}
+                              name={"album_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'artist_pick_track_id'}
+                              name={"artist_pick_track_id"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'bio'}
+                              name={"bio"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem collapsible={true} className={'schemaItem'}>
-                              <details style={{}} className={'openapi-markdown__details'}>
-                                <summary style={{}}>
-                                  <span className={'openapi-schema__container'}>
-                                    <strong className={'openapi-schema__property'}>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
                                       cover_photo
-                                    </strong>
-                                    <span className={'openapi-schema__name'}>object</span>
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span>
                                   </span>
-                                </summary>
-                                <div style={{ marginLeft: '1rem' }}>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
                                   <SchemaItem
                                     collapsible={false}
-                                    name={'640x'}
+                                    name={"640x"}
                                     required={false}
-                                    schemaName={'string'}
+                                    schemaName={"string"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'string' }}
-                                  ></SchemaItem>
-                                  <SchemaItem
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
                                     collapsible={false}
-                                    name={'2000x'}
+                                    name={"2000x"}
                                     required={false}
-                                    schemaName={'string'}
+                                    schemaName={"string"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'string' }}
-                                  ></SchemaItem>
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem>
                                 </div>
                               </details>
-                            </SchemaItem>
-                            <SchemaItem
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'followee_count'}
+                              name={"followee_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'follower_count'}
+                              name={"follower_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'handle'}
+                              name={"handle"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'id'}
+                              name={"id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'is_verified'}
+                              name={"is_verified"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'twitter_handle'}
+                              name={"twitter_handle"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'instagram_handle'}
+                              name={"instagram_handle"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'tiktok_handle'}
+                              name={"tiktok_handle"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'verified_with_twitter'}
+                              name={"verified_with_twitter"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'verified_with_instagram'}
+                              name={"verified_with_instagram"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'verified_with_tiktok'}
+                              name={"verified_with_tiktok"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'website'}
+                              name={"website"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'donation'}
+                              name={"donation"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'location'}
+                              name={"location"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'name'}
+                              name={"name"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'playlist_count'}
+                              name={"playlist_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem collapsible={true} className={'schemaItem'}>
-                              <details style={{}} className={'openapi-markdown__details'}>
-                                <summary style={{}}>
-                                  <span className={'openapi-schema__container'}>
-                                    <strong className={'openapi-schema__property'}>
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
                                       profile_picture
-                                    </strong>
-                                    <span className={'openapi-schema__name'}>object</span>
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span>
                                   </span>
-                                </summary>
-                                <div style={{ marginLeft: '1rem' }}>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
                                   <SchemaItem
                                     collapsible={false}
-                                    name={'150x150'}
+                                    name={"150x150"}
                                     required={false}
-                                    schemaName={'string'}
+                                    schemaName={"string"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'string' }}
-                                  ></SchemaItem>
-                                  <SchemaItem
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
                                     collapsible={false}
-                                    name={'480x480'}
+                                    name={"480x480"}
                                     required={false}
-                                    schemaName={'string'}
+                                    schemaName={"string"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'string' }}
-                                  ></SchemaItem>
-                                  <SchemaItem
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
                                     collapsible={false}
-                                    name={'1000x1000'}
+                                    name={"1000x1000"}
                                     required={false}
-                                    schemaName={'string'}
+                                    schemaName={"string"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'string' }}
-                                  ></SchemaItem>
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem>
                                 </div>
                               </details>
-                            </SchemaItem>
-                            <SchemaItem
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'repost_count'}
+                              name={"repost_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'track_count'}
+                              name={"track_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'is_deactivated'}
+                              name={"is_deactivated"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'is_available'}
+                              name={"is_available"}
                               required={true}
-                              schemaName={'boolean'}
+                              schemaName={"boolean"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'boolean' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'erc_wallet'}
+                              name={"erc_wallet"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'spl_wallet'}
+                              name={"spl_wallet"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'spl_usdc_payout_wallet'}
+                              name={"spl_usdc_wallet"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"spl_usdc_payout_wallet"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'supporter_count'}
+                              name={"supporter_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'supporting_count'}
+                              name={"supporting_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'total_audio_balance'}
+                              name={"total_audio_balance"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'wallet'}
+                              name={"wallet"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{
-                                type: 'string',
-                                description: "The user's Ethereum wallet address for their account",
-                              }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"string","description":"The user's Ethereum wallet address for their account"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -458,28 +581,49 @@ Search for users that match the given query
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "album_count": 1,\n      "artist_pick_track_id": "GrzQ2w",\n      "bio": "WHAT YOU FINNUH DO\\n\\nBOOKINGS: luis@continuamgmt.com\\n\\ndm for plates/speshes",\n      "cover_photo": {\n        "640x": "https://audius-content-2.figment.io/content/01H7RT0YGE5EHNPETN5HA68S9H/640x.jpg",\n        "2000x": "https://audius-content-2.figment.io/content/01H7RT0YGE5EHNPETN5HA68S9H/2000x.jpg"\n      },\n      "followee_count": 612,\n      "follower_count": 2237,\n      "handle": "finnuh",\n      "id": "D8v5P",\n      "is_verified": true,\n      "twitter_handle": "finnuhdoit",\n      "instagram_handle": "finnuh",\n      "tiktok_handle": null,\n      "verified_with_twitter": false,\n      "verified_with_instagram": true,\n      "verified_with_tiktok": false,\n      "website": "finnuh.com",\n      "donation": "finnuh.com",\n      "location": "Dallas, TX",\n      "name": "finnuh",\n      "playlist_count": 0,\n      "profile_picture": {\n        "150x150": "https://audius-content-2.figment.io/content/01H7RT1JSCQPSZ4RC2M3XJM90X/150x150.jpg",\n        "480x480": "https://audius-content-2.figment.io/content/01H7RT1JSCQPSZ4RC2M3XJM90X/480x480.jpg",\n        "1000x1000": "https://audius-content-2.figment.io/content/01H7RT1JSCQPSZ4RC2M3XJM90X/1000x1000.jpg"\n      },\n      "repost_count": 187,\n      "track_count": 53,\n      "is_deactivated": false,\n      "is_available": true,\n      "erc_wallet": "0x200076832e3b58ce92ba3ce18b77de52ec3ff1d4",\n      "spl_wallet": "8Uwy8cWVbUeNPuXVxsp9cS9u7m9inExFKjHNk1UvZwv9",\n      "supporter_count": 22,\n      "supporting_count": 80,\n      "total_audio_balance": null,\n      "wallet": "0x200076832e3b58ce92ba3ce18b77de52ec3ff1d4"\n    },\n    {\n      "album_count": 0,\n      "artist_pick_track_id": null,\n      "bio": null,\n      "cover_photo": null,\n      "followee_count": 0,\n      "follower_count": 0,\n      "handle": "finnuhdoit",\n      "id": "24yWd",\n      "is_verified": false,\n      "twitter_handle": null,\n      "instagram_handle": null,\n      "tiktok_handle": null,\n      "verified_with_twitter": null,\n      "verified_with_instagram": null,\n      "verified_with_tiktok": null,\n      "website": null,\n      "donation": null,\n      "location": "Dallas, TX",\n      "name": "finnuhdoit",\n      "playlist_count": 0,\n      "profile_picture": {\n        "150x150": "https://cn1.stuffisup.com/content/QmYfCWcs7Vvx8TosHjoHdfMG8vwr3wqF6QTG9fkomjX6bz/150x150.jpg",\n        "480x480": "https://cn1.stuffisup.com/content/QmYfCWcs7Vvx8TosHjoHdfMG8vwr3wqF6QTG9fkomjX6bz/480x480.jpg",\n        "1000x1000": "https://cn1.stuffisup.com/content/QmYfCWcs7Vvx8TosHjoHdfMG8vwr3wqF6QTG9fkomjX6bz/1000x1000.jpg"\n      },\n      "repost_count": 0,\n      "track_count": 0,\n      "is_deactivated": false,\n      "is_available": true,\n      "erc_wallet": "0x1908be62da39db1b35848f2eaac5234ae7467ee7",\n      "spl_wallet": "AsyLSKXDPUHhQatmpXLQsgRrE76YVne17wmdBbWd5kJh",\n      "supporter_count": 0,\n      "supporting_count": 0,\n      "total_audio_balance": null,\n      "wallet": "0x1908be62da39db1b35848f2eaac5234ae7467ee7"\n    },\n    {\n      "album_count": 4,\n      "artist_pick_track_id": null,\n      "bio": "#keepitderrrty",\n      "cover_photo": {\n        "640x": "https://cn1.stuffisup.com/content/QmTcjLcpx9kiDxZvoZQwcMo9FTZBxCqwMMF7xDfq5jquHf/640x.jpg",\n        "2000x": "https://cn1.stuffisup.com/content/QmTcjLcpx9kiDxZvoZQwcMo9FTZBxCqwMMF7xDfq5jquHf/2000x.jpg"\n      },\n      "followee_count": 3811,\n      "follower_count": 2136,\n      "handle": "derrrtyrecords",\n      "id": "D8p5P",\n      "is_verified": false,\n      "twitter_handle": "derrrtyrecords",\n      "instagram_handle": "derrrtyrecords",\n      "tiktok_handle": null,\n      "verified_with_twitter": false,\n      "verified_with_instagram": false,\n      "verified_with_tiktok": false,\n      "website": "https://records.derrrty.com",\n      "donation": null,\n      "location": null,\n      "name": "Derrrty Records",\n      "playlist_count": 1,\n      "profile_picture": {\n        "150x150": "https://cn3.mainnet.audiusindex.org/content/QmWhJFF79RGRQCULP6NLVQFr1tcWqvLhVmYnDLF9r7jDxr/150x150.jpg",\n        "480x480": "https://cn3.mainnet.audiusindex.org/content/QmWhJFF79RGRQCULP6NLVQFr1tcWqvLhVmYnDLF9r7jDxr/480x480.jpg",\n        "1000x1000": "https://cn3.mainnet.audiusindex.org/content/QmWhJFF79RGRQCULP6NLVQFr1tcWqvLhVmYnDLF9r7jDxr/1000x1000.jpg"\n      },\n      "repost_count": 7,\n      "track_count": 32,\n      "is_deactivated": false,\n      "is_available": true,\n      "erc_wallet": "0x45ab569bde2a695f0692c1cd175fe747a0a7c644",\n      "spl_wallet": "7Y227ZyzrMzTzA2WatmFYkATfmKndfb4BomEuNEiyRGS",\n      "supporter_count": 0,\n      "supporting_count": 0,\n      "total_audio_balance": null,\n      "wallet": "0x45ab569bde2a695f0692c1cd175fe747a0a7c644"\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"album_count\": 0,\n      \"artist_pick_track_id\": \"string\",\n      \"bio\": \"string\",\n      \"cover_photo\": {\n        \"640x\": \"string\",\n        \"2000x\": \"string\"\n      },\n      \"followee_count\": 0,\n      \"follower_count\": 0,\n      \"handle\": \"string\",\n      \"id\": \"string\",\n      \"is_verified\": true,\n      \"twitter_handle\": \"string\",\n      \"instagram_handle\": \"string\",\n      \"tiktok_handle\": \"string\",\n      \"verified_with_twitter\": true,\n      \"verified_with_instagram\": true,\n      \"verified_with_tiktok\": true,\n      \"website\": \"string\",\n      \"donation\": \"string\",\n      \"location\": \"string\",\n      \"name\": \"string\",\n      \"playlist_count\": 0,\n      \"profile_picture\": {\n        \"150x150\": \"string\",\n        \"480x480\": \"string\",\n        \"1000x1000\": \"string\"\n      },\n      \"repost_count\": 0,\n      \"track_count\": 0,\n      \"is_deactivated\": true,\n      \"is_available\": true,\n      \"erc_wallet\": \"string\",\n      \"spl_wallet\": \"string\",\n      \"spl_usdc_wallet\": \"string\",\n      \"spl_usdc_payout_wallet\": \"string\",\n      \"supporter_count\": 0,\n      \"supporting_count\": 0,\n      \"total_audio_balance\": 0,\n      \"wallet\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

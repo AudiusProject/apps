@@ -1,158 +1,221 @@
 ---
 id: get-track-top-listeners
-title: 'Get Track Top Listeners'
-description: 'Get the users that have listened to a track the most'
-sidebar_label: 'Get Top Listeners'
+title: "Get Track Top Listeners"
+description: "Get the users that have listened to a track the most"
+sidebar_label: "Get Track Top Listeners"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVU1v2kAQ/SurPSUVwknVXrilahVF6qFqSS8RihZ7jDfY3s3sGBVZ/PfOrA2YQKI06QmW+XrzZubRajKLoCd3mtCky6BnI51BSNF6sq7WE30NpKgA1QTAwN8MqcKsQJU2ENSQKXLKqBgd/SoXSI+084BGUtxkfZJpdJk6r753oRjYzxs0FZA8JnetrvnB/jHdvc3YwQoIb6jQT5Fd9SlvvrIJ4bGxCFyMsIGRDmkBldGTVtPaS8pAaOuF3mxGuyouzwPQtsZjA7g+KjLlluqmmgMqlytLUAXpOCytH6vbAHlTqtyh8mZh69iwOuPvu6APTFRl6VyfgGRrggXgAabo/SZIOVBavLaMTHPA7/OFxJEZlkrbLVCVWTKV8S20Qxz484TPZDrBuzpAEPvHiwv5OKz1q0lTCLIRqWO8NYmL8b60aWQ1eQji1x7XcfMHSAWBR1k6sl2VzNDQyyAa6TDSxe/UYtqUBs/I+ft+l/FcONJkqYxLOLCwQUyfTkH/YrIBD3v4EvD5ZK+AK6YREB0+ieAQvobCydEs4m7G1Z/opLvPpN2exiYZ4hPiQkzb3VGDJQcVRD5MkiSzIXVsWzNFK5sBjk2T2SaMU5esLrVMyNa5i3T1zV/9uDk+uBikfl+qzirVOsvl+EIzdM+3X5k4pn7Pnj/8g9TtnoS3Ck4/Z4I/lPjS8FozoEhD23O407iRiMROYA5pZCoKScjebTs3AW6x3Gzk5+5GhFym08xL0ZrclAFe6OU/qsfJ/pawHurYypSNOGm59Hej3ArKC5W3avWOwq8WmBdg7NVsD2QmD7SC5B+Hdvaz/y85Vwd/MScBbOWlXg+rb4Ht1mwzY98CDN9eRNOZr1jz/JC/I8GTNnaCcP1tyjr0F3T6oeg=
-sidebar_class_name: 'get api-method'
+api: eJytVU1v2kAQ/SurPSUVwknVXrilahVF6qFqSS8RihZ7jDfY3s3sGBVZ/PfOrA2YQKI06QmW+XrzZubRajKLoCd3mtCky6BnI51BSNF6sq7WE30NpKgA1QTAwN8MqcKsQJU2ENSQKXLKqBgd/SoXSI+084BGUtxkfZJpdJk6r753oRjYzxs0FZA8JnetrvnB/jHdvc3YwQoIb6jQT5Fd9SlvvrIJ4bGxCFyMsIGRDmkBldGTVtPaS8pAaOuF3mxGuyouzwPQtsZjA7g+KjLlluqmmgMqlytLUAXpOCytH6vbAHlTqtyh8mZh69iwOuPvu6APTFRl6VyfgGRrggXgAabo/SZIOVBavLaMTHPA7/OFxJEZlkrbLVCVWTKV8S20Qxz484TPZDrBuzpAEPvHiwv5OKz1q0lTCLIRqWO8NYmL8b60aWQ1eQji1x7XcfMHSAWBR1k6sl2VzNDQyyAa6TDSxe/UYtqUBs/I+ft+l/FcONJkqYxLOLCwQUyfTkH/YrIBD3v4EvD5ZK+AK6YREB0+ieAQvobCydEs4m7G1Z/opLvPpN2exiYZ4hPiQkzb3VGDJQcVRD5MksR4OzZNZpswTl2yutQyE1vnLhLUt3v14+b4xGKQ+n2pOqvk7yyX4wvNYD1fe2XiYPrNev7UD1K3+7bfKjH9ZAn+UOJLw4vMgGLjbc/aTtVGIgs7STkkjqkoJCF7t+3cBLjFcrORn7urEDozG8y8FHXJTRnghV7+o16c7G8J66FyrUzZiJOW2343yq2EvFB5q0/vKPxqSXkBxl6/9kBm8kArSP5xaGc/+3+Pc3Xwp3ISwFZQ6vWw+hbYbs02M/YtwGQsHoKmM1+xyvkhf0cSJ23sJOD625SV5y/oBpvf
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Track Top Listeners'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Track Top Listeners"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/tracks/{track_id}/top_listeners'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/top_listeners"}
+>
+  
+</MethodEndpoint>
+
+
 
 Get the users that have listened to a track the most
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'track_id',
-          in: 'path',
-          description: 'A Track ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'offset',
-          in: 'query',
-          description: 'The number of items to skip. Useful for pagination (page number * limit)',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'limit',
-          in: 'query',
-          description: 'The number of items to fetch',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
                       <SchemaItem
                         collapsible={false}
-                        name={'data'}
+                        name={"data"}
                         required={false}
-                        schemaName={'undefined[]'}
+                        schemaName={"undefined[]"}
                         qualifierMessage={undefined}
-                        schema={{ type: 'array', items: 'circular(top_listener)' }}
-                      ></SchemaItem>
+                        schema={{"type":"array","items":"circular(top_listener)"}}
+                      >
+                        
+                      </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={'{\n  "data": [\n    {\n      "count": 31,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": "4boROp0",\n        "bio": "Artist Exec @ Audius",\n        "cover_photo": {\n          "640x": "https://creatornode.audius.co/content/01J5XKNTCK84YJJM1PYW1VQHZB/640x.jpg",\n          "2000x": "https://creatornode.audius.co/content/01J5XKNTCK84YJJM1PYW1VQHZB/2000x.jpg"\n        },\n        "followee_count": 160,\n        "follower_count": 193,\n        "handle": "froootmusic",\n        "id": "qm4Ya",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": "froootmusic",\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "los angeles",\n        "name": "frooot",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://creatornode2.audius.co/content/01HBYERXY7VSV3B2W938D4KR0K/150x150.jpg",\n          "480x480": "https://creatornode2.audius.co/content/01HBYERXY7VSV3B2W938D4KR0K/480x480.jpg",\n          "1000x1000": "https://creatornode2.audius.co/content/01HBYERXY7VSV3B2W938D4KR0K/1000x1000.jpg"\n        },\n        "repost_count": 166,\n        "track_count": 9,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0x949c3a1a05f8ea6be70a847457eeb7fbbe374a50",\n        "spl_wallet": "BqDfZpjiQ19sQD356351u95gweL8Fto7Y4rQAiBaMKWY",\n        "supporter_count": 3,\n        "supporting_count": 12,\n        "total_audio_balance": 955,\n        "wallet": "0x949c3a1a05f8ea6be70a847457eeb7fbbe374a50"\n      }\n    },\n    {\n      "count": 31,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": null,\n        "followee_count": 5,\n        "follower_count": 1,\n        "handle": "paypmentseatbelt",\n        "id": "zEprAWq",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Lansing, IL",\n        "name": "Routenetworking",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://creatornode.audius8.prod-eks-ap-northeast-1.staked.cloud/content/01J2PPS1YNJ4GM9HB7HYH9JB61/150x150.jpg",\n          "480x480": "https://creatornode.audius8.prod-eks-ap-northeast-1.staked.cloud/content/01J2PPS1YNJ4GM9HB7HYH9JB61/480x480.jpg",\n          "1000x1000": "https://creatornode.audius8.prod-eks-ap-northeast-1.staked.cloud/content/01J2PPS1YNJ4GM9HB7HYH9JB61/1000x1000.jpg"\n        },\n        "repost_count": 1,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0xf0beebe421af2d0b59e2a3fcd60ab2323584a90e",\n        "spl_wallet": null,\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 0,\n        "wallet": "0xf0beebe421af2d0b59e2a3fcd60ab2323584a90e"\n      }\n    },\n    {\n      "count": 10,\n      "user": {\n        "album_count": 2,\n        "artist_pick_track_id": null,\n        "bio": "An \"artist\" that composes whimsical, nonsensical anti-tunes that defy musical theory and challenge listeners preconceived notions of melody and harmony.",\n        "cover_photo": {\n          "640x": "https://cn1.mainnet.audiusindex.org/content/01J6DQF5SHQ0E2W3HYW24MV0MN/640x.jpg",\n          "2000x": "https://cn1.mainnet.audiusindex.org/content/01J6DQF5SHQ0E2W3HYW24MV0MN/2000x.jpg"\n        },\n        "followee_count": 5,\n        "follower_count": 2,\n        "handle": "dwoolfe",\n        "id": "8PgpQ4p",\n        "is_verified": false,\n        "twitter_handle": "AlgoRhapsody",\n        "instagram_handle": "AlgoRhapsody",\n        "tiktok_handle": "AlgoRhapsody",\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Ashburn, VA",\n        "name": "Algo Rhapsody",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://audius-creator-2.theblueprint.xyz/content/01J1GFFHE6YX1FX5STM40Q657Z/150x150.jpg",\n          "480x480": "https://audius-creator-2.theblueprint.xyz/content/01J1GFFHE6YX1FX5STM40Q657Z/480x480.jpg",\n          "1000x1000": "https://audius-creator-2.theblueprint.xyz/content/01J1GFFHE6YX1FX5STM40Q657Z/1000x1000.jpg"\n        },\n        "repost_count": 0,\n        "track_count": 28,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0x3e82c6c37c976f5581b3506af72caa8dc8138833",\n        "spl_wallet": "2mFL2maFHW8fVoq81cbQFVfBmBDK8894R6PeRyRgBsNQ",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 5,\n        "wallet": "0x3e82c6c37c976f5581b3506af72caa8dc8138833"\n      }\n    },\n    {\n      "count": 7,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": "Developer Relations Engineer @ Audius",\n        "cover_photo": {\n          "640x": "https://audius-content-3.cultur3stake.com/content/01J09GE07M4ZJAMRQNS05KMQHJ/640x.jpg",\n          "2000x": "https://audius-content-3.cultur3stake.com/content/01J09GE07M4ZJAMRQNS05KMQHJ/2000x.jpg"\n        },\n        "followee_count": 51,\n        "follower_count": 27,\n        "handle": "samgutentag",\n        "id": "AAWJg3g",\n        "is_verified": false,\n        "twitter_handle": "samgutentag",\n        "instagram_handle": "samgutentag",\n        "tiktok_handle": "samgutentag",\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": "docs.audius.org/developers",\n        "donation": null,\n        "location": "Santa Barbara, CA",\n        "name": "Sam",\n        "playlist_count": 1,\n        "profile_picture": {\n          "150x150": "https://audius-content-14.figment.io/content/01HDM1JKHWKAZ9014PNE2VPHMD/150x150.jpg",\n          "480x480": "https://audius-content-14.figment.io/content/01HDM1JKHWKAZ9014PNE2VPHMD/480x480.jpg",\n          "1000x1000": "https://audius-content-14.figment.io/content/01HDM1JKHWKAZ9014PNE2VPHMD/1000x1000.jpg"\n        },\n        "repost_count": 36,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0x7df7e5261728693d6cd7052af4b7a4fa057225e7",\n        "spl_wallet": "9ezgmnJa51GsDHtrkgQwSaDusynJ4r759v3vbZcnoqNZ",\n        "supporter_count": 0,\n        "supporting_count": 7,\n        "total_audio_balance": 56,\n        "wallet": "0x7df7e5261728693d6cd7052af4b7a4fa057225e7"\n      }\n    },\n    {\n      "count": 6,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": {\n          "640x": "https://audius-content-12.cultur3stake.com/content/01HVHQ23CXD42TY2TK8SZ1Q50C/640x.jpg",\n          "2000x": "https://audius-content-12.cultur3stake.com/content/01HVHQ23CXD42TY2TK8SZ1Q50C/2000x.jpg"\n        },\n        "followee_count": 5,\n        "follower_count": 1,\n        "handle": "threadstraddler97",\n        "id": "jNJPwxo",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Glasgow, SCT",\n        "name": "Victoria De Morte",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://audius-creator-5.theblueprint.xyz/content/01HVHQ1VDJ3A7S2E6AVQDB7MA6/150x150.jpg",\n          "480x480": "https://audius-creator-5.theblueprint.xyz/content/01HVHQ1VDJ3A7S2E6AVQDB7MA6/480x480.jpg",\n          "1000x1000": "https://audius-creator-5.theblueprint.xyz/content/01HVHQ1VDJ3A7S2E6AVQDB7MA6/1000x1000.jpg"\n        },\n        "repost_count": 0,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0xa350a121fe92e39eeb2cbab036bd95ced077c261",\n        "spl_wallet": "5RYdgwq7rxLMr7jdGxRaYkwTZZUmoTF3YSovjFgpsimP",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 0,\n        "wallet": "0xa350a121fe92e39eeb2cbab036bd95ced077c261"\n      }\n    },\n    {\n      "count": 5,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": {\n          "640x": "https://cn2.mainnet.audiusindex.org/content/QmXEMnSBCaAtGGKUnaiHthTXcvGN3FnYGAHdLNWKQWWjPW/640x.jpg",\n          "2000x": "https://cn2.mainnet.audiusindex.org/content/QmXEMnSBCaAtGGKUnaiHthTXcvGN3FnYGAHdLNWKQWWjPW/2000x.jpg"\n        },\n        "followee_count": 19,\n        "follower_count": 53,\n        "handle": "elwyn_80",\n        "id": "aAY3a",\n        "is_verified": false,\n        "twitter_handle": "elwyn_80",\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Cheyenne, WY",\n        "name": "Michael Patterson",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://audius-creator-5.theblueprint.xyz/content/QmRMvYYmw8XyNJT2rGyJZfhCQdQiKh6ebqRRv36HQKiAL1/150x150.jpg",\n          "480x480": "https://audius-creator-5.theblueprint.xyz/content/QmRMvYYmw8XyNJT2rGyJZfhCQdQiKh6ebqRRv36HQKiAL1/480x480.jpg",\n          "1000x1000": "https://audius-creator-5.theblueprint.xyz/content/QmRMvYYmw8XyNJT2rGyJZfhCQdQiKh6ebqRRv36HQKiAL1/1000x1000.jpg"\n        },\n        "repost_count": 17,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0x2f30f04dfc6308f269cbcdb1eb928c0e9bd722c2",\n        "spl_wallet": "4rinQEicErGBTHHSsXRUtJuwjmPWsq1V2ge5JYUZGZER",\n        "supporter_count": 0,\n        "supporting_count": 1,\n        "total_audio_balance": 0,\n        "wallet": "0x2f30f04dfc6308f269cbcdb1eb928c0e9bd722c2"\n      }\n    },\n    {\n      "count": 5,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": null,\n        "followee_count": 11,\n        "follower_count": 8,\n        "handle": "pisuke",\n        "id": "ROvk1",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Madrid, MD",\n        "name": "pisuke",\n        "playlist_count": 0,\n        "profile_picture": null,\n        "repost_count": 0,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0xd87d367d8106ea63bf2f74f860052fad54f898bb",\n        "spl_wallet": "AedD9GwAwWfm1UH3JTcGMyJsYovgSBrvMW78dfgiayvv",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 0,\n        "wallet": "0xd87d367d8106ea63bf2f74f860052fad54f898bb"\n      }\n    },\n    {\n      "count": 4,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": null,\n        "followee_count": 1,\n        "follower_count": 1,\n        "handle": "Roger84176251",\n        "id": "ZOz81R7",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Chicago, IL",\n        "name": "Roger",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://audius-content-11.cultur3stake.com/content/01HYN8Y4CFHKD1TCW4KEVTW788/150x150.jpg",\n          "480x480": "https://audius-content-11.cultur3stake.com/content/01HYN8Y4CFHKD1TCW4KEVTW788/480x480.jpg",\n          "1000x1000": "https://audius-content-11.cultur3stake.com/content/01HYN8Y4CFHKD1TCW4KEVTW788/1000x1000.jpg"\n        },\n        "repost_count": 1,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0xe34cc7b375cbb646c2896bb0f664709894988286",\n        "spl_wallet": "FJ8e8vSfw8aqsQpY5FusvBFr5WPujB3VppY6H1pW7d3h",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 0,\n        "wallet": "0xe34cc7b375cbb646c2896bb0f664709894988286"\n      }\n    },\n    {\n      "count": 4,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": null,\n        "followee_count": 4,\n        "follower_count": 1,\n        "handle": "_Kara_",\n        "id": "d9PJ0b5",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Delft, ZH",\n        "name": "…",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://blockdaemon-audius-content-03.bdnodes.net/content/01HVYQS8T89YMAW27BP7XNR23V/150x150.jpg",\n          "480x480": "https://blockdaemon-audius-content-03.bdnodes.net/content/01HVYQS8T89YMAW27BP7XNR23V/480x480.jpg",\n          "1000x1000": "https://blockdaemon-audius-content-03.bdnodes.net/content/01HVYQS8T89YMAW27BP7XNR23V/1000x1000.jpg"\n        },\n        "repost_count": 0,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0x04b1d16ba5d83c5531e9405d306dadea7464a22d",\n        "spl_wallet": "9EekSeYxTyscj5F6bMBrfH9bH3E7ibmmm8gxckaER6F4",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 0,\n        "wallet": "0x04b1d16ba5d83c5531e9405d306dadea7464a22d"\n      }\n    },\n    {\n      "count": 4,\n      "user": {\n        "album_count": 0,\n        "artist_pick_track_id": null,\n        "bio": null,\n        "cover_photo": null,\n        "followee_count": 4,\n        "follower_count": 0,\n        "handle": "netralogy",\n        "id": "9lgza",\n        "is_verified": false,\n        "twitter_handle": null,\n        "instagram_handle": null,\n        "tiktok_handle": null,\n        "verified_with_twitter": false,\n        "verified_with_instagram": false,\n        "verified_with_tiktok": false,\n        "website": null,\n        "donation": null,\n        "location": "Singapore",\n        "name": "Saani",\n        "playlist_count": 0,\n        "profile_picture": {\n          "150x150": "https://cn4.mainnet.audiusindex.org/content/Qmecf8Kf4XnGdb5c733LEp8PxFtL8vpBu4BpuZPKGJSjq9/150x150.jpg",\n          "480x480": "https://cn4.mainnet.audiusindex.org/content/Qmecf8Kf4XnGdb5c733LEp8PxFtL8vpBu4BpuZPKGJSjq9/480x480.jpg",\n          "1000x1000": "https://cn4.mainnet.audiusindex.org/content/Qmecf8Kf4XnGdb5c733LEp8PxFtL8vpBu4BpuZPKGJSjq9/1000x1000.jpg"\n        },\n        "repost_count": 0,\n        "track_count": 0,\n        "is_deactivated": false,\n        "is_available": true,\n        "erc_wallet": "0xe5ddf3ac4c8b8d788058b51f9e54ff02c1a4fcd3",\n        "spl_wallet": "9uLKasjc2FMcqGAtNxqLP2W9NorMNx5xgKoCu8Qt3L3X",\n        "supporter_count": 0,\n        "supporting_count": 0,\n        "total_audio_balance": 2,\n        "wallet": "0xe5ddf3ac4c8b8d788058b51f9e54ff02c1a4fcd3"\n      }\n    }\n  ]\n}'}
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    null\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

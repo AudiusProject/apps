@@ -1,0 +1,313 @@
+---
+id: claim-rewards
+title: "Claim Rewards"
+description: "Claims all the filtered undisbursed rewards for a user"
+sidebar_label: "Claim Rewards"
+hide_title: true
+hide_table_of_contents: true
+api: eJytVm1P2zAQ/iuWP21SoZQBZf1WXrYhNFZKKdsYQpfEbVySONhOeYn633fnmL5ABdVGKrVJfPfc+bl7zi25haHhrUuuxR3oyPCrGo+ECbXMrVQZb/H9BGRqGCQJs7FgA5lYoUXEiiySJii0wXvvzAZKM2CFEZrXuMqFBgI5ip5gWNdHqWG820IYu6eiB94q3aNEWN6yuhA1HqrMiszSEuR5IkOHVB8ZyqnkJoxFCnRnH3KB8CoYidB63AroklMiGBy3lGvKxkphyCeMcTciGwrKbAphrJbZkD/ffw83PXVgRwfMKk/CdNsflDOG5CN6i3tI84QACz6pcZOLUA4kMrJSpKn56mGaorOdUSi/3ZXikK3fTOgqM1fCZegIb6V1b5z9tbe/9nVEC7LRwuQqMxXNmxsb9LMY/KwIQ2GoA96lxBFYeFlg93bmCVrDAzpKK1LzFuJ8c8yX73276L8bZQY2c1zaFZCqomL5bdCqqMy7zMM1Np4ul6scZmALLcwKLPt4kxcBNWQGQnpic4BzUS/59qhpGqejtHv8pTgI9i++d/vdExmc9Tf77fZheHLc2fl2cd78eteJft7s/R7Hj7vZ1vg0aQZ7t7v2ZKv7+Pm+cTz6lHa27053dW/z185jm19hLkJrtQLVh2TGUuxYQKrlwKtlADIR0QJDR5kpBgMZSuxpFkACWSicKl6RTiUWr52tZXLZA5quTmJsjZ2oqU6nwsX0ZDaGREYsBw2pwJGxKC8C316qRaHHOAYqKhY90AWRYkWjO1eGmiEHG+NT3WdQd+FJIg6FDpGSFzpBk9ja3LTqdcjlOhSRLMx6qOrjBp+giEjf3dnwP3wi8JmgUBQLmvANPZtysw6X2UC5SnqW252jF3VsuzRYv8GqVcq4Wmmsu5amTabgJk+GJC45sRYAyxlb/35C+taz4t7WcwSppjhRWHq2Z+dyrWoeGkMx1QOXyjIAI851MpnQa6RU41l6ibdj0BICJyHq9VhARBxigW7EA2Vc5b7WowTIPCmcgp+P4UntyaONUzu3r9pezbVM58dZD40Df7qnKiIfDXc0bPG7xf/gx/1JIAQ3Ltz7kqNwhgWKDW0qXLr+AkFP91E=
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Claim Rewards"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/rewards/claim"}
+>
+  
+</MethodEndpoint>
+
+
+
+Claims all the filtered undisbursed rewards for a user
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<MimeTabs
+  className={"openapi-tabs__mime"}
+>
+  <TabItem
+    label={"application/json"}
+    value={"application/json-schema"}
+  >
+    <details
+      style={{}}
+      className={"openapi-markdown__details mime"}
+      data-collapsed={false}
+      open={true}
+    >
+      <summary
+        style={{}}
+        className={"openapi-markdown__details-summary-mime"}
+      >
+        <h3
+          className={"openapi-markdown__details-summary-header-body"}
+        >
+          Body
+        </h3><strong
+          className={"openapi-schema__required"}
+        >
+          required
+        </strong>
+      </summary><div
+        style={{"textAlign":"left","marginLeft":"1rem"}}
+      >
+        
+      </div><ul
+        style={{"marginLeft":"1rem"}}
+      >
+        <SchemaItem
+          collapsible={false}
+          name={"challengeId"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The challenge ID to filter rewards (optional)","example":"u"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"specifier"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The specifier to filter rewards (optional)","example":"7eP5n"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"userId"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The user ID to claim rewards for","example":"7eP5n"}}
+        >
+          
+        </SchemaItem>
+      </ul>
+    </details>
+  </TabItem>
+</MimeTabs><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                              >
+                                Array [
+                              </div>
+                            </li><SchemaItem
+                              collapsible={false}
+                              name={"challengeId"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The challenge ID","example":"u"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"specifier"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The challenge specifier","example":"7eP5n"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"amount"}
+                              required={false}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The reward amount","example":"1000000000"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"signatures"}
+                              required={false}
+                              schemaName={"string[]"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"array","items":{"type":"string"},"description":"Transaction signatures","example":["5j7s1QjmRKFuDbCWMRVRNibSV2VAAEcNKP6HWU7GwPdXkBZvhz8n4vQl7bBq8tN4Rz9x1Kj3mP5wQ8rT2Y6zA"]}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"error"}
+                              required={false}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"Error message if claim failed","example":"Insufficient balance"}}
+                            >
+                              
+                            </SchemaItem><li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                              >
+                                ]
+                              </div>
+                            </li>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": [\n    {\n      \"challengeId\": \"u\",\n      \"specifier\": \"7eP5n\",\n      \"amount\": \"1000000000\",\n      \"signatures\": [\n        \"5j7s1QjmRKFuDbCWMRVRNibSV2VAAEcNKP6HWU7GwPdXkBZvhz8n4vQl7bBq8tN4Rz9x1Kj3mP5wQ8rT2Y6zA\"\n      ],\n      \"error\": \"Insufficient balance\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request - No rewards to claim or invalid parameters
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      
