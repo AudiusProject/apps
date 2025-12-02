@@ -194,7 +194,7 @@ app.post('/attestation/:handle', async (c) => {
 
     // Custom rules for specific challenges
     if (challengeId === 'e') {
-      if (user.totalAudioBalance < 100) {
+      if (!user.isVerified) {
         return c.json({ error: 'denied' }, 400)
       }
     }
