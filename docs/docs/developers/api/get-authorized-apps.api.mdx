@@ -1,171 +1,231 @@
 ---
 id: get-authorized-apps
-title: 'Get Authorized Apps'
-description: 'Get the apps that user has authorized to write to their account'
-sidebar_label: 'Get Authorized Apps'
+title: "Get Authorized Apps"
+description: "Get the apps that user has authorized to write to their account"
+sidebar_label: "Get Authorized Apps"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVE1v2zAM/SuCThsQ1O2wXXzLsKHobdjWXYoiYC02VudYGkVny4z895Gym6aO29NOlvUofjw+srcM62TLG9slpGRvF9ZhqshH9qG1pb1ENlyjgRiTHICNGpoakoGO60D+LzrDwfwmz6gHsfZkoKpC17Jd2BCRQL1dudHf8unhUtyKTQSCDbJmUN70tpUfsfVOIK9ZRODaTlNbmmtN5eqTIIS/Ok8oEZg6XNhU1bgBW/aWd1F9JSbfru1+f6vGKYY2YVL83fm5fp67/tZVFSbNrAoto9QhJkJB46tcSvGQ1K4/jRPuHrDSsiNp4eyHKA742AqIYKfFMW4y/pT/jQXnaAi+Jmh5VRECo1sBH6666CZXgVbamFXmLPMnhb6e02OcU5JGD3PAM55mcL+BNa46ambRaaov2hwX/bLREQ0znZb6PTeZ7oPgVtJEgV7EkoKCvp9TxUdwRhuFiZ8pQx98mJUR0lYUikSBJi/kiQi+DjoTa8zNUY2XtsiDWPTe7YtpbqLr7HGYkkyyrZljKovC+VQFwXbS5K13SGfQOd+lsyoU2wuruvftfchEjaUvv1ydDlV+ZH5cmAHVaANycXauzMeQeAO5+eOYzo/0RCiH2v/DRhkbzfiHi9iAbAjJa5TcwOLjOlvYMg/ElEgho5Y61LDv7yDhNTX7vV5Ld2kn93LcAnm4U6aEbKFXz9Kue2gSvlLfm6/jLL81xxtqNunHddDqMthC0+mfHH/ibth/+1uxqhGknzmNAVjKdop89ORkNWm7D/q6/PxdZP0PSdYKxg==
-sidebar_class_name: 'get api-method'
+api: eJytVMFu2zAM/RVBpw0I6nbYLr5l2FD0NmzrLkURsBYbq3MsjaKzZUb+faTspqnj9rSTZT2SIh8f2VuGdbLlje0SUrK3C+swVeQj+9Da0l4iG67RQIxJDsBGDU0NyUDHdSD/F53hYH6TZ9SDWHsyUFWha9kubIhIoNGu3Bhv+eS4lLBiE4Fgg6wZlDe9beVHbL0TyGsWEbi209SW5lpTufokCOGvzhPKC0wdLmyqatyALXvLu6ixEpNv13a/v1XjFEObMCn+7vxcP89Df+uqCpNmVoWWUeoQE6Gg8VUupXhIatefvhPuHrDSsiNp4eyHVxzwsRUQwU6LY9xk/Cn/GwvO0fD4mqDlVUUIjG4FfLjqoptcBVppY1aZs8yfFPp6To/vnJI0RpgDnvE0g/sNrHHVUTOLTlN90ea46JeNjmiY6bTU77nJdB8Et5ImCvQilhQU9P2cKj6CM9ooTPxMGerwYVZGSFtRKBIFmniIiwi+DjoTa8zNUY2XtsiDWPTe7YtpbqLrHHGYkkyyrZljKosCoj+DzvkunVWh2F5YVbpv70OmZix2+eXqdIyyk/lxYQZU4w/Ixdm5ch1D4g3kdo+DOT/EE2kcqv0PO2RsLeMfLmIDshMkr1FkA2+PC2xhyzwCU+qEjFrqUMO+v4OE19Ts93ot/aSd3MtxC+ThTpkSep1PepYG3UOT8JX63nwdp/etOd5Js0k/LoBWx38LTad/cvyJu2Hj7W/FqkZwSDmNAVjKPop85HKyjLTdB0Vdfv4uQv4HFr8EvQ==
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Authorized Apps'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Authorized Apps"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/authorized_apps'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/authorized_apps"}
+>
+  
+</MethodEndpoint>
+
+
 
 Get the apps that user has authorized to write to their account
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'address'}
+                              name={"address"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'name'}
+                              name={"name"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'description'}
+                              name={"description"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'image_url'}
+                              name={"image_url"}
                               required={false}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'grantor_user_id'}
+                              name={"grantor_user_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'grant_created_at'}
+                              name={"grant_created_at"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'grant_updated_at'}
+                              name={"grant_updated_at"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -175,28 +235,49 @@ Get the apps that user has authorized to write to their account
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "address": "0x7d2a1604175e083eccc31a374155e89c97d9b206",\n      "name": "Test App",\n      "description": null,\n      "image_url": null,\n      "grantor_user_id": "D8v5P",\n      "grant_created_at": "2023-08-04 14:33:22",\n      "grant_updated_at": "2023-08-04 14:33:22"\n    },\n    {\n      "address": "0x82f27eaa87ed1557863283e6d1bb1d3f478413c4",\n      "name": "test",\n      "description": "test",\n      "image_url": null,\n      "grantor_user_id": "D8v5P",\n      "grant_created_at": "2023-10-19 23:48:43",\n      "grant_updated_at": "2023-10-19 23:48:43"\n    },\n    {\n      "address": "0xe84f7b9d34174b97d58ea8fde1fdb2f7c4d30056",\n      "name": "My Vite App",\n      "description": null,\n      "image_url": null,\n      "grantor_user_id": "D8v5P",\n      "grant_created_at": "2024-02-28 21:36:57",\n      "grant_updated_at": "2024-02-28 21:36:57"\n    }\n  ]\n}\n'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"address\": \"string\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"image_url\": \"string\",\n      \"grantor_user_id\": \"string\",\n      \"grant_created_at\": \"string\",\n      \"grant_updated_at\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

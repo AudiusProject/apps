@@ -1,221 +1,1073 @@
 ---
 id: get-track-access-info
-title: 'Get Track Access Info'
-description:
-  'Gets the information necessary to access the track and what access the given user has.'
-sidebar_label: 'Get Track Access'
+title: "Get Track Access Info"
+description: "Gets the information necessary to access the track and what access the given user has."
+sidebar_label: "Get Track Access Info"
 hide_title: true
 hide_table_of_contents: true
-api: eJy1Vk1v2zAM/SuCThuQ1e2OuRXo0OW0Yeu2QxEEjM3EahzJleRkgeH/PlKyY6fJ0g9sp0Amxff4KJKppYelk+N76S2kKyenI5mhS60qvTJajuUteid8jkLphbFr4M9CY4rOgd0JbwSkfAg+IYgAnYltDn5oWaoNalE5tCIHdyFH0pRoQ7RJFmHEXbh9HS9NCI68SrCwRo+WSdZS04G8A85MZeSgmGQJPpdPmV+3ASc3ZLL4WCmLBOVthSPp0hzXIMe19LuSQzpvlV7KphntUZjtAOSxQrs7Qrmj5EJakxthFiHXcFzDiuKFM2Oj8/Ic6pQputJoh47tHy8v+ecQ63sVtKFAqdEetWcXKMtCpUHJ5MGxX32MY+YPmDKD0rLuXkWUDHzw6tW5l/PCpCtdredoyb/TgPidDxVrfQryMIebcJqje+aJ0EUoii+LUPYhv8xsdWGAy0LqIayf59b69dzmxhQIWjajPtwJK5m98gV/a9Nrpk2vyVEZX/A2CI3O4aBc7BdmMRS9D6uoyMtQhuO4gxuDWGILThTgvKhKKi4pRsGVm0UFZsvw6TjTpwC/ciSyxNMKbfyAOBWGnjOnm1IkEcPyO59jrqjtQXcVZSgGb5HpwWaKo7/giXw2W54rleYUW4z9QzH9oDl4Ik9DdoXD39QoGWazGGAWeU2jLF3x/7kwXeCz0uzR3y5OP3QHbfF2UQYPPo7Y1s6z/0Q7hO+zbm6RQ8M+NK5zwzN9iaEVeTaPZRIXTFJ3s7tJYpAPKk566pNNN+YrW9CV3PvSjZMkUy41ZNtRV29UhvYCqkxV7iI1yeZK8uwMMVi7lt/118nxPgiXxM8rEa2MFi1XF5dcj9I4v4YwQNsN8LetdBC47qfx/9uWbSU9VS4pC1BhdgWZ6lbh/Qof8Y7b78ehyCRUTjmyb13PweEPWzQNf467jaUnsWFecDMsoHB4JtdXbb6T/Fe4O1izGygq9gol3YBVzOSVrN59a3fFe3HwB+AkgfYj6N0QvSO2VzGMixwh4+lMbKKZn0TpBxePNjGnse+G20931CF/AK1USCA=
-sidebar_class_name: 'get api-method'
+api: eJztWN2P2zYM/1cMPW1AdrkUKAbk7bDrugP2he62PRSHgLGVWI0tuZKcNAjyv4+k/Jn4Lm6x7mV5upNJkT+RP1EMD8LD2on5e+EtxBsnniYikS62qvDKaDEXb6V3kU9lpPTK2Bzoc6RlLJ0Du4+8iSCmBeuwkQh0Eu1S8F3JWm2ljkonbZSCuxETYQpp2dpDEtxEj7z7Lmx6QHeoVYCFXHppCeRBaFygNvtZqAQVFIEswKfiFPldZfDhHkVWfiyVlejK21JOhItTmYOYH4TfF2TSeav0WhyPk8YLoe04+VhKuz/z8oiH42M93EdmxWflZQ4btMdr8i2dFy95fSKIrjDaSUfyV7e39Kfv64+SY4OGYqO91J5UoCgyFXMkpx8c6R3O/ZjlBxkTgsJS3L0KXhLwrNVG571YZibe6DJfSov6dQwQ38umQq6HXPbPcM+rpXQXKIIbIct+W3Hau/gSs9OZAUoLRk9CfhlbpddiWxqTSdDiOGnNDUhR7JXP6Ft1vOPTsY3JWRpHcAO94ZoXyoX7Qii6QW/NKkzymtNwbrezo2Mr2oGLMnA+KgtMLkYMjSu3CBFYrPnT+UlPHfydSgSLOG2kje8Ax8Qgnem4MVqKglni+VKmCq896Dqj5IqcV56RsIki6yMo8pPZUV0pNR2x8tEQxbSFpkcRo+UAWbwqFqMp3FW+nIRfSowybjnlLua6Ad+jEJmvotIHuTJZZnbjcZ7oj4Qado1GWzkZBFy6JF4UpY2RDvIy3r76xfQz2gL2IdHGQxYVyDfJ74rDYudrFoRzQJIgJbFudk7yXPFgQ1Q5yIy7DD3on0f42JhoZWAt0PugvMzdaVWF3JSa7cPelH6xQ3yS19LGWMlhPSqQz2X82DPUyquSgmK80LXT8+fnFNaQRnWCAd8d1shP+CwlMlmgvRzRLDhKqDKkw7wIBHsaNlJxZpiFeuWxrCDemIlzMXon+uN4mJqMq9qvPz7WJTywrrU0gnYVRenhTkFRveUW4yLkoD3wzshPkBchWNz5SEw0OQorZzLxxLUXrwzYwZeqtfDm3Q/fv5p1jDQf8J/Z7PVrtlUfYYgaoV8aEKgc6finzQaFlGarIftZ6c1gI9YQ4iRzfbaQcJAf3mykDqLLpb/V/S95EdziA0pewqK6ZiMR89ZRfQhp1kh5LzbxEi9Zt/yfYBjXiATlS6aHrncn6P2U9gQDG0Mv0OzkDqfu4/71Hqc2/GKX03j/8j6n/f3U6XCv/c21v7n2N9f+5trfXPuba3/zP+1vujt58FnJaSI7MKTi74t6mki1iXRyvDqGJq3rUJZpYjoX0zD2nR7qiepxGox8p8L8FSvyth6+lkR0kXpfuPl0CoW6gTJRpbuJzXQ746PwLm41AqK73x/O57K8KfprFgUp2Q+S2c0t12rjfA5cF6pJ7HPT4Z7hQzsV/XpT64owHnM1LTKqXjQQDBUgxLQZpU9o1tzMqbthxUCleEbSPRyW+ABgCTke6XOYMVOwE+VgmdE1WkHm5Atn/awJ9CD+jUSfnXH3FrKStDilW7CKkHwmqm/eVXXg26g3iB8EUHcYet/1XgNrosi9fiohoSkpogliokThOxvPJuJ0jIb/b9884p34B9UXtRw=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Track Access Info'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Track Access Info"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/tracks/{track_id}/access-info'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/access-info"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets the information necessary to access the track and what access the given user has.
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'track_id',
-          in: 'path',
-          description: 'A Track ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
-                            <SchemaItem collapsible={true} className={'schemaItem'}>
-                              <details style={{}} className={'openapi-markdown__details'}>
-                                <summary style={{}}>
-                                  <span className={'openapi-schema__container'}>
-                                    <strong className={'openapi-schema__property'}>access</strong>
-                                    <span className={'openapi-schema__name'}>object</span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      access
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span>
                                   </span>
-                                </summary>
-                                <div style={{ marginLeft: '1rem' }}>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
                                   <SchemaItem
                                     collapsible={false}
-                                    name={'stream'}
+                                    name={"stream"}
                                     required={true}
-                                    schemaName={'boolean'}
+                                    schemaName={"boolean"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'boolean' }}
-                                  ></SchemaItem>
-                                  <SchemaItem
+                                    schema={{"type":"boolean"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
                                     collapsible={false}
-                                    name={'download'}
+                                    name={"download"}
                                     required={true}
-                                    schemaName={'boolean'}
+                                    schemaName={"boolean"}
                                     qualifierMessage={undefined}
-                                    schema={{ type: 'boolean' }}
-                                  ></SchemaItem>
+                                    schema={{"type":"boolean"}}
+                                  >
+                                    
+                                  </SchemaItem>
+                                </div>
+                              </details>
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"user_id"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string","description":"The user ID of the owner of this track"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"blocknumber"}
+                              required={true}
+                              schemaName={"integer"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer","description":"The blocknumber this track was last updated"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"is_stream_gated"}
+                              required={false}
+                              schemaName={"boolean"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"boolean","description":"Whether or not the owner has restricted streaming behind an access gate"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      stream_conditions
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span>
+                                  </span>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
+                                  <div>
+                                    <span
+                                      className={"badge badge--info"}
+                                    >
+                                      oneOf
+                                    </span><SchemaTabs>
+                                      <TabItem
+                                        label={"tip_gate"}
+                                        value={"0-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={false}
+                                          name={"tip_user_id"}
+                                          required={true}
+                                          schemaName={"integer"}
+                                          qualifierMessage={undefined}
+                                          schema={{"type":"integer","description":"Must tip the given user ID to unlock"}}
+                                        >
+                                          
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"follow_gate"}
+                                        value={"1-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={false}
+                                          name={"follow_user_id"}
+                                          required={true}
+                                          schemaName={"integer"}
+                                          qualifierMessage={undefined}
+                                          schema={{"type":"integer","description":"Must follow the given user ID to unlock"}}
+                                        >
+                                          
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"extended_purchase_gate"}
+                                        value={"2-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  usdc_purchase
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must pay the total price and split to the given addresses to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"price"}
+                                                required={true}
+                                                schemaName={"integer"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"integer"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={true}
+                                                className={"schemaItem"}
+                                              >
+                                                <details
+                                                  style={{}}
+                                                  className={"openapi-markdown__details"}
+                                                >
+                                                  <summary
+                                                    style={{}}
+                                                  >
+                                                    <span
+                                                      className={"openapi-schema__container"}
+                                                    >
+                                                      <strong
+                                                        className={"openapi-schema__property"}
+                                                      >
+                                                        splits
+                                                      </strong><span
+                                                        className={"openapi-schema__name"}
+                                                      >
+                                                         object[]
+                                                      </span><span
+                                                        className={"openapi-schema__divider"}
+                                                      >
+                                                        
+                                                      </span><span
+                                                        className={"openapi-schema__required"}
+                                                      >
+                                                        required
+                                                      </span>
+                                                    </span>
+                                                  </summary><div
+                                                    style={{"marginLeft":"1rem"}}
+                                                  >
+                                                    <li>
+                                                      <div
+                                                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                                                      >
+                                                        Array [
+                                                      </div>
+                                                    </li><SchemaItem
+                                                      collapsible={false}
+                                                      name={"user_id"}
+                                                      required={false}
+                                                      schemaName={"integer"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"integer"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"percentage"}
+                                                      required={true}
+                                                      schemaName={"number"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"number"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"eth_wallet"}
+                                                      required={false}
+                                                      schemaName={"string"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"string"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"payout_wallet"}
+                                                      required={true}
+                                                      schemaName={"string"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"string"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"amount"}
+                                                      required={true}
+                                                      schemaName={"integer"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"integer"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><li>
+                                                      <div
+                                                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                                                      >
+                                                        ]
+                                                      </div>
+                                                    </li>
+                                                  </div>
+                                                </details>
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"nft_gate"}
+                                        value={"3-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  nft_collection
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must hold an NFT of the given collection to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"chain"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={"**Possible values:** [`eth`, `sol`]"}
+                                                schema={{"type":"string","example":"eth","enum":["eth","sol"]}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"standard"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={"**Possible values:** [`ERC721`, `ERC1155`]"}
+                                                schema={{"type":"string","example":"ERC721","enum":["ERC721","ERC1155"]}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"address"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"name"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"imageUrl"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"externalLink"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"token_gate"}
+                                        value={"4-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  token_gate
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must hold an NFT of the given collection to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"token_mint"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string","description":"The mint of the token needed to unlock"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"token_amount"}
+                                                required={true}
+                                                schemaName={"integer"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"integer","description":"The amount of the token needed to unlock"}}
+                                              >
+                                                
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem>
+                                    </SchemaTabs>
+                                  </div>
+                                </div>
+                              </details>
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"is_download_gated"}
+                              required={false}
+                              schemaName={"boolean"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"boolean","description":"Whether or not the owner has restricted downloading behind an access gate"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      download_conditions
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object
+                                    </span>
+                                  </span>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
+                                  <div>
+                                    <span
+                                      className={"badge badge--info"}
+                                    >
+                                      oneOf
+                                    </span><SchemaTabs>
+                                      <TabItem
+                                        label={"tip_gate"}
+                                        value={"0-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={false}
+                                          name={"tip_user_id"}
+                                          required={true}
+                                          schemaName={"integer"}
+                                          qualifierMessage={undefined}
+                                          schema={{"type":"integer","description":"Must tip the given user ID to unlock"}}
+                                        >
+                                          
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"follow_gate"}
+                                        value={"1-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={false}
+                                          name={"follow_user_id"}
+                                          required={true}
+                                          schemaName={"integer"}
+                                          qualifierMessage={undefined}
+                                          schema={{"type":"integer","description":"Must follow the given user ID to unlock"}}
+                                        >
+                                          
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"extended_purchase_gate"}
+                                        value={"2-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  usdc_purchase
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must pay the total price and split to the given addresses to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"price"}
+                                                required={true}
+                                                schemaName={"integer"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"integer"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={true}
+                                                className={"schemaItem"}
+                                              >
+                                                <details
+                                                  style={{}}
+                                                  className={"openapi-markdown__details"}
+                                                >
+                                                  <summary
+                                                    style={{}}
+                                                  >
+                                                    <span
+                                                      className={"openapi-schema__container"}
+                                                    >
+                                                      <strong
+                                                        className={"openapi-schema__property"}
+                                                      >
+                                                        splits
+                                                      </strong><span
+                                                        className={"openapi-schema__name"}
+                                                      >
+                                                         object[]
+                                                      </span><span
+                                                        className={"openapi-schema__divider"}
+                                                      >
+                                                        
+                                                      </span><span
+                                                        className={"openapi-schema__required"}
+                                                      >
+                                                        required
+                                                      </span>
+                                                    </span>
+                                                  </summary><div
+                                                    style={{"marginLeft":"1rem"}}
+                                                  >
+                                                    <li>
+                                                      <div
+                                                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                                                      >
+                                                        Array [
+                                                      </div>
+                                                    </li><SchemaItem
+                                                      collapsible={false}
+                                                      name={"user_id"}
+                                                      required={false}
+                                                      schemaName={"integer"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"integer"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"percentage"}
+                                                      required={true}
+                                                      schemaName={"number"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"number"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"eth_wallet"}
+                                                      required={false}
+                                                      schemaName={"string"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"string"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"payout_wallet"}
+                                                      required={true}
+                                                      schemaName={"string"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"string"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><SchemaItem
+                                                      collapsible={false}
+                                                      name={"amount"}
+                                                      required={true}
+                                                      schemaName={"integer"}
+                                                      qualifierMessage={undefined}
+                                                      schema={{"type":"integer"}}
+                                                    >
+                                                      
+                                                    </SchemaItem><li>
+                                                      <div
+                                                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                                                      >
+                                                        ]
+                                                      </div>
+                                                    </li>
+                                                  </div>
+                                                </details>
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"nft_gate"}
+                                        value={"3-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  nft_collection
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must hold an NFT of the given collection to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"chain"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={"**Possible values:** [`eth`, `sol`]"}
+                                                schema={{"type":"string","example":"eth","enum":["eth","sol"]}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"standard"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={"**Possible values:** [`ERC721`, `ERC1155`]"}
+                                                schema={{"type":"string","example":"ERC721","enum":["ERC721","ERC1155"]}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"address"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"name"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"imageUrl"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"externalLink"}
+                                                required={false}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string"}}
+                                              >
+                                                
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem><TabItem
+                                        label={"token_gate"}
+                                        value={"4-item-properties"}
+                                      >
+                                        <SchemaItem
+                                          collapsible={true}
+                                          className={"schemaItem"}
+                                        >
+                                          <details
+                                            style={{}}
+                                            className={"openapi-markdown__details"}
+                                          >
+                                            <summary
+                                              style={{}}
+                                            >
+                                              <span
+                                                className={"openapi-schema__container"}
+                                              >
+                                                <strong
+                                                  className={"openapi-schema__property"}
+                                                >
+                                                  token_gate
+                                                </strong><span
+                                                  className={"openapi-schema__name"}
+                                                >
+                                                   object
+                                                </span><span
+                                                  className={"openapi-schema__divider"}
+                                                >
+                                                  
+                                                </span><span
+                                                  className={"openapi-schema__required"}
+                                                >
+                                                  required
+                                                </span>
+                                              </span>
+                                            </summary><div
+                                              style={{"marginLeft":"1rem"}}
+                                            >
+                                              <div
+                                                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                              >
+                                                
+                                                
+                                                Must hold an NFT of the given collection to unlock
+                                                
+                                                
+                                              </div><SchemaItem
+                                                collapsible={false}
+                                                name={"token_mint"}
+                                                required={true}
+                                                schemaName={"string"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"string","description":"The mint of the token needed to unlock"}}
+                                              >
+                                                
+                                              </SchemaItem><SchemaItem
+                                                collapsible={false}
+                                                name={"token_amount"}
+                                                required={true}
+                                                schemaName={"integer"}
+                                                qualifierMessage={undefined}
+                                                schema={{"type":"integer","description":"The amount of the token needed to unlock"}}
+                                              >
+                                                
+                                              </SchemaItem>
+                                            </div>
+                                          </details>
+                                        </SchemaItem>
+                                      </TabItem>
+                                    </SchemaTabs>
+                                  </div>
                                 </div>
                               </details>
                             </SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'user_id'}
-                              required={true}
-                              schemaName={'string'}
-                              qualifierMessage={undefined}
-                              schema={{
-                                type: 'string',
-                                description: 'The user ID of the owner of this track',
-                              }}
-                            ></SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'blocknumber'}
-                              required={true}
-                              schemaName={'integer'}
-                              qualifierMessage={undefined}
-                              schema={{
-                                type: 'integer',
-                                description: 'The blocknumber this track was last updated',
-                              }}
-                            ></SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'is_stream_gated'}
-                              required={false}
-                              schemaName={'boolean'}
-                              qualifierMessage={undefined}
-                              schema={{
-                                type: 'boolean',
-                                description:
-                                  'Whether or not the owner has restricted streaming behind an access gate',
-                              }}
-                            ></SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'stream_conditions'}
-                              required={false}
-                              schemaName={'object'}
-                              qualifierMessage={undefined}
-                              schema={{ type: 'object', title: 'extended_access_gate' }}
-                            ></SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'is_download_gated'}
-                              required={false}
-                              schemaName={'boolean'}
-                              qualifierMessage={undefined}
-                              schema={{
-                                type: 'boolean',
-                                description:
-                                  'Whether or not the owner has restricted downloading behind an access gate',
-                              }}
-                            ></SchemaItem>
-                            <SchemaItem
-                              collapsible={false}
-                              name={'download_conditions'}
-                              required={false}
-                              schemaName={'object'}
-                              qualifierMessage={undefined}
-                              schema={{ type: 'object', title: 'extended_access_gate' }}
-                            ></SchemaItem>
                           </div>
                         </details>
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={'{\n  "data": {\n    "access": {\n      "stream": true,\n      "download": true\n    },\n    "user_id": "qm4Ya",\n    "blocknumber": 75099561,\n    "is_stream_gated": false,\n    "stream_conditions": null,\n    "is_download_gated": false,\n    "download_conditions": null\n  }\n}'}
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": {\n    \"access\": {\n      \"stream\": true,\n      \"download\": true\n    },\n    \"user_id\": \"string\",\n    \"blocknumber\": 0,\n    \"is_stream_gated\": true,\n    \"stream_conditions\": {\n      \"tip_user_id\": 0\n    },\n    \"is_download_gated\": true,\n    \"download_conditions\": {\n      \"tip_user_id\": 0\n    }\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
@@ -225,3 +1077,4 @@ Gets the information necessary to access the track and what access the given use
     </ApiTabs>
   </div>
 </div>
+      

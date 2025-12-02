@@ -1,0 +1,267 @@
+---
+id: create-reward-code
+title: "Create Reward Code"
+description: "Creates a new reward code with Solana signature verification"
+sidebar_label: "Create Reward Code"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFVtty4jgQ/RWVnmaqSLhfq/YBcp9JZpNA2GwulZLtxhaxLSHJEELx79uyTbgksztTs1vLAxir+3Tr9OmWFtQwX9POPVUwY8rT9LFAPdCu4tJwEdMOPVDADGjCSAwzkpkRV3hAZtwEpC9CFjOiuR8zkyggU1B8xF2WuheokKDS5zPvDYxcZygHiIImCiYJaNMT3px2FulfrgDNjUqgQF0RG4iNXWJShjl0caxteguq3QAiZp/MXALGEM4YXJPjZkD39C0/fB/x2C6zSCT4gBuWymZpOOgU8M10jamN4rFPd7npMQ2N2h7Elg9vxcWRV6nXy+0NTsSImABIhkIeqDV/oAgHLyySoY1QHZ00X66Cynlr+rUtv9Wi67oeNJI/mtPb1vyuzHoV97AKxzX/tM6/NJ7Pm9G3lrhsT65LelBOhpXZbXV+V2O9unvYgOOmf9riX9rPv9Flvt9/3MsAE3QFj4k1J8zzFGi9lWL7/PXgYnLoD77++do+VK+TWPoA1f4Ja7UTWWWVWnMuL8aVFzW5sHFzgteRERh8UB+GzoWV+ZBPUaINcYD4qWAU0sdiUvqcVY9HSUQ75Y3cyqXSEiMabtJM3dTrKcN8smw/5SKjy6U1xL1JEeus4JVS2f58JHuP7K3EmkpeJ66LtIySMJyTLIpH/yWJulk35OrMc1/X4XtyTd1+qLo+xLYXcVONPTdgirmWWRZK5DaJsG3dzfbeKj3rVb368f8pph0+fiiDlaYyH/KJJSYQir8iAzJxsEzkGeaft9O6hTtHz5x+/+am1j0ddtWVM7gad4/G3ctgOIOTm7or/N7weRrUfk3j9Cflmwk212+tVHov2R7zSC5zlO1ZPGUh9zam0EioiBkiFFZFazuJVvIjIw6hp7eUnIWpvg9zLJTDPQ9iDNL/cOyTEePhTmNYuPpHWfdBoS8BpYTa8bByAyyZPTmk0JYyyUyA/4r5cVXMlapTEHuQLWiiQrQIjJG6UywyyfdZ4vFE77uiOC3TJXaQbczr9alztKrD1vD/z0byqol+rgfWWrNqKaDQRiLVXS6a7uXZO9F1042TYZlkq5ajbKW8X7LytaxGLB1SMYvgeyf0FupiXaNfvRzkPWPgxRRlyHhsc0rrt8grvb6YFLJJh9ULrBRwZbFw8Py9UeFyaV9jORVeIO7xccoUZ46l5f4REQNgHrakFQc2vE0728DewMa35mGSTrnd2b0srDy6OPel+Vvbxw21Xv7eH6Cxk19ponRGU8VmdrLjd4c+0PQCIFJS03mWvl9QZMxPmG/tM1z7+Qs9J01l
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create Reward Code"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/rewards/code"}
+>
+  
+</MethodEndpoint>
+
+
+
+Creates a new reward code with Solana signature verification
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<MimeTabs
+  className={"openapi-tabs__mime"}
+>
+  <TabItem
+    label={"application/json"}
+    value={"application/json-schema"}
+  >
+    <details
+      style={{}}
+      className={"openapi-markdown__details mime"}
+      data-collapsed={false}
+      open={true}
+    >
+      <summary
+        style={{}}
+        className={"openapi-markdown__details-summary-mime"}
+      >
+        <h3
+          className={"openapi-markdown__details-summary-header-body"}
+        >
+          Body
+        </h3><strong
+          className={"openapi-schema__required"}
+        >
+          required
+        </strong>
+      </summary><div
+        style={{"textAlign":"left","marginLeft":"1rem"}}
+      >
+        
+      </div><ul
+        style={{"marginLeft":"1rem"}}
+      >
+        <SchemaItem
+          collapsible={false}
+          name={"signature"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Base64-encoded Solana Ed25519 signature of the string \"code\"","example":"3fG7xQh2L8vK9pN4mR5sT6uW7vX8yZ1aB2cD3eF4gH5iJ6kL7mN8oP9qR0sT1uV2wX3yZ4aB5cD6eF7gH8iJ9k="}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"mint"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The coin mint address","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"amount"}
+          required={true}
+          schemaName={"integer"}
+          qualifierMessage={"**Possible values:** `>= 1`"}
+          schema={{"type":"integer","description":"The reward amount (must be greater than 0)","minimum":1,"example":100}}
+        >
+          
+        </SchemaItem>
+      </ul>
+    </details>
+  </TabItem>
+</MimeTabs><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"201"}
+        value={"201"}
+      >
+        <div>
+          
+          
+          Created - Reward code successfully created
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"code"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The generated 6-character alphanumeric reward code","example":"aB3d5F"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"mint"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The coin mint address","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"reward_address"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The reward address (authorized public key)","example":"9XeZbswbSSUU4AHVArQbTQjAEjAPhVweGU5cogBVkvh4"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"amount"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer","description":"The reward amount","example":100}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"code\": \"aB3d5F\",\n  \"mint\": \"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM\",\n  \"reward_address\": \"9XeZbswbSSUU4AHVArQbTQjAEjAPhVweGU5cogBVkvh4\",\n  \"amount\": 100\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request - Invalid signature format or missing required fields
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"403"}
+        value={"403"}
+      >
+        <div>
+          
+          
+          Forbidden - Signature verification failed
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

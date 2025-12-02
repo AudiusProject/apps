@@ -8,7 +8,7 @@ import { themes as prismThemes } from 'prism-react-renderer'
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Audius Developer Documentation',
+  title: 'Audius Dev Docs',
   tagline:
     'Audius is a fully decentralized music platform. ARTISTS (AND DEVELOPERS) DESERVE MORE 💜',
   favicon: 'img/favicon.ico',
@@ -77,7 +77,7 @@ const config = {
       //   isCloseable: false,
       // },
       navbar: {
-        title: '| Developer Documentation',
+        title: '| Dev Docs',
         hideOnScroll: false,
         logo: {
           alt: 'Audius Logo',
@@ -86,47 +86,34 @@ const config = {
         },
         items: [
           {
-            label: 'Learn',
+            label: 'Welcome',
             to: '/',
             position: 'right',
-            activeBasePath: 'learn',
+            activeBaseRegex: '^/$|^$',
           },
           {
-            label: 'Developers',
+            label: 'API',
+            to: '/api',
+            position: 'right',
+            activeBasePath: 'api',
+          },
+          {
+            label: 'SDK',
+            to: '/sdk',
+            position: 'right',
+            activeBasePath: 'sdk',
+          },
+          {
+            label: 'Guides',
+            to: '/developers/introduction/overview',
             position: 'right',
             activeBasePath: 'developers',
-            items: [
-              {
-                label: 'Getting Started',
-                to: '/developers/introduction/overview',
-              },
-              {
-                label: 'SDK',
-                to: '/sdk',
-              },
-              {
-                label: 'API',
-                to: '/api',
-              },
-            ],
-          },
-          {
-            label: 'Staking',
-            to: '/node-operator/overview',
-            position: 'right',
-            activeBasePath: 'staking',
           },
           {
             label: 'Distributors',
             to: '/distributors/introduction/overview',
             position: 'right',
             activeBasePath: 'distributors',
-          },
-          {
-            label: 'Reference',
-            to: '/reference/overview',
-            position: 'right',
-            activeBasePath: 'reference',
           },
           {
             'aria-label': 'Discord',
@@ -191,16 +178,16 @@ const config = {
     [
       'docusaurus-plugin-openapi-docs',
       {
-        id: 'openapi',
+        id: 'api',
         docsPluginId: 'classic', // e.g. "classic" or the plugin-content-docs id
         config: {
           api: {
-            specPath: 'docs/developers/openapi.yaml', // path or URL to the OpenAPI spec
-            // specPath: 'https://discoveryprovider.audius.co/v1/swagger.json', // path or URL to the OpenAPI spec
+            specPath: 'docs/developers/openapi.yaml', // synced from https://api.audius.co/v1/swagger.yaml
             outputDir: 'docs/developers/api', // output directory for generated *.mdx and sidebar.js files
             sidebarOptions: {
               groupPathsBy: 'tag', // generate a sidebar.js slice that groups operations by tag
             },
+            downloadUrl: 'https://api.audius.co/v1/swagger.yaml',
           },
         },
       },

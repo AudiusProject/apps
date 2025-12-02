@@ -1,81 +1,103 @@
 ---
 id: resolve
-title: 'Resolves and redirects a provided Audius app URL to the API resource URL it represents'
-description: 'This endpoint allows you to lookup and access API resources when you only know the'
-sidebar_label: 'Resolve URL'
+title: "Resolves and redirects a provided Audius app URL to the API resource URL it represents"
+description: "This endpoint allows you to lookup and access API resources when you only know the"
+sidebar_label: "Resolves and redirects a provided Audius app URL to the API resource URL it represents"
 hide_title: true
 hide_table_of_contents: true
-api: eJzNk01v2zAMhv8KoVMLGEmz3XzroRgC7FAEyS5rDorNxFoUSRUpZ4bh/z7KcbN+DLsN2MkWKVHP+5LqFesDqfK7ikjetqi2haqRqmgCG+9UqdaNIUBXB28cg7bWnwk6n4A9WO+PKYB2NeiqQiK4f1xCLpWiLOHcoBv3emc7ODp/Bm7wyelUm0SzysNm9XX25NZRV0cq4NHqzhpi+c01N4SRQEcESiH4yFjPVKF8wKgz3bIWvtUEXqigoz4hyxkR1CsnC8mnaCVnspTnhLFT7wUKQtYyGTCDByOMEfbJCvPexxPWGRNuGuZA5Xx+pb8FH+FHIs6qQO+kQGKEoLmRWyI+JxNRGDkmLBRVDZ60KnvFXchkxNG4gxqGbd5MwTtCyvnPd5/y5y3m0okyp62A1lK2Yrmi8hJ0LJuHYSiUiG989uSAPPohHKWax6tD4mf7Yk/2pVQvmmpDlZdcF6JvTY1xdlU5bxcqIxq39yO9YZvxpdUfvLwfD8G3BVyy+bZLZjG7U4IYPPFJu1xn6s/UPxo7/qJNVjCR1DAV1SHA1Kts9+tJG+OGZR0kJI7Qe7L+t1f/4URPA8H4k+fBahlWsWpsUD918c0DbcTEHOr7nSbcRDsMOXwZ79xb6abe2Tx6e20J/+LFzWqa0lv4V+/gj+KO2F3fZqttyjvGKWt1NJlddGxfj/SXh7W8lF/z2qEN
-sidebar_class_name: 'get api-method'
+api: eJzNkz9v2zAQxb/KgVMCCHbcbtoyBIWBDoFhd2k80NLZYk2TDI+UKwj67r2TFTd/im4FOkk8Uqffe/fYq6QPpMrvKiJ526LaFqpGqqIJyXinSrVuDAG6OnjjEmhr/Zmg8xmSB+v9MQfQrgZdVUgE949LkFY58hLODbrxrHe2g6PzZ0gNPjmda5NpVnnYrL7Ontw66upIBTxa3VlDiV+l54YwEuiIQDkEHxPWM1UoHzBqoVvWzLeawAsVdNQnTPwNC+qV4wXv52h5z4iU54yxU+8FMoJomQyYwYNhxgj7bJl57+MJa8GEmyalQOV8fqW/BR/hR6YkqkDvuEFOCEGnhv8S8TmbiMyYYsZCUdXgSauyV6kLQkYpGndQw7CVwxS8IyTZ/3z3SR5vMZeOlTltGbTmtlXiX1Seiy7x4WEYCsXiGy+eHDCNfjBHqebx6hD72b7YI76U6qopmNlV17xdKIEybu9HXpOsAPNwP7h3P34E3xZw2ZX+l53F7E4xVPCUTtpJn2ki08RonPGLGl5BiL41Nds9NdUhwDQdMfh1tsa6SbwOXGIP6D1Z/9ud/zDDUwQS/kzzYDXHk60aR9JPc3tzJRs2UUp9v9OEm2iHQcqXQMs0a0N6ZyVse20J/+LFzWrK5S38q+T/UdwRu+ttbLXNcmJMWaujEXbWsX0d4i8Pa74bvwAm95sE
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
 <Heading
-  as={'h1'}
-  className={'openapi__heading'}
-  children={
-    'Resolves and redirects a provided Audius app URL to the API resource URL it represents'
-  }
-></Heading>
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Resolves and redirects a provided Audius app URL to the API resource URL it represents"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/resolve'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/resolve"}
+>
+  
+</MethodEndpoint>
 
-This endpoint allows you to lookup and access API resources when you only know the audius.co URL.
+
+
+This endpoint allows you to lookup and access API resources when you only know the
+audius.co URL.
 Tracks, Playlists, and Users are supported.
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'url',
-          in: 'query',
-          description:
-            'URL to resolve. Either fully formed URL (https://audius.co) or just the absolute path',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"url","in":"query","description":"URL to resolve. Either fully formed URL (https://audius.co) or just the absolute path","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'302'} value={'302'}>
-        <div>Internal redirect</div>
-        <div></div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"302"}
+        value={"302"}
+      >
+        <div>
+          
+          
+          Internal redirect
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

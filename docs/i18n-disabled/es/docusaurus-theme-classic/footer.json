@@ -17,7 +17,7 @@
   },
   "link.item.label.API": {
     "message": "API",
-    "description": "The label of footer link with label=API linking to api/rest-api"
+    "description": "The label of footer link with label=API linking to api"
   },
   "link.item.label.Discord": {
     "message": "Discord",

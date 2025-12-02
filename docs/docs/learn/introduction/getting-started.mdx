@@ -6,68 +6,85 @@ pagination_label: Getting Started
 sidebar_label: Getting Started
 description: Audius Protocol Documentation
 slug: /
+hide_table_of_contents: true
 ---
 
 import useBaseUrl from '@docusaurus/useBaseUrl'
+import Admonition from '@theme/Admonition'
 
-<div class="container">
-  <div class="row">
-    <div class="col col--12">
-      <img className="welcomeBanner" src={useBaseUrl('/img/dev.jpg')} />
-    </div>
-  </div>
+<div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
+  <img className="welcomeBanner" src={useBaseUrl('/img/dev.jpg')} />
+</div>
+
+<div className="learnCentered">
+
+**Welcome to the Audius dev docs!** 🧑‍💻
+
+Audius is a music streaming service built on top of the
+[Open Audio Protocol](https://openaudio.org). These docs are your entry point for building
+applications that tap directly into one of the largest open music catalogs on the internet.
+
+If you want to create apps that stream music from the catalog, extend the listening experience, or
+invent entirely new audio-native products, you are in the right place. Think of it like building on
+a free, open, Spotify-alternative API where the music is permissionless and the ecosystem is yours
+to build on.
+
+To learn more about the Open Audio Protocol and build directly on the transaction, DDEX, and storage
+layer, visit [docs.openaudio.org](https://docs.openaudio.org).
+
+<div class="downloadBadges margin-top--md margin-bottom--md">
+  <a
+    href="https://audius.co"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Open Web"
+    className="ctaButton"
+  >
+    <span>Listen Now</span>
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6.21057 20.3009C6.21057 19.8341 6.43448 19.3353 6.75619 19.0339L13.736 12L6.66096 4.86743C6.37014 4.56868 6.21057 4.10189 6.21057 3.69912C6.21057 2.7682 6.95179 2 7.85 2C8.30039 2 8.7199 2.20005 9.04161 2.53348L17.2104 10.7997C17.5322 11.1011 17.7895 11.5332 17.7895 12C17.7895 12.4348 17.4987 12.9016 17.2104 13.2003L9.04161 21.4665C8.65556 21.8666 8.23605 22 7.85 22C6.95179 22 6.21057 21.2345 6.21057 20.3009Z"
+      />
+    </svg>
+  </a>
+  <a
+    href="https://play.google.com/store/apps/details?id=co.audius.app&hl=en_US"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Get it on Google Play"
+    className="storeLink"
+  >
+    <img
+      src={useBaseUrl('/img/badges/google-play-badge.svg')}
+      alt="Get it on Google Play"
+      className="storeBadge"
+    />
+  </a>
+  <a
+    href="https://apps.apple.com/us/app/audius-music/id1491270519"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Download on the App Store"
+    className="storeLink"
+  >
+    <img
+      src={useBaseUrl('/img/badges/app-store-badge.svg')}
+      alt="Download on the App Store"
+      className="storeBadge"
+    />
+  </a>
 </div>
 
 ---
 
 ## Getting Started
 
-> Audius is a digital streaming service that connects fans to artists and exclusive new music
-> directly.
-
-As a fully decentralized project, Audius is owned and run by a vibrant, open source community of
-Artists, Fans, and Developers all around the world. Audius gives Artists the power to share never
-before heard music and monetize streams directly with Fans. Developers can build their own apps on
-top of Audius, giving them access to one of the most unique audio catalogs in existence.
-
-Under the hood, Audius is both a protocol and a platform built on top of the blockchain (several, in
-fact) and community run nodes. Audius is Open Source, Open Data & Access, and Open Ownership.
-
-:::info Create an Audius Account
-
-Check out the reference music player implementation at [audius.co](https://audius.co) by creating
-and account and exploring new music.
-
-:::
-
----
-
-## Learn
-
-> Want to learn more? Get started by diving into these concepts.
-
-<!-- TODO: - [Audius 101]() - a walkthrough of the Audius protocol. -->
-
-- [Core Concepts](/learn/concepts/protocol) - Learn about the building blocks of Audius, starting
-  with nodes.
-- [Architecture](/learn/architecture/content-node) - Breakdown of Audius' on-chain and off-chain
-  systems.
-- [Deploy a Node](/node-operator/setup/overview) - Deploy Content and Discovery nodes to power the
-  Audius protocol.
-- [Contracts & Programs](/reference/eth-contracts) - Ethereum Contracts and Solana Programs that
-  power the Audius protocol.
-
----
-
-## Tutorials
-
-> Find more how-tos, guides, and tutorials in the Developers section.
-
-- [Explore the Javascript SDK](/sdk) - Use the Javascript SDK to build your first Audius app.
-- [Create Apps Easily](/developers/guides/create-audius-app) - Run `npx create-audius-app` to get a
-  head start building.
-- [Query the REST API](/api) - Query, stream, and search for tracks, users & playlists across the
-  network.
+- [REST API](/api) - Query, stream, and search for tracks, users & playlists across the network.
+- [Javascript SDK](/sdk) - Use the Javascript SDK to build your first Audius app.
+- [Quick Start](/developers/guides/create-audius-app) - Run `npx create-audius-app` to get a head
+  start building.
 - [Log in with Audius](/developers/guides/log-in-with-audius) - let users log in to your app with
   their Audius account.
 
@@ -76,21 +93,11 @@ Find more how-tos, guide and tutorials like this in the
 
 ---
 
-## Documentation
+:::info
 
-> Familiarize yourself with Audius concepts, how to participate in the protocol & community from a
-> technical perspective, and how to interact with and use the $AUDIO token.
+To read more about the Open Audio Protocol and build directly on the transaction, DDEX, and storage
+layer, check out [docs.openaudio.org](https://docs.openaudio.org)
 
-- [Code on GitHub](https://github.com/AudiusProject/apps) - check the repository for the
-  latest updates
-- [Audius SDK](/sdk) - easily interact with the Audius protocol
-- [APIs](/api) - Information for API's and ABI's for on-chain and off-chain systems.
-- [Node Operators](/node-operator/setup/overview) - learn about operating a Service Node on the
-  Audius Network.
+:::
 
----
-
-## Contributing
-
-To learn about how to contribute to the protocol, including this documentation site, check out the
-[Contributing](/learn/contributing/overview) section.
+</div>

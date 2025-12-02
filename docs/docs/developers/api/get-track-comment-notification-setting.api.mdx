@@ -1,0 +1,241 @@
+---
+id: get-track-comment-notification-setting
+title: "Get Track Comment Notification Setting"
+description: "Get the comment notification setting for a track"
+sidebar_label: "Get Track Comment Notification Setting"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVE2P2jAQ/SuWT62ECFTthRv90IpLVXVpLyuETDIQL0nstSeoKMp/74xjQlgQ6vYE8Xy8N89v3EhUOy9nTxKdSvderkYyA586bVGbSs7kA6DAHERqyhIqFJVBvdWp4rDwgKirndgaJ5QILeRIGgsuxBdZbLDkiPgSW3wftnjsWlCZVU6VgOCYTyMr+qDy0HStM0rQzMcqzOVrkvOIsPhKIQcvtXZA2OhqGEmf5lAqOWskHi239OgYsW1HPUrtwQ1AXmpwxyuUJcnAiQQjzDaoEj5LtWcR+JuxwaO8h7piit6ayoPn+IfJhH8usR7rNAXvqVFqKiTVOEVZW0TdkmfPec01jtk8Q8oMrOOLQN2hZApD1lmdJ6n9uqyR/hOl+9V95hlnY0wBqmIZJWos+CyaZD00yTqa5CKxu9Wb6SdtKJ8rPt5S57PKBlKfFeKCTzflBHegmwLnjHtVQSXkutywV3cQRmeLzWTSrUTSnCzYJnfnozsPKJ19a1dQjxzR+lmSKKvHqs507cepSQ5TyS7Q1dYEQaMo8x+La2eHIvF7Kroo9+8i0/FEEndrPJYqWCF6+Z8X7gKpOYvyPzsfTYHwBxNbKNoi4hY0aKKe/RMz4sXsl/qupCRSTvNxcdNslIdfrmhbPu42lIXOtFebgq25VYWHO2O9aX9vDrSH48VjcVBFzVnhOg/KaWbyRlbvfsaNfC8unrGbBOKhqo5D9BOxXtZ2Rbk5qAxcYNOF5/SkWBwUXr0nPEa/DA/flrSDfwGT4R+c
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Track Comment Notification Setting"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/comment_notification_setting"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get the comment notification setting for a track
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"is_muted"}
+                              required={true}
+                              schemaName={"boolean"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"boolean"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": {\n    \"is_muted\": true\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

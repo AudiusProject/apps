@@ -1,180 +1,229 @@
 ---
 id: get-user-tracks-remixed
-title: 'Get User Tracks Remixed'
-description: 'Gets tracks owned by the user which have been remixed by another track'
-sidebar_label: 'Get User Tracks Remixed'
+title: "Get User Tracks Remixed"
+description: "Gets tracks owned by the user which have been remixed by another track"
+sidebar_label: "Get User Tracks Remixed"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVcFO4zAQ/RXLJ1hVDax2L7mBdoW4rVjYC6oqN5kkpoltbKdQRf33nbGbNtBQsQunNPF43ps3M68d96J0PL3nrQPr+GzCc3CZlcZLrXjKr8A75q3Ilo7pJwU5W6yZr4BRPHuqZFaxSqyALQAUs9DI5xgjlMYwG+/yCdcGrKCk13lMy+4ow21MfRMvYpwRVjTgiUx633GFLxgv6UgSISN8xV+zvIjJrn/giYXHVlrMlXrbwoS7rIJG8LTjfm0ol/NWqpJvNpNdel0UDnwP8diCXR9g3GLRqm0WiKMLJj00KIxmbinNlOCLtmaFtsyIUqpQKTvB37tLX1gtG+lP+QglqTyUYF9wCtH/RakAn1XvhaE+zvfyvg3URoUJadf/RixRyvBOsoPzY7A7wWfUHWe0cuDo/OvZGT1eYv1uswycw0SZRr7KU4gwppZZUDV5cBTXHeLoxQNkxMBYmjYvI0ou/DBKWCuowiAXfd8PzD0PAzzPdKsoj5e+BnrSkJJIWMBxrF3kYfV9urGTIexou/q7fLth8wgkytJCKTxgzCAo9DQu7by/0AtPkRj6bUz6S5EP+riXny58H+0V2BWOAVir7asbeAXXuNK07WXYrbC5KU+C0ySdzDdJ5JjY3fa7kDCufmtrDK+8Ny5Nkly6TOPZGgVfyRzsVLS5bN0008nqnNNsSVXoIN9Whotf14dOES6xP+csnhJaPDmfnlErjHa+EWHAthvytle9SN3ty/8819xOgodnn5ha4IoixSBMt9Wzd+4JT8MWR1Q+6SeFZrbCmiiy6xbCwZ2tNxv6HHedpEZxxaKmFShE7eBIZZ/ogqO1LWE99OOVqFsK4uRYH2bZG+MR5N51PwD8bqM8QmPvynsiM3qxkpj8Y9NObrYWd8qG/5Sj+L1LqvUQvOeFlDYzjKpA4AoGGvHgAk3bDIU7cGziv3OEq5+3aER/AZ7T6N0=
-sidebar_class_name: 'get api-method'
+api: eJytVclu2zAQ/RWCp6QQLLtoL7qlaBHkVqRJL4Fh0NJIYiyRDBcnhuB/L4e0lsROuuVkSXwz783C545aVhma3VFnQBu6TGgBJtdcWS4FzeglWEOsZvnGEPkooCDrHbE1EMSTx5rnNanZFsgaQBANLX+KGCakh+kYSxMqFWiGSa+KmJbcYoabmPo6BnqcYpq1YFFMdtdR4V88nuMRR0GK2Zq+VHkRk1199ScaHhzXPldmtYOEmryGltGso3anMJexmouK7vfJkF6WpQHbUzw40LsjjhtftHDt2vPIknALrW+MJGbD1QzpS9eQUmqiWMVFqJSc+ech6ANpeMvtOZ1KKqBkrrE0mye9PC4sVKA9rOWCt671h1OtIcs/SS3B5jU90ZGRctCzmE/4F/6ZPR2e58/U4Bqsxum8rsfFAaGgYX1atvGTCO84NTD2lLphXkscrlFSGDB4/nE+jz2ccv1weQ7G+ES59GUJixCmVMPzMJT03iCuO+aR63vIUYHSuKyWR5aC2SmKac2wwtBV/D7u2x0N+7/KpROYx3LbAP7ijmOTlslvuAbkcfV9ulMnU9rjqe7HWHq4oKtIxKpKQ8UseMwEFGYa7/yqD+gbj0gP/XSq9V9YMZnj2H4M+HxyVqC3fg1Aa6lfRPgQ7wK1RLOowtUMFz+jaTCqtOPFPo0aUz2YhwkJo3M43Xh4ba0yWZoyxWfMFdyZWS7T7YLiNnFRytCwQ+EX36+OrSUEkZ8LEk8xfzxZzObYfCWNbVlYqcOdeN3cnqXuxoLfz2YPs7fwZFPVMH8pvcTQiu7Qwd7qE5qFextZadLvBm5p7WtCZNetmYFb3ez3+DnebmxuwQ1bN7j0JWsMvFHZO9rmydo2sJsa+JY1DkEUPeq/VfaO+QZzb8f/QfzH1viGjNGHRyFLfNEclfzl0M6uD6Z2TqZ/rSf5e18Uuyl5r8tL2i89qgZWeC9CGfHgwtu0mjbuyKNR/+ABl99uvPX8AmvT9mk=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get User Tracks Remixed'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User Tracks Remixed"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/tracks/remixed'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/tracks/remixed"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets tracks owned by the user which have been remixed by another track
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'offset',
-          in: 'query',
-          description: 'The number of items to skip. Useful for pagination (page number * limit)',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'limit',
-          in: 'query',
-          description: 'The number of items to fetch',
-          schema: { type: 'integer' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"default":0,"type":"integer","minimum":0}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer","default":10,"minimum":1,"maximum":100}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'track_id'}
+                              name={"track_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'title'}
+                              name={"title"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'remix_count'}
+                              name={"remix_count"}
                               required={true}
-                              schemaName={'integer'}
+                              schemaName={"integer"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'integer' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"integer"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -184,28 +233,49 @@ Gets tracks owned by the user which have been remixed by another track
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "track_id": "35Kz9J",\n      "title": "do it for the vine",\n      "remix_count": 10\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"track_id\": \"string\",\n      \"title\": \"string\",\n      \"remix_count\": 0\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

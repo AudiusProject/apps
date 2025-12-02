@@ -1,147 +1,204 @@
 ---
 id: get-favorites
-title: 'Get Favorites'
+title: "Get Favorites"
 description: "Gets a user's favorite tracks"
-sidebar_label: 'Get Favorites'
+sidebar_label: "Get Favorites"
 hide_title: true
 hide_table_of_contents: true
-api: eJyFVE2PmzAQ/SuWL22lKCRVe+G2q7ar3Kq220sURROYBO8S7NoDaoT4750xsJsPtD0Bfs/z8eYNrSY4BJ2udR3QB72Z6RxD5o0jYyud6gekoEAJ+i6oPTTWG0JFHrLnoGfaOvQg3FXes9W3gSOoAw9HJImcrltd8QezTM6QkegOqNDXKe/UI2dTqy+MePxTG48cm3yNMx2yAo+g01bTyUmsQN5UB911GyEHZ6vAmRn/uFjI4zL0zzrLMEhlma0IKxIKOFeaLDaRPAXhtbd57O4JM5KWvLRMps+SA52zwHs4SXOEx4i/1r/WmUcgzLcgYUYlt0LdRkVejmKwWZyIINzZ20XcxLqV5zr6FGPMN4Wd1T6hPRdoqJSjMQsfTpyG7TgiwZnwaWpI95Ar0Q0DXQxKLnyenCr6hg2D3lt/dYOvsP8KK+Y8YJROLJfqJPo9aU3eJfszx4YYq7dr7UtmFkQupEmSm5BZxk4sfmNy9HOoc1OHeWaTZqnFgKba26jP0Pfd99Wtu+Ml9XupelSy9chyvhCpnQ10hOjCYV+ut+oiYPva73+XdZgb4V9KXAm8gjJ26bIddBn/AzOdXngy/hkKrkwobbuDgI++7Do55kn5E5/zawPewE56Z/lYMHln6fdQBnyj7vc/hjX5oM6Xf7LccdMq2bMGylq++PUZT/2vpdswq0DgCcUyeuCOF9/R2ZWbrZcBvnjl4esvtug/29vATQ==
-sidebar_class_name: 'get api-method'
+api: eJyFVE1vm0AQ/StoL20ly9hVe+HmqEnkW9U2vViWNYax2QTDdnawaiH+e2cWSPyB0hOw7+2brzc0hmHvTbIytUfyZj0xGfqUrGNblSYxj8g+gkjRDz7awbEiyxgxQfrizcRUDgmUu8w6dvTQcxR1QHBAVuVk1ZhSPoRlM4Gsqjvg3FyHXERPEi1afhOE8E9tCUWbqcaJ8WmOBzBJY/jkVMsz2XJv2natZO+q0ktkwT/PZvq4lP5Zpyl6zSytSsaSlQLOFTYNRcTPXnnNbZxq+4wpa0mkJbPtomTA5ywggpMWx3gI+Fv+K5MSAmO2AZUZOrlR6iZ05PUoiE3CRBSRyt5P4kbrtj3X6mOMId4Ydpb7SO8lQcuFHg1R5HDk1G+GESkuhC9jQ7qDLNK+oeeLQemFr6NTRTqKYZCooqsbckX8l1dqzj2G1qnlEhMHv8eNzdp4d+ZYH7Q6u9ZUCDNndj6JY3B2CnVmaz9Nq/g4N2o5W+6q0JG+0sX35a2fw6Xo9zzqUNXvkPl0ps11lecDBN/1G3K9RxeCzVuF/13PflKMfzl2BcjS6aC1rqbvxLD5E5NcuDD8C3LJTClNswWPT1S0rR7LbOgk5/J6BLKw1dqlYZn1+i7N3kHh8Z28P/7oF+NTdL7uo+kOu1XqZh2hqPVLXl/w1P1M2rWwcoQMKaTRAQtZdcdnV272XAf46o7H+19iyn/esrpE
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
-<Heading as={'h1'} className={'openapi__heading'} children={'Get Favorites'}></Heading>
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Favorites"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/users/{id}/favorites'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/favorites"}
+>
+  
+</MethodEndpoint>
+
+
 
 Gets a user's favorite tracks
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'id',
-          in: 'path',
-          description: 'A User ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
         <div>
-          <MimeTabs className={'openapi-tabs__mime'} schemaType={'response'}>
-            <TabItem label={'application/json'} value={'application/json'}>
-              <SchemaTabs className={'openapi-tabs__schema'}>
-                <TabItem label={'Schema'} value={'Schema'}>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
                   <details
                     style={{}}
-                    className={'openapi-markdown__details response'}
+                    className={"openapi-markdown__details response"}
                     data-collapsed={false}
                     open={true}
                   >
-                    <summary style={{}} className={'openapi-markdown__details-summary-response'}>
-                      <strong>Schema</strong>
-                    </summary>
-                    <div style={{ textAlign: 'left', marginLeft: '1rem' }}></div>
-                    <ul style={{ marginLeft: '1rem' }}>
-                      <SchemaItem collapsible={true} className={'schemaItem'}>
-                        <details style={{}} className={'openapi-markdown__details'}>
-                          <summary style={{}}>
-                            <span className={'openapi-schema__container'}>
-                              <strong className={'openapi-schema__property'}>data</strong>
-                              <span className={'openapi-schema__name'}>object[]</span>
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
                             </span>
-                          </summary>
-                          <div style={{ marginLeft: '1rem' }}>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
                             <li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                  paddingBottom: '.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
                               >
                                 Array [
                               </div>
-                            </li>
-                            <SchemaItem
+                            </li><SchemaItem
                               collapsible={false}
-                              name={'favorite_item_id'}
+                              name={"favorite_item_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'favorite_type'}
+                              name={"favorite_type"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'user_id'}
+                              name={"user_id"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <SchemaItem
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
                               collapsible={false}
-                              name={'created_at'}
+                              name={"created_at"}
                               required={true}
-                              schemaName={'string'}
+                              schemaName={"string"}
                               qualifierMessage={undefined}
-                              schema={{ type: 'string' }}
-                            ></SchemaItem>
-                            <li>
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
                               <div
-                                style={{
-                                  fontSize: 'var(--ifm-code-font-size)',
-                                  opacity: '0.6',
-                                  marginLeft: '-.5rem',
-                                }}
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
                               >
                                 ]
                               </div>
@@ -151,28 +208,49 @@ Gets a user's favorite tracks
                       </SchemaItem>
                     </ul>
                   </details>
-                </TabItem>
-                <TabItem label={'Example'} value={'Example'}>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
                   <ResponseSamples
-                    responseExample={
-                      '{\n  "data": [\n    {\n      "favorite_item_id": "AQk82pk",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-08-07 20:32:11"\n    },\n    {\n      "favorite_item_id": "QRKMpG9",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-08-06 20:31:05"\n    },\n    {\n      "favorite_item_id": "4boROp0",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-08-06 05:14:08"\n    },\n    {\n      "favorite_item_id": "35Nw580",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-31 16:44:40"\n    },\n    {\n      "favorite_item_id": "NPWzZ",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-29 22:17:17"\n    },\n    {\n      "favorite_item_id": "ydRy2o7",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-22 16:56:47"\n    },\n    {\n      "favorite_item_id": "NYGb1px",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-18 18:05:43"\n    },\n    {\n      "favorite_item_id": "xNwR7",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-17 20:08:28"\n    },\n    {\n      "favorite_item_id": "wpKO2",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-17 20:02:04"\n    },\n    {\n      "favorite_item_id": "VKkZEly",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-17 05:51:40"\n    },\n    {\n      "favorite_item_id": "ljo8RvO",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-15 22:25:16"\n    },\n    {\n      "favorite_item_id": "vW2qw0m",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-10 06:33:19"\n    },\n    {\n      "favorite_item_id": "WQqZ3M6",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-02 17:58:36"\n    },\n    {\n      "favorite_item_id": "aWK1xmE",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-07-01 19:03:09"\n    },\n    {\n      "favorite_item_id": "lwZ4ABQ",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-06-11 17:41:21"\n    },\n    {\n      "favorite_item_id": "Qb88w7G",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-06-11 17:24:34"\n    },\n    {\n      "favorite_item_id": "wVAw4AZ",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-06-11 17:05:38"\n    },\n    {\n      "favorite_item_id": "PWJAa3X",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-05-31 22:27:18"\n    },\n    {\n      "favorite_item_id": "Dr4vN",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-05-31 21:42:41"\n    },\n    {\n      "favorite_item_id": "JZEpZJ7",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-05-14 23:07:24"\n    },\n    {\n      "favorite_item_id": "gvoaVzd",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-05-03 18:53:19"\n    },\n    {\n      "favorite_item_id": "91yg2w",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-25 20:20:39"\n    },\n    {\n      "favorite_item_id": "3GbWOZk",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-24 16:39:47"\n    },\n    {\n      "favorite_item_id": "Ya5VKrK",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-22 17:15:57"\n    },\n    {\n      "favorite_item_id": "AbdAw",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-08 23:14:34"\n    },\n    {\n      "favorite_item_id": "9mgVZ3k",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-08 07:26:17"\n    },\n    {\n      "favorite_item_id": "O57oKgQ",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-08 07:26:00"\n    },\n    {\n      "favorite_item_id": "a5K2a",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-04-02 17:44:57"\n    },\n    {\n      "favorite_item_id": "9drqz12",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-03-17 00:07:33"\n    },\n    {\n      "favorite_item_id": "Q02Mov4",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-03-14 06:12:27"\n    },\n    {\n      "favorite_item_id": "qE3qX1B",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-03-12 21:17:29"\n    },\n    {\n      "favorite_item_id": "YmNrwwW",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-24 18:59:17"\n    },\n    {\n      "favorite_item_id": "mRN09Vv",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-16 19:51:57"\n    },\n    {\n      "favorite_item_id": "bVBQlvM",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-16 18:55:13"\n    },\n    {\n      "favorite_item_id": "rb6l089",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-16 18:02:37"\n    },\n    {\n      "favorite_item_id": "rW8EyGG",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-12 20:54:49"\n    },\n    {\n      "favorite_item_id": "zV84zYq",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2024-01-05 23:20:40"\n    },\n    {\n      "favorite_item_id": "WaE98lj",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-12-14 20:48:42"\n    },\n    {\n      "favorite_item_id": "PA8487",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-12-13 19:52:14"\n    },\n    {\n      "favorite_item_id": "ljG7vrZ",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-17 01:54:09"\n    },\n    {\n      "favorite_item_id": "amZOWJw",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-16 21:38:01"\n    },\n    {\n      "favorite_item_id": "M20QE1V",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-16 21:37:16"\n    },\n    {\n      "favorite_item_id": "7Grkk7j",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-16 21:36:16"\n    },\n    {\n      "favorite_item_id": "3Om3kmM",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-16 21:36:15"\n    },\n    {\n      "favorite_item_id": "D7KyD",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-11-16 06:32:28"\n    },\n    {\n      "favorite_item_id": "b5pPK",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-10-27 19:24:20"\n    },\n    {\n      "favorite_item_id": "50y6aN7",\n      "favorite_type": "SaveType.track",\n      "user_id": "AAWJg3g",\n      "created_at": "2023-10-27 04:31:44"\n    }\n  ]\n}'
-                    }
-                    language={'json'}
-                  ></ResponseSamples>
+                    responseExample={"{\n  \"data\": [\n    {\n      \"favorite_item_id\": \"string\",\n      \"favorite_type\": \"string\",\n      \"user_id\": \"string\",\n      \"created_at\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
                 </TabItem>
               </SchemaTabs>
             </TabItem>
           </MimeTabs>
         </div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      

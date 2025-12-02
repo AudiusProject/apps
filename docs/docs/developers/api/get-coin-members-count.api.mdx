@@ -1,0 +1,161 @@
+---
+id: get-coin-members-count
+title: "Get Coin Members Count"
+description: "Gets the total number of Audius users with a non-zero balance of a specific coin"
+sidebar_label: "Get Coin Members Count"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1VNFOGzEQ/BXLT62UciQgtckbggqhNlJVaKUKoWjj2+RM72zH3qMkp/v37l4uUAgqfelTfOuxdzwzm0YTLJOeXGvjrUv6ZqB9wAhkvbvI9USfI6lT3lJTrOYYE3/UjvRA55hMtEGAW1hSVKAiT1AqVwtY+YU6qXNbJ1UnOfvLUqFAOe/ebTB6NYcSnEHBgUoBjV1Yo4QJNwgQoULic0yv0Y4/uFFlu+5WmgagYo/JFZMQkII8j5iSXC7E+lsjrmobkZ9GscaBTqbACvSk0bQO0iBRtG7JSLyHKpRSGn/enE5XZ8urTz8247O4WbmwRDy6PIcP4zocwej4/TpMb0f3cTXVbXsjXVLwLmGSi0eHh/LzlOZlbQyz4z7GO0J+FEMghNKaTvzsNgmu2Sfo57do6MlTrnUOBGJeiGIf2W3nrvp4klXBJcYXJXvu26uGiabPLXuQ7HjUtgNNljr9ZHdWbfMzM5Kf2U4glqsVKBtdeMnbEqnznp2d6KwLZdaIn23W35CZPoHM8G6XjjqWjC+IQppkGQR7AF3wDozP7oZaPLFu4TsxelYnXy72lOjT+n2otrty/3ZneHComWfwiSrojOkD+W8D0jza/D9mpTeY8J6yUALXmGunSdNruRvwgZ70I9TL2SVQGLNEBb9OoE0zh4TfYtm2Ul7VGNdc5+UdRAtz0Y9Fz22SNdu2gDLhX5785muf1bfqlfl88SV9EdxaPIGyli9e/sT17i+hvWFcgZBzvoXbduuEhyzQH4f2JkyS8RC+849XHMjfk8q9Zg==
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Coin Members Count"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/coins/{mint}/members/count"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets the total number of Audius users with a non-zero balance of a specific coin
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer","description":"The total number of users with a non-zero balance of the specific coin","example":42}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": 42\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

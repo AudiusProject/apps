@@ -1,0 +1,211 @@
+---
+id: get-track-comment-count
+title: "Get Track Comment Count"
+description: "Get the comment count for a track"
+sidebar_label: "Get Track Comment Count"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVMGOm0AM/RU0p1aKQlK1F27ptlrlVrVpL1UUOeCE2QAzO2OiRoh/rz2QBDbZqnsBDfPs92w/0yiCvVfJb0UO0oNX64nK0KdOW9KmUol6RIooxyg1ZYkV8bvm5864CKIQoybKWHQg+GXWR6zkJnroYx4khnEWHJRI6ISxURUfGB+ybHTGAC2MFihXL2Us+pTLL3zl8LnWDpmMXI0T5dMcS1BJo+hkJaUnp6u9atvJhaX26AYkzzW60w3LigsVINNEZhfqDscSDpwvnIUbvVTzOutaJHprKo9e7j/MZvIac/2o0xS950SpqYjbJBCwttBp6GX85AXX3PKY7ROmoZ9OOk+6Y8mAhijNSffopAmKNBXXVvej3IRRbs5KGSjQj/e0foZsUPhVrwR8ulscuiP3DZ0z7kUEh7AHciNW2WNnCx54ouLOgnFzNkQbj5RKy0Pazj21KzgoJ7I+iWOwegp1pms/TU18nCsZgq52JnSkL3/xbXlrrBAU/ZpH3a3k727m05lisdZ4KiFMorfS6wYfpW6uZf/XFvVzI/xDsS2Abcrsocqmb9FlSyfi/MvWjLvEdecsWdBNswWPP13RtvK587z0LtMetoUs0A4Kj/8Q/qaNuFvBAU+j9TtCUQsqTOgITouSN6p6973/A7yPRj+GuwL6j1CdhuxnYZc+tmvG5ggZ74yo6a4XvKSWBoE3GyplXAz9+HXFe/QXdNrRtg==
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Track Comment Count"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/comment_count"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get the comment count for a track
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={false}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": 0\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

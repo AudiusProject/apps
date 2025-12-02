@@ -1,0 +1,340 @@
+---
+id: get-user-balance-history
+title: "Get User Balance History"
+description: "Get the user's historical portfolio balance data"
+sidebar_label: "Get User Balance History"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFVktv2zgQ/isEL2kBx482TRa+pUi2m8NiF5t6L0Fg0OLYYiuTKjlK4xr+7ztDyZYUu147TdGTTXIe33ya11KimgU5vJNFAB/kfUdqCIk3ORpn5VB+ABSYguDnkyBSE9B5k6hM5M7j1GXGiYnKlE1AaIVKdqTLwStWv9GVgREpi/eV1B/RxIIEc+XVHJD9Du+W0tKBFIymJ8O+c4WpfArosrR2c0UvHr4UxgO5QV9AR4YkhbmSw6XERc62AnpjZ3K16mzMB1Qex2joULn5UkCE0/Zzy3KC5cTU+cjBOs6ShIWIiuLVze1f4rfz/oDl5gpfd8UVTFWRYRDoxAXRsghCzVy3hXiqsrAHckeW1uiGaIXTCLgZB1h9QBTXVr9ADNZ9fVnwM69skSlvcLEf/xWllGhId8VJ6gqfLU6EByy8pZSM55h8lJPGYuiIE61MUyYe6RvMPMwIkI7S7RjXdo8MFGwx5/IptRk/uyrrKBon4eqtSQCX07jO9N3Bf6zqjpJduOmmDMVcfSbn8cxIIaA8LPevbeI06FNm9fRPCEHNNvmTgtLgd2KI1GKqUHxVQQQzs8TgZFED4uTia0VsM6bEPZTxHA3qdm3lAFi1RyKHMXYYjX4Omnv+5iF3NkDg9zf9Pv886QhFkhBnZChxFsEii6g8z6gdskjvU2C55bYfN/kECbYS607GbkmOc88NE03pOd7Wmsp7FUsEYR7+zyKXGbW3eU73VZ2Pi6C3ndSCtUUqHJhFpje1S1fnZ1vUj6x5FBsLwlgRiGKrmRh4pKuMzA0u+mf98wvicdXGUjukwpm0/WlXTDLY/tYOd44b8jy6vRKKB5QJohl9jePN27Puu3PKNwoa+WaDpuqAY2Z8HBsHJcIeuXWCsBSJne1KkfdKN0qyTpNSYbCtMLKqwJQm6jfQOzTebmv87vzEaA12S/zdzqQFT9kvwHvnn2iQCk3f1PGUngHGgUwDdyh7cRfoLY1e9SoWeulmaodosRzZ1Ne4RhHzMOz1VG66qtCmCN3E9R4GkuvK2Kkrc66k9fLvm+2ZHpXEvwNRvrL98mXQ7UvCmbuAcxWLq+oae9aKlu1lHfJzdpkqVxEesZdniloSoYlRLyu21ptTRw5jP68M0L81ZURCSvhZdLmcqAAjn61WfF22fSZSm6Ao9+uJ890gfs5esjPOz7B4ujA9qKxgQckN/HDQL7qG7MHaWIqeifTXLBx7QmqvSs+M6qhNYg+Yem2pgdzzwRtGcmQqv/qnGl6vRXOr3+l/PQ9ti4U1LoK0uiepals4DsaPrTh72PrOuvUD3/DoledQdM29q4WvlL2kzSfHxtvW2sNpsJkmH64/0pT8D6zm66U=
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get User Balance History"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/balance/history"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get the user's historical portfolio balance data
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"start_time","in":"query","description":"Start time for the balance history query (ISO 8601 format). Defaults to 7 days ago.","required":false,"schema":{"type":"string","format":"date-time"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"end_time","in":"query","description":"End time for the balance history query (ISO 8601 format). Defaults to now.","required":false,"schema":{"type":"string","format":"date-time"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"granularity","in":"query","description":"Data granularity. 'hourly' returns hourly data points, 'daily' returns daily aggregated data. Defaults to 'hourly'.","required":false,"schema":{"type":"string","enum":["hourly","daily"],"default":"hourly"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Header Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Message","in":"header","description":"The data that was signed by the user for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Signature","in":"header","description":"The signature of data, used for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                              >
+                                Array [
+                              </div>
+                            </li><SchemaItem
+                              collapsible={false}
+                              name={"timestamp"}
+                              required={true}
+                              schemaName={"int64"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"integer","format":"int64","description":"Unix timestamp in seconds","example":1704067200}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"balance_usd"}
+                              required={true}
+                              schemaName={"double"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"number","format":"double","description":"Total portfolio balance in USD at this timestamp","example":1234.56}}
+                            >
+                              
+                            </SchemaItem><li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                              >
+                                ]
+                              </div>
+                            </li>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": [\n    {\n      \"timestamp\": 1704067200,\n      \"balance_usd\": 1234.56\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"403"}
+        value={"403"}
+      >
+        <div>
+          
+          
+          Forbidden
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

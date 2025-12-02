@@ -1,165 +1,197 @@
 ---
 id: download-track
-title: 'Download the original or MP3 file of a track'
-description: 'Download an original or mp3 track'
-sidebar_label: 'Download Track'
+title: "Download the original or MP3 file of a track"
+description: "Download an original or mp3 track"
+sidebar_label: "Download the original or MP3 file of a track"
 hide_title: true
 hide_table_of_contents: true
-api: eJzNVttu00AQ/ZXRvgBSSFpuD3mDFqE+ABUUeIAKTe2xvaqza3bXKVGUf2dmfYnThpDSIlFFqp2d2TNnbidLFTD3avpVBYfJpVfnI5WST5yugrZGTdWxvTKlxRTQgHU61wZLfoBZ9RSijxopW5FDsT9Jhx5n7XGFDmcUyAnQUhl+YbPo/F2nbKAFqMJQqOvoL5tL4OSYjxz9qLUjxgiuppHySUEzVNOlCotKrvTBaZOr1WrUo9Se3ADkR01ucQPlrCAQQ4YBm0HoXmd4yffFd8EmH9QtUL3ODYba0W7w9/GBk/oYeg/InJ0NcSUMufSBhyssSwrjbwbav7NCe+CPIUophWABa3Y1QScYaM0GTQpzcjpbACYJeXYykKBvTGI55JqcndLxbYimGHBvjmIMV4VOCmbiJbIYck5GeqiJxXbm64Sgy+sZc9o3MJOF7w3Lv6gDO3cpGpSEmz5IqptMrSlUjuba1r5c9CxSuOAkc/Fy7bnv+f343aBiXwh4YvjCGTAVHjuwBnSIFapQChMYytk6LyQ3R+/2Zd0N6N5MZZBAZ5C2Myt91k95pkvaBnxhbUlo4r0Z1mVQ0wxLT8NIxDc+7p1zNpbhE0ch3UU0hpMMjA2cZjvX3OAjaFG9mDXF2Ai5uYmLpUNJuzN3LkvFV9Z48nL+5OBA/m0G+bGOrcAXJdYE7kE2YarqyeGLm8an6ILmQDrT607PtiG84mW5XjDXHLahHDUm4NDkXD8zxzLuuE3X51vZkOMlAOScddc82IXXdGFliecU4ubmnTxVk0YcJstuZ68mXXkkvfHGZrfXrmT7IoTKTyeTVPvE8tmirZ0bY53q2o8TO5kfKkm/NpmNlZFiycI/PbkpAtEJPh9Ccypozcnh+EBx1JX1YcYNOe3br9eguE4GsvX29GnTYtxq2AvYBt5ynZS91K9tqkA/w6QqkdudQ4qJWLYJ7NV1JNLVy16fQ85DwRTEcLm84I38yZWrlXzdjI1klnOJF6WIX5y1HTHfSs22Bn9Jiw3p5PaqxUrJgO8fyH+rbH8iPVSMu3O/B8X7U8CtAt891v9S+Xaw/43M3z0R+wjjjrgGQnwPRfl30riDwkDB1xTO5cVp4XDLrfTwQ/vr/RFs/KjfGkH7JZrFEL2LrF+hq/OhZL15fcaS/gsnCmro
-sidebar_class_name: 'get api-method'
+api: eJzNVktv00AQ/iurvQBSSJryOOQGLUI5UCoocIComtpje1V7191dp0RW/jszfsVJQ5rQIjWKFG92Zr755ulSeoidnPyU3kJw7eRsIEN0gVW5V0bLiTw1tzo1EArQwlgVKw0pPYgsfyUqHTmQJkcLLD8N+xoXzXUOFjL0aBmolJoOJFYpX6qQBBQD5eATuYn+rjYipqd0ZfGmUBYJw9sCB9IFCWYgJ6X0i5xNOm+VjuVyOehQCoe2B3JToF3cQblIULAgwQgTCd8eM7gme9WZsdF5eQCqU7EGX1jcDf65eqCgvhSdhoisyfq47AYbfebELaQp+uEvLZrPRaKcoK9GDDEU3ggoSFV7FYDHFRvQoZijVdFCQBCgIyUtAnC1SJUONhOTUjg8hGgIHvbmyMLiNlFBQkwce1a5HKPmGqp9Ma34KiBg4yIjTvs6piN/WbP8hzyQchuiXkqo6D2Huo7UikJuca5M4dJFxyIUVxRkSl6sHNU9nU/Pehn7gYI6hgxmgqhQ2wmjhfJVhnLgxHiCsqaIE47Nydm+rCOVYvW4N1MS5pJnRYYKm94dimkktPFEzswVldVAhBhBkXrHYnUIunHQwvJc8MqnuNvfGbeyy4126Pj++OiIf9ad/FpUCSBDgdGeMk8iRFUej9/eFT4H6xU50opuKr3ehvCeRtSqrTcUtqGc1CLCgo6RmmcOaTVZ1lXfbGWDllpPoLXGbmiQCg3HxPDojNFX85Im4USO6pE8KttJuRy16eHwVhbriVrYlOQT73M3GY0gV0MoQlW4YWBG87HkgCsdmSoXnB4erOfTu8O2UhLfx6K+Zfv1zXh4JMnP3DifgWY7TcF1s75q2956+HT+qi4qKi7oFsUaXrkKw15bpikjj7/9KE+BCpxcqqiXTci6LTbgFdGtly5qFIeEKLBgWV7R5Ptm0+WS/64bhWMZKgdXKS+ZCFKHO3w+aGtsdf4aF2srigqqYCnJLb2/I092g9xHuj+ZH879ETbLfQ43m+7hvj7JDbOD/V/W6SME4v8toB10entyRWHGB6uYw4GT4PmX5s30hVh7Yd3qQfMn6EUfvfWsG1vLWX8xfPxwQYvzDzirBJQ=
+sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from '@theme/ApiTabs'
-import DiscriminatorTabs from '@theme/DiscriminatorTabs'
-import MethodEndpoint from '@theme/ApiExplorer/MethodEndpoint'
-import SecuritySchemes from '@theme/ApiExplorer/SecuritySchemes'
-import MimeTabs from '@theme/MimeTabs'
-import ParamsItem from '@theme/ParamsItem'
-import ResponseSamples from '@theme/ResponseSamples'
-import SchemaItem from '@theme/SchemaItem'
-import SchemaTabs from '@theme/SchemaTabs'
-import Heading from '@theme/Heading'
-import OperationTabs from '@theme/OperationTabs'
-import TabItem from '@theme/TabItem'
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
 
 <Heading
-  as={'h1'}
-  className={'openapi__heading'}
-  children={'Download the original or MP3 file of a track'}
-></Heading>
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Download the original or MP3 file of a track"}
+>
+</Heading>
 
-<MethodEndpoint method={'get'} path={'/tracks/{track_id}/download'}></MethodEndpoint>
+<MethodEndpoint
+  method={"get"}
+  path={"/tracks/{track_id}/download"}
+>
+  
+</MethodEndpoint>
+
+
 
 Download an original or mp3 track
 
 <Heading
-  id={'request'}
-  as={'h2'}
-  className={'openapi-tabs__heading'}
-  children={'Request'}
-></Heading>
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
 
 <details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Path Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'track_id',
-          in: 'path',
-          description: 'A Track ID',
-          required: true,
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<details
-  style={{ marginBottom: '1rem' }}
-  className={'openapi-markdown__details'}
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
   data-collapsed={false}
   open={true}
 >
-  <summary style={{}}>
-    <h3 className={'openapi-markdown__details-summary-header-params'}>Query Parameters</h3>
-  </summary>
-  <div>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
     <ul>
       <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_id',
-          in: 'query',
-          description: 'The user ID of the user making the request',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_signature',
-          in: 'query',
-          description:
-            "Optional - signature from the requesting user's wallet.\n        This is needed to authenticate the user and verify access in case the track is gated.",
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'user_data',
-          in: 'query',
-          description:
-            'Optional - data which was used to generate the optional signature argument.',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'nft_access_signature',
-          in: 'query',
-          description:
-            'Optional - nft access signature for this track which was previously generated by a registered DN.\n        We perform checks on it and pass it through to CN.',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'original',
-          in: 'query',
-          description: 'Optional - true if downloading original file',
-          schema: { type: 'boolean', default: false },
-        }}
-      ></ParamsItem>
-      <ParamsItem
-        className={'paramsItem'}
-        param={{
-          name: 'filename',
-          in: 'query',
-          description:
-            'Optional - name of file to download. If not provided, defaults to track original filename or title.',
-          schema: { type: 'string' },
-        }}
-      ></ParamsItem>
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_signature","in":"query","description":"Optional - signature from the requesting user's wallet.\n        This is needed to authenticate the user and verify access in case the track is gated.","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_data","in":"query","description":"Optional - data which was used to generate the optional signature argument.","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"nft_access_signature","in":"query","description":"Optional - nft access signature for this track which was previously generated by a registered DN.\n        We perform checks on it and pass it through to CN.","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"filename","in":"query","description":"Optional - name of file to download. If not provided, defaults to track original filename or title.","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
     </ul>
   </div>
-</details>
-<div>
+</details><div>
   <div>
-    <ApiTabs label={undefined} id={undefined}>
-      <TabItem label={'200'} value={'200'}>
-        <div>Success</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'216'} value={'216'}>
-        <div>Partial content</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'400'} value={'400'}>
-        <div>Bad request</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'416'} value={'416'}>
-        <div>Content range invalid</div>
-        <div></div>
-      </TabItem>
-      <TabItem label={'500'} value={'500'}>
-        <div>Server error</div>
-        <div></div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"216"}
+        value={"216"}
+      >
+        <div>
+          
+          
+          Partial content
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"416"}
+        value={"416"}
+      >
+        <div>
+          
+          
+          Content range invalid
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
       </TabItem>
     </ApiTabs>
   </div>
 </div>
+      
