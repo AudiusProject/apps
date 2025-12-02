@@ -3,7 +3,7 @@
   "productName": "Audius",
   "description": "The Audius web client reference implementation",
   "author": "Audius",
-  "version": "1.5.162",
+  "version": "1.5.163",
   "private": true,
   "scripts": {
     "DEV & BUILD========================================": "",
@@ -273,6 +273,7 @@
     "url": "^0.11.0",
     "vite": "7.2.4",
     "vite-plugin-glslify": "2.0.2",
+    "vite-plugin-node-polyfills": "^0.15.0",
     "vite-plugin-svgr": "4.1.0",
     "vitest": "^3.2.4"
   }

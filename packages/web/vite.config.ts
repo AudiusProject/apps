@@ -13,7 +13,6 @@ import svgr from 'vite-plugin-svgr'
 
 const SOURCEMAP_URL = 'https://s3.us-west-1.amazonaws.com/sourcemaps.audius.co/'
 
-
 export default defineConfig(async ({ mode }) => {
   // Despite loading env here, the result is the same as a filtered process.env
   // rather than dynamically loading the correct env file by mode.
@@ -64,7 +63,6 @@ export default defineConfig(async ({ mode }) => {
       'process.env': env
     },
     optimizeDeps: {
-          exclude: ['@coral-xyz/anchor', '@audius/spl'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
@@ -118,28 +116,7 @@ export default defineConfig(async ({ mode }) => {
       react({
         jsxImportSource: '@emotion/react'
       }),
-      ...(ssr
-        ? [
-            vike(),
-            // Plugin to prevent processing of anchor/spl during SSR to avoid CommonJS/ESM issues
-            {
-              name: 'ssr-exclude-anchor-spl',
-              resolveId(id) {
-                // Prevent Vite from processing these packages during SSR
-                if (
-                  ssr &&
-                  (id === '@coral-xyz/anchor' ||
-                    id === '@audius/spl' ||
-                    id.startsWith('@coral-xyz/anchor/') ||
-                    id.startsWith('@audius/spl/'))
-                ) {
-                  return { id, external: true }
-                }
-                return null
-              }
-            }
-          ]
-        : []),
+      ...(ssr ? [vike()] : []),
       ...((analyze
         ? [
             visualizer({
@@ -183,18 +160,6 @@ export default defineConfig(async ({ mode }) => {
         // Resolve to lodash-es to support tree-shaking
         lodash: 'lodash-es'
       }
-    },
-    ssr: {
-      resolve: {
-        // Ensure dayjs plugins are properly resolved in SSR
-        conditions: ['node', 'import', 'module', 'browser', 'default']
-      },
-      // Don't externalize dayjs - let Vite handle it
-      // Exclude anchor and spl from SSR processing to avoid CommonJS/ESM issues
-      noExternal: ssr ? ['dayjs'] : undefined,
-      // Externalize anchor and spl to prevent bundling issues during route config processing
-      // These are CommonJS modules that don't work well with ESM imports
-      external: ssr ? ['@coral-xyz/anchor', '@audius/spl'] : undefined
     },
     server: {
       host: '0.0.0.0',
