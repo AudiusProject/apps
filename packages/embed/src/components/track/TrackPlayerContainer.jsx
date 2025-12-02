@@ -136,7 +136,12 @@ const TrackPlayerContainer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didTogglePlay])
 
-  const albumArtURL = getArtworkUrl(track)
+  const [albumArtURL, setAlbumArtURL] = useState(null)
+  useEffect(() => {
+    if (track) {
+      getArtworkUrl(track).then((url) => setAlbumArtURL(url))
+    }
+  }, [track])
 
   const hasPremiumExtras =
     track?.isDownloadGated && instanceOfPurchaseGate(track?.downloadConditions)

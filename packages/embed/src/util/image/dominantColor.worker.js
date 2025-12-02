@@ -37,7 +37,7 @@ export default () => {
   const dominantRgb = ({ key, imageUrl, attempt = 0 }) => {
     if (attempt > 2) {
       console.info('Failed all attempts, returning default')
-      postMessage({ key, result: DEFAULT_DOMINANT_COLOR })
+      postMessage({ key, result: 'rgb(126,27,204)' })
       return
     }
 
