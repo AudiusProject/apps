@@ -1,4 +1,3 @@
-// import { Id } from '@audius/sdk'
 import { Helmet } from 'react-helmet'
 
 import { env } from 'services/env'
