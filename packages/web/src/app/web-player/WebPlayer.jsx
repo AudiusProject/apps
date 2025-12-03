@@ -16,7 +16,10 @@ import {
 } from '@audius/common/api'
 import { Client, Status } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
-import { guestRoutes } from '@audius/common/src/utils/route'
+import {
+  COIN_DETAIL_BUY_PAGE,
+  guestRoutes
+} from '@audius/common/src/utils/route'
 import { UploadType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
@@ -740,6 +743,30 @@ const WebPlayer = (props) => {
                   return <CoinDetailPage {...props} />
                 }}
               />
+              <Route
+                exact
+                path={COIN_DETAIL_BUY_PAGE}
+                isMobile={isMobile}
+                render={(props) => {
+                  const ticker = props.match.params.ticker
+                  if (ticker && ticker !== ticker.toUpperCase()) {
+                    return (
+                      <Redirect
+                        to={{
+                          pathname: COIN_DETAIL_PAGE.replace(
+                            ':ticker',
+                            ticker.toUpperCase()
+                          ),
+                          search: props.location.search,
+                          hash: props.location.hash
+                        }}
+                      />
+                    )
+                  }
+                  return <CoinDetailPage {...props} />
+                }}
+              />
+              <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />
               <Route
                 exact
                 path={COIN_REDEEM_PAGE}
