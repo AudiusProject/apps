@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   useArtistCoin,
@@ -13,6 +13,7 @@ import {
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import { COIN_DETAIL_BUY_PAGE } from '@audius/common/src/utils/route'
 import {
   useBuySellModal,
   useReceiveTokensModal,
@@ -30,6 +31,7 @@ import {
   Text,
   useTheme
 } from '@audius/harmony'
+import { useLocation } from 'react-router-dom'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'
@@ -40,6 +42,7 @@ import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { env } from 'services/env'
+import { doesMatchRoute } from 'utils/route'
 
 import { OpenAppDrawer } from './OpenAppDrawer'
 
@@ -440,6 +443,18 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
     // Has balance - show buy/sell modal
     openBuySellModal({ initialTab, isOpen: true })
   }, [initialTab, openBuySellModal])
+
+  const location = useLocation()
+  useEffect(() => {
+    const match = doesMatchRoute(location, COIN_DETAIL_BUY_PAGE)
+    if (match) {
+      openBuySellModal({
+        initialTab: 'buy',
+        isOpen: true,
+        ticker: coin?.ticker
+      })
+    }
+  }, [location, openBuySellModal, coin?.ticker])
 
   const handleReceive = useRequiresAccountCallback(() => {
     openReceiveTokensModal({

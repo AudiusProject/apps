@@ -5,6 +5,7 @@ import {
   useWalletAudioBalance
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
+import { SIGN_UP_PAGE } from '@audius/common/src/utils/route'
 import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
 import { AUDIO } from '@audius/fixed-decimal'
 import {
@@ -27,6 +28,7 @@ const messages = {
   tradeWith: 'Trade with',
   builtInWallet: 'Built-in Wallet',
   noWalletAvailable: 'No wallet available',
+  signUp: 'Sign Up',
   connect: 'Connect',
   disconnect: 'Disconnect',
   available: 'Available'
@@ -209,12 +211,12 @@ export const CurrentWalletBanner = ({
             </Flex>
           ) : null}
         </Flex>
-        <TextLink
-          variant='visible'
-          href='#'
-          onClick={(e) => e.preventDefault()}
-        >
-          <Text variant='body' size='l' onClick={handleConnectOrDisconnect}>
+        <Text variant='body' size='l'>
+          <TextLink
+            variant='visible'
+            href='#'
+            onClick={handleConnectOrDisconnect}
+          >
             {isConnectingExternalWallet ? (
               <LoadingSpinner />
             ) : isUsingExternalWallet ? (
@@ -222,8 +224,18 @@ export const CurrentWalletBanner = ({
             ) : (
               messages.connect
             )}
-          </Text>
-        </TextLink>
+          </TextLink>
+          {!userHasWallet &&
+            !isConnectingExternalWallet &&
+            !isUsingExternalWallet && (
+              <>
+                {' or '}
+                <TextLink variant='visible' href={SIGN_UP_PAGE}>
+                  {messages.signUp}
+                </TextLink>
+              </>
+            )}
+        </Text>
       </Flex>
 
       {/* Right side: balance and "Available" text */}
