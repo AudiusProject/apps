@@ -1,7 +1,6 @@
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider, PortalHost } from '@gorhom/portal'
-import * as Sentry from '@sentry/react-native'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Platform, UIManager } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -108,6 +107,4 @@ const App = () => {
   )
 }
 
-const AppWithSentry = Sentry.wrap(App)
-
-export { AppWithSentry as App }
+export { App }

@@ -1,6 +1,5 @@
 import type { CommonStoreContext } from '@audius/common/store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { setTag, getCurrentScope } from '@sentry/react-native'
 
 import * as analytics from 'app/services/analytics'
 import { audioPlayer } from 'app/services/audio-player'
@@ -46,7 +45,10 @@ export const storeContext: CommonStoreContext = {
   env,
   explore,
   nftClient: null,
-  sentry: { setTag, getCurrentScope },
+  sentry: {
+    setTag: () => {}, // Sentry removed - no-op
+    getCurrentScope: () => ({}) // Sentry removed - no-op
+  },
   reportToSentry,
   // Shim in main, but defined in native-reloaded branch
   audioPlayer,

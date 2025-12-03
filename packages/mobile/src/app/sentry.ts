@@ -1,26 +1,8 @@
-import { env } from 'process'
+// Sentry removed from mobile - using only console logging and other error tracking
 
-import * as Sentry from '@sentry/react-native'
-
-import packageJson from '../../package.json'
-
-const { version: appVersion } = packageJson
-
-export const navigationIntegration = Sentry.reactNavigationIntegration({
-  enableTimeToInitialDisplay: true
-})
+export const navigationIntegration = null
 
 export const initSentry = () => {
-  Sentry.init({
-    dsn: env.SENTRY_DSN,
-    integrations: [
-      navigationIntegration,
-      Sentry.reactNativeTracingIntegration()
-    ],
-    enableUserInteractionTracing: true,
-    release: appVersion,
-    tracesSampleRate: 1
-  })
-  Sentry.setTag('commit_sha', process.env.VITE_CURRENT_GIT_SHA)
-  Sentry.setTag('platform', 'mobile')
+  // No-op: Sentry disabled for mobile
+  console.log('Sentry disabled for mobile app')
 }

@@ -1,17 +1,6 @@
 import { ErrorLevel } from '@audius/common/models'
 import type { ReportToSentryArgs } from '@audius/common/models'
 import { getErrorMessage, isResponseError } from '@audius/common/utils'
-import { captureException, withScope } from '@sentry/react-native'
-import type { SeverityLevel } from '@sentry/types'
-
-const Levels: { [level in ErrorLevel]: SeverityLevel } = {
-  Warning: 'warning',
-  Fatal: 'fatal',
-  Debug: 'debug',
-  Error: 'error',
-  Info: 'info',
-  Log: 'log'
-}
 
 type ConsoleLoggingMethod = keyof Pick<
   Console,
@@ -28,8 +17,8 @@ const jsLoggerMapping: { [level in ErrorLevel]: ConsoleLoggingMethod } = {
 }
 
 /**
- * Helper fn that reports to sentry while creating a localized scope to contain additional data
- * Also logs to console with the appropriate level (console.log, console.warn, console.error, etc)
+ * Helper fn that logs errors to console
+ * Note: Sentry has been removed from mobile
  */
 export const reportToSentry = async ({
   level = ErrorLevel.Error,
@@ -40,41 +29,38 @@ export const reportToSentry = async ({
   feature
 }: ReportToSentryArgs) => {
   try {
-    withScope(async (scope) => {
-      if (level) {
-        scope.setLevel(Levels[level])
+    let enrichedAdditionalInfo = additionalInfo
+
+    if (isResponseError(error)) {
+      const responseBody =
+        (await error.response.json().catch()) ??
+        (await error.response.text().catch())
+      enrichedAdditionalInfo = {
+        ...additionalInfo,
+        response: error.response,
+        requestId: error.response.headers.get('X-Request-ID'),
+        responseBody
       }
-      if (isResponseError(error)) {
-        const responseBody =
-          (await error.response.json().catch()) ??
-          (await error.response.text().catch())
-        additionalInfo = {
-          ...additionalInfo,
-          response: error.response,
-          requestId: error.response.headers.get('X-Request-ID'),
-          responseBody
-        }
-      }
-      if (additionalInfo) {
-        scope.setContext('additionalInfo', additionalInfo)
-      }
-      if (name) {
-        error.name = `${name}: ${error.name}`
-      }
-      if (tags || feature) {
-        scope.setTags({ ...tags, feature })
-      }
-      // Call JS console method using the specified level
-      const consoleMethod =
-        jsLoggerMapping[level || ErrorLevel.Log] || jsLoggerMapping.Log
-      // eslint-disable-next-line no-console
-      console[consoleMethod](error, 'More info in console.debug')
-      if (additionalInfo || tags) {
-        console.debug('Additional error info:', { additionalInfo, tags, level })
-      }
-      captureException(error)
-    })
-  } catch (error) {
-    console.error(`Got error trying to log error: ${getErrorMessage(error)}`)
+    }
+
+    if (name) {
+      error.name = `${name}: ${error.name}`
+    }
+
+    // Call JS console method using the specified level
+    const consoleMethod =
+      jsLoggerMapping[level || ErrorLevel.Log] || jsLoggerMapping.Log
+    // eslint-disable-next-line no-console
+    console[consoleMethod](error, 'More info in console.debug')
+    if (enrichedAdditionalInfo || tags || feature) {
+      console.debug('Additional error info:', {
+        additionalInfo: enrichedAdditionalInfo,
+        tags,
+        feature,
+        level
+      })
+    }
+  } catch (err) {
+    console.error(`Got error trying to log error: ${getErrorMessage(err)}`)
   }
 }

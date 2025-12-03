@@ -95,6 +95,11 @@ const config = {
         './node_modules',
         'react-native-reanimated'
       ),
+      'react-native-gesture-handler': path.resolve(
+        __dirname,
+        './node_modules',
+        'react-native-gesture-handler'
+      ),
 
       react: resolveModule('react'),
       'react-native': path.resolve(__dirname, './node_modules', 'react-native'),

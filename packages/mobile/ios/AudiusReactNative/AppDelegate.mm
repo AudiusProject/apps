@@ -4,6 +4,7 @@
 #import <GoogleCast/GoogleCast.h>
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import <React/RCTRootView.h>
 #import <React/RCTLinkingManager.h>
 #import "RNNotifications.h"
@@ -44,6 +45,7 @@
   [GCKCastContext setSharedInstanceWithOptions:options];
 
   self.moduleName = @"AudiusReactNative";
+  self.dependencyProvider = [RCTAppDependencyProvider new];
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
@@ -60,9 +62,14 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+  // React Native 0.77 - explicitly set Metro URL
+  NSURL *url = [NSURL URLWithString:@"http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false"];
+  NSLog(@"[AppDelegate] DEBUG mode - Using Metro URL: %@", url);
+  return url;
 #else
-  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  NSURL *url = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  NSLog(@"[AppDelegate] RELEASE mode - Using bundled file: %@", url);
+  return url;
 #endif
 }
 

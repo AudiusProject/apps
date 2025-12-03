@@ -14,7 +14,6 @@ import {
   createNavigationContainerRef,
   getStateFromPath
 } from '@react-navigation/native'
-import type { reactNavigationIntegration } from '@sentry/react-native'
 import queryString from 'query-string'
 import { useAccountStatus } from '~/api/tan-query/users/account/useAccountStatus'
 
@@ -27,7 +26,7 @@ import { navigationThemes } from './navigationThemes'
 
 type NavigationContainerProps = {
   children: ReactNode
-  navigationIntegration: ReturnType<typeof reactNavigationIntegration>
+  navigationIntegration: any // Sentry removed - kept for compatibility
 }
 
 export const navigationRef = createNavigationContainerRef()
@@ -510,7 +509,10 @@ const NavigationContainer = (props: NavigationContainerProps) => {
 
   const onReady = () => {
     routeNameRef.current = getPrimaryRoute(navigationRef.getRootState())
-    navigationIntegration.registerNavigationContainer(navigationRef)
+    // Sentry removed - navigationIntegration is null
+    if (navigationIntegration?.registerNavigationContainer) {
+      navigationIntegration.registerNavigationContainer(navigationRef)
+    }
   }
 
   return (
