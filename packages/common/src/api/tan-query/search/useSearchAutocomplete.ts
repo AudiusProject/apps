@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SearchResults, searchResultsFromSDK } from '~/adapters/search'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useFeatureFlag } from '~/hooks/useFeatureFlag'
+import { ID } from '~/models'
 import { FeatureFlags } from '~/services/remote-config'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -17,11 +18,16 @@ type UseSearchAutocompleteArgs = {
   limit?: number
 }
 
-export const getSearchAutocompleteQueryKey = ({
-  query,
-  limit = DEFAULT_LIMIT
-}: UseSearchAutocompleteArgs) =>
-  [QUERY_KEYS.search, query, { limit }] as unknown as QueryKey<SearchResults>
+export const getSearchAutocompleteQueryKey = (
+  currentUserId: ID | null | undefined,
+  { query, limit = DEFAULT_LIMIT }: UseSearchAutocompleteArgs
+) =>
+  [
+    QUERY_KEYS.search,
+    currentUserId,
+    query,
+    { limit }
+  ] as unknown as QueryKey<SearchResults>
 
 export const useSearchAutocomplete = (
   { query, limit = DEFAULT_LIMIT }: UseSearchAutocompleteArgs,
@@ -35,7 +41,7 @@ export const useSearchAutocomplete = (
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: getSearchAutocompleteQueryKey({ query, limit }),
+    queryKey: getSearchAutocompleteQueryKey(currentUserId, { query, limit }),
     queryFn: async () => {
       const sdk = await audiusSdk()
       const { data } = await sdk.full.search.searchAutocomplete({

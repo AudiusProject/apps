@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux'
 
 import { trackActivityFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
+import { ID } from '~/models'
 import { PlaybackSource } from '~/models/Analytics'
 import {
   historyPageTracksLineupActions,
@@ -25,13 +26,12 @@ type UseTrackHistoryArgs = {
   sortDirection?: full.GetUsersTrackHistorySortDirectionEnum
 }
 
-export const getTrackHistoryQueryKey = ({
-  query,
-  pageSize,
-  sortMethod,
-  sortDirection
-}: UseTrackHistoryArgs) => [
+export const getTrackHistoryQueryKey = (
+  currentUserId: ID | null | undefined,
+  { query, pageSize, sortMethod, sortDirection }: UseTrackHistoryArgs
+) => [
   QUERY_KEYS.trackHistory,
+  currentUserId,
   { pageSize, query, sortMethod, sortDirection }
 ]
 
@@ -55,7 +55,7 @@ export const useTrackHistory = (
       if (lastPage.length < pageSize) return undefined
       return allPages.length * pageSize
     },
-    queryKey: getTrackHistoryQueryKey({
+    queryKey: getTrackHistoryQueryKey(currentUserId, {
       pageSize,
       query,
       sortMethod,
@@ -118,7 +118,7 @@ export const useTrackHistory = (
   return useLineupQuery({
     lineupData: queryData.data ?? [],
     queryData,
-    queryKey: getTrackHistoryQueryKey({
+    queryKey: getTrackHistoryQueryKey(currentUserId, {
       pageSize,
       query,
       sortMethod,
