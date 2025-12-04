@@ -1,7 +1,7 @@
 web-init:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - checkout
     - attach_workspace:
@@ -40,7 +40,7 @@ web-init:
 web-build-demo:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - checkout
@@ -66,7 +66,7 @@ web-build-demo:
 web-build-staging:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-build:
@@ -77,7 +77,7 @@ web-build-staging:
 web-build-ssr-staging:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-build:
@@ -93,7 +93,7 @@ web-build-ssr-staging:
 web-check-ssr-staging-bundlesize:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-check-ssr-bundlesize:
@@ -102,7 +102,7 @@ web-check-ssr-staging-bundlesize:
 web-test:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - checkout
@@ -122,7 +122,7 @@ web-test:
 web-build-production:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-build:
@@ -133,7 +133,7 @@ web-build-production:
 web-build-ssr-production:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-build:
@@ -149,7 +149,7 @@ web-build-ssr-production:
 web-check-ssr-production-bundlesize:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   resource_class: xlarge
   steps:
     - web-check-ssr-bundlesize:
@@ -192,7 +192,7 @@ web-deploy-staging-s3:
 web-deploy-staging-cloudflare:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - web-deploy-cloudflare:
         build-type: staging
@@ -203,7 +203,7 @@ web-deploy-staging-cloudflare:
 web-deploy-release-candidate:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - web-deploy-cloudflare:
         build-type: production
@@ -214,7 +214,7 @@ web-deploy-release-candidate:
 web-deploy-staging-release-candidate:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - web-deploy-cloudflare:
         build-type: staging
@@ -251,7 +251,7 @@ web-deploy-production-s3:
 web-deploy-production-cloudflare:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - web-deploy-cloudflare:
         build-type: production
@@ -262,7 +262,7 @@ web-deploy-production-cloudflare:
 web-deploy-sentry-sourcemaps:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - checkout
     - attach_workspace:
