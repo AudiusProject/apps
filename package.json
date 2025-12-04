@@ -124,6 +124,7 @@
     "dotenv": "^16.4.5",
     "elliptic": "6.6.1",
     "express": "^4.19.2",
+    "ffmpeg-kit-react-native": "^6.0.2",
     "pg": "8.8.0",
     "pino": "^9.1.0",
     "react-native-google-cast": "4.6.2",
@@ -142,7 +143,7 @@
     "@types/bn.js": "5.1.0",
     "bn.js": "5.1.0",
     "moment": "2.24.0",
-    "react-native-svg": "15.10.1",
+    "react-native-svg": "15.11.1",
     "redux": "4.1.1",
     "webpack": "5.88.2",
     "elliptic": "6.6.1"

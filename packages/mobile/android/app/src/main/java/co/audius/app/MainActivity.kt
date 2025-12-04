@@ -39,6 +39,9 @@ class MainActivity : ReactActivity() {
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    // Disable React Native inspector to workaround RN 0.77 crash
+    System.setProperty("react.native.inspector.disable", "true")
+    
     // Check if this is an oauth deep link and redirect to browser
     if (handleOAuthDeepLink(intent)) {
       finish()

@@ -31,7 +31,7 @@ PODS:
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
   - lottie-ios (4.5.0)
-  - lottie-react-native (7.1.0):
+  - lottie-react-native (7.3.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1307,8 +1307,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-fast-crypto (2.2.0):
-    - React
+  - react-native-fast-crypto (3.0.0):
+    - React-Core
   - react-native-get-random-values (1.10.0):
     - React-Core
   - react-native-google-cast (4.6.2):
@@ -1424,7 +1424,7 @@ PODS:
     - SwiftAudioEx (= 1.0.0)
   - react-native-version-number (0.3.6):
     - React
-  - react-native-video (6.0.0):
+  - react-native-video (6.18.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1437,7 +1437,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.0.0)
+    - react-native-video/Video (= 6.18.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1446,7 +1446,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.0.0):
+  - react-native-video/Video (6.18.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1819,7 +1819,7 @@ PODS:
     - Yoga
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.29.1):
+  - RNGestureHandler (2.25.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1964,7 +1964,7 @@ PODS:
     - Yoga
   - RNShare (10.0.2):
     - React-Core
-  - RNSVG (15.10.1):
+  - RNSVG (15.11.1):
     - React-Core
   - RNZipArchive (7.0.1):
     - React-Core
@@ -2039,7 +2039,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
-  - lottie-react-native (from `../../../node_modules/lottie-react-native`)
+  - lottie-react-native (from `../node_modules/lottie-react-native`)
   - nSure
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -2077,7 +2077,7 @@ DEPENDENCIES:
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-create-thumbnail (from `../../../node_modules/react-native-create-thumbnail`)
   - "react-native-document-picker (from `../../../node_modules/@react-native-documents/picker`)"
-  - react-native-fast-crypto (from `../../../node_modules/react-native-fast-crypto`)
+  - react-native-fast-crypto (from `../node_modules/react-native-fast-crypto`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
   - react-native-google-cast (from `../../../node_modules/react-native-google-cast`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
@@ -2093,7 +2093,7 @@ DEPENDENCIES:
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-track-player (from `../node_modules/react-native-track-player`)
   - react-native-version-number (from `../../../node_modules/react-native-version-number`)
-  - react-native-video (from `../node_modules/react-native-video`)
+  - react-native-video (from `../../../node_modules/react-native-video`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../../../node_modules/react-native-webview`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -2141,7 +2141,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
-  - RNSVG (from `../node_modules/react-native-svg`)
+  - RNSVG (from `../../../node_modules/react-native-svg`)
   - RNZipArchive (from `../../../node_modules/react-native-zip-archive`)
   - "snap-kit-react-native (from `../../../node_modules/@snapchat/snap-kit-react-native`)"
   - SRSRadialGradient (from `../../../node_modules/react-native-radial-gradient/ios`)
@@ -2191,7 +2191,7 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2024-11-25-RNv0.77.0-d4f25d534ab744866448b36ca3bf3d97c08e638c
   lottie-react-native:
-    :path: "../../../node_modules/lottie-react-native"
+    :path: "../node_modules/lottie-react-native"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2261,7 +2261,7 @@ EXTERNAL SOURCES:
   react-native-document-picker:
     :path: "../../../node_modules/@react-native-documents/picker"
   react-native-fast-crypto:
-    :path: "../../../node_modules/react-native-fast-crypto"
+    :path: "../node_modules/react-native-fast-crypto"
   react-native-get-random-values:
     :path: "../../../node_modules/react-native-get-random-values"
   react-native-google-cast:
@@ -2293,7 +2293,7 @@ EXTERNAL SOURCES:
   react-native-version-number:
     :path: "../../../node_modules/react-native-version-number"
   react-native-video:
-    :path: "../node_modules/react-native-video"
+    :path: "../../../node_modules/react-native-video"
   react-native-view-shot:
     :path: "../node_modules/react-native-view-shot"
   react-native-webview:
@@ -2389,7 +2389,7 @@ EXTERNAL SOURCES:
   RNShare:
     :path: "../node_modules/react-native-share"
   RNSVG:
-    :path: "../node_modules/react-native-svg"
+    :path: "../../../node_modules/react-native-svg"
   RNZipArchive:
     :path: "../../../node_modules/react-native-zip-archive"
   snap-kit-react-native:
@@ -2417,7 +2417,7 @@ SPEC CHECKSUMS:
   hermes-engine: b2187dbe13edb0db8fcb2a93a69c1987a30d98a4
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
-  lottie-react-native: 24c0759f37f7a1ca99978ac5d1095c9bc7da0545
+  lottie-react-native: 04061d06c966a4179c9c1352aac63b699642c77e
   nSure: 2fc3fc973c44aa0be9a3446f84cb514adc475205
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 36fe2295e44b10d831836cc0d1daec5f8abcf809
@@ -2454,7 +2454,7 @@ SPEC CHECKSUMS:
   react-native-config: 86038147314e2e6d10ea9972022aa171e6b1d4d8
   react-native-create-thumbnail: ab55d24aea01723cf386f18b0b542aabb1982f27
   react-native-document-picker: 4f90a074d1eb269e32d5563c53b70d469180cece
-  react-native-fast-crypto: 5943c42466b86ad70be60d3a5f64bd22251e5d9e
+  react-native-fast-crypto: b30594570dab23aca7e74e206b2c03e28a006216
   react-native-get-random-values: 384787fd76976f5aec9465aff6fa9e9129af1e74
   react-native-google-cast: 18b9b2fc518caabfa65d309409e160b3fc6d1733
   react-native-image-picker: f104798044ef2c9211c42a48025d0693b5f34981
@@ -2470,7 +2470,7 @@ SPEC CHECKSUMS:
   react-native-slider: 218734690828ecc8cab2dbd2f5a7825061d816d2
   react-native-track-player: 97d76dbbd35f27cc709e5f04540615e54264b3f9
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
-  react-native-video: 91efe5060087a740af5eb94a1e581db664840825
+  react-native-video: 865d91f3637dd7b6cc97e0bb05e485c0025dfedb
   react-native-view-shot: 6b7ed61d77d88580fed10954d45fad0eb2d47688
   react-native-webview: c41470d7ddc7b4ae0bd94f72789dca947369faf2
   React-nativeconfig: f77b4627803bf7886a1f2e96b33b8af34e583cc4
@@ -2511,14 +2511,14 @@ SPEC CHECKSUMS:
   RNFingerprintjsPro: b92c7eeff80f567abea771a4a3aaa196799caf7c
   RNFlashList: 9f51bc9dfd6f8de406735fa4ac886d1ca365cf67
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: 5facb047b520a2ece49e15aeb25f4ffed9eb54b5
+  RNGestureHandler: 83e18e53d3388ac5cb165a1404bc3be1e4cbdad0
   RNImageCropPicker: 64b6bec9ec185ee59b71a93d7058816bd0e1916e
   RNPermissions: e6379535a4f3166931b2ada9dfe6cdd10c80ae6a
   RNReactNativeHapticFeedback: ec56a5f81c3941206fd85625fa669ffc7b4545f9
   RNReanimated: 10df3198b328f8a0677fdaaa2b449db53cdbff40
   RNScreens: 52bf34e02b474a36fa3e4de06e29aa9d8e0c4f30
   RNShare: 859ff710211285676b0bcedd156c12437ea1d564
-  RNSVG: 7ff26379b2d1871b8571e6f9bc9630de6baf9bdf
+  RNSVG: 515a902fc18a375907eb4c3abec0b803fbfa37ef
   RNZipArchive: 7bb4c70d6aa2dd235212c0a4a3de0a4e237e2569
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
