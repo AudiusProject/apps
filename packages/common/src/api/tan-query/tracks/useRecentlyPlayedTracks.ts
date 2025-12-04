@@ -52,9 +52,11 @@ export const useRecentlyPlayedTracks = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
+      const id = Id.parse(currentUserId)
       const { data = [] } = await sdk.full.users.getUsersTrackHistory({
         ...args,
-        id: Id.parse(currentUserId),
+        id,
+        userId: id,
         limit: pageSize,
         offset: pageParam
       })
