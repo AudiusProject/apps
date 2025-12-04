@@ -21,6 +21,7 @@
 		838AABE023CE3813004B2DA3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 838AABDF23CE3813004B2DA3 /* GoogleService-Info.plist */; };
 		83F7359F23C55C2D0040A4C5 /* AirplayViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 83F7359E23C55C2D0040A4C5 /* AirplayViewManager.m */; };
 		83F735A523C64C950040A4C5 /* AirplayEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = 83F735A423C64C950040A4C5 /* AirplayEvent.m */; };
+		83FB60B623A4351D00DC2238 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 		9204DC5D38C1495FA330CF12 /* AvenirNextLTPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6F65A9A9BAD047FABD240C59 /* AvenirNextLTPro-Regular.otf */; };
 		9A21B5C22EF94A738EBABFED /* AvenirNextLTPro-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = BAEB40775EC64F48AC1983F7 /* AvenirNextLTPro-Thin.otf */; };
 		9E394FBA2BD1B7A8008DD9D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9E5B39082BB49198009C765B /* PrivacyInfo.xcprivacy */; };
@@ -55,6 +56,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* AudiusReactNativeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudiusReactNativeTests.m; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Audius Music.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Audius Music.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -139,6 +141,7 @@
 				253BCCF92B324974007DC74C /* NSureSDK.m */,
 				838AABDF23CE3813004B2DA3 /* GoogleService-Info.plist */,
 				A20D1DBF23ABDA2B003D6530 /* Audius Music.entitlements */,
+				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -333,6 +336,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				717F36E82733C73F0017511F /* AvenirNextLTPro-DemiBold.otf in Resources */,
+				83FB60B623A4351D00DC2238 /* main.jsbundle in Resources */,
 				9E394FBA2BD1B7A8008DD9D2 /* PrivacyInfo.xcprivacy in Resources */,
 				7103C3ED2929C6B5002B9072 /* BootSplash.storyboard in Resources */,
 				838AABE023CE3813004B2DA3 /* GoogleService-Info.plist in Resources */,
@@ -383,7 +387,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/scripts/uploadSentryDebugSymbols.sh";
+			shellScript = "${SRCROOT}/scripts/uploadSentryDebugSymbols.sh\n";
 		};
 		4F8185A02FC4BDA0C345B32B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -432,9 +436,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AudiusReactNative/Pods-AudiusReactNative-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AudiusReactNative/Pods-AudiusReactNative-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -449,9 +457,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AudiusReactNative/Pods-AudiusReactNative-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AudiusReactNative/Pods-AudiusReactNative-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
