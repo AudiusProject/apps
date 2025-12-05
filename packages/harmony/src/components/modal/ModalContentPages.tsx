@@ -4,12 +4,12 @@ import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, Transition } from 'react-spring/renderprops.cjs'
-const animatedAny = animated as any
 import useMeasure from 'react-use-measure'
 
 import { ModalContent } from './ModalContent'
 import styles from './ModalContentPages.module.css'
 import { ModalContentProps } from './types'
+const animatedAny = animated as any
 
 const INNER_HEIGHT_PADDING = 100
 

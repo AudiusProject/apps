@@ -118,15 +118,15 @@ web-distribute:
     - attach_workspace:
         at: ./
     - run:
-        name: Install Node.js 18.7.0
+        name: Install Node.js 22
         command: |
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
           echo 'Successfully installed nvm'
           echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
           echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --install' >> $BASH_ENV
           source $BASH_ENV
-          nvm install 18.7.0
-          nvm alias default 18.7.0
+          nvm install 22
+          nvm alias default 22
 
     - create_concatenated_patch_file:
         filename: combined-patch-file.txt

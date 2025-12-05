@@ -14,12 +14,12 @@ use rand::Rng;
 use solana_program::{
     instruction::Instruction, program_pack::Pack, pubkey::Pubkey, system_instruction,
 };
-use solana_program_test::*;
+use solana_program_test::{*, tokio::time::sleep};
 use solana_sdk::{
     secp256k1_instruction::construct_eth_pubkey, signature::Keypair, signer::Signer,
     transaction::Transaction, transport::TransportError,
 };
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit};
 use utils::*;
 
 // Test a transfer can be completed successfully
@@ -861,6 +861,8 @@ async fn failure_multiple_disbursements() {
     )
     .await
     .unwrap();
+
+    sleep(std::time::Duration::from_secs(1)).await;
 
     // Do the whole thing again, this time expecting an error
     let res = submit_and_evaluate(keys, &mut c, signers).await;

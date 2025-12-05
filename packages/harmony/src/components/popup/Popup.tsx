@@ -13,7 +13,6 @@ import { useTheme } from '@emotion/react'
 import cn from 'classnames'
 import ReactDOM from 'react-dom'
 import { useTransition, animated } from 'react-spring'
-const animatedAny = animated as any
 import { usePrevious } from 'react-use'
 
 import { PlainButton } from '~harmony/components/button/PlainButton/PlainButton'
@@ -25,6 +24,7 @@ import { getScrollParent } from '../../utils/getScrollParent'
 
 import styles from './Popup.module.css'
 import type { PopupProps, Origin } from './types'
+const animatedAny = animated as any
 
 const messages = {
   close: 'close popup'

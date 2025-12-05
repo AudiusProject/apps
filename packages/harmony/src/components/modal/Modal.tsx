@@ -15,7 +15,6 @@ import uniqueId from 'lodash/uniqueId'
 import ReactDOM from 'react-dom'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, useTransition } from 'react-spring'
-const animatedAny = animated as any
 import { useEffectOnce } from 'react-use'
 
 import { ModalState } from '~harmony/utils/modalState'
@@ -28,6 +27,7 @@ import { ModalContext } from './ModalContext'
 import { findAncestor } from './findAncestor'
 import { useModalScrollCount } from './hooks'
 import { ModalProps, Anchor } from './types'
+const animatedAny = animated as any
 
 const rootContainer = 'modalRootContainer'
 const rootId = 'modalRoot'

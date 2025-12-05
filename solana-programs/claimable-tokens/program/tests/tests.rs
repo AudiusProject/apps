@@ -329,6 +329,154 @@ async fn init_instruction() {
     assert_eq!(token_account.mint, mint_account.pubkey());
 }
 
+// Test SetAuthority instruction signed by the ethereum key for the token account
+#[tokio::test]
+async fn set_authority_instruction() {
+    let mut program_context = program_test().start_with_context().await;
+    let rent = program_context.banks_client.get_rent().await.unwrap();
+    let (
+        _rng,
+        _key,
+        priv_key,
+        _secp_pubkey,
+        mint_account,
+        mint_authority,
+        _user_token_account,
+        eth_address,
+    ) = init_test_variables();
+
+    // prepare transfer creates mint, PDA and mints tokens to PDA (so token account exists)
+    let (base_acc, derive_acc, _tokens_amount) = prepare_transfer(
+        &mut program_context,
+        mint_account,
+        rent,
+        mint_authority,
+        eth_address,
+        &Keypair::new(),
+    )
+    .await;
+
+    // Choose a new authority pubkey to set
+    let new_authority = Keypair::new().pubkey();
+
+    // Build the SPL Token SetAuthority instruction bytes
+    use solana_program::program_option::COption;
+    let spl_set_auth = spl_token::instruction::TokenInstruction::SetAuthority {
+        authority_type: spl_token::instruction::AuthorityType::AccountOwner,
+        new_authority: COption::Some(new_authority),
+    };
+    let packed = spl_set_auth.pack();
+
+    // Construct SignedSetAuthorityData with recent blockhash
+    use claimable_tokens::state::SignedSetAuthorityData;
+    let signed = SignedSetAuthorityData {
+        blockhash: program_context.last_blockhash,
+        instruction: packed.to_vec(),
+        account_pubkey: derive_acc,
+    };
+    let message = signed.try_to_vec().expect("serialize signed set authority");
+
+    // create secp instruction signing the message with the priv_key
+    let secp_inst = new_secp256k1_instruction(&priv_key, &message);
+
+    // Program instruction to set authority
+    let set_auth_inst = instruction::set_authority(&id(), &derive_acc, &base_acc).unwrap();
+
+    // send transaction: secp first, then program instruction
+    let mut tx = Transaction::new_with_payer(
+        &[secp_inst, set_auth_inst],
+        Some(&program_context.payer.pubkey()),
+    );
+    tx.sign(&[&program_context.payer], program_context.last_blockhash);
+    program_context
+        .banks_client
+        .process_transaction(tx)
+        .await
+        .expect("set_authority tx failed");
+
+    // Verify the token account's owner changed to new_authority
+    let token_account_data = get_account(&mut program_context, &derive_acc)
+        .await
+        .unwrap();
+    let token_account = spl_token::state::Account::unpack(&token_account_data.data.as_slice()).unwrap();
+
+    assert_eq!(token_account.owner, new_authority);
+}
+
+
+// Ensure a signature for one token account cannot be used for another token account
+#[tokio::test]
+async fn set_authority_bound_to_specific_account() {
+    let mut program_context = program_test().start_with_context().await;
+    let rent = program_context.banks_client.get_rent().await.unwrap();
+    let (
+        _rng,
+        _key,
+        priv_key,
+        _secp_pubkey,
+        mint_account_a,
+        mint_authority_a,
+        _user_token_account_a,
+        eth_address,
+    ) = init_test_variables();
+
+    // Create a second mint and authority for the second token account
+    let mint_account_b = Keypair::new();
+    let mint_authority_b = Keypair::new();
+
+    // prepare first token account (mint A)
+    let (_base_a, derive_a, _tokens_a) = prepare_transfer(
+        &mut program_context,
+        mint_account_a,
+        rent,
+        mint_authority_a,
+        eth_address,
+        &Keypair::new(),
+    )
+    .await;
+
+    // prepare second token account (mint B) for the SAME ethereum address
+    let (_base_b, derive_b, _tokens_b) = prepare_transfer(
+        &mut program_context,
+        mint_account_b,
+        rent,
+        mint_authority_b,
+        eth_address,
+        &Keypair::new(),
+    )
+    .await;
+
+    // Build SPL SetAuthority payload that is explicitly bound to derive_a
+    use solana_program::program_option::COption;
+    let new_authority = Keypair::new().pubkey();
+    let spl_set_auth = spl_token::instruction::TokenInstruction::SetAuthority {
+        authority_type: spl_token::instruction::AuthorityType::AccountOwner,
+        new_authority: COption::Some(new_authority),
+    };
+    let packed = spl_set_auth.pack();
+
+    use claimable_tokens::state::SignedSetAuthorityData;
+    let signed = SignedSetAuthorityData {
+        blockhash: program_context.last_blockhash,
+        instruction: packed.to_vec(),
+        account_pubkey: derive_a, // bound to account A
+    };
+    let message = signed.try_to_vec().expect("serialize signed set authority");
+
+    // create secp instruction signing the message with the priv_key
+    let secp_inst = new_secp256k1_instruction(&priv_key, &message);
+
+    // But call set_authority for derive_b (account B) -- should fail
+    let set_auth_inst = instruction::set_authority(&id(), &derive_b, &find_address_pair(&id(), &derive_b, eth_address).unwrap().base.address).unwrap();
+
+    let mut tx = Transaction::new_with_payer(&[secp_inst, set_auth_inst], Some(&program_context.payer.pubkey()));
+    tx.sign(&[&program_context.payer], program_context.last_blockhash);
+    let res = program_context.banks_client.process_transaction(tx).await;
+
+    // Expect InvalidSignatureData at instruction index 1
+    assert_custom_error(res, 1, ClaimableProgramError::InvalidSignatureData);
+}
+
 // Verify that someone cannot block an account creation
 #[tokio::test]
 async fn create_account_with_seed_denial() {
@@ -912,15 +1060,16 @@ async fn transfer_replay_instruction() {
     let mut transaction =
         Transaction::new_with_payer(&instructions, Some(&program_context.payer.pubkey()));
 
-    transaction.sign(&[&program_context.payer], program_context.last_blockhash);
+    let recent_blockhash = program_context.last_blockhash;
+    transaction.sign(&[&program_context.payer], recent_blockhash);
     program_context
         .banks_client
         .process_transaction(transaction)
         .await
         .unwrap();
 
-    let final_user_nonce = get_user_account_nonce(&mut program_context, &nonce_account).await;
-    assert_eq!(transfer_instr_data.nonce + 1, final_user_nonce);
+    let user_nonce = get_user_account_nonce(&mut program_context, &nonce_account).await;
+    assert_eq!(transfer_instr_data.nonce + 1, user_nonce);
 
     let bank_token_account_data = get_account(&mut program_context, &user_bank_account)
         .await
@@ -937,19 +1086,53 @@ async fn transfer_replay_instruction() {
         spl_token::state::Account::unpack(&user_token_account_data.data.as_slice()).unwrap();
 
     assert_eq!(user_token_account.amount, transfer_amount);
+
+    // Replay the same transaction with the same blockhash and signature
     let mut transaction2 =
         Transaction::new_with_payer(&instructions, Some(&program_context.payer.pubkey()));
-    let recent_blockhash = program_context
+    transaction2.sign(&[&program_context.payer], recent_blockhash);
+    program_context
+        .banks_client
+        .process_transaction(transaction2)
+        .await;
+    
+    let user_nonce_after_replay = get_user_account_nonce(&mut program_context, &nonce_account).await;
+    // Nonce should not have changed
+    assert_eq!(user_nonce, user_nonce_after_replay);
+
+    let bank_token_account_data = get_account(&mut program_context, &user_bank_account)
+        .await
+        .unwrap();
+    let bank_token_account_after_replay =
+        spl_token::state::Account::unpack(&bank_token_account_data.data.as_slice()).unwrap();
+    // Balance should not have changed
+    assert_eq!(bank_token_account.amount, bank_token_account_after_replay.amount);
+
+    // Replay again with a new blockhash to make the signature change
+    let mut new_recent_blockhash = program_context
         .banks_client
         .get_recent_blockhash()
         .await
         .unwrap();
-    transaction2.sign(&[&program_context.payer], recent_blockhash);
-    let tx_result = program_context
+    while new_recent_blockhash == recent_blockhash {
+        // wait until blockhash changes
+        tokio::time::sleep(std::time::Duration::from_millis(400)).await;
+        new_recent_blockhash = program_context
+            .banks_client
+            .get_recent_blockhash()
+            .await
+            .unwrap();
+    }
+    let mut transaction3 =
+        Transaction::new_with_payer(&instructions, Some(&program_context.payer.pubkey()));
+    transaction3.sign(&[&program_context.payer], new_recent_blockhash);
+    let final_tx_result = program_context
         .banks_client
-        .process_transaction(transaction2)
+        .process_transaction(transaction3)
         .await;
-    assert_custom_error(tx_result, 1, ClaimableProgramError::NonceVerificationError);
+    
+    assert_custom_error(final_tx_result, 1, ClaimableProgramError::NonceVerificationError);
+        
 }
 
 // Verify that someone cannot cause a transfer denial by sending lamports to a nonce account

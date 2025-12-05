@@ -4,7 +4,7 @@ use solana_program::{
     msg,
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack, Sealed},
-    pubkey::Pubkey,
+    pubkey::Pubkey, hash::Hash,
 };
 
 /// Transfer instruction data
@@ -17,6 +17,17 @@ pub struct TransferInstructionData {
     pub amount: u64,
     /// User level nonce
     pub nonce: u64,
+}
+
+/// The message structure for signing a SetAuthority instruction
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, PartialEq)]
+pub struct SignedSetAuthorityData {
+    /// A recent blockhash to prevent replays
+    pub blockhash: Hash,
+    /// The instruction data as a serialized byte array
+    pub instruction: Vec<u8>,
+    /// The account to act on behalf of
+    pub account_pubkey: Pubkey,
 }
 
 /// Current program version

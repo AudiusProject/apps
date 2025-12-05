@@ -16,7 +16,10 @@ import {
 } from '@audius/common/api'
 import { Client, Status } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
-import { guestRoutes } from '@audius/common/src/utils/route'
+import {
+  COIN_DETAIL_BUY_PAGE,
+  guestRoutes
+} from '@audius/common/src/utils/route'
 import { UploadType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
@@ -753,6 +756,14 @@ const WebPlayer = (props) => {
               <Route path={COINS_CREATE_PAGE} element={<LaunchpadPage />} />
               <Route
                 path={COIN_DETAIL_PAGE}
+                element={
+                  <CoinDetailPageRoute
+                    mainContentRef={mainContentRef.current}
+                  />
+                }
+              />
+              <Route
+                path={COIN_DETAIL_BUY_PAGE}
                 element={
                   <CoinDetailPageRoute
                     mainContentRef={mainContentRef.current}

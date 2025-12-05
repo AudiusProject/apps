@@ -24,6 +24,9 @@ pub enum ClaimableProgramError {
     /// User nonce verification error
     #[error("Nonce verification failed")]
     NonceVerificationError,
+    /// Invalid signature data
+    #[error("Invalid signature data")]
+    InvalidSignatureData,
 }
 impl From<ClaimableProgramError> for ProgramError {
     fn from(e: ClaimableProgramError) -> Self {

@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+
 import { full } from '@audius/sdk'
 import cn from 'classnames'
 import SimpleBar from 'simplebar-react'
@@ -102,6 +104,14 @@ const CollectionPlayerCard = ({
   const isGated = !!streamConditions
   const isPurchaseable =
     streamConditions && instanceOfPurchaseGate(streamConditions)
+
+  const [artworkURL, setArtworkURL] = useState(null)
+  useEffect(() => {
+    if (collection) {
+      getArtworkUrl(collection).then((url) => setArtworkURL(url))
+    }
+  }, [collection])
+
   return (
     <Card
       isTwitter={isTwitter}
@@ -127,7 +137,7 @@ const CollectionPlayerCard = ({
         <div className={styles.middleRow}>
           <Artwork
             className={styles.artwork}
-            artworkURL={getArtworkUrl(collection)}
+            artworkURL={artworkURL}
             onClickURL={permalink}
             displayHoverPlayButton
             onTogglePlay={makeOnTogglePlay(activeTrackIndex)}

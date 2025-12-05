@@ -42,6 +42,24 @@ pub enum ClaimableProgramInstruction {
     ///   7. `[r]` System program id
     ///   8. `[r]` SPL token account id
     Transfer(EthereumAddress),
+
+    /// Set authority
+    /// 
+    ///   0. `[w]` Token acc to change owner of (bank account)
+    ///   1. `[r]` Banks token account authority (current owner)
+    ///   2. `[r]` Sysvar instruction id
+    ///   3. `[r]` Sysvar recent blockhashes id
+    ///   4. `[r]` SPL token account id
+    SetAuthority,
+
+    /// Close token account
+    ///
+    /// 0. `[w]` Token acc to close
+    /// 1. `[r]` Token acc authority
+    /// 2. `[w]` Destination acc to receive rent
+    /// 3. `[r]` SPL token account id
+    /// 4. `[s]` Close authority (if different from token acc authority)
+    Close(EthereumAddress),
 }
 
 /// Create `CreateTokenAccount` instruction
@@ -96,6 +114,55 @@ pub fn transfer(
         // A reference to the token and system programs is needed even if unused directly
         // Below are required in function scope for allocation of a new account
         AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+    ];
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data,
+    })
+}
+
+/// Create `SetAuthority` instruction
+/// 
+/// NOTE: Instruction must followed after `new_secp256k1_instruction`
+/// with params: current owner ethereum private key and bank token account public key.
+/// Otherwise error message `Secp256 instruction losing` will be issued
+pub fn set_authority(
+    program_id: &Pubkey,
+    banks_token_acc: &Pubkey,
+    authority: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let data = ClaimableProgramInstruction::SetAuthority.try_to_vec()?;
+    let accounts = vec![
+        AccountMeta::new(*banks_token_acc, false),
+        AccountMeta::new_readonly(*authority, false),
+        AccountMeta::new_readonly(sysvar::instructions::id(), false),
+        AccountMeta::new_readonly(sysvar::recent_blockhashes::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+    ];
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data,
+    })
+}
+
+/// Create `Close` instruction
+pub fn close(
+    program_id: &Pubkey,
+    token_account: &Pubkey,
+    authority: &Pubkey,
+    destination_account: &Pubkey,
+    eth_address: EthereumAddress,
+) -> Result<Instruction, ProgramError> {
+    let data = ClaimableProgramInstruction::Close(eth_address)
+        .try_to_vec()
+        .unwrap();
+    let accounts = vec![
+        AccountMeta::new(*token_account, false),
+        AccountMeta::new_readonly(*authority, false),
+        AccountMeta::new(*destination_account, false),
         AccountMeta::new_readonly(spl_token::id(), false),
     ];
     Ok(Instruction {

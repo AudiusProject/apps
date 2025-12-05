@@ -1,7 +1,7 @@
 mobile-init:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:18.17
+    - image: cimg/node:22.17
   steps:
     - checkout
     - run:

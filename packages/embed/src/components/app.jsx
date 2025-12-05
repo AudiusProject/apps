@@ -178,7 +178,7 @@ const App = (props) => {
             stripLeadingSlash(track.permalink)
           )
 
-          const artworkUrl = getArtworkUrl(track)
+          const artworkUrl = await getArtworkUrl(track)
           // Set dominant color
           let color
           if (artworkUrl) {
@@ -214,7 +214,7 @@ const App = (props) => {
             stripLeadingSlash(collection.permalink)
           )
 
-          const artworkUrl = getArtworkUrl(collection)
+          const artworkUrl = await getArtworkUrl(collection)
           // Set dominant color
           let color
           if (artworkUrl) {
@@ -353,12 +353,20 @@ const App = (props) => {
     return null
   }
 
+  const [pausePopoverArtworkURL, setPausePopoverArtworkURL] = useState(null)
+  useEffect(() => {
+    const response = tracksResponse || collectionsResponse
+    if (response) {
+      getArtworkUrl(response).then((url) => setPausePopoverArtworkURL(url))
+    }
+  }, [tracksResponse, collectionsResponse])
+
   const renderPausePopover = () => {
     if (!requestState || (!tracksResponse && !collectionsResponse)) {
       return null
     }
 
-    const artworkURL = getArtworkUrl(tracksResponse || collectionsResponse)
+    const artworkURL = pausePopoverArtworkURL
     const artworkClickURL =
       tracksResponse?.permalink || collectionsResponse?.permalink
         ? stripLeadingSlash(

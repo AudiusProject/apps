@@ -132,14 +132,14 @@ pub enum Instructions {
 
     ///   Evaluate attestations, transferring tokens to token recipient
     ///
-    ///   0. `[]` Verified messages - New or existing account PDA storing verified messages-
+    ///   0. `[writable]` Verified messages - New or existing account PDA storing verified messages
     ///   1. `[]` Reward manager
     ///   2. `[]` Reward manager authority
-    ///   3. `[]` Reward token source
-    ///   4. `[]` Reward token recipient
-    ///   5. `[]` Transfer account - the account which represents a successful transfer
+    ///   3. `[writable]` Reward token source
+    ///   4. `[writable]` Reward token recipient (or token mint if burning)
+    ///   5. `[writable]` Transfer account - the account which represents a successful transfer
     ///   6. `[]` Bot oracle - the ethereum public address of the oracle
-    ///   7. `[]` Payer
+    ///   7. `[signer]` Payer
     ///   8. `[]` Sysvar rent
     ///   9. `[]` Token program id
     ///  10. `[]` System program id
@@ -402,7 +402,7 @@ pub fn evaluate_attestations(
     verified_messages: &Pubkey,
     reward_manager: &Pubkey,
     reward_token_source: &Pubkey,
-    reward_token_recipient: &Pubkey,
+    reward_token_recipient_or_mint: &Pubkey,
     bot_oracle: &Pubkey,
     payer: &Pubkey,
     amount: u64,
@@ -429,7 +429,7 @@ pub fn evaluate_attestations(
         AccountMeta::new_readonly(*reward_manager, false),
         AccountMeta::new_readonly(reward_manager_authority, false),
         AccountMeta::new(*reward_token_source, false),
-        AccountMeta::new(*reward_token_recipient, false),
+        AccountMeta::new(*reward_token_recipient_or_mint, false),
         AccountMeta::new(derived_address, false),
         AccountMeta::new_readonly(*bot_oracle, false),
         AccountMeta::new(*payer, true),

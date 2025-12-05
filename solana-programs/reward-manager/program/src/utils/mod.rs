@@ -192,6 +192,36 @@ pub fn spl_token_transfer<'a>(
     )
 }
 
+// Burn tokens with program address
+#[allow(clippy::too_many_arguments)]
+pub fn spl_token_burn<'a>(
+    program_id: &Pubkey,
+    reward_manager: &Pubkey,
+    source: &AccountInfo<'a>,
+    mint: &AccountInfo<'a>,
+    authority: &AccountInfo<'a>,
+    amount: u64,
+) -> ProgramResult {
+    let bump_seed = find_program_address(program_id, reward_manager).1;
+
+    let authority_signature_seeds = [&reward_manager.to_bytes()[..32], &[bump_seed]];
+    let signers = &[&authority_signature_seeds[..]];
+
+    let tx = spl_token::instruction::burn(
+        &spl_token::id(),
+        source.key,
+        mint.key,
+        authority.key,
+        &[],
+        amount,
+    )?;
+    invoke_signed(
+        &tx,
+        &[source.clone(), mint.clone(), authority.clone()],
+        signers,
+    )
+}
+
 /// Create account
 #[allow(clippy::too_many_arguments)]
 pub fn create_account<'a>(
