@@ -67,9 +67,6 @@ project.ext.envConfigFiles = [
     stagingreleasecandidate: ".env.stage",
 ]
 
-// def sentryGradleFile = file("../../node_modules/@sentry/react-native/sentry.gradle")
-
-// apply from: sentryGradleFile
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 /**
