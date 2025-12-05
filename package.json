@@ -143,6 +143,8 @@
     "@types/bn.js": "5.1.0",
     "bn.js": "5.1.0",
     "moment": "2.24.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native-svg": "15.11.1",
     "redux": "4.1.1",
     "webpack": "5.88.2",

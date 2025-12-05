@@ -64,6 +64,7 @@ export default defineConfig(async ({ mode }) => {
     },
     optimizeDeps: {
       include: ['react', 'react-dom'],
+      dedupe: ['react', 'react-dom'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
