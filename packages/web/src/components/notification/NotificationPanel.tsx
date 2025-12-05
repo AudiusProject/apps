@@ -27,7 +27,7 @@ const messages = {
 }
 
 type NotificationPanelProps = {
-  anchorRef: RefObject<HTMLButtonElement>
+  anchorRef: RefObject<HTMLButtonElement | null>
   isOpen: boolean
   onClose: () => void
 }

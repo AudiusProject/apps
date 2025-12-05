@@ -45,7 +45,7 @@ export type DynamicImageProps = {
   useBlur?: boolean
 } & ComponentPropsWithoutRef<'div'>
 
-const moveBehind = (ref: RefObject<HTMLDivElement>) => {
+const moveBehind = (ref: RefObject<HTMLDivElement | null>) => {
   if (ref.current) {
     ref.current.style.animation = 'none'
     ref.current.style.zIndex = '1'
@@ -54,7 +54,7 @@ const moveBehind = (ref: RefObject<HTMLDivElement>) => {
 }
 
 const fadeIn = (
-  ref: RefObject<HTMLDivElement>,
+  ref: RefObject<HTMLDivElement | null>,
   isUrl: boolean,
   image: string,
   immediate: boolean

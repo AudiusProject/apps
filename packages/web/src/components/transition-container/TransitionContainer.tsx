@@ -2,6 +2,7 @@ import { ReactElement } from 'react'
 
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, Transition } from 'react-spring/renderprops.cjs'
+const animatedAny = animated as any
 
 type TransitionContainerProps<T> = {
   render: (item: any, style: object) => ReactElement
@@ -32,9 +33,9 @@ export function TransitionContainer<T>({
       config={config}
     >
       {(item) => (style) => (
-        <animated.div style={{ ...style, ...additionalStyles }}>
+        <animatedAny.div style={{ ...style, ...additionalStyles }}>
           {render(item, style)}
-        </animated.div>
+        </animatedAny.div>
       )}
     </Transition>
   )

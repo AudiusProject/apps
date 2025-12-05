@@ -17,7 +17,7 @@ import { ArtistRecommendations } from './ArtistRecommendations'
 import styles from './ArtistRecommendationsPopup.module.css'
 
 type Props = {
-  anchorRef: RefObject<HTMLElement>
+  anchorRef: RefObject<HTMLElement | null>
   artistId: ID
   isVisible: boolean
   onClose: () => void

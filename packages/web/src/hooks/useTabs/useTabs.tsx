@@ -26,6 +26,7 @@ import { SeoLink } from 'components/link'
 import Tooltip from 'components/tooltip/Tooltip'
 
 import styles from './TabStyles.module.css'
+const animatedAny = animated as any
 
 export type TabHeader = {
   icon?: ReactNode
@@ -83,7 +84,7 @@ const Tab = forwardRef(
 )
 
 const TabAccent = ({ style }: { style: any }) => (
-  <animated.div className={styles.tabAccent} style={style} />
+  <animatedAny.div className={styles.tabAccent} style={style} />
 )
 
 // How much the tab accent should horizontally stretch
@@ -707,7 +708,7 @@ const GestureSupportingBodyContainer = memo(
         ref={containerCallbackRef}
         style={containerStyle as CSSProperties}
       >
-        <animated.div
+        <animatedAny.div
           className={styles.elementScrollContainer}
           {...bind()}
           style={{
@@ -759,7 +760,7 @@ const GestureSupportingBodyContainer = memo(
               )
             })
           })()}
-        </animated.div>
+        </animatedAny.div>
       </div>
     )
   }
@@ -874,7 +875,7 @@ const BodyContainer = memo(
         }}
       >
         {transitions.map(({ item, props, key }) => (
-          <animated.div
+          <animatedAny.div
             key={key}
             style={{
               ...(props as any),
@@ -885,7 +886,7 @@ const BodyContainer = memo(
             className={cn(styles.elementWrapper, elementClassName)}
           >
             {elements[item]}
-          </animated.div>
+          </animatedAny.div>
         ))}
       </div>
     )
@@ -976,7 +977,7 @@ type UseTabsResult = {
 
   // Plug this ref into the object you with to
   // have a full width transition in.
-  fullWidthContainerRef: RefObject<HTMLDivElement>
+  fullWidthContainerRef: RefObject<HTMLDivElement | null>
 
   // Manually recalculate body dimensions.
   // You shouldn't need this except in rare circumstances.

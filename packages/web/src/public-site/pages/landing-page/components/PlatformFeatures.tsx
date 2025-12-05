@@ -9,6 +9,7 @@ import productShot from 'assets/img/publicSite/ProductShot3.webp'
 import useHasViewed from 'hooks/useHasViewed'
 
 import styles from './PlatformFeatures.module.css'
+const animatedAny = animated as any
 
 const messages = {
   title: ' Empowering Features for Artists',
@@ -100,7 +101,7 @@ const PlatformFeatures = (props: PlatformFeaturesProps) => {
       <div className={styles.content} ref={refInView}>
         {!props.isMobile ? (
           <div className={styles.animateTitleContainer}>
-            <animated.div
+            <animatedAny.div
               style={{
                 opacity: textStyles.opacity,
                 transform: textStyles.x.interpolate(
@@ -112,7 +113,7 @@ const PlatformFeatures = (props: PlatformFeaturesProps) => {
                 <h3 className={styles.title}>{messages.title}</h3>
                 <h4 className={styles.subTitle}>{messages.subTitle}</h4>
               </div>
-            </animated.div>
+            </animatedAny.div>
           </div>
         ) : null}
         <div className={styles.body}>
@@ -123,7 +124,7 @@ const PlatformFeatures = (props: PlatformFeaturesProps) => {
           />
           {props.isMobile ? (
             <div className={styles.animateTitleContainer}>
-              <animated.div
+              <animatedAny.div
                 style={{
                   opacity: textStyles.opacity,
                   transform: textStyles.x.interpolate(
@@ -135,7 +136,7 @@ const PlatformFeatures = (props: PlatformFeaturesProps) => {
                   <h3 className={styles.title}>{messages.title}</h3>
                   <h4 className={styles.subTitle}>{messages.subTitle}</h4>
                 </div>
-              </animated.div>
+              </animatedAny.div>
             </div>
           ) : null}
           <div className={styles.features}>

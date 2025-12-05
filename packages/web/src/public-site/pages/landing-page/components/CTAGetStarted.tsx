@@ -13,6 +13,7 @@ import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { useMatchesBreakpoint } from 'utils/useMatchesBreakpoint'
 
 import styles from './CTAGetStarted.module.css'
+const animatedAny = animated as any
 
 const MOBILE_WIDTH_MEDIA_QUERY = window.matchMedia('(max-width: 1150px)')
 
@@ -48,7 +49,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
     return false
   }, [setHasViewed])
 
-  const titleRef = useRef()
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
 
   const titleSpring = useTrail(titleItems.length, {
     // @ts-ignore
@@ -111,7 +112,7 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
             <h3 className={styles.title}>
               {titleSpring.map(
                 ({ x, wordYPosition, ...rest }: any, index: number) => (
-                  <animated.span
+                  <animatedAny.span
                     key={index}
                     className={cn(styles.textAnimateTitle)}
                     style={{
@@ -121,13 +122,13 @@ const CTAGetStarted = (props: CTAGetStartedProps) => {
                       )
                     }}
                   >
-                    <animated.div
+                    <animatedAny.div
                       className={cn(styles.word, styles.coloredTitleWord)}
                     >
                       {' '}
                       {titleItems[index]}{' '}
-                    </animated.div>
-                  </animated.span>
+                    </animatedAny.div>
+                  </animatedAny.span>
                 )
               )}
             </h3>

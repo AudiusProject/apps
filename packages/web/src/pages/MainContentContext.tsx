@@ -23,7 +23,7 @@ export const useMainContentRef = () => {
 
 export const MainContentContextProvider = memo(
   (props: { children: ReactNode }) => {
-    const ref = useRef<HTMLDivElement>()
+    const ref = useRef<HTMLDivElement | undefined>(undefined)
     const [ready, setReady] = useState(false)
     return (
       <MainContentContext.Provider

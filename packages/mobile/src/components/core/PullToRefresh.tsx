@@ -214,7 +214,7 @@ export const PullToRefresh = ({
   const [didHitTop, setDidHitTop] = useState(false)
   const hitTop = useRef(false)
   const [shouldShowSpinner, setShouldShowSpinner] = useState(false)
-  const animationRef = useRef<LottieView | null>()
+  const animationRef = useRef<LottieView | null | undefined>(undefined)
 
   const { neutral, white } = useAnimations()
   const { spin, pull } = color ? white : neutral

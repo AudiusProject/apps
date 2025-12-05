@@ -8,6 +8,7 @@ import IconAudioRewardsPill from 'assets/img/iconAudioRewardsPill.svg'
 import useCardWeight from 'hooks/useCardWeight'
 
 import styles from './PerspectiveCard.module.css'
+const animatedAny = animated as any
 
 type PerspectiveCardProps = {
   backgroundGradient?: string
@@ -49,7 +50,7 @@ const PerspectiveCard = ({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      <animated.div
+      <animatedAny.div
         className={styles.perspective}
         // @ts-ignore -- TODO figure out why react-spring transform type doesn't work here
         style={{ transform }}
@@ -74,7 +75,7 @@ const PerspectiveCard = ({
             {backgroundIcon}
           </div>
         </div>
-      </animated.div>
+      </animatedAny.div>
     </div>
   )
 }

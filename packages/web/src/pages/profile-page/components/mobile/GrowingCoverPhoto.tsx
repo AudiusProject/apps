@@ -7,6 +7,7 @@ import { useSpring, animated } from 'react-spring'
 import DynamicImage, {
   DynamicImageProps
 } from 'components/dynamic-image/DynamicImage'
+const animatedAny = animated as any
 
 // Scale the image by making it larger relative to y-pos and translate it up slightly (capping at -15px) so it
 // covers the gap made by overscroll.
@@ -104,7 +105,7 @@ const GrowingCoverPhoto = ({ children, ...rest }: DynamicImageProps) => {
   }, [handleScrollEvent, handleReset, handleTouch])
 
   return (
-    <animated.div
+    <animatedAny.div
       style={{
         zIndex: 3,
         overflowX: 'hidden',
@@ -118,7 +119,7 @@ const GrowingCoverPhoto = ({ children, ...rest }: DynamicImageProps) => {
       <DynamicImage alt={messages.coverArtAltText} {...rest}>
         {children}
       </DynamicImage>
-    </animated.div>
+    </animatedAny.div>
   )
 }
 

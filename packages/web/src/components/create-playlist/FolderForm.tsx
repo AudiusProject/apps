@@ -51,6 +51,7 @@ const FolderForm = ({
   return (
     <div className={styles.folderForm}>
       <form onSubmit={onFormSubmit}>
+        {/* @ts-ignore */}
         <Input
           variant='elevatedPlaceholder'
           placeholder='Folder Name'

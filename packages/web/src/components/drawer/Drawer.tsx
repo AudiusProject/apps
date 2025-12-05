@@ -12,6 +12,7 @@ import { useDrag } from 'react-use-gesture'
 import { usePortal } from 'hooks/usePortal'
 
 import styles from './Drawer.module.css'
+const animatedAny = animated as any
 
 // Fraction of swipe up to fade (1 / FADE_FRACTION_DENOMINATOR)
 const FADE_FRACTION_DENOMINATOR = 2
@@ -276,7 +277,7 @@ const DraggableDrawer = ({
 
   return (
     <Portal>
-      <animated.div
+      <animatedAny.div
         role='dialog'
         aria-labelledby={ariaLabelledBy}
         className={cn(styles.drawer, { [styles.isOpen]: isOpen })}
@@ -287,15 +288,15 @@ const DraggableDrawer = ({
           zIndex
         }}
       >
-        <animated.div className={styles.playBar} style={contentFadeProps}>
+        <animatedAny.div className={styles.playBar} style={contentFadeProps}>
           <div ref={contentRef}>{children}</div>
-        </animated.div>
+        </animatedAny.div>
         {/* "Bottom padding" so over drags upwards of the drawer are white */}
         <div className={styles.skirt} />
-      </animated.div>
+      </animatedAny.div>
       {/* Display transparent BG to block clicks behind drawer */}
       {isBackgroundVisible && (
-        <animated.div
+        <animatedAny.div
           onClick={close}
           className={styles.background}
           style={{
@@ -366,7 +367,7 @@ const FullscreenDrawer = ({
         ({ item, props, key }) =>
           // @ts-ignore
           item && (
-            <animated.div
+            <animatedAny.div
               role='dialog'
               aria-labelledby={ariaLabelledBy}
               ref={drawerRef}
@@ -388,7 +389,7 @@ const FullscreenDrawer = ({
                 <IconClose size='s' />
               </div>
               {children}
-            </animated.div>
+            </animatedAny.div>
           )
       )}
     </Portal>

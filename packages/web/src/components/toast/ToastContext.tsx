@@ -11,6 +11,7 @@ import zIndex from 'utils/zIndex'
 
 import styles from './ToastContext.module.css'
 import Toast from './mobile/Toast'
+const animatedAny = animated as any
 const { clearToasts, toast, dismissToast } = toastActions
 
 const DEFAULT_TIMEOUT = 3000
@@ -107,7 +108,7 @@ export const ToastContextProvider = (props: { children: ReactNode }) => {
       }}
     >
       {transitions.map(({ item, props, key }, i) => (
-        <animated.div
+        <animatedAny.div
           key={key}
           className={styles.container}
           style={{
@@ -144,7 +145,7 @@ export const ToastContextProvider = (props: { children: ReactNode }) => {
             isControlled
             isOpen
           />
-        </animated.div>
+        </animatedAny.div>
       ))}
       {props.children}
     </ToastContext.Provider>

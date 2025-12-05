@@ -9,6 +9,7 @@ import dotsLogo1x from 'assets/img/publicSite/dot-logo@1x.jpg'
 import dotsLogo2x from 'assets/img/publicSite/dot-logo@2x.jpg'
 
 import styles from './Description.module.css'
+const animatedAny = animated as any
 
 const messages = {
   title: 'The Music Industry Hard Fork',
@@ -46,8 +47,8 @@ const Description = (props: DescriptionProps) => {
     [refInView]
   )
 
-  const titleRef = useRef()
-  const bodyRef = useRef()
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
 
   const titleTrail = useTrail(titleItems.length, {
     // @ts-ignore
@@ -96,7 +97,7 @@ const Description = (props: DescriptionProps) => {
           <h3 ref={setStartAnimation} className={styles.titleColor}>
             {titleTrail.map(
               ({ x, wordYPosition, ...rest }: any, index: number) => (
-                <animated.span
+                <animatedAny.span
                   key={titleItems[index]}
                   className={cn(cn(styles.textAnimate))}
                   // @ts-ignore
@@ -107,7 +108,7 @@ const Description = (props: DescriptionProps) => {
                     )
                   }}
                 >
-                  <animated.div
+                  <animatedAny.div
                     className={cn(
                       styles.word,
                       styles.coloredTitleWord,
@@ -116,12 +117,12 @@ const Description = (props: DescriptionProps) => {
                   >
                     {' '}
                     {titleItems[index]}{' '}
-                  </animated.div>
-                </animated.span>
+                  </animatedAny.div>
+                </animatedAny.span>
               )
             )}
           </h3>
-          <animated.div
+          <animatedAny.div
             className={styles.textDescription}
             style={{
               // @ts-ignore
@@ -135,7 +136,7 @@ const Description = (props: DescriptionProps) => {
             <div className={cn(styles.description)}>
               <p>{messages.description}</p>
             </div>
-          </animated.div>
+          </animatedAny.div>
         </div>
       </div>
     )
@@ -160,7 +161,7 @@ const Description = (props: DescriptionProps) => {
           <h3 ref={setStartAnimation} className={styles.coloredTitle}>
             {titleTrail.map(
               ({ x, wordYPosition, ...rest }: any, index: number) => (
-                <animated.span
+                <animatedAny.span
                   key={titleItems[index]}
                   className={cn(cn(styles.textAnimate))}
                   // @ts-ignore
@@ -171,7 +172,7 @@ const Description = (props: DescriptionProps) => {
                     )
                   }}
                 >
-                  <animated.div
+                  <animatedAny.div
                     className={cn(
                       styles.word,
                       styles.coloredTitleWord,
@@ -180,12 +181,12 @@ const Description = (props: DescriptionProps) => {
                   >
                     {' '}
                     {titleItems[index]}{' '}
-                  </animated.div>
-                </animated.span>
+                  </animatedAny.div>
+                </animatedAny.span>
               )
             )}
           </h3>
-          <animated.div
+          <animatedAny.div
             className={styles.descriptionBody}
             style={{
               // @ts-ignore
@@ -199,7 +200,7 @@ const Description = (props: DescriptionProps) => {
             <div className={cn(styles.subText, styles.description)}>
               {messages.description}
             </div>
-          </animated.div>
+          </animatedAny.div>
         </div>
         <img
           src={dotsLogo1x}

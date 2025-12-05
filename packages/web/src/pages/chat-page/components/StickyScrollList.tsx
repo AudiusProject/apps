@@ -62,8 +62,8 @@ export const StickyScrollList = forwardRef<
   } = props
   const ref = useRef<HTMLDivElement>(null)
 
-  const oldResetKey = useRef<any>()
-  const oldUpdateKey = useRef<any>()
+  const oldResetKey = useRef<any | undefined>(undefined)
+  const oldUpdateKey = useRef<any | undefined>(undefined)
   const measuresBefore = useRef<MeasuresBefore>({
     scrollHeight: 0,
     scrollTop: 0,

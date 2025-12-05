@@ -38,7 +38,8 @@ export const UnsavedChangesDialog = () => {
   })
 
   const seenModalRef = useRef(false)
-  const hotkeyHookRef = useRef<(e: KeyboardEvent) => void>()
+  const hotkeyHookRef =
+    useRef<(e: KeyboardEvent) => void | undefined>(undefined)
 
   const addElectronListener = isElectron()
   const ipcRef = useRef<any>(null)

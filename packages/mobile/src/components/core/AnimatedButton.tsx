@@ -57,7 +57,7 @@ export const AnimatedButton = ({
 }: AnimatedButtonProps) => {
   const [iconIndex, setIconIndex] = useState<number>(externalIconIndex ?? 0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const animationRef = useRef<LottieView | null>()
+  const animationRef = useRef<LottieView | null | undefined>(undefined)
   const previousExternalIconIndex = usePrevious(externalIconIndex)
   const previousActiveState = usePrevious(isActive)
 

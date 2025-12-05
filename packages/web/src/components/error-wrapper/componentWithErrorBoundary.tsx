@@ -54,6 +54,7 @@ export function componentWithErrorBoundary<P extends object>(
 
     return (
       <ErrorBoundary fallbackRender={fallbackRender} onError={handleError}>
+        {/* @ts-ignore */}
         <WrappedComponent {...props} />
       </ErrorBoundary>
     )

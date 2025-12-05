@@ -26,8 +26,8 @@ export type OverrideSetting = 'enabled' | 'disabled' | null
 export const useRecomputeToggle = (configLoaded: boolean) => {
   const [recomputeToggle, setRecomputeToggle] = useState(0)
   const isInitialRender = useRef(true)
-  const prevHasAccount = useRef<boolean>()
-  const prevConfigLoaded = useRef<boolean>()
+  const prevHasAccount = useRef<boolean | undefined>(undefined)
+  const prevConfigLoaded = useRef<boolean | undefined>(undefined)
 
   const hasAccount = useHasAccount()
 

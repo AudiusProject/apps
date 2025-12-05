@@ -97,7 +97,9 @@ export const SendTip = () => {
       <div className={styles.amountContainer}>
         {audioBadge ? (
           cloneElement(audioBadge, {
+            // @ts-ignore
             height: 16,
+            // @ts-ignore
             width: 16
           })
         ) : (

@@ -126,7 +126,7 @@ export const ComposerInput = forwardRef(function ComposerInput(
       }
     }, {})
   )
-  const selectionRef = useRef<TextInputSelectionChangeEventData['selection']>()
+  const selectionRef = useRef<TextInputSelectionChangeEventData['selection'] | undefined>(undefined)
   const { primary, neutralLight7 } = useThemeColors()
   const hasLength = value.length > 0
   const internalRef = useRef<RnTextInput>(null)

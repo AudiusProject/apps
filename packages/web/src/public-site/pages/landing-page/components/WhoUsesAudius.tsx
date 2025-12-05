@@ -10,6 +10,7 @@ import useHasViewed from 'hooks/useHasViewed'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import styles from './WhoUsesAudius.module.css'
+const animatedAny = animated as any
 
 const messages = {
   title: 'Who Uses Audius?',
@@ -32,7 +33,10 @@ const Artist = (props: AristProps) => {
     >
       <div className={styles.artistContainer}>
         <div className={styles.artistImageWrapper}>
-          <animated.img src={props.imageUrl} className={styles.artistImage} />
+          <animatedAny.img
+            src={props.imageUrl}
+            className={styles.artistImage}
+          />
         </div>
         <div className={styles.artistName}>{props.name}</div>
       </div>
@@ -94,7 +98,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
       <div className={styles.mobileContainer}>
         <div ref={refInView} className={styles.content}>
           <div className={styles.animateTitleContainer}>
-            <animated.div
+            <animatedAny.div
               style={{
                 opacity: titleStyles.opacity,
                 transform: titleStyles.x.interpolate(
@@ -105,7 +109,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
             >
               <h3 className={styles.title}>{messages.title}</h3>
               <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-            </animated.div>
+            </animatedAny.div>
           </div>
         </div>
         <div className={styles.artistsContainer}>
@@ -124,7 +128,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
   return (
     <div className={styles.container}>
       <div ref={refInView} className={styles.content}>
-        <animated.div
+        <animatedAny.div
           style={{
             opacity: titleStyles.opacity,
             transform: titleStyles.x.interpolate(
@@ -135,7 +139,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
         >
           <h3 className={styles.title}>{messages.title}</h3>
           <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-        </animated.div>
+        </animatedAny.div>
         <div className={styles.artistsContainer}>
           {takeoverArtists.map((artist) => (
             <Artist key={artist.name} {...artist} goToArtist={goToCoinPage} />

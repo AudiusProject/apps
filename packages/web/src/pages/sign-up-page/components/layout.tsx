@@ -37,7 +37,7 @@ type PageProps = FlexProps & {
   centered?: boolean
   transition?: 'horizontal' | 'vertical'
   transitionBack?: 'horizontal' | 'vertical'
-  autoFocusInputRef?: RefObject<HTMLInputElement>
+  autoFocusInputRef?: RefObject<HTMLInputElement | null>
 }
 
 const transitionAxisConfig = {

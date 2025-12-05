@@ -108,7 +108,7 @@ export const ReactionPopup = ({
   const { data: userId } = useCurrentUserId()
   const { toast } = useToast()
 
-  const newReaction = useRef<string>()
+  const newReaction = useRef<string | undefined>(undefined)
   const userIdEncoded = OptionalId.parse(userId)
   const selectedReaction = message.reactions?.find(
     (r) => r.user_id === userIdEncoded

@@ -14,7 +14,7 @@ import { ALLOWED_IMAGE_FILE_TYPES } from 'utils/imageProcessingUtil'
 import zIndex from 'utils/zIndex'
 
 type ImageUploadAreaProps = {
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   coinImage: File | null
   imageUrl: string | null
   onFileSelect: () => void

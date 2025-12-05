@@ -12,6 +12,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { getPathname } from 'utils/route'
 
 import styles from './AppRedirectPopover.module.css'
+const animatedAny = animated as any
 
 const { APP_REDIRECT, SIGN_UP_PAGE } = route
 
@@ -158,7 +159,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
       {backgroundTransitions.map(({ item, props, key }) => {
         return (
           item && (
-            <animated.div
+            <animatedAny.div
               style={props}
               className={styles.container}
               key={key}
@@ -167,7 +168,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
               {drawerTransitions.map(({ item, props, key }) => {
                 return (
                   item && (
-                    <animated.div
+                    <animatedAny.div
                       style={props}
                       className={styles.popover}
                       key={key}
@@ -181,7 +182,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
                                 onClick={onClick}
                               />
                               {newItem && (
-                                <animated.div
+                                <animatedAny.div
                                   style={{
                                     ...props,
                                     backgroundImage: `url(${AppIcon})`,
@@ -191,7 +192,7 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
                                 />
                               )}
                               {newItem && (
-                                <animated.div
+                                <animatedAny.div
                                   className={styles.mainButtonContainer}
                                   style={props}
                                 >
@@ -206,26 +207,26 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
                                   >
                                     {messages.openInApp}
                                   </Button>
-                                </animated.div>
+                                </animatedAny.div>
                               )}
                               {newItem && (
-                                <animated.div
+                                <animatedAny.div
                                   style={props}
                                   className={styles.notNow}
                                   onClick={onDismiss}
                                 >
                                   {messages.notNow}
-                                </animated.div>
+                                </animatedAny.div>
                               )}
                             </Fragment>
                           )
                         }
                       )}
-                    </animated.div>
+                    </animatedAny.div>
                   )
                 )
               })}
-            </animated.div>
+            </animatedAny.div>
           )
         )
       })}

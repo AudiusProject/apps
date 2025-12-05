@@ -61,7 +61,7 @@ const RegisterServiceModal = ({
   const serviceInfo = useServiceInfo()
   const { user } = useAccountUser()
   const { data: connectedAudiusUserData } = useDashboardWalletUser(user?.wallet)
-  const calculatedMinStakeRef = useRef<BN>()
+  const calculatedMinStakeRef = useRef<BN | undefined>(undefined)
 
   // Check how much available stake the SP can use for registration
   // This computation is as follows:

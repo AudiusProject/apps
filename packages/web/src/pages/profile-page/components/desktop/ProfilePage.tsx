@@ -535,6 +535,7 @@ const ProfilePage = ({
                 w={PROFILE_LEFT_COLUMN_WIDTH_PX}
                 justifyContent='center'
               >
+                {/* @ts-ignore */}
                 <ProfilePicture
                   userId={userId}
                   updatedProfilePicture={

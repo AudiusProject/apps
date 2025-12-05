@@ -13,6 +13,7 @@ import { useTheme } from '@emotion/react'
 import cn from 'classnames'
 import ReactDOM from 'react-dom'
 import { useTransition, animated } from 'react-spring'
+const animatedAny = animated as any
 import { usePrevious } from 'react-use'
 
 import { PlainButton } from '~harmony/components/button/PlainButton/PlainButton'
@@ -386,7 +387,7 @@ export const PopupInternal = forwardRef<
     },
     config: spring.standard,
     unique: true,
-    onDestroyed: (isDestroyed) => {
+    onDestroyed: (isDestroyed: boolean) => {
       setPopupState(isDestroyed ? 'closed' : 'open')
     }
   })
@@ -414,9 +415,11 @@ export const PopupInternal = forwardRef<
               style={rootStyle}
               onMouseLeave={handleMouseLeave}
             >
-              {transitions.map(({ item, key, props }) =>
-                item ? (
-                  <animated.div
+              {transitions.map(({ item, key, props }: any) => {
+                if (!item) return null
+                const AnimatedDiv = animatedAny.div as any
+                return (
+                  <AnimatedDiv
                     className={cn(styles.popup, className)}
                     css={{ boxShadow: shadows[shadow] }}
                     ref={popupRef}
@@ -444,9 +447,9 @@ export const PopupInternal = forwardRef<
                       </div>
                     )}
                     {children}
-                  </animated.div>
-                ) : null
-              )}
+                  </AnimatedDiv>
+                )
+              })}
             </div>,
             portalLocation
           )

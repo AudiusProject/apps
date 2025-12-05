@@ -119,6 +119,7 @@ const CoverPhoto = ({
 
       <div className={styles.button}>
         {edit ? (
+          // @ts-ignore
           <ImageSelectionButton
             imageName={messages.imageName}
             hasImage={Boolean(image || updatedCoverPhoto)}

@@ -169,7 +169,7 @@ const bannerMessages = {
 type BannerImageSectionProps = {
   bannerImageUrl: string | null
   defaultBannerImageUrl: string | null
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
   onFileSelect: () => void
   isProcessing: boolean

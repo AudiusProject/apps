@@ -17,6 +17,7 @@ import { getIsIOS } from 'utils/browser'
 import { getPathname } from 'utils/route'
 
 import { RouterContext, SlideDirection } from './RouterContextProvider'
+const animatedAny = animated as any
 const { SIGN_IN_PAGE, SIGN_UP_PAGE, NOTIFICATION_PAGE } = route
 
 const DISABLED_PAGES = new Set([SIGN_IN_PAGE, SIGN_UP_PAGE])
@@ -144,7 +145,7 @@ const AnimatedSwitch = ({
     }
     const transitionProps = stackReset ? {} : props
     return (
-      <animated.div
+      <animatedAny.div
         ref={animationRef}
         style={{
           ...transitionProps,
@@ -158,7 +159,7 @@ const AnimatedSwitch = ({
         key={key}
       >
         <Routes location={item}>{children}</Routes>
-      </animated.div>
+      </animatedAny.div>
     )
   })
 }
