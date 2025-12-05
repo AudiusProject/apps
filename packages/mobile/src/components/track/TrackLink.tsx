@@ -17,7 +17,7 @@ export const TrackLink = ({ trackId, ...props }: TrackLinkProps) => {
   const { title, permalink } = partialTrack
 
   return (
-    <TextLink to={permalink} {...props}>
+    <TextLink url={permalink} {...props}>
       {title}
     </TextLink>
   )

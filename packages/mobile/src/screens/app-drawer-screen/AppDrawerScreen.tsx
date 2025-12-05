@@ -34,7 +34,7 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
     setGesturesDisabled
   } = props
 
-  const drawerNavigation = useNavigation()
+  const drawerNavigation = useNavigation() as any
 
   return (
     <AppDrawerContextProvider

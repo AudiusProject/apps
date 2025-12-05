@@ -58,7 +58,7 @@ export function useNavigation<
         const stackNavigator = getNearestStackNavigator(navigation)
 
         if (stackNavigator) {
-          stackNavigator.push(...config)
+          ;(stackNavigator.push as any)(...config)
 
           // Set lastNavAction, it will be reset via an event handler in AppTabScreen
           setLastNavAction(config)

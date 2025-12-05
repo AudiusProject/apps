@@ -6,7 +6,7 @@ import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
 export const AudiusHomeLink = () => {
   return (
     <TouchableOpacity>
-      <Link to='trending'>
+      <Link screen='trending' params={{}}>
         <IconAudiusLogoHorizontal height={24} width={100} color='subdued' />
       </Link>
     </TouchableOpacity>

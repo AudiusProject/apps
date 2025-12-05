@@ -47,7 +47,7 @@ export const storeContext: CommonStoreContext = {
   nftClient: null,
   sentry: {
     setTag: () => {}, // Sentry removed - no-op
-    getCurrentScope: () => ({}) // Sentry removed - no-op
+    getCurrentScope: () => ({ setUser: () => {} }) // Sentry removed - no-op
   },
   reportToSentry,
   // Shim in main, but defined in native-reloaded branch

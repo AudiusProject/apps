@@ -48,9 +48,9 @@ export const useScrollToTop = (
  * Get array of all parent navigators
  */
 const getParentNavigators = (
-  navigation?: NavigationProp<any>,
-  parents: NavigationProp<any>[] = []
-): NavigationProp<any>[] => {
+  navigation?: NavigationProp<any> | any,
+  parents: (NavigationProp<any> | any)[] = []
+): (NavigationProp<any> | any)[] => {
   if (!navigation) {
     return parents
   }

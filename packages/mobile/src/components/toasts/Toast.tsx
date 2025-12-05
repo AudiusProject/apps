@@ -3,7 +3,6 @@ import React, { useRef, useCallback, useEffect } from 'react'
 import type { Toast as ToastType } from '@audius/common/store'
 import { toastActions } from '@audius/common/store'
 import { Link } from '@react-navigation/native'
-import type { To } from '@react-navigation/native/lib/typescript/src/useLinkTo'
 import { Animated, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
@@ -128,7 +127,11 @@ export const Toast = (props: ToastProps) => {
               {linkText && linkConfig ? (
                 <>
                   {' '}
-                  <Link style={styles.link} to={linkConfig as To}>
+                  <Link
+                    style={styles.link}
+                    screen={linkConfig.screen as string}
+                    params={linkConfig.params as Record<string, unknown>}
+                  >
                     {linkText}
                   </Link>
                 </>

@@ -61,10 +61,8 @@ export const CommentBlockInternal = (
   const { color, spacing, type } = useTheme()
   const { isPending: isUserPending } = useUser(userId)
   const { onPress: onPressProfilePic, ...profilePicLinkProps } = useLinkProps({
-    to: {
-      screen: 'Profile',
-      params: { id: userId }
-    }
+    screen: 'Profile',
+    params: { id: userId }
   })
 
   const handlePressProfilePic = useCallback(() => {

@@ -87,7 +87,8 @@ export default function useAuthorization() {
     async (wallet: AuthorizeAPI & ReauthorizeAPI) => {
       const authorizationResult = await (authorization
         ? wallet.reauthorize({
-            auth_token: authorization.authToken
+            auth_token: authorization.authToken,
+            identity: APP_IDENTITY
           })
         : wallet.authorize({
             cluster: 'mainnet-beta',

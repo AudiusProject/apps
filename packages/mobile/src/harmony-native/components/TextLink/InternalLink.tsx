@@ -4,17 +4,21 @@ import { useCallback } from 'react'
 import { getPathFromAudiusUrl } from '@audius/common/utils'
 import type { NavigationAction } from '@react-navigation/native'
 import { useLinkProps, useLinkTo, StackActions } from '@react-navigation/native'
-import type { To } from '@react-navigation/native/lib/typescript/src/useLinkTo'
 import type { GestureResponderEvent } from 'react-native'
 
 import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { TextPressable } from './TextPressable'
 
+type NavigationTarget<ParamList extends ReactNavigation.RootParamList> = {
+  screen: keyof ParamList
+  params?: ParamList[keyof ParamList]
+}
+
 export type InternalLinkToProps<
   ParamList extends ReactNavigation.RootParamList
 > = {
-  to: To<ParamList>
+  to: NavigationTarget<ParamList>
   action?: NavigationAction
   target?: string
   onPress?: (e: GestureResponderEvent) => void
@@ -29,14 +33,19 @@ export const InternalLinkTo = <ParamList extends ReactNavigation.RootParamList>(
   // Always use push action for internal navigation since we always have screen and params
   const finalAction =
     action ||
-    (typeof to === 'object' && to && 'screen' in to
-      ? StackActions.push((to as any).screen, (to as any).params)
+    (to && 'screen' in to
+      ? StackActions.push(to.screen as string, to.params as any)
       : undefined)
 
-  const { onPress: onPressLink, ...linkProps } = useLinkProps({
-    to,
-    action: finalAction
-  })
+  const linkPropsConfig = finalAction
+    ? ({ action: finalAction } as const)
+    : ({
+        screen: to.screen as string,
+        params: to.params
+      } as const)
+  const { onPress: onPressLink, ...linkProps } = useLinkProps<ParamList>(
+    linkPropsConfig as any
+  )
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {

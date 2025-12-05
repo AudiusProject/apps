@@ -15,7 +15,6 @@ import type { CommentMention } from '@audius/sdk'
 import { HashId, ResolveApi } from '@audius/sdk'
 import { css } from '@emotion/native'
 import type { NavigationProp, ParamListBase } from '@react-navigation/native'
-import type { To } from '@react-navigation/native/lib/typescript/src/useLinkTo'
 import type { Match } from 'autolinker/dist/es2015'
 import { View } from 'react-native'
 import type {
@@ -32,6 +31,11 @@ import type { TextLinkProps, TextProps } from '@audius/harmony-native'
 import { TextLink } from 'app/harmony-native/components/TextLink/TextLink'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { audiusSdk } from 'app/services/sdk/audius-sdk'
+
+type NavigationTarget<ParamList extends ReactNavigation.RootParamList> = {
+  screen: keyof ParamList
+  params?: ParamList[keyof ParamList]
+}
 
 const {
   instanceOfTrackResponse,
@@ -72,7 +76,7 @@ const Link = ({
   navigation?: NavigationProp<ParamListBase>
 }) => {
   const [unfurledContent, setUnfurledContent] = useState<string>()
-  const [to, setTo] = useState<To<any> | undefined>(undefined)
+  const [to, setTo] = useState<NavigationTarget<any> | undefined>(undefined)
   const shouldUnfurl = isAudiusUrl(url)
   const currentNavigation = useNavigation()
   const navigation = navigationProp ?? currentNavigation
