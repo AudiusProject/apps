@@ -21,8 +21,8 @@
     "@audius/harmony": "*",
     "@audius/sdk": "*",
     "@tanstack/react-query": "5.62.7",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "0.2.3",
