@@ -27,7 +27,7 @@ export type ContextualMenuProps = {
   errorMessage?: string
   lastItem?: boolean
   startAdornment?: ReactNode
-  renderValue?: (value: any) => JSX.Element | null
+  renderValue?: (value: any) => ReactNode | null
 }
 
 const useStyles = makeStyles(({ spacing, palette }) => ({

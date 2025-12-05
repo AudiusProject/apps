@@ -18,7 +18,7 @@ const messages = {
 
 type Props = {
   trackId: ID
-  scrollRef?: RefObject<ScrollView | FlatList>
+  scrollRef?: RefObject<ScrollView | FlatList | null>
 }
 
 /**

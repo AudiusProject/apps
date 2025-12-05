@@ -143,7 +143,7 @@ type TrackScreenDetailsTileProps = {
   user: User | SearchUser
   uid: UID
   isLineupLoading: boolean
-  scrollViewRef: RefObject<FlatList>
+  scrollViewRef: RefObject<FlatList | null>
 }
 
 const recordPlay = (id, play = true, isPreview = false) => {

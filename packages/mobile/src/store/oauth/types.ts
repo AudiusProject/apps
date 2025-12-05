@@ -1,5 +1,3 @@
-import type { Credentials as TikTokCredentials } from '@audius/common/hooks'
-
 export type InstagramCredentials = {
   code: string
 }
@@ -9,11 +7,7 @@ export type TwitterCredentials = {
   oauthToken: string
 }
 
-export type Credentials = (
-  | TikTokCredentials
-  | InstagramCredentials
-  | TwitterCredentials
-) & {
+export type Credentials = (InstagramCredentials | TwitterCredentials) & {
   error?: string
 }
 

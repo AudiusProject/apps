@@ -1,3 +1,5 @@
+import { ReactElement } from 'react'
+
 import { IconComponent } from '@audius/harmony'
 import { Mood } from '@audius/sdk'
 
@@ -44,7 +46,7 @@ export type Category = {
 export type MoodInfo = {
   label: Mood
   value: Mood
-  icon: JSX.Element
+  icon: ReactElement
 }
 
 export type CategoryKey = keyof typeof categories

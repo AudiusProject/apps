@@ -253,7 +253,15 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
                 : null
             ]}
             shadow='mid'
-            ref={itemsRef ? (el) => (itemsRef.current[messageId] = el) : null}
+            ref={
+              itemsRef
+                ? (el) => {
+                    if (el) {
+                      itemsRef.current[messageId] = el
+                    }
+                  }
+                : null
+            }
           >
             {senderUserId ? (
               <ArtistCoinHeader

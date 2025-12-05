@@ -197,7 +197,11 @@ export const AnimatedButton = ({
               wrapperStyle
             ]}
             key={hasMultipleStates ? iconIndex : undefined}
-            ref={(animation) => (animationRef.current = animation)}
+            ref={(animation) => {
+              if (animation) {
+                animationRef.current = animation
+              }
+            }}
             onAnimationFinish={handleAnimationFinish}
             progress={progress}
             loop={false}

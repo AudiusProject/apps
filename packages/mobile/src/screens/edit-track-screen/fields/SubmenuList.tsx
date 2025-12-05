@@ -17,7 +17,10 @@ export const SubmenuList = (props: SubmenuListProps) => {
   const { children, removeBottomDivider, style } = props
   const updatedChildren = Children.map(children, (child: ReactElement, index) =>
     cloneElement(child, {
-      lastItem: !removeBottomDivider && index === Children.count(children) - 1
+      // @ts-ignore
+      lastItem:
+        !removeBottomDivider &&
+        index === Children.count(children as ReactElement[]) - 1
     })
   )
   return (

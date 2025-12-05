@@ -1,4 +1,5 @@
 import { useCallback, useContext } from 'react'
+import type React from 'react'
 
 import {
   useCollection,
@@ -55,7 +56,7 @@ const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { removeTrackFromPlaylist } = cacheCollectionsActions
 
 type Props = {
-  render: (callbacks: OverflowActionCallbacks) => JSX.Element
+  render: (callbacks: OverflowActionCallbacks) => React.ReactElement
 }
 
 const messages = {

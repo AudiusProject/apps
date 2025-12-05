@@ -21,7 +21,7 @@ import { Box } from '@audius/harmony-native'
 import { CommentForm } from './CommentForm'
 
 type CommentDrawerFormProps = {
-  commentListRef: RefObject<BottomSheetFlatListMethods>
+  commentListRef: RefObject<BottomSheetFlatListMethods | null>
   onAutocompleteChange?: (isActive: boolean, value: string) => void
   setAutocompleteHandler?: (handler: (user: UserMetadata) => void) => void
   autoFocus?: boolean

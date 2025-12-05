@@ -60,7 +60,7 @@ export type RemixContestTabParamList = {
 
 type RemixContestSectionProps = {
   trackId: ID
-  scrollRef?: RefObject<FlatList>
+  scrollRef?: RefObject<FlatList | null>
 }
 
 type Route = {

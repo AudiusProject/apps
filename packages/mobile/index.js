@@ -1,5 +1,7 @@
 /* eslint-disable import/first */
 /* eslint-disable import/order */
+// Import React first to ensure React internals are available
+import React from 'react'
 import 'react-native-gesture-handler'
 
 // Import Reactotron in development mode only

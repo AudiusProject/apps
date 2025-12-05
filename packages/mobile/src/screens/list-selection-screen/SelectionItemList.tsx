@@ -15,7 +15,7 @@ type ListItemData = {
   value: string
   icon?: IconComponent
   disabled?: boolean
-  leadingElement?: JSX.Element
+  leadingElement?: ReactElement
 }
 
 type SelectionItemListProps = {

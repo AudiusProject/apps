@@ -1,3 +1,5 @@
+import type React from 'react'
+
 import { useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { ShareSource, FollowSource } from '@audius/common/models'
@@ -15,7 +17,7 @@ const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { followUser, unfollowUser } = usersSocialActions
 
 type Props = {
-  render: (callbacks: OverflowActionCallbacks) => JSX.Element
+  render: (callbacks: OverflowActionCallbacks) => React.ReactElement
 }
 
 const ProfileOverflowMenuDrawer = ({ render }: Props) => {

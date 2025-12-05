@@ -225,7 +225,7 @@ export type LineupProps = {
   /**
    * Map of indices to JSX Elements that can be used to delineate the elements from the rest
    */
-  delineatorMap?: Record<number, JSX.Element>
+  delineatorMap?: Record<number, ReactElement>
 
   /** The number of tracks to fetch in each request */
   limit?: number
