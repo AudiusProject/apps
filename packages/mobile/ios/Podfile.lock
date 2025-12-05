@@ -1312,8 +1312,6 @@ PODS:
     - react-native-config/App (= 1.5.1)
   - react-native-config/App (1.5.1):
     - React-Core
-  - react-native-create-thumbnail (2.0.0):
-    - React-Core
   - react-native-document-picker (10.1.2):
     - DoubleConversion
     - glog
@@ -2102,7 +2100,6 @@ DEPENDENCIES:
   - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - "react-native-blur (from `../../../node_modules/@react-native-community/blur`)"
   - react-native-config (from `../node_modules/react-native-config`)
-  - react-native-create-thumbnail (from `../../../node_modules/react-native-create-thumbnail`)
   - "react-native-document-picker (from `../../../node_modules/@react-native-documents/picker`)"
   - react-native-fast-crypto (from `../node_modules/react-native-fast-crypto`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
@@ -2284,8 +2281,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-community/blur"
   react-native-config:
     :path: "../node_modules/react-native-config"
-  react-native-create-thumbnail:
-    :path: "../../../node_modules/react-native-create-thumbnail"
   react-native-document-picker:
     :path: "../../../node_modules/@react-native-documents/picker"
   react-native-fast-crypto:
@@ -2479,7 +2474,6 @@ SPEC CHECKSUMS:
   react-native-blob-util: 30a6c9fd067aadf9177e61a998f2c7efb670598d
   react-native-blur: 5b2d13981ad6ce3d15339e135377336cb9be2d68
   react-native-config: 86038147314e2e6d10ea9972022aa171e6b1d4d8
-  react-native-create-thumbnail: ab55d24aea01723cf386f18b0b542aabb1982f27
   react-native-document-picker: 4f90a074d1eb269e32d5563c53b70d469180cece
   react-native-fast-crypto: b30594570dab23aca7e74e206b2c03e28a006216
   react-native-get-random-values: 384787fd76976f5aec9465aff6fa9e9129af1e74
