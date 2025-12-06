@@ -48,7 +48,7 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@radix-ui/react-slot": "^1.0.2",
-    "@react-spring/web": "^10.0.3",
+    "@react-spring/web": "10.0.3",
     "@reduxjs/toolkit": "1.9.7",
     "@safe-global/api-kit": "2.1.0",
     "@self.id/3box-legacy": "0.3.0",
