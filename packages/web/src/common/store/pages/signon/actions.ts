@@ -1,11 +1,5 @@
 import { ID } from '@audius/common/models'
-import {
-  InstagramProfile,
-  TwitterProfile,
-  TikTokProfile,
-  Image,
-  toastActions
-} from '@audius/common/store'
+import { toastActions } from '@audius/common/store'
 import { createCustomAction } from 'typesafe-actions'
 
 import { UiErrorCode } from 'store/errors/actions'
@@ -50,12 +44,6 @@ export const SIGN_UP_TIMEOUT = 'SIGN_ON/SIGN_UP_TIMEOUT'
 export const SET_FINISHED_PHASE_1 = 'SIGN_ON/SET_FINISHED_PHASE_1'
 export const SET_LINKED_SOCIAL_ON_FIRST_PAGE =
   'SIGN_ON/SET_LINKED_SOCIAL_ON_FIRST_PAGE'
-export const SET_TWITTER_PROFILE = 'SIGN_ON/SET_TWITTER_PROFILE'
-export const SET_TWITTER_PROFILE_ERROR = 'SIGN_ON/SET_TWITTER_PROFILE_ERROR'
-export const SET_INSTAGRAM_PROFILE = 'SIGN_ON/SET_INSTAGRAM_PROFILE'
-export const SET_INSTAGRAM_PROFILE_ERROR = 'SIGN_ON/SET_INSTAGRAM_PROFILE_ERROR'
-export const SET_TIKTOK_PROFILE = 'SIGN_ON/SET_TIKTOK_PROFILE'
-export const SET_TIKTOK_PROFILE_ERROR = 'SIGN_ON/SET_TIKTOK_PROFILE_ERROR'
 
 export const SET_STATUS = 'SIGN_ON/SET_STATUS'
 export const USING_EXTERNAL_WALLET = 'SIGN_ON/USING_EXTERNAL_WALLET'
@@ -270,59 +258,6 @@ export function setFinishedPhase1(finished: boolean) {
     type: SET_FINISHED_PHASE_1,
     finishedPhase1: finished
   }
-}
-
-export function setTwitterProfile(
-  twitterId: string,
-  profile: TwitterProfile,
-  profileImage?: Image | null,
-  coverPhoto?: Image | null
-) {
-  return {
-    type: SET_TWITTER_PROFILE,
-    twitterId,
-    profile,
-    profileImage,
-    coverPhoto
-  }
-}
-
-export function setTwitterProfileError(error: string) {
-  return { type: SET_TWITTER_PROFILE_ERROR, error }
-}
-
-export function setInstagramProfile(
-  instagramId: string,
-  profile: InstagramProfile,
-  profileImage?: Image | null
-) {
-  return {
-    type: SET_INSTAGRAM_PROFILE,
-    instagramId,
-    profile,
-    profileImage
-  }
-}
-
-export function setInstagramProfileError(error: string) {
-  return { type: SET_INSTAGRAM_PROFILE_ERROR, error }
-}
-
-export function setTikTokProfile(
-  tikTokId: string,
-  profile: TikTokProfile,
-  profileImage?: Image | null
-) {
-  return {
-    type: SET_TIKTOK_PROFILE,
-    tikTokId,
-    profile,
-    profileImage
-  }
-}
-
-export function setTikTokProfileError(error: string) {
-  return { type: SET_TIKTOK_PROFILE_ERROR, error }
 }
 
 export function setHidePreviewHint() {

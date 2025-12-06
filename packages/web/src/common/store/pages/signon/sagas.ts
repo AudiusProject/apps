@@ -335,99 +335,6 @@ function* validateEmail(
   }
 }
 
-function* associateSocialAccounts({
-  userId,
-  handle,
-  blockNumber,
-  twitterId,
-  instagramId,
-  tikTokId
-}: {
-  userId: ID
-  handle: string
-  blockNumber: number
-  twitterId?: string
-  instagramId?: string
-  tikTokId?: string
-}) {
-  const identityService = yield* getContext('identityService')
-  const reportToSentry = yield* getContext('reportToSentry')
-
-  if (twitterId) {
-    try {
-      yield* call(
-        [identityService, identityService.associateTwitterUser],
-        twitterId,
-        userId,
-        handle,
-        blockNumber
-      )
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(err as string)
-      reportToSentry({
-        error,
-        name: 'Sign Up: Error while associating Twitter account',
-        additionalInfo: {
-          handle,
-          userId,
-          twitterId
-        },
-        feature: Feature.SignUp
-      })
-      yield* put(signOnActions.setTwitterProfileError(error.message))
-    }
-  }
-  if (instagramId) {
-    try {
-      yield* call(
-        [identityService, identityService.associateInstagramUser],
-        instagramId,
-        userId,
-        handle,
-        blockNumber
-      )
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(err as string)
-      reportToSentry({
-        error,
-        name: 'Sign Up: Error while associating Instagram account',
-        additionalInfo: {
-          handle,
-          userId,
-          instagramId
-        },
-        feature: Feature.SignUp
-      })
-      yield* put(signOnActions.setInstagramProfileError(error.message))
-    }
-  }
-
-  if (tikTokId) {
-    try {
-      yield* call(
-        [identityService, identityService.associateTikTokUser],
-        tikTokId,
-        userId,
-        handle,
-        blockNumber
-      )
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(err as string)
-      reportToSentry({
-        error,
-        name: 'Sign Up: Error while associating TikTok account',
-        additionalInfo: {
-          handle,
-          userId,
-          tikTokId
-        },
-        feature: Feature.SignUp
-      })
-      yield* put(signOnActions.setTikTokProfileError(error.message))
-    }
-  }
-}
-
 function* sendPostSignInRecoveryEmail({
   handle,
   email
@@ -678,21 +585,6 @@ function* signUp() {
                 createUserMetadata
               )
               userId = metadata.userId
-              const { twitterId, instagramId, tikTokId } = signOn
-
-              if (
-                !usingExternalWallet &&
-                (twitterId || instagramId || tikTokId)
-              ) {
-                yield* fork(associateSocialAccounts, {
-                  userId,
-                  handle,
-                  blockNumber,
-                  twitterId,
-                  instagramId,
-                  tikTokId
-                })
-              }
             }
 
             yield* put(

@@ -17,7 +17,6 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { CommentDrawerProvider } from 'app/components/comments/CommentDrawerContext'
 import NavigationContainer from 'app/components/navigation-container'
 import { NotificationReminder } from 'app/components/notification-reminder/NotificationReminder'
-import OAuthWebView from 'app/components/oauth/OAuthWebView'
 import { RateCtaReminder } from 'app/components/rate-cta-drawer/RateCtaReminder'
 import { Toasts } from 'app/components/toasts'
 import { incrementSessionCount } from 'app/hooks/useSessionCount'
@@ -84,7 +83,6 @@ const App = () => {
                                   <Airplay />
                                   <RootScreen />
                                   <Drawers />
-                                  <OAuthWebView />
                                   <NotificationReminder />
                                   <RateCtaReminder />
                                   <PortalHost name='ChatReactionsPortal' />

@@ -4,9 +4,6 @@ import {
   SET_ACCOUNT_READY,
   SET_FIELD,
   SET_VALUE_FIELD,
-  SET_TWITTER_PROFILE,
-  SET_INSTAGRAM_PROFILE,
-  SET_TIKTOK_PROFILE,
   VALIDATE_EMAIL,
   VALIDATE_EMAIL_SUCCEEDED,
   VALIDATE_EMAIL_FAILED,
@@ -65,12 +62,6 @@ const initialState = {
   verified: false,
   usingExternalWallet: false,
   accountReady: false,
-  twitterId: '',
-  twitterScreenName: '',
-  instagramId: '',
-  instagramScreenName: '',
-  tikTokId: '',
-  tikTokScreenName: '',
   profileImage: null, // Object with file blob & url
   coverPhoto: null, // Object with file blob & url
   status: 'editing', // 'editing', 'loading', 'success', or 'failure'
@@ -212,62 +203,6 @@ const actionsMap = {
     return {
       ...state,
       linkedSocialOnFirstPage: action.linkedSocialOnFirstPage
-    }
-  },
-  [SET_TWITTER_PROFILE](state, action) {
-    return {
-      ...state,
-      twitterId: action.twitterId,
-      name: {
-        value: action.profile.name,
-        status: 'editing',
-        error: ''
-      },
-      handle: {
-        ...state.handle,
-        value: action.profile.screen_name
-      },
-      twitterScreenName: action.profile.screen_name,
-      profileImage: action.profileImage,
-      coverPhoto: action.coverPhoto,
-      verified: action.profile.verified
-    }
-  },
-  [SET_INSTAGRAM_PROFILE](state, action) {
-    return {
-      ...state,
-      instagramId: action.instagramId,
-      name: {
-        value: action.profile.full_name || '',
-        status: 'editing',
-        error: ''
-      },
-      handle: {
-        ...state.handle,
-        value: action.profile.username
-      },
-      instagramScreenName: action.profile.username,
-      profileImage: action.profileImage || null,
-      verified: action.profile.is_verified
-    }
-  },
-  [SET_TIKTOK_PROFILE](state, action) {
-    return {
-      ...state,
-      tikTokId: action.tikTokId,
-      tikTokProfile: action.tikTokProfile,
-      name: {
-        value: action.profile.display_name || '',
-        status: 'editing',
-        error: ''
-      },
-      handle: {
-        ...state.handle,
-        value: action.profile.username
-      },
-      tikTokScreenName: action.profile.display_name,
-      profileImage: action.profileImage || null,
-      verified: action.profile.is_verified
     }
   },
   [VALIDATE_EMAIL](state, action) {

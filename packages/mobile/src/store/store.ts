@@ -30,8 +30,6 @@ import type { DrawersState } from './drawers/slice'
 import drawers from './drawers/slice'
 import type { KeyboardState } from './keyboard/slice'
 import keyboard from './keyboard/slice'
-import type { OAuthState } from './oauth/reducer'
-import oauth from './oauth/reducer'
 import type { OfflineDownloadsState } from './offline-downloads/slice'
 import offlineDownloads from './offline-downloads/slice'
 import type { PurchaseVendorState } from './purchase-vendor/slice'
@@ -54,7 +52,6 @@ export type AppState = CommonState & {
 
   drawers: DrawersState
   keyboard: KeyboardState
-  oauth: OAuthState
   offlineDownloads: OfflineDownloadsState
   remoteConfig: RemoteConfigState
   walletConnect: WalletConnectState
@@ -111,7 +108,6 @@ const rootReducer = combineReducers({
   signOn: signOnReducer as unknown as SignOnPageReducer,
   drawers,
   keyboard,
-  oauth,
   offlineDownloads,
   remoteConfig,
   walletConnect,

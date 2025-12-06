@@ -27,11 +27,7 @@ export default interface SignOnPageState {
   usingExternalWallet: boolean
   accountReady: boolean
   accountAlreadyExisted: boolean
-  twitterId: string
-  tikTokId: string
-  instagramId: string
   linkedSocialOnFirstPage: boolean
-  twitterScreenName: string
   profileImage: ImageFieldValue
   coverPhoto: ImageFieldValue
   suggestedFollowIds: ID[]

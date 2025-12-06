@@ -5,10 +5,6 @@ import * as errorActions from 'store/errors/actions'
 import * as signOnActions from './actions'
 
 const noRedirectSet = new Set([
-  // Social failures are not fatal
-  signOnActions.SET_TWITTER_PROFILE_ERROR,
-  signOnActions.SET_INSTAGRAM_PROFILE_ERROR,
-  signOnActions.SET_TIKTOK_PROFILE_ERROR,
   // Sign in errors are never fatal
   signOnActions.SIGN_IN_FAILED
 ])
@@ -58,9 +54,6 @@ function* handleSignOnError(
 export function* watchSignOnError() {
   yield takeEvery(
     [
-      signOnActions.SET_TWITTER_PROFILE_ERROR,
-      signOnActions.SET_INSTAGRAM_PROFILE_ERROR,
-      signOnActions.SET_TIKTOK_PROFILE_ERROR,
       signOnActions.SIGN_UP_FAILED,
       signOnActions.SIGN_UP_TIMEOUT,
       signOnActions.SIGN_IN_FAILED

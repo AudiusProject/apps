@@ -29,10 +29,6 @@ export const getRouteOnCompletion = (state: AppState) =>
 export const getRouteOnExit = (state: AppState) => state.signOn.routeOnExit
 export const getLinkedSocialOnFirstPage = (state: AppState) =>
   state.signOn.linkedSocialOnFirstPage
-export const getIsSocialConnected = (state: AppState) =>
-  !!state.signOn.twitterId ||
-  !!state.signOn.tikTokId ||
-  !!state.signOn.instagramId
 export const getAccountReady = (state: AppState) => state.signOn.accountReady
 export const getAccountAlreadyExisted = (state: AppState) =>
   state.signOn.accountAlreadyExisted

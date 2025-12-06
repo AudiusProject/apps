@@ -25,7 +25,6 @@ import {
   getCoverPhotoField,
   getEmailField,
   getHandleField,
-  getIsSocialConnected,
   getLinkedSocialOnFirstPage,
   getNameField,
   getProfileImageField
@@ -88,7 +87,6 @@ export const FinishProfilePage = () => {
   const { value: savedDisplayName } = useSelector(getNameField)
   const handle = useSelector(getHandleField)
   const email = useSelector(getEmailField)
-  const isSocialConnected = useSelector(getIsSocialConnected)
   const linkedSocialOnFirstPage = useSelector(getLinkedSocialOnFirstPage)
   const savedCoverPhoto = useSelector(getCoverPhotoField)
   const savedProfileImage = useSelector(getProfileImageField)
@@ -200,7 +198,7 @@ export const FinishProfilePage = () => {
             sticky
             buttonProps={{ disabled: !isValid }}
             postfix={
-              isMobile || isSocialConnected ? null : (
+              isMobile ? null : (
                 <Button
                   variant='secondary'
                   fullWidth
