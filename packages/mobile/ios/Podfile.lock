@@ -1445,9 +1445,28 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-track-player (4.0.1):
+  - react-native-track-player (5.0.0-alpha0-nightly-359af5a12d712d3b685530aed9b9625865a25d74):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
-    - SwiftAudioEx (= 1.0.0)
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SwiftAudioEx (= 1.1.0)
+    - Yoga
   - react-native-version-number (0.3.6):
     - React
   - react-native-video (6.18.0):
@@ -2016,7 +2035,7 @@ PODS:
   - SRSRadialGradient (1.1.4):
     - React
   - SSZipArchive (2.5.5)
-  - SwiftAudioEx (1.0.0)
+  - SwiftAudioEx (1.1.0)
   - tiktok-opensdk-react-native (0.10.7):
     - DoubleConversion
     - glog
@@ -2115,7 +2134,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
-  - react-native-track-player (from `../node_modules/react-native-track-player`)
+  - react-native-track-player (from `../../../node_modules/react-native-track-player`)
   - react-native-version-number (from `../../../node_modules/react-native-version-number`)
   - react-native-video (from `../../../node_modules/react-native-video`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
@@ -2312,7 +2331,7 @@ EXTERNAL SOURCES:
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   react-native-track-player:
-    :path: "../node_modules/react-native-track-player"
+    :path: "../../../node_modules/react-native-track-player"
   react-native-version-number:
     :path: "../../../node_modules/react-native-version-number"
   react-native-video:
@@ -2489,7 +2508,7 @@ SPEC CHECKSUMS:
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162
   react-native-safe-area-context: e48706fb09fde89f82e12bfb49b140cfdcb761f7
   react-native-slider: 218734690828ecc8cab2dbd2f5a7825061d816d2
-  react-native-track-player: 97d76dbbd35f27cc709e5f04540615e54264b3f9
+  react-native-track-player: fb1bf760daef2ab1c87e207b9eebf26c274aaba0
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-video: 865d91f3637dd7b6cc97e0bb05e485c0025dfedb
   react-native-view-shot: 6b7ed61d77d88580fed10954d45fad0eb2d47688
@@ -2547,7 +2566,7 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SRSRadialGradient: 8363f6c3ce63636f5ffee74a7016f5c84a6df0a1
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
-  SwiftAudioEx: 6f511018b7a0fdfd14ed1bb4081f953588245cc0
+  SwiftAudioEx: f6aa653770f3a0d3851edaf8d834a30aee4a7646
   tiktok-opensdk-react-native: 0672e98125a3da98e7025d29ed02be387dcf3447
   TikTokOpenSDKCore: e6f34e48bd6e85e4d94f9c04782c13d5defafb55
   TikTokOpenShareSDK: a7da017bc66c28d0aefea9342c0cfcc7e52ea2b7

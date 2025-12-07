@@ -85,7 +85,8 @@ export const usePosition = (
 
   useAsync(async () => {
     if (appState === 'active') {
-      positionRef.current = await TrackPlayer.getPosition()
+      const { position } = await TrackPlayer.getProgress()
+      positionRef.current = position
     }
   }, [appState])
 

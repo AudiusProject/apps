@@ -101,7 +101,7 @@ export const TrackingBar = (props: TrackingBarProps) => {
     if (paused || buffering) {
       currentAnimation.current?.stop()
     } else if (isPlaying) {
-      const position = await TrackPlayer.getPosition()
+      const { position } = await TrackPlayer.getProgress()
       runTranslateXAnimation(duration - position)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- no duration

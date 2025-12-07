@@ -112,8 +112,6 @@ const updatePlayerOptions = async (isLongFormContent = false) => {
   return await TrackPlayer.updateOptions({
     // Media controls capabilities
     capabilities: [...coreCapabilities, Capability.Stop, Capability.SeekTo],
-    // Capabilities that will show up when the notification is in the compact form on Android
-    compactCapabilities: coreCapabilities,
     // Notification form capabilities
     notificationCapabilities: coreCapabilities,
     android: {
@@ -576,9 +574,8 @@ export const AudioPlayer = () => {
   const seekToRef = useRef<number | null>(null)
 
   const setSeekPosition = useCallback(async (seekPos = 0) => {
-    const currentState = await TrackPlayer.getState()
-    const isSeekableState =
-      currentState === State.Playing || currentState === State.Ready
+    const { state } = await TrackPlayer.getPlaybackState()
+    const isSeekableState = state === State.Playing || state === State.Ready
 
     // Delay calling seekTo if we are not currently in a seekable state
     // Delayed seeking is handle in handlePlayerStateChange

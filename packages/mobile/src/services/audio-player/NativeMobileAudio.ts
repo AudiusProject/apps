@@ -20,8 +20,16 @@ export class NativeMobileAudio {
   setVolume = () => null
   setPlaybackRate = () => {}
   isBuffering = () => false
-  getPosition = async () => await TrackPlayer.getPosition()
-  getDuration = async () => await TrackPlayer.getDuration()
+  getPosition = async () => {
+    const { position } = await TrackPlayer.getProgress()
+    return position
+  }
+
+  getDuration = async () => {
+    const { duration } = await TrackPlayer.getProgress()
+    return duration
+  }
+
   getPlaybackRate = () => '1x' as PlaybackRate
   getAudioPlaybackRate = () => 1.0
   onBufferingChange = () => {}

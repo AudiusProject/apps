@@ -103,7 +103,7 @@ export const useChromecast = () => {
   // Load media when the cast connects
   useAsync(async () => {
     if (castState === CastState.CONNECTED) {
-      const currentPosition = await TrackPlayer.getPosition()
+      const { position: currentPosition } = await TrackPlayer.getProgress()
       const currentPlaying = await TrackPlayer.getActiveTrack()
       if (currentPlaying) {
         loadCast(track, currentPosition, currentPlaying?.url)
@@ -113,7 +113,8 @@ export const useChromecast = () => {
         TrackPlayer.addEventListener(
           Event.PlaybackActiveTrackChanged,
           async () => {
-            const currentPosition = await TrackPlayer.getPosition()
+            const { position: currentPosition } =
+              await TrackPlayer.getProgress()
             const currentPlaying = await TrackPlayer.getActiveTrack()
             loadCast(track, currentPosition, currentPlaying?.url)
           }

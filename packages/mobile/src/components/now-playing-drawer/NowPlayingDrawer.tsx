@@ -238,7 +238,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     const isLongFormContent =
       track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
     if (isLongFormContent) {
-      const currentPosition = await TrackPlayer.getPosition()
+      const { position: currentPosition } = await TrackPlayer.getProgress()
       const newPosition = currentPosition + SKIP_DURATION_SEC
       dispatch(seek({ seconds: Math.min(track.duration, newPosition) }))
     } else {
@@ -248,7 +248,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   }, [dispatch, setMediaKey, track])
 
   const onPrevious = useCallback(async () => {
-    const currentPosition = await TrackPlayer.getPosition()
+    const { position: currentPosition } = await TrackPlayer.getProgress()
     const isLongFormContent =
       track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
     if (isLongFormContent) {

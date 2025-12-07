@@ -49,7 +49,7 @@ export const CommentDrawerForm = (props: CommentDrawerFormProps) => {
     if (editingComment) {
       editComment(editingComment.id, message, mentions)
     } else {
-      const currentPosition = await TrackPlayer.getPosition()
+      const { position: currentPosition } = await TrackPlayer.getProgress()
       const trackTimestampS =
         playerTrackId !== null && currentPosition && playerTrackId === entityId
           ? Math.floor(currentPosition)

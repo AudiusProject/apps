@@ -323,7 +323,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
           play(durationRef.current * 1000)
           prevMediaKey.current = mediaKey
         } else {
-          const position = await TrackPlayer.getPosition()
+          const { position } = await TrackPlayer.getProgress()
           play((durationRef.current - position) * 1000)
         }
       }
@@ -341,7 +341,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
    */
   useAsync(async () => {
     if (previousAppState === 'background' && appState === 'active') {
-      const position = await TrackPlayer.getPosition()
+      const { position } = await TrackPlayer.getProgress()
       const percentComplete =
         durationRef.current === 0 ? 0 : position / durationRef.current
       translationAnim.setValue(percentComplete * railWidth)
