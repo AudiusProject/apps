@@ -64,10 +64,10 @@ export const FilterButton = forwardRef(function FilterButton<
   const selectedOption = options?.find((option) => option.value === value)
   const selectedLabel = selectedOption?.label ?? selectedOption?.value
   const leadingElement = leadingElementProp ?? selectedOption?.leadingElement
-  const anchorRef = useRef<HTMLButtonElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const anchorRef = useRef<HTMLButtonElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const optionRefs = useRef<HTMLButtonElement[]>([])
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
 
   // Size Styles
   const defaultStyles: CSSObject = {

@@ -129,6 +129,7 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               {messages.aboutYou}
             </Text>
 
+            {/* @ts-ignore */}
             <TextArea
               // Ofsetting some internal padding weirdness on
               // this component
@@ -139,6 +140,8 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               defaultValue={bio || ''}
               onChange={onUpdateBio}
             />
+
+            {/* @ts-ignore */}
             <Input
               css={(theme) => ({
                 '& > input': {

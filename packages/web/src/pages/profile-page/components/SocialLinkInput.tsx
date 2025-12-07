@@ -55,10 +55,10 @@ const SocialLinkInput = ({
 }: SocialLinkInputProps) => {
   const [value, setValue] = useState(defaultValue)
   const [focused, setFocused] = useState(false)
-  const timeoutRef = useRef<any>()
+  const timeoutRef = useRef<any | undefined>(undefined)
   const { spacing } = useTheme()
 
-  const inputRef = useRef()
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const isHandle = useMemo(() => handleTypes.includes(type), [type])
 
@@ -118,6 +118,7 @@ const SocialLinkInput = ({
         }}
       />
       {isHandle && <span className={styles.at}>{'@'}</span>}
+      {/* @ts-ignore */}
       <Input
         className={cn(styles.input, className, {
           [styles.handle]: isHandle,

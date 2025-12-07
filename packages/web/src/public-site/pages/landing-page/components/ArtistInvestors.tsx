@@ -11,6 +11,7 @@ import investorTheChainsmokers from 'assets/img/publicSite/Investor-The-Chainsmo
 import useHasViewed from 'hooks/useHasViewed'
 
 import styles from './ArtistInvestors.module.css'
+const animatedAny = animated as any
 
 const messages = {
   title: 'Backed By The Best',
@@ -29,7 +30,10 @@ const Artist = (props: AristProps) => {
     <div className={styles.cardMoveContainer}>
       <div className={styles.artistContainer}>
         <div className={styles.artistImageWrapper}>
-          <animated.img src={props.imageUrl} className={styles.artistImage} />
+          <animatedAny.img
+            src={props.imageUrl}
+            className={styles.artistImage}
+          />
         </div>
         <div className={styles.artistName}>{props.name}</div>
       </div>
@@ -92,7 +96,7 @@ const ArtistInvestors = (props: ArtistInvestorsProps) => {
     return (
       <div className={styles.mobileContainer}>
         <div ref={refInView} className={styles.content}>
-          <animated.div
+          <animatedAny.div
             style={{
               opacity: titleStyles.opacity,
               transform: titleStyles.x.interpolate(
@@ -103,7 +107,7 @@ const ArtistInvestors = (props: ArtistInvestorsProps) => {
           >
             <h3 className={styles.title}>{messages.title}</h3>
             <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-          </animated.div>
+          </animatedAny.div>
           <div className={styles.artistsContainer}>
             {artists.map((artist, i) => (
               <MobileArtist key={artist.name} {...artist} />
@@ -126,7 +130,7 @@ const ArtistInvestors = (props: ArtistInvestorsProps) => {
   return (
     <div className={styles.container}>
       <div ref={refInView} className={styles.content}>
-        <animated.div
+        <animatedAny.div
           style={{
             opacity: titleStyles.opacity,
             transform: titleStyles.x.interpolate(
@@ -137,7 +141,7 @@ const ArtistInvestors = (props: ArtistInvestorsProps) => {
         >
           <h3 className={styles.title}>{messages.title}</h3>
           <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-        </animated.div>
+        </animatedAny.div>
         <div className={styles.artistsContainer}>
           {artists.map((artist) => (
             <Artist key={artist.name} {...artist} />

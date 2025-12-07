@@ -10,6 +10,7 @@ import { Transition, animated } from 'react-spring/renderprops.cjs'
 import { ProfileInfo } from '../../profile-info/ProfileInfo'
 
 import styles from './TipAudio.module.css'
+const animatedAny = animated as any
 const { getSendTipData } = tippingSelectors
 const { confirmSendTip, beginTip } = tippingActions
 
@@ -47,12 +48,12 @@ const ConvertingInfo = ({ isVisible }: { isVisible: boolean }) => (
   >
     {(item) => (style) =>
       item ? (
-        <animated.div style={style} className={styles.info}>
+        <animatedAny.div style={style} className={styles.info}>
           <p>{messages.maintenance}</p>
           <br />
           <p>{messages.severalMinutes}</p>
           <p>{messages.holdOn}</p>
-        </animated.div>
+        </animatedAny.div>
       ) : null
     }
   </Transition>

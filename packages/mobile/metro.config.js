@@ -52,11 +52,26 @@ const config = {
   server: {
     enhanceMiddleware: (middleware) => {
       return (req, res, next) => {
+        // Android dev check expects this exact string for /status endpoint
         if (req.url === '/status') {
-          // Android dev check expects this exact string
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('packager-status:running')
           return
+        }
+        // Handle CORS for Android requests in React Native 0.78
+        const userAgent = req.headers['user-agent'] || ''
+        const isAndroid =
+          userAgent.includes('Android') || userAgent.includes('okhttp')
+        if (isAndroid) {
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+          // Handle OPTIONS preflight requests
+          if (req.method === 'OPTIONS') {
+            res.writeHead(200)
+            res.end()
+            return
+          }
         }
         return middleware(req, res, next)
       }

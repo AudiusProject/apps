@@ -21,6 +21,7 @@ import { audiusSdk } from 'services/audius-sdk'
 import { env } from 'services/env'
 
 import styles from './FeaturedContent.module.css'
+const animatedAny = animated as any
 
 const { collectionPage } = route
 
@@ -55,7 +56,7 @@ const DesktopPlaylistTile = (props: PlaylistTileProps) => {
       onMouseUp={() => setMouseDown(false)}
       onMouseDown={() => setMouseDown(true)}
     >
-      <animated.div
+      <animatedAny.div
         className={styles.trackContainer}
         // @ts-ignore
         style={{ transform: mouseDown ? '' : transform }}
@@ -72,7 +73,7 @@ const DesktopPlaylistTile = (props: PlaylistTileProps) => {
             <IconListenOnAudius className={styles.listenOnAudius} />
           </div>
         </div>
-      </animated.div>
+      </animatedAny.div>
       <div className={styles.trackTitleContainer}>
         <span className={styles.trackTitle}>{props.title}</span>
       </div>
@@ -130,7 +131,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
     return (
       <div className={styles.mobileContainer} ref={refInView}>
         <div className={styles.content}>
-          <animated.div
+          <animatedAny.div
             style={{
               opacity: textStyles.opacity,
               transform: textStyles.x.interpolate(
@@ -140,7 +141,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
           >
             <h3 className={styles.title}>{messages.title}</h3>
             <h4 className={styles.subTitle}>{messages.subTitle}</h4>
-          </animated.div>
+          </animatedAny.div>
         </div>
         <div className={styles.tracksContainer}>
           {loading ? (
@@ -176,7 +177,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
   return (
     <div className={styles.container} ref={refInView}>
       <div className={styles.content}>
-        <animated.div
+        <animatedAny.div
           style={{
             transform: textStyles.x.interpolate(
               (x) => `translate3d(0,${x}px,0)`
@@ -185,7 +186,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
         >
           <h3 className={styles.title}>{messages.title}</h3>
           <h4 className={styles.subTitle}>{messages.subTitle}</h4>
-        </animated.div>
+        </animatedAny.div>
         <div className={styles.tracksContainer}>
           {loading ? (
             <div className={styles.loadingContainer}>

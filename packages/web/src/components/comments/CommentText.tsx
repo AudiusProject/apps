@@ -27,7 +27,7 @@ type CommentTextProps = {
 
 export const CommentText = (props: CommentTextProps) => {
   const { children, isEdited, mentions, isPreview, commentId, duration } = props
-  const textRef = useRef<HTMLElement>()
+  const textRef = useRef<HTMLElement | undefined>(undefined)
   const [isOverflowing, setIsOverflowing] = useState(false)
   const [isExpanded, toggleIsExpanded] = useToggle(false)
 

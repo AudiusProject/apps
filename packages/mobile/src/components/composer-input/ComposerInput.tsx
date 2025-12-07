@@ -1,4 +1,4 @@
-import type { Ref } from 'react'
+import type { ReactNode, Ref } from 'react'
 import {
   forwardRef,
   useCallback,
@@ -126,7 +126,9 @@ export const ComposerInput = forwardRef(function ComposerInput(
       }
     }, {})
   )
-  const selectionRef = useRef<TextInputSelectionChangeEventData['selection']>()
+  const selectionRef = useRef<
+    TextInputSelectionChangeEventData['selection'] | undefined
+  >(undefined)
   const { primary, neutralLight7 } = useThemeColors()
   const hasLength = value.length > 0
   const internalRef = useRef<RnTextInput>(null)
@@ -435,7 +437,7 @@ export const ComposerInput = forwardRef(function ComposerInput(
         return createTextSections(value)
       }
 
-      const renderedTextSections: JSX.Element[] = []
+      const renderedTextSections: ReactNode[] = []
       const autocompleteRange = getAutocompleteRange()
 
       // Filter out matches split by an autocomplete section

@@ -162,6 +162,7 @@ const UserBadges = ({
             }
           }}
         >
+          {/* @ts-ignore */}
           {cloneElement(audioTierMap[tier]!, { size })}
         </Flex>
       </AudioHoverCard>

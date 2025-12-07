@@ -107,7 +107,9 @@ export const DashboardPage = () => {
         <TotalPlaysChart
           data={chartData}
           theme={theme}
+          // @ts-ignore
           tracks={chartTracks}
+          // @ts-ignore
           selectedTrack={selectedTrack}
           onSetYearOption={onSetYearOption}
           onSetTrackOption={setSelectedTrack}

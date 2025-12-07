@@ -15,7 +15,7 @@ interface TrackFlairProps {
   className?: string
   hideToolTip?: boolean
   id: ID
-  forwardRef?: RefObject<HTMLDivElement>
+  forwardRef?: RefObject<HTMLDivElement | null>
 }
 
 const TrackFlair = (props: TrackFlairProps) => {

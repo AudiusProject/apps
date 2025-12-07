@@ -33,7 +33,7 @@ type ExpandableContentProps = {
   children: ReactNode
   maxLines?: number
   lineHeight?: number
-  scrollRef?: RefObject<ScrollView | FlatList>
+  scrollRef?: RefObject<ScrollView | FlatList | null>
 }
 
 export const ExpandableContent = ({

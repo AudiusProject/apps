@@ -7,7 +7,7 @@ import { ExpandableContent, UserGeneratedText } from 'app/components/core'
 
 type TrackDescriptionProps = {
   description?: Nullable<string>
-  scrollRef?: RefObject<ScrollView | FlatList>
+  scrollRef?: RefObject<ScrollView | FlatList | null>
 }
 
 export const TrackDescription = ({

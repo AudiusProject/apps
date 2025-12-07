@@ -36,7 +36,7 @@ export const CreatePasswordPage = () => {
   const emailField = useSelector(getEmailField)
   const navigate = useNavigateToPage()
   const { isMobile } = useMedia()
-  const passwordInputRef = useRef<HTMLInputElement>(null)
+  const passwordInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleSubmit = useCallback(
     (values: CreatePasswordValues) => {
@@ -68,6 +68,7 @@ export const CreatePasswordPage = () => {
               label={messages.yourEmail}
               value={emailField.value}
             />
+            {/* @ts-ignore */}
             <EnterPasswordSection inputRef={passwordInputRef} />
           </Flex>
           <PageFooter

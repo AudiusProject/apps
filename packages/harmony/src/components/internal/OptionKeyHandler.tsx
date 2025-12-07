@@ -26,7 +26,7 @@ type OptionKeyHandlerProps<Value extends string> = {
   onChange: (value: Value) => void
   optionRefs: RefObject<HTMLButtonElement[]>
   options: OptionType<Value>[]
-  scrollRef: RefObject<HTMLDivElement>
+  scrollRef: RefObject<HTMLDivElement | null>
   initialActiveIndex?: number
 }
 

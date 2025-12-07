@@ -139,7 +139,7 @@ const CommentDrawerAutocompleteContent = ({
 }
 
 const CommentDrawerContent = (props: {
-  commentListRef: RefObject<BottomSheetFlatListMethods>
+  commentListRef: RefObject<BottomSheetFlatListMethods | null>
   highlightedComment?: Comment | null
 }) => {
   const { commentListRef, highlightedComment } = props
@@ -226,7 +226,7 @@ export type CommentDrawerData = {
 }
 
 type CommentDrawerProps = {
-  bottomSheetModalRef: React.RefObject<BottomSheetModal>
+  bottomSheetModalRef: React.RefObject<BottomSheetModal | null>
   handleClose: (trackId: ID) => void
 } & CommentDrawerData
 

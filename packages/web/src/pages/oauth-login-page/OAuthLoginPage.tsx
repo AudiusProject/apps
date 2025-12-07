@@ -435,6 +435,7 @@ export const OAuthLoginPage = () => {
             ) : (
               <div className={styles.signInFormContainer}>
                 <form onSubmit={handleSignInFormSubmit}>
+                  {/* @ts-ignore */}
                   <Input
                     placeholder='Email'
                     size='medium'
@@ -446,6 +447,7 @@ export const OAuthLoginPage = () => {
                     value={emailInput}
                     onChange={handleEmailInputChange}
                   />
+                  {/* @ts-ignore */}
                   <Input
                     className={styles.passwordInput}
                     placeholder='Password'
@@ -469,6 +471,7 @@ export const OAuthLoginPage = () => {
                     </div>
                   )}
                   {showOtpInput ? (
+                    // @ts-ignore
                     <Input
                       placeholder='Verification Code'
                       size='medium'

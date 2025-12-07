@@ -29,8 +29,8 @@
     "@babel/preset-env": "7.22.15",
     "@babel/preset-react": "7.22.15",
     "@babel/preset-typescript": "7.22.15",
-    "@emotion/babel-plugin": "11.11.0",
-    "@emotion/babel-preset-css-prop": "11.11.0",
+    "@emotion/babel-plugin": "11.12.0",
+    "@emotion/babel-preset-css-prop": "11.12.0",
     "@rollup/plugin-alias": "5.0.1",
     "@rollup/plugin-image": "3.0.3",
     "@rollup/plugin-json": "6.1.0",
@@ -50,8 +50,8 @@
     "@svgr/rollup": "8.1.0",
     "@svgr/webpack": "8.1.0",
     "@types/color": "3.0.6",
-    "@types/react": "18.3.1",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
     "@types/react-virtualized": "9.21.30",
     "@types/storybook__addon-knobs": "5.2.1",
     "@types/storybook__react": "4.0.2",
@@ -84,12 +84,12 @@
     "webpack": "4.46.0"
   },
   "dependencies": {
-    "@emotion/css": "^11.11.2",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/css": "11.13.5",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
     "@juggle/resize-observer": "3.4.0",
     "@radix-ui/react-slot": "^1.0.2",
-    "@react-spring/web": "^9.7.2",
+    "@react-spring/web": "10.0.3",
     "classnames": "^2.5.1",
     "color": "4.2.3",
     "lodash": "^4.17.21",
@@ -97,13 +97,13 @@
     "numeral": "2.0.6",
     "react-merge-refs": "^2.0.1",
     "react-perfect-scrollbar": "^1.5.8",
-    "react-spring": "^8.0.27",
+    "react-spring": "8.0.27",
     "react-use": "^17.5.0",
     "react-use-measure": "^2.1.1",
     "react-virtualized": "9.22.3"
   },
   "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   }
 }

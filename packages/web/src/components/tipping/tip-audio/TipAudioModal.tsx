@@ -26,6 +26,7 @@ import { ConfirmSendTip } from './ConfirmSendTip'
 import { SendTip } from './SendTip'
 import styles from './TipAudio.module.css'
 import { TipSent } from './TipSent'
+const animatedAny = animated as any
 const { resetSend } = tippingActions
 const { getSendStatus, getSendTipData } = tippingSelectors
 
@@ -187,9 +188,9 @@ export const TipAudioModal = () => {
           unique={true}
         >
           {(item) => (style) => (
-            <animated.div style={{ ...style }}>
+            <animatedAny.div style={{ ...style }}>
               {renderModalContent(item)}
-            </animated.div>
+            </animatedAny.div>
           )}
         </Transition>
       </div>

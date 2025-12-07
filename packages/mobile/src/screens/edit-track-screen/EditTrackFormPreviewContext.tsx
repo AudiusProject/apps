@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { createContext, useCallback, useMemo, useState } from 'react'
 
 import { playerActions, playerSelectors } from '@audius/common/store'
@@ -17,7 +18,7 @@ export const EditTrackFormPreviewContext = createContext<PreviewContextProps>({
 })
 
 export const EditTrackFormPreviewContextProvider = (props: {
-  children: JSX.Element
+  children: ReactNode
 }) => {
   const dispatch = useDispatch()
   const [sourceUri, setSourceUri] = useState('')

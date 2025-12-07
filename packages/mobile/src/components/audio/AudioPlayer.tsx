@@ -632,7 +632,7 @@ export const AudioPlayer = () => {
   const queueListRef = useRef<string[]>([])
 
   // A ref to the enqueue task to await before either requeing or appending to queue
-  const enqueueTracksJobRef = useRef<Promise<void>>()
+  const enqueueTracksJobRef = useRef<Promise<void> | undefined>(undefined)
   // A way to abort the enqeue tracks job if a new lineup is played
   const abortEnqueueControllerRef = useRef(new AbortController())
 

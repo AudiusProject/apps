@@ -9,6 +9,7 @@ import useMeasure from 'react-use-measure'
 import { ModalContent } from './ModalContent'
 import styles from './ModalContentPages.module.css'
 import { ModalContentProps } from './types'
+const animatedAny = animated as any
 
 const INNER_HEIGHT_PADDING = 100
 
@@ -96,21 +97,24 @@ export const ModalContentPages = ({
         leave={transitions.leave}
         unique={true}
       >
-        {(item) => (style) => (
-          <animated.div style={{ ...style }} className={styles.pageContainer}>
-            <ModalContent
-              className={cn(styles.modalContent, modalContentClassName)}
-              {...otherModalContentProps}
-            >
-              <div
-                className={cn(styles.nestedModalContent, contentClassName)}
-                ref={contentRef}
+        {(item) => (style) => {
+          const AnimatedDiv = animatedAny.div
+          return (
+            <AnimatedDiv style={{ ...style }} className={styles.pageContainer}>
+              <ModalContent
+                className={cn(styles.modalContent, modalContentClassName)}
+                {...otherModalContentProps}
               >
-                {Children.toArray(children)[item]}
-              </div>
-            </ModalContent>
-          </animated.div>
-        )}
+                <div
+                  className={cn(styles.nestedModalContent, contentClassName)}
+                  ref={contentRef}
+                >
+                  {Children.toArray(children)[item]}
+                </div>
+              </ModalContent>
+            </AnimatedDiv>
+          )
+        }}
       </Transition>
     </div>
   )

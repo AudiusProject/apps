@@ -38,7 +38,7 @@ const messages = {
 const CommentSettingsModal = () => {
   const [isVisible, setIsVisible] = useModalState('CommentSettings')
   const handleClose = useCallback(() => setIsVisible(false), [setIsVisible])
-  const scrollParentRef = useRef<HTMLElement>()
+  const scrollParentRef = useRef<HTMLElement | undefined>(undefined)
 
   const { data: mutedUsers, isPending } = useMutedUsers()
   return (

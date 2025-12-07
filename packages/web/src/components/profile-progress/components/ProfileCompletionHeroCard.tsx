@@ -11,6 +11,7 @@ import { SegmentedProgressBar } from 'components/segmented-progress-bar/Segmente
 import { useProfileCompletionDismissal, useVerticalCollapse } from '../hooks'
 
 import { TaskCompletionList } from './TaskCompletionList'
+const animatedAny = animated as any
 
 const { profileMeterDismissed } = profilePageActions
 const { getProfilePageMeterDismissed } = challengesSelectors
@@ -74,7 +75,7 @@ export const ProfileCompletionHeroCard = () => {
     <>
       {transitions.map(({ item, key, props }) =>
         item ? (
-          <animated.div style={props} key={key}>
+          <animatedAny.div style={props} key={key}>
             <Flex
               shadow='emphasis'
               w='100%'
@@ -106,11 +107,11 @@ export const ProfileCompletionHeroCard = () => {
                     letterSpacing: 1.86
                   })}
                 >
-                  <animated.span>
+                  <animatedAny.span>
                     {animatedPercentage.interpolate((v: unknown) =>
                       (v as number).toFixed()
                     )}
-                  </animated.span>
+                  </animatedAny.span>
                   %
                 </Box>
                 <Flex p='m'>
@@ -154,7 +155,7 @@ export const ProfileCompletionHeroCard = () => {
                 Dismiss
               </button>
             </Flex>
-          </animated.div>
+          </animatedAny.div>
         ) : null
       )}
     </>

@@ -24,6 +24,7 @@ import { getScrollParent } from '../../utils/getScrollParent'
 
 import styles from './Popup.module.css'
 import type { PopupProps, Origin } from './types'
+const animatedAny = animated as any
 
 const messages = {
   close: 'close popup'
@@ -386,7 +387,7 @@ export const PopupInternal = forwardRef<
     },
     config: spring.standard,
     unique: true,
-    onDestroyed: (isDestroyed) => {
+    onDestroyed: (isDestroyed: boolean) => {
       setPopupState(isDestroyed ? 'closed' : 'open')
     }
   })
@@ -414,9 +415,11 @@ export const PopupInternal = forwardRef<
               style={rootStyle}
               onMouseLeave={handleMouseLeave}
             >
-              {transitions.map(({ item, key, props }) =>
-                item ? (
-                  <animated.div
+              {transitions.map(({ item, key, props }: any) => {
+                if (!item) return null
+                const AnimatedDiv = animatedAny.div as any
+                return (
+                  <AnimatedDiv
                     className={cn(styles.popup, className)}
                     css={{ boxShadow: shadows[shadow] }}
                     ref={popupRef}
@@ -444,9 +447,9 @@ export const PopupInternal = forwardRef<
                       </div>
                     )}
                     {children}
-                  </animated.div>
-                ) : null
-              )}
+                  </AnimatedDiv>
+                )
+              })}
             </div>,
             portalLocation
           )

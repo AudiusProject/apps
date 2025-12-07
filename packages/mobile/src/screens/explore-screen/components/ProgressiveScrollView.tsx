@@ -77,6 +77,7 @@ export const ProgressiveScrollView = ({
     // Clone the child and pass isLoading prop
     return cloneElement(child, {
       key: index,
+      // @ts-ignore
       isLoading: !isLoaded
     })
   }

@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+import type React from 'react'
 
 import { useCollection, useUser } from '@audius/common/api'
 import {
@@ -37,7 +38,7 @@ const {
 const { publishPlaylist } = cacheCollectionsActions
 
 type Props = {
-  render: (callbacks: OverflowActionCallbacks) => JSX.Element
+  render: (callbacks: OverflowActionCallbacks) => React.ReactElement
 }
 
 const CollectionOverflowMenuDrawer = ({ render }: Props) => {

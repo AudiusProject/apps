@@ -154,7 +154,9 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
   useEffect(getRailPageX, [railRef])
 
-  const currentAnimation = useRef<Animated.CompositeAnimation>()
+  const currentAnimation = useRef<Animated.CompositeAnimation | undefined>(
+    undefined
+  )
   const playbackRate = useSelector(getPlaybackRate)
 
   // Calculate the actual playback rate based on track type

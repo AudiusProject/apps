@@ -51,7 +51,9 @@ export const TrackingBar = (props: TrackingBarProps) => {
   const { primaryLight2, primaryDark2 } = useThemeColors()
 
   const translateXAnimation = useRef(new Animated.Value(0))
-  const currentAnimation = useRef<Animated.CompositeAnimation>()
+  const currentAnimation = useRef<Animated.CompositeAnimation | undefined>(
+    undefined
+  )
 
   const seek = useSelector(getSeek) ?? 0
   const { playing } = useIsPlaying()

@@ -12,7 +12,7 @@ type OptionsListProps<Value extends string> = {
   options: FilterButtonOptionType<Value>[]
   isOpen: boolean
   optionRefs: RefObject<HTMLButtonElement[]>
-  scrollRef: RefObject<HTMLDivElement>
+  scrollRef: RefObject<HTMLDivElement | null>
   onChange: (value: Value) => void
 }
 

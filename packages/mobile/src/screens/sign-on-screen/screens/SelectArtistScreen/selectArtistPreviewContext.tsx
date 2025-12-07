@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
@@ -31,7 +32,7 @@ export const SelectArtistsPreviewContext = createContext<PreviewContextProps>({
 })
 
 export const SelectArtistsPreviewContextProvider = (props: {
-  children: JSX.Element
+  children: ReactNode
 }) => {
   const [hasPlayed, setHasPlayed] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)

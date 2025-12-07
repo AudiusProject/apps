@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "1.5.163",
+  "version": "1.5.164",
   "workspaces": [
     "packages/*",
     "packages/discovery-provider/plugins/pedalboard/apps/*",
@@ -70,10 +70,10 @@
     "pedalboard:test": "turbo run test --filter='./packages/discovery-provider/plugins/pedalboard/apps/*' --filter='./packages/discovery-provider/plugins/pedalboard/packages/*'"
   },
   "devDependencies": {
-    "@emotion/eslint-plugin": "11.11.0",
+    "@emotion/eslint-plugin": "11.12.0",
     "@tsconfig/strictest": "2.0.2",
     "@types/keyv": "4.2.0",
-    "@types/react": "18.3.1",
+    "@types/react": "19.0.0",
     "@typescript-eslint/eslint-plugin": "6.16.0",
     "@typescript-eslint/parser": "6.16.0",
     "concurrently": "7.4.0",
@@ -139,10 +139,12 @@
   },
   "overrides": {
     "@types/prop-types": "15.7.5",
-    "@types/react": "18.3.1",
+    "@types/react": "19.0.0",
     "@types/bn.js": "5.1.0",
     "bn.js": "5.1.0",
     "moment": "2.24.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native-svg": "15.11.1",
     "redux": "4.1.1",
     "webpack": "5.88.2",

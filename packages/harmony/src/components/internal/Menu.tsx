@@ -21,7 +21,7 @@ export type MenuContentProps = {
   width?: CSSObject['width']
   minWidth?: CSSObject['minWidth']
   MenuListProps?: WithCSS<Partial<FlexProps>>
-  scrollRef: Ref<HTMLDivElement>
+  scrollRef: Ref<HTMLDivElement | null>
   'aria-label'?: string
   'aria-activedescendent'?: string
 }

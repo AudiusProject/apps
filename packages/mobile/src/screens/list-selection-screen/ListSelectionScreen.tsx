@@ -20,8 +20,8 @@ export type ListSelectionData = {
   value: string
   disabled?: boolean
   icon?: IconComponent
-  leadingElement?: JSX.Element
-  labelLeadingElement?: JSX.Element
+  leadingElement?: ReactElement
+  labelLeadingElement?: ReactElement
 }
 
 export type ListSelectionProps = Partial<Omit<FormScreenProps, 'header'>> & {

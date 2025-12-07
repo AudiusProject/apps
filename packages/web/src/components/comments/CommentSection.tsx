@@ -29,7 +29,7 @@ import { NoComments } from './NoComments'
 const { getLineup } = trackPageSelectors
 
 type CommentSectionInnerProps = {
-  commentSectionRef: React.RefObject<HTMLDivElement>
+  commentSectionRef: React.RefObject<HTMLDivElement | null>
   entityId: ID
 }
 

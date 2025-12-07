@@ -1,7 +1,7 @@
 harmony-init:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:22.17
+    - image: cimg/node:20.19
   steps:
     - checkout
 
@@ -28,7 +28,7 @@ harmony-init:
 harmony-build-storybook:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:22.17
+    - image: cimg/node:20.19
   steps:
     - checkout
     - attach_workspace:
@@ -61,7 +61,7 @@ harmony-test-storybook:
 harmony-deploy-storybook:
   working_directory: ~/apps
   docker:
-    - image: cimg/node:22.17
+    - image: cimg/node:20.19
   steps:
     - checkout
     - attach_workspace:
@@ -84,7 +84,7 @@ harmony-deploy-storybook:
 
 harmony-deploy-chromatic:
   docker:
-    - image: cimg/node:22.17
+    - image: cimg/node:20.19
   working_directory: ~/harmony
   steps:
     - checkout

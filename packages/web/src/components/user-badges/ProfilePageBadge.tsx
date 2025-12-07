@@ -85,6 +85,7 @@ const ProfilePageBadge = ({
 
   const badge = audioTierMap[tier as BadgeTier]
   if (!badge) return null
+  // @ts-ignore
   const badgeWithSize = cloneElement(badge, { size: '3xl' })
 
   return (

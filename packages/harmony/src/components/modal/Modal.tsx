@@ -27,6 +27,7 @@ import { ModalContext } from './ModalContext'
 import { findAncestor } from './findAncestor'
 import { useModalScrollCount } from './hooks'
 import { ModalProps, Anchor } from './types'
+const animatedAny = animated as any
 
 const rootContainer = 'modalRootContainer'
 const rootId = 'modalRoot'
@@ -227,7 +228,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
     leave: { transform: 'scale(0)', opacity: 0 },
     unique: true,
     config: spring.standard,
-    onDestroyed: (isDestroyed) => {
+    onDestroyed: (isDestroyed: boolean) => {
       setModalState(isDestroyed ? 'closed' : 'open')
       if (isDestroyed) {
         onClosed?.()
@@ -336,67 +337,65 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
       {modalRoot && (process.env.NODE_ENV === 'test' ? isOpenProp : isOpen)
         ? ReactDOM.createPortal(
             <>
-              {transition.map(
-                ({ item, props, key }) =>
-                  item && (
-                    <animated.div
-                      className={wrapperClassNames}
-                      style={{
-                        ...wrapperStyle,
-                        opacity: props.opacity,
-                        height,
-                        minHeight: height
-                      }}
-                      key={key}
-                      ref={ref}
+              {transition.map(({ item, props, key }: any) => {
+                if (!item) return null
+                const AnimatedDiv = animatedAny.div as any
+                return (
+                  <AnimatedDiv
+                    className={wrapperClassNames}
+                    style={{
+                      ...wrapperStyle,
+                      opacity: props.opacity,
+                      height,
+                      minHeight: height
+                    }}
+                    key={key}
+                    ref={ref}
+                  >
+                    <AnimatedDiv
+                      ref={dismissOnClickOutside ? outsideClickRef : null}
+                      className={bodyClassNames}
+                      style={{ ...props, ...bodyOffset, ...bodyStyle }}
+                      role='dialog'
+                      aria-labelledby={titleId}
+                      aria-describedby={subtitleId}
+                      onMouseDown={handleModalContentClicked}
                     >
-                      <animated.div
-                        ref={dismissOnClickOutside ? outsideClickRef : null}
-                        className={bodyClassNames}
-                        style={{ ...props, ...bodyOffset, ...bodyStyle }}
-                        role='dialog'
-                        aria-labelledby={titleId}
-                        aria-describedby={subtitleId}
-                        onMouseDown={handleModalContentClicked}
-                      >
-                        <>
-                          {/** Begin @deprecated section (moved to ModalHeader and ModalTitle sub-components)  */}
-                          {showTitleHeader && (
-                            <div className={headerContainerClassNames}>
-                              {showDismissButton && (
-                                <div
-                                  className={styles.dismissButton}
-                                  onClick={onClose}
-                                >
-                                  <IconClose color='subdued' size='s' />
-                                </div>
-                              )}
+                      <>
+                        {/** Begin @deprecated section (moved to ModalHeader and ModalTitle sub-components)  */}
+                        {showTitleHeader && (
+                          <div className={headerContainerClassNames}>
+                            {showDismissButton && (
                               <div
-                                id={titleId}
-                                className={cn(styles.header, titleClassName)}
+                                className={styles.dismissButton}
+                                onClick={onClose}
                               >
-                                {title}
+                                <IconClose color='subdued' size='s' />
                               </div>
-                              <div
-                                id={subtitleId}
-                                className={cn(
-                                  styles.subtitle,
-                                  subtitleClassName
-                                )}
-                              >
-                                {subtitle}
-                              </div>
+                            )}
+                            <div
+                              id={titleId}
+                              className={cn(styles.header, titleClassName)}
+                            >
+                              {title}
                             </div>
-                          )}
-                          {/** End @deprecated section  */}
-                          <ModalContext.Provider value={modalContextValue}>
-                            {children}
-                          </ModalContext.Provider>
-                        </>
-                      </animated.div>
-                    </animated.div>
-                  )
-              )}
+                            <div
+                              id={subtitleId}
+                              className={cn(styles.subtitle, subtitleClassName)}
+                            >
+                              {subtitle}
+                            </div>
+                          </div>
+                        )}
+                        {/** End @deprecated section  */}
+                        <ModalContext.Provider value={modalContextValue}>
+                          {children}
+                        </ModalContext.Provider>
+                      </>
+                    </AnimatedDiv>
+                  </AnimatedDiv>
+                )
+              })}
             </>,
             modalRoot
           )

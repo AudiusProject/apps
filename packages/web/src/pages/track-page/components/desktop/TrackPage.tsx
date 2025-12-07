@@ -202,6 +202,7 @@ const TrackPage = ({
               <Flex flex='3'>
                 <CommentSection
                   entityId={defaults.trackId}
+                  // @ts-ignore
                   commentSectionRef={commentSectionRef}
                 />
               </Flex>

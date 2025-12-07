@@ -9,6 +9,7 @@ import {
   ArtistRecommendationsProps
 } from './ArtistRecommendations'
 import styles from './ArtistRecommendationsDropdown.module.css'
+const animatedAny = animated as any
 
 type ArtistRecommendationsDropdownProps = Omit<
   ArtistRecommendationsProps,
@@ -50,13 +51,13 @@ export const ArtistRecommendationsDropdown = (
   if (!shouldShowDropdown) return null
 
   return (
-    <animated.div className={styles.dropdown} style={spring}>
+    <animatedAny.div className={styles.dropdown} style={spring}>
       <ArtistRecommendations
         ref={childRef}
         className={styles.artistRecommendations}
         itemClassName={styles.artistRecommendationsItem}
         {...props}
       />
-    </animated.div>
+    </animatedAny.div>
   )
 }

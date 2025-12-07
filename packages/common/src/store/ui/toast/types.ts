@@ -1,8 +1,8 @@
-import { ComponentType } from 'react'
+import { ComponentType, ReactElement } from 'react'
 
 import { PayloadAction } from '@reduxjs/toolkit'
 
-type ToastContent = string | JSX.Element
+type ToastContent = string | ReactElement
 
 export type ToastType = 'info' | 'error'
 

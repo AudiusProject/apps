@@ -33,7 +33,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
     } = props
 
     const { spacing, typography, color } = useTheme()
-    const clickInsideRef = useRef<any>()
+    const clickInsideRef = useRef<any>(null)
     const anchorRef = useRef<HTMLElement>(null)
 
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)

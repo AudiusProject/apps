@@ -214,7 +214,7 @@ export const PullToRefresh = ({
   const [didHitTop, setDidHitTop] = useState(false)
   const hitTop = useRef(false)
   const [shouldShowSpinner, setShouldShowSpinner] = useState(false)
-  const animationRef = useRef<LottieView | null>()
+  const animationRef = useRef<LottieView | null | undefined>(undefined)
 
   const { neutral, white } = useAnimations()
   const { spin, pull } = color ? white : neutral
@@ -294,7 +294,11 @@ export const PullToRefresh = ({
     <Animated.View style={[styles.root, { top: topOffset }, animatedStyles]}>
       <LottieView
         style={{ height: '100%', width: '100%' }}
-        ref={(animation) => (animationRef.current = animation)}
+        ref={(animation) => {
+          if (animation) {
+            animationRef.current = animation
+          }
+        }}
         loop={shouldShowSpinner}
         autoPlay={false}
         source={colorizedIcon}

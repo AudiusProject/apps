@@ -49,7 +49,7 @@ jobs:
   init:
     working_directory: ~/apps
     docker:
-      - image: cimg/node:22.17
+      - image: cimg/node:20.19
     resource_class: large
     steps:
       - checkout
@@ -158,7 +158,7 @@ jobs:
   generate-client-release:
     working_directory: ~/apps
     docker:
-      - image: cimg/node:22.17
+      - image: cimg/node:20.19
     steps:
       - checkout
       - add_ssh_keys:

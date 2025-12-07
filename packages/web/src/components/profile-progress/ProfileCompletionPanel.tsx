@@ -14,6 +14,7 @@ import { SegmentedProgressBar } from 'components/segmented-progress-bar/Segmente
 
 import { ProfileCompletionTooltip } from './components/ProfileCompletionTooltip'
 import { useProfileCompletionDismissal, useSlideDown } from './hooks'
+const animatedAny = animated as any
 
 const { show: showMusicConfetti } = musicConfettiActions
 
@@ -82,7 +83,7 @@ export const ProfileCompletionPanel = () => {
     <Flex justifyContent='center'>
       {transitions.map(({ item, key, props }) =>
         item ? (
-          <animated.div style={props} key={key}>
+          <animatedAny.div style={props} key={key}>
             <ProfileCompletionTooltip
               completionStages={completionStages}
               isDisabled={isTooltipDisabled}
@@ -99,11 +100,11 @@ export const ProfileCompletionPanel = () => {
                 alignItems='center'
               >
                 <Text variant='title' size='s'>
-                  <animated.div>
+                  <animatedAny.div>
                     {(animatedCompletion as any).interpolate((v: number) =>
                       messages.completionText(Math.round(v))
                     )}
-                  </animated.div>
+                  </animatedAny.div>
                 </Text>
                 <SegmentedProgressBar
                   numSteps={numSteps}
@@ -115,7 +116,7 @@ export const ProfileCompletionPanel = () => {
                 </TextLink>
               </Flex>
             </ProfileCompletionTooltip>
-          </animated.div>
+          </animatedAny.div>
         ) : null
       )}
     </Flex>

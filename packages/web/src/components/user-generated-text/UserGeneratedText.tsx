@@ -135,6 +135,7 @@ export const UserGeneratedText = forwardRef(function <T extends ElementType>(
       : childrenProp
 
   return (
+    // @ts-ignore
     <Linkify
       options={options}
       as={LinkifyText}

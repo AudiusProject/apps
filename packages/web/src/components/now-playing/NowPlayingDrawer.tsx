@@ -13,6 +13,7 @@ import MobilePlayBar from 'components/play-bar/mobile/PlayBar'
 
 import NowPlaying from './NowPlaying'
 import styles from './NowPlayingDrawer.module.css'
+const animatedAny = animated as any
 const { setIsOpen: _setIsNowPlayingOpen } = nowPlayingUIActions
 
 const DEFAULT_HEIGHT = typeof window !== 'undefined' ? window.innerHeight : 0
@@ -371,7 +372,7 @@ const NowPlayingDrawer = ({
 
   return (
     <>
-      <animated.div
+      <animatedAny.div
         className={styles.drawer}
         id='now-playing-drawer'
         {...bind()}
@@ -382,28 +383,28 @@ const NowPlayingDrawer = ({
           transform: drawerSlideProps.y.interpolate(interpY)
         }}
       >
-        <animated.div className={styles.header} style={headerFadeProps}>
+        <animatedAny.div className={styles.header} style={headerFadeProps}>
           <IconAudiusLogoHorizontal color='subdued' sizeH='l' width='auto' />
-        </animated.div>
+        </animatedAny.div>
 
-        <animated.div className={styles.playBar} style={playBarFadeProps}>
+        <animatedAny.div className={styles.playBar} style={playBarFadeProps}>
           <MobilePlayBar onClickInfo={open} />
-        </animated.div>
+        </animatedAny.div>
 
         <div className={styles.nowPlaying}>
           <NowPlaying onClose={close} />
         </div>
         {/* "Bottom padding" so over drags upwards of the drawer are white */}
         <div className={styles.skirt} />
-      </animated.div>
+      </animatedAny.div>
 
-      <animated.div
+      <animatedAny.div
         className={styles.bottomBar}
         // @ts-ignore
         style={{ transform: bottomBarSlideProps.y.interpolate(interpY) }}
       >
         <ConnectedBottomBar />
-      </animated.div>
+      </animatedAny.div>
     </>
   )
 }

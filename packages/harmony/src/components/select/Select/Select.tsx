@@ -70,10 +70,10 @@ export const Select = forwardRef(function Select<Value extends string>(
       selectedOption.label ??
       selectedOption.value)
     : ''
-  const anchorRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const anchorRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const optionRefs = useRef<HTMLButtonElement[]>([])
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
 
   const handleChange = useCallback(
     (value: Value) => {

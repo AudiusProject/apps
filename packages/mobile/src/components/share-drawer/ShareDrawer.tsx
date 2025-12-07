@@ -69,7 +69,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 export const ShareDrawer = () => {
   const styles = useStyles()
-  const viewShotRef = useRef() as React.RefObject<ViewShot>
+  const viewShotRef = useRef<ViewShot | null>(null) as React.RefObject<ViewShot>
   const navigation = useNavigation<AppTabScreenParamList>()
   const sendShareAction = useShareAction()
 

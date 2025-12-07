@@ -54,7 +54,7 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
     ...lottieProps
   } = props
   const { color } = useTheme()
-  const animationRef = useRef<LottieView | null>()
+  const animationRef = useRef<LottieView | null | undefined>(undefined)
   const previousActive = usePrevious(isActive)
   const initialIsActive = Boolean(
     (isActive && previousActive === undefined) || (previousActive && isActive)

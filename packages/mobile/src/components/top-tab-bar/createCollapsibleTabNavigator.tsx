@@ -9,7 +9,10 @@ import {
   TabRouter,
   useNavigationBuilder
 } from '@react-navigation/native'
-import type { CollapsibleProps } from 'react-native-collapsible-tab-view'
+import type {
+  CollapsibleProps,
+  CollapsibleRef
+} from 'react-native-collapsible-tab-view'
 import { Tabs } from 'react-native-collapsible-tab-view'
 
 import { useTheme } from '@audius/harmony-native'
@@ -36,7 +39,7 @@ export const CollapsibleTabNavigator = ({
     initialRouteName
   })
 
-  const ref = useRef()
+  const ref = useRef<CollapsibleRef | null>(null)
 
   const onTabChange = ({ tabName, index, prevIndex }) => {
     const target = tabName.toString()

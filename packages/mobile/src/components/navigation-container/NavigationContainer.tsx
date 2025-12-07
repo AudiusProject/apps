@@ -106,7 +106,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
   const { data: accountStatus } = useAccountStatus()
   const hasCompletedInitialLoad = useRef(false)
 
-  const routeNameRef = useRef<string>()
+  const routeNameRef = useRef<string | undefined>(undefined)
 
   // Ensure that the user's account data is fully loaded before rendering the app.
   // This prevents the NavigationContainer from rendering prematurely, which relies

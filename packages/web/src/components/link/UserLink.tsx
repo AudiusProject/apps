@@ -13,7 +13,7 @@ import { TextLink, TextLinkProps } from './TextLink'
 
 const { profilePage } = route
 
-type UserLinkProps = Omit<TextLinkProps, 'to'> & {
+type UserLinkProps = Omit<TextLinkProps, 'to' | 'popover'> & {
   userId: ID | undefined
   badgeSize?: IconSize
   popover?: boolean

@@ -16,7 +16,7 @@ import { harmonyCache } from '../../HarmonyCacheProvider'
 import { getIndexHtml } from '../getIndexHtml'
 
 const { extractCriticalToChunks, constructStyleTagsFromChunks } =
-  createEmotionServer(harmonyCache)
+  createEmotionServer(harmonyCache as any)
 
 type CollectionPageContext = PageContextServer & {
   pageProps: {

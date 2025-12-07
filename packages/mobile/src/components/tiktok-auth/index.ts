@@ -1,1 +1,0 @@
-export { TikTokAuthButton } from './TikTokAuthButton'

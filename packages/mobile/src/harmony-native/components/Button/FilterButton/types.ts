@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType, ReactElement, ReactNode } from 'react'
 
 import type { Maybe } from '@audius/common/utils'
 import type { GestureResponderEvent } from 'react-native'
@@ -26,11 +26,11 @@ export type FilterButtonOptionType<Value extends string> = {
   /**
    * A leading element to display before the option label. Useful for icons/emojis
    */
-  leadingElement?: JSX.Element
+  leadingElement?: ReactElement
   /**
    * A leading element to display before the filter button label
    */
-  labelLeadingElement?: JSX.Element
+  labelLeadingElement?: ReactElement
 }
 
 export type ScreenProps<Value> = {

@@ -155,7 +155,7 @@ const inputAccessoryViewID = 'audiusInputAccessoryView'
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   (props, ref) => {
     const { scale, handlePressIn, handlePressOut } = usePressScaleAnimation(0.8)
-    const innerInputRef = useRef<RNTextInput>()
+    const innerInputRef = useRef<RNTextInput | undefined>(undefined)
 
     const {
       id,

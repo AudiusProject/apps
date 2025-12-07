@@ -57,7 +57,7 @@ const HEADER_COLLAPSE_THRESHOLD = 50
 type SearchExploreHeaderProps = {
   filterTranslateY: SharedValue<number>
   scrollY: SharedValue<number>
-  scrollRef: React.RefObject<ScrollView>
+  scrollRef: React.RefObject<ScrollView | null>
 }
 
 export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {

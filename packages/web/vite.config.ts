@@ -63,6 +63,8 @@ export default defineConfig(async ({ mode }) => {
       'process.env': env
     },
     optimizeDeps: {
+      include: ['react', 'react-dom'],
+      dedupe: ['react', 'react-dom'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
@@ -130,6 +132,9 @@ export default defineConfig(async ({ mode }) => {
     ],
     resolve: {
       alias: {
+        // Ensure single React instance to prevent ReactCurrentDispatcher errors
+        react: path.resolve(__dirname, '../../node_modules/react'),
+        'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
         // Can't use vite-tsconfig-paths because of vike
         app: '/src/app',
         assets: '/src/assets',

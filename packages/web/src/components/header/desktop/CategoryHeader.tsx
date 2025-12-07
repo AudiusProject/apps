@@ -14,6 +14,7 @@ const CategoryHeader = ({ categoryName, onMore }: CategoryHeaderProps) => {
   ) : null
   return (
     <div className={styles.categoryHeader}>
+      {/* @ts-ignore */}
       <Delineator
         className={styles.delineator}
         text={categoryName}

@@ -19,7 +19,7 @@ import styles from './Scrollbar.module.css'
 import { ScrollbarProps } from './types'
 
 const ScrollbarContext = createContext<{
-  scrollBarRef: RefObject<HTMLElement> | null
+  scrollBarRef: RefObject<HTMLElement | null> | null
 }>({
   scrollBarRef: null
 })
