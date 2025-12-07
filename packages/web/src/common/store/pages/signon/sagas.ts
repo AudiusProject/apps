@@ -580,7 +580,7 @@ function* signUp() {
                 }
               }
 
-              const { blockNumber, metadata } = yield* call(
+              const { metadata } = yield* call(
                 [sdk.users, sdk.users.createUser],
                 createUserMetadata
               )

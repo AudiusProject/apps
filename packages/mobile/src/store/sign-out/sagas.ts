@@ -21,7 +21,6 @@ import {
 } from 'app/constants/storage-keys'
 import { localStorage } from 'app/services/local-storage'
 
-import { resetOAuthState } from '../oauth/actions'
 import { clearOfflineDownloads } from '../offline-downloads/slice'
 import { deregisterPushNotifications } from '../settings/sagas'
 
@@ -44,7 +43,6 @@ function* signOut() {
   yield* put(feedPageLineupActions.reset())
 
   yield* put(clearHistory())
-  yield* put(resetOAuthState())
   yield* put(clearOfflineDownloads())
   yield* put(resetWalletState())
   yield* put(resetSignOn())
