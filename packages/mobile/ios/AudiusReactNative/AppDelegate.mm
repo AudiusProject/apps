@@ -4,8 +4,8 @@
 #import <GoogleCast/GoogleCast.h>
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
-#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import <React/RCTRootView.h>
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import <React/RCTLinkingManager.h>
 #import "RNNotifications.h"
 #import <TiktokOpensdkReactNative-Bridging-Header.h>
@@ -49,9 +49,20 @@
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
-  [super application:application didFinishLaunchingWithOptions:launchOptions];
+  BOOL result = [super application:application didFinishLaunchingWithOptions:launchOptions];
+  
+  // For react-native-bootsplash v6 with new architecture, we need to initialize after root view is created
+  // The storyboard shows initially, but we need to connect it to React Native for useHideAnimation to work
 
-  return YES;
+  return result;
+}
+
+// Override customizeRootView for React Native 0.74+ with new architecture
+- (void)customizeRootView:(RCTRootView *)rootView {
+  [super customizeRootView:rootView];
+  if (rootView != nil) {
+    [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView];
+  }
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
@@ -83,11 +94,6 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
   [RNNotifications didReceiveBackgroundNotification:userInfo withCompletionHandler:completionHandler];
-}
-
-- (void)customizeRootView:(RCTRootView *)rootView {
-  [super customizeRootView:rootView];
-  [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView]; // ⬅️ initialize the splash screen
 }
 
 @end

@@ -15,6 +15,7 @@
 		23A43AB92E37E73000CDCDF2 /* RichPushExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 23A43AB12E37E73000CDCDF2 /* RichPushExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		253BCCFA2B324974007DC74C /* NSureSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 253BCCF92B324974007DC74C /* NSureSDK.m */; };
 		32FE1B49FE7E47B69CF28E06 /* AvenirNextLTPro-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = EA6D8E31A68B4451B423AFF0 /* AvenirNextLTPro-Bold.otf */; };
+		43C373D295154DA6B89272D5 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04F6B3542BF84180BC937315 /* Colors.xcassets */; };
 		5983D8FED74747CCA45F8FC4 /* AvenirNextLTPro-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 33E11CC84EEA4109B8A1AE2C /* AvenirNextLTPro-Medium.otf */; };
 		7103C3ED2929C6B5002B9072 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7103C3EC2929C6B5002B9072 /* BootSplash.storyboard */; };
 		717F36E82733C73F0017511F /* AvenirNextLTPro-DemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 717F36E72733C73F0017511F /* AvenirNextLTPro-DemiBold.otf */; };
@@ -57,6 +58,7 @@
 /* Begin PBXFileReference section */
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* AudiusReactNativeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudiusReactNativeTests.m; sourceTree = "<group>"; };
+		04F6B3542BF84180BC937315 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = AudiusReactNative/Colors.xcassets; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Audius Music.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Audius Music.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = AudiusReactNative/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = AudiusReactNative/AppDelegate.mm; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				83F7359E23C55C2D0040A4C5 /* AirplayViewManager.m */,
 				83F735A423C64C950040A4C5 /* AirplayEvent.m */,
+				04F6B3542BF84180BC937315 /* Colors.xcassets */,
 			);
 			name = AudiusReactNative;
 			sourceTree = "<group>";
@@ -343,6 +346,7 @@
 				CFE33B15004249189EB75CDC /* AvenirNextLTPro-UltLt.otf in Resources */,
 				F50849B3CA2D48F3852465FA /* AvenirNextLTPro-Light.otf in Resources */,
 				9A21B5C22EF94A738EBABFED /* AvenirNextLTPro-Thin.otf in Resources */,
+				43C373D295154DA6B89272D5 /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -488,6 +492,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "AudiusReactNative/Audius Music.entitlements";
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = LRFCG93S85;
 				INFOPLIST_FILE = AudiusReactNative/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.5;

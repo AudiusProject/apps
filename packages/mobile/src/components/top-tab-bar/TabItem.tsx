@@ -4,6 +4,7 @@ import Animated, {
   useAnimatedStyle,
   Extrapolate
 } from 'react-native-reanimated'
+import type { SharedValue } from 'react-native-reanimated'
 
 import { Text } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
@@ -28,7 +29,7 @@ export type TabItemProps = {
   route: any
   index: number
   isFocused: boolean
-  indexDecimal: Animated.SharedValue<number>
+  indexDecimal: SharedValue<number>
   options: any
   onPress: () => void
   onLongPress: () => void

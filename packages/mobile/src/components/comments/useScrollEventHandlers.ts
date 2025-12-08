@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import type {
   ScrollEventHandlerCallbackType,
   ScrollEventsHandlersHookType
@@ -8,7 +10,7 @@ import {
   SHEET_STATE,
   SCROLLABLE_STATE
 } from '@gorhom/bottom-sheet'
-import { scrollTo, useWorkletCallback } from 'react-native-reanimated'
+import { scrollTo } from 'react-native-reanimated'
 
 export type ScrollEventContextType = {
   initialContentOffsetY: number
@@ -31,8 +33,9 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
 
   // #region callbacks
   const handleOnScroll: ScrollEventHandlerCallbackType<ScrollEventContextType> =
-    useWorkletCallback(
+    useCallback(
       ({ contentOffset: { y } }, context) => {
+        'worklet'
         rootScrollableContentOffsetY.value = y
         /**
          * if sheet position is extended or fill parent, then we reset
@@ -78,8 +81,9 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
       ]
     )
   const handleOnBeginDrag: ScrollEventHandlerCallbackType<ScrollEventContextType> =
-    useWorkletCallback(
+    useCallback(
       ({ contentOffset: { y } }, context) => {
+        'worklet'
         scrollableContentOffsetY.value = y
         rootScrollableContentOffsetY.value = y
         context.initialContentOffsetY = y
@@ -105,8 +109,9 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
       ]
     )
   const handleOnEndDrag: ScrollEventHandlerCallbackType<ScrollEventContextType> =
-    useWorkletCallback(
+    useCallback(
       ({ contentOffset: { y } }, context) => {
+        'worklet'
         const atSnapPoint = animatedSnapPoints.value.some(
           (v) => animatedPosition.value === v
         )
@@ -139,8 +144,9 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
       ]
     )
   const handleOnMomentumEnd: ScrollEventHandlerCallbackType<ScrollEventContextType> =
-    useWorkletCallback(
+    useCallback(
       ({ contentOffset: { y } }, context) => {
+        'worklet'
         const atSnapPoint = animatedSnapPoints.value.some(
           (v) => animatedPosition.value === v
         )

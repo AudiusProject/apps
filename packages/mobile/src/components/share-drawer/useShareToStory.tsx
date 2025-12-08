@@ -11,11 +11,8 @@ import type { ShareContent } from '@audius/common/store'
 import { uuid } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
-import {
-  activateKeepAwake,
-  deactivateKeepAwake
-} from '@sayem314/react-native-keep-awake'
 import { CreativeKit } from '@snapchat/snap-kit-react-native'
+import { useKeepAwake } from '@thehale/react-native-keep-awake'
 import type { FFmpegSession } from 'ffmpeg-kit-react-native'
 import { FFmpegKit, FFmpegKitConfig, ReturnCode } from 'ffmpeg-kit-react-native'
 import { Platform, View } from 'react-native'
@@ -130,6 +127,9 @@ export const useShareToStory = ({
   const { data: userId } = useCurrentUserId()
   const [selectedPlatform, setSelectedPlatform] =
     useState<ShareToStoryPlatform | null>(null)
+
+  // Keep screen awake when sharing to story
+  useKeepAwake()
   const trackTitle =
     content?.type === 'track' ? content?.track.title : undefined
   const artistHandle =
@@ -197,7 +197,6 @@ export const useShareToStory = ({
   // Actions that should always be taken once the story generation is finished (cancelled, errored, or successful):
   const cleanup = useCallback(
     (reopenShareModal = true) => {
-      deactivateKeepAwake()
       dispatch(reset())
       toggleProgressDrawer(false, undefined, reopenShareModal)
       setSelectedPlatform(null)
@@ -307,7 +306,6 @@ export const useShareToStory = ({
         dispatch(reset())
         cancelRef.current = false
 
-        activateKeepAwake()
         dispatch(setCancel(() => cancelStory(platform)))
         toggleProgressDrawer(true, platform)
         dispatch(setProgress(10))
@@ -451,7 +449,6 @@ export const useShareToStory = ({
               })
               // Give Instagram time to open before cleanup
               setTimeout(() => {
-                deactivateKeepAwake()
                 dispatch(reset())
                 toggleProgressDrawer(false, undefined, false)
                 setSelectedPlatform(null)
@@ -495,7 +492,6 @@ export const useShareToStory = ({
         if (Platform.OS === 'android') {
           // Delay cleanup on Android to prevent app from coming back to foreground
           setTimeout(() => {
-            deactivateKeepAwake()
             dispatch(reset())
             toggleProgressDrawer(false, undefined, false)
             setSelectedPlatform(null)

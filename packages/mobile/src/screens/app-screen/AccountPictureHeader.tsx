@@ -13,6 +13,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
+import type { SharedValue } from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
 import { ProfilePicture } from 'app/components/core'
@@ -50,7 +51,7 @@ type AccountPictureHeaderProps = {
 
 export const AccountPictureHeader = (props: AccountPictureHeaderProps) => {
   const { onPress, style } = props
-  const drawerProgress = useDrawerProgress() as Animated.SharedValue<number>
+  const drawerProgress = useDrawerProgress() as SharedValue<number>
   const styles = useStyles()
   const { data: accountId } = useCurrentUserId()
   const challengeRewardIds = useRemoteVar(StringKeys.CHALLENGE_REWARD_IDS)

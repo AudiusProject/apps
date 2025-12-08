@@ -98,6 +98,7 @@ class PushNotifications {
 
     if (Platform.OS === MobileOS.ANDROID) {
       // For android, Notifications.registerRemoteNotifications is supposed to prompt user for permission but its currently not
+      // @ts-expect-error POST_NOTIFICATIONS might not be in types for this version but exists at runtime for Android 13+
       await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
     }
 

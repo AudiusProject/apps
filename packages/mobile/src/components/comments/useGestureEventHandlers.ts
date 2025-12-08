@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import type {
   GestureEventHandlerCallbackType,
   GestureEventsHandlersHookType
@@ -11,7 +13,7 @@ import {
   useBottomSheetInternal
 } from '@gorhom/bottom-sheet'
 import { Keyboard, Platform } from 'react-native'
-import { runOnJS, useWorkletCallback } from 'react-native-reanimated'
+import { runOnJS } from 'react-native-reanimated'
 
 export const clamp = (
   value: number,
@@ -72,8 +74,9 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
 
   // #region gesture methods
   const handleOnStart: GestureEventHandlerCallbackType<GestureEventContextType> =
-    useWorkletCallback(
+    useCallback(
       function handleOnStart(__, _, context) {
+        'worklet'
         // cancel current animation
         stopAnimation()
 
@@ -98,8 +101,9 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
     )
 
   const handleOnActive: GestureEventHandlerCallbackType<GestureEventContextType> =
-    useWorkletCallback(
+    useCallback(
       function handleOnActive(source, { translationY }, context) {
+        'worklet'
         let highestSnapPoint = animatedHighestSnapPoint.value
 
         /**
@@ -269,12 +273,13 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
       ]
     )
   const handleOnEnd: GestureEventHandlerCallbackType<GestureEventContextType> =
-    useWorkletCallback(
+    useCallback(
       function handleOnEnd(
         source,
         { translationY, absoluteY, velocityY },
         context
       ) {
+        'worklet'
         const highestSnapPoint = animatedHighestSnapPoint.value
         const isSheetAtHighestSnapPoint =
           animatedPosition.value === highestSnapPoint

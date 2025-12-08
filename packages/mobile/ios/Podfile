@@ -91,6 +91,14 @@ target 'AudiusReactNative' do
       end
     end
 
+    # Fix for GenerateDSYMFile error with new architecture
+    installer.pods_project.build_configurations.each do |config|
+      if config.name == 'Debug'
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
+        config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'NO'
+      end
+    end
+
   end
 end
 

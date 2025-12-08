@@ -36,7 +36,7 @@ if [[ -z "${SKIP_POD_INSTALL}" ]]; then
       bundle check || bundle install
     fi
     if command -v pod >/dev/null; then
-      RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
+      bundle exec pod install
     fi
     cd ../../..
   } > /dev/null

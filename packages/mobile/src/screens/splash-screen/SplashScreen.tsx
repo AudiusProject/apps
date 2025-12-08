@@ -1,12 +1,8 @@
 import { useState, useRef } from 'react'
 
-import { Animated, Platform, StyleSheet } from 'react-native'
+import { Animated, Image, Platform } from 'react-native'
 import * as BootSplash from 'react-native-bootsplash'
 import { useAsync } from 'react-use'
-
-import SplashLogo from 'app/assets/images/bootsplash_logo.svg'
-import { makeStyles } from 'app/styles'
-import { zIndex } from 'app/utils/zIndex'
 
 /**
  * Assets for this splash screen are generated with
@@ -23,21 +19,6 @@ const RENDER_WIDTH = 1000
 const START_SIZE = 0.15
 const END_SIZE = 1
 
-const useStyles = makeStyles(({ palette }) => {
-  return {
-    splash: {
-      zIndex: zIndex.SPLASH_SCREEN,
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: palette.staticSecondary
-    },
-    logo: {
-      width: RENDER_WIDTH
-    }
-  }
-})
-
 type SplashScreenProps = {
   canDismiss: boolean
   onDismiss: () => void
@@ -53,17 +34,17 @@ export const SplashScreen = (props: SplashScreenProps) => {
 
 const IosSplashScreen = (props: SplashScreenProps) => {
   const { canDismiss, onDismiss } = props
-  const styles = useStyles()
   const opacity = useRef(new Animated.Value(1)).current
   const scale = useRef(new Animated.Value(START_SIZE)).current
   const [isShowing, setIsShowing] = useState(true)
 
-  const { container } = BootSplash.useHideAnimation({
-    // @ts-expect-error this is not implemented in the type but is valid
-    // https://github.com/zoontek/react-native-bootsplash?tab=readme-ov-file#method-type-2
+  // useHideAnimation requires logo source and proper usage of returned props
+  const { container, logo } = BootSplash.useHideAnimation({
     ready: canDismiss,
-    manifest: require('../../assets/images/bootsplash_manifest.json'),
+    manifest: require('../../assets/images/manifest.json'),
+    logo: require('../../assets/images/logo.png'), // Provide logo source
     animate: () => {
+      // This is called after the native splash is hidden
       Animated.spring(scale, {
         useNativeDriver: true,
         tension: 10,
@@ -92,17 +73,20 @@ const IosSplashScreen = (props: SplashScreenProps) => {
   })
 
   return isShowing ? (
-    <Animated.View
-      {...container}
-      style={[StyleSheet.absoluteFill, styles.splash, { opacity }]}
-    >
+    <Animated.View {...container} style={[container.style, { opacity }]}>
       <Animated.View
         style={[
-          styles.logo,
-          { transform: [{ scaleX: scale }, { scaleY: scale }] }
+          {
+            width: RENDER_WIDTH,
+            height: (125 / 150) * RENDER_WIDTH, // Maintain aspect ratio
+            transform: [{ scaleX: scale }, { scaleY: scale }],
+            alignItems: 'center',
+            justifyContent: 'center'
+          }
         ]}
       >
-        <SplashLogo />
+        {/* Use the logo from useHideAnimation - it handles sizing and loading */}
+        <Image {...logo} />
       </Animated.View>
     </Animated.View>
   ) : null

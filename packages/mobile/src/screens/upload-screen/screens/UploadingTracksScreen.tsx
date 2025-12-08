@@ -7,7 +7,7 @@ import {
   UploadType
 } from '@audius/common/store'
 import { useRoute } from '@react-navigation/native'
-import { useKeepAwake } from '@sayem314/react-native-keep-awake'
+import { useKeepAwake } from '@thehale/react-native-keep-awake'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffectOnce } from 'react-use'
