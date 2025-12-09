@@ -2,7 +2,6 @@ import type { ReactElement } from 'react'
 import { useRef } from 'react'
 
 import type { MaterialTopTabNavigationOptions } from '@react-navigation/material-top-tabs'
-import type { MaterialTopTabDescriptorMap } from '@react-navigation/material-top-tabs/lib/typescript/src/types'
 import type { DefaultRouterOptions } from '@react-navigation/native'
 import {
   createNavigatorFactory,
@@ -70,7 +69,8 @@ export const CollapsibleTabNavigator = ({
           ...props,
           state,
           navigation,
-          descriptors: descriptors as unknown as MaterialTopTabDescriptorMap
+          // @ts-expect-error
+          descriptors
         })
       }
       onTabChange={onTabChange}

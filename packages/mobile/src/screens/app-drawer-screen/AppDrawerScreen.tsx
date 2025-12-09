@@ -1,8 +1,7 @@
 import { memo, useMemo, useState } from 'react'
 
+import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import { createDrawerNavigator } from '@react-navigation/drawer'
-// eslint-disable-next-line import/no-unresolved
-import type { DrawerNavigationHelpers } from '@react-navigation/drawer/lib/typescript/src/types'
 import { useNavigation } from '@react-navigation/native'
 import { Dimensions } from 'react-native'
 
@@ -19,7 +18,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 const Drawer = createDrawerNavigator()
 
 type AppTabScreenProps = {
-  navigation: DrawerNavigationHelpers
+  navigation: DrawerContentComponentProps['navigation']
   gesturesDisabled: boolean
   setGesturesDisabled: (gesturesDisabled: boolean) => void
 }

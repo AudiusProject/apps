@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react'
 import { useMemo, createContext } from 'react'
 
-// eslint-disable-next-line import/no-unresolved
-import type { DrawerNavigationHelpers } from '@react-navigation/drawer/lib/typescript/src/types'
+import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import type { NavigationProp } from '@react-navigation/native'
 
 type AppDrawerContextType = {
-  drawerHelpers: DrawerNavigationHelpers
+  drawerHelpers: DrawerContentComponentProps['navigation']
   drawerNavigation?: NavigationProp<any>
   gesturesDisabled?: boolean
   setGesturesDisabled?: (gestureDisabled: boolean) => void

@@ -69,7 +69,10 @@ export const ProfileScreen = () => {
   }, [dispatch, handleLower])
 
   const currentTab = useNavigationState((state) => {
-    const tabIndex = state.routes[1].state?.index
+    const tabIndex = state.routes[state.index]?.state?.index
+    if (tabIndex === undefined) {
+      return ProfilePageTabs.TRACKS
+    }
     if (profile?.track_count && profile?.track_count > 0) {
       switch (tabIndex) {
         case 0:

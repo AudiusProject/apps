@@ -1,6 +1,7 @@
 import { useCallback, useContext } from 'react'
 
 import type { ParamListBase, RouteProp } from '@react-navigation/core'
+import type { Theme } from '@react-navigation/native'
 import type {
   NativeStackNavigationOptions,
   NativeStackNavigationProp
@@ -42,14 +43,15 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   }
 }))
 
-type ParamList = AppScreenParamList
-
-type Options = {
-  navigation: NativeStackNavigationProp<ParamList>
-  route: RouteProp<ParamListBase>
+type Options<ParamList extends ParamListBase = AppScreenParamList> = {
+  navigation: NativeStackNavigationProp<ParamList, string, string | undefined>
+  route: RouteProp<ParamList, string>
+  theme: Theme
 }
 
-export const useAppScreenOptions = (
+export const useAppScreenOptions = <
+  ParamList extends ParamListBase = AppScreenParamList
+>(
   overrides?: Partial<NativeStackNavigationOptions>
 ) => {
   const styles = useStyles()
@@ -67,83 +69,84 @@ export const useAppScreenOptions = (
     })
   }, [navigation])
 
-  const screenOptions: (options: Options) => NativeStackNavigationOptions =
-    useCallback(
-      (options) => {
-        const { navigation, route } = options
-        const { params } = route
-        const isFromAppLeftDrawer =
-          params && (params as ContextualParams).fromAppDrawer
+  const screenOptions: (
+    options: Options<ParamList>
+  ) => NativeStackNavigationOptions = useCallback(
+    (options) => {
+      const { navigation, route } = options
+      const { params } = route
+      const isFromAppLeftDrawer =
+        params && (params as ContextualParams).fromAppDrawer
 
-        return {
-          animation: isFromAppLeftDrawer ? 'none' : 'default',
-          fullScreenGestureEnabled: true,
-          freezeOnBlur: true,
-          cardOverlayEnabled: true,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          headerShadowVisible: false,
-          headerTitleAlign: 'center',
-          headerBackVisible: false,
-          headerLeft: (props) => {
-            const { canGoBack, ...other } = props
-            if (canGoBack) {
-              return (
-                <View style={styles.headerLeft}>
-                  <IconButton
-                    icon={IconCaretLeft}
-                    color='subdued'
-                    size='l'
-                    {...other}
-                    onPress={() => navigation.pop()}
-                  />
-                </View>
-              )
-            }
+      return {
+        animation: isFromAppLeftDrawer ? 'none' : 'default',
+        fullScreenGestureEnabled: true,
+        freezeOnBlur: true,
+        cardOverlayEnabled: true,
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        headerShadowVisible: false,
+        headerTitleAlign: 'center',
+        headerBackVisible: false,
+        headerLeft: (props) => {
+          const { canGoBack, ...other } = props
+          if (canGoBack) {
             return (
-              <View style={[styles.headerLeft, { marginLeft: 0 }]}>
-                <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
-              </View>
-            )
-          },
-          title: '',
-          headerTitle: ({ children }) => {
-            if (children === 'none') return null
-            if (children) {
-              return (
-                <Text style={styles.title} accessibilityRole='header'>
-                  {children}
-                </Text>
-              )
-            }
-            return (
-              <View>
-                <IconAudiusLogoHorizontal
-                  height={24}
-                  width={100}
-                  color='subdued'
-                />
-              </View>
-            )
-          },
-          headerRightContainerStyle: styles.headerRight,
-          headerRight: () => {
-            return (
-              <View style={styles.headerRight}>
+              <View style={styles.headerLeft}>
                 <IconButton
-                  icon={IconSearch}
-                  onPress={handlePressSearch}
-                  hitSlop={20}
+                  icon={IconCaretLeft}
                   color='subdued'
-                  size='m'
+                  size='l'
+                  {...other}
+                  onPress={() => navigation.pop()}
                 />
               </View>
             )
-          },
-          ...overrides
-        }
-      },
-      [handleOpenLeftNavDrawer, handlePressSearch, styles, overrides]
-    )
+          }
+          return (
+            <View style={[styles.headerLeft, { marginLeft: 0 }]}>
+              <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
+            </View>
+          )
+        },
+        title: '',
+        headerTitle: ({ children }) => {
+          if (children === 'none') return null
+          if (children) {
+            return (
+              <Text style={styles.title} accessibilityRole='header'>
+                {children}
+              </Text>
+            )
+          }
+          return (
+            <View>
+              <IconAudiusLogoHorizontal
+                height={24}
+                width={100}
+                color='subdued'
+              />
+            </View>
+          )
+        },
+        headerRightContainerStyle: styles.headerRight,
+        headerRight: () => {
+          return (
+            <View style={styles.headerRight}>
+              <IconButton
+                icon={IconSearch}
+                onPress={handlePressSearch}
+                hitSlop={20}
+                color='subdued'
+                size='m'
+              />
+            </View>
+          )
+        },
+        ...overrides
+      }
+    },
+    [handleOpenLeftNavDrawer, handlePressSearch, styles, overrides]
+  )
 
   return screenOptions
 }

@@ -1,7 +1,9 @@
 import { useCallback } from 'react'
 
-import type { BottomTabBarProps as RNBottomTabBarProps } from '@react-navigation/bottom-tabs'
-import type { BottomTabNavigationEventMap } from '@react-navigation/bottom-tabs/lib/typescript/src/types'
+import type {
+  BottomTabNavigationEventMap,
+  BottomTabBarProps as RNBottomTabBarProps
+} from '@react-navigation/bottom-tabs'
 import type { NavigationHelpers, ParamListBase } from '@react-navigation/native'
 import { Animated } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

@@ -11,8 +11,14 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
-import { TabView, SceneMap, TabBar, TabBarItem } from 'react-native-tab-view'
-import type { Props as TabBarItemProps } from 'react-native-tab-view/lib/typescript/src/TabBarItem'
+import {
+  TabView,
+  SceneMap,
+  TabBar,
+  TabBarItem,
+  type TabBarItemProps,
+  type Route
+} from 'react-native-tab-view'
 import { usePrevious } from 'react-use'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
@@ -61,11 +67,6 @@ export type RemixContestTabParamList = {
 type RemixContestSectionProps = {
   trackId: ID
   scrollRef?: RefObject<FlatList | null>
-}
-
-type Route = {
-  key: string
-  title: string
 }
 
 const AnimatedPaper = Animated.createAnimatedComponent(Paper)
