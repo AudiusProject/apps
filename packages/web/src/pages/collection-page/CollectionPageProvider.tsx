@@ -205,21 +205,23 @@ class CollectionPageClassComponent extends Component<
 
   componentDidMount() {
     this.fetchCollection(getPathname(this.props.location), true)
-    this.unlisten = this.props.history.listen((location, action) => {
-      if (
-        action !== 'REPLACE' &&
-        getPathname(this.props.location) !== getPathname(location)
-      ) {
-        // If the action is not replace (e.g. we are not trying to update
-        // the URL for the same playlist. Reset it.)
-        this.resetCollection()
-      }
-      this.fetchCollection(getPathname(location), true)
-      this.setState({
-        initialOrder: null,
-        reordering: null
+    if (this.props.history?.listen) {
+      this.unlisten = this.props.history.listen((location, action) => {
+        if (
+          action !== 'REPLACE' &&
+          getPathname(this.props.location) !== getPathname(location)
+        ) {
+          // If the action is not replace (e.g. we are not trying to update
+          // the URL for the same playlist. Reset it.)
+          this.resetCollection()
+        }
+        this.fetchCollection(getPathname(location), true)
+        this.setState({
+          initialOrder: null,
+          reordering: null
+        })
       })
-    })
+    }
   }
 
   componentDidUpdate(prevProps: CollectionClassProps) {
