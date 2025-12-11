@@ -7,6 +7,7 @@ apis/DeveloperAppsApi.ts
 apis/EventsApi.ts
 apis/ExploreApi.ts
 apis/PlaylistsApi.ts
+apis/PrizesApi.ts
 apis/ResolveApi.ts
 apis/RewardsApi.ts
 apis/TipsApi.ts
@@ -31,6 +32,8 @@ models/ChallengeResponse.ts
 models/ClaimRewardsRequest.ts
 models/ClaimRewardsResponse.ts
 models/ClaimRewardsResponseDataInner.ts
+models/ClaimedPrize.ts
+models/ClaimedPrizesResponse.ts
 models/Coin.ts
 models/CoinArtistFees.ts
 models/CoinArtistLocker.ts
@@ -99,6 +102,10 @@ models/PlaylistResponse.ts
 models/PlaylistSearchResult.ts
 models/PlaylistTracksResponse.ts
 models/PlaylistsResponse.ts
+models/PrizeClaimRequest.ts
+models/PrizeClaimResponse.ts
+models/PrizePublic.ts
+models/PrizesResponse.ts
 models/ProfilePicture.ts
 models/PurchasersResponse.ts
 models/RedeemAmountResponse.ts
