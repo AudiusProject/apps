@@ -91,6 +91,11 @@ export type LineupProps = {
    */
   leadingElementDelineator?: ReactElement
 
+  /**
+   * Whether to show the artist pick icon on track tiles (only on profile page)
+   */
+  showArtistPick?: boolean
+
   /** The number of tracks to fetch in each request */
   limit?: number
 
@@ -188,7 +193,7 @@ export type TogglePlayConfig = {
 
 export type LineupItemTileProps = Pick<
   LineupProps,
-  'isTrending' | 'leadingElementId' | 'itemStyles'
+  'isTrending' | 'leadingElementId' | 'itemStyles' | 'showArtistPick'
 > & {
   rankIconCount: number
   item: LineupItem | LoadingLineupItem

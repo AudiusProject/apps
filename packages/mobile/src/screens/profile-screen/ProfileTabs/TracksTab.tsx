@@ -38,6 +38,7 @@ export const TracksTab = () => {
       selfLoad
       pullToRefresh
       leadingElementId={artist_pick_track_id}
+      showArtistPick={true}
       actions={tracksActions}
       lineup={lineup}
       fetchPayload={fetchPayload}

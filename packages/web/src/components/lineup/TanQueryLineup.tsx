@@ -97,6 +97,11 @@ export interface TanQueryLineupProps {
    */
   leadingElementTileProps?: Partial<TileProps>
 
+  /**
+   * Whether to show the artist pick icon on track tiles (only on profile page)
+   */
+  showArtistPick?: boolean
+
   ordered?: boolean
   lineupContainerStyles?: string
   tileContainerStyles?: string
@@ -167,6 +172,7 @@ export const TanQueryLineup = ({
   loadMoreThreshold = DEFAULT_LOAD_MORE_THRESHOLD,
   offset = 0,
   shouldLoadMore = true,
+  showArtistPick = false,
   data,
   pageSize,
   lineup = defaultLineup,
@@ -368,7 +374,8 @@ export const TanQueryLineup = ({
             onClick: onClickTile,
             source: ModalSource.LineUpTrackTile,
             isBuffering,
-            playingSource
+            playingSource,
+            showArtistPick
           }
 
           // @ts-ignore - the types here need work - we're not passing the full expected types here whenever we pass isLoading: true

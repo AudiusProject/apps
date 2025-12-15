@@ -69,6 +69,7 @@ export type TrackTileProps = TileProps & {
   uploadText?: string
   uploadError?: boolean
   isArtistPick?: boolean
+  showArtistPick?: boolean
   isUnlisted?: boolean
   coSign?: Remix | null
   releaseDate?: Nullable<string>

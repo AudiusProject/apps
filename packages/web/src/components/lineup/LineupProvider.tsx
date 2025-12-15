@@ -155,6 +155,11 @@ export interface LineupProviderProps {
   leadingElementTileProps?: Partial<TileProps>
 
   /**
+   * Whether to show the artist pick icon on track tiles (only on profile page)
+   */
+  showArtistPick?: boolean
+
+  /**
    * Class name to optionally apply to the leading element
    */
   leadingElementClassName?: string
@@ -528,7 +533,8 @@ class LineupProvider extends PureComponent<CombinedProps, LineupProviderState> {
             hasLoaded: this.hasLoaded,
             isTrending,
             onClick: onClickTile,
-            source: ModalSource.LineUpTrackTile
+            source: ModalSource.LineUpTrackTile,
+            showArtistPick: this.props.showArtistPick
           }
           if (entry.id === leadingElementId) {
             trackProps = { ...trackProps, ...leadingElementTileProps }

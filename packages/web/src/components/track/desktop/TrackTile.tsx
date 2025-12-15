@@ -76,6 +76,7 @@ export type TrackTileProps = {
   onClick?: (trackId: ID) => void
   dragKind?: DragDropKind
   noShimmer?: boolean
+  showArtistPick?: boolean
 }
 
 export const TrackTile = ({
@@ -94,7 +95,8 @@ export const TrackTile = ({
   isFeed = false,
   onClick,
   dragKind,
-  noShimmer
+  noShimmer,
+  showArtistPick = false
 }: TrackTileProps) => {
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -382,7 +384,7 @@ export const TrackTile = ({
                   )}
                 </Flex>
                 <Flex gap='s' alignItems='center'>
-                  {isArtistPick ? (
+                  {showArtistPick && isArtistPick ? (
                     <IconText icons={[{ icon: IconPin }]}>
                       {messages.artistPick}
                     </IconText>

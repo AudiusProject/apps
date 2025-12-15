@@ -144,7 +144,8 @@ const LineupTileView = memo(function LineupTileView({
   togglePlay,
   onPress,
   itemStyles,
-  actions
+  actions,
+  showArtistPick
 }: LineupTileViewProps) {
   const TrackOrCollectionTile = getLineupTileComponent(item)
 
@@ -165,6 +166,7 @@ const LineupTileView = memo(function LineupTileView({
           onPress={onPress}
           uid={item.uid}
           actions={actions}
+          showArtistPick={showArtistPick}
         />
       </View>
     )
@@ -184,7 +186,8 @@ const LineupItemTile = memo(function LineupItemTile({
   togglePlay,
   onPress,
   itemStyles,
-  actions
+  actions,
+  showArtistPick
 }: LineupItemTileProps) {
   if (!item) return null
   if ('_loading' in item) {
@@ -201,6 +204,7 @@ const LineupItemTile = memo(function LineupItemTile({
         onPress={onPress}
         itemStyles={itemStyles}
         actions={actions}
+        showArtistPick={showArtistPick}
       />
     )
   }
@@ -242,6 +246,7 @@ export const Lineup = ({
   initialPageSize,
   pageSize,
   tanQuery,
+  showArtistPick = false,
   ...listProps
 }: LineupProps) => {
   const dispatch = useDispatch()
@@ -419,6 +424,7 @@ export const Lineup = ({
           onPress={onPressItem}
           itemStyles={itemStyles}
           actions={actions}
+          showArtistPick={showArtistPick}
         />
       )
     },
@@ -429,7 +435,8 @@ export const Lineup = ({
       togglePlay,
       onPressItem,
       itemStyles,
-      actions
+      actions,
+      showArtistPick
     ]
   )
 

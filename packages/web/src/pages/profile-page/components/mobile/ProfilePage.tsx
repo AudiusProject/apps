@@ -357,6 +357,7 @@ const ProfilePage = g(
               <Lineup
                 {...getLineupProps(artistTracks)}
                 leadingElementId={profile.artist_pick_track_id}
+                showArtistPick={true}
                 limit={profile.track_count}
                 loadMore={loadMoreArtistTracks}
                 playTrack={playArtistTrack}

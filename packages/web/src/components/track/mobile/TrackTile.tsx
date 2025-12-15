@@ -103,7 +103,8 @@ export const TrackTile = ({
   containerClassName,
   isFeed = false,
   source,
-  noShimmer
+  noShimmer,
+  showArtistPick = false
 }: ConnectedTrackTileProps) => {
   const dispatch = useDispatch()
 
@@ -390,7 +391,7 @@ export const TrackTile = ({
             alignItems='center'
             className={cn(styles.duration, fadeIn)}
           >
-            {isArtistPick ? (
+            {showArtistPick && isArtistPick ? (
               <IconText icons={[{ icon: IconPin }]}>
                 {messages.artistPick}
               </IconText>

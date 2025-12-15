@@ -92,7 +92,8 @@ const LineupTileView = memo(function LineupTileView({
   togglePlay,
   onPress,
   itemStyles,
-  actions
+  actions,
+  showArtistPick
 }: LineupTileViewProps) {
   const TrackOrCollectionTile = getLineupTileComponent(item)
 
@@ -113,6 +114,7 @@ const LineupTileView = memo(function LineupTileView({
           onPress={onPress}
           uid={item.uid}
           actions={actions}
+          showArtistPick={showArtistPick}
         />
       </View>
     )
@@ -132,7 +134,8 @@ const LineupItemTile = memo(function LineupItemTile({
   togglePlay,
   onPress,
   itemStyles,
-  actions
+  actions,
+  showArtistPick
 }: LineupItemTileProps) {
   if (!item) return null
   if ('_loading' in item) {
@@ -151,6 +154,7 @@ const LineupItemTile = memo(function LineupItemTile({
         onPress={onPress}
         itemStyles={itemStyles}
         actions={actions}
+        showArtistPick={showArtistPick}
       />
     )
   }
@@ -226,6 +230,11 @@ export type LineupProps = {
    * Map of indices to JSX Elements that can be used to delineate the elements from the rest
    */
   delineatorMap?: Record<number, ReactElement>
+
+  /**
+   * Whether to show the artist pick icon on track tiles (only on profile page)
+   */
+  showArtistPick?: boolean
 
   /** The number of tracks to fetch in each request */
   limit?: number
@@ -362,6 +371,7 @@ export const TanQueryLineup = ({
   queryData = [],
   maxEntries = Infinity,
   hidePlayBarChin = false,
+  showArtistPick = false,
   ...listProps
 }: LineupProps) => {
   const debouncedLoadNextPage = useDebouncedCallback(
@@ -419,6 +429,7 @@ export const TanQueryLineup = ({
             onPress={onPressItem}
             itemStyles={itemStyles}
             actions={actions}
+            showArtistPick={showArtistPick}
           />
           {delineatorMap?.[index + indexOffset]
             ? delineatorMap[index + indexOffset]
@@ -434,7 +445,8 @@ export const TanQueryLineup = ({
       onPressItem,
       itemStyles,
       actions,
-      delineatorMap
+      delineatorMap,
+      showArtistPick
     ]
   )
 

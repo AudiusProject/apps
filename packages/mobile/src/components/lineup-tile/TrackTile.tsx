@@ -56,7 +56,15 @@ const { getTrackPosition } = playbackPositionSelectors
 const { setLockedContentId } = gatedContentActions
 
 export const TrackTile = (props: TrackTileProps) => {
-  const { id, onPress, togglePlay, variant, style, ...lineupTileProps } = props
+  const {
+    id,
+    onPress,
+    togglePlay,
+    variant,
+    style,
+    showArtistPick = false,
+    ...lineupTileProps
+  } = props
 
   const dispatch = useDispatch()
   const navigation = useNavigation()
@@ -293,7 +301,7 @@ export const TrackTile = (props: TrackTileProps) => {
         isLongFormContent={
           track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
         }
-        isArtistPick={isArtistPick}
+        isArtistPick={showArtistPick && isArtistPick}
       />
       <TrackTileStats
         trackId={track.track_id}

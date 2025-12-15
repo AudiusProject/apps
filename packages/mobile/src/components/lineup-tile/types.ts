@@ -35,6 +35,7 @@ export type TrackTileProps = {
   actions?: LineupBaseActions
   style?: StyleProp<ViewStyle>
   source?: LineupTileSource
+  showArtistPick?: boolean
 }
 
 export type CollectionTileProps = {

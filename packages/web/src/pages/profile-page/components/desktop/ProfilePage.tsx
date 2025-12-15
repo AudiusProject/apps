@@ -342,6 +342,7 @@ const ProfilePage = ({
               extraPrecedingElement={trackUploadChip}
               animateLeadingElement
               leadingElementId={profile.artist_pick_track_id}
+              showArtistPick={true}
               loadMore={loadMoreArtistTracks}
               playTrack={playArtistTrack}
               pauseTrack={pauseArtistTrack}
