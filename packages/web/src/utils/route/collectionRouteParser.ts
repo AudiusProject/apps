@@ -9,6 +9,23 @@ const {
   ALBUM_BY_PERMALINK_PAGE
 } = route
 
+/**
+ * Safely decodes a string if it's URL-encoded, otherwise returns as-is.
+ * This prevents double-encoding when values that are already encoded get encoded again.
+ * Needed because React Router v6's matchPath can return URL-encoded route parameters.
+ */
+const safeDecode = (value: string | null | undefined): string | null => {
+  if (!value) return null
+  try {
+    // Try to decode - if it changes, it was encoded; otherwise use original
+    const decoded = decodeURIComponent(value)
+    return decoded !== value ? decoded : value
+  } catch {
+    // If decoding fails, the value wasn't properly encoded or contains invalid sequences
+    return value
+  }
+}
+
 type CollectionRouteParams =
   | {
       collectionId: ID
@@ -43,7 +60,11 @@ export const parseCollectionRoute = (route: string): CollectionRouteParams => {
 
   if (playlistByPermalinkMatch) {
     const { handle, slug } = playlistByPermalinkMatch.params ?? {}
-    const permalink = `/${handle}/playlist/${slug}`
+    // Decode handle and slug before constructing permalink to prevent double-encoding
+    // React Router v6's matchPath can return URL-encoded route parameters
+    const decodedHandle = safeDecode(handle)
+    const decodedSlug = safeDecode(slug)
+    const permalink = `/${decodedHandle}/playlist/${decodedSlug}`
     return {
       title: null,
       collectionId: null,
@@ -56,7 +77,11 @@ export const parseCollectionRoute = (route: string): CollectionRouteParams => {
 
   if (albumByPermalinkMatch) {
     const { handle, slug } = albumByPermalinkMatch.params ?? {}
-    const permalink = `/${handle}/album/${slug}`
+    // Decode handle and slug before constructing permalink to prevent double-encoding
+    // React Router v6's matchPath can return URL-encoded route parameters
+    const decodedHandle = safeDecode(handle)
+    const decodedSlug = safeDecode(slug)
+    const permalink = `/${decodedHandle}/album/${decodedSlug}`
     return {
       title: null,
       collectionId: null,

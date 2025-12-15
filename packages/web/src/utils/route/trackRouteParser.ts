@@ -5,6 +5,23 @@ import { matchPath } from 'react-router-dom'
 
 const { TRACK_ID_PAGE, TRACK_PAGE } = route
 
+/**
+ * Safely decodes a string if it's URL-encoded, otherwise returns as-is.
+ * This prevents double-encoding when values that are already encoded get encoded again.
+ * Needed because React Router v6's matchPath can return URL-encoded route parameters.
+ */
+const safeDecode = (value: string | null | undefined): string | null => {
+  if (!value) return null
+  try {
+    // Try to decode - if it changes, it was encoded; otherwise use original
+    const decoded = decodeURIComponent(value)
+    return decoded !== value ? decoded : value
+  } catch {
+    // If decoding fails, the value wasn't properly encoded or contains invalid sequences
+    return value
+  }
+}
+
 export type TrackRouteParams =
   | { slug: string; trackId: null; handle: string }
   | { slug: null; trackId: ID; handle: null }
@@ -34,7 +51,11 @@ export const parseTrackRoute = (
       slug?: string
     }
     if (handle && slug) {
-      return { slug, trackId: null, handle }
+      // Decode handle and slug to prevent double-encoding when used in API calls
+      // React Router v6's matchPath can return URL-encoded route parameters
+      const decodedHandle = safeDecode(handle)
+      const decodedSlug = safeDecode(slug)
+      return { slug: decodedSlug, trackId: null, handle: decodedHandle }
     }
   }
 

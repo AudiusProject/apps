@@ -7,6 +7,23 @@ import { matchPath } from 'react-router-dom'
 
 const { USER_ID_PAGE, PROFILE_PAGE, staticRoutes } = route
 
+/**
+ * Safely decodes a string if it's URL-encoded, otherwise returns as-is.
+ * This prevents double-encoding when values that are already encoded get encoded again.
+ * Needed because React Router v6's matchPath can return URL-encoded route parameters.
+ */
+const safeDecode = (value: string | null | undefined): string | null => {
+  if (!value) return null
+  try {
+    // Try to decode - if it changes, it was encoded; otherwise use original
+    const decoded = decodeURIComponent(value)
+    return decoded !== value ? decoded : value
+  } catch {
+    // If decoding fails, the value wasn't properly encoded or contains invalid sequences
+    return value
+  }
+}
+
 type UserRouteParams =
   | { handle: string; userId: null; tab: null }
   | { handle: string; userId: null; tab: ProfilePageTabRoute }
@@ -33,13 +50,18 @@ export const parseUserRoute = (
   const profilePageMatch = matchPath(PROFILE_PAGE, route)
   if (profilePageMatch?.params?.handle) {
     const { handle } = profilePageMatch.params
-    return { handle, userId: null, tab: null }
+    // Decode handle to prevent double-encoding when used in API calls
+    // React Router v6's matchPath can return URL-encoded route parameters
+    const decodedHandle = safeDecode(handle)
+    return { handle: decodedHandle, userId: null, tab: null }
   }
 
   const commentHistoryMatch = matchPath(PROFILE_PAGE_COMMENTS, route)
   if (commentHistoryMatch?.params?.handle) {
     const { handle } = commentHistoryMatch.params
-    return { handle, userId: null, tab: null }
+    // Decode handle to prevent double-encoding when used in API calls
+    const decodedHandle = safeDecode(handle)
+    return { handle: decodedHandle, userId: null, tab: null }
   }
 
   const profilePageTabMatch = matchPath(`${PROFILE_PAGE}/:tab`, route)
@@ -55,7 +77,13 @@ export const parseUserRoute = (
         tab === 'playlists' ||
         tab === 'reposts')
     ) {
-      return { handle, userId: null, tab: tab as ProfilePageTabRoute }
+      // Decode handle to prevent double-encoding when used in API calls
+      const decodedHandle = safeDecode(handle)
+      return {
+        handle: decodedHandle,
+        userId: null,
+        tab: tab as ProfilePageTabRoute
+      }
     }
   }
 
