@@ -55,7 +55,9 @@ export const parseTrackRoute = (
       // React Router v6's matchPath can return URL-encoded route parameters
       const decodedHandle = safeDecode(handle)
       const decodedSlug = safeDecode(slug)
-      return { slug: decodedSlug, trackId: null, handle: decodedHandle }
+      if (decodedHandle && decodedSlug) {
+        return { slug: decodedSlug, trackId: null, handle: decodedHandle }
+      }
     }
   }
 

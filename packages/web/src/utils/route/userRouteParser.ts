@@ -53,7 +53,9 @@ export const parseUserRoute = (
     // Decode handle to prevent double-encoding when used in API calls
     // React Router v6's matchPath can return URL-encoded route parameters
     const decodedHandle = safeDecode(handle)
-    return { handle: decodedHandle, userId: null, tab: null }
+    if (decodedHandle) {
+      return { handle: decodedHandle, userId: null, tab: null }
+    }
   }
 
   const commentHistoryMatch = matchPath(PROFILE_PAGE_COMMENTS, route)
@@ -61,7 +63,9 @@ export const parseUserRoute = (
     const { handle } = commentHistoryMatch.params
     // Decode handle to prevent double-encoding when used in API calls
     const decodedHandle = safeDecode(handle)
-    return { handle: decodedHandle, userId: null, tab: null }
+    if (decodedHandle) {
+      return { handle: decodedHandle, userId: null, tab: null }
+    }
   }
 
   const profilePageTabMatch = matchPath(`${PROFILE_PAGE}/:tab`, route)
@@ -79,10 +83,12 @@ export const parseUserRoute = (
     ) {
       // Decode handle to prevent double-encoding when used in API calls
       const decodedHandle = safeDecode(handle)
-      return {
-        handle: decodedHandle,
-        userId: null,
-        tab: tab as ProfilePageTabRoute
+      if (decodedHandle) {
+        return {
+          handle: decodedHandle,
+          userId: null,
+          tab: tab as ProfilePageTabRoute
+        }
       }
     }
   }

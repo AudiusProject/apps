@@ -369,11 +369,15 @@ class CollectionPageClassComponent extends Component<
             }
             const normalizedPathname = normalizePathname(pathname)
             const normalizedTitle = normalizePathname(title)
-            const normalizedNewCollectionName = normalizePathname(newCollectionName)
+            const normalizedNewCollectionName =
+              normalizePathname(newCollectionName)
 
             // Only replace if the normalized values differ
             if (normalizedTitle !== normalizedNewCollectionName) {
-              const newPath = normalizedPathname.replace(normalizedTitle, normalizedNewCollectionName)
+              const newPath = normalizedPathname.replace(
+                normalizedTitle,
+                normalizedNewCollectionName
+              )
               this.props.replaceRoute(newPath)
             }
           }
