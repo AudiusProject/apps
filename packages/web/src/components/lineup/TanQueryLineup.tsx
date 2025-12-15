@@ -429,6 +429,7 @@ export const TanQueryLineup = ({
     onClickTile,
     isBuffering,
     playingSource,
+    showArtistPick,
     TrackTile,
     play,
     pause,
