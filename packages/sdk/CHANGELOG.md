@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 11.3.0
+
+### Minor Changes
+
+- 2059715: Add prize endpoint to SDK
+
 ## 11.2.0
 
 ### Minor Changes
