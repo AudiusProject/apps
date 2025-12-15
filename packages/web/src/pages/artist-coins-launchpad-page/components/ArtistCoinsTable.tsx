@@ -470,7 +470,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   }
 
   return (
-    <Flex ref={setTableNode} border='default' borderRadius='m'>
+    <Flex ref={setTableNode} border='default' borderRadius='m' w='100%'>
       <Table
         columns={columns}
         data={coins ?? []}

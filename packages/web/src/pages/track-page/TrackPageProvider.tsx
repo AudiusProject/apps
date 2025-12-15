@@ -251,12 +251,25 @@ class TrackPageProviderClass extends Component<
           if (
             pathname === this.state.pathname &&
             prevProps.track?.track_id === track?.track_id &&
-            trackPermalink &&
-            trackPermalink !== pathname
+            trackPermalink
           ) {
-            // The path is going to change but don't re-fetch as we already have the track
-            this.setState({ pathname: trackPermalink })
-            this.props.replaceRoute(trackPermalink)
+            // Normalize both pathnames for comparison (decode to handle encoded special chars)
+            // This prevents infinite loops when comparing decoded trackPermalink to encoded pathname
+            const normalizePathname = (p: string) => {
+              try {
+                return decodeURIComponent(p)
+              } catch {
+                return p
+              }
+            }
+            const normalizedPathname = normalizePathname(pathname)
+            const normalizedPermalink = normalizePathname(trackPermalink)
+
+            if (normalizedPermalink !== normalizedPathname) {
+              // The path is going to change but don't re-fetch as we already have the track
+              this.setState({ pathname: trackPermalink })
+              this.props.replaceRoute(trackPermalink)
+            }
           }
         }
       }

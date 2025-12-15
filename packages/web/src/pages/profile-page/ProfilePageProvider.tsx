@@ -238,7 +238,21 @@ class ProfilePageClassComponent extends PureComponent<
         const { handle } = params
         if (handle === null) {
           const newPath = profilePage(profile.profile.handle)
-          this.props.replaceRoute(newPath)
+          // Normalize both pathnames for comparison (decode to handle encoded special chars)
+          // This prevents infinite loops when comparing decoded newPath to encoded pathname
+          const normalizePathname = (p: string) => {
+            try {
+              return decodeURIComponent(p)
+            } catch {
+              return p
+            }
+          }
+          const normalizedPathname = normalizePathname(pathname)
+          const normalizedNewPath = normalizePathname(newPath)
+
+          if (normalizedNewPath !== normalizedPathname) {
+            this.props.replaceRoute(newPath)
+          }
         }
       }
     }

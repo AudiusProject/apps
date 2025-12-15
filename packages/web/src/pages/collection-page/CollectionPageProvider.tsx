@@ -336,7 +336,21 @@ class CollectionPageClassComponent extends Component<
             metadata.permalink,
             metadata.is_album
           )
-          this.props.replaceRoute(newPath)
+          // Normalize both pathnames for comparison (decode to handle encoded special chars)
+          // This prevents infinite loops when comparing decoded newPath to encoded pathname
+          const normalizePathname = (p: string) => {
+            try {
+              return decodeURIComponent(p)
+            } catch {
+              return p
+            }
+          }
+          const normalizedPathname = normalizePathname(pathname)
+          const normalizedNewPath = normalizePathname(newPath)
+
+          if (normalizedNewPath !== normalizedPathname) {
+            this.props.replaceRoute(newPath)
+          }
         } else {
           // Id matches or temp id matches
           const idMatches =
@@ -344,8 +358,22 @@ class CollectionPageClassComponent extends Component<
             (metadata._temp && `${collectionId}` === `${metadata.playlist_id}`)
           // Check that the playlist name hasn't changed. If so, update url.
           if (idMatches && title) {
-            if (newCollectionName !== title) {
-              const newPath = pathname.replace(title, newCollectionName)
+            // Normalize both pathnames for comparison (decode to handle encoded special chars)
+            // This prevents infinite loops when comparing decoded title to encoded pathname
+            const normalizePathname = (p: string) => {
+              try {
+                return decodeURIComponent(p)
+              } catch {
+                return p
+              }
+            }
+            const normalizedPathname = normalizePathname(pathname)
+            const normalizedTitle = normalizePathname(title)
+            const normalizedNewCollectionName = normalizePathname(newCollectionName)
+
+            // Only replace if the normalized values differ
+            if (normalizedTitle !== normalizedNewCollectionName) {
+              const newPath = normalizedPathname.replace(normalizedTitle, normalizedNewCollectionName)
               this.props.replaceRoute(newPath)
             }
           }
