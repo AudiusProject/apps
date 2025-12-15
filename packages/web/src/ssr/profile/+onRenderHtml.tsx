@@ -1,4 +1,6 @@
 import type { User } from '@audius/common/models'
+import createCache from '@emotion/cache'
+import { CacheProvider } from '@emotion/react'
 import createEmotionServer from '@emotion/server/create-instance'
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
@@ -12,11 +14,7 @@ import { MobileServerProfilePage } from 'pages/profile-page/MobileServerProfileP
 import { isMobileUserAgent } from 'utils/clientUtil'
 import { getUserPageSEOFields } from 'utils/seo'
 
-import { harmonyCache } from '../../HarmonyCacheProvider'
 import { getIndexHtml } from '../getIndexHtml'
-
-const { extractCriticalToChunks, constructStyleTagsFromChunks } =
-  createEmotionServer(harmonyCache as any)
 
 type TrackPageContext = PageContextServer & {
   pageProps: {
@@ -33,6 +31,12 @@ export default function render(pageContext: TrackPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
+  // Create a fresh cache instance for this SSR request
+  // This ensures the theme context is properly connected
+  const cache = createCache({ key: 'harmony', prepend: true })
+  const { extractCriticalToChunks, constructStyleTagsFromChunks } =
+    createEmotionServer(cache)
+
   const seoMetadata = getUserPageSEOFields({
     handle,
     userName: name,
@@ -41,18 +45,20 @@ export default function render(pageContext: TrackPageContext) {
   })
 
   const pageHtml = renderToString(
-    <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
-      <>
-        <MetaTags {...seoMetadata} />
-        {user ? (
-          isMobile ? (
-            <MobileServerProfilePage user={user} />
-          ) : (
-            <DesktopServerProfilePage user={user} />
-          )
-        ) : null}
-      </>
-    </ServerWebPlayer>
+    <CacheProvider value={cache}>
+      <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
+        <>
+          <MetaTags {...seoMetadata} />
+          {user ? (
+            isMobile ? (
+              <MobileServerProfilePage user={user} />
+            ) : (
+              <DesktopServerProfilePage user={user} />
+            )
+          ) : null}
+        </>
+      </ServerWebPlayer>
+    </CacheProvider>
   )
 
   const helmet = Helmet.renderStatic()

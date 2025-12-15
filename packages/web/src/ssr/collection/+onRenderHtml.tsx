@@ -1,4 +1,6 @@
 import type { Collection, User } from '@audius/common/models'
+import createCache from '@emotion/cache'
+import { CacheProvider } from '@emotion/react'
 import createEmotionServer from '@emotion/server/create-instance'
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
@@ -12,11 +14,7 @@ import { MobileServerCollectionPage } from 'pages/collection-page/MobileServerCo
 import { isMobileUserAgent } from 'utils/clientUtil'
 import { getCollectionPageSEOFields } from 'utils/seo'
 
-import { harmonyCache } from '../../HarmonyCacheProvider'
 import { getIndexHtml } from '../getIndexHtml'
-
-const { extractCriticalToChunks, constructStyleTagsFromChunks } =
-  createEmotionServer(harmonyCache as any)
 
 type CollectionPageContext = PageContextServer & {
   pageProps: {
@@ -34,6 +32,12 @@ export default function render(pageContext: CollectionPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
+  // Create a fresh cache instance for this SSR request
+  // This ensures the theme context is properly connected
+  const cache = createCache({ key: 'harmony', prepend: true })
+  const { extractCriticalToChunks, constructStyleTagsFromChunks } =
+    createEmotionServer(cache)
+
   const seoMetadata = getCollectionPageSEOFields({
     playlistName: playlist_name,
     playlistId: playlist_id,
@@ -45,16 +49,18 @@ export default function render(pageContext: CollectionPageContext) {
   })
 
   const pageHtml = renderToString(
-    <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
-      <>
-        <MetaTags {...seoMetadata} />
-        {isMobile ? (
-          <MobileServerCollectionPage collection={collection} user={user} />
-        ) : (
-          <DesktopServerCollectionPage collection={collection} user={user} />
-        )}
-      </>
-    </ServerWebPlayer>
+    <CacheProvider value={cache}>
+      <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
+        <>
+          <MetaTags {...seoMetadata} />
+          {isMobile ? (
+            <MobileServerCollectionPage collection={collection} user={user} />
+          ) : (
+            <DesktopServerCollectionPage collection={collection} user={user} />
+          )}
+        </>
+      </ServerWebPlayer>
+    </CacheProvider>
   )
 
   const helmet = Helmet.renderStatic()

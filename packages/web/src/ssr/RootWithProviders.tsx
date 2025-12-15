@@ -1,13 +1,18 @@
-import { HarmonyCacheProvider } from '../HarmonyCacheProvider'
+import createCache from '@emotion/cache'
+import { CacheProvider } from '@emotion/react'
+
 import { Root } from '../Root'
 
 import { SsrContextProvider, SsrContextType } from './SsrContext'
+
+// Create cache for client-side rendering
+const cache = createCache({ key: 'harmony', prepend: true })
 
 type RootWithProvidersProps = SsrContextType
 
 export const RootWithProviders = (props: RootWithProvidersProps) => {
   return (
-    <HarmonyCacheProvider>
+    <CacheProvider value={cache}>
       <SsrContextProvider value={props}>
         <>
           <Root />
@@ -16,7 +21,7 @@ export const RootWithProviders = (props: RootWithProvidersProps) => {
           <div data-testid='app-hydrated'></div>
         </>
       </SsrContextProvider>
-    </HarmonyCacheProvider>
+    </CacheProvider>
   )
 }
 

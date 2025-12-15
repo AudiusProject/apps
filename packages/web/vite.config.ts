@@ -7,7 +7,12 @@ import react from '@vitejs/plugin-react-swc'
 import fixReactVirtualized from 'esbuild-plugin-react-virtualized'
 import { visualizer } from 'rollup-plugin-visualizer'
 import vike from 'vike/plugin'
-import { defineConfig, loadEnv } from 'vite'
+import {
+  defineConfig,
+  defaultClientConditions,
+  defaultServerConditions,
+  loadEnv
+} from 'vite'
 import glslify from 'vite-plugin-glslify'
 import svgr from 'vite-plugin-svgr'
 
@@ -131,10 +136,36 @@ export default defineConfig(async ({ mode }) => {
         : []) as any)
     ],
     resolve: {
+      conditions: [...defaultClientConditions],
+      dedupe: ['react', 'react-dom'],
       alias: {
         // Ensure single React instance to prevent ReactCurrentDispatcher errors
-        react: path.resolve(__dirname, '../../node_modules/react'),
-        'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
+        ...(!ssr
+          ? {
+              react: path.resolve(__dirname, '../../node_modules/react'),
+              'react-dom': path.resolve(
+                __dirname,
+                '../../node_modules/react-dom'
+              )
+            }
+          : {
+              '@emotion/react': path.resolve(
+                __dirname,
+                '../../node_modules/@emotion/react'
+              ),
+              '@emotion/styled': path.resolve(
+                __dirname,
+                '../../node_modules/@emotion/styled'
+              ),
+              '@emotion/cache': path.resolve(
+                __dirname,
+                '../../node_modules/@emotion/cache'
+              ),
+              '@emotion/css': path.resolve(
+                __dirname,
+                '../../node_modules/@emotion/css'
+              )
+            }),
         // Can't use vite-tsconfig-paths because of vike
         app: '/src/app',
         assets: '/src/assets',
@@ -164,6 +195,16 @@ export default defineConfig(async ({ mode }) => {
         stream: require.resolve('stream-browserify'),
         // Resolve to lodash-es to support tree-shaking
         lodash: 'lodash-es'
+      }
+    },
+    ssr: {
+      external: ['react', 'react-dom', 'react-dom/server'],
+      resolve: {
+        // Affects *non-externalized* deps in the SSR pipeline
+        conditions: [...defaultServerConditions],
+
+        // Affects *externalized* imports resolution (important since you're externalizing react-dom)
+        externalConditions: [...defaultServerConditions]
       }
     },
     server: {
