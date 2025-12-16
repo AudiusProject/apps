@@ -201,86 +201,6 @@ jobs:
             git checkout -b release-client-v${VERSION}
             git push -u origin release-client-v${VERSION}
 
-  notify-stuck-stage-nodes-job:
-    resource_class: small
-    docker:
-      - image: cimg/base:2023.01
-    steps:
-      - run:
-          name: Alert Slack of stuck stage nodes
-          command: |
-            handle_error() {
-              # Construct failure Slack message
-              failure_content="{ \"blocks\": ["
-              failure_content+="{ \"type\": \"section\", \"text\": { \"type\": \"plain_text\", \"text\": \"Encountered error while checking for stuck staging nodes\n\" } }"
-              failure_content+="]}"
-              echo "Sending error message to Slack: $failure_content"
-
-              # Send Slack failure message
-              curl -f -X POST -H 'Content-type: application/json' \
-                --data "$failure_content" \
-                $SLACK_DAILY_DEPLOY_WEBHOOK
-            }
-
-            fetchEndpoints() {
-              url=$1
-              fetchedEndpoints=$(curl -s "$url" | jq -r '.data[]' 2>/dev/null)
-
-              if [ -z "$fetchedEndpoints" ]; then
-                echo "FETCH_ERROR"
-              else
-                echo $fetchedEndpoints
-              fi
-            }
-
-            (
-              set -e
-
-              # Fetch the latest version from the GitHub repository (assume Content and Discovery have the same latest versions)
-              versionUrl="https://raw.githubusercontent.com/AudiusProject/apps/main/packages/discovery-provider/.version.json"
-              VERSION=$(curl -s "$versionUrl" | jq -r '.version')
-
-              if [ -z "$VERSION" ]; then
-                echo "Failed to fetch version data"
-                exit 1
-              fi
-
-              discoveryEndpoints=($(fetchEndpoints "https://api.staging.audius.co/discovery"))
-              slack_message=""
-
-              compareVersions() {
-                for endpoint in "$@"; do
-                    if [ "$endpoint" == "FETCH_ERROR" ]; then
-                      continue
-                    fi
-                  response=$(curl -s -o /dev/null -w "%{http_code}" "$endpoint/health_check")
-                  if [ "$response" -eq 200 ]; then
-                    endpointVersion=$(curl -s "$endpoint/health_check" | jq -r '.data.version')
-                    if [ "$endpointVersion" != "$VERSION" ]; then
-                      slack_message+="\n$endpoint (behind at v$endpointVersion)"
-                    fi
-                  else
-                    slack_message+="\n$endpoint (error status=$response)"
-                  fi
-                done
-              }
-
-              compareVersions "${discoveryEndpoints[@]}"
-
-              # Send Slack message if any node is behind or if the API Gateway is down
-              if [ ! -z "$slack_message" ]; then
-                json_content="{ \"blocks\": [ { \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Please set these nodes back on auto-upgrade if they're not in use:$slack_message\" } } ] }"
-                curl -f -X POST -H 'Content-type: application/json' \
-                    --data "$json_content" \
-                    $SLACK_DAILY_DEPLOY_WEBHOOK
-              elif [[ " ${contentEndpoints[@]} " =~ " FETCH_ERROR " ]] || [[ " ${discoveryEndpoints[@]} " =~ " FETCH_ERROR " ]]; then
-                json_content="{ \"blocks\": [ { \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Unable to check for offline / out-of-date stage nodes due to api.staging.audius.co being unreachable... \" } } ] }"
-                curl -f -X POST -H 'Content-type: application/json' \
-                    --data "$json_content" \
-                    $SLACK_DAILY_DEPLOY_WEBHOOK
-              fi
-            ) || handle_error
-
   notify-pipeline-status:
     working_directory: ~/apps
     resource_class: small
@@ -494,25 +414,9 @@ workflows:
       - approve-foundation-deployment-holds:
           context: [slack-secrets, circle-daily-deploy-secrets]
 
-  auto-approve-sp-deploy:
-    when:
-      equal: ['auto-approve-sp-deploy', << pipeline.parameters.workflow >>]
-    jobs:
-      - approve-sp-deployment-holds:
-          context: [slack-secrets, circle-daily-deploy-secrets]
-
   release-client-create-branch:
     when:
       equal:
         ['release-client-create-branch', << pipeline.parameters.workflow >>]
     jobs:
       - generate-client-release
-
-  notify-stuck-stage-nodes:
-    when:
-      and:
-        - equal:
-            ['notify-stuck-stage-nodes', << pipeline.parameters.workflow >>]
-    jobs:
-      - notify-stuck-stage-nodes-job:
-          context: [slack-secrets]
