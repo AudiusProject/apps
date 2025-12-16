@@ -3,13 +3,14 @@ jobs:
   - mobile-init:
       context: Audius Mobile Client
 
+  # Staging builds disabled - staging environment has been dropped
   - mobile-build-staging-ios:
       context: Audius Mobile Client
       requires:
         - mobile-init
       filters:
         branches:
-          only: /^mobile-build.*$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-staging-ios:
       context:
@@ -19,7 +20,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /^main$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-releasecandidate-ios:
       context:
@@ -31,6 +32,7 @@ jobs:
         branches:
           only: /(^release.*)$/
 
+  # Staging release candidate disabled - staging environment has been dropped
   - mobile-build-upload-staging-releasecandidate-ios:
       context:
         - Audius Mobile Client
@@ -39,7 +41,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-production-ios-if-full-release:
       context:
@@ -51,13 +53,14 @@ jobs:
         branches:
           only: /(^release.*)$/
 
+  # Staging builds disabled - staging environment has been dropped
   - mobile-build-staging-android:
       context: Audius Mobile Client
       requires:
         - mobile-init
       filters:
         branches:
-          only: /^mobile-build.*$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-staging-android:
       context:
@@ -67,7 +70,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /^main$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-releasecandidate-android:
       context:
@@ -79,6 +82,7 @@ jobs:
         branches:
           only: /(^release.*)$/
 
+  # Staging release candidate disabled - staging environment has been dropped
   - mobile-build-upload-staging-releasecandidate-android:
       context:
         - Audius Mobile Client
@@ -87,7 +91,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^__STAGING_DISABLED__$/
 
   - mobile-build-upload-production-android-if-full-release:
       context:

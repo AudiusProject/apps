@@ -23,23 +23,33 @@ jobs:
   #         ignore: /^main$/
 
   # Build
+  # Staging builds disabled - staging environment has been dropped
   - web-build-staging:
       context:
         - Vercel
       requires:
         - web-init
+      filters:
+        branches:
+          only: /^__STAGING_DISABLED__$/
 
   - web-build-ssr-staging:
       context:
         - Vercel
       requires:
         - web-init
+      filters:
+        branches:
+          only: /^__STAGING_DISABLED__$/
 
   - web-check-ssr-staging-bundlesize:
       context:
         - Vercel
       requires:
         - web-build-ssr-staging
+      filters:
+        branches:
+          only: /^__STAGING_DISABLED__$/
 
   - web-build-production:
       context:
@@ -65,19 +75,21 @@ jobs:
       requires:
         - web-build-ssr-production
 
-  - web-test:
-      context:
-        - Audius Client
-      requires:
-        - web-build-staging
+  # web-test disabled - it required staging build which is now disabled
+  # - web-test:
+  #     context:
+  #       - Audius Client
+  #     requires:
+  #       - web-build-staging
 
+  # Staging deploys disabled - staging environment has been dropped
   - web-deploy-staging-s3:
       context: Audius Client
       requires:
         - web-build-staging
       filters:
         branches:
-          only: /^main$/
+          only: /^__STAGING_DISABLED__$/
 
   - web-deploy-staging-cloudflare:
       context:
@@ -89,7 +101,7 @@ jobs:
         - web-check-ssr-staging-bundlesize
       filters:
         branches:
-          only: /^main$/
+          only: /^__STAGING_DISABLED__$/
 
   - web-deploy-release-candidate:
       context: Audius Client
@@ -102,6 +114,7 @@ jobs:
         branches:
           only: /(^release.*)$/
 
+  # Staging release candidate deploy disabled - staging environment has been dropped
   - web-deploy-staging-release-candidate:
       context: Audius Client
       requires:
@@ -111,7 +124,7 @@ jobs:
         - web-check-ssr-staging-bundlesize
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^__STAGING_DISABLED__$/
 
   # Release production web.
   - web-hold-production:
