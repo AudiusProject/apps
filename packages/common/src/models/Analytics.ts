@@ -593,6 +593,7 @@ export enum Name {
   BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
   BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
   BANNER_YAK_COIN_LAUNCH_CLICKED = 'Banner Yak Coin Launch Clicked',
+  BANNER_JAY_COIN_LAUNCH_CLICKED = 'Banner Jay Coin Launch Clicked',
 
   // Artist Coin Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
