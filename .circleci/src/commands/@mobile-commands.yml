@@ -37,7 +37,7 @@ mobile-prepare-ios:
         name: install pods
         command: |
           cd packages/mobile/ios
-          RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
+          bundle exec pod install
     - run:
         name: Install Sentry CLI
         command: |
