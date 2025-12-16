@@ -1,11 +1,41 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 
-import { useToggleFavoriteTrack } from '@audius/common/api'
-import { useGatedContentAccess } from '@audius/common/hooks'
-import { ID, Track, User, FavoriteSource } from '@audius/common/models'
+import {
+  useCurrentUserId,
+  useTrackByParams,
+  useToggleFavoriteTrack,
+  useUser
+} from '@audius/common/api'
+import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  ID,
+  Track,
+  FavoriteSource,
+  Kind,
+  PlayableType,
+  Name,
+  ShareSource,
+  RepostSource,
+  FollowSource,
+  PlaybackSource
+} from '@audius/common/models'
+import {
+  trackPageLineupActions,
+  trackPageActions,
+  trackPageSelectors,
+  tracksSocialActions as socialTracksActions,
+  usersSocialActions as socialUsersActions,
+  shareModalUIActions,
+  playerSelectors,
+  playerActions
+} from '@audius/common/store'
+import { formatDate, route, makeUid } from '@audius/common/utils'
 import { Box, Flex } from '@audius/harmony'
 import { Id } from '@audius/sdk'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
 
+import { make } from 'common/store/analytics/actions'
 import { CommentSection } from 'components/comments/CommentSection'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -14,91 +44,212 @@ import Page from 'components/page/Page'
 import { EmptyStatBanner } from 'components/stat-banner/StatBanner'
 import { GiantTrackTile } from 'components/track/GiantTrackTile'
 import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
+import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults, emptyStringGuard } from 'pages/track-page/utils'
+import { parseTrackRoute } from 'utils/route/trackRouteParser'
+import { getTrackPageSEOFields } from 'utils/seo'
 
 import { TrackPageLineup } from '../TrackPageLineup'
 import { useTrackPageSize } from '../useTrackPageSize'
 
 import { RemixContestSection } from './RemixContestSection'
 
-export type OwnProps = {
-  title: string
-  description: string
-  canonicalUrl: string
-  structuredData?: Object
-  // Hero Track Props
-  heroTrack: Track | null
-  user: User | null
-  heroPlaying: boolean
-  previewing: boolean
-  userId: ID | null
-  onHeroPlay: ({
-    isPlaying,
-    isPreview
-  }: {
-    isPlaying: boolean
-    isPreview?: boolean
-  }) => void
-  onHeroShare: (trackId: ID) => void
-  onHeroRepost: (isReposted: boolean, trackId: ID) => void
-  onFollow: () => void
-  onUnfollow: () => void
+const { NOT_FOUND_PAGE } = route
+const { getPlaying, getPreviewing } = playerSelectors
+const { requestOpen: requestOpenShareModal } = shareModalUIActions
+const { tracksActions } = trackPageLineupActions
 
-  makePublic: (trackId: ID) => void
-}
+const TrackPage = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-const TrackPage = ({
-  title,
-  description,
-  canonicalUrl,
-  structuredData,
-  // Hero Track Props
-  heroTrack,
-  user,
-  heroPlaying,
-  previewing,
-  userId,
-  onHeroPlay,
-  onHeroShare,
-  onHeroRepost,
-  onFollow,
-  onUnfollow,
-  makePublic
-}: OwnProps) => {
+  const params = parseTrackRoute(location.pathname)
+  const { data: track, status } = useTrackByParams(params)
+  const { data: user } = useUser(track?.owner_id)
+  const { data: accountUserId } = useCurrentUserId()
+  const currentTrack = useCurrentTrack()
+  const playing = useSelector(getPlaying)
+  const previewing = useSelector(getPreviewing)
+  const source = useSelector(trackPageSelectors.getSourceSelector)
+
+  const heroPlaying =
+    playing &&
+    !!track &&
+    !!currentTrack &&
+    currentTrack.track_id === track.track_id
+
+  // Simple error handling
+  useEffect(() => {
+    if (status === 'error') {
+      navigate(NOT_FOUND_PAGE)
+    }
+  }, [status, navigate])
+
+  // Simple cleanup
+  useEffect(() => {
+    return () => {
+      dispatch(trackPageActions.resetTrackPage())
+    }
+  }, [dispatch])
   const { isDesktop } = useTrackPageSize()
-  const isOwner = heroTrack?.owner_id === userId
+  const isOwner = track?.owner_id === accountUserId
   const following = user?.does_current_user_follow ?? false
-  const isSaved = heroTrack?.has_current_user_saved ?? false
-  const isReposted = heroTrack?.has_current_user_reposted ?? false
+  const isSaved = track?.has_current_user_saved ?? false
+  const isReposted = track?.has_current_user_reposted ?? false
 
-  const { isFetchingNFTAccess, hasStreamAccess } =
-    useGatedContentAccess(heroTrack)
+  const { isFetchingNFTAccess, hasStreamAccess } = useGatedContentAccess(track)
 
-  const isCommentingEnabled = !heroTrack?.comments_disabled
-  const loading = !heroTrack || isFetchingNFTAccess
+  const isCommentingEnabled = !track?.comments_disabled
+  const loading = !track || isFetchingNFTAccess
 
   const toggleSaveTrack = useToggleFavoriteTrack({
-    trackId: heroTrack?.track_id,
+    trackId: track?.track_id,
     source: FavoriteSource.TRACK_PAGE
   })
+
+  // Handlers
+  const onHeroPlay = useCallback(
+    ({
+      isPlaying: isPlayingParam,
+      isPreview = false
+    }: {
+      isPlaying: boolean
+      isPreview?: boolean
+    }) => {
+      if (!track) return
+
+      const isOwner = track.owner_id === accountUserId
+      const shouldPreview = isPreview && isOwner
+      const isSameTrack = currentTrack?.track_id === track.track_id
+      const trackUid = makeUid(Kind.TRACKS, track.track_id, source)
+
+      if (previewing !== isPreview || !isSameTrack) {
+        dispatch(playerActions.stop({}))
+        dispatch(tracksActions.play(trackUid, { isPreview: shouldPreview }))
+        dispatch(
+          make(Name.PLAYBACK_PLAY, {
+            id: `${track.track_id}`,
+            isPreview: shouldPreview,
+            source: PlaybackSource.TRACK_PAGE
+          })
+        )
+      } else if (isPlayingParam) {
+        dispatch(tracksActions.pause())
+        dispatch(
+          make(Name.PLAYBACK_PAUSE, {
+            id: `${track.track_id}`,
+            source: PlaybackSource.TRACK_PAGE
+          })
+        )
+      } else {
+        dispatch(tracksActions.play())
+        dispatch(
+          make(Name.PLAYBACK_PLAY, {
+            id: `${track.track_id}`,
+            isPreview: shouldPreview,
+            source: PlaybackSource.TRACK_PAGE
+          })
+        )
+      }
+    },
+    [track, accountUserId, currentTrack, previewing, dispatch, source]
+  )
+
+  const onHeroRepost = useCallback(
+    (isReposted: boolean, trackId: ID) => {
+      if (!isReposted) {
+        dispatch(
+          socialTracksActions.repostTrack(trackId, RepostSource.TRACK_PAGE)
+        )
+      } else {
+        dispatch(
+          socialTracksActions.undoRepostTrack(trackId, RepostSource.TRACK_PAGE)
+        )
+      }
+    },
+    [dispatch]
+  )
+
+  const onHeroShare = useCallback(
+    (trackId: ID) => {
+      dispatch(
+        requestOpenShareModal({
+          type: 'track',
+          trackId,
+          source: ShareSource.PAGE
+        })
+      )
+    },
+    [dispatch]
+  )
+
+  const onFollow = useCallback(() => {
+    if (track) {
+      dispatch(
+        socialUsersActions.followUser(track.owner_id, FollowSource.TRACK_PAGE)
+      )
+    }
+  }, [track, dispatch])
+
+  const onUnfollow = useCallback(() => {
+    if (track) {
+      dispatch(
+        socialUsersActions.unfollowUser(track.owner_id, FollowSource.TRACK_PAGE)
+      )
+    }
+  }, [track, dispatch])
+
+  const makePublic = useCallback(
+    (trackId: ID) => {
+      dispatch(trackPageActions.makeTrackPublic(trackId))
+    },
+    [dispatch]
+  )
 
   const onPlay = () => onHeroPlay({ isPlaying: heroPlaying })
   const onPreview = () =>
     onHeroPlay({ isPlaying: heroPlaying, isPreview: true })
-
-  const onShare = () => (heroTrack ? onHeroShare(heroTrack.track_id) : null)
+  const onShare = () => (track ? onHeroShare(track.track_id) : null)
   const onRepost = () =>
-    heroTrack ? onHeroRepost(isReposted, heroTrack.track_id) : null
+    track ? onHeroRepost(isReposted, track.track_id) : null
 
   const commentSectionRef = useRef<HTMLDivElement | null>(null)
 
-  const defaults = getTrackDefaults(heroTrack)
+  const defaults = getTrackDefaults(track as Track | null)
 
   const scrollToCommentSection = useCallback(() => {
     if (commentSectionRef.current) {
       commentSectionRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [commentSectionRef])
+
+  // SEO fields
+  const releaseDate = track ? track.release_date || track.created_at : ''
+  const seoFields = getTrackPageSEOFields({
+    title: track?.title,
+    permalink: track?.permalink,
+    userName: user?.name,
+    releaseDate: releaseDate ? formatDate(releaseDate) : ''
+  })
+
+  // Handle deleted track
+  if ((track?.is_delete || track?._marked_deleted) && user) {
+    return (
+      <DeletedPage
+        title={seoFields.title ?? ''}
+        description={seoFields.description ?? ''}
+        canonicalUrl={seoFields.canonicalUrl ?? ''}
+        structuredData={seoFields.structuredData}
+        playable={{
+          metadata: (track as Track | null) ?? null,
+          type: PlayableType.TRACK
+        }}
+        user={user ?? null}
+        deletedByArtist={!track._blocked && track.is_available}
+      />
+    )
+  }
 
   const renderGiantTrackTile = () => (
     <GiantTrackTile
@@ -121,13 +272,11 @@ const TrackPage = ({
       saveCount={defaults.saveCount}
       isReposted={isReposted}
       isOwner={isOwner}
-      currentUserId={userId}
+      currentUserId={accountUserId ?? null}
       isArtistPick={
-        heroTrack && user
-          ? user.artist_pick_track_id === heroTrack.track_id
-          : false
+        track && user ? user.artist_pick_track_id === track.track_id : false
       }
-      ddexApp={heroTrack?.ddex_app}
+      ddexApp={track?.ddex_app}
       isSaved={isSaved}
       isUnlisted={defaults.isUnlisted}
       isScheduledRelease={defaults.isScheduledRelease}
@@ -156,20 +305,20 @@ const TrackPage = ({
 
   return (
     <Page
-      title={title}
-      description={description}
+      title={seoFields.title ?? ''}
+      description={seoFields.description ?? ''}
       ogDescription={defaults.description}
-      canonicalUrl={canonicalUrl}
-      structuredData={structuredData}
+      canonicalUrl={seoFields.canonicalUrl ?? ''}
+      structuredData={seoFields.structuredData}
       entityType='track'
-      hashId={heroTrack?.track_id ? Id.parse(heroTrack.track_id) : undefined}
+      hashId={track?.track_id ? Id.parse(track.track_id) : undefined}
       variant='flush'
       scrollableSearch
       fromOpacity={1}
       noIndex={defaults.isUnlisted}
     >
       <FlushPageContainer>
-        <RemixContestCountdown trackId={heroTrack?.track_id ?? 0} />
+        <RemixContestCountdown trackId={track?.track_id ?? 0} />
       </FlushPageContainer>
       <Box w='100%' css={{ position: 'absolute', height: '376px' }}>
         <CoverPhoto loading={loading} userId={user ? user.user_id : null} />
@@ -187,7 +336,7 @@ const TrackPage = ({
         >
           {renderGiantTrackTile()}
           <RemixContestSection
-            trackId={heroTrack?.track_id ?? 0}
+            trackId={track?.track_id ?? 0}
             isOwner={isOwner}
           />
           <Flex
@@ -208,9 +357,9 @@ const TrackPage = ({
               </Flex>
             ) : null}
             <TrackPageLineup
-              user={user}
-              trackId={heroTrack?.track_id}
-              commentsDisabled={heroTrack?.comments_disabled}
+              user={user ?? null}
+              trackId={track?.track_id}
+              commentsDisabled={track?.comments_disabled}
             />
           </Flex>
         </Flex>
