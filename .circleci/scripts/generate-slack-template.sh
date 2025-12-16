@@ -46,7 +46,7 @@ if [[ $CIRCLE_BRANCH == "main" ]]; then
     SUMMARY_MESSAGE="*Action Items*:\n1. If you broke `$CIRCLE_BRANCH`, then fix it or revert your change.\n2. If you think a test is flaky, confirm it, make a change to skip the test with a ticket comment, and assign the ticket to the test owner.\n3. Once CI is green again, give this a :white_check_mark:."
     AUTHOR="$author_name <@$SLACK_USER_ID>"
   else
-    SUMMARY_MESSAGE="Changes should be live on <https://staging.audius.co|staging web> and all staging mobile apps."
+    SUMMARY_MESSAGE="Changes have been merged to main."
     AUTHOR="$author_name"
   fi
 else

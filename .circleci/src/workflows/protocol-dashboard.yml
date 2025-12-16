@@ -3,23 +3,6 @@ jobs:
   - protocol-dashboard-init:
       context:
         - Vercel
-  # Staging builds disabled - staging environment has been dropped
-  - protocol-dashboard-build-staging:
-      context:
-        - Vercel
-      requires:
-        - protocol-dashboard-init
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-  - protocol-dashboard-deploy-staging:
-      context:
-        - Audius Client
-      requires:
-        - protocol-dashboard-build-staging
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
   - protocol-dashboard-build-prod:
       context:
         - Vercel

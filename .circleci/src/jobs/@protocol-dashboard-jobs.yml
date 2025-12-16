@@ -33,39 +33,6 @@ protocol-dashboard-init:
           - packages/libs/node_modules
           - packages/sdk/node_modules
 
-protocol-dashboard-build-staging:
-  working_directory: ~/apps
-  resource_class: xlarge
-  docker:
-    - image: cimg/node:20.19
-  steps:
-    - checkout
-    - attach_workspace:
-        at: ./
-    - run:
-        name: build
-        command: |
-          cd packages/protocol-dashboard
-          npm install dotenv@16.3.1
-          npm run build:stage
-    - persist_to_workspace:
-        root: ./
-        paths:
-          - packages/protocol-dashboard/*
-
-protocol-dashboard-deploy-staging:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  steps:
-    - attach_workspace:
-        at: ./
-    - run:
-        name: deploy to staging
-        command: |
-          cd packages/protocol-dashboard
-          npm run deploy:stage
-
 protocol-dashboard-build-prod:
   working_directory: ~/apps
   resource_class: xlarge

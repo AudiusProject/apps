@@ -23,34 +23,6 @@ jobs:
   #         ignore: /^main$/
 
   # Build
-  # Staging builds disabled - staging environment has been dropped
-  - web-build-staging:
-      context:
-        - Vercel
-      requires:
-        - web-init
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-
-  - web-build-ssr-staging:
-      context:
-        - Vercel
-      requires:
-        - web-init
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-
-  - web-check-ssr-staging-bundlesize:
-      context:
-        - Vercel
-      requires:
-        - web-build-ssr-staging
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-
   - web-build-production:
       context:
         - Vercel
@@ -75,34 +47,6 @@ jobs:
       requires:
         - web-build-ssr-production
 
-  # web-test disabled - it required staging build which is now disabled
-  # - web-test:
-  #     context:
-  #       - Audius Client
-  #     requires:
-  #       - web-build-staging
-
-  # Staging deploys disabled - staging environment has been dropped
-  - web-deploy-staging-s3:
-      context: Audius Client
-      requires:
-        - web-build-staging
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-
-  - web-deploy-staging-cloudflare:
-      context:
-        - Audius Client
-        - slack-secrets
-      requires:
-        - web-build-staging
-        - web-build-ssr-staging
-        - web-check-ssr-staging-bundlesize
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-
   - web-deploy-release-candidate:
       context: Audius Client
       requires:
@@ -113,18 +57,6 @@ jobs:
       filters:
         branches:
           only: /(^release.*)$/
-
-  # Staging release candidate deploy disabled - staging environment has been dropped
-  - web-deploy-staging-release-candidate:
-      context: Audius Client
-      requires:
-        - web-init
-        - web-build-staging
-        - web-build-ssr-staging
-        - web-check-ssr-staging-bundlesize
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
 
   # Release production web.
   - web-hold-production:
@@ -161,42 +93,6 @@ jobs:
       filters:
         branches:
           only: /(^release.*)$/
-
-  # Distribute staging desktop binaries.
-  # Mac Stage Desktop App deploys are skipped to prevent high
-  # CircleCI credit usage as they use the M1. Enable for one-off deploys
-  #
-  # - web-dist-mac-staging:
-  #     context:
-  #       - Audius Client
-  #       - Vercel
-  #       - slack-secrets
-  #     requires:
-  #       - web-build-staging
-  #     filters:
-  #       branches:
-  #         only: /(^main)$/
-  # Also removing win and linux since this is unecessary work for 99.9% percent of cases
-  # - web-dist-win-staging:
-  #     context:
-  #       - Audius Client
-  #       - Vercel
-  #       - slack-secrets
-  #     requires:
-  #       - web-build-staging
-  #     filters:
-  #       branches:
-  #         only: /(^main)$/
-  # - web-dist-linux-staging:
-  #     context:
-  #       - Audius Client
-  #       - Vercel
-  #       - slack-secrets
-  #     requires:
-  #       - web-build-staging
-  #     filters:
-  #       branches:
-  #         only: /(^main)$/
 
   # Distribute production desktop binaries.
   - web-hold-dist-mac-production:

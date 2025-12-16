@@ -23,17 +23,3 @@ jobs:
       service: discovery-provider-notifications
       requires:
         - lint-discovery-provider
-
-  # Deploy `main` branch (stage)
-  - deploy-stage-nodes-just-tag:
-      name: deploy-stage-discovery-provider
-      requires:
-        - lint-discovery-provider
-        - test-discovery-provider
-        - push-discovery-provider
-
-      filters:
-        branches:
-          only: main
-      context: github
-      service: discovery-provider

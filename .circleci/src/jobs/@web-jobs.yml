@@ -63,42 +63,6 @@ web-build-demo:
         paths:
           - packages/web/build-demo
 
-web-build-staging:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  resource_class: xlarge
-  steps:
-    - web-build:
-        build-type: stage
-        build-directory: packages/web/build-staging
-        build-name: build-staging
-
-web-build-ssr-staging:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  resource_class: xlarge
-  steps:
-    - web-build:
-        build-type: ssr:stage
-        build-directory: packages/web/build-ssr-staging
-        build-name: build-ssr-staging
-    # Need to persist vike auto importer so the CF worker finds the build
-    - persist_to_workspace:
-        root: ./
-        paths:
-          - node_modules/@brillout/vite-plugin-import-build/dist
-
-web-check-ssr-staging-bundlesize:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  resource_class: xlarge
-  steps:
-    - web-check-ssr-bundlesize:
-        build-type: stage
-
 web-test:
   working_directory: ~/apps
   docker:
@@ -170,36 +134,6 @@ web-deploy-demo:
     - web-pr-comment:
         comment: Preview this change https://demo.audius.co/${CIRCLE_BRANCH}
 
-web-deploy-staging-s3:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/python:3.7.12-node
-  steps:
-    - checkout
-    - aws-cli/install
-    - attach_workspace:
-        at: ./
-    - run:
-        name: Create TAR
-        command: |
-          tar -zcvf packages/web/build-staging.tar.gz packages/web/build-staging
-    - run:
-        name: Deploy to S3
-        command: |
-          aws s3 sync --exclude "packages/web/sitemaps/*" packages/web/build-staging s3://staging.audius.co --delete --cache-control max-age=0
-          aws s3 cp packages/web/build-staging.tar.gz s3://staging.audius.co/build-staging.tar.gz --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
-
-web-deploy-staging-cloudflare:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  steps:
-    - web-deploy-cloudflare:
-        build-type: staging
-        environment: staging
-        copy-robots: false
-    - web-deploy-sourcemaps-s3
-
 web-deploy-release-candidate:
   working_directory: ~/apps
   docker:
@@ -208,17 +142,6 @@ web-deploy-release-candidate:
     - web-deploy-cloudflare:
         build-type: production
         environment: release
-        copy-robots: true
-    - web-deploy-sourcemaps-s3
-
-web-deploy-staging-release-candidate:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  steps:
-    - web-deploy-cloudflare:
-        build-type: staging
-        environment: staging-release
         copy-robots: true
     - web-deploy-sourcemaps-s3
 
@@ -282,46 +205,6 @@ web-deploy-sentry-sourcemaps:
         command: |
           cd packages/web
           ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client finalize ${CIRCLE_SHA1}
-
-web-dist-mac-staging:
-  working_directory: ~/apps
-  # run on macos so dmg can be created and signed.
-  resource_class: macos.m1.large.gen1
-  macos:
-    xcode: '16.2.0'
-  steps:
-    - run:
-        name: Install Python 3.11
-        command: |
-          brew install pyenv
-          pyenv install 3.11.8
-          pyenv global 3.11.8
-          python3 --version
-    - web-distribute:
-        build-type: mac-publish
-        install-license: true
-        environment: 'staging'
-        os: 'mac'
-
-web-dist-win-staging:
-  working_directory: ~/apps
-  docker:
-    - image: electronuserland/builder:18-wine
-  steps:
-    - web-distribute:
-        build-type: win-publish
-        environment: 'staging'
-        os: 'win'
-
-web-dist-linux-staging:
-  working_directory: ~/apps
-  docker:
-    - image: electronuserland/builder
-  steps:
-    - web-distribute:
-        build-type: linux-publish
-        environment: 'staging'
-        os: 'linux'
 
 web-dist-mac-production:
   working_directory: ~/apps

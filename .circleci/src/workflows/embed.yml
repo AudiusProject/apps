@@ -1,20 +1,6 @@
 when: << pipeline.parameters.run-embed-workflow >>
 jobs:
   - embed-init
-  # Staging builds disabled - staging environment has been dropped
-  - embed-build-staging:
-      requires:
-        - embed-init
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
-  - embed-deploy-staging-cloudflare:
-      context: Audius Client
-      requires:
-        - embed-build-staging
-      filters:
-        branches:
-          only: /^__STAGING_DISABLED__$/
   - embed-build-production:
       requires:
         - embed-init
