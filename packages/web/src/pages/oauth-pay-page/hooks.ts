@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   useArtistCoin,
@@ -7,14 +7,16 @@ import {
   useSendCoins,
   useCurrentAccountUser
 } from '@audius/common/api'
-import { isValidSolAddress } from '@audius/common/store'
+import { useUserbank } from '@audius/common/hooks'
 import { SolanaWalletAddress } from '@audius/common/models'
+import { isValidSolAddress } from '@audius/common/store'
 import * as queryString from 'query-string'
 import { useLocation } from 'react-router-dom'
 
+import { getIsRedirectValid } from '../oauth-login-page/utils'
+
 import { messages } from './messages'
 import { Display } from './types'
-import { getIsRedirectValid } from '../oauth-login-page/utils'
 
 const useParsedPayParams = () => {
   const { search } = useLocation()
@@ -27,8 +29,7 @@ const useParsedPayParams = () => {
     redirect_uri: redirectUri,
     response_mode: responseMode,
     origin,
-    display: displayQueryParam,
-    ...rest
+    display: displayQueryParam
   } = queryString.parse(search)
 
   const parsedRedirectUri = useMemo<'postmessage' | URL | null>(() => {
@@ -135,7 +136,6 @@ export const useOAuthPaySetup = ({
     amount,
     mint,
     state,
-    redirectUri,
     responseMode,
     parsedRedirectUri,
     isRedirectValid,
@@ -146,6 +146,10 @@ export const useOAuthPaySetup = ({
 
   const { data: account } = useCurrentAccountUser()
   const isLoggedIn = Boolean(account?.user_id)
+
+  // Get the user-bank address for the specific mint (the one used to send tokens)
+  const { userBankAddress } = useUserbank(mint ?? undefined)
+  const currentUserWallet = userBankAddress
 
   // Get token info
   const { data: coin } = useArtistCoin(mint ?? '')
@@ -162,9 +166,9 @@ export const useOAuthPaySetup = ({
   const sendCoinsMutation = useSendCoins({ mint: mint ?? '' })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [transactionSignature, setTransactionSignature] = useState<string | null>(
-    null
-  )
+  const [transactionSignature, setTransactionSignature] = useState<
+    string | null
+  >(null)
 
   // Parse amount as bigint
   const amountBigInt = useMemo(() => {
@@ -189,20 +193,27 @@ export const useOAuthPaySetup = ({
   }, [tokenBalance])
 
   const formResponseAndPostMessage = useCallback(
-    async (result: { signature?: string; error?: string }) => {
+    async (result: { signature?: string; error?: string; wallet?: string }) => {
       if (isRedirectValid === true) {
         if (parsedRedirectUri === 'postmessage') {
           if (parsedOrigin) {
             if (!window.opener) {
               onError(messages.noWindowError)
             } else {
-              const message: { state?: string; signature?: string; error?: string } =
-                {}
+              const message: {
+                state?: string
+                signature?: string
+                error?: string
+                wallet?: string
+              } = {}
               if (state != null) {
                 message.state = state as string
               }
               if (result.signature) {
                 message.signature = result.signature
+              }
+              if (result.wallet) {
+                message.wallet = result.wallet
               }
               if (result.error) {
                 message.error = result.error
@@ -217,7 +228,10 @@ export const useOAuthPaySetup = ({
               parsedRedirectUri!.searchParams.append('state', state as string)
             }
             if (result.signature) {
-              parsedRedirectUri!.searchParams.append('signature', result.signature)
+              parsedRedirectUri!.searchParams.append(
+                'signature',
+                result.signature
+              )
             }
             if (result.error) {
               parsedRedirectUri!.searchParams.append('error', result.error)
@@ -278,14 +292,18 @@ export const useOAuthPaySetup = ({
     amountBigInt,
     mint,
     hasSufficientBalance,
+    formResponseAndPostMessage,
     sendCoinsMutation,
     onError
   ])
 
   // Handle closing after success screen is shown
   const handleSuccessClose = useCallback(async () => {
-    if (transactionSignature) {
-      await formResponseAndPostMessage({ signature: transactionSignature })
+    if (transactionSignature && currentUserWallet) {
+      await formResponseAndPostMessage({
+        signature: transactionSignature,
+        wallet: currentUserWallet
+      })
       // Small delay to ensure message is sent before closing
       setTimeout(() => {
         if (window.opener) {
@@ -293,7 +311,7 @@ export const useOAuthPaySetup = ({
         }
       }, 100)
     }
-  }, [transactionSignature, formResponseAndPostMessage])
+  }, [transactionSignature, currentUserWallet, formResponseAndPostMessage])
 
   const handleCancel = useCallback(() => {
     // Close the window when user cancels
@@ -323,4 +341,3 @@ export const useOAuthPaySetup = ({
     handleSuccessClose
   }
 }
-
