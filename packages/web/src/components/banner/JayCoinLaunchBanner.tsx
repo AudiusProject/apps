@@ -15,7 +15,7 @@ const JAY_COIN_LAUNCH_BANNER_LOCAL_STORAGE_KEY =
 
 const messages = {
   pill: 'New',
-  text: 'Kodak Black just launched $JAY coin! Check it out!'
+  text: 'Almighty Jay just launched $JAY coin! Check it out!'
 }
 
 export const JayCoinLaunchBanner = () => {
