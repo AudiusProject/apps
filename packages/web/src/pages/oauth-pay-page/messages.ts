@@ -28,5 +28,9 @@ export const messages = {
   transactionFailed: 'Transaction failed',
   loading: 'Loading...',
   sendingTransaction: 'Sending transaction...',
-  userDoesNotHoldMint: 'You do not hold this coin.'
+  userDoesNotHoldMint: 'You do not hold this coin.',
+  transactionComplete: 'Your transaction is complete!',
+  sent: 'Sent',
+  viewOnSolana: 'View On Solana Block Explorer',
+  done: 'Done'
 }

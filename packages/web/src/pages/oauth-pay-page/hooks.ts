@@ -162,6 +162,9 @@ export const useOAuthPaySetup = ({
   const sendCoinsMutation = useSendCoins({ mint: mint ?? '' })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [transactionSignature, setTransactionSignature] = useState<string | null>(
+    null
+  )
 
   // Parse amount as bigint
   const amountBigInt = useMemo(() => {
@@ -260,13 +263,14 @@ export const useOAuthPaySetup = ({
         amount: amountBigInt
       })
 
-      await formResponseAndPostMessage({ signature })
+      // Store signature to show success screen
+      setTransactionSignature(signature)
+      setIsSubmitting(false)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : messages.transactionFailed
       await formResponseAndPostMessage({ error: errorMessage })
       onError(errorMessage)
-    } finally {
       setIsSubmitting(false)
     }
   }, [
@@ -275,9 +279,21 @@ export const useOAuthPaySetup = ({
     mint,
     hasSufficientBalance,
     sendCoinsMutation,
-    formResponseAndPostMessage,
     onError
   ])
+
+  // Handle closing after success screen is shown
+  const handleSuccessClose = useCallback(async () => {
+    if (transactionSignature) {
+      await formResponseAndPostMessage({ signature: transactionSignature })
+      // Small delay to ensure message is sent before closing
+      setTimeout(() => {
+        if (window.opener) {
+          window.close()
+        }
+      }, 100)
+    }
+  }, [transactionSignature, formResponseAndPostMessage])
 
   const handleCancel = useCallback(() => {
     // Close the window when user cancels
@@ -301,8 +317,10 @@ export const useOAuthPaySetup = ({
     display,
     isLoggedIn,
     account,
+    transactionSignature,
     handleConfirm,
-    handleCancel
+    handleCancel,
+    handleSuccessClose
   }
 }
 

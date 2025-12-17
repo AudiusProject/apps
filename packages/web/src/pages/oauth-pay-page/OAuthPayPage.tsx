@@ -1,8 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
+import { makeSolanaTransactionLink } from '@audius/common/utils'
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { Button, Flex, Text, Hint, Divider } from '@audius/harmony'
+import {
+  Button,
+  Flex,
+  Text,
+  Hint,
+  Divider,
+  CompletionCheck,
+  IconExternalLink,
+  PlainButton
+} from '@audius/harmony'
 import cn from 'classnames'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -31,8 +41,10 @@ export const OAuthPayPage = () => {
     queryParamsError,
     display,
     isLoggedIn,
+    transactionSignature,
     handleConfirm,
-    handleCancel
+    handleCancel,
+    handleSuccessClose
   } = useOAuthPaySetup({
     onError: (errorMessage) => {
       setError(errorMessage)
@@ -67,6 +79,17 @@ export const OAuthPayPage = () => {
   // Determine error message to show
   const displayError = queryParamsError || error
 
+  // Auto-close success screen after 1 second
+  useEffect(() => {
+    if (transactionSignature) {
+      const timer = setTimeout(() => {
+        handleSuccessClose()
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [transactionSignature, handleSuccessClose])
+
   if (queryParamsError) {
     return (
       <ContentWrapper display={display ?? 'popup'}>
@@ -83,6 +106,75 @@ export const OAuthPayPage = () => {
         <Flex p='4xl' alignItems='center' justifyContent='center'>
           <LoadingSpinner className={styles.loadingStateSpinner} />
         </Flex>
+      </ContentWrapper>
+    )
+  }
+
+  // Show success screen if transaction completed
+  if (transactionSignature) {
+    return (
+      <ContentWrapper display={display ?? 'popup'}>
+        <div className={styles.container}>
+          <Flex alignItems='center' direction='column'>
+            <Text variant='heading' size='l' className={styles.title}>
+              {messages.confirmTransaction}
+            </Text>
+          </Flex>
+
+          <div className={styles.formArea}>
+            <Flex direction='column' gap='xl' p='xl'>
+              {/* Amount Info */}
+              <Flex direction='column' gap='m'>
+                <Flex direction='column' gap='xs'>
+                  <Text variant='heading' size='s' color='subdued'>
+                    {messages.sent}
+                  </Text>
+                  <Text variant='heading' size='s' color='default'>
+                    -{formatAmount(amount)}{' '}
+                    {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
+                  </Text>
+                </Flex>
+              </Flex>
+
+              <Divider orientation='horizontal' color='default' />
+
+              {/* Address Container */}
+              <Flex direction='column' gap='m'>
+                <Text variant='heading' size='s' color='subdued'>
+                  {messages.recipient}
+                </Text>
+                <Text
+                  variant='body'
+                  size='m'
+                  color='default'
+                  css={{ wordBreak: 'break-all' }}
+                >
+                  {recipient}
+                </Text>
+                <PlainButton
+                  variant='subdued'
+                  css={{ alignSelf: 'flex-start' }}
+                  onClick={() => {
+                    window.open(
+                      makeSolanaTransactionLink(transactionSignature),
+                      '_blank'
+                    )
+                  }}
+                  iconRight={IconExternalLink}
+                >
+                  {messages.viewOnSolana}
+                </PlainButton>
+              </Flex>
+
+              <Flex gap='s' alignItems='center'>
+                <CompletionCheck value='complete' />
+                <Text variant='heading' size='s' color='default'>
+                  {messages.transactionComplete}
+                </Text>
+              </Flex>
+            </Flex>
+          </div>
+        </div>
       </ContentWrapper>
     )
   }
