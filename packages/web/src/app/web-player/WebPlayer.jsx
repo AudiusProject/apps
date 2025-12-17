@@ -766,7 +766,6 @@ const WebPlayer = (props) => {
                   return <CoinDetailPage {...props} />
                 }}
               />
-              <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />
               <Route
                 exact
                 path={COIN_REDEEM_PAGE}
