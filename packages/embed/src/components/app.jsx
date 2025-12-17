@@ -130,6 +130,7 @@ const App = (props) => {
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(false)
   const onGoingRequest = useRef(false)
   const [dominantColor, setDominantColor] = useState(null)
+  const playerContainerRef = useRef(null)
 
   useEffect(() => {
     if (didError) {
@@ -311,10 +312,12 @@ const App = (props) => {
     }
 
     const mobileWebTwitter = isMobileWebTwitter(requestState?.isTwitter)
+    const isCard = requestState?.playerFlavor === PlayerFlavor.CARD
 
     if (requestState && dominantColor) {
       return (
         <CSSTransition
+          nodeRef={playerContainerRef}
           classNames={{
             appear: mobileWebTwitter
               ? transitions.appearMobileWebTwitter
@@ -327,7 +330,16 @@ const App = (props) => {
           in
           timeout={1000}
         >
-          <>
+          <div
+            ref={playerContainerRef}
+            style={{
+              flex: 1,
+              width: isCard ? 'auto' : '100%',
+              display: isCard ? 'flex' : 'block',
+              justifyContent: isCard ? 'center' : undefined,
+              alignItems: isCard ? 'center' : undefined
+            }}
+          >
             {!tracksResponse ? null : (
               <TrackPlayerContainer
                 track={tracksResponse}
@@ -345,7 +357,7 @@ const App = (props) => {
                 rowBackgroundColor={dominantColor.secondary}
               />
             )}
-          </>
+          </div>
         </CSSTransition>
       )
     }

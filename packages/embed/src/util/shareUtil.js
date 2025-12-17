@@ -19,7 +19,7 @@ export const getAudiusURL = () => {
 }
 
 export const getCopyableLink = (path) => {
-  return `${getAudiusURL()}/app-redirect${path ? `/${path}` : ''}#embed`
+  return `${path || ''}#embed`
 }
 
 export const share = (url, title, creator) => {

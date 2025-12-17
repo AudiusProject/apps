@@ -7,8 +7,18 @@ const fallback = 'https://creatornode.audius.co/content'
 const preloadImageFn = (url) => {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    img.onload = () => resolve()
-    img.onerror = () => reject(new Error(`Failed to load image: ${url}`))
+    const timeout = setTimeout(() => {
+      reject(new Error(`Image load timeout: ${url}`))
+    }, 5000)
+
+    img.onload = () => {
+      clearTimeout(timeout)
+      resolve()
+    }
+    img.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error(`Failed to load image: ${url}`))
+    }
     img.src = url
   })
 }

@@ -7,6 +7,7 @@ import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import IconVerified from '../../assets/img/iconVerified.svg'
 import { getArtworkUrl } from '../../util/getArtworkUrl'
+import { getAudiusHostname } from '../../util/getEnv'
 import { stripLeadingSlash } from '../../util/stringUtil'
 import Artwork from '../artwork/Artwork'
 import AudiusLogoButton from '../button/AudiusLogoButton'
@@ -99,8 +100,9 @@ const CollectionPlayerCard = ({
   streamConditions,
   audioPlayer
 }) => {
+  const hostname = getAudiusHostname()
   const makeOnTogglePlay = (index) => () => onTogglePlay(index)
-  const permalink = `${stripLeadingSlash(collection.permalink)}`
+  const permalink = `https://${hostname}${collection.permalink}`
   const isGated = !!streamConditions
   const isPurchaseable =
     streamConditions && instanceOfPurchaseGate(streamConditions)

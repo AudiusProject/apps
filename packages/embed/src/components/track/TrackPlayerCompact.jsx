@@ -105,7 +105,7 @@ const TrackPlayerCompact = ({
         </div>
         <div
           className={styles.bottomSection}
-          style={{ marginTop: isRemixContest && isPurchaseable ? 4 : 18 }}
+          style={{ marginTop: isRemixContest && isPurchaseable ? 4 : 0 }}
         >
           <PlayButton
             playingState={playingState}

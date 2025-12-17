@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useRef } from 'react'
 
 import { Flex } from '@audius/harmony'
 import cn from 'classnames'
@@ -28,14 +28,17 @@ const PausedPopoverCard = ({
 }) => {
   const { popoverVisibility, setPopoverVisibility } = useContext(PauseContext)
   const { width } = useContext(CardDimensionsContext)
+  const popoverRef = useRef(null)
 
   return (
     <CSSTransition
+      nodeRef={popoverRef}
       in={popoverVisibility}
       timeout={1000}
       classNames={pauseTransitions}
     >
       <div
+        ref={popoverRef}
         className={cn(styles.root, {
           [styles.blur]: popoverVisibility
         })}

@@ -8,6 +8,7 @@ import { useSpacebar } from '../../hooks/useSpacebar'
 import { getTrackStreamEndpoint } from '../../util/BedtimeClient'
 import { formatGateways } from '../../util/gatewayUtil'
 import { getArtworkUrl } from '../../util/getArtworkUrl'
+import { getAudiusHostname } from '../../util/getEnv'
 import { isMobile } from '../../util/isMobile'
 import { logError } from '../../util/logError'
 import { stripLeadingSlash } from '../../util/stringUtil'
@@ -145,6 +146,7 @@ const TrackPlayerContainer = ({
 
   const hasPremiumExtras =
     track?.isDownloadGated && instanceOfPurchaseGate(track?.downloadConditions)
+  const hostname = getAudiusHostname()
 
   const props = {
     title: track?.title,
@@ -158,7 +160,7 @@ const TrackPlayerContainer = ({
     seekTo: didInitAudio ? seekTo : undefined,
     position: didInitAudio ? position : 0,
     duration: didInitAudio ? duration : 0,
-    trackURL: stripLeadingSlash(track?.permalink),
+    trackURL: `https://${hostname}${track?.permalink}`,
     backgroundColor,
     isTwitter,
     streamConditions: track?.streamConditions,
