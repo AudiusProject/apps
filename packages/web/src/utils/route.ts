@@ -14,7 +14,7 @@ export const profilePage = (handle: string | null | undefined) => {
   return `/${encodeUrlName(handle ?? '')}`
 }
 
-const collectionPage = (
+export const collectionPage = (
   handle?: string | null,
   playlistName?: string | null,
   playlistId?: ID | null,
