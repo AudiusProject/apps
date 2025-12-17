@@ -24,6 +24,7 @@ const {
 
 const SignOnPage = lazy(() => import('pages/sign-on-page'))
 const OAuthLoginPage = lazy(() => import('pages/oauth-login-page'))
+const OAuthPayPage = lazy(() => import('pages/oauth-pay-page'))
 const PrivateKeyExporterPage = lazy(
   () => import('pages/private-key-exporter-page/PrivateKeyExporterPage')
 )
@@ -61,6 +62,9 @@ export const App = () => {
           </Route>
           <Route exact path='/oauth/auth'>
             <OAuthLoginPage />
+          </Route>
+          <Route exact path='/oauth/pay'>
+            <OAuthPayPage />
           </Route>
           <Route path={PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}>
             <PrivateKeyExporterPage />
