@@ -100,9 +100,9 @@ function getFeePayerKeypair(singleFeePayer = true) {
   if (!feePayerKeypairs) {
     feePayerKeypairs = config.get('solanaFeePayerWallets')
       ? config
-        .get('solanaFeePayerWallets')
-        .map((item) => item.privateKey)
-        .map((key) => solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(key)))
+          .get('solanaFeePayerWallets')
+          .map((item) => item.privateKey)
+          .map((key) => solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(key)))
       : null
   }
   if (!feePayerKeypair) {
