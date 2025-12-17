@@ -3,7 +3,6 @@ import { Request } from 'express'
 import { Logger } from 'pino'
 import { getClientIp } from 'request-ip'
 
-import { config } from '../config'
 import { logger } from '../logger'
 
 export type LocationData = {
@@ -12,29 +11,14 @@ export type LocationData = {
   country: string
 } | null
 
-// gets ip data from api.ipdata.co, returns an empty object {} if api key not configured or an error occurs
+// gets ip data from a validator node
 export const getIpData = async (
   logger: Logger,
   ip: string
 ): Promise<LocationData> => {
-  const ipdataApiKey = config.ipdataApiKey
-  if (ipdataApiKey === null) {
-    logger.warn({}, 'ip data requested but api key not configured')
-    return null
-  }
-  const url = `https://api.ipdata.co/${ip}?api-key=${ipdataApiKey}`
+  const url = `https://creatornode.audius.co/storage.v1.StorageService/GetIPData?ip=${ip}`
   try {
-    const response = await axios
-      .get(url)
-      .then(
-        ({
-          data: { city, region, country_name }
-        }: {
-          data: { city: string; region: string; country_name: string }
-        }) => {
-          return { city, region, country: country_name }
-        }
-      )
+    const { data: response } = await axios.get(url)
     return response
   } catch (e: unknown) {
     logger.error({ error: e }, 'error requesting ip data')
@@ -42,7 +26,6 @@ export const getIpData = async (
   }
 }
 
-// gets ip data from api.ipdata.co, returns an empty object {} if api key not configured or an error occurs
 export const getRequestIpData = async (
   logger: Logger,
   req: Request<unknown>

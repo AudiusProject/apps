@@ -534,16 +534,9 @@ module.exports = function (app) {
       )
       let location
       try {
-        const url = `https://api.ipdata.co/${ip}?api-key=${config.get(
-          'ipdataAPIKey'
-        )}`
+        const url = `https://creatornode.audius.co/storage.v1.StorageService/GetIPData?ip=${ip}`
 
-        const locationResponse = (await axios.get(url)).data
-        location = {
-          city: locationResponse.city,
-          region: locationResponse.region,
-          country: locationResponse.country_name
-        }
+        const location = (await axios.get(url)).data
       } catch (e) {
         req.logger.error(
           `TrackListen location fetch failed: ${e}, trackId=${trackId} userId=${userId}, ${JSON.stringify(

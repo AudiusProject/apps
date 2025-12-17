@@ -47,7 +47,6 @@ type Config = {
   bonkMintAddress: string
   solanaFeePayerWallets: Keypair[]
   delegatePrivateKey: Buffer
-  ipdataApiKey: string | null
   listensValidSigner: string
   solanaSignerPrivateKey: string
   identityRelayerPublicKey: string
@@ -136,10 +135,6 @@ const readConfig = (): Config => {
     solana_relay_server_host: str({ default: '0.0.0.0' }),
     solana_relay_server_port: num({ default: 6002 }),
     audius_delegate_private_key: str({ default: '' }),
-    audius_ipdata_api_key: str({
-      // Throwaway test key
-      default: '01b633611c0b57babd56a6fdf7400b21340956e1840da6dd788f9c37'
-    }),
     audius_solana_eth_registry_program: str({
       default: 'testBgRfFcage1hN7zmTsktdQCJZkHEhM1eguYPaeKg'
     }),
@@ -203,8 +198,6 @@ const readConfig = (): Config => {
     bonkMintAddress: env.audius_solana_bonk_mint,
     solanaFeePayerWallets,
     delegatePrivateKey,
-    ipdataApiKey:
-      env.audius_ipdata_api_key === '' ? null : env.audius_ipdata_api_key,
     listensValidSigner: env.audius_solana_listens_valid_signer,
     ethRegistryProgramId: env.audius_solana_eth_registry_program,
     solanaSignerPrivateKey: env.audius_solana_signer_private_key,

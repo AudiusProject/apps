@@ -4,7 +4,6 @@
   "redisHost": "identity-redis",
   "redisPort": 6379,
   "logLevel": "debug",
-  "ipdataAPIKey": "",
   "twitterAPIKey": "",
   "twitterAPISecret": "",
   "twitterBearerToken": "",

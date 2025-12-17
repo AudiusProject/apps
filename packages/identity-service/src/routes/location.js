@@ -9,7 +9,39 @@ const {
 const config = require('../config')
 const { logger } = require('../logging')
 
-const IP_API_KEY = config.get('ipdataAPIKey')
+const isEU = (countryCode) => {
+  return [
+    'AT',
+    'BE',
+    'BG',
+    'HR',
+    'CY',
+    'CZ',
+    'DK',
+    'EE',
+    'FI',
+    'FR',
+    'DE',
+    'GR',
+    'HU',
+    'IE',
+    'IT',
+    'LV',
+    'LT',
+    'LU',
+    'MT',
+    'NL',
+    'PL',
+    'PT',
+    'RO',
+    'SK',
+    'SI',
+    'ES',
+    'SE',
+    'GB',
+    'UK'
+  ].includes(countryCode)
+}
 
 module.exports = function (app) {
   app.get(
@@ -22,16 +54,16 @@ module.exports = function (app) {
       if (ip.startsWith('::ffff:')) {
         ip = ip.slice(7)
       }
-      const url = `https://api.ipdata.co/${ip}`
+      const url = `https://creatornode.audius.co/storage.v1.StorageService/GetIPData?ip=${ip}`
       try {
         const res = await axios({
           method: 'get',
-          url,
-          params: {
-            'api-key': IP_API_KEY
-          }
+          url
         })
-        return successResponse({ ...res.data, in_eu: res.data.is_eu })
+        return successResponse({
+          ...res.data,
+          in_eu: isEU(res.data.countryCode)
+        })
       } catch (e) {
         logger.error(`Got error in location: ${e.response?.data}`)
         return errorResponse(e.response?.status, e.response?.data)

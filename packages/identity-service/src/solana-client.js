@@ -100,9 +100,9 @@ function getFeePayerKeypair(singleFeePayer = true) {
   if (!feePayerKeypairs) {
     feePayerKeypairs = config.get('solanaFeePayerWallets')
       ? config
-          .get('solanaFeePayerWallets')
-          .map((item) => item.privateKey)
-          .map((key) => solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(key)))
+        .get('solanaFeePayerWallets')
+        .map((item) => item.privateKey)
+        .map((key) => solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(key)))
       : null
   }
   if (!feePayerKeypair) {
@@ -171,18 +171,11 @@ async function createTrackListenInstructions({
     accInfo.data.toJSON().data.slice(1, 33)
   ) // cut off version and eth address from valid signer data
 
-  let sourceData
-  if (config.get('ipdataAPIKey')) {
-    sourceData = JSON.stringify({ source, location })
-  } else {
-    sourceData = source
-  }
-
   // max sol tx size is 1232 bytes
   const trackData = new TrackData({
     userId,
     trackId,
-    source: sourceData, // use api key as feature flag
+    source,
     timestamp:
       (await getListenTimestamp(connection)) ||
       Math.round(new Date().getTime() / 1000)

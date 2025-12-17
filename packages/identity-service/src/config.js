@@ -599,12 +599,6 @@ const config = convict({
     env: 'hCaptchaSecret',
     default: ''
   },
-  ipdataAPIKey: {
-    doc: 'API Key for ipdata',
-    format: String,
-    env: 'ipdataAPIKey',
-    default: ''
-  },
   plaidClientId: {
     doc: 'Plaid client ID',
     format: String,
