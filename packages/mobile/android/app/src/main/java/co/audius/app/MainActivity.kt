@@ -79,10 +79,19 @@ class MainActivity : ReactActivity() {
       val path = data.path
       // If the path starts with /oauth, open in browser instead
       if (path != null && path.startsWith("/oauth")) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, data)
-        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(browserIntent)
-        return true
+        try {
+          val browserIntent = Intent(Intent.ACTION_VIEW, data)
+          browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+          // Verify that an activity can handle this intent
+          if (browserIntent.resolveActivity(packageManager) != null) {
+            startActivity(browserIntent)
+            return true
+          }
+        } catch (e: Exception) {
+          // If opening browser fails, at least prevent the app from handling the deeplink
+          e.printStackTrace()
+          return true
+        }
       }
     }
     
