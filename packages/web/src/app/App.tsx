@@ -52,8 +52,9 @@ export const App = () => {
           ))}
           <Route path={`${SIGN_IN_PAGE}/*`} element={<SignOnPage />} />
           <Route path={`${SIGN_UP_PAGE}/*`} element={<SignOnPage />} />
-          <Route path='/oauth/auth' element={<OAuthLoginPage />} />
+          <Route path='/oauth/auth/pay' element={<OAuthPayPage />} />
           <Route path='/oauth/pay' element={<OAuthPayPage />} />
+          <Route path='/oauth/auth' element={<OAuthLoginPage />} />
           <Route
             path={`${PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}/*`}
             element={
