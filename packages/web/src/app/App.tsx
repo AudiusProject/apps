@@ -60,11 +60,14 @@ export const App = () => {
           <Route path={[SIGN_IN_PAGE, SIGN_UP_PAGE]}>
             <SignOnPage />
           </Route>
-          <Route exact path='/oauth/auth'>
-            <OAuthLoginPage />
+          <Route exact path='/oauth/auth/pay'>
+            <OAuthPayPage />
           </Route>
           <Route exact path='/oauth/pay'>
             <OAuthPayPage />
+          </Route>
+          <Route exact path='/oauth/auth'>
+            <OAuthLoginPage />
           </Route>
           <Route path={PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}>
             <PrivateKeyExporterPage />
