@@ -99,7 +99,7 @@
     "@reown/appkit-adapter-solana": "1.7.1",
     "@reown/appkit-adapter-wagmi": "1.7.1",
     "@reown/appkit-wallet-button": "1.7.1",
-    "@sentry/browser": "7.117.0",
+    "@sentry/browser": "^7.117.0",
     "@solana/spl-token": "0.3.8",
     "@solana/web3.js": "1.98.0",
     "@stripe/crypto": "0.0.4",

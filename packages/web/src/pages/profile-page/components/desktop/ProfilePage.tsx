@@ -1,24 +1,15 @@
-import { memo, ReactNode, useEffect, useState } from 'react'
+import { memo, ReactNode, useEffect, useState, RefObject } from 'react'
 
 import { useMutedUsers } from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
 import { commentsMessages } from '@audius/common/messages'
-import {
-  Status,
-  Collection,
-  ID,
-  UID,
-  ProfilePictureSizes,
-  LineupState,
-  Track,
-  User
-} from '@audius/common/models'
+import { Status } from '@audius/common/models'
 import {
   profilePageFeedLineupActions as feedActions,
   profilePageTracksLineupActions as tracksActions,
   ProfilePageTabs
 } from '@audius/common/store'
-import { Nullable, route } from '@audius/common/utils'
+import { route } from '@audius/common/utils'
 import {
   Box,
   Flex,
@@ -45,17 +36,13 @@ import { FlushPageContainer } from 'components/page/FlushPageContainer'
 import Page from 'components/page/Page'
 import ProfilePicture from 'components/profile-picture/ProfilePicture'
 import { ProfileCompletionHeroCard } from 'components/profile-progress/components/ProfileCompletionHeroCard'
-import {
-  EmptyStatBanner,
-  ProfileMode,
-  StatBanner
-} from 'components/stat-banner/StatBanner'
-import { StatProps } from 'components/stats/Stats'
+import { EmptyStatBanner, StatBanner } from 'components/stat-banner/StatBanner'
 import UploadChip from 'components/upload/UploadChip'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
 import useTabs, { TabHeader, useTabRecalculator } from 'hooks/useTabs/useTabs'
 import { BlockUserConfirmationModal } from 'pages/chat-page/components/BlockUserConfirmationModal'
 import { UnblockUserConfirmationModal } from 'pages/chat-page/components/UnblockUserConfirmationModal'
+import { useProfilePage } from 'pages/profile-page/useProfilePage'
 import { getUserPageSEOFields } from 'utils/seo'
 import { zIndex } from 'utils/zIndex'
 
@@ -76,112 +63,8 @@ import {
 
 const { profilePage } = route
 
-export type ProfilePageProps = {
-  // State
-  editMode: boolean
-  shouldMaskContent: boolean
-  areArtistRecommendationsVisible: boolean
-
-  // Computed
-  accountUserId: ID | null
-  isArtist: boolean
-  isOwner: boolean
-  userId: ID | null
-  handle: string
-  verified: boolean
-  created: string
-  name: string
-  bio: string
-  location: string
-  twitterHandle: string
-  instagramHandle: string
-  tikTokHandle: string
-  twitterVerified: boolean
-  instagramVerified: boolean
-  tikTokVerified: boolean
-  website: string
-  artistCoinBadge: Nullable<{
-    mint: string
-    logo_uri: string
-    ticker: string
-  }>
-  updatedCoverPhoto: { error: boolean; url: string }
-  profilePictureSizes: ProfilePictureSizes | null
-  updatedProfilePicture: { error: boolean; url: string }
-  hasProfilePicture: boolean
-  activeTab: ProfilePageTabs | null
-  dropdownDisabled: boolean
-  mode: ProfileMode
-  stats: StatProps[]
-  isBlocked: boolean
-  canCreateChat: boolean
-  showBlockUserConfirmationModal: boolean
-  showUnblockUserConfirmationModal: boolean
-  showMuteUserConfirmationModal: boolean
-  showUnmuteUserConfirmationModal: boolean
-
-  profile: User | null
-  status: Status
-  goToRoute: (route: string) => void
-  artistTracks: LineupState<Track>
-  playArtistTrack: (uid: UID) => void
-  pauseArtistTrack: () => void
-  // Feed
-  userFeed: LineupState<Track | Collection>
-  playUserFeedTrack: (uid: UID) => void
-  pauseUserFeedTrack: () => void
-
-  // Methods
-  onFollow: () => void
-  onUnfollow: () => void
-  updateName: (name: string) => void
-  updateBio: (bio: string) => void
-  updateLocation: (location: string) => void
-  updateTwitterHandle: (handle: string) => void
-  updateInstagramHandle: (handle: string) => void
-  updateTikTokHandle: (handle: string) => void
-  updateWebsite: (website: string) => void
-  updateArtistCoinBadge: (
-    badge: Nullable<{
-      mint: string
-      logo_uri: string
-      ticker: string
-    }>
-  ) => void
-  changeTab: (tab: ProfilePageTabs) => void
-  getLineupProps: (lineup: any) => any
-  onEdit: () => void
-  onSave: () => void
-  onShare: () => void
-  onCancel: () => void
-  onSortByRecent: () => void
-  onSortByPopular: () => void
-  loadMoreArtistTracks: (offset: number, limit: number) => void
-  loadMoreUserFeed: (offset: number, limit: number) => void
-  formatCardSecondaryText: (
-    saves: number,
-    tracks: number,
-    isPrivate?: boolean
-  ) => string
-  updateProfile: (metadata: any) => void
-  updateProfilePicture: (
-    selectedFiles: any,
-    source: 'original' | 'unsplash' | 'url'
-  ) => Promise<void>
-  updateCoverPhoto: (
-    selectedFiles: any,
-    source: 'original' | 'unsplash' | 'url'
-  ) => Promise<void>
-  didChangeTabsFrom: (prevLabel: string, currentLabel: string) => void
-  onCloseArtistRecommendations: () => void
-  onMessage: () => void
-  onBlock: () => void
-  onUnblock: () => void
-  onMute: () => void
-  onCloseBlockUserConfirmationModal: () => void
-  onCloseUnblockUserConfirmationModal: () => void
-  onCloseMuteUserConfirmationModal: () => void
-  onCloseUnmuteUserConfirmationModal: () => void
+type ProfilePageProps = {
+  containerRef: RefObject<HTMLDivElement>
 }
 
 const LeftColumnSpacer = () => (
@@ -191,86 +74,88 @@ const LeftColumnSpacer = () => (
   />
 )
 
-const ProfilePage = ({
-  isOwner,
-  profile,
-  status,
-  goToRoute,
-  artistTracks,
-  playArtistTrack,
-  pauseArtistTrack,
-  getLineupProps,
-  userFeed,
-  playUserFeedTrack,
-  pauseUserFeedTrack,
-  formatCardSecondaryText,
-  loadMoreUserFeed,
-  loadMoreArtistTracks,
-  updateProfile,
-  onFollow,
-  onUnfollow,
-  updateName,
-  updateBio,
-  updateLocation,
-  updateTwitterHandle,
-  updateInstagramHandle,
-  updateTikTokHandle,
-  updateWebsite,
-  updateArtistCoinBadge,
-  updateProfilePicture,
-  updateCoverPhoto,
-  changeTab,
-  mode,
-  stats,
-  onEdit,
-  onSave,
-  onShare,
-  onCancel,
-  onSortByRecent,
-  onSortByPopular,
-  isArtist,
-  activeTab,
-  shouldMaskContent,
-  editMode,
-  areArtistRecommendationsVisible,
-  onCloseArtistRecommendations,
-  canCreateChat,
-  onMessage,
-  onBlock,
-  onUnblock,
-  onMute,
-  isBlocked,
-  showBlockUserConfirmationModal,
-  onCloseBlockUserConfirmationModal,
-  showUnblockUserConfirmationModal,
-  onCloseUnblockUserConfirmationModal,
-  showMuteUserConfirmationModal,
-  showUnmuteUserConfirmationModal,
-  onCloseMuteUserConfirmationModal,
-  onCloseUnmuteUserConfirmationModal,
-  accountUserId,
-  userId,
-  handle,
-  verified,
-  created,
-  name,
-  bio,
-  location,
-  twitterHandle,
-  instagramHandle,
-  tikTokHandle,
-  twitterVerified,
-  instagramVerified,
-  tikTokVerified,
-  website,
-  artistCoinBadge,
-  updatedCoverPhoto,
-  profilePictureSizes,
-  updatedProfilePicture,
-  hasProfilePicture,
-  dropdownDisabled,
-  didChangeTabsFrom
-}: ProfilePageProps) => {
+const ProfilePage = ({ containerRef }: ProfilePageProps) => {
+  const {
+    // Profile data
+    profile,
+    status,
+    accountUserId,
+    isArtist,
+    isOwner,
+    userId,
+    handle,
+    verified,
+    created,
+    name,
+    bio,
+    location,
+    twitterHandle,
+    instagramHandle,
+    tikTokHandle,
+    twitterVerified,
+    instagramVerified,
+    tikTokVerified,
+    website,
+    artistCoinBadge,
+    hasProfilePicture,
+    mode,
+    stats,
+    activeTab,
+    dropdownDisabled,
+    profilePictureSizes,
+    updatedCoverPhoto,
+    updatedProfilePicture,
+
+    // Lineups
+    artistTracks,
+    userFeed,
+
+    // State
+    editMode,
+    areArtistRecommendationsVisible,
+    showBlockUserConfirmationModal,
+    showUnblockUserConfirmationModal,
+    showMuteUserConfirmationModal,
+    isBlocked,
+    canCreateChat,
+
+    // Handlers
+    changeTab,
+    getLineupProps,
+    onSortByRecent,
+    onSortByPopular,
+    loadMoreArtistTracks,
+    loadMoreUserFeed,
+    playArtistTrack,
+    pauseArtistTrack,
+    playUserFeedTrack,
+    pauseUserFeedTrack,
+    onFollow,
+    onUnfollow,
+    onShare,
+    onEdit,
+    onSave,
+    onCancel,
+    updateProfilePicture,
+    updateName,
+    updateBio,
+    updateLocation,
+    updateTwitterHandle,
+    updateInstagramHandle,
+    updateTikTokHandle,
+    updateWebsite,
+    updateArtistCoinBadge,
+    updateCoverPhoto,
+    didChangeTabsFrom,
+    onCloseArtistRecommendations,
+    onMessage,
+    onBlock,
+    onUnblock,
+    onMute,
+    onCloseBlockUserConfirmationModal,
+    onCloseUnblockUserConfirmationModal,
+    onCloseMuteUserConfirmationModal
+  } = useProfilePage(containerRef)
   const renderProfileCompletionCard = () => {
     return isOwner ? <ProfileCompletionHeroCard /> : null
   }
@@ -339,9 +224,9 @@ const ProfilePage = ({
           ) : (
             <Lineup
               {...getLineupProps(artistTracks)}
-              extraPrecedingElement={trackUploadChip}
+              extraPrecedingElement={trackUploadChip ?? undefined}
               animateLeadingElement
-              leadingElementId={profile.artist_pick_track_id}
+              leadingElementId={profile.artist_pick_track_id ?? undefined}
               showArtistPick={true}
               loadMore={loadMoreArtistTracks}
               playTrack={playArtistTrack}

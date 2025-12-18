@@ -1,8 +1,7 @@
-import { RefObject, memo } from 'react'
+import { RefObject } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import ProfilePageProvider from './ProfilePageProvider'
 import DesktopProfilePage from './components/desktop/ProfilePage'
 import MobileProfilePage from './components/mobile/ProfilePage'
 
@@ -13,14 +12,11 @@ type ProfilePageProps = {
 const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   const isMobile = useIsMobile()
 
-  const content = isMobile ? MobileProfilePage : DesktopProfilePage
-
-  return (
-    // @ts-ignore
-    <ProfilePageProvider containerRef={containerRef}>
-      {content}
-    </ProfilePageProvider>
+  return isMobile ? (
+    <MobileProfilePage containerRef={containerRef} />
+  ) : (
+    <DesktopProfilePage containerRef={containerRef} />
   )
 }
 
-export default memo(ProfilePage)
+export default ProfilePage

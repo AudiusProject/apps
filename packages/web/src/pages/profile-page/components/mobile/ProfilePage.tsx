@@ -1,16 +1,6 @@
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, RefObject } from 'react'
 
-import {
-  Status,
-  Collection,
-  ID,
-  UID,
-  ProfilePictureSizes,
-  CoverPhotoSizes,
-  LineupState,
-  User,
-  Track
-} from '@audius/common/models'
+import { Status, User } from '@audius/common/models'
 import {
   profilePageFeedLineupActions as feedActions,
   profilePageTracksLineupActions as tracksActions,
@@ -36,8 +26,8 @@ import NavContext, {
 import TextElement, { Type } from 'components/nav/mobile/TextElement'
 import TierExplainerDrawer from 'components/user-badges/TierExplainerDrawer'
 import useTabs, { TabHeader } from 'hooks/useTabs/useTabs'
+import { useProfilePage } from 'pages/profile-page/useProfilePage'
 import { getUserPageSEOFields } from 'utils/seo'
-import { withNullGuard } from 'utils/withNullGuard'
 
 import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 
@@ -50,85 +40,8 @@ import styles from './ProfilePage.module.css'
 import { ShareUserButton } from './ShareUserButton'
 const { profilePage } = route
 
-export type ProfilePageProps = {
-  // Computed
-  accountUserId: ID | null
-  isArtist: boolean
-  isOwner: boolean
-  userId: ID | null
-  handle: string
-  verified: boolean
-  created: string
-  name: string
-  bio: string
-  location: string
-  xHandle: string
-  instagramHandle: string
-  tikTokHandle: string
-  twitterVerified: boolean
-  instagramVerified: boolean
-  tikTokVerified: boolean
-  website: string
-  coverPhotoSizes: CoverPhotoSizes | null
-  profilePictureSizes: ProfilePictureSizes | null
-  hasProfilePicture: boolean
-  followers: User[]
-  followersLoading: boolean
-  setFollowingUserId: (userId: ID) => void
-  setFollowersUserId: (userId: ID) => void
-  activeTab: ProfilePageTabs | null
-  following: boolean
-  isSubscribed: boolean
-  mode: string
-  // Whether or not the user has edited at least one thing on their profile
-  hasMadeEdit: boolean
-  onEdit: () => void
-  onSave: () => void
-  onCancel: () => void
-  stats: Array<{ number: number; title: string; key: string }>
-  trackIsActive: boolean
-
-  profile: User | null
-  status: Status
-  collectionStatus: Status
-  goToRoute: (route: string) => void
-  artistTracks: LineupState<Track>
-  userFeed: LineupState<Track | Collection>
-  playArtistTrack: (uid: UID) => void
-  pauseArtistTrack: () => void
-  playUserFeedTrack: (uid: UID) => void
-  pauseUserFeedTrack: () => void
-  refreshProfile: () => void
-
-  // Updates
-  updatedCoverPhoto: { file: File; url: string } | null
-  updatedProfilePicture: { file: File; url: string } | null
-
-  // Methods
-  changeTab: (tab: ProfilePageTabs) => void
-  getLineupProps: (lineup: any) => any
-  loadMoreArtistTracks: (offset: number, limit: number) => void
-  loadMoreUserFeed: (offset: number, limit: number) => void
-  onFollow: (id: ID) => void
-  onConfirmUnfollow: (id: ID) => void
-  updateName: (name: string) => void
-  updateBio: (bio: string) => void
-  updateLocation: (location: string) => void
-  updateXHandle: (handle: string) => void
-  updateInstagramHandle: (handle: string) => void
-  updateTikTokHandle: (handle: string) => void
-  updateWebsite: (website: string) => void
-  updateProfilePicture: (
-    selectedFiles: any,
-    source: 'original' | 'unsplash' | 'url'
-  ) => Promise<void>
-  updateCoverPhoto: (
-    selectedFiles: any,
-    source: 'original' | 'unsplash' | 'url'
-  ) => Promise<void>
-  didChangeTabsFrom: (prevLabel: string, currentLabel: string) => void
-  areArtistRecommendationsVisible: boolean
-  onCloseArtistRecommendations: () => void
+type ProfilePageProps = {
+  containerRef: RefObject<HTMLDivElement>
 }
 
 const artistTabs: TabHeader[] = [
@@ -194,40 +107,44 @@ const getMessages = ({
     : `${name} hasn't reposted anything yet`
 })
 
-const g = withNullGuard((props: ProfilePageProps) => {
-  const { profile } = props
-  if (profile) {
-    return { ...props, profile }
-  }
-})
-
-const ProfilePage = g(
-  ({
-    accountUserId,
-    userId,
-    name,
-    handle,
+const ProfilePage = ({ containerRef }: ProfilePageProps) => {
+  const {
+    // Profile data
     profile,
-    bio,
-    location,
     status,
-    collectionStatus,
     isArtist,
     isOwner,
+    userId,
+    handle,
     verified,
-    coverPhotoSizes,
-    profilePictureSizes,
-    hasProfilePicture,
-    followers,
+    name,
+    bio,
+    location,
+    twitterHandle,
     instagramHandle,
     tikTokHandle,
-    xHandle,
     twitterVerified,
     instagramVerified,
     tikTokVerified,
     website,
+    hasProfilePicture,
+    following,
+    mode,
+    activeTab,
+    profilePictureSizes,
+    updatedCoverPhoto,
+    updatedProfilePicture,
+
+    // Lineups
     artistTracks,
     userFeed,
+
+    // State
+    hasMadeEdit,
+    areArtistRecommendationsVisible,
+
+    // Handlers
+    goToRoute,
     getLineupProps,
     loadMoreArtistTracks,
     loadMoreUserFeed,
@@ -237,285 +154,285 @@ const ProfilePage = g(
     pauseUserFeedTrack,
     setFollowingUserId,
     setFollowersUserId,
-    goToRoute,
-    following,
-    isSubscribed,
     onFollow,
     onConfirmUnfollow,
-    mode,
-    hasMadeEdit,
     onEdit,
     onSave,
     onCancel,
-    updatedCoverPhoto,
-    updatedProfilePicture,
     updateName,
     updateBio,
     updateLocation,
-    updateXHandle,
+    updateTwitterHandle,
     updateInstagramHandle,
     updateTikTokHandle,
     updateWebsite,
     updateProfilePicture,
     updateCoverPhoto,
     didChangeTabsFrom,
-    activeTab,
-    areArtistRecommendationsVisible,
     onCloseArtistRecommendations
-  }) => {
-    const { setHeader } = useContext(HeaderContext)
-    useEffect(() => {
-      setHeader(null)
-    }, [setHeader])
+  } = useProfilePage(containerRef)
 
-    const messages = getMessages({ name, isOwner })
-    let content
-    let profileTabs
-    let profileElements
-    const isLoading = status === Status.LOADING
-    const isEditing = mode === 'editing'
+  // Map twitterHandle to xHandle for mobile
+  const xHandle = twitterHandle
+  const updateXHandle = updateTwitterHandle
+  const followers: User[] = [] // TODO: Add followers fetching if needed
 
-    // Set Nav-Bar Menu
-    const { setLeft, setCenter, setRight } = useContext(NavContext)!
-    useEffect(() => {
-      let leftNav
-      let rightNav
-      if (isEditing) {
-        leftNav = (
-          <TextElement text='Cancel' type={Type.SECONDARY} onClick={onCancel} />
-        )
-        rightNav = (
-          <TextElement
-            text='Save'
-            type={Type.PRIMARY}
-            isEnabled={hasMadeEdit}
-            onClick={onSave}
-          />
-        )
-      } else {
-        leftNav = isOwner ? LeftPreset.SETTINGS : LeftPreset.BACK
-        rightNav = <ShareUserButton userId={userId} />
-      }
-      if (userId) {
-        setLeft(leftNav)
-        setRight(rightNav)
-        setCenter(CenterPreset.LOGO)
-      }
-    }, [
-      setLeft,
-      setCenter,
-      setRight,
-      userId,
-      isOwner,
-      isEditing,
-      onCancel,
-      onSave,
-      hasMadeEdit
-    ])
+  const { setHeader } = useContext(HeaderContext)
+  useEffect(() => {
+    setHeader(null)
+  }, [setHeader])
 
-    if (isLoading) {
-      content = null
-    } else if (isEditing) {
-      content = (
-        <EditProfile
-          name={name}
-          bio={bio}
-          location={location}
-          xHandle={xHandle}
-          instagramHandle={instagramHandle}
-          tikTokHandle={tikTokHandle}
-          twitterVerified={twitterVerified}
-          instagramVerified={instagramVerified}
-          tikTokVerified={tikTokVerified}
-          website={website}
-          onUpdateName={updateName}
-          onUpdateBio={updateBio}
-          onUpdateLocation={updateLocation}
-          onUpdateXHandle={updateXHandle}
-          onUpdateInstagramHandle={updateInstagramHandle}
-          onUpdateTikTokHandle={updateTikTokHandle}
-          onUpdateWebsite={updateWebsite}
+  const messages = getMessages({ name, isOwner })
+  let content
+  let profileTabs
+  let profileElements
+  const isLoading = status === Status.LOADING
+  const isEditing = mode === 'editing'
+
+  // Set Nav-Bar Menu
+  const { setLeft, setCenter, setRight } = useContext(NavContext)!
+  useEffect(() => {
+    let leftNav
+    let rightNav
+    if (isEditing) {
+      leftNav = (
+        <TextElement text='Cancel' type={Type.SECONDARY} onClick={onCancel} />
+      )
+      rightNav = (
+        <TextElement
+          text='Save'
+          type={Type.PRIMARY}
+          isEnabled={hasMadeEdit}
+          onClick={onSave}
         />
       )
     } else {
-      if (isArtist) {
-        profileTabs = artistTabs
-        profileElements = [
-          <div className={styles.tracksLineupContainer} key='artistTracks'>
-            {profile.track_count === 0 ? (
-              <EmptyTab
-                message={
-                  <>
-                    {messages.emptyTracks}
-                    <i
-                      className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                    />
-                  </>
-                }
-              />
-            ) : (
-              <Lineup
-                {...getLineupProps(artistTracks)}
-                leadingElementId={profile.artist_pick_track_id}
-                showArtistPick={true}
-                limit={profile.track_count}
-                loadMore={loadMoreArtistTracks}
-                playTrack={playArtistTrack}
-                pauseTrack={pauseArtistTrack}
-                actions={tracksActions}
-              />
-            )}
-          </div>,
-          <div className={styles.cardLineupContainer} key='artistAlbums'>
-            <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
-          </div>,
-          <div className={styles.cardLineupContainer} key='artistPlaylists'>
-            <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-          </div>,
-          <div className={styles.tracksLineupContainer} key='artistUsers'>
-            {profile.repost_count === 0 ? (
-              <EmptyTab
-                message={
-                  <>
-                    {messages.emptyReposts}
-                    <i
-                      className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                    />
-                  </>
-                }
-              />
-            ) : (
-              <Lineup
-                {...getLineupProps(userFeed)}
-                count={profile.repost_count}
-                loadMore={loadMoreUserFeed}
-                playTrack={playUserFeedTrack}
-                pauseTrack={pauseUserFeedTrack}
-                actions={feedActions}
-              />
-            )}
-          </div>
-        ]
-      } else {
-        profileTabs = userTabs
-        profileElements = [
-          <div className={styles.tracksLineupContainer} key='tracks'>
-            {profile.repost_count === 0 ? (
-              <EmptyTab
-                message={
-                  <>
-                    {messages.emptyReposts}
-                    <i
-                      className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                    />
-                  </>
-                }
-              />
-            ) : (
-              <Lineup
-                {...getLineupProps(userFeed)}
-                count={profile.repost_count}
-                loadMore={loadMoreUserFeed}
-                playTrack={playUserFeedTrack}
-                pauseTrack={pauseUserFeedTrack}
-                actions={feedActions}
-              />
-            )}
-          </div>,
-          <div className={styles.cardLineupContainer} key='playlists'>
-            <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-          </div>
-        ]
-      }
+      leftNav = isOwner ? LeftPreset.SETTINGS : LeftPreset.BACK
+      rightNav = <ShareUserButton userId={userId} />
     }
-
-    const { tabs, body } = useTabs({
-      didChangeTabsFrom,
-      tabs: isLoading ? [] : profileTabs || [],
-      elements: isLoading ? [] : profileElements || [],
-      initialTab: activeTab || undefined,
-      pathname: profilePage(handle)
-    })
-
-    if (profile && profile.is_deactivated) {
-      content = (
-        <div className={styles.contentContainer}>
-          <DeactivatedProfileTombstone isMobile />
-        </div>
-      )
-    } else if (!isLoading && !isEditing) {
-      content = (
-        <div className={styles.contentContainer}>
-          <div className={styles.tabs}>{tabs}</div>
-          {body}
-        </div>
-      )
+    if (userId) {
+      setLeft(leftNav)
+      setRight(rightNav)
+      setCenter(CenterPreset.LOGO)
     }
+  }, [
+    setLeft,
+    setCenter,
+    setRight,
+    userId,
+    isOwner,
+    isEditing,
+    onCancel,
+    onSave,
+    hasMadeEdit
+  ])
 
-    const {
-      title = '',
-      description = '',
-      canonicalUrl = '',
-      structuredData
-    } = getUserPageSEOFields({ handle, userName: name, bio })
+  const { tabs, body } = useTabs({
+    didChangeTabsFrom,
+    tabs: isLoading ? [] : profileTabs || [],
+    elements: isLoading ? [] : profileElements || [],
+    initialTab: activeTab || undefined,
+    pathname: profilePage(handle)
+  })
 
-    return (
-      <>
-        <MobilePageContainer
-          title={title}
-          description={description}
-          canonicalUrl={canonicalUrl}
-          structuredData={structuredData}
-          entityType='user'
-          hashId={profile?.user_id ? Id.parse(profile.user_id) : undefined}
-          containerClassName={styles.container}
-        >
-          <ProfileHeader
-            isDeactivated={profile?.is_deactivated}
-            profile={profile}
-            name={name}
-            handle={handle}
-            isArtist={isArtist}
-            bio={bio}
-            verified={verified}
-            userId={profile.user_id}
-            loading={status === Status.LOADING}
-            coverPhotoSizes={coverPhotoSizes}
-            profilePictureSizes={profilePictureSizes}
-            hasProfilePicture={hasProfilePicture}
-            playlistCount={profile.playlist_count}
-            trackCount={profile.track_count}
-            followerCount={profile.follower_count}
-            followingCount={profile.followee_count}
-            setFollowingUserId={setFollowingUserId}
-            setFollowersUserId={setFollowersUserId}
-            xHandle={xHandle}
-            instagramHandle={instagramHandle}
-            tikTokHandle={tikTokHandle}
-            website={website}
-            followers={followers}
-            following={following}
-            onFollow={onFollow}
-            onUnfollow={onConfirmUnfollow}
-            goToRoute={goToRoute}
-            mode={mode}
-            switchToEditMode={onEdit}
-            updatedProfilePicture={
-              updatedProfilePicture ? updatedProfilePicture.url : null
-            }
-            updatedCoverPhoto={updatedCoverPhoto ? updatedCoverPhoto.url : null}
-            onUpdateProfilePicture={updateProfilePicture}
-            onUpdateCoverPhoto={updateCoverPhoto}
-            areArtistRecommendationsVisible={areArtistRecommendationsVisible}
-            onCloseArtistRecommendations={onCloseArtistRecommendations}
-          />
-          {content}
-        </MobilePageContainer>
+  if (!profile) {
+    return null
+  }
 
-        <TierExplainerDrawer />
-      </>
+  const coverPhotoSizes = profile.cover_photo ?? null
+
+  if (isLoading) {
+    content = null
+  } else if (isEditing) {
+    content = (
+      <EditProfile
+        name={name}
+        bio={bio}
+        location={location}
+        xHandle={xHandle}
+        instagramHandle={instagramHandle}
+        tikTokHandle={tikTokHandle}
+        twitterVerified={twitterVerified}
+        instagramVerified={instagramVerified}
+        tikTokVerified={tikTokVerified}
+        website={website}
+        onUpdateName={updateName}
+        onUpdateBio={updateBio}
+        onUpdateLocation={updateLocation}
+        onUpdateXHandle={updateXHandle}
+        onUpdateInstagramHandle={updateInstagramHandle}
+        onUpdateTikTokHandle={updateTikTokHandle}
+        onUpdateWebsite={updateWebsite}
+      />
+    )
+  } else {
+    if (isArtist) {
+      profileTabs = artistTabs
+      profileElements = [
+        <div className={styles.tracksLineupContainer} key='artistTracks'>
+          {profile.track_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {messages.emptyTracks}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(artistTracks)}
+              leadingElementId={profile.artist_pick_track_id ?? undefined}
+              showArtistPick={true}
+              limit={profile.track_count}
+              loadMore={loadMoreArtistTracks}
+              playTrack={playArtistTrack}
+              pauseTrack={pauseArtistTrack}
+              actions={tracksActions}
+            />
+          )}
+        </div>,
+        <div className={styles.cardLineupContainer} key='artistAlbums'>
+          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>,
+        <div className={styles.cardLineupContainer} key='artistPlaylists'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>,
+        <div className={styles.tracksLineupContainer} key='artistUsers'>
+          {profile.repost_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {messages.emptyReposts}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(userFeed)}
+              count={profile.repost_count}
+              loadMore={loadMoreUserFeed}
+              playTrack={playUserFeedTrack}
+              pauseTrack={pauseUserFeedTrack}
+              actions={feedActions}
+            />
+          )}
+        </div>
+      ]
+    } else {
+      profileTabs = userTabs
+      profileElements = [
+        <div className={styles.tracksLineupContainer} key='tracks'>
+          {profile.repost_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {messages.emptyReposts}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(userFeed)}
+              count={profile.repost_count}
+              loadMore={loadMoreUserFeed}
+              playTrack={playUserFeedTrack}
+              pauseTrack={pauseUserFeedTrack}
+              actions={feedActions}
+            />
+          )}
+        </div>,
+        <div className={styles.cardLineupContainer} key='playlists'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>
+      ]
+    }
+  }
+
+  if (profile.is_deactivated) {
+    content = (
+      <div className={styles.contentContainer}>
+        <DeactivatedProfileTombstone isMobile />
+      </div>
+    )
+  } else if (!isLoading && !isEditing) {
+    content = (
+      <div className={styles.contentContainer}>
+        <div className={styles.tabs}>{tabs}</div>
+        {body}
+      </div>
     )
   }
-)
+
+  const {
+    title = '',
+    description = '',
+    canonicalUrl = '',
+    structuredData
+  } = getUserPageSEOFields({ handle, userName: name, bio })
+
+  return (
+    <>
+      <MobilePageContainer
+        title={title}
+        description={description}
+        canonicalUrl={canonicalUrl}
+        structuredData={structuredData}
+        entityType='user'
+        hashId={profile?.user_id ? Id.parse(profile.user_id) : undefined}
+        containerClassName={styles.container}
+      >
+        <ProfileHeader
+          isDeactivated={profile.is_deactivated ?? false}
+          profile={profile}
+          name={name}
+          handle={handle}
+          isArtist={isArtist}
+          bio={bio}
+          verified={verified}
+          userId={profile.user_id}
+          loading={status === Status.LOADING}
+          coverPhotoSizes={coverPhotoSizes}
+          profilePictureSizes={profilePictureSizes}
+          hasProfilePicture={hasProfilePicture}
+          playlistCount={profile.playlist_count}
+          trackCount={profile.track_count}
+          followerCount={profile.follower_count}
+          followingCount={profile.followee_count}
+          setFollowingUserId={setFollowingUserId}
+          setFollowersUserId={setFollowersUserId}
+          xHandle={xHandle}
+          instagramHandle={instagramHandle}
+          tikTokHandle={tikTokHandle}
+          website={website}
+          followers={followers}
+          following={following}
+          onFollow={onFollow}
+          onUnfollow={onConfirmUnfollow}
+          goToRoute={goToRoute}
+          mode={mode}
+          switchToEditMode={onEdit}
+          updatedProfilePicture={updatedProfilePicture?.url ?? null}
+          updatedCoverPhoto={updatedCoverPhoto?.url ?? null}
+          onUpdateProfilePicture={updateProfilePicture}
+          onUpdateCoverPhoto={updateCoverPhoto}
+          areArtistRecommendationsVisible={areArtistRecommendationsVisible}
+          onCloseArtistRecommendations={onCloseArtistRecommendations}
+        />
+        {content}
+      </MobilePageContainer>
+
+      <TierExplainerDrawer />
+    </>
+  )
+}
 
 export default ProfilePage
