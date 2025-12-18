@@ -179,7 +179,7 @@ export const useAudioBalance = (
   options?: QueryOptions
 ) => {
   const {
-    includeConnectedWallets = true,
+    includeConnectedWallets: includeConnectedWalletsParam = true,
     includeStaked = false,
     userId: userIdParam
   } = params
@@ -187,6 +187,10 @@ export const useAudioBalance = (
   // Get account balances
   const { data: currentUserId } = useCurrentUserId()
   const userId = userIdParam ?? currentUserId
+  // Connected wallets are private - we can only fetch them for the current user
+  // For other users, we should only show their main account balance
+  const includeConnectedWallets =
+    includeConnectedWalletsParam && userId === currentUserId
   const { data, isSuccess: isUserFetched } = useUser(userId)
   const accountBalances = useWalletAudioBalances(
     {
@@ -202,7 +206,10 @@ export const useAudioBalance = (
       ],
       includeStaked
     },
-    { ...options, enabled: isUserFetched }
+    {
+      ...options,
+      enabled: options?.enabled !== false && isUserFetched
+    }
   )
   let accountBalance = AUDIO(0).value
 
@@ -213,10 +220,13 @@ export const useAudioBalance = (
   }
 
   // Get linked/connected wallets balances
+  // Only fetch connected wallets for the current user, not for other users
   const context = useQueryContext()
+  const shouldFetchConnectedWallets =
+    includeConnectedWallets && !!currentUserId && options?.enabled !== false // Respect parent enabled option
   const connectedWalletsQuery = useQuery({
-    ...getConnectedWalletsQueryOptions(context, { userId }),
-    enabled: !!userId && includeConnectedWallets
+    ...getConnectedWalletsQueryOptions(context, { userId: currentUserId }),
+    enabled: shouldFetchConnectedWallets
   })
   const {
     data: connectedWallets = [],
@@ -231,8 +241,8 @@ export const useAudioBalance = (
     {
       ...options,
       enabled:
+        shouldFetchConnectedWallets &&
         isConnectedWalletsFetched &&
-        includeConnectedWallets &&
         options?.enabled !== false
     }
   )
