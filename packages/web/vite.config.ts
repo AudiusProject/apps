@@ -121,7 +121,10 @@ export default defineConfig(async ({ mode }) => {
         }
       },
       react({
-        jsxImportSource: '@emotion/react'
+        jsxImportSource: '@emotion/react',
+        babel: {
+          plugins: ['babel-plugin-react-compiler']
+        }
       }),
       ...(ssr ? [vike()] : []),
       ...((analyze

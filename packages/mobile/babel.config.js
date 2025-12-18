@@ -1,6 +1,7 @@
 module.exports = (api) => {
   const babelEnv = api.env()
   const plugins = [
+    'babel-plugin-react-compiler',
     ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }],
     '@babel/plugin-transform-export-namespace-from',
     [

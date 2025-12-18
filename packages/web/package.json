@@ -231,6 +231,7 @@
     "@vitejs/plugin-react-swc": "4.2.2",
     "abort-controller": "3.0.0",
     "assert": "^2.0.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "base64url": "3.0.1",
     "browserify-zlib": "0.2.0",
     "buffer": "6.0.3",
