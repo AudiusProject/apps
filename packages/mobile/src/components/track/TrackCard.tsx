@@ -23,6 +23,7 @@ import { TrackImage } from '../image/TrackImage'
 import { TrackDownloadStatusIndicator } from '../offline-downloads'
 
 import { TrackCardSkeleton } from './TrackCardSkeleton'
+import { TrackDogEar } from './TrackDogEar'
 
 const messages = {
   repost: 'Reposts',
@@ -88,6 +89,7 @@ export const TrackCard = (props: TrackCardProps) => {
 
   return (
     <Paper border='default' onPress={handlePress}>
+      <TrackDogEar trackId={id} />
       <Flex p='s' gap='s'>
         <TrackImage
           trackId={id}
