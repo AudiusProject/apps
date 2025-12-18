@@ -222,7 +222,7 @@ export const useOAuthPaySetup = ({
             }
           }
         } else {
-          // URL redirect mode (not commonly used for pay flow, but support it)
+          // URL redirect mode (used for fullScreen mode)
           if (responseMode && responseMode === 'query') {
             if (state != null) {
               parsedRedirectUri!.searchParams.append('state', state as string)
@@ -233,16 +233,26 @@ export const useOAuthPaySetup = ({
                 result.signature
               )
             }
+            if (result.wallet) {
+              parsedRedirectUri!.searchParams.append('wallet', result.wallet)
+            }
             if (result.error) {
               parsedRedirectUri!.searchParams.append('error', result.error)
             }
           } else {
+            // Fragment mode (default for fullScreen)
             const statePart = state != null ? `state=${state}&` : ''
             const signaturePart = result.signature
               ? `signature=${result.signature}`
               : ''
+            const walletPart = result.wallet ? `wallet=${result.wallet}` : ''
             const errorPart = result.error ? `error=${result.error}` : ''
-            const parts = [statePart, signaturePart, errorPart].filter(Boolean)
+            const parts = [
+              statePart,
+              signaturePart,
+              walletPart,
+              errorPart
+            ].filter(Boolean)
             parsedRedirectUri!.hash = `#${parts.join('&')}`
           }
           window.location.href = parsedRedirectUri!.toString()
