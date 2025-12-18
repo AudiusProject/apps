@@ -53,7 +53,7 @@
     "@audius/fixed-decimal": "*",
     "@audius/harmony": "*",
     "@audius/sdk": "*",
-    "@coinflowlabs/react-native": "4.2.3",
+    "@coinflowlabs/react-native": "4.5.2",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "11.14.0",
     "@fingerprintjs/fingerprintjs-pro-react-native": "3.9.0",
