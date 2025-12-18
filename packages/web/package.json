@@ -80,7 +80,7 @@
     "@audius/sdk": "*",
     "@cloudflare/kv-asset-handler": "0.2.0",
     "@coinbase/cbpay-js": "1.2.0",
-    "@coinflowlabs/react": "5.0.2",
+    "@coinflowlabs/react": "5.5.1",
     "@emotion/css": "11.11.2",
     "@emotion/react": "11.11.1",
     "@emotion/server": "11.11.0",
