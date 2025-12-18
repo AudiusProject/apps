@@ -710,62 +710,66 @@ export const Table = ({
         minimumBatchSize={fetchBatchSize}
       >
         {({ onRowsRendered, registerChild: registerListChild }) => (
-          <WindowScroller ref={wsRef} scrollElement={scrollRef?.current}>
-            {({
-              height,
-              registerChild,
-              isScrolling,
-              onChildScroll,
-              scrollTop
-            }) => (
-              <div className={cn(styles.tableWrapper, wrapperClassName)}>
-                <table
-                  className={cn(styles.table, tableClassName)}
-                  {...getTableProps()}
-                >
-                  <thead className={cn(styles.tableHead, tableHeaderClassName)}>
-                    {renderHeaders()}
-                  </thead>
-                  <tbody>{loading ? <TableLoadingSpinner /> : null}</tbody>
-                </table>
-                <div
-                  className={styles.tableBody}
-                  {...getTableBodyProps()}
-                  ref={
-                    registerChild as (
-                      instance: HTMLTableSectionElement | null
-                    ) => void
-                  }
-                >
-                  {loading ? null : (
-                    <AutoSizer disableHeight>
-                      {({ width }) => (
-                        <List
-                          role='Tabpanel'
-                          autoHeight
-                          height={height}
-                          width={width}
-                          isScrolling={isScrolling}
-                          onScroll={onChildScroll}
-                          scrollTop={scrollTop}
-                          onRowsRendered={(info) => onRowsRendered(info)}
-                          ref={registerListChild}
-                          overscanRowsCount={2}
-                          rowCount={
-                            fetchMore && totalRowCount != null
-                              ? totalRowCount
-                              : rows.length
-                          }
-                          rowHeight={64}
-                          rowRenderer={renderRow}
-                        />
-                      )}
-                    </AutoSizer>
-                  )}
+          <div style={{ width: '100%' }}>
+            <WindowScroller ref={wsRef} scrollElement={scrollRef?.current}>
+              {({
+                height,
+                registerChild,
+                isScrolling,
+                onChildScroll,
+                scrollTop
+              }) => (
+                <div className={cn(styles.tableWrapper, wrapperClassName)}>
+                  <table
+                    className={cn(styles.table, tableClassName)}
+                    {...getTableProps()}
+                  >
+                    <thead
+                      className={cn(styles.tableHead, tableHeaderClassName)}
+                    >
+                      {renderHeaders()}
+                    </thead>
+                    <tbody>{loading ? <TableLoadingSpinner /> : null}</tbody>
+                  </table>
+                  <div
+                    className={styles.tableBody}
+                    {...getTableBodyProps()}
+                    ref={
+                      registerChild as (
+                        instance: HTMLTableSectionElement | null
+                      ) => void
+                    }
+                  >
+                    {loading ? null : (
+                      <AutoSizer disableHeight>
+                        {({ width }) => (
+                          <List
+                            role='Tabpanel'
+                            autoHeight
+                            height={height}
+                            width={width}
+                            isScrolling={isScrolling}
+                            onScroll={onChildScroll}
+                            scrollTop={scrollTop}
+                            onRowsRendered={(info) => onRowsRendered(info)}
+                            ref={registerListChild}
+                            overscanRowsCount={2}
+                            rowCount={
+                              fetchMore && totalRowCount != null
+                                ? totalRowCount
+                                : rows.length
+                            }
+                            rowHeight={64}
+                            rowRenderer={renderRow}
+                          />
+                        )}
+                      </AutoSizer>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </WindowScroller>
+              )}
+            </WindowScroller>
+          </div>
         )}
       </InfiniteLoader>
     )
