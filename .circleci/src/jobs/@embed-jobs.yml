@@ -24,16 +24,6 @@ embed-init:
           - packages/sdk/node_modules
           - packages/sdk/dist
 
-embed-build-staging:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  resource_class: xlarge
-  steps:
-    - embed-build:
-        build-directory: packages/embed/build-staging
-        build-type: stage
-
 embed-build-production:
   working_directory: ~/apps
   docker:
@@ -43,15 +33,6 @@ embed-build-production:
     - embed-build:
         build-directory: packages/embed/build-production
         build-type: prod
-
-embed-deploy-staging-cloudflare:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/python:3.7.12-node
-  steps:
-    - embed-deploy-cloudflare:
-        build-type: stage
-        environment: staging
 
 embed-deploy-production-cloudflare:
   working_directory: ~/apps

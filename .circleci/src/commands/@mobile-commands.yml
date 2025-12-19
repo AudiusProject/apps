@@ -103,8 +103,7 @@ mobile-release-ios:
             job_url="https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID"
             environment=<<parameters.bundle-id>>
             if [ "$environment" = 'co.audius.audiusmusic' ] ||
-              [ "$environment" = 'co.audius.audiusmusic.releasecandidate' ] ||
-              [ "$environment" = 'co.audius.audiusmusic.staging.releasecandidate' ]; then
+              [ "$environment" = 'co.audius.audiusmusic.releasecandidate' ]; then
 
               json_content="{ \"blocks\": ["
               json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed $environment <${job_url}|v$deploying_version> to mobile ios \n\" } }"
@@ -232,8 +231,7 @@ mobile-release-android:
             environment=<<parameters.upload-type>>
 
             if [ "$environment" = 'prod' ] ||
-              [ "$environment" = 'releaseCandidate' ] ||
-              [ "$environment" = 'stagingReleaseCandidate' ]; then
+              [ "$environment" = 'releaseCandidate' ]; then
 
               json_content="{ \"blocks\": ["
               json_content+="{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed $environment <${job_url}|v$deploying_version> to mobile android \n\" } }"

@@ -19,14 +19,3 @@ jobs:
       service: identity-service
       requires:
         - identity-init
-
-  - deploy-stage-nodes-just-tag:
-      name: deploy-stage-identity-service
-      requires:
-        - test-identity-service
-        - push-identity-service
-      filters:
-        branches:
-          only: main
-      context: github
-      service: identity-service

@@ -3,35 +3,7 @@ jobs:
   - mobile-init:
       context: Audius Mobile Client
 
-  - mobile-build-staging-ios:
-      context: Audius Mobile Client
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /^mobile-build.*$/
-
-  - mobile-build-upload-staging-ios:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /^main$/
-
   - mobile-build-upload-releasecandidate-ios:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /(^release.*)$/
-
-  - mobile-build-upload-staging-releasecandidate-ios:
       context:
         - Audius Mobile Client
         - slack-secrets
@@ -51,35 +23,7 @@ jobs:
         branches:
           only: /(^release.*)$/
 
-  - mobile-build-staging-android:
-      context: Audius Mobile Client
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /^mobile-build.*$/
-
-  - mobile-build-upload-staging-android:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /^main$/
-
   - mobile-build-upload-releasecandidate-android:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /(^release.*)$/
-
-  - mobile-build-upload-staging-releasecandidate-android:
       context:
         - Audius Mobile Client
         - slack-secrets

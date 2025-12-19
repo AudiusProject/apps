@@ -3,19 +3,6 @@ jobs:
   - protocol-dashboard-init:
       context:
         - Vercel
-  - protocol-dashboard-build-staging:
-      context:
-        - Vercel
-      requires:
-        - protocol-dashboard-init
-  - protocol-dashboard-deploy-staging:
-      context:
-        - Audius Client
-      requires:
-        - protocol-dashboard-build-staging
-      filters:
-        branches:
-          only: /^main$/
   - protocol-dashboard-build-prod:
       context:
         - Vercel
