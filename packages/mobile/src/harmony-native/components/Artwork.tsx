@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 
 import { useTheme } from '@emotion/react'
-import FastImage from 'react-native-fast-image'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
 
+import { FastImage } from './FastImage/FastImage'
 import type { FastImageProps } from './FastImage/FastImage'
 import { Skeleton } from './Skeleton'
 import { Box } from './layout/Box/Box'
@@ -21,7 +21,7 @@ export type ArtworkProps = {
   borderWidth?: number
   'data-testid'?: string
   noLoading?: boolean
-} & Partial<Pick<FastImageProps, 'source' | 'priority'>> &
+} & Partial<Pick<FastImageProps, 'source'>> &
   BoxProps
 
 /**
@@ -40,7 +40,6 @@ export const Artwork = (props: ArtworkProps) => {
     shadow,
     children,
     'data-testid': testId,
-    priority,
     ...other
   } = props
   const [isLoadingState, setIsLoadingState] = useState(true)
@@ -52,8 +51,8 @@ export const Artwork = (props: ArtworkProps) => {
     : typeof source === 'number'
       ? source
       : Array.isArray(source)
-        ? { uri: source[0].uri, priority }
-        : { uri: source.uri, priority }
+        ? { uri: source[0].uri }
+        : { uri: source.uri }
 
   const hasImageSource = typeof imageSource === 'number' || imageSource?.uri
 

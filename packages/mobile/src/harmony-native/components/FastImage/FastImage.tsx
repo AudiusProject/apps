@@ -1,36 +1,85 @@
-import type { ImageSourcePropType } from 'react-native'
-import type {
-  FastImageProps as RNFastImageProps,
-  Priority
-} from 'react-native-fast-image'
-import RNFastImage from 'react-native-fast-image'
+import type { ComponentProps } from 'react'
 
-export type FastImageProps = Omit<RNFastImageProps, 'source'> & {
+import { Image, type ImageSourcePropType } from 'react-native'
+import TurboImage from 'react-native-turbo-image'
+
+export type FastImageProps = Omit<
+  ComponentProps<typeof TurboImage>,
+  'source' | 'onLoad'
+> & {
   source?: ImageSourcePropType
-  priority?: Priority
+  onLoad?: () => void
 }
 
 export type ImageProps = Omit<FastImageProps, 'source'>
 
 /**
- * Utility component that wraps react-native-fast-image
- * NOTE: react-native-fast-image seems to be pretty much abandoned
- * It is also a hard blocker as we upgrade RN https://github.com/DylanVann/react-native-fast-image/issues/985
- * For the time being it's working and whenever we upgrade we should consider
- * alternatives like expo-image
+ * Utility component that wraps react-native-turbo-image
  */
 export const FastImage = (props: FastImageProps) => {
-  const { source, priority, ...other } = props
+  const { source, onLoad, ...other } = props
 
-  const imageSource = !source
-    ? source
-    : typeof source === 'number'
-      ? source
-      : Array.isArray(source)
-        ? { uri: source[0].uri, priority }
-        : { uri: source.uri, priority }
+  // Use React Native Image for local assets (number sources)
+  if (typeof source === 'number') {
+    // Only pass React Native Image compatible props
+    const {
+      style,
+      resizeMode,
+      testID,
+      accessibilityLabel,
+      accessibilityHint,
+      accessibilityRole,
+      accessibilityState,
+      accessibilityValue,
+      accessible
+    } = other as ComponentProps<typeof TurboImage>
+    return (
+      <Image
+        source={source}
+        onLoad={onLoad}
+        style={style}
+        resizeMode={resizeMode}
+        testID={testID}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityRole={accessibilityRole}
+        accessibilityState={accessibilityState}
+        accessibilityValue={accessibilityValue}
+        accessible={accessible}
+      />
+    )
+  }
 
-  return <RNFastImage source={imageSource} {...other} />
+  if (!source) {
+    return null
+  }
+
+  const imageSource = Array.isArray(source)
+    ? { uri: source[0].uri ?? '' }
+    : { uri: source.uri ?? '' }
+
+  if (!imageSource.uri) {
+    return null
+  }
+
+  // TurboImage uses onSuccess instead of onLoad
+  const turboProps = onLoad ? { ...other, onSuccess: () => onLoad() } : other
+
+  return <TurboImage source={imageSource} {...turboProps} />
 }
 
-export const preload = RNFastImage.preload
+/**
+ * Prefetch images using TurboImage.prefetch
+ * Returns a Promise that resolves when prefetching is complete
+ * Throws an error if prefetching fails
+ */
+export const preload = async (
+  sources: Array<{ uri: string }>
+): Promise<void> => {
+  const success = await TurboImage.prefetch(sources)
+  if (!success) {
+    throw new Error(
+      `Failed to prefetch images: ${sources.map((s) => s.uri).join(', ')}`
+    )
+  }
+}
