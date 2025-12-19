@@ -76,8 +76,11 @@ const { createPlaylist } = cacheCollectionsActions
 const { getProfileFeedLineup, getProfileTracksLineup } = profilePageSelectors
 const { createChat } = chatActions
 const { getBlockees, useCanCreateChat } = chatSelectors
+const { setCurrentUser } = profileActions
 
-export const useProfilePage = (containerRef: RefObject<HTMLDivElement>) => {
+export const useProfilePage = (
+  containerRef?: RefObject<HTMLDivElement> | null
+) => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -218,6 +221,13 @@ export const useProfilePage = (containerRef: RefObject<HTMLDivElement>) => {
       setActiveTab(ProfilePageTabs.REPOSTS)
     }
   }, [activeTab, profile, artistTracks?.status, isArtist, accountUserId])
+
+  // Set current user in Redux state for profile selectors
+  useEffect(() => {
+    if (handleLower) {
+      dispatch(setCurrentUser(handleLower))
+    }
+  }, [handleLower, dispatch])
 
   // Reset state when profile changes
   useEffect(() => {
@@ -436,7 +446,7 @@ export const useProfilePage = (containerRef: RefObject<HTMLDivElement>) => {
         playingUid,
         playing,
         buffering,
-        scrollParent: containerRef.current || null
+        scrollParent: containerRef?.current || null
       }
     },
     [currentQueueItem, currentTrack, playing, buffering, containerRef]

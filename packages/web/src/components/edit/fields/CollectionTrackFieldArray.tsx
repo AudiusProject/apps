@@ -4,7 +4,7 @@ import {
   isTrackForUpload
 } from '@audius/common/store'
 import { FieldArray, useField } from 'formik'
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import { DragDropContext, Draggable, Droppable } from '@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration'
 
 import { CollectionTrackField } from './CollectionTrackField'
 const messages = {

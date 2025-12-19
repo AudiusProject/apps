@@ -7,6 +7,7 @@ import {
   useUserByHandle
 } from '~/api'
 import { User } from '~/models'
+import { CommonState } from '~/store/commonStore'
 import {
   getProfileUserHandle,
   getProfileUserId
@@ -15,12 +16,11 @@ import {
 export const useProfileUser = <TResult = User>(
   options?: SelectableQueryOptions<User, TResult>
 ) => {
-  const profileUserId = useSelector(getProfileUserId)
   const profileUserHandle = useSelector(getProfileUserHandle)
-  const userByHandleQueryData = useUserByHandle(profileUserHandle, {
-    enabled: !profileUserId,
-    ...options
-  })
+  const profileUserId = useSelector((state: CommonState) =>
+    getProfileUserId(state)
+  )
+  const userByHandleQueryData = useUserByHandle(profileUserHandle, options)
   const { data: profileUserByHandle } = userByHandleQueryData
   const userByIdQueryData = useUser<TResult>(profileUserId, options)
   const { data: profileUserById } = userByIdQueryData

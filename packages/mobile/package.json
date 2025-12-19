@@ -161,7 +161,7 @@
     "react-native-webview": "^13.14.1",
     "react-native-worklets": "0.6.1",
     "react-native-zip-archive": "7.0.1",
-    "react-qr-code": "2.0.12",
+    "react-qr-code": "2.0.18",
     "react-redux": "8.0.5",
     "react-use": "17.3.2",
     "redux": "4.1.1",
