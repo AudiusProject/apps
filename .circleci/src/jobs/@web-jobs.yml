@@ -105,9 +105,11 @@ web-build-ssr-production:
         build-directory: packages/web/build-ssr-production
         build-name: build-ssr-production
     # Need to persist vike auto importer so the CF worker finds the build
+    # Also persist the build directory again to ensure it's included with the vike plugin dist
     - persist_to_workspace:
         root: ./
         paths:
+          - packages/web/build-ssr-production
           - node_modules/@brillout/vite-plugin-import-build/dist
 
 web-check-ssr-production-bundlesize:
