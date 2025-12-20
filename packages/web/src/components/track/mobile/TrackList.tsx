@@ -1,8 +1,12 @@
 import { memo, useCallback } from 'react'
 
+import {
+  DragDropContext,
+  Droppable,
+  Draggable
+} from '@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration'
 import { ID, CoverArtSizes, AccessConditions } from '@audius/common/models'
 import cn from 'classnames'
-import { DragDropContext, Droppable, Draggable } from '@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration'
 import { Nullable } from 'vitest'
 
 import TrackListItem from './ConnectedTrackListItem'
