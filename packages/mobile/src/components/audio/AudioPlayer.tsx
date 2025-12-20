@@ -365,6 +365,7 @@ export const AudioPlayer = () => {
           genre: track.genre,
           date: track.created_at,
           artwork: imageUrl,
+          imageUrl, // react-native-track-player v5 may require both artwork and imageUrl
           duration: shouldPreview
             ? getTrackPreviewDuration(track)
             : track.duration
@@ -461,52 +462,63 @@ export const AudioPlayer = () => {
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 
-      // Update queue and player state if the track player auto plays next track
-      if (playerIndex > queueIndex) {
-        if (queueShuffle) {
-          // TODO: There will be a very short period where the next track in the queue is played instead of the next shuffle track.
-          // Figure out how to call next earlier
-          next()
-        } else {
-          const { track, playerBehavior } = queueTracks[playerIndex] ?? {}
+      // Update player info when track changes (including when first track starts)
+      // This ensures trackId and uid are set in player state so UI components can fetch track data
+      if (playerIndex >= 0 && playerIndex < queueTracks.length) {
+        const { track, playerBehavior } = queueTracks[playerIndex] ?? {}
 
+        if (track) {
           const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
             track,
             playerBehavior
           )
 
           // Skip track if user does not have access i.e. for an unlocked gated track
-          if (!track || shouldSkip) {
+          if (shouldSkip) {
             next()
-          } else {
-            // Track Player natively went to the next track
-            // Update queue info and handle playback position updates
-            updateQueueIndex(playerIndex)
-            updatePlayerInfo({
-              previewing: shouldPreview,
-              trackId: track.track_id,
-              uid: queueTrackUids[playerIndex]
-            })
+            return
+          }
 
-            const isLongFormContent =
-              track?.genre === Genre.PODCASTS ||
-              track?.genre === Genre.AUDIOBOOKS
-            const trackPosition = trackPositions?.[track.track_id]
-            if (trackPosition?.status === 'IN_PROGRESS') {
-              dispatch(
-                playerActions.seek({ seconds: trackPosition.playbackPosition })
-              )
-            } else if (isLongFormContent) {
-              dispatch(
-                setTrackPosition({
-                  userId: currentUserId,
-                  trackId: track.track_id,
-                  positionInfo: {
-                    status: 'IN_PROGRESS',
-                    playbackPosition: 0
-                  }
-                })
-              )
+          // Update player info for the current track
+          updatePlayerInfo({
+            previewing: shouldPreview,
+            trackId: track.track_id,
+            uid: queueTrackUids[playerIndex]
+          })
+
+          // Update queue and player state if the track player auto plays next track
+          if (playerIndex > queueIndex) {
+            if (queueShuffle) {
+              // TODO: There will be a very short period where the next track in the queue is played instead of the next shuffle track.
+              // Figure out how to call next earlier
+              next()
+            } else {
+              // Track Player natively went to the next track
+              // Update queue info and handle playback position updates
+              updateQueueIndex(playerIndex)
+
+              const isLongFormContent =
+                track?.genre === Genre.PODCASTS ||
+                track?.genre === Genre.AUDIOBOOKS
+              const trackPosition = trackPositions?.[track.track_id]
+              if (trackPosition?.status === 'IN_PROGRESS') {
+                dispatch(
+                  playerActions.seek({
+                    seconds: trackPosition.playbackPosition
+                  })
+                )
+              } else if (isLongFormContent) {
+                dispatch(
+                  setTrackPosition({
+                    userId: currentUserId,
+                    trackId: track.track_id,
+                    positionInfo: {
+                      status: 'IN_PROGRESS',
+                      playbackPosition: 0
+                    }
+                  })
+                )
+              }
             }
           }
         }
@@ -741,7 +753,20 @@ export const AudioPlayer = () => {
       const firstTrack = newQueueTracks[queueIndex]
       if (!firstTrack) return
 
-      await TrackPlayer.add(await makeTrackData(firstTrack))
+      const firstTrackData = await makeTrackData(firstTrack)
+      await TrackPlayer.add(firstTrackData)
+
+      // Set player info immediately when first track is added
+      // This ensures trackId and uid are set in player state so UI components can fetch track data
+      const { shouldPreview } = calculatePlayerBehavior(
+        firstTrack.track,
+        firstTrack.playerBehavior
+      )
+      updatePlayerInfo({
+        previewing: shouldPreview,
+        trackId: firstTrack.track?.track_id ?? 0,
+        uid: queueTrackUids[queueIndex]
+      })
 
       enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
       await enqueueTracksJobRef.current
