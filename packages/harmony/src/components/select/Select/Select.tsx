@@ -11,7 +11,7 @@ import {
 
 import { mergeRefs } from 'react-merge-refs'
 
-import { TextInput, TextInputSize } from '~harmony/components/input'
+import { TextInput } from '~harmony/components/input'
 
 import { useControlled } from '../../../hooks/useControlled'
 import { IconCaretDown, IconCloseAlt } from '../../../icons'
@@ -66,9 +66,9 @@ export const Select = forwardRef(function Select<Value extends string>(
   const [inputValue, setInputValue] = useState('')
   const selectedOption = options.find((option) => option.value === value)
   const selectedLabel = selectedOption
-    ? renderSelectedOptionlabel?.(selectedOption) ??
+    ? (renderSelectedOptionlabel?.(selectedOption) ??
       selectedOption.label ??
-      selectedOption.value
+      selectedOption.value)
     : ''
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)

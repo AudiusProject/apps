@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 
 import { Theme } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
-import { Select, TextInputSize } from '@audius/harmony'
+import { Select } from '@audius/harmony'
 import moment from 'moment'
 import numeral from 'numeral'
 import PropTypes from 'prop-types'
