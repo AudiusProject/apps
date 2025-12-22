@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
-import { IconCaretDown } from '@audius/harmony'
-import AntDropdown from 'antd/lib/dropdown'
-import AntMenu from 'antd/lib/menu'
+import {
+  IconCaretDown,
+  PopupMenu
+} from '@audius/harmony'
 import cn from 'classnames'
 import PropTypes from 'prop-types'
 
@@ -49,44 +50,47 @@ const Dropdown = ({
     [styles.border]: variant === 'border'
   }
 
-  const overlay = (
-    <AntMenu>
-      {menu.items.map((item, i) => (
-        <AntMenu.Item key={`${item.text}_${i}`}>
-          <div
-            onClick={() => {
-              handleClick(i, item.onClick)
-            }}
-            className={cn(textClassName)}
-          >
-            {item.text}
-          </div>
-        </AntMenu.Item>
-      ))}
-    </AntMenu>
-  )
+  const popupMenuItems = menu.items.map((item, i) => ({
+    text: item.text,
+    onClick: (e) => {
+      handleClick(i, item.onClick)
+    }
+  }))
 
   const selection = menu.items.length > 0 ? menu.items[index].text : null
+  const containerRef = useRef(null)
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} ref={containerRef}>
       {label ? <div className={styles.label}>{label}</div> : null}
       <div className={cn(styles.dropdown, style)}>
-        <AntDropdown
-          overlay={overlay}
-          trigger={['click']}
-          disabled={disabled}
-          onVisibleChange={handleVisibleChange}
-          // Mount the dropdown inside the dropdown div.
-          getPopupContainer={(trigger) => trigger.parentNode}
-        >
-          <div className={styles.selector}>
-            <div className={cn(styles.selectorText, textClassName)}>
-              {selection}
+        <PopupMenu
+          items={popupMenuItems}
+          onClose={() => handleVisibleChange(false)}
+          id={`dropdown-${label || 'default'}`}
+          containerRef={containerRef}
+          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+          renderTrigger={(anchorRef, triggerPopup, triggerProps) => (
+            <div
+              ref={anchorRef}
+              {...triggerProps}
+              className={styles.selector}
+              onClick={() => {
+                if (!disabled) {
+                  handleVisibleChange(true)
+                  triggerPopup()
+                }
+              }}
+              style={{ cursor: disabled ? 'default' : 'pointer' }}
+            >
+              <div className={cn(styles.selectorText, textClassName)}>
+                {selection}
+              </div>
+              <IconCaretDown className={styles.iconCaret} />
             </div>
-            <IconCaretDown className={styles.iconCaret} />
-          </div>
-        </AntDropdown>
+          )}
+        />
       </div>
     </div>
   )

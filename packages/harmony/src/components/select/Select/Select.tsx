@@ -204,6 +204,9 @@ export const Select = forwardRef(function Select<Value extends string>(
         isVisible={isOpen}
         onClose={() => setIsOpen(false)}
         {...defaultMenuProps}
+        {...(menuProps && {
+          takeWidthOfAnchor: menuProps.takeWidthOfAnchor
+        })}
         PaperProps={menuProps?.PaperProps}
       >
         <MenuContent

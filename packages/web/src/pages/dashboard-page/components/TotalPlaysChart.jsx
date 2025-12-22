@@ -2,12 +2,12 @@ import { useRef, useState, useEffect } from 'react'
 
 import { Theme } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
+import { Select } from '@audius/harmony'
 import moment from 'moment'
 import numeral from 'numeral'
 import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
 
-import DropdownInput from 'components/data-entry/DropdownInput'
 import Dropdown from 'components/navigation/Dropdown'
 
 import { messages } from '../DashboardPage'
@@ -220,6 +220,7 @@ const TotalPlaysChart = ({
 }) => {
   const [chartSize, setChartSize] = useState({ width: 0, height: 0 })
   const [yearOptions, setYearOptions] = useState([{ text: messages.thisYear }])
+  const [selectedTrackId, setSelectedTrackId] = useState('-1')
 
   const chartContainer = useRef()
   const chart = useRef()
@@ -261,9 +262,10 @@ const TotalPlaysChart = ({
 
   const trackOptions = [{ name: 'All Tracks', id: -1 }].concat(tracks)
 
-  const tracksMenu = {
-    items: trackOptions.map((t) => ({ id: t.id, text: t.name }))
-  }
+  const tracksOptions = trackOptions.map((t) => ({
+    value: String(t.id),
+    label: t.name
+  }))
   const yearsMenu = { items: yearOptions }
 
   const lineData = getDataProps(data, theme)
@@ -274,12 +276,14 @@ const TotalPlaysChart = ({
       <div className={styles.playsTileHeading}>
         <div className={styles.playsTileHeader}>Total Plays</div>
         <div className={styles.playsTrackDropdown}>
-          <DropdownInput
-            size='small'
-            variant='alternative'
-            onSelect={onSetTrackOption}
+          <Select
+            value={selectedTrackId}
+            onChange={(value) => {
+              setSelectedTrackId(value)
+              onSetTrackOption?.(parseInt(value, 10))
+            }}
             placeholder='All Tracks'
-            menu={tracksMenu}
+            options={tracksOptions}
           />
         </div>
         <div className={styles.playsYearDropdown}>

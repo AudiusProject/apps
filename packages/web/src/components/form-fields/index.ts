@@ -1,5 +1,5 @@
 export * from './TextField'
 export * from './TextAreaField'
-export * from './DropdownField'
+export * from './SelectField'
 export * from './TagField'
 export * from './ArtworkField'
