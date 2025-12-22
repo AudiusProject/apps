@@ -140,7 +140,7 @@ export default defineConfig(async ({ mode }) => {
     ],
     resolve: {
       conditions: [...defaultClientConditions],
-      dedupe: ['react', 'react-dom'],
+      dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
       alias: {
         // Ensure single React instance to prevent ReactCurrentDispatcher errors
         ...(!ssr
