@@ -19,19 +19,19 @@ type InternalProps = {
   /**
    * @ignore
    * This prop is for internal use only.
-   * Toggles the incorrect error state for the storybook docs
+   * Toggles the incorrect error state
    */
   _incorrectError?: boolean
   /**
    * @ignore
    * This prop is for internal use only.
-   * Toggles the focus state for the storybook docs
+   * Toggles the focus state
    */
   _isFocused?: boolean
   /**
    * @ignore
    * This prop is for internal use only.
-   * Disabled pointer events for storybook docs
+   * Disabled pointer events
    */
   _disablePointerEvents?: boolean
 }

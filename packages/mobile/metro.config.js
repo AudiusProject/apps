@@ -173,11 +173,4 @@ const config = {
 
 const mergedConfig = mergeConfig(defaultConfig, config)
 
-if (process.env.RN_STORYBOOK) {
-  mergedConfig.resolver.resolverMainFields.unshift('sbmodern')
-}
-
-if (process.env.RN_E2E)
-  mergedConfig.resolver.sourceExts = ['e2e.ts', ...config.resolver.sourceExts]
-
 module.exports = mergedConfig
