@@ -222,7 +222,6 @@
     "@types/react-dom": "19.0.0",
     "@types/react-helmet": "6.1.6",
     "@types/react-infinite-scroller": "1.2.1",
-    "@types/react-native-push-notification": "3.0.8",
     "@types/react-table": "7.7.12",
     "@types/react-twitter-auth": "0.0.4",
     "@types/react-virtualized": "9.21.21",
