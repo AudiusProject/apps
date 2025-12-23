@@ -10,7 +10,7 @@ import { Flex, Paper, Text, useTheme } from '@audius/harmony'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useSearchCategory } from 'pages/search-page/hooks'
-import { MOODS } from 'pages/search-page/moods'
+import { MOODS } from 'utils/Moods'
 
 const QuickSearchPresetButton = ({
   preset,

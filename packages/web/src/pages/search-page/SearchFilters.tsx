@@ -17,7 +17,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { BpmFilter } from './BpmFilter'
 import { useUpdateSearchParams } from './hooks'
-import { MOODS } from './moods'
+import { MOODS } from 'utils/Moods'
 import { Filter } from './types'
 
 const messages = {

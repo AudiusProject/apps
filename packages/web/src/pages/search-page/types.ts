@@ -1,9 +1,7 @@
-import { ReactElement } from 'react'
-
 import { IconComponent } from '@audius/harmony'
-import { Mood } from '@audius/sdk'
 
 import { categories } from './categories'
+import { MoodInfo } from './moods'
 
 export type ViewLayout = 'grid' | 'list'
 export const viewLayoutOptions: { label: string; value: ViewLayout }[] = [
@@ -43,10 +41,6 @@ export type Category = {
   icon?: IconComponent
 }
 
-export type MoodInfo = {
-  label: Mood
-  value: Mood
-  icon: ReactElement
-}
+export type { MoodInfo }
 
 export type CategoryKey = keyof typeof categories

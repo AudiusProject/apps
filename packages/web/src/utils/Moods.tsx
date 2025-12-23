@@ -1,3 +1,5 @@
+import { ReactElement } from 'react'
+
 import { Mood } from '@audius/sdk'
 
 export const moodEmojiMap: Record<Mood, string> = {
@@ -25,3 +27,23 @@ export const moodEmojiMap: Record<Mood, string> = {
   Upbeat: 'person-raising-both-hands-in-celebration',
   Other: 'shrug'
 }
+
+export type MoodInfo = {
+  label: Mood
+  value: Mood
+  icon: ReactElement
+}
+
+export const MOODS: Record<Mood, MoodInfo> = Object.entries(
+  moodEmojiMap
+).reduce(
+  (acc, [mood, emojiClass]) => {
+    acc[mood as Mood] = {
+      label: mood as Mood,
+      value: mood as Mood,
+      icon: <i className={`emoji ${emojiClass}`} />
+    }
+    return acc
+  },
+  {} as Record<Mood, MoodInfo>
+)
