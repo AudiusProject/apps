@@ -176,7 +176,7 @@ export const AUDIUS_X_LINK = 'https://x.com/audius'
 export const AUDIUS_INSTAGRAM_LINK = 'https://www.instagram.com/audius'
 export const AUDIUS_DISCORD_LINK = 'https://discord.gg/audius'
 export const AUDIUS_DISCORD_OAUTH_LINK =
-  'https://discord.com/oauth2/authorize?client_id=1404512878890975373&response_type=code&redirect_uri=http%3A%2F%2Fdiscord.audius.co%3A8081%2Fdiscord_callback&scope=guilds.join+identify'
+  'https://discord.com/oauth2/authorize?client_id=1404512878890975373&response_type=code&redirect_uri=http%3A%2F%2Fdiscord.audius.co%2Fdiscord_callback&scope=guilds.join+identify'
 export const AUDIUS_TELEGRAM_LINK = 'https://t.me/Audius'
 export const AUDIUS_PRESS_LINK = 'https://brand.audius.co'
 export const AUDIUS_MERCH_LINK = 'https://merch.audius.co/'
