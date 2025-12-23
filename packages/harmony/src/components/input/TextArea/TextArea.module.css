@@ -37,8 +37,8 @@
   border-color: var(--harmony-n-200);
 }
 
-/* Using .focus class since Firefox doesn't support :has() */
-.root.focus {
+/* Using .focused class since Firefox doesn't support :has() */
+.root.focused {
   border-color: var(--harmony-secondary);
 }
 
@@ -144,3 +144,4 @@ textarea.transparentTextArea {
   align-items: center;
   overflow: visible;
 }
+

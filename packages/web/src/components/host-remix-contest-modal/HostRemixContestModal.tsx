@@ -23,11 +23,11 @@ import {
   ModalTitle,
   Select,
   Text,
-  TextLink
+  TextLink,
+  TextArea
 } from '@audius/harmony'
 import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
 
-import { TextAreaV2 } from 'components/data-entry/TextAreaV2'
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
 import { track, make } from 'services/analytics'
@@ -219,7 +219,7 @@ export const HostRemixContestModal = () => {
             >
               {remixMessages.descriptionLabel}
             </Text>
-            <TextAreaV2
+            <TextArea
               id='contestDescription'
               aria-label='contestDescription'
               placeholder={remixMessages.descriptionPlaceholder}
@@ -247,7 +247,7 @@ export const HostRemixContestModal = () => {
             >
               {remixMessages.prizeInfoLabel}
             </Text>
-            <TextAreaV2
+            <TextArea
               id='contestPrizeInfo'
               aria-label='contestPrizeInfo'
               placeholder={remixMessages.prizeInfoPlaceholder}

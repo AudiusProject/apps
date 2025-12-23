@@ -11,7 +11,7 @@ import { Button, Text, Flex, Checkbox } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 
 import { CashBalanceSection } from 'components/add-cash/CashBalanceSection'
-import { HelperText } from 'components/data-entry/HelperText'
+import { HelperText } from '@audius/harmony'
 import { Divider } from 'components/divider'
 
 import { ADDRESS, AMOUNT, CONFIRM, METHOD } from '../types'

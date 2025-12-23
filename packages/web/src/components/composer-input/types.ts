@@ -2,7 +2,7 @@ import { LinkEntity } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { CommentMention, EntityType } from '@audius/sdk'
 
-import { TextAreaV2Props } from 'components/data-entry/TextAreaV2'
+import { TextAreaProps } from '@audius/harmony'
 
 export type ComposerInputProps = {
   messageId: number
@@ -23,7 +23,7 @@ export type ComposerInputProps = {
   isLoading?: boolean
   maxMentions?: number
 } & Pick<
-  TextAreaV2Props,
+  TextAreaProps,
   | 'name'
   | 'maxLength'
   | 'placeholder'

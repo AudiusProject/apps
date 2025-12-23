@@ -5,7 +5,7 @@ import { CollectionValues } from '@audius/common/schemas'
 import { getErrorMessage } from '@audius/common/utils'
 import { useField, useFormikContext } from 'formik'
 
-import { HelperText } from 'components/data-entry/HelperText'
+import { HelperText } from '@audius/harmony'
 import { TrackEditFormValues } from 'components/edit-track/types'
 import UploadArtwork, {
   UploadArtworkProps

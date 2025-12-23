@@ -28,7 +28,7 @@ import { EntityType, HashId } from '@audius/sdk'
 import { isEqual, pick } from 'lodash'
 import { usePrevious } from 'react-use'
 
-import { TextAreaV2 } from 'components/data-entry/TextAreaV2'
+import { TextArea } from '@audius/harmony'
 import { audiusSdk } from 'services/audius-sdk'
 import { env } from 'services/env'
 
@@ -518,7 +518,7 @@ export const ComposerInput = (props: ComposerInputProps) => {
   }, [onAddTimestamp, timestamps, prevTimestamps])
 
   return (
-    <TextAreaV2
+    <TextArea
       css={{
         '&&': {
           paddingBlock: 6,
@@ -552,6 +552,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
           disabled={!value || isLoading || other.disabled}
         />
       )}
-    </TextAreaV2>
+    </TextArea>
   )
 }

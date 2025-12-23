@@ -32,7 +32,7 @@ import {
 } from 'formik'
 import { useToggle } from 'react-use'
 
-import { HelperText } from 'components/data-entry/HelperText'
+import { HelperText } from '@audius/harmony'
 import { Tile } from 'components/tile'
 
 import styles from './ContextualMenu.module.css'

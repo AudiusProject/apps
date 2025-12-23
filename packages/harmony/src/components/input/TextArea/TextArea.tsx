@@ -10,11 +10,12 @@ import {
 import cn from 'classnames'
 import { mergeRefs } from 'react-merge-refs'
 
-import { HelperText } from './HelperText'
-import styles from './TextAreaV2.module.css'
-import { useFocusState } from './useFocusState'
+import { useFocusState } from '../useFocusState'
 
-enum TextAreaSize {
+import { HelperText } from './HelperText'
+import styles from './TextArea.module.css'
+
+export enum TextAreaSize {
   MEDIUM,
   SMALL
 }
@@ -40,7 +41,7 @@ const getMaxHeight = ({
     ? maxVisibleRows * sizeToLineHeight[size] + sizeToVerticalPadding[size]
     : undefined
 
-export type TextAreaV2Props = ComponentPropsWithoutRef<'textarea'> & {
+export type TextAreaProps = ComponentPropsWithoutRef<'textarea'> & {
   grows?: boolean
   resize?: boolean
   size?: TextAreaSize
@@ -54,7 +55,7 @@ export type TextAreaV2Props = ComponentPropsWithoutRef<'textarea'> & {
 
 const CHARACTER_LIMIT_WARN_THRESHOLD_PERCENT = 0.875
 
-export const TextAreaV2 = forwardRef<HTMLTextAreaElement, TextAreaV2Props>(
+export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (props, forwardedRef) => {
     const {
       resize = false,
@@ -162,7 +163,7 @@ export const TextAreaV2 = forwardRef<HTMLTextAreaElement, TextAreaV2Props>(
               <div className={styles.bottomRight}>
                 <div
                   className={styles.children}
-                  css={{ height: sizeToLineHeight[size] }}
+                  style={{ height: sizeToLineHeight[size] }}
                 >
                   {children}
                 </div>

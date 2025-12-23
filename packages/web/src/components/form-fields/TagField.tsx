@@ -8,6 +8,7 @@ import TagInput, { TagInputProps } from 'components/data-entry/TagInput'
 type TagFieldProps = Partial<TagInputProps> & {
   name: string
 }
+
 export const TagField = (props: TagFieldProps) => {
   const { name, ...other } = props
   const [field, , { setValue }] = useField<string>(name)

@@ -1,8 +1,8 @@
 import { useField } from 'formik'
 
-import { TextAreaV2, TextAreaV2Props } from 'components/data-entry/TextAreaV2'
+import { TextArea, TextAreaProps } from '@audius/harmony'
 
-type TextAreaFieldProps = TextAreaV2Props & {
+type TextAreaFieldProps = TextAreaProps & {
   name: string
 }
 
@@ -13,7 +13,7 @@ export const TextAreaField = (props: TextAreaFieldProps) => {
   const hasError = Boolean(meta.touched && meta.error)
 
   return (
-    <TextAreaV2
+    <TextArea
       value={value ?? ''}
       {...field}
       error={hasError}

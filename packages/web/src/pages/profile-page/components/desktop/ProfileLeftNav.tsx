@@ -1,10 +1,9 @@
 import { useArtistCreatedCoin } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { Box, Flex, Text } from '@audius/harmony'
+import { Box, Flex, Text, TextArea, TextAreaSize } from '@audius/harmony'
 
 import Input from 'components/data-entry/Input'
-import TextArea from 'components/data-entry/TextArea'
 import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
 import UploadChip from 'components/upload/UploadChip'
 import { Type } from 'pages/profile-page/components/SocialLink'
@@ -129,16 +128,15 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               {messages.aboutYou}
             </Text>
 
-            {/* @ts-ignore */}
             <TextArea
               // Ofsetting some internal padding weirdness on
               // this component
               css={{ marginBottom: -5 }}
-              size='small'
+              size={TextAreaSize.SMALL}
               grows
               placeholder={messages.description}
               defaultValue={bio || ''}
-              onChange={onUpdateBio}
+              onChange={(e) => onUpdateBio(e.target.value)}
             />
 
             {/* @ts-ignore */}
