@@ -8,13 +8,13 @@ import {
   Text,
   IconArrowRight,
   Flex,
-  makeResponsiveStyles
+  makeResponsiveStyles,
+  Tooltip
 } from '@audius/harmony'
 
 import gift from 'assets/fonts/emojis/gift.png'
 import globe from 'assets/fonts/emojis/globe.png'
 import moneyWithWingsEmoji from 'assets/fonts/emojis/money-with-wings.png'
-import { Tooltip } from '@audius/harmony'
 
 import { WalletSetupCard, WhyCreateCard } from '../components/index'
 

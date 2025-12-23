@@ -14,12 +14,11 @@ import {
   Button,
   IconArrowRight,
   IconLogoCircleETH,
-  Text
+  Text,
+  Tooltip
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 import { useLocalStorage } from 'react-use'
-
-import { Tooltip } from '@audius/harmony'
 
 import SettingsCard from './SettingsCard'
 

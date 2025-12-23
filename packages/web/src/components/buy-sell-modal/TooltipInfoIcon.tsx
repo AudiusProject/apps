@@ -6,6 +6,7 @@ import {
   TooltipPlacement
 } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
+
 import { zIndex } from 'utils/zIndex'
 
 const messages = {

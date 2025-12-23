@@ -6,11 +6,14 @@ import {
   collectionsSocialActions,
   playlistLibraryHelpers
 } from '@audius/common/store'
-import { IconHeart, IconButtonProps, IconButton } from '@audius/harmony'
+import {
+  IconHeart,
+  IconButtonProps,
+  IconButton,
+  Tooltip
+} from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
-
-import { Tooltip } from '@audius/harmony'
 
 const { saveCollection, unsaveCollection } = collectionsSocialActions
 const { findInPlaylistLibrary } = playlistLibraryHelpers

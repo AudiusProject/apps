@@ -1,9 +1,8 @@
 import { USDCPurchaseDetails } from '@audius/common/models'
 import { USDC } from '@audius/fixed-decimal'
-import { Flex, IconInfo, Text } from '@audius/harmony'
+import { Flex, IconInfo, Text, Tooltip } from '@audius/harmony'
 
 import { SummaryTable, SummaryTableItem } from 'components/summary-table'
-import { Tooltip } from '@audius/harmony'
 
 import styles from './styles.module.css'
 

@@ -12,10 +12,10 @@ import {
   IconSortDown,
   IconSortUp,
   Paper,
-  Text
+  Text,
+  Tooltip
 } from '@audius/harmony'
 
-import { Tooltip } from '@audius/harmony'
 import { env } from 'services/env'
 
 import { componentWithErrorBoundary } from '../../../components/error-wrapper/componentWithErrorBoundary'

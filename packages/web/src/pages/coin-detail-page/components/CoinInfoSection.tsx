@@ -39,7 +39,8 @@ import {
   Text,
   TextLink,
   useTheme,
-  Divider
+  Divider,
+  Tooltip
 } from '@audius/harmony'
 import { HashId } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
@@ -49,7 +50,6 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import { ExternalLink } from 'components/link/ExternalLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
-import { Tooltip } from '@audius/harmony'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'

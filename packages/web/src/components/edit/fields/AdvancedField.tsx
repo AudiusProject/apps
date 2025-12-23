@@ -12,7 +12,8 @@ import {
   Flex,
   IconCcBy as IconCreativeCommons,
   IconInfo,
-  Text
+  Text,
+  Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useField } from 'formik'
@@ -32,7 +33,6 @@ import { computeLicenseIcons } from 'components/edit-track/utils/computeLicenseI
 import { TextField } from 'components/form-fields'
 import { SegmentedControlField } from 'components/form-fields/SegmentedControlField'
 import layoutStyles from 'components/layout/layout.module.css'
-import { Tooltip } from '@audius/harmony'
 import { useBpmMaskedInput } from 'hooks/useBpmMaskedInput'
 import { env } from 'services/env'
 

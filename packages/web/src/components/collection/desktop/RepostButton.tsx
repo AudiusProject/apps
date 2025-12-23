@@ -3,10 +3,13 @@ import { useCallback } from 'react'
 import { useCollection } from '@audius/common/api'
 import { RepostSource, ID } from '@audius/common/models'
 import { collectionsSocialActions } from '@audius/common/store'
-import { IconRepost, IconButton, IconButtonProps } from '@audius/harmony'
+import {
+  IconRepost,
+  IconButton,
+  IconButtonProps,
+  Tooltip
+} from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-
-import { Tooltip } from '@audius/harmony'
 
 const { repostCollection, undoRepostCollection } = collectionsSocialActions
 

@@ -29,7 +29,8 @@ import {
   Flex,
   Paper,
   Text,
-  useTheme
+  useTheme,
+  Tooltip
 } from '@audius/harmony'
 import { useLocation } from 'react-router-dom'
 
@@ -37,7 +38,6 @@ import { useModalState } from 'common/hooks/useModalState'
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
 import Skeleton from 'components/skeleton/Skeleton'
-import { Tooltip } from '@audius/harmony'
 import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'

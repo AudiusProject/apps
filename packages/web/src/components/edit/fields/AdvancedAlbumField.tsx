@@ -1,6 +1,13 @@
 import { advancedAlbumMessages as messages } from '@audius/common/messages'
 import { Nullable } from '@audius/common/utils'
-import { Divider, Flex, IconIndent, IconInfo, Text } from '@audius/harmony'
+import {
+  Divider,
+  Flex,
+  IconIndent,
+  IconInfo,
+  Text,
+  Tooltip
+} from '@audius/harmony'
 import { useField } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
@@ -10,7 +17,6 @@ import {
   SelectedValue
 } from 'components/data-entry/ContextualMenu'
 import { HarmonyTextField } from 'components/form-fields/HarmonyTextField'
-import { Tooltip } from '@audius/harmony'
 
 import { DatePickerField } from './DatePickerField'
 

@@ -10,11 +10,11 @@ import {
   IconTowerBroadcast,
   Paper,
   Flex,
-  IconInfo
+  IconInfo,
+  Tooltip
 } from '@audius/harmony'
 import { ChatBlast, ChatBlastAudience } from '@audius/sdk'
 
-import { Tooltip } from '@audius/harmony'
 import { UserProfilePictureList } from 'components/user-profile-picture-list'
 import {
   UserListEntityType,

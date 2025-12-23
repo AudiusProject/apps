@@ -23,7 +23,8 @@ import {
   Modal,
   Scrollbar,
   IconMultiselectAdd,
-  LoadingSpinner
+  LoadingSpinner,
+  Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
 import { capitalize } from 'lodash'
@@ -33,7 +34,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useModalState } from 'common/hooks/useModalState'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import SearchBar from 'components/search-bar/SearchBar'
-import { Tooltip } from '@audius/harmony'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
 import styles from './AddToCollectionModal.module.css'

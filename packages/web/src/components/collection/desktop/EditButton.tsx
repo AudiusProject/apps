@@ -1,9 +1,12 @@
 import { useCollection } from '@audius/common/api'
-import { IconPencil, IconButton, IconButtonProps } from '@audius/harmony'
+import {
+  IconPencil,
+  IconButton,
+  IconButtonProps,
+  Tooltip
+} from '@audius/harmony'
 import { pick } from 'lodash'
 import { Link } from 'react-router-dom'
-
-import { Tooltip } from '@audius/harmony'
 
 const messages = {
   edit: (isAlbum: boolean) => `Edit ${isAlbum ? 'Album' : 'Playlist'}`

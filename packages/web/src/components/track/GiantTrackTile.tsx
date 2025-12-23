@@ -42,7 +42,8 @@ import {
   PlainButton,
   IconCaretDown,
   IconCaretUp,
-  spacing
+  spacing,
+  Tooltip
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
@@ -59,7 +60,6 @@ import Menu from 'components/menu/Menu'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import Skeleton from 'components/skeleton/Skeleton'
 import Toast from 'components/toast/Toast'
-import { Tooltip } from '@audius/harmony'
 import { ComponentPlacement } from 'components/types'
 import { UserGeneratedText } from 'components/user-generated-text'
 

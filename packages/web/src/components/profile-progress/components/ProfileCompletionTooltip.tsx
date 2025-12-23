@@ -1,8 +1,6 @@
 import { ReactNode } from 'react'
 
-import { Flex, Text, useTheme } from '@audius/harmony'
-
-import { Tooltip } from '@audius/harmony'
+import { Flex, Text, useTheme, Tooltip } from '@audius/harmony'
 
 import { getPercentageComplete } from './ProfileCompletionHeroCard'
 import styles from './ProfileCompletionTooltip.module.css'

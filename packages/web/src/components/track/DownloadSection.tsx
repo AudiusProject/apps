@@ -28,14 +28,14 @@ import {
   Button,
   IconCaretDown,
   IconLockUnlocked,
-  LoadingSpinner
+  LoadingSpinner,
+  Tooltip
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Expandable } from 'components/expandable/Expandable'
-import { Tooltip } from '@audius/harmony'
 import { useIsMobile } from 'hooks/useIsMobile'
 import {
   useRequiresAccountCallback,

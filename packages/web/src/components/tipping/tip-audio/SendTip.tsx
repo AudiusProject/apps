@@ -15,14 +15,14 @@ import {
   TokenAmountInput,
   TokenAmountInputChangeHandler,
   Button,
-  Flex
+  Flex,
+  Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import IconNoTierBadge from 'assets/img/tokenBadgePurple16@2x.webp'
 import Skeleton from 'components/skeleton/Skeleton'
-import { Tooltip } from '@audius/harmony'
 import { audioTierMap } from 'components/user-badges/UserBadges'
 
 import { ProfileInfo } from '../../profile-info/ProfileInfo'

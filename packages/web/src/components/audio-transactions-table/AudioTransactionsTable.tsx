@@ -7,6 +7,7 @@ import {
   TransactionDetails
 } from '@audius/common/store'
 import { wAUDIO } from '@audius/fixed-decimal'
+import { Tooltip } from '@audius/harmony'
 import cn from 'classnames'
 import moment from 'moment'
 import { Cell, Row } from 'react-table'
@@ -14,7 +15,6 @@ import { Cell, Row } from 'react-table'
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { Table } from 'components/table'
 import { TableProps } from 'components/table/Table'
-import { Tooltip } from '@audius/harmony'
 
 import styles from './AudioTransactionsTable.module.css'
 

@@ -23,7 +23,8 @@ import {
   ModalTitle,
   PlainButton,
   Text,
-  TokenAmountInput
+  TokenAmountInput,
+  Tooltip
 } from '@audius/harmony'
 import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { FormikProvider, useFormikContext } from 'formik'
@@ -36,7 +37,6 @@ import { TransactionSuccessScreen } from 'components/buy-sell-modal/TransactionS
 import { TokenDropdown } from 'components/buy-sell-modal/components/TokenDropdown'
 import { IconAUDIO } from 'components/shared-icons/Icons'
 import { ToastContext } from 'components/toast/ToastContext'
-import { Tooltip } from '@audius/harmony'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { make, track } from 'services/analytics'
 import zIndex from 'utils/zIndex'

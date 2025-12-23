@@ -1,9 +1,8 @@
 import { ReactNode, useCallback, useContext } from 'react'
 
-import { IconCopy } from '@audius/harmony'
+import { IconCopy, Tooltip } from '@audius/harmony'
 
 import { ToastContext } from 'components/toast/ToastContext'
-import { Tooltip } from '@audius/harmony'
 import { ComponentPlacement, MountPlacement } from 'components/types'
 import { copyToClipboard } from 'utils/clipboardUtil'
 

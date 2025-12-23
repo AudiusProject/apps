@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 
 import { AUDIO, type AudioWei } from '@audius/fixed-decimal'
-
 import { Tooltip } from '@audius/harmony'
 
 type TokenHoverTooltipProps = {

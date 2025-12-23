@@ -4,11 +4,10 @@ import {
   useWalletAudioBalances
 } from '@audius/common/api'
 import { AUDIO } from '@audius/fixed-decimal'
-import { IconInfo } from '@audius/harmony'
+import { IconInfo, Tooltip } from '@audius/harmony'
 
 import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
-import { Tooltip } from '@audius/harmony'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
 import DisplayAudio from '../DisplayAudio'

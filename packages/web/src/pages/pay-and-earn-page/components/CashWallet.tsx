@@ -20,13 +20,13 @@ import {
   Text,
   IconButton,
   useMedia,
-  Skeleton
+  Skeleton,
+  Tooltip
 } from '@audius/harmony'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { TextLink } from 'components/link'
 import { PayoutWalletDisplay } from 'components/payout-wallet-display'
-import { Tooltip } from '@audius/harmony'
 import { make, track } from 'services/analytics'
 import { zIndex } from 'utils/zIndex'
 

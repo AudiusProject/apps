@@ -2,10 +2,13 @@ import { useCallback } from 'react'
 
 import { ShareSource, ID } from '@audius/common/models'
 import { shareModalUIActions } from '@audius/common/store'
-import { IconShare, IconButton, IconButtonProps } from '@audius/harmony'
+import {
+  IconShare,
+  IconButton,
+  IconButtonProps,
+  Tooltip
+} from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-
-import { Tooltip } from '@audius/harmony'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 

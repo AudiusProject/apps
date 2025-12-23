@@ -31,7 +31,8 @@ import {
   useMedia,
   useTheme,
   IconCaretRight,
-  IconLogoCircleUSDCPng
+  IconLogoCircleUSDCPng,
+  Tooltip
 } from '@audius/harmony'
 import { useNavigate } from 'react-router-dom'
 import { roundedHexClipPath } from '~harmony/icons/SVGDefs'
@@ -39,7 +40,6 @@ import { roundedHexClipPath } from '~harmony/icons/SVGDefs'
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
-import { Tooltip } from '@audius/harmony'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
 import { env } from 'services/env'

@@ -3,11 +3,16 @@ import { ChangeEvent, useCallback } from 'react'
 import { useCurrentUserId } from '@audius/common/api'
 import { AccessConditions } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { Hint, IconInfo, Radio, RadioGroup, Text } from '@audius/harmony'
+import {
+  Hint,
+  IconInfo,
+  Radio,
+  RadioGroup,
+  Text,
+  Tooltip
+} from '@audius/harmony'
 import cn from 'classnames'
 import { useField } from 'formik'
-
-import { Tooltip } from '@audius/harmony'
 
 import {
   AccessAndSaleFormValues,

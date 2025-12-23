@@ -22,7 +22,8 @@ import {
   Flex,
   IconSparkles,
   IconCart,
-  Text
+  Text,
+  Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
 import moment from 'moment'
@@ -42,7 +43,6 @@ import {
   numericSorter
 } from 'components/table'
 import type { TableProps } from 'components/table/Table'
-import { Tooltip } from '@audius/harmony'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { isDescendantElementOf } from 'utils/domUtils'
 

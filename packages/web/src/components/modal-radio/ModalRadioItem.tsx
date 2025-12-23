@@ -1,12 +1,18 @@
 import { ReactNode, useContext, useEffect, useState } from 'react'
 
-import { Tag, Radio, RadioGroupContext, Text, Box } from '@audius/harmony'
+import {
+  Tag,
+  Radio,
+  RadioGroupContext,
+  Text,
+  Box,
+  Tooltip
+} from '@audius/harmony'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 import useMeasure from 'react-use-measure'
 
 import layoutStyles from 'components/layout/layout.module.css'
-import { Tooltip } from '@audius/harmony'
 
 import styles from './ModalRadioItem.module.css'
 

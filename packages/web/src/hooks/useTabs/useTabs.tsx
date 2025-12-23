@@ -14,7 +14,7 @@ import {
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { Text } from '@audius/harmony'
+import { Text, Tooltip } from '@audius/harmony'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 import cn from 'classnames'
 import { throttle } from 'lodash'
@@ -23,7 +23,6 @@ import { animated, useTransition, useSpring } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
 
 import { SeoLink } from 'components/link'
-import { Tooltip } from '@audius/harmony'
 
 import styles from './TabStyles.module.css'
 const animatedAny = animated as any

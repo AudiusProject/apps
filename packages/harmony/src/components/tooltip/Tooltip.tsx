@@ -10,6 +10,7 @@ import {
 
 import cn from 'classnames'
 import ReactDOM from 'react-dom'
+import { mergeRefs } from 'react-merge-refs'
 
 import { Text } from '../text'
 
@@ -385,21 +386,19 @@ export const Tooltip = ({
   }
 
   // Clone child element to add ref and event handlers
+  // In React 19, ref is a regular prop, so we can merge it cleanly
   const triggerElement = isValidElement(children)
-    ? cloneElement(children as ReactElement, {
-        ref: (node: HTMLElement) => {
-          triggerRef.current = node
-          // Preserve original ref if it exists
-          if (typeof (children as any).ref === 'function') {
-            ;(children as any).ref(node)
-          } else if ((children as any).ref) {
-            ;(children as any).ref.current = node
-          }
-        },
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-        onClick: handleClick
-      })
+    ? cloneElement(
+        children as ReactElement,
+        {
+          // Merge our ref with any existing ref on the child
+          // In React 19, ref is accessible as a prop
+          ref: mergeRefs([triggerRef, (children as any).ref]),
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: handleMouseLeave,
+          onClick: handleClick
+        } as any
+      )
     : children
 
   const portalContainer = getPortalContainer()
@@ -428,7 +427,7 @@ export const Tooltip = ({
               })}
             >
               <Text
-                color={color === 'white' ? 'neutral' : 'white'}
+                color={color === 'white' ? 'subdued' : 'white'}
                 lineHeight='single'
               >
                 {text}

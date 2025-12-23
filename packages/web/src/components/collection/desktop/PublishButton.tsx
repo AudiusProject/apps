@@ -6,11 +6,14 @@ import {
   useEarlyReleaseConfirmationModal,
   usePublishConfirmationModal
 } from '@audius/common/store'
-import { IconRocket, IconButton, IconButtonProps } from '@audius/harmony'
+import {
+  IconRocket,
+  IconButton,
+  IconButtonProps,
+  Tooltip
+} from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
-
-import { Tooltip } from '@audius/harmony'
 
 const messages = {
   publish: 'Make Public',
