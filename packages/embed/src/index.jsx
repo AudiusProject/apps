@@ -10,7 +10,8 @@ import { HASH_ID_ROUTE, ID_ROUTE } from './routes'
 const Index = () => (
   <BrowserRouter
     future={{
-      v7_relativeSplatPath: true
+      v7_relativeSplatPath: true,
+      v7_startTransition: true
     }}
   >
     <Routes>

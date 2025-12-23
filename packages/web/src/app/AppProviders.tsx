@@ -80,7 +80,8 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
               <RouterComponent
                 basename={basename}
                 future={{
-                  v7_relativeSplatPath: true
+                  v7_relativeSplatPath: true,
+                  v7_startTransition: true
                 }}
               >
                 <NavigationSetup>

@@ -122,7 +122,8 @@ export const PublicSite = (props: PublicSiteProps) => {
                 <RouterComponent
                   basename={basename}
                   future={{
-                    v7_relativeSplatPath: true
+                    v7_relativeSplatPath: true,
+                    v7_startTransition: true
                   }}
                 >
                   <NavScreen
