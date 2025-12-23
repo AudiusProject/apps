@@ -251,8 +251,27 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             startIcon={IconSearch}
             onChange={handleFilterChange}
             value={filterText}
-            size={TextInputSize.SMALL}
+            size={TextInputSize.EXTRA_SMALL}
             className={styles.searchInput}
+            css={{
+              width: '100%',
+              '& input': {
+                fontSize: 'var(--harmony-font-xs)',
+                fontWeight: 'var(--harmony-font-medium)',
+                marginLeft: '2px',
+                background: 'unset !important',
+                color: 'var(--harmony-neutral) !important'
+              },
+              '& .contentContainer': {
+                background: 'var(--harmony-white)',
+                boxShadow: '0 2px 5px 0 var(--search-bar-shadow)',
+                borderRadius: '4px',
+                border: 'none',
+                padding: '0 12px',
+                height: '32px',
+                minHeight: '32px'
+              }
+            }}
           />
         ) : null}
       </Flex>

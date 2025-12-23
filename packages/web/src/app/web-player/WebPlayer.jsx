@@ -61,7 +61,7 @@ import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCo
 import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
 import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
 import { CashPage } from 'pages/cash-page'
-import { ChatPageProvider } from 'pages/chat-page/ChatPageProvider'
+import ChatPage from 'pages/chat-page'
 import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
 import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
 import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
@@ -794,7 +794,7 @@ const WebPlayer = (props) => {
               <Route path={REWARDS_PAGE} element={<RewardsPage />} />
               <Route path={AIRDROP_PAGE} element={<RewardsPage />} />
 
-              <Route path={CHAT_PAGE} element={<ChatPageProvider />} />
+              <Route path={CHAT_PAGE} element={<ChatPage />} />
               <Route
                 path={DEACTIVATE_PAGE}
                 element={<DeactivateAccountPage />}

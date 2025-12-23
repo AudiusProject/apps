@@ -2,9 +2,8 @@ import { RefObject } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import RemixesPageProvider from './RemixesPageProvider'
-import NewRemixesPageDesktopContent from './components/desktop/NewRemixesPage'
-import NewRemixesPageMobileContent from './components/mobile/NewRemixesPage'
+import RemixesPageDesktopContent from './components/desktop/RemixesPage'
+import RemixesPageMobileContent from './components/mobile/RemixesPage'
 
 type RemixesPageProps = {
   containerRef: RefObject<HTMLDivElement>
@@ -13,15 +12,10 @@ type RemixesPageProps = {
 const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const isMobile = useIsMobile()
 
-  const content = isMobile
-    ? NewRemixesPageMobileContent
-    : NewRemixesPageDesktopContent
-
-  return (
-    <RemixesPageProvider containerRef={containerRef}>
-      {/* @ts-ignore: These props match */}
-      {content}
-    </RemixesPageProvider>
+  return isMobile ? (
+    <RemixesPageMobileContent containerRef={containerRef} />
+  ) : (
+    <RemixesPageDesktopContent containerRef={containerRef} />
   )
 }
 

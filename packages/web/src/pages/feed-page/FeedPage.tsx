@@ -2,20 +2,20 @@ import { RefObject } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import FeedPageProvider from './FeedPageProvider'
 import FeedPageContent from './components/desktop/FeedPageContent'
 import FeedPageMobileContent from './components/mobile/FeedPageContent'
 
-type FeedPageContentProps = {
+type FeedPageProps = {
   containerRef: RefObject<HTMLDivElement>
 }
 
-const FeedPage = ({ containerRef }: FeedPageContentProps) => {
+const FeedPage = ({ containerRef }: FeedPageProps) => {
   const isMobile = useIsMobile()
-  const content = isMobile ? FeedPageMobileContent : FeedPageContent
 
-  return (
-    <FeedPageProvider containerRef={containerRef}>{content}</FeedPageProvider>
+  return isMobile ? (
+    <FeedPageMobileContent containerRef={containerRef} />
+  ) : (
+    <FeedPageContent containerRef={containerRef} />
   )
 }
 

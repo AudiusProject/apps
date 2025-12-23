@@ -45,17 +45,6 @@ export interface TrendingPageDispatchProps {
   makeResetTrending: (timeRange: TimeRange) => () => void
 }
 
-// Component's own props
-export interface TrendingPageOwnProps {
-  containerRef?: RefObject<HTMLDivElement>
-  children: React.ComponentType<TrendingPageContentProps>
-}
-
-// Combined props for the provider component
-export type TrendingPageProviderProps = TrendingPageStateProps &
-  TrendingPageDispatchProps &
-  TrendingPageOwnProps
-
 // URL parameter types
 export interface TrendingUrlParams {
   genre: string | null

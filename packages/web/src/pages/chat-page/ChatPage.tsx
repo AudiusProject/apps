@@ -4,8 +4,11 @@ import { useCanSendMessage } from '@audius/common/hooks'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import { ResizeObserver } from '@juggle/resize-observer'
 import { useDispatch } from 'react-redux'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import useMeasure from 'react-use-measure'
 
+import { useIsMobile } from 'hooks/useIsMobile'
+import { useManagedAccountNotAllowedRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
 import Page from 'components/page/Page'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
@@ -17,6 +20,7 @@ import { ChatHeader } from './components/ChatHeader'
 import { ChatList } from './components/ChatList'
 import { ChatMessageList } from './components/ChatMessageList'
 import { CreateChatPrompt } from './components/CreateChatPrompt'
+import { SkeletonChatPage as MobileChatPage } from './components/mobile/SkeletonChatPage'
 
 const { fetchPermissions } = chatActions
 const { getChat } = chatSelectors
@@ -25,13 +29,30 @@ const messages = {
   messages: 'Messages'
 }
 
-export const ChatPage = ({
-  currentChatId,
-  presetMessage
-}: {
-  currentChatId?: string
-  presetMessage?: string
-}) => {
+export const ChatPage = () => {
+  useManagedAccountNotAllowedRedirect()
+  const params = useParams<{ id?: string }>()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  const currentChatId = params.id
+  const presetMessage = (
+    location.state as { presetMessage?: string } | undefined
+  )?.presetMessage
+
+  // Replace the preset message in browser history after the first navigation
+  useEffect(() => {
+    if (presetMessage) {
+      navigate(location.pathname, {
+        state: { presetMessage: undefined },
+        replace: true
+      })
+    }
+  }, [navigate, location.pathname, presetMessage])
+
+  if (isMobile) {
+    return <MobileChatPage />
+  }
   const dispatch = useDispatch()
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
   const chat = useSelector((state) => getChat(state, currentChatId ?? ''))
