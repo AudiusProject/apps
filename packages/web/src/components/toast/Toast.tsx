@@ -1,143 +1,143 @@
-import { useCallback, useEffect, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  MutableRefObject
+} from 'react'
 
 import { useHasAccount } from '@audius/common/api'
-import Tooltip from 'antd/lib/tooltip'
-import cn from 'classnames'
-
-import { ComponentPlacement, MountPlacement } from 'components/types'
-
-import styles from './Toast.module.css'
+import { Box, Popup, type PopupProps } from '@audius/harmony'
 
 type ToastProps = {
-  open?: boolean
-  // Time in milliseconds before the toast disappears
-  delay?: number
-  // Text to appear in toast
   text: string | JSX.Element
+  children?: JSX.Element
+  open?: boolean
+  delay?: number
   requireAccount?: boolean
-  // Called when the toast appears or disappears
   onVisibilityChange?: (isVisible: boolean) => void
-  // determines if it should display.
   disabled?: boolean
-  // Whether or not the toast is triggered by the child element being clicked.
   firesOnClick?: boolean
-  useCaret?: boolean
-  // Whether or not the tooltip has 100% width.
-  fillParent?: boolean
-  // Whether the tooltip gets mounted.
-  mount?: MountPlacement
-  placement?: ComponentPlacement
-  tooltipClassName?: string
-  overlayClassName?: string
   containerClassName?: string
   containerStyles?: object
-  children?: JSX.Element
-}
+} & Pick<
+  PopupProps,
+  'anchorOrigin' | 'transformOrigin' | 'portalLocation' | 'className'
+>
 
 const Toast = ({
+  text,
+  children,
   open,
   delay = 3000,
-  text,
   requireAccount = true,
   onVisibilityChange,
   disabled = false,
   firesOnClick = true,
-  useCaret = false,
-  fillParent = true,
-  mount = MountPlacement.PAGE,
-  placement = ComponentPlacement.RIGHT,
-  tooltipClassName,
-  overlayClassName,
   containerClassName,
-  containerStyles = {},
-  children
+  containerStyles,
+  anchorOrigin,
+  transformOrigin,
+  portalLocation,
+  className,
+  ...popupProps
 }: ToastProps) => {
-  const [showToast, setShowToast] = useState(false)
-  const [hideTimeout, setHideTimeout] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null)
-
+  const [isVisible, setIsVisible] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const divRef = useRef<HTMLDivElement | null>(null)
+  const anchorRef = divRef as MutableRefObject<HTMLElement | null>
   const hasAccount = useHasAccount()
+
+  const handleClose = useCallback(() => {
+    setIsVisible(false)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    onVisibilityChange?.(false)
+  }, [onVisibilityChange])
 
   const handleClick = useCallback(() => {
     if (disabled || !firesOnClick || (!hasAccount && requireAccount)) return
 
-    setShowToast(true)
-    if (onVisibilityChange) onVisibilityChange(true)
-    if (hideTimeout) {
-      clearTimeout(hideTimeout)
-    }
-    const timeout = setTimeout(() => {
-      setShowToast(false)
-      if (onVisibilityChange) onVisibilityChange(false)
-    }, delay)
-    setHideTimeout(timeout)
+    setIsVisible(true)
+    onVisibilityChange?.(true)
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(handleClose, delay)
   }, [
     disabled,
     firesOnClick,
     hasAccount,
     requireAccount,
-    onVisibilityChange,
     delay,
-    hideTimeout
+    handleClose,
+    onVisibilityChange
   ])
 
   useEffect(() => {
-    if (open && delay) {
-      handleClick()
+    if (open !== undefined) {
+      setIsVisible(open)
+      if (open && delay) {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        timeoutRef.current = setTimeout(handleClose, delay)
+      }
     }
-  }, [open, delay, handleClick])
+  }, [open, delay, handleClose])
 
   useEffect(() => {
     return () => {
-      if (hideTimeout) clearTimeout(hideTimeout)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [hideTimeout])
+  }, [])
 
-  const isVisible = open !== undefined ? open : showToast
-  let popupContainer: ((triggerNode: HTMLElement) => HTMLElement) | undefined
-
-  switch (mount) {
-    case MountPlacement.PARENT:
-      popupContainer = (triggerNode: HTMLElement) =>
-        triggerNode.parentNode as HTMLElement
-      break
-    case MountPlacement.PAGE: {
-      const page =
-        typeof document !== 'undefined' && document.getElementById('page')
-      if (page) popupContainer = () => page
-      break
-    }
-    case MountPlacement.BODY:
-    default:
-      popupContainer =
-        typeof document !== 'undefined' ? () => document.body : undefined
-  }
+  const visible = open !== undefined ? open : isVisible
 
   return (
-    <Tooltip
-      className={cn(styles.tooltip, {
-        [tooltipClassName as string]: !!tooltipClassName,
-        [styles.fillParent]: fillParent
-      })}
-      placement={placement}
-      title={text}
-      visible={isVisible}
-      getPopupContainer={popupContainer}
-      overlayClassName={cn(styles.toast, {
-        [overlayClassName as string]: !!overlayClassName && isVisible,
-        [styles.hideCaret]: !useCaret
-      })}
-    >
+    <>
       <div
+        ref={divRef}
         onClick={handleClick}
         className={containerClassName}
         style={containerStyles}
       >
         {children}
       </div>
-      {useCaret ? <div className={cn(styles.caret)} /> : null}
-    </Tooltip>
+      {visible && (
+        <Popup
+          {...popupProps}
+          anchorRef={anchorRef}
+          isVisible={visible}
+          onClose={handleClose}
+          hideCloseButton
+          zIndex={10000}
+          anchorOrigin={anchorOrigin}
+          transformOrigin={transformOrigin}
+          portalLocation={portalLocation}
+          dismissOnMouseLeave={false}
+          shadow='mid'
+          className={className}
+        >
+          <Box
+            pt='xs'
+            pb='xs'
+            pl='s'
+            pr='s'
+            borderRadius='m'
+            style={{
+              backgroundColor: 'var(--harmony-secondary)',
+              color: 'var(--harmony-white)',
+              fontSize: '12px',
+              fontWeight: 600,
+              textAlign: 'center',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {text}
+          </Box>
+        </Popup>
+      )}
+    </>
   )
 }
 

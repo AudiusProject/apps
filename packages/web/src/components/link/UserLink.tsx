@@ -6,7 +6,6 @@ import { CSSObject } from '@emotion/react'
 import { Link } from 'react-router-dom'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import { MountPlacement } from 'components/types'
 import UserBadges from 'components/user-badges/UserBadges'
 
 import { TextLink, TextLinkProps } from './TextLink'
@@ -17,7 +16,6 @@ type UserLinkProps = Omit<TextLinkProps, 'to' | 'popover'> & {
   userId: ID | undefined
   badgeSize?: IconSize
   popover?: boolean
-  popoverMount?: MountPlacement
   noText?: boolean // Should be used if you're intending for the children to be the link element (i.e. Avatar)
   noBadges?: boolean
   // Hack to fix avatars wrapped in user link
@@ -32,7 +30,6 @@ export const UserLink = (props: UserLinkProps) => {
     userId,
     badgeSize = 's',
     popover,
-    popoverMount,
     children,
     noText,
     noBadges,
@@ -111,8 +108,6 @@ export const UserLink = (props: UserLinkProps) => {
             overflow: noOverflow ? 'visible' : 'hidden'
           }}
           handle={handle}
-          component='span'
-          mount={popoverMount}
         >
           <TextLink to={url} {...other}>
             <Text ellipses>{name}</Text>

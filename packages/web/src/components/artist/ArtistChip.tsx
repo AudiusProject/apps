@@ -39,7 +39,6 @@ const ArtistIdentifier = ({
         <ArtistPopover
           handle={handle}
           mouseEnterDelay={0.3}
-          mount={popoverMount}
           onNavigateAway={onNavigateAway}
         >
           <p>{name}</p>
@@ -51,7 +50,6 @@ const ArtistIdentifier = ({
       <ArtistPopover
         handle={handle}
         mouseEnterDelay={0.3}
-        mount={popoverMount}
         onNavigateAway={onNavigateAway}
       >
         <div className={styles.handle}>@{handle}</div>
@@ -139,7 +137,6 @@ const ArtistChip = ({
         <ArtistPopover
           handle={handle}
           mouseEnterDelay={0.3}
-          mount={popoverMount}
           onNavigateAway={onNavigateAway}
         >
           <DynamicImage

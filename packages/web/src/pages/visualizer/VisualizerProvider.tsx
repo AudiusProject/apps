@@ -16,7 +16,6 @@ import Visualizer1 from 'utils/visualizer/visualizer-1.js'
 import Toast from 'components/toast/Toast'
 
 import styles from './VisualizerProvider.module.css'
-import { MountPlacement, ComponentPlacement } from 'components/types'
 
 import { shouldShowDark } from 'utils/theme/theme'
 import { make, TrackEvent } from 'common/store/analytics/actions'
@@ -240,12 +239,11 @@ const Visualizer = ({
         {renderTrackInfo()}
       </div>
       <Toast
-        useCaret={false}
-        mount={MountPlacement.BODY}
-        placement={ComponentPlacement.BOTTOM}
-        overlayClassName={styles.visualizerDisabled}
         open={isVisible && !!toastText}
         text={toastText || ''}
+        className={styles.visualizerDisabled}
+        anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'center', vertical: 'top' }}
       />
     </div>
   )

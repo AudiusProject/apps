@@ -18,7 +18,6 @@ import { Divider } from 'components/divider'
 import { TextAreaField, TextField } from 'components/form-fields'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import Toast from 'components/toast/Toast'
-import { MountPlacement } from 'components/types'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './EditAppPage.module.css'
@@ -167,7 +166,14 @@ export const EditAppPage = (props: EditAppPageProps) => {
             <span className={styles.keyText}>{apiKey}</span>
             <Divider type='vertical' className={styles.keyDivider} />
             <span>
-              <Toast text={messages.copied} mount={MountPlacement.PARENT}>
+              <Toast
+                text={messages.copied}
+                portalLocation={
+                  typeof document !== 'undefined'
+                    ? document.getElementById('page') || document.body
+                    : undefined
+                }
+              >
                 <IconButton
                   onClick={copyApiKey}
                   aria-label={messages.copyApiKeyLabel}

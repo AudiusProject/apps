@@ -17,7 +17,6 @@ import { Button, Flex, Text, IconLink } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
 import Toast from 'components/toast/Toast'
-import { ComponentPlacement, MountPlacement } from 'components/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { copyToClipboard, getCopyableLink } from 'utils/clipboardUtil'
 
@@ -63,8 +62,13 @@ export const InviteLink = () => {
     <Toast
       text={messages.copiedLabel}
       delay={2000}
-      placement={ComponentPlacement.TOP}
-      mount={MountPlacement.PARENT}
+      anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
+      transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+      portalLocation={
+        typeof document !== 'undefined'
+          ? document.getElementById('page') || document.body
+          : undefined
+      }
     >
       <Button
         variant='secondary'

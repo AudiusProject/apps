@@ -11,7 +11,6 @@ import {
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
 import { UserLink } from 'components/link'
-import { MountPlacement } from 'components/types'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
 const messages = {
@@ -101,7 +100,6 @@ export const AvatarContent = (props: AvatarProps) => {
         popover={popover}
         noText
         aria-label={label}
-        popoverMount={MountPlacement.PARENT}
         noOverflow={popover}
       >
         <HarmonyAvatar

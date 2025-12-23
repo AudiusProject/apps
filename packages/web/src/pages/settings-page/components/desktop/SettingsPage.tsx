@@ -49,7 +49,6 @@ import { ChangePasswordModal } from 'components/change-password/ChangePasswordMo
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import Toast from 'components/toast/Toast'
-import { ComponentPlacement } from 'components/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { env } from 'services/env'
@@ -410,11 +409,11 @@ export const SettingsPage = () => {
             description={settingsMessages.accountRecoveryCardDescription}
           >
             <Toast
-              tooltipClassName={styles.cardToast}
               text={emailToastText}
               open={isEmailToastVisible}
-              placement={ComponentPlacement.BOTTOM}
-              fillParent={false}
+              className={styles.cardToast}
+              anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+              transformOrigin={{ horizontal: 'center', vertical: 'top' }}
             >
               <Button onClick={showEmailToast} variant='secondary' fullWidth>
                 {settingsMessages.accountRecoveryButtonText}

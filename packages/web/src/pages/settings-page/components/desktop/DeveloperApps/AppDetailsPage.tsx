@@ -5,7 +5,6 @@ import { IconCopy, IconError, IconButton, Hint, Button } from '@audius/harmony'
 import { Divider } from 'components/divider'
 import { ExternalTextLink } from 'components/link'
 import Toast from 'components/toast/Toast'
-import { MountPlacement } from 'components/types'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './AppDetailsPage.module.css'
@@ -79,7 +78,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
         <span className={styles.keyText}>{apiKey}</span>
         <Divider type='vertical' className={styles.keyDivider} />
         <span>
-          <Toast text={messages.copied} mount={MountPlacement.PARENT}>
+          <Toast
+            text={messages.copied}
+            portalLocation={
+              typeof document !== 'undefined'
+                ? document.getElementById('page') || document.body
+                : undefined
+            }
+          >
             <IconButton
               onClick={copyApiKey}
               aria-label={messages.copyApiKeyLabel}
@@ -96,7 +102,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
           <span className={styles.keyText}>{apiSecret}</span>
           <Divider type='vertical' className={styles.keyDivider} />
           <span>
-            <Toast text={messages.copied} mount={MountPlacement.PARENT}>
+            <Toast
+              text={messages.copied}
+              portalLocation={
+                typeof document !== 'undefined'
+                  ? document.getElementById('page') || document.body
+                  : undefined
+              }
+            >
               <IconButton
                 onClick={copySecret}
                 aria-label={messages.copyApiKeyLabel}

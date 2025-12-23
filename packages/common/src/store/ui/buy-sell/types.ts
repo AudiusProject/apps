@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-import { TooltipPlacement } from 'antd/lib/tooltip'
+import type { TooltipPlacement } from '@audius/harmony'
 
 export type BuySellTab = 'buy' | 'sell' | 'convert'
 

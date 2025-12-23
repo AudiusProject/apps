@@ -10,7 +10,6 @@ import {
 import { CSSObject } from '@emotion/styled'
 
 import Toast from 'components/toast/Toast'
-import { MountPlacement, ComponentPlacement } from 'components/types'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 const messages = {
@@ -80,11 +79,15 @@ export const ForgotPasswordModal = (props: ForgotPasswordModalProps) => {
           <Flex direction='column' gap='m' flex='1'>
             <Toast
               text={messages.copied}
-              fillParent={false}
-              mount={MountPlacement.PARENT}
-              placement={ComponentPlacement.TOP_LEFT}
               requireAccount={false}
               delay={TOOLTIP_DELAY}
+              anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+              transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+              portalLocation={
+                typeof document !== 'undefined'
+                  ? document.getElementById('page') || document.body
+                  : undefined
+              }
             >
               <Text
                 variant='title'
@@ -97,11 +100,15 @@ export const ForgotPasswordModal = (props: ForgotPasswordModalProps) => {
             </Toast>
             <Toast
               text={messages.copied}
-              fillParent={false}
-              mount={MountPlacement.PARENT}
-              placement={ComponentPlacement.TOP_LEFT}
               requireAccount={false}
               delay={TOOLTIP_DELAY}
+              anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+              transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+              portalLocation={
+                typeof document !== 'undefined'
+                  ? document.getElementById('page') || document.body
+                  : undefined
+              }
             >
               <Text
                 variant='title'

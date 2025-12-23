@@ -62,11 +62,7 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
   if (disablePopover) return profilePictureElement
 
   return (
-    <ArtistPopover
-      handle={user.handle}
-      component='span'
-      onNavigateAway={onClose}
-    >
+    <ArtistPopover handle={user.handle} onNavigateAway={onClose}>
       {profilePictureElement}
     </ArtistPopover>
   )

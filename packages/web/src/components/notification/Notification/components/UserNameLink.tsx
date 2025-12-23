@@ -80,7 +80,7 @@ export const UserNameLink = (props: UserNameLinkProps) => {
 
   if (!isMobile) {
     userNameElement = (
-      <ArtistPopover handle={handle} component='span' onNavigateAway={onClose}>
+      <ArtistPopover handle={handle} onNavigateAway={onClose}>
         {userNameElement}
       </ArtistPopover>
     )

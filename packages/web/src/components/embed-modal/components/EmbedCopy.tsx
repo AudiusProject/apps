@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
 import Toast from 'components/toast/Toast'
-import { MountPlacement, ComponentPlacement } from 'components/types'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './EmbedCopy.module.css'
@@ -25,10 +24,14 @@ const EmbedCopy = ({ frameString, onCopy }: EmbedCopyProps) => {
   return (
     <Toast
       text={messages.copied}
-      fillParent={false}
-      mount={MountPlacement.PARENT}
-      placement={ComponentPlacement.TOP}
       requireAccount={false}
+      anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+      transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+      portalLocation={
+        typeof document !== 'undefined'
+          ? document.getElementById('page') || document.body
+          : undefined
+      }
     >
       <div className={styles.copy} onClick={copy}>
         <div className={styles.box}>{frameString}</div>

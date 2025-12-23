@@ -27,7 +27,6 @@ import { Link, useMatch } from 'react-router-dom'
 
 import { Avatar } from 'components/avatar'
 import { UserLink } from 'components/link'
-import { MountPlacement } from 'components/types'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -264,13 +263,7 @@ const RecentSearchUser = (props: { searchItem: SearchItem }) => {
     >
       <Avatar userId={id} w={40} borderWidth='thin' />
       <Flex direction='column' alignItems='flex-start' w='100%'>
-        <UserLink
-          popover
-          popoverMount={MountPlacement.PAGE}
-          userId={id}
-          size='s'
-          badgeSize='xs'
-        />
+        <UserLink popover userId={id} size='s' badgeSize='xs' />
         <Text variant='body' size='xs' color='subdued'>
           Profile
         </Text>

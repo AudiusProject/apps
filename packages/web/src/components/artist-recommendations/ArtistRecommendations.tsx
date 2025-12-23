@@ -12,7 +12,6 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
-import { MountPlacement } from 'components/types'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -59,7 +58,7 @@ const ArtistProfilePictureWrapper = ({
     )
   }
   return (
-    <ArtistPopover mount={MountPlacement.PARENT} handle={handle}>
+    <ArtistPopover handle={handle}>
       <div>
         <DynamicImage
           wrapperClassName={styles.profilePicture}
@@ -90,13 +89,7 @@ const ArtistPopoverWrapper = ({
   const isMobile = useIsMobile()
   return (
     <div className={styles.artistLink} role='link' onClick={onArtistNameClick}>
-      {!isMobile ? (
-        <ArtistPopover mount={MountPlacement.PARENT} handle={handle}>
-          {name}
-        </ArtistPopover>
-      ) : (
-        name
-      )}
+      {!isMobile ? <ArtistPopover handle={handle}>{name}</ArtistPopover> : name}
       <UserBadges
         userId={userId}
         className={styles.verified}

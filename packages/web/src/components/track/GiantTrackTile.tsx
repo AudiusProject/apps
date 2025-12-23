@@ -60,7 +60,6 @@ import Menu from 'components/menu/Menu'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import Skeleton from 'components/skeleton/Skeleton'
 import Toast from 'components/toast/Toast'
-import { ComponentPlacement } from 'components/types'
 import { UserGeneratedText } from 'components/user-generated-text'
 
 import { CardTitle } from './CardTitle'
@@ -343,11 +342,11 @@ export const GiantTrackTile = ({
       !isPublishing &&
       !isOwner && (
         <Toast
-          placement={ComponentPlacement.BOTTOM}
           text={'Reposted!'}
           disabled={isReposted}
           delay={REPOST_TIMEOUT}
-          fillParent={false}
+          anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         >
           <Tooltip
             disabled={isOwner || repostCount === 0}
@@ -378,11 +377,11 @@ export const GiantTrackTile = ({
       !isUnlisted &&
       !isOwner && (
         <Toast
-          placement={ComponentPlacement.BOTTOM}
           text={'Favorited!'}
           disabled={isSaved}
           delay={SAVED_TIMEOUT}
-          fillParent={false}
+          anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         >
           <Tooltip
             disabled={isOwner || saveCount === 0}

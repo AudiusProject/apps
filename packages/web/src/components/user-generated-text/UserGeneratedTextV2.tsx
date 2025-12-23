@@ -177,7 +177,7 @@ const HandleLink = ({
   )
 
   return userId ? (
-    <ArtistPopover handle={handle} component='span'>
+    <ArtistPopover handle={handle}>
       <TextLink {...other} to={profilePage(handle)} onClick={handleClick}>
         {handle}
       </TextLink>
@@ -208,7 +208,7 @@ const MentionLink = ({
   )
 
   return (
-    <ArtistPopover handle={userHandle} component='span'>
+    <ArtistPopover handle={userHandle}>
       <TextLink {...other} to={profilePage(userHandle)} onClick={handleClick}>
         {handle}
       </TextLink>
