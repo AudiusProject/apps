@@ -77,13 +77,8 @@ const TrendingPageMobileContent = ({
 
   useTrendingPageCleanup({ trendingPageState, actions })
 
-  const { pageTitle, trendingDescription } = TRENDING_MESSAGES
-  const {
-    trendingWeek,
-    trendingMonth,
-    trendingAllTime,
-    getLineupProps
-  } = lineups
+  const { trendingWeek, trendingMonth, trendingAllTime, getLineupProps } =
+    lineups
   const { trendingGenre, trendingTimeRange } = trendingPageState
   const {
     makeLoadMore,
@@ -233,11 +228,11 @@ const TrendingPageMobileContent = ({
   }, [setHeader, trendingGenre, goToGenreSelection, tabs])
 
   return (
-      <MobilePageContainer
-        title={TRENDING_MESSAGES.pageTitle}
-        description={TRENDING_MESSAGES.trendingDescription}
-        canonicalUrl={`${BASE_URL}${TRENDING_PAGE}`}
-      >
+    <MobilePageContainer
+      title={TRENDING_MESSAGES.pageTitle}
+      description={TRENDING_MESSAGES.trendingDescription}
+      canonicalUrl={`${BASE_URL}${TRENDING_PAGE}`}
+    >
       <div className={styles.tabsContainer}>
         <div className={styles.tabBodyHolder}>{body}</div>
       </div>

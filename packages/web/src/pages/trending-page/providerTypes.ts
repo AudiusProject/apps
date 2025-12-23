@@ -1,11 +1,7 @@
-import { RefObject } from 'react'
-
 import { TimeRange, Track, LineupState, UID } from '@audius/common/models'
 import { QueueSource } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { Dispatch } from 'redux'
-
-import { TrendingPageContentProps } from './types'
 
 // Core state props from Redux
 export interface TrendingPageStateProps {

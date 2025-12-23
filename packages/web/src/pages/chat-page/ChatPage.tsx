@@ -7,9 +7,9 @@ import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import useMeasure from 'react-use-measure'
 
+import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useManagedAccountNotAllowedRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
-import Page from 'components/page/Page'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
 import { chatPage } from 'utils/route'
@@ -40,19 +40,7 @@ export const ChatPage = () => {
     location.state as { presetMessage?: string } | undefined
   )?.presetMessage
 
-  // Replace the preset message in browser history after the first navigation
-  useEffect(() => {
-    if (presetMessage) {
-      navigate(location.pathname, {
-        state: { presetMessage: undefined },
-        replace: true
-      })
-    }
-  }, [navigate, location.pathname, presetMessage])
-
-  if (isMobile) {
-    return <MobileChatPage />
-  }
+  // All hooks must be called before any early returns
   const dispatch = useDispatch()
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
   const chat = useSelector((state) => getChat(state, currentChatId ?? ''))
@@ -90,11 +78,25 @@ export const ChatPage = () => {
     }, 0)
   }, [messagesRef])
 
+  // Replace the preset message in browser history after the first navigation
   useEffect(() => {
-    if (firstOtherUser) {
+    if (presetMessage) {
+      navigate(location.pathname, {
+        state: { presetMessage: undefined },
+        replace: true
+      })
+    }
+  }, [navigate, location.pathname, presetMessage])
+
+  useEffect(() => {
+    if (firstOtherUser && !isMobile) {
       dispatch(fetchPermissions({ userIds: [firstOtherUser.user_id] }))
     }
-  }, [dispatch, firstOtherUser])
+  }, [dispatch, firstOtherUser, isMobile])
+
+  if (isMobile) {
+    return <MobileChatPage />
+  }
 
   return (
     <Page

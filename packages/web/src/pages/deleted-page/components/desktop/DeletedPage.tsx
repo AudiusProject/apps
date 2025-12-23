@@ -13,11 +13,9 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
-import { NestedNonNullable } from '@audius/common/utils'
+import { route, NestedNonNullable } from '@audius/common/utils'
 import { Button, IconUser, Flex } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
@@ -100,7 +98,6 @@ const DeletedPage = g(
     deletedByArtist = true
   }) => {
     const dispatch = useDispatch()
-    const navigate = useNavigate()
     const currentTrack = useCurrentTrack()
 
     const getMoreByLineup = useRef(makeGetLineupMetadatas(getLineup)).current

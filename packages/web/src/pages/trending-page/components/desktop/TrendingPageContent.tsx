@@ -78,11 +78,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   useTrendingPageCleanup({ trendingPageState, actions })
 
-  const {
-    trendingTitle,
-    pageTitle,
-    trendingDescription
-  } = TRENDING_MESSAGES
+  const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
   const {
     trendingWeek,
     trendingMonth,
@@ -91,11 +87,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     getLineupForRange,
     scrollToTop
   } = lineups
-  const {
-    trendingGenre,
-    trendingTimeRange,
-    lastFetchedTrendingGenre
-  } = trendingPageState
+  const { trendingGenre, trendingTimeRange, lastFetchedTrendingGenre } =
+    trendingPageState
   const {
     makeLoadMore,
     makePlayTrack,

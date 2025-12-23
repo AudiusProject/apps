@@ -9,14 +9,12 @@ import {
   useRemixesLineup
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
-import { Track, User } from '@audius/common/models'
 import {
   remixesPageLineupActions,
   remixesPageActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
-import { pluralize } from '@audius/common/utils'
+import { route, pluralize } from '@audius/common/utils'
 import { IconRemix as IconRemixes } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -88,17 +86,8 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     }
   }, [dispatch, user])
 
-  if (!track || !user) {
-    return null
-  }
-
-  const isRemixContest = !!remixContest
-  const title = isRemixContest
-    ? remixMessages.submissionsTitle
-    : remixMessages.remixesTitle
-
+  // All hooks must be called before any early returns
   useSubPageHeader()
-
   const {
     data,
     isFetching,
@@ -112,24 +101,36 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     lineup,
     pageSize
   } = useRemixesLineup({
-    trackId: track.track_id
+    trackId: track?.track_id
   })
   const { setHeader } = useContext(HeaderContext)
+
+  const isRemixContest = !!remixContest
+  const title = isRemixContest
+    ? remixMessages.submissionsTitle
+    : remixMessages.remixesTitle
+
   useEffect(() => {
-    setHeader(
-      <>
-        <Header
-          className={styles.header}
-          title={
-            <>
-              <IconRemixes className={styles.iconRemix} color='heading' />
-              <span>{title}</span>
-            </>
-          }
-        />
-      </>
-    )
+    if (track && user) {
+      setHeader(
+        <>
+          <Header
+            className={styles.header}
+            title={
+              <>
+                <IconRemixes className={styles.iconRemix} color='heading' />
+                <span>{title}</span>
+              </>
+            }
+          />
+        </>
+      )
+    }
   }, [setHeader, title, track, user, goToArtistPage, goToTrackPage])
+
+  if (!track || !user) {
+    return null
+  }
 
   return (
     <MobilePageContainer

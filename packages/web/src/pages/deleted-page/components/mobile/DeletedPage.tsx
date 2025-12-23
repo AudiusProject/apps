@@ -13,8 +13,7 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
-import { NestedNonNullable } from '@audius/common/utils'
+import { route, NestedNonNullable } from '@audius/common/utils'
 import { Button, IconUser } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect } from 'react'
 
 import {
   useUser,
@@ -9,14 +9,11 @@ import {
   useRemixesLineup
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
-import { Track, User, ID } from '@audius/common/models'
 import {
   remixesPageLineupActions,
   remixesPageActions,
-  remixesPageSelectors,
-  queueSelectors
+  remixesPageSelectors
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
 import { pluralize } from '@audius/common/utils'
 import { IconRemix, Text } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
@@ -27,13 +24,10 @@ import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { TrackLink } from 'components/link/TrackLink'
 import { UserLink } from 'components/link/UserLink'
 import Page from 'components/page/Page'
-import { push as pushRoute } from 'utils/navigation'
 import { fullTrackRemixesPage } from 'utils/route'
-import { withNullGuard } from 'utils/withNullGuard'
 
 import styles from './RemixesPage.module.css'
 
-const { profilePage } = route
 const { getTrackId } = remixesPageSelectors
 const { fetchTrackSucceeded, reset } = remixesPageActions
 
@@ -77,27 +71,7 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     }
   }, [dispatch])
 
-  const goToTrackPage = useCallback(() => {
-    if (user && track) {
-      dispatch(pushRoute(track.permalink))
-    }
-  }, [dispatch, track, user])
-
-  const goToArtistPage = useCallback(() => {
-    if (user) {
-      dispatch(pushRoute(profilePage(user?.handle)))
-    }
-  }, [dispatch, user])
-
-  if (!track || !user) {
-    return null
-  }
-
-  const isRemixContest = !!remixContest
-  const title = isRemixContest
-    ? remixMessages.submissionsTitle
-    : remixMessages.remixesTitle
-
+  // All hooks must be called before any early returns
   const {
     data,
     isFetching,
@@ -111,8 +85,17 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     lineup,
     pageSize
   } = useRemixesLineup({
-    trackId: track.track_id
+    trackId: track?.track_id
   })
+
+  if (!track || !user) {
+    return null
+  }
+
+  const isRemixContest = !!remixContest
+  const title = isRemixContest
+    ? remixMessages.submissionsTitle
+    : remixMessages.remixesTitle
 
   const renderHeader = () => (
     <Header

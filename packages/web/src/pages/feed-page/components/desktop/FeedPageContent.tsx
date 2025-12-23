@@ -33,7 +33,7 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getSource } = queueSelectors
+const { getSource, getUid } = queueSelectors
 const { getPlaying, getBuffering } = playerSelectors
 const { getDiscoverFeedLineup, getFeedFilter } = feedPageSelectors
 const { makeGetLineupMetadatas } = lineupSelectors
@@ -46,9 +46,12 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const dispatch = useDispatch()
   const currentTrack = useCurrentTrack()
 
-  const getFeedLineup = useRef(makeGetLineupMetadatas(getDiscoverFeedLineup)).current
+  const getFeedLineup = useRef(
+    makeGetLineupMetadatas(getDiscoverFeedLineup)
+  ).current
   const feed = useSelector((state: any) => getFeedLineup(state))
   const source = useSelector(getSource)
+  const uid = useSelector(getUid)
   const playing = useSelector(getPlaying)
   const buffering = useSelector(getBuffering)
   const feedFilter = useSelector(getFeedFilter)
@@ -63,8 +66,8 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const getLineupProps = (lineup: any) => {
     return {
       lineup,
-      playingUid: source?.uid ?? null,
-      playingSource: source?.source ?? '',
+      playingUid: uid,
+      playingSource: source ?? '',
       playingTrackId: currentTrack?.track_id ?? null,
       playing,
       buffering,

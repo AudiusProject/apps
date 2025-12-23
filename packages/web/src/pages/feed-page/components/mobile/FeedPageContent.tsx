@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from 'react'
 
-import { useCurrentTrack } from '@audius/common/hooks'
 import { useHasAccount } from '@audius/common/api'
+import { useCurrentTrack } from '@audius/common/hooks'
 import { Name, FeedFilter } from '@audius/common/models'
 import {
   lineupSelectors,
@@ -12,8 +12,8 @@ import {
   playerSelectors
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { useDispatch, useSelector } from 'react-redux'
 import cn from 'classnames'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { make, useRecord } from 'common/store/analytics/actions'
@@ -37,7 +37,7 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getSource } = queueSelectors
+const { getSource, getUid } = queueSelectors
 const { getPlaying, getBuffering } = playerSelectors
 const { getDiscoverFeedLineup, getFeedFilter } = feedPageSelectors
 const { makeGetLineupMetadatas } = lineupSelectors
@@ -46,14 +46,19 @@ type FeedPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-const FeedPageMobileContent = ({ containerRef }: FeedPageMobileContentProps) => {
+const FeedPageMobileContent = ({
+  containerRef
+}: FeedPageMobileContentProps) => {
   const dispatch = useDispatch()
   const currentTrack = useCurrentTrack()
   const hasAccount = useHasAccount()
 
-  const getFeedLineup = useRef(makeGetLineupMetadatas(getDiscoverFeedLineup)).current
+  const getFeedLineup = useRef(
+    makeGetLineupMetadatas(getDiscoverFeedLineup)
+  ).current
   const feed = useSelector((state: any) => getFeedLineup(state))
   const source = useSelector(getSource)
+  const uid = useSelector(getUid)
   const playing = useSelector(getPlaying)
   const buffering = useSelector(getBuffering)
   const feedFilter = useSelector(getFeedFilter)
@@ -70,8 +75,8 @@ const FeedPageMobileContent = ({ containerRef }: FeedPageMobileContentProps) => 
   const getLineupProps = (lineup: any) => {
     return {
       lineup,
-      playingUid: source?.uid ?? null,
-      playingSource: source?.source ?? '',
+      playingUid: uid,
+      playingSource: source ?? '',
       playingTrackId: currentTrack?.track_id ?? null,
       playing,
       buffering,
