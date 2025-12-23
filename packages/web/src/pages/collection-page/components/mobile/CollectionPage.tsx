@@ -1,11 +1,8 @@
 import { memo, useEffect, useContext } from 'react'
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
-import { Status, PlayableType } from '@audius/common/models'
-import {
-  CollectionTrack,
-  CollectionsPageType
-} from '@audius/common/store'
+import { Status, PlayableType, ID } from '@audius/common/models'
+import { CollectionTrack, CollectionsPageType } from '@audius/common/store'
 import { Id } from '@audius/sdk'
 
 import CollectionHeader from 'components/collection/mobile/CollectionHeader'
@@ -18,8 +15,8 @@ import NavContext, {
   RightPreset
 } from 'components/nav/mobile/NavContext'
 import TrackList from 'components/track/mobile/TrackList'
-import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import { computeCollectionMetadataProps } from 'pages/collection-page/store/utils'
+import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 
 import styles from './CollectionPage.module.css'
@@ -77,26 +74,33 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     structuredData
   } = useCollectionPage(type, true)
 
-  if (!collection) return null
-
-  const metadata = collection
+  // All hooks must be called before any conditional returns
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
+  const { setHeader } = useContext(HeaderContext)
+
   useEffect(() => {
-    if (metadata) {
+    if (collection) {
       // If the collection is deleted, don't update the nav
-      if (metadata.is_delete || metadata._marked_deleted) {
+      if (collection.is_delete || collection._marked_deleted) {
         return
       }
       setLeft(LeftPreset.BACK)
       setRight(RightPreset.KEBAB)
       setCenter(CenterPreset.LOGO)
     }
-  }, [setLeft, setCenter, setRight, metadata])
+  }, [setLeft, setCenter, setRight, collection])
 
-  const { setHeader } = useContext(HeaderContext)
   useEffect(() => {
     setHeader(null)
   }, [setHeader])
+
+  // useGatedContentAccessMap must be called before conditional returns
+  const trackAccessMap = useGatedContentAccessMap(tracks.entries)
+
+  // Now we can do conditional returns after all hooks
+  if (!collection) return null
+
+  const metadata = collection
 
   // TODO: Consider dynamic lineups, esp. for caching improvement.
   const collectionLoading = status === Status.LOADING
@@ -137,11 +141,28 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   } = computeCollectionMetadataProps(metadata, tracks)
 
   const togglePlay = (uid: string, trackId: ID) => {
-    onClickRow({ uid, track_id: trackId })
+    // Find the actual track record from tracks.entries
+    const trackRecord = tracks.entries.find((entry) => entry.uid === uid)
+    if (trackRecord) {
+      // Format it as CollectionPageTrackRecord
+      const formattedRecord = {
+        ...trackRecord,
+        key: `${trackRecord.title}_${trackRecord.uid}_0`,
+        name: trackRecord.title,
+        artist: trackRecord.user.name,
+        handle: trackRecord.user.handle,
+        date: trackRecord.dateAdded || trackRecord.created_at,
+        time: trackRecord.duration,
+        plays:
+          trackRecord.is_unlisted && accountUserId !== trackRecord.owner_id
+            ? -1
+            : trackRecord.play_count
+      }
+      onClickRow(formattedRecord)
+    }
   }
   const playingUid = getPlayingUid()
 
-  const trackAccessMap = useGatedContentAccessMap(tracks.entries)
   const trackList = tracks.entries.map((entry) => {
     const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
       entry.track_id
@@ -176,9 +197,9 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   if ((metadata?.is_delete || metadata?._marked_deleted) && user) {
     return (
       <DeletedPage
-        title={title}
-        description={pageDescription}
-        canonicalUrl={canonicalUrl}
+        title={title ?? ''}
+        description={pageDescription ?? ''}
+        canonicalUrl={canonicalUrl ?? ''}
         structuredData={structuredData}
         playable={{
           metadata,
@@ -202,7 +223,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
         <div>
           <CollectionHeader
             access={access}
-            collectionId={playlistId}
+            collectionId={playlistId ?? 0}
             userId={user?.user_id ?? 0}
             loading={collectionLoading}
             tracksLoading={tracksLoading}

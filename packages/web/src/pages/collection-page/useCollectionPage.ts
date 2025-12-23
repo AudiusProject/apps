@@ -9,16 +9,15 @@ import { useCurrentTrack } from '@audius/common/hooks'
 import {
   Status,
   ID,
-  UID,
   isContentUSDCPurchaseGated,
   ModalSource,
-  Track,
   Name,
   ShareSource,
   RepostSource,
   FavoriteSource,
+  FavoriteType,
+  FollowSource,
   PlaybackSource,
-  PlayableType,
   Kind
 } from '@audius/common/models'
 import {
@@ -45,21 +44,19 @@ import {
   CollectionPageTrackRecord,
   PurchaseableContentType,
   usePremiumContentPurchaseModalActions,
-  PremiumContentPurchaseModalState,
   albumTrackRemoveConfirmationModalActions,
-  AlbumTrackRemoveConfirmationModalState,
   PlayerBehavior,
   playerActions,
   useLineupTable,
   lineupSelectors,
   cacheCollectionsActions
 } from '@audius/common/store'
-import { formatUrlName, Uid, Nullable, route, makeUid } from '@audius/common/utils'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { formatUrlName, Uid, route, makeUid } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useHistoryContext } from 'app/HistoryProvider'
-import { TrackEvent, make } from 'common/store/analytics/actions'
+import { make } from 'common/store/analytics/actions'
 import {
   setUsers,
   setVisibility
@@ -68,7 +65,6 @@ import {
   UserListType,
   UserListEntityType
 } from 'store/application/ui/userListModal/types'
-import { getLocationPathname } from 'store/routing/selectors'
 import { replace } from 'utils/navigation'
 import { getPathname, collectionPage, profilePage } from 'utils/route'
 import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
@@ -78,25 +74,21 @@ const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
 const { makeGetCurrent, getPlayerBehavior } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
+const { getPlaying } = playerSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
-const { getCollectionTracksLineup, getUserUid, getCollectionPermalink } =
-  collectionPageSelectors
+const { getCollectionTracksLineup } = collectionPageSelectors
 const { updatedPlaylistViewed } = playlistUpdatesActions
 const { makeGetLineupOrder } = lineupSelectors
-const {
-  editPlaylist,
-  removeTrackFromPlaylist,
-  orderPlaylist,
-  publishPlaylist
-} = cacheCollectionsActions
+const { removeTrackFromPlaylist, orderPlaylist, publishPlaylist } =
+  cacheCollectionsActions
 
-type PlaylistTrack = { time: number; track: ID; uid?: UID }
-
-export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) => {
+export const useCollectionPage = (
+  type: CollectionsPageType,
+  isMobile: boolean
+) => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -104,8 +96,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
   const pathname = getPathname(location)
 
   const params = parseCollectionRoute(pathname)
-  const { data: collection, status: collectionStatus } =
-    useCollectionByParams(params)
+  const { data: collection } = useCollectionByParams(params)
   const { data: user } = useUser(collection?.playlist_owner_id)
   const { data: accountUserId } = useCurrentUserId()
   const currentTrack = useCurrentTrack()
@@ -145,7 +136,9 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
 
       const { permalink, collectionId } = paramsToFetch
 
-      const locationState = location.state as { forceFetch?: boolean } | undefined
+      const locationState = location.state as
+        | { forceFetch?: boolean }
+        | undefined
       const forceFetch = locationState?.forceFetch
 
       if (forceFetch || permalink || collectionId !== localPlaylistId) {
@@ -179,10 +172,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
 
     const unlisten = history.listen((location, action) => {
       const newPathname = getPathname(location)
-      if (
-        action !== 'REPLACE' &&
-        prevPathnameRef.current !== newPathname
-      ) {
+      if (action !== 'REPLACE' && prevPathnameRef.current !== newPathname) {
         resetCollection()
       }
       prevPathnameRef.current = newPathname
@@ -289,7 +279,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
   // URL normalization
   useEffect(() => {
     if (!collection || !params || !user || updatingRoute) return
-    
+
     const { collectionId, title, collectionType, handle, permalink } = params
     const newCollectionName = formatUrlName(collection.playlist_name)
 
@@ -410,7 +400,9 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
   )
 
   const getFilteredData = useCallback(
-    (trackMetadatas: CollectionTrack[]): [CollectionPageTrackRecord[], number] => {
+    (
+      trackMetadatas: CollectionTrack[]
+    ): [CollectionPageTrackRecord[], number] => {
       const playingUid = getPlayingUid()
       const activeIndex = tracks.entries.findIndex(
         ({ uid }) => uid === playingUid
@@ -422,7 +414,9 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
       )
       const filteredIndex =
         activeIndex > -1
-          ? filteredMetadata.findIndex((metadata) => metadata.uid === playingUid)
+          ? filteredMetadata.findIndex(
+              (metadata) => metadata.uid === playingUid
+            )
           : activeIndex
       return [filteredMetadata, filteredIndex]
     },
@@ -492,8 +486,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
       dispatch(
         usePremiumContentPurchaseModalActions.open({
           contentId: record.track_id,
-          contentType: PurchaseableContentType.TRACK,
-          source: ModalSource.TrackListItem
+          contentType: PurchaseableContentType.TRACK
         })
       )
       dispatch(
@@ -512,12 +505,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
   )
 
   const onClickRemove = useCallback(
-    (
-      trackId: number,
-      _index: number,
-      uid: string,
-      timestamp: number
-    ) => {
+    (trackId: number, _index: number, uid: string, timestamp: number) => {
       if (!collection || !playlistId) return
       if (isContentUSDCPurchaseGated(collection.stream_conditions)) {
         dispatch(
@@ -752,7 +740,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
       dispatch(
         socialUsersActions.followUser(
           collection.playlist_owner_id,
-          FavoriteSource.COLLECTION_PAGE
+          FollowSource.COLLECTION_PAGE
         )
       )
     }
@@ -763,7 +751,7 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
       dispatch(
         socialUsersActions.unfollowUser(
           collection.playlist_owner_id,
-          FavoriteSource.COLLECTION_PAGE
+          FollowSource.COLLECTION_PAGE
         )
       )
     }
@@ -793,8 +781,8 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
     userName: user?.name,
     userHandle: user?.handle,
     isAlbum: collection?.is_album,
-    permalink: collection?.permalink,
-    hashId: collection?.id
+    permalink: collection?.permalink
+    // hashId is optional and TQCollection doesn't have id property
   })
 
   return {
@@ -845,4 +833,3 @@ export const useCollectionPage = (type: CollectionsPageType, isMobile: boolean) 
     ...seoFields
   }
 }
-

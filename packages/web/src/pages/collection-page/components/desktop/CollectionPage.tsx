@@ -7,7 +7,8 @@ import {
   isContentUSDCPurchaseGated,
   ModalSource,
   Track,
-  FavoriteSource
+  FavoriteSource,
+  PlayableType
 } from '@audius/common/models'
 import {
   CollectionTrack,
@@ -25,10 +26,9 @@ import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
 import { TracksTable } from 'components/tracks-table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import { computeCollectionMetadataProps } from 'pages/collection-page/store/utils'
+import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
-import { PlayableType } from '@audius/common/models'
 
 import styles from './CollectionPage.module.css'
 
@@ -95,7 +95,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     status,
     trackCount,
     playlistId,
-    filterText,
     allowReordering,
     isQueued,
     getFilteredData,
@@ -115,9 +114,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     structuredData
   } = useCollectionPage(type, false)
 
-  // All hooks must be called before any conditional returns
-  // Note: This would normally belong in the CollectionPageProvider,
-  // but it benefits us more to reuse existing hooks and that component cannot use hooks
   const { onOpen: openPremiumContentModal } = usePremiumContentPurchaseModal()
   const openPurchaseModal = useRequiresAccountCallback(
     ({ track_id }: Track) => {
@@ -230,9 +226,9 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   if ((metadata?.is_delete || metadata?._marked_deleted) && user) {
     return (
       <DeletedPage
-        title={title}
-        description={pageDescription}
-        canonicalUrl={canonicalUrl}
+        title={title ?? ''}
+        description={pageDescription ?? ''}
+        canonicalUrl={canonicalUrl ?? ''}
         structuredData={structuredData}
         playable={{
           metadata,
@@ -251,9 +247,9 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       loading={collectionLoading}
       tracksLoading={tracksLoading}
       type={typeTitle}
-      title={playlistName}
-      artistName={playlistOwnerName}
-      artistHandle={playlistOwnerHandle}
+      title={playlistName ?? ''}
+      artistName={playlistOwnerName ?? ''}
+      artistHandle={playlistOwnerHandle ?? ''}
       description={description}
       isOwner={isOwner}
       isAlbum={isAlbum}
@@ -302,7 +298,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       scrollableSearch
     >
       <Paper column mb='unit-10' css={{ minWidth: 774 }}>
-        <CollectionDogEar collectionId={playlistId} borderOffset={0} />
+        <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
         {!collectionLoading && isEmpty ? (
           <EmptyContent
@@ -332,7 +328,9 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               onReorder={onReorderTracks}
               onSort={onSortTracks}
               isReorderable={
-                accountUserId !== null && accountUserId === playlistOwnerId && allowReordering
+                accountUserId !== null &&
+                accountUserId === playlistOwnerId &&
+                allowReordering
               }
               removeText={`${messages.remove} ${
                 isAlbum ? messages.type.album : messages.type.playlist
