@@ -4,7 +4,7 @@ import { Flex } from '@audius/harmony'
 import { Mood } from '@audius/sdk'
 
 import { MetadataItem } from 'components/entity/MetadataItem'
-import { moodMap } from 'utils/Moods'
+import { moodEmojiMap } from 'utils/Moods'
 
 type TrackMetadataListProps = {
   trackId: ID
@@ -19,7 +19,14 @@ export const TrackMetadataList = (props: TrackMetadataListProps) => {
     trackId
   })
 
-  const renderMood = (value: string) => moodMap[value as Mood]
+  const renderMood = (value: string) => {
+    const emojiClass = moodEmojiMap[value as Mood]
+    return (
+      <Flex alignItems='center' gap='xs'>
+        {value} {emojiClass ? <i className={`emoji ${emojiClass}`} style={{ marginBottom: 0 }} /> : null}
+      </Flex>
+    )
+  }
 
   return (
     <Flex as='dl' w='100%' gap='l' wrap='wrap'>
