@@ -17,7 +17,6 @@ import {
   LibraryCategory,
   LibraryPageTabs,
   LibraryPageTrack,
-  QueueItem,
   CommonState
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -43,6 +42,7 @@ import { TrackItemAction } from 'components/track/mobile/TrackListItem'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import useTabs from 'hooks/useTabs/useTabs'
 import { useLibraryCollections } from 'pages/library-page/hooks/useLibraryCollections'
+import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
 import { LibraryCategorySelectionMenu } from '../desktop/LibraryCategorySelectionMenu'
 import { emptyStateMessages } from '../emptyStateMessages'
@@ -261,7 +261,7 @@ const TracksLineup = ({
           <div className={styles.searchContainer}>
             <div className={styles.searchInnerContainer}>
               <input
-                placeholder={messages.filterTracks}
+                placeholder={filterMessages.filterTracks}
                 onChange={onFilterChange}
                 value={filterText}
               />
@@ -368,7 +368,7 @@ const AlbumCardLineup = () => {
             <div className={styles.searchContainer}>
               <div className={styles.searchInnerContainer}>
                 <input
-                  placeholder={messages.filterAlbums}
+                  placeholder={filterMessages.filterAlbums}
                   onChange={handleFilterChange}
                 />
                 <IconFilter className={styles.iconFilter} />
@@ -487,7 +487,7 @@ const PlaylistCardLineup = ({
             <div className={styles.searchContainer}>
               <div className={styles.searchInnerContainer}>
                 <input
-                  placeholder={messages.filterPlaylists}
+                  placeholder={filterMessages.filterPlaylists}
                   onChange={handleFilterChange}
                 />
                 <IconFilter className={styles.iconFilter} />
@@ -513,7 +513,7 @@ const PlaylistCardLineup = ({
   )
 }
 
-const messages = {
+const filterMessages = {
   filterTracks: 'Filter Tracks',
   filterAlbums: 'Filter Albums',
   filterPlaylists: 'Filter Playlists'
@@ -537,58 +537,27 @@ const tabHeaders = [
   }
 ]
 
-export type LibraryPageProps = {
-  title: string
-  description: string
-  onFilterChange: (e: any) => void
-  isQueued: boolean
-  playingUid: UID | null
-  getFilteredData: (trackMetadatas: any) => [LibraryPageTrack[], number]
-  onTogglePlay: (uid: UID, trackId: ID) => void
-
-  onPlay: () => void
-  onSortTracks: (sorters: any) => void
-  formatCardSecondaryText: (saves: number, tracks: number) => string
-  filterText: string
-  initialOrder: UID[] | null
-  tracks: Lineup<LibraryPageTrack>
-  currentQueueItem: QueueItem
-  playing: boolean
-  buffering: boolean
-  fetchLibraryTracks: () => void
-  resetSavedTracks: () => void
-  updateLineupOrder: (updatedOrderIndices: UID[]) => void
-
-  goToRoute: (route: string) => void
-  repostTrack: (trackId: ID) => void
-  undoRepostTrack: (trackId: ID) => void
-  saveTrack: (trackId: ID) => void
-  unsaveTrack: (trackId: ID) => void
-  onClickRemove: any
-  onReorderTracks: any
-  playlistUpdates: number[]
-  updatePlaylistLastViewedAt: (playlistId: number) => void
-  currentTab: LibraryPageTabs
-  onChangeTab: (tab: LibraryPageTabs) => void
+const messages = {
+  title: 'Library',
+  description: "View tracks that you've favorited"
 }
 
-const LibraryPage = ({
-  title,
-  description,
-  playingUid,
-  tracks,
-  goToRoute,
-  playing,
-  isQueued,
-  onTogglePlay,
-  getFilteredData,
-  onFilterChange,
-  filterText,
-  playlistUpdates,
-  updatePlaylistLastViewedAt,
-  currentTab,
-  onChangeTab
-}: LibraryPageProps) => {
+const LibraryPage = () => {
+  const {
+    playingUid,
+    tracks,
+    goToRoute,
+    playing,
+    isQueued,
+    onTogglePlay,
+    getFilteredData,
+    onFilterChange,
+    filterText,
+    playlistUpdates,
+    updatePlaylistLastViewedAt,
+    currentTab,
+    onChangeTab
+  } = useLibraryPage()
   useMainPageHeader()
   const queuedAndPlaying = playing && isQueued
 
@@ -632,7 +601,7 @@ const LibraryPage = ({
   useEffect(() => {
     setHeader(
       <>
-        <Header className={styles.header} title={<span>{title}</span>}>
+        <Header className={styles.header} title={<span>{messages.title}</span>}>
           <div className={styles.categoryMenuWrapper}>
             <LibraryCategorySelectionMenu
               currentTab={currentTab}
@@ -644,12 +613,12 @@ const LibraryPage = ({
         <div className={styles.tabBar}>{tabs}</div>
       </>
     )
-  }, [title, setHeader, tabs, currentTab])
+  }, [setHeader, tabs, currentTab])
 
   return (
     <MobilePageContainer
-      title={title}
-      description={description}
+      title={messages.title}
+      description={messages.description}
       containerClassName={styles.mobilePageContainer}
     >
       <div className={styles.tabContainer}>

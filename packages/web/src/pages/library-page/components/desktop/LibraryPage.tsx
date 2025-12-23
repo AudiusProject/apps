@@ -5,22 +5,12 @@ import {
   useFavoriteTrack,
   useUnfavoriteTrack
 } from '@audius/common/api'
-import {
-  Kind,
-  Status,
-  ID,
-  UID,
-  Lineup,
-  FavoriteSource,
-  Track
-} from '@audius/common/models'
+import { Kind, Status, FavoriteSource, Track } from '@audius/common/models'
 import {
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
   LibraryPageTrack,
-  TrackRecord,
-  QueueItem,
   CommonState
 } from '@audius/common/store'
 import {
@@ -42,6 +32,7 @@ import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import useTabs from 'hooks/useTabs/useTabs'
 import { useMainContentRef } from 'pages/MainContentContext'
+import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
 import { emptyStateMessages } from '../emptyStateMessages'
 
@@ -55,8 +46,10 @@ const { getInitialFetchStatus, getCategory } = libraryPageSelectors
 const messages = {
   libraryHeader: 'Library',
   filterPlaceholder: 'Filter Tracks',
-  emptyTracksBody: 'Once you have, this is where you’ll find them!',
-  goToTrending: 'Go to Trending'
+  emptyTracksBody: "Once you have, this is where you'll find them!",
+  goToTrending: 'Go to Trending',
+  title: 'Library',
+  description: "View tracks that you've favorited"
 }
 
 const tableColumns: TracksTableColumn[] = [
@@ -71,64 +64,28 @@ const tableColumns: TracksTableColumn[] = [
   'overflowActions'
 ]
 
-export type LibraryPageProps = {
-  title: string
-  description: string
-  onFilterChange: (e: any) => void
-  onSortChange: (method: string, direction: string) => void
-  hasReachedEnd: boolean
-  isQueued: boolean
-  playingUid: UID | null
-  getFilteredData: (
-    trackMetadatas: LibraryPageTrack[]
-  ) => [LibraryPageTrack[], number]
-  fetchMoreTracks: (offset?: number, limit?: number) => void
-  onClickRow: (record: TrackRecord) => void
-  onClickRepost: (record: TrackRecord) => void
-  onPlay: () => void
-  onSortTracks: (sorters: any) => void
-  onChangeTab: (tab: LibraryPageTabs) => void
-  allTracksFetched: boolean
-  filterText: string
-  initialOrder: UID[] | null
-  currentTab: LibraryPageTabs
-  tracks: Lineup<LibraryPageTrack>
-  currentQueueItem: QueueItem
-  playing: boolean
-  buffering: boolean
-  fetchLibraryTracks: () => void
-  resetSavedTracks: () => void
-  updateLineupOrder: (updatedOrderIndices: UID[]) => void
-  goToRoute: (route: string) => void
-  play: (uid?: UID) => void
-  pause: () => void
-  repostTrack: (trackId: ID) => void
-  undoRepostTrack: (trackId: ID) => void
-  saveTrack: (trackId: ID) => void
-  unsaveTrack: (trackId: ID) => void
-}
-
-const LibraryPage = ({
-  title,
-  description,
-  tracks: { status, entries },
-  goToRoute,
-  playing,
-  currentTab,
-  isQueued,
-  fetchMoreTracks,
-  getFilteredData,
-  onPlay,
-  onFilterChange,
-  onSortChange,
-  allTracksFetched,
-  hasReachedEnd,
-  filterText,
-  onChangeTab,
-  onClickRow,
-  onClickRepost,
-  onSortTracks
-}: LibraryPageProps) => {
+const LibraryPage = () => {
+  const {
+    title,
+    description,
+    tracks: { status, entries },
+    goToRoute,
+    playing,
+    currentTab,
+    isQueued,
+    fetchMoreTracks,
+    getFilteredData,
+    onPlay,
+    onFilterChange,
+    onSortChange,
+    allTracksFetched,
+    hasReachedEnd,
+    filterText,
+    onChangeTab,
+    onClickRow,
+    onClickRepost,
+    onSortTracks
+  } = useLibraryPage()
   const mainContentRef = useMainContentRef()
   const initFetch = useSelector(getInitialFetchStatus)
   const { data: currentUserId } = useCurrentUserId()
@@ -307,8 +264,8 @@ const LibraryPage = ({
 
   return (
     <Page
-      title={title}
-      description={description}
+      title={messages.title}
+      description={messages.description}
       contentClassName={styles.libraryPageWrapper}
       header={header}
     >
