@@ -107,7 +107,6 @@
     "@tanstack/react-query": "5.62.7",
     "@tanstack/react-query-devtools": "5.62.7",
     "@wagmi/connectors": "5.7.11",
-    "antd": "4.20.6",
     "array-pack-2d": "0.1.1",
     "array-range": "1.0.1",
     "body-scroll-lock": "4.0.0-beta.0",

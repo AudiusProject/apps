@@ -14,13 +14,13 @@ import {
   IconExternalLink,
   Text,
   PlainButton,
-  IconValidationCheck
+  IconValidationCheck,
+  Divider
 } from '@audius/harmony'
 import { useField } from 'formik'
 import { useSelector } from 'react-redux'
 
 import { CashBalanceSection } from 'components/add-cash/CashBalanceSection'
-import { Divider } from 'components/divider'
 import { make, track } from 'services/analytics'
 
 import { ADDRESS, AMOUNT, METHOD } from '../types'
@@ -78,7 +78,7 @@ export const TransferSuccessful = ({
   return (
     <Flex column gap='xl'>
       <CashBalanceSection />
-      <Divider style={{ margin: 0 }} />
+      <Divider css={{ margin: 0 }} />
       <Flex alignItems='center' justifyContent='space-between'>
         <Text variant='heading' size='s' color='subdued'>
           {messages.amountWithdrawn}
@@ -89,7 +89,7 @@ export const TransferSuccessful = ({
       </Flex>
       {methodValue === WithdrawMethod.MANUAL_TRANSFER && signature ? (
         <>
-          <Divider style={{ margin: 0 }} />
+          <Divider css={{ margin: 0 }} />
           <Flex column gap='s' alignItems='flex-start'>
             <Text variant='heading' size='s' color='subdued'>
               {messages.destinationAddress}

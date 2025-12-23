@@ -1,10 +1,8 @@
 import { useFormattedUSDCBalance } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { decimalIntegerToHumanReadable } from '@audius/common/utils'
-import { Text, Button, IconValidationX, Flex } from '@audius/harmony'
+import { Text, Button, IconValidationX, Flex, Divider } from '@audius/harmony'
 import { useField } from 'formik'
-
-import { Divider } from 'components/divider'
 
 import { ADDRESS, AMOUNT } from '../types'
 
@@ -23,14 +21,14 @@ export const ErrorPage = ({ onClose }: ErrorPageProps) => {
   return (
     <Flex column gap='xl'>
       <TextRow left={walletMessages.cashBalance} right={balanceFormatted} />
-      <Divider style={{ margin: 0 }} />
+      <Divider css={{ margin: 0 }} />
       <TextRow
         left={walletMessages.amountToWithdraw}
         right={`${walletMessages.minus}${walletMessages.dollarSign}${decimalIntegerToHumanReadable(amountValue)}`}
       />
       {addressValue ? (
         <>
-          <Divider style={{ margin: 0 }} />
+          <Divider css={{ margin: 0 }} />
           <Flex column gap='s'>
             <TextRow left={walletMessages.destination} />
             <Text variant='body' size='m' strength='default'>

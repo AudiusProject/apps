@@ -8,12 +8,11 @@ import {
 } from '@audius/common/models'
 import { removeNullable, Nullable } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import { Text } from '@audius/harmony'
+import { Text, Divider } from '@audius/harmony'
 import { useField } from 'formik'
 import { usePrevious } from 'react-use'
 import { z } from 'zod'
 
-import { Divider } from 'components/divider'
 import { processFiles } from 'pages/upload-page/store/utils/processFiles'
 import { stemDropdownRows } from 'utils/stems'
 

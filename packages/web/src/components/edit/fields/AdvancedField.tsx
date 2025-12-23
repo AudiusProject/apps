@@ -13,7 +13,8 @@ import {
   IconCcBy as IconCreativeCommons,
   IconInfo,
   Text,
-  Tooltip
+  Tooltip,
+  Divider
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useField } from 'formik'
@@ -26,7 +27,6 @@ import {
   SelectedValue,
   SelectedValues
 } from 'components/data-entry/ContextualMenu'
-import { Divider } from 'components/divider'
 import { useTrackField } from 'components/edit-track/hooks'
 import { SingleTrackEditValues } from 'components/edit-track/types'
 import { computeLicenseIcons } from 'components/edit-track/utils/computeLicenseIcons'
@@ -449,7 +449,7 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
               fullWidth
             />
           </div>
-          <Divider className={styles.verticalDivider} type='vertical' />
+          <Divider className={styles.verticalDivider} orientation='vertical' />
           <div
             className={cn(
               styles.attributionRowItem,

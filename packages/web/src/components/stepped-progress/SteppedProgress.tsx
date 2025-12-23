@@ -1,8 +1,6 @@
 import { Fragment, forwardRef, useEffect, useRef, useState } from 'react'
 
-import { Box, Flex, IconComponent, Text } from '@audius/harmony'
-
-import { Divider } from 'components/divider'
+import { Box, Flex, IconComponent, Text, Divider } from '@audius/harmony'
 
 import styles from './SteppedProgress.module.css'
 
@@ -88,7 +86,7 @@ export const SteppedProgress = ({
               isActive={activeStep === s.key}
             />
             {i !== steps.length - 1 ? (
-              <Divider className={styles.connector} variant='default' />
+              <Divider className={styles.connector} color='strong' />
             ) : null}
           </Fragment>
         ))}

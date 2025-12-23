@@ -8,13 +8,19 @@ import {
   useEditDeveloperApp
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { IconCopy, IconButton, Button, Flex, IconEmbed } from '@audius/harmony'
+import {
+  IconCopy,
+  IconButton,
+  Button,
+  Flex,
+  IconEmbed,
+  Divider
+} from '@audius/harmony'
 import { Form, Formik, useField } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { make, useRecord } from 'common/store/analytics/actions'
-import { Divider } from 'components/divider'
 import { TextAreaField, TextField } from 'components/form-fields'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import Toast from 'components/toast/Toast'
@@ -162,9 +168,9 @@ export const EditAppPage = (props: EditAppPageProps) => {
           />
           <div className={styles.keyRoot}>
             <span className={styles.keyLabel}>{messages.apiKey}</span>
-            <Divider type='vertical' className={styles.keyDivider} />
+            <Divider orientation='vertical' className={styles.keyDivider} />
             <span className={styles.keyText}>{apiKey}</span>
-            <Divider type='vertical' className={styles.keyDivider} />
+            <Divider orientation='vertical' className={styles.keyDivider} />
             <span>
               <Toast
                 text={messages.copied}

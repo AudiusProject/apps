@@ -21,11 +21,10 @@ import {
   decimalIntegerToHumanReadable
 } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import { Button, Flex, SegmentedControl, Text } from '@audius/harmony'
+import { Button, Flex, SegmentedControl, Text, Divider } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 
 import { CashBalanceSection } from 'components/add-cash/CashBalanceSection'
-import { Divider } from 'components/divider'
 import { TextField } from 'components/form-fields'
 import { make, track } from 'services/analytics'
 
@@ -119,7 +118,7 @@ export const EnterTransferDetails = () => {
   return (
     <Flex column gap='xl'>
       <CashBalanceSection />
-      <Divider style={{ margin: 0 }} />
+      <Divider css={{ margin: 0 }} />
       <Flex column gap='l'>
         <Flex column gap='s'>
           <Text variant='heading' size='s' color='subdued'>
@@ -150,7 +149,7 @@ export const EnterTransferDetails = () => {
           )}
         </Flex>
       </Flex>
-      <Divider style={{ margin: 0 }} />
+      <Divider css={{ margin: 0 }} />
       {isCoinflowEnabled ? (
         <SegmentedControl
           fullWidth

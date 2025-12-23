@@ -19,12 +19,12 @@ import {
   IconError,
   SegmentedControl,
   Option,
-  Hint
+  Hint,
+  Divider
 } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
 import { MenuFormCallbackStatus } from 'components/data-entry/ContextualMenu'
-import { Divider } from 'components/divider'
 import { useTrackField } from 'components/edit-track/hooks'
 
 import { STREAM_CONDITIONS } from '../types'

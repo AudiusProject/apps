@@ -4,11 +4,11 @@ import { useTrackByPermalink } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { remixSettingsMessages as messages } from '@audius/common/messages'
 import { getPathFromTrackUrl } from '@audius/common/utils'
+import { Divider } from '@audius/harmony'
 import { useField } from 'formik'
 import { pick } from 'lodash'
 import { useThrottle } from 'react-use'
 
-import { Divider } from 'components/divider'
 import { TextField } from 'components/form-fields'
 
 import { SwitchRowField } from '../SwitchRowField'

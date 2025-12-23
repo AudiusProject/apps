@@ -1,7 +1,6 @@
 import { useAuthorizedApps } from '@audius/common/api'
-import { ModalContentText } from '@audius/harmony'
+import { ModalContentText, Divider } from '@audius/harmony'
 
-import { Divider } from 'components/divider'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import { AuthorizedAppListItem } from './AuthorizedAppListItem'

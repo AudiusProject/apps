@@ -1,8 +1,14 @@
 import { useCallback } from 'react'
 
-import { IconCopy, IconError, IconButton, Hint, Button } from '@audius/harmony'
+import {
+  IconCopy,
+  IconError,
+  IconButton,
+  Hint,
+  Button,
+  Divider
+} from '@audius/harmony'
 
-import { Divider } from 'components/divider'
 import { ExternalTextLink } from 'components/link'
 import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -74,9 +80,9 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
       )}
       <div className={styles.keyRoot}>
         <span className={styles.keyLabel}>{messages.apiKey}</span>
-        <Divider type='vertical' className={styles.keyDivider} />
+        <Divider orientation='vertical' className={styles.keyDivider} />
         <span className={styles.keyText}>{apiKey}</span>
-        <Divider type='vertical' className={styles.keyDivider} />
+        <Divider orientation='vertical' className={styles.keyDivider} />
         <span>
           <Toast
             text={messages.copied}
@@ -98,9 +104,9 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
       {!apiSecret ? null : (
         <div className={styles.keyRoot}>
           <span className={styles.keyLabel}>{messages.apiSecret}</span>
-          <Divider type='vertical' className={styles.keyDivider} />
+          <Divider orientation='vertical' className={styles.keyDivider} />
           <span className={styles.keyText}>{apiSecret}</span>
-          <Divider type='vertical' className={styles.keyDivider} />
+          <Divider orientation='vertical' className={styles.keyDivider} />
           <span>
             <Toast
               text={messages.copied}
