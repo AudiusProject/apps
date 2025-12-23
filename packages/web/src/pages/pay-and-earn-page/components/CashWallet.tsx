@@ -26,7 +26,7 @@ import {
 import { useModalState } from 'common/hooks/useModalState'
 import { TextLink } from 'components/link'
 import { PayoutWalletDisplay } from 'components/payout-wallet-display'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { make, track } from 'services/analytics'
 import { zIndex } from 'utils/zIndex'
 
@@ -99,7 +99,7 @@ export const CashWallet = () => {
                 }
                 shouldWrapContent={false}
                 shouldDismissOnClick={false}
-                css={{ zIndex: zIndex.CASH_WALLET_TOOLTIP }}
+                zIndex={zIndex.CASH_WALLET_TOOLTIP}
               >
                 <IconButton
                   icon={IconInfo}

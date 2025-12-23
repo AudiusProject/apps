@@ -1,0 +1,194 @@
+.root {
+  font-family: var(--harmony-font-family);
+  position: fixed;
+  z-index: var(--harmony-layer-tooltip, 10000);
+  pointer-events: none;
+}
+
+.tooltip {
+  background-color: var(--harmony-secondary);
+  color: var(--harmony-white);
+  font-family: var(--harmony-font-family);
+  font-size: var(--harmony-font-xs);
+  font-weight: var(--harmony-font-medium);
+  user-select: none;
+  text-transform: none;
+  border-radius: 4px;
+  padding: var(--harmony-spacing-m);
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12))
+    drop-shadow(0 6px 16px rgba(0, 0, 0, 0.08))
+    drop-shadow(0 9px 28px rgba(0, 0, 0, 0.05));
+  box-shadow: none;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 250px;
+}
+
+.tooltip.primary {
+  background-color: var(--harmony-primary);
+}
+
+.tooltip.secondary {
+  background-color: var(--harmony-secondary);
+}
+
+.tooltip.white {
+  background-color: var(--harmony-white);
+  color: var(--harmony-neutral);
+}
+
+.tooltip.nonWrapping {
+  max-width: none;
+  white-space: nowrap;
+}
+
+.arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Arrow positioning for top */
+.top .arrow,
+.topLeft .arrow,
+.topRight .arrow {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px 5px 0 5px;
+  border-color: var(--harmony-secondary) transparent transparent transparent;
+}
+
+.topLeft .arrow {
+  left: 12px;
+  transform: none;
+}
+
+.topRight .arrow {
+  right: 12px;
+  left: auto;
+  transform: none;
+}
+
+/* Arrow positioning for bottom */
+.bottom .arrow,
+.bottomLeft .arrow,
+.bottomRight .arrow {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent var(--harmony-secondary) transparent;
+}
+
+.bottomLeft .arrow {
+  left: 12px;
+  transform: none;
+}
+
+.bottomRight .arrow {
+  right: 12px;
+  left: auto;
+  transform: none;
+}
+
+/* Arrow positioning for left */
+.left .arrow,
+.leftTop .arrow,
+.leftBottom .arrow {
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent var(--harmony-secondary);
+}
+
+.leftTop .arrow {
+  top: 12px;
+  transform: none;
+}
+
+.leftBottom .arrow {
+  bottom: 12px;
+  top: auto;
+  transform: none;
+}
+
+/* Arrow positioning for right */
+.right .arrow,
+.rightTop .arrow,
+.rightBottom .arrow {
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 5px 5px 0;
+  border-color: transparent var(--harmony-secondary) transparent transparent;
+}
+
+.rightTop .arrow {
+  top: 12px;
+  transform: none;
+}
+
+.rightBottom .arrow {
+  bottom: 12px;
+  top: auto;
+  transform: none;
+}
+
+/* Arrow color variants for primary */
+.primary.top .arrow,
+.primary.topLeft .arrow,
+.primary.topRight .arrow {
+  border-color: var(--harmony-primary) transparent transparent transparent;
+}
+
+.primary.bottom .arrow,
+.primary.bottomLeft .arrow,
+.primary.bottomRight .arrow {
+  border-color: transparent transparent var(--harmony-primary) transparent;
+}
+
+.primary.left .arrow,
+.primary.leftTop .arrow,
+.primary.leftBottom .arrow {
+  border-color: transparent transparent transparent var(--harmony-primary);
+}
+
+.primary.right .arrow,
+.primary.rightTop .arrow,
+.primary.rightBottom .arrow {
+  border-color: transparent var(--harmony-primary) transparent transparent;
+}
+
+/* Arrow color variants for white */
+.white.top .arrow,
+.white.topLeft .arrow,
+.white.topRight .arrow {
+  border-color: var(--harmony-white) transparent transparent transparent;
+}
+
+.white.bottom .arrow,
+.white.bottomLeft .arrow,
+.white.bottomRight .arrow {
+  border-color: transparent transparent var(--harmony-white) transparent;
+}
+
+.white.left .arrow,
+.white.leftTop .arrow,
+.white.leftBottom .arrow {
+  border-color: transparent transparent transparent var(--harmony-white);
+}
+
+.white.right .arrow,
+.white.rightTop .arrow,
+.white.rightBottom .arrow {
+  border-color: transparent var(--harmony-white) transparent transparent;
+}
+

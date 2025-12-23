@@ -6,7 +6,7 @@ import { collectionsSocialActions } from '@audius/common/store'
 import { IconRepost, IconButton, IconButtonProps } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 const { repostCollection, undoRepostCollection } = collectionsSocialActions
 

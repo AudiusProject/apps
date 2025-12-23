@@ -23,7 +23,7 @@ import { animated, useTransition, useSpring } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
 
 import { SeoLink } from 'components/link'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import styles from './TabStyles.module.css'
 const animatedAny = animated as any

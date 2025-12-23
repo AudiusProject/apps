@@ -8,7 +8,7 @@ import {
   IconInfo
 } from '@audius/harmony'
 
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 export const CashBalanceSection = () => {
   const { balanceFormatted } = useFormattedUSDCBalance()

@@ -6,7 +6,7 @@ import cn from 'classnames'
 import Lottie from 'lottie-react'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import styles from './SearchBar.module.css'
 

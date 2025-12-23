@@ -18,7 +18,7 @@ import {
 
 import { MobileFilterButton } from 'components/mobile-filter-button/MobileFilterButton'
 import { SummaryTable, SummaryTableItem } from 'components/summary-table'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useIsMobile } from 'hooks/useIsMobile'
 import zIndex from 'utils/zIndex'
 

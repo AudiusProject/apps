@@ -6,7 +6,7 @@ import cn from 'classnames'
 import useMeasure from 'react-use-measure'
 
 import layoutStyles from 'components/layout/layout.module.css'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import styles from './ModalRadioItem.module.css'
 

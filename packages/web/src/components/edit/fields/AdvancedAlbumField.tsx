@@ -10,7 +10,7 @@ import {
   SelectedValue
 } from 'components/data-entry/ContextualMenu'
 import { HarmonyTextField } from 'components/form-fields/HarmonyTextField'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import { DatePickerField } from './DatePickerField'
 

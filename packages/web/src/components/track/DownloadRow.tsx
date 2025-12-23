@@ -9,7 +9,7 @@ import { getFilename, formatBytes } from '@audius/common/utils'
 import { Flex, IconButton, IconReceive, Text } from '@audius/harmony'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import styles from './DownloadRow.module.css'

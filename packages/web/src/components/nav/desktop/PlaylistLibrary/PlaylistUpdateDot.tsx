@@ -1,4 +1,4 @@
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { UpdateDot } from 'components/update-dot'
 
 const messages = { recentlyUpdatedTooltip: 'Recently Updated' }

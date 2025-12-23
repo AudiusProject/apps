@@ -16,10 +16,10 @@ import {
   TextInput,
   TokenAmountInput,
   TokenAmountInputChangeHandler,
-  IconButton
+  IconButton,
+  TooltipPlacement
 } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
-import { TooltipPlacement } from 'antd/lib/tooltip'
 
 import { TokenIcon } from './TokenIcon'
 import { TooltipInfoIcon } from './TooltipInfoIcon'

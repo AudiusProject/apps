@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 import { AUDIO, type AudioWei } from '@audius/fixed-decimal'
 
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 type TokenHoverTooltipProps = {
   children: ReactNode

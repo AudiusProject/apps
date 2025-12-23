@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import FavoriteButton from 'components/alt-button/FavoriteButton'
 import RepostButton from 'components/alt-button/RepostButton'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
 import { shouldShowDark } from 'utils/theme/theme'

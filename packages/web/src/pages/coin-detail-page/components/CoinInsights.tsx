@@ -15,7 +15,7 @@ import {
   Text
 } from '@audius/harmony'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { env } from 'services/env'
 
 import { componentWithErrorBoundary } from '../../../components/error-wrapper/componentWithErrorBoundary'

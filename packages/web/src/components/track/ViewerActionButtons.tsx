@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux'
 import FavoriteButton from 'components/alt-button/FavoriteButton'
 import RepostButton from 'components/alt-button/RepostButton'
 import ShareButton from 'components/alt-button/ShareButton'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import { GatedConditionsPill } from './GatedConditionsPill'
 import styles from './ViewerActionButtons.module.css'

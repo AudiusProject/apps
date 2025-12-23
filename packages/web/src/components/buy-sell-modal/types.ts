@@ -1,5 +1,5 @@
 import { CoinInfo, CoinPair } from '@audius/common/store'
-import { TooltipPlacement } from 'antd/lib/tooltip'
+import { TooltipPlacement } from '@audius/harmony'
 
 // Transaction data structure
 export type TransactionData = {

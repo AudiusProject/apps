@@ -8,7 +8,7 @@ import { IconInfo } from '@audius/harmony'
 
 import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
 import DisplayAudio from '../DisplayAudio'

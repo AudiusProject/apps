@@ -36,7 +36,7 @@ import { TransactionSuccessScreen } from 'components/buy-sell-modal/TransactionS
 import { TokenDropdown } from 'components/buy-sell-modal/components/TokenDropdown'
 import { IconAUDIO } from 'components/shared-icons/Icons'
 import { ToastContext } from 'components/toast/ToastContext'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { make, track } from 'services/analytics'
 import zIndex from 'utils/zIndex'

@@ -32,7 +32,7 @@ import {
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
 import styles from './Tiers.module.css'

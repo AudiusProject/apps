@@ -59,7 +59,7 @@ import Menu from 'components/menu/Menu'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import Skeleton from 'components/skeleton/Skeleton'
 import Toast from 'components/toast/Toast'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { ComponentPlacement } from 'components/types'
 import { UserGeneratedText } from 'components/user-generated-text'
 

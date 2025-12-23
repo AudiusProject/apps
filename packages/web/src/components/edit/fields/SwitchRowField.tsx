@@ -3,7 +3,7 @@ import { ChangeEvent, ComponentProps, PropsWithChildren } from 'react'
 import { Flex, IconInfo, Switch, Text } from '@audius/harmony'
 import { useField } from 'formik'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 type ToggleFieldProps = PropsWithChildren & {
   name: string

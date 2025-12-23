@@ -7,7 +7,7 @@ import { Hint, IconInfo, Radio, RadioGroup, Text } from '@audius/harmony'
 import cn from 'classnames'
 import { useField } from 'formik'
 
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import {
   AccessAndSaleFormValues,

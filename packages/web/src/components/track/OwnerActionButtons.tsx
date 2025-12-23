@@ -15,7 +15,7 @@ import {
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 import { push } from 'utils/navigation'
 
 const { makeTrackPublic } = trackPageActions

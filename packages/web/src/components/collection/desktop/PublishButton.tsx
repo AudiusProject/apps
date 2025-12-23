@@ -10,7 +10,7 @@ import { IconRocket, IconButton, IconButtonProps } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 const messages = {
   publish: 'Make Public',

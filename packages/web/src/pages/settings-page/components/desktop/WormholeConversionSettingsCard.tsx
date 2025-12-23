@@ -19,7 +19,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { useLocalStorage } from 'react-use'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import SettingsCard from './SettingsCard'
 

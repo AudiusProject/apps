@@ -15,7 +15,7 @@ import {
 } from '@audius/harmony'
 
 import ResponsiveModal from '../../../components/modal/ResponsiveModal'
-import Tooltip from '../../../components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 const messages = coinDetailsMessages.claimVestedCoinsModal
 

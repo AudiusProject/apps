@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 import { Flex, IconInfo, Text } from '@audius/harmony'
 
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 type TokenInfoRowProps = {
   label: string

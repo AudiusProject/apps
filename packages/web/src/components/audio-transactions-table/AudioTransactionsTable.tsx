@@ -14,7 +14,7 @@ import { Cell, Row } from 'react-table'
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { Table } from 'components/table'
 import { TableProps } from 'components/table/Table'
-import Tooltip from 'components/tooltip/Tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import styles from './AudioTransactionsTable.module.css'
 

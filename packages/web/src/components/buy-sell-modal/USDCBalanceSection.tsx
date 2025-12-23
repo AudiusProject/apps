@@ -1,5 +1,4 @@
-import { Divider, Flex, Text } from '@audius/harmony'
-import { TooltipPlacement } from 'antd/lib/tooltip'
+import { Divider, Flex, Text, TooltipPlacement } from '@audius/harmony'
 
 import { TooltipInfoIcon } from './TooltipInfoIcon'
 

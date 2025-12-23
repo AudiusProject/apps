@@ -15,7 +15,8 @@ import {
   IconCaretDown,
   IconCaretLeft,
   IconCaretRight,
-  IconCaretUp
+  IconCaretUp,
+  Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
 import { range } from 'lodash'
@@ -38,7 +39,6 @@ import {
 
 import { Draggable, Droppable } from 'components/dragndrop'
 import Skeleton from 'components/skeleton/Skeleton'
-import Tooltip from 'components/tooltip/Tooltip'
 
 import styles from './Table.module.css'
 import { TableLoadingSpinner } from './components/TableLoadingSpinner'

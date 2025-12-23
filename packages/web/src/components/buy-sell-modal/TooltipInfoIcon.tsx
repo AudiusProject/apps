@@ -1,9 +1,11 @@
 import { walletMessages } from '@audius/common/messages'
-import { IconButton, IconInfo } from '@audius/harmony'
+import {
+  IconButton,
+  IconInfo,
+  Tooltip,
+  TooltipPlacement
+} from '@audius/harmony'
 import { useTheme } from '@emotion/react'
-import { TooltipPlacement } from 'antd/lib/tooltip'
-
-import Tooltip from 'components/tooltip/Tooltip'
 import { zIndex } from 'utils/zIndex'
 
 const messages = {
@@ -43,7 +45,7 @@ export const TooltipInfoIcon = ({
       }}
       shouldWrapContent={false}
       shouldDismissOnClick={false}
-      css={{ zIndex: zIndex.CASH_WALLET_TOOLTIP }}
+      zIndex={zIndex.CASH_WALLET_TOOLTIP}
     >
       <IconButton
         icon={IconInfo}

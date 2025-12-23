@@ -3,7 +3,7 @@ import { USDC } from '@audius/fixed-decimal'
 import { Flex, IconInfo, Text } from '@audius/harmony'
 
 import { SummaryTable, SummaryTableItem } from 'components/summary-table'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 
 import styles from './styles.module.css'
 

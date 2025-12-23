@@ -33,7 +33,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useModalState } from 'common/hooks/useModalState'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import SearchBar from 'components/search-bar/SearchBar'
-import { Tooltip } from 'components/tooltip'
+import { Tooltip } from '@audius/harmony'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
 import styles from './AddToCollectionModal.module.css'
