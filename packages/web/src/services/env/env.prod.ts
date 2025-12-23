@@ -86,5 +86,5 @@ export const env: Env = {
   EMAIL_ENCRYPTION_UUID: 61969424,
   EMAIL_ENCRYPTION_PUBLIC_KEY:
     'BMpaZ9tHeeNXvmEL1bqxbcJfi0HOcp+Zf1HARJ+N5ZPUwqYuUU67td1GgE1NjX+hb2j39OwI9wjfBmnfagHKMqk=',
-  DISCORD_BOT_SERVER: 'http://discord.audius.co:8081'
+  DISCORD_BOT_SERVER: 'http://discord.audius.co'
 }
