@@ -4,7 +4,7 @@ import { searchActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Text, Flex, Avatar, Artwork, IconCloseAlt } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import UserBadges from 'components/user-badges/UserBadges'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
@@ -30,33 +30,49 @@ const ResultWrapper = ({
   id: ID
 }) => {
   const dispatch = useDispatch()
-  const navigate = useNavigate()
 
   return (
-    <Flex
-      alignItems='center'
-      justifyContent='space-between'
-      p='s'
-      css={{
-        minWidth: 0
-      }}
-      as={Link}
-      gap='s'
+    <Link
+      to={to}
       onClick={() => {
         dispatch(addRecentSearch({ searchItem: { kind, id } }))
-        navigate(to)
+      }}
+      style={{
+        textDecoration: 'none',
+        display: 'block',
+        width: '100%'
       }}
     >
-      {children}
-      {onRemove ? (
-        <IconCloseAlt
-          onClick={onRemove}
-          size='s'
-          color='subdued'
-          className={styles.removeIcon}
-        />
-      ) : null}
-    </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        p='s'
+        css={{
+          minWidth: 0,
+          width: '100%',
+          '&:hover': {
+            backgroundColor: 'var(--harmony-bg-surface-2)',
+            borderRadius: '4px'
+          }
+        }}
+        gap='s'
+      >
+        {children}
+        {onRemove ? (
+          <IconCloseAlt
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onRemove()
+            }}
+            size='s'
+            color='subdued'
+            className={styles.removeIcon}
+            css={{ flexShrink: 0 }}
+          />
+        ) : null}
+      </Flex>
+    </Link>
   )
 }
 
@@ -67,13 +83,13 @@ type ResultTextProps = {
 }
 
 const ResultText = ({ primary, secondary, badges }: ResultTextProps) => (
-  <Flex direction='column' flex={1} css={{ minWidth: 0, maxWidth: '100%' }}>
-    <Flex alignItems='center' gap='2xs' css={{ minWidth: 0 }}>
+  <Flex direction='column' flex={1} css={{ minWidth: 0, width: 0 }}>
+    <Flex alignItems='center' gap='2xs' css={{ minWidth: 0, width: '100%' }}>
       <Text
         variant='body'
         size='s'
         color='default'
-        css={{ minWidth: 0 }}
+        css={{ minWidth: 0, flex: 1 }}
         ellipses
         className={styles.primary}
       >
