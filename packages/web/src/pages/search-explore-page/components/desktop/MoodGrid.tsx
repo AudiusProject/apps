@@ -6,8 +6,8 @@ import { Mood } from '@audius/sdk'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useSearchCategory } from 'pages/search-page/hooks'
-import { MOODS } from 'utils/Moods'
 import { labelByCategoryView } from 'pages/search-page/types'
+import { MOODS } from 'utils/Moods'
 
 export const MoodGrid = () => {
   const [category, setCategory] = useSearchCategory()

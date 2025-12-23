@@ -15,9 +15,10 @@ import {
 import { Mood } from '@audius/sdk'
 import { useSearchParams } from 'react-router-dom'
 
+import { MOODS } from 'utils/Moods'
+
 import { BpmFilter } from './BpmFilter'
 import { useUpdateSearchParams } from './hooks'
-import { MOODS } from 'utils/Moods'
 import { Filter } from './types'
 
 const messages = {
