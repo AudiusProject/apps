@@ -50,24 +50,45 @@ export const App = () => {
               element={<Navigate to={SIGN_IN_PAGE} replace />}
             />
           ))}
-          <Route path={`${SIGN_IN_PAGE}/*`} element={<SignOnPage />} />
-          <Route path={`${SIGN_UP_PAGE}/*`} element={<SignOnPage />} />
+          <Route path={SIGN_IN_PAGE}>
+            <Route index element={<SignOnPage />} />
+            <Route path='*' element={<SignOnPage />} />
+          </Route>
+          <Route path={SIGN_UP_PAGE}>
+            <Route index element={<SignOnPage />} />
+            <Route path='*' element={<SignOnPage />} />
+          </Route>
           <Route path='/oauth/auth/pay' element={<OAuthPayPage />} />
           <Route path='/oauth/pay' element={<OAuthPayPage />} />
           <Route path='/oauth/auth' element={<OAuthLoginPage />} />
-          <Route
-            path={`${PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}/*`}
-            element={
-              <>
-                <PrivateKeyExporterPage />
-                <AppModal
-                  key='PrivateKeyExporter'
-                  name='PrivateKeyExporter'
-                  modal={PrivateKeyExporterModal}
-                />
-              </>
-            }
-          />
+          <Route path={PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}>
+            <Route
+              index
+              element={
+                <>
+                  <PrivateKeyExporterPage />
+                  <AppModal
+                    key='PrivateKeyExporter'
+                    name='PrivateKeyExporter'
+                    modal={PrivateKeyExporterModal}
+                  />
+                </>
+              }
+            />
+            <Route
+              path='*'
+              element={
+                <>
+                  <PrivateKeyExporterPage />
+                  <AppModal
+                    key='PrivateKeyExporter'
+                    name='PrivateKeyExporter'
+                    modal={PrivateKeyExporterModal}
+                  />
+                </>
+              }
+            />
+          </Route>
           <Route
             path='/*'
             element={

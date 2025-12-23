@@ -119,7 +119,12 @@ export const PublicSite = (props: PublicSiteProps) => {
                 : BrowserRouter
               const basename = env.BASENAME || undefined
               return (
-                <RouterComponent basename={basename}>
+                <RouterComponent
+                  basename={basename}
+                  future={{
+                    v7_relativeSplatPath: true
+                  }}
+                >
                   <NavScreen
                     closeNavScreen={closeNavScreen}
                     isOpen={isNavScreenOpen}

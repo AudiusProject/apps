@@ -77,7 +77,12 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         <MediaProvider>
           <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <RouterComponent basename={basename}>
+              <RouterComponent
+                basename={basename}
+                future={{
+                  v7_relativeSplatPath: true
+                }}
+              >
                 <NavigationSetup>
                   <RouterContextProvider>
                     <HeaderContextProvider>

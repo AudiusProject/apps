@@ -8,7 +8,11 @@ import App from './components/app'
 import { HASH_ID_ROUTE, ID_ROUTE } from './routes'
 
 const Index = () => (
-  <BrowserRouter>
+  <BrowserRouter
+    future={{
+      v7_relativeSplatPath: true
+    }}
+  >
     <Routes>
       <Route exact path={ID_ROUTE} element={<App path={ID_ROUTE} />} />
       <Route
