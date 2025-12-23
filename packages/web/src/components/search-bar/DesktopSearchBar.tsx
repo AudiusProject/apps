@@ -14,7 +14,6 @@ import { searchActions, searchSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   IconSearch,
-  IconCloseAlt,
   IconArrowRight,
   Flex,
   LoadingSpinner,
@@ -150,10 +149,6 @@ export const DesktopSearchBar = () => {
     setIsMenuOpen(true)
   }, [])
 
-  const handleClear = useCallback(() => {
-    setInputValue('')
-  }, [])
-
   const handleSelect = useCallback(() => {
     setInputValue('')
     setIsMenuOpen(false)
@@ -180,19 +175,6 @@ export const DesktopSearchBar = () => {
       setSearchParams
     ]
   )
-
-  const renderEndIcon = () => {
-    if (inputValue && !isLoading) {
-      return IconCloseAlt
-    }
-    return undefined
-  }
-
-  const handleEndIconClick = useCallback(() => {
-    if (inputValue && !isLoading) {
-      handleClear()
-    }
-  }, [inputValue, isLoading, handleClear])
 
   const autocompleteOptions = useMemo(() => {
     if (!data) return []
@@ -315,7 +297,9 @@ export const DesktopSearchBar = () => {
     return baseOptions
   }, [handleClickClear, inputValue, searchHistory])
 
-  const showResults = !isSearchPage && !!(data || searchHistory || isLoading)
+  const options = data ? autocompleteOptions : recentSearchOptions
+  const hasOptions = options.length > 0
+  const showResults = !isSearchPage && hasOptions
   const shouldShowMenu = isMenuOpen && showResults
   // Calculate hasNoResults for the dropdown class name
   const hasNoResults =
@@ -326,10 +310,10 @@ export const DesktopSearchBar = () => {
 
   // Update menu visibility based on results
   useEffect(() => {
-    if (showResults && inputValue) {
+    if (hasOptions && inputValue) {
       setIsMenuOpen(true)
     }
-  }, [showResults, inputValue])
+  }, [hasOptions, inputValue])
 
   const handleFocus = useCallback(() => {
     setIsMenuOpen(true)
@@ -358,8 +342,6 @@ export const DesktopSearchBar = () => {
     }
   })
 
-  const options = data ? autocompleteOptions : recentSearchOptions
-
   const renderMenuContent = () => {
     return (
       <MenuContent
@@ -368,7 +350,9 @@ export const DesktopSearchBar = () => {
         width='280px'
         MenuListProps={{
           css: {
-            padding: '16px 8px'
+            padding: '16px 8px',
+            overflowY: 'auto',
+            width: '100%'
           }
         }}
         aria-label='Search results'
@@ -446,10 +430,6 @@ export const DesktopSearchBar = () => {
           autoComplete='off'
           type='search'
           startIcon={IconSearch}
-          endIcon={renderEndIcon()}
-          IconProps={{
-            onClick: handleEndIconClick
-          }}
           css={{
             width: '100%',
             '& input': {
