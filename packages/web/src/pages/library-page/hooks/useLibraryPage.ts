@@ -573,6 +573,10 @@ export const useLibraryPage = () => {
   const playingUid = getPlayingUid()
 
   return {
+    // Messages
+    title: messages.title,
+    description: messages.description,
+
     // State
     currentTab: state.currentTab,
     filterText: state.filterText,
@@ -628,7 +632,7 @@ export const useLibraryPage = () => {
 
     // Additional props
     hasReachedEnd: hasReachedEndValue,
-    playlistUpdates,
+    playlistUpdates: playlistUpdates as number[],
     updatePlaylistLastViewedAt,
     account
   }

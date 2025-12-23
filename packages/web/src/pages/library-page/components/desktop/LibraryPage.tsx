@@ -264,8 +264,8 @@ const LibraryPage = () => {
 
   return (
     <Page
-      title={messages.title}
-      description={messages.description}
+      title={title}
+      description={description}
       contentClassName={styles.libraryPageWrapper}
       header={header}
     >
