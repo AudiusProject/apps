@@ -3,6 +3,7 @@ import { useEffect, type ReactNode } from 'react'
 import { ThemeProvider as EmotionThemeProvider } from '@emotion/react'
 
 import { SVGDefs } from '../../icons/SVGDefs'
+import { GlobalStyles } from '../reset/GlobalStyles'
 
 import { themes } from './theme'
 import type { Theme } from './types'
@@ -23,6 +24,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
 
   return (
     <EmotionThemeProvider theme={themes[theme]}>
+      <GlobalStyles />
       <SVGDefs />
       {children}
     </EmotionThemeProvider>

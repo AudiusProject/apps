@@ -143,10 +143,6 @@ table {
   outline: none !important;
 }
 
-a :not(::hover) {
-  text-decoration: none !important;
-}
-
 /* End Reset.css */
 
 body {
