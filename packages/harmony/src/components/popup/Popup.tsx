@@ -306,6 +306,7 @@ export const PopupInternal = forwardRef<
     wrapperRef,
     anchorRef,
     anchorOrigin,
+    disableAutoFlip,
     transformOrigin,
     setComputedTransformOrigin,
     originalTopPosition,
