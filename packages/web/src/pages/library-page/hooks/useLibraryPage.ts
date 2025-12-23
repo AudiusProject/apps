@@ -12,10 +12,7 @@ import {
   PlaybackSource,
   ID,
   UID,
-  LineupTrack,
-  Track,
-  Lineup,
-  AccountCollection
+  LineupTrack
 } from '@audius/common/models'
 import {
   LibraryPageTabs as ProfileTabs,
@@ -31,8 +28,7 @@ import {
   LibraryCategoryType,
   LibraryPageTrack,
   TrackRecord,
-  useLineupTable,
-  AccountState
+  useLineupTable
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { full } from '@audius/sdk'
@@ -40,18 +36,13 @@ import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { TrackEvent, make } from 'common/store/analytics/actions'
-import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
 
 const { profilePage } = route
 const { makeGetCurrent } = queueSelectors
 const { getPlaying, getBuffering } = playerSelectors
-const {
-  getLibraryTracksLineup,
-  hasReachedEnd,
-  getTracksCategory,
-  getCollectionsCategory
-} = libraryPageSelectors
+const { getLibraryTracksLineup, hasReachedEnd, getTracksCategory } =
+  libraryPageSelectors
 const { updatedPlaylistViewed } = playlistUpdatesActions
 
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
@@ -98,7 +89,6 @@ export const useLibraryPage = () => {
   const playlistUpdates = useSelector(selectAllPlaylistUpdateIds)
   const hasReachedEndValue = useSelector(hasReachedEnd)
   const tracksCategory = useSelector(getTracksCategory)
-  const collectionsCategory = useSelector(getCollectionsCategory)
 
   const { data: account } = useCurrentAccount({
     select: (account) => {
@@ -290,6 +280,7 @@ export const useLibraryPage = () => {
       state.sortMethod,
       state.sortDirection
     )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run on mount
 
   useEffect(() => {
