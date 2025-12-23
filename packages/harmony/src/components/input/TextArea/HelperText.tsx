@@ -19,4 +19,3 @@ export const HelperText = (props: HelperTextProps) => {
     </div>
   )
 }
-

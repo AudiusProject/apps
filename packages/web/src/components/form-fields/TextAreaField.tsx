@@ -1,6 +1,5 @@
-import { useField } from 'formik'
-
 import { TextArea, TextAreaProps } from '@audius/harmony'
+import { useField } from 'formik'
 
 type TextAreaFieldProps = TextAreaProps & {
   name: string

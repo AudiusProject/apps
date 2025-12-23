@@ -19,7 +19,8 @@ import {
   IconCaretRight,
   IconComponent,
   Button,
-  HiddenInput
+  HiddenInput,
+  HelperText
 } from '@audius/harmony'
 import {
   Form,
@@ -32,7 +33,6 @@ import {
 } from 'formik'
 import { useToggle } from 'react-use'
 
-import { HelperText } from '@audius/harmony'
 import { Tile } from 'components/tile'
 
 import styles from './ContextualMenu.module.css'

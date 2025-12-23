@@ -3,9 +3,9 @@ import { useState, useCallback } from 'react'
 import { useGeneratePlaylistArtwork } from '@audius/common/hooks'
 import { CollectionValues } from '@audius/common/schemas'
 import { getErrorMessage } from '@audius/common/utils'
+import { HelperText } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 
-import { HelperText } from '@audius/harmony'
 import { TrackEditFormValues } from 'components/edit-track/types'
 import UploadArtwork, {
   UploadArtworkProps

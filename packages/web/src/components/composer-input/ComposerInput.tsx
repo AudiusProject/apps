@@ -22,13 +22,13 @@ import {
   SendIcon,
   Text,
   TextProps,
-  useTheme
+  useTheme,
+  TextArea
 } from '@audius/harmony'
 import { EntityType, HashId } from '@audius/sdk'
 import { isEqual, pick } from 'lodash'
 import { usePrevious } from 'react-use'
 
-import { TextArea } from '@audius/harmony'
 import { audiusSdk } from 'services/audius-sdk'
 import { env } from 'services/env'
 

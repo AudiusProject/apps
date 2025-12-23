@@ -7,11 +7,10 @@ import {
   WithdrawMethod
 } from '@audius/common/store'
 import { decimalIntegerToHumanReadable } from '@audius/common/utils'
-import { Button, Text, Flex, Checkbox } from '@audius/harmony'
+import { Button, Text, Flex, Checkbox, HelperText } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 
 import { CashBalanceSection } from 'components/add-cash/CashBalanceSection'
-import { HelperText } from '@audius/harmony'
 import { Divider } from 'components/divider'
 
 import { ADDRESS, AMOUNT, CONFIRM, METHOD } from '../types'
