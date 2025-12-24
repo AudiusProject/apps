@@ -9,7 +9,7 @@ import { MetaTags } from 'components/meta-tags/MetaTags'
 import { getIndexHtml } from 'ssr/getIndexHtml'
 import { getWalletPageSEOFields } from 'utils/seo'
 
-export function render() {
+export default function render() {
   const seoMetadata = getWalletPageSEOFields()
 
   const pageHtml = renderToString(

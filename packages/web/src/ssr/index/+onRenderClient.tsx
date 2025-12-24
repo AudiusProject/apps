@@ -17,7 +17,7 @@ window.global ||= window
 window.Buffer = Buffer
 window.process = { ...processBrowser, env: process.env }
 
-export function render() {
+export default function render() {
   const container = document.getElementById('root')
   if (container) {
     const root = createRoot(container)

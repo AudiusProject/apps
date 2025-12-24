@@ -30,6 +30,27 @@ export type MetaTagsProps = {
    * Hash ID for OG URL generation (id field from entities)
    */
   hashId?: string
+  /**
+   * Whether to show embed player (for Twitter/Discord)
+   */
+  embed?: boolean
+  /**
+   * URL to the embed player (e.g. /embed/track/xyz?flavor=card&twitter=true)
+   */
+  embedUrl?: string
+  /**
+   * Deep link URL for mobile apps (e.g. audius://track/xyz)
+   */
+  appUrl?: string
+  /**
+   * Web URL for the current page (e.g. https://audius.co/track/xyz)
+   */
+  webUrl?: string
+  /**
+   * Whether the image shows as a small thumbnail version.
+   * Controls twitter:card type (summary vs summary_large_image)
+   */
+  thumbnail?: boolean
 }
 
 /**
@@ -67,7 +88,12 @@ export const MetaTags = (props: MetaTagsProps) => {
     structuredData,
     noIndex = false,
     entityType,
-    hashId
+    hashId,
+    embed = false,
+    embedUrl,
+    appUrl,
+    webUrl,
+    thumbnail = true
   } = props
 
   const formattedTitle = title
@@ -76,6 +102,13 @@ export const MetaTags = (props: MetaTagsProps) => {
 
   // Generate OG URL if entity type and hash ID are provided
   const ogUrl = generateOgUrl(entityType, hashId)
+
+  // Determine twitter card type based on thumbnail and embed settings
+  const getTwitterCardType = () => {
+    if (thumbnail) return 'summary'
+    if (embed && embedUrl) return 'player'
+    return 'summary_large_image'
+  }
 
   return (
     <>
@@ -124,6 +157,14 @@ export const MetaTags = (props: MetaTagsProps) => {
         </Helmet>
       ) : null}
 
+      {/* Image dimensions for non-thumbnail images */}
+      {image && !thumbnail ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta property='og:image:width' content='1000' />
+          <meta property='og:image:height' content='1000' />
+        </Helmet>
+      ) : null}
+
       {imageAlt ? (
         <Helmet encodeSpecialCharacters={false}>
           <meta name='twitter:image:alt' content={imageAlt} />
@@ -131,10 +172,52 @@ export const MetaTags = (props: MetaTagsProps) => {
         </Helmet>
       ) : null}
 
+      {/* OG Type and Twitter Card */}
       <Helmet encodeSpecialCharacters={false}>
         <meta property='og:type' content='website' />
-        <meta name='twitter:card' content='summary' />
+        <meta name='twitter:card' content={getTwitterCardType()} />
       </Helmet>
+
+      {/* Twitter Player (for embeds) */}
+      {embed && embedUrl ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta name='twitter:player' content={embedUrl} />
+          <meta name='twitter:player:width' content='480' />
+          <meta name='twitter:player:height' content='480' />
+        </Helmet>
+      ) : null}
+
+      {/* Twitter App Links */}
+      {appUrl ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta name='twitter:app:name:iphone' content='Audius Music' />
+          <meta name='twitter:app:id:iphone' content='1491270519' />
+          <meta name='twitter:app:url:iphone' content={appUrl} />
+          <meta name='twitter:app:name:ipad' content='Audius Music' />
+          <meta name='twitter:app:id:ipad' content='1491270519' />
+          <meta name='twitter:app:url:ipad' content={appUrl} />
+          <meta name='twitter:app:name:googleplay' content='Audius Music' />
+          <meta name='twitter:app:id:googleplay' content='co.audius.app' />
+          <meta name='twitter:app:url:googleplay' content={appUrl} />
+        </Helmet>
+      ) : null}
+
+      {/* Farcaster Frame */}
+      {webUrl ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta property='fc:frame' content='vNext' />
+          <meta property='fc:frame:image:aspect_ratio' content='1:1' />
+          <meta property='fc:frame:button:1' content='Listen on Audius!' />
+          <meta property='fc:frame:button:1:action' content='link' />
+          <meta property='fc:frame:button:1:target' content={webUrl} />
+        </Helmet>
+      ) : null}
+
+      {webUrl && image ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta property='fc:frame:image' content={image} />
+        </Helmet>
+      ) : null}
 
       {structuredData ? (
         <Helmet encodeSpecialCharacters={false}>

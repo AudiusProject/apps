@@ -11,26 +11,45 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerTrackPage } from 'pages/track-page/DesktopServerTrackPage'
 import { MobileServerTrackPage } from 'pages/track-page/MobileServerTrackPage'
+import {
+  canEmbed,
+  DEFAULT_IMAGE_URL,
+  getAppUrl,
+  getEmbedUrl,
+  getWebUrl
+} from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
 import { getTrackPageSEOFields } from 'utils/seo'
 
 import { getIndexHtml } from '../getIndexHtml'
 
+type CommentData = {
+  comment: { entity_id: string; user_id: string }
+  track: { id: string; title: string; user: { name: string } }
+  commenter: { name: string }
+}
+
 type TrackPageContext = PageContextServer & {
   pageProps: {
-    track: Track & { id: string }
+    track: Track & { id: string; is_stream_gated?: boolean }
     user: User
+    commentData?: CommentData | null
   }
 }
 
 export default function render(pageContext: TrackPageContext) {
   const { pageProps, headers, urlPathname } = pageContext
-  const { track, user } = pageProps
-  const { id, title, permalink, release_date, created_at } = track
+  const { track, user, commentData } = pageProps
+  const { id, title, permalink, release_date, created_at, is_stream_gated } =
+    track
   const { name: userName } = user
 
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
+
+  // Check if this request can show an embed player (Twitter/Discord bots)
+  // Don't show embed for comment pages
+  const shouldEmbed = canEmbed(userAgent) && !is_stream_gated && !commentData
 
   // Create a fresh cache instance for this SSR request
   // This ensures the theme context is properly connected
@@ -38,19 +57,44 @@ export default function render(pageContext: TrackPageContext) {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  const seoMetadata = getTrackPageSEOFields({
-    title,
-    permalink,
-    userName,
-    releaseDate: release_date || created_at,
-    hashId: id
-  })
+  // Build meta tags - use comment-specific if we have comment data
+  let seoMetadata
+  if (commentData) {
+    const trackName = commentData.track.title
+    const artistName = commentData.track.user.name
+    const commenterName = commentData.commenter.name
+    seoMetadata = {
+      title: `${commenterName}'s comment on ${trackName} | Audius Music`,
+      description: `Join the conversation around ${trackName} by ${artistName} — streaming on Audius`,
+      image: DEFAULT_IMAGE_URL
+    }
+  } else {
+    seoMetadata = getTrackPageSEOFields({
+      title,
+      permalink,
+      userName,
+      releaseDate: release_date || created_at,
+      hashId: id
+    })
+  }
+
+  // Generate embed and app URLs
+  const embedUrl = getEmbedUrl('track', id)
+  const appUrl = getAppUrl(urlPathname)
+  const webUrl = getWebUrl(urlPathname)
 
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
       <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
         <>
-          <MetaTags {...seoMetadata} />
+          <MetaTags
+            {...seoMetadata}
+            embed={shouldEmbed}
+            embedUrl={embedUrl}
+            appUrl={appUrl}
+            webUrl={webUrl}
+            thumbnail={false}
+          />
           {isMobile ? (
             <MobileServerTrackPage track={track} user={user} />
           ) : (
