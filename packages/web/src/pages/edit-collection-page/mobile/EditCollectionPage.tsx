@@ -20,7 +20,7 @@ import { Nullable } from '@audius/common/utils'
 import { IconCamera } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { connect, useDispatch } from 'react-redux'
-import { useParams, useMatch, useNavigate } from 'react-router-dom'
+import { useParams, useMatch, useNavigate } from 'react-router'
 import { Dispatch } from 'redux'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'

@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from 'react'
 
-import { useComment, useHighlightedComment, useUser } from '@audius/common/api'
+import { useComment, useUser } from '@audius/common/api'
 import {
   useCurrentCommentSection,
   useDeleteComment
@@ -30,6 +30,7 @@ import { CommentForm } from './CommentForm'
 import { CommentText } from './CommentText'
 import { Timestamp } from './Timestamp'
 import { TimestampLink } from './TimestampLink'
+import { useHighlightedComment } from './useHighlightedComment'
 
 type CommentBlockProps = {
   commentId: ID

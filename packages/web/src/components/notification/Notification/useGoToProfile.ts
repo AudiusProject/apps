@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { User } from '@audius/common/models'
 import { Nullable, route } from '@audius/common/utils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 const { profilePage } = route
 

@@ -6,7 +6,7 @@ import {
 } from '@audius/common/adapters'
 import { route } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 import { useAsync } from 'react-use'

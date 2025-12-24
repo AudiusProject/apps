@@ -19,7 +19,7 @@ import {
   useMedia
 } from '@audius/harmony'
 import { capitalize } from 'lodash'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'

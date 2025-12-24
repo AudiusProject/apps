@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import ContentTable from 'components/ContentTable'
 import Page from 'components/Page'

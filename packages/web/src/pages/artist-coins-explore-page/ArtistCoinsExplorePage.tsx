@@ -23,7 +23,7 @@ import {
   PlainButton,
   IconSearch
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/publicSite/imageCoinsBackgroundImage2x.webp'
 import { ExternalLink } from 'components/link'

@@ -5,7 +5,7 @@ import {
   IconUser,
   IconUserFollow
 } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { SteppedProgress } from 'components/stepped-progress/SteppedProgress'
 

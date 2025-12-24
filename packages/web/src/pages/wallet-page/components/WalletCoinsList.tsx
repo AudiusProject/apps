@@ -34,7 +34,7 @@ import {
   IconLogoCircleUSDCPng,
   Tooltip
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { roundedHexClipPath } from '~harmony/icons/SVGDefs'
 
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'

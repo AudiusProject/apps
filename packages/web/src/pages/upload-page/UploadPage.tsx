@@ -11,7 +11,7 @@ import {
 } from '@audius/common/store'
 import { IconCloudUpload } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'

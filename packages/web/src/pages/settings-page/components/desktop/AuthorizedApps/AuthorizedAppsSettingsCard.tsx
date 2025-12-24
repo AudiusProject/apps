@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { Button, IconShieldCheck } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { doesMatchRoute } from 'utils/route'
 

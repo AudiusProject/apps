@@ -21,7 +21,7 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import { pick } from 'lodash'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link'

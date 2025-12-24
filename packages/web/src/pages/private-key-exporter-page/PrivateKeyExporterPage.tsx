@@ -22,7 +22,7 @@ import {
   Switch
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { make, useRecord } from 'common/store/analytics/actions'

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { MobileOS } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { Dispatch } from 'redux'
 
 import { getMobileOS } from 'utils/clientUtil'

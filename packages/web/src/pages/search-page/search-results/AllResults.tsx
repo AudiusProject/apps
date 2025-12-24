@@ -14,7 +14,7 @@ import {
   Skeleton
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
 import { CollectionCard, CollectionCardSkeleton } from 'components/collection'

@@ -23,7 +23,7 @@ import {
 } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useMatch } from 'react-router-dom'
+import { Link, useMatch } from 'react-router'
 
 import { Avatar } from 'components/avatar'
 import { UserLink } from 'components/link'

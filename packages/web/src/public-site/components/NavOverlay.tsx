@@ -16,7 +16,7 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import ReactDOM from 'react-dom'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 
 import HeroBackground from 'assets/img/publicSite/HeroBG@2x.webp'
 

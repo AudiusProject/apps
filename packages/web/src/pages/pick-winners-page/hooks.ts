@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useSearchParams as useParams } from 'react-router-dom'
+import { useSearchParams as useParams } from 'react-router'
 
 export type PickWinnersSortMethod = 'likes' | 'plays' | 'recent'
 

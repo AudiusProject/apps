@@ -1,7 +1,7 @@
 import { route } from '@audius/common/utils'
 import { Button, IconArrowRight } from '@audius/harmony'
 import cn from 'classnames'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import styles from './DeactivatedProfileTombstone.module.css'
 

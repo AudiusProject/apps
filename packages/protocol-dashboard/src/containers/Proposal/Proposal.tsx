@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import Markdown from 'react-markdown'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import DiscoveryTable from 'components/DiscoveryTable'
 import Page from 'components/Page'

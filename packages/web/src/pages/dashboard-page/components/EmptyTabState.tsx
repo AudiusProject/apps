@@ -4,7 +4,7 @@ import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Button, Flex, IconAlbum, IconNote, Text } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { track, make } from 'services/analytics'
 import { push as pushRoute } from 'utils/navigation'

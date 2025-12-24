@@ -15,7 +15,7 @@ import {
   IconX,
   IconLink
 } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import ActionDrawer from 'components/action-drawer/ActionDrawer'
 import { ToastContext } from 'components/toast/ToastContext'

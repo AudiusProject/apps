@@ -60,7 +60,7 @@
     "react-helmet": "6.1.0",
     "react-merge-refs": "2.1.1",
     "react-perfect-scrollbar": "1.5.8",
-    "react-router-dom": "6.18.0",
+    "react-router": "^7.11.0",
     "react-transition-group": "4.4.5",
     "react-use": "17.4.0",
     "react-use-measure": "2.1.1",

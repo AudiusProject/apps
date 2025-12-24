@@ -3,7 +3,7 @@ import { MouseEventHandler, useCallback } from 'react'
 import { SquareSizes, User } from '@audius/common/models'
 import { useNotificationModal } from '@audius/common/store'
 import cn from 'classnames'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import DynamicImage from 'components/dynamic-image/DynamicImage'

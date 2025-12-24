@@ -11,7 +11,7 @@ import { playerSelectors } from '@audius/common/src/store'
 import { Avatar, Flex } from '@audius/harmony'
 import { CommentMention } from '@audius/sdk'
 import { useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { usePrevious } from 'react-use'
 
 import { ComposerInput } from 'components/composer-input/ComposerInput'

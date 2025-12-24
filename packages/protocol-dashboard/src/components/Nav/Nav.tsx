@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { Button, ButtonType } from '@audius/stems'
 import clsx from 'clsx'
-import { matchPath, useNavigate, useLocation } from 'react-router-dom'
+import { matchPath, useNavigate, useLocation } from 'react-router'
 
 import { navRoutes } from 'utils/routes'
 

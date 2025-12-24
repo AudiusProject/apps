@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useCurrentAccount, useDeleteCollection } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { SetRequired } from 'type-fest'
 
 import { DeleteConfirmationModal } from 'components/delete-confirmation'

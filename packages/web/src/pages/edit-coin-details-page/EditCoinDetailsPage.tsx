@@ -38,7 +38,7 @@ import {
   Text
 } from '@audius/harmony'
 import { Form, Formik, useFormikContext } from 'formik'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { AnchoredSubmitRowEdit } from 'components/edit/AnchoredSubmitRowEdit'

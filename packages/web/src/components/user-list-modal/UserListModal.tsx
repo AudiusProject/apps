@@ -20,7 +20,7 @@ import {
 } from '@audius/harmony'
 import { ChatBlastAudience } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
-import { useMatch, useLocation } from 'react-router-dom'
+import { useMatch, useLocation } from 'react-router'
 
 import { CoinLeaderboardUserList } from 'components/user-list/lists/CoinLeaderboardUserList'
 import { FavoritesUserList } from 'components/user-list/lists/FavoritesUserList'

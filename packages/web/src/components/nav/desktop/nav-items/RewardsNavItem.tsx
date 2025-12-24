@@ -4,7 +4,7 @@ import { useHasAccount } from '@audius/common/api'
 import { useChallengeCooldownSchedule } from '@audius/common/hooks'
 import { route } from '@audius/common/utils'
 import { IconGift, NotificationCount } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { matchesRoute } from 'utils/route'
 

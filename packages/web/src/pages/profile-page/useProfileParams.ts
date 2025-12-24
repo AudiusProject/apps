@@ -1,5 +1,5 @@
 import { useUserByParams } from '@audius/common/api'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { getPathname } from 'utils/route'
 import { parseUserRoute } from 'utils/route/userRouteParser'

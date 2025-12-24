@@ -19,7 +19,7 @@ import { Paper } from '@audius/harmony/src/components/layout/Paper'
 import { Tag } from '@audius/harmony/src/components/tag'
 import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { ServerUserGeneratedText } from 'components/user-generated-text/ServerUserGeneratedText'
 import { profilePage, searchResultsPage } from 'utils/route'

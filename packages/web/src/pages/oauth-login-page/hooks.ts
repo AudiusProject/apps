@@ -10,7 +10,7 @@ import {
 import { Id } from '@audius/sdk'
 import * as queryString from 'query-string'
 import { useDispatch } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { audiusSdk } from 'services/audius-sdk'

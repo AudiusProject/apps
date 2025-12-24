@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { route } from '@audius/common/utils'
 import { IconCaretRight, IconCloudDownload } from '@audius/harmony'
 import cn from 'classnames'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Parallax, useParallaxController } from 'react-scroll-parallax'
 
 import HeroBackgroundMobile from 'assets/img/publicSite/HeroBG.webp'

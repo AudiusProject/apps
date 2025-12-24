@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useCurrentAccount } from '@audius/common/api'
 import { useCurrentCommentSection } from '@audius/common/context'
 import { Name } from '@audius/common/models'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useToggle } from 'react-use'
 
 import { DownloadMobileAppDrawer } from 'components/download-mobile-app-drawer/DownloadMobileAppDrawer'

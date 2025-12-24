@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { Name } from '@audius/common/models'
 import { NavItem, NavItemProps } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
 import {

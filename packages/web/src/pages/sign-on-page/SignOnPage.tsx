@@ -21,7 +21,7 @@ import {
   useNavigate,
   matchPath,
   useSearchParams
-} from 'react-router-dom'
+} from 'react-router'
 import { useEffectOnce, useLocalStorage, useMeasure } from 'react-use'
 
 import djBackground from 'assets/img/2-DJ-4-3.jpg'

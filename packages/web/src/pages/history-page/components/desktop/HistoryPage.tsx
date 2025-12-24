@@ -10,7 +10,7 @@ import {
 } from '@audius/harmony'
 import { full } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
 import FilterInput from 'components/filter-input/FilterInput'

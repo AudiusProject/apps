@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { IconAudiusLogoHorizontal } from '@audius/harmony'
 import { Button, ButtonType, IconRemove } from '@audius/stems'
 import clsx from 'clsx'
-import { matchPath, useNavigate, useLocation } from 'react-router-dom'
+import { matchPath, useNavigate, useLocation } from 'react-router'
 
 import useOpenLink from 'hooks/useOpenLink'
 import { AUDIUS_DAPP_URL, navRoutes } from 'utils/routes'

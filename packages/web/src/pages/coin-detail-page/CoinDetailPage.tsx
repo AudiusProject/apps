@@ -7,7 +7,7 @@ import { coinDetailsMessages } from '@audius/common/messages'
 import { coinPage } from '@audius/common/src/utils/route'
 import { formatTickerForUrl, route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'

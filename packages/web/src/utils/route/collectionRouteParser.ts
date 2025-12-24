@@ -1,7 +1,7 @@
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { OptionalHashId } from '@audius/sdk'
-import { matchPath } from 'react-router-dom'
+import { matchPath } from 'react-router'
 
 const {
   PLAYLIST_ID_PAGE,

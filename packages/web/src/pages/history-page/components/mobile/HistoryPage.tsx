@@ -3,7 +3,7 @@ import { useEffect, useContext, useMemo } from 'react'
 import { useTrackHistory, useTracks, useUsers } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { Button } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { useTanQueryLineupProps } from 'components/lineup/hooks'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'

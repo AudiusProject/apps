@@ -7,7 +7,7 @@ import { useTheme } from '@audius/harmony'
 import cn from 'classnames'
 import Lottie from 'lottie-react'
 import PropTypes from 'prop-types'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'

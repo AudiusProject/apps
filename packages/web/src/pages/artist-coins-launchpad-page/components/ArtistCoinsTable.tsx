@@ -26,7 +26,7 @@ import {
 } from '@audius/harmony'
 import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
 import moment from 'moment'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Cell } from 'react-table'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'

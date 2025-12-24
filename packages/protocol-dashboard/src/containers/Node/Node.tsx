@@ -1,6 +1,6 @@
 import { IconEmbed } from '@audius/harmony'
 import clsx from 'clsx'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import IndividualNodeUptimeChart from 'components/IndividualNodeUptimeChart'
 import IndividualServiceApiCallsChart from 'components/IndividualServiceApiCallsChart'

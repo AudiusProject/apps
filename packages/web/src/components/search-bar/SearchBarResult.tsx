@@ -4,7 +4,7 @@ import { searchActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Text, Flex, Avatar, Artwork, IconCloseAlt } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import UserBadges from 'components/user-badges/UserBadges'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'

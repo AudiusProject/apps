@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react'
 
 import { route } from '@audius/common/utils'
-import { NavigateFunction } from 'react-router-dom'
+import { NavigateFunction } from 'react-router'
 
 import { pushWindowRoute } from 'utils/route'
 

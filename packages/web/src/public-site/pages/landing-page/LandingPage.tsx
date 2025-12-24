@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { coinPage } from '@audius/common/src/utils/route'
 import { Flex, IconButton, IconClose, Paper, Text } from '@audius/harmony'
 import cn from 'classnames'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
 import { ParallaxProvider } from 'react-scroll-parallax'
 
 import HeroBackgroundTakeover from 'assets/img/publicSite/HeroBGTakeover.webp'

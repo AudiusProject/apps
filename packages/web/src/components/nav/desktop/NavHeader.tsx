@@ -12,7 +12,7 @@ import {
   IconDashboard,
   IconSettings
 } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 

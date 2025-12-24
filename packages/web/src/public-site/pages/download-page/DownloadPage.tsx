@@ -5,7 +5,7 @@ import { route } from '@audius/common/utils'
 import { IconCloudDownload } from '@audius/harmony'
 import cn from 'classnames'
 import queryString from 'query-string'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { ParallaxProvider } from 'react-scroll-parallax'
 
 import IconDownloadDesktop from 'assets/img/publicSite/downloadDesktop.svg'

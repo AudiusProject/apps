@@ -9,7 +9,7 @@ import {
 import { Entity, useNotificationModal } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { OptionalId } from '@audius/sdk'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 

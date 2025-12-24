@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useRef } from 'react'
 
 import { ThemeProvider } from '@audius/harmony'
 import cn from 'classnames'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router'
 import { CSSTransition } from 'react-transition-group'
 
 import '@audius/harmony/dist/harmony.css'

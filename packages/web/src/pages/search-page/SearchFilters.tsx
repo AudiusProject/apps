@@ -13,7 +13,7 @@ import {
   FilterButton
 } from '@audius/harmony'
 import { Mood } from '@audius/sdk'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 
 import { MOODS } from 'utils/Moods'
 

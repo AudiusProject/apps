@@ -27,7 +27,7 @@ import {
   TextLink
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router'
 
 import { SignOnLink } from 'components/SignOnLink'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'

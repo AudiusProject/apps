@@ -18,7 +18,7 @@ import {
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router'
 import { tracksActions } from '~/store/pages/track/lineup/actions'
 
 import { push as pushRoute } from 'utils/navigation'

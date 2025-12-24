@@ -1,10 +1,6 @@
 import { useState } from 'react'
 
-import {
-  useComment,
-  useCommentReplies,
-  useHighlightedComment
-} from '@audius/common/api'
+import { useComment, useCommentReplies } from '@audius/common/api'
 import { useCurrentCommentSection } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { Comment, ID, Name, ReplyComment } from '@audius/common/models'
@@ -19,6 +15,7 @@ import {
 import { track, make } from 'services/analytics'
 
 import { CommentBlock } from './CommentBlock'
+import { useHighlightedComment } from './useHighlightedComment'
 
 export const CommentThread = ({ commentId }: { commentId: ID }) => {
   const { data: rootCommentData } = useComment(commentId)

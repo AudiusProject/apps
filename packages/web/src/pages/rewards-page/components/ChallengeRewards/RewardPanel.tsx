@@ -24,7 +24,7 @@ import {
   useTheme
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useEffectOnce } from 'react-use'
 
 import { make, track } from 'services/analytics'

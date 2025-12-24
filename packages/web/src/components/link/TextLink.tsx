@@ -6,7 +6,7 @@ import {
   TextLink as HarmonyTextLink,
   TextLinkProps as HarmonyTextLinkProps
 } from '@audius/harmony'
-import { Link, LinkProps } from 'react-router-dom'
+import { Link, LinkProps } from 'react-router'
 
 import { RestrictedLink, RestrictedLinkProps } from 'components/RestrictedLink'
 import { SignOnLink, SignOnLinkProps } from 'components/SignOnLink'

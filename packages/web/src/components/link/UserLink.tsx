@@ -3,7 +3,7 @@ import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { IconSize, Text, useTheme, Flex } from '@audius/harmony'
 import { CSSObject } from '@emotion/react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import UserBadges from 'components/user-badges/UserBadges'

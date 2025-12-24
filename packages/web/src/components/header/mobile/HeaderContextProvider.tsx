@@ -7,7 +7,7 @@ import {
   useContext
 } from 'react'
 
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { useInstanceVar } from 'hooks/useInstanceVar'
 import { useIsMobile } from 'hooks/useIsMobile'

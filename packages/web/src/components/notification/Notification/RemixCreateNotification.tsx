@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { useTrack, useUser } from '@audius/common/api'
 import { Name, TrackMetadata } from '@audius/common/models'
 import { RemixCreateNotification as RemixCreateNotificationType } from '@audius/common/store'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
 import { XShareButton } from 'components/x-share-button/XShareButton'

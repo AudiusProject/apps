@@ -1,19 +1,14 @@
 import React from 'react'
 
 import { createRoot } from 'react-dom/client'
-import { Route, Routes, BrowserRouter } from 'react-router-dom'
+import { Route, Routes, BrowserRouter } from 'react-router'
 
 import './util/initWeb3'
 import App from './components/app'
 import { HASH_ID_ROUTE, ID_ROUTE } from './routes'
 
 const Index = () => (
-  <BrowserRouter
-    future={{
-      v7_relativeSplatPath: true,
-      v7_startTransition: true
-    }}
-  >
+  <BrowserRouter>
     <Routes>
       <Route exact path={ID_ROUTE} element={<App path={ID_ROUTE} />} />
       <Route

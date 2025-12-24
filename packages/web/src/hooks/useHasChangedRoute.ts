@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 /**
  * Custom hook that fires a callback when the route changes

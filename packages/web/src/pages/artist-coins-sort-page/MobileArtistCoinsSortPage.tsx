@@ -13,7 +13,7 @@ import {
   IconComponent
 } from '@audius/harmony'
 import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 import { useMobileHeader } from 'components/header/mobile/hooks'
 

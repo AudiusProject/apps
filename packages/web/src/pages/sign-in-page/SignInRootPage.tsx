@@ -3,7 +3,7 @@ import { signInPageMessages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
 import { useSelector } from 'react-redux'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import { useFirstMountState } from 'react-use'
 
 import { getEmailField, getIsGuest } from 'common/store/pages/signon/selectors'

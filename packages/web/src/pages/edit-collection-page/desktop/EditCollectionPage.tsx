@@ -10,8 +10,7 @@ import {
 } from '@audius/common/store'
 import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
-import { useParams } from 'react-router'
-import { useMatch, useSearchParams } from 'react-router-dom'
+import { useParams, useMatch, useSearchParams } from 'react-router'
 
 import { EditCollectionForm } from 'components/edit-collection/EditCollectionForm'
 import { Header } from 'components/header/desktop/Header'

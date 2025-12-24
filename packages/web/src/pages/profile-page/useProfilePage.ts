@@ -46,7 +46,7 @@ import { getErrorMessage, Nullable, route } from '@audius/common/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 import { make, TrackEvent } from 'common/store/analytics/actions'
 import {

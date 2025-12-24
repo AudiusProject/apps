@@ -53,7 +53,7 @@ import {
 } from '@audius/common/store'
 import { formatUrlName, Uid, route, makeUid } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 import { useHistoryContext } from 'app/HistoryProvider'
 import { make } from 'common/store/analytics/actions'

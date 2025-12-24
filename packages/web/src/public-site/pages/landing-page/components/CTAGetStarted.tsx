@@ -3,7 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { coinPage } from '@audius/common/src/utils/route'
 import { IconCaretRight } from '@audius/harmony'
 import cn from 'classnames'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Parallax } from 'react-scroll-parallax'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useChain, useTrail, animated } from 'react-spring'

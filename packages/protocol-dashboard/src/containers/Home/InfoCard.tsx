@@ -1,5 +1,5 @@
 import { Box, PlainButton, Text, IconArrowRight } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { Card } from 'components/Card/Card'
 

@@ -19,7 +19,7 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import { pick } from 'lodash'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { UserLink } from 'components/link'
 import Skeleton from 'components/skeleton/Skeleton'

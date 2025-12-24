@@ -6,7 +6,7 @@ import { route } from '@audius/common/utils'
 import { Hint, IconError } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { usePrevious } from 'react-use'
 
 import { setField } from 'common/store/pages/signon/actions'

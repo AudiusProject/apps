@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import queryString from 'query-string'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
 
 /** Picks the given query param out of the URL and optionally replaces the path.
  * Will only pick once per mount.

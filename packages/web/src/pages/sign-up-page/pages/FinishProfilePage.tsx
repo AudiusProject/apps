@@ -11,7 +11,7 @@ import { route } from '@audius/common/utils'
 import { Button, Flex, Paper, Text } from '@audius/harmony'
 import { Formik, Form, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { make } from 'common/store/analytics/actions'

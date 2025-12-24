@@ -35,7 +35,7 @@ import {
 import { ClassNames } from '@emotion/react'
 import { isEqual } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router'
 
 import { Droppable } from 'components/dragndrop'
 import { Header } from 'components/header/desktop/Header'

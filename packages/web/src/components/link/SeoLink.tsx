@@ -1,7 +1,7 @@
 import { MouseEvent, forwardRef, useCallback } from 'react'
 
 import cn from 'classnames'
-import { LinkProps } from 'react-router-dom'
+import { LinkProps } from 'react-router'
 
 import styles from './SeoLink.module.css'
 

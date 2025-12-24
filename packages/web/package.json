@@ -164,7 +164,7 @@
     "react-plaid-link": "3.6.1",
     "react-qr-code": "2.0.18",
     "react-redux": "8.0.5",
-    "react-router-dom": "^6.22.3",
+    "react-router": "^7.11.0",
     "react-scroll-parallax": "3.3.2",
     "react-spring": "8.0.27",
     "react-table": "7.8.0",

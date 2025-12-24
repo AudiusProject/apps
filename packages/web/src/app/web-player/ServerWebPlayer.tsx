@@ -17,8 +17,7 @@ import { Flex } from '@audius/harmony/src/components/layout/Flex'
 import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
 import { ThemeProvider } from '@audius/harmony/src/foundations/theme/ThemeProvider'
-import { Link } from 'react-router-dom'
-import { StaticRouter } from 'react-router-dom/server'
+import { Link, StaticRouter } from 'react-router'
 
 type WebPlayerContentProps = {
   children: ReactElement

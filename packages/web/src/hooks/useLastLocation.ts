@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { useLocation, Location } from 'react-router-dom'
+import { useLocation, Location } from 'react-router'
 
 /**
  * Hook to get the last location before the current one.

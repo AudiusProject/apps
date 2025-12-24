@@ -32,7 +32,7 @@ import {
   useTheme,
   Tooltip
 } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { useBuySellRegionSupport } from 'components/buy-sell-modal'

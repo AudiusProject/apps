@@ -1,7 +1,7 @@
 import { useArtistCoinByTicker, useExclusiveTracks } from '@audius/common/api'
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
 import { Flex } from '@audius/harmony'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'

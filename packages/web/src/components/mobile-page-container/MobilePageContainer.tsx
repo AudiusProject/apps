@@ -4,7 +4,7 @@ import { useInstanceVar } from '@audius/common/hooks'
 import { playerSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { connect } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { MetaTags, MetaTagsProps } from 'components/meta-tags/MetaTags'
 import { ScrollContext } from 'components/scroll-provider/ScrollProvider'

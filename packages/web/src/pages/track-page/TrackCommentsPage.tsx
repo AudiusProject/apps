@@ -1,13 +1,14 @@
 import { useContext, useEffect } from 'react'
 
-import { useHighlightedComment, useTrackByPermalink } from '@audius/common/api'
+import { useTrackByPermalink } from '@audius/common/api'
 import { CommentSectionProvider } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { Flex, Text } from '@audius/harmony'
 import { pick } from 'lodash'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import { CommentList } from 'components/comments/CommentList'
+import { useHighlightedComment } from 'components/comments/useHighlightedComment'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 

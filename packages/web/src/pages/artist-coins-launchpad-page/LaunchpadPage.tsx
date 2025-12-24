@@ -36,7 +36,7 @@ import { solana } from '@reown/appkit/networks'
 import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useFormikContext } from 'formik'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router'
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { Header } from 'components/header/desktop/Header'

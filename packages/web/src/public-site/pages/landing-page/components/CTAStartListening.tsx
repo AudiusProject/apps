@@ -1,6 +1,6 @@
 import { route } from '@audius/common/utils'
 import { IconCaretRight } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Parallax } from 'react-scroll-parallax'
 
 import footerBackgroundMobile from 'assets/img/publicSite/Footer-Background-mobile@2x.jpg'

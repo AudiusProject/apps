@@ -5,7 +5,7 @@ import { chatSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { IconMessages, NotificationCount } from '@audius/harmony'
 import { useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { matchesRoute } from 'utils/route'
 

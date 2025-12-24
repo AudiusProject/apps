@@ -1,5 +1,4 @@
 import qs from 'query-string'
-import { matchPath, generatePath } from 'react-router'
 
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
@@ -435,17 +434,6 @@ export const getHash = (str: string) =>
     }, 0)
   ).toString(36)
 
-/** Given a pathname, finds a matching route */
-export const findRoute = (pathname: string) => {
-  for (const route of orderedRoutes) {
-    const match = matchPath(route, pathname)
-    if (match) {
-      return route
-    }
-  }
-  return null
-}
-
 type NullableSearchFilters = {
   [key in keyof SearchFilters]: SearchFilters[key] | null
 }
@@ -462,8 +450,11 @@ export const searchPage = (searchOptions: SearchOptions) => {
     searchParams.genre = convertGenreLabelToValue(searchParams.genre) as Genre
   }
 
+  // Build the search path - category is optional
+  const searchPath = category ? `/search/${category}` : '/search'
+
   return qs.stringifyUrl({
-    url: generatePath(SEARCH_PAGE, { category: category ?? null }),
+    url: searchPath,
     query: searchParams
   })
 }

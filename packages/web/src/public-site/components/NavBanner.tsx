@@ -15,7 +15,7 @@ import {
   IconLink
 } from '@audius/harmony'
 import cn from 'classnames'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { useMatchesBreakpoint } from 'utils/useMatchesBreakpoint'
 import zIndex from 'utils/zIndex'

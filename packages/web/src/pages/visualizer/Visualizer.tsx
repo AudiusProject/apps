@@ -7,7 +7,7 @@ import { getIsVisible } from './store/selectors'
 import { closeVisualizer, toggleVisibility } from './store/slice'
 
 import styles from './Visualizer.module.css'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useHotkeys } from '@audius/harmony'
 import { route } from '@audius/common/utils'
 

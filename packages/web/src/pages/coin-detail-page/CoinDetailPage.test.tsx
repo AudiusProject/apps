@@ -1,5 +1,5 @@
 import { COIN_DETAIL_PAGE, coinPage } from '@audius/common/src/utils/route'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import {
   describe,
   expect,

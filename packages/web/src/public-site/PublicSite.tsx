@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, useCallback, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { ThemeProvider } from '@audius/harmony'
-import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router'
 
 import LoadingSpinnerFullPage from 'components/loading-spinner-full-page/LoadingSpinnerFullPage'
 import NavScreen from 'public-site/components/NavOverlay'
@@ -118,14 +118,10 @@ export const PublicSite = (props: PublicSiteProps) => {
                 ? HashRouter
                 : BrowserRouter
               const basename = env.BASENAME || undefined
+              // In React Router v7, future flags are enabled by default for declarative routers
+              // The future prop is only available for data routers (createBrowserRouter)
               return (
-                <RouterComponent
-                  basename={basename}
-                  future={{
-                    v7_relativeSplatPath: true,
-                    v7_startTransition: true
-                  }}
-                >
+                <RouterComponent basename={basename}>
                   <NavScreen
                     closeNavScreen={closeNavScreen}
                     isOpen={isNavScreenOpen}

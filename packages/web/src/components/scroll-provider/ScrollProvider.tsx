@@ -1,7 +1,7 @@
 import { memo, createContext, useCallback } from 'react'
 
 import { route } from '@audius/common/utils'
-import { matchPath } from 'react-router-dom'
+import { matchPath } from 'react-router'
 
 import { useInstanceVar } from 'hooks/useInstanceVar'
 import { useIsMobile } from 'hooks/useIsMobile'

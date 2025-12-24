@@ -7,7 +7,7 @@ import {
   UserSubscriptionNotification as UserSubscriptionNotificationType
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 

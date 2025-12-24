@@ -5,7 +5,7 @@ import { MediaProvider } from '@audius/harmony/src/contexts'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Provider as ReduxProvider } from 'react-redux'
-import { BrowserRouter, HashRouter, useNavigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, useNavigate } from 'react-router'
 import { PersistGate } from 'redux-persist/integration/react'
 import { WagmiProvider } from 'wagmi'
 
@@ -71,19 +71,20 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     return <>{children}</>
   }
 
+  // In React Router v7, future flags are enabled by default for declarative routers
+  // The future prop is only available for data routers (createBrowserRouter)
+  // For BrowserRouter/HashRouter, the v7 behavior is the default
+  const routerProps = {
+    basename
+  }
+
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
           <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <RouterComponent
-                basename={basename}
-                future={{
-                  v7_relativeSplatPath: true,
-                  v7_startTransition: true
-                }}
-              >
+              <RouterComponent {...routerProps}>
                 <NavigationSetup>
                   <RouterContextProvider>
                     <HeaderContextProvider>

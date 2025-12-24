@@ -5,7 +5,7 @@ import { ID, SquareSizes } from '@audius/common/models'
 import { formatCount, route } from '@audius/common/utils'
 import { Box, Skeleton, Text, TextLink } from '@audius/harmony'
 import { pick } from 'lodash'
-import { useLinkClickHandler } from 'react-router-dom'
+import { useLinkClickHandler } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar'

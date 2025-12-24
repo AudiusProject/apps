@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 import { SquareSizes } from '@audius/common/models'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import {
   describe,
   expect,

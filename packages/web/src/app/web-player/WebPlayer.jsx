@@ -24,15 +24,16 @@ import { UploadType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
-import { generatePath, matchPath } from 'react-router'
 import {
+  generatePath,
+  matchPath,
   Navigate,
   Route,
   Routes,
   useLocation,
   useParams,
   useNavigate
-} from 'react-router-dom'
+} from 'react-router'
 import semver from 'semver'
 
 import { Pages as SignOnPages } from 'common/store/pages/signon/types'

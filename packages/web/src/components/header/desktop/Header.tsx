@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 import { Flex, IconComponent, Text } from '@audius/harmony'
 import cn from 'classnames'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { BackButton } from 'components/back-button/BackButton'
 import { HeaderGutter } from 'components/header/desktop/HeaderGutter'

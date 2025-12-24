@@ -7,7 +7,7 @@ import {
 } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { useDispatch } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import {
   openSignOn,

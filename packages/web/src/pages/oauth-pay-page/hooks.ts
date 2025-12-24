@@ -11,7 +11,7 @@ import { useUserbank } from '@audius/common/hooks'
 import { SolanaWalletAddress } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
 import * as queryString from 'query-string'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { getIsRedirectValid } from '../oauth-login-page/utils'
 

@@ -12,7 +12,7 @@ import {
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
-import { matchPath, useLocation, useNavigate } from 'react-router-dom'
+import { matchPath, useLocation, useNavigate } from 'react-router'
 
 import { HistoryContext } from 'app/HistoryProvider'
 import { openSignOn } from 'common/store/pages/signon/actions'

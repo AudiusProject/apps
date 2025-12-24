@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { coinPage } from '@audius/common/src/utils/route'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 

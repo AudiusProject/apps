@@ -1,4 +1,4 @@
-import { useLocation, useMatch } from 'react-router-dom'
+import { useLocation, useMatch } from 'react-router'
 
 import NodeOverview from 'components/NodeOverview'
 import Page from 'components/Page'

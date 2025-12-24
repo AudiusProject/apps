@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { route } from '@audius/common/utils'
 import { Button, IconUserArrowRotate } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { replace } from 'utils/navigation'
 import { doesMatchRoute } from 'utils/route'

@@ -18,7 +18,7 @@ import {
   IconTrophy,
   Button
 } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { MIN_PAGE_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'

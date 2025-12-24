@@ -14,7 +14,7 @@ import {
   useParams,
   To,
   NavigateProps
-} from 'react-router-dom'
+} from 'react-router'
 
 import Header from 'components/Header'
 import API from 'containers/API'

@@ -11,7 +11,7 @@ import {
   PlainButton,
   useTheme
 } from '@audius/harmony'
-import { Route, Routes, useMatch, useNavigate } from 'react-router-dom'
+import { Route, Routes, useMatch, useNavigate } from 'react-router'
 
 import { getRouteOnExit } from 'common/store/pages/signon/selectors'
 import { useMedia } from 'hooks/useMedia'

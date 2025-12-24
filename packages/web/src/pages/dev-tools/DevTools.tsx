@@ -14,7 +14,7 @@ import {
   makeResponsiveStyles
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import { Page } from 'components/page/Page'

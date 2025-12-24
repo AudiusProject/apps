@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { APP_REDIRECT } from '@audius/common/src/utils/route'
 import { Box, Button, Flex, Text } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import Drawer from 'components/drawer/Drawer'
 import { getPathname } from 'utils/route'

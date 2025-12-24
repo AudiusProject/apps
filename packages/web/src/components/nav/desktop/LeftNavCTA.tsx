@@ -10,7 +10,7 @@ import {
 import { Name, Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Box, Button, IconArrowRight } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { SignOnLink } from 'components/SignOnLink'

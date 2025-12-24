@@ -32,7 +32,7 @@ import {
   matchPath,
   useNavigate,
   useSearchParams
-} from 'react-router-dom'
+} from 'react-router'
 import { useDebounce, usePrevious } from 'react-use'
 
 import { searchResultsPage } from 'utils/route'

@@ -12,7 +12,7 @@ import {
   IconKebabHorizontal
 } from '@audius/harmony'
 import cn from 'classnames'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 
 import {

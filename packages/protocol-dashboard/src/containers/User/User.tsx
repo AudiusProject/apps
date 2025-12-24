@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { Flex, IconUser } from '@audius/harmony'
-import { matchPath, useLocation, useParams } from 'react-router-dom'
+import { matchPath, useLocation, useParams } from 'react-router'
 
 import { ConnectAudiusProfileCard } from 'components/ConnectAudiusProfileCard/ConnectAudiusProfileCard'
 import { ManageAccountCard } from 'components/ManageAccountCard/ManageAccountCard'

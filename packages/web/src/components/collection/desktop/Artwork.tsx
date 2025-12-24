@@ -5,7 +5,7 @@ import { imageBlank } from '@audius/common/assets'
 import { SquareSizes } from '@audius/common/models'
 import { Button, IconPencil } from '@audius/harmony'
 import { pick } from 'lodash'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'

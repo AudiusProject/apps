@@ -7,7 +7,7 @@ import {
 } from '@audius/common/store'
 import { Button, Flex, IconTrophy } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { push } from 'utils/navigation'
 import { pickWinnersPage } from 'utils/route'

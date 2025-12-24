@@ -9,7 +9,7 @@ import {
 } from '@audius/common/utils'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { Divider, Flex, Text, useTheme } from '@audius/harmony'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'

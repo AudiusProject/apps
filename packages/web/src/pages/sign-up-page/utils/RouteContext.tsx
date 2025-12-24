@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useEffect, useState, useRef } from 'react'
 
-import { useLocation, useNavigationType } from 'react-router-dom'
+import { useLocation, useNavigationType } from 'react-router'
 
 export const RouteContext = createContext({
   isGoBack: false

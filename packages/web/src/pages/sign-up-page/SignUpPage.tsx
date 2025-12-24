@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import { route } from '@audius/common/utils'
 import { Helmet } from 'react-helmet'
 import { useSelector } from 'react-redux'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router'
 
 import { getRouteOnCompletion } from 'common/store/pages/signon/selectors'
 import { useDetermineAllowedRoute } from 'pages/sign-up-page/utils/useDetermineAllowedRoutes'

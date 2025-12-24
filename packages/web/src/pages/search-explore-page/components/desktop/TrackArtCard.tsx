@@ -4,7 +4,7 @@ import { useRemixContest, useTrack } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { dayjs, formatContestDeadlineWithStatus } from '@audius/common/utils'
 import { Flex, Skeleton, Text } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { TrackLink } from 'components/link/TrackLink'
 import { UserLink } from 'components/link/UserLink'

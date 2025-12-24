@@ -7,7 +7,7 @@ import {
   IconX
 } from '@audius/harmony'
 import cn from 'classnames'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import styles from './Footer.module.css'
 import { handleClickRoute } from './handleClickRoute'

@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
 import { Button } from '@audius/harmony'
-import { matchPath, useLocation } from 'react-router-dom'
+import { matchPath, useLocation } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, useTransition } from 'react-spring'
 import { useSessionStorage } from 'react-use'

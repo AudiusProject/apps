@@ -3,7 +3,7 @@ import { useCallback, MouseEvent } from 'react'
 import { Name, AllTrackingEvents } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Tag, TagProps } from '@audius/harmony'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 

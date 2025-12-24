@@ -10,7 +10,7 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import type { Location } from 'history'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
 
 import layoutStyles from 'components/layout/layout.module.css'
 

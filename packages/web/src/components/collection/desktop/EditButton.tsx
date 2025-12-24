@@ -6,7 +6,7 @@ import {
   Tooltip
 } from '@audius/harmony'
 import { pick } from 'lodash'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 const messages = {
   edit: (isAlbum: boolean) => `Edit ${isAlbum ? 'Album' : 'Playlist'}`

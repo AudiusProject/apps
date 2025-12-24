@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
 import { Notification as NotificationObjectType } from '@audius/common/store'
 import { Text } from '@audius/harmony'
-import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router'
 import { describe, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 
 import { setNavigateRef } from 'store/navigationMiddleware'

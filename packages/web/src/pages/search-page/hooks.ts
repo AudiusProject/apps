@@ -10,7 +10,7 @@ import {
   useMatch,
   useNavigate,
   useSearchParams as useRouterSearchParams
-} from 'react-router-dom'
+} from 'react-router'
 
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { useIsMobile } from 'hooks/useIsMobile'

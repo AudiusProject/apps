@@ -4,7 +4,7 @@ import { useRemixContest, useTrack, useUser } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { formatContestDeadlineWithStatus } from '@audius/common/utils'
 import { Flex, Skeleton, Text } from '@audius/harmony'
-import { useLinkClickHandler } from 'react-router-dom'
+import { useLinkClickHandler } from 'react-router'
 
 import { Card, CardProps, CardFooter, CardContent } from 'components/card'
 import { TextLink, UserLink } from 'components/link'

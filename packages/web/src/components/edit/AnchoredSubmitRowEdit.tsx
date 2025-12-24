@@ -2,7 +2,7 @@ import { useContext } from 'react'
 
 import { Button, Flex, IconError, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { Frosted } from 'components/frosted/Frosted'
 

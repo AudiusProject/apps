@@ -9,7 +9,7 @@ import {
 
 import { useInstanceVar } from '@audius/common/hooks'
 import { route } from '@audius/common/utils'
-import { Routes, useLocation } from 'react-router-dom'
+import { Routes, useLocation } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useTransition, animated } from 'react-spring'
 

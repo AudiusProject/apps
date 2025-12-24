@@ -4,7 +4,7 @@ import { useFormattedAudioBalance } from '@audius/common/hooks'
 import { AUDIO_TICKER, TOKEN_LISTING_MAP } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { IconTokenAUDIO } from '@audius/harmony'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { CoinRow } from './CoinCard'
 
