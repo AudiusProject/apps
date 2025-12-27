@@ -36,6 +36,7 @@
   ],
   "devDependencies": {
     "@playwright/test": "1.42.1",
+    "@types/cross-spawn": "^6.0.6",
     "@types/glob": "7.1.1",
     "@types/prompts": "2.4.2",
     "@types/tar": "6.1.11",

@@ -6,7 +6,6 @@ declare module '@emotion/react' {
   export interface Theme extends HarmonyTheme {}
 }
 
-
 // Fix for React 19 JSX types with Emotion
 declare global {
   namespace JSX {

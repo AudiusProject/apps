@@ -36,7 +36,7 @@ export async function install(
         DISABLE_OPENCOLLECTIVE: '1'
       }
     })
-    child.on('close', (code) => {
+    child.on('close', (code: number | null) => {
       if (code !== 0) {
         reject({ command: `${'npm'} ${args.join(' ')}` })
         return
