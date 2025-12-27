@@ -1,35 +1,28 @@
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode, useState, useMemo } from 'react'
 
-import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { MediaProvider } from '@audius/harmony/src/contexts'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Provider as ReduxProvider } from 'react-redux'
-import { BrowserRouter, HashRouter, useNavigate } from 'react-router'
+import {
+  createBrowserRouter,
+  createHashRouter,
+  RouterProvider
+} from 'react-router'
 import { PersistGate } from 'redux-persist/integration/react'
 import { WagmiProvider } from 'wagmi'
 
-import { RouterContextProvider } from 'components/animated-switch/RouterContextProvider'
-import { HeaderContextProvider } from 'components/header/mobile/HeaderContextProvider'
-import { NavProvider } from 'components/nav/mobile/NavContext'
-import { ScrollProvider } from 'components/scroll-provider/ScrollProvider'
-import { ToastContextProvider } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { MainContentContextProvider } from 'pages/MainContentContext'
 import { env } from 'services/env'
-import { localStorage } from 'services/local-storage'
 import { queryClient } from 'services/query-client'
 import { configureStore } from 'store/configureStore'
-import { setNavigateRef } from 'store/navigationMiddleware'
 import { getSystemAppearance, getTheme } from 'utils/theme/theme'
 
-import { AppContextProvider } from './AppContextProvider'
-import { AudiusQueryProvider } from './AudiusQueryProvider'
 import { wagmiAdapter } from './ReownAppKitModal'
-import { ThemeProvider } from './ThemeProvider'
+import { createRoutes } from './routes'
 
 type AppProvidersProps = {
-  children: ReactNode
+  children?: ReactNode
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
@@ -53,30 +46,19 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     return { store, persistor }
   })
 
-  // Use HashRouter or BrowserRouter based on environment
-  const RouterComponent = env.USE_HASH_ROUTING ? HashRouter : BrowserRouter
   const basename = env.BASENAME || undefined
 
-  // Component to set up navigation ref for middleware
-  const NavigationSetup = ({ children }: { children: ReactNode }) => {
-    const navigate = useNavigate()
+  // Create router with data router API for code-splitting and performance
+  const router = useMemo(() => {
+    const routes = createRoutes()
+    const createRouter = env.USE_HASH_ROUTING
+      ? createHashRouter
+      : createBrowserRouter
 
-    useEffect(() => {
-      setNavigateRef(navigate)
-      return () => {
-        setNavigateRef(null as any)
-      }
-    }, [navigate])
-
-    return <>{children}</>
-  }
-
-  // In React Router v7, future flags are enabled by default for declarative routers
-  // The future prop is only available for data routers (createBrowserRouter)
-  // For BrowserRouter/HashRouter, the v7 behavior is the default
-  const routerProps = {
-    basename
-  }
+    return createRouter(routes, {
+      basename
+    })
+  }, [basename])
 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
@@ -84,33 +66,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         <MediaProvider>
           <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <RouterComponent {...routerProps}>
-                <NavigationSetup>
-                  <RouterContextProvider>
-                    <HeaderContextProvider>
-                      <NavProvider>
-                        <ScrollProvider>
-                          <ThemeProvider>
-                            <ToastContextProvider>
-                              <AppContextProvider>
-                                <AudiusQueryProvider>
-                                  <MainContentContextProvider>
-                                    <SyncLocalStorageUserProvider
-                                      localStorage={localStorage}
-                                    >
-                                      {children}
-                                    </SyncLocalStorageUserProvider>
-                                  </MainContentContextProvider>
-                                </AudiusQueryProvider>
-                              </AppContextProvider>
-                            </ToastContextProvider>
-                          </ThemeProvider>
-                        </ScrollProvider>
-                      </NavProvider>
-                    </HeaderContextProvider>
-                  </RouterContextProvider>
-                </NavigationSetup>
-              </RouterComponent>
+              <RouterProvider router={router} />
             </PersistGate>
           </ReduxProvider>
         </MediaProvider>

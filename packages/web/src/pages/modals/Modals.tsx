@@ -61,7 +61,7 @@ import { ChatBlastModal } from 'pages/chat-page/components/ChatBlastModal'
 import { ClaimVestedCoinsModal } from 'pages/coin-detail-page/components/ClaimVestedCoinsModal'
 import { ChallengeRewardsModal } from 'pages/rewards-page/components/modals/ChallengeRewardsModal'
 
-import { AppModal } from './AppModal'
+import AppModal from './AppModal'
 const ShareModal = lazy(() => import('components/share-modal'))
 
 const StripeOnRampModal = lazy(() => import('components/stripe-on-ramp-modal'))

@@ -43,10 +43,6 @@
   },
   "include": ["src", "src/**/*.css", "src/test/vitest-setup.ts"],
   "exclude": [
-    "node_modules",
-    "../harmony/src/**/*.stories.tsx",
-    "../harmony/src/**/*.stories.ts",
-    "../harmony/src/storybook",
-    "../harmony/.storybook"
+    "node_modules"
   ]
 }
