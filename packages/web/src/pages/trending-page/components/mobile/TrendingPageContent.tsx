@@ -23,7 +23,12 @@ import NavContext, {
   RightPreset
 } from 'components/nav/mobile/NavContext'
 import useTabs from 'hooks/useTabs/useTabs'
-import { TrendingPageContentProps } from 'pages/trending-page/types'
+import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
+import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
+import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
+import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
+import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
+import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
 import { BASE_URL } from 'utils/route'
 import { scrollWindowToTop } from 'utils/scroll'
 
@@ -49,24 +54,40 @@ const tabHeaders = [
   { icon: <IconAllTime />, text: messages.allTime, label: TimeRange.ALL_TIME }
 ]
 
+type TrendingPageMobileContentProps = {
+  containerRef?: React.RefObject<HTMLDivElement>
+}
+
 const TrendingPageMobileContent = ({
-  pageTitle,
-  trendingDescription,
+  containerRef
+}: TrendingPageMobileContentProps) => {
+  const trendingPageState = useTrendingPageState()
+  const actions = useTrendingActions()
+  const lineups = useTrendingLineups({
+    trendingPageState,
+    containerRef: containerRef || undefined
+  })
 
-  trendingTimeRange,
-  setTrendingTimeRange,
+  useTrendingUrlParams({
+    trendingPageState,
+    setTrendingGenre: actions.setTrendingGenre,
+    setTrendingTimeRange: actions.setTrendingTimeRange,
+    replaceRoute: actions.replaceRoute
+  })
 
-  getLineupProps,
-  makePauseTrack,
-  makeLoadMore,
-  makePlayTrack,
-  trendingWeek,
-  trendingMonth,
-  trendingAllTime,
-  makeSetInView,
-  trendingGenre,
-  goToGenreSelection
-}: TrendingPageContentProps) => {
+  useTrendingPageCleanup({ trendingPageState, actions })
+
+  const { trendingWeek, trendingMonth, trendingAllTime, getLineupProps } =
+    lineups
+  const { trendingGenre, trendingTimeRange } = trendingPageState
+  const {
+    makeLoadMore,
+    makePlayTrack,
+    makePauseTrack,
+    makeSetInView,
+    setTrendingTimeRange,
+    goToGenreSelection
+  } = actions
   // Set Nav-Bar Menu
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
@@ -89,7 +110,7 @@ const TrendingPageMobileContent = ({
     [getLineupProps, trendingAllTime]
   )
 
-  const lineups = useMemo(() => {
+  const lineupElements = useMemo(() => {
     return [
       <>
         {trendingGenre === null ? (
@@ -176,12 +197,12 @@ const TrendingPageMobileContent = ({
   )
 
   const memoizedElements = useMemo(() => {
-    return lineups.map((lineup, i) => (
+    return lineupElements.map((lineup, i) => (
       <div key={i} className={cn(styles.lineupContainer)}>
         {lineup}
       </div>
     ))
-  }, [lineups])
+  }, [lineupElements])
 
   const { tabs, body } = useTabs({
     tabs: tabHeaders,
@@ -208,8 +229,8 @@ const TrendingPageMobileContent = ({
 
   return (
     <MobilePageContainer
-      title={pageTitle}
-      description={trendingDescription}
+      title={TRENDING_MESSAGES.pageTitle}
+      description={TRENDING_MESSAGES.trendingDescription}
       canonicalUrl={`${BASE_URL}${TRENDING_PAGE}`}
     >
       <div className={styles.tabsContainer}>

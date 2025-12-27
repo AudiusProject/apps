@@ -4,9 +4,12 @@ import { useCanSendMessage } from '@audius/common/hooks'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import { ResizeObserver } from '@juggle/resize-observer'
 import { useDispatch } from 'react-redux'
+import { useParams, useLocation, useNavigate } from 'react-router'
 import useMeasure from 'react-use-measure'
 
 import Page from 'components/page/Page'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { useManagedAccountNotAllowedRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
 import { chatPage } from 'utils/route'
@@ -17,6 +20,7 @@ import { ChatHeader } from './components/ChatHeader'
 import { ChatList } from './components/ChatList'
 import { ChatMessageList } from './components/ChatMessageList'
 import { CreateChatPrompt } from './components/CreateChatPrompt'
+import { SkeletonChatPage as MobileChatPage } from './components/mobile/SkeletonChatPage'
 
 const { fetchPermissions } = chatActions
 const { getChat } = chatSelectors
@@ -25,13 +29,18 @@ const messages = {
   messages: 'Messages'
 }
 
-export const ChatPage = ({
-  currentChatId,
-  presetMessage
-}: {
-  currentChatId?: string
-  presetMessage?: string
-}) => {
+export const ChatPage = () => {
+  useManagedAccountNotAllowedRedirect()
+  const params = useParams<{ id?: string }>()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  const currentChatId = params.id
+  const presetMessage = (
+    location.state as { presetMessage?: string } | undefined
+  )?.presetMessage
+
+  // All hooks must be called before any early returns
   const dispatch = useDispatch()
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
   const chat = useSelector((state) => getChat(state, currentChatId ?? ''))
@@ -69,11 +78,25 @@ export const ChatPage = ({
     }, 0)
   }, [messagesRef])
 
+  // Replace the preset message in browser history after the first navigation
   useEffect(() => {
-    if (firstOtherUser) {
+    if (presetMessage) {
+      navigate(location.pathname, {
+        state: { presetMessage: undefined },
+        replace: true
+      })
+    }
+  }, [navigate, location.pathname, presetMessage])
+
+  useEffect(() => {
+    if (firstOtherUser && !isMobile) {
       dispatch(fetchPermissions({ userIds: [firstOtherUser.user_id] }))
     }
-  }, [dispatch, firstOtherUser])
+  }, [dispatch, firstOtherUser, isMobile])
+
+  if (isMobile) {
+    return <MobileChatPage />
+  }
 
   return (
     <Page

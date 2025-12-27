@@ -4,9 +4,8 @@ import { useUser } from '@audius/common/api'
 import { useImageSize } from '@audius/common/hooks'
 import type { SquareSizes, ID } from '@audius/common/models'
 import { pick } from 'lodash'
-import { Image } from 'react-native'
 
-import { FastImage } from '@audius/harmony-native'
+import { FastImage, preload } from '@audius/harmony-native'
 import type { FastImageProps } from '@audius/harmony-native'
 import profilePicEmpty from 'app/assets/images/imageProfilePicEmpty2X.png'
 
@@ -35,7 +34,7 @@ export const useProfilePicture = ({
     targetSize: size,
     defaultImage: '',
     preloadImageFn: async (url: string) => {
-      Image.prefetch(url)
+      await preload([{ uri: url }])
     }
   })
 

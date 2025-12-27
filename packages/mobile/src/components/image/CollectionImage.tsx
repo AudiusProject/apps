@@ -56,7 +56,7 @@ export const useCollectionImage = ({
     targetSize: size,
     defaultImage: '',
     preloadImageFn: async (url: string) => {
-      preload([{ uri: url }])
+      await preload([{ uri: url }])
     }
   })
 

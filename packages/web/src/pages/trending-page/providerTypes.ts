@@ -1,11 +1,7 @@
-import { RefObject } from 'react'
-
 import { TimeRange, Track, LineupState, UID } from '@audius/common/models'
 import { QueueSource } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { Dispatch } from 'redux'
-
-import { TrendingPageContentProps } from './types'
 
 // Core state props from Redux
 export interface TrendingPageStateProps {
@@ -44,17 +40,6 @@ export interface TrendingPageDispatchProps {
   makeSetInView: (timeRange: TimeRange) => (inView: boolean) => void
   makeResetTrending: (timeRange: TimeRange) => () => void
 }
-
-// Component's own props
-export interface TrendingPageOwnProps {
-  containerRef?: RefObject<HTMLDivElement>
-  children: React.ComponentType<TrendingPageContentProps>
-}
-
-// Combined props for the provider component
-export type TrendingPageProviderProps = TrendingPageStateProps &
-  TrendingPageDispatchProps &
-  TrendingPageOwnProps
 
 // URL parameter types
 export interface TrendingUrlParams {

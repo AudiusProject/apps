@@ -12,7 +12,12 @@ import Lineup from 'components/lineup/Lineup'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import useTabs from 'hooks/useTabs/useTabs'
-import { TrendingPageContentProps } from 'pages/trending-page/types'
+import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
+import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
+import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
+import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
+import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
+import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
 
 import RewardsBanner from '../RewardsBanner'
 
@@ -29,6 +34,10 @@ const messages = {
   allGenres: 'All Genres',
   endOfLineupDescription: "Looks like you've reached the end of this list...",
   disabledTabTooltip: 'Nothing available'
+}
+
+type TrendingPageContentProps = {
+  containerRef?: React.RefObject<HTMLDivElement>
 }
 
 // Creates a unique cache key for a time range & genre combination
@@ -52,28 +61,43 @@ const getRangesToDisable = (timeRange: TimeRange) => {
   }
 }
 
-const TrendingPageContent = (props: TrendingPageContentProps) => {
+const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
+  const trendingPageState = useTrendingPageState()
+  const actions = useTrendingActions()
+  const lineups = useTrendingLineups({
+    trendingPageState,
+    containerRef: containerRef || undefined
+  })
+
+  useTrendingUrlParams({
+    trendingPageState,
+    setTrendingGenre: actions.setTrendingGenre,
+    setTrendingTimeRange: actions.setTrendingTimeRange,
+    replaceRoute: actions.replaceRoute
+  })
+
+  useTrendingPageCleanup({ trendingPageState, actions })
+
+  const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
   const {
-    trendingTitle,
-    pageTitle,
-    trendingDescription,
     trendingWeek,
     trendingMonth,
     trendingAllTime,
     getLineupProps,
-    trendingGenre,
-    setTrendingGenre,
-    setTrendingTimeRange,
-    trendingTimeRange,
-    lastFetchedTrendingGenre,
+    getLineupForRange,
+    scrollToTop
+  } = lineups
+  const { trendingGenre, trendingTimeRange, lastFetchedTrendingGenre } =
+    trendingPageState
+  const {
     makeLoadMore,
     makePlayTrack,
     makePauseTrack,
     makeSetInView,
     makeResetTrending,
-    getLineupForRange,
-    scrollToTop
-  } = props
+    setTrendingGenre,
+    setTrendingTimeRange
+  } = actions
 
   const weekProps = getLineupProps(trendingWeek)
   const monthProps = getLineupProps(trendingMonth)

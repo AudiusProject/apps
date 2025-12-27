@@ -1,3 +1,6 @@
+import { useEffect, useCallback, useRef } from 'react'
+
+import { useCurrentTrack } from '@audius/common/hooks'
 import {
   PlayableType,
   SquareSizes,
@@ -5,19 +8,35 @@ import {
   Playable,
   User
 } from '@audius/common/models'
-import { NestedNonNullable } from '@audius/common/utils'
+import {
+  lineupSelectors,
+  queueSelectors,
+  playerSelectors
+} from '@audius/common/store'
+import { route, NestedNonNullable } from '@audius/common/utils'
 import { Button, IconUser } from '@audius/harmony'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Lineup, { LineupProps } from 'components/lineup/Lineup'
+import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { push as pushRoute } from 'utils/navigation'
 import { withNullGuard } from 'utils/withNullGuard'
 
+import { moreByActions } from '../../store/lineups/more-by/actions'
+import { getLineup } from '../../store/selectors'
+
 import styles from './DeletedPage.module.css'
+
+const { profilePage } = route
+const { makeGetCurrent } = queueSelectors
+const { getPlaying, getBuffering } = playerSelectors
+const { makeGetLineupMetadatas } = lineupSelectors
 
 const messages = {
   trackDeleted: 'Track [Deleted]',
@@ -50,11 +69,8 @@ export type DeletedPageProps = {
   canonicalUrl: string
   structuredData?: Object
   deletedByArtist: boolean
-
   playable: Playable
-  user: User | null
-  getLineupProps: () => LineupProps
-  goToArtistPage: () => void
+  user: User
 }
 
 const g = withNullGuard(
@@ -71,10 +87,51 @@ const DeletedPage = g(
     structuredData,
     playable,
     deletedByArtist = true,
-    user,
-    getLineupProps,
-    goToArtistPage
+    user
   }) => {
+    const dispatch = useDispatch()
+    const currentTrack = useCurrentTrack()
+
+    const getMoreByLineup = useRef(makeGetLineupMetadatas(getLineup)).current
+    const getCurrentQueueItem = useRef(makeGetCurrent()).current
+    const moreBy = useSelector((state: any) => getMoreByLineup(state))
+    const currentQueueItem = useSelector(getCurrentQueueItem)
+    const isPlaying = useSelector(getPlaying)
+    const isBuffering = useSelector(getBuffering)
+
+    useEffect(() => {
+      return function cleanup() {
+        dispatch(moreByActions.reset())
+      }
+    }, [dispatch])
+
+    const goToArtistPage = useCallback(() => {
+      dispatch(pushRoute(profilePage(user?.handle)))
+    }, [dispatch, user])
+
+    const getLineupProps = (): LineupProps => {
+      return {
+        selfLoad: true,
+        variant: LineupVariant.CONDENSED,
+        lineup: moreBy,
+        count: 5,
+        playingUid: currentQueueItem.uid,
+        playingSource: currentQueueItem.source,
+        playingTrackId: currentTrack?.track_id ?? null,
+        playing: isPlaying,
+        buffering: isBuffering,
+        pauseTrack: () => dispatch(moreByActions.pause()),
+        playTrack: (uid?: string) => dispatch(moreByActions.play(uid)),
+        actions: moreByActions,
+        loadMore: (offset: number, limit: number) => {
+          dispatch(
+            moreByActions.fetchLineupMetadatas(offset, limit, false, {
+              handle: user?.handle
+            })
+          )
+        }
+      }
+    }
     const isPlaylist =
       playable.type === PlayableType.PLAYLIST ||
       playable.type === PlayableType.ALBUM

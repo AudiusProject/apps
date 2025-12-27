@@ -1,6 +1,17 @@
+import { useEffect, useRef } from 'react'
+
+import { useCurrentTrack } from '@audius/common/hooks'
 import { Name, FeedFilter } from '@audius/common/models'
-import { feedPageLineupActions as feedActions } from '@audius/common/store'
+import {
+  lineupSelectors,
+  feedPageLineupActions as feedActions,
+  feedPageSelectors,
+  feedPageActions as discoverPageAction,
+  queueSelectors,
+  playerSelectors
+} from '@audius/common/store'
 import { IconFeed } from '@audius/harmony'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Header } from 'components/header/desktop/Header'
@@ -13,28 +24,81 @@ import {
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
-import { FeedPageContentProps } from 'pages/feed-page/types'
 
 import { FeedFilters } from './FeedFilters'
 
 const messages = {
-  feedHeaderTitle: 'Your Feed'
+  feedHeaderTitle: 'Your Feed',
+  feedTitle: 'Feed',
+  feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const FeedPageContent = ({
-  feedTitle,
-  feedDescription,
-  feedIsMain,
-  feed,
-  setFeedInView,
-  loadMoreFeed,
-  playFeedTrack,
-  pauseFeedTrack,
-  getLineupProps,
-  feedFilter,
-  setFeedFilter,
-  resetFeedLineup
-}: FeedPageContentProps) => {
+const { getSource, getUid } = queueSelectors
+const { getPlaying, getBuffering } = playerSelectors
+const { getDiscoverFeedLineup, getFeedFilter } = feedPageSelectors
+const { makeGetLineupMetadatas } = lineupSelectors
+
+type FeedPageContentProps = {
+  containerRef?: React.RefObject<HTMLDivElement>
+}
+
+const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
+  const dispatch = useDispatch()
+  const currentTrack = useCurrentTrack()
+
+  const getFeedLineup = useRef(
+    makeGetLineupMetadatas(getDiscoverFeedLineup)
+  ).current
+  const feed = useSelector((state: any) => getFeedLineup(state))
+  const source = useSelector(getSource)
+  const uid = useSelector(getUid)
+  const playing = useSelector(getPlaying)
+  const buffering = useSelector(getBuffering)
+  const feedFilter = useSelector(getFeedFilter)
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(feedActions.reset())
+    }
+  }, [dispatch])
+
+  const getLineupProps = (lineup: any) => {
+    return {
+      lineup,
+      playingUid: uid,
+      playingSource: source ?? '',
+      playingTrackId: currentTrack?.track_id ?? null,
+      playing,
+      buffering,
+      scrollParent: containerRef?.current ?? null,
+      selfLoad: true
+    }
+  }
+
+  const setFeedInView = (inView: boolean) => {
+    dispatch(feedActions.setInView(inView))
+  }
+
+  const loadMoreFeed = (offset: number, limit: number, overwrite: boolean) => {
+    dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
+  }
+
+  const playFeedTrack = (uid: string) => {
+    dispatch(feedActions.play(uid))
+  }
+
+  const pauseFeedTrack = () => {
+    dispatch(feedActions.pause())
+  }
+
+  const setFeedFilter = (filter: FeedFilter) => {
+    dispatch(discoverPageAction.setFeedFilter(filter))
+  }
+
+  const resetFeedLineup = () => {
+    dispatch(feedActions.reset())
+  }
   const mainLineupProps = {
     variant: LineupVariant.MAIN
   }
@@ -45,7 +109,7 @@ const FeedPageContent = ({
     loadMore: loadMoreFeed,
     playTrack: playFeedTrack,
     pauseTrack: pauseFeedTrack,
-    delineate: feedIsMain,
+    delineate: false,
     actions: feedActions
   }
   const record = useRecord()
@@ -80,8 +144,8 @@ const FeedPageContent = ({
 
   return (
     <Page
-      title={feedTitle}
-      description={feedDescription}
+      title={messages.feedTitle}
+      description={messages.feedDescription}
       size='large'
       header={header}
     >

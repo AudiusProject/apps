@@ -2,11 +2,10 @@ import { Playable, User } from '@audius/common/models'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import DeletedPageProvider from './DeletedPageProvider'
 import DeletedPageDesktopContent from './components/desktop/DeletedPage'
 import DeletedPageMobileContent from './components/mobile/DeletedPage'
 
-type DeletedPageContentProps = {
+type DeletedPageProps = {
   title: string
   description: string
   canonicalUrl: string
@@ -24,25 +23,23 @@ const DeletedPage = ({
   playable,
   user,
   deletedByArtist = true
-}: DeletedPageContentProps) => {
+}: DeletedPageProps) => {
   const isMobile = useIsMobile()
 
-  const content = isMobile
-    ? DeletedPageMobileContent
-    : DeletedPageDesktopContent
+  const props = {
+    title,
+    description,
+    canonicalUrl,
+    structuredData,
+    playable,
+    user,
+    deletedByArtist
+  }
 
-  return (
-    <DeletedPageProvider
-      title={title}
-      description={description}
-      canonicalUrl={canonicalUrl}
-      structuredData={structuredData}
-      playable={playable}
-      user={user}
-      deletedByArtist={deletedByArtist}
-    >
-      {content}
-    </DeletedPageProvider>
+  return isMobile ? (
+    <DeletedPageMobileContent {...props} />
+  ) : (
+    <DeletedPageDesktopContent {...props} />
   )
 }
 

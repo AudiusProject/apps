@@ -6,9 +6,9 @@ import type {
 } from '@gorhom/bottom-sheet'
 import {
   useBottomSheetInternal,
-  ANIMATION_STATE,
+  ANIMATION_STATUS,
   SHEET_STATE,
-  SCROLLABLE_STATE
+  SCROLLABLE_STATUS
 } from '@gorhom/bottom-sheet'
 import { scrollTo } from 'react-native-reanimated'
 
@@ -25,10 +25,10 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
   const {
     animatedSheetState,
     animatedScrollableState,
+    animatedScrollableStatus,
     animatedAnimationState,
-    animatedSnapPoints,
-    animatedPosition,
-    animatedScrollableContentOffsetY: rootScrollableContentOffsetY
+    animatedDetentsState,
+    animatedPosition
   } = useBottomSheetInternal()
 
   // #region callbacks
@@ -36,7 +36,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
     useCallback(
       ({ contentOffset: { y } }, context) => {
         'worklet'
-        rootScrollableContentOffsetY.value = y
         /**
          * if sheet position is extended or fill parent, then we reset
          * `shouldLockInitialPosition` value to false.
@@ -48,36 +47,34 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           context.shouldLockInitialPosition = false
         }
 
-        const atSnapPoint = animatedSnapPoints.value.some(
-          (v) => animatedPosition.value === v
-        )
+        const { detents } = animatedDetentsState.get()
+        const atSnapPoint =
+          detents !== undefined &&
+          detents.some((v) => animatedPosition.value === v)
 
         /**
          * NOTE: this is the change to the default hook.
          * If the drawer is not at a a snap point or the scrollable is scrolled upwards,
          * lock the scrolling
          */
-
-        animatedScrollableState.value =
-          !atSnapPoint || y < 0
-            ? SCROLLABLE_STATE.LOCKED
-            : SCROLLABLE_STATE.UNLOCKED
-
-        if (animatedScrollableState.value === SCROLLABLE_STATE.LOCKED) {
+        if (!atSnapPoint || y < 0) {
           const lockPosition = 0
 
           // @ts-ignore
           scrollTo(scrollableRef, 0, lockPosition, false)
           scrollableContentOffsetY.value = lockPosition
+          animatedScrollableStatus.value = SCROLLABLE_STATUS.LOCKED
+        } else {
+          animatedScrollableStatus.value = SCROLLABLE_STATUS.UNLOCKED
         }
       },
       [
         scrollableRef,
         scrollableContentOffsetY,
-        animatedScrollableState,
+        animatedScrollableStatus,
         animatedSheetState,
         animatedPosition,
-        animatedSnapPoints
+        animatedDetentsState
       ]
     )
   const handleOnBeginDrag: ScrollEventHandlerCallbackType<ScrollEventContextType> =
@@ -85,8 +82,11 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
       ({ contentOffset: { y } }, context) => {
         'worklet'
         scrollableContentOffsetY.value = y
-        rootScrollableContentOffsetY.value = y
         context.initialContentOffsetY = y
+        animatedScrollableState.set((state) => ({
+          ...state,
+          contentOffsetY: y
+        }))
 
         /**
          * if sheet position not extended or fill parent and the scrollable position
@@ -102,19 +102,16 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           context.shouldLockInitialPosition = false
         }
       },
-      [
-        scrollableContentOffsetY,
-        animatedSheetState,
-        rootScrollableContentOffsetY
-      ]
+      [scrollableContentOffsetY, animatedSheetState, animatedScrollableState]
     )
   const handleOnEndDrag: ScrollEventHandlerCallbackType<ScrollEventContextType> =
     useCallback(
       ({ contentOffset: { y } }, context) => {
         'worklet'
-        const atSnapPoint = animatedSnapPoints.value.some(
-          (v) => animatedPosition.value === v
-        )
+        const { detents } = animatedDetentsState.get()
+        const atSnapPoint =
+          detents !== undefined &&
+          detents.some((v) => animatedPosition.value === v)
 
         /**
          * NOTE: this is the change to the default hook.
@@ -130,9 +127,12 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           scrollableContentOffsetY.value = lockPosition
           return
         }
-        if (animatedAnimationState.value !== ANIMATION_STATE.RUNNING) {
+        if (animatedAnimationState.get().status !== ANIMATION_STATUS.RUNNING) {
           scrollableContentOffsetY.value = y
-          rootScrollableContentOffsetY.value = y
+          animatedScrollableState.set((state) => ({
+            ...state,
+            contentOffsetY: y
+          }))
         }
       },
       [
@@ -140,16 +140,18 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
         scrollableContentOffsetY,
         animatedAnimationState,
         animatedScrollableState,
-        rootScrollableContentOffsetY
+        animatedDetentsState,
+        animatedPosition
       ]
     )
   const handleOnMomentumEnd: ScrollEventHandlerCallbackType<ScrollEventContextType> =
     useCallback(
       ({ contentOffset: { y } }, context) => {
         'worklet'
-        const atSnapPoint = animatedSnapPoints.value.some(
-          (v) => animatedPosition.value === v
-        )
+        const { detents } = animatedDetentsState.get()
+        const atSnapPoint =
+          detents !== undefined &&
+          detents.some((v) => animatedPosition.value === v)
 
         /**
          * NOTE: this is the change to the default hook.
@@ -165,9 +167,12 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           scrollableContentOffsetY.value = 0
           return
         }
-        if (animatedAnimationState.value !== ANIMATION_STATE.RUNNING) {
+        if (animatedAnimationState.get().status !== ANIMATION_STATUS.RUNNING) {
           scrollableContentOffsetY.value = y
-          rootScrollableContentOffsetY.value = y
+          animatedScrollableState.set((state) => ({
+            ...state,
+            contentOffsetY: y
+          }))
         }
       },
       [
@@ -175,7 +180,8 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
         scrollableRef,
         animatedAnimationState,
         animatedScrollableState,
-        rootScrollableContentOffsetY
+        animatedDetentsState,
+        animatedPosition
       ]
     )
   // #endregion

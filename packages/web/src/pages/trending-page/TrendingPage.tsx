@@ -2,22 +2,20 @@ import { RefObject } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import TrendingPageProvider from './TrendingPageProvider'
 import TrendingPageContent from './components/desktop/TrendingPageContent'
 import TrendingPageMobileContent from './components/mobile/TrendingPageContent'
 
-interface TrendingPageContentProps {
+type TrendingPageProps = {
   containerRef: RefObject<HTMLDivElement>
 }
 
-const TrendingPage = ({ containerRef }: TrendingPageContentProps) => {
+const TrendingPage = ({ containerRef }: TrendingPageProps) => {
   const isMobile = useIsMobile()
-  const content = isMobile ? TrendingPageMobileContent : TrendingPageContent
 
-  return (
-    <TrendingPageProvider containerRef={containerRef}>
-      {content}
-    </TrendingPageProvider>
+  return isMobile ? (
+    <TrendingPageMobileContent containerRef={containerRef} />
+  ) : (
+    <TrendingPageContent containerRef={containerRef} />
   )
 }
 

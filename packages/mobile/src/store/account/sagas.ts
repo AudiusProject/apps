@@ -7,9 +7,9 @@ import {
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { updateProfileAsync } from 'common/store/profile/sagas'
-import FastImage from 'react-native-fast-image'
 import { takeEvery, call } from 'typed-redux-saga'
 
+import { preload } from '@audius/harmony-native'
 import { IS_MOBILE_USER } from 'app/constants/storage-keys'
 const { signedIn } = accountActions
 
@@ -27,7 +27,7 @@ function* cacheUserImages(user: User) {
       .filter(removeNullable)
       .map((uri) => ({ uri }))
 
-    yield* call(FastImage.preload, sourcesToPreload)
+    yield* call(preload, sourcesToPreload)
   } catch (e) {
     console.error('Could not cache profile images', e)
   }
