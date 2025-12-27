@@ -6,10 +6,6 @@ declare module '@emotion/react' {
   export interface Theme extends HarmonyTheme {}
 }
 
-// Override Storybook's Theme to be HarmonyTheme
-declare module '@storybook/theming' {
-  export interface Theme extends HarmonyTheme {}
-}
 
 // Fix for React 19 JSX types with Emotion
 declare global {

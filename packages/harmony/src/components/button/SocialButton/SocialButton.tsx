@@ -7,7 +7,7 @@ import type { ButtonProps } from '../Button/types'
 
 type SocialMedia = 'tiktok' | 'instagram' | 'x'
 
-// Omitting aria-label from original type purely for showing in Storybook
+// Omitting aria-label from original type for development purposes
 export type SocialButtonProps = ButtonProps & {
   /**
    * Which social media.

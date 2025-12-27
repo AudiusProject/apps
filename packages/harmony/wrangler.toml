@@ -6,5 +6,4 @@ account_id = "3811365464a8e56b2b27a5590e328e49"
 workers_dev = true
 
 [site]
-bucket = "./storybook-static"
 entry-point = "./workers-site"

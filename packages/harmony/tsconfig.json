@@ -17,9 +17,7 @@
     // TODO: enable after react-native migration [C-3548]
     "isolatedModules": false,
     "paths": {
-      "~harmony/*": ["src/*"],
-      "storybook": ["src/storybook/index.ts"],
-      "storybook/*": ["src/storybook/*"]
+      "~harmony/*": ["src/*"]
     },
     "plugins": [
       { "transform": "typescript-transform-paths" },

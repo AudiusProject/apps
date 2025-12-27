@@ -53,7 +53,7 @@
     "embed:dev": "npm run start:dev -w embed",
     "HARMONY====================================": "",
     "harmony": "turbo run start --filter=@audius/harmony",
-    "harmony:dev": "npm run storybook -w @audius/harmony",
+    "harmony:dev": "npm run start -w @audius/harmony",
     "SDK======================================": "",
     "sdk": "turbo run start --filter=@audius/sdk",
     "sdk:browser:es": "npm run start:sdk:browser:es -w @audius/sdk",

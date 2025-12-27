@@ -1,14 +1,8 @@
 {
   "extends": ["//"],
   "tasks": {
-    "build-storybook": {
-      "outputs": ["storybook-static/**"],
-      "dependsOn": ["^build"],
-      "outputLogs": "new-only"
-    },
     "test": {
       "outputs": ["coverage/**"],
-      "dependsOn": ["build-storybook"],
       "outputLogs": "new-only"
     }
   }

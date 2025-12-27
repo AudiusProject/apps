@@ -12,7 +12,6 @@ const LoadingSpinner = (props: LoadingSpinnerProps) => {
   return (
     <Flex
       role='progressbar'
-      data-chromatic='ignore'
       css={(theme) => ({
         height: size ? theme.iconSizes[size] : undefined,
         width: size ? theme.iconSizes[size] : undefined,

@@ -1,6 +1,4 @@
 <p align="center">
-  <img height="288px" src="https://github.com/AudiusProject/apps/blob/main/packages/harmony/src/storybook/assets/harmonyLogoDark.png#gh-dark-mode-only">
-  <img height="288px" src="https://github.com/AudiusProject/apps/blob/main/packages/harmony/src/storybook/assets/harmonyLogo.png?raw=true#gh-light-mode-only">
 
   <p align="center">
     Harmony is design system focused on collaboration, reusability, and scalability.
@@ -114,12 +112,6 @@ const App = () => {
 ```
 
 ## Development
-
-Run storybook (docs site):
-
-```bash
-npm run storybook
-```
 
 ## Contribution
 

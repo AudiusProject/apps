@@ -17,7 +17,7 @@ export type HTMLButtonProps = ComponentPropsWithoutRef<'button'>
 
 /**
  * These props should only be used for dev purposes, whether in debug mode,
- * or to show various states in storybook.
+ * or to show various states in development.
  * */
 type InternalProps = {
   /**
