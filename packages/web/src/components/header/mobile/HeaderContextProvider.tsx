@@ -1,6 +1,8 @@
 import {
   memo,
   ReactNode,
+  ReactElement,
+  isValidElement,
   createContext,
   useState,
   useEffect,
@@ -43,7 +45,7 @@ export const HeaderContextProvider = memo(
   }
 )
 
-export const HeaderContextConsumer = () => {
+export const HeaderContextConsumer = (): ReactElement | null => {
   const location = useLocation()
   const { pathname } = location
   const [getPreviousPathname, setPreviousPathname] = useInstanceVar(pathname)
@@ -60,5 +62,6 @@ export const HeaderContextConsumer = () => {
     setPreviousPathname(pathname)
   }, [pathname, setHeader, getPreviousPathname, setPreviousPathname])
 
-  return header
+  // Use React's built-in type guard to check if header is a valid React element
+  return isValidElement(header) ? header : null
 }

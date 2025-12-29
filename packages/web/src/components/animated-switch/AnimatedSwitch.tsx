@@ -139,29 +139,33 @@ const AnimatedSwitch = ({
     extraStyles.transform = 'none'
   }
 
-  return transitions.map(({ item, props, state, key }) => {
-    if (stackReset && state === 'leave') {
-      return null
-    }
-    const transitionProps = stackReset ? {} : props
-    return (
-      <animatedAny.div
-        ref={animationRef}
-        style={{
-          ...transitionProps,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          ...extraStyles
-        }}
-        key={key}
-      >
-        <Routes location={item}>{children}</Routes>
-      </animatedAny.div>
-    )
-  })
+  return (
+    <>
+      {transitions.map(({ item, props, state, key }) => {
+        if (stackReset && state === 'leave') {
+          return null
+        }
+        const transitionProps = stackReset ? {} : props
+        return (
+          <animatedAny.div
+            ref={animationRef}
+            style={{
+              ...transitionProps,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              ...extraStyles
+            }}
+            key={key}
+          >
+            <Routes location={item}>{children}</Routes>
+          </animatedAny.div>
+        )
+      })}
+    </>
+  )
 }
 
 export default AnimatedSwitch
