@@ -54,60 +54,11 @@ import Notice from 'components/notice/Notice'
 import { NotificationPage } from 'components/notification'
 import PlayBarProvider from 'components/play-bar/PlayBarProvider'
 import { RewardClaimedToast } from 'components/reward-claimed-toast/RewardClaimedToast'
-import TrendingGenreSelectionPage from 'components/trending-genre-selection/TrendingGenreSelectionPage'
 import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceFetcher'
 import { useEnvironment } from 'hooks/useEnvironment'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
-import { ArtistCoinsExplorePage } from 'pages/artist-coins-explore-page/ArtistCoinsExplorePage'
-import { LaunchpadPage } from 'pages/artist-coins-launchpad-page'
-import { MobileArtistCoinsSortPage } from 'pages/artist-coins-sort-page/MobileArtistCoinsSortPage'
-import { CashPage } from 'pages/cash-page'
-import ChatPage from 'pages/chat-page'
-import { CoinDetailPage } from 'pages/coin-detail-page/CoinDetailPage'
-import { ExclusiveTracksPage } from 'pages/coin-detail-page/components/ExclusiveTracksPage'
-import { ArtistCoinDetailsPage } from 'pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage'
-import { ExclusiveTracksPage as MobileExclusiveTracksPage } from 'pages/coin-detail-page/components/mobile/ExclusiveTracksPage'
-import { CoinRedeemPage } from 'pages/coin-redeem-page/CoinRedeemPage'
-import CollectionPage from 'pages/collection-page/CollectionPage'
-import CommentHistoryPage from 'pages/comment-history/CommentHistoryPage'
-import { DashboardPage } from 'pages/dashboard-page/DashboardPage'
-import { DeactivateAccountPage } from 'pages/deactivate-account-page/DeactivateAccountPage'
-import DevTools from 'pages/dev-tools/DevTools'
-import SolanaToolsPage from 'pages/dev-tools/SolanaToolsPage'
-import UserIdParserPage from 'pages/dev-tools/UserIdParserPage'
-import { EditCoinDetailsPage } from 'pages/edit-coin-details-page/EditCoinDetailsPage'
-import { EditCollectionPage } from 'pages/edit-collection-page'
-import EmptyPage from 'pages/empty-page/EmptyPage'
-import FavoritesPage from 'pages/favorites-page/FavoritesPage'
-import { FbSharePage } from 'pages/fb-share-page/FbSharePage'
-import FeedPage from 'pages/feed-page/FeedPage'
-import FollowersPage from 'pages/followers-page/FollowersPage'
-import FollowingPage from 'pages/following-page/FollowingPage'
-import HistoryPage from 'pages/history-page/HistoryPage'
-import { LeaderboardPage } from 'pages/leaderboard-page/LeaderboardPage'
-import LibraryPage from 'pages/library-page/LibraryPage'
-import { NotFoundPage } from 'pages/not-found-page/NotFoundPage'
-import { NotificationUsersPage } from 'pages/notification-users-page/NotificationUsersPage'
-import { PayAndEarnPage } from 'pages/pay-and-earn-page/PayAndEarnPage'
 import { TableType } from 'pages/pay-and-earn-page/types'
-import { PickWinnersPage } from 'pages/pick-winners-page/PickWinnersPage'
-import ProfilePage from 'pages/profile-page/ProfilePage'
-import RemixesPage from 'pages/remixes-page/RemixesPage'
-import RepostsPage from 'pages/reposts-page/RepostsPage'
-import { RequiresUpdate } from 'pages/requires-update/RequiresUpdate'
-import { RewardsPage } from 'pages/rewards-page/RewardsPage'
-import { ExplorePage } from 'pages/search-explore-page/ExplorePage'
-import SettingsPage from 'pages/settings-page/SettingsPage'
 import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
-import SupportingPage from 'pages/supporting-page/SupportingPage'
-import TopSupportersPage from 'pages/top-supporters-page/TopSupportersPage'
-import { TrackCommentsPage } from 'pages/track-page/TrackCommentsPage'
-import TrackPage from 'pages/track-page/TrackPage'
-import TrendingPage from 'pages/trending-page/TrendingPage'
-import TrendingPlaylistsPage from 'pages/trending-playlists/TrendingPlaylistPage'
-import TrendingUndergroundPage from 'pages/trending-underground/TrendingUndergroundPage'
-import Visualizer from 'pages/visualizer/Visualizer'
-import { WalletPage } from 'pages/wallet-page'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
 import { initializeSentry } from 'services/sentry'
 import { SsrContext } from 'ssr/SsrContext'
@@ -121,6 +72,160 @@ import 'utils/redirect'
 import { getPathname } from 'utils/route'
 
 import styles from './WebPlayer.module.css'
+const TrendingGenreSelectionPage = lazy(
+  () => import('components/trending-genre-selection/TrendingGenreSelectionPage')
+)
+// Lazy load heavy page components for code-splitting
+const ArtistCoinsExplorePage = lazy(() =>
+  import('pages/artist-coins-explore-page/ArtistCoinsExplorePage').then(
+    (m) => ({ default: m.ArtistCoinsExplorePage })
+  )
+)
+const LaunchpadPage = lazy(() =>
+  import('pages/artist-coins-launchpad-page').then((m) => ({
+    default: m.LaunchpadPage
+  }))
+)
+const MobileArtistCoinsSortPage = lazy(
+  () => import('pages/artist-coins-sort-page/MobileArtistCoinsSortPage')
+)
+const CashPage = lazy(() =>
+  import('pages/cash-page').then((m) => ({ default: m.CashPage }))
+)
+const ChatPage = lazy(() => import('pages/chat-page'))
+const CoinDetailPage = lazy(() =>
+  import('pages/coin-detail-page/CoinDetailPage').then((m) => ({
+    default: m.CoinDetailPage
+  }))
+)
+const ExclusiveTracksPage = lazy(() =>
+  import('pages/coin-detail-page/components/ExclusiveTracksPage').then((m) => ({
+    default: m.ExclusiveTracksPage
+  }))
+)
+const ArtistCoinDetailsPage = lazy(() =>
+  import('pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage').then(
+    (m) => ({ default: m.ArtistCoinDetailsPage })
+  )
+)
+const MobileExclusiveTracksPage = lazy(() =>
+  import('pages/coin-detail-page/components/mobile/ExclusiveTracksPage').then(
+    (m) => ({ default: m.ExclusiveTracksPage })
+  )
+)
+const CoinRedeemPage = lazy(() =>
+  import('pages/coin-redeem-page/CoinRedeemPage').then((m) => ({
+    default: m.CoinRedeemPage
+  }))
+)
+const CollectionPage = lazy(
+  () => import('pages/collection-page/CollectionPage')
+)
+const CommentHistoryPage = lazy(
+  () => import('pages/comment-history/CommentHistoryPage')
+)
+const DashboardPage = lazy(() =>
+  import('pages/dashboard-page/DashboardPage').then((m) => ({
+    default: m.DashboardPage
+  }))
+)
+const DeactivateAccountPage = lazy(() =>
+  import('pages/deactivate-account-page/DeactivateAccountPage').then((m) => ({
+    default: m.DeactivateAccountPage
+  }))
+)
+const DevTools = lazy(() => import('pages/dev-tools/DevTools'))
+const SolanaToolsPage = lazy(() => import('pages/dev-tools/SolanaToolsPage'))
+const UserIdParserPage = lazy(() => import('pages/dev-tools/UserIdParserPage'))
+const EditCoinDetailsPage = lazy(() =>
+  import('pages/edit-coin-details-page/EditCoinDetailsPage').then((m) => ({
+    default: m.EditCoinDetailsPage
+  }))
+)
+const EditCollectionPage = lazy(() =>
+  import('pages/edit-collection-page').then((m) => ({
+    default: m.EditCollectionPage
+  }))
+)
+const EmptyPage = lazy(() => import('pages/empty-page/EmptyPage'))
+const FavoritesPage = lazy(() => import('pages/favorites-page/FavoritesPage'))
+const FbSharePage = lazy(() =>
+  import('pages/fb-share-page/FbSharePage').then((m) => ({
+    default: m.FbSharePage
+  }))
+)
+const FeedPage = lazy(() => import('pages/feed-page/FeedPage'))
+const FollowersPage = lazy(() => import('pages/followers-page/FollowersPage'))
+const FollowingPage = lazy(() => import('pages/following-page/FollowingPage'))
+const HistoryPage = lazy(() => import('pages/history-page/HistoryPage'))
+const LeaderboardPage = lazy(() =>
+  import('pages/leaderboard-page/LeaderboardPage').then((m) => ({
+    default: m.LeaderboardPage
+  }))
+)
+const LibraryPage = lazy(() => import('pages/library-page/LibraryPage'))
+const NotFoundPage = lazy(() =>
+  import('pages/not-found-page/NotFoundPage').then((m) => ({
+    default: m.NotFoundPage
+  }))
+)
+const NotificationUsersPage = lazy(() =>
+  import('pages/notification-users-page/NotificationUsersPage').then((m) => ({
+    default: m.NotificationUsersPage
+  }))
+)
+const PayAndEarnPage = lazy(() =>
+  import('pages/pay-and-earn-page/PayAndEarnPage').then((m) => ({
+    default: m.PayAndEarnPage
+  }))
+)
+const PickWinnersPage = lazy(() =>
+  import('pages/pick-winners-page/PickWinnersPage').then((m) => ({
+    default: m.PickWinnersPage
+  }))
+)
+const ProfilePage = lazy(() => import('pages/profile-page/ProfilePage'))
+const RemixesPage = lazy(() => import('pages/remixes-page/RemixesPage'))
+const RepostsPage = lazy(() => import('pages/reposts-page/RepostsPage'))
+const RequiresUpdate = lazy(() =>
+  import('pages/requires-update/RequiresUpdate').then((m) => ({
+    default: m.RequiresUpdate
+  }))
+)
+const RewardsPage = lazy(() =>
+  import('pages/rewards-page/RewardsPage').then((m) => ({
+    default: m.RewardsPage
+  }))
+)
+const ExplorePage = lazy(() =>
+  import('pages/search-explore-page/ExplorePage').then((m) => ({
+    default: m.ExplorePage
+  }))
+)
+const SettingsPage = lazy(() => import('pages/settings-page/SettingsPage'))
+const SupportingPage = lazy(
+  () => import('pages/supporting-page/SupportingPage')
+)
+const TopSupportersPage = lazy(
+  () => import('pages/top-supporters-page/TopSupportersPage')
+)
+const TrackCommentsPage = lazy(() =>
+  import('pages/track-page/TrackCommentsPage').then((m) => ({
+    default: m.TrackCommentsPage
+  }))
+)
+const TrackPage = lazy(() => import('pages/track-page/TrackPage'))
+const TrendingPage = lazy(() => import('pages/trending-page/TrendingPage'))
+const TrendingPlaylistsPage = lazy(
+  () => import('pages/trending-playlists/TrendingPlaylistPage')
+)
+const TrendingUndergroundPage = lazy(
+  () => import('pages/trending-underground/TrendingUndergroundPage')
+)
+const Visualizer = lazy(() => import('pages/visualizer/Visualizer'))
+const WalletPage = lazy(() =>
+  import('pages/wallet-page').then((m) => ({ default: m.WalletPage }))
+)
 
 const {
   FEED_PAGE,
