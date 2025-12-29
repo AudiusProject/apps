@@ -7,21 +7,21 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated'
 
-import { FastImage } from './FastImage/FastImage'
-import type { FastImageProps } from './FastImage/FastImage'
+import { Image } from './Image/Image'
+import type { ImageProps } from './Image/Image'
 import { Skeleton } from './Skeleton'
 import { Box } from './layout/Box/Box'
 import type { BoxProps } from './layout/Box/types'
 import { Flex } from './layout/Flex/Flex'
 
-const AnimatedFastImage = Animated.createAnimatedComponent(FastImage)
+const AnimatedImage = Animated.createAnimatedComponent(Image)
 
 export type ArtworkProps = {
   isLoading?: boolean
   borderWidth?: number
   'data-testid'?: string
   noLoading?: boolean
-} & Partial<Pick<FastImageProps, 'source'>> &
+} & Partial<Pick<ImageProps, 'source'>> &
   BoxProps
 
 /**
@@ -104,7 +104,7 @@ export const Artwork = (props: ArtworkProps) => {
           }}
         />
         {hasImageSource ? (
-          <AnimatedFastImage
+          <AnimatedImage
             testID={testId}
             style={[
               {

@@ -1,5 +1,3 @@
-import { useCallback } from 'react'
-
 import { useCollection } from '@audius/common/api'
 import { useImageSize } from '@audius/common/hooks'
 import type { SquareSizes, ID } from '@audius/common/models'
@@ -7,8 +5,8 @@ import { reachabilitySelectors } from '@audius/common/store'
 import type { Maybe } from '@audius/common/utils'
 import { useSelector } from 'react-redux'
 
-import { FastImage, preload, useTheme } from '@audius/harmony-native'
-import type { FastImageProps } from '@audius/harmony-native'
+import { Image, preload, useTheme } from '@audius/harmony-native'
+import type { ImageProps } from '@audius/harmony-native'
 import imageEmpty from 'app/assets/images/imageBlank2x.png'
 import { getLocalCollectionCoverArtPath } from 'app/services/offline-downloader'
 import { getCollectionDownloadStatus } from 'app/store/offline-downloads/selectors'
@@ -51,7 +49,7 @@ export const useCollectionImage = ({
   const { data: artwork } = useCollection(collectionId, {
     select: (collection) => collection.artwork
   })
-  const { imageUrl, onError } = useImageSize({
+  const { imageUrl } = useImageSize({
     artwork,
     targetSize: size,
     defaultImage: '',
@@ -63,8 +61,7 @@ export const useCollectionImage = ({
   if (imageUrl === '') {
     return {
       source: imageEmpty,
-      isFallbackImage: true,
-      onError
+      isFallbackImage: true
     }
   }
 
@@ -76,23 +73,21 @@ export const useCollectionImage = ({
     return {
       // @ts-ignore
       source: primitiveToImageSource(artwork.url),
-      isFallbackImage: false,
-      onError
+      isFallbackImage: false
     }
   }
 
   return {
     source: primitiveToImageSource(imageUrl),
-    isFallbackImage: false,
-    onError
+    isFallbackImage: false
   }
 }
 
 type CollectionImageProps = {
   collectionId: ID
   size: SquareSizes
-  style?: FastImageProps['style']
-  onLoad?: FastImageProps['onLoad']
+  style?: ImageProps['style']
+  onLoad?: ImageProps['onLoad']
   children?: React.ReactNode
 }
 
@@ -103,22 +98,12 @@ export const CollectionImage = (props: CollectionImageProps) => {
   const collectionImageSource = useCollectionImage({ collectionId, size })
   const { cornerRadius } = useTheme()
   const { skeleton } = useThemeColors()
-  const {
-    source: loadedSource,
-    isFallbackImage,
-    onError
-  } = collectionImageSource
+  const { source: loadedSource, isFallbackImage } = collectionImageSource
 
   const source = loadedSource ?? localCollectionImageUri
 
-  const handleError = useCallback(() => {
-    if (source && typeof source === 'object' && 'uri' in source && source.uri) {
-      onError(source.uri)
-    }
-  }, [source, onError])
-
   return (
-    <FastImage
+    <Image
       {...other}
       style={[
         { aspectRatio: 1, borderRadius: cornerRadius.s },
@@ -129,7 +114,6 @@ export const CollectionImage = (props: CollectionImageProps) => {
       ]}
       source={source}
       onLoad={onLoad}
-      onError={handleError}
     />
   )
 }

@@ -1,12 +1,10 @@
-import { useCallback } from 'react'
-
 import { useUser } from '@audius/common/api'
 import { useImageSize } from '@audius/common/hooks'
 import type { SquareSizes, ID } from '@audius/common/models'
 import { pick } from 'lodash'
 
-import { FastImage, preload } from '@audius/harmony-native'
-import type { FastImageProps } from '@audius/harmony-native'
+import { Image, preload } from '@audius/harmony-native'
+import type { ImageProps } from '@audius/harmony-native'
 import profilePicEmpty from 'app/assets/images/imageProfilePicEmpty2X.png'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
@@ -29,7 +27,7 @@ export const useProfilePicture = ({
   })
 
   const { profile_picture, updatedProfilePicture } = partialUser ?? {}
-  const { imageUrl, onError } = useImageSize({
+  const { imageUrl } = useImageSize({
     artwork: profile_picture,
     targetSize: size,
     defaultImage: '',
@@ -41,37 +39,28 @@ export const useProfilePicture = ({
   if (imageUrl === '') {
     return {
       source: profilePicEmpty,
-      isFallbackImage: true,
-      onError
+      isFallbackImage: true
     }
   }
 
   if (updatedProfilePicture) {
     return {
       source: primitiveToImageSource(updatedProfilePicture.url),
-      isFallbackImage: false,
-      onError
+      isFallbackImage: false
     }
   }
 
   return {
     source: primitiveToImageSource(imageUrl),
-    isFallbackImage: false,
-    onError
+    isFallbackImage: false
   }
 }
 
-export type UserImageProps = UseUserImageOptions & Partial<FastImageProps>
+export type UserImageProps = UseUserImageOptions & Partial<ImageProps>
 
 export const UserImage = (props: UserImageProps) => {
   const { userId, size, ...imageProps } = props
-  const { source, onError } = useProfilePicture({ userId, size })
+  const { source } = useProfilePicture({ userId, size })
 
-  const handleError = useCallback(() => {
-    if (source && typeof source === 'object' && 'uri' in source && source.uri) {
-      onError(source.uri)
-    }
-  }, [source, onError])
-
-  return <FastImage {...imageProps} source={source} onError={handleError} />
+  return <Image {...imageProps} source={source} />
 }

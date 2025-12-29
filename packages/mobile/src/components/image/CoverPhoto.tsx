@@ -1,5 +1,3 @@
-import { useCallback } from 'react'
-
 import { useUser } from '@audius/common/api'
 import { useImageSize } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
@@ -13,8 +11,8 @@ import Animated, {
   useAnimatedStyle
 } from 'react-native-reanimated'
 
-import type { FastImageProps } from '@audius/harmony-native'
-import { FastImage, preload } from '@audius/harmony-native'
+import type { ImageProps } from '@audius/harmony-native'
+import { Image, preload } from '@audius/harmony-native'
 
 import { useProfilePicture } from './UserImage'
 import { primitiveToImageSource } from './primitiveToImageSource'
@@ -42,7 +40,7 @@ export const useCoverPhoto = ({
   })
   const { cover_photo, updatedCoverPhoto } = partialUser ?? {}
   const coverPhoto = cover_photo
-  const { imageUrl, onError } = useImageSize({
+  const { imageUrl } = useImageSize({
     artwork: coverPhoto,
     targetSize: size,
     defaultImage: '',
@@ -57,26 +55,25 @@ export const useCoverPhoto = ({
   if (updatedCoverPhoto && !shouldBlur) {
     return {
       source: primitiveToImageSource(updatedCoverPhoto.url),
-      shouldBlur,
-      onError
+      shouldBlur
     }
   }
 
   if (shouldBlur) {
-    return { source: profilePicture, shouldBlur, onError }
+    return { source: profilePicture, shouldBlur }
   }
-  return { source: primitiveToImageSource(imageUrl), shouldBlur, onError }
+  return { source: primitiveToImageSource(imageUrl), shouldBlur }
 }
 
 type CoverPhotoProps = {
   userId: ID
-} & Partial<FastImageProps>
+} & Partial<ImageProps>
 
 export const CoverPhoto = (props: CoverPhotoProps) => {
   const { userId, ...imageProps } = props
   const scrollY = useCurrentTabScrollY()
 
-  const { source, shouldBlur, onError } = useCoverPhoto({
+  const { source, shouldBlur } = useCoverPhoto({
     userId,
     size: WidthSizes.SIZE_640
   })
@@ -107,17 +104,11 @@ export const CoverPhoto = (props: CoverPhotoProps) => {
     })
   }))
 
-  const handleError = useCallback(() => {
-    if (source && typeof source === 'object' && 'uri' in source && source.uri) {
-      onError(source.uri)
-    }
-  }, [source, onError])
-
   if (!source) return null
 
   return (
     <Animated.View style={animatedStyle}>
-      <FastImage source={source} {...imageProps} onError={handleError}>
+      <Image source={source} {...imageProps}>
         {shouldBlur || scrollY ? (
           <AnimatedBlurView
             blurType='light'
@@ -125,7 +116,7 @@ export const CoverPhoto = (props: CoverPhotoProps) => {
             style={blurViewStyle}
           />
         ) : null}
-      </FastImage>
+      </Image>
     </Animated.View>
   )
 }

@@ -1,22 +1,24 @@
 import type { ComponentProps } from 'react'
 
-import { Image, type ImageSourcePropType } from 'react-native'
+import { Image as RNImage, type ImageSourcePropType } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
 
-export type FastImageProps = Omit<
+export type ImageProps = Omit<
   ComponentProps<typeof TurboImage>,
-  'source' | 'onLoad'
+  'source' | 'onLoad' | 'style'
 > & {
   source?: ImageSourcePropType
   onLoad?: () => void
+  style?: ComponentProps<typeof TurboImage>['style']
 }
 
-export type ImageProps = Omit<FastImageProps, 'source'>
+// Export ImageProps without source for render prop usage
+export type ImagePropsWithoutSource = Omit<ImageProps, 'source'>
 
 /**
  * Utility component that wraps react-native-turbo-image
  */
-export const FastImage = (props: FastImageProps) => {
+export const Image = (props: ImageProps) => {
   const { source, onLoad, ...other } = props
 
   // Use React Native Image for local assets (number sources)
@@ -34,7 +36,7 @@ export const FastImage = (props: FastImageProps) => {
       accessible
     } = other as ComponentProps<typeof TurboImage>
     return (
-      <Image
+      <RNImage
         source={source}
         onLoad={onLoad}
         style={style}
@@ -63,9 +65,13 @@ export const FastImage = (props: FastImageProps) => {
   }
 
   // TurboImage uses onSuccess instead of onLoad
-  const turboProps = onLoad ? { ...other, onSuccess: () => onLoad() } : other
+  // Extract style to ensure it's always provided
+  const { style, ...restOther } = other
+  const turboProps = onLoad
+    ? { ...restOther, onSuccess: () => onLoad() }
+    : restOther
 
-  return <TurboImage source={imageSource} {...turboProps} />
+  return <TurboImage source={imageSource} style={style ?? {}} {...turboProps} />
 }
 
 /**
