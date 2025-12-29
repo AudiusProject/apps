@@ -29,12 +29,29 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useUpdateRequired } from 'app/hooks/useUpdateRequired'
 import { SplashScreen } from 'app/screens/splash-screen'
-import { UpdateRequiredScreen } from 'app/screens/update-required-screen'
 import { enterBackground, enterForeground } from 'app/store/lifecycle/actions'
 
-import { AppDrawerScreen } from '../app-drawer-screen'
-import { ResetPasswordModalScreen } from '../reset-password-screen'
-import { SignOnStack } from '../sign-on-screen'
+import { lazyScreenNamed } from 'app/utils/lazyScreen'
+
+// Lazy load root-level screens
+const AppDrawerScreen = lazyScreenNamed(
+  () => import('../app-drawer-screen'),
+  'AppDrawerScreen'
+)
+const ResetPasswordModalScreen = lazyScreenNamed(
+  () => import('../reset-password-screen'),
+  'ResetPasswordModalScreen'
+)
+const UpdateRequiredScreen = lazyScreenNamed(
+  () => import('../update-required-screen'),
+  'UpdateRequiredScreen'
+)
+
+// SignOnStack needs special handling since it's used as a render function with props
+const SignOnStackLazy = lazyScreenNamed(
+  () => import('../sign-on-screen'),
+  'SignOnStack'
+)
 
 import { StatusBar } from './StatusBar'
 import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount'
@@ -168,7 +185,7 @@ export const RootScreen = () => {
           ) : (
             <Stack.Screen name='SignOnStack'>
               {() => (
-                <SignOnStack
+                <SignOnStackLazy
                   isSplashScreenDismissed={isSplashScreenDismissed}
                 />
               )}

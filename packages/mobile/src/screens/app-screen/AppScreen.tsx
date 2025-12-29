@@ -5,18 +5,47 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Platform } from 'react-native'
 
 import { setLastNavAction } from 'app/hooks/useNavigation'
-
-import { BuySellModalScreen } from '../buy-sell-screen'
-import { ChangePasswordModalScreen } from '../change-password-screen'
-import { CreateChatBlastNavigator } from '../create-chat-blast-screen/CreateChatBlastNavigator'
-import { EditCollectionScreen } from '../edit-collection-screen'
-import { EditTrackModalScreen } from '../edit-track-screen'
-import { ExternalWalletsModalScreen } from '../external-wallets'
-import { FeatureFlagOverrideScreen } from '../feature-flag-override-screen'
-import { TipArtistModalScreen } from '../tip-artist-screen'
-import { UploadModalScreen } from '../upload-screen'
+import { lazyScreenNamed } from 'app/utils/lazyScreen'
 
 import { AppTabsScreen } from './AppTabsScreen'
+
+// Lazy load modal screens
+const BuySellModalScreen = lazyScreenNamed(
+  () => import('../buy-sell-screen'),
+  'BuySellModalScreen'
+)
+const ChangePasswordModalScreen = lazyScreenNamed(
+  () => import('../change-password-screen'),
+  'ChangePasswordModalScreen'
+)
+const CreateChatBlastNavigator = lazyScreenNamed(
+  () => import('../create-chat-blast-screen/CreateChatBlastNavigator'),
+  'CreateChatBlastNavigator'
+)
+const EditCollectionScreen = lazyScreenNamed(
+  () => import('../edit-collection-screen'),
+  'EditCollectionScreen'
+)
+const EditTrackModalScreen = lazyScreenNamed(
+  () => import('../edit-track-screen'),
+  'EditTrackModalScreen'
+)
+const ExternalWalletsModalScreen = lazyScreenNamed(
+  () => import('../external-wallets'),
+  'ExternalWalletsModalScreen'
+)
+const FeatureFlagOverrideScreen = lazyScreenNamed(
+  () => import('../feature-flag-override-screen'),
+  'FeatureFlagOverrideScreen'
+)
+const TipArtistModalScreen = lazyScreenNamed(
+  () => import('../tip-artist-screen'),
+  'TipArtistModalScreen'
+)
+const UploadModalScreen = lazyScreenNamed(
+  () => import('../upload-screen'),
+  'UploadModalScreen'
+)
 
 const Stack = createNativeStackNavigator()
 

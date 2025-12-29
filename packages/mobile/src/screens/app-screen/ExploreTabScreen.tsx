@@ -1,11 +1,23 @@
 import type { SearchCategory, SearchFilters } from '@audius/common/api'
 
-import { SearchExploreScreen } from '../explore-screen/SearchExploreScreen'
-import { TrendingPlaylistsScreen } from '../explore-screen/tabs/ForYouTab/TrendingPlaylistsScreen'
-import { TrendingUndergroundScreen } from '../explore-screen/tabs/ForYouTab/TrendingUndergroundScreen'
+import { lazyScreenNamed } from 'app/utils/lazyScreen'
 
 import type { AppTabScreenParamList } from './AppTabScreen'
 import { createAppTabScreenStack } from './createAppTabScreenStack'
+
+// Lazy load nested explore screens
+const SearchExploreScreen = lazyScreenNamed(
+  () => import('../explore-screen/SearchExploreScreen'),
+  'SearchExploreScreen'
+)
+const TrendingPlaylistsScreen = lazyScreenNamed(
+  () => import('../explore-screen/tabs/ForYouTab/TrendingPlaylistsScreen'),
+  'TrendingPlaylistsScreen'
+)
+const TrendingUndergroundScreen = lazyScreenNamed(
+  () => import('../explore-screen/tabs/ForYouTab/TrendingUndergroundScreen'),
+  'TrendingUndergroundScreen'
+)
 
 export type ExploreTabScreenParamList = AppTabScreenParamList & {
   SearchExplore: {

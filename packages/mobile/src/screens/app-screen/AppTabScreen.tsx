@@ -25,52 +25,154 @@ import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
-import { AudioScreen } from 'app/screens/audio-screen'
-import { CashScreen } from 'app/screens/cash-screen'
-import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
-import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
-import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
-import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
-import {
-  CoinDetailsScreen,
-  EditCoinDetailsScreen,
-  ExclusiveTracksScreen
-} from 'app/screens/coin-details-screen'
-import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
-import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
-import { EditProfileScreen } from 'app/screens/edit-profile-screen'
-import { ProfileScreen } from 'app/screens/profile-screen'
-import { RewardsScreen } from 'app/screens/rewards-screen'
-import {
-  AboutScreen,
-  AccountSettingsScreen,
-  ListeningHistoryScreen,
-  DownloadSettingsScreen,
-  InboxSettingsScreen,
-  CommentSettingsScreen,
-  NotificationSettingsScreen,
-  SettingsScreen
-} from 'app/screens/settings-screen'
-import { TrackScreen } from 'app/screens/track-screen'
-import { TrackRemixesScreen } from 'app/screens/track-screen/TrackRemixesScreen'
-import {
-  FavoritedScreen,
-  FollowersScreen,
-  FollowingScreen,
-  RepostsScreen,
-  NotificationUsersScreen,
-  MutualsScreen,
-  RelatedArtistsScreen,
-  TopSupportersScreen,
-  SupportingUsersScreen,
-  CoinLeaderboardScreen
-} from 'app/screens/user-list-screen'
-import { WalletScreen } from 'app/screens/wallet-screen'
+import { lazyScreenNamed } from 'app/utils/lazyScreen'
 
 import { ArtistCoinSortScreen } from '../artist-coin-sort-screen/ArtistCoinSortScreen'
 import { ArtistCoinsExploreScreen } from '../artist-coins-explore-screen/ArtistCoinsExploreScreen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
+
+// Lazy load all screens
+const AudioScreen = lazyScreenNamed(
+  () => import('app/screens/audio-screen'),
+  'AudioScreen'
+)
+const CashScreen = lazyScreenNamed(
+  () => import('app/screens/cash-screen'),
+  'CashScreen'
+)
+const ChangeEmailModalScreen = lazyScreenNamed(
+  () => import('app/screens/change-email-screen/ChangeEmailScreen'),
+  'ChangeEmailModalScreen'
+)
+const ChatListScreen = lazyScreenNamed(
+  () => import('app/screens/chat-screen/ChatListScreen'),
+  'ChatListScreen'
+)
+const ChatScreen = lazyScreenNamed(
+  () => import('app/screens/chat-screen/ChatScreen'),
+  'ChatScreen'
+)
+const ChatUserListScreen = lazyScreenNamed(
+  () => import('app/screens/chat-screen/ChatUserListScreen'),
+  'ChatUserListScreen'
+)
+const CoinDetailsScreen = lazyScreenNamed(
+  () => import('app/screens/coin-details-screen'),
+  'CoinDetailsScreen'
+)
+const EditCoinDetailsScreen = lazyScreenNamed(
+  () => import('app/screens/coin-details-screen'),
+  'EditCoinDetailsScreen'
+)
+const ExclusiveTracksScreen = lazyScreenNamed(
+  () => import('app/screens/coin-details-screen'),
+  'ExclusiveTracksScreen'
+)
+const CoinRedeemScreen = lazyScreenNamed(
+  () => import('app/screens/coin-redeem-screen'),
+  'CoinRedeemScreen'
+)
+const CollectionScreen = lazyScreenNamed(
+  () => import('app/screens/collection-screen/CollectionScreen'),
+  'CollectionScreen'
+)
+const EditProfileScreen = lazyScreenNamed(
+  () => import('app/screens/edit-profile-screen'),
+  'EditProfileScreen'
+)
+const ProfileScreen = lazyScreenNamed(
+  () => import('app/screens/profile-screen'),
+  'ProfileScreen'
+)
+const RewardsScreen = lazyScreenNamed(
+  () => import('app/screens/rewards-screen'),
+  'RewardsScreen'
+)
+const AboutScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'AboutScreen'
+)
+const AccountSettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'AccountSettingsScreen'
+)
+const ListeningHistoryScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'ListeningHistoryScreen'
+)
+const DownloadSettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'DownloadSettingsScreen'
+)
+const InboxSettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'InboxSettingsScreen'
+)
+const CommentSettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'CommentSettingsScreen'
+)
+const NotificationSettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'NotificationSettingsScreen'
+)
+const SettingsScreen = lazyScreenNamed(
+  () => import('app/screens/settings-screen'),
+  'SettingsScreen'
+)
+const TrackScreen = lazyScreenNamed(
+  () => import('app/screens/track-screen'),
+  'TrackScreen'
+)
+const TrackRemixesScreen = lazyScreenNamed(
+  () => import('app/screens/track-screen/TrackRemixesScreen'),
+  'TrackRemixesScreen'
+)
+const FavoritedScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'FavoritedScreen'
+)
+const FollowersScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'FollowersScreen'
+)
+const FollowingScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'FollowingScreen'
+)
+const RepostsScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'RepostsScreen'
+)
+const NotificationUsersScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'NotificationUsersScreen'
+)
+const MutualsScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'MutualsScreen'
+)
+const RelatedArtistsScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'RelatedArtistsScreen'
+)
+const TopSupportersScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'TopSupportersScreen'
+)
+const SupportingUsersScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'SupportingUsersScreen'
+)
+const CoinLeaderboardScreen = lazyScreenNamed(
+  () => import('app/screens/user-list-screen'),
+  'CoinLeaderboardScreen'
+)
+const WalletScreen = lazyScreenNamed(
+  () => import('app/screens/wallet-screen'),
+  'WalletScreen'
+)
 
 export type AppTabScreenParamList = {
   Track: {
