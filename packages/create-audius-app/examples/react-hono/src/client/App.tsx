@@ -17,11 +17,10 @@ import { hc } from 'hono/client'
 import { css } from '@emotion/react'
 import { useSdk } from './hooks/useSdk'
 import { useAuth } from './contexts/AuthProvider'
-import type { AppType } from '..'
+import { AppType } from '..'
 import { Status } from './contexts/types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const client = hc<AppType>('/') as any
+const client = hc<AppType>('/')
 
 export default function App() {
   const { sdk } = useSdk()
@@ -83,12 +82,12 @@ export default function App() {
     const { data: tracks } = await res.json()
     setTracks(tracks ?? [])
 
-    const trackFavorites = (tracks ?? []).reduce(
-      (result: Record<string, boolean>, track: FullSdk.TrackFull) => ({
+    const trackFavorites = (tracks ?? []).reduce<Record<string, boolean>>(
+      (result, track) => ({
         ...result,
         [track.id]: track.hasCurrentUserSaved
       }),
-      {} as Record<string, boolean>
+      {}
     )
 
     setFavorites(trackFavorites)
@@ -110,7 +109,7 @@ export default function App() {
 
   /**
    * Favorite or unfavorite a track. This requires a user to be authenticated and granted
-   * write permissions to the app. Uses the client-side SDK with hedgehog wallet for signing.
+   * write permissions to the app
    */
   const favoriteTrack =
     (trackId: string, favorite = true): MouseEventHandler<HTMLButtonElement> =>
@@ -120,14 +119,18 @@ export default function App() {
         setFavorites((prev) => ({ ...prev, [trackId]: favorite }))
         try {
           if (favorite) {
-            await sdk.tracks.favoriteTrack({
-              userId: user.id,
-              trackId
+            await client.favorite.$post({
+              json: {
+                userId: user.id,
+                trackId
+              }
             })
           } else {
-            await sdk.tracks.unfavoriteTrack({
-              userId: user.id,
-              trackId
+            await client.unfavorite.$post({
+              json: {
+                userId: user.id,
+                trackId
+              }
             })
           }
         } catch (e) {
