@@ -10,7 +10,7 @@ import { formatCurrency, shortenSPLAddress } from '@audius/common/utils'
 import { AUDIO } from '@audius/fixed-decimal'
 import {
   Flex,
-  IconAudiusLogoColor,
+  // IconAudiusLogoColor,
   IconPhantom,
   IconMetamask,
   IconSolana,
@@ -67,9 +67,8 @@ export const CurrentWalletBanner = ({
     isPending: isConnectingExternalWallet
   } = useConnectExternalWallets()
 
-  const WalletIcon = isUsingExternalWallet
-    ? getWalletIcon()
-    : IconAudiusLogoColor
+  const WalletIcon = isUsingExternalWallet ? getWalletIcon() : getWalletIcon()
+  // : IconAudiusLogoColor
 
   const {
     data: externalWalletTokenBalance,
