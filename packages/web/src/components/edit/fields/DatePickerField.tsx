@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { dayjs } from '@audius/common/utils'
-import { Flex, IconCalendarMonth, Popup, Text } from '@audius/harmony'
+import { Flex, IconCalendarMonth, Popup, Text, useTheme } from '@audius/harmony'
 import cn from 'classnames'
 import { useField, useFormikContext } from 'formik'
 
@@ -71,6 +71,7 @@ type DatePickerProps = DatePickerFieldProps & {
 }
 
 export const DatePicker = (props: DatePickerProps) => {
+  const { color } = useTheme()
   const {
     name,
     label,
@@ -108,11 +109,11 @@ export const DatePicker = (props: DatePickerProps) => {
         ph='l'
         pv='m'
         w='100%'
-        css={(theme) => ({
+        css={{
           '&:hover': {
-            borderColor: theme.color.border.strong
+            borderColor: color.border.strong
           }
-        })}
+        }}
       >
         <div
           ref={anchorRef}

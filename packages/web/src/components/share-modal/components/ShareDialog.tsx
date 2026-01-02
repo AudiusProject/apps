@@ -10,7 +10,8 @@ import {
   IconX,
   ButtonProps,
   Button,
-  ModalContentText
+  ModalContentText,
+  useTheme
 } from '@audius/harmony'
 
 import { messages } from '../messages'
@@ -21,12 +22,13 @@ import styles from './ShareDialog.module.css'
 type ShareActionListItemProps = ButtonProps
 
 const ShareActionListItem = (props: ShareActionListItemProps) => {
+  const { color } = useTheme()
   return (
     <li className={styles.actionListItem}>
       <Button
         variant='secondary'
         fullWidth
-        css={(theme) => ({ color: theme.color.secondary.secondary })}
+        css={{ color: color.secondary.secondary }}
         className={styles.actionButton}
         {...props}
       />

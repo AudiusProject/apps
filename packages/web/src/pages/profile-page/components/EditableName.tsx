@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 
-import { IconButton, IconPencil } from '@audius/harmony'
+import { IconButton, IconPencil, useTheme } from '@audius/harmony'
 import cn from 'classnames'
 
 import UserBadges from 'components/user-badges'
@@ -21,6 +21,7 @@ type EditableNameProps = {
 }
 
 export const EditableName = (props: EditableNameProps) => {
+  const { spacing } = useTheme()
   const { name, userId, onChange, editable, className, verified } = props
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -49,7 +50,7 @@ export const EditableName = (props: EditableNameProps) => {
           <div className={styles.editNameContainer}>
             <span className={styles.editingName}>{name}</span>
             <IconButton
-              css={(theme) => ({ marginBottom: theme.spacing.s })}
+              css={{ marginBottom: spacing.s }}
               aria-label={messages.editLabel}
               icon={IconPencil}
               color='white'

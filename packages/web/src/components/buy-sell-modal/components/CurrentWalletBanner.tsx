@@ -17,7 +17,8 @@ import {
   LoadingSpinner,
   Skeleton,
   Text,
-  TextLink
+  TextLink,
+  useTheme
 } from '@audius/harmony'
 
 import { appkitModal } from 'app/ReownAppKitModal'
@@ -55,6 +56,7 @@ export const CurrentWalletBanner = ({
 }: {
   inputToken: { mint: string; symbol: string }
 }) => {
+  const { color } = useTheme()
   const { data: currentUser } = useCurrentAccountUser()
   const externalWalletAccount = appkitModal.getAccount('solana')
 
@@ -199,9 +201,9 @@ export const CurrentWalletBanner = ({
                 border='default'
                 alignItems='center'
                 justifyContent='center'
-                css={(theme) => ({
-                  backgroundColor: theme.color.static.staticWhite
-                })}
+                css={{
+                  backgroundColor: color.static.staticWhite
+                }}
               >
                 <WalletIcon size='s' />
               </Flex>

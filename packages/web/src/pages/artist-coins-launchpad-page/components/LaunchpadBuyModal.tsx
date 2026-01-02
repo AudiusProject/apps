@@ -24,7 +24,8 @@ import {
   PlainButton,
   Text,
   TokenAmountInput,
-  Tooltip
+  Tooltip,
+  useTheme
 } from '@audius/harmony'
 import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
 import { FormikProvider, useFormikContext } from 'formik'
@@ -138,6 +139,7 @@ const FormInputStep = ({
     onMaxClick()
   }
 
+  const { spacing } = useTheme()
   return (
     <>
       <ModalHeader onClose={onClose}>
@@ -148,12 +150,12 @@ const FormInputStep = ({
           onClick={() => {
             window.open(WALLET_GUIDE_URL, '_blank')
           }}
-          css={(theme) => ({
+          css={{
             position: 'absolute',
-            top: theme.spacing.xl,
-            right: theme.spacing.xl,
+            top: spacing.xl,
+            right: spacing.xl,
             zIndex: zIndex.BUY_SELL_MODAL + 1
-          })}
+          }}
         >
           {buySellMessages.help}
         </PlainButton>
@@ -213,7 +215,7 @@ const FormInputStep = ({
               <Button variant='secondary' size='large' onClick={handleMaxClick}>
                 {buySellMessages.max}
               </Button>
-              <Flex css={(theme) => ({ minWidth: theme.spacing.unit15 })}>
+              <Flex css={{ minWidth: spacing.unit15 }}>
                 <TokenDropdown
                   selectedToken={values.selectedInputToken}
                   availableTokens={INPUT_TOKEN_LIST}

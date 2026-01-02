@@ -36,7 +36,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalTitle,
-  SegmentedControl
+  SegmentedControl,
+  useTheme
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
@@ -112,6 +113,7 @@ export const SettingsPage = () => {
   const dispatch = useDispatch()
   const isManagedAccount = useIsManagedAccount()
   const { authService, identityService } = useQueryContext()
+  const { spacing } = useTheme()
 
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
@@ -477,7 +479,7 @@ export const SettingsPage = () => {
           variant='secondary'
           iconLeft={IconSignOut}
           onClick={openSignOutModal}
-          css={(theme) => ({ marginBottom: theme.spacing.l })}
+          css={{ marginBottom: spacing.l }}
         >
           {settingsMessages.signOut}
         </Button>

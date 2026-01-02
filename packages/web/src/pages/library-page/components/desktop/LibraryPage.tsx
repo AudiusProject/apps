@@ -20,7 +20,8 @@ import {
   IconPause,
   IconPlay,
   Button,
-  IconLibrary
+  IconLibrary,
+  useTheme
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
@@ -65,6 +66,7 @@ const tableColumns: TracksTableColumn[] = [
 ]
 
 const LibraryPage = () => {
+  const { spacing } = useTheme()
   const {
     title,
     description,
@@ -159,7 +161,7 @@ const LibraryPage = () => {
       <Button
         variant='primary'
         size='small'
-        css={(theme) => ({ marginLeft: theme.spacing.xl })}
+        css={{ marginLeft: spacing.xl }}
         iconLeft={queuedAndPlaying ? IconPause : IconPlay}
         onClick={onPlay}
       >

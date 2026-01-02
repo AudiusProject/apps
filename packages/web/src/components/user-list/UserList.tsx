@@ -2,7 +2,7 @@ import { useCallback, useMemo, ReactNode } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { ID, FollowSource } from '@audius/common/models'
-import { Flex, useScrollbarRef, Text } from '@audius/harmony'
+import { Flex, useScrollbarRef, Text, useTheme } from '@audius/harmony'
 import { range } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 
@@ -75,6 +75,7 @@ export const UserList = <T extends UserListDataItem>({
   showRank = false,
   renderRightContent
 }: UserListProps<T>) => {
+  const { spacing } = useTheme()
   const { data: currentUserId } = useCurrentUserId()
   const scrollRef = useScrollbarRef()
 
@@ -131,12 +132,12 @@ export const UserList = <T extends UserListDataItem>({
         initialLoad={false}
         threshold={SCROLL_THRESHOLD}
         getScrollParent={scrollRef ? () => scrollRef?.current : undefined}
-        css={(theme) => ({
+        css={{
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing.s,
-          padding: theme.spacing.s
-        })}
+          gap: spacing.s,
+          padding: spacing.s
+        }}
       >
         {data?.map((item: T, index: number) => {
           const userId = getUserId(item)

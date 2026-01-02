@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
-import { Button } from '@audius/harmony'
+import { Button, useTheme } from '@audius/harmony'
 import { matchPath, useLocation } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { animated, useTransition } from 'react-spring'
@@ -154,6 +154,8 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
     decrementScroll()
   }
 
+  const theme = useTheme()
+
   return (
     <>
       {backgroundTransitions.map(({ item, props, key }) => {
@@ -198,11 +200,11 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
                                 >
                                   <Button
                                     variant='secondary'
-                                    css={(theme) => ({
+                                    css={{
                                       borderRadius: theme.cornerRadius['2xl'],
                                       color: theme.color.secondary.secondary,
                                       background: theme.color.static.white
-                                    })}
+                                    }}
                                     onClick={onClick}
                                   >
                                     {messages.openInApp}

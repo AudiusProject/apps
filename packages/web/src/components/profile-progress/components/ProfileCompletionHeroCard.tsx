@@ -49,7 +49,8 @@ export const ProfileCompletionHeroCard = () => {
   const isAccountLoaded = useIsAccountLoaded()
   const completionStages = useOrderedCompletionStages()
   const isDismissed = useSelector(getProfilePageMeterDismissed)
-  const { color } = useTheme()
+  const theme = useTheme()
+  const { color } = theme
 
   const onDismiss = () => dispatch(profileMeterDismissed())
 
@@ -99,13 +100,13 @@ export const ProfileCompletionHeroCard = () => {
               >
                 <Box
                   mt={34}
-                  css={(theme) => ({
+                  css={{
                     color: theme.color.text.accent,
                     fontSize: '52px',
                     fontWeight: theme.typography.weight.heavy,
                     lineHeight: theme.typography.lineHeight.xl,
                     letterSpacing: 1.86
-                  })}
+                  }}
                 >
                   <animatedAny.span>
                     {animatedPercentage.interpolate((v: unknown) =>
@@ -133,7 +134,7 @@ export const ProfileCompletionHeroCard = () => {
                 <TaskCompletionList completionStages={completionStages} />
               </Flex>
               <button
-                css={(theme) => ({
+                css={{
                   position: 'absolute',
                   bottom: theme.spacing.m,
                   right: theme.spacing.m,
@@ -149,7 +150,7 @@ export const ProfileCompletionHeroCard = () => {
                   '&:hover': {
                     textDecoration: 'underline'
                   }
-                })}
+                }}
                 onClick={onDismiss}
               >
                 Dismiss

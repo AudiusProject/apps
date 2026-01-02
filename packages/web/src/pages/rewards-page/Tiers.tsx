@@ -27,9 +27,9 @@ import {
   Flex,
   IconValidationCheck,
   IconRefresh,
-  useTheme,
   Paper,
-  Tooltip
+  Tooltip,
+  useTheme
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -188,9 +188,9 @@ const TierColumn = ({
           justifyContent='center'
           pv='m'
           mb='m'
-          css={(theme) => ({
-            background: theme.color.special.gradient
-          })}
+          css={{
+            background: color.special.gradient
+          }}
         >
           <Text variant='label' size='s' color='white'>
             {messages.currentTier}
