@@ -1,6 +1,6 @@
 import { Nullable } from '~/utils/typeUtils'
 
-export type Environment = 'development' | 'staging' | 'production'
+export type Environment = 'development' | 'production'
 
 export type Env = {
   AAO_ENDPOINT: string

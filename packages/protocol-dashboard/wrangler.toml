@@ -6,8 +6,5 @@ main = "src/worker.ts"
 [site]
 bucket = "./dist"
 
-[env.staging]
-name = "protocol-dashboard-staging"
-
 [env.production]
 name = "protocol-dashboard"

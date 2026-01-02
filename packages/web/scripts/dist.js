@@ -23,15 +23,6 @@ const PRODUCTION_ICON = 'resources/icons/AudiusIcon.png'
 const PRODUCTION_SCHEME = 'audius'
 const PRODUCTION_BUILD_DIR = 'build-production'
 
-const STAGING_APP_ID = 'co.audius.staging.app'
-const STAGING_NAME = 'Audius Staging'
-const STAGING_PACKAGE_JSON_NAME = 'audius-client-staging'
-const STAGING_BUCKET = 'download.staging.audius.co'
-const STAGING_ICNS = 'resources/icons/AudiusStagingIcon.icns'
-const STAGING_DMG_ICNS = 'resources/icons/AudiusStagingDmgIcon.icns'
-const STAGING_ICON = 'resources/icons/AudiusStagingIcon.png'
-const STAGING_SCHEME = 'audius-staging'
-const STAGING_BUILD_DIR = 'build-staging'
 
 program
   .option('-m, --mac', 'Build for mac')
@@ -41,7 +32,7 @@ program
   .option(
     '-e, --env [mode]',
     'Selected environment to deploy',
-    /^(staging|production)$/i
+    /^(production)$/i
   )
   .parse(process.argv)
 
@@ -89,7 +80,7 @@ const writeEnv = (isProduction) => {
   }
   return fse.writeFile(
     'electronConfig.json',
-    JSON.stringify({ env: 'staging' })
+    JSON.stringify({ env: 'localhost' })
   )
 }
 
@@ -98,19 +89,17 @@ const writeEnv = (isProduction) => {
  * @param {boolean} isProduction
  */
 const makeBuildParams = (isProduction) => {
-  const appId = isProduction ? PRODUCTION_APP_ID : STAGING_APP_ID
-  const productName = isProduction ? PRODUCTION_NAME : STAGING_NAME
-  const packageJsonName = isProduction
-    ? PRODUCTION_PACKAGE_JSON_NAME
-    : STAGING_PACKAGE_JSON_NAME
+  const appId = PRODUCTION_APP_ID
+  const productName = PRODUCTION_NAME
+  const packageJsonName = PRODUCTION_PACKAGE_JSON_NAME
 
-  const bucket = isProduction ? PRODUCTION_BUCKET : STAGING_BUCKET
-  const icns = isProduction ? PRODUCTION_ICNS : STAGING_ICNS
-  const dmgIcns = isProduction ? PRODUCTION_DMG_ICNS : STAGING_DMG_ICNS
-  const icon = isProduction ? PRODUCTION_ICON : STAGING_ICON
-  const buildDir = isProduction ? PRODUCTION_BUILD_DIR : STAGING_BUILD_DIR
+  const bucket = PRODUCTION_BUCKET
+  const icns = PRODUCTION_ICNS
+  const dmgIcns = PRODUCTION_DMG_ICNS
+  const icon = PRODUCTION_ICON
+  const buildDir = PRODUCTION_BUILD_DIR
 
-  const scheme = isProduction ? PRODUCTION_SCHEME : STAGING_SCHEME
+  const scheme = PRODUCTION_SCHEME
 
   return {
     config: {

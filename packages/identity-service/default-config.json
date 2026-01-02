@@ -16,7 +16,7 @@
   "web3Provider": "http://audius_ganache_cli:8545/",
   "nethermindWeb3Provider": "http://audius_ganache_cli:8545/",
   "secondaryWeb3Provider": "http://audius_ganache_cli:8545/",
-  "audiusNotificationUrl": "https://download.staging.audius.co/notifications",
+  "audiusNotificationUrl": "https://download.audius.co/notifications",
   "relayerPrivateKey": "34efbbc0431c7f481cdba15d65bbc9ef47196b9cf38d5c4b30afa2bcf86fafba",
   "relayerPublicKey": "0xaaaa90Fc2bfa70028D6b444BB9754066d9E2703b",
   "relayerWallets": "[{\"publicKey\":\"0xaaaa90Fc2bfa70028D6b444BB9754066d9E2703b\",\"privateKey\":\"34efbbc0431c7f481cdba15d65bbc9ef47196b9cf38d5c4b30afa2bcf86fafba\"},{\"publicKey\":\"0xBE718F98a5B5a473186eB6E30888F26E72be0b66\",\"privateKey\":\"d3426cd10c4e75207bdc4802c551d21faa89a287546c2c6b3d9a0476f34934d2\"}]",

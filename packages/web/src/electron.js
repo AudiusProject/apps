@@ -24,8 +24,7 @@ const POLL_FOR_WEB_UPDATES_INTERVAL_MS = 60_000 // 1 min
 
 const Environment = Object.freeze({
   PRODUCTION: 0,
-  STAGING: 1,
-  LOCALHOST: 2
+  LOCALHOST: 1
 })
 
 const args = process.argv.slice(2)
@@ -68,12 +67,6 @@ switch (env) {
     scheme = 'audius-localhost'
     buildName = 'build'
     s3Bucket = ''
-    break
-  case 'staging':
-    appEnvironment = Environment.STAGING
-    scheme = 'audius-staging'
-    buildName = 'build-staging'
-    s3Bucket = 'staging.audius.co'
     break
   case 'production':
     appEnvironment = Environment.PRODUCTION
@@ -409,10 +402,7 @@ const initMenu = () => {
     }
   ]
 
-  if (
-    appEnvironment === Environment.LOCALHOST ||
-    appEnvironment === Environment.STAGING
-  ) {
+  if (appEnvironment === Environment.LOCALHOST) {
     template.push({
       label: 'Debug',
       submenu: [

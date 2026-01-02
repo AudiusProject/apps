@@ -12,11 +12,6 @@ name = "test"
 route = "test.audius.co/*"
 vars = { GA = "https://general-admission.audius.co" }
 
-[env.staging]
-name = "embed-staging"
-route = "embed.staging.audius.co/*"
-vars = { GA = "https://general-admission.staging.audius.co" }
-
 [env.production]
 name = "embed"
 route = "embed.audius.co/*"

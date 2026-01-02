@@ -6,20 +6,6 @@ node_compat = true
 [site]
 bucket = "./build"
 
-[env.staging]
-name = "audius-staging"
-services = [
-  { binding = "SSR", service = "audius-web-ssr-staging" }
-]
-vars = { ENVIRONMENT = "staging", GA = "https://general-admission.staging.audius.co", EMBED = "https://embed-staging.audius.workers.dev", API_URL = "https://api.staging.audius.co", DISCOVERY_NODES = "https://api.staging.audius.co" }
-
-[env.staging-release]
-name = "audius-staging-release-candidate"
-services = [
-  { binding = "SSR", service = "audius-web-ssr-staging-release-candidate" }
-]
-vars = { ENVIRONMENT = "staging", GA = "https://general-admission.staging.audius.co", EMBED = "https://embed-staging.audius.workers.dev", API_URL = "https://api.staging.audius.co", DISCOVERY_NODES = "https://api.staging.audius.co" }
-
 [env.release]
 name = "audius-release-candidate"
 services = [

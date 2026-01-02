@@ -29,8 +29,6 @@ let pushPackageName = ''
 const environment = config.get('environment')
 if (environment === 'development') {
   pushPackageName = 'devPushPackage.zip'
-} else if (environment === 'staging') {
-  pushPackageName = 'stagingPushPackage.zip'
 } else {
   pushPackageName = 'productionPushPackage.zip'
 }

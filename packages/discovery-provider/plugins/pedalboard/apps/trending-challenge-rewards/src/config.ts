@@ -2,8 +2,7 @@ import { audiusSdk } from './sdk'
 import {
   AudiusSdk,
   developmentConfig,
-  productionConfig,
-  stagingConfig
+  productionConfig
 } from '@audius/sdk'
 import dotenv from 'dotenv'
 
@@ -24,14 +23,12 @@ export type SharedData = {
 let sharedData: SharedData | undefined = undefined
 
 const getApiEndpoint = (
-  environment: 'development' | 'staging' | 'production'
+  environment: 'development' | 'production'
 ) => {
   const sdkConfig =
     environment === 'development'
       ? developmentConfig
-      : environment === 'staging'
-        ? stagingConfig
-        : productionConfig
+      : productionConfig
   return sdkConfig.network.apiEndpoint
 }
 
@@ -44,13 +41,12 @@ export const initSharedData = async (): Promise<SharedData> => {
       apiSecret: process.env.trending_rewards_api_secret!,
       environment: process.env.environment as
         | 'development'
-        | 'staging'
         | 'production',
       solanaRpcEndpoint: process.env.solana_rpc_endpoint,
       solanaRelayNode: process.env.solana_relay_node!
     }),
     apiEndpoint: getApiEndpoint(
-      process.env.environment as 'development' | 'staging' | 'production'
+      process.env.environment as 'development' | 'production'
     ),
     runNow: process.env.run_now?.toLowerCase() === 'true',
     dryRun: process.env.tcr_dry_run?.toLowerCase() === 'true',

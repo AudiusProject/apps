@@ -18,17 +18,14 @@ const REWARD_MANAGER_SIZE = 66 // 1 (version) + 32 (token_account) + 32 (manager
 const TOKEN_ACCOUNT_SIZE = 165
 
 const STAGE_SENDERS = [
-  // creatornode9.staging.audius.co
   {
     senderEthAddress: '0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3',
     operatorEthAddress: '0x140eD283b33be2145ed7d9d15f1fE7bF1E0B2Ac3'
   },
-  // creatornode11.staging.audius.co
   {
     senderEthAddress: '0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6',
     operatorEthAddress: '0x4c88d2c0f4c4586b41621aD6e98882ae904B98f6'
   },
-  // creatornode12.staging.audius.co
   {
     senderEthAddress: '0x6b52969934076318863243fb92E9C4b3A08267b5',
     operatorEthAddress: '0x6b52969934076318863243fb92E9C4b3A08267b5'

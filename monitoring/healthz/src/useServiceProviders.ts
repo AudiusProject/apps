@@ -3,8 +3,6 @@ import { getRegisteredNodes } from './utils/contracts'
 
 const prodEndpoint = 'https://api.audius.co'
 
-const stagingEndpoint = 'https://api.staging.audius.co'
-
 export type SP = {
   id: string
   owner: string
@@ -19,10 +17,7 @@ function ethServiceFetcher(env: string) {
   const controller = new AbortController()
   const reqTimeout = setTimeout(() => controller.abort(), 5000)
 
-  let endpoint = prodEndpoint
-  if (env === 'staging') {
-    endpoint = stagingEndpoint
-  }
+  const endpoint = prodEndpoint
 
   return fetch(`${endpoint}/validators`, { signal: controller.signal })
     .then(async (resp) => {

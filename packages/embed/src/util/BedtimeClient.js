@@ -24,11 +24,7 @@ const audiusSdk = sdk({
 })
 
 const apiEndpoint =
-  env === 'production'
-    ? 'https://api.audius.co'
-    : env === 'staging'
-      ? 'https://api.staging.audius.co'
-      : 'http://audius-api'
+  env === 'production' ? 'https://api.audius.co' : 'http://audius-api'
 
 export const getTrackStreamEndpoint = (trackId, isPurchaseable) =>
   `${apiEndpoint}/v1/tracks/${trackId}/stream?app_name=${appName}&api_key=${apiKey}${

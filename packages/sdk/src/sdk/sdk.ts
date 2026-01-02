@@ -39,7 +39,6 @@ import { TracksApi } from './api/tracks/TracksApi'
 import { UsersApi } from './api/users/UsersApi'
 import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
-import { stagingConfig } from './config/staging'
 import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware
@@ -140,11 +139,7 @@ export const sdk = (config: SdkConfig) => {
 
 const initializeServices = (config: SdkConfig) => {
   const servicesConfig =
-    config.environment === 'development'
-      ? developmentConfig
-      : config.environment === 'staging'
-        ? stagingConfig
-        : productionConfig
+    config.environment === 'development' ? developmentConfig : productionConfig
 
   const defaultLogger = new Logger({
     logLevel: config.environment !== 'production' ? 'debug' : undefined
@@ -424,9 +419,7 @@ const initializeApis = ({
   const apiEndpoint =
     config.environment === 'development'
       ? developmentConfig.network.apiEndpoint
-      : config.environment === 'staging'
-        ? stagingConfig.network.apiEndpoint
-        : productionConfig.network.apiEndpoint
+      : productionConfig.network.apiEndpoint
   const basePath = `${apiEndpoint}/v1`
 
   const middleware = [

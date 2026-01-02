@@ -51,7 +51,6 @@ import Page from 'components/page/Page'
 import Toast from 'components/toast/Toast'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
-import { env } from 'services/env'
 import {
   isPushManagerAvailable,
   isSafariPushAvailable,
@@ -102,8 +101,6 @@ const {
 } = route
 const { version } = packageInfo
 
-const isStaging = env.ENVIRONMENT === 'staging'
-
 const EMAIL_TOAST_TIMEOUT = 2000
 
 const messages = {
@@ -130,7 +127,6 @@ export const SettingsPage = () => {
   const showMatrix =
     tier === 'gold' ||
     tier === 'platinum' ||
-    isStaging ||
     process.env.NODE_ENV === 'development'
 
   const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false)

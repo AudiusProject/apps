@@ -55,7 +55,7 @@ export default function Nodes() {
             </thead >
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {sps.map((sp) => (
-                <HealthRow key={sp.endpoint} sp={sp} isStaging={env === 'staging'} />
+                <HealthRow key={sp.endpoint} sp={sp} />
               ))}
             </tbody>
           </table >
@@ -81,7 +81,7 @@ export default function Nodes() {
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {sps.map((sp) => (
-                <CoreHealthRow key={sp.endpoint} sp={sp} isStaging={env === 'staging'} />
+                <CoreHealthRow key={sp.endpoint} sp={sp} />
               ))}
             </tbody>
           </table>
@@ -91,7 +91,7 @@ export default function Nodes() {
   }
 }
 
-function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
+function HealthRow({ sp }: { sp: SP }) {
   const path = '/health_check'
   const { data, error: dataError } = useSWR(sp.endpoint + path, fetcher)
   const { data: metrics } = useSWR(sp.endpoint + '/internal/metrics', fetcher)
@@ -175,7 +175,7 @@ function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
   }
 
   // 4TB artificial limit for cloud backends
-  const MAX_STORAGE_SIZE = isStaging ? 400 : 4000
+  const MAX_STORAGE_SIZE = 4000
   const totalMediorumSize = mediorumDiskSize && health.blobStorePrefix === 'file' ? mediorumDiskSize : MAX_STORAGE_SIZE
 
   const isBehind = 'whitespace-nowrap px-3 py-5 text-sm' + (health.block_difference > 5 ? ' is-unhealthy' : '')
@@ -314,7 +314,7 @@ function HealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
   )
 }
 
-function CoreHealthRow({ sp, isStaging }: { sp: SP, isStaging: boolean }) {
+function CoreHealthRow({ sp }: { sp: SP }) {
   const path = '/console/health_check'
   const { data, error: dataError } = useSWR(sp.endpoint + path, fetcher)
 

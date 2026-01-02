@@ -6,8 +6,6 @@ const getApiUrl = () => {
   switch (env) {
     case 'production':
       return 'https://api.audius.co'
-    case 'staging':
-      return 'https://api.staging.audius.co'
     case 'development':
     default:
       return process.env.VITE_API_URL || 'http://audius-api'

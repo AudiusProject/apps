@@ -63,8 +63,6 @@ react {
 project.ext.envConfigFiles = [
     prod: ".env.prod",
     releasecandidate: ".env.prod",
-    staging: ".env.stage",
-    stagingreleasecandidate: ".env.stage",
 ]
 
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
@@ -144,19 +142,6 @@ android {
             applicationIdSuffix ".releasecandidate"
             manifestPlaceholders = [
                 appIcon: "@mipmap/ic_launcher_releasecandidate"
-            ]
-        }
-        staging {
-            // Pre-compile run ENVFILE=.env.stage
-            applicationIdSuffix ".staging"
-            manifestPlaceholders = [
-                appIcon: "@mipmap/ic_launcher_staging"
-            ]
-        }
-        stagingReleaseCandidate {
-            applicationIdSuffix ".staging.releasecandidate"
-            manifestPlaceholders = [
-                appIcon: "@mipmap/ic_launcher_staging_releasecandidate"
             ]
         }
     }

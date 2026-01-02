@@ -23,13 +23,8 @@ import { useEmail, userFingerprints } from './identity'
 import { cors } from 'hono/cors'
 import { getAudiusSdk } from './sdk'
 
-let CONTENT_NODE = 'https://creatornode2.audius.co'
-let FRONTEND = 'https://audius.co'
-
-if (config.environment == 'stage') {
-  CONTENT_NODE = 'https://creatornode10.staging.audius.co'
-  FRONTEND = 'https://staging.audius.co'
-}
+const CONTENT_NODE = 'https://creatornode2.audius.co'
+const FRONTEND = 'https://audius.co'
 
 let { AAO_AUTH_USER, AAO_AUTH_PASSWORD } = process.env
 if (!AAO_AUTH_USER) {

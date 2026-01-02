@@ -35,9 +35,7 @@ const main = async () => {
     environment:
       config.environment === 'dev'
         ? 'development'
-        : config.environment === 'stage'
-          ? 'staging'
-          : 'production'
+        : 'production'
   })
   try {
     // async config

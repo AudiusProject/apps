@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { cleanEnv, str, num } from 'envalid'
 import { LogLevel } from './logger'
 
-export type Environment = 'dev' | 'stage' | 'prod'
+export type Environment = 'dev' | 'prod'
 
 export type Config = {
   environment: Environment

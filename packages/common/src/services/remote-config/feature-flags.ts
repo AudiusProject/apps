@@ -24,7 +24,6 @@ export const environmentFlagDefaults: Record<
   Partial<FlagDefaults>
 > = {
   development: {},
-  staging: {},
   production: {}
 }
 

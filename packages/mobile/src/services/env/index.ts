@@ -3,7 +3,6 @@ import Config from 'react-native-config'
 
 import { env as envDev } from './env.dev'
 import { env as envProd } from './env.prod'
-import { env as envStage } from './env.stage'
 
 const environment = Config.ENVIRONMENT
 
@@ -15,9 +14,6 @@ switch (environment) {
     break
   case 'production':
     env = envProd
-    break
-  case 'staging':
-    env = envStage
     break
   default:
     throw new Error(`Unknown environment: ${environment}`)

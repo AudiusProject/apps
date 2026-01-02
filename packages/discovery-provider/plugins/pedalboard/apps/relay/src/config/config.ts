@@ -44,7 +44,6 @@ const defaultCoreEndpoint = (env: string): string => {
 }
 
 export const chainId = (config: Config): string => {
-  if (config.environment == 'stage') return '1056801'
   if (config.environment == 'dev') return '1337'
   return '31524'
 }

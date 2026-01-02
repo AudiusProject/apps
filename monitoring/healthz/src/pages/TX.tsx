@@ -19,7 +19,6 @@ export function TxViewer() {
   const discoveryEndpoint = useSomeDiscoveryEndpoint()
   const provider = useEthersProvider()
   const isProd = useLocation().pathname.indexOf('/prod') == 0
-  const isStage = useLocation().pathname.indexOf('/stage') == 0
 
   const { data, isLoading } = useQuery(
     [location.pathname, location.search],
@@ -30,7 +29,7 @@ export function TxViewer() {
       const logs: any[] = await provider.getLogs({
         fromBlock: Math.max(0, latestBlock - (isProd ? 1000 : 10000)),
         toBlock: latestBlock,
-        address: emAddress(isProd, isStage),
+        address: emAddress(isProd),
       })
 
       logs.reverse()
@@ -41,13 +40,6 @@ export function TxViewer() {
   if (isLoading || !data) return <div>loading</div>
   const { latestBlock, logs } = data
 
-  function toggleStaging() {
-    if (isProd) {
-      navigate(location.pathname.replace('prod', 'stage'))
-    } else {
-      navigate(location.pathname.replace('stage', 'prod'))
-    }
-  }
 
   function showOlder() {
     const no = logs[logs.length - 1].blockNumber
@@ -67,15 +59,6 @@ export function TxViewer() {
           <h2>Recent Transactions</h2>
         </div>
 
-        <label onClick={toggleStaging}>
-          <input
-            type="checkbox"
-            checked={!isProd}
-            style={{ marginRight: 5 }}
-            onChange={() => {}}
-          />
-          staging
-        </label>
       </div>
 
       <div className="my-2 flex items-center gap-2">

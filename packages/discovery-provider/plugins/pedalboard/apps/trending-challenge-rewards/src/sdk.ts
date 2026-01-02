@@ -54,7 +54,7 @@ export const audiusSdk = ({
 }: {
   apiKey: string
   apiSecret: string
-  environment: 'development' | 'staging' | 'production'
+  environment: 'development' | 'production'
   solanaRpcEndpoint?: string
   solanaRelayNode: string
 }) => {

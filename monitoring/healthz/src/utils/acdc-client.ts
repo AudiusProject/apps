@@ -3,24 +3,17 @@ import { useEnvironmentSelection } from '../components/EnvironmentSelector'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
-export function emAddress(isProd: boolean, isStage: boolean) {
+export function emAddress(isProd: boolean) {
   if (isProd) {
-    return '0x1cd8a543596d499b9b6e7a6ec15ecd2b7857fd64'
-  }
-  if (isStage) {
     return '0x1cd8a543596d499b9b6e7a6ec15ecd2b7857fd64'
   }
   return '0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B'
 }
 
 export function useEthersProvider() {
-  const isStage = useLocation().pathname.indexOf('/stage') == 0
   const isDev = useLocation().pathname.indexOf('/dev') == 0
 
   let rpcEndpoint = 'https://discoveryprovider.audius.co/chain'
-  if (isStage) {
-    rpcEndpoint = 'https://discoveryprovider.staging.audius.co/chain'
-  }
   if (isDev) {
     rpcEndpoint = 'http://audius-discovery-provider-1/chain'
   }
@@ -35,26 +28,18 @@ export function useEthersProvider() {
 
 export function useSomeDiscoveryEndpoint() {
   const isProd = useLocation().pathname.indexOf('/prod') == 0
-  const isStage = useLocation().pathname.indexOf('/stage') == 0
 
   if (isProd) {
     return 'https://discoveryprovider.audius.co'
-  }
-  if (isStage) {
-    ;('https://discoveryprovider.staging.audius.co')
   }
   return 'http://audius-discovery-provider-1'
 }
 
 export function useSomeContentEndpoint() {
   const isProd = useLocation().pathname.indexOf('/prod') == 0
-  const isStage = useLocation().pathname.indexOf('/stage') == 0
 
   if (isProd) {
     return 'https://creatornode2.audius.co'
-  }
-  if (isStage) {
-    return 'https://creatornode12.staging.audius.co'
   }
   return 'http://audius-creator-node-1'
 }

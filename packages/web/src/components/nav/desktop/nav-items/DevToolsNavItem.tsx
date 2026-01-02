@@ -12,7 +12,7 @@ const { DEV_TOOLS_PAGE } = route
 export const DevToolsNavItem = () => {
   const { isProduction } = useEnvironment()
 
-  // Only show in development and staging environments
+  // Only show in development environment
   if (isProduction) {
     return null
   }

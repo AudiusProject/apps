@@ -22,9 +22,8 @@ npm run gen:{env}:{flavor?}
 
 ### Options
 
-- `env` choices=("dev", "stage", "prod"): Which environment to choose the API environment to generate from
+- `env` choices=("dev", "prod"): Which environment to choose the API environment to generate from
   - `dev`: http://127.0.0.1:1323/
-  - `stage`: https://api.staging.audius.co/
   - `prod`: https://api.audius.co
 - `flavor` [optional] choices=("default", "full"): Which flavor of the API to generate types for
   - undefined for both
@@ -36,11 +35,6 @@ npm run gen:{env}:{flavor?}
 npm run gen:dev
 npm run gen:dev:default
 npm run gen:dev:full
-
-#### STAGING ####
-npm run gen:stage
-npm run gen:stage:default
-npm run gen:stage:full
 
 #### PROD ####
 npm run gen:prod

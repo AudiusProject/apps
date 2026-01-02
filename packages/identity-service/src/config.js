@@ -504,7 +504,7 @@ const config = convict({
     env: 'apnAuthKey'
   },
   environment: {
-    doc: 'Determines running on development, staging, or production',
+    doc: 'Determines running on development or production',
     format: String,
     default: 'development',
     env: 'environment'

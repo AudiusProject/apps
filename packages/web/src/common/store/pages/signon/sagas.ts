@@ -116,11 +116,6 @@ function* getDefautFollowUserIds() {
       defaultFollowUserIds = new Set([51])
       break
     }
-    case 'staging': {
-      // user id 1964: stage testing account
-      defaultFollowUserIds = new Set([1964])
-      break
-    }
   }
 
   return defaultFollowUserIds
@@ -987,8 +982,6 @@ function* followArtists(
     if (!skipDefaultFollows) {
       if (ENVIRONMENT === 'production') {
         yield* fork(followCollections, [4281], FavoriteSource.SIGN_UP)
-      } else if (ENVIRONMENT === 'staging') {
-        yield* fork(followCollections, [555], FavoriteSource.SIGN_UP)
       }
     }
 

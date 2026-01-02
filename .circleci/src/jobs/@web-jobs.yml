@@ -53,11 +53,11 @@ web-build-demo:
         # demo.audius.co/some-branch/handle/track resolves as /handle/track would at audius.co
         command: |
           cd packages/web
-          cp ./env/.env.stage ./env/.env.stage.tmp
-          echo -e "\nVITE_BASENAME=/${CIRCLE_BRANCH}" >> ./env/.env.stage
-          CI=false npm run build:stage -w @audius/web
-          mv build-staging build-demo
-          cp ./env/.env.stage.tmp ./env/.env.stage
+          cp ./env/.env.dev ./env/.env.dev.tmp
+          echo -e "\nVITE_BASENAME=/${CIRCLE_BRANCH}" >> ./env/.env.dev
+          CI=false npm run build:dev -w @audius/web
+          mv build-development build-demo
+          cp ./env/.env.dev.tmp ./env/.env.dev
     - persist_to_workspace:
         root: ./
         paths:

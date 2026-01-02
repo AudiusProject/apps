@@ -3,10 +3,9 @@ import { readConfig, Environment } from './config'
 
 const environmentToSdkEnvironment: Record<
   Environment,
-  'development' | 'staging' | 'production'
+  'development' | 'production'
 > = {
   dev: 'development',
-  stage: 'staging',
   prod: 'production'
 }
 

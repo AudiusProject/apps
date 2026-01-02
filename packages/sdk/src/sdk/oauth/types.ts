@@ -29,9 +29,8 @@ export type WriteOnceParams =
       wallet: string
     }
 
-export type OAuthEnv = 'production' | 'staging'
+export type OAuthEnv = 'production'
 
 export const OAUTH_URL = {
-  production: 'https://audius.co/oauth/auth',
-  staging: 'https://staging.audius.co/oauth/auth'
+  production: 'https://audius.co/oauth/auth'
 } as Record<OAuthEnv, string>

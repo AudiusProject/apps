@@ -9,7 +9,7 @@ export const main = async () => {
   dotenv.config({ path: './dev.env' })
 
   const provider = new ethers.providers.JsonRpcProvider(
-    'http://eth-client.staging.audius.co'
+    'http://audius-eth-ganache-1'
   )
   const { chainId } = await provider.getNetwork()
   console.log(`chain id = ${chainId}`)
@@ -21,7 +21,7 @@ export const main = async () => {
     appName: 'experimentalDiscoveryRelay',
     apiKey,
     apiSecret,
-    environment: 'staging'
+    environment: 'development'
   })
   const { data } = await audiusSdk.users.getUserByHandle({
     handle: 'totallynotalec'

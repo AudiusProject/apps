@@ -7,10 +7,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:audius.co</string>
-		<string>applinks:staging.audius.co</string>
-		<string>applinks:general-admission.staging.audius.co</string>
 		<string>applinks:redirect.audius.co</string>
-		<string>applinks:redirect.staging.audius.co</string>
 	</array>
 	<key>com.apple.developer.networking.wifi-info</key>
 	<true/>
