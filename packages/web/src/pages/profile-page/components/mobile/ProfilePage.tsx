@@ -27,7 +27,7 @@ import TextElement, { Type } from 'components/nav/mobile/TextElement'
 import TierExplainerDrawer from 'components/user-badges/TierExplainerDrawer'
 import useTabs, { TabHeader } from 'hooks/useTabs/useTabs'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
-import { getUserPageSEOFields } from 'utils/seo'
+import { getUserPageSEOFields } from 'ssr/metaTags'
 
 import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 

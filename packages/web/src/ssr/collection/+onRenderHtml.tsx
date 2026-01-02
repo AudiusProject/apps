@@ -11,9 +11,14 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerCollectionPage } from 'pages/collection-page/DesktopServerCollectionPage'
 import { MobileServerCollectionPage } from 'pages/collection-page/MobileServerCollectionPage'
-import { canEmbed, getAppUrl, getEmbedUrl, getWebUrl } from 'ssr/metaTags'
+import {
+  canEmbed,
+  getAppUrl,
+  getCollectionPageSEOFields,
+  getEmbedUrl,
+  getWebUrl
+} from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
-import { getCollectionPageSEOFields } from 'utils/seo'
 
 import { getIndexHtml } from '../getIndexHtml'
 

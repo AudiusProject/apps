@@ -50,8 +50,8 @@ import NavContext, {
 import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
+import { getTrackPageSEOFields } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
-import { getTrackPageSEOFields } from 'utils/seo'
 
 import { TrackPageLineup } from '../TrackPageLineup'
 

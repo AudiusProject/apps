@@ -16,10 +16,10 @@ import {
   DEFAULT_IMAGE_URL,
   getAppUrl,
   getEmbedUrl,
-  getWebUrl
+  getWebUrl,
+  getTrackPageSEOFields
 } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
-import { getTrackPageSEOFields } from 'utils/seo'
 
 import { getIndexHtml } from '../getIndexHtml'
 

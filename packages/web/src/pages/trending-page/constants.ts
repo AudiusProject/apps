@@ -1,7 +1,7 @@
 import { TimeRange } from '@audius/common/models'
 import { trendingPageLineupActions } from '@audius/common/store'
 
-import { createSeoDescription } from 'utils/seo'
+import { createSeoDescription } from 'ssr/metaTags'
 
 // Static messages used throughout the trending page
 export const TRENDING_MESSAGES = {

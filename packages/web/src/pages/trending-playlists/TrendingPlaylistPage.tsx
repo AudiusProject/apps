@@ -16,8 +16,8 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
+import { createSeoDescription } from 'ssr/metaTags'
 import { BASE_URL } from 'utils/route'
-import { createSeoDescription } from 'utils/seo'
 
 import styles from './TrendingPlaylistPage.module.css'
 

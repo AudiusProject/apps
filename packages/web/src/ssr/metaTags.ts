@@ -1,7 +1,9 @@
 /**
  * SSR Meta Tags Utilities
- * Duplicated logic from general-admission for SSR meta tag generation
+ * Centralized meta tag generation for both SSR and client-side rendering
  */
+
+import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
 
 // Image URLs
 export const DEFAULT_IMAGE_URL =
@@ -263,4 +265,258 @@ export const getSearchContext = () => ({
   description: 'Search for tracks, artists, and playlists on Audius',
   image: DEFAULT_IMAGE_URL,
   thumbnail: true
+})
+
+/**
+ * SEO Utility functions to generate titles and descriptions
+ * Used by both SSR and client-side rendering
+ */
+
+/**
+ * Create SEO description with consistent formatting
+ */
+export const createSeoDescription = (msg: string, userPage?: boolean) => {
+  if (userPage)
+    return `${msg} | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
+  return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
+}
+
+/**
+ * Get SEO fields for user/profile pages
+ */
+export const getUserPageSEOFields = ({
+  handle,
+  userName,
+  bio,
+  hashId
+}: {
+  handle: string
+  userName: string
+  bio: string
+  hashId?: string
+}) => {
+  const pageTitle = userName
+  const pageDescription = createSeoDescription(
+    `Play ${userName} on Audius and discover followers on Audius`,
+    true
+  )
+  const canonicalUrl = fullProfilePage(handle)
+  const structuredData = {
+    '@context': 'http://schema.googleapis.com/',
+    '@type': 'MusicGroup',
+    '@id': canonicalUrl,
+    datePublished: null,
+    url: canonicalUrl,
+    name: userName,
+    description: bio || pageDescription,
+    potentialAction: {
+      '@type': 'ListenAction',
+      target: [
+        {
+          '@type': 'EntryPoint',
+          urlTemplate: canonicalUrl
+        }
+      ],
+      expectsAcceptanceOf: {
+        '@type': 'Offer',
+        category: 'free',
+        eligibleRegion: []
+      }
+    }
+  }
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    canonicalUrl,
+    structuredData,
+    entityType: 'user' as const,
+    hashId
+  }
+}
+
+/**
+ * Get SEO fields for track pages
+ */
+export const getTrackPageSEOFields = ({
+  title,
+  userName,
+  permalink,
+  releaseDate,
+  hashId
+}: {
+  title?: string
+  userName?: string
+  permalink?: string
+  releaseDate?: string
+  hashId?: string
+}) => {
+  if (!title || !userName || !permalink) return {}
+  const pageTitle = `${title} by ${userName}`
+  const pageDescription = `Stream ${title} by ${userName} on Audius | Stream similar artists to ${userName} on desktop and mobile`
+  const canonicalUrl = fullTrackPage(permalink)
+  const structuredData = {
+    '@context': 'http://schema.googleapis.com/',
+    '@type': 'MusicRecording',
+    '@id': canonicalUrl,
+    url: canonicalUrl,
+    name: title,
+    description: pageDescription,
+    datePublished: releaseDate || null,
+    potentialAction: {
+      '@type': 'ListenAction',
+      target: [
+        {
+          '@type': 'EntryPoint',
+          urlTemplate: canonicalUrl
+        }
+      ],
+      expectsAcceptanceOf: {
+        '@type': 'Offer',
+        category: 'free',
+        eligibleRegion: []
+      }
+    }
+  }
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    canonicalUrl,
+    structuredData,
+    entityType: 'track' as const,
+    hashId
+  }
+}
+
+/**
+ * Get SEO fields for collection (playlist/album) pages
+ */
+export const getCollectionPageSEOFields = ({
+  playlistName,
+  playlistId,
+  userName,
+  userHandle,
+  isAlbum,
+  permalink,
+  hashId
+}: {
+  playlistName?: string
+  playlistId?: number
+  userName?: string
+  userHandle?: string
+  isAlbum?: boolean
+  permalink?: string
+  hashId?: string
+}) => {
+  if (!playlistName || !playlistId || !userName || !userHandle) return {}
+
+  const pageTitle = `${playlistName} by ${userName}`
+  const pageDescription = createSeoDescription(
+    `Listen to ${playlistName} ${
+      isAlbum ? 'an album' : 'a playlist curated'
+    } by ${userName} on Audius`
+  )
+  const canonicalUrl = fullCollectionPage(
+    userHandle,
+    playlistName,
+    playlistId,
+    permalink,
+    isAlbum
+  )
+  const structuredData = {
+    '@context': 'http://schema.googleapis.com/',
+    '@type': 'MusicAlbum',
+    '@id': canonicalUrl,
+    url: canonicalUrl,
+    name: playlistName,
+    description: pageDescription,
+    potentialAction: {
+      '@type': 'ListenAction',
+      target: [
+        {
+          '@type': 'EntryPoint',
+          urlTemplate: canonicalUrl
+        }
+      ],
+      expectsAcceptanceOf: {
+        '@type': 'Offer',
+        category: 'free',
+        eligibleRegion: []
+      }
+    }
+  }
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    canonicalUrl,
+    structuredData,
+    entityType: 'collection' as const,
+    hashId
+  }
+}
+
+/**
+ * Get SEO fields for coins page
+ */
+export const getCoinsPageSEOFields = () => {
+  const pageTitle = 'Discover Artist Coins'
+  const pageDescription =
+    'Explore Artist Coins on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
+  const canonicalUrl = 'https://audius.co/coins'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
+/**
+ * Get SEO fields for wallet page
+ */
+export const getWalletPageSEOFields = () => {
+  const pageTitle = 'Wallet'
+  const pageDescription =
+    'Manage your Audius wallet. View your cash balance, artist coins, and linked wallets all in one place.'
+  const canonicalUrl = 'https://audius.co/wallet'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
+/**
+ * Get SEO fields for cash page
+ */
+export const getCashPageSEOFields = () => {
+  const pageTitle = 'Cash'
+  const pageDescription =
+    'Manage your Audius Cash. View your balance, transaction history, and cash-enabled features.'
+  const canonicalUrl = 'https://audius.co/cash'
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    ogDescription: pageDescription,
+    canonicalUrl
+  }
+}
+
+/**
+ * Get default SEO fields for pages without specific metadata
+ */
+export const getDefaultSEOFields = () => ({
+  title: 'Audius - Empowering Creators',
+  description:
+    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+  ogDescription:
+    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+  image: DEFAULT_IMAGE_URL,
+  imageAlt: 'The Audius Platform'
 })

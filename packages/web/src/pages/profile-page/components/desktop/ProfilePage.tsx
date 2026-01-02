@@ -43,7 +43,7 @@ import useTabs, { TabHeader, useTabRecalculator } from 'hooks/useTabs/useTabs'
 import { BlockUserConfirmationModal } from 'pages/chat-page/components/BlockUserConfirmationModal'
 import { UnblockUserConfirmationModal } from 'pages/chat-page/components/UnblockUserConfirmationModal'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
-import { getUserPageSEOFields } from 'utils/seo'
+import { getUserPageSEOFields } from 'ssr/metaTags'
 import { zIndex } from 'utils/zIndex'
 
 import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'

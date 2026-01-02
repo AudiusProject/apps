@@ -1,5 +1,5 @@
 import { useIsMobile } from 'hooks/useIsMobile'
-import { createSeoDescription } from 'utils/seo'
+import { createSeoDescription } from 'ssr/metaTags'
 
 import DesktopSearchExplorePage from './components/desktop/SearchExplorePage'
 import MobileSearchExplorePage from './components/mobile/SearchExplorePage'
