@@ -161,3 +161,12 @@
 .reactDatepicker :global(.react-datepicker__day--outside-month) {
   color: var(--harmony-n-150) !important;
 }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--harmony-neutral);
+  font-size: var(--harmony-font-s);
+}
