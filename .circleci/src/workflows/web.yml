@@ -30,7 +30,7 @@ jobs:
         - web-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - web-build-ssr-production:
       context:
@@ -39,7 +39,7 @@ jobs:
         - web-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - web-check-ssr-production-bundlesize:
       context:
@@ -56,7 +56,7 @@ jobs:
         - web-check-ssr-production-bundlesize
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   # Release production web.
   - web-hold-production:

@@ -194,12 +194,6 @@ jobs:
             git push -u origin main
             git tag client-v${VERSION}
             git push origin client-v${VERSION}
-      - run:
-          name: Create release branch
-          command: |
-            VERSION=$(jq -r .version ./package.json)
-            git checkout -b release-client-v${VERSION}
-            git push -u origin release-client-v${VERSION}
 
   notify-pipeline-status:
     working_directory: ~/apps
@@ -341,6 +335,8 @@ workflows:
             packages/fixed-decimal/.* run-common-workflow true
             packages/spl/.* run-sdk-workflow true
             packages/spl/.* run-identity-workflow true
+            .* run-web-workflow true
+            .* run-mobile-workflow true
           requires:
             - generate-config
             - init
@@ -363,22 +359,6 @@ workflows:
             - init
           workspace_path: ../workspace
 
-      - path-filtering/filter:
-          name: trigger-release-client-workflows
-          filters:
-            branches:
-              only: /^release-client.*$/
-          base-revision: main
-          config-path: ../workspace/.circleci/continue_config.yml
-          mapping: |
-            .* run-web-workflow true
-            .* run-mobile-workflow true
-            .* run-embed-workflow true
-            .* run-protocol-dashboard-workflow true
-          requires:
-            - generate-config
-            - init
-          workspace_path: ../workspace
 
       - notify-pipeline-status:
           context:
@@ -414,9 +394,3 @@ workflows:
       - approve-foundation-deployment-holds:
           context: [slack-secrets, circle-daily-deploy-secrets]
 
-  release-client-create-branch:
-    when:
-      equal:
-        ['release-client-create-branch', << pipeline.parameters.workflow >>]
-    jobs:
-      - generate-client-release
