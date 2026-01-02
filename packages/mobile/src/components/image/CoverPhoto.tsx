@@ -79,13 +79,18 @@ export const useCoverPhoto = ({
 
 type CoverPhotoProps = {
   userId: ID
+  children?: React.ReactNode
 } & Partial<ImageProps>
 
 export const CoverPhoto = (props: CoverPhotoProps) => {
-  const { userId, onError, ...imageProps } = props
+  const { userId, onError, children, ...imageProps } = props
   const scrollY = useCurrentTabScrollY()
 
-  const { source, shouldBlur, onError: onImageError } = useCoverPhoto({
+  const {
+    source,
+    shouldBlur,
+    onError: onImageError
+  } = useCoverPhoto({
     userId,
     size: WidthSizes.SIZE_640
   })
@@ -127,15 +132,15 @@ export const CoverPhoto = (props: CoverPhotoProps) => {
 
   return (
     <Animated.View style={animatedStyle}>
-      <Image source={source} {...imageProps} onError={handleError}>
-        {shouldBlur || scrollY ? (
-          <AnimatedBlurView
-            blurType='light'
-            blurAmount={20}
-            style={blurViewStyle}
-          />
-        ) : null}
-      </Image>
+      <Image source={source} {...imageProps} onError={handleError} />
+      {shouldBlur || scrollY ? (
+        <AnimatedBlurView
+          blurType='light'
+          blurAmount={20}
+          style={blurViewStyle}
+        />
+      ) : null}
+      {children}
     </Animated.View>
   )
 }
