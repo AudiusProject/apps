@@ -1,13 +1,13 @@
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 
 import Delineator from 'components/delineator/Delineator'
 
-const NOW = moment()
-const START_OF_DAY = moment(NOW).startOf('day')
-const START_OF_YESTERDAY = moment(NOW).subtract(1, 'days').startOf('day')
-const START_OF_WEEK = moment(NOW).startOf('week')
-const START_OF_LAST_WEEK = moment(NOW).subtract(1, 'week').startOf('week')
-const START_OF_MONTH = moment(NOW).startOf('month')
+const NOW = dayjs()
+const START_OF_DAY = dayjs(NOW).startOf('day')
+const START_OF_YESTERDAY = dayjs(NOW).subtract(1, 'day').startOf('day')
+const START_OF_WEEK = dayjs(NOW).startOf('week')
+const START_OF_LAST_WEEK = dayjs(NOW).subtract(1, 'week').startOf('week')
+const START_OF_MONTH = dayjs(NOW).startOf('month')
 
 const Delineations = Object.freeze({
   TODAY: 'today',
@@ -18,24 +18,24 @@ const Delineations = Object.freeze({
 })
 
 const calculateBucket = (timestamp) => {
-  const time = moment(timestamp)
-  if (time > START_OF_DAY) {
+  const time = dayjs(timestamp)
+  if (time.isAfter(START_OF_DAY)) {
     return Delineations.TODAY
   }
-  if (time > START_OF_YESTERDAY) {
+  if (time.isAfter(START_OF_YESTERDAY)) {
     return Delineations.YESTERDAY
   }
-  if (time > START_OF_WEEK) {
+  if (time.isAfter(START_OF_WEEK)) {
     return Delineations.EARLIER_THIS_WEEK
   }
-  if (time > START_OF_LAST_WEEK) {
+  if (time.isAfter(START_OF_LAST_WEEK)) {
     return Delineations.LAST_WEEK
   }
-  if (time > START_OF_MONTH) {
+  if (time.isAfter(START_OF_MONTH)) {
     return Delineations.EARLIER_THIS_MONTH
   }
   return {
-    moment: moment(time).startOf('month')
+    dayjs: dayjs(time).startOf('month')
   }
 }
 
@@ -47,7 +47,7 @@ export const delineateByTime = (tiles, isMobile) => {
     const timestamp = tile.props.activityTimestamp
     if (timestamp) {
       const bucket = calculateBucket(timestamp)
-      const bucketKey = bucket.moment ? bucket.moment.format() : bucket
+      const bucketKey = bucket.dayjs ? bucket.dayjs.format() : bucket
 
       if (!buckets.has(bucketKey)) {
         buckets.add(bucketKey)
@@ -55,12 +55,12 @@ export const delineateByTime = (tiles, isMobile) => {
         let key = null
         let text = null
 
-        if (bucket.moment) {
-          key = bucket.moment.format()
-          if (bucket.moment.year() === NOW.year()) {
-            text = bucket.moment.format('MMMM')
+        if (bucket.dayjs) {
+          key = bucket.dayjs.format()
+          if (bucket.dayjs.year() === NOW.year()) {
+            text = bucket.dayjs.format('MMMM')
           } else {
-            text = bucket.moment.format('MMMM YYYY')
+            text = bucket.dayjs.format('MMMM YYYY')
           }
         } else {
           key = bucket

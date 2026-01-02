@@ -34,7 +34,8 @@ module.exports = {
         ],
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
       }
-    }
+    },
+    'import/ignore': ['.css$']
   },
   rules: {
     'no-restricted-imports': [
@@ -50,6 +51,15 @@ module.exports = {
             message:
               'Do not import from the SDK dist folder. If needed, update SDK to export the item you wish to use.'
           }
+        ]
+      }
+    ],
+    'import/no-unresolved': [
+      'error',
+      {
+        ignore: [
+          '^react-datepicker/dist/.*\\.css$',
+          '\\.css$'
         ]
       }
     ]

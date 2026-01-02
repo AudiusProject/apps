@@ -9,10 +9,9 @@ import {
 } from '@audius/common/api'
 import { Track } from '@audius/common/models'
 import { getContext, getSDK } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import { dayjs, Dayjs, route } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { each } from 'lodash'
-import moment from 'moment'
 import { all, call, put, takeEvery } from 'typed-redux-saga'
 
 import { retrieveUserTracks } from 'common/store/pages/profile/lineups/tracks/retrieveUserTracks'
@@ -24,8 +23,8 @@ import ArtistDashboardState from './types'
 
 const { DASHBOARD_PAGE } = route
 
-const formatMonth = (date: moment.Moment | string) =>
-  moment.utc(date).format('MMM').toUpperCase()
+const formatMonth = (date: Dayjs | string) =>
+  dayjs.utc(date).format('MMM').toUpperCase()
 
 function* fetchDashboardTracksAsync(
   action: ReturnType<typeof dashboardActions.fetchTracks>
@@ -106,12 +105,12 @@ function* fetchDashboardAsync(
     yield* call(primeCollectionDataSaga, [...playlists, ...albums])
 
     const trackIds = tracks.map((t) => t.track_id)
-    const now = moment()
+    const now = dayjs()
 
     yield* put(
       dashboardActions.fetchListenData({
         trackIds,
-        start: now.clone().subtract(1, 'years').toISOString(),
+        start: now.subtract(1, 'year').toISOString(),
         end: now.toISOString(),
         period: 'month'
       })
@@ -150,10 +149,10 @@ function* fetchDashboardListenDataAsync(
   )
   const labels: string[] = []
   const labelIndexMap: { [key: string]: number } = {}
-  const startDate = moment.utc(start)
-  const endDate = moment.utc(end)
+  let startDate = dayjs.utc(start)
+  const endDate = dayjs.utc(end)
   while (startDate.isBefore(endDate)) {
-    startDate.add(1, 'month').endOf('month')
+    startDate = startDate.add(1, 'month').endOf('month')
     const label = formatMonth(startDate)
     labelIndexMap[label] = labels.length
     labels.push(label)

@@ -6,10 +6,10 @@ import {
   TransactionMethod,
   TransactionDetails
 } from '@audius/common/store'
+import { dayjs } from '@audius/common/utils'
 import { wAUDIO } from '@audius/fixed-decimal'
 import { Tooltip } from '@audius/harmony'
 import cn from 'classnames'
-import moment from 'moment'
 import { Cell, Row } from 'react-table'
 
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
@@ -102,7 +102,7 @@ const renderBalanceCell = (cellInfo: TransactionCell) => {
 
 const renderDateCell = (cellInfo: TransactionCell) => {
   const transaction = cellInfo.row.original
-  return moment(transaction.date).format('M/D/YY')
+  return dayjs(transaction.date).format('M/D/YY')
 }
 
 const renderChangeCell = (cellInfo: TransactionCell) => {

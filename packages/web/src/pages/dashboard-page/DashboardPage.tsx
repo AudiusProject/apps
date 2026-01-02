@@ -3,10 +3,9 @@ import { useState, Suspense, ReactNode, useEffect, useCallback } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { themeSelectors } from '@audius/common/store'
-import { formatCount } from '@audius/common/utils'
+import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
 import cn from 'classnames'
 import { each } from 'lodash'
-import moment, { Moment } from 'moment'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Header } from 'components/header/desktop/Header'
@@ -68,15 +67,15 @@ export const DashboardPage = () => {
 
   const onSetYearOption = useCallback(
     (year: string) => {
-      let start: Moment
-      let end: Moment
+      let start: Dayjs
+      let end: Dayjs
       if (year === messages.thisYear) {
-        const now = moment()
-        start = now.clone().subtract(1, 'years')
+        const now = dayjs()
+        start = now.subtract(1, 'year')
         end = now
       } else {
-        start = moment('01/01/' + year)
-        end = start.clone().add(1, 'year')
+        start = dayjs('01/01/' + year)
+        end = start.add(1, 'year')
       }
       dispatch(
         fetchListenData({

@@ -6,9 +6,9 @@ import {
 import { queryCollection, queryCurrentUserId } from '@audius/common/api'
 import type { ID, DownloadReason } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
+import { dayjs } from '@audius/common/utils'
 import { OptionalId, Id } from '@audius/sdk'
 import { difference } from 'lodash'
-import moment from 'moment'
 import { call, put, race, select, take } from 'typed-redux-saga'
 
 import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
@@ -168,7 +168,9 @@ function* syncCollection(collectionId: ID) {
   if (!latestCollection) return CollectionSyncStatus.ERROR
 
   if (
-    moment(latestCollection.updated_at).isAfter(currentCollection.updated_at)
+    dayjs(latestCollection.updated_at).isAfter(
+      dayjs(currentCollection.updated_at)
+    )
   ) {
     dispatch(
       redownloadOfflineItems({

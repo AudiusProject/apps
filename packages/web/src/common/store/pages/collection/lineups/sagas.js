@@ -9,9 +9,8 @@ import {
   collectionPageSelectors,
   queueSelectors
 } from '@audius/common/store'
-import { removeNullable, Uid } from '@audius/common/utils'
+import { dayjs, removeNullable, Uid } from '@audius/common/utils'
 import { keyBy } from 'lodash'
-import moment from 'moment'
 import { select, call } from 'redux-saga/effects'
 
 import { LineupSagas } from 'common/store/lineup/sagas'
@@ -39,7 +38,7 @@ function* getCollectionTracks() {
   // Some playlists & albums may not have a metadata time, so use the time if not.
   // If for whatever reason, the metadata time is off, prefer the release date
   const times = tracks.map((t) =>
-    Math.max(t.metadata_time || t.time, moment(collection.release_date).unix())
+    Math.max(t.metadata_time || t.time, dayjs(collection.release_date).unix())
   )
 
   // Reconcile fetching this playlist with the queue.
@@ -80,7 +79,7 @@ function* getCollectionTracks() {
         if (!metadata.track_id) return null
 
         if (times[i]) {
-          metadata.dateAdded = moment.unix(times[i])
+          metadata.dateAdded = dayjs.unix(times[i])
         }
         if (uidForSource[id] && uidForSource[id].length > 0) {
           metadata.uid = uidForSource[id].shift()

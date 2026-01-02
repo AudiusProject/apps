@@ -1,11 +1,11 @@
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 
 export const mergeReleaseDateValues = (
   day: string,
   time: string,
   meridian: string
 ) => {
-  const truncatedReleaseDate = moment(day).startOf('day')
+  const truncatedReleaseDate = dayjs(day).startOf('day')
   const hour = parseInt(time.split(':')[0])
   let adjustedHours = hour
 
@@ -15,8 +15,8 @@ export const mergeReleaseDateValues = (
     adjustedHours = 0
   }
   const combinedDateTime = truncatedReleaseDate
-    .add(adjustedHours, 'hours')
-    .add(time.split(':')[1], 'minutes')
+    .add(adjustedHours, 'hour')
+    .add(parseInt(time.split(':')[1]), 'minute')
 
   return combinedDateTime
 }

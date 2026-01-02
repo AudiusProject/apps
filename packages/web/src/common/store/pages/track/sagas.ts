@@ -5,7 +5,7 @@ import {
   trackPageActions,
   trackPageSelectors
 } from '@audius/common/store'
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 import { call, put, select, takeEvery } from 'typed-redux-saga'
 
 import trackLineupSagas from './lineups/sagas'
@@ -40,7 +40,7 @@ function* watchTrackPageMakePublic() {
       track = {
         ...track,
         is_unlisted: false,
-        release_date: moment().toString(),
+        release_date: dayjs().toString(),
         is_scheduled_release: false,
         field_visibility: {
           genre: true,

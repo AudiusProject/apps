@@ -11,6 +11,7 @@ import {
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import { Kind, ID, TrackMetadata } from '@audius/common/models'
+import { dayjs } from '@audius/common/utils'
 import {
   IconCaretDown,
   IconCaretLeft,
@@ -20,7 +21,6 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import { range } from 'lodash'
-import moment from 'moment'
 import {
   Cell,
   Row,
@@ -69,8 +69,8 @@ export const alphaSorter = (accessor: string) => (rowA: any, rowB: any) => {
 }
 
 export const dateSorter = (accessor: string) => (rowA: any, rowB: any) => {
-  if (moment(rowB[accessor]).isAfter(rowA[accessor])) return 1
-  if (moment(rowA[accessor]).isAfter(rowB[accessor])) return -1
+  if (dayjs(rowB[accessor]).isAfter(dayjs(rowA[accessor]))) return 1
+  if (dayjs(rowA[accessor]).isAfter(dayjs(rowB[accessor]))) return -1
   return 0
 }
 

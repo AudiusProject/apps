@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { USDCPurchaseDetails } from '@audius/common/models'
-import { makeSolanaTransactionLink } from '@audius/common/utils'
+import { makeSolanaTransactionLink, dayjs } from '@audius/common/utils'
 import {
   ModalContent,
   ModalHeader,
@@ -13,7 +13,6 @@ import {
   IconArrowRight,
   IconExternalLink
 } from '@audius/harmony'
-import moment from 'moment'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { ExternalLink, UserLink } from 'components/link'
@@ -105,7 +104,7 @@ export const PurchaseModalContent = ({
             }
           >
             <Text variant='body' size='l'>
-              {moment(purchaseDetails.createdAt).format('MMM DD, YYYY')}
+              {dayjs(purchaseDetails.createdAt).format('MMM DD, YYYY')}
             </Text>
           </DetailSection>
           <TransactionSummary transaction={purchaseDetails} />

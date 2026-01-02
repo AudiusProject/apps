@@ -2,8 +2,8 @@ import { userTrackMetadataFromSDK } from '@audius/common/adapters'
 import { queryCurrentUserId, queryTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
+import { dayjs } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
-import moment from 'moment'
 import { put, select, call, take, race } from 'typed-redux-saga'
 
 import { getTrackOfflineDownloadStatus } from 'app/store/offline-downloads/selectors'
@@ -63,7 +63,7 @@ export function* handleStaleTrack(trackId: ID) {
 
   if (!latestTrack) return OfflineDownloadStatus.ERROR
 
-  if (moment(latestTrack.updated_at).isAfter(currentTrack.updated_at)) {
+  if (dayjs(latestTrack.updated_at).isAfter(dayjs(currentTrack.updated_at))) {
     yield* put(
       redownloadOfflineItems({
         items: [{ type: 'track', id: trackId }]
