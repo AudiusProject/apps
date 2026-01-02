@@ -27,7 +27,7 @@ export const useProfilePicture = ({
   })
 
   const { profile_picture, updatedProfilePicture } = partialUser ?? {}
-  const { imageUrl } = useImageSize({
+  const { imageUrl, onError: onImageError } = useImageSize({
     artwork: profile_picture,
     targetSize: size,
     defaultImage: '',
@@ -39,28 +39,38 @@ export const useProfilePicture = ({
   if (imageUrl === '') {
     return {
       source: profilePicEmpty,
-      isFallbackImage: true
+      isFallbackImage: true,
+      onError: onImageError
     }
   }
 
   if (updatedProfilePicture) {
     return {
       source: primitiveToImageSource(updatedProfilePicture.url),
-      isFallbackImage: false
+      isFallbackImage: false,
+      onError: onImageError
     }
   }
 
   return {
     source: primitiveToImageSource(imageUrl),
-    isFallbackImage: false
+    isFallbackImage: false,
+    onError: onImageError
   }
 }
 
 export type UserImageProps = UseUserImageOptions & Partial<ImageProps>
 
 export const UserImage = (props: UserImageProps) => {
-  const { userId, size, ...imageProps } = props
-  const { source } = useProfilePicture({ userId, size })
+  const { userId, size, onError, ...imageProps } = props
+  const { source, onError: onImageError } = useProfilePicture({ userId, size })
 
-  return <Image {...imageProps} source={source} />
+  const handleError = (error: { nativeEvent: { error: string } }) => {
+    if (source && typeof source === 'object' && 'uri' in source) {
+      onImageError?.(source.uri as string)
+    }
+    onError?.(error)
+  }
+
+  return <Image {...imageProps} source={source} onError={handleError} />
 }

@@ -26,21 +26,24 @@ export const useCoverPhoto = ({
   userId?: ID
   size: WidthSizes
 }) => {
-  const { source: profilePicture, isFallbackImage: isDefaultProfile } =
-    useProfilePicture({
-      userId,
-      size:
-        size === WidthSizes.SIZE_640
-          ? SquareSizes.SIZE_480_BY_480
-          : SquareSizes.SIZE_1000_BY_1000,
-      defaultImage: ''
-    })
+  const {
+    source: profilePicture,
+    isFallbackImage: isDefaultProfile,
+    onError: onProfilePictureError
+  } = useProfilePicture({
+    userId,
+    size:
+      size === WidthSizes.SIZE_640
+        ? SquareSizes.SIZE_480_BY_480
+        : SquareSizes.SIZE_1000_BY_1000,
+    defaultImage: ''
+  })
   const { data: partialUser } = useUser(userId, {
     select: (user) => pick(user, 'cover_photo', 'updatedCoverPhoto')
   })
   const { cover_photo, updatedCoverPhoto } = partialUser ?? {}
   const coverPhoto = cover_photo
-  const { imageUrl } = useImageSize({
+  const { imageUrl, onError: onImageError } = useImageSize({
     artwork: coverPhoto,
     targetSize: size,
     defaultImage: '',
@@ -55,25 +58,39 @@ export const useCoverPhoto = ({
   if (updatedCoverPhoto && !shouldBlur) {
     return {
       source: primitiveToImageSource(updatedCoverPhoto.url),
-      shouldBlur
+      shouldBlur,
+      onError: onImageError
     }
   }
 
   if (shouldBlur) {
-    return { source: profilePicture, shouldBlur }
+    return {
+      source: profilePicture,
+      shouldBlur,
+      onError: onProfilePictureError ?? onImageError
+    }
   }
-  return { source: primitiveToImageSource(imageUrl), shouldBlur }
+  return {
+    source: primitiveToImageSource(imageUrl),
+    shouldBlur,
+    onError: onImageError
+  }
 }
 
 type CoverPhotoProps = {
   userId: ID
+  children?: React.ReactNode
 } & Partial<ImageProps>
 
 export const CoverPhoto = (props: CoverPhotoProps) => {
-  const { userId, ...imageProps } = props
+  const { userId, onError, children, ...imageProps } = props
   const scrollY = useCurrentTabScrollY()
 
-  const { source, shouldBlur } = useCoverPhoto({
+  const {
+    source,
+    shouldBlur,
+    onError: onImageError
+  } = useCoverPhoto({
     userId,
     size: WidthSizes.SIZE_640
   })
@@ -106,17 +123,24 @@ export const CoverPhoto = (props: CoverPhotoProps) => {
 
   if (!source) return null
 
+  const handleError = (error: { nativeEvent: { error: string } }) => {
+    if (source && typeof source === 'object' && 'uri' in source) {
+      onImageError?.(source.uri as string)
+    }
+    onError?.(error)
+  }
+
   return (
     <Animated.View style={animatedStyle}>
-      <Image source={source} {...imageProps}>
-        {shouldBlur || scrollY ? (
-          <AnimatedBlurView
-            blurType='light'
-            blurAmount={20}
-            style={blurViewStyle}
-          />
-        ) : null}
-      </Image>
+      <Image source={source} {...imageProps} onError={handleError} />
+      {shouldBlur || scrollY ? (
+        <AnimatedBlurView
+          blurType='light'
+          blurAmount={20}
+          style={blurViewStyle}
+        />
+      ) : null}
+      {children}
     </Animated.View>
   )
 }

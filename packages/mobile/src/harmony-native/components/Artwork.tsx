@@ -21,7 +21,7 @@ export type ArtworkProps = {
   borderWidth?: number
   'data-testid'?: string
   noLoading?: boolean
-} & Partial<Pick<ImageProps, 'source'>> &
+} & Partial<Pick<ImageProps, 'source' | 'onError'>> &
   BoxProps
 
 /**
@@ -35,6 +35,7 @@ export const Artwork = (props: ArtworkProps) => {
   const {
     isLoading: isLoadingProp,
     source,
+    onError,
     borderRadius = 's',
     borderWidth,
     shadow,
@@ -120,6 +121,7 @@ export const Artwork = (props: ArtworkProps) => {
             onLoad={() => {
               setIsLoadingState(false)
             }}
+            onError={onError}
             source={imageSource}
           />
         ) : null}

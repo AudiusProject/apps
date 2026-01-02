@@ -49,7 +49,7 @@ export const useCollectionImage = ({
   const { data: artwork } = useCollection(collectionId, {
     select: (collection) => collection.artwork
   })
-  const { imageUrl } = useImageSize({
+  const { imageUrl, onError: onImageError } = useImageSize({
     artwork,
     targetSize: size,
     defaultImage: '',
@@ -61,7 +61,8 @@ export const useCollectionImage = ({
   if (imageUrl === '') {
     return {
       source: imageEmpty,
-      isFallbackImage: true
+      isFallbackImage: true,
+      onError: onImageError
     }
   }
 
@@ -73,13 +74,15 @@ export const useCollectionImage = ({
     return {
       // @ts-ignore
       source: primitiveToImageSource(artwork.url),
-      isFallbackImage: false
+      isFallbackImage: false,
+      onError: onImageError
     }
   }
 
   return {
     source: primitiveToImageSource(imageUrl),
-    isFallbackImage: false
+    isFallbackImage: false,
+    onError: onImageError
   }
 }
 
@@ -88,19 +91,31 @@ type CollectionImageProps = {
   size: SquareSizes
   style?: ImageProps['style']
   onLoad?: ImageProps['onLoad']
+  onError?: ImageProps['onError']
   children?: React.ReactNode
 }
 
 export const CollectionImage = (props: CollectionImageProps) => {
-  const { collectionId, size, style, onLoad, ...other } = props
+  const { collectionId, size, style, onLoad, onError, ...other } = props
 
   const localCollectionImageUri = useLocalCollectionImageUri(collectionId)
   const collectionImageSource = useCollectionImage({ collectionId, size })
   const { cornerRadius } = useTheme()
   const { skeleton } = useThemeColors()
-  const { source: loadedSource, isFallbackImage } = collectionImageSource
+  const {
+    source: loadedSource,
+    isFallbackImage,
+    onError: onImageError
+  } = collectionImageSource
 
   const source = loadedSource ?? localCollectionImageUri
+
+  const handleError = (error: { nativeEvent: { error: string } }) => {
+    if (source && typeof source === 'object' && 'uri' in source) {
+      onImageError?.(source.uri as string)
+    }
+    onError?.(error)
+  }
 
   return (
     <Image
@@ -114,6 +129,7 @@ export const CollectionImage = (props: CollectionImageProps) => {
       ]}
       source={source}
       onLoad={onLoad}
+      onError={handleError}
     />
   )
 }

@@ -122,13 +122,17 @@ export const TrackTile = (props: TrackTileProps) => {
   )
 
   const renderImage = useCallback(
-    (props: ImageProps) => (
-      <TrackImage
-        trackId={track?.track_id ?? 0}
-        size={SquareSizes.SIZE_150_BY_150}
-        {...props}
-      />
-    ),
+    (props: ImageProps) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { borderRadius, ...restProps } = props
+      return (
+        <TrackImage
+          trackId={track?.track_id ?? 0}
+          size={SquareSizes.SIZE_150_BY_150}
+          {...restProps}
+        />
+      )
+    },
     [track?.track_id]
   )
 
