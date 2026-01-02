@@ -47,7 +47,6 @@ const REWARDS_MANAGER_TOKEN_PDA = import.meta.env.VITE_REWARDS_MANAGER_TOKEN_PDA
 const ENV = import.meta.env.VITE_ENVIRONMENT
 
 export const IS_PRODUCTION = ENV === 'production'
-const IS_STAGING = ENV === 'staging'
 
 export const getWalletChainId = async (walletProvider: Eip1193Provider) => {
   const chainId = await walletProvider.request({ method: 'eth_chainId' })
@@ -177,7 +176,7 @@ const configureReadOnlyLibs = async () => {
     identityServiceConfig,
     discoveryProviderConfig: { endpoint: apiEndpoint },
     isServer: false,
-    isDebug: !IS_PRODUCTION && !IS_STAGING
+    isDebug: !IS_PRODUCTION
   }
   // @ts-ignore
   const libs = new AudiusLibs(audiusLibsConfig)
@@ -264,7 +263,7 @@ const configureLibsWithAccount = async ({
     ),
     discoveryProviderConfig: { endpoint: apiEndpoint },
     isServer: false,
-    isDebug: !IS_PRODUCTION && !IS_STAGING
+    isDebug: !IS_PRODUCTION
   }
   // @ts-ignore
   const libs = new AudiusLibs(audiusLibsConfig)

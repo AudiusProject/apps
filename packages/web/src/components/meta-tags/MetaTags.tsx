@@ -44,10 +44,7 @@ const generateOgUrl = (
   }
 
   // Get the base OG URL based on environment
-  const baseOgUrl =
-    env.ENVIRONMENT === 'staging'
-      ? 'https://og.staging.audius.co'
-      : 'https://og.audius.co'
+  const baseOgUrl = 'https://og.audius.co'
 
   // Generate the path based on entity type
   const path = `/${entityType}/${hashId}`

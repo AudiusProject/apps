@@ -19,7 +19,6 @@ import untildify from 'untildify'
 
 import { developmentConfig } from '../config/development'
 import { productionConfig } from '../config/production'
-import { stagingConfig } from '../config/staging'
 import type { SdkServicesConfig } from '../config/types'
 import { sdk as audiusSdk } from '../sdk'
 import { Logger } from '../services'
@@ -127,8 +126,6 @@ const getConfig = (environment: SdkConfig['environment']) => {
   const config =
     environment === 'development'
       ? developmentConfig
-      : environment === 'staging'
-      ? stagingConfig
       : productionConfig
   return config
 }

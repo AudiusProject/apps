@@ -61,49 +61,6 @@ const productionConfig: SdkServicesConfig = {
   }
 }
 
-const stagingConfig: SdkServicesConfig = {
-  network: {
-    minVersion: '',
-    apiEndpoint: 'https://api.staging.audius.co',
-    storageNodes: [],
-    antiAbuseOracleNodes: {
-      endpoints: ['https://discoveryprovider.staging.audius.co'],
-      registeredAddresses: []
-    },
-    identityService: 'https://identityservice.staging.audius.co'
-  },
-  acdc: {
-    entityManagerContractAddress: '0x1Cd8a543596D499B9b6E7a6eC15ECd2B7857Fd64',
-    chainId: 1056801
-  },
-  solana: {
-    claimableTokensProgramAddress:
-      '2sjQNmUfkV6yKKi4dPR8gWRgtyma5aiymE3aXL2RAZww',
-    rewardManagerProgramAddress: 'CDpzvz7DfgbF95jSSCHLX3ERkugyfgn9Fw8ypNZ1hfXp',
-    rewardManagerStateAddress: 'GaiG9LDYHfZGqeNaoGRzFEnLiwUT7WiC6sA6FDJX9ZPq',
-    paymentRouterProgramAddress: 'sp28KA2bTnTA4oSZ3r9tTSKfmiXZtZQHnYYQqWfUyVa',
-    stakingBridgeProgramAddress: 'stkuyR7dTzxV1YnoDo5tfuBmkuKn7zDatimYRDTmQvj',
-    rpcEndpoint: 'https://audius-fe.rpcpool.com',
-    usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    wAudioTokenMint: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
-    bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
-    rewardManagerLookupTableAddress:
-      'ChFCWjeFxM6SRySTfT46zXn2K7m89TJsft4HWzEtkB4J'
-  },
-  ethereum: {
-    rpcEndpoint: 'https://eth-client.staging.audius.co',
-    addresses: {
-      ethRewardsManagerAddress: '0x563483ccD66a49Ca730275F8cf37Dd3E6Da864f1',
-      serviceProviderFactoryAddress:
-        '0x377BE01aD31360d0DFB16035A4515954395A8185',
-      serviceTypeManagerAddress: '0x9fd76d2cD48022526F3a164541E6552291F4a862',
-      audiusTokenAddress: '0x1376180Ee935AA64A27780F4BE97726Df7B0e2B2',
-      audiusWormholeAddress: '0xf6f45e4d836da1d4ecd43bb1074620bfb0b7e0d7',
-      delegateManagerAddress: '0xDA74d6FfbF268Ac441404f5a61f01103451E8697',
-      stakingAddress: '0x5bcF21A4D5Bab9B0869B9c55D233f80135C814C6'
-    }
-  }
-}
 
 const developmentConfig: SdkServicesConfig = {
   network: {
@@ -197,11 +154,9 @@ const generateServicesConfig = async (
 
 const writeServicesConfig = async () => {
   const production = await generateServicesConfig(productionConfig)
-  const staging = await generateServicesConfig(stagingConfig)
   const development = developmentConfig
   const config: Record<string, SdkServicesConfig> = {
     development,
-    staging,
     production
   }
   for (const env of Object.keys(config)) {

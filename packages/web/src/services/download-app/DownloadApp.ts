@@ -1,21 +1,6 @@
 import { OS } from '@audius/common/models'
 
-import { env } from 'services/env'
-
-const ENVIRONMENT = env.ENVIRONMENT
-
-let APP_DOWNLOAD_URL: string
-switch (ENVIRONMENT) {
-  case 'staging':
-    APP_DOWNLOAD_URL = 'https://download.staging.audius.co'
-    break
-  case 'production':
-    APP_DOWNLOAD_URL = 'https://download.audius.co'
-    break
-  default:
-    APP_DOWNLOAD_URL = 'https://download.audius.co'
-    break
-}
+const APP_DOWNLOAD_URL = 'https://download.audius.co'
 
 /** Given the OS, fetch the latest download version from s3. */
 export const getDownloadLinkForSystem = async (os: OS) => {

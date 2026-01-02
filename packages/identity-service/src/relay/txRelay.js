@@ -125,16 +125,12 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
     ? currentBlock > finalPOABlock
     : false
 
-  // force staging to use nethermind since it hasn't surpassed finalPOABlock
-  // prod will surpass
+  // prod will surpass finalPOABlock
   if (!config.get('nethermindEnabled')) {
     // nulling this will disable nethermind relays
     nethermindContractAddress = null
   }
-  if (
-    config.get('environment') === 'staging' ||
-    config.get('environment') === 'production'
-  ) {
+  if (config.get('environment') === 'production') {
     sendToNethermindOnly = true
   }
 

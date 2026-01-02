@@ -38,7 +38,7 @@ export const DistributorCard = ({
     })
     distroSdk.oauth!.init({
       successCallback: () => undefined,
-      env: env === 'prod' ? 'production' : 'staging'
+      env: env === 'prod' ? 'production' : 'development'
     })
     distroSdk.oauth!.login({
       scope: 'write',

@@ -21,12 +21,8 @@ default_platform(:ios)
 
 AUDIUSMUSIC_ID = "co.audius.audiusmusic"
 AUDIUSMUSIC_RELEASECANDIDATE_ID = "co.audius.audiusmusic.releasecandidate"
-AUDIUSMUSIC_STAGING_ID = "co.audius.audiusmusic.staging"
-AUDIUSMUSIC_STAGING_RELEASECANDIDATE_ID = "co.audius.audiusmusic.staging.releasecandidate"
 AUDIUSMUSIC_PROFILE = "match AppStore co.audius.audiusmusic"
 AUDIUSMUSIC_RELEASECANDIDATE_PROFILE = "match AppStore co.audius.audiusmusic.releasecandidate"
-AUDIUSMUSIC_STAGING_PROFILE = "match AppStore co.audius.audiusmusic.staging"
-AUDIUSMUSIC_STAGING_RELEASECANDIDATE_PROFILE = "match AppStore co.audius.audiusmusic.staging.releasecandidate"
 TEAM = "LRFCG93S85"
 
 platform :ios do
@@ -43,24 +39,12 @@ platform :ios do
       environment = 'prod'
       scheme = 'AudiusReactNative'
       configuration = 'Release'
-    elsif options[:bundle_id] === AUDIUSMUSIC_STAGING_ID
-      appId = AUDIUSMUSIC_STAGING_ID
-      provisioningProfile = AUDIUSMUSIC_STAGING_PROFILE
-      environment = 'stage'
-      scheme = 'Staging'
-      configuration = 'Staging.Release'
     elsif options[:bundle_id] === AUDIUSMUSIC_RELEASECANDIDATE_ID
       appId = AUDIUSMUSIC_RELEASECANDIDATE_ID
       provisioningProfile = AUDIUSMUSIC_RELEASECANDIDATE_PROFILE
       environment = 'prod'
       scheme = 'AudiusReactNative'
       configuration = 'ReleaseCandidate'
-    elsif options[:bundle_id] === AUDIUSMUSIC_STAGING_RELEASECANDIDATE_ID
-      appId = AUDIUSMUSIC_STAGING_RELEASECANDIDATE_ID
-      provisioningProfile = AUDIUSMUSIC_STAGING_RELEASECANDIDATE_PROFILE
-      environment = 'stage'
-      scheme = 'Staging'
-      configuration = 'Staging.ReleaseCandidate'
     end
 
     match(
@@ -121,15 +105,9 @@ platform :ios do
     if (options[:bundle_id] === 'co.audius.audiusmusic') 
       appleId = "1491270519"
       ipa = './output/gym/Audius Music.ipa'
-    elsif (options[:bundle_id] === 'co.audius.audiusmusic.staging')
-      appleId = "6444191594"
-      ipa = './output/gym/Audius Music Staging.ipa'
     elsif (options[:bundle_id] === 'co.audius.audiusmusic.releasecandidate')
       appleId = "6444068448"
       ipa = './output/gym/Audius Music Release Candidate.ipa'
-    elsif (options[:bundle_id] === 'co.audius.audiusmusic.staging.releasecandidate')
-      appleId = "6444190971"
-      ipa = './output/gym/Audius Music Release Candidate Staging.ipa'
     end
    
     # Upload to test flight
@@ -147,12 +125,8 @@ platform :ios do
   lane:build_and_upload do |options|
     if options[:bundle_id] === AUDIUSMUSIC_ID
       scheme = 'AudiusReactNative'
-    elsif options[:bundle_id] === AUDIUSMUSIC_STAGING_ID
-      scheme = 'Staging'
     elsif options[:bundle_id] === AUDIUSMUSIC_RELEASECANDIDATE_ID
       scheme = 'AudiusReactNative'
-    elsif options[:bundle_id] === AUDIUSMUSIC_STAGING_RELEASECANDIDATE_ID
-      scheme = 'Staging'
     end
     
     plistVersionNumber = Gem::Version.new get_version_number_from_plist(

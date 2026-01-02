@@ -27,7 +27,6 @@ import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import useScrollToTop from 'hooks/useScrollToTop'
-import { env } from 'services/env'
 import { isDarkMode } from 'utils/theme/theme'
 
 import AboutSettingsPage from './AboutSettingsPage'
@@ -51,8 +50,6 @@ const {
   NOTIFICATION_SETTINGS_PAGE,
   PAYMENTS_PAGE
 } = route
-
-const isStaging = env.ENVIRONMENT === 'staging'
 
 export enum SubPage {
   ACCOUNT = 'account',
@@ -104,7 +101,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
   const { userId, handle, name } = accountData ?? {}
   const theme = useSelector(getTheme)
   const { tier } = useTierAndVerifiedForUser(userId)
-  const showMatrix = tier === 'gold' || tier === 'platinum' || isStaging
+  const showMatrix = tier === 'gold' || tier === 'platinum'
 
   useEffect(() => {
     dispatch(getPushNotificationSettingsAction())

@@ -50,8 +50,6 @@ const downloadSpec = async ({ env, apiVersion, apiFlavor }) => {
   let baseURL = ''
   if (env === 'dev') {
     baseURL = 'http://127.0.0.1:1323'
-  } else if (env === 'stage') {
-    baseURL = 'https://api.staging.audius.co'
   } else if (env === 'prod') {
     baseURL = 'https://api.audius.co'
   }

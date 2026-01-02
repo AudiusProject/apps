@@ -17,7 +17,7 @@ export const useDiscordCode = <TResult = string>(
   assetMint: string,
   options?: SelectableQueryOptions<string, TResult>
 ) => {
-  const { audiusBackend, audiusSdk, env } = useQueryContext()
+  const { audiusBackend, audiusSdk } = useQueryContext()
 
   return useQuery({
     queryKey: getDiscordCodeQueryKey(assetMint),
@@ -28,9 +28,7 @@ export const useDiscordCode = <TResult = string>(
         data,
         sdk
       })
-      // There's only one bot so in the discord code we tell it if we're in the staging env
-      const stagingEnvString = env.ENVIRONMENT === 'staging' ? '-staging' : ''
-      const appended = `${signature}-${data}-${assetMint}${stagingEnvString}`
+      const appended = `${signature}-${data}-${assetMint}`
       return appended
     },
     ...options

@@ -18,17 +18,14 @@ if (args.length < 3) {
 }
 
 const env = args[2]
-if (env !== 'dev' && env !== 'stage' && env !== 'prod') {
-  console.error('Environment must be <dev|stage|prod>')
+if (env !== 'dev' && env !== 'prod') {
+  console.error('Environment must be <dev|prod>')
   process.exit(1)
 }
 
 const config = {
   dev: {
     gaEndpoint: 'http://localhost:9001'
-  },
-  stage: {
-    gaEndpoint: 'https://general-admission.staging.audius.co'
   },
   prod: {
     gaEndpoint: 'https://general-admission.audius.co'

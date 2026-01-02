@@ -28,9 +28,6 @@ const isAcceptedServiceType = (b: BytesLike): boolean => {
   return acceptedTypes.includes(s)
 }
 
-const isStaging = (env: string): boolean => {
-  return env === 'staging'
-}
 
 /** contract keys */
 const RegistryKey = utf8ToHex('Registry')
@@ -38,9 +35,6 @@ const ServiceProviderFactoryKey = utf8ToHex('ServiceProviderFactory')
 
 const ProdProvider = new WebSocketProvider(
   'wss://eth-mainnet.alchemyapi.io/v2/hELYSivAlDc8LV29Mw_LumSdCZ4HQEge'
-)
-const StageProvider = new WebSocketProvider(
-  'wss://eth-sepolia.g.alchemy.com/v2/J1Pj86H-g87FqUZVMUbLGgnyoaQTHP1P'
 )
 
 // `${env}` => SPs
@@ -55,11 +49,9 @@ export const getRegisteredNodes = async (
     return cached
   }
 
-  const provider = isStaging(env) ? StageProvider : ProdProvider
+  const provider = ProdProvider
 
-  const initialRegistryAddress = isStaging(env)
-    ? '0xc682C2166E11690B64338e11633Cb8Bb60B0D9c0'
-    : '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C'
+  const initialRegistryAddress = '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C'
 
   const registry = new Contract(initialRegistryAddress, RegistryAbi, provider)
 

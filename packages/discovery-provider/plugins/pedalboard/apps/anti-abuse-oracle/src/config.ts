@@ -14,7 +14,7 @@ export const InstructionsProgram = new PublicKey(
   'Sysvar1nstructions1111111111111111111111111'
 )
 
-export type Environment = 'dev' | 'stage' | 'prod'
+export type Environment = 'dev' | 'prod'
 
 // reads .env file based on environment
 const readDotEnv = () => {

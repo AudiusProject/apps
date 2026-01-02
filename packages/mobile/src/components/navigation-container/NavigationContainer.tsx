@@ -134,12 +134,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       'https://audius.co',
       'http://audius.co',
       'https://redirect.audius.co',
-      'http://redirect.audius.co',
-      'audius-staging://',
-      'https://staging.audius.co',
-      'http://staging.audius.co',
-      'https://redirect.staging.audius.co',
-      'http://redirect.staging.audius.co'
+      'http://redirect.audius.co'
     ],
     // configuration for matching screens with paths
     config: {

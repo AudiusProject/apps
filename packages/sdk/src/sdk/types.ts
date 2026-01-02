@@ -192,7 +192,7 @@ const DevAppSchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'staging', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional()
 })
 
 const CustomAppSchema = z.object({
@@ -216,7 +216,7 @@ const CustomAppSchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'staging', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional()
 })
 
 export const SdkConfigSchema = z.union([DevAppSchema, CustomAppSchema])

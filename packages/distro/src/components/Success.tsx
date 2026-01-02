@@ -14,11 +14,7 @@ const messages = {
   located: 'located under Settings in the Audius app'
 }
 
-const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'stage' | 'prod'
-const settingsLink =
-  env === 'prod'
-    ? 'https://audius.co/settings/authorized-apps'
-    : 'https://staging.audius.co/settings/authorized-apps'
+const settingsLink = 'https://audius.co/settings/authorized-apps'
 
 export const Success = () => {
   const { logout, user } = useAuth()

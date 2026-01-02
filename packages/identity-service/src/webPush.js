@@ -83,10 +83,7 @@ const apnAuthKeyPath = path.resolve(
 if (apnAuthKey) {
   fs.writeFileSync(apnAuthKeyPath, apnAuthKey)
 }
-const apnTopic =
-  config.get('environment') === 'staging'
-    ? 'web.co.audius.staging'
-    : 'web.co.audius'
+const apnTopic = 'web.co.audius'
 
 const apnConfig = {
   token: {

@@ -30,7 +30,6 @@ const start = async () => {
 
   const environment = process.env.environment as
     | 'development'
-    | 'staging'
     | 'production'
     | undefined
   logger.info('Starting SDK in environment:', environment)

@@ -11,7 +11,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - mobile-build-upload-production-ios-if-full-release:
       context:
@@ -31,7 +31,7 @@ jobs:
         - mobile-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - mobile-build-upload-production-android-if-full-release:
       context:

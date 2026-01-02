@@ -6,12 +6,6 @@ node_compat = true
 [site]
 bucket = "../../build-ssr/client"
 
-[env.staging]
-name = "audius-web-ssr-staging"
-
-[env.staging-release]
-name = "audius-web-ssr-staging-release-candidate"
-
 [env.release]
 name = "audius-web-ssr-release-candidate"
 

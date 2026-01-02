@@ -4,24 +4,6 @@ jobs:
       context:
         - Vercel
 
-  # TODO: Replace demo code with cloudflare and re-enable
-  # Cut a demo if not main
-  # - web-build-demo:
-  #     context:
-  #       - Vercel
-  #     requires:
-  #       - web-init
-  #     filters:
-  #       branches:
-  #         ignore: /^main$/
-  # - web-deploy-demo:
-  #     context: Audius Client
-  #     requires:
-  #       - web-build-demo
-  #     filters:
-  #       branches:
-  #         ignore: /^main$/
-
   # Build
   - web-build-production:
       context:
@@ -30,7 +12,7 @@ jobs:
         - web-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - web-build-ssr-production:
       context:
@@ -39,7 +21,7 @@ jobs:
         - web-init
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   - web-check-ssr-production-bundlesize:
       context:
@@ -56,7 +38,7 @@ jobs:
         - web-check-ssr-production-bundlesize
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
   # Release production web.
   - web-hold-production:

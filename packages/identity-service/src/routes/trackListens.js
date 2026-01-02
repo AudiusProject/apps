@@ -87,8 +87,6 @@ const sortKeys = (x) => {
 const getDiscoveryListensEndpoint = () => {
   const env = config.get('environment')
   switch (env) {
-    case 'staging':
-      return 'https://discoveryprovider.staging.audius.co'
     case 'production':
       return 'https://discoveryprovider.audius.co'
     case 'development':

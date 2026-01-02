@@ -68,7 +68,7 @@ export const useConnectAudiusProfile = ({
   const connect = async () => {
     setIsWaiting(true)
     sdk.oauth.init({
-      env: env === 'production' ? 'production' : 'staging',
+      env: env,
       successCallback: handleConnectSuccess,
       errorCallback: (errorMessage: string) => {
         window.removeEventListener('message', receiveUserId)
@@ -119,7 +119,7 @@ export const useConnectAudiusProfile = ({
   const disconnect = async () => {
     setIsWaiting(true)
     sdk.oauth.init({
-      env: env === 'production' ? 'production' : 'staging',
+      env: env,
       successCallback: handleDisconnectSuccess,
       errorCallback: (errorMessage: string) => {
         console.error(errorMessage)

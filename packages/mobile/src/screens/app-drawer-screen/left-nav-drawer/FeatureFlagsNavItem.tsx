@@ -4,7 +4,6 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
 import { IconEmbed } from '@audius/harmony-native'
-import { env } from 'app/services/env'
 
 import { LeftNavLink } from './LeftNavLink'
 
@@ -17,8 +16,8 @@ export const FeatureFlagsNavItem = () => {
     FeatureFlags.FEATURE_FLAG_ACCESS
   )
 
-  // Only show in staging or if feature flag access is enabled
-  if (env.ENVIRONMENT !== 'staging' && !isFeatureFlagAccessEnabled) {
+  // Only show if feature flag access is enabled
+  if (!isFeatureFlagAccessEnabled) {
     return null
   }
 

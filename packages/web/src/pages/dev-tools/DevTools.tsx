@@ -34,7 +34,7 @@ type DevToolCardProps = {
 }
 
 /**
- * Dev Tools page - only available in development and staging environments
+ * Dev Tools page - only available in development environment
  * This page contains tools and utilities for developers to test and debug the application
  */
 

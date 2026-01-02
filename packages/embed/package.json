@@ -5,13 +5,10 @@
   "scripts": {
     "start": "vite",
     "start:dev": "env-cmd -f .env.dev turbo run start",
-    "start:stage": "env-cmd -f .env.stage turbo run start",
     "start:prod": "env-cmd -f .env.prod turbo run start",
     "build": "vite build",
-    "build:stage": "env-cmd -f .env.stage turbo run build && npm run build-api && mv build build-staging",
     "build:prod": "env-cmd -f .env.prod turbo run build && npm run build-api && mv build build-production",
     "build-api": "webpack --config src/api/webpack.config.js -o build/api.js",
-    "deploy:stage": "npx wrangler publish --env staging",
     "deploy:prod": "npx wrangler publish --env production",
     "lint:fix": "eslint --cache --fix --ext=js,jsx,ts,tsx src",
     "lint": "eslint --cache --ext=js,jsx,ts,tsx src",

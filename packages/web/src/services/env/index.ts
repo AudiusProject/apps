@@ -2,7 +2,6 @@ import type { Environment, Env } from '@audius/common/services'
 
 import { env as envDev } from './env.dev'
 import { env as envProd } from './env.prod'
-import { env as envStage } from './env.stage'
 
 const environment = process.env.VITE_ENVIRONMENT as Environment
 
@@ -14,9 +13,6 @@ switch (environment) {
     break
   case 'production':
     env = envProd
-    break
-  case 'staging':
-    env = envStage
     break
   default:
     throw new Error(`Unknown environment: ${environment}`)

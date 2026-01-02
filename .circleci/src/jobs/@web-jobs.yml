@@ -37,32 +37,6 @@ web-init:
           - packages/sdk/node_modules
           - packages/sdk/dist
 
-web-build-demo:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  resource_class: xlarge
-  steps:
-    - checkout
-    - attach_workspace:
-        at: ./
-    - run:
-        name: build-demo
-        no_output_timeout: 30m
-        # Set the branch name as the VITE_BASENAME so that relative paths work, e.g.
-        # demo.audius.co/some-branch/handle/track resolves as /handle/track would at audius.co
-        command: |
-          cd packages/web
-          cp ./env/.env.stage ./env/.env.stage.tmp
-          echo -e "\nVITE_BASENAME=/${CIRCLE_BRANCH}" >> ./env/.env.stage
-          CI=false npm run build:stage -w @audius/web
-          mv build-staging build-demo
-          cp ./env/.env.stage.tmp ./env/.env.stage
-    - persist_to_workspace:
-        root: ./
-        paths:
-          - packages/web/build-demo
-
 web-test:
   working_directory: ~/apps
   docker:
@@ -120,21 +94,6 @@ web-check-ssr-production-bundlesize:
   steps:
     - web-check-ssr-bundlesize:
         build-type: prod
-
-web-deploy-demo:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/python:3.7.12-node
-  steps:
-    - checkout
-    - aws-cli/install
-    - attach_workspace:
-        at: ./
-    - run:
-        name: Deploy to S3
-        command: aws s3 sync packages/web/build-demo s3://frontend-demo.audius.co/${CIRCLE_BRANCH} --delete --cache-control max-age=0
-    - web-pr-comment:
-        comment: Preview this change https://demo.audius.co/${CIRCLE_BRANCH}
 
 web-deploy-release-candidate:
   working_directory: ~/apps
