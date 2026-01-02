@@ -187,7 +187,7 @@ export const UsersSearch = (props: UsersSearchProps) => {
               css={{
                 width: spacing.unit12,
                 height: spacing.unit12,
-                marginBlock: theme.spacing.l,
+                marginBlock: spacing.l,
                 marginInline: 'auto'
               }}
             />

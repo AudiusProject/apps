@@ -25,4 +25,3 @@ export default function render() {
     root.render(<RootWithProviders isServerSide={false} isMobile={isMobile} />)
   }
 }
-

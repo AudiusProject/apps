@@ -38,4 +38,3 @@ export default function render() {
 
   return escapeInject`${dangerouslySkipEscape(html)}`
 }
-

@@ -16,8 +16,8 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
-import { BASE_URL } from 'utils/route'
 import { createSeoDescription } from 'ssr/metaTags'
+import { BASE_URL } from 'utils/route'
 
 import styles from './TrendingUndergroundPage.module.css'
 const { TRENDING_UNDERGROUND_PAGE } = route

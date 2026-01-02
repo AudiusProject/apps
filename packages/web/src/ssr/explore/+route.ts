@@ -4,4 +4,3 @@ export default makePageRoute(
   ['/explore', '/explore/@type', '/trending/playlists'],
   'Explore Page'
 )
-
