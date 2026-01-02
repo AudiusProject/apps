@@ -16,8 +16,8 @@ import {
   DEFAULT_IMAGE_URL,
   getAppUrl,
   getEmbedUrl,
-  getWebUrl,
-  getTrackPageSEOFields
+  getTrackPageContext,
+  getWebUrl
 } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
 
@@ -69,7 +69,7 @@ export default function render(pageContext: TrackPageContext) {
       image: DEFAULT_IMAGE_URL
     }
   } else {
-    seoMetadata = getTrackPageSEOFields({
+    seoMetadata = getTrackPageContext({
       title,
       permalink,
       userName,

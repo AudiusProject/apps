@@ -50,7 +50,7 @@ import NavContext, {
 import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
-import { getTrackPageSEOFields } from 'ssr/metaTags'
+import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
@@ -240,7 +240,7 @@ const TrackPage = () => {
 
   // SEO fields
   const releaseDate = track ? track.release_date || track.created_at : ''
-  const seoFields = getTrackPageSEOFields({
+  const seoFields = getTrackPageContext({
     title: track?.title,
     permalink: track?.permalink,
     userName: user?.name,

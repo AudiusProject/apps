@@ -11,7 +11,7 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerProfilePage } from 'pages/profile-page/DesktopServerProfilePage'
 import { MobileServerProfilePage } from 'pages/profile-page/MobileServerProfilePage'
-import { getAppUrl, getWebUrl, getUserPageSEOFields } from 'ssr/metaTags'
+import { getAppUrl, getUserPageContext, getWebUrl } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
 
 import { getIndexHtml } from '../getIndexHtml'
@@ -37,7 +37,7 @@ export default function render(pageContext: TrackPageContext) {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  const seoMetadata = getUserPageSEOFields({
+  const seoMetadata = getUserPageContext({
     handle,
     userName: name,
     bio: bio ?? '',

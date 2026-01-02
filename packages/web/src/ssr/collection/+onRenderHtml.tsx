@@ -14,7 +14,7 @@ import { MobileServerCollectionPage } from 'pages/collection-page/MobileServerCo
 import {
   canEmbed,
   getAppUrl,
-  getCollectionPageSEOFields,
+  getCollectionPageContext,
   getEmbedUrl,
   getWebUrl
 } from 'ssr/metaTags'
@@ -47,7 +47,7 @@ export default function render(pageContext: CollectionPageContext) {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  const seoMetadata = getCollectionPageSEOFields({
+  const seoMetadata = getCollectionPageContext({
     playlistName: playlist_name,
     playlistId: playlist_id,
     userName,

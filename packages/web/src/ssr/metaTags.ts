@@ -108,10 +108,13 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
  * Default meta tag context
  */
 export const getDefaultContext = () => ({
-  title: 'Audius',
+  title: 'Audius - Empowering Creators',
   description:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators',
+    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+  ogDescription:
+    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
   image: DEFAULT_IMAGE_URL,
+  imageAlt: 'The Audius Platform',
   thumbnail: true
 })
 
@@ -282,9 +285,9 @@ export const createSeoDescription = (msg: string, userPage?: boolean) => {
 }
 
 /**
- * Get SEO fields for user/profile pages
+ * User/profile page meta tag context
  */
-export const getUserPageSEOFields = ({
+export const getUserPageContext = ({
   handle,
   userName,
   bio,
@@ -331,14 +334,16 @@ export const getUserPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'user' as const,
-    hashId
+    hashId,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: true
   }
 }
 
 /**
- * Get SEO fields for track pages
+ * Track page meta tag context
  */
-export const getTrackPageSEOFields = ({
+export const getTrackPageContext = ({
   title,
   userName,
   permalink,
@@ -385,14 +390,16 @@ export const getTrackPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'track' as const,
-    hashId
+    hashId,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: false
   }
 }
 
 /**
- * Get SEO fields for collection (playlist/album) pages
+ * Collection (playlist/album) page meta tag context
  */
-export const getCollectionPageSEOFields = ({
+export const getCollectionPageContext = ({
   playlistName,
   playlistId,
   userName,
@@ -453,14 +460,16 @@ export const getCollectionPageSEOFields = ({
     canonicalUrl,
     structuredData,
     entityType: 'collection' as const,
-    hashId
+    hashId,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: false
   }
 }
 
 /**
- * Get SEO fields for coins page
+ * Coins page meta tag context
  */
-export const getCoinsPageSEOFields = () => {
+export const getCoinsPageContext = () => {
   const pageTitle = 'Discover Artist Coins'
   const pageDescription =
     'Explore Artist Coins on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
@@ -470,14 +479,16 @@ export const getCoinsPageSEOFields = () => {
     title: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-    canonicalUrl
+    canonicalUrl,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: true
   }
 }
 
 /**
- * Get SEO fields for wallet page
+ * Wallet page meta tag context
  */
-export const getWalletPageSEOFields = () => {
+export const getWalletPageContext = () => {
   const pageTitle = 'Wallet'
   const pageDescription =
     'Manage your Audius wallet. View your cash balance, artist coins, and linked wallets all in one place.'
@@ -487,14 +498,16 @@ export const getWalletPageSEOFields = () => {
     title: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-    canonicalUrl
+    canonicalUrl,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: true
   }
 }
 
 /**
- * Get SEO fields for cash page
+ * Cash page meta tag context
  */
-export const getCashPageSEOFields = () => {
+export const getCashPageContext = () => {
   const pageTitle = 'Cash'
   const pageDescription =
     'Manage your Audius Cash. View your balance, transaction history, and cash-enabled features.'
@@ -504,19 +517,8 @@ export const getCashPageSEOFields = () => {
     title: pageTitle,
     description: pageDescription,
     ogDescription: pageDescription,
-    canonicalUrl
+    canonicalUrl,
+    image: DEFAULT_IMAGE_URL,
+    thumbnail: true
   }
 }
-
-/**
- * Get default SEO fields for pages without specific metadata
- */
-export const getDefaultSEOFields = () => ({
-  title: 'Audius - Empowering Creators',
-  description:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  ogDescription:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  image: DEFAULT_IMAGE_URL,
-  imageAlt: 'The Audius Platform'
-})

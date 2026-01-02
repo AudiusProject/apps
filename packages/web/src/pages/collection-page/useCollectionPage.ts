@@ -68,7 +68,7 @@ import {
 import { replace } from 'utils/navigation'
 import { getPathname, collectionPage, profilePage } from 'utils/route'
 import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
-import { getCollectionPageSEOFields } from 'ssr/metaTags'
+import { getCollectionPageContext } from 'ssr/metaTags'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
@@ -775,7 +775,7 @@ export const useCollectionPage = (
   }, [fetchCollection, pathname])
 
   // SEO fields
-  const seoFields = getCollectionPageSEOFields({
+  const seoFields = getCollectionPageContext({
     playlistName: collection?.playlist_name,
     playlistId: collection?.playlist_id,
     userName: user?.name,
