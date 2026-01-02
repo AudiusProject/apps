@@ -76,7 +76,7 @@ export const FindAccountManagerPage = (props: FindAccountManagerPageProps) => {
         </Box>
       )
     },
-    [query, setPageState]
+    [query, setPageState, color]
   )
 
   return (
