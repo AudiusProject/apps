@@ -11,6 +11,7 @@
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint src --ext=ts,tsx,mdx",
