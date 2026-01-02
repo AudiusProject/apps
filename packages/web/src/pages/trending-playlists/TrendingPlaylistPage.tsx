@@ -16,7 +16,7 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
-import { createSeoDescription } from 'ssr/metaTags'
+import { getExploreInfo } from 'ssr/metaTags'
 import { BASE_URL } from 'utils/route'
 
 import styles from './TrendingPlaylistPage.module.css'
@@ -24,9 +24,10 @@ import styles from './TrendingPlaylistPage.module.css'
 const { TRENDING_PLAYLISTS_PAGE } = route
 const { getLineup } = trendingPlaylistsPageLineupSelectors
 
+const exploreInfo = getExploreInfo('trending-playlists')
 const messages = {
-  trendingPlaylistTile: 'Trending Playlists',
-  description: createSeoDescription('Trending Playlists on Audius')
+  trendingPlaylistTile: exploreInfo.title,
+  description: exploreInfo.description
 }
 
 /** Wraps useLineupProps to return trending playlist lineup props */

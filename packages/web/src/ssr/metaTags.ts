@@ -30,6 +30,15 @@ export interface ExploreInfo {
   image: string
 }
 
+/**
+ * Create SEO description with consistent formatting
+ */
+export const createSeoDescription = (msg: string, userPage?: boolean) => {
+  if (userPage)
+    return `${msg} | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
+  return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
+}
+
 // Get base public URL based on environment
 const getPublicUrl = (): string => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
@@ -79,13 +88,14 @@ export const getWebUrl = (path: string): string => {
 export const exploreMap: Record<string, ExploreInfo> = {
   'trending-playlists': {
     title: 'Trending Playlists',
-    description: 'The trending playlists on Audius right now',
+    description: createSeoDescription('Trending Playlists on Audius'),
     image: TOP_PLAYLISTS_URL
   },
   underground: {
     title: 'Underground Trending',
-    description:
-      'Some of the best up-and-coming music on Audius all in one place',
+    description: createSeoDescription(
+      "Listen to what's trending on the Audius platform"
+    ),
     image: UNDERGROUND_TRENDING_URL
   }
 }
@@ -97,7 +107,7 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
   if (!type || !exploreMap[type]) {
     return {
       title: 'Explore',
-      description: `Content curated for you based on your likes, reposts, and follows. Refreshes often so if you like a track, favorite it.`,
+      description: createSeoDescription('Explore featured content on Audius'),
       image: DEFAULT_IMAGE_URL
     }
   }
@@ -185,7 +195,9 @@ export const getDownloadAppContext = () => ({
  */
 export const getTrendingContext = () => ({
   title: 'Trending',
-  description: 'Listen to trending tracks on Audius',
+  description: createSeoDescription(
+    "Listen to what's trending on the Audius platform"
+  ),
   image: DEFAULT_IMAGE_URL,
   thumbnail: true
 })
@@ -274,15 +286,6 @@ export const getSearchContext = () => ({
  * SEO Utility functions to generate titles and descriptions
  * Used by both SSR and client-side rendering
  */
-
-/**
- * Create SEO description with consistent formatting
- */
-export const createSeoDescription = (msg: string, userPage?: boolean) => {
-  if (userPage)
-    return `${msg} | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
-  return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
-}
 
 /**
  * User/profile page meta tag context

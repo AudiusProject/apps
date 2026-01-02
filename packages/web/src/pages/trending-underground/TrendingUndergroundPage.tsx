@@ -16,7 +16,7 @@ import MobilePageContainer from 'components/mobile-page-container/MobilePageCont
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
-import { createSeoDescription } from 'ssr/metaTags'
+import { getExploreInfo } from 'ssr/metaTags'
 import { BASE_URL } from 'utils/route'
 
 import styles from './TrendingUndergroundPage.module.css'
@@ -34,11 +34,10 @@ const useTrendingUndergroundLineup = (containerRef: HTMLElement) => {
   })
 }
 
+const exploreInfo = getExploreInfo('underground')
 const messages = {
-  trendingUndergroundTitle: 'Underground Trending',
-  description: createSeoDescription(
-    "Listen to what's trending on the Audius platform"
-  )
+  trendingUndergroundTitle: exploreInfo.title,
+  description: exploreInfo.description
 }
 
 type TrendingUndergroundPageProps = {
