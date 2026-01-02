@@ -1,9 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 
 import { Theme } from '@audius/common/models'
-import { formatCount } from '@audius/common/utils'
+import { dayjs, formatCount } from '@audius/common/utils'
 import { Select } from '@audius/harmony'
-import moment from 'moment'
 import numeral from 'numeral'
 import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
@@ -246,13 +245,13 @@ const TotalPlaysChart = ({
     })
 
     // Calculate how many years to show in the dropdown
-    const createdAt = moment(accountCreatedAt)
-    const today = moment()
+    const createdAt = dayjs(accountCreatedAt)
+    const today = dayjs()
 
-    const diff = today.diff(createdAt, 'years')
+    const diff = today.diff(createdAt, 'year')
     const years = []
     for (let i = 0; i < diff; i++) {
-      const year = createdAt.clone().add(i, 'years').year()
+      const year = createdAt.add(i, 'year').year()
       years.push({ value: String(year), label: String(year) })
     }
     setYearOptions((prev) => [...prev, ...years])

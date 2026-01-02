@@ -1,6 +1,6 @@
+import { dayjs } from '@audius/common/utils'
 import { Form, Formik } from 'formik'
 import { merge } from 'lodash'
-import moment from 'moment'
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 
 import {
@@ -161,7 +161,7 @@ describe.skip('VisibilityField', () => {
             {
               is_scheduled_release: true,
               is_unlisted: true,
-              release_date: moment('Sat Jun 15 2024 00:01:00').toString()
+              release_date: dayjs('Sat Jun 15 2024 00:01:00').toString()
             }
           ]
         }),

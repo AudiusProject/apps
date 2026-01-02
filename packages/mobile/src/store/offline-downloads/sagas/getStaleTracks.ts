@@ -1,10 +1,10 @@
 import type { ID } from '@audius/common/models'
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 import { select } from 'typed-redux-saga'
 
 import { getOfflineTrackMetadata } from '../selectors'
 
-const STALE_DURATION_TRACKS = moment.duration(7, 'days')
+const STALE_DURATION_TRACKS = dayjs.duration(7, 'day')
 const STALE_BATCH_SIZE = 20
 
 export function* getStaleTracks() {
@@ -15,9 +15,9 @@ export function* getStaleTracks() {
     .filter((trackId) => {
       const metadata = offlineTrackMetadata[trackId]
       if (!metadata?.last_verified_time) return false
-      return moment()
+      return dayjs()
         .subtract(STALE_DURATION_TRACKS)
-        .isAfter(metadata.last_verified_time)
+        .isAfter(dayjs(metadata.last_verified_time))
     })
     .sort((trackIdA: ID, trackIdB: ID) => {
       const lastVerifiedA = offlineTrackMetadata[trackIdA].last_verified_time

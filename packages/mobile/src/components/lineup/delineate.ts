@@ -1,14 +1,14 @@
+import { dayjs } from '@audius/common/utils'
 import { groupBy } from 'lodash'
-import moment from 'moment'
 
 import type { LineupItem } from './types'
 
-const NOW = moment()
-const START_OF_DAY = moment(NOW).startOf('day')
-const START_OF_YESTERDAY = moment(NOW).subtract(1, 'days').startOf('day')
-const START_OF_WEEK = moment(NOW).startOf('week')
-const START_OF_LAST_WEEK = moment(NOW).subtract(1, 'week').startOf('week')
-const START_OF_MONTH = moment(NOW).startOf('month')
+const NOW = dayjs()
+const START_OF_DAY = dayjs(NOW).startOf('day')
+const START_OF_YESTERDAY = dayjs(NOW).subtract(1, 'day').startOf('day')
+const START_OF_WEEK = dayjs(NOW).startOf('week')
+const START_OF_LAST_WEEK = dayjs(NOW).subtract(1, 'week').startOf('week')
+const START_OF_MONTH = dayjs(NOW).startOf('month')
 
 const Delineations = Object.freeze({
   TODAY: 'today',
@@ -19,24 +19,24 @@ const Delineations = Object.freeze({
 })
 
 const getLineupItemGroup = ({ activityTimestamp }: LineupItem) => {
-  const time = moment(activityTimestamp)
-  if (time > START_OF_DAY) {
+  const time = dayjs(activityTimestamp)
+  if (time.isAfter(START_OF_DAY)) {
     return Delineations.TODAY
   }
-  if (time > START_OF_YESTERDAY) {
+  if (time.isAfter(START_OF_YESTERDAY)) {
     return Delineations.YESTERDAY
   }
-  if (time > START_OF_WEEK) {
+  if (time.isAfter(START_OF_WEEK)) {
     return Delineations.EARLIER_THIS_WEEK
   }
-  if (time > START_OF_LAST_WEEK) {
+  if (time.isAfter(START_OF_LAST_WEEK)) {
     return Delineations.LAST_WEEK
   }
-  if (time > START_OF_MONTH) {
+  if (time.isAfter(START_OF_MONTH)) {
     return Delineations.EARLIER_THIS_MONTH
   }
 
-  const startOfMonth = moment(time).startOf('month')
+  const startOfMonth = dayjs(time).startOf('month')
   if (startOfMonth.year() === NOW.year()) {
     return startOfMonth.format('MMMM')
   }

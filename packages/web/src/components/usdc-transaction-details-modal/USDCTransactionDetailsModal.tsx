@@ -1,6 +1,6 @@
 import { USDCTransactionType } from '@audius/common/models'
 import { useUSDCTransactionDetailsModal } from '@audius/common/store'
-import { makeSolanaTransactionLink } from '@audius/common/utils'
+import { makeSolanaTransactionLink, dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 import {
   Modal,
@@ -12,7 +12,6 @@ import {
   IconExternalLink,
   Text
 } from '@audius/harmony'
-import moment from 'moment'
 
 import { ExternalTextLink } from 'components/link'
 
@@ -67,7 +66,7 @@ export const USDCTransactionDetailsModal = () => {
         />
         <DetailSection
           label={messages.date}
-          value={moment(transactionDetails.transactionDate).format(
+          value={dayjs(transactionDetails.transactionDate).format(
             'MMM DD, YYYY'
           )}
         />

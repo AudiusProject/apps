@@ -7,8 +7,7 @@ import {
   collectionPageSelectors,
   queueSelectors
 } from '@audius/common/store'
-import { areSetsEqual, Uid, makeUid } from '@audius/common/utils'
-import moment from 'moment'
+import { areSetsEqual, dayjs, Uid, makeUid } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useReachabilityEffect } from 'app/hooks/useReachabilityEffect'
@@ -87,8 +86,7 @@ export const useFetchCollectionLineup = (
               collectionTrackUidMap[trackId]?.[trackIdEncounters[trackId]] ??
               makeUid(Kind.TRACKS, trackId, collectionUidSource),
 
-            dateAdded:
-              typeof time === 'string' ? moment(time) : moment.unix(time)
+            dateAdded: typeof time === 'string' ? dayjs(time) : dayjs.unix(time)
           }
         })
 

@@ -42,9 +42,8 @@ import {
   followersUserListActions,
   playerSelectors
 } from '@audius/common/store'
-import { getErrorMessage, Nullable, route } from '@audius/common/utils'
+import { dayjs, getErrorMessage, Nullable, route } from '@audius/common/utils'
 import { useQueryClient } from '@tanstack/react-query'
-import moment from 'moment'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 
@@ -314,8 +313,8 @@ export const useProfilePage = (
   const instagramVerified = !!profile?.verified_with_instagram
   const tikTokVerified = !!profile?.verified_with_tiktok
   const created = profile
-    ? moment(profile.created_at).format('YYYY')
-    : moment().format('YYYY')
+    ? dayjs(profile.created_at).format('YYYY')
+    : dayjs().format('YYYY')
 
   const name = profile ? (updatedName ?? profile.name ?? '') : ''
   const bio = profile && updatedBio !== null ? updatedBio : (profile?.bio ?? '')

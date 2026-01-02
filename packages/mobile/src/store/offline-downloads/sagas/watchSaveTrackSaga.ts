@@ -1,5 +1,5 @@
 import { tracksSocialActions } from '@audius/common/store'
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 import { put, takeEvery, select } from 'typed-redux-saga'
 
 import { make, track } from 'app/services/analytics'
@@ -36,7 +36,7 @@ function* downloadSavedTrack(
             type: 'track',
             id: trackId,
             metadata: {
-              favorite_created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+              favorite_created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
               reasons_for_download: [
                 {
                   is_from_favorites: true,

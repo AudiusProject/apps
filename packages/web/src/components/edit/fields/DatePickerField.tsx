@@ -1,19 +1,26 @@
-import 'react-dates/initialize'
-import 'react-dates/lib/css/_datepicker.css'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-
+import { dayjs } from '@audius/common/utils'
 import { Flex, IconCalendarMonth, Popup, Text } from '@audius/harmony'
 import cn from 'classnames'
 import { useField, useFormikContext } from 'formik'
-import moment from 'moment'
-import {
-  isInclusivelyBeforeDay,
-  isInclusivelyAfterDay,
-  DayPickerSingleDateController
-} from 'react-dates'
+
+import lazyWithPreload from 'utils/lazyWithPreload'
 
 import styles from './DatePickerField.module.css'
+
+// Lazy load react-datepicker since it's only used when the popup is open
+// Preload when the date field is focused to minimize delay (200ms auto-preload)
+// CSS is imported dynamically as part of the lazy load to avoid linter errors
+const ReactDatePicker = lazyWithPreload(
+  () =>
+    import('react-datepicker').then((module) => {
+      // Dynamically import CSS to avoid linter errors about package exports
+      import('react-datepicker/dist/react-datepicker.css')
+      return module
+    }),
+  200
+)
 
 type DatePickerFieldProps = {
   name: string
@@ -85,6 +92,13 @@ export const DatePicker = (props: DatePickerProps) => {
 
   useEffect(() => setIsFocused(shouldFocus ?? false), [shouldFocus])
 
+  // Preload the date picker when user focuses on the field
+  useEffect(() => {
+    if (isFocused) {
+      ReactDatePicker.preload()
+    }
+  }, [isFocused])
+
   return (
     <Flex direction='column' gap='s'>
       <Flex
@@ -116,12 +130,23 @@ export const DatePicker = (props: DatePickerProps) => {
             <input
               className={styles.input}
               name={name}
-              value={moment(value).format('L')}
+              value={value ? dayjs(value).format('L') : ''}
               aria-readonly
               readOnly
             />
             <div className={styles.displayValue}>
-              {value ? moment(value).calendar().split(' at')[0] : null}
+              {value
+                ? dayjs(value)
+                    .calendar(undefined, {
+                      sameDay: '[Today]',
+                      nextDay: '[Tomorrow]',
+                      nextWeek: 'dddd',
+                      lastDay: '[Yesterday]',
+                      lastWeek: '[Last] dddd',
+                      sameElse: 'M/D/YYYY'
+                    })
+                    .split(' at')[0]
+                : null}
             </div>
           </div>
         </div>
@@ -132,47 +157,56 @@ export const DatePicker = (props: DatePickerProps) => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
           <div className={cn(styles.datePicker, style)}>
-            <DayPickerSingleDateController
-              // @ts-ignore todo: upgrade moment
-              date={moment(value)}
-              onDateChange={(date) => {
-                onChange(date?.startOf('day').toString() ?? moment().toString())
-              }}
-              isOutsideRange={(day) => {
-                if (maxDate && minDate) {
-                  return (
-                    !isInclusivelyAfterDay(day, moment(minDate)) ||
-                    !isInclusivelyBeforeDay(day, moment(maxDate))
-                  )
-                }
-                if (maxDate) {
-                  return (
-                    !isInclusivelyAfterDay(day, moment()) ||
-                    !isInclusivelyBeforeDay(day, moment(maxDate))
-                  )
-                }
-                if (minDate) {
-                  return !isInclusivelyAfterDay(day, moment(minDate))
-                }
-                if (futureDatesOnly) {
-                  return !isInclusivelyAfterDay(day, moment())
-                } else if (isInitiallyUnlisted) {
-                  return !isInclusivelyBeforeDay(day, moment().add(1, 'year'))
-                } else {
-                  // @ts-ignore mismatched moment versions; shouldn't be relevant here
-                  return !isInclusivelyBeforeDay(day, moment())
-                }
-              }}
-              focused={isFocused}
-              isFocused={isFocused}
-              onFocusChange={({ focused }) => {
-                setIsFocused(focused)
-              }}
-              // @ts-ignore mismatched moment versions; shouldn't be relevant here
-              initialVisibleMonth={() => moment()} // PropTypes.func or null,
-              hideKeyboardShortcutsPanel
-              noBorder
-            />
+            <Suspense
+              fallback={<div className={styles.loading}>Loading...</div>}
+            >
+              <ReactDatePicker
+                selected={value ? dayjs(value).toDate() : null}
+                onChange={(date: Date | null) => {
+                  if (date) {
+                    onChange(dayjs(date).startOf('day').toString())
+                  }
+                  setIsFocused(false)
+                }}
+                minDate={minDate}
+                maxDate={maxDate}
+                filterDate={(date: Date) => {
+                  const dateDayjs = dayjs(date)
+                  if (maxDate && minDate) {
+                    return (
+                      dateDayjs.isAfter(dayjs(minDate).subtract(1, 'day')) &&
+                      dateDayjs.isBefore(dayjs(maxDate).add(1, 'day'))
+                    )
+                  }
+                  if (maxDate) {
+                    return (
+                      dateDayjs.isAfter(dayjs().subtract(1, 'day')) &&
+                      dateDayjs.isBefore(dayjs(maxDate).add(1, 'day'))
+                    )
+                  }
+                  if (minDate) {
+                    return dateDayjs.isAfter(dayjs(minDate).subtract(1, 'day'))
+                  }
+                  if (futureDatesOnly) {
+                    return dateDayjs.isAfter(dayjs().subtract(1, 'day'))
+                  } else if (isInitiallyUnlisted) {
+                    return dateDayjs.isBefore(
+                      dayjs().add(1, 'year').add(1, 'day')
+                    )
+                  } else {
+                    return dateDayjs.isBefore(dayjs().add(1, 'day'))
+                  }
+                }}
+                open={isFocused}
+                onCalendarOpen={() => setIsFocused(true)}
+                onCalendarClose={() => setIsFocused(false)}
+                inline
+                calendarClassName={styles.reactDatepicker}
+                dateFormat='MM/dd/yyyy'
+                showMonthDropdown={false}
+                showYearDropdown={false}
+              />
+            </Suspense>
           </div>
         </Popup>
       </Flex>

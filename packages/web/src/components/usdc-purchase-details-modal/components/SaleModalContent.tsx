@@ -8,7 +8,7 @@ import {
   chatActions,
   useInboxUnavailableModal
 } from '@audius/common/store'
-import { makeSolanaTransactionLink } from '@audius/common/utils'
+import { makeSolanaTransactionLink, dayjs } from '@audius/common/utils'
 import {
   ModalContent,
   ModalHeader,
@@ -22,7 +22,6 @@ import {
   Hint,
   IconCart
 } from '@audius/harmony'
-import moment from 'moment'
 import { useDispatch } from 'react-redux'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
@@ -145,7 +144,7 @@ export const SaleModalContent = ({
             }
           >
             <Text variant='body' size='l'>
-              {moment(purchaseDetails.createdAt).format('MMM DD, YYYY')}
+              {dayjs(purchaseDetails.createdAt).format('MMM DD, YYYY')}
             </Text>
           </DetailSection>
           <TransactionSummary isSale transaction={purchaseDetails} />

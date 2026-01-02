@@ -1,5 +1,4 @@
 import { dayjs } from '@audius/common/utils'
-import moment from 'moment'
 import { Nullable } from 'vitest'
 
 export const formatToday = () => {
@@ -15,7 +14,7 @@ const formatReleaseMessage = (
   base: string,
   prefixMessage: string
 ) => {
-  const isFutureRelease = moment(releaseDate ?? undefined).isAfter(moment.now())
+  const isFutureRelease = dayjs(releaseDate ?? undefined).isAfter(dayjs())
   let message = isFutureRelease ? '[' + prefixMessage + '] ' : ''
   message += base
   message += isFutureRelease ? ' @ LT' : ''
@@ -31,14 +30,14 @@ export const formatCalendarTime = (
   }
 
   return (
-    moment(time).calendar(undefined, {
+    dayjs(time).calendar(undefined, {
       sameDay: formatReleaseMessage(time, '[Today]', prefixMessage),
       nextDay: formatReleaseMessage(time, '[Tomorrow]', prefixMessage),
       nextWeek: formatReleaseMessage(time, 'dddd', prefixMessage),
       lastDay: '[Yesterday]',
       lastWeek: '[Last] dddd',
       sameElse: formatReleaseMessage(time, 'M/D/YYYY', prefixMessage)
-    }) + (moment(time).isAfter(moment()) ? ' ' + getLocalTimezone() : '')
+    }) + (dayjs(time).isAfter(dayjs()) ? ' ' + getLocalTimezone() : '')
   )
 }
 

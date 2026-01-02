@@ -5,9 +5,9 @@ import {
   queryCurrentUserId
 } from '@audius/common/api'
 import { libraryPageSelectors, getSDK } from '@audius/common/store'
+import { dayjs } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
 import { fetchAllAccountCollections } from 'common/store/saved-collections/sagas'
-import moment from 'moment'
 import { takeEvery, select, call, put } from 'typed-redux-saga'
 
 import { make, track } from 'app/services/analytics'
@@ -41,7 +41,7 @@ function* downloadAllFavorites() {
   ]
 
   // Add local saves
-  const favorite_created_at = moment().format('YYYY-MM-DD HH:mm:ss')
+  const favorite_created_at = dayjs().format('YYYY-MM-DD HH:mm:ss')
   const localSaves = yield* select(getLocalTrackFavorites)
   const localSavesToAdd: OfflineEntry[] = Object.keys(localSaves)
     .map((id) => parseInt(id, 10))

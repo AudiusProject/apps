@@ -21,9 +21,8 @@ import {
   LibraryPageTrack,
   AccountState
 } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import { dayjs, makeUid } from '@audius/common/utils'
 import { uniq } from 'lodash'
-import moment from 'moment'
 import { call, select, put, takeEvery } from 'typed-redux-saga'
 
 import { LineupSagas } from 'common/store/lineup/sagas'
@@ -192,7 +191,7 @@ function* watchAddToLibrary() {
         uid: localSaveUid,
         kind: Kind.TRACKS,
         id: trackId,
-        dateSaved: moment().format()
+        dateSaved: dayjs().format()
       }
 
       let relevantCategory

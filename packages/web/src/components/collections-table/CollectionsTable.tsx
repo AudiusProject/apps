@@ -4,10 +4,9 @@ import {
   CollectionMetadata,
   UserCollectionMetadata
 } from '@audius/common/models'
-import { formatCount } from '@audius/common/utils'
+import { dayjs, formatCount } from '@audius/common/utils'
 import { Flex, IconCart, IconVisibilityHidden } from '@audius/harmony'
 import cn from 'classnames'
-import moment from 'moment'
 import { Cell, Row } from 'react-table'
 
 import { TextLink } from 'components/link'
@@ -120,7 +119,7 @@ export const CollectionsTable = ({
 
   const renderReleaseDateCell = useCallback((cellInfo: CollectionCell) => {
     const collection = cellInfo.row.original
-    return moment(collection.release_date ?? collection.created_at).format(
+    return dayjs(collection.release_date ?? collection.created_at).format(
       'M/D/YY'
     )
   }, [])

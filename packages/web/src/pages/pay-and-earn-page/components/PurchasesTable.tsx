@@ -1,8 +1,8 @@
 import { MouseEvent, useCallback, useMemo } from 'react'
 
 import { USDCPurchaseDetails } from '@audius/common/models'
+import { dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import moment from 'moment'
 
 import { UserLink } from 'components/link'
 import { Table } from 'components/table'
@@ -65,7 +65,7 @@ const renderArtistCell = (cellInfo: PurchaseCell) => {
 
 const renderDateCell = (cellInfo: PurchaseCell) => {
   const transaction = cellInfo.row.original
-  return moment(transaction.createdAt).format('M/D/YY')
+  return dayjs(transaction.createdAt).format('M/D/YY')
 }
 
 const renderValueCell = (cellInfo: PurchaseCell) => {

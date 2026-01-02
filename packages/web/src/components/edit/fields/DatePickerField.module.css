@@ -9,7 +9,8 @@
 }
 
 .datePicker {
-  height: 296px;
+  width: 100%;
+  min-width: 280px;
 }
 
 .label {
@@ -44,88 +45,128 @@
   line-height: 18px;
 }
 
-.datePickerField :global(.SingleDatePicker_picker) {
-  top: -110px !important;
-  left: 128px !important;
+/* React DatePicker Styles - Override default styles to match design */
+.reactDatepicker {
+  border: none !important;
+  font-family: var(--harmony-font-family) !important;
+  background: var(--harmony-white) !important;
+  padding: 0 !important;
 }
 
-:global(.DayPicker),
-:global(.SingleDatePicker_picker),
-:global(.DayPicker__horizontal),
-:global(.CalendarMonth),
-:global(.CalendarMonthGrid),
-:global(.DayPickerNavigation_button__default) {
-  background: var(--harmony-white);
-  border-color: var(--harmony-border-strong);
+.reactDatepicker :global(.react-datepicker__header) {
+  background: var(--harmony-white) !important;
+  border-bottom: 1px solid var(--harmony-border-strong) !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }
 
-:global(.DayPickerNavigation_button__default):hover {
-  border-color: var(--harmony-border-default);
+.reactDatepicker :global(.react-datepicker__current-month) {
+  color: var(--harmony-neutral) !important;
+  font-family: Avenir Next LT Pro !important;
+  font-size: 20px !important;
+  font-weight: var(--harmony-font-demi-bold) !important;
+  margin-bottom: 0.5rem !important;
 }
 
-.datePickerField :global(.DateInput_fang) {
-  display: none;
+.reactDatepicker :global(.react-datepicker__day-names) {
+  display: flex !important;
+  justify-content: space-around !important;
+  margin-bottom: 0.5rem !important;
 }
 
-/* New Styles for date picker */
-:global(.CalendarMonth_caption) {
-  color: var(--harmony-neutral);
-  text-align: center;
-  font-family: Avenir Next LT Pro;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: var(--harmony-font-demi-bold);
+.reactDatepicker :global(.react-datepicker__day-name) {
+  color: var(--harmony-neutral) !important;
+  font-weight: var(--harmony-font-demi-bold) !important;
+  font-size: var(--harmony-font-s) !important;
+  width: 2.5rem !important;
+  line-height: 2.5rem !important;
+  margin: 0 !important;
+  text-align: center !important;
 }
 
-:global(.CalendarDay) {
-  font-family: var(--harmony-font-family);
-  line-height: 38px;
+.reactDatepicker :global(.react-datepicker__month) {
+  margin: 0 !important;
+  padding: 0.5rem !important;
+}
+
+.reactDatepicker :global(.react-datepicker__week) {
+  display: flex !important;
+  justify-content: space-around !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day) {
+  color: var(--harmony-neutral) !important;
+  font-size: var(--harmony-font-s) !important;
+  font-weight: var(--harmony-font-demi-bold) !important;
+  border: 1px solid var(--harmony-border-strong) !important;
+  background: var(--harmony-white) !important;
+  line-height: 2.5rem !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day):hover {
+  background: var(--harmony-n-100) !important;
+  border: 1px solid var(--harmony-border-strong) !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day--selected) {
+  background-color: var(--harmony-secondary) !important;
+  color: var(--harmony-white) !important;
+  border: 1px solid var(--harmony-border-strong) !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day--selected):hover {
+  background-color: var(--harmony-secondary) !important;
+  color: var(--harmony-white) !important;
+  border: 1px solid var(--harmony-border-default) !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day--disabled) {
+  color: var(--harmony-n-150) !important;
+  cursor: not-allowed !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day--disabled):hover {
+  color: var(--harmony-n-150) !important;
+  background: var(--harmony-white) !important;
+}
+
+.reactDatepicker :global(.react-datepicker__navigation) {
+  top: 1rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+.reactDatepicker :global(.react-datepicker__navigation--previous) {
+  left: 1rem !important;
+}
+
+.reactDatepicker :global(.react-datepicker__navigation--next) {
+  right: 1rem !important;
+}
+
+.reactDatepicker :global(.react-datepicker__navigation-icon::before) {
+  border-color: var(--harmony-neutral) !important;
+  border-width: 2px 2px 0 0 !important;
+}
+
+.reactDatepicker :global(.react-datepicker__day--outside-month) {
+  color: var(--harmony-n-150) !important;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
   color: var(--harmony-neutral);
   font-size: var(--harmony-font-s);
-  font-weight: var(--harmony-font-demi-bold);
-  border: 1px solid var(--harmony-border-strong);
-  background: var(--harmony-white);
-}
-
-:global(.CalendarDay):hover {
-  background: var(--harmony-n-100);
-  border: 1px solid var(--harmony-border-strong);
-}
-
-:global(.CalendarDay__selected) {
-  background-color: var(--harmony-secondary);
-  color: var(--harmony-white);
-  border: 1px solid var(--harmony-border-strong);
-}
-
-:global(.CalendarDay__selected):hover {
-  background-color: var(--harmony-secondary);
-  color: var(--harmony-white);
-  border: 1px solid var(--harmony-border-default);
-}
-
-:global(.CalendarDay__blocked_out_of_range) {
-  color: var(--harmony-n-150);
-}
-
-:global(.CalendarDay__blocked_out_of_range):hover {
-  color: var(--harmony-n-150);
-  background: var(--harmony-white);
-}
-
-:global(.DayPicker_weekHeader) {
-  top: 58px;
-}
-
-:global(.DayPickerNavigation_button__horizontalDefault) {
-  padding: 2px 16px;
-}
-
-:global(.CalendarMonth_caption) {
-  padding-bottom: 40px;
-}
-
-:global(.DayPickerNavigation_svg__horizontal) path {
-  stroke-width: 64px;
-  stroke: var(--harmony-neutral);
 }

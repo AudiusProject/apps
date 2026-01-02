@@ -6,7 +6,7 @@ import {
   TrackForUpload,
   UploadType
 } from '@audius/common/store'
-import moment from 'moment'
+import { dayjs } from '@audius/common/utils'
 
 import { EditCollectionForm } from 'components/edit-collection/EditCollectionForm'
 
@@ -27,7 +27,7 @@ export const UploadCollectionForm = (props: UploadCollectionFormProps) => {
     artwork: null,
     playlist_name: '',
     description: '',
-    release_date: moment().toString(),
+    release_date: dayjs().toString(),
     is_private: false,
     trackDetails: {
       genre: null,

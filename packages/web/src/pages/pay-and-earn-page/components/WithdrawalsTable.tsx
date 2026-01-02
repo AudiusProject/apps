@@ -4,8 +4,8 @@ import {
   USDCTransactionDetails,
   USDCTransactionType
 } from '@audius/common/models'
+import { dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import moment from 'moment'
 
 import { Table } from 'components/table'
 
@@ -77,7 +77,7 @@ const renderDestinationCell = (cellInfo: TransactionCell) => {
 
 const renderDateCell = (cellInfo: TransactionCell) => {
   const transaction = cellInfo.row.original
-  return moment(transaction.transactionDate).format('M/D/YY')
+  return dayjs(transaction.transactionDate).format('M/D/YY')
 }
 
 const renderAmountCell = (cellInfo: TransactionCell) => {

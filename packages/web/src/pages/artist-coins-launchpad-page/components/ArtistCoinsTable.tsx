@@ -13,7 +13,8 @@ import { useBuySellModal } from '@audius/common/store'
 import {
   route,
   formatCurrencyWithSubscript,
-  formatCount
+  formatCount,
+  dayjs
 } from '@audius/common/utils'
 import {
   Button,
@@ -25,7 +26,6 @@ import {
   Text
 } from '@audius/harmony'
 import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
-import moment from 'moment'
 import { useNavigate } from 'react-router'
 import { Cell } from 'react-table'
 
@@ -175,7 +175,7 @@ const renderCreatedDateCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
     <Text variant='body' size='m'>
-      {moment(coin.createdAt).format('M/D/YY')}
+      {dayjs(coin.createdAt).format('M/D/YY')}
     </Text>
   )
 }

@@ -15,7 +15,7 @@ import {
   gatedContentSelectors,
   usePremiumContentPurchaseModal
 } from '@audius/common/store'
-import { formatCount, formatSeconds } from '@audius/common/utils'
+import { formatCount, formatSeconds, dayjs } from '@audius/common/utils'
 import {
   IconVisibilityHidden,
   IconLock,
@@ -26,7 +26,6 @@ import {
   Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
-import moment from 'moment'
 import { useDispatch, useSelector } from 'react-redux'
 import { Cell, Row } from 'react-table'
 
@@ -271,17 +270,17 @@ export const TracksTable = ({
 
   const renderDateCell = useCallback((cellInfo: TrackCell) => {
     const track = cellInfo.row.original
-    return moment(track.date).format('M/D/YY')
+    return dayjs(track.date).format('M/D/YY')
   }, [])
 
   const renderAddedDateCell = useCallback((cellInfo: TrackCell) => {
     const track = cellInfo.row.original
-    return moment(track.dateAdded).format('M/D/YY')
+    return dayjs(track.dateAdded).format('M/D/YY')
   }, [])
 
   const renderSavedDateCell = useCallback((cellInfo: TrackCell) => {
     const track = cellInfo.row.original
-    return moment(track.dateSaved).format('M/D/YY')
+    return dayjs(track.dateSaved).format('M/D/YY')
   }, [])
 
   const renderSavesCell = useCallback(
@@ -319,12 +318,12 @@ export const TracksTable = ({
 
   const renderReleaseDateCell = useCallback((cellInfo: TrackCell) => {
     const track = cellInfo.row.original
-    return moment(track.release_date ?? track.created_at).format('M/D/YY')
+    return dayjs(track.release_date ?? track.created_at).format('M/D/YY')
   }, [])
 
   const renderListenDateCell = useCallback((cellInfo: TrackCell) => {
     const track = cellInfo.row.original
-    return moment(track.dateListened).format('M/D/YY')
+    return dayjs(track.dateListened).format('M/D/YY')
   }, [])
 
   const favoriteButtonRef = useRef<HTMLDivElement>(null)
