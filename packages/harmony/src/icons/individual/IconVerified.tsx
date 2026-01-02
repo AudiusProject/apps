@@ -1,4 +1,5 @@
 import { IconComponent, SVGIconProps } from '~harmony/components/icon'
+
 import IconVerifiedSVG from '../../assets/icons/Verified.svg'
 
 export const IconVerified = ((props: SVGIconProps) => (
