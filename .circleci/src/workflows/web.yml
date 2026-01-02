@@ -4,24 +4,6 @@ jobs:
       context:
         - Vercel
 
-  # TODO: Replace demo code with cloudflare and re-enable
-  # Cut a demo if not main
-  # - web-build-demo:
-  #     context:
-  #       - Vercel
-  #     requires:
-  #       - web-init
-  #     filters:
-  #       branches:
-  #         ignore: /^main$/
-  # - web-deploy-demo:
-  #     context: Audius Client
-  #     requires:
-  #       - web-build-demo
-  #     filters:
-  #       branches:
-  #         ignore: /^main$/
-
   # Build
   - web-build-production:
       context:
