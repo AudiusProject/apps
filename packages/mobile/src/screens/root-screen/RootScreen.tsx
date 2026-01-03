@@ -146,10 +146,7 @@ export const RootScreen = () => {
         canDismiss={isLoaded}
         onDismiss={handleSplashScreenDismissed}
       />
-      <StatusBar
-        isAppLoaded={isLoaded}
-        isSplashScreenDismissed={isSplashScreenDismissed}
-      />
+      <StatusBar isAppLoaded={isLoaded} />
       {isLoaded ? (
         <Stack.Navigator
           screenOptions={{ gestureEnabled: false, headerShown: false }}
