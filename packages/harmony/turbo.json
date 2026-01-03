@@ -1,6 +1,11 @@
 {
   "extends": ["//"],
   "tasks": {
+    "build:css": {
+      "inputs": ["src/css-entry.ts", "src/foundations/**/*.css"],
+      "outputs": ["dist/harmony.css"],
+      "outputLogs": "new-only"
+    },
     "test": {
       "outputs": ["coverage/**"],
       "outputLogs": "new-only"

@@ -7,5 +7,9 @@ const fetch = (input: RequestInfo | URL, init?: RequestInit) =>
       'credentials' in Request.prototype ? init?.credentials : undefined
   })
 
-export * from 'cross-fetch'
+// Export Headers, Request, Response from global for browser compatibility
+// cross-fetch doesn't export these in browser environments
+export const Headers = globalThis.Headers
+export const Request = globalThis.Request
+export const Response = globalThis.Response
 export default fetch

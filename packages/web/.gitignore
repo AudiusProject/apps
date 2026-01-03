@@ -53,6 +53,9 @@ react-app-env.d.ts
 .log
 .eslintcache
 
+# Bundle analysis files
+analyse.html
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -37,6 +37,7 @@
       "@audius/common/utils": ["../../common/src/utils/index.ts"],
       "@audius/common/src/*": ["../../common/src/*"],
       "@audius/harmony": ["../../harmony/src/index.ts"],
+      "@audius/sdk": ["../../sdk/src/index.ts"],
       "~/*": ["../../common/src/*"],
       "~harmony/*": ["../../harmony/src/*"]
     }

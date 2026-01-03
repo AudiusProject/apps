@@ -4,7 +4,6 @@
     "build": {
       "dependsOn": [
         "@audius/common#build",
-        "@audius/sdk#build",
         "@audius/fixed-decimal#build"
       ],
       "outputs": ["dist/**", "build/**"],

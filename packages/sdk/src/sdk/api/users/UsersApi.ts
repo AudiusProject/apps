@@ -560,7 +560,7 @@ export class UsersApi extends GeneratedUsersApi {
       throw new Error('Email owner user ID and receiving user ID are required')
     }
 
-    const accessGrants = []
+    const accessGrants = [] as any[]
 
     const {
       data: { encryptedKey: emailOwnerKey, isInitial } = {

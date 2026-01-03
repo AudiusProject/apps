@@ -124,7 +124,7 @@ type OAuthConfig = {
 
 export class OAuth {
   activePopupWindow: null | Window
-  popupCheckInterval: NodeJS.Timeout | null
+  popupCheckInterval: any | null
   loginSuccessCallback: LoginSuccessCallback | null
   loginErrorCallback: LoginErrorCallback | null
   apiKey: string | null

@@ -7,13 +7,31 @@
         "build-ssr/**",
         "../../node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js"
       ],
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "@audius/common#build",
+        "@audius/fixed-decimal#build",
+        "@audius/harmony#build:css"
+      ],
       "outputLogs": "new-only",
       "env": ["VITE_ENVIRONMENT", "VITE_SSR"]
     },
     "dist": {
       "outputs": ["dist/**"],
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "@audius/common#build",
+        "@audius/fixed-decimal#build",
+        "@audius/harmony#build:css"
+      ],
+      "outputLogs": "new-only"
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": [
+        "@audius/common#build",
+        "@audius/fixed-decimal#build",
+        "@audius/harmony#build:css"
+      ],
       "outputLogs": "new-only"
     }
   }
