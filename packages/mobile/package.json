@@ -27,14 +27,16 @@
     "lint:env": "dotenv-linter",
     "react-devtools": "npx react-devtools",
     "redux-devtools": "redux-devtools --port=8000 --open",
-    "start": "REACT_NATIVE_INSPECTOR_PROXY_DISABLED=true react-native start",
+    "start": "react-native start",
     "test": "jest src",
     "typecheck:trace": "tsc --generateTrace tsc_trace",
     "typecheck:watch": "tsc --watch",
     "typecheck": "tsc",
     "upgrade": "react-native upgrade",
     "upload:ios": "xcrun altool --upload-app -type ios --file build/AudiusReactNative.ipa --username $APPLE_ID --password $APPLE_ID_PASSWORD",
-    "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:lint:env\""
+    "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:lint:env\"",
+    "analyze:ios": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-ios.js' --dev=false --platform='ios' --sourcemap-output='./bundle-ios.js.map' && npx --yes source-map-explorer './bundle-ios.js' './bundle-ios.js.map' --html bundle-analysis-ios.html --no-border-checks",
+    "analyze:android": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-android.js' --dev=false --platform='android' --sourcemap-output='./bundle-android.js.map' && npx --yes source-map-explorer './bundle-android.js' './bundle-android.js.map' --html bundle-analysis-android.html --no-border-checks"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.4.11",
@@ -203,6 +205,7 @@
     "jest": "^29.2.1",
     "jetifier": "1.6.8",
     "prettier": "3.4.2",
+    "react-native-bundle-visualizer": "^3.1.3",
     "react-native-clean-project": "4.0.3",
     "react-test-renderer": "19.0.0",
     "reactotron-react-native": "^5.1.14",

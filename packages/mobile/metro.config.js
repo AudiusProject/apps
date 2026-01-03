@@ -100,7 +100,7 @@ const config = {
     unstable_enablePackageExports: false,
     unstable_conditionNames: ['default', 'require', 'react-native'],
     assetExts: [...assetExts.filter((ext) => ext !== 'svg'), 'lottie'],
-    sourceExts: [...sourceExts, 'svg', 'cjs', 'workerscript'],
+    sourceExts: [...sourceExts, 'svg', 'cjs', 'mjs', 'workerscript'],
     extraNodeModules: {
       ...require('node-libs-react-native'),
 
@@ -109,6 +109,7 @@ const config = {
       '@audius/harmony-native': path.resolve(__dirname, 'src/harmony-native'),
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
+      '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
 
       // The following imports are needed for @audius/common
       // and @audius/web to compile correctly
@@ -161,6 +162,20 @@ const config = {
           filePath: `${resolveModule(
             '@metaplex-foundation/umi'
           )}/dist/cjs/serializers.cjs`,
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === 'react-merge-refs') {
+        return {
+          filePath: `${resolveModule('react-merge-refs')}/dist/index.mjs`,
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/sdk') {
+        return {
+          filePath: path.resolve(__dirname, '../sdk/src/index.ts'),
           type: 'sourceFile'
         }
       }

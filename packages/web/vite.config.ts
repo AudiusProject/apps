@@ -189,6 +189,8 @@ export default defineConfig(async ({ mode }) => {
         '@audius/harmony/src': path.resolve(__dirname, '../harmony/src'),
         '@audius/harmony/dist': path.resolve(__dirname, '../harmony/dist'),
         '@audius/harmony': path.resolve(__dirname, '../harmony/src'),
+        '@audius/sdk/src': path.resolve(__dirname, '../sdk/src'),
+        '@audius/sdk': path.resolve(__dirname, '../sdk/src'),
         path: require.resolve('path-browserify'),
         url: require.resolve('url'),
         zlib: require.resolve('browserify-zlib'),
