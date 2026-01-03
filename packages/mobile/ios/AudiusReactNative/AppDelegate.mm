@@ -60,9 +60,7 @@
 // Override customizeRootView for React Native 0.74+ with new architecture
 - (void)customizeRootView:(RCTRootView *)rootView {
   [super customizeRootView:rootView];
-  if (rootView != nil) {
-    [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView];
-  }
+  [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView];
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
