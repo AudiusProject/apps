@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { useCurrentUserId, useManagers } from '@audius/common/api'
 import { User } from '@audius/common/models'
-import { Box, Flex, IconShieldUser, Text } from '@audius/harmony'
+import { Box, Flex, IconShieldUser, Text, useTheme } from '@audius/harmony'
 
 import ArtistChip from 'components/artist/ArtistChip'
 import { UsersSearch } from 'components/search-users-modal/SearchUsersModal'
@@ -18,6 +18,7 @@ const messages = {
 }
 
 export const FindAccountManagerPage = (props: FindAccountManagerPageProps) => {
+  const { color } = useTheme()
   const { setPageState, params } = props
   const [query, setQuery] = useState(params?.query ?? '')
   const { data: userId } = useCurrentUserId()
@@ -52,12 +53,12 @@ export const FindAccountManagerPage = (props: FindAccountManagerPageProps) => {
           pv='l'
           borderTop='default'
           ph='xl'
-          css={(theme) => ({
+          css={{
             '&:hover': {
               cursor: 'pointer',
-              backgroundColor: theme.color.background.surface1
+              backgroundColor: color.background.surface1
             }
-          })}
+          }}
         >
           <ArtistChip
             userId={user.user_id}
@@ -75,7 +76,7 @@ export const FindAccountManagerPage = (props: FindAccountManagerPageProps) => {
         </Box>
       )
     },
-    [query, setPageState]
+    [query, setPageState, color]
   )
 
   return (

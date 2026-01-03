@@ -6,7 +6,8 @@ import {
   Button,
   IconListeningHistory,
   IconPause,
-  IconPlay
+  IconPlay,
+  useTheme
 } from '@audius/harmony'
 import { full } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
@@ -37,6 +38,7 @@ export type HistoryPageProps = {
 const pageSize = 50
 
 export const HistoryPage = ({ title, description }: HistoryPageProps) => {
+  const { spacing } = useTheme()
   const { data: currentUserId } = useCurrentUserId()
   const dispatch = useDispatch()
   const mainContentRef = useMainContentRef()
@@ -95,7 +97,7 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
     <Button
       variant='primary'
       size='small'
-      css={(theme) => ({ marginLeft: theme.spacing.xl })}
+      css={{ marginLeft: spacing.xl }}
       iconLeft={isPlaying ? IconPause : IconPlay}
       onClick={handlePlay}
     >

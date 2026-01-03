@@ -14,7 +14,8 @@ import {
   Divider,
   Hint,
   Checkbox,
-  useMedia
+  useMedia,
+  useTheme
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
@@ -47,9 +48,9 @@ const SendTokensConfirmation = ({
   amount,
   destinationAddress,
   onConfirm,
-  onBack,
-  onClose
+  onBack
 }: SendTokensConfirmationProps) => {
+  const { color } = useTheme()
   const [isConfirmed, setIsConfirmed] = useState(false)
   const { isMobile } = useMedia()
 
@@ -147,11 +148,7 @@ const SendTokensConfirmation = ({
           </Text>
           <Flex gap='xl' alignItems='center'>
             <Checkbox checked={isConfirmed} onChange={handleCheckboxChange} />
-            <Text
-              variant='body'
-              size='s'
-              css={(theme) => ({ color: theme.color.neutral.n600 })}
-            >
+            <Text variant='body' size='s' css={{ color: color.neutral.n600 }}>
               {messages.confirmationText}
             </Text>
           </Flex>

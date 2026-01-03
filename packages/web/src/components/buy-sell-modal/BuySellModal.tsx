@@ -11,7 +11,8 @@ import {
   ModalHeader,
   ModalTitle,
   PlainButton,
-  Text
+  Text,
+  useTheme
 } from '@audius/harmony'
 import { useAppKitState } from '@reown/appkit/react'
 
@@ -23,6 +24,7 @@ import { Screen } from './types'
 export const WALLET_GUIDE_URL = 'https://help.audius.co/product/wallet-guide'
 
 export const BuySellModal = () => {
+  const theme = useTheme()
   const { isOpen, onClose, data } = useBuySellModal()
   const { ticker, initialTab } = data
   const { onOpen: openAddCashModal } = useAddCashModal()
@@ -72,12 +74,12 @@ export const BuySellModal = () => {
             onClick={() => {
               window.open(WALLET_GUIDE_URL, '_blank')
             }}
-            css={(theme) => ({
+            css={{
               position: 'absolute',
               top: theme.spacing.xl,
               right: theme.spacing.xl,
               zIndex: zIndex.BUY_SELL_MODAL + 1
-            })}
+            }}
           >
             {buySellMessages.help}
           </PlainButton>

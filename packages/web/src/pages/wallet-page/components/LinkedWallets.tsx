@@ -200,15 +200,16 @@ const WalletEmptyState = ({
 }
 
 const BuiltInWalletRow = () => {
+  const { color, spacing, cornerRadius } = useTheme()
   return (
     <Flex alignItems='center' gap='s' w='100%'>
       <IconLogoWhiteBackground
-        css={(theme) => ({
-          borderRadius: theme.cornerRadius.circle,
-          borderColor: theme.color.border.default,
-          height: theme.spacing.xl,
-          width: theme.spacing.xl
-        })}
+        css={{
+          borderRadius: cornerRadius.circle,
+          borderColor: color.border.default,
+          height: spacing.xl,
+          width: spacing.xl
+        }}
       />
       <Text variant='body' size='m' strength='strong'>
         {coinDetailsMessages.externalWallets.builtIn}

@@ -2,7 +2,7 @@ import { useCallback, MouseEvent } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { Text } from '@audius/harmony'
+import { Text, useTheme } from '@audius/harmony'
 
 import { TextLink, TextLinkProps } from 'components/link'
 
@@ -10,6 +10,7 @@ type VanityMetricProps = TextLinkProps
 
 export const VanityMetric = (props: VanityMetricProps) => {
   const { children, onClick, ...other } = props
+  const { spacing } = useTheme()
   const handleClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
       e.stopPropagation()
@@ -23,12 +24,12 @@ export const VanityMetric = (props: VanityMetricProps) => {
       size='xs'
       applyHoverStylesToInnerSvg
       noUnderlineOnHover
-      css={(theme) => ({
-        gap: theme.spacing.xs,
+      css={{
+        gap: spacing.xs,
         alignItems: 'center',
         flexWrap: 'nowrap',
         whiteSpace: 'nowrap'
-      })}
+      }}
       onClick={handleClick}
       {...other}
     >

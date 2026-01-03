@@ -11,8 +11,8 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerProfilePage } from 'pages/profile-page/DesktopServerProfilePage'
 import { MobileServerProfilePage } from 'pages/profile-page/MobileServerProfilePage'
+import { getAppUrl, getUserPageContext, getWebUrl } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
-import { getUserPageSEOFields } from 'utils/seo'
 
 import { getIndexHtml } from '../getIndexHtml'
 
@@ -37,18 +37,22 @@ export default function render(pageContext: TrackPageContext) {
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  const seoMetadata = getUserPageSEOFields({
+  const seoMetadata = getUserPageContext({
     handle,
     userName: name,
     bio: bio ?? '',
     hashId: id
   })
 
+  // Generate app and web URLs for deep linking and Farcaster
+  const appUrl = getAppUrl(urlPathname)
+  const webUrl = getWebUrl(urlPathname)
+
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
       <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
         <>
-          <MetaTags {...seoMetadata} />
+          <MetaTags {...seoMetadata} appUrl={appUrl} webUrl={webUrl} />
           {user ? (
             isMobile ? (
               <MobileServerProfilePage user={user} />

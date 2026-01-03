@@ -5,7 +5,7 @@ import {
   WidthSizes,
   SupportedUserMetadata
 } from '@audius/common/models'
-import { Flex, IconTrophy, Paper, Text } from '@audius/harmony'
+import { Flex, IconTrophy, Paper, Text, useTheme } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { Avatar } from 'components/avatar'
@@ -19,6 +19,7 @@ type SupportingCardProps = {
 }
 
 export const SupportingTile = ({ supporting }: SupportingCardProps) => {
+  const { spacing } = useTheme()
   const { receiver, rank } = supporting
   const dispatch = useDispatch()
   const handle = receiver?.handle
@@ -47,11 +48,11 @@ export const SupportingTile = ({ supporting }: SupportingCardProps) => {
           pv='2xs'
           ph='xs'
           gap='2xs'
-          css={(theme) => ({
+          css={{
             position: 'absolute',
-            right: theme.spacing.s,
-            top: theme.spacing.s
-          })}
+            right: spacing.s,
+            top: spacing.s
+          }}
         >
           <IconTrophy color='accent' />
           <Flex inline alignItems='center'>

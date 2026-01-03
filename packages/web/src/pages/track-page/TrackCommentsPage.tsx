@@ -3,7 +3,7 @@ import { useContext, useEffect } from 'react'
 import { useTrackByPermalink } from '@audius/common/api'
 import { CommentSectionProvider } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, Text, useTheme } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useParams } from 'react-router'
 
@@ -18,6 +18,7 @@ type TrackCommentsParams = {
 }
 
 export const TrackCommentsPage = () => {
+  const { color } = useTheme()
   const { slug, handle } = useParams<TrackCommentsParams>()
   const { data: partialTrack } = useTrackByPermalink(`/${handle}/${slug}`, {
     select: (track) =>
@@ -46,10 +47,10 @@ export const TrackCommentsPage = () => {
   return (
     <MobilePageContainer
       title={messages.title}
-      css={(theme) => ({
-        backgroundColor: theme.color.background.white,
+      css={{
+        backgroundColor: color.background.white,
         minHeight: '100%'
-      })}
+      }}
     >
       {comments_disabled ? (
         <Flex p='2xl' justifyContent='center'>

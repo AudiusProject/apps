@@ -8,7 +8,7 @@ import {
 } from '@audius/common/schemas'
 import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { Button, Flex, Paper, Text } from '@audius/harmony'
+import { Button, Flex, Paper, Text, useTheme } from '@audius/harmony'
 import { Formik, Form, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
@@ -79,6 +79,7 @@ const ImageUploadErrorText = () => {
 }
 
 export const FinishProfilePage = () => {
+  const { spacing } = useTheme()
   const { isMobile } = useMedia()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -188,9 +189,9 @@ export const FinishProfilePage = () => {
               placeholder={finishProfilePageMessages.inputPlaceholder}
               maxLength={MAX_DISPLAY_NAME_LENGTH}
               onChange={(e) => setDisplayName(e.currentTarget.value)}
-              css={(theme) => ({
-                padding: theme.spacing.l
-              })}
+              css={{
+                padding: spacing.l
+              }}
             />
           </Paper>
           <PageFooter

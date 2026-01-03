@@ -26,7 +26,8 @@ import {
   ModalTitle,
   ModalTitleProps,
   Scrollbar,
-  TextInput
+  TextInput,
+  useTheme
 } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
@@ -70,6 +71,7 @@ type SearchUsersModalProps = {
   Omit<ModalProps, 'children'>
 
 export const UsersSearch = (props: UsersSearchProps) => {
+  const { spacing } = useTheme()
   const {
     debounceMs = DEBOUNCE_MS,
     defaultUserList = {
@@ -182,12 +184,12 @@ export const UsersSearch = (props: UsersSearchProps) => {
           getScrollParent={getScrollParent}
           loader={
             <LoadingSpinner
-              css={(theme) => ({
-                width: theme.spacing.unit12,
-                height: theme.spacing.unit12,
-                marginBlock: theme.spacing.l,
+              css={{
+                width: spacing.unit12,
+                height: spacing.unit12,
+                marginBlock: spacing.l,
                 marginInline: 'auto'
-              })}
+              }}
             />
           }
           threshold={48}

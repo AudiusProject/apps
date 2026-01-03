@@ -6,7 +6,8 @@ import {
   TextLink,
   IconCloudUpload,
   Paper,
-  Box
+  Box,
+  useTheme
 } from '@audius/harmony'
 import cn from 'classnames'
 import ReactDropzone from 'react-dropzone'
@@ -67,6 +68,7 @@ export const Dropzone = ({
   disableClick,
   isTruncated
 }: DropzoneProps) => {
+  const { spacing } = useTheme()
   const getMessage = () => {
     if (subtitle) return subtitle
     let message
@@ -143,10 +145,10 @@ export const Dropzone = ({
         <div className={cn(styles.text, messageClassName)}>{getMessage()}</div>
       </div>
       <Flex
-        css={(theme) => ({
+        css={{
           position: 'absolute',
-          bottom: theme.spacing['3xl']
-        })}
+          bottom: spacing['3xl']
+        }}
       >
         {children}
       </Flex>

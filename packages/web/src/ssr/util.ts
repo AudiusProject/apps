@@ -2,50 +2,46 @@ import { resolveRoute } from 'vike/routing'
 import type { PageContextServer } from 'vike/types'
 
 // Route constants - defined locally to avoid importing route.ts which pulls in dayjs
-const SEARCH_BASE_ROUTE = '/search'
-const SEARCH_PAGE = '/search/:category?'
 const CHANGE_EMAIL_SETTINGS_PAGE = '/settings/change-email'
 const CHANGE_PASSWORD_SETTINGS_PAGE = '/settings/change-password'
-const CHATS_PAGE = '/messages'
 const CHAT_PAGE = '/messages/:id?'
-const DOWNLOAD_LINK = '/download'
 
 const assetPaths = new Set(['src', 'assets', 'scripts', 'fonts', 'favicons'])
 
 const invalidPaths = new Set(['undefined'])
 
-const staticRoutes = new Set([
-  '/',
-  '/trending',
-  '/feed',
-  '/explore',
-  '/explore/playlists',
-  '/explore/underground',
-  '/library',
-  '/history',
-  '/dashboard',
-  '/audio',
-  '/rewards',
-  '/upload',
-  '/settings',
-  '/notifications',
-  '/messages',
-  SEARCH_BASE_ROUTE,
-  '/search/all',
-  '/search/profiles',
-  '/search/tracks',
-  '/search/albums',
-  '/search/playlists'
+// Reserved paths that have their own SSR handlers and should NOT match /@handle patterns
+// This prevents /upload from being matched as a profile with handle="upload"
+const reservedPaths = new Set([
+  'upload',
+  'explore',
+  'audio',
+  'signup',
+  'download',
+  'trending',
+  'feed',
+  'library',
+  'history',
+  'dashboard',
+  'rewards',
+  'settings',
+  'notifications',
+  'messages',
+  'search',
+  'coins',
+  'cash',
+  'wallet',
+  'error'
 ])
 
+// Static routes that should skip SSR (only the root now, all others have SSR handlers)
+const staticRoutes = new Set(['/'])
+
+// Paths that should not use SSR even if they match a route
 const nonSsrPaths = [
-  SEARCH_BASE_ROUTE,
-  SEARCH_PAGE,
   CHANGE_EMAIL_SETTINGS_PAGE,
   CHANGE_PASSWORD_SETTINGS_PAGE,
-  CHATS_PAGE,
-  CHAT_PAGE,
-  DOWNLOAD_LINK,
+  CHAT_PAGE, // Individual chat pages, not the main messages page
   '/react-query',
   '/react-query-cache-prime',
   '/react-query-redux-cache-sync',
@@ -55,15 +51,24 @@ const nonSsrPaths = [
 export const makePageRoute =
   (routes: string[], pageName?: string) =>
   ({ urlPathname }: PageContextServer) => {
+    const firstSegment = urlPathname.split('/')[1]
+
     for (let i = 0; i < routes.length; i++) {
       const route = routes[i]
 
-      // Don't render page if the route matches any of the asset, invalid, or static  routes
+      // Don't render page if the route matches any of the asset, invalid, or static routes
       if (
-        assetPaths.has(urlPathname.split('/')[1]) ||
-        invalidPaths.has(urlPathname.split('/')[1]) ||
+        assetPaths.has(firstSegment) ||
+        invalidPaths.has(firstSegment) ||
         staticRoutes.has(urlPathname)
       ) {
+        continue
+      }
+
+      // If the route starts with /@handle pattern (e.g. /@handle, /@handle/tracks),
+      // don't match if the first URL segment is a reserved path
+      // This prevents /upload from matching as handle="upload"
+      if (route.startsWith('/@') && reservedPaths.has(firstSegment)) {
         continue
       }
 

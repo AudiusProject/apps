@@ -1,7 +1,14 @@
 import { useArtistCreatedCoin } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { Box, Flex, Text, TextArea, TextAreaSize } from '@audius/harmony'
+import {
+  Box,
+  Flex,
+  Text,
+  TextArea,
+  TextAreaSize,
+  useTheme
+} from '@audius/harmony'
 
 import Input from 'components/data-entry/Input'
 import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
@@ -70,6 +77,7 @@ type ProfileLeftNavProps = {
 }
 
 export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
+  const { spacing } = useTheme()
   const {
     userId,
     handle,
@@ -141,11 +149,11 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
 
             {/* @ts-ignore */}
             <Input
-              css={(theme) => ({
+              css={{
                 '& > input': {
-                  paddingLeft: theme.spacing.s
+                  paddingLeft: spacing.s
                 }
-              })}
+              }}
               characterLimit={30}
               size='small'
               placeholder={messages.location}

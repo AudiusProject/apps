@@ -6,7 +6,8 @@ import {
   IconInstagram,
   Button,
   SocialButton,
-  IconX
+  IconX,
+  useTheme
 } from '@audius/harmony'
 
 import { useModalState } from 'common/hooks/useModalState'
@@ -50,6 +51,7 @@ const onClickInstagram = () => {
 const Divider = () => <div className={styles.divider} />
 
 const VerifiedUpload = ({ dismissModal }: { dismissModal: () => void }) => {
+  const { spacing } = useTheme()
   const navigate = useNavigateToPage()
   const isMobile = useIsMobile()
 
@@ -90,7 +92,7 @@ const VerifiedUpload = ({ dismissModal }: { dismissModal: () => void }) => {
       </span>
       <Button
         variant='primary'
-        css={(theme) => ({ marginTop: theme.spacing['2xl'] })}
+        css={{ marginTop: spacing['2xl'] }}
         className={styles.uploadButton}
         iconRight={IconCloudUpload}
         onClick={onClickUpload}

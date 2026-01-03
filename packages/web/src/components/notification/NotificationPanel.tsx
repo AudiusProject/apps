@@ -11,7 +11,8 @@ import {
   Popup,
   Flex,
   Text,
-  LoadingSpinner
+  LoadingSpinner,
+  useTheme
 } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useSelector } from 'react-redux'
@@ -51,6 +52,7 @@ export const NotificationPanel = ({
   isOpen,
   onClose
 }: NotificationPanelProps) => {
+  const { spacing } = useTheme()
   const {
     notifications,
     fetchNextPage,
@@ -150,14 +152,14 @@ export const NotificationPanel = ({
               />
             }
             getScrollParent={getScrollParent}
-            css={(theme) => ({
+            css={{
               display: 'flex',
               flexDirection: 'column',
-              gap: theme.spacing.s,
-              padding: theme.spacing.l,
-              paddingTop: theme.spacing.xl,
+              gap: spacing.s,
+              padding: spacing.l,
+              paddingTop: spacing.xl,
               listStyleType: 'none'
-            })}
+            }}
             element='ul'
           >
             {userHasNoNotifications ? (

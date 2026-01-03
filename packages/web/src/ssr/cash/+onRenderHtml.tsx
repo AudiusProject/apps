@@ -7,10 +7,10 @@ import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { getIndexHtml } from 'ssr/getIndexHtml'
-import { getCashPageSEOFields } from 'utils/seo'
+import { getCashPageContext } from 'ssr/metaTags'
 
-export function render() {
-  const seoMetadata = getCashPageSEOFields()
+export default function render() {
+  const seoMetadata = getCashPageContext()
 
   const pageHtml = renderToString(
     <>

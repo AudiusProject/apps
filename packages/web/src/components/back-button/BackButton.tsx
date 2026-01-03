@@ -1,4 +1,4 @@
-import { IconCaretLeft, IconButton } from '@audius/harmony'
+import { IconCaretLeft, IconButton, useTheme } from '@audius/harmony'
 
 const messages = {
   goBack: 'Go Back'
@@ -9,10 +9,11 @@ type BackButtonProps = {
 }
 
 export const BackButton = (props: BackButtonProps) => {
+  const theme = useTheme()
   return (
     <IconButton
       {...props}
-      css={(theme) => ({ marginRight: theme.spacing.l })}
+      css={{ marginRight: theme.spacing.l }}
       icon={IconCaretLeft}
       aria-label={messages.goBack}
       color='subdued'

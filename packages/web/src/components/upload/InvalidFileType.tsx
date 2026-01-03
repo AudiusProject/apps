@@ -1,5 +1,5 @@
 import { ALLOWED_MAX_AUDIO_SIZE_BYTES } from '@audius/common/utils'
-import { Paper, PaperProps, Text } from '@audius/harmony'
+import { Paper, PaperProps, Text, useTheme } from '@audius/harmony'
 import { animated, Spring } from '@react-spring/web'
 
 type InvalidFileReason = 'type' | 'size' | 'corrupted'
@@ -18,6 +18,7 @@ const messages: Record<InvalidFileReason, string> = {
 }
 
 export const InvalidFileType = ({ reason, ...other }: InvalidFileTypeProps) => {
+  const { color } = useTheme()
   return (
     <Spring
       from={{ opacity: 0.6 }}
@@ -31,10 +32,10 @@ export const InvalidFileType = ({ reason, ...other }: InvalidFileTypeProps) => {
           pv='s'
           ph='l'
           alignItems='center'
-          css={(theme) => ({
-            backgroundColor: theme.color.special.red,
+          css={{
+            backgroundColor: color.special.red,
             maxWidth: 320
-          })}
+          }}
           style={animProps}
           {...other}
         >

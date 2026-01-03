@@ -7,10 +7,10 @@ import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { getIndexHtml } from 'ssr/getIndexHtml'
-import { getWalletPageSEOFields } from 'utils/seo'
+import { getWalletPageContext } from 'ssr/metaTags'
 
-export function render() {
-  const seoMetadata = getWalletPageSEOFields()
+export default function render() {
+  const seoMetadata = getWalletPageContext()
 
   const pageHtml = renderToString(
     <>

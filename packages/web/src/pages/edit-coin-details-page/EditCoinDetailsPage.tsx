@@ -35,7 +35,8 @@ import {
   LoadingSpinner,
   PlainButton,
   spacing,
-  Text
+  Text,
+  useTheme
 } from '@audius/harmony'
 import { Form, Formik, useFormikContext } from 'formik'
 import { Navigate, useNavigate, useParams } from 'react-router'
@@ -185,6 +186,7 @@ const BannerImageSection = ({
   isProcessing,
   error
 }: BannerImageSectionProps) => {
+  const { spacing } = useTheme()
   const displayBannerUrl = bannerImageUrl ?? defaultBannerImageUrl
   const hasBanner = Boolean(displayBannerUrl)
 
@@ -251,10 +253,10 @@ const BannerImageSection = ({
           color='danger'
           size='s'
           variant='body'
-          css={(theme) => ({
-            margin: theme.spacing.xl,
-            marginTop: theme.spacing.l
-          })}
+          css={{
+            margin: spacing.xl,
+            marginTop: spacing.l
+          }}
         >
           {error}
         </Text>

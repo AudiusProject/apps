@@ -27,7 +27,7 @@ import TextElement, { Type } from 'components/nav/mobile/TextElement'
 import TierExplainerDrawer from 'components/user-badges/TierExplainerDrawer'
 import useTabs, { TabHeader } from 'hooks/useTabs/useTabs'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
-import { getUserPageSEOFields } from 'utils/seo'
+import { getUserPageContext } from 'ssr/metaTags'
 
 import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 
@@ -377,7 +377,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     description = '',
     canonicalUrl = '',
     structuredData
-  } = getUserPageSEOFields({ handle, userName: name, bio })
+  } = getUserPageContext({ handle, userName: name, bio })
 
   return (
     <>

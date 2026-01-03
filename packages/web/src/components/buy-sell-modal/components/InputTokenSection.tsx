@@ -7,7 +7,14 @@ import {
   sanitizeNumericInput,
   formatTokenInputWithSmartDecimals
 } from '@audius/common/utils'
-import { Button, Flex, Text, TextInput, TextInputSize } from '@audius/harmony'
+import {
+  Button,
+  Flex,
+  Text,
+  TextInput,
+  TextInputSize,
+  useTheme
+} from '@audius/harmony'
 
 import { StaticTokenDisplay } from './StaticTokenDisplay'
 import { TokenDropdown } from './TokenDropdown'
@@ -42,6 +49,7 @@ export const InputTokenSection = ({
   onTokenChange,
   hideTokenDisplay = false
 }: InputTokenSectionProps) => {
+  const { spacing } = useTheme()
   const { symbol, isStablecoin } = tokenInfo
   const [localAmount, setLocalAmount] = useState(amount || '')
 
@@ -97,7 +105,7 @@ export const InputTokenSection = ({
           </Flex>
 
           {!hideTokenDisplay && shouldDisplayTokenDropdown ? (
-            <Flex css={(theme) => ({ minWidth: theme.spacing.unit15 })}>
+            <Flex css={{ minWidth: spacing.unit15 }}>
               <TokenDropdown
                 selectedToken={tokenInfo}
                 availableTokens={availableTokens}
@@ -105,7 +113,7 @@ export const InputTokenSection = ({
               />
             </Flex>
           ) : !hideTokenDisplay ? (
-            <Flex css={(theme) => ({ minWidth: theme.spacing.unit15 })}>
+            <Flex css={{ minWidth: spacing.unit15 }}>
               <StaticTokenDisplay tokenInfo={tokenInfo} />
             </Flex>
           ) : null}

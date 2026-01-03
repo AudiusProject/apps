@@ -12,8 +12,41 @@ const getApiUrl = () => {
   }
 }
 
-export async function onBeforeRender(pageContext: PageContextServer) {
+type TrackPageContextServer = PageContextServer & {
+  urlParsed: {
+    search: Record<string, string>
+  }
+}
+
+// Fetch comment data if commentId is provided
+async function fetchCommentData(commentId: string) {
+  try {
+    const url = `${getApiUrl()}/v1/full/comments/${commentId}`
+    const res = await fetch(url)
+    if (res.status !== 200) {
+      return null
+    }
+    const { data, related } = await res.json()
+    const comment = Array.isArray(data) ? data[0] : data
+
+    if (!comment) return null
+
+    const track = related.tracks.find(
+      (t: { id: string }) => t.id === comment.entity_id
+    )
+    const commenter = related.users.find(
+      (u: { id: string }) => u.id === comment.user_id
+    )
+
+    return { comment, track, commenter }
+  } catch {
+    return null
+  }
+}
+
+export async function onBeforeRender(pageContext: TrackPageContextServer) {
   const { handle, slug } = pageContext.routeParams
+  const { commentId } = pageContext.urlParsed.search ?? {}
 
   try {
     const requestPath = `v1/full/tracks?permalink=${handle}/${slug}`
@@ -32,9 +65,20 @@ export async function onBeforeRender(pageContext: PageContextServer) {
 
     const { user, ...track } = apiTrack
 
+    // Fetch comment data if commentId is provided
+    let commentData = null
+    if (commentId) {
+      commentData = await fetchCommentData(commentId)
+      // Verify the comment is for this track
+      if (commentData && commentData.track?.id !== track.id) {
+        console.info('Comment track does not match URL track, ignoring comment')
+        commentData = null
+      }
+    }
+
     return {
       pageContext: {
-        pageProps: { track, user }
+        pageProps: { track, user, commentData }
       }
     }
   } catch (e) {

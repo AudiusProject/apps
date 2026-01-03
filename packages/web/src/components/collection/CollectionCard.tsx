@@ -7,7 +7,7 @@ import {
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import { formatCount, formatReleaseDate } from '@audius/common/utils'
-import { Flex, Skeleton, Text } from '@audius/harmony'
+import { Flex, Skeleton, Text, useTheme } from '@audius/harmony'
 import IconHeart from '@audius/harmony/src/assets/icons/Heart.svg'
 import IconRepost from '@audius/harmony/src/assets/icons/Repost.svg'
 import { pick } from 'lodash'
@@ -75,6 +75,7 @@ export const CollectionCardSkeleton = (
 
 export const CollectionCard = forwardRef(
   (props: CollectionCardProps, ref: Ref<HTMLDivElement>) => {
+    const { typography } = useTheme()
     const {
       id,
       loading,
@@ -168,7 +169,7 @@ export const CollectionCard = forwardRef(
               size='s'
               strength='strong'
               color='subdued'
-              css={(theme) => ({ lineHeight: theme.typography.lineHeight.s })}
+              css={{ lineHeight: typography.lineHeight.s }}
             >
               {isScheduledRelease && releaseDate
                 ? messages.releases(releaseDate)

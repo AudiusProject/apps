@@ -16,7 +16,8 @@ import {
   IconInfo,
   Paper,
   Text,
-  makeResponsiveStyles
+  makeResponsiveStyles,
+  useTheme
 } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
@@ -136,6 +137,7 @@ const useStyles = makeResponsiveStyles(({ theme }) => ({
 }))
 
 export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
+  const theme = useTheme()
   const { values } = useFormikContext<LaunchpadFormValues>()
   const imageUrl = useFormImageUrl(values.coinImage)
   const styles = useStyles()
@@ -209,9 +211,9 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
               gap='m'
               p='l'
               borderBottom='default'
-              css={(theme) => ({
+              css={{
                 backgroundColor: theme.color.background.white
-              })}
+              }}
             >
               {imageUrl && (
                 <Artwork

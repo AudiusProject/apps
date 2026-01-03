@@ -11,8 +11,14 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerCollectionPage } from 'pages/collection-page/DesktopServerCollectionPage'
 import { MobileServerCollectionPage } from 'pages/collection-page/MobileServerCollectionPage'
+import {
+  canEmbed,
+  getAppUrl,
+  getCollectionPageContext,
+  getEmbedUrl,
+  getWebUrl
+} from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
-import { getCollectionPageSEOFields } from 'utils/seo'
 
 import { getIndexHtml } from '../getIndexHtml'
 
@@ -32,13 +38,16 @@ export default function render(pageContext: CollectionPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
+  // Check if this request can show an embed player (Twitter/Discord bots)
+  const shouldEmbed = canEmbed(userAgent)
+
   // Create a fresh cache instance for this SSR request
   // This ensures the theme context is properly connected
   const cache = createCache({ key: 'harmony', prepend: true })
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  const seoMetadata = getCollectionPageSEOFields({
+  const seoMetadata = getCollectionPageContext({
     playlistName: playlist_name,
     playlistId: playlist_id,
     userName,
@@ -48,11 +57,24 @@ export default function render(pageContext: CollectionPageContext) {
     hashId: id
   })
 
+  // Generate embed and app URLs
+  const embedType = is_album ? 'album' : 'playlist'
+  const embedUrl = getEmbedUrl(embedType, id)
+  const appUrl = getAppUrl(urlPathname)
+  const webUrl = getWebUrl(urlPathname)
+
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
       <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
         <>
-          <MetaTags {...seoMetadata} />
+          <MetaTags
+            {...seoMetadata}
+            embed={shouldEmbed}
+            embedUrl={embedUrl}
+            appUrl={appUrl}
+            webUrl={webUrl}
+            thumbnail={false}
+          />
           {isMobile ? (
             <MobileServerCollectionPage collection={collection} user={user} />
           ) : (
