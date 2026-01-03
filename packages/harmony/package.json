@@ -14,6 +14,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "rollup -c",
+    "build:css": "rollup -c rollup.css.config.mjs && rm -f dist/harmony.css.placeholder.js",
     "lint": "eslint src --ext=ts,tsx,mdx",
     "lint:fix": "npm run lint -- --fix",
     "start": "rollup -c -w",
