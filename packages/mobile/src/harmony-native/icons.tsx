@@ -153,7 +153,6 @@ export { default as IconRecoveryEmail } from '@audius/harmony/src/assets/icons/R
 export { default as IconHeadphones } from '@audius/harmony/src/assets/icons/Headphones.svg'
 export { default as IconValidationCheck } from '@audius/harmony/src/assets/icons/ValidationCheck.svg'
 export { default as IconValidationX } from '@audius/harmony/src/assets/icons/ValidationX.svg'
-export { default as IconSoundwave } from '@audius/harmony/src/assets/icons/Soundwave.svg'
 export { default as IconCreditCard } from '@audius/harmony/src/assets/icons/CreditCard.svg'
 export { default as IconWaveform } from '@audius/harmony/src/assets/icons/Waveform.svg'
 export { default as IconMoneyBracket } from '@audius/harmony/src/assets/icons/MoneyBracket.svg'
@@ -238,7 +237,6 @@ export { default as IconCcZero } from '@audius/harmony/src/assets/icons/ccZero.s
 
 // Logos
 export { default as IconAudiusLogo } from '@audius/harmony/src/assets/icons/AudiusLogo.svg'
-export { default as IconAudiusLogoColor } from '@audius/harmony/src/assets/icons/AudiusLogoColor.svg'
 export { default as IconAudiusLogoHorizontal } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontal.svg'
 export { default as IconAudiusLogoHorizontalNew } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalNew.svg'
 export { default as IconAudiusLogoHorizontalColor } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalColor.svg'
@@ -251,7 +249,6 @@ export { default as IconSnapChat } from '@audius/harmony/src/assets/icons/SnapCh
 export { default as IconTelegram } from '@audius/harmony/src/assets/icons/Telegram.svg'
 export { default as IconTikTok } from '@audius/harmony/src/assets/icons/TikTok.svg'
 export { default as IconInstagram } from '@audius/harmony/src/assets/icons/Instagram.svg'
-export { default as IconLogoCircle } from '@audius/harmony/src/assets/icons/LogoCircle.svg'
 export { default as IconLogoCircleETH } from '@audius/harmony/src/assets/icons/LogoCircleETH.svg'
 export { default as IconLogoCircleSOL } from '@audius/harmony/src/assets/icons/LogoCircleSOL.svg'
 export { default as IconLogoCircleSTR } from '@audius/harmony/src/assets/icons/LogoCircleSTR.svg'
