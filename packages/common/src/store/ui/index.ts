@@ -95,8 +95,7 @@ export {
   NON_ARTIST_COIN_MINTS,
   AUDIO_MINT,
   SOL_MINT,
-  USDC_MINT,
-  BONK_MINT
+  USDC_MINT
 } from './shared/tokenConstants'
 export type {
   AmountObject,

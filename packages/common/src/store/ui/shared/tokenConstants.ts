@@ -1,5 +1,3 @@
-import TokenAUDIOPng from '@audius/harmony/src/assets/icons/TokenAUDIO.png'
-
 /**
  * From Jupiter API documentation:
  * https://docs.jup.ag/jupiter-core/jupiter-sdk/v2/full-guide
@@ -23,7 +21,7 @@ const BASE_TOKEN_METADATA = {
     symbol: 'AUDIO',
     name: 'Audius Coin',
     decimals: 8,
-    logoURI: TokenAUDIOPng as string
+    logoURI: '/assets/img/TokenAUDIO.png'
   },
   SOL: {
     chainId: 101,
@@ -41,28 +39,14 @@ const BASE_TOKEN_METADATA = {
     decimals: 6,
     logoURI:
       'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png'
-  },
-  BONK: {
-    chainId: 101,
-    symbol: 'BONK',
-    name: 'Bonk',
-    decimals: 5,
-    logoURI:
-      'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263/logo.png'
   }
 } as const
 
 export const AUDIO_MINT = '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'
 export const SOL_MINT = 'So11111111111111111111111111111111111111112'
 export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-export const BONK_MINT = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
 
-export const NON_ARTIST_COIN_MINTS = [
-  AUDIO_MINT,
-  SOL_MINT,
-  USDC_MINT,
-  BONK_MINT
-]
+export const NON_ARTIST_COIN_MINTS = [AUDIO_MINT, SOL_MINT, USDC_MINT]
 
 /**
  * Legacy token listing map with hardcoded addresses for backward compatibility
@@ -78,10 +62,6 @@ export const TOKEN_LISTING_MAP: Record<string, JupiterTokenListing> = {
   USDC: {
     ...BASE_TOKEN_METADATA.USDC,
     address: USDC_MINT
-  },
-  BONK: {
-    ...BASE_TOKEN_METADATA.BONK,
-    address: BONK_MINT
   }
 }
 
