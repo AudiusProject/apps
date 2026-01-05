@@ -210,9 +210,9 @@ app.post('/attestation/:handle', async (c) => {
       Buffer.from(toSignStr),
       config.privateSignerAddress
     )
-    const result = new bn(Uint8Array.of(...signature, recoveryId)).toString(
-      'hex'
-    )
+    const result = new bn(Uint8Array.of(...signature, recoveryId))
+      .toString('hex')
+      .padStart(130, '0')
 
     return c.json({ result })
   } catch (error) {
