@@ -30,6 +30,46 @@ export const productionConfig: SdkServicesConfig = {
         "delegateOwnerWallet": "0xf686647E3737d595C60c6DE2f5F90463542FE439"
       },
       {
+        "endpoint": "https://audius.rickyrombo.com",
+        "delegateOwnerWallet": "0xae5D0507b6653589A03ae5becb35EB0C160e7131"
+      },
+      {
+        "endpoint": "https://audius-discovery-2.cultur3stake.com",
+        "delegateOwnerWallet": "0xB98a729444E262ec9AC5F1539b68e69aEC37Ef2C"
+      },
+      {
+        "endpoint": "https://audius-discovery-3.cultur3stake.com",
+        "delegateOwnerWallet": "0xeEB73B487f8B4b23B757d9d738Bfc48fD0cc2606"
+      },
+      {
+        "endpoint": "https://audius-discovery-4.cultur3stake.com",
+        "delegateOwnerWallet": "0x8162684B7a004AF41de09Bfd3bE6Ef53d64158F5"
+      },
+      {
+        "endpoint": "https://audius-discovery-7.cultur3stake.com",
+        "delegateOwnerWallet": "0xb03478a9e8fB1516AA91b272Afc7422b1c71D837"
+      },
+      {
+        "endpoint": "https://audius-discovery-8.cultur3stake.com",
+        "delegateOwnerWallet": "0x9D0a106E6cE7643DF87914c7387b3d864bfA152B"
+      },
+      {
+        "endpoint": "https://audius-discovery-10.cultur3stake.com",
+        "delegateOwnerWallet": "0x241Da559e97d2e76f37F7144a04623849Fa576ff"
+      },
+      {
+        "endpoint": "https://audius-discovery-1.cultur3stake.com",
+        "delegateOwnerWallet": "0x3f0cbB987b82f620dF313A74999f025E03A11a30"
+      },
+      {
+        "endpoint": "https://v.monophonic.digital",
+        "delegateOwnerWallet": "0x422541273087beC833c57D3c15B9e17F919bFB1F"
+      },
+      {
+        "endpoint": "https://validator.stuffisup.com",
+        "delegateOwnerWallet": "0x3E2Cd6d498b412Da182Ef25837F72355f8918BE9"
+      },
+      {
         "endpoint": "https://audius-content-1.figment.io",
         "delegateOwnerWallet": "0xBfdE9a7DD3620CB6428463E9A9e9932B4d10fdc5"
       },
@@ -134,44 +174,8 @@ export const productionConfig: SdkServicesConfig = {
         "delegateOwnerWallet": "0x8ea81225013719950E968DE0602c4Eca458fA9f4"
       },
       {
-        "endpoint": "https://blockdaemon-audius-content-04.bdnodes.net",
-        "delegateOwnerWallet": "0xcfFA8ACF0b04d9278eEE13928be264b2E9aaab97"
-      },
-      {
-        "endpoint": "https://blockdaemon-audius-content-05.bdnodes.net",
-        "delegateOwnerWallet": "0xB4Ff0cab630FB05a7fcEfec9E979a968b8f4fE55"
-      },
-      {
-        "endpoint": "https://blockdaemon-audius-content-06.bdnodes.net",
-        "delegateOwnerWallet": "0x7449da7d1548C11c481b87667EC9b2A8F20C13A0"
-      },
-      {
-        "endpoint": "https://blockdaemon-audius-content-07.bdnodes.net",
-        "delegateOwnerWallet": "0x00B1CA1A34257860f66e742eF163Ad30bF42d075"
-      },
-      {
-        "endpoint": "https://blockdaemon-audius-content-08.bdnodes.net",
-        "delegateOwnerWallet": "0x16650eDB44C720ea627d5a59ff0b4f74c37fe419"
-      },
-      {
-        "endpoint": "https://blockdaemon-audius-content-09.bdnodes.net",
-        "delegateOwnerWallet": "0xD5Cfcf4149c683516239fc653D5a470F3F4A606D"
-      },
-      {
         "endpoint": "https://audius-content-8.cultur3stake.com",
         "delegateOwnerWallet": "0xff432F81D0eb77DA5973Cf55e24A897882fdd3E6"
-      },
-      {
-        "endpoint": "https://blockchange-audius-content-01.bdnodes.net",
-        "delegateOwnerWallet": "0x8464c88502925a0076c381962F8B70b6EC892861"
-      },
-      {
-        "endpoint": "https://blockchange-audius-content-02.bdnodes.net",
-        "delegateOwnerWallet": "0x5e0D0BeDC11F0B512457f6f707A35703b1447Fb5"
-      },
-      {
-        "endpoint": "https://blockchange-audius-content-03.bdnodes.net",
-        "delegateOwnerWallet": "0xe3F1c416c3919bB2ffD78F1e38b9E81E8c80815F"
       },
       {
         "endpoint": "https://audius-content-9.cultur3stake.com",
@@ -192,26 +196,6 @@ export const productionConfig: SdkServicesConfig = {
       {
         "endpoint": "https://audius-content-13.cultur3stake.com",
         "delegateOwnerWallet": "0xcb23908aa0dCDef762ebEaA38391D8fFC69E6e8F"
-      },
-      {
-        "endpoint": "https://audius-content-14.cultur3stake.com",
-        "delegateOwnerWallet": "0xCbDa351492e52fdb2f0E7FBc440cA2047738b71C"
-      },
-      {
-        "endpoint": "https://audius-content-15.cultur3stake.com",
-        "delegateOwnerWallet": "0x2fE2652296c40BB22D33C6379558Bf63A25b4f9a"
-      },
-      {
-        "endpoint": "https://audius-content-16.cultur3stake.com",
-        "delegateOwnerWallet": "0x47367ED3Db5D9691d866cb09545DE7cccD571579"
-      },
-      {
-        "endpoint": "https://audius-content-17.cultur3stake.com",
-        "delegateOwnerWallet": "0xb472c555Ab9eA1D33543383d6d1F8885c97eF83A"
-      },
-      {
-        "endpoint": "https://audius-content-18.cultur3stake.com",
-        "delegateOwnerWallet": "0x4F62C17Dc54E58289354847974E1F246c8EAcf11"
       },
       {
         "endpoint": "https://audius-content-12.figment.io",
@@ -274,24 +258,12 @@ export const productionConfig: SdkServicesConfig = {
         "delegateOwnerWallet": "0xc69F344FCDbc9D747559c968562f682ABfBa442C"
       },
       {
-        "endpoint": "https://cn1.stuffisup.com",
-        "delegateOwnerWallet": "0x0D16f8bBfFF114B1a525Bf8b8d98ED177FA74AD3"
-      },
-      {
         "endpoint": "https://audius-creator-7.theblueprint.xyz",
         "delegateOwnerWallet": "0x720758adEa33433833c14e2516fA421261D0875e"
       },
       {
         "endpoint": "https://cn1.shakespearetech.com",
         "delegateOwnerWallet": "0x44955AD360652c302644F564B42D1458C584A4ec"
-      },
-      {
-        "endpoint": "https://cn2.shakespearetech.com",
-        "delegateOwnerWallet": "0x68835714d9c208f9d6F4953F0555507e492fd898"
-      },
-      {
-        "endpoint": "https://cn3.shakespearetech.com",
-        "delegateOwnerWallet": "0x7162Ee2b7F0cB9651fd2FA2838B0CAF225B2a8D3"
       },
       {
         "endpoint": "https://audius-creator-8.theblueprint.xyz",
@@ -345,7 +317,6 @@ export const productionConfig: SdkServicesConfig = {
     "rpcEndpoint": "https://audius-fe.rpcpool.com",
     "usdcTokenMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     "wAudioTokenMint": "9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM",
-    "bonkTokenMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "rewardManagerLookupTableAddress": "4UQwpGupH66RgQrWRqmPM9Two6VJEE68VZ7GeqZ3mvVv"
   },
   "ethereum": {

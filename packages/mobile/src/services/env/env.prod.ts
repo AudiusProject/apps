@@ -79,7 +79,6 @@ export const env: Env = {
   USDC_MINT_ADDRESS: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   USE_HASH_ROUTING: false,
   WAUDIO_MINT_ADDRESS: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
-  BONK_MINT_ADDRESS: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
   WORMHOLE_ADDRESS: '0x6E7a1F7339bbB62b23D44797b63e4258d283E095',
   WORMHOLE_RPC_HOSTS:
     'https://wormhole-v2-mainnet-api.certus.one,https://wormhole.inotel.ro,https://wormhole-v2-mainnet-api.mcf.rocks,https://wormhole-v2-mainnet-api.chainlayer.network,https://wormhole-v2-mainnet-api.staking.fund,https://wormhole-v2-mainnet-api.chainlayer.network'

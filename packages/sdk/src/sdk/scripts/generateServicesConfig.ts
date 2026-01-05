@@ -42,7 +42,6 @@ const productionConfig: SdkServicesConfig = {
     rpcEndpoint: 'https://audius-fe.rpcpool.com',
     usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     wAudioTokenMint: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
-    bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     rewardManagerLookupTableAddress:
       '4UQwpGupH66RgQrWRqmPM9Two6VJEE68VZ7GeqZ3mvVv'
   },
@@ -60,7 +59,6 @@ const productionConfig: SdkServicesConfig = {
     }
   }
 }
-
 
 const developmentConfig: SdkServicesConfig = {
   network: {
@@ -92,7 +90,6 @@ const developmentConfig: SdkServicesConfig = {
     rpcEndpoint: 'http://audius-solana-test-validator-1',
     usdcTokenMint: '26Q7gP8UfkDzi7GMFEQxTJaNJ8D2ybCUjex58M5MLu8y',
     wAudioTokenMint: '37RCjhgV1qGV2Q54EHFScdxZ22ydRMdKMtVgod47fDP3',
-    bonkTokenMint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     rewardManagerLookupTableAddress:
       'GNHKVSmHvoRBt1JJCxz7RSMfzDQGDGhGEjmhHyxb3K5J'
   },
