@@ -3,8 +3,7 @@ import { Global, css } from '@emotion/react'
 /**
  * GlobalStyles component that applies base styles via CSS-in-JS.
  * These styles complement the reset.css file and ensure consistent
- * styling across the application, replacing styles that were previously
- * provided by antd.
+ * styling across the application.
  */
 export const GlobalStyles = () => {
   return (

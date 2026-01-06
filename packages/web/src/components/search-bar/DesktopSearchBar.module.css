@@ -30,47 +30,6 @@
   stroke: var(--harmony-n-500) !important;
 }
 
-.searchBar :global(.ant-select-selection) {
-  background: none;
-  margin-bottom: 4px;
-}
-
-.searchBar :global(.ant-select-auto-complete.ant-select) {
-  line-height: 1;
-}
-.searchBar
-  :global(
-    .ant-select-auto-complete.ant-select .ant-select-selection-search-input
-  ) {
-  border-radius: 4px;
-  width: 160px;
-  box-shadow: 0 2px 5px 0 var(--search-bar-shadow);
-  background-color: var(--search-bar-background);
-  transition:
-    width 0.2s ease-in-out,
-    background 0.04s ease-in-out;
-  padding: 0 12px;
-  color: var(--harmony-neutral);
-  font-size: var(--harmony-font-xs);
-  font-weight: var(--harmony-font-medium);
-  border: none;
-}
-.searchBar :global(.ant-select-auto-complete.ant-select .ant-input) {
-  height: 24px;
-  margin-left: 2px;
-  background-color: unset !important;
-  transition:
-    width 0.2s ease-in-out,
-    background 0.04s ease-in-out;
-  color: var(--harmony-neutral) !important;
-  font-size: var(--harmony-font-xs);
-  font-weight: var(--harmony-font-medium);
-}
-
-.searchBar :global(.ant-select-auto-complete) {
-  border-radius: 4px;
-}
-
 .searchBar
   :global(
     .ant-select-auto-complete.ant-select
@@ -81,85 +40,6 @@
   width: 280px;
 }
 
-.searchBar :global(.ant-input:focus) {
-  border: none;
-  box-shadow: none;
-}
-.searchBar :global(.ant-input::placeholder) {
-  color: var(--harmony-n-400);
-}
-
-.searchBar :global(.ant-input-prefix) > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.searchBar :global(.ant-input-prefix) > svg g path {
-  fill: var(--harmony-n-400);
-}
-
-/* Hide the placeholder text when selecting. */
-.searchBar :global(.ant-input:focus::placeholder) {
-  opacity: 0;
-}
-
-.searchBar :global(.ant-select-dropdown .rc-virtual-list-holder) {
-  padding: 16px 8px;
-  max-height: unset !important;
-}
-
-@media (max-height: 990px) {
-  .searchBar :global(.ant-select-dropdown .rc-virtual-list-holder) {
-    max-height: 560px !important;
-
-    /* Prevent dropdown scroll from propagating */
-    overscroll-behavior-y: contain;
-  }
-}
-
-.searchBar :global(.ant-select-dropdown) {
-  -webkit-app-region: none;
-  animation-duration: 0.2s !important;
-  box-shadow:
-    0px 0px 4px 0px rgba(0, 0, 0, 0.04),
-    0px 4px 8px 0px rgba(0, 0, 0, 0.06);
-  position: absolute;
-  background: var(--harmony-white);
-  width: 100%;
-  top: 32px !important;
-  border-radius: 8px;
-  border: 1px solid var(--harmony-n-100);
-  padding: 0;
-}
-
-.searchBox :global(.ant-select-dropdown-menu) {
-  width: 280px;
-  max-height: none;
-}
-
-.searchBox :global(.ant-select-item-option) {
-  margin: auto 0px;
-  padding: 0px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  min-height: unset;
-  height: auto;
-  line-height: 10px;
-  border-radius: 4px;
-  transition: all ease-in-out 0.04s;
-}
-
-.searchBox :global(.ant-select-item-option):last-child {
-  margin: 0;
-  padding: 0;
-}
-.searchBox.hasResults :global(.ant-select-item-option):last-child {
-  margin: 12px 0 0;
-  padding: 0;
-  border-radius: 0px 0px 4px 4px;
-}
-
 .searchBox
   :global(
     .ant-select-dropdown-menu
@@ -167,26 +47,6 @@
       .ant-select-dropdown-menu-vertical
   ) {
   padding-top: 4px;
-}
-
-.searchBox :global(.ant-select-item-group) {
-  height: 14px;
-  min-height: 26px;
-  color: var(--harmony-neutral);
-  font-size: var(--harmony-font-xs);
-  font-weight: var(--harmony-font-bold);
-  letter-spacing: 0.7px;
-  line-height: 14px;
-  text-transform: uppercase;
-  padding: 8px;
-}
-
-.searchBoxEmpty :global(.ant-select-item-group) {
-  height: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
 }
 
 .customHr {
@@ -222,43 +82,6 @@
   border-radius: 4px;
 }
 
-/**
- * To make this bg color work with both hover & keyboard selection, we set bg color in the ant
- * active state, AND unset bg color in the ant built in hover state. Active state must take precedence (!important),
- * otherwise unsetting in hover will unset us everywhere.
- */
-.searchBox :global(.ant-select-item-option.ant-select-item-option-active) {
-  border-radius: 4px;
-  border: 1px solid var(--border-border-default);
-  background-color: var(--harmony-bg-surface-2) !important;
-}
-.searchBox
-  :global(.ant-select-item-option.ant-select-item-option-active):has(
-    :global(.dropdown-action)
-  ) {
-  background-color: transparent !important;
-}
-.searchBox :global(.ant-select-item-option:hover) {
-  background-color: unset;
-}
-
-.searchBox
-  :global(.ant-select-item-option.ant-select-item-option-active)
-  > div
-  > div
-  > div
-  > div
-  > .resultText {
-  color: var(--harmony-white);
-}
-
-.searchBox
-  :global(
-    .ant-select-item-option.ant-select-item-option-active
-  ).noResultsOption {
-  background-color: var(--harmony-white);
-}
-
 .noResults {
   height: 48px;
   line-height: 48px;
@@ -267,29 +90,6 @@
   color: var(--harmony-neutral);
   font-size: var(--harmony-font-xs);
   font-weight: var(--harmony-font-medium);
-}
-
-.searchBox
-  :global(.ant-select-item-option.ant-select-item-option-active)
-  .noResultsOption
-  span {
-  color: var(--harmony-white);
-}
-
-/* Do not display the dummy search item used to let the user arrow back up to the search bar. */
-.searchBarDummyOption,
-.searchBox :global(.ant-select-item-option.searchBarDummyOption) {
-  display: none !important;
-  height: 0 !important;
-  width: 0 !important;
-  margin: 0 !important;
-}
-
-.searchBox :global(.ant-select-item-option.searchBarDummyOption) {
-  display: none !important;
-  height: 0 !important;
-  width: 0 !important;
-  margin: 0 !important;
 }
 
 .tagSearchPopup {
@@ -346,10 +146,6 @@
 .tagSearchPopup:hover path,
 .focused path {
   fill: var(--harmony-white);
-}
-
-:global(.ant-select-item-option-active) .iconArrow path {
-  fill: var(--harmony-static-white);
 }
 
 .removeIcon {

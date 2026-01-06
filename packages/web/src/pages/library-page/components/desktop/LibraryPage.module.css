@@ -7,38 +7,6 @@
   justify-content: left;
 }
 
-/* Filter Input in Header */
-.libraryPageWrapper :global(.ant-input-affix-wrapper) {
-  position: absolute;
-  right: 0px;
-  top: 60px;
-  width: 120px;
-  z-index: 1;
-}
-.libraryPageWrapper :global(.ant-input-affix-wrapper .ant-input) {
-  border-radius: 4px;
-  border: 1px solid var(--harmony-n-100) !important;
-  box-shadow: 0 2px 5px 0 var(--search-bar-shadow);
-  background-color: var(--harmony-n-25);
-  transition:
-    width 0.2s ease-in-out,
-    background 0.04s ease-in-out;
-  color: var(--harmony-neutral);
-  font-size: var(--harmony-font-xs);
-  font-weight: var(--harmony-font-medium);
-  border: none;
-
-  padding-top: 1px;
-  padding-bottom: 1px;
-  height: 24px;
-}
-.libraryPageWrapper :global(.ant-input-prefix) > svg {
-  width: 12px;
-  height: 12px;
-}
-.libraryPageWrapper :global(.ant-input-prefix) > svg g path {
-  fill: var(--harmony-n-400);
-}
 
 .filterContainer {
   transition: all 0.5s;

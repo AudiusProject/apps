@@ -32,8 +32,3 @@
   height: var(--harmony-unit-16);
   flex: 0 0 var(--harmony-unit-16);
 }
-
-.tooltip :global(.ant-tooltip-inner) {
-  border-radius: var(--harmony-unit-2);
-  padding: var(--harmony-unit-3) var(--harmony-unit-6);
-}

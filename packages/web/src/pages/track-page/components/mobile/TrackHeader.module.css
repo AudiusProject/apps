@@ -49,28 +49,8 @@
 
 /* Loading */
 
-.loadingSkeleton,
-.loadingSkeleton :global(.ant-skeleton-content) {
+.loadingSkeleton {
   padding: 0 !important;
-}
-
-.loadingSkeleton :global(.ant-skeleton-paragraph) li {
-  border-radius: 4px;
-}
-
-.loadingSkeleton.loadingArtwork :global(.ant-skeleton-paragraph) li {
-  height: 195px !important;
-  width: 195px !important;
-}
-
-.loadingSkeleton.loadingTitle :global(.ant-skeleton-paragraph) li {
-  height: 24px;
-  width: 160px !important;
-}
-
-.loadingSkeleton.loadingName :global(.ant-skeleton-paragraph) li {
-  height: 24px;
-  width: 120px !important;
 }
 
 .loadingInfoSection {
@@ -80,12 +60,6 @@
 .loadingDescription {
   margin-top: 8px;
   width: 100%;
-}
-
-.loadingSkeleton.loadingDescription :global(.ant-skeleton-paragraph) li {
-  height: 24px;
-  width: 100% !important;
-  margin-bottom: 24px;
 }
 
 .gatedContentSectionWrapper {

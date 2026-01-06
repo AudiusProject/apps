@@ -37,10 +37,3 @@
   width: 100%;
   height: 100%;
 }
-
-.tooltip :global(.ant-tooltip-inner) {
-  padding: 8px 16px;
-  overflow: hidden;
-  border: 1px solid var(--harmony-n-100);
-  border-radius: 12px;
-}
