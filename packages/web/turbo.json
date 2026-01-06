@@ -10,7 +10,9 @@
       "dependsOn": [
         "@audius/common#build",
         "@audius/fixed-decimal#build",
-        "@audius/harmony#build:css"
+        "@audius/harmony#build:css",
+        "@audius/eth#build",
+        "@audius/spl#build"
       ],
       "outputLogs": "new-only",
       "env": ["VITE_ENVIRONMENT", "VITE_SSR"]
@@ -20,7 +22,9 @@
       "dependsOn": [
         "@audius/common#build",
         "@audius/fixed-decimal#build",
-        "@audius/harmony#build:css"
+        "@audius/harmony#build:css",
+        "@audius/eth#build",
+        "@audius/spl#build"
       ],
       "outputLogs": "new-only"
     },
@@ -30,7 +34,9 @@
       "dependsOn": [
         "@audius/common#build",
         "@audius/fixed-decimal#build",
-        "@audius/harmony#build:css"
+        "@audius/harmony#build:css",
+        "@audius/eth#build",
+        "@audius/spl#build"
       ],
       "outputLogs": "new-only"
     }
