@@ -13,16 +13,6 @@ jobs:
         branches:
           only: /^main$/
 
-  - mobile-build-upload-production-ios-if-full-release:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /(^release.*)$/
-
   - mobile-build-upload-releasecandidate-android:
       context:
         - Audius Mobile Client
@@ -33,30 +23,37 @@ jobs:
         branches:
           only: /^main$/
 
-  - mobile-build-upload-production-android-if-full-release:
-      context:
-        - Audius Mobile Client
-        - slack-secrets
-      requires:
-        - mobile-init
-      filters:
-        branches:
-          only: /(^release.*)$/
-
-  - mobile-hold-deploy-saga-dapp-store:
+  # Production mobile deployment on main.
+  - mobile-hold-production-ios-main:
       type: approval
       requires:
         - mobile-init
       filters:
         branches:
-          only: /(^release.*)$/
-
-  - mobile-deploy-saga-dapp-store:
+          only: /^main$/
+  - mobile-build-upload-production-ios-main:
       context:
         - Audius Mobile Client
         - slack-secrets
       requires:
-        - mobile-hold-deploy-saga-dapp-store
+        - mobile-hold-production-ios-main
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
+
+  - mobile-hold-production-android-main:
+      type: approval
+      requires:
+        - mobile-init
+      filters:
+        branches:
+          only: /^main$/
+  - mobile-build-upload-production-android-main:
+      context:
+        - Audius Mobile Client
+        - slack-secrets
+      requires:
+        - mobile-hold-production-android-main
+      filters:
+        branches:
+          only: /^main$/

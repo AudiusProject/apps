@@ -58,3 +58,6 @@ parameters:
   run-create-audius-app-workflow:
     type: boolean
     default: false
+  run-mobile-prod-build-workflow:
+    type: boolean
+    default: false
