@@ -75,7 +75,6 @@ export type Env = {
   USDC_MINT_ADDRESS: string
   USE_HASH_ROUTING: boolean
   WAUDIO_MINT_ADDRESS: string
-  BONK_MINT_ADDRESS: string
   WORMHOLE_ADDRESS: Nullable<string>
   WORMHOLE_RPC_HOSTS: Nullable<string>
   EMAIL_ENCRYPTION_UUID?: number
