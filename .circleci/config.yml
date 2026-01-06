@@ -155,46 +155,6 @@ jobs:
           name: Approve SP Deployment
           command: bash .circleci/scripts/auto-approve-release.sh sp
 
-  generate-client-release:
-    working_directory: ~/apps
-    docker:
-      - image: cimg/node:20.19
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - 'a4:99:2e:fa:80:31:dc:23:25:7b:a5:70:3f:08:5f:fa'
-      - run:
-          name: Bump version
-          command: |
-            git config --global user.email "audius-infra@audius.co"
-            git config --global user.name "audius-infra"
-            PREV_VERSION=$(jq -r .version ./package.json)
-            CLIENT_DIRS=$(bash ./scripts/get-release-dirs.sh client)
-            CHANGELOG=$(git log --pretty=format:"[%h] %s %an" --date=short client-v${PREV_VERSION}..HEAD -- ${CLIENT_DIRS})
-            npm i --ignore-scripts
-            npm version patch -w @audius/web -w @audius/mobile --include-workspace-root --no-git-tag-version
-
-            # Update iOS Info.plist version
-            CURRENT_VERSION=$(grep -A1 'CFBundleShortVersionString' packages/mobile/ios/AudiusReactNative/Info.plist | tail -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' OFS=.)
-            sed -i "s/$CURRENT_VERSION/$NEW_VERSION/" packages/mobile/ios/AudiusReactNative/Info.plist
-
-            # Update Android versionName
-            CURRENT_VERSION=$(grep -E 'versionName.*"[0-9]+\.[0-9]+\.[0-9]+"' packages/mobile/android/app/build.gradle | sed 's/.*"\([0-9.]*\)".*/\1/')
-            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' OFS=.)
-            sed -i "s/versionName \"$CURRENT_VERSION\"/versionName \"$NEW_VERSION\"/" packages/mobile/android/app/build.gradle
-
-            git add .
-            VERSION=$(jq -r .version ./package.json)
-            MESSAGE="Audius Client (Web and Mobile) v${VERSION}
-
-            ${CHANGELOG}"
-            git commit -m "${MESSAGE}"
-            git push -u origin main
-            git tag client-v${VERSION}
-            git push origin client-v${VERSION}
-
   notify-pipeline-status:
     working_directory: ~/apps
     resource_class: small
