@@ -117,11 +117,13 @@ export const SegmentedControl = <Value,>(
   const [optionWidths, setOptionWidths] = useState(options.map(() => 0))
   const [maxOptionWidth, setMaxOptionWidth] = useState(0)
   const [containerWidth, setContainerWidth] = useState(0)
-  const [initLeft, setInitLeft] = useState(false)
+  const [isReady, setIsReady] = useState(false)
   const leftAnim = useRef(new Animated.Value(0)).current
   const widthAnim = useRef(new Animated.Value(0)).current
+  const opacityAnim = useRef(new Animated.Value(0)).current
   const [selected, setSelected] = useState(defaultSelected)
   const selectedOption = selectedProp ?? selected
+  const lastSelectedOption = useRef<Value | null>(null)
 
   const handleSelectOption = (option: Value) => {
     light()
@@ -138,6 +140,7 @@ export const SegmentedControl = <Value,>(
       .reduce((totalWidth, width) => totalWidth + width, offset)
   }, [optionWidths, options, selectedOption])
 
+  // Position the slider - only animate when user changes selection
   useEffect(() => {
     const selectedOptionIdx = options.findIndex(
       (option) => option.key === selectedOption
@@ -145,66 +148,79 @@ export const SegmentedControl = <Value,>(
     const width = optionWidths[selectedOptionIdx]
     const left = getLeftValue()
 
-    springToValue(leftAnim, left)
-    springToValue(widthAnim, width)
-  }, [options, selectedOption, leftAnim, widthAnim, optionWidths, getLeftValue])
-
-  // Watch for the options widths to be populated and then set the initial left value of the selector thumb
-  useEffect(() => {
-    if (!initLeft && optionWidths.every((val) => val !== 0)) {
-      leftAnim.setValue(getLeftValue())
-
-      // Calculate maxOptionWidth considering container constraints
-      const naturalMaxWidth = optionWidths.reduce((a, b) => Math.max(a, b), 0)
-
-      if (fullWidth && equalWidth && containerWidth > 0) {
-        // Calculate available width for options (subtract padding and separators)
-        const separatorsWidth = (options.length - 1) * 1 // 1px per separator
-        const availableWidth = containerWidth - offset * 2 - separatorsWidth
-        const equalOptionWidth = Math.floor(availableWidth / options.length)
-
-        // Use the smaller of natural max width or calculated equal width
-        setMaxOptionWidth(Math.min(naturalMaxWidth, equalOptionWidth))
-      } else {
-        setMaxOptionWidth(naturalMaxWidth)
-      }
-
-      setInitLeft(true)
+    // Don't update if we don't have valid measurements yet
+    if (width === 0 || !optionWidths.every((val) => val !== 0)) {
+      return
     }
+
+    // Determine if this is a user selection change (should animate)
+    // vs initial render or layout change (should snap)
+    const isUserSelection =
+      lastSelectedOption.current !== null &&
+      lastSelectedOption.current !== selectedOption
+
+    if (isUserSelection) {
+      // User changed selection - animate
+      springToValue(leftAnim, left)
+      springToValue(widthAnim, width)
+    } else {
+      // Initial render or layout shift - snap immediately
+      leftAnim.setValue(left)
+      widthAnim.setValue(width)
+    }
+
+    // Show the slider once positioned
+    if (!isReady) {
+      opacityAnim.setValue(1)
+      setIsReady(true)
+    }
+
+    lastSelectedOption.current = selectedOption
   }, [
-    optionWidths,
-    initLeft,
     options,
-    leftAnim,
     selectedOption,
+    leftAnim,
+    widthAnim,
+    opacityAnim,
+    optionWidths,
     getLeftValue,
-    fullWidth,
-    equalWidth,
-    containerWidth
+    isReady
   ])
+
+  // Calculate maxOptionWidth when all widths are known
+  useEffect(() => {
+    if (!optionWidths.every((val) => val !== 0)) return
+
+    const naturalMaxWidth = optionWidths.reduce((a, b) => Math.max(a, b), 0)
+
+    if (fullWidth && equalWidth && containerWidth > 0) {
+      // Calculate available width for options (subtract padding and separators)
+      const separatorsWidth = (options.length - 1) * 1 // 1px per separator
+      const availableWidth = containerWidth - offset * 2 - separatorsWidth
+      const equalOptionWidth = Math.floor(availableWidth / options.length)
+
+      // Use the smaller of natural max width or calculated equal width
+      setMaxOptionWidth(Math.min(naturalMaxWidth, equalOptionWidth))
+    } else {
+      setMaxOptionWidth(naturalMaxWidth)
+    }
+  }, [optionWidths, options, fullWidth, equalWidth, containerWidth])
 
   const setOptionWidth = (i: number) => (event: LayoutChangeEvent) => {
     const { width } = event.nativeEvent.layout
-
-    if (i === 0) {
-      springToValue(leftAnim, offset)
-      springToValue(widthAnim, width)
-    }
-    setOptionWidths([
-      ...optionWidths.slice(0, i),
-      width,
-      ...optionWidths.slice(i + 1)
-    ])
-
-    // Set the width of the selector thumb to the width of the selected option
-    if (options[i].key === selectedOption) {
-      widthAnim.setValue(width)
-    }
+    setOptionWidths((prev) => {
+      const next = [...prev]
+      next[i] = width
+      return next
+    })
   }
 
   const sliderElement = (
     <Animated.View
-      style={[styles.slider, { left: leftAnim, width: widthAnim }]}
+      style={[
+        styles.slider,
+        { left: leftAnim, width: widthAnim, opacity: opacityAnim }
+      ]}
     />
   )
 
