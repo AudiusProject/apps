@@ -2,7 +2,14 @@ import { useCollection, useTrack, useUser } from '@audius/common/api'
 import { ID, Kind, SquareSizes } from '@audius/common/models'
 import { searchActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { Text, Flex, Avatar, Artwork, IconCloseAlt } from '@audius/harmony'
+import {
+  Text,
+  Flex,
+  Avatar,
+  Artwork,
+  IconCloseAlt,
+  useTheme
+} from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
 
@@ -21,23 +28,26 @@ const ResultWrapper = ({
   to,
   onRemove,
   kind,
-  id
+  id,
+  isSelected
 }: {
   children: React.ReactNode
   to: string
   onRemove?: () => void
   kind: Kind
   id: ID
+  isSelected?: boolean
 }) => {
   const dispatch = useDispatch()
-
+  const { color } = useTheme()
   return (
     <Link
       to={to}
+      data-search-result-value={id}
       onClick={() => {
         dispatch(addRecentSearch({ searchItem: { kind, id } }))
       }}
-      style={{
+      css={{
         textDecoration: 'none',
         display: 'block',
         width: '100%'
@@ -46,13 +56,24 @@ const ResultWrapper = ({
       <Flex
         alignItems='center'
         justifyContent='space-between'
-        p='s'
+        borderRadius='s'
         css={{
           minWidth: 0,
           width: '100%',
+          minHeight: '56px',
+          padding: '0 8px',
+          border: '1px solid transparent',
+          borderRadius: 's',
+          backgroundColor: 'transparent',
+          ...(isSelected
+            ? {
+                backgroundColor: color.background.surface2,
+                border: `1px solid ${color.border.default}`
+              }
+            : {}),
           '&:hover': {
-            backgroundColor: 'var(--harmony-bg-surface-2)',
-            borderRadius: '4px'
+            backgroundColor: color.background.surface2,
+            border: `1px solid ${color.border.default}`
           }
         }}
         gap='s'
@@ -63,12 +84,26 @@ const ResultWrapper = ({
             onClick={(e: React.MouseEvent) => {
               e.preventDefault()
               e.stopPropagation()
+              e.nativeEvent.stopImmediatePropagation()
               onRemove()
+            }}
+            onMouseDown={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
             }}
             size='s'
             color='subdued'
-            className={styles.removeIcon}
-            css={{ flexShrink: 0 }}
+            css={{
+              flexShrink: 0,
+              cursor: 'pointer',
+              opacity: 0,
+              transition: 'opacity 0.2s ease-in-out',
+              pointerEvents: 'auto',
+              '&:hover': {
+                color: color.icon.default,
+                opacity: 1
+              }
+            }}
           />
         ) : null}
       </Flex>
@@ -84,18 +119,21 @@ type ResultTextProps = {
 
 const ResultText = ({ primary, secondary, badges }: ResultTextProps) => (
   <Flex direction='column' flex={1} css={{ minWidth: 0, width: 0 }}>
-    <Flex alignItems='center' gap='2xs' css={{ minWidth: 0, width: '100%' }}>
+    <Flex alignItems='center' gap='xs' css={{ minWidth: 0, width: '100%' }}>
       <Text
         variant='body'
         size='s'
         color='default'
-        css={{ minWidth: 0, flex: 1 }}
         ellipses
         className={styles.primary}
       >
         {primary}
       </Text>
-      {badges}
+      {badges && (
+        <Flex alignItems='center' gap='2xs' css={{ flexShrink: 0 }}>
+          {badges}
+        </Flex>
+      )}
     </Flex>
     <Text
       variant='body'
@@ -113,9 +151,14 @@ const ResultText = ({ primary, secondary, badges }: ResultTextProps) => (
 type UserResultProps = {
   userId: ID
   onRemove?: () => void
+  isSelected?: boolean
 }
 
-export const UserResult = ({ userId, onRemove }: UserResultProps) => {
+export const UserResult = ({
+  userId,
+  onRemove,
+  isSelected
+}: UserResultProps) => {
   const { data: user } = useUser(userId)
   const profilePicture = useProfilePicture({
     userId,
@@ -128,6 +171,7 @@ export const UserResult = ({ userId, onRemove }: UserResultProps) => {
       onRemove={onRemove}
       kind={Kind.USERS}
       id={userId}
+      isSelected={isSelected}
     >
       <Avatar
         h={30}
@@ -139,7 +183,7 @@ export const UserResult = ({ userId, onRemove }: UserResultProps) => {
       <ResultText
         primary={user.name}
         secondary={`@${user.handle}`}
-        badges={<UserBadges userId={user.user_id} size='s' inline />}
+        badges={<UserBadges userId={user.user_id} size='xs' inline />}
       />
     </ResultWrapper>
   )
@@ -148,9 +192,14 @@ export const UserResult = ({ userId, onRemove }: UserResultProps) => {
 type TrackResultProps = {
   trackId: ID
   onRemove?: () => void
+  isSelected?: boolean
 }
 
-export const TrackResult = ({ trackId, onRemove }: TrackResultProps) => {
+export const TrackResult = ({
+  trackId,
+  onRemove,
+  isSelected
+}: TrackResultProps) => {
   const { data: track } = useTrack(trackId)
   const { data: user } = useUser(track?.owner_id)
   const trackArtwork = useTrackCoverArt({
@@ -166,6 +215,7 @@ export const TrackResult = ({ trackId, onRemove }: TrackResultProps) => {
       onRemove={onRemove}
       kind={Kind.TRACKS}
       id={trackId}
+      isSelected={isSelected}
     >
       <Artwork h={30} w={30} src={trackArtwork} css={{ flexShrink: 0 }} />
       <ResultText primary={track.title} secondary={user.name} />
@@ -176,11 +226,13 @@ export const TrackResult = ({ trackId, onRemove }: TrackResultProps) => {
 type CollectionResultProps = {
   collectionId: ID
   onRemove?: () => void
+  isSelected?: boolean
 }
 
 export const CollectionResult = ({
   collectionId,
-  onRemove
+  onRemove,
+  isSelected
 }: CollectionResultProps) => {
   const { data: collection } = useCollection(collectionId)
   const { data: user } = useUser(
@@ -203,6 +255,7 @@ export const CollectionResult = ({
       onRemove={onRemove}
       kind={Kind.COLLECTIONS}
       id={collectionId}
+      isSelected={isSelected}
     >
       <Artwork h={30} w={30} src={collectionArtwork} css={{ flexShrink: 0 }} />
       <ResultText primary={collection.playlist_name} secondary={user.name} />

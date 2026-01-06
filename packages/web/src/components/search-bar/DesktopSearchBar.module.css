@@ -354,7 +354,5 @@
 
 .removeIcon {
   opacity: 0;
-}
-:global(.ant-select-item-option.ant-select-item-option-active) .removeIcon {
-  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
 }

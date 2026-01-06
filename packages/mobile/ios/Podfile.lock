@@ -1369,7 +1369,7 @@ PODS:
     - React
     - react-native-google-cast/NoBluetoothArm (= 4.6.2)
   - react-native-google-cast/NoBluetoothArm (4.6.2):
-    - google-cast-sdk-dynamic-xcframework-no-bluetooth
+    - google-cast-sdk-dynamic-xcframework-no-bluetooth (= 4.7.1)
     - React
     - react-native-google-cast/RNGoogleCast
   - react-native-google-cast/RNGoogleCast (4.6.2):
@@ -2872,7 +2872,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 9fe3cd3187a2995d78d1f34d3a52eac1b68df245
   react-native-fast-crypto: b30594570dab23aca7e74e206b2c03e28a006216
   react-native-get-random-values: 384787fd76976f5aec9465aff6fa9e9129af1e74
-  react-native-google-cast: 18b9b2fc518caabfa65d309409e160b3fc6d1733
+  react-native-google-cast: 0a82cf63114470403e41e04ffa2b13d6448b6112
   react-native-image-picker: 42e3b160d82fb168288345db3b9a2a99aad02afe
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keyboard-controller: 3aaba4f7015628ca833ce7ad889754571cef6455
