@@ -40,6 +40,40 @@ jobs:
         branches:
           only: /^main$/
 
+  # Production web deployment on main.
+  - web-hold-production-main:
+      type: approval
+      requires:
+        - web-build-production
+        - web-build-ssr-production
+        - web-check-ssr-production-bundlesize
+      filters:
+        branches:
+          only: /^main$/
+  - web-deploy-production-s3-main:
+      context: Audius Client
+      requires:
+        - web-hold-production-main
+      filters:
+        branches:
+          only: /^main$/
+  - web-deploy-production-cloudflare-main:
+      context:
+        - Audius Client
+        - slack-secrets
+      requires:
+        - web-hold-production-main
+      filters:
+        branches:
+          only: /^main$/
+  - web-deploy-sentry-sourcemaps-main:
+      context: Audius Client
+      requires:
+        - web-hold-production-main
+      filters:
+        branches:
+          only: /^main$/
+
   # Release production web.
   - web-hold-production:
       type: approval

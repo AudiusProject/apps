@@ -33,6 +33,41 @@ jobs:
         branches:
           only: /^main$/
 
+  # Production mobile deployment on main.
+  - mobile-hold-production-ios-main:
+      type: approval
+      requires:
+        - mobile-init
+      filters:
+        branches:
+          only: /^main$/
+  - mobile-build-upload-production-ios-main:
+      context:
+        - Audius Mobile Client
+        - slack-secrets
+      requires:
+        - mobile-hold-production-ios-main
+      filters:
+        branches:
+          only: /^main$/
+
+  - mobile-hold-production-android-main:
+      type: approval
+      requires:
+        - mobile-init
+      filters:
+        branches:
+          only: /^main$/
+  - mobile-build-upload-production-android-main:
+      context:
+        - Audius Mobile Client
+        - slack-secrets
+      requires:
+        - mobile-hold-production-android-main
+      filters:
+        branches:
+          only: /^main$/
+
   - mobile-build-upload-production-android-if-full-release:
       context:
         - Audius Mobile Client
