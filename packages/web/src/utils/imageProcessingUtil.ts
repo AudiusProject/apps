@@ -46,7 +46,9 @@ const getGifPreviewWorker = async (): Promise<WebWorker> => {
 const getGeneratePlaylistArtworkWorker = async (): Promise<WebWorker> => {
   if (!generatePlaylistArtworkWorkerPromise) {
     generatePlaylistArtworkWorkerPromise = Promise.all([
-      import('workers/generatePlaylistArtwork.worker.js').then((m) => m.default),
+      import('workers/generatePlaylistArtwork.worker.js').then(
+        (m) => m.default
+      ),
       getJimp()
     ]).then(
       ([generatePlaylistArtworkWorkerFile, jimp]) =>
