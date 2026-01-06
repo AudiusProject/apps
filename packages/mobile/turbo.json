@@ -5,6 +5,7 @@
       "dependsOn": [
         "@audius/common#build",
         "@audius/fixed-decimal#build",
+        "@audius/eth#build",
         "@audius/spl#build"
       ],
       "outputs": ["dist/**", "build/**"],

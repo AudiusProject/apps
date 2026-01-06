@@ -11,6 +11,7 @@
         "@audius/common#build",
         "@audius/fixed-decimal#build",
         "@audius/harmony#build:css",
+        "@audius/eth#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only",
@@ -22,6 +23,7 @@
         "@audius/common#build",
         "@audius/fixed-decimal#build",
         "@audius/harmony#build:css",
+        "@audius/eth#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only"
@@ -33,6 +35,7 @@
         "@audius/common#build",
         "@audius/fixed-decimal#build",
         "@audius/harmony#build:css",
+        "@audius/eth#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only"

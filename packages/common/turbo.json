@@ -4,9 +4,9 @@
     "build": {
       "dependsOn": [
         "@audius/fixed-decimal#build",
+        "@audius/eth#build",
         "@audius/spl#build"
       ]
     }
   }
 }
-
