@@ -1,9 +1,12 @@
 export enum Theme {
-  DEFAULT = 'default',
   DARK = 'dark',
   AUTO = 'auto',
-  MATRIX = 'matrix'
+  MATRIX = 'matrix',
+  LIGHT = 'light'
 }
+
+/** Legacy theme value - treat as AUTO when encountered */
+export const LEGACY_THEME_DEFAULT = 'default'
 
 export enum SystemAppearance {
   LIGHT = 'light',

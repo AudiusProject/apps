@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
-import { Theme, SystemAppearance } from '@audius/common/models'
+import {
+  Theme,
+  SystemAppearance,
+  LEGACY_THEME_DEFAULT
+} from '@audius/common/models'
 import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -26,23 +30,21 @@ const selectHarmonyTheme = (state: AppState) => {
   const systemAppearance = getSystemAppearance(state)
 
   switch (theme) {
-    case Theme.DEFAULT:
+    case Theme.LIGHT:
       return 'day'
     case Theme.DARK:
       return 'dark'
     case Theme.MATRIX:
       return 'matrix'
     case Theme.AUTO:
+    default:
       switch (systemAppearance) {
         case SystemAppearance.DARK:
           return 'dark'
         case SystemAppearance.LIGHT:
-          return 'day'
         default:
           return 'day'
       }
-    default:
-      return 'day'
   }
 }
 
@@ -54,11 +56,15 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   const theme = useSelector(selectHarmonyTheme)
 
   useAsync(async () => {
-    const savedTheme = (await AsyncStorage.getItem(
-      THEME_STORAGE_KEY
-    )) as Nullable<Theme>
+    const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY)
 
-    dispatch(setTheme({ theme: savedTheme ?? Theme.DEFAULT }))
+    // Handle legacy "default" value - treat as AUTO
+    const theme =
+      savedTheme === LEGACY_THEME_DEFAULT
+        ? Theme.AUTO
+        : ((savedTheme as Nullable<Theme>) ?? Theme.AUTO)
+
+    dispatch(setTheme({ theme }))
   }, [dispatch])
 
   useEffect(() => {

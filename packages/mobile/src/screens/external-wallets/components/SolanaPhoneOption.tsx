@@ -26,7 +26,7 @@ const messages = {
 
 const useStyles = makeStyles(({ type }) => ({
   root: {
-    backgroundColor: type === Theme.DEFAULT ? 'black' : 'white',
+    backgroundColor: type === Theme.LIGHT ? 'black' : 'white',
     height: 64,
     width: 64,
     justifyContent: 'center',

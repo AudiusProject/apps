@@ -18,23 +18,21 @@ const selectHarmonyTheme = (state: AppState) => {
   const systemAppearance = getSystemAppearance(state)
 
   switch (theme) {
-    case Theme.DEFAULT:
+    case Theme.LIGHT:
       return 'day'
     case Theme.DARK:
       return 'dark'
     case Theme.MATRIX:
       return 'matrix'
     case Theme.AUTO:
+    default:
       switch (systemAppearance) {
         case SystemAppearance.DARK:
           return 'dark'
         case SystemAppearance.LIGHT:
-          return 'day'
         default:
           return 'day'
       }
-    default:
-      return 'day'
   }
 }
 

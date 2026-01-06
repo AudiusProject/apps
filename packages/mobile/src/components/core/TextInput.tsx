@@ -456,7 +456,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
           <InputAccessoryView nativeID={inputAccessoryViewID}>
             <BlurView
               blurType={
-                themeVariant === Theme.DEFAULT
+                themeVariant === Theme.LIGHT
                   ? 'thinMaterialLight'
                   : 'thinMaterialDark'
               }

@@ -29,8 +29,8 @@ export const AppearanceSettingsRow = () => {
   const { tier } = useTierAndVerifiedForUser(accountId)
 
   const appearanceOptions = [
-    { key: Theme.DEFAULT, text: messages.lightMode },
     { key: Theme.AUTO, text: messages.autoMode },
+    { key: Theme.LIGHT, text: messages.lightMode },
     { key: Theme.DARK, text: messages.darkMode }
   ]
 
@@ -42,12 +42,9 @@ export const AppearanceSettingsRow = () => {
     (theme: Theme) => {
       dispatch(setTheme({ theme }))
 
-      const recordedTheme =
-        theme === Theme.DEFAULT ? 'light' : theme.toLocaleLowerCase()
-
       const trackEvent = make({
         eventName: Name.SETTINGS_CHANGE_THEME,
-        mode: recordedTheme as 'dark' | 'light' | 'matrix' | 'auto'
+        mode: theme.toLocaleLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
       })
 
       track(trackEvent)
@@ -68,7 +65,7 @@ export const AppearanceSettingsRow = () => {
         <SegmentedControl
           fullWidth
           options={appearanceOptions}
-          defaultSelected={theme ?? Theme.DEFAULT}
+          defaultSelected={theme ?? Theme.AUTO}
           onSelectOption={handleSetTheme}
         />
       </SettingsRowContent>
