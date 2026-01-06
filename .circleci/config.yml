@@ -359,7 +359,6 @@ workflows:
             - init
           workspace_path: ../workspace
 
-
       - notify-pipeline-status:
           context:
             - slack-secrets
@@ -393,4 +392,17 @@ workflows:
     jobs:
       - approve-foundation-deployment-holds:
           context: [slack-secrets, circle-daily-deploy-secrets]
+
+  mobile-prod-build:
+    when:
+      equal: ['mobile-prod-build', << pipeline.parameters.workflow >>]
+    jobs:
+      - generate-config
+      - init:
+          context:
+            - Vercel
+      - continuation/continue:
+          config_path: .circleci/continue_config.yml
+          parameters:
+            run-mobile-prod-build-workflow: true
 
