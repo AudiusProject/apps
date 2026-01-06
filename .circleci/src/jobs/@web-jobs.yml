@@ -267,3 +267,43 @@ web-dist-linux-production:
         build-type: linux-publish-production
         environment: 'production'
         os: 'linux'
+
+web-dist-mac-production-main:
+  working_directory: ~/apps
+  # run on macos so dmg can be created and signed.
+  resource_class: macos.m1.large.gen1
+  macos:
+    xcode: '16.2.0'
+  steps:
+    - run:
+        name: Install Python 3.11
+        command: |
+          brew install pyenv
+          pyenv install 3.11.8
+          pyenv global 3.11.8
+          python3 --version
+    - web-distribute:
+        build-type: mac-publish-production
+        install-license: true
+        environment: 'production'
+        os: 'mac'
+
+web-dist-win-production-main:
+  working_directory: ~/apps
+  docker:
+    - image: electronuserland/builder:18-wine
+  steps:
+    - web-distribute:
+        build-type: win-publish-production
+        environment: 'production'
+        os: 'win'
+
+web-dist-linux-production-main:
+  working_directory: ~/apps
+  docker:
+    - image: electronuserland/builder
+  steps:
+    - web-distribute:
+        build-type: linux-publish-production
+        environment: 'production'
+        os: 'linux'

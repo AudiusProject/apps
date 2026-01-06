@@ -73,3 +73,56 @@ jobs:
       filters:
         branches:
           only: /^main$/
+
+  # Distribute production desktop binaries on main.
+  - web-hold-dist-mac-production-main:
+      type: approval
+      requires:
+        - web-build-production
+      filters:
+        branches:
+          only: /^main$/
+  - web-dist-mac-production-main:
+      context:
+        - Audius Client
+        - Vercel
+        - slack-secrets
+      requires:
+        - web-hold-dist-mac-production-main
+      filters:
+        branches:
+          only: /^main$/
+  - web-hold-dist-win-production-main:
+      type: approval
+      requires:
+        - web-build-production
+      filters:
+        branches:
+          only: /^main$/
+  - web-dist-win-production-main:
+      context:
+        - Audius Client
+        - Vercel
+        - slack-secrets
+      requires:
+        - web-hold-dist-win-production-main
+      filters:
+        branches:
+          only: /^main$/
+  - web-hold-dist-linux-production-main:
+      type: approval
+      requires:
+        - web-build-production
+      filters:
+        branches:
+          only: /^main$/
+  - web-dist-linux-production-main:
+      context:
+        - Audius Client
+        - Vercel
+        - slack-secrets
+      requires:
+        - web-hold-dist-linux-production-main
+      filters:
+        branches:
+          only: /^main$/
