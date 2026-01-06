@@ -4,7 +4,8 @@
     "build": {
       "dependsOn": [
         "@audius/common#build",
-        "@audius/fixed-decimal#build"
+        "@audius/fixed-decimal#build",
+        "@audius/spl#build"
       ],
       "outputs": ["dist/**", "build/**"],
       "outputLogs": "new-only"

@@ -2,7 +2,10 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["@audius/fixed-decimal#build"]
+      "dependsOn": [
+        "@audius/fixed-decimal#build",
+        "@audius/spl#build"
+      ]
     }
   }
 }
