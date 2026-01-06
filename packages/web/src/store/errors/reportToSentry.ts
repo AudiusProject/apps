@@ -1,6 +1,5 @@
 import { ErrorLevel, ReportToSentryArgs } from '@audius/common/models'
 import { getErrorMessage, isResponseError } from '@audius/common/utils'
-import { withScope, captureException } from '@sentry/browser'
 import type { SeverityLevel } from '@sentry/types'
 
 const Levels: { [level in ErrorLevel]: SeverityLevel } = {
@@ -39,6 +38,10 @@ export const reportToSentry = async ({
   feature
 }: ReportToSentryArgs) => {
   try {
+    // Lazy load Sentry SDK
+    const Sentry = await import('@sentry/browser')
+    const { withScope, captureException } = Sentry
+    
     withScope(async (scope) => {
       if (level) {
         const sentryLevel = Levels[level]

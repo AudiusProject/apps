@@ -1,5 +1,3 @@
-import * as amplitude from '@amplitude/analytics-browser'
-import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser'
 import { Name, MobileOS, IdentifyTraits } from '@audius/common/models'
 
 import { env } from 'services/env'
@@ -10,8 +8,35 @@ const AMPLITUDE_PROXY = env.AMPLITUDE_PROXY
 
 const isAmplitudeConfigured = !!AMP_API_KEY && !!AMPLITUDE_PROXY
 
-// Create and Install Session Replay Plugin
-const sessionReplayTracking = sessionReplayPlugin()
+// Lazy-loaded Amplitude SDK
+let amplitudeInstance: typeof import('@amplitude/analytics-browser') | null = null
+let sessionReplayPluginInstance: typeof import('@amplitude/plugin-session-replay-browser') | null = null
+let amplitudeInitPromise: Promise<void> | null = null
+let isInitialized = false
+
+/**
+ * Lazy-load Amplitude SDK
+ */
+const getAmplitude = async () => {
+  if (amplitudeInstance) {
+    return amplitudeInstance
+  }
+  
+  amplitudeInstance = await import('@amplitude/analytics-browser')
+  return amplitudeInstance
+}
+
+/**
+ * Lazy-load Session Replay Plugin
+ */
+const getSessionReplayPlugin = async () => {
+  if (sessionReplayPluginInstance) {
+    return sessionReplayPluginInstance
+  }
+  
+  sessionReplayPluginInstance = await import('@amplitude/plugin-session-replay-browser')
+  return sessionReplayPluginInstance
+}
 
 /**
  * ========================= Amplitude Analytics =========================
@@ -19,44 +44,75 @@ const sessionReplayTracking = sessionReplayPlugin()
  *  The Amplitude library using V2 API
  */
 export const init = async (isMobile: boolean) => {
-  try {
-    if (isAmplitudeConfigured) {
-      amplitude.init(AMP_API_KEY, {
-        serverUrl: AMPLITUDE_PROXY,
-        defaultTracking: {
-          sessions: true
-        }
-      })
-      amplitude.add(sessionReplayTracking)
-
-      const source = getSource(isMobile)
-      amplitude.track(Name.SESSION_START, { source })
-    }
-  } catch (err) {
-    console.error(err)
+  if (amplitudeInitPromise) {
+    return amplitudeInitPromise
   }
+  
+  if (isInitialized) {
+    return
+  }
+  
+  amplitudeInitPromise = (async () => {
+    try {
+      if (isAmplitudeConfigured) {
+        // Lazy load Amplitude SDK and plugin
+        const [amplitude, sessionReplayPlugin] = await Promise.all([
+          getAmplitude(),
+          getSessionReplayPlugin()
+        ])
+        
+        amplitude.init(AMP_API_KEY, {
+          serverUrl: AMPLITUDE_PROXY,
+          defaultTracking: {
+            sessions: true
+          }
+        })
+        
+        const sessionReplayTracking = sessionReplayPlugin.sessionReplayPlugin()
+        amplitude.add(sessionReplayTracking)
+
+        const source = getSource(isMobile)
+        amplitude.track(Name.SESSION_START, { source })
+        
+        isInitialized = true
+      }
+    } catch (err) {
+      console.error(err)
+      amplitudeInitPromise = null
+      throw err
+    }
+  })()
+  
+  return amplitudeInitPromise
 }
 
 // Identify User
-export const identify = (traits?: IdentifyTraits, callback?: () => void) => {
+export const identify = async (traits?: IdentifyTraits, callback?: () => void) => {
   if (!isAmplitudeConfigured) {
     if (callback) callback()
     return
   }
 
-  if (traits?.handle) {
-    amplitude.setUserId(traits.handle)
+  try {
+    const amplitude = await getAmplitude()
+    
+    if (traits?.handle) {
+      amplitude.setUserId(traits.handle)
+    }
+    if (traits && Object.keys(traits).length > 0) {
+      const identifyObj = new amplitude.Identify()
+      Object.entries(traits).map(([k, v]) => identifyObj.set(k, v))
+      amplitude.identify(identifyObj)
+    }
+    if (callback) callback()
+  } catch (err) {
+    console.error('Failed to identify user in Amplitude:', err)
+    if (callback) callback()
   }
-  if (traits && Object.keys(traits).length > 0) {
-    const identifyObj = new amplitude.Identify()
-    Object.entries(traits).map(([k, v]) => identifyObj.set(k, v))
-    amplitude.identify(identifyObj)
-  }
-  if (callback) callback()
 }
 
 // Track Event
-export const track = (
+export const track = async (
   event: string,
   properties?: Record<string, any>,
   callback?: () => void
@@ -65,9 +121,18 @@ export const track = (
     if (callback) callback()
     return
   }
-  amplitude.track(event, properties)
-  if (callback) {
-    callback()
+  
+  try {
+    const amplitude = await getAmplitude()
+    amplitude.track(event, properties)
+    if (callback) {
+      callback()
+    }
+  } catch (err) {
+    console.error('Failed to track event in Amplitude:', err)
+    if (callback) {
+      callback()
+    }
   }
 }
 
