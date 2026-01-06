@@ -9,12 +9,16 @@ import {
 import { getWalletClient } from '@wagmi/core'
 import { type WalletClient } from 'viem'
 
-import { audiusChain, wagmiAdapter } from 'app/ReownAppKitModal'
+import { audiusChain, getWagmiAdapter } from 'app/ReownAppKitModal'
 
 import { env } from '../env'
 import { localStorage } from '../local-storage'
 
-const wagmiConfig = wagmiAdapter.wagmiConfig
+// Lazy-load wagmiConfig when needed (async)
+const getWagmiConfig = async () => {
+  const adapter = await getWagmiAdapter()
+  return adapter.wagmiConfig
+}
 
 export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   // Check if the user has already connected Hedgehog first...
@@ -33,6 +37,7 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   console.debug('[audiusSdk] Initializing SDK with external wallet...')
 
   // Wait for the wallet to finish connecting/reconnecting
+  const wagmiConfig = await getWagmiConfig()
   if (
     wagmiConfig.state.status === 'reconnecting' ||
     wagmiConfig.state.status === 'connecting'

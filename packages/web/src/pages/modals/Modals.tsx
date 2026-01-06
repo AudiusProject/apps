@@ -9,7 +9,12 @@ import { AlbumTrackRemoveConfirmationModal } from 'components/album-track-remove
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import { ArtistPickModal } from 'components/artist-pick-modal/ArtistPickModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
-import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
+// Lazy load BuySellModal to avoid loading @reown packages until needed
+const BuySellModal = lazy(() =>
+  import('components/buy-sell-modal/BuySellModal').then((m) => ({
+    default: m.BuySellModal
+  }))
+)
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
 import DeletePlaylistConfirmationModal from 'components/delete-playlist-confirmation-modal/DeletePlaylistConfirmationModal'
