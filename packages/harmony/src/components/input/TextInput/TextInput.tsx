@@ -245,7 +245,12 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
             {inputElement}
           </Flex>
           {onClear && value ? (
-            <IconCloseAlt onClick={onClear} color='subdued' />
+            <IconCloseAlt
+              size={size === TextInputSize.EXTRA_SMALL ? 's' : 'l'}
+              onClick={onClear}
+              color='subdued'
+              cursor='pointer'
+            />
           ) : null}
           {endAdornment}
         </label>

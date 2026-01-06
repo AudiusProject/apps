@@ -1,4 +1,4 @@
-import {
+import React, {
   useCallback,
   useState,
   useRef,
@@ -64,11 +64,23 @@ const ViewMoreButton = ({ query }: { query: string }) => {
   const navigate = useNavigate()
 
   return (
-    <Flex alignItems='center' pt='l' gap='2xs' justifyContent='center'>
+    <Flex
+      alignItems='center'
+      justifyContent='center'
+      w='100%'
+      css={{ padding: '16px 0' }}
+    >
       <PlainButton
         iconRight={IconArrowRight}
         onClick={() => navigate(searchResultsPage('all', query))}
         className='dropdown-action'
+        css={{
+          '&:hover': {
+            '& > *': {
+              color: 'var(--harmony-text-icon-default)'
+            }
+          }
+        }}
       >
         {messages.viewMoreResults}
       </PlainButton>
@@ -83,7 +95,12 @@ const ClearRecentSearchesButton = () => {
   }, [dispatch])
 
   return (
-    <Flex alignItems='center' pt='l' gap='2xs' justifyContent='center'>
+    <Flex
+      alignItems='center'
+      justifyContent='center'
+      w='100%'
+      css={{ padding: '8px 0' }}
+    >
       <PlainButton onClick={handleClickClear} className='dropdown-action'>
         {messages.clearRecentSearches}
       </PlainButton>
@@ -95,6 +112,20 @@ const NoResults = () => (
   <Flex alignItems='center' ph='l' pv='m'>
     <Text variant='label' size='s' color='subdued'>
       {messages.noResults}
+    </Text>
+  </Flex>
+)
+
+const RecentSearchesEmptyState = () => (
+  <Flex
+    alignItems='center'
+    justifyContent='center'
+    direction='column'
+    gap='s'
+    p='s'
+  >
+    <Text variant='body' size='s' color='subdued'>
+      No recent searches
     </Text>
   </Flex>
 )
@@ -121,6 +152,8 @@ export const DesktopSearchBar = () => {
   const anchorRef = inputContainerRef as MutableRefObject<HTMLElement | null>
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [isFocused, setIsFocused] = useState(false)
   const navigate = useNavigate()
 
   const isSearchPage = !!matchPath(SEARCH_PAGE, location.pathname)
@@ -149,32 +182,15 @@ export const DesktopSearchBar = () => {
     setIsMenuOpen(true)
   }, [])
 
+  const handleClear = useCallback(() => {
+    setInputValue('')
+    inputRef.current?.focus()
+  }, [])
+
   const handleSelect = useCallback(() => {
     setInputValue('')
     setIsMenuOpen(false)
   }, [])
-
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        if (isSearchPage) {
-          const newParams = new URLSearchParams(searchParams)
-          newParams.set('query', debouncedValue)
-          setSearchParams(newParams)
-        } else {
-          navigate(searchResultsPage('all', inputValue))
-        }
-      }
-    },
-    [
-      debouncedValue,
-      navigate,
-      inputValue,
-      isSearchPage,
-      searchParams,
-      setSearchParams
-    ]
-  )
 
   const autocompleteOptions = useMemo(() => {
     if (!data) return []
@@ -243,7 +259,22 @@ export const DesktopSearchBar = () => {
   )
 
   const recentSearchOptions = useMemo(() => {
-    if (!searchHistory.length || inputValue) return []
+    if (inputValue) return []
+
+    if (!searchHistory.length) {
+      return [
+        {
+          label: 'Recent Searches',
+          options: [
+            {
+              label: <RecentSearchesEmptyState />,
+              value: 'empty-state' as any
+            }
+          ]
+        }
+      ]
+    }
+
     const searchHistoryOptions = searchHistory.map((searchItem) => {
       if (searchItem.kind === Kind.USERS) {
         return {
@@ -282,14 +313,10 @@ export const DesktopSearchBar = () => {
         label: 'Recent Searches',
         options: [
           ...searchHistoryOptions,
-          ...(searchHistoryOptions
-            ? [
-                {
-                  label: <ClearRecentSearchesButton />,
-                  value: 'Clear search'
-                }
-              ]
-            : [])
+          {
+            label: <ClearRecentSearchesButton />,
+            value: 'Clear search'
+          }
         ]
       }
     ]
@@ -301,6 +328,135 @@ export const DesktopSearchBar = () => {
   const hasOptions = options.length > 0
   const showResults = !isSearchPage && hasOptions
   const shouldShowMenu = isMenuOpen && showResults
+
+  // Flatten all options for keyboard navigation
+  const flatOptions = useMemo(() => {
+    const flat: Array<{ value: string; isSelectable: boolean }> = []
+    options.forEach((group) => {
+      group.options.forEach((option) => {
+        const value = String(option.value ?? '')
+        flat.push({
+          value,
+          isSelectable: value !== 'no-results' && value !== 'empty-state'
+        })
+      })
+    })
+    return flat
+  }, [options])
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!shouldShowMenu) {
+        if (event.key === 'Enter') {
+          if (isSearchPage) {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.set('query', debouncedValue)
+            setSearchParams(newParams)
+          } else {
+            navigate(searchResultsPage('all', inputValue))
+          }
+        }
+        return
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setSelectedIndex((prev) => {
+          if (prev < flatOptions.length - 1) {
+            return prev + 1
+          }
+          return 0 // Wrap to first
+        })
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setSelectedIndex((prev) => {
+          if (prev > 0) {
+            return prev - 1
+          }
+          return flatOptions.length - 1 // Wrap to last
+        })
+      } else if (event.key === 'Enter') {
+        event.preventDefault()
+        if (selectedIndex >= 0 && selectedIndex < flatOptions.length) {
+          const selectedOption = flatOptions[selectedIndex]
+          if (selectedOption.isSelectable) {
+            // Find the actual option and trigger its action
+            let optionIndex = 0
+            for (const group of options) {
+              for (const opt of group.options) {
+                if (optionIndex === selectedIndex) {
+                  const value = String(opt.value ?? '')
+                  if (value === 'viewMore' && inputValue) {
+                    navigate(searchResultsPage('all', inputValue))
+                    handleSelect()
+                  } else if (value === 'Clear search') {
+                    dispatch(clearHistory())
+                  } else {
+                    // This is a search result - find the link and click it
+                    const linkElement = document.querySelector(
+                      `[data-search-result-value="${value}"]`
+                    ) as HTMLElement
+                    if (linkElement) {
+                      linkElement.click()
+                      handleSelect()
+                    }
+                  }
+                  return
+                }
+                optionIndex++
+              }
+            }
+          }
+        } else {
+          // No selection, navigate to search page
+          if (isSearchPage) {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.set('query', debouncedValue)
+            setSearchParams(newParams)
+          } else {
+            navigate(searchResultsPage('all', inputValue))
+          }
+        }
+      } else if (event.key === 'Escape') {
+        setIsMenuOpen(false)
+        setSelectedIndex(-1)
+      }
+    },
+    [
+      shouldShowMenu,
+      flatOptions,
+      selectedIndex,
+      options,
+      inputValue,
+      navigate,
+      isSearchPage,
+      searchParams,
+      setSearchParams,
+      debouncedValue,
+      dispatch,
+      handleSelect
+    ]
+  )
+
+  // Reset selected index when options change
+  useEffect(() => {
+    setSelectedIndex(-1)
+  }, [options])
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && scrollRef.current) {
+      const selectedElement = scrollRef.current.querySelector(
+        `[data-option-index="${selectedIndex}"]`
+      ) as HTMLElement
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [selectedIndex])
   // Calculate hasNoResults for the dropdown class name
   const hasNoResults =
     data &&
@@ -312,17 +468,20 @@ export const DesktopSearchBar = () => {
   useEffect(() => {
     if (hasOptions && inputValue) {
       setIsMenuOpen(true)
+    } else if (!inputValue && !hasOptions) {
+      setIsMenuOpen(false)
     }
   }, [hasOptions, inputValue])
 
   const handleFocus = useCallback(() => {
+    setIsFocused(true)
     setIsMenuOpen(true)
   }, [])
 
   const handleBlur = useCallback(() => {
+    setIsFocused(false)
     // Delay closing to allow clicks on menu items
     setTimeout(() => {
-      if (!document.hasFocus()) return
       setIsMenuOpen(false)
     }, 200)
   }, [])
@@ -343,6 +502,7 @@ export const DesktopSearchBar = () => {
   })
 
   const renderMenuContent = () => {
+    let currentIndex = 0
     return (
       <MenuContent
         scrollRef={scrollRef}
@@ -362,41 +522,62 @@ export const DesktopSearchBar = () => {
             {group.label && (
               <Text
                 variant='label'
-                size='xs'
-                color='subdued'
-                css={{
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.7px',
-                  padding: '8px',
-                  fontWeight: 'bold'
-                }}
+                size='s'
+                color='default'
+                css={{ paddingLeft: '8px' }}
               >
                 {group.label}
               </Text>
             )}
-            {group.options.map((option, optionIndex) => (
-              <Flex
-                key={optionIndex}
-                onClick={() => {
-                  if (
-                    option.value !== 'viewMore' &&
-                    option.value !== 'no-results'
-                  ) {
-                    handleSelect()
-                  }
-                }}
-                css={{
-                  cursor: 'pointer',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  '&:hover': {
-                    backgroundColor: 'var(--harmony-bg-surface-2)'
-                  }
-                }}
-              >
-                {option.label}
-              </Flex>
-            ))}
+            {group.options.map((option, optionIndex) => {
+              const isSelected = currentIndex === selectedIndex
+              const index = currentIndex++
+              const value = String(option.value ?? '')
+              const isSelectable =
+                value !== 'no-results' && value !== 'empty-state'
+
+              const enhancedLabel =
+                isSelectable && React.isValidElement(option.label)
+                  ? React.cloneElement(
+                      option.label as React.ReactElement<{
+                        isSelected: boolean
+                      }>,
+                      {
+                        isSelected
+                      }
+                    )
+                  : option.label
+
+              return (
+                <Flex
+                  key={`${groupIndex}-${optionIndex}-${value}`}
+                  data-option-index={index}
+                  onClick={() => {
+                    if (
+                      option.value !== 'viewMore' &&
+                      option.value !== 'no-results' &&
+                      option.value !== 'empty-state'
+                    ) {
+                      handleSelect()
+                    }
+                  }}
+                  borderRadius='s'
+                  css={{
+                    cursor: isSelectable ? 'pointer' : 'default',
+                    minHeight: '20px',
+                    '&:hover': isSelectable
+                      ? {
+                          '& svg': {
+                            opacity: '1'
+                          }
+                        }
+                      : {}
+                  }}
+                >
+                  {enhancedLabel}
+                </Flex>
+              )
+            })}
           </Flex>
         ))}
       </MenuContent>
@@ -411,7 +592,10 @@ export const DesktopSearchBar = () => {
           position: 'relative',
           zIndex: 2,
           display: 'inline-block',
-          width: inputValue ? '280px' : '160px',
+          width:
+            (inputValue && isFocused) || (isMenuOpen && hasOptions)
+              ? '280px'
+              : '160px',
           transition: 'width 0.2s ease-in-out'
         }}
       >
@@ -430,6 +614,7 @@ export const DesktopSearchBar = () => {
           autoComplete='off'
           type='search'
           startIcon={IconSearch}
+          onClear={!isLoading && inputValue ? handleClear : undefined}
           css={{
             width: '100%',
             '& input': {
@@ -439,16 +624,13 @@ export const DesktopSearchBar = () => {
               background: 'unset !important',
               color: 'var(--harmony-neutral) !important'
             },
-            '& .contentContainer': {
-              background: inputValue
-                ? 'var(--harmony-white)'
-                : 'var(--search-bar-background)',
-              boxShadow: '0 2px 5px 0 var(--search-bar-shadow)',
-              borderRadius: '4px',
-              border: 'none',
-              padding: '0 12px',
-              height: '32px',
-              minHeight: '32px'
+            '& input[type="search"]::-webkit-search-cancel-button': {
+              display: 'none',
+              appearance: 'none',
+              WebkitAppearance: 'none'
+            },
+            '& input[type="search"]::-ms-clear': {
+              display: 'none'
             }
           }}
         />
@@ -460,7 +642,7 @@ export const DesktopSearchBar = () => {
               top: '50%',
               transform: 'translateY(-50%)',
               pointerEvents: 'none',
-              zIndex: 3
+              zIndex: 4
             }}
           >
             <LoadingSpinner size='s' />

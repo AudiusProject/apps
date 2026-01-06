@@ -9,7 +9,7 @@
   /* Background */
   --harmony-bg-default: var(--harmony-background);
   --harmony-bg-surface-1: var(--harmony-n-25);
-  --harmony-bg-surface-2: var(--harmony-n-100);
+  --harmony-bg-surface-2: var(--harmony-n-50);
   --harmony-bg-white: var(--harmony-white);
 
   /* Border */
