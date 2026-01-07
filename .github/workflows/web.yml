@@ -26,12 +26,12 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20.19'
+  NODE_VERSION: '22.21.1'
 
 jobs:
-  # Initialize: Install dependencies, lint, typecheck, stylelint
+  # Initialize: Install dependencies and cache
   web-init:
-    name: Web Init (Lint & Typecheck)
+    name: Web Init (Install & Cache)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -77,12 +77,6 @@ jobs:
             npm ci --prefer-offline
           fi
 
-      - name: Lint & Typecheck
-        run: npx turbo run verify --filter=@audius/web
-
-      - name: Stylelint
-        run: npm run stylelint -w @audius/web
-
       - name: Upload workspace artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -99,11 +93,86 @@ jobs:
             packages/sdk/dist
           retention-days: 1
 
+  # Lint job
+  web-lint:
+    name: Web Lint
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download workspace artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: .
+
+      - name: Lint
+        run: |
+          cd packages/web
+          npm run lint
+
+  # Typecheck job
+  web-typecheck:
+    name: Web Typecheck
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download workspace artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: .
+
+      - name: Typecheck
+        run: |
+          cd packages/web
+          npm run typecheck
+
+  # Stylelint job
+  web-stylelint:
+    name: Web Stylelint
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download workspace artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: .
+
+      - name: Stylelint
+        run: |
+          cd packages/web
+          npm run stylelint
+
   # Build production bundle
   web-build-production:
     name: Build Production
     runs-on: ubuntu-latest
-    needs: web-init
+    needs: [web-init, web-lint, web-typecheck, web-stylelint]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
@@ -140,7 +209,7 @@ jobs:
   web-build-ssr-production:
     name: Build SSR Production
     runs-on: ubuntu-latest
-    needs: web-init
+    needs: [web-init, web-lint, web-typecheck, web-stylelint]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
@@ -212,7 +281,7 @@ jobs:
   web-deploy-release-candidate:
     name: Deploy Release Candidate
     runs-on: ubuntu-latest
-    needs: [web-init, web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
+    needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
     if: github.ref == 'refs/heads/main'
     environment:
       name: release
@@ -469,6 +538,7 @@ jobs:
   web-test:
     name: Web Tests
     runs-on: ubuntu-latest
+    needs: web-init
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -477,40 +547,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
 
-      - name: Create concatenated patch file
-        id: patch-file
-        run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
-          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-
-      - name: Cache node modules
-        uses: actions/cache@v4
+      - name: Download workspace artifacts
+        uses: actions/download-artifact@v4
         with:
-          path: |
-            node_modules
-            packages/web/node_modules
-            packages/harmony/node_modules
-            packages/common/node_modules
-            packages/libs/node_modules
-            packages/sdk/node_modules
-          key: npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
-          restore-keys: |
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
-
-      - name: Install dependencies
-        env:
-          CI: true
-        run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
-          else
-            echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
-          fi
+          name: node-modules
+          path: .
 
       - name: Run tests
         timeout-minutes: 30
