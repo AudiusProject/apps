@@ -19,7 +19,8 @@
     "jsxImportSource": "@emotion/react",
     "downlevelIteration": true,
     "noFallthroughCasesInSwitch": true,
-    "ignoreDeprecations": "5.0",
+    "suppressImplicitAnyIndexErrors": true,
+    "ignoreDeprecations": ["5.0", "TS5102"],
     "types": ["vite/client"],
     "paths": {
       "@audius/common/adapters": ["../../common/src/adapters/index.ts"],
