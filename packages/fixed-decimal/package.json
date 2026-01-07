@@ -11,9 +11,9 @@
     "types": "./dist/types/index.d.ts"
   },
   "scripts": {
-    "start": "./scripts/makePackageTypes.sh && tsc --build --verbose --watch tsconfig.build.json",
-    "build": "./scripts/makePackageTypes.sh && tsc --build --verbose tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
+    "start": "./scripts/makePackageTypes.sh && npx tsc --build --verbose --watch tsconfig.build.json",
+    "build": "./scripts/makePackageTypes.sh && npx tsc --build --verbose tsconfig.build.json",
+    "typecheck": "npx tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
