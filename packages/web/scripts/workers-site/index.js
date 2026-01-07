@@ -49,7 +49,7 @@ function isCrawler(val) {
     return false
   }
   const crawlerTest =
-    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|duckduckbot|googlebot|google-inspectiontool|msnbot|nextgensearchbot|yahoo|yandex/i
+    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|discordbot|duckduckbot|embedly|facebookexternalhit|gigabot|googlebot|google-inspectiontool|ia_archiver|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|reaper|slackbot|snap|telegrambot|twitterbot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|zend|zoominfobot/i
   return crawlerTest.test(val)
 }
 
