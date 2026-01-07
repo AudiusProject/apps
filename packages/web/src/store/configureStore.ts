@@ -1,15 +1,12 @@
 import { Name, ErrorLevel } from '@audius/common/models'
 import { chatMiddleware } from '@audius/common/store'
 import { composeWithDevToolsLogOnlyInProduction } from '@redux-devtools/extension'
-import { configureScope, addBreadcrumb } from '@sentry/browser'
 import { createStore, applyMiddleware, Action, Store } from 'redux'
 import { persistStore } from 'redux-persist'
 import createSagaMiddleware from 'redux-saga'
-import createSentryMiddleware from 'redux-sentry-middleware'
 import thunk from 'redux-thunk'
 import { PartialDeep } from 'type-fest'
 
-import { track as amplitudeTrack } from 'services/analytics/amplitude'
 import { audiusSdk } from 'services/audius-sdk'
 import { queryClient } from 'services/query-client'
 import * as errorActions from 'store/errors/actions'
@@ -20,6 +17,19 @@ import rootSaga, { testRootSaga } from 'store/sagas'
 import { navigationMiddleware } from './navigationMiddleware'
 import { buildStoreContext } from './storeContext'
 import { AppState } from './types'
+
+// Lazy load Amplitude track function
+const amplitudeTrack = async (
+  event: string,
+  properties?: Record<string, any>
+) => {
+  try {
+    const { track } = await import('services/analytics/amplitude')
+    await track(event, properties)
+  } catch (err) {
+    console.error('Failed to track event in Amplitude:', err)
+  }
+}
 
 declare global {
   interface Window {
@@ -81,13 +91,81 @@ const statePruner = (state: AppState) => {
 // If we discover we want specific action bodies in the future for Sentry
 // debuggability, those should be whitelisted here.
 const actionSanitizer = (action: Action) => ({ type: action.type })
-const sentryMiddleware = createSentryMiddleware(
-  { configureScope, addBreadcrumb } as any,
-  {
-    actionTransformer: actionSanitizer,
-    stateTransformer: statePruner
+
+// Lazy-load Sentry middleware wrapper
+// This creates a middleware that lazy-loads the actual Sentry SDK and middleware
+type SentryMiddlewareFactory = (
+  store: any
+) => (next: any) => (action: Action) => any
+let sentryMiddlewareFactory: SentryMiddlewareFactory | null = null
+let sentryMiddlewarePromise: Promise<SentryMiddlewareFactory | null> | null =
+  null
+
+const createLazySentryMiddleware = () => {
+  return (store: any) => {
+    let sentryNext: ((action: Action) => any) | null = null
+
+    return (next: any) => (action: Action) => {
+      // Lazy load Sentry middleware on first action
+      if (!sentryMiddlewareFactory && !sentryMiddlewarePromise) {
+        sentryMiddlewarePromise = (async () => {
+          try {
+            const [Sentry, createSentryMiddleware] = await Promise.all([
+              import('@sentry/browser'),
+              import('redux-sentry-middleware')
+            ])
+
+            const middleware = createSentryMiddleware.default(
+              {
+                configureScope: Sentry.configureScope,
+                addBreadcrumb: Sentry.addBreadcrumb
+              } as any,
+              {
+                actionTransformer: actionSanitizer,
+                stateTransformer: statePruner
+              }
+            )
+
+            sentryMiddlewareFactory = middleware
+            return sentryMiddlewareFactory
+          } catch (err) {
+            console.error('Failed to load Sentry middleware:', err)
+            sentryMiddlewarePromise = null
+            return null
+          }
+        })()
+      }
+
+      // If middleware is already loaded, use it
+      if (sentryMiddlewareFactory) {
+        if (!sentryNext) {
+          sentryNext = sentryMiddlewareFactory(store)(next)
+        }
+        return sentryNext(action)
+      }
+
+      // If still loading, pass through the action for now
+      if (sentryMiddlewarePromise) {
+        sentryMiddlewarePromise
+          .then((factory) => {
+            if (factory) {
+              sentryNext = factory(store)(next)
+              if (sentryNext) {
+                sentryNext(action)
+              }
+            }
+          })
+          .catch(() => {
+            // Silently fail - just pass through
+          })
+      }
+
+      return next(action)
+    }
   }
-)
+}
+
+const sentryMiddleware = createLazySentryMiddleware()
 
 export const configureStore = ({
   isMobile,
@@ -124,7 +202,10 @@ export const configureStore = ({
       error,
       additionalInfo
     })
-    amplitudeTrack(Name.ERROR_PAGE, additionalInfo)
+    // Fire and forget - don't await to avoid blocking error handling
+    amplitudeTrack(Name.ERROR_PAGE, additionalInfo).catch((err) => {
+      console.error('Failed to track error in Amplitude:', err)
+    })
   }
 
   const context = buildStoreContext({ isMobile, isTest })
