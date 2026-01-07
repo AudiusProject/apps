@@ -7,47 +7,51 @@
  */
 
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler'
+// eslint-disable-next-line import/no-unresolved
+import manifestJSON from '__STATIC_CONTENT_MANIFEST'
 import { Toucan } from 'toucan-js'
 import { renderPage } from 'vike/server'
 
-/* globals SENTRY_DSN */
+const assetManifest = JSON.parse(manifestJSON)
 
 const DEBUG = false
 const BROWSER_CACHE_TTL_SECONDS = 60 * 60 * 24
 
-addEventListener('fetch', (event) => {
-  const sentry =
-    typeof SENTRY_DSN !== 'undefined'
+export default {
+  async fetch(request, env, ctx) {
+    const sentry = env.SENTRY_DSN
       ? new Toucan({
-          dsn: SENTRY_DSN,
-          context: event,
-          request: event.request
-        })
+        dsn: env.SENTRY_DSN,
+        context: ctx,
+        request
+      })
       : null
-  try {
-    event.respondWith(handleEvent(event))
-  } catch (e) {
-    if (sentry) {
-      sentry.captureException(e)
-    }
-    if (DEBUG) {
-      return event.respondWith(
-        new Response(e.message || e.toString(), {
-          status: 500
-        })
-      )
-    }
-    event.respondWith(new Response('Internal Error', { status: 500 }))
-  }
-})
 
-async function handleEvent(event) {
-  if (!isAssetUrl(event.request.url)) {
-    // If the request is not for an asset, then it's a request for a page
+    try {
+      return await handleRequest(request, env, ctx)
+    } catch (e) {
+      if (sentry) {
+        sentry.captureException(e)
+      }
+      if (DEBUG) {
+        return new Response(e.message || e.toString(), { status: 500 })
+      }
+      return new Response('Internal Error', { status: 500 })
+    }
+  }
+}
+
+async function handleRequest(request, env, ctx) {
+  if (!isAssetUrl(request.url)) {
+    // Convert request headers to a plain object for Vike
+    const headers = {}
+    request.headers.forEach((value, key) => {
+      headers[key.toLowerCase()] = value
+    })
 
     const pageContextInit = {
-      urlOriginal: event.request.url,
-      userAgent: event.request.headers.get('User-Agent')
+      urlOriginal: request.url,
+      headers
     }
 
     const pageContext = await renderPage(pageContextInit)
@@ -56,18 +60,39 @@ async function handleEvent(event) {
     if (!httpResponse) {
       throw new Error(pageContext.errorWhileRendering)
     } else {
-      const { body, statusCode: status, headers } = httpResponse
+      const { statusCode: status, headers } = httpResponse
+      // httpResponse.body can be a string or ReadableStream
+      // Use getBody() if available, otherwise use body directly
+      const body =
+        typeof httpResponse.getBody === 'function'
+          ? await httpResponse.getBody()
+          : httpResponse.body
+
       return new Response(body, { headers, status })
     }
   } else {
-    // Adjust browser cache on assets that don't change frequently and/or
-    // are given unique hashes when they do.
-    const asset = await getAssetFromKV(event)
+    try {
+      const asset = await getAssetFromKV(
+        {
+          request,
+          waitUntil: ctx.waitUntil.bind(ctx)
+        },
+        {
+          ASSET_NAMESPACE: env.__STATIC_CONTENT,
+          ASSET_MANIFEST: assetManifest
+        }
+      )
 
-    const response = new Response(asset.body, asset)
-    response.headers.set('cache-control', BROWSER_CACHE_TTL_SECONDS)
+      const response = new Response(asset.body, asset)
+      response.headers.set(
+        'cache-control',
+        `max-age=${BROWSER_CACHE_TTL_SECONDS}`
+      )
 
-    return response
+      return response
+    } catch (e) {
+      return new Response('Asset not found', { status: 404 })
+    }
   }
 }
 

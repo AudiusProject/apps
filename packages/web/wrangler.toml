@@ -1,7 +1,7 @@
-compatibility_date = "2023-10-25"
+compatibility_date = "2025-12-10"
+compatibility_flags = ["nodejs_compat"]
 account_id = "3811365464a8e56b2b27a5590e328e49"
 main = "./scripts/workers-site/index.js"
-node_compat = true
 
 [site]
 bucket = "./build"

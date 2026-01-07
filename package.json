@@ -100,6 +100,7 @@
     "standard": "17.0.0",
     "turbo": "2.5.3",
     "typescript": "5.0.4",
+    "unenv": "^2.0.0-rc.24",
     "vike": "^0.4.247",
     "wait-on": "7.2.0"
   },
@@ -135,7 +136,8 @@
   },
   "resolutions": {
     "@babel/core": "7.25.2",
-    "cipher-base": "1.0.7"
+    "cipher-base": "1.0.7",
+    "unenv": "2.0.0-rc.24"
   },
   "overrides": {
     "@types/prop-types": "15.7.5",
@@ -147,7 +149,8 @@
     "react-native-svg": "15.11.1",
     "redux": "4.1.1",
     "webpack": "5.88.2",
-    "elliptic": "6.6.1"
+    "elliptic": "6.6.1",
+    "unenv": "2.0.0-rc.24"
   },
   "packageManager": "npm@9.6.7"
 }
