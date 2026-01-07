@@ -1,7 +1,14 @@
-import { createRef, Fragment, useState, useRef, useEffect } from 'react'
+import {
+  createRef,
+  Fragment,
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback
+} from 'react'
 
 import { ResizeObserver } from '@juggle/resize-observer'
-import { useSpring, animated } from '@react-spring/web'
 import cn from 'classnames'
 import { mergeRefs } from 'react-merge-refs'
 import useMeasure from 'react-use-measure'
@@ -35,7 +42,7 @@ export const SegmentedControl = <T extends string>(
   const [localSelected, setLocalSelected] = useState(options[0]?.key ?? '')
   const [maxOptionWidth, setMaxOptionWidth] = useState(0)
 
-  const selectedOption = selected || localSelected
+  const selectedOption = selected ?? localSelected
 
   const onSetSelected = (option: T) => {
     // Call props function if controlled
@@ -43,13 +50,19 @@ export const SegmentedControl = <T extends string>(
     setLocalSelected(option)
   }
 
-  const [tabProps, tabApi] = useSpring(() => ({
-    to: { left: '0px', width: '0px' }
-  }))
+  // Background pill position - use state for direct control
+  const [pillStyle, setPillStyle] = useState<{
+    left: number
+    width: number
+    ready: boolean
+    shouldAnimate: boolean
+  }>({ left: 0, width: 0, ready: false, shouldAnimate: false })
 
   // Update refs when options change
   useEffect(() => {
-    optionRefs.current = options.map((_) => createRef<HTMLLabelElement>())
+    optionRefs.current = options.map(
+      (_, i) => optionRefs.current[i] ?? createRef<HTMLLabelElement>()
+    )
   }, [options])
 
   // Update localSelected if current selection is no longer valid
@@ -79,36 +92,62 @@ export const SegmentedControl = <T extends string>(
 
   const [forceRefresh, setForceRefresh] = useState(false)
   useEffect(() => {
-    setTimeout(() => {
-      setForceRefresh(!forceRefresh)
+    if (!forceRefreshAfterMs) return
+    const id = setTimeout(() => {
+      setForceRefresh((prev) => !prev)
     }, forceRefreshAfterMs)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    return () => {
+      clearTimeout(id)
+    }
+  }, [forceRefreshAfterMs])
 
-  useEffect(() => {
+  // Track the last selected option to determine when to animate
+  const lastSelectedOption = useRef<string | null>(null)
+
+  // Update pill position
+  const updatePillPosition = useCallback(() => {
     let selectedRefIdx = options.findIndex(
       (option) => option.key === selectedOption
     )
     if (selectedRefIdx === -1) selectedRefIdx = 0
 
-    const { clientWidth: width, offsetLeft: left } = optionRefs.current[
-      selectedRefIdx
-    ]?.current ?? { clientWidth: 0, offsetLeft: 0 }
+    const selectedEl = optionRefs.current[selectedRefIdx]?.current
+    if (!selectedEl) return
 
-    tabApi.start({
-      to: { left: `${left}px`, width: `${width}px` }
+    const width = selectedEl.clientWidth
+    const left = selectedEl.offsetLeft
+
+    // Don't position if we don't have valid measurements
+    if (width === 0) return
+
+    // Determine if we should animate (only when user changes selection)
+    const isUserSelection =
+      lastSelectedOption.current !== null &&
+      lastSelectedOption.current !== selectedOption
+
+    setPillStyle((prev) => {
+      // Skip if position hasn't changed
+      if (prev.left === left && prev.width === width && prev.ready) {
+        return prev
+      }
+      return { left, width, ready: true, shouldAnimate: isUserSelection }
     })
-  }, [
-    options,
-    equalWidth,
-    selectedOption,
-    selected,
-    tabApi,
-    localSelected,
-    optionRefs,
-    bounds,
-    forceRefresh
-  ])
+
+    lastSelectedOption.current = selectedOption
+  }, [selectedOption, options])
+
+  // Run on mount and when dependencies change
+  useLayoutEffect(() => {
+    updatePillPosition()
+  }, [updatePillPosition, equalWidth, bounds, forceRefresh])
+
+  // Also update after a short delay to handle any layout settling
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      updatePillPosition()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [updatePillPosition])
 
   return (
     <div
@@ -121,7 +160,17 @@ export const SegmentedControl = <T extends string>(
       aria-label={label}
       aria-labelledby={ariaLabelledBy}
     >
-      <animated.div className={styles.tabBackground} style={tabProps} />
+      <div
+        className={styles.tabBackground}
+        style={{
+          left: `${pillStyle.left}px`,
+          width: `${pillStyle.width}px`,
+          opacity: pillStyle.ready ? 1 : 0,
+          transition: pillStyle.shouldAnimate
+            ? 'left 0.3s cubic-bezier(0.34, 1.1, 0.64, 1), width 0.3s cubic-bezier(0.34, 1.1, 0.64, 1)'
+            : 'none'
+        }}
+      />
       {options.map((option, idx) => {
         const isOptionDisabled = disabled || option.disabled
         const isSelected = option.key === selectedOption

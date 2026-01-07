@@ -1,4 +1,8 @@
-import { SystemAppearance, Theme } from '@audius/common/models'
+import {
+  SystemAppearance,
+  Theme,
+  LEGACY_THEME_DEFAULT
+} from '@audius/common/models'
 import { useSelector } from 'react-redux'
 
 export const THEME_KEY = 'theme'
@@ -20,14 +24,20 @@ export const shouldShowDark = (theme?: Theme | null) => {
 }
 
 export const getTheme = (): Theme | null => {
-  const theme =
-    typeof window !== 'undefined'
-      ? window.localStorage.getItem(THEME_KEY) || Theme.DEFAULT
-      : null
-  if (theme && Object.values(Theme).includes(theme as Theme)) {
-    return theme as Theme
+  if (typeof window === 'undefined') return null
+
+  const storedTheme = window.localStorage.getItem(THEME_KEY)
+
+  // Handle legacy "default" value - treat as AUTO
+  if (storedTheme === LEGACY_THEME_DEFAULT) {
+    return Theme.AUTO
   }
-  return null
+
+  if (storedTheme && Object.values(Theme).includes(storedTheme as Theme)) {
+    return storedTheme as Theme
+  }
+
+  return Theme.AUTO
 }
 
 export const getSystemAppearance = () =>

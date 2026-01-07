@@ -63,7 +63,7 @@ const messages = {
   pageTitle: 'Settings',
   appearanceTitle: 'Appearance',
   appearance:
-    "Enable dark mode or choose 'Auto' to change with your system settings",
+    'Enable dark mode or use the default setting to match your system preferences.',
   aboutTitle: 'About',
   cast: 'Select your prefered casting method.',
   title: 'Settings',
@@ -127,10 +127,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
   const toggleTheme = (option: Theme) => {
     dispatch(
       make(Name.SETTINGS_CHANGE_THEME, {
-        mode:
-          option === Theme.DEFAULT
-            ? 'light'
-            : (option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto')
+        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
       })
     )
     dispatch(setTheme({ theme: option }))
@@ -156,7 +153,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
         text: 'Dark'
       },
       {
-        key: Theme.DEFAULT,
+        key: Theme.LIGHT,
         text: 'Light'
       }
     ]
@@ -170,7 +167,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
         isMobile
         fullWidth
         options={options}
-        selected={theme || Theme.DEFAULT}
+        selected={theme ?? Theme.AUTO}
         onSelectOption={(option) => toggleTheme(option)}
         key={`tab-slider-${options.length}`}
       />

@@ -151,22 +151,22 @@ export const darkTheme = createMobileThemeFromHarmony(themes.dark)
 export const matrixTheme = createMobileThemeFromHarmony(themes.matrix)
 
 export const themeColorsByThemeVariant = {
-  [Theme.DEFAULT]: defaultTheme,
+  [Theme.LIGHT]: defaultTheme,
   [Theme.DARK]: darkTheme,
   [Theme.MATRIX]: matrixTheme
 }
 
 export const selectSystemTheme = (state: CommonState) => {
   const systemAppearance = getSystemAppearance(state)
-  const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.DEFAULT
+  const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.LIGHT
   return themeColorsByThemeVariant[systemTheme]
 }
 
 export const useThemeVariant = (): keyof typeof themeColorsByThemeVariant => {
   const theme = useSelector(getTheme)
   const systemAppearance = useSelector(getSystemAppearance)
-  const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.DEFAULT
-  return theme === Theme.AUTO ? systemTheme : (theme ?? Theme.DEFAULT)
+  const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.LIGHT
+  return theme === Theme.AUTO ? systemTheme : (theme ?? systemTheme)
 }
 
 export const useThemeColors = () => {

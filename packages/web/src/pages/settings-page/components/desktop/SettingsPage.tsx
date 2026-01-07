@@ -293,10 +293,7 @@ export const SettingsPage = () => {
   const toggleTheme = (option: Theme) => {
     dispatch(
       make(Name.SETTINGS_CHANGE_THEME, {
-        mode:
-          option === Theme.DEFAULT
-            ? 'light'
-            : (option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto')
+        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
       })
     )
     dispatch(setTheme({ theme: option }))
@@ -315,7 +312,7 @@ export const SettingsPage = () => {
         text: settingsMessages.autoMode
       },
       {
-        key: Theme.DEFAULT,
+        key: Theme.LIGHT,
         text: settingsMessages.lightMode
       },
       {
@@ -353,7 +350,7 @@ export const SettingsPage = () => {
               fullWidth
               label={settingsMessages.appearanceTitle}
               options={appearanceOptions}
-              selected={theme || Theme.DEFAULT}
+              selected={theme ?? Theme.AUTO}
               onSelectOption={(option) => toggleTheme(option)}
               key={`tab-slider-${appearanceOptions.length}`}
             />

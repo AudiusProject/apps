@@ -28,7 +28,7 @@ export const settingsMessages = {
   desktopAppCardTitle: 'Download the Desktop App',
 
   appearanceDescription:
-    "Enable dark mode or choose 'Auto' to change with your system settings.",
+    'Enable dark mode or use the default setting to match your system preferences.',
   inboxSettingsCardDescription:
     'Configure who is able to send messages to your inbox.',
   commentSettingsCardDescription:
