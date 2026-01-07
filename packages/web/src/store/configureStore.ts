@@ -240,8 +240,9 @@ export const configureStore = ({
   )
   context.dispatch = store.dispatch
 
-  if (typeof window !== 'undefined' && sagaMiddleware) {
-    sagaMiddleware.run(isTest ? testRootSaga : rootSaga)
+  // Don't run sagas in tests - we just need the store
+  if (typeof window !== 'undefined' && sagaMiddleware && !isTest) {
+    sagaMiddleware.run(rootSaga)
   }
 
   const persistor = persistStore(store)
