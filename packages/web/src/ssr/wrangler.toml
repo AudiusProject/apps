@@ -1,13 +1,16 @@
-compatibility_date = "2023-10-25"
+compatibility_date = "2025-12-10"
+compatibility_flags = ["nodejs_compat"]
 account_id = "3811365464a8e56b2b27a5590e328e49"
 main = "./worker.js"
-node_compat = true
 
 [site]
 bucket = "../../build-ssr/client"
 
 [env.release]
 name = "audius-web-ssr-release-candidate"
+vars = { VITE_ENVIRONMENT = "production", DISCOVERY_NODE_ALLOWLIST = [
+    "https://api.audius.co"
+] }
 
 [env.production]
 name = "audius-web-ssr"

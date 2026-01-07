@@ -6,8 +6,8 @@
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "start": "tsc --build --verbose --watch tsconfig.all.json",
-    "build": "tsc --build --verbose tsconfig.all.json",
+    "start": "npx tsc --build --verbose --watch tsconfig.all.json",
+    "build": "npx tsc --build --verbose tsconfig.all.json",
     "test": "vitest run",
     "test:watch": "vitest"
   },
