@@ -21,10 +21,10 @@ export default {
   async fetch(request, env, ctx) {
     const sentry = env.SENTRY_DSN
       ? new Toucan({
-        dsn: env.SENTRY_DSN,
-        context: ctx,
-        request
-      })
+          dsn: env.SENTRY_DSN,
+          context: ctx,
+          request
+        })
       : null
 
     try {
