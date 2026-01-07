@@ -99,9 +99,9 @@ jobs:
             packages/sdk/dist
           retention-days: 1
 
-  # Lint job
+  # Lint & Stylelint job
   web-lint:
-    name: Web Lint
+    name: Web Lint & Stylelint
     runs-on: ubuntu-latest
     needs: web-init
     steps:
@@ -112,6 +112,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Download workspace artifacts
         uses: actions/download-artifact@v4
@@ -120,9 +143,10 @@ jobs:
           path: .
 
       - name: Lint
-        run: |
-          cd packages/web
-          npm run lint
+        run: npx turbo run lint --filter=@audius/web
+
+      - name: Stylelint
+        run: npm run stylelint -w @audius/web
 
   # Typecheck job
   web-typecheck:
@@ -137,6 +161,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Download workspace artifacts
         uses: actions/download-artifact@v4
@@ -145,40 +192,13 @@ jobs:
           path: .
 
       - name: Typecheck
-        run: |
-          cd packages/web
-          npm run typecheck
-
-  # Stylelint job
-  web-stylelint:
-    name: Web Stylelint
-    runs-on: ubuntu-latest
-    needs: web-init
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
-
-      - name: Stylelint
-        run: |
-          cd packages/web
-          npm run stylelint
+        run: npx turbo run typecheck --filter=@audius/web
 
   # Build production bundle
   web-build-production:
     name: Build Production
     runs-on: ubuntu-latest
-    needs: [web-init, web-lint, web-typecheck, web-stylelint]
+    needs: [web-init, web-lint, web-typecheck]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
@@ -215,7 +235,7 @@ jobs:
   web-build-ssr-production:
     name: Build SSR Production
     runs-on: ubuntu-latest
-    needs: [web-init, web-lint, web-typecheck, web-stylelint]
+    needs: [web-init, web-lint, web-typecheck]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
@@ -553,6 +573,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Download workspace artifacts
         uses: actions/download-artifact@v4
