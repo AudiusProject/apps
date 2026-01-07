@@ -68,7 +68,7 @@ export default defineConfig(async ({ mode }) => {
       'process.env': env
     },
     optimizeDeps: {
-      include: ['react', 'react-dom'],
+      include: ['react', 'react-dom', '@audius/sdk'],
       dedupe: ['react', 'react-dom'],
       esbuildOptions: {
         define: {
@@ -222,14 +222,20 @@ export default defineConfig(async ({ mode }) => {
       deps: {
         optimizer: {
           web: {
-            include: ['./src/test/vitest-canvas-mock']
+            include: ['./src/test/vitest-canvas-mock', '@audius/sdk'],
+            exclude: ['redux-saga']
           }
         }
       },
       exclude: ['e2e', 'node_modules', 'dist'],
       threads: false,
       minWorkers: 1,
-      maxWorkers: 1 // Segfaults if multithreaded
+      maxWorkers: 1, // Segfaults if multithreaded
+      server: {
+        deps: {
+          inline: []
+        }
+      }
     }
   }
 })
