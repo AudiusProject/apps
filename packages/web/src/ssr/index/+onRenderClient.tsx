@@ -2,7 +2,6 @@
 // simply render the SPA without SSR
 // TODO: Use vike SPA setting
 
-// Polyfills MUST be imported first - before any other imports
 import '../polyfills'
 
 import 'setimmediate'
