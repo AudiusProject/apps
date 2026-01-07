@@ -83,21 +83,6 @@ jobs:
             npm ci --prefer-offline
           fi
 
-      - name: Upload workspace artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-modules
-          path: |
-            node_modules
-            packages/web/node_modules
-            packages/harmony/node_modules
-            packages/harmony/dist
-            packages/common/node_modules
-            packages/libs/node_modules
-            packages/libs/dist
-            packages/sdk/node_modules
-            packages/sdk/dist
-          retention-days: 1
 
   # Lint & Stylelint job
   web-lint:
@@ -136,11 +121,17 @@ jobs:
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
 
       - name: Lint
         run: npx turbo run lint --filter=@audius/web
@@ -171,6 +162,7 @@ jobs:
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
+        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: |
@@ -185,11 +177,17 @@ jobs:
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
 
       - name: Typecheck
         run: npx turbo run typecheck --filter=@audius/web
@@ -211,11 +209,39 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
         with:
-          name: node-modules
-          path: .
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
 
       - name: Build production
         timeout-minutes: 30
@@ -248,11 +274,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
 
       - name: Build SSR production
         timeout-minutes: 30
@@ -286,11 +307,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
@@ -320,11 +336,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -449,11 +460,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -527,11 +533,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -583,6 +584,7 @@ jobs:
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
+        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: |
@@ -597,11 +599,17 @@ jobs:
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Download workspace artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: .
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
 
       - name: Run tests
         timeout-minutes: 30
