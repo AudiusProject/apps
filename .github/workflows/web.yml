@@ -621,7 +621,7 @@ jobs:
         with:
           name: test-results
           path: packages/web/report.xml
-          retention-days: 7
+          retention-days: 1
 
       - name: Upload test output
         uses: actions/upload-artifact@v4
@@ -629,5 +629,5 @@ jobs:
         with:
           name: test-output
           path: packages/web/test-output
-          retention-days: 7
+          retention-days: 1
 
