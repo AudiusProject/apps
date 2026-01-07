@@ -9,8 +9,11 @@ const AMPLITUDE_PROXY = env.AMPLITUDE_PROXY
 const isAmplitudeConfigured = !!AMP_API_KEY && !!AMPLITUDE_PROXY
 
 // Lazy-loaded Amplitude SDK
-let amplitudeInstance: typeof import('@amplitude/analytics-browser') | null = null
-let sessionReplayPluginInstance: typeof import('@amplitude/plugin-session-replay-browser') | null = null
+let amplitudeInstance: typeof import('@amplitude/analytics-browser') | null =
+  null
+let sessionReplayPluginInstance:
+  | typeof import('@amplitude/plugin-session-replay-browser')
+  | null = null
 let amplitudeInitPromise: Promise<void> | null = null
 let isInitialized = false
 
@@ -21,7 +24,7 @@ const getAmplitude = async () => {
   if (amplitudeInstance) {
     return amplitudeInstance
   }
-  
+
   amplitudeInstance = await import('@amplitude/analytics-browser')
   return amplitudeInstance
 }
@@ -33,8 +36,10 @@ const getSessionReplayPlugin = async () => {
   if (sessionReplayPluginInstance) {
     return sessionReplayPluginInstance
   }
-  
-  sessionReplayPluginInstance = await import('@amplitude/plugin-session-replay-browser')
+
+  sessionReplayPluginInstance = await import(
+    '@amplitude/plugin-session-replay-browser'
+  )
   return sessionReplayPluginInstance
 }
 
@@ -47,11 +52,11 @@ export const init = async (isMobile: boolean) => {
   if (amplitudeInitPromise) {
     return amplitudeInitPromise
   }
-  
+
   if (isInitialized) {
     return
   }
-  
+
   amplitudeInitPromise = (async () => {
     try {
       if (isAmplitudeConfigured) {
@@ -60,20 +65,20 @@ export const init = async (isMobile: boolean) => {
           getAmplitude(),
           getSessionReplayPlugin()
         ])
-        
+
         amplitude.init(AMP_API_KEY, {
           serverUrl: AMPLITUDE_PROXY,
           defaultTracking: {
             sessions: true
           }
         })
-        
+
         const sessionReplayTracking = sessionReplayPlugin.sessionReplayPlugin()
         amplitude.add(sessionReplayTracking)
 
         const source = getSource(isMobile)
         amplitude.track(Name.SESSION_START, { source })
-        
+
         isInitialized = true
       }
     } catch (err) {
@@ -82,12 +87,15 @@ export const init = async (isMobile: boolean) => {
       throw err
     }
   })()
-  
+
   return amplitudeInitPromise
 }
 
 // Identify User
-export const identify = async (traits?: IdentifyTraits, callback?: () => void) => {
+export const identify = async (
+  traits?: IdentifyTraits,
+  callback?: () => void
+) => {
   if (!isAmplitudeConfigured) {
     if (callback) callback()
     return
@@ -95,7 +103,7 @@ export const identify = async (traits?: IdentifyTraits, callback?: () => void) =
 
   try {
     const amplitude = await getAmplitude()
-    
+
     if (traits?.handle) {
       amplitude.setUserId(traits.handle)
     }
@@ -121,7 +129,7 @@ export const track = async (
     if (callback) callback()
     return
   }
-  
+
   try {
     const amplitude = await getAmplitude()
     amplitude.track(event, properties)

@@ -37,13 +37,15 @@ export const initializeSentry = async () => {
   sentryInitPromise = (async () => {
     try {
       await remoteConfigInstance.waitForRemoteConfig()
-      
+
       // Lazy load Sentry SDK
       const Sentry = await import('@sentry/browser')
-      
+
       Sentry.init({
         dsn: env.SENTRY_DSN,
-        transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
+        transport: Sentry.makeBrowserOfflineTransport(
+          Sentry.makeFetchTransport
+        ),
         ignoreErrors:
           process.env.VITE_SENTRY_DISABLED === 'true' ? [/.*/] : undefined,
 
@@ -91,7 +93,7 @@ export const initializeSentry = async () => {
 
       Sentry.setTag('commit_sha', process.env.VITE_CURRENT_GIT_SHA)
       Sentry.setTag('platform', 'web')
-      
+
       sentryInitialized = true
     } catch (err) {
       console.error('Failed to initialize Sentry:', err)

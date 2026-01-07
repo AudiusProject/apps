@@ -7,15 +7,6 @@ import createSagaMiddleware from 'redux-saga'
 import thunk from 'redux-thunk'
 import { PartialDeep } from 'type-fest'
 
-// Lazy load Amplitude track function
-const amplitudeTrack = async (event: string, properties?: Record<string, any>) => {
-  try {
-    const { track } = await import('services/analytics/amplitude')
-    await track(event, properties)
-  } catch (err) {
-    console.error('Failed to track event in Amplitude:', err)
-  }
-}
 import { audiusSdk } from 'services/audius-sdk'
 import { queryClient } from 'services/query-client'
 import * as errorActions from 'store/errors/actions'
@@ -26,6 +17,19 @@ import rootSaga, { testRootSaga } from 'store/sagas'
 import { navigationMiddleware } from './navigationMiddleware'
 import { buildStoreContext } from './storeContext'
 import { AppState } from './types'
+
+// Lazy load Amplitude track function
+const amplitudeTrack = async (
+  event: string,
+  properties?: Record<string, any>
+) => {
+  try {
+    const { track } = await import('services/analytics/amplitude')
+    await track(event, properties)
+  } catch (err) {
+    console.error('Failed to track event in Amplitude:', err)
+  }
+}
 
 declare global {
   interface Window {
@@ -90,13 +94,17 @@ const actionSanitizer = (action: Action) => ({ type: action.type })
 
 // Lazy-load Sentry middleware wrapper
 // This creates a middleware that lazy-loads the actual Sentry SDK and middleware
-let sentryMiddlewareFactory: ((store: any) => (next: any) => (action: Action) => any) | null = null
-let sentryMiddlewarePromise: Promise<typeof sentryMiddlewareFactory> | null = null
+type SentryMiddlewareFactory = (
+  store: any
+) => (next: any) => (action: Action) => any
+let sentryMiddlewareFactory: SentryMiddlewareFactory | null = null
+let sentryMiddlewarePromise: Promise<SentryMiddlewareFactory | null> | null =
+  null
 
 const createLazySentryMiddleware = () => {
   return (store: any) => {
     let sentryNext: ((action: Action) => any) | null = null
-    
+
     return (next: any) => (action: Action) => {
       // Lazy load Sentry middleware on first action
       if (!sentryMiddlewareFactory && !sentryMiddlewarePromise) {
@@ -106,15 +114,18 @@ const createLazySentryMiddleware = () => {
               import('@sentry/browser'),
               import('redux-sentry-middleware')
             ])
-            
+
             const middleware = createSentryMiddleware.default(
-              { configureScope: Sentry.configureScope, addBreadcrumb: Sentry.addBreadcrumb } as any,
+              {
+                configureScope: Sentry.configureScope,
+                addBreadcrumb: Sentry.addBreadcrumb
+              } as any,
               {
                 actionTransformer: actionSanitizer,
                 stateTransformer: statePruner
               }
             )
-            
+
             sentryMiddlewareFactory = middleware
             return sentryMiddlewareFactory
           } catch (err) {
@@ -124,7 +135,7 @@ const createLazySentryMiddleware = () => {
           }
         })()
       }
-      
+
       // If middleware is already loaded, use it
       if (sentryMiddlewareFactory) {
         if (!sentryNext) {
@@ -132,19 +143,23 @@ const createLazySentryMiddleware = () => {
         }
         return sentryNext(action)
       }
-      
+
       // If still loading, pass through the action for now
       if (sentryMiddlewarePromise) {
-        sentryMiddlewarePromise.then((factory) => {
-          if (factory) {
-            sentryNext = factory(store)(next)
-            sentryNext(action)
-          }
-        }).catch(() => {
-          // Silently fail - just pass through
-        })
+        sentryMiddlewarePromise
+          .then((factory) => {
+            if (factory) {
+              sentryNext = factory(store)(next)
+              if (sentryNext) {
+                sentryNext(action)
+              }
+            }
+          })
+          .catch(() => {
+            // Silently fail - just pass through
+          })
       }
-      
+
       return next(action)
     }
   }

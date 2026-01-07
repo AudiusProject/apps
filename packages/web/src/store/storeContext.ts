@@ -65,10 +65,14 @@ export const buildStoreContext = ({
         const Sentry = await import('@sentry/browser')
         return Sentry.setTag(...args)
       },
-      getCurrentScope: async () => {
-        const Sentry = await import('@sentry/browser')
-        return Sentry.getCurrentScope()
-      }
+      getCurrentScope: () => ({
+        setUser: (user: any) => {
+          // Lazy load Sentry and set user asynchronously
+          import('@sentry/browser').then((Sentry) => {
+            Sentry.getCurrentScope().setUser(user)
+          })
+        }
+      })
     },
     reportToSentry,
     trackDownload,

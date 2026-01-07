@@ -41,7 +41,7 @@ export const reportToSentry = async ({
     // Lazy load Sentry SDK
     const Sentry = await import('@sentry/browser')
     const { withScope, captureException } = Sentry
-    
+
     withScope(async (scope) => {
       if (level) {
         const sentryLevel = Levels[level]
