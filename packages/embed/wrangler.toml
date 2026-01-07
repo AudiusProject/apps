@@ -10,9 +10,7 @@ entry-point = "workers-site"
 [env.test]
 name = "test"
 route = "test.audius.co/*"
-vars = { GA = "https://general-admission.audius.co" }
 
 [env.production]
 name = "embed"
 route = "embed.audius.co/*"
-vars = { GA = "https://general-admission.audius.co" }

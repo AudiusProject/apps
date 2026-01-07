@@ -40,7 +40,6 @@ export const env: Env = {
   FINGERPRINT_PUBLIC_API_KEY: 'MNtDQ4NCsNSP7YOkOiQT',
   GA_HOSTNAME: 'audius.co',
   GA_MEASUREMENT_ID: 'UA-120325397-2',
-  GENERAL_ADMISSION: 'https://general-admission.audius.co',
   HCAPTCHA_BASE_URL: 'https://audius.co',
   HCAPTCHA_SITE_KEY: 'b250803e-dcba-428c-bc87-8acf559aacb9',
   IDENTITY_SERVICE: 'https://identityservice.audius.co',

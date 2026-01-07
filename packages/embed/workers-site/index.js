@@ -20,16 +20,6 @@ addEventListener('fetch', (event) => {
 })
 
 async function handleEvent(event) {
-  const url = new URL(event.request.url)
-  const { pathname, search, hash } = url
-  
-  if (pathname.startsWith('/embed/api')) {
-    const destinationURL = GA + pathname + search + hash
-    const newRequest = new Request(destinationURL, event.request)
-
-    return await fetch(newRequest)
-  }
-  
   const options = {}
   // Always map requests to `/` since this is an SPA
   options.mapRequestToAsset = (request) => {

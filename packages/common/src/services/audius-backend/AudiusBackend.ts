@@ -21,13 +21,7 @@ import { userMetadataToSdk } from '~/adapters/user'
 import { Env } from '~/services/env'
 import dayjs from '~/utils/dayjs'
 
-import {
-  ID,
-  InstagramUser,
-  TikTokUser,
-  ComputedUserProperties,
-  WriteableUserMetadata
-} from '../../models'
+import { ID, ComputedUserProperties, WriteableUserMetadata } from '../../models'
 import { AnalyticsEvent } from '../../models/Analytics'
 import { ReportToSentryArgs } from '../../models/ErrorReporting'
 import * as schemas from '../../schemas'
@@ -120,7 +114,6 @@ type AudiusBackendParams = {
   ) => Promise<boolean | null> | null | boolean
   getHostUrl: () => Nullable<string>
   identityServiceUrl: Maybe<string>
-  generalAdmissionUrl: Maybe<string>
   isElectron: Maybe<boolean>
   localStorage?: LocalStorage
   nativeMobile: Maybe<boolean>
@@ -141,7 +134,6 @@ type AudiusBackendParams = {
 
 export const audiusBackend = ({
   identityServiceUrl,
-  generalAdmissionUrl,
   nativeMobile,
   reportError,
   env
@@ -216,28 +208,12 @@ export const audiusBackend = ({
     }
   }
 
-  async function instagramHandle(handle: string) {
-    try {
-      const res = await fetch(
-        `${generalAdmissionUrl}/social/instagram/${handle}`
-      )
-      const json: InstagramUser = await res.json()
-      return json
-    } catch (error) {
-      console.error(error)
-      return null
-    }
+  async function instagramHandle(_: string) {
+    return null
   }
 
-  async function tiktokHandle(handle: string) {
-    try {
-      const res = await fetch(`${generalAdmissionUrl}/social/tiktok/${handle}`)
-      const json: TikTokUser = await res.json()
-      return json
-    } catch (error) {
-      console.error(error)
-      return null
-    }
+  async function tiktokHandle(_: string) {
+    return null
   }
 
   async function clearNotificationBadges({ sdk }: { sdk: AudiusSdk }) {
