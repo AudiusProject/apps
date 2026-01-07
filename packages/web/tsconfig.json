@@ -20,7 +20,7 @@
     "downlevelIteration": true,
     "noFallthroughCasesInSwitch": true,
     "suppressImplicitAnyIndexErrors": true,
-    "ignoreDeprecations": ["5.0", "TS5102"],
+    "ignoreDeprecations": "5.0",
     "types": ["vite/client"],
     "paths": {
       "@audius/common/adapters": ["../../common/src/adapters/index.ts"],
