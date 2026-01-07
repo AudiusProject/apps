@@ -61,14 +61,20 @@ jobs:
             packages/common/node_modules
             packages/libs/node_modules
             packages/sdk/node_modules
-          key: npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies
         env:
           CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          mkdir -p /tmp/android-sdk-dummy
           if [[ -d node_modules ]]; then
             echo "Using cached node_modules, running postinstall..."
             npm run postinstall
