@@ -18,7 +18,8 @@ const doesPreferDarkMode = () => {
 
 export const shouldShowDark = (theme?: Theme | null) => {
   return (
-    !!theme && (theme === Theme.DARK || (theme === Theme.AUTO && doesPreferDarkMode()))
+    !!theme &&
+    (theme === Theme.DARK || (theme === Theme.AUTO && doesPreferDarkMode()))
   )
 }
 
