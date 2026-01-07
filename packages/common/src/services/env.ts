@@ -38,7 +38,6 @@ export type Env = {
   FINGERPRINT_PUBLIC_API_KEY: Nullable<string>
   GA_HOSTNAME: string
   GA_MEASUREMENT_ID: string
-  GENERAL_ADMISSION: string
   HCAPTCHA_BASE_URL: string
   HCAPTCHA_SITE_KEY: string
   IDENTITY_SERVICE: string

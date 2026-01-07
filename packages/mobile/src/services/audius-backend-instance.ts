@@ -24,7 +24,6 @@ export const audiusBackendInstance = audiusBackend({
     return `${env.PUBLIC_PROTOCOL}//${env.PUBLIC_HOSTNAME}`
   },
   identityServiceUrl: env.IDENTITY_SERVICE,
-  generalAdmissionUrl: env.GENERAL_ADMISSION,
   isElectron: false,
   localStorage: AsyncStorage,
   nativeMobile: true,

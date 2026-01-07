@@ -11,14 +11,14 @@ name = "audius-release-candidate"
 services = [
   { binding = "SSR", service = "audius-web-ssr-release-candidate" }
 ]
-vars = { ENVIRONMENT = "production", GA = "https://general-admission.audius.co", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
+vars = { ENVIRONMENT = "production", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
 
 [env.production]
 name = "audius"
 services = [
   { binding = "SSR", service = "audius-web-ssr" }
 ]
-vars = { ENVIRONMENT = "production", GA = "https://general-admission.audius.co", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
+vars = { ENVIRONMENT = "production", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
 
 # Test environment, replace `test` with subdomain
 # Invoke with npx wrangler dev --env test
@@ -27,4 +27,4 @@ name = "test"
 services = [
   { binding = "SSR", service = "audius-web-ssr-test" }
 ]
-vars = { ENVIRONMENT = "production", GA = "https://general-admission.audius.co", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
+vars = { ENVIRONMENT = "production", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }

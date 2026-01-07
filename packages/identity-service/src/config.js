@@ -731,12 +731,6 @@ const config = convict({
     default: '',
     env: 'aaoAddress'
   },
-  generalAdmissionAddress: {
-    doc: 'General admission server address',
-    format: String,
-    default: '',
-    env: 'generalAdmissionAddress'
-  },
   sentryDSN: {
     doc: 'Sentry DSN key',
     format: String,
