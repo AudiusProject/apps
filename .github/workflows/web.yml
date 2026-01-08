@@ -255,13 +255,6 @@ jobs:
           mkdir -p /tmp/android-sdk-dummy
           npm run postinstall
 
-      - name: Build harmony CSS
-        run: |
-          cd packages/harmony
-          npm run build:css
-          ls -la dist/ || echo "dist directory not found"
-          test -f dist/harmony.css && echo "harmony.css exists" || echo "harmony.css NOT FOUND"
-
       - name: Build production
         timeout-minutes: 30
         run: |
@@ -338,13 +331,6 @@ jobs:
         run: |
           mkdir -p /tmp/android-sdk-dummy
           npm run postinstall
-
-      - name: Build harmony CSS
-        run: |
-          cd packages/harmony
-          npm run build:css
-          ls -la dist/ || echo "dist directory not found"
-          test -f dist/harmony.css && echo "harmony.css exists" || echo "harmony.css NOT FOUND"
 
       - name: Build SSR production
         timeout-minutes: 30
