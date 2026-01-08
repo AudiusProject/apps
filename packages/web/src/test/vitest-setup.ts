@@ -64,54 +64,15 @@ vi.mock('@reown/appkit/react', () => {
     useAppKitState: vi.fn().mockReturnValue({
       open: false
     }),
-    useAppKitAccount: vi.fn().mockReturnValue({
-      address: null,
-      isConnected: false
-    }),
     useDisconnect: vi.fn().mockReturnValue({
       disconnect: vi.fn()
     })
   }
 })
 
-vi.mock('@reown/appkit/networks', () => {
-  return {
-    mainnet: { id: 1, name: 'Ethereum' },
-    solana: { id: 1111111111111, name: 'Solana' },
-    ethereum: { id: 1, name: 'Ethereum' },
-    polygon: { id: 137, name: 'Polygon' }
-  }
-})
-
-vi.mock('@reown/appkit', () => {
-  return {}
-})
-
-vi.mock('@reown/appkit-common', () => {
-  return {}
-})
-
-vi.mock('@reown/appkit-wallet-button/react', () => {
-  return {
-    useAppKitWallet: vi.fn().mockReturnValue({
-      wallet: null
-    })
-  }
-})
-
 vi.mock('@reown/appkit-adapter-wagmi', () => {
   return {
-    WagmiAdapter: vi.fn().mockImplementation(() => ({
-      // Mock adapter object - just return an empty object
-    }))
-  }
-})
-
-vi.mock('@reown/appkit-adapter-solana/react', () => {
-  return {
-    SolanaAdapter: vi.fn().mockImplementation(() => ({
-      // Mock adapter object - just return an empty object
-    }))
+    WagmiAdapter: vi.fn()
   }
 })
 

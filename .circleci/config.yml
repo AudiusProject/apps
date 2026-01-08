@@ -218,32 +218,32 @@ workflows:
             .circleci/.* run-eth-contracts-workflow true
             .circleci/.* run-protocol-dashboard-workflow true
             .circleci/.* run-sdk-workflow true
-            .circleci/.* run-web-workflow false
+            .circleci/.* run-web-workflow true
             .circleci/.* run-mobile-workflow true
             .circleci/.* run-embed-workflow true
             package-lock.json run-sdk-workflow true
             .* run-integration-workflow true
             .* run-release-workflow false
             packages/discovery-provider/.* run-discovery-workflow true
-            packages/web/.* run-web-workflow false
+            packages/web/.* run-web-workflow true
             packages/web/e2e/.* run-integration-workflow true
             packages/mobile/.* run-mobile-workflow true
             packages/embed/.* run-embed-workflow true
             packages/common/.* run-common-workflow true
-            packages/common/.* run-web-workflow false
+            packages/common/.* run-web-workflow true
             packages/common/.* run-mobile-workflow true
             packages/common/.* run-protocol-dashboard-workflow true
             packages/protocol-dashboard/.* run-protocol-dashboard-workflow true
-            packages/harmony/.* run-web-workflow false
+            packages/harmony/.* run-web-workflow true
             packages/harmony/.* run-protocol-dashboard-workflow true
             packages/harmony/.* run-embed-workflow true
-            packages/eslint-config-audius/.* run-web-workflow false
+            packages/eslint-config-audius/.* run-web-workflow true
             packages/eslint-config-audius/.* run-mobile-workflow true
             packages/sdk/.* run-sdk-workflow true
             packages/sdk/.* run-create-audius-app-workflow true
             packages/create-audius-app/.* run-create-audius-app-workflow true
             packages/fixed-decimal/.* run-sdk-workflow true
-            packages/fixed-decimal/.* run-web-workflow false
+            packages/fixed-decimal/.* run-web-workflow true
             packages/fixed-decimal/.* run-mobile-workflow true
             packages/fixed-decimal/.* run-common-workflow true
             packages/spl/.* run-sdk-workflow true
@@ -269,33 +269,33 @@ workflows:
             .circleci/.* run-eth-contracts-workflow true
             .circleci/.* run-protocol-dashboard-workflow true
             .circleci/.* run-sdk-workflow true
-            .circleci/.* run-web-workflow false
+            .circleci/.* run-web-workflow true
             .circleci/.* run-mobile-workflow true
             .circleci/.* run-embed-workflow true
             package-lock.json run-sdk-workflow true
             .* run-integration-workflow true
             .* run-release-workflow false
             packages/discovery-provider/.* run-discovery-workflow true
-            packages/web/.* run-web-workflow false
+            packages/web/.* run-web-workflow true
             packages/mobile/.* run-mobile-workflow true
             packages/embed/.* run-embed-workflow true
             packages/common/.* run-common-workflow true
-            packages/common/.* run-web-workflow false
+            packages/common/.* run-web-workflow true
             packages/common/.* run-mobile-workflow true
             packages/protocol-dashboard/.* run-protocol-dashboard-workflow true
-            packages/harmony/.* run-web-workflow false
-            packages/eslint-config-audius/.* run-web-workflow false
+            packages/harmony/.* run-web-workflow true
+            packages/eslint-config-audius/.* run-web-workflow true
             packages/eslint-config-audius/.* run-mobile-workflow true
             packages/sdk/.* run-sdk-workflow true
             packages/sdk/.* run-create-audius-app-workflow true
             packages/create-audius-app/.* run-create-audius-app-workflow true
             packages/fixed-decimal/.* run-sdk-workflow true
-            packages/fixed-decimal/.* run-web-workflow false
+            packages/fixed-decimal/.* run-web-workflow true
             packages/fixed-decimal/.* run-mobile-workflow true
             packages/fixed-decimal/.* run-common-workflow true
             packages/spl/.* run-sdk-workflow true
             packages/spl/.* run-identity-workflow true
-            .* run-web-workflow false
+            .* run-web-workflow true
             .* run-mobile-workflow true
           requires:
             - generate-config

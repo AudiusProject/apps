@@ -1,7 +1,3 @@
-# NOTE: Web CI/CD has been migrated to GitHub Actions (.github/workflows/web.yml)
-# This workflow is disabled via path filtering in config.yml
-# Desktop distribution jobs (mac/win/linux) are not yet migrated and will need
-# to be added to GitHub Actions or re-enabled here if needed.
 when: << pipeline.parameters.run-web-workflow >>
 jobs:
   - web-init:

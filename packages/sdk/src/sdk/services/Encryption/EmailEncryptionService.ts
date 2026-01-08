@@ -1,7 +1,7 @@
 import { base64 } from '@scure/base'
 
 import type { Configuration } from '../..'
-import { BaseAPI } from '../../api/generated/default'
+import { BaseAPI } from '../..'
 import { CryptoUtils } from '../../utils/crypto'
 import type { AudiusWalletClient } from '../AudiusWalletClient'
 
