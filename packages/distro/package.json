@@ -8,7 +8,7 @@
     "start:dev": "env-cmd -f .env.dev turbo run start --filter=@audius/distro",
     "start:stage": "env-cmd -f .env.stage turbo run start --filter=@audius/distro",
     "start:prod": "env-cmd -f .env.prod turbo run start --filter=@audius/distro",
-    "build": "npx tsc && vite build",
+    "build": "tsc && vite build",
     "build:dev": "env-cmd -f .env.dev turbo run build --filter=@audius/distro",
     "build:stage": "env-cmd -f .env.stage turbo run build --filter=@audius/distro",
     "build:prod": "env-cmd -f .env.prod turbo run build --filter=@audius/distro",

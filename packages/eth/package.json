@@ -6,8 +6,8 @@
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "start": "npx tsc --build --verbose --watch tsconfig.all.json",
-    "build": "npx tsc --build --verbose tsconfig.all.json",
+    "start": "tsc --build --verbose --watch tsconfig.all.json",
+    "build": "tsc --build --verbose tsconfig.all.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

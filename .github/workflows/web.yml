@@ -378,8 +378,8 @@ jobs:
         run: |
           cd packages/web
           echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env release
-          npx wrangler publish --config ./src/ssr/wrangler.toml --env release
-          npx wrangler publish --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --env release
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -502,8 +502,8 @@ jobs:
         run: |
           cd packages/web
           echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env production
-          npx wrangler publish --config ./src/ssr/wrangler.toml --env production
-          npx wrangler publish --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --env production
 
       - name: Slack notification
         if: success()
