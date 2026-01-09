@@ -197,7 +197,7 @@ jobs:
     name: Build Production
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -274,7 +274,7 @@ jobs:
     name: Build SSR Production
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -352,7 +352,7 @@ jobs:
     name: Check SSR Bundle Size
     runs-on: ubuntu-latest
     needs: web-build-ssr-production
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -426,7 +426,7 @@ jobs:
     name: Deploy Release Candidate
     runs-on: ubuntu-latest
     needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     environment:
       name: release
     steps:
@@ -454,11 +454,11 @@ jobs:
         run: |
           cd packages/web
           mkdir -p sourcemaps/assets
-          mv build-production/assets/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/server/chunks/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/server/entries/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-production/assets/*.map sourcemaps/assets
+          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets
+          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets
+          mv build-ssr-production/server/chunks/*.map sourcemaps/assets
+          mv build-ssr-production/server/entries/*.map sourcemaps/assets
 
       - name: Move build
         run: |
@@ -578,11 +578,11 @@ jobs:
         run: |
           cd packages/web
           mkdir -p sourcemaps/assets
-          mv build-production/assets/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/server/chunks/*.map sourcemaps/assets 2>/dev/null || true
-          mv build-ssr-production/server/entries/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-production/assets/*.map sourcemaps/assets
+          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets
+          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets
+          mv build-ssr-production/server/chunks/*.map sourcemaps/assets
+          mv build-ssr-production/server/entries/*.map sourcemaps/assets
 
       - name: Move build
         run: |
