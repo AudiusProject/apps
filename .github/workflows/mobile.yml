@@ -64,6 +64,7 @@ jobs:
             packages/sdk/node_modules
             packages/sdk/dist
             packages/harmony/node_modules
+            packages/dotenv-linter/bin
           key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
@@ -82,6 +83,11 @@ jobs:
           if [[ -d node_modules ]]; then
             echo "Using cached node_modules, running postinstall..."
             npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
           else
             echo "No cache found, running fresh install..."
             npm ci --prefer-offline
