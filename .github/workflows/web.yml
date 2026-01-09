@@ -274,7 +274,7 @@ jobs:
     name: Build SSR Production
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -352,7 +352,7 @@ jobs:
     name: Check SSR Bundle Size
     runs-on: ubuntu-latest
     needs: web-build-ssr-production
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -416,15 +416,6 @@ jobs:
           name: build-ssr-production
           path: .
 
-      - name: Verify build artifacts exist
-        run: |
-          cd packages/web
-          echo "Checking for build-ssr-production directory..."
-          ls -la build-ssr-production/ || echo "build-ssr-production directory not found"
-          echo "Checking for server chunks..."
-          ls -la build-ssr-production/server/chunks/ 2>/dev/null || echo "server/chunks directory not found"
-          find build-ssr-production -name "chunk-*.js" -type f | head -5 || echo "No chunk-*.js files found"
-
       - name: Check bundlesize
         run: |
           cd packages/web
@@ -435,7 +426,7 @@ jobs:
     name: Deploy Release Candidate
     runs-on: ubuntu-latest
     needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     environment:
       name: release
     steps:
