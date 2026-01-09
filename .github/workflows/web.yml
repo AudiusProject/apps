@@ -64,7 +64,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies
         env:
@@ -119,7 +118,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -175,7 +173,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -229,7 +226,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -306,7 +302,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -384,7 +379,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -710,7 +704,6 @@ jobs:
           key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies (if cache miss)
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
