@@ -136,6 +136,40 @@ mobile-build-upload-production-android-if-full-release:
         track: 'alpha'
         slack-notify: false
 
+mobile-build-upload-production-ios-main:
+  working_directory: ~/apps
+  # run on macos so app can be created and signed.
+  resource_class: macos.m1.medium.gen1
+  macos:
+    xcode: '16.2.0'
+  environment:
+    FL_OUTPUT_DIR: output
+  shell: /bin/bash --login -o pipefail
+  steps:
+    - mobile-prepare-ios:
+        build-directory: 'build-mobile-production'
+        bundle-id: 'co.audius.audiusmusic'
+        env: '.env.prod'
+    - mobile-release-ios:
+        build-directory: 'build-mobile-production'
+        bundle-id: 'co.audius.audiusmusic'
+        env: '.env.prod'
+        slack-notify: false
+
+mobile-build-upload-production-android-main:
+  working_directory: ~/apps
+  resource_class: xlarge
+  docker:
+    - image: cimg/android:2023.08-node
+  steps:
+    - mobile-prepare-android:
+        build-directory: 'build-mobile-production'
+    - mobile-release-android:
+        build-directory: 'build-mobile-production'
+        upload-type: 'prod'
+        track: 'alpha'
+        slack-notify: false
+
 mobile-deploy-saga-dapp-store:
   working_directory: ~/apps
   resource_class: xlarge

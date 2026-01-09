@@ -1,3 +1,7 @@
+# NOTE: Web CI/CD has been migrated to GitHub Actions (.github/workflows/web.yml)
+# This workflow is disabled via path filtering in config.yml
+# Desktop distribution jobs (mac/win/linux) are not yet migrated and will need
+# to be added to GitHub Actions or re-enabled here if needed.
 when: << pipeline.parameters.run-web-workflow >>
 jobs:
   - web-init:
@@ -40,7 +44,7 @@ jobs:
         branches:
           only: /^main$/
 
-  # Release production web.
+  # Production web deployment on main.
   - web-hold-production:
       type: approval
       requires:
@@ -49,14 +53,14 @@ jobs:
         - web-check-ssr-production-bundlesize
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-deploy-production-s3:
       context: Audius Client
       requires:
         - web-hold-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-deploy-production-cloudflare:
       context:
         - Audius Client
@@ -65,25 +69,23 @@ jobs:
         - web-hold-production
       filters:
         branches:
-          only: /(^release.*)$/
-
-  # Upload sourcemaps
+          only: /^main$/
   - web-deploy-sentry-sourcemaps:
       context: Audius Client
       requires:
         - web-hold-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
 
-  # Distribute production desktop binaries.
+  # Distribute production desktop binaries on main.
   - web-hold-dist-mac-production:
       type: approval
       requires:
         - web-build-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-dist-mac-production:
       context:
         - Audius Client
@@ -93,14 +95,14 @@ jobs:
         - web-hold-dist-mac-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-hold-dist-win-production:
       type: approval
       requires:
         - web-build-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-dist-win-production:
       context:
         - Audius Client
@@ -110,14 +112,14 @@ jobs:
         - web-hold-dist-win-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-hold-dist-linux-production:
       type: approval
       requires:
         - web-build-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/
   - web-dist-linux-production:
       context:
         - Audius Client
@@ -127,4 +129,4 @@ jobs:
         - web-hold-dist-linux-production
       filters:
         branches:
-          only: /(^release.*)$/
+          only: /^main$/

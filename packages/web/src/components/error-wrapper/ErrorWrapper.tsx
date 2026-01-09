@@ -1,7 +1,5 @@
 import { PureComponent, ReactNode } from 'react'
 
-import { captureException, captureMessage } from '@sentry/browser'
-
 type ErrorWrapperProps = {
   children: ReactNode
   errorMessage?: string
@@ -12,11 +10,17 @@ class ErrorWrapper extends PureComponent<ErrorWrapperProps> {
     didError: false
   }
 
-  componentDidCatch(error: Error | null, errorInfo: object) {
+  async componentDidCatch(error: Error | null, errorInfo: object) {
     this.setState({ didError: true })
-    const { errorMessage } = this.props
-    if (errorMessage) captureMessage(errorMessage)
-    captureException(error)
+    try {
+      // Lazy load Sentry SDK
+      const Sentry = await import('@sentry/browser')
+      const { errorMessage } = this.props
+      if (errorMessage) Sentry.captureMessage(errorMessage)
+      Sentry.captureException(error)
+    } catch (err) {
+      console.error('Failed to report error to Sentry:', err)
+    }
   }
 
   render() {

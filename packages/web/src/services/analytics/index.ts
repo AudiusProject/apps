@@ -60,7 +60,7 @@ export const track = async (
 
     // TODO: This can be removed when the the web layer is removed from mobile
     await didInit
-    return amplitude.track(eventName, propertiesWithContext, callback)
+    return await amplitude.track(eventName, propertiesWithContext, callback)
   } catch (err) {
     console.error(err)
   }
@@ -79,7 +79,7 @@ export const identify = async (
       return
     }
     await didInit
-    return amplitude.identify(traits, callback)
+    return await amplitude.identify(traits, callback)
   } catch (err) {
     console.error(err)
   }

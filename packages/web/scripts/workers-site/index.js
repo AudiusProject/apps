@@ -44,21 +44,12 @@ function matchRoute(input) {
   return null
 }
 
-function checkIsBot(val) {
-  if (!val) {
-    return false
-  }
-  const botTest =
-    /discordbot|facebookexternalhit|gigabot|ia_archiver|meta-externalfetcher|linkbot|linkedinbot|reaper|slackbot|snap url preview service|telegrambot|twitterbot|whatsapp|whatsup|yeti|yodaobot|zend|zoominfobot|embedly|iframely/i
-  return botTest.test(val)
-}
-
-function checkIsCrawler(val) {
+function isCrawler(val) {
   if (!val) {
     return false
   }
   const crawlerTest =
-    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|duckduckbot|googlebot|google-inspectiontool|msnbot|nextgensearchbot|yahoo|yandex/i
+    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|discordbot|duckduckbot|embedly|facebookexternalhit|gigabot|googlebot|google-inspectiontool|ia_archiver|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|reaper|slackbot|snap|telegrambot|twitterbot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|zend|zoominfobot/i
   return crawlerTest.test(val)
 }
 
@@ -339,17 +330,6 @@ async function handleEvent(request, env, ctx) {
     return response
   }
 
-  const isBot = checkIsBot(userAgent)
-
-  if (isBot) {
-    const destinationURL = env.GA + pathname + search + hash
-    const newRequest = new Request(destinationURL, request)
-    newRequest.headers.set('host', env.GA)
-    newRequest.headers.set('x-access-token', env.GA_ACCESS_TOKEN)
-
-    return await fetch(newRequest)
-  }
-
   const isEmbed = pathname.startsWith('/embed')
   if (isEmbed) {
     const destinationURL = env.EMBED + pathname + search + hash
@@ -369,7 +349,7 @@ async function handleEvent(request, env, ctx) {
     }
 
     // For now, only SSR for crawlers
-    if (SSR && checkIsCrawler(userAgent)) {
+    if (SSR && isCrawler(userAgent)) {
       const ssrResponse = await env.SSR.fetch(request.clone())
       return ssrResponse
     } else {

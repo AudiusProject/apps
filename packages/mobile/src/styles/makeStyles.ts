@@ -31,9 +31,9 @@ export const makeStyles = <T extends Record<string, StyleTypes>>(
 ): (() => T) => {
   const baseOptions = { spacing, typography }
 
-  const defaultStylesheet = StyleSheet.create(
+  const lightStylesheet = StyleSheet.create(
     styles({
-      type: Theme.DEFAULT,
+      type: Theme.LIGHT,
       palette: defaultTheme,
       ...baseOptions
     })
@@ -56,7 +56,7 @@ export const makeStyles = <T extends Record<string, StyleTypes>>(
   )
 
   const themedStylesheets = {
-    [Theme.DEFAULT]: defaultStylesheet,
+    [Theme.LIGHT]: lightStylesheet,
     [Theme.DARK]: darkStylesheet,
     [Theme.MATRIX]: matrixStylesheet
   }

@@ -1,0 +1,734 @@
+name: Web CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/web/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/web.yml'
+      - '.circleci/**'
+  pull_request:
+    paths:
+      - 'packages/web/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/web.yml'
+      - '.circleci/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.21.1'
+
+jobs:
+  # Initialize: Install dependencies and cache
+  web-init:
+    name: Web Init (Install & Cache)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+          else
+            echo "No cache found, running fresh install..."
+            npm ci --prefer-offline
+          fi
+
+
+  # Lint & Stylelint job
+  web-lint:
+    name: Web Lint & Stylelint
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Lint
+        run: npx turbo run lint --filter=@audius/web
+
+      - name: Stylelint
+        run: npm run stylelint -w @audius/web
+
+  # Typecheck job
+  web-typecheck:
+    name: Web Typecheck
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Typecheck
+        run: npx turbo run typecheck --filter=@audius/web
+
+  # Build production bundle
+  web-build-production:
+    name: Build Production
+    runs-on: ubuntu-latest
+    needs: [web-init, web-lint, web-typecheck]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
+
+      - name: Build production
+        timeout-minutes: 30
+        run: |
+          cd packages/web
+          npm run build:prod
+          cp package.json build-production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-production
+          path: packages/web/build-production
+          retention-days: 1
+
+  # Build SSR production bundle
+  web-build-ssr-production:
+    name: Build SSR Production
+    runs-on: ubuntu-latest
+    needs: [web-init, web-lint, web-typecheck]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
+
+      - name: Build SSR production
+        timeout-minutes: 30
+        run: |
+          cd packages/web
+          npm run build:ssr:prod
+
+      - name: Upload SSR build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-ssr-production
+          path: |
+            packages/web/build-ssr-production
+            node_modules/@brillout/vite-plugin-import-build/dist
+          retention-days: 1
+
+  # Check SSR bundle size
+  web-check-ssr-production-bundlesize:
+    name: Check SSR Bundle Size
+    runs-on: ubuntu-latest
+    needs: web-build-ssr-production
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
+
+      - name: Download SSR build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ssr-production
+          path: .
+
+      - name: Check bundlesize
+        run: |
+          cd packages/web
+          npm run bundlesize:prod
+
+  # Deploy to release candidate environment
+  web-deploy-release-candidate:
+    name: Deploy Release Candidate
+    runs-on: ubuntu-latest
+    needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: .
+
+      - name: Download SSR build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ssr-production
+          path: .
+
+      - name: Move sourcemaps
+        run: |
+          cd packages/web
+          mkdir -p sourcemaps/assets
+          mv build-production/assets/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/server/chunks/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/server/entries/*.map sourcemaps/assets 2>/dev/null || true
+
+      - name: Move build
+        run: |
+          cd packages/web
+          mv build-production build
+          mv build-ssr-production build-ssr
+
+      - name: Copy robots.txt
+        run: |
+          cd packages/web
+          cp ./robots.txt build
+          cp ./robots.txt build-ssr/client
+
+      - name: Deploy to Cloudflare (Release)
+        env:
+          GA_ACCESS_TOKEN: ${{ secrets.GA_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          cd packages/web
+          echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --env release
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy sourcemaps to S3
+        run: |
+          aws s3 sync packages/web/sourcemaps s3://sourcemaps.audius.co --cache-control max-age=604800
+
+  # Production deployment (requires approval)
+  web-deploy-production-s3:
+    name: Deploy Production to S3
+    runs-on: ubuntu-latest
+    needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: .
+
+      - name: Create TAR
+        run: |
+          cd packages/web
+          tar -zcvf build-production.tar.gz build-production
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync --exclude "*.map" --exclude robots.txt --exclude "packages/web/sitemaps/*" packages/web/build-production s3://audius.co --delete --cache-control max-age=604800
+          aws s3 cp s3://audius.co/index.html s3://audius.co/index.html --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --metadata-directive REPLACE --acl public-read
+          aws s3 cp packages/web/robots.txt s3://audius.co --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
+          aws s3 cp packages/web/build-production.tar.gz s3://audius.co/build-production.tar.gz --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id E1ZJ9Z971FJQJ8 --paths "/*"
+
+  # Deploy to Cloudflare production
+  web-deploy-production-cloudflare:
+    name: Deploy Production to Cloudflare
+    runs-on: ubuntu-latest
+    needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: .
+
+      - name: Download SSR build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ssr-production
+          path: .
+
+      - name: Move sourcemaps
+        run: |
+          cd packages/web
+          mkdir -p sourcemaps/assets
+          mv build-production/assets/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/server/chunks/*.map sourcemaps/assets 2>/dev/null || true
+          mv build-ssr-production/server/entries/*.map sourcemaps/assets 2>/dev/null || true
+
+      - name: Move build
+        run: |
+          cd packages/web
+          mv build-production build
+          mv build-ssr-production build-ssr
+
+      - name: Copy robots.txt
+        run: |
+          cd packages/web
+          cp ./robots.txt build
+          cp ./robots.txt build-ssr/client
+
+      - name: Deploy to Cloudflare (Production)
+        env:
+          GA_ACCESS_TOKEN: ${{ secrets.GA_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          cd packages/web
+          echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --env production
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          cd packages/web
+          deploying_version=$(jq -r '.version' package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to web \n\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  # Deploy Sentry sourcemaps
+  web-deploy-sentry-sourcemaps:
+    name: Deploy Sentry Sourcemaps
+    runs-on: ubuntu-latest
+    needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: .
+
+      - name: Cut Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          cd packages/web
+          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client new ${{ github.sha }}
+
+      - name: Upload sourcemaps
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          cd packages/web
+          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client files ${{ github.sha }} upload-sourcemaps --no-rewrite build-production/static/js
+
+      - name: Finalize release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          cd packages/web
+          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client finalize ${{ github.sha }}
+
+  # Test job (runs on PRs)
+  web-test:
+    name: Web Tests
+    runs-on: ubuntu-latest
+    needs: web-init
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run tests
+        timeout-minutes: 30
+        run: npm run web:test -- -- run --reporter=default --reporter=junit --outputFile=report.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: packages/web/report.xml
+          retention-days: 1
+
+      - name: Upload test output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-output
+          path: packages/web/test-output
+          retention-days: 1
+

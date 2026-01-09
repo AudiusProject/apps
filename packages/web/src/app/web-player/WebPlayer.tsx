@@ -63,7 +63,6 @@ import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
 import { TableType } from 'pages/pay-and-earn-page/types'
 import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
-import { initializeSentry } from 'services/sentry'
 import { SsrContext } from 'ssr/SsrContext'
 import { getShowCookieBanner } from 'store/application/ui/cookieBanner/selectors'
 import {
@@ -341,7 +340,17 @@ const validSearchCategories = [
   'playlists'
 ]
 
-initializeSentry()
+// Lazy load Sentry - initialize on first user interaction or after app loads
+if (typeof window !== 'undefined') {
+  // Initialize Sentry after a short delay to not block initial render
+  setTimeout(() => {
+    import('services/sentry').then(({ initializeSentry }) => {
+      initializeSentry().catch((err) => {
+        console.error('Failed to initialize Sentry:', err)
+      })
+    })
+  }, 100)
+}
 
 // Wrapper components for routes that need params or location
 const SearchCategoryLegacyRedirect = () => {

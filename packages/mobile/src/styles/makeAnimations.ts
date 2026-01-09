@@ -13,11 +13,13 @@ type AnimationCreatorConfig = { palette: ThemeColors; type: Theme }
 export const makeAnimations = <TReturn>(
   animationCreator: (config: AnimationCreatorConfig) => TReturn
 ) => {
+  const lightAnimations = animationCreator({
+    palette: defaultTheme,
+    type: Theme.LIGHT
+  })
+
   const themedAnimations = {
-    [Theme.DEFAULT]: animationCreator({
-      palette: defaultTheme,
-      type: Theme.DEFAULT
-    }),
+    [Theme.LIGHT]: lightAnimations,
     [Theme.DARK]: animationCreator({
       palette: darkTheme,
       type: Theme.DARK

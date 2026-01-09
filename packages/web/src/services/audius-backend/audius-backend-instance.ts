@@ -22,7 +22,6 @@ export const audiusBackendInstance = audiusBackend({
   getFeatureEnabled,
   getHostUrl: () => window.location.origin,
   identityServiceUrl: env.IDENTITY_SERVICE,
-  generalAdmissionUrl: env.GENERAL_ADMISSION,
   isElectron: isElectron(),
   nativeMobile: false,
   recaptchaSiteKey: env.RECAPTCHA_SITE_KEY,

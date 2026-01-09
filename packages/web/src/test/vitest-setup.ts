@@ -64,21 +64,81 @@ vi.mock('@reown/appkit/react', () => {
     useAppKitState: vi.fn().mockReturnValue({
       open: false
     }),
+    useAppKitAccount: vi.fn().mockReturnValue({
+      address: null,
+      isConnected: false
+    }),
     useDisconnect: vi.fn().mockReturnValue({
       disconnect: vi.fn()
     })
   }
 })
 
+vi.mock('@reown/appkit/networks', () => {
+  return {
+    mainnet: { id: 1, name: 'Ethereum' },
+    solana: { id: 1111111111111, name: 'Solana' },
+    ethereum: { id: 1, name: 'Ethereum' },
+    polygon: { id: 137, name: 'Polygon' }
+  }
+})
+
+vi.mock('@reown/appkit', () => {
+  return {}
+})
+
+vi.mock('@reown/appkit-common', () => {
+  return {}
+})
+
+vi.mock('@reown/appkit-wallet-button/react', () => {
+  return {
+    useAppKitWallet: vi.fn().mockReturnValue({
+      wallet: null
+    })
+  }
+})
+
 vi.mock('@reown/appkit-adapter-wagmi', () => {
   return {
-    WagmiAdapter: vi.fn()
+    WagmiAdapter: vi.fn().mockImplementation(() => ({
+      // Mock adapter object - just return an empty object
+    }))
+  }
+})
+
+vi.mock('@reown/appkit-adapter-solana/react', () => {
+  return {
+    SolanaAdapter: vi.fn().mockImplementation(() => ({
+      // Mock adapter object - just return an empty object
+    }))
   }
 })
 
 vi.mock('redux-first-history', async (importOriginal) => {
   const originalImport: any = await importOriginal()
   return { ...originalImport, connectRouter: vi.fn() }
+})
+
+vi.mock('redux-saga', () => {
+  // Create a proper redux middleware function (store) => (next) => (action) => next(action)
+  const createMockSagaMiddleware = (options?: any) => {
+    const middleware = (store: any) => (next: any) => (action: any) => {
+      return next(action)
+    }
+
+    // Add methods that saga middleware normally has
+    ;(middleware as any).run = vi.fn()
+    ;(middleware as any).setContext = vi.fn()
+    ;(middleware as any).toPromise = vi.fn()
+
+    return middleware
+  }
+
+  return {
+    default: createMockSagaMiddleware,
+    createSagaMiddleware: createMockSagaMiddleware
+  }
 })
 
 window.matchMedia = vi.fn().mockReturnValue({

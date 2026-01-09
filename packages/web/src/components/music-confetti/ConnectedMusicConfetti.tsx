@@ -40,7 +40,7 @@ const ConnectedMusicConfetti = () => {
     <MusicConfetti
       zIndex={zIndex.MUSIC_CONFETTI}
       onCompletion={onConfettiFinished}
-      theme={theme || Theme.DEFAULT}
+      theme={theme ?? Theme.AUTO}
       isMobile={isMobile}
     />
   ) : null

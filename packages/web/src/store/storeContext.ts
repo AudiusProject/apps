@@ -1,6 +1,5 @@
 import { FeatureFlags } from '@audius/common/services'
 import { CommonStoreContext } from '@audius/common/store'
-import { setTag, getCurrentScope } from '@sentry/browser'
 
 import * as analytics from 'services/analytics'
 import { audioPlayer } from 'services/audio-player'
@@ -61,7 +60,20 @@ export const buildStoreContext = ({
     getLineupSelectorForRoute,
     audioPlayer: audioPlayer!,
     nftClient: null,
-    sentry: { setTag, getCurrentScope },
+    sentry: {
+      setTag: async (...args) => {
+        const Sentry = await import('@sentry/browser')
+        return Sentry.setTag(...args)
+      },
+      getCurrentScope: () => ({
+        setUser: (user: any) => {
+          // Lazy load Sentry and set user asynchronously
+          import('@sentry/browser').then((Sentry) => {
+            Sentry.getCurrentScope().setUser(user)
+          })
+        }
+      })
+    },
     reportToSentry,
     trackDownload,
     instagramAppId: env.INSTAGRAM_APP_ID,

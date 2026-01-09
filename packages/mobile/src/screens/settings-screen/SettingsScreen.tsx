@@ -50,7 +50,7 @@ const useStyles = makeStyles(({ spacing, palette, type }) => ({
     marginVertical: spacing(6),
     alignSelf: 'center',
     resizeMode: 'contain',
-    tintColor: type === Theme.DEFAULT ? undefined : palette.staticWhite
+    tintColor: type === Theme.LIGHT ? undefined : palette.staticWhite
   }
 }))
 
