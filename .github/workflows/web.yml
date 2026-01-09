@@ -442,13 +442,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: .temp/build-production
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .
+          path: .temp/build-ssr-production
+
+      - name: Move artifacts to final location
+        run: |
+          mkdir -p packages/web
+          mv .temp/build-production/packages/web/build-production packages/web/build-production
+          mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
 
       - name: Move sourcemaps
         run: |
@@ -566,13 +572,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: .temp/build-production
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .
+          path: .temp/build-ssr-production
+
+      - name: Move artifacts to final location
+        run: |
+          mkdir -p packages/web
+          mv .temp/build-production/packages/web/build-production packages/web/build-production
+          mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
 
       - name: Move sourcemaps
         run: |
