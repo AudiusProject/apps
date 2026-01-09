@@ -451,6 +451,8 @@ jobs:
             mv .temp/build-production/packages/web/build-production packages/web/build-production
           elif [ -d ".temp/build-production/build-production" ]; then
             mv .temp/build-production/build-production packages/web/build-production
+          elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
+            mv .temp/build-production packages/web/build-production
           else
             echo "ERROR: Could not find build-production. Checking structure:"
             find .temp/build-production -type d 2>/dev/null | head -10
@@ -460,6 +462,8 @@ jobs:
             mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
             mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
+          elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
+            mv .temp/build-ssr-production packages/web/build-ssr-production
           else
             echo "ERROR: Could not find build-ssr-production. Checking structure:"
             find .temp/build-ssr-production -type d 2>/dev/null | head -10
@@ -597,6 +601,8 @@ jobs:
             mv .temp/build-production/packages/web/build-production packages/web/build-production
           elif [ -d ".temp/build-production/build-production" ]; then
             mv .temp/build-production/build-production packages/web/build-production
+          elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
+            mv .temp/build-production packages/web/build-production
           else
             echo "ERROR: Could not find build-production. Checking structure:"
             find .temp/build-production -type d 2>/dev/null | head -10
@@ -606,6 +612,8 @@ jobs:
             mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
             mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
+          elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
+            mv .temp/build-ssr-production packages/web/build-ssr-production
           else
             echo "ERROR: Could not find build-ssr-production. Checking structure:"
             find .temp/build-ssr-production -type d 2>/dev/null | head -10
