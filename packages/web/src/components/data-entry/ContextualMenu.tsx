@@ -127,7 +127,7 @@ export const SelectedValue = (props: SelectedValueProps) => {
       {Icon ? <Icon size='s' color='default' /> : null}
       {startAdornment ?? null}
       {label ? (
-        <Text variant='body' size='s'>
+        <Text variant='body' size='s' color='default'>
           {label}
         </Text>
       ) : null}

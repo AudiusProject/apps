@@ -23,12 +23,14 @@ import { useWindowSize } from 'react-use'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import audiusLogoColored from 'assets/img/audiusLogoColored.png'
+import audiusLogoWhite from 'assets/img/audiusLogoWhite.png'
 import { setValueField, startSignUp } from 'common/store/pages/signon/actions'
 import { getEmailField } from 'common/store/pages/signon/selectors'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { identify } from 'services/analytics'
+import { isDarkMode } from 'utils/theme/theme'
 
 import { ExternalWalletSignUpModal } from '../components/ExternalWalletSignUpModal'
 import { NewEmailField } from '../components/NewEmailField'
@@ -102,7 +104,7 @@ export const CreateEmailPage = () => {
               <IconAudiusLogoHorizontalColor />
             ) : (
               <PreloadImage
-                src={audiusLogoColored}
+                src={isDarkMode() ? audiusLogoWhite : audiusLogoColored}
                 alt='Audius Colored Logo'
                 css={{
                   height: 160,
