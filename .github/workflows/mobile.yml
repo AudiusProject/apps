@@ -133,6 +133,25 @@ jobs:
             npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
+      - name: Copy production env
+        run: |
+          cd packages/mobile
+          echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+          else
+            echo "No cache found, running fresh install..."
+            npm ci --prefer-offline
+          fi
+
       - name: Cache iOS gems
         uses: actions/cache@v4
         with:
@@ -167,7 +186,7 @@ jobs:
       - name: Update fastlane
         run: cd packages/mobile/ios && sudo bundle update fastlane
 
-      - name: Copy production env
+      - name: Copy production env to iOS
         run: cp packages/mobile/.env.prod packages/mobile/ios/
 
       - name: Build and upload iOS (Release Candidate)
@@ -386,6 +405,25 @@ jobs:
             npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
             npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
 
+      - name: Copy production env
+        run: |
+          cd packages/mobile
+          echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+          else
+            echo "No cache found, running fresh install..."
+            npm ci --prefer-offline
+          fi
+
       - name: Cache iOS gems
         uses: actions/cache@v4
         with:
@@ -420,7 +458,7 @@ jobs:
       - name: Update fastlane
         run: cd packages/mobile/ios && sudo bundle update fastlane
 
-      - name: Copy production env
+      - name: Copy production env to iOS
         run: cp packages/mobile/.env.prod packages/mobile/ios/
 
       - name: Build and upload iOS (Production)
