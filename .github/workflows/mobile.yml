@@ -144,6 +144,11 @@ jobs:
           cd packages/mobile
           echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
 
+      - name: Install Python build dependencies
+        run: |
+          # Python 3.12+ doesn't include distutils, but setuptools provides it
+          python3 -m pip install --upgrade setuptools
+
       - name: Install dependencies
         env:
           CI: true
@@ -153,6 +158,11 @@ jobs:
           if [[ -d node_modules ]]; then
             echo "Using cached node_modules, running postinstall..."
             npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
           else
             echo "No cache found, running fresh install..."
             npm ci --prefer-offline
@@ -416,6 +426,11 @@ jobs:
           cd packages/mobile
           echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
 
+      - name: Install Python build dependencies
+        run: |
+          # Python 3.12+ doesn't include distutils, but setuptools provides it
+          python3 -m pip install --upgrade setuptools
+
       - name: Install dependencies
         env:
           CI: true
@@ -425,6 +440,11 @@ jobs:
           if [[ -d node_modules ]]; then
             echo "Using cached node_modules, running postinstall..."
             npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
           else
             echo "No cache found, running fresh install..."
             npm ci --prefer-offline
