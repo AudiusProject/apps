@@ -147,7 +147,8 @@ jobs:
       - name: Install Python build dependencies
         run: |
           # Python 3.12+ doesn't include distutils, but setuptools provides it
-          python3 -m pip install --upgrade setuptools
+          # Use --user flag to avoid externally-managed-environment error
+          python3 -m pip install --user --upgrade setuptools
 
       - name: Install dependencies
         env:
@@ -429,7 +430,8 @@ jobs:
       - name: Install Python build dependencies
         run: |
           # Python 3.12+ doesn't include distutils, but setuptools provides it
-          python3 -m pip install --upgrade setuptools
+          # Use --user flag to avoid externally-managed-environment error
+          python3 -m pip install --user --upgrade setuptools
 
       - name: Install dependencies
         env:
