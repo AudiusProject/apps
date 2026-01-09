@@ -274,7 +274,7 @@ jobs:
     name: Build SSR Production
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -352,7 +352,7 @@ jobs:
     name: Check SSR Bundle Size
     runs-on: ubuntu-latest
     needs: web-build-ssr-production
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -414,7 +414,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Check bundlesize
         run: |
