@@ -6,7 +6,8 @@ import {
   Text,
   IconCloudUpload,
   IconHeadphones,
-  IconMessage
+  IconMessage,
+  useTheme
 } from '@audius/harmony-native'
 
 import { PANEL_EXPAND_DURATION } from '../constants'
@@ -27,14 +28,15 @@ type AudiusValueProps = { icon: IconComponent; text: string }
  */
 const AudiusValue = (props: AudiusValueProps) => {
   const { icon: Icon, text } = props
+  const theme = useTheme()
   return (
     <Flex alignItems='center' justifyContent='center' gap='m' direction='row'>
-      <Icon color='white' size='l' shadow='emphasis' />
+      <Icon color='inverse' size='l' shadow='emphasis' />
       <Text
         variant='title'
         size='l'
         strength='weak'
-        color='white'
+        color={theme.type === 'dark' ? 'inverse' : 'white'}
         shadow='emphasis'
       >
         {text}
