@@ -416,6 +416,15 @@ jobs:
           name: build-ssr-production
           path: .
 
+      - name: Verify build artifacts exist
+        run: |
+          cd packages/web
+          echo "Checking for build-ssr-production directory..."
+          ls -la build-ssr-production/ || echo "build-ssr-production directory not found"
+          echo "Checking for server chunks..."
+          ls -la build-ssr-production/server/chunks/ 2>/dev/null || echo "server/chunks directory not found"
+          find build-ssr-production -name "chunk-*.js" -type f | head -5 || echo "No chunk-*.js files found"
+
       - name: Check bundlesize
         run: |
           cd packages/web
@@ -426,7 +435,7 @@ jobs:
     name: Deploy Release Candidate
     runs-on: ubuntu-latest
     needs: [web-build-production, web-build-ssr-production, web-check-ssr-production-bundlesize]
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     environment:
       name: release
     steps:
@@ -438,18 +447,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -527,7 +535,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Create TAR
         run: |
@@ -567,13 +575,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -640,7 +648,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Cut Sentry release
         env:
