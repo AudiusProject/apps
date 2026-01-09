@@ -81,19 +81,8 @@
   pointer-events: all;
 }
 
-.loadingSkeleton,
-.loadingSkeleton :global(.ant-skeleton-content),
-.loadingSkeleton,
-.loadingSkeleton :global(.ant-skeleton-header) {
+.loadingSkeleton {
   padding: 0 !important;
-}
-
-.profilePictureWrapper .loadingSkeleton :global(.ant-skeleton-avatar) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 208px;
-  width: 208px !important;
 }
 
 .invalidProfilePictureFile {
@@ -107,10 +96,6 @@
 .hide {
   opacity: 0;
   transition: opacity ease-in-out 0.5s;
-}
-
-.hide :global(.ant-skeleton-avatar) {
-  opacity: 0;
 }
 
 .show {

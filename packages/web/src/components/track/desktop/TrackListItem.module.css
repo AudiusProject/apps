@@ -124,11 +124,6 @@
   font-weight: var(--harmony-font-medium);
 }
 
-.disabled .artistName :global(.ant-popover-open):hover {
-  color: var(--harmony-n-600);
-  text-decoration: none;
-}
-
 .artistName .by {
   margin-right: 4px;
 }

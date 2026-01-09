@@ -4,7 +4,6 @@
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 6px 6px 0px 0px;
-  /* NOTE: the width and margin left are b/c antd calculated partial pixels to shift the artist card */
   width: calc(100% + 2px) !important;
   margin-left: -1px;
 }

@@ -18,7 +18,7 @@ import styles from './Tooltip.module.css'
 import type { TooltipProps, TooltipPlacement } from './types'
 
 /**
- * Converts antd-style placement to origin objects for positioning
+ * Converts placement to origin objects for positioning
  */
 const placementToOrigins = (
   placement: TooltipPlacement

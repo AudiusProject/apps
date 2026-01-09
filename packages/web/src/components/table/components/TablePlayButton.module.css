@@ -17,9 +17,6 @@
 .hideDefault {
   opacity: 0;
 }
-:global(.ant-table-tbody > tr:hover:not(.ant-table-expanded-row)) .icon {
-  opacity: 1;
-}
 
 .tablePlayButton:hover .icon {
   transform: scale3d(1.1, 1.1, 1.1);
