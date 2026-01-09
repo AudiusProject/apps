@@ -7,7 +7,6 @@
   justify-content: left;
 }
 
-
 .filterContainer {
   transition: all 0.5s;
   padding-bottom: var(--harmony-unit-5);
