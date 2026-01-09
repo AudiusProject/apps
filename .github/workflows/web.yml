@@ -448,10 +448,13 @@ jobs:
         run: |
           mkdir -p packages/web
           if [ -d ".temp/build-production/packages/web/build-production" ]; then
+            echo "✓ Found build-production at: .temp/build-production/packages/web/build-production"
             mv .temp/build-production/packages/web/build-production packages/web/build-production
           elif [ -d ".temp/build-production/build-production" ]; then
+            echo "✓ Found build-production at: .temp/build-production/build-production"
             mv .temp/build-production/build-production packages/web/build-production
           elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
+            echo "✓ Found build-production at: .temp/build-production (root level)"
             mv .temp/build-production packages/web/build-production
           else
             echo "ERROR: Could not find build-production. Checking structure:"
@@ -459,10 +462,13 @@ jobs:
             exit 1
           fi
           if [ -d ".temp/build-ssr-production/packages/web/build-ssr-production" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/packages/web/build-ssr-production"
             mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/build-ssr-production"
             mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production (root level with client/server)"
             mv .temp/build-ssr-production packages/web/build-ssr-production
           else
             echo "ERROR: Could not find build-ssr-production. Checking structure:"
@@ -498,7 +504,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env release
+          echo ${GA_ACCESS_TOKEN} | npm_config_yes=true npx wrangler@4.54.0 secret put GA_ACCESS_TOKEN --env release
           npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
           npm_config_yes=true npx wrangler@4.54.0 publish --env release
 
@@ -598,10 +604,13 @@ jobs:
         run: |
           mkdir -p packages/web
           if [ -d ".temp/build-production/packages/web/build-production" ]; then
+            echo "✓ Found build-production at: .temp/build-production/packages/web/build-production"
             mv .temp/build-production/packages/web/build-production packages/web/build-production
           elif [ -d ".temp/build-production/build-production" ]; then
+            echo "✓ Found build-production at: .temp/build-production/build-production"
             mv .temp/build-production/build-production packages/web/build-production
           elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
+            echo "✓ Found build-production at: .temp/build-production (root level)"
             mv .temp/build-production packages/web/build-production
           else
             echo "ERROR: Could not find build-production. Checking structure:"
@@ -609,10 +618,13 @@ jobs:
             exit 1
           fi
           if [ -d ".temp/build-ssr-production/packages/web/build-ssr-production" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/packages/web/build-ssr-production"
             mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/build-ssr-production"
             mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
           elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
+            echo "✓ Found build-ssr-production at: .temp/build-ssr-production (root level with client/server)"
             mv .temp/build-ssr-production packages/web/build-ssr-production
           else
             echo "ERROR: Could not find build-ssr-production. Checking structure:"
@@ -648,7 +660,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env production
+          echo ${GA_ACCESS_TOKEN} | npm_config_yes=true npx wrangler@4.54.0 secret put GA_ACCESS_TOKEN --env production
           npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
           npm_config_yes=true npx wrangler@4.54.0 publish --env production
 
