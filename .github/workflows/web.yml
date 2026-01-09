@@ -29,7 +29,6 @@ env:
   NODE_VERSION: '22.21.1'
 
 jobs:
-  # Initialize: Install dependencies and cache
   web-init:
     name: Web Init (Install & Cache)
     runs-on: ubuntu-latest
@@ -82,8 +81,6 @@ jobs:
             npm ci --prefer-offline
           fi
 
-
-  # Lint & Stylelint job
   web-lint:
     name: Web Lint & Stylelint
     runs-on: ubuntu-latest
@@ -137,7 +134,6 @@ jobs:
       - name: Stylelint
         run: npm run stylelint -w @audius/web
 
-  # Typecheck job
   web-typecheck:
     name: Web Typecheck
     runs-on: ubuntu-latest
@@ -189,7 +185,6 @@ jobs:
       - name: Typecheck
         run: npx turbo run typecheck --filter=@audius/web
 
-  # Build production bundle
   web-build-production:
     name: Build Production
     runs-on: ubuntu-latest
@@ -262,7 +257,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-production
-          path: packages/web/build-production
+          path: |
+            packages/web/build-production
           retention-days: 1
 
   # Build SSR production bundle
@@ -436,45 +432,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .temp/build-production
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .temp/build-ssr-production
-
-      - name: Move artifacts to final location
-        run: |
-          mkdir -p packages/web
-          if [ -d ".temp/build-production/packages/web/build-production" ]; then
-            echo "✓ Found build-production at: .temp/build-production/packages/web/build-production"
-            mv .temp/build-production/packages/web/build-production packages/web/build-production
-          elif [ -d ".temp/build-production/build-production" ]; then
-            echo "✓ Found build-production at: .temp/build-production/build-production"
-            mv .temp/build-production/build-production packages/web/build-production
-          elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
-            echo "✓ Found build-production at: .temp/build-production (root level)"
-            mv .temp/build-production packages/web/build-production
-          else
-            echo "ERROR: Could not find build-production. Checking structure:"
-            find .temp/build-production -type d 2>/dev/null | head -10
-            exit 1
-          fi
-          if [ -d ".temp/build-ssr-production/packages/web/build-ssr-production" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/packages/web/build-ssr-production"
-            mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
-          elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/build-ssr-production"
-            mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
-          elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production (root level with client/server)"
-            mv .temp/build-ssr-production packages/web/build-ssr-production
-          else
-            echo "ERROR: Could not find build-ssr-production. Checking structure:"
-            find .temp/build-ssr-production -type d 2>/dev/null | head -10
-            exit 1
-          fi
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -500,11 +464,9 @@ jobs:
 
       - name: Deploy to Cloudflare (Release)
         env:
-          GA_ACCESS_TOKEN: ${{ secrets.GA_ACCESS_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          echo ${GA_ACCESS_TOKEN} | npm_config_yes=true npx wrangler@4.54.0 secret put GA_ACCESS_TOKEN --env release
           npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
           npm_config_yes=true npx wrangler@4.54.0 publish --env release
 
@@ -519,7 +481,7 @@ jobs:
         run: |
           aws s3 sync packages/web/sourcemaps s3://sourcemaps.audius.co --cache-control max-age=604800
 
-  # Production deployment (requires approval)
+  # Deploy to production environment (approval required)
   web-deploy-production-s3:
     name: Deploy Production to S3
     runs-on: ubuntu-latest
@@ -570,7 +532,6 @@ jobs:
         run: |
           aws cloudfront create-invalidation --distribution-id E1ZJ9Z971FJQJ8 --paths "/*"
 
-  # Deploy to Cloudflare production
   web-deploy-production-cloudflare:
     name: Deploy Production to Cloudflare
     runs-on: ubuntu-latest
@@ -592,45 +553,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .temp/build-production
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .temp/build-ssr-production
-
-      - name: Move artifacts to final location
-        run: |
-          mkdir -p packages/web
-          if [ -d ".temp/build-production/packages/web/build-production" ]; then
-            echo "✓ Found build-production at: .temp/build-production/packages/web/build-production"
-            mv .temp/build-production/packages/web/build-production packages/web/build-production
-          elif [ -d ".temp/build-production/build-production" ]; then
-            echo "✓ Found build-production at: .temp/build-production/build-production"
-            mv .temp/build-production/build-production packages/web/build-production
-          elif [ -d ".temp/build-production/assets" ] || [ -f ".temp/build-production/index.html" ]; then
-            echo "✓ Found build-production at: .temp/build-production (root level)"
-            mv .temp/build-production packages/web/build-production
-          else
-            echo "ERROR: Could not find build-production. Checking structure:"
-            find .temp/build-production -type d 2>/dev/null | head -10
-            exit 1
-          fi
-          if [ -d ".temp/build-ssr-production/packages/web/build-ssr-production" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/packages/web/build-ssr-production"
-            mv .temp/build-ssr-production/packages/web/build-ssr-production packages/web/build-ssr-production
-          elif [ -d ".temp/build-ssr-production/build-ssr-production" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production/build-ssr-production"
-            mv .temp/build-ssr-production/build-ssr-production packages/web/build-ssr-production
-          elif [ -d ".temp/build-ssr-production/client" ] || [ -d ".temp/build-ssr-production/server" ]; then
-            echo "✓ Found build-ssr-production at: .temp/build-ssr-production (root level with client/server)"
-            mv .temp/build-ssr-production packages/web/build-ssr-production
-          else
-            echo "ERROR: Could not find build-ssr-production. Checking structure:"
-            find .temp/build-ssr-production -type d 2>/dev/null | head -10
-            exit 1
-          fi
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -656,11 +585,9 @@ jobs:
 
       - name: Deploy to Cloudflare (Production)
         env:
-          GA_ACCESS_TOKEN: ${{ secrets.GA_ACCESS_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          echo ${GA_ACCESS_TOKEN} | npm_config_yes=true npx wrangler@4.54.0 secret put GA_ACCESS_TOKEN --env production
           npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
           npm_config_yes=true npx wrangler@4.54.0 publish --env production
 
@@ -720,7 +647,6 @@ jobs:
           cd packages/web
           ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client finalize ${{ github.sha }}
 
-  # Test job (runs on PRs)
   web-test:
     name: Web Tests
     runs-on: ubuntu-latest
