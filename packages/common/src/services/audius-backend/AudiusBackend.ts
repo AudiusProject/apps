@@ -916,10 +916,11 @@ export const audiusBackend = ({
     if (recipientEthAddress) {
       // When sending to a user, derive their user-bank ATA for this Solana mint
       // The user-bank is a PDA derived from their Ethereum address and the mint
-      tokenAccountAddress = await sdk.services.claimableTokensClient.deriveUserBank({
-        ethWallet: recipientEthAddress,
-        mint
-      })
+      tokenAccountAddress =
+        await sdk.services.claimableTokensClient.deriveUserBank({
+          ethWallet: recipientEthAddress,
+          mint
+        })
     } else {
       // When sending to a Solana wallet address directly, use regular ATA logic
       tokenAccountAddress = await getOrCreateAssociatedTokenAccount({

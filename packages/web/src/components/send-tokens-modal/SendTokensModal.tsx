@@ -86,7 +86,8 @@ const SendTokensModal = () => {
         error instanceof Error ? error.message : 'An unknown error occurred'
 
       // Check for specific Solana token account errors
-      const errorString = error instanceof Error ? error.toString() : String(error)
+      const errorString =
+        error instanceof Error ? error.toString() : String(error)
       if (
         errorString.includes('Account not associated with this Mint') ||
         errorString.includes('Custom:3') ||
@@ -105,7 +106,7 @@ const SendTokensModal = () => {
           amount: state.amount.toString(),
           destinationAddress: state.destinationAddress,
           mint,
-          errorString: errorString
+          errorString
         },
         feature: Feature.SendTokens
       })

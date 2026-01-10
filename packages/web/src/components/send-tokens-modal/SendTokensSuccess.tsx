@@ -14,7 +14,6 @@ import {
   CompletionCheck,
   IconExternalLink,
   PlainButton,
-  useMedia,
   Avatar
 } from '@audius/harmony'
 
@@ -49,7 +48,6 @@ const SendTokensSuccess = ({
   signature,
   onClose
 }: SendTokensSuccessProps) => {
-  const { isMobile } = useMedia()
   const { data: coin } = useArtistCoin(mint)
   const { data: tokenBalance } = useCoinBalance({
     mint,

@@ -13,7 +13,6 @@ import {
   CompletionCheck,
   IconExternalLink,
   PlainButton,
-  useMedia,
   Avatar
 } from '@audius/harmony'
 
@@ -50,7 +49,6 @@ const SendTokensFailure = ({
   onTryAgain,
   onClose
 }: SendTokensFailureProps) => {
-  const { isMobile } = useMedia()
   // Get token data and balance using the same hooks as ReceiveTokensModal
   const { data: coin } = useArtistCoin(mint)
   const { data: tokenBalance } = useCoinBalance({
@@ -146,7 +144,13 @@ const SendTokensFailure = ({
             />
             <Flex direction='column' flex={1} css={{ minWidth: 0 }}>
               <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
-                <Text variant='body' size='m' color='default' ellipses strength='strong'>
+                <Text
+                  variant='body'
+                  size='m'
+                  color='default'
+                  ellipses
+                  strength='strong'
+                >
                   {selectedUser.name}
                 </Text>
                 <UserBadges userId={selectedUser.user_id} size='xs' inline />
