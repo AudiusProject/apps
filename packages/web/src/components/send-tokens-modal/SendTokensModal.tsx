@@ -6,7 +6,12 @@ import {
   useSendCoins
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import { ErrorLevel, Feature, SolanaWalletAddress } from '@audius/common/models'
+import {
+  ErrorLevel,
+  Feature,
+  SolanaWalletAddress,
+  User
+} from '@audius/common/models'
 import { useSendTokensModal } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
 
@@ -23,6 +28,7 @@ type SendTokensState = {
   step: 'input' | 'confirm' | 'progress' | 'success' | 'failure'
   amount: bigint
   destinationAddress: string
+  selectedUser: User | null
   signature: string
 }
 
@@ -34,6 +40,7 @@ const SendTokensModal = () => {
     step: 'input',
     amount: BigInt(0),
     destinationAddress: '',
+    selectedUser: null,
     signature: ''
   })
   const [error, setError] = useState<string>('')
@@ -43,11 +50,16 @@ const SendTokensModal = () => {
 
   const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
 
-  const handleInputContinue = (amount: bigint, destinationAddress: string) => {
+  const handleInputContinue = (
+    amount: bigint,
+    destinationAddress: string,
+    selectedUser: User | null
+  ) => {
     setState({
       step: 'confirm',
       amount,
       destinationAddress,
+      selectedUser,
       signature: ''
     })
   }
@@ -59,7 +71,9 @@ const SendTokensModal = () => {
     try {
       const { signature } = await sendTokensMutation.mutateAsync({
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
-        amount: state.amount
+        amount: state.amount,
+        // When sending to a user, pass their Ethereum address to derive user-bank ATA
+        recipientEthAddress: state.selectedUser?.erc_wallet
       })
 
       setState((prev) => ({
@@ -68,8 +82,21 @@ const SendTokensModal = () => {
         signature
       }))
     } catch (error) {
-      const errorMessage =
+      let errorMessage =
         error instanceof Error ? error.message : 'An unknown error occurred'
+
+      // Check for specific Solana token account errors
+      const errorString = error instanceof Error ? error.toString() : String(error)
+      if (
+        errorString.includes('Account not associated with this Mint') ||
+        errorString.includes('Custom:3') ||
+        errorString.includes('0x3') ||
+        errorString.includes('custom program error: 0x3')
+      ) {
+        errorMessage =
+          'The recipient wallet does not have a token account for this coin. They may need to receive tokens of this type first, or the transaction needs to create the account automatically.'
+      }
+
       setError(errorMessage)
       reportToSentry({
         level: ErrorLevel.Error,
@@ -77,7 +104,8 @@ const SendTokensModal = () => {
         additionalInfo: {
           amount: state.amount.toString(),
           destinationAddress: state.destinationAddress,
-          mint
+          mint,
+          errorString: errorString
         },
         feature: Feature.SendTokens
       })
@@ -100,6 +128,7 @@ const SendTokensModal = () => {
       step: 'input',
       amount: BigInt(0),
       destinationAddress: '',
+      selectedUser: null,
       signature: ''
     })
     setError('')
@@ -134,6 +163,7 @@ const SendTokensModal = () => {
           mint={mint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
           onConfirm={handleConfirm}
           onBack={handleBack}
           onClose={handleClose}
@@ -147,6 +177,7 @@ const SendTokensModal = () => {
           mint={mint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
           signature={state.signature}
           onClose={handleClose}
         />
@@ -157,6 +188,7 @@ const SendTokensModal = () => {
           mint={mint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
           error={error}
           onTryAgain={handleTryAgain}
           onClose={handleClose}

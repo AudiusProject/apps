@@ -5,7 +5,7 @@ import {
   useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { walletMessages } from '@audius/common/messages'
+import { User, SquareSizes } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
@@ -14,16 +14,19 @@ import {
   Divider,
   Hint,
   Checkbox,
-  useMedia,
-  useTheme
+  useTheme,
+  Avatar
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
+import UserBadges from 'components/user-badges/UserBadges'
+import { useProfilePicture } from 'hooks/useProfilePicture'
 
 interface SendTokensConfirmationProps {
   mint: string
   amount: bigint
   destinationAddress: string
+  selectedUser: User | null
   onConfirm: () => void
   onBack: () => void
   onClose: () => void
@@ -31,7 +34,9 @@ interface SendTokensConfirmationProps {
 
 const messages = {
   sendTitle: 'SEND',
-  amountToSend: 'Amount to Send',
+  sending: 'Sending',
+  toRecipient: 'To Recipient',
+  recipient: 'Recipient',
   destinationAddress: 'Destination Address',
   reviewDetails: 'Review Details Carefully',
   reviewDescription:
@@ -47,12 +52,12 @@ const SendTokensConfirmation = ({
   mint,
   amount,
   destinationAddress,
+  selectedUser,
   onConfirm,
   onBack
 }: SendTokensConfirmationProps) => {
   const { color } = useTheme()
   const [isConfirmed, setIsConfirmed] = useState(false)
-  const { isMobile } = useMedia()
 
   // Get token data and balance using the same hooks as ReceiveTokensModal
   const { data: coin } = useArtistCoin(mint)
@@ -62,6 +67,11 @@ const SendTokensConfirmation = ({
     includeStaked: false
   })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+
+  const profilePicture = useProfilePicture({
+    userId: selectedUser?.user_id,
+    size: SquareSizes.SIZE_150_BY_150
+  })
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -105,36 +115,73 @@ const SendTokensConfirmation = ({
 
       <Divider orientation='horizontal' />
 
-      {/* Amount Info */}
-      <Flex
-        direction={isMobile ? 'column' : 'row'}
-        justifyContent='space-between'
-        gap='m'
-      >
+      {/* Sending Section */}
+      <Flex column gap='s'>
         <Text variant='heading' size='s' color='subdued'>
-          {messages.amountToSend}
+          {messages.sending}
         </Text>
-        <Text variant='heading' size='s' css={{ wordBreak: 'break-all' }}>
-          {walletMessages.minus}
-          {formatAmount(amount)} ${tokenInfo.symbol}
-        </Text>
+        <Flex alignItems='center' gap='s'>
+          {/* Token logo would go here */}
+          <Flex direction='column' gap='xs'>
+            <Text variant='body' size='m' color='default' strength='strong'>
+              {tokenInfo.name}
+            </Text>
+            <Text variant='heading' size='s' color='default'>
+              {formatAmount(amount)} ${tokenInfo.symbol}
+            </Text>
+          </Flex>
+        </Flex>
       </Flex>
 
       <Divider orientation='horizontal' />
 
-      {/* Transfer Info */}
-      <Flex column gap='m'>
+      {/* To Recipient Section */}
+      <Flex column gap='s'>
         <Text variant='heading' size='s' color='subdued'>
-          {messages.destinationAddress}
+          {messages.toRecipient}
         </Text>
-        <Text
-          variant='body'
-          size='l'
-          color='default'
-          css={{ wordBreak: 'break-all' }}
-        >
-          {destinationAddress}
-        </Text>
+        {selectedUser ? (
+          <Flex alignItems='center' gap='s'>
+            <Avatar
+              h={32}
+              w={32}
+              src={profilePicture}
+              borderWidth='thin'
+              css={{ flexShrink: 0 }}
+            />
+            <Flex direction='column' flex={1} css={{ minWidth: 0 }}>
+              <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
+                <Text
+                  variant='body'
+                  size='m'
+                  color='default'
+                  ellipses
+                  strength='strong'
+                >
+                  {selectedUser.name}
+                </Text>
+                <UserBadges userId={selectedUser.user_id} size='xs' inline />
+              </Flex>
+              <Text variant='body' size='s' color='subdued' ellipses>
+                @{selectedUser.handle}
+              </Text>
+            </Flex>
+          </Flex>
+        ) : (
+          <Flex column gap='xs'>
+            <Text variant='heading' size='s' color='subdued'>
+              {messages.destinationAddress}
+            </Text>
+            <Text
+              variant='body'
+              size='m'
+              color='default'
+              css={{ wordBreak: 'break-all' }}
+            >
+              {destinationAddress}
+            </Text>
+          </Flex>
+        )}
       </Flex>
 
       {/* Review Details Hint */}
