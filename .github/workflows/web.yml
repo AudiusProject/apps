@@ -347,6 +347,7 @@ jobs:
           path: |
             packages/web/build-production
             packages/web/build-ssr-production
+            node_modules/@brillout/vite-plugin-import-build/dist
           retention-days: 1
 
   web-check-ssr-bundlesize:
