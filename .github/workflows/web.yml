@@ -103,6 +103,7 @@ jobs:
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
+        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: |
@@ -404,7 +405,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .
+          path: |
+            packages/web/build-ssr-production
 
       - name: Check bundlesize
         run: |
@@ -432,7 +434,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: |
+            packages/web/build-production
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
@@ -514,7 +517,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: |
+            packages/web/build-production
 
       - name: Create TAR
         run: |
@@ -553,13 +557,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: |
+            packages/web/build-production
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: .
+          path: |
+            packages/web/build-ssr-production
 
       - name: Move sourcemaps
         run: |
@@ -624,7 +630,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: .
+          path: |
+            packages/web/build-production
 
       - name: Cut Sentry release
         env:
