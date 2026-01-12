@@ -186,8 +186,8 @@ jobs:
       - name: Typecheck
         run: npx turbo run typecheck --filter=@audius/web
 
-  web-build-production:
-    name: Build Production
+  web-build:
+    name: Build
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
     # if: github.ref == 'refs/heads/main'
@@ -254,87 +254,18 @@ jobs:
           npm run build:prod
           cp package.json build-production
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-production
-          path: |
-            packages/web/build-production
-          retention-days: 1
-
-  # Build SSR production bundle
-  web-build-ssr-production:
-    name: Build SSR Production
-    runs-on: ubuntu-latest
-    needs: [web-init, web-lint, web-typecheck]
-    # if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Create concatenated patch file
-        id: patch-file
-        run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
-          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/web/node_modules
-            packages/harmony/node_modules
-            packages/common/node_modules
-            packages/libs/node_modules
-            packages/sdk/node_modules
-          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
-          restore-keys: |
-            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
-
-      - name: Install dependencies (if cache miss)
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        env:
-          CI: true
-          SKIP_POD_INSTALL: true
-          SKIP_ANDROID_INSTALL: true
-          ANDROID_HOME: /tmp/android-sdk-dummy
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: |
-          mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
-
-      - name: Run postinstall (if cache hit)
-        if: steps.cache-node-modules.outputs.cache-hit == 'true'
-        env:
-          CI: true
-          SKIP_POD_INSTALL: true
-          SKIP_ANDROID_INSTALL: true
-          ANDROID_HOME: /tmp/android-sdk-dummy
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: |
-          mkdir -p /tmp/android-sdk-dummy
-          npm run postinstall
-
       - name: Build SSR production
         timeout-minutes: 30
         run: |
           cd packages/web
           npm run build:ssr:prod
 
-      - name: Upload SSR build artifacts
+      - name: Upload builds
         uses: actions/upload-artifact@v4
         with:
-          name: build-ssr-production
+          name: builds
           path: |
+            packages/web/build-production
             packages/web/build-ssr-production
             node_modules/@brillout/vite-plugin-import-build/dist
           retention-days: 1
@@ -401,10 +332,10 @@ jobs:
           mkdir -p /tmp/android-sdk-dummy
           npm run postinstall
 
-      - name: Download SSR build artifacts
+      - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          name: build-ssr-production
+          name: builds
 
       - name: Check bundlesize
         run: |
@@ -428,11 +359,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Download build artifacts
+      - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          pattern: build-*
-          merge-multiple: true
+          name: builds
 
       - name: Debug where artifacts landed
         run: |
@@ -521,15 +451,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Download build artifacts
+      - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          name: build-production
-
-      - name: Create TAR
-        run: |
-          cd packages/web
-          tar -zcvf build-production.tar.gz build-production
+          name: builds
 
       - name: Deploy to S3
         run: |
@@ -558,11 +483,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Download build artifacts
+      - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          pattern: build-*
-          merge-multiple: true
+          name: builds
 
       - name: Move sourcemaps
         run: |
@@ -622,11 +546,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-
-      - name: Download build artifacts
+      - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          name: build-production
+          name: builds
 
       - name: Cut Sentry release
         env:
