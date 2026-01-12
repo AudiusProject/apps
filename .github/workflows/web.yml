@@ -405,7 +405,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
 
       - name: Check bundlesize
         run: |
@@ -433,18 +432,21 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
 
       - name: Move sourcemaps
         run: |
           cd packages/web
           mkdir -p sourcemaps/assets
+          shopt -s nullglob
+          ls -al .
+          ls -al build-production/assets
+          ls -al build-ssr-production/client/assets
+          ls -al build-ssr-production/server/chunks
           mv build-production/assets/*.map sourcemaps/assets
           mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets
           mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets
@@ -515,7 +517,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
 
       - name: Create TAR
         run: |
@@ -554,13 +555,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
 
       - name: Move sourcemaps
         run: |
@@ -625,7 +624,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
 
       - name: Cut Sentry release
         env:
