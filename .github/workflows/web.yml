@@ -431,13 +431,11 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-production
+          name: |
+            build-production
+            build-ssr-production
+          merge-multiple: true
 
-      - name: Download SSR build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-ssr-production
-      
       - name: Debug where artifacts landed
         run: |
           echo "PWD=$(pwd)"
@@ -562,16 +560,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-production
-
-      - name: Download SSR build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-ssr-production
+          name: |
+            build-production
+            build-ssr-production
+          merge-multiple: true
 
       - name: Move sourcemaps
         run: |
