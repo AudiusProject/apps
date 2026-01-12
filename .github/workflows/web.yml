@@ -255,7 +255,7 @@ jobs:
           retention-days: 1
 
   web-build:
-    name: Build
+    name: Web Build
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
     # if: github.ref == 'refs/heads/main'
@@ -339,7 +339,7 @@ jobs:
           retention-days: 1
 
   web-check-ssr-bundlesize:
-    name: Check SSR Bundle Size
+    name: Web Check SSR Bundlesize
     runs-on: ubuntu-latest
     needs: web-build
     # if: github.ref == 'refs/heads/main'
@@ -410,7 +410,7 @@ jobs:
           npm run bundlesize:prod
 
   web-deploy-release-candidate:
-    name: Deploy Release Candidate
+    name: Web Deploy Release Candidate
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
     # if: github.ref == 'refs/heads/main'
@@ -430,27 +430,10 @@ jobs:
         with:
           name: builds
 
-      - name: Debug where artifacts landed
-        run: |
-          echo "PWD=$(pwd)"
-          echo "=== find build-production dirs ==="
-          find . -maxdepth 5 -type d -name "build-production" -print || true
-          echo "=== find build-ssr-production dirs ==="
-          find . -maxdepth 5 -type d -name "build-ssr-production" -print || true
-          echo "=== ls repo root ==="
-          ls -la
-          echo "=== ls packages/web ==="
-          ls -la packages/web
-
       - name: Move sourcemaps
         run: |
           cd packages/web
           mkdir -p sourcemaps/assets
-          shopt -s nullglob
-          ls -al .
-          ls -al build-production/assets
-          ls -al build-ssr-production/client/assets
-          ls -al build-ssr-production/server/chunks
           mv build-production/assets/*.map sourcemaps/assets
           mv build-ssr-production/client/assets/chunks/*.map sourcemaps/assets
           mv build-ssr-production/client/assets/entries/*.map sourcemaps/assets
@@ -474,8 +457,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
-          npm_config_yes=true npx wrangler@4.54.0 publish --env release
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env release
+          npm_config_yes=true npx wrangler@4.54.0 deploy --env release
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -489,7 +472,7 @@ jobs:
           aws s3 sync packages/web/sourcemaps s3://sourcemaps.audius.co --cache-control max-age=604800
 
   web-deploy-s3:
-    name: Deploy Production to S3
+    name: Web Deploy S3
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
     if: github.ref == 'refs/heads/main'
@@ -533,7 +516,7 @@ jobs:
           aws cloudfront create-invalidation --distribution-id E1ZJ9Z971FJQJ8 --paths "/*"
 
   web-deploy:
-    name: Deploy Production
+    name: Web Deploy
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
     if: github.ref == 'refs/heads/main'
@@ -595,7 +578,7 @@ jobs:
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
 
   web-deploy-sentry-sourcemaps:
-    name: Deploy Sentry Sourcemaps
+    name: Web Deploy Sentry Sourcemaps
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
     if: github.ref == 'refs/heads/main'
