@@ -213,11 +213,22 @@ jobs:
           
           # Add GitHub to known_hosts
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
           
           # Add SSH private key for accessing certs-and-profiles repository
+          # Write key and remove any carriage returns (works on both macOS and Linux)
           echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          
+          # Verify key is valid before adding to agent
+          if ! ssh-keygen -l -f ~/.ssh/id_rsa > /dev/null 2>&1; then
+            echo "Error: SSH key format is invalid"
+            exit 1
+          fi
+          
+          # Add key to agent
           ssh-add ~/.ssh/id_rsa
           
           # Configure git to use SSH
@@ -514,11 +525,22 @@ jobs:
           
           # Add GitHub to known_hosts
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
           
           # Add SSH private key for accessing certs-and-profiles repository
+          # Write key and remove any carriage returns (works on both macOS and Linux)
           echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          
+          # Verify key is valid before adding to agent
+          if ! ssh-keygen -l -f ~/.ssh/id_rsa > /dev/null 2>&1; then
+            echo "Error: SSH key format is invalid"
+            exit 1
+          fi
+          
+          # Add key to agent
           ssh-add ~/.ssh/id_rsa
           
           # Configure git to use SSH
