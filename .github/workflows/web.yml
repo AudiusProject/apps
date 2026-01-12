@@ -431,9 +431,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: |
-            build-production
-            build-ssr-production
+          pattern: build-*
           merge-multiple: true
 
       - name: Debug where artifacts landed
@@ -563,9 +561,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: |
-            build-production
-            build-ssr-production
+          pattern: build-*
           merge-multiple: true
 
       - name: Move sourcemaps
