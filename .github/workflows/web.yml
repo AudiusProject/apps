@@ -437,6 +437,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
+      
+      - name: Debug where artifacts landed
+        run: |
+          echo "PWD=$(pwd)"
+          echo "=== find build-production dirs ==="
+          find . -maxdepth 5 -type d -name "build-production" -print || true
+          echo "=== find build-ssr-production dirs ==="
+          find . -maxdepth 5 -type d -name "build-ssr-production" -print || true
+          echo "=== ls repo root ==="
+          ls -la
+          echo "=== ls packages/web ==="
+          ls -la packages/web
 
       - name: Move sourcemaps
         run: |
