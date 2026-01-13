@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 # TODO: Run nethermind in a container called `chain` like https://github.com/AudiusProject/audius-docker-compose/blob/main/discovery-provider/docker-compose.yml#L247
 # This has never existed locally but seems to break discovery indexing when signing up now (was previously working)
@@ -6,26 +6,30 @@ version: '3.9'
 x-common: &common
   logging:
     options:
-      max-size: '50m'
-      max-file: '3'
+      max-size: "50m"
+      max-file: "3"
     driver: json-file
   extra_hosts:
     # Allows the containers can talk to each other via their hostnames routed through nginx
-    - 'audius-comms-1:host-gateway'
-    - 'audius-comms-2:host-gateway'
-    - 'audius-comms-3:host-gateway'
-    - 'audius-creator-node-1:host-gateway'
-    - 'audius-creator-node-2:host-gateway'
-    - 'audius-creator-node-3:host-gateway'
-    - 'audius-discovery-provider-1:host-gateway'
-    - 'audius-discovery-provider-2:host-gateway'
-    - 'audius-discovery-provider-3:host-gateway'
-    - 'audius-identity-service-1:host-gateway'
-    - 'audius-solana-test-validator-1:host-gateway'
-    - 'audius-eth-ganache-1:host-gateway'
-    - 'audius-pedalboard:host-gateway'
-    - 'audius-api:host-gateway'
-    - 'audius-api-elasticsearch:host-gateway'
+    - "audius-comms-1:host-gateway"
+    - "audius-comms-2:host-gateway"
+    - "audius-comms-3:host-gateway"
+    - "audius-creator-node-1:host-gateway"
+    - "audius-creator-node-2:host-gateway"
+    - "audius-creator-node-3:host-gateway"
+    - "audius-discovery-provider-1:host-gateway"
+    - "audius-discovery-provider-2:host-gateway"
+    - "audius-discovery-provider-3:host-gateway"
+    - "audius-identity-service-1:host-gateway"
+    - "audius-solana-test-validator-1:host-gateway"
+    - "audius-eth-ganache-1:host-gateway"
+    - "audius-pedalboard:host-gateway"
+    - "audius-api:host-gateway"
+    - "audius-api-elasticsearch:host-gateway"
+    - "node1.oap.devnet:host-gateway"
+    - "node2.oap.devnet:host-gateway"
+    - "node3.oap.devnet:host-gateway"
+    - "node4.oap.devnet:host-gateway"
   deploy:
     resources:
       limits:
@@ -48,15 +52,15 @@ services:
       - 5432:5432
       - 5454:5432
     environment:
-      PGUSER: 'postgres'
-      POSTGRES_PASSWORD: 'postgres'
+      PGUSER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
     volumes:
       - ../startup/initdb:/docker-entrypoint-initdb.d
       - postgresdata:/var/lib/postgresql/data
     <<: *common
     healthcheck:
       # identity_service is the last db to be created in init-db.sql
-      test: ['CMD', 'pg_isready', '--dbname', 'identity_service']
+      test: ["CMD", "pg_isready", "--dbname", "identity_service"]
       interval: 10s
       timeout: 5s
 
@@ -85,41 +89,30 @@ services:
       - ${PROJECT_ROOT}/dev-tools/environment/api.env
     <<: *common
 
-  # Validators
-  audiusd-1:
+  # Validator Nodes
+  openaudio-1:
     extends:
-      file: docker-compose.audiusd.yml
-      service: audiusd
-    container_name: audiusd-1
-    env_file:
-      - ${PROJECT_ROOT}/dev-tools/environment/audiusd-1.env
+      file: docker-compose.oap.yml
+      service: openaudio-1
+    container_name: openaudio-1
     <<: *common
-
-  audiusd-2:
+  openaudio-2:
     extends:
-      file: docker-compose.audiusd.yml
-      service: audiusd
-    container_name: audiusd-2
-    env_file:
-      - ${PROJECT_ROOT}/dev-tools/environment/audiusd-2.env
+      file: docker-compose.oap.yml
+      service: openaudio-2
+    container_name: openaudio-2
     <<: *common
-
-  audiusd-3:
+  openaudio-3:
     extends:
-      file: docker-compose.audiusd.yml
-      service: audiusd
-    container_name: audiusd-3
-    env_file:
-      - ${PROJECT_ROOT}/dev-tools/environment/audiusd-3.env
+      file: docker-compose.oap.yml
+      service: openaudio-3
+    container_name: openaudio-3
     <<: *common
-
-  audiusd-4:
+  openaudio-4:
     extends:
-      file: docker-compose.audiusd.yml
-      service: audiusd
-    container_name: audiusd-4
-    env_file:
-      - ${PROJECT_ROOT}/dev-tools/environment/audiusd-4.env
+      file: docker-compose.oap.yml
+      service: openaudio-4
+    container_name: openaudio-4
     <<: *common
 
   # Identity

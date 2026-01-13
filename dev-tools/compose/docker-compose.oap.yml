@@ -1,0 +1,100 @@
+services:
+  openaudio-1:
+    image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
+    restart: unless-stopped
+    env_file:
+      - ../environment/openaudio-1.env
+    extra_hosts:
+      - "node1.oap.devnet:host-gateway"
+      - "node2.oap.devnet:host-gateway"
+      - "node3.oap.devnet:host-gateway"
+      - "node4.oap.devnet:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://node1.oap.devnet/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./cmd:/app/cmd
+      - ./pkg:/app/pkg
+      - ./go.mod:/app/go.mod
+      - ./go.sum:/app/go.sum
+    profiles:
+      - discovery
+      - storage
+
+  openaudio-2:
+    image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
+    restart: unless-stopped
+    env_file:
+      - ../environment/openaudio-2.env
+    extra_hosts:
+      - "node1.oap.devnet:host-gateway"
+      - "node2.oap.devnet:host-gateway"
+      - "node3.oap.devnet:host-gateway"
+      - "node4.oap.devnet:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://node2.oap.devnet/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./cmd:/app/cmd
+      - ./pkg:/app/pkg
+      - ./go.mod:/app/go.mod
+      - ./go.sum:/app/go.sum
+    profiles:
+      - discovery
+      - storage
+
+  openaudio-3:
+    image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
+    restart: unless-stopped
+    env_file:
+      - ../environment/openaudio-3.env
+    extra_hosts:
+      - "node1.oap.devnet:host-gateway"
+      - "node2.oap.devnet:host-gateway"
+      - "node3.oap.devnet:host-gateway"
+      - "node4.oap.devnet:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://node3.oap.devnet/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./cmd:/app/cmd
+      - ./pkg:/app/pkg
+      - ./go.mod:/app/go.mod
+      - ./go.sum:/app/go.sum
+    profiles:
+      - discovery
+      - storage
+
+  openaudio-4:
+    image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
+    restart: unless-stopped
+    env_file:
+      - ../environment/openaudio-4.env
+    extra_hosts:
+      - "node1.oap.devnet:host-gateway"
+      - "node2.oap.devnet:host-gateway"
+      - "node3.oap.devnet:host-gateway"
+      - "node4.oap.devnet:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://node4.oap.devnet/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./cmd:/app/cmd
+      - ./pkg:/app/pkg
+      - ./go.mod:/app/go.mod
+      - ./go.sum:/app/go.sum
+    profiles:
+      - discovery
+      - storage
