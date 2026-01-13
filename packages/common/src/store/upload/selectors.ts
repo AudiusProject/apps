@@ -5,11 +5,8 @@ import { CommonState } from '../commonStore'
 import { ProgressState, ProgressStatus } from './types'
 
 export const getStems = (state: CommonState) => state.upload.stems
-export const getUploadProgress = (state: CommonState) =>
-  state.upload.uploadProgress
 export const getUploadSuccess = (state: CommonState) => state.upload.success
 export const getUploadError = (state: CommonState) => state.upload.error
-export const getTracks = (state: CommonState) => state.upload.tracks
 export const getIsUploading = (state: CommonState) => state.upload.uploading
 export const getFormState = (state: CommonState) => state.upload.formState
 
@@ -62,7 +59,7 @@ const trackProgressSummary = (
  * as a percentage between [0, 1]
  */
 const getKeyUploadProgress = (state: CommonState, key: 'art' | 'audio') => {
-  const uploadProgress = getUploadProgress(state)
+  const uploadProgress = state.upload.uploadProgress
   if (uploadProgress == null) return 0
 
   const filteredProgress = uploadProgress.filter((progress) => key in progress)

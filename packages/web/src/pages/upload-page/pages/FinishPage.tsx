@@ -149,18 +149,18 @@ export const FinishPage = (props: FinishPageProps) => {
       case UploadType.PLAYLIST:
         return messages.visitPlaylist
       default:
-        if (!upload.tracks || upload.tracks.length > 1) {
+        if (!formState.tracks || formState.tracks.length > 1) {
           return messages.visitProfile
         } else {
           return messages.visitTrack
         }
     }
-  }, [upload.tracks, uploadType])
+  }, [formState.tracks, uploadType])
 
   const visitButtonPath = useUploadCompletionRoute({
+    id: upload.completionId,
     uploadType,
-    upload,
-    accountHandle: accountHandle as string | null
+    accountHandle: accountHandle!
   })
 
   const handleViewUpload = useCallback(() => {
@@ -169,9 +169,9 @@ export const FinishPage = (props: FinishPageProps) => {
   }, [dispatch, uploadType, onContinue])
 
   const isUnlistedTrack =
-    (upload.tracks &&
-      upload.tracks.length === 1 &&
-      upload.tracks[0].metadata.is_unlisted) ??
+    (formState.tracks &&
+      formState.tracks.length === 1 &&
+      formState.tracks[0].metadata.is_unlisted) ??
     false
 
   return (

@@ -3,11 +3,9 @@ import { NativeFile } from '@audius/sdk'
 import { CollectionValues } from '~/schemas'
 
 import {
-  Collection,
   CollectionMetadata,
   StemUpload,
   StemUploadWithFile,
-  Track,
   TrackMetadata
 } from '../../models'
 import { Nullable } from '../../utils/typeUtils'
@@ -23,6 +21,7 @@ export enum UploadType {
  * Represents a track file, its metadata prior to upload, and a preview.
  */
 export interface TrackForUpload {
+  clientId: string
   file: File | NativeFile
   preview?: any // Basically the Howler.js API, but with underscores.
   metadata: TrackMetadataForUpload
@@ -66,19 +65,44 @@ export interface TrackMetadataForUpload
  * and track details to be passed to its descendant tracks.
  */
 export interface CollectionMetadataForUpload
-  extends Omit<CollectionMetadata, 'artwork'> {
-  artwork?:
-    | Nullable<{
-        file?: Blob | NativeFile
-        url: string
-        source?: string
-      }>
-    | CollectionMetadata['artwork']
+  extends Omit<
+    CollectionMetadata,
+    | 'artwork'
+    | 'blocknumber'
+    | 'is_repost_of_repost'
+    | 'is_delete'
+    | 'followee_reposts'
+    | 'followee_saves'
+    | 'has_current_user_reposted'
+    | 'has_current_user_saved'
+    | 'created_at'
+    | 'save_count'
+    | 'repost_count'
+    | 'cover_art'
+    | 'cover_art_sizes'
+    | 'access'
+    | 'permalink'
+    | 'track_count'
+    | 'playlist_owner_id'
+    | 'updated_at'
+    | 'variant'
+    | 'tracks'
+  > {
+  artwork?: Nullable<{
+    file?: Blob | NativeFile
+  }>
   trackDetails: {
     genre: string
     mood: string
     tags: string
   }
+  field_visibility?: {
+    mood: boolean
+    tags: boolean
+    genre: boolean
+    share: boolean
+  }
+  tracks: (TrackForUpload | TrackForEdit)[]
 }
 
 export enum ProgressStatus {
@@ -104,6 +128,7 @@ export type Progress = {
 }
 
 export type ProgressState = {
+  clientId: string
   /** The progress of the artwork upload. */
   art: Progress
   /** The progress of the audio track upload. */
@@ -136,7 +161,6 @@ export type UploadFormState =
 
 type UploadStateBase = {
   openMultiTrackNotification: boolean
-  tracks: Nullable<TrackForUpload[]>
   metadata: Nullable<CollectionValues>
   uploading: boolean
   uploadProgress: Nullable<ProgressState[]>
@@ -150,12 +174,10 @@ type UploadStateBase = {
 
 type UploadStateForTracks = UploadStateBase & {
   uploadType: UploadType.INDIVIDUAL_TRACK | UploadType.INDIVIDUAL_TRACKS | null
-  completedEntity?: Track
 }
 
 type UploadStateForCollection = UploadStateBase & {
   uploadType: UploadType.ALBUM | UploadType.PLAYLIST | null
-  completedEntity?: Collection
 }
 
 /** The type for the upload reducer state of the store. */

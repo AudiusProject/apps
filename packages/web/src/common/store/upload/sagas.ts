@@ -950,10 +950,7 @@ export function* uploadCollection(
       function* (confirmedPlaylist: Collection) {
         yield* put(
           uploadActions.uploadTracksSucceeded({
-            id: confirmedPlaylist.playlist_id,
-            trackMetadatas: [],
-            completedEntity: confirmedPlaylist,
-            uploadType
+            id: confirmedPlaylist.playlist_id
           })
         )
         const user = yield* queryUser(userId)
@@ -1094,10 +1091,7 @@ export function* uploadMultipleTracks(
   // At this point, the upload was success! The rest is metrics.
   yield* put(
     uploadActions.uploadTracksSucceeded({
-      id: newTracks[0].track_id,
-      trackMetadatas: newTracks,
-      completedEntity: newTracks[0],
-      uploadType
+      id: newTracks[0].track_id
     })
   )
 
