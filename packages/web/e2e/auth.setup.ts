@@ -1,5 +1,6 @@
-import { expect } from '@playwright/test'
 import fs from 'fs'
+
+import { expect } from '@playwright/test'
 
 import { getUser } from './data'
 import { test as setup } from './test'
