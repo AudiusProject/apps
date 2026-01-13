@@ -127,8 +127,18 @@ const TrackRow = (props: TrackRowProps) => {
       const newTracks = [...values.tracks]
       newTrackMetadatas.splice(index, 1)
       newTracks.splice(index, 1)
-      const newIndex =
-        selectedIndex === index ? Math.max(index - 1, 0) : selectedIndex
+      // Calculate new index correctly
+      let newIndex = selectedIndex
+      if (selectedIndex === index) {
+        // If removing the selected track, move to the previous one (or 0)
+        newIndex = Math.max(index - 1, 0)
+      } else if (selectedIndex > index) {
+        // If removing a track before the selected one, shift the index down
+        newIndex = selectedIndex - 1
+      }
+      // Clamp to the new array bounds
+      newIndex = Math.min(newIndex, newTrackMetadatas.length - 1)
+
       setValues({
         ...values,
         tracks: newTracks,
