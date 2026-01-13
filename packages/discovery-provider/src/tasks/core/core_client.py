@@ -76,7 +76,7 @@ class AudiusdClient(CoreClient):
     def get_audiusd_endpoint(self) -> str:
         if environment == "prod" or environment == "stage":
             return "core:50051"
-        return "audiusd-1:50051"
+        return "openaudio-1:50051"
 
     def get_core_endpoint(self) -> str:
         # For compatibility with CoreClient interface
