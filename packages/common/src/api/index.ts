@@ -182,3 +182,9 @@ export * from './tan-query/authorized-apps/useRemoveAuthorizedApp'
 
 // Coins
 export * from './tan-query/coins'
+
+// Uploads
+export * from './tan-query/upload/useUploadFiles'
+export * from './tan-query/upload/useUploadStatus'
+export * from './tan-query/upload/usePublishTracks'
+export * from './tan-query/upload/usePublishCollection'
