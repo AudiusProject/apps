@@ -513,7 +513,7 @@ jobs:
         run: |
           cd packages/web
           npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env release
-          npm_config_yes=true npx wrangler@4.54.0 deploy --env release
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./wrangler.toml --env release
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -608,8 +608,8 @@ jobs:
           restore-keys: |
             npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
 
-      - name: Install dependencies (if cache miss)
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      - name: Install dependencies (regardless of cache status)
+        # if: steps.cache-node-modules.outputs.cache-hit != 'true'
         env:
           CI: true
           SKIP_POD_INSTALL: true
@@ -618,19 +618,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
-
-      - name: Run postinstall (if cache hit)
-        if: steps.cache-node-modules.outputs.cache-hit == 'true'
-        env:
-          CI: true
-          SKIP_POD_INSTALL: true
-          SKIP_ANDROID_INSTALL: true
-          ANDROID_HOME: /tmp/android-sdk-dummy
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: |
-          mkdir -p /tmp/android-sdk-dummy
-          npm run postinstall
+          npm i
 
       - name: Download builds
         uses: actions/download-artifact@v4
@@ -666,7 +654,7 @@ jobs:
         run: |
           cd packages/web
           npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
-          npm_config_yes=true npx wrangler@4.54.0 publish --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./wrangler.toml --env production
 
       - name: Slack notification
         if: success()
