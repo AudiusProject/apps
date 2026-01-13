@@ -237,6 +237,7 @@ export class TracksApi extends GeneratedTracksApi {
         cid: '',
         data: {
           ...snakecaseKeys(metadata),
+          owner_id: decodedUserId,
           download_conditions:
             metadata.downloadConditions &&
             snakecaseKeys(metadata.downloadConditions),

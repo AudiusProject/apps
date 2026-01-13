@@ -1,9 +1,10 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import FormData from 'form-data'
+import * as tus from 'tus-js-client'
 
 import { productionConfig } from '../../config/production'
 import { isNodeFile } from '../../types/File'
-import type { CrossPlatformFile as File } from '../../types/File'
+import type { CrossPlatformFile } from '../../types/File'
 import fetch from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
 import { wait } from '../../utils/wait'
@@ -12,6 +13,7 @@ import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
 import { getDefaultStorageServiceConfig } from './getDefaultConfig'
 import type {
+  FileMetadata,
   FileTemplate,
   ProgressHandler,
   StorageService,
@@ -56,7 +58,7 @@ export class Storage implements StorageService {
     template,
     options = {}
   }: {
-    file: File
+    file: CrossPlatformFile
     onProgress?: ProgressHandler
     template: FileTemplate
     options?: { [key: string]: string }
@@ -139,6 +141,66 @@ export class Storage implements StorageService {
       template,
       onProgress
     )
+  }
+
+  async uploadFileV2({
+    file,
+    onProgress,
+    metadata
+  }: {
+    file: File
+    onProgress: (loadedBytes: number, totalBytes: number) => void
+    metadata: FileMetadata
+  }): Promise<string> {
+    const selectedNode = await this.storageNodeSelector.getSelectedNode()
+    if (!selectedNode) {
+      throw new Error('No node available')
+    }
+    return new Promise((resolve, reject) => {
+      const upload = new tus.Upload(file, {
+        endpoint: `${selectedNode}/files/`,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        metadata: {
+          filename: file.name,
+          filetype: file.type,
+          ...metadata
+        },
+        onError: (error) => {
+          reject(error)
+        },
+        onProgress,
+        onSuccess: () => {
+          const uploadId = upload.url?.split('/').pop()
+          if (!uploadId) {
+            reject(new Error('No upload ID received'))
+            return
+          }
+          resolve(uploadId)
+        }
+      })
+
+      upload.findPreviousUploads().then((previousUploads) => {
+        if (previousUploads.length && previousUploads[0]) {
+          upload.resumeFromPreviousUpload(previousUploads[0])
+        }
+        upload.start()
+      })
+    })
+  }
+
+  async getUploadStatus(uploadId: string): Promise<UploadResponse> {
+    const selectedNode = await this.storageNodeSelector.getSelectedNode()
+    if (!selectedNode) {
+      throw new Error('No node available')
+    }
+
+    const response = await fetch(`${selectedNode}/uploads/${uploadId}`)
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get upload status for uploadId ${uploadId}, status: ${response.status}`
+      )
+    }
+    return await response.json()
   }
 
   /**

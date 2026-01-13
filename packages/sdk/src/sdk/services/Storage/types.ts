@@ -1,4 +1,4 @@
-import type { CrossPlatformFile as File } from '../../types/File'
+import type { CrossPlatformFile } from '../../types/File'
 import type { LoggerService } from '../Logger'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
@@ -43,11 +43,21 @@ export type StorageService = {
     template,
     options
   }: {
-    file: File
+    file: CrossPlatformFile
     onProgress?: ProgressHandler
     template: FileTemplate
     options?: { [key: string]: string }
   }) => Promise<UploadResponse>
+  uploadFileV2: ({
+    file,
+    onProgress,
+    metadata
+  }: {
+    file: File
+    onProgress: (loadedBytes: number, totalBytes: number) => void
+    metadata: FileMetadata
+  }) => Promise<string>
+  getUploadStatus: (uploadId: string) => Promise<UploadResponse>
   generatePreview: ({
     cid,
     secondOffset
@@ -65,6 +75,7 @@ export type ProcessingStatus =
   | 'retranscode_preview'
   | 'busy_retranscode_preview'
   | 'error_retranscode_preview'
+  | 'timeout'
 
 export type UploadResponse = {
   id: string
@@ -84,4 +95,13 @@ export type UploadResponse = {
     }
   }
   transcode_progress?: number
+}
+
+export type FileMetadata = {
+  filename?: string
+  filetype?: string
+  template: 'audio' | 'img_square' | 'img_backdrop'
+  userWallet?: string
+  previewStartSeconds?: string
+  placementHosts?: string
 }
