@@ -20,9 +20,14 @@ export const getUserCoinQueryKey = (mint: string, userId?: ID | null) =>
     mint
   ] as unknown as QueryKey<UserCoinWithAccounts | null>
 
+export type UseUserCoinOptions<TResult> = SelectableQueryOptions<
+  UserCoinWithAccounts | null,
+  TResult
+>
+
 export const useUserCoin = <TResult = UserCoinWithAccounts | null>(
   params: UseUserCoinParams,
-  options?: SelectableQueryOptions<UserCoinWithAccounts | null, TResult>
+  options?: UseUserCoinOptions<TResult>
 ) => {
   const { audiusSdk, env } = useQueryContext()
   // Default to current user if no userId is provided

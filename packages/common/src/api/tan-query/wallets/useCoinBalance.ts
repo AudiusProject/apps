@@ -4,14 +4,14 @@ import {
   useAudioBalance,
   useCurrentAccountUser,
   useUser,
-  useUserCoin
+  useUserCoin,
+  type UseAudioBalanceOptions,
+  type UseUserCoinOptions
 } from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
 
-import { QueryOptions } from '../types'
-
-import { useUSDCBalance } from './useUSDCBalance'
+import { useUSDCBalance, type UseUSDCBalanceOptions } from './useUSDCBalance'
 
 const USDC_DECIMALS = 6
 const WEI_DECIMALS = 18
@@ -41,7 +41,9 @@ export const useCoinBalance = ({
   includeStaked?: boolean
   pollingInterval?: number
   walletAddress?: string
-} & QueryOptions) => {
+} & UseAudioBalanceOptions &
+  UseUserCoinOptions<any> &
+  UseUSDCBalanceOptions<any>) => {
   const { env } = useQueryContext()
   const { data: userById } = useUser(userId)
   const { data: currentUser } = useCurrentAccountUser({ enabled: !userId })
