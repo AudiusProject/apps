@@ -12,6 +12,7 @@ import manifestJSON from '__STATIC_CONTENT_MANIFEST'
 import { Toucan } from 'toucan-js'
 import { renderPage } from 'vike/server'
 try {
+  // @ts-ignore
   await import('../../build-ssr/server/entry.mjs')
 } catch (e) {
   // ok in dev / when SSR build hasn't been produced yet
