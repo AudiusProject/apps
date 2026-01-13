@@ -108,6 +108,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up SSH for Fastlane Match (test early)
+        run: |
+          # Set up SSH agent
+          eval "$(ssh-agent -s)"
+          
+          # Add GitHub to known_hosts
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Add SSH private key for accessing certs-and-profiles repository
+          # Check if secret is set
+          if [[ -z "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" ]]; then
+            echo "Error: GITHUB_SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          
+          # Write key and remove any carriage returns (works on both macOS and Linux)
+          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add key to agent (will provide detailed error if format is wrong)
+          ssh-add ~/.ssh/id_rsa
+          
+          # Configure git to use SSH
+          git config --global user.email "audius-infra@audius.co"
+          git config --global user.name "audius-infra"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -205,35 +234,6 @@ jobs:
 
       - name: Copy production env to iOS
         run: cp packages/mobile/.env.prod packages/mobile/ios/
-
-      - name: Set up SSH for Fastlane Match
-        run: |
-          # Set up SSH agent
-          eval "$(ssh-agent -s)"
-          
-          # Add GitHub to known_hosts
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          
-          # Add SSH private key for accessing certs-and-profiles repository
-          # Write key and remove any carriage returns (works on both macOS and Linux)
-          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # Verify key is valid before adding to agent
-          if ! ssh-keygen -l -f ~/.ssh/id_rsa > /dev/null 2>&1; then
-            echo "Error: SSH key format is invalid"
-            exit 1
-          fi
-          
-          # Add key to agent
-          ssh-add ~/.ssh/id_rsa
-          
-          # Configure git to use SSH
-          git config --global user.email "audius-infra@audius.co"
-          git config --global user.name "audius-infra"
 
       - name: Build and upload iOS (Release Candidate)
         timeout-minutes: 60
@@ -420,6 +420,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up SSH for Fastlane Match (test early)
+        run: |
+          # Set up SSH agent
+          eval "$(ssh-agent -s)"
+          
+          # Add GitHub to known_hosts
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Add SSH private key for accessing certs-and-profiles repository
+          # Check if secret is set
+          if [[ -z "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" ]]; then
+            echo "Error: GITHUB_SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          
+          # Write key and remove any carriage returns (works on both macOS and Linux)
+          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add key to agent (will provide detailed error if format is wrong)
+          ssh-add ~/.ssh/id_rsa
+          
+          # Configure git to use SSH
+          git config --global user.email "audius-infra@audius.co"
+          git config --global user.name "audius-infra"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -517,35 +546,6 @@ jobs:
 
       - name: Copy production env to iOS
         run: cp packages/mobile/.env.prod packages/mobile/ios/
-
-      - name: Set up SSH for Fastlane Match
-        run: |
-          # Set up SSH agent
-          eval "$(ssh-agent -s)"
-          
-          # Add GitHub to known_hosts
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          
-          # Add SSH private key for accessing certs-and-profiles repository
-          # Write key and remove any carriage returns (works on both macOS and Linux)
-          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # Verify key is valid before adding to agent
-          if ! ssh-keygen -l -f ~/.ssh/id_rsa > /dev/null 2>&1; then
-            echo "Error: SSH key format is invalid"
-            exit 1
-          fi
-          
-          # Add key to agent
-          ssh-add ~/.ssh/id_rsa
-          
-          # Configure git to use SSH
-          git config --global user.email "audius-infra@audius.co"
-          git config --global user.name "audius-infra"
 
       - name: Build and upload iOS (Production)
         timeout-minutes: 60
