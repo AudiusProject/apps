@@ -265,7 +265,7 @@ jobs:
     name: Web Build
     runs-on: ubuntu-latest
     needs: [web-init, web-lint, web-typecheck]
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -350,7 +350,7 @@ jobs:
     name: Web Check SSR Bundlesize
     runs-on: ubuntu-latest
     needs: web-build
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -422,7 +422,7 @@ jobs:
     name: Web Deploy Release Candidate
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     environment:
       name: release
     steps:
