@@ -325,6 +325,7 @@ export const createCollectionSchema = (collectionType: 'playlist' | 'album') =>
  * - Playlist ID isn't on the schema.
  * - Artwork is more than just a URL.
  * - Tracks are full TrackForUploads, not just titles.
+ * - Then some extra optional Collection fields so that the adapters for SDK are happy.
  */
 type UnvalidatedCollectionMetadata = {
   playlist_id?: number
@@ -337,6 +338,12 @@ type UnvalidatedCollectionMetadata = {
     | null
   tracks: (TrackForUpload | TrackForEdit)[]
   playlist_contents?: Collection['playlist_contents']
+  upc?: string
+  license?: string
+  ddex_app?: string
+  copyright_line?: Collection['copyright_line']
+  producer_copyright_line?: Collection['producer_copyright_line']
+  parental_warning_type?: Collection['parental_warning_type']
 }
 
 export const PlaylistSchema = createCollectionSchema('playlist')
