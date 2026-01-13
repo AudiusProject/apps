@@ -1,5 +1,0 @@
-.tooltip :global(.ant-tooltip-inner) {
-  padding: 0px;
-  overflow: hidden;
-  border-radius: 8px;
-}

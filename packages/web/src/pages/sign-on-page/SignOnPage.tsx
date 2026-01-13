@@ -139,7 +139,7 @@ const DesktopSignOnRoot = (props: RootProps) => {
           css={{
             maxWidth: isExpanded ? '100%' : 584,
             minWidth: 400,
-            background: 'white',
+            background: color.background.white,
             zIndex: 1,
             transition: `width ${motion.expressive}`
           }}

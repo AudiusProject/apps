@@ -20,6 +20,7 @@ import { useWindowSize } from 'react-use'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import audiusLogoColored from 'assets/img/audiusLogoColored.png'
+import audiusLogoWhite from 'assets/img/audiusLogoWhite.png'
 import { setValueField, signIn } from 'common/store/pages/signon/actions'
 import {
   getEmailField,
@@ -37,6 +38,7 @@ import { ForgotPasswordModal } from 'pages/sign-up-page/components/ForgotPasswor
 import { Heading, ScrollView } from 'pages/sign-up-page/components/layout'
 import { identify } from 'services/analytics'
 import { useSelector } from 'utils/reducer'
+import { isDarkMode } from 'utils/theme/theme'
 
 import { SignInWithMetaMaskButton } from './SignInWithMetaMaskButton'
 
@@ -116,7 +118,7 @@ export const SignInPage = () => {
                 <IconAudiusLogoHorizontalColor />
               ) : (
                 <PreloadImage
-                  src={audiusLogoColored}
+                  src={isDarkMode() ? audiusLogoWhite : audiusLogoColored}
                   alt='Audius Logo'
                   css={{
                     height: 160,

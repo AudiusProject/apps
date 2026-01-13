@@ -36,8 +36,8 @@
     "typecheck:watch": "tsc --watch",
     "typecheck": "tsc",
     "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:stylelint\"",
-    "worker-ssr:dev": "npx wrangler dev --env test --config ./src/ssr/wrangler.toml",
-    "worker:dev": "npx wrangler dev --env test",
+    "worker-ssr:dev": "npx wrangler@4.54.0 dev --env release --config ./src/ssr/wrangler.toml",
+    "worker:dev": "npx wrangler@4.54.0 dev --env test",
     "write-sha": "./scripts/writeSHA.sh",
     "pw-ui": "npx playwright test --ui",
     "pw": "npx playwright test",
@@ -267,7 +267,6 @@
     "vite-plugin-glslify": "2.0.2",
     "vite-plugin-node-polyfills": "^0.15.0",
     "vite-plugin-svgr": "4.1.0",
-    "vitest": "^3.2.4",
-    "wrangler": "4.54.0"
+    "vitest": "^3.2.4"
   }
 }

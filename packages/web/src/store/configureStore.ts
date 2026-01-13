@@ -12,7 +12,7 @@ import { queryClient } from 'services/query-client'
 import * as errorActions from 'store/errors/actions'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import createRootReducer from 'store/reducers'
-import rootSaga, { testRootSaga } from 'store/sagas'
+import rootSaga from 'store/sagas'
 
 import { navigationMiddleware } from './navigationMiddleware'
 import { buildStoreContext } from './storeContext'

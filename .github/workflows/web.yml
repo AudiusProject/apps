@@ -243,6 +243,18 @@ jobs:
           mkdir -p /tmp/android-sdk-dummy
           npm ci --prefer-offline
 
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
+
       - name: Build production
         timeout-minutes: 30
         run: |
@@ -274,6 +286,51 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
 
       - name: Build SSR production
         timeout-minutes: 30
@@ -307,12 +364,57 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Check bundlesize
         run: |
@@ -336,18 +438,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -378,8 +479,8 @@ jobs:
         run: |
           cd packages/web
           echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env release
-          npx wrangler publish --config ./src/ssr/wrangler.toml --env release
-          npx wrangler publish --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env release
+          npm_config_yes=true npx wrangler@4.54.0 publish --env release
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -425,7 +526,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Create TAR
         run: |
@@ -465,13 +566,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Download SSR build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-ssr-production
-          path: packages/web
+          path: .
 
       - name: Move sourcemaps
         run: |
@@ -502,8 +603,8 @@ jobs:
         run: |
           cd packages/web
           echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env production
-          npx wrangler publish --config ./src/ssr/wrangler.toml --env production
-          npx wrangler publish --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
+          npm_config_yes=true npx wrangler@4.54.0 publish --env production
 
       - name: Slack notification
         if: success()
@@ -538,7 +639,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-production
-          path: packages/web
+          path: .
 
       - name: Cut Sentry release
         env:

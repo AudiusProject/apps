@@ -50,18 +50,6 @@
   width: 100%;
 }
 
-/* Shrink Header Row Height */
-:global(.ant-table-thead > tr > th) {
-  line-height: 1 !important;
-  padding-top: 14px !important;
-  padding-bottom: 14px !important;
-}
-
-/* No border bottom on last row */
-:global(.ant-table-tbody > tr:last-child td) {
-  border-bottom: none;
-}
-
 .spinner {
   background-color: var(--harmony-white);
   width: 100%;

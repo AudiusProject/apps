@@ -3,7 +3,6 @@ import { ReactNode } from 'react'
 import { Flex, Text, useTheme, Tooltip } from '@audius/harmony'
 
 import { getPercentageComplete } from './ProfileCompletionHeroCard'
-import styles from './ProfileCompletionTooltip.module.css'
 import { TaskCompletionList } from './TaskCompletionList'
 import { CompletionStages } from './types'
 
@@ -62,7 +61,6 @@ export const ProfileCompletionTooltip = ({
     <Tooltip
       color='secondary'
       shouldWrapContent={false}
-      className={styles.tooltip}
       disabled={isDisabled}
       mouseEnterDelay={0.1}
       shouldDismissOnClick={shouldDismissOnClick}

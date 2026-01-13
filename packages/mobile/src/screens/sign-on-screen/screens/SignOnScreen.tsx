@@ -21,7 +21,8 @@ import { usePrevious } from 'react-use'
 
 import {
   Flex,
-  IconAudiusLogoHorizontalColor,
+  IconAudiusLogoHorizontalColorNew,
+  IconAudiusLogoHorizontalNew,
   Paper,
   RadialGradient,
   Text,
@@ -157,6 +158,7 @@ type SignOnScreenProps = {
  */
 export const SignOnScreen = (props: SignOnScreenProps) => {
   const { isSplashScreenDismissed } = props
+  const theme = useTheme()
   const { params } = useRoute<RouteProp<SignOnScreenParamList, 'SignOn'>>()
   const {
     screen: screenParam = 'sign-up',
@@ -185,9 +187,17 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
       {isSplashScreenDismissed ? (
         <Flex flex={1} style={css({ flexGrow: 1, zIndex: 2 })} h='100%'>
           <ExpandablePanel>
-            <IconAudiusLogoHorizontalColor
-              style={css({ alignSelf: 'center' })}
-            />
+            {theme.type === 'dark' ? (
+              <IconAudiusLogoHorizontalNew
+                style={css({ alignSelf: 'center' })}
+                width={200}
+                color='inverse'
+              />
+            ) : (
+              <IconAudiusLogoHorizontalColorNew
+                style={css({ alignSelf: 'center' })}
+              />
+            )}
             {screen === 'sign-up' ? (
               <CreateEmailScreen onChangeScreen={setScreen} />
             ) : (
