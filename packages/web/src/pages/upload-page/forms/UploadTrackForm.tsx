@@ -56,10 +56,10 @@ export const UploadTrackForm = (props: UploadTrackFormProps) => {
 
   const onSubmit = useCallback(
     (values: TrackEditFormValues) => {
-      const tracksForUpload = tracks.map((track, i) => {
+      const tracksForUpload = values.tracks.map((track, i) => {
         const metadata = values.trackMetadatas[i]
-        const file = (values.tracks[i] as TrackForUpload).file ?? tracks[i].file
-        return { ...track, metadata, file }
+        const file = 'file' in track ? track.file : tracks[i].file
+        return { ...tracks[i], metadata, file }
       })
 
       onContinue({ ...formState, tracks: tracksForUpload })
