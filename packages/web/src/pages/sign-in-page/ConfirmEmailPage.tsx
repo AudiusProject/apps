@@ -87,6 +87,7 @@ export const ConfirmEmailPage = () => {
 const VerificationCodeField = () => {
   const isInvalidOtp = useSelector(
     (state) =>
+      typeof getPasswordField(state).error.includes === 'function' &&
       getPasswordField(state).error.includes('400') &&
       getOtpField(state).value === ''
   )
