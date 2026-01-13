@@ -160,6 +160,8 @@ export class Storage implements StorageService {
       const upload = new tus.Upload(file, {
         endpoint: `${selectedNode}/files/`,
         retryDelays: [0, 3000, 5000, 10000, 20000],
+        chunkSize: 100_000_000, // 100MB
+        removeFingerprintOnSuccess: true,
         metadata: {
           filename: file.name,
           filetype: file.type,

@@ -45,7 +45,11 @@ type PublishCollectionParams = {
   tracks: {
     clientId: string
     metadata: TrackMetadataForUpload
-    onProgress: (clientId: string, progress: Progress) => void
+    onProgress: (
+      clientId: string,
+      stemIndex: number | null,
+      progress: Progress
+    ) => void
   }[]
 }
 

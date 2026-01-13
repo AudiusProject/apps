@@ -144,6 +144,23 @@ const actionsMap = {
     const trackIndex = newState.uploadProgress.findIndex(
       (p) => p && p.clientId === clientId
     )
+
+    if (
+      stemIndex !== null &&
+      newState.uploadProgress[trackIndex] &&
+      !newState.uploadProgress[trackIndex]?.stems[stemIndex]
+    ) {
+      newState.uploadProgress[trackIndex].stems[stemIndex] = {
+        ...cloneDeep(initialUploadState),
+        art: {
+          status: ProgressStatus.COMPLETE,
+          loaded: 0,
+          total: 0,
+          transcode: 0
+        }
+      }
+    }
+
     const prevProgress =
       stemIndex === null
         ? newState.uploadProgress[trackIndex]?.[key]

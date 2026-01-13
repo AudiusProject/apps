@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -7,6 +7,10 @@ import {
   useTrack,
   useUploadFiles
 } from '@audius/common/api'
+import type {
+  StemUploadWithCids,
+  StemUploadWithFile
+} from '@audius/common/models'
 import { updateProgress } from '@audius/common/src/store/upload/actions'
 import {
   uploadActions,
@@ -16,10 +20,11 @@ import {
   useUploadConfirmationModal,
   TrackMetadataForUpload,
   type TrackForUpload,
-  type CollectionFormState
+  type CollectionFormState,
+  type TrackFormState
 } from '@audius/common/store'
 import { IconCloudUpload } from '@audius/harmony'
-import { HashId } from '@audius/sdk'
+import { HashId, StemCategory } from '@audius/sdk'
 import type { UploadResponse } from '@audius/sdk/src/sdk/services/Storage/types'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
@@ -74,6 +79,34 @@ const updateTrackArtworkWithUploadResponse = (
   }
 }
 
+const updateTrackStemsWithUploadResponse = (
+  trackMetadata: TrackMetadataForUpload,
+  stemsUploadData: UploadResponse[]
+): TrackMetadataForUpload => {
+  if (!stemsUploadData || stemsUploadData.length === 0) return trackMetadata
+
+  return {
+    ...trackMetadata,
+    stems: stemsUploadData?.map(
+      (res, index) =>
+        ({
+          ...trackMetadata.stems?.[index],
+          track_cid: res?.results['320'],
+          orig_file_cid: res?.orig_file_cid,
+          orig_filename: res?.orig_filename,
+          audio_upload_id: res?.id,
+          is_downloadable: true,
+          stem_of: {
+            parent_track_id: trackMetadata.track_id!,
+            category:
+              (trackMetadata.stems?.[index] as StemUploadWithFile)?.category ??
+              StemCategory.OTHER
+          }
+        }) satisfies StemUploadWithCids
+    )
+  }
+}
+
 const { updateFormState, reset, uploadTracksSucceeded, uploadTracksRequested } =
   uploadActions
 const { getFormState, getUploadSuccess, getUploadError } = uploadSelectors
@@ -123,26 +156,17 @@ export const UploadPage = (props: UploadPageProps) => {
     formStateFromStore ?? initialFormState
   )
   const { data: user } = useCurrentAccountUser()
-  const {
-    data: trackUploadData,
-    mutateAsync: uploadTrackFilesAsync,
-    isSuccess: isTrackUploadSuccess
-  } = useUploadFiles()
-  const {
-    data: artworkData,
-    mutateAsync: uploadArtworkFilesAsync,
-    isSuccess: isArtworkUploadSuccess
-  } = useUploadFiles()
-  const { mutateAsync: publishTracksAsync, isIdle: isPublishTracksIdle } =
-    usePublishTracks()
-  const {
-    mutateAsync: publishCollectionAsync,
-    isIdle: isPublishCollectionIdle
-  } = usePublishCollection()
+  const { mutateAsync: uploadFiles } = useUploadFiles()
+  const { mutateAsync: publishTracksAsync } = usePublishTracks()
+  const { mutateAsync: publishCollectionAsync } = usePublishCollection()
+
+  const trackUploadPromise = useRef<ReturnType<typeof uploadFiles>>(
+    Promise.resolve([])
+  )
 
   const uploadTracks = useCallback(
     async (tracks: TrackForUpload[]) => {
-      await uploadTrackFilesAsync({
+      return await uploadFiles({
         files: tracks.map((t) => {
           return {
             clientId: t.clientId,
@@ -167,7 +191,7 @@ export const UploadPage = (props: UploadPageProps) => {
         })
       })
     },
-    [dispatch, uploadTrackFilesAsync, user?.wallet]
+    [dispatch, uploadFiles, user?.wallet]
   )
 
   const uploadTrackArtworks = useCallback(
@@ -203,7 +227,7 @@ export const UploadPage = (props: UploadPageProps) => {
             return { clientId: t.clientId, file }
           })
       )
-      await uploadArtworkFilesAsync({
+      return await uploadFiles({
         files: files
           .filter(({ file }) => file !== null)
           .map(({ clientId, file }) => ({
@@ -228,7 +252,7 @@ export const UploadPage = (props: UploadPageProps) => {
           }))
       })
     },
-    [uploadArtworkFilesAsync, dispatch, user?.wallet]
+    [uploadFiles, dispatch, user?.wallet]
   )
 
   const uploadCollectionArtwork = useCallback(
@@ -257,7 +281,7 @@ export const UploadPage = (props: UploadPageProps) => {
                 'artwork',
                 { type: 'image/jpeg' }
               )
-      await uploadArtworkFilesAsync({
+      return await uploadFiles({
         files: [
           {
             clientId: 'collection-artwork',
@@ -282,7 +306,143 @@ export const UploadPage = (props: UploadPageProps) => {
         ]
       })
     },
-    [uploadArtworkFilesAsync, dispatch, user?.wallet]
+    [uploadFiles, dispatch, user?.wallet]
+  )
+
+  const uploadStemFiles = useCallback(
+    (tracks: TrackForUpload[]) => {
+      return uploadFiles({
+        files: tracks.flatMap(
+          (t) =>
+            t.metadata.stems?.map((stemFile, index) => ({
+              clientId: t.clientId,
+              stemIndex: index,
+              file: (stemFile as StemUploadWithFile).file,
+              metadata: {
+                filename:
+                  (stemFile as StemUploadWithFile).file.name ?? undefined,
+                filetype:
+                  (stemFile as StemUploadWithFile).file.type ?? undefined,
+                userWallet: user?.wallet,
+                template: 'audio'
+              },
+              onProgress: (clientId, progress) => {
+                dispatch(
+                  updateProgress({
+                    clientId,
+                    stemIndex: index,
+                    key: 'audio',
+                    progress
+                  })
+                )
+              }
+            })) ?? []
+        )
+      })
+    },
+    [uploadFiles, user?.wallet, dispatch]
+  )
+
+  const finishUpload = useCallback(
+    async (formState: CollectionFormState | TrackFormState) => {
+      dispatch(uploadTracksRequested(formState))
+
+      // Upload stem files
+      const stems = await uploadStemFiles(formState.tracks ?? [])
+
+      // Wait for track files to finish uploading before publishing
+      const tracks = await trackUploadPromise.current
+
+      if (
+        formState.uploadType === UploadType.INDIVIDUAL_TRACKS ||
+        formState.uploadType === UploadType.INDIVIDUAL_TRACK
+      ) {
+        const artworks = await uploadTrackArtworks(formState.tracks ?? [])
+        const publishRes = await publishTracksAsync(
+          formState.tracks!.map((t) => ({
+            clientId: t.clientId,
+            metadata: updateTrackMetadataWithUploadResponse(
+              updateTrackStemsWithUploadResponse(
+                updateTrackArtworkWithUploadResponse(
+                  t.metadata,
+                  artworks?.find((at) => at.clientId === t.clientId)?.response
+                ),
+                stems
+                  .filter((ut) => ut.clientId === t.clientId)
+                  .map((ut) => ut.response)
+              ),
+              tracks.find((ut) => ut.clientId === t.clientId)?.response
+            ),
+            onProgress: (clientId, stemIndex, progress) => {
+              dispatch(
+                updateProgress({
+                  clientId,
+                  stemIndex,
+                  key: 'audio',
+                  progress
+                })
+              )
+            }
+          }))
+        )
+        if (formState.uploadType === UploadType.INDIVIDUAL_TRACK) {
+          dispatch(
+            uploadTracksSucceeded({ id: HashId.parse(publishRes[0]!.trackId) })
+          )
+        } else if (formState.uploadType === UploadType.INDIVIDUAL_TRACKS) {
+          dispatch(uploadTracksSucceeded({ id: null }))
+        }
+      } else if (
+        formState.uploadType === UploadType.ALBUM ||
+        formState.uploadType === UploadType.PLAYLIST
+      ) {
+        const artwork = await uploadCollectionArtwork(
+          formState as CollectionFormState
+        )
+        const publishRes = await publishCollectionAsync({
+          collectionMetadata: formState.metadata,
+          tracks: formState.tracks!.map((t) => ({
+            clientId: t.clientId,
+            metadata: updateTrackMetadataWithUploadResponse(
+              updateTrackArtworkWithUploadResponse(
+                t.metadata,
+                artwork?.[0]?.response // Collection artwork is first in the array
+              ),
+              tracks.find((ut) => ut.clientId === t.clientId)?.response
+            ),
+            onProgress: (clientId, stemIndex, progress) => {
+              dispatch(
+                updateProgress({
+                  clientId,
+                  stemIndex,
+                  key: 'audio',
+                  progress
+                })
+              )
+              dispatch(
+                updateProgress({
+                  clientId,
+                  stemIndex,
+                  key: 'art',
+                  progress
+                })
+              )
+            }
+          }))
+        })
+        dispatch(
+          uploadTracksSucceeded({ id: HashId.parse(publishRes.playlistId) })
+        )
+      }
+    },
+    [
+      dispatch,
+      uploadStemFiles,
+      uploadCollectionArtwork,
+      uploadTrackArtworks,
+      publishTracksAsync,
+      publishCollectionAsync
+    ]
   )
 
   // For navigating back to a remix contest page
@@ -351,7 +511,7 @@ export const UploadPage = (props: UploadPageProps) => {
           onContinue={(formState: UploadFormState) => {
             setFormState(formState)
             setPhase(Phase.EDIT)
-            uploadTracks(formState.tracks ?? [])
+            trackUploadPromise.current = uploadTracks(formState.tracks ?? [])
           }}
         />
       )
@@ -371,14 +531,7 @@ export const UploadPage = (props: UploadPageProps) => {
                 formState.tracks?.some(
                   (track) => !track.metadata.is_unlisted
                 ) ?? true
-              if (
-                formState.uploadType === UploadType.INDIVIDUAL_TRACK ||
-                formState.uploadType === UploadType.INDIVIDUAL_TRACKS
-              ) {
-                uploadTrackArtworks(formState.tracks ?? [])
-              } else {
-                uploadCollectionArtwork(formState as CollectionFormState)
-              }
+              finishUpload(formState as CollectionFormState | TrackFormState)
               openUploadConfirmation(hasPublicTracks && !isPrivateCollection)
             }}
           />
@@ -411,92 +564,6 @@ export const UploadPage = (props: UploadPageProps) => {
       setPhase(Phase.SELECT)
     }
   }, [phase, originalTrack, navigate])
-
-  // When done uploading files and after confirming upload, publish the tracks or collection
-  if (
-    isTrackUploadSuccess &&
-    isArtworkUploadSuccess &&
-    isPublishTracksIdle &&
-    isPublishCollectionIdle &&
-    phase === Phase.FINISH &&
-    formState.tracks &&
-    trackUploadData &&
-    artworkData
-  ) {
-    dispatch(uploadTracksRequested(formState))
-    if (
-      formState.uploadType === UploadType.INDIVIDUAL_TRACKS ||
-      formState.uploadType === UploadType.INDIVIDUAL_TRACK
-    ) {
-      publishTracksAsync(
-        formState.tracks!.map((t) => ({
-          clientId: t.clientId,
-          metadata: updateTrackMetadataWithUploadResponse(
-            updateTrackArtworkWithUploadResponse(
-              t.metadata,
-              artworkData?.find((at) => at.clientId === t.clientId)?.response
-            ),
-            trackUploadData.find((ut) => ut.clientId === t.clientId)?.response
-          ),
-          onProgress: (clientId, progress) => {
-            dispatch(
-              updateProgress({
-                clientId,
-                stemIndex: null,
-                key: 'audio',
-                progress
-              })
-            )
-          }
-        }))
-      ).then((res) => {
-        if (formState.uploadType === UploadType.INDIVIDUAL_TRACK) {
-          dispatch(uploadTracksSucceeded({ id: HashId.parse(res[0]!.trackId) }))
-        } else if (formState.uploadType === UploadType.INDIVIDUAL_TRACKS) {
-          dispatch(uploadTracksSucceeded({ id: null }))
-        }
-      })
-    } else if (
-      formState.uploadType === UploadType.ALBUM ||
-      formState.uploadType === UploadType.PLAYLIST
-    ) {
-      publishCollectionAsync({
-        collectionMetadata: formState.metadata,
-        tracks: formState.tracks!.map((t) => ({
-          clientId: t.clientId,
-          metadata: updateTrackMetadataWithUploadResponse(
-            updateTrackArtworkWithUploadResponse(
-              t.metadata,
-              artworkData?.[0]?.response // Collection artwork is first in the array
-            ),
-            trackUploadData.find((ut) => ut.clientId === t.clientId)?.response
-          ),
-          onProgress: (clientId, progress) => {
-            dispatch(
-              updateProgress({
-                clientId,
-                stemIndex: null,
-                key: 'audio',
-                progress
-              })
-            )
-            dispatch(
-              updateProgress({
-                clientId,
-                stemIndex: null,
-                key: 'art',
-                progress
-              })
-            )
-          }
-        }))
-      }).then((collection) => {
-        dispatch(
-          uploadTracksSucceeded({ id: HashId.parse(collection.playlistId) })
-        )
-      })
-    }
-  }
 
   return (
     <Page

@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import { trackMetadataForUploadToSdk } from '~/adapters'
 import {
   isContentUSDCPurchaseGated,
+  type StemUploadWithCids,
   type USDCPurchaseConditions
 } from '~/models'
 import { ProgressStatus } from '~/store'
@@ -30,7 +31,11 @@ type PublishTracksContext = Pick<QueryContextType, 'audiusSdk'> & {
 type PublishTracksParams = {
   clientId: string
   metadata: TrackMetadataForUpload
-  onProgress: (clientId: string, progress: Progress) => void
+  onProgress: (
+    clientId: string,
+    stemIndex: number | null,
+    progress: Progress
+  ) => void
 }[]
 
 export const publishTracks = async (
@@ -49,19 +54,42 @@ export const publishTracks = async (
   return await Promise.all(
     params.map(async (param) => {
       try {
-        const metadata = trackMetadataForUploadToSdk(
-          addPremiumMetadata(userBank.toString(), param.metadata)
+        const snakeMetadata = addPremiumMetadata(
+          userBank.toString(),
+          param.metadata
         )
+        const camelMetadata = trackMetadataForUploadToSdk(snakeMetadata)
         const res = await sdk.tracks.writeTrackToChain(
           Id.parse(userId),
-          metadata
+          camelMetadata
         )
-        param.onProgress(param.clientId, {
+        param.onProgress(param.clientId, null, {
           status: ProgressStatus.COMPLETE
         })
+
+        await Promise.all(
+          (param.metadata.stems ?? []).map(async (s, index) => {
+            const stem = s as StemUploadWithCids
+            stem.stem_of.parent_track_id = HashId.parse(res.trackId)
+            const metadata = {
+              ...snakeMetadata,
+              ...stem
+            }
+            console.log({ trackId: res.trackId, snakeMetadata, stem, metadata })
+            const stemRes = await sdk.tracks.writeTrackToChain(
+              Id.parse(userId),
+              trackMetadataForUploadToSdk(metadata)
+            )
+            param.onProgress(param.clientId, index, {
+              status: ProgressStatus.COMPLETE
+            })
+            return stemRes
+          })
+        )
+
         return { clientId: param.clientId, trackId: res.trackId }
       } catch (e) {
-        param.onProgress(param.clientId, {
+        param.onProgress(param.clientId, null, {
           status: ProgressStatus.ERROR
         })
         console.error('Error publishing track:', e)
