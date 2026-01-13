@@ -411,6 +411,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: builds
+          path: packages/web
 
       - name: Check bundlesize
         run: |
@@ -482,6 +483,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: builds
+          path: packages/web
 
       - name: Move sourcemaps
         run: |
@@ -556,6 +558,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: builds
+          path: packages/web
 
       - name: Deploy to S3
         run: |
@@ -633,6 +636,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: builds
+          path: packages/web
 
       - name: Move sourcemaps
         run: |
@@ -695,6 +699,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: builds
+          path: packages/web
 
       - name: Cut Sentry release
         env:
