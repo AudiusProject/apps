@@ -110,7 +110,7 @@ export const createRoutes = (): RouteObject[] => {
         })),
         // Sign in routes
         {
-          path: SIGN_IN_PAGE,
+          path: `${SIGN_IN_PAGE}/*`,
           children: [
             {
               index: true,
@@ -124,7 +124,7 @@ export const createRoutes = (): RouteObject[] => {
         },
         // Sign up routes
         {
-          path: SIGN_UP_PAGE,
+          path: `${SIGN_UP_PAGE}/*`,
           children: [
             {
               index: true,
