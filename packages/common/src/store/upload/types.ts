@@ -60,50 +60,6 @@ export interface TrackMetadataForUpload
    */
   track_id?: number
 }
-/**
- * Unlike normal CollectionMetadata, CollectionMetadataForUpload has artwork
- * and track details to be passed to its descendant tracks.
- */
-export interface CollectionMetadataForUpload
-  extends Omit<
-    CollectionMetadata,
-    | 'artwork'
-    | 'blocknumber'
-    | 'is_repost_of_repost'
-    | 'is_delete'
-    | 'followee_reposts'
-    | 'followee_saves'
-    | 'has_current_user_reposted'
-    | 'has_current_user_saved'
-    | 'created_at'
-    | 'save_count'
-    | 'repost_count'
-    | 'cover_art'
-    | 'cover_art_sizes'
-    | 'access'
-    | 'permalink'
-    | 'track_count'
-    | 'playlist_owner_id'
-    | 'updated_at'
-    | 'variant'
-    | 'tracks'
-  > {
-  artwork?: Nullable<{
-    file?: Blob | NativeFile
-  }>
-  trackDetails: {
-    genre: string
-    mood: string
-    tags: string
-  }
-  field_visibility?: {
-    mood: boolean
-    tags: boolean
-    genre: boolean
-    share: boolean
-  }
-  tracks: (TrackForUpload | TrackForEdit)[]
-}
 
 export enum ProgressStatus {
   /** The file is being uploaded to the storage node. */
