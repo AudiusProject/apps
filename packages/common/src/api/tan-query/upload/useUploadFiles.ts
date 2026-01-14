@@ -1,4 +1,4 @@
-import type { FileMetadata } from '@audius/sdk'
+import type { CrossPlatformFile, FileMetadata } from '@audius/sdk'
 import {
   mutationOptions,
   useMutation,
@@ -17,7 +17,7 @@ type UploadFilesParams = {
   files: {
     clientId: string
     stemIndex?: number | null
-    file: File
+    file: CrossPlatformFile
     metadata: FileMetadata
   }[]
 }

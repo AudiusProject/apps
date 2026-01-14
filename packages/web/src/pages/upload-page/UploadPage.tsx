@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { fileToSdk } from '@audius/common/adapters'
 import {
   useCurrentAccountUser,
   usePublishCollection,
@@ -125,18 +126,16 @@ export const UploadPage = (props: UploadPageProps) => {
       })
 
       return await uploadFiles({
-        files: tracks.map((t) => {
-          return {
-            clientId: t.clientId,
-            file: t.file as File,
-            metadata: {
-              filename: t.file.name ?? undefined,
-              filetype: t.file.type ?? undefined,
-              userWallet: user?.wallet,
-              template: 'audio'
-            }
+        files: tracks.map((t) => ({
+          clientId: t.clientId,
+          file: fileToSdk(t.file, 'audio'),
+          metadata: {
+            filename: t.file.name ?? undefined,
+            filetype: t.file.type ?? undefined,
+            userWallet: user?.wallet,
+            template: 'audio'
           }
-        })
+        }))
       })
     },
     [dispatch, uploadFiles, user?.wallet]
@@ -144,50 +143,34 @@ export const UploadPage = (props: UploadPageProps) => {
 
   const uploadTrackArtworks = useCallback(
     async (tracks: TrackForUpload[]) => {
-      const files = await Promise.all(
-        tracks
+      return await uploadFiles({
+        files: tracks
           .filter(
             (t) =>
               t.metadata?.artwork &&
               'file' in t.metadata.artwork &&
               t.metadata.artwork.file
           )
-          .map(async (t) => {
+          .map((t) => {
             if (
               !t.metadata.artwork ||
               !('file' in t.metadata.artwork) ||
-              !t.metadata.artwork?.file
+              !t.metadata.artwork.file
             ) {
-              throw new Error('No artwork file found')
+              throw new Error('Artwork file missing')
             }
-            const file =
-              t.metadata.artwork.file instanceof Blob
-                ? new File([t.metadata.artwork.file as Blob], 'artwork', {
-                    type: t.metadata.artwork.file.type
-                  })
-                : t.metadata.artwork.file instanceof File
-                  ? t.metadata.artwork.file
-                  : new File(
-                      [await (await fetch(t.metadata.artwork.file.uri)).blob()],
-                      'artwork',
-                      { type: 'image/jpeg' }
-                    )
-            return { clientId: t.clientId, file }
+            const file = fileToSdk(t.metadata.artwork.file, 'artwork')
+            return {
+              clientId: t.clientId,
+              file,
+              metadata: {
+                filename: file.name ?? undefined,
+                filetype: file.type ?? undefined,
+                userWallet: user?.wallet,
+                template: 'img_square'
+              }
+            }
           })
-      )
-      return await uploadFiles({
-        files: files
-          .filter(({ file }) => file !== null)
-          .map(({ clientId, file }) => ({
-            clientId,
-            file,
-            metadata: {
-              filename: file.name ?? undefined,
-              filetype: file.type ?? undefined,
-              userWallet: user?.wallet,
-              template: 'img_square'
-            }
-          }))
       })
     },
     [uploadFiles, user?.wallet]
@@ -203,30 +186,14 @@ export const UploadPage = (props: UploadPageProps) => {
       ) {
         return
       }
-      const file =
-        formState.metadata.artwork.file instanceof Blob
-          ? new File([formState.metadata.artwork.file as Blob], 'artwork', {
-              type: formState.metadata.artwork.file.type
-            })
-          : formState.metadata.artwork.file instanceof File
-            ? formState.metadata.artwork.file
-            : new File(
-                [
-                  await (
-                    await fetch(formState.metadata.artwork.file.uri)
-                  ).blob()
-                ],
-                'artwork',
-                { type: 'image/jpeg' }
-              )
       return await uploadFiles({
         files: [
           {
             clientId: 'collection-artwork',
-            file,
+            file: fileToSdk(formState.metadata.artwork.file, 'artwork'),
             metadata: {
-              filename: file.name ?? undefined,
-              filetype: file.type ?? undefined,
+              filename: 'artwork',
+              filetype: formState.metadata.artwork.file.type ?? undefined,
               userWallet: user?.wallet,
               template: 'img_square'
             }
@@ -242,19 +209,20 @@ export const UploadPage = (props: UploadPageProps) => {
       return uploadFiles({
         files: tracks.flatMap(
           (t) =>
-            t.metadata.stems?.map((stemFile, index) => ({
-              clientId: t.clientId,
-              stemIndex: index,
-              file: (stemFile as StemUploadWithFile).file,
-              metadata: {
-                filename:
-                  (stemFile as StemUploadWithFile).file.name ?? undefined,
-                filetype:
-                  (stemFile as StemUploadWithFile).file.type ?? undefined,
-                userWallet: user?.wallet,
-                template: 'audio'
+            t.metadata.stems?.map((stemFile, index) => {
+              const file = (stemFile as StemUploadWithFile).file
+              return {
+                clientId: t.clientId,
+                stemIndex: index,
+                file: fileToSdk(file, 'audio'),
+                metadata: {
+                  filename: file.name ?? undefined,
+                  filetype: file.type ?? undefined,
+                  userWallet: user?.wallet,
+                  template: 'audio'
+                }
               }
-            })) ?? []
+            }) ?? []
         )
       })
     },

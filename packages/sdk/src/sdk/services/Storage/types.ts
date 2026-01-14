@@ -53,7 +53,7 @@ export type StorageService = {
     onProgress,
     metadata
   }: {
-    file: File
+    file: CrossPlatformFile
     onProgress: (loadedBytes: number, totalBytes: number) => void
     metadata: FileMetadata
   }) => Promise<string>
