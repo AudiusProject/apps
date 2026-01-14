@@ -255,20 +255,11 @@ export const UploadPage = (props: UploadPageProps) => {
       let stems = []
       let tracks = []
       try {
-        const timeoutId = setTimeout(
-          () => {
-            throw new Error('Timeout uploading files')
-          },
-          5 * 60 * 1000
-        ) // 5 minutes
-
         // Upload stem files
         stems = await uploadStemFiles(formState.tracks ?? [])
 
         // Wait for track files to finish uploading before publishing
         tracks = await trackUploadPromise.current
-
-        clearTimeout(timeoutId)
       } catch (err) {
         console.error('Error uploading files:', err)
         dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
