@@ -68,7 +68,11 @@ export default defineConfig(async ({ mode }) => {
       'process.env': env
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', '@audius/sdk'],
+      include: [
+        'react',
+        'react-dom',
+        ...(env.VITE_ENV === 'production' ? ['@audius/sdk'] : [])
+      ],
       dedupe: ['react', 'react-dom'],
       esbuildOptions: {
         define: {

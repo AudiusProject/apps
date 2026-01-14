@@ -11,6 +11,12 @@ import { getAssetFromKV } from '@cloudflare/kv-asset-handler'
 import manifestJSON from '__STATIC_CONTENT_MANIFEST'
 import { Toucan } from 'toucan-js'
 import { renderPage } from 'vike/server'
+try {
+  // eslint-disable-next-line import/no-unresolved
+  await import('../../build-ssr/server/entry.mjs')
+} catch (e) {
+  // ok in dev / when SSR build hasn't been produced yet
+}
 
 const assetManifest = JSON.parse(manifestJSON)
 
