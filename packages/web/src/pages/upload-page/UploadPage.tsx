@@ -344,10 +344,10 @@ export const UploadPage = (props: UploadPageProps) => {
           const publishRes = await publishCollectionAsync({
             collectionMetadata: formState.metadata,
             tracks: formState.tracks!.map((t) => {
-              const artResponse = artwork?.find(
+              const artUploadResponse = artwork?.find(
                 (a) => a.clientId === t.clientId
-              )
-              if (!artResponse) {
+              )?.response
+              if (!artUploadResponse) {
                 throw new Error(`No artwork found for track ${t.clientId}`)
               }
               return {
@@ -356,7 +356,7 @@ export const UploadPage = (props: UploadPageProps) => {
                 audioUploadResponse: tracks.find(
                   (ut) => ut.clientId === t.clientId
                 )!.response,
-                artUploadResponse: artResponse.response
+                artUploadResponse
               }
             })
           })
