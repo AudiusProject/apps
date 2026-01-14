@@ -382,3 +382,52 @@ export const PurchaseTrackSchema = z
   .strict()
 
 export type PurchaseTrackRequest = z.input<typeof PurchaseTrackSchema>
+
+const UploadResponseSchema = z.object({
+  id: z.string(),
+  status: z.enum([
+    'new',
+    'error',
+    'busy',
+    'timeout',
+    'audio_analysis',
+    'busy_audio_analysis',
+    'done'
+  ]),
+  orig_file_cid: z.string(),
+  orig_filename: z.string(),
+  results: z.record(z.string(), z.string()),
+  probe: z
+    .object({
+      format: z
+        .object({
+          duration: z.string().optional()
+        })
+        .optional()
+    })
+    .optional(),
+  audio_analysis_results: z
+    .object({
+      bpm: z.number().optional(),
+      key: z.string().optional()
+    })
+    .optional()
+    .nullable(),
+  audio_analysis_error_count: z.number()
+})
+
+export type UploadResponse = z.input<typeof UploadResponseSchema>
+
+export const PublishTrackSchema = z
+  .object({
+    userId: HashId,
+    metadata: UploadTrackMetadataSchema.extend({
+      genre: z.optional(z.enum(Object.values(Genre) as [Genre, ...Genre[]]))
+    }).strict(),
+    audioUploadResponse: UploadResponseSchema,
+    artUploadResponse: UploadResponseSchema,
+    stemsUploadResponses: z.array(UploadResponseSchema).optional()
+  })
+  .strict()
+
+export type PublishTrackRequest = z.input<typeof PublishTrackSchema>

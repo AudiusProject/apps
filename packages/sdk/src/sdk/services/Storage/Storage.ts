@@ -279,10 +279,7 @@ export class Storage implements StorageService {
         if (resp?.status === 'done') {
           return resp
         }
-        if (
-          resp?.status === 'error' ||
-          resp?.status === 'error_retranscode_preview'
-        ) {
+        if (resp?.status === 'error') {
           throw new Error(
             `Upload failed: id=${id}, resp=${JSON.stringify(resp)}`
           )

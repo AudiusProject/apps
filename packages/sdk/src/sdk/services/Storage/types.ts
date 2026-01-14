@@ -69,13 +69,12 @@ export type StorageService = {
 
 export type ProcessingStatus =
   | 'new'
-  | 'busy'
-  | 'done'
   | 'error'
-  | 'retranscode_preview'
-  | 'busy_retranscode_preview'
-  | 'error_retranscode_preview'
+  | 'busy'
   | 'timeout'
+  | 'audio_analysis'
+  | 'busy_audio_analysis'
+  | 'done'
 
 export type UploadResponse = {
   id: string
@@ -87,11 +86,12 @@ export type UploadResponse = {
   orig_filename: string
   audio_analysis_error_count: number
   audio_analysis_results?: {
-    [key: string]: string
-  }
-  probe: {
-    format: {
-      duration: string
+    bpm?: number
+    key?: string
+  } | null
+  probe?: {
+    format?: {
+      duration?: string
     }
   }
   transcode_progress?: number

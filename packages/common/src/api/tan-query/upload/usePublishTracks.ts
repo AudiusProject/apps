@@ -1,5 +1,5 @@
 import { USDC } from '@audius/fixed-decimal'
-import { HashId, Id } from '@audius/sdk'
+import { HashId, Id, type UploadResponse } from '@audius/sdk'
 import {
   mutationOptions,
   useMutation,
@@ -10,7 +10,8 @@ import { useDispatch } from 'react-redux'
 import { trackMetadataForUploadToSdk } from '~/adapters'
 import {
   isContentUSDCPurchaseGated,
-  type StemUploadWithCids,
+  StemCategory,
+  type StemUploadPending,
   type USDCPurchaseConditions
 } from '~/models'
 import { ProgressStatus } from '~/store'
@@ -31,6 +32,8 @@ type PublishTracksContext = Pick<QueryContextType, 'audiusSdk'> & {
 type PublishTracksParams = {
   clientId: string
   metadata: TrackMetadataForUpload
+  audioUploadResponse: UploadResponse
+  artUploadResponse: UploadResponse
   onProgress: (
     clientId: string,
     stemIndex: number | null,
@@ -59,27 +62,34 @@ export const publishTracks = async (
           param.metadata
         )
         const camelMetadata = trackMetadataForUploadToSdk(snakeMetadata)
-        const res = await sdk.tracks.writeTrackToChain(
-          Id.parse(userId),
-          camelMetadata
-        )
+        const res = await sdk.tracks.publishTrack({
+          userId: Id.parse(userId),
+          metadata: camelMetadata,
+          audioUploadResponse: param.audioUploadResponse,
+          artUploadResponse: param.artUploadResponse
+        })
         param.onProgress(param.clientId, null, {
           status: ProgressStatus.COMPLETE
         })
 
         await Promise.all(
           (param.metadata.stems ?? []).map(async (s, index) => {
-            const stem = s as StemUploadWithCids
-            stem.stem_of.parent_track_id = HashId.parse(res.trackId)
+            const stem = s as StemUploadPending
             const metadata = {
               ...snakeMetadata,
-              ...stem
+              ...stem.metadata,
+              is_downloadable: true,
+              stem_of: {
+                category: stem.category ?? StemCategory.OTHER,
+                parent_track_id: HashId.parse(res.trackId)
+              }
             }
-            console.log({ trackId: res.trackId, snakeMetadata, stem, metadata })
-            const stemRes = await sdk.tracks.writeTrackToChain(
-              Id.parse(userId),
-              trackMetadataForUploadToSdk(metadata)
-            )
+            const stemRes = await sdk.tracks.publishTrack({
+              userId: Id.parse(userId),
+              metadata: trackMetadataForUploadToSdk(metadata),
+              audioUploadResponse: stem.audioUploadResponse,
+              artUploadResponse: param.artUploadResponse
+            })
             param.onProgress(param.clientId, index, {
               status: ProgressStatus.COMPLETE
             })
