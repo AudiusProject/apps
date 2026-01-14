@@ -420,7 +420,8 @@ function* publishPlaylistAsync(
 
   const playlist = yield* queryCollection(action.playlistId)
   if (!playlist) return
-  playlist._is_publishing = true
+  const playlistWithPublishing = { ...playlist, _is_publishing: true }
+
   yield* call(updateCollectionData, [
     { playlist_id: playlist.playlist_id, _is_publishing: true }
   ])
@@ -429,7 +430,7 @@ function* publishPlaylistAsync(
     confirmPublishPlaylist,
     userId,
     action.playlistId,
-    playlist,
+    playlistWithPublishing,
     action.dismissToastKey,
     action.isAlbum
   )

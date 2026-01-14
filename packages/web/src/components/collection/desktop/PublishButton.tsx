@@ -79,16 +79,18 @@ export const PublishButton = (props: PublishButtonProps) => {
 
   const publishButtonElement = (
     <Tooltip text={messages.publish}>
-      <IconButton
-        icon={IconRocket}
-        onClick={handleClickPublish}
-        aria-label='Publish Collection'
-        size='2xl'
-        color='subdued'
-        disabled={isDisabled}
-        isLoading={_is_publishing}
-        {...other}
-      />
+      <span>
+        <IconButton
+          icon={IconRocket}
+          onClick={handleClickPublish}
+          aria-label='Publish Collection'
+          size='2xl'
+          color='subdued'
+          disabled={isDisabled}
+          isLoading={_is_publishing}
+          {...other}
+        />
+      </span>
     </Tooltip>
   )
 

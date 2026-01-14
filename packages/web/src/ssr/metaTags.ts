@@ -338,7 +338,6 @@ export const getUserPageContext = ({
     structuredData,
     entityType: 'user' as const,
     hashId,
-    image: DEFAULT_IMAGE_URL,
     thumbnail: true
   }
 }
@@ -394,7 +393,6 @@ export const getTrackPageContext = ({
     structuredData,
     entityType: 'track' as const,
     hashId,
-    image: DEFAULT_IMAGE_URL,
     thumbnail: false
   }
 }
@@ -464,7 +462,6 @@ export const getCollectionPageContext = ({
     structuredData,
     entityType: 'collection' as const,
     hashId,
-    image: DEFAULT_IMAGE_URL,
     thumbnail: false
   }
 }
