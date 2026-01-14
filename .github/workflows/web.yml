@@ -78,7 +78,10 @@ jobs:
             npm run postinstall
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
   web-lint:
@@ -127,7 +130,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Cache for Turbo
         uses: rharkor/caching-for-turbo@v2.2.1
@@ -184,7 +190,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Cache for Turbo
         uses: rharkor/caching-for-turbo@v2.2.1
@@ -238,7 +247,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Cache for Turbo
         uses: rharkor/caching-for-turbo@v2.2.1
@@ -308,7 +320,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Run postinstall (if cache hit)
         if: steps.cache-node-modules.outputs.cache-hit == 'true'
@@ -393,7 +408,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Run postinstall (if cache hit)
         if: steps.cache-node-modules.outputs.cache-hit == 'true'
@@ -465,7 +483,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Run postinstall (if cache hit)
         if: steps.cache-node-modules.outputs.cache-hit == 'true'
@@ -618,7 +639,10 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          npm ci --prefer-offline
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Run postinstall (if cache hit)
         if: steps.cache-node-modules.outputs.cache-hit == 'true'

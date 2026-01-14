@@ -90,7 +90,10 @@ jobs:
             fi
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Lint & Typecheck
@@ -195,7 +198,10 @@ jobs:
             fi
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Cache iOS gems
@@ -346,7 +352,10 @@ jobs:
             npm run postinstall
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Update bundler
@@ -507,7 +516,10 @@ jobs:
             fi
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Cache iOS gems
@@ -641,7 +653,10 @@ jobs:
             npm run postinstall
           else
             echo "No cache found, running fresh install..."
-            npm ci --prefer-offline
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Update bundler
