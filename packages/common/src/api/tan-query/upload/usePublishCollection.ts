@@ -12,11 +12,7 @@ import {
   playlistMetadataForCreateWithSDK,
   fileToSdk
 } from '~/adapters'
-import {
-  isContentUSDCPurchaseGated,
-  type FieldVisibility,
-  Name
-} from '~/models'
+import { isContentUSDCPurchaseGated, type FieldVisibility } from '~/models'
 import type { CollectionValues } from '~/schemas'
 import {
   type TrackMetadataForUpload,
@@ -42,6 +38,7 @@ type PublishCollectionContext = Pick<QueryContextType, 'audiusSdk'> & {
   userId?: number
   wallet?: string
   dispatch: (action: any) => void
+  analytics?: QueryContextType['analytics']
 }
 
 type PublishCollectionParams = {
@@ -98,7 +95,12 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
 
       // Publish all the tracks first
       const publishedTracks = await publishTracks(
-        { ...context, dispatch: context.dispatch },
+        {
+          ...context,
+          dispatch: context.dispatch,
+          analytics: context.analytics,
+          kind: params.collectionMetadata.is_album ? 'album' : 'playlist'
+        },
         params.tracks
       )
 
@@ -132,9 +134,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
   })
 
 export const usePublishCollection = (
-  options?: Partial<ReturnType<typeof getPublishCollectionOptions>> & {
-    kind?: 'album' | 'playlist'
-  }
+  options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
 ) => {
   const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
@@ -143,7 +143,6 @@ export const usePublishCollection = (
   const { data: accountUser } = useCurrentAccountUser()
   const userId = account?.userId ?? undefined
   const wallet = account?.walletAddresses.currentUser ?? undefined
-  const kind = options?.kind ?? 'playlist'
 
   return useMutation({
     ...options,
@@ -151,19 +150,11 @@ export const usePublishCollection = (
       audiusSdk,
       userId,
       wallet,
-      dispatch
+      dispatch,
+      analytics
     }),
 
     onSuccess: async (playlist) => {
-      // Track success analytics
-      await analytics?.track(
-        analytics.make({
-          eventName: Name.TRACK_UPLOAD_SUCCESS,
-          endpoint: '',
-          kind
-        })
-      )
-
       if (!playlist.playlistId) return
       const sdk = await audiusSdk()
 

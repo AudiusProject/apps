@@ -31,6 +31,7 @@ type PublishTracksContext = Pick<QueryContextType, 'audiusSdk'> & {
   wallet?: string
   dispatch: (action: any) => void
   analytics?: QueryContextType['analytics']
+  kind?: 'tracks' | 'album' | 'playlist'
 }
 
 type PublishTracksParams = {
@@ -74,6 +75,23 @@ export const publishTracks = async (
             stemIndex: null,
             key: 'audio',
             progress: { status: ProgressStatus.COMPLETE }
+          })
+        )
+
+        // Track success analytics for this individual track
+        const analyticsKind =
+          (context.kind ?? 'tracks') === 'tracks'
+            ? params.length > 1
+              ? ('multi_track' as const)
+              : ('single_track' as const)
+            : context.kind === 'album'
+              ? ('album' as const)
+              : ('playlist' as const)
+        await context.analytics?.track(
+          context.analytics.make({
+            eventName: Name.TRACK_UPLOAD_SUCCESS,
+            endpoint: '',
+            kind: analyticsKind
           })
         )
 
@@ -162,18 +180,10 @@ export const usePublishTracks = (
       userId,
       wallet,
       dispatch,
-      analytics
+      analytics,
+      kind
     }),
     onSuccess: async (data) => {
-      // Track success analytics
-      await analytics?.track(
-        analytics.make({
-          eventName: Name.TRACK_UPLOAD_SUCCESS,
-          endpoint: '',
-          kind: kind === 'tracks' ? 'multi_track' : kind
-        })
-      )
-
       const sdk = await audiusSdk()
       const batchGetTracks = getTracksBatcher({
         sdk,

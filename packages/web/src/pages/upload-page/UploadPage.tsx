@@ -93,12 +93,7 @@ export const UploadPage = (props: UploadPageProps) => {
   const { data: user } = useCurrentAccountUser()
   const { mutateAsync: uploadFiles } = useUploadFiles()
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
-  const { mutateAsync: publishAlbumAsync } = usePublishCollection({
-    kind: 'album'
-  })
-  const { mutateAsync: publishPlaylistAsync } = usePublishCollection({
-    kind: 'playlist'
-  })
+  const { mutateAsync: publishCollectionAsync } = usePublishCollection()
 
   const trackUploadPromise = useRef<ReturnType<typeof uploadFiles>>(
     Promise.resolve([])
@@ -374,12 +369,6 @@ export const UploadPage = (props: UploadPageProps) => {
         formState.uploadType === UploadType.ALBUM ||
         formState.uploadType === UploadType.PLAYLIST
       ) {
-        const collectionKind =
-          formState.uploadType === UploadType.ALBUM ? 'album' : 'playlist'
-        const publishCollectionAsync =
-          formState.uploadType === UploadType.ALBUM
-            ? publishAlbumAsync
-            : publishPlaylistAsync
         try {
           const artwork = await uploadCollectionArtwork(
             formState as CollectionFormState
@@ -417,7 +406,12 @@ export const UploadPage = (props: UploadPageProps) => {
           )
         } catch (err) {
           console.error('Error publishing collection:', err)
-          dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind: collectionKind }))
+          dispatch(
+            make(Name.TRACK_UPLOAD_FAILURE, {
+              kind:
+                formState.uploadType === UploadType.ALBUM ? 'album' : 'playlist'
+            })
+          )
           await reportToSentry({
             error: err as Error,
             name: 'Upload: Collection Publishing Failed',
@@ -441,8 +435,7 @@ export const UploadPage = (props: UploadPageProps) => {
       uploadCollectionArtwork,
       uploadTrackArtworks,
       publishTracksAsync,
-      publishAlbumAsync,
-      publishPlaylistAsync
+      publishCollectionAsync
     ]
   )
 
