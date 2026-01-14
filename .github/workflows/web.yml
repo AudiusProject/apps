@@ -526,46 +526,6 @@ jobs:
         run: |
           aws s3 sync packages/web/sourcemaps s3://sourcemaps.audius.co --cache-control max-age=604800
 
-  web-deploy-s3:
-    name: Web Deploy S3
-    runs-on: ubuntu-latest
-    needs: [web-build, web-check-ssr-bundlesize]
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Download builds
-        uses: actions/download-artifact@v4
-        with:
-          name: builds
-          path: packages/web
-
-      - name: Deploy to S3
-        run: |
-          aws s3 sync --exclude "*.map" --exclude robots.txt --exclude "packages/web/sitemaps/*" packages/web/build-production s3://audius.co --delete --cache-control max-age=604800
-          aws s3 cp s3://audius.co/index.html s3://audius.co/index.html --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --metadata-directive REPLACE --acl public-read
-          aws s3 cp packages/web/robots.txt s3://audius.co --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
-          aws s3 cp packages/web/build-production.tar.gz s3://audius.co/build-production.tar.gz --cache-control max-age=0 --content-type 'application/json' --metadata-directive REPLACE
-
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id E1ZJ9Z971FJQJ8 --paths "/*"
-
   web-deploy:
     name: Web Deploy
     runs-on: ubuntu-latest
