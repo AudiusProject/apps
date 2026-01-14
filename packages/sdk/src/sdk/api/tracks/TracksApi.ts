@@ -212,8 +212,6 @@ export class TracksApi extends GeneratedTracksApi {
    * Publishes a track that was uploaded using storage node uploadFileV2 uploads.
    */
   async publishTrack(params: PublishTrackRequest) {
-    // Parse inputs
-    this.logger.info('Parsing inputs for publishTrack')
     const {
       userId,
       metadata: parsedMetadata,
@@ -221,14 +219,11 @@ export class TracksApi extends GeneratedTracksApi {
       artUploadResponse
     } = await parseParams('publishTrack', PublishTrackSchema)(params)
 
-    // Transform metadata
-    this.logger.info('Transforming metadata for publishTrack')
     const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
       parsedMetadata,
       userId
     )
 
-    // Update metadata to include uploaded CIDs
     const populatedMetadata =
       this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
         metadata,
@@ -236,7 +231,6 @@ export class TracksApi extends GeneratedTracksApi {
         artUploadResponse
       )
 
-    // Write track metadata to chain
     return this.writeTrackToChain(params.userId, populatedMetadata)
   }
 
