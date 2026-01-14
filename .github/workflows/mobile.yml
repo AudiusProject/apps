@@ -121,13 +121,13 @@ jobs:
           
           # Add SSH private key for accessing certs-and-profiles repository
           # Check if secret is set
-          if [[ -z "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" ]]; then
-            echo "Error: GITHUB_SSH_PRIVATE_KEY secret is not set"
+          if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
+            echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
             exit 1
           fi
           
           # Write key and remove any carriage returns (works on both macOS and Linux)
-          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
           # Add key to agent (will provide detailed error if format is wrong)
@@ -433,13 +433,13 @@ jobs:
           
           # Add SSH private key for accessing certs-and-profiles repository
           # Check if secret is set
-          if [[ -z "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" ]]; then
-            echo "Error: GITHUB_SSH_PRIVATE_KEY secret is not set"
+          if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
+            echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
             exit 1
           fi
           
           # Write key and remove any carriage returns (works on both macOS and Linux)
-          echo "${{ secrets.GITHUB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
           # Add key to agent (will provide detailed error if format is wrong)
