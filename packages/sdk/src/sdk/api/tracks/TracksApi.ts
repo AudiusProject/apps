@@ -56,7 +56,9 @@ import {
   UpdateTrackSchema,
   UploadTrackFilesSchema,
   ShareTrackSchema,
-  ShareTrackRequest
+  ShareTrackRequest,
+  type PublishTrackRequest,
+  PublishTrackSchema
 } from './types'
 
 // Extend that new class
@@ -204,6 +206,32 @@ export class TracksApi extends GeneratedTracksApi {
       audioResponse,
       coverArtResponse
     )
+  }
+
+  /** @hidden
+   * Publishes a track that was uploaded using storage node uploadFileV2 uploads.
+   */
+  async publishTrack(params: PublishTrackRequest) {
+    const {
+      userId,
+      metadata: parsedMetadata,
+      audioUploadResponse,
+      artUploadResponse
+    } = await parseParams('publishTrack', PublishTrackSchema)(params)
+
+    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      parsedMetadata,
+      userId
+    )
+
+    const populatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse,
+        artUploadResponse
+      )
+
+    return this.writeTrackToChain(params.userId, populatedMetadata)
   }
 
   /** @hidden

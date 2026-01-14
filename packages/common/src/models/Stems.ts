@@ -1,3 +1,5 @@
+import type { UploadResponse } from '@audius/sdk'
+
 import { TrackMetadataForUpload } from '~/store'
 import { Nullable } from '~/utils'
 
@@ -40,4 +42,8 @@ export type StemUpload = {
 
 export type StemUploadWithFile = StemUpload & {
   file: File
+}
+
+export type StemUploadPending = StemUpload & {
+  audioUploadResponse: UploadResponse
 }

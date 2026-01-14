@@ -135,8 +135,7 @@
   },
   "resolutions": {
     "@babel/core": "7.25.2",
-    "cipher-base": "1.0.7",
-    "tslib": "^2.6.0"
+    "cipher-base": "1.0.7"
   },
   "overrides": {
     "@types/prop-types": "15.7.5",
@@ -148,8 +147,7 @@
     "react-native-svg": "15.11.1",
     "redux": "4.1.1",
     "webpack": "5.88.2",
-    "elliptic": "6.6.1",
-    "tslib": "^2.6.0"
+    "elliptic": "6.6.1"
   },
   "packageManager": "npm@9.6.7"
 }

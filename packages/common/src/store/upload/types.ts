@@ -3,10 +3,10 @@ import { NativeFile } from '@audius/sdk'
 import { CollectionValues } from '~/schemas'
 
 import {
-  CollectionMetadata,
   StemUpload,
   StemUploadWithFile,
-  TrackMetadata
+  TrackMetadata,
+  type StemUploadPending
 } from '../../models'
 import { Nullable } from '../../utils/typeUtils'
 
@@ -54,7 +54,7 @@ export interface TrackMetadataForUpload
         source?: string
       }>
     | TrackMetadata['artwork']
-  stems?: (StemUploadWithFile | StemUpload)[]
+  stems?: (StemUploadWithFile | StemUpload | StemUploadPending)[]
   /** During Upload, tracks will typically not have a track_id, but it might
    * be assigned ahead of time for tracks with stems.
    */
