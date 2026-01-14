@@ -143,6 +143,11 @@ export function* watchPlay() {
         retries ?? 0
       )
 
+      const isLongFormContent =
+        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
+
+      const onEndCallback = onEnd ?? queueActions.next
+
       const createEndChannel = async (url: string) => {
         const endChannel = eventChannel((emitter) => {
           audioPlayer.load(
@@ -152,8 +157,8 @@ export function* watchPlay() {
                 0
               ),
             () => {
-              if (onEnd) {
-                emitter(onEnd({}))
+              if (onEndCallback) {
+                emitter(onEndCallback({}))
               }
               if (isLongFormContent) {
                 emitter(
@@ -200,9 +205,6 @@ export function* watchPlay() {
         )
         endChannel = yield* call(createEndChannel, streamUrl)
       }
-
-      const isLongFormContent =
-        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
 
       yield* spawn(actionChannelDispatcher, endChannel)
 
