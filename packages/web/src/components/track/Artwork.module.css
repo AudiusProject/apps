@@ -56,12 +56,6 @@
   fill: rgba(0, 0, 0, 0);
 }
 
-.artworkWrapper :global(.ant-skeleton) {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
 .spinner {
   pointer-events: none;
   width: 36px;

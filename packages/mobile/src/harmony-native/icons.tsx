@@ -240,6 +240,7 @@ export { default as IconAudiusLogo } from '@audius/harmony/src/assets/icons/Audi
 export { default as IconAudiusLogoHorizontal } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontal.svg'
 export { default as IconAudiusLogoHorizontalNew } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalNew.svg'
 export { default as IconAudiusLogoHorizontalColor } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalColor.svg'
+export { default as IconAudiusLogoHorizontalColorNew } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalColorNew.svg'
 export { default as IconAudiusLogoVertical } from '@audius/harmony/src/assets/icons/AudiusLogoVertical.svg'
 export { default as IconLogoLinkByStripe } from '@audius/harmony/src/assets/icons/LinkByStripe.svg'
 export { default as IconDiscord } from '@audius/harmony/src/assets/icons/Discord.svg'

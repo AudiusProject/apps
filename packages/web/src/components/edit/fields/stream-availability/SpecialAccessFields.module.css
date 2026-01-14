@@ -22,11 +22,6 @@
   cursor: pointer;
 }
 
-.tooltip :global(.ant-tooltip-inner) {
-  width: 272px;
-  text-align: center;
-}
-
 .disabled .radio input {
   cursor: default;
 }

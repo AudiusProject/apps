@@ -105,20 +105,3 @@
   padding: 0px;
   max-width: calc(100% - 128px) !important;
 }
-
-.visualizerDisabled > :global(.ant-tooltip-content) {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.visualizerDisabled :global(.ant-tooltip-inner) {
-  width: 100%;
-  max-width: 780px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0px 16px;
-  background-color: var(--harmony-white) !important;
-  color: var(--harmony-secondary) !important;
-  font-size: var(--harmony-font-s);
-}

@@ -243,8 +243,8 @@ web-deploy-cloudflare:
         command: |
           cd packages/web
           echo ${GA_ACCESS_TOKEN} | npx wrangler secret put GA_ACCESS_TOKEN --env << parameters.environment >>
-          npx wrangler publish --config ./src/ssr/wrangler.toml --env << parameters.environment >>
-          npx wrangler publish --env << parameters.environment >>
+          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env << parameters.environment >>
+          npm_config_yes=true npx wrangler@4.54.0 publish --env << parameters.environment >>
     - run:
         name: slack announce
         command: |

@@ -126,15 +126,15 @@ vi.mock('redux-saga', () => {
     const middleware = (store: any) => (next: any) => (action: any) => {
       return next(action)
     }
-    
+
     // Add methods that saga middleware normally has
     ;(middleware as any).run = vi.fn()
     ;(middleware as any).setContext = vi.fn()
     ;(middleware as any).toPromise = vi.fn()
-    
+
     return middleware
   }
-  
+
   return {
     default: createMockSagaMiddleware,
     createSagaMiddleware: createMockSagaMiddleware
