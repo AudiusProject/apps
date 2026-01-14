@@ -255,11 +255,11 @@ export const UploadPage = (props: UploadPageProps) => {
       let stems = []
       let tracks = []
       try {
-        // Upload stem files
-        stems = await uploadStemFiles(formState.tracks ?? [])
-
-        // Wait for track files to finish uploading before publishing
-        tracks = await trackUploadPromise.current
+        // Wait for stems and tracks to upload before publishing
+        ;[stems, tracks] = await Promise.all([
+          uploadStemFiles(formState.tracks ?? []),
+          trackUploadPromise.current
+        ])
       } catch (err) {
         console.error('Error uploading files:', err)
         dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
