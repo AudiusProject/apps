@@ -7,12 +7,8 @@ import {
   useTrack,
   useUploadFiles
 } from '@audius/common/api'
-import type {
-  StemUploadPending,
-  StemUploadWithFile
-} from '@audius/common/models'
-import { Feature, Name, isContentFollowGated } from '@audius/common/models'
-import { updateProgress } from '@audius/common/src/store/upload/actions'
+import type { StemUploadWithFile } from '@audius/common/models'
+import { Feature, isContentFollowGated, Name } from '@audius/common/models'
 import {
   uploadActions,
   UploadFormState,
@@ -97,7 +93,12 @@ export const UploadPage = (props: UploadPageProps) => {
   const { data: user } = useCurrentAccountUser()
   const { mutateAsync: uploadFiles } = useUploadFiles()
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
-  const { mutateAsync: publishCollectionAsync } = usePublishCollection()
+  const { mutateAsync: publishAlbumAsync } = usePublishCollection({
+    kind: 'album'
+  })
+  const { mutateAsync: publishPlaylistAsync } = usePublishCollection({
+    kind: 'playlist'
+  })
 
   const trackUploadPromise = useRef<ReturnType<typeof uploadFiles>>(
     Promise.resolve([])
@@ -133,16 +134,6 @@ export const UploadPage = (props: UploadPageProps) => {
           return {
             clientId: t.clientId,
             file: t.file as File,
-            onProgress: (clientId, progress) => {
-              dispatch(
-                updateProgress({
-                  clientId,
-                  stemIndex: null,
-                  key: 'audio',
-                  progress
-                })
-              )
-            },
             metadata: {
               filename: t.file.name ?? undefined,
               filetype: t.file.type ?? undefined,
@@ -195,16 +186,6 @@ export const UploadPage = (props: UploadPageProps) => {
           .map(({ clientId, file }) => ({
             clientId,
             file,
-            onProgress: (clientId, progress) => {
-              dispatch(
-                updateProgress({
-                  clientId,
-                  stemIndex: null,
-                  key: 'art',
-                  progress
-                })
-              )
-            },
             metadata: {
               filename: file.name ?? undefined,
               filetype: file.type ?? undefined,
@@ -214,7 +195,7 @@ export const UploadPage = (props: UploadPageProps) => {
           }))
       })
     },
-    [uploadFiles, dispatch, user?.wallet]
+    [uploadFiles, user?.wallet]
   )
 
   const uploadCollectionArtwork = useCallback(
@@ -248,16 +229,6 @@ export const UploadPage = (props: UploadPageProps) => {
           {
             clientId: 'collection-artwork',
             file,
-            onProgress: (clientId, progress) => {
-              dispatch(
-                updateProgress({
-                  clientId,
-                  stemIndex: null,
-                  key: 'art',
-                  progress
-                })
-              )
-            },
             metadata: {
               filename: file.name ?? undefined,
               filetype: file.type ?? undefined,
@@ -268,7 +239,7 @@ export const UploadPage = (props: UploadPageProps) => {
         ]
       })
     },
-    [uploadFiles, dispatch, user?.wallet]
+    [uploadFiles, user?.wallet]
   )
 
   const uploadStemFiles = useCallback(
@@ -287,22 +258,12 @@ export const UploadPage = (props: UploadPageProps) => {
                   (stemFile as StemUploadWithFile).file.type ?? undefined,
                 userWallet: user?.wallet,
                 template: 'audio'
-              },
-              onProgress: (clientId, progress) => {
-                dispatch(
-                  updateProgress({
-                    clientId,
-                    stemIndex: index,
-                    key: 'audio',
-                    progress
-                  })
-                )
               }
             })) ?? []
         )
       })
     },
-    [uploadFiles, user?.wallet, dispatch]
+    [uploadFiles, user?.wallet]
   )
 
   const finishUpload = useCallback(
@@ -328,11 +289,31 @@ export const UploadPage = (props: UploadPageProps) => {
 
       dispatch(uploadTracksRequested(formState))
 
-      // Upload stem files
-      const stems = await uploadStemFiles(formState.tracks ?? [])
+      let stems = []
+      let tracks = []
+      try {
+        // Upload stem files
+        stems = await uploadStemFiles(formState.tracks ?? [])
 
-      // Wait for track files to finish uploading before publishing
-      const tracks = await trackUploadPromise.current
+        // Wait for track files to finish uploading before publishing
+        tracks = await trackUploadPromise.current
+      } catch (err) {
+        console.error('Error uploading files:', err)
+        dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
+        await reportToSentry({
+          error: err as Error,
+          name: 'Upload: File Upload Failed',
+          additionalInfo: {
+            tracks: formState.tracks?.map((t) => ({
+              title: t.metadata.title,
+              stemCount: t.metadata.stems?.length ?? 0
+            }))
+          },
+          feature: Feature.Upload
+        })
+        dispatch(uploadTracksFailed())
+        return
+      }
 
       if (
         formState.uploadType === UploadType.INDIVIDUAL_TRACKS ||
@@ -343,39 +324,20 @@ export const UploadPage = (props: UploadPageProps) => {
           const publishRes = await publishTracksAsync(
             formState.tracks!.map((t) => ({
               clientId: t.clientId,
-              metadata: {
-                ...t.metadata,
-                stems: t.metadata.stems?.map(
-                  (s, index) =>
-                    ({
-                      ...s,
-                      audioUploadResponse: stems.filter(
-                        (su) => su.clientId === t.clientId
-                      )[index].response
-                    }) satisfies StemUploadPending
-                )
-              },
+              metadata: t.metadata,
               audioUploadResponse: tracks.find(
                 (ut) => ut.clientId === t.clientId
               )!.response,
               artUploadResponse: artworks.find(
                 (a) => a.clientId === t.clientId
               )!.response,
-              onProgress: (clientId, stemIndex, progress) => {
-                dispatch(
-                  updateProgress({
-                    clientId,
-                    stemIndex,
-                    key: 'audio',
-                    progress
-                  })
-                )
-              }
+              stemsUploadResponses: stems
+                .filter((su) => su.clientId === t.clientId)
+                .map((su) => su.response)
             }))
           )
 
-          // Track success metrics
-          dispatch(make(Name.TRACK_UPLOAD_SUCCESS, { kind }))
+          // Track complete upload analytics
           dispatch(
             make(Name.TRACK_UPLOAD_COMPLETE_UPLOAD, {
               trackCount: formState.tracks?.length ?? 0,
@@ -412,43 +374,37 @@ export const UploadPage = (props: UploadPageProps) => {
         formState.uploadType === UploadType.ALBUM ||
         formState.uploadType === UploadType.PLAYLIST
       ) {
+        const collectionKind =
+          formState.uploadType === UploadType.ALBUM ? 'album' : 'playlist'
+        const publishCollectionAsync =
+          formState.uploadType === UploadType.ALBUM
+            ? publishAlbumAsync
+            : publishPlaylistAsync
         try {
           const artwork = await uploadCollectionArtwork(
             formState as CollectionFormState
           )
           const publishRes = await publishCollectionAsync({
             collectionMetadata: formState.metadata,
-            tracks: formState.tracks!.map((t) => ({
-              clientId: t.clientId,
-              metadata: t.metadata,
-              audioUploadResponse: tracks.find(
-                (ut) => ut.clientId === t.clientId
-              )!.response,
-              artUploadResponse: artwork?.find((a) => a.clientId === t.clientId)
-                ?.response,
-              onProgress: (clientId, stemIndex, progress) => {
-                dispatch(
-                  updateProgress({
-                    clientId,
-                    stemIndex,
-                    key: 'audio',
-                    progress
-                  })
-                )
-                dispatch(
-                  updateProgress({
-                    clientId,
-                    stemIndex,
-                    key: 'art',
-                    progress
-                  })
-                )
+            tracks: formState.tracks!.map((t) => {
+              const artResponse = artwork?.find(
+                (a) => a.clientId === t.clientId
+              )
+              if (!artResponse) {
+                throw new Error(`No artwork found for track ${t.clientId}`)
               }
-            }))
+              return {
+                clientId: t.clientId,
+                metadata: t.metadata,
+                audioUploadResponse: tracks.find(
+                  (ut) => ut.clientId === t.clientId
+                )!.response,
+                artUploadResponse: artResponse.response
+              }
+            })
           })
 
-          // Track success metrics
-          dispatch(make(Name.TRACK_UPLOAD_SUCCESS, { kind }))
+          // Track complete upload analytics
           dispatch(
             make(Name.TRACK_UPLOAD_COMPLETE_UPLOAD, {
               trackCount: formState.tracks?.length ?? 0,
@@ -461,7 +417,7 @@ export const UploadPage = (props: UploadPageProps) => {
           )
         } catch (err) {
           console.error('Error publishing collection:', err)
-          dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
+          dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind: collectionKind }))
           await reportToSentry({
             error: err as Error,
             name: 'Upload: Collection Publishing Failed',
@@ -485,7 +441,8 @@ export const UploadPage = (props: UploadPageProps) => {
       uploadCollectionArtwork,
       uploadTrackArtworks,
       publishTracksAsync,
-      publishCollectionAsync
+      publishAlbumAsync,
+      publishPlaylistAsync
     ]
   )
 

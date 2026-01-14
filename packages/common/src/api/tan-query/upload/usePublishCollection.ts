@@ -12,11 +12,14 @@ import {
   playlistMetadataForCreateWithSDK,
   fileToSdk
 } from '~/adapters'
-import { isContentUSDCPurchaseGated, type FieldVisibility } from '~/models'
+import {
+  isContentUSDCPurchaseGated,
+  type FieldVisibility,
+  Name
+} from '~/models'
 import type { CollectionValues } from '~/schemas'
 import {
   type TrackMetadataForUpload,
-  type Progress,
   libraryPageActions,
   LibraryCategory,
   accountActions
@@ -38,6 +41,7 @@ import {
 type PublishCollectionContext = Pick<QueryContextType, 'audiusSdk'> & {
   userId?: number
   wallet?: string
+  dispatch: (action: any) => void
 }
 
 type PublishCollectionParams = {
@@ -45,11 +49,12 @@ type PublishCollectionParams = {
   tracks: {
     clientId: string
     metadata: TrackMetadataForUpload
-    onProgress: (
-      clientId: string,
-      stemIndex: number | null,
-      progress: Progress
-    ) => void
+    audioUploadResponse: Parameters<
+      typeof publishTracks
+    >[1][0]['audioUploadResponse']
+    artUploadResponse: Parameters<
+      typeof publishTracks
+    >[1][0]['artUploadResponse']
   }[]
 }
 
@@ -92,7 +97,10 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       }
 
       // Publish all the tracks first
-      const publishedTracks = await publishTracks(context, params.tracks)
+      const publishedTracks = await publishTracks(
+        { ...context, dispatch: context.dispatch },
+        params.tracks
+      )
 
       // For collection artwork, use the existing flow (not TUS) to keep things simple for now.
       const { artwork } = params.collectionMetadata
@@ -124,25 +132,38 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
   })
 
 export const usePublishCollection = (
-  options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
+  options?: Partial<ReturnType<typeof getPublishCollectionOptions>> & {
+    kind?: 'album' | 'playlist'
+  }
 ) => {
-  const { audiusSdk } = useQueryContext()
+  const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: account = null } = useCurrentAccount()
   const { data: accountUser } = useCurrentAccountUser()
   const userId = account?.userId ?? undefined
   const wallet = account?.walletAddresses.currentUser ?? undefined
+  const kind = options?.kind ?? 'playlist'
 
   return useMutation({
     ...options,
     ...getPublishCollectionOptions({
       audiusSdk,
       userId,
-      wallet
+      wallet,
+      dispatch
     }),
 
     onSuccess: async (playlist) => {
+      // Track success analytics
+      await analytics?.track(
+        analytics.make({
+          eventName: Name.TRACK_UPLOAD_SUCCESS,
+          endpoint: '',
+          kind
+        })
+      )
+
       if (!playlist.playlistId) return
       const sdk = await audiusSdk()
 
