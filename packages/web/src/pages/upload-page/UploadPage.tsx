@@ -11,6 +11,7 @@ import type {
   StemUploadPending,
   StemUploadWithFile
 } from '@audius/common/models'
+import { Feature, Name, isContentFollowGated } from '@audius/common/models'
 import { updateProgress } from '@audius/common/src/store/upload/actions'
 import {
   uploadActions,
@@ -28,10 +29,12 @@ import { HashId } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
 
+import { make } from 'common/store/analytics/actions'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { EditFormScrollContext } from 'pages/edit-page/EditTrackPage'
+import { reportToSentry } from 'store/errors/reportToSentry'
 
 import styles from './UploadPage.module.css'
 import { EditPage } from './pages/EditPage'
@@ -102,6 +105,29 @@ export const UploadPage = (props: UploadPageProps) => {
 
   const uploadTracks = useCallback(
     async (tracks: TrackForUpload[]) => {
+      // Track analytics for each track being uploaded
+      tracks.forEach((t) => {
+        dispatch(
+          make(Name.TRACK_UPLOAD_TRACK_UPLOADING, {
+            artworkSource:
+              t.metadata.artwork && 'source' in t.metadata.artwork
+                ? t.metadata.artwork.source
+                : undefined,
+            trackId: t.metadata.track_id,
+            genre: t.metadata.genre,
+            mood: t.metadata.mood,
+            size: t.file.size,
+            fileType: t.file.type,
+            name: t.file.name,
+            downloadable: isContentFollowGated(t.metadata.download_conditions)
+              ? 'follow'
+              : t.metadata.is_downloadable
+                ? 'yes'
+                : 'no'
+          })
+        )
+      })
+
       return await uploadFiles({
         files: tracks.map((t) => {
           return {
@@ -281,6 +307,25 @@ export const UploadPage = (props: UploadPageProps) => {
 
   const finishUpload = useCallback(
     async (formState: CollectionFormState | TrackFormState) => {
+      const kind = (() => {
+        switch (formState.uploadType) {
+          case UploadType.ALBUM:
+            return 'album'
+          case UploadType.PLAYLIST:
+            return 'playlist'
+          default:
+            return 'tracks'
+        }
+      })()
+
+      // Track start of upload
+      dispatch(
+        make(Name.TRACK_UPLOAD_START_UPLOADING, {
+          count: formState.tracks?.length ?? 0,
+          kind
+        })
+      )
+
       dispatch(uploadTracksRequested(formState))
 
       // Upload stem files
@@ -328,6 +373,16 @@ export const UploadPage = (props: UploadPageProps) => {
               }
             }))
           )
+
+          // Track success metrics
+          dispatch(make(Name.TRACK_UPLOAD_SUCCESS, { kind }))
+          dispatch(
+            make(Name.TRACK_UPLOAD_COMPLETE_UPLOAD, {
+              trackCount: formState.tracks?.length ?? 0,
+              kind
+            })
+          )
+
           if (formState.uploadType === UploadType.INDIVIDUAL_TRACK) {
             dispatch(
               uploadTracksSucceeded({
@@ -339,48 +394,89 @@ export const UploadPage = (props: UploadPageProps) => {
           }
         } catch (err) {
           console.error('Error publishing tracks:', err)
+          dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
+          await reportToSentry({
+            error: err as Error,
+            name: 'Upload: Track Publishing Failed',
+            additionalInfo: {
+              tracks: formState.tracks?.map((t) => ({
+                title: t.metadata.title,
+                hasArtwork: !!t.metadata.artwork
+              }))
+            },
+            feature: Feature.Upload
+          })
           dispatch(uploadTracksFailed())
         }
       } else if (
         formState.uploadType === UploadType.ALBUM ||
         formState.uploadType === UploadType.PLAYLIST
       ) {
-        const artwork = await uploadCollectionArtwork(
-          formState as CollectionFormState
-        )
-        const publishRes = await publishCollectionAsync({
-          collectionMetadata: formState.metadata,
-          tracks: formState.tracks!.map((t) => ({
-            clientId: t.clientId,
-            metadata: t.metadata,
-            audioUploadResponse: tracks.find(
-              (ut) => ut.clientId === t.clientId
-            )!.response,
-            artUploadResponse: artwork?.find((a) => a.clientId === t.clientId)
-              ?.response,
-            onProgress: (clientId, stemIndex, progress) => {
-              dispatch(
-                updateProgress({
-                  clientId,
-                  stemIndex,
-                  key: 'audio',
-                  progress
-                })
-              )
-              dispatch(
-                updateProgress({
-                  clientId,
-                  stemIndex,
-                  key: 'art',
-                  progress
-                })
-              )
-            }
-          }))
-        })
-        dispatch(
-          uploadTracksSucceeded({ id: HashId.parse(publishRes.playlistId) })
-        )
+        try {
+          const artwork = await uploadCollectionArtwork(
+            formState as CollectionFormState
+          )
+          const publishRes = await publishCollectionAsync({
+            collectionMetadata: formState.metadata,
+            tracks: formState.tracks!.map((t) => ({
+              clientId: t.clientId,
+              metadata: t.metadata,
+              audioUploadResponse: tracks.find(
+                (ut) => ut.clientId === t.clientId
+              )!.response,
+              artUploadResponse: artwork?.find((a) => a.clientId === t.clientId)
+                ?.response,
+              onProgress: (clientId, stemIndex, progress) => {
+                dispatch(
+                  updateProgress({
+                    clientId,
+                    stemIndex,
+                    key: 'audio',
+                    progress
+                  })
+                )
+                dispatch(
+                  updateProgress({
+                    clientId,
+                    stemIndex,
+                    key: 'art',
+                    progress
+                  })
+                )
+              }
+            }))
+          })
+
+          // Track success metrics
+          dispatch(make(Name.TRACK_UPLOAD_SUCCESS, { kind }))
+          dispatch(
+            make(Name.TRACK_UPLOAD_COMPLETE_UPLOAD, {
+              trackCount: formState.tracks?.length ?? 0,
+              kind
+            })
+          )
+
+          dispatch(
+            uploadTracksSucceeded({ id: HashId.parse(publishRes.playlistId) })
+          )
+        } catch (err) {
+          console.error('Error publishing collection:', err)
+          dispatch(make(Name.TRACK_UPLOAD_FAILURE, { kind }))
+          await reportToSentry({
+            error: err as Error,
+            name: 'Upload: Collection Publishing Failed',
+            additionalInfo: {
+              collectionType: formState.uploadType,
+              trackCount: formState.tracks?.length,
+              tracks: formState.tracks?.map((t) => ({
+                title: t.metadata.title,
+                hasStems: !!t.metadata.stems?.length
+              }))
+            },
+            feature: Feature.Upload
+          })
+          dispatch(uploadTracksFailed())
+        }
       }
     },
     [
