@@ -112,28 +112,24 @@ export const MetaTags = (props: MetaTagsProps) => {
 
   return (
     <>
-      {/* noIndex */}
       {noIndex ? (
         <Helmet>
           <meta name='robots' content='noindex'></meta>
         </Helmet>
       ) : null}
 
-      {/* Title */}
       <Helmet>
         <title>{formattedTitle}</title>
         <meta property='og:title' content={formattedTitle} />
         <meta name='twitter:title' content={formattedTitle} />
       </Helmet>
 
-      {/* Description */}
       {description ? (
         <Helmet encodeSpecialCharacters={false}>
           <meta name='description' content={description} />
         </Helmet>
       ) : null}
 
-      {/* OG Description */}
       {ogDescription ? (
         <Helmet encodeSpecialCharacters={false}>
           <meta property='og:description' content={ogDescription} />
@@ -141,24 +137,28 @@ export const MetaTags = (props: MetaTagsProps) => {
         </Helmet>
       ) : null}
 
-      {/* Canonical URL - use OG URL if available, otherwise use provided canonicalUrl */}
-      {ogUrl || canonicalUrl ? (
+      {canonicalUrl || ogUrl ? (
         <Helmet encodeSpecialCharacters={false}>
-          <link rel='canonical' href={ogUrl || canonicalUrl} />
-          <meta property='og:url' content={ogUrl || canonicalUrl} />
+          <link rel='canonical' href={canonicalUrl || ogUrl} />
         </Helmet>
       ) : null}
 
-      {/* Image */}
-      {image ? (
+      {canonicalUrl || webUrl ? (
         <Helmet encodeSpecialCharacters={false}>
-          <meta property='og:image' content={image} />
-          <meta name='twitter:image' content={image} />
+          <meta property='og:url' content={canonicalUrl || webUrl} />
+        </Helmet>
+      ) : null}
+
+      {/* Image - use OG URL if available, otherwise use provided image */}
+      {ogUrl || image ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <meta property='og:image' content={ogUrl ?? image} />
+          <meta name='twitter:image' content={ogUrl ?? image} />
         </Helmet>
       ) : null}
 
       {/* Image dimensions for non-thumbnail images */}
-      {image && !thumbnail ? (
+      {(ogUrl || image) && !thumbnail ? (
         <Helmet encodeSpecialCharacters={false}>
           <meta property='og:image:width' content='1000' />
           <meta property='og:image:height' content='1000' />
@@ -210,12 +210,10 @@ export const MetaTags = (props: MetaTagsProps) => {
           <meta property='fc:frame:button:1' content='Listen on Audius!' />
           <meta property='fc:frame:button:1:action' content='link' />
           <meta property='fc:frame:button:1:target' content={webUrl} />
-        </Helmet>
-      ) : null}
-
-      {webUrl && image ? (
-        <Helmet encodeSpecialCharacters={false}>
-          <meta property='fc:frame:image' content={image} />
+          {/* Use OG URL for frame image if available, otherwise use provided image */}
+          {ogUrl || image ? (
+            <meta property='fc:frame:image' content={ogUrl ?? image} />
+          ) : null}
         </Helmet>
       ) : null}
 

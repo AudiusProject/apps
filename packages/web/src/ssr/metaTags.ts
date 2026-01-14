@@ -394,7 +394,6 @@ export const getTrackPageContext = ({
     structuredData,
     entityType: 'track' as const,
     hashId,
-    image: DEFAULT_IMAGE_URL,
     thumbnail: false
   }
 }
