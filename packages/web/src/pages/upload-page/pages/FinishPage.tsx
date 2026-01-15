@@ -86,17 +86,37 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
       ? track.metadata.artwork?.url
       : null
 
+  const hasStems = trackProgress?.stems && trackProgress.stems.length > 0
+
   return (
-    <div className={styles.uploadTrackItem} {...otherProps}>
-      <ProgressIndicator status={trackProgress?.audio?.status} />
-      {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
-      {displayArtwork ? (
-        <DynamicImage
-          wrapperClassName={styles.trackItemArtwork}
-          image={artworkUrl || placeholderArt}
-        />
+    <div className={styles.uploadTrackItemContainer}>
+      <div className={styles.uploadTrackItem} {...otherProps}>
+        <ProgressIndicator status={trackProgress?.audio?.status} />
+        {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
+        {displayArtwork ? (
+          <DynamicImage
+            wrapperClassName={styles.trackItemArtwork}
+            image={artworkUrl || placeholderArt}
+          />
+        ) : null}
+        <Text size='s'>{track.metadata.title}</Text>
+      </div>
+      {hasStems ? (
+        <div className={styles.stemsList}>
+          {trackProgress.stems.map((stemProgress, stemIdx) => {
+            const stemMetadata = track.metadata.stems?.[stemIdx]
+            const stemCategory = stemMetadata?.category || 'stem'
+            return (
+              <div key={stemIdx} className={styles.stemItem}>
+                <ProgressIndicator status={stemProgress?.audio?.status} />
+                <Text size='s' className={styles.stemLabel}>
+                  {stemCategory.charAt(0).toUpperCase() + stemCategory.slice(1)}
+                </Text>
+              </div>
+            )
+          })}
+        </div>
       ) : null}
-      <Text size='s'>{track.metadata.title}</Text>
     </div>
   )
 }
