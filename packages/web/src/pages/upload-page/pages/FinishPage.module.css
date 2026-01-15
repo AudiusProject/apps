@@ -49,37 +49,6 @@
   padding: 16px;
 }
 
-.uploadTrackItemContainer {
-  display: flex;
-  flex-direction: column;
-}
-
-.uploadTrackItem {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 8px;
-}
-
-.stemsList {
-  display: flex;
-  flex-direction: column;
-  margin-left: 28px;
-}
-
-.stemItem {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 8px;
-  padding-left: 20px;
-  opacity: 0.8;
-}
-
-.stemLabel {
-  color: var(--harmony-text-subdued);
-}
-
 .trackItemArtwork {
   height: 40px;
   width: 40px;
@@ -98,8 +67,4 @@
 .progressIndicator {
   height: 16px;
   width: 16px;
-}
-
-.visitLink:hover {
-  text-decoration: none !important;
 }

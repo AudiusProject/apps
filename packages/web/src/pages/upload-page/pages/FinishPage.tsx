@@ -21,7 +21,9 @@ import {
   IconValidationCheck,
   Text,
   PlainButton,
-  ProgressBar
+  ProgressBar,
+  Box,
+  Flex
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
@@ -89,8 +91,8 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
   const hasStems = trackProgress?.stems && trackProgress.stems.length > 0
 
   return (
-    <div className={styles.uploadTrackItemContainer}>
-      <div className={styles.uploadTrackItem} {...otherProps}>
+    <Box>
+      <Flex gap='m' alignItems='center' p='s' {...otherProps}>
         <ProgressIndicator status={trackProgress?.audio?.status} />
         {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
         {displayArtwork ? (
@@ -100,24 +102,24 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
           />
         ) : null}
         <Text size='s'>{track.metadata.title}</Text>
-      </div>
+      </Flex>
       {hasStems ? (
-        <div className={styles.stemsList}>
+        <Box ml='3xl'>
           {trackProgress.stems.map((stemProgress, stemIdx) => {
             const stemMetadata = track.metadata.stems?.[stemIdx]
             const stemCategory = stemMetadata?.category || 'stem'
             return (
-              <div key={stemIdx} className={styles.stemItem}>
+              <Flex key={stemIdx} gap='m' alignItems='center' p='s' pl='xl'>
                 <ProgressIndicator status={stemProgress?.audio?.status} />
-                <Text size='s' className={styles.stemLabel}>
+                <Text size='s' color='subdued'>
                   {stemCategory.charAt(0).toUpperCase() + stemCategory.slice(1)}
                 </Text>
-              </div>
+              </Flex>
             )
           })}
-        </div>
+        </Box>
       ) : null}
-    </div>
+    </Box>
   )
 }
 
