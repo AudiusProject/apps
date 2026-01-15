@@ -26,11 +26,12 @@ import { useQueryContext, type QueryContextType } from '../utils'
 
 const { updateProgress } = uploadActions
 
-type PublishTracksContext = Pick<QueryContextType, 'audiusSdk'> & {
+type PublishTracksContext = Pick<
+  QueryContextType,
+  'audiusSdk' | 'analytics' | 'dispatch'
+> & {
   userId?: number
   wallet?: string
-  dispatch: (action: any) => void
-  analytics?: QueryContextType['analytics']
   kind?: 'tracks' | 'album' | 'playlist'
 }
 
@@ -82,11 +83,11 @@ export const publishTracks = async (
         const analyticsKind =
           (context.kind ?? 'tracks') === 'tracks'
             ? params.length > 1
-              ? ('multi_track' as const)
-              : ('single_track' as const)
+              ? 'multi_track'
+              : 'single_track'
             : context.kind === 'album'
-              ? ('album' as const)
-              : ('playlist' as const)
+              ? 'album'
+              : 'playlist'
         await context.analytics?.track(
           context.analytics.make({
             eventName: Name.TRACK_UPLOAD_SUCCESS,
