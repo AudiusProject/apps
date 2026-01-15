@@ -16,7 +16,6 @@ import { isContentUSDCPurchaseGated, type FieldVisibility } from '~/models'
 import type { CollectionValues } from '~/schemas'
 import {
   type TrackMetadataForUpload,
-  type Progress,
   libraryPageActions,
   LibraryCategory,
   accountActions
@@ -38,6 +37,8 @@ import {
 type PublishCollectionContext = Pick<QueryContextType, 'audiusSdk'> & {
   userId?: number
   wallet?: string
+  dispatch: (action: any) => void
+  analytics?: QueryContextType['analytics']
 }
 
 type PublishCollectionParams = {
@@ -45,11 +46,12 @@ type PublishCollectionParams = {
   tracks: {
     clientId: string
     metadata: TrackMetadataForUpload
-    onProgress: (
-      clientId: string,
-      stemIndex: number | null,
-      progress: Progress
-    ) => void
+    audioUploadResponse: Parameters<
+      typeof publishTracks
+    >[1][0]['audioUploadResponse']
+    artUploadResponse: Parameters<
+      typeof publishTracks
+    >[1][0]['artUploadResponse']
   }[]
 }
 
@@ -92,7 +94,15 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       }
 
       // Publish all the tracks first
-      const publishedTracks = await publishTracks(context, params.tracks)
+      const publishedTracks = await publishTracks(
+        {
+          ...context,
+          dispatch: context.dispatch,
+          analytics: context.analytics,
+          kind: params.collectionMetadata.is_album ? 'album' : 'playlist'
+        },
+        params.tracks
+      )
 
       // For collection artwork, use the existing flow (not TUS) to keep things simple for now.
       const { artwork } = params.collectionMetadata
@@ -126,7 +136,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
 export const usePublishCollection = (
   options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
 ) => {
-  const { audiusSdk } = useQueryContext()
+  const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: account = null } = useCurrentAccount()
@@ -139,7 +149,9 @@ export const usePublishCollection = (
     ...getPublishCollectionOptions({
       audiusSdk,
       userId,
-      wallet
+      wallet,
+      dispatch,
+      analytics
     }),
 
     onSuccess: async (playlist) => {

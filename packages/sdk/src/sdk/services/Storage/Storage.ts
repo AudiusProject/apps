@@ -148,7 +148,7 @@ export class Storage implements StorageService {
     onProgress,
     metadata
   }: {
-    file: File
+    file: CrossPlatformFile
     onProgress: (loadedBytes: number, totalBytes: number) => void
     metadata: FileMetadata
   }): Promise<string> {
@@ -157,14 +157,15 @@ export class Storage implements StorageService {
       throw new Error('No node available')
     }
     return new Promise((resolve, reject) => {
-      const upload = new tus.Upload(file, {
+      const upload = new tus.Upload(file as File, {
         endpoint: `${selectedNode}/files/`,
         retryDelays: [0, 3000, 5000, 10000, 20000],
         chunkSize: 100_000_000, // 100MB
         removeFingerprintOnSuccess: true,
         metadata: {
-          filename: file.name,
-          filetype: file.type,
+          filename: metadata.filename || file.name || 'file',
+          filetype:
+            metadata.filetype || file.type || 'application/octet-stream',
           ...metadata
         },
         onError: (error) => {

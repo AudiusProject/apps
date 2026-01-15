@@ -1,38 +1,48 @@
-import type { FileMetadata } from '@audius/sdk'
+import type { CrossPlatformFile, FileMetadata } from '@audius/sdk'
 import {
   mutationOptions,
   useMutation,
   type MutationFunctionContext
 } from '@tanstack/react-query'
 
-import { ProgressStatus, type Progress } from '~/store'
+import { ProgressStatus, uploadActions } from '~/store'
 
 import { useQueryContext, type QueryContextType } from '../utils'
 
 import { getUploadStatusOptions } from './useUploadStatus'
 
+const { updateProgress } = uploadActions
+
 type UploadFilesParams = {
   files: {
     clientId: string
-    file: File
+    stemIndex?: number | null
+    file: CrossPlatformFile
     metadata: FileMetadata
-    onProgress: (clientId: string, progress: Progress) => void
   }[]
 }
 
-type UploadFileContext = Pick<QueryContextType, 'audiusSdk'>
+type UploadFileContext = Pick<QueryContextType, 'audiusSdk' | 'dispatch'>
 
 const pollFileUploadStatus = async (
   context: UploadFileContext,
   queryContext: MutationFunctionContext,
   clientId: string,
-  onProgress: (clientId: string, progress: Progress) => void,
+  stemIndex: number | null | undefined,
+  type: 'audio' | 'art',
   uploadId: string,
   timeoutS: number = 3600, // 1 hour
   delayMs: number = 3000 // 3 seconds
 ) => {
   const t = setTimeout(() => {
-    onProgress(clientId, { status: ProgressStatus.ERROR })
+    context.dispatch(
+      updateProgress({
+        clientId,
+        stemIndex: stemIndex ?? null,
+        key: type,
+        progress: { status: ProgressStatus.ERROR }
+      })
+    )
     throw new Error('Upload timed out')
   }, timeoutS * 1000)
 
@@ -46,10 +56,17 @@ const pollFileUploadStatus = async (
       const res = await queryContext.client.fetchQuery(
         getUploadStatusOptions(context, { uploadId })
       )
-      onProgress(clientId, {
-        status: ProgressStatus.PROCESSING,
-        transcode: res.transcode_progress
-      })
+      context.dispatch(
+        updateProgress({
+          clientId,
+          stemIndex: stemIndex ?? null,
+          key: 'audio',
+          progress: {
+            status: ProgressStatus.PROCESSING,
+            transcode: res.transcode_progress
+          }
+        })
+      )
       if (
         res.status === 'done' ||
         res.status === 'error' ||
@@ -61,7 +78,14 @@ const pollFileUploadStatus = async (
         if (res.status === 'error') {
           throw new Error('Upload failed')
         }
-        onProgress(clientId, { status: ProgressStatus.COMPLETE })
+        context.dispatch(
+          updateProgress({
+            clientId,
+            stemIndex: stemIndex ?? null,
+            key: 'audio',
+            progress: { status: ProgressStatus.COMPLETE }
+          })
+        )
         clearTimeout(t)
         return res
       }
@@ -76,23 +100,32 @@ const getUploadFilesOptions = (context: UploadFileContext) => {
   return mutationOptions({
     mutationFn: async (params: UploadFilesParams, queryContext) => {
       const sdk = await context.audiusSdk()
+
       return await Promise.all(
         params.files.map(async (fileObj) => {
           const uploadId = await sdk.services.storage.uploadFileV2({
             file: fileObj.file,
             onProgress: (loaded, total) =>
-              fileObj.onProgress(fileObj.clientId, {
-                status: ProgressStatus.UPLOADING,
-                loaded,
-                total
-              }),
+              context.dispatch(
+                updateProgress({
+                  clientId: fileObj.clientId,
+                  stemIndex: fileObj.stemIndex ?? null,
+                  key: fileObj.metadata.template === 'audio' ? 'audio' : 'art',
+                  progress: {
+                    status: ProgressStatus.UPLOADING,
+                    loaded,
+                    total
+                  }
+                })
+              ),
             metadata: fileObj.metadata
           })
           const res = await pollFileUploadStatus(
             context,
             queryContext,
             fileObj.clientId,
-            fileObj.onProgress,
+            fileObj.stemIndex,
+            fileObj.metadata.template === 'audio' ? 'audio' : 'art',
             uploadId
           )
           return { response: res, clientId: fileObj.clientId }
@@ -106,9 +139,10 @@ type UseUploadFilesOptions = ReturnType<typeof getUploadFilesOptions>
 
 export const useUploadFiles = (options?: UseUploadFilesOptions) => {
   const context = useQueryContext()
+  const { dispatch } = context
 
   return useMutation({
     ...options,
-    ...getUploadFilesOptions(context)
+    ...getUploadFilesOptions({ ...context, dispatch })
   })
 }
