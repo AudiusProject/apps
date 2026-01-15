@@ -713,7 +713,7 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd packages/web
-          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client files ${{ github.sha }} upload-sourcemaps --no-rewrite build-production/static/js
+          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} sourcemaps upload --org audius --project audius-client --release ${{ github.sha }} build-production/static/js
 
       - name: Finalize release
         env:
