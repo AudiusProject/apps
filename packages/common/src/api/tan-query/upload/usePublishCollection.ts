@@ -1,4 +1,4 @@
-import { HashId, Id } from '@audius/sdk'
+import { HashId, Id, type UploadResponse } from '@audius/sdk'
 import {
   mutationOptions,
   useMutation,
@@ -34,11 +34,12 @@ import {
   getUSDCMetadata
 } from './usePublishTracks'
 
-type PublishCollectionContext = Pick<QueryContextType, 'audiusSdk'> & {
+type PublishCollectionContext = Pick<
+  QueryContextType,
+  'audiusSdk' | 'analytics' | 'dispatch'
+> & {
   userId?: number
   wallet?: string
-  dispatch: (action: any) => void
-  analytics?: QueryContextType['analytics']
 }
 
 type PublishCollectionParams = {
@@ -46,12 +47,8 @@ type PublishCollectionParams = {
   tracks: {
     clientId: string
     metadata: TrackMetadataForUpload
-    audioUploadResponse: Parameters<
-      typeof publishTracks
-    >[1][0]['audioUploadResponse']
-    artUploadResponse: Parameters<
-      typeof publishTracks
-    >[1][0]['artUploadResponse']
+    audioUploadResponse: UploadResponse
+    artUploadResponse: UploadResponse
   }[]
 }
 
@@ -97,8 +94,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       const publishedTracks = await publishTracks(
         {
           ...context,
-          dispatch: context.dispatch,
-          analytics: context.analytics,
           kind: params.collectionMetadata.is_album ? 'album' : 'playlist'
         },
         params.tracks

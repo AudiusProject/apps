@@ -518,7 +518,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         trackId,
         timestamp
       })),
-      playlistImageSizesMultihash: coverArtResponse.id
+      playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 
     // Write playlist metadata to chain
@@ -575,7 +575,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     const updatedMetadata = {
       ...metadata,
       ...(coverArtResponse
-        ? { playlistImageSizesMultihash: coverArtResponse.id }
+        ? { playlistImageSizesMultihash: coverArtResponse.orig_file_cid }
         : {})
     }
 
@@ -632,7 +632,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         trackId,
         timestamp
       })),
-      playlistImageSizesMultihash: coverArtResponse?.id ?? metadata.coverArtCid
+      playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 
     // Write playlist metadata to chain
