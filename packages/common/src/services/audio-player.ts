@@ -29,5 +29,6 @@ export type AudioPlayer = {
   getAudioPlaybackRate: () => number
   onBufferingChange: (isBuffering: boolean) => void
   onError: (error: string, data: string | Event) => void
+  onEnd: (() => void) | null
   audioCtx: Nullable<AudioContext>
 }
