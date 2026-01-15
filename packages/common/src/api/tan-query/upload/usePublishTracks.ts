@@ -63,41 +63,51 @@ export const publishTracks = async (
           userBank.toString(),
           param.metadata
         )
-        const camelMetadata = trackMetadataForUploadToSdk(snakeMetadata)
-        const res = await sdk.tracks.publishTrack({
-          userId: Id.parse(userId),
-          metadata: camelMetadata,
-          audioUploadResponse: param.audioUploadResponse,
-          artUploadResponse: param.artUploadResponse
+
+        const trackId = await sdk.tracks.generateTrackId()
+        const camelMetadata = trackMetadataForUploadToSdk({
+          ...snakeMetadata,
+          track_id: trackId
         })
-        dispatch(
-          updateProgress({
-            clientId: param.clientId,
-            stemIndex: null,
-            key: 'audio',
-            progress: { status: ProgressStatus.COMPLETE }
-          })
-        )
 
-        // Track success analytics for this individual track
-        const analyticsKind =
-          (context.kind ?? 'tracks') === 'tracks'
-            ? params.length > 1
-              ? 'multi_track'
-              : 'single_track'
-            : context.kind === 'album'
-              ? 'album'
-              : 'playlist'
-        context.analytics?.track(
-          context.analytics.make({
-            eventName: Name.TRACK_UPLOAD_SUCCESS,
-            endpoint: '',
-            kind: analyticsKind
+        const publishParentTrack = async () => {
+          const res = await sdk.tracks.publishTrack({
+            userId: Id.parse(userId),
+            metadata: camelMetadata,
+            audioUploadResponse: param.audioUploadResponse,
+            artUploadResponse: param.artUploadResponse
           })
-        )
+          dispatch(
+            updateProgress({
+              clientId: param.clientId,
+              stemIndex: null,
+              key: 'audio',
+              progress: { status: ProgressStatus.COMPLETE }
+            })
+          )
 
-        await Promise.all(
-          (param.metadata.stems ?? []).map(async (stem, index) => {
+          // Track success analytics for this individual track
+          const analyticsKind =
+            (context.kind ?? 'tracks') === 'tracks'
+              ? params.length > 1
+                ? 'multi_track'
+                : 'single_track'
+              : context.kind === 'album'
+                ? 'album'
+                : 'playlist'
+          context.analytics?.track(
+            context.analytics.make({
+              eventName: Name.TRACK_UPLOAD_SUCCESS,
+              endpoint: '',
+              kind: analyticsKind
+            })
+          )
+          return res
+        }
+
+        const results = await Promise.all([
+          publishParentTrack(),
+          ...(param.metadata.stems ?? []).map(async (stem, index) => {
             try {
               const stemUploadResponse = param.stemsUploadResponses?.[index]
               if (!stemUploadResponse) {
@@ -109,7 +119,7 @@ export const publishTracks = async (
                 is_downloadable: true,
                 stem_of: {
                   category: stem.category ?? StemCategory.OTHER,
-                  parent_track_id: HashId.parse(res.trackId)
+                  parent_track_id: trackId
                 }
               }
               const stemRes = await sdk.tracks.publishTrack({
@@ -130,7 +140,7 @@ export const publishTracks = async (
                 context.analytics.make({
                   eventName: Name.STEM_COMPLETE_UPLOAD,
                   id: HashId.parse(stemRes.trackId),
-                  parent_track_id: HashId.parse(res.trackId),
+                  parent_track_id: trackId,
                   category: stem.category ?? StemCategory.OTHER
                 })
               )
@@ -148,9 +158,9 @@ export const publishTracks = async (
               throw e
             }
           })
-        )
+        ])
 
-        return { clientId: param.clientId, trackId: res.trackId }
+        return { clientId: param.clientId, trackId: results[0].trackId }
       } catch (e) {
         dispatch(
           updateProgress({
