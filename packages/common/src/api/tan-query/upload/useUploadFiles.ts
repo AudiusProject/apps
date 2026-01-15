@@ -60,7 +60,7 @@ const pollFileUploadStatus = async (
         updateProgress({
           clientId,
           stemIndex: stemIndex ?? null,
-          key: 'audio',
+          key: type,
           progress: {
             status: ProgressStatus.PROCESSING,
             transcode: res.transcode_progress
@@ -82,7 +82,7 @@ const pollFileUploadStatus = async (
           updateProgress({
             clientId,
             stemIndex: stemIndex ?? null,
-            key: 'audio',
+            key: type,
             progress: { status: ProgressStatus.COMPLETE }
           })
         )
