@@ -1,0 +1,691 @@
+name: Mobile CI/CD
+
+on:
+  push:
+    # TODO: Restrict to main branch after testing
+    # branches:
+    #   - main
+    paths:
+      - 'packages/mobile/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
+      - '.circleci/**'
+  pull_request:
+    paths:
+      - 'packages/mobile/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
+      - '.circleci/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.21.1'
+
+jobs:
+  # Initialize: Install dependencies, lint & typecheck
+  mobile-init:
+    name: Mobile Init (Install, Lint & Typecheck)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+            packages/dotenv-linter/bin
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Copy production env
+        run: |
+          cd packages/mobile
+          echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Lint & Typecheck
+        run: npx turbo run verify --filter=@audius/mobile
+
+  # iOS Release Candidate: Build and upload
+  mobile-build-upload-releasecandidate-ios:
+    name: iOS Release Candidate Build & Upload
+    runs-on: macos-15
+    needs: mobile-init
+    # TODO: Re-enable main branch restriction after testing
+    # if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH for Fastlane Match (test early)
+        run: |
+          # Set up SSH agent
+          eval "$(ssh-agent -s)"
+          
+          # Add GitHub to known_hosts
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Add SSH private key for accessing certs-and-profiles repository
+          # Check if secret is set
+          if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
+            echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
+            exit 1
+          fi
+          
+          # Write key and remove any carriage returns (works on both macOS and Linux)
+          echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add key to agent (will provide detailed error if format is wrong)
+          ssh-add ~/.ssh/id_rsa
+          
+          # Configure git to use SSH
+          git config --global user.email "audius-infra@audius.co"
+          git config --global user.name "audius-infra"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Copy production env
+        run: |
+          cd packages/mobile
+          echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Install Python build dependencies
+        run: |
+          # Python 3.12+ doesn't include distutils, but setuptools provides it
+          # Use --break-system-packages for CI (safe since runner is ephemeral)
+          python3 -m pip install --break-system-packages --upgrade setuptools
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Cache iOS gems
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/ios/vendor/bundle
+          key: gems-ios-${{ hashFiles('packages/mobile/ios/Gemfile.lock') }}
+          restore-keys: |
+            gems-ios-
+
+      - name: Install gems
+        run: |
+          cd packages/mobile/ios
+          sudo gem install bundler:2.5.16
+          bundle check || bundle install --path vendor/bundle
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd packages/mobile/ios
+          bundle exec pod install
+
+      - name: Install Sentry CLI
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
+
+      - name: Build dependencies
+        timeout-minutes: 60
+        run: npx turbo run build --filter=@audius/mobile
+
+      - name: Create iOS bundle
+        run: cd packages/mobile && npx turbo run bundle:ios
+
+      - name: Update fastlane
+        run: cd packages/mobile/ios && sudo bundle update fastlane
+
+      - name: Copy production env to iOS
+        run: cp packages/mobile/.env.prod packages/mobile/ios/
+
+      - name: Build and upload iOS (Release Candidate)
+        timeout-minutes: 60
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          cd packages/mobile/ios
+          bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic.releasecandidate
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          deploying_version=$(jq -r '.version' packages/mobile/package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed co.audius.audiusmusic.releasecandidate <${job_url}|v${deploying_version}> to mobile ios\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  # Android Release Candidate: Build and upload
+  mobile-build-upload-releasecandidate-android:
+    name: Android Release Candidate Build & Upload
+    runs-on: ubuntu-latest
+    needs: mobile-init
+    # TODO: Re-enable main branch restriction after testing
+    # if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Cache Android libs
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/android/libs
+          key: ffmpeg-aar-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            ffmpeg-aar-
+
+      - name: Cache Android gems
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/android/vendor/bundle
+          key: gems-android-${{ hashFiles('packages/mobile/android/Gemfile.lock') }}
+          restore-keys: |
+            gems-android-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Update bundler
+        run: sudo gem install bundler:1.17.3
+
+      - name: Install pip and ninja
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip ninja-build
+
+      - name: Install Android gems
+        run: |
+          cd packages/mobile/android
+          bundle check || bundle install --path vendor/bundle
+
+      - name: Update fastlane
+        run: cd packages/mobile/android && sudo bundle update fastlane
+
+      - name: Migrate support libraries for AndroidX
+        run: cd packages/mobile && npm run jetifier
+
+      - name: Install ffmpeg-aar
+        run: |
+          cd packages/mobile/android
+          ./gradlew :app:downloadAar
+
+      - name: Setup Play Store API
+        run: |
+          echo "${{ secrets.FASTLANE_PLAYSTORE_JSON }}" | base64 --decode > packages/mobile/android/app/api.json
+
+      - name: Build dependencies
+        timeout-minutes: 60
+        run: npx turbo run build --filter=@audius/mobile
+
+      - name: Release Android (Release Candidate)
+        timeout-minutes: 60
+        env:
+          FASTLANE_PLAYSTORE_JSON: ${{ secrets.FASTLANE_PLAYSTORE_JSON }}
+        run: |
+          cd packages/mobile/android
+          bundle exec fastlane releaseCandidate track:internal
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          deploying_version=$(jq -r '.version' packages/mobile/package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed releaseCandidate <${job_url}|v${deploying_version}> to mobile android\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  # iOS Production: Build and upload (requires approval)
+  mobile-build-upload-production-ios-main:
+    name: iOS Production Build & Upload
+    runs-on: macos-15
+    needs: mobile-init
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment:
+      name: mobile-production-ios
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH for Fastlane Match (test early)
+        run: |
+          # Set up SSH agent
+          eval "$(ssh-agent -s)"
+          
+          # Add GitHub to known_hosts
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Add SSH private key for accessing certs-and-profiles repository
+          # Check if secret is set
+          if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
+            echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
+            exit 1
+          fi
+          
+          # Write key and remove any carriage returns (works on both macOS and Linux)
+          echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add key to agent (will provide detailed error if format is wrong)
+          ssh-add ~/.ssh/id_rsa
+          
+          # Configure git to use SSH
+          git config --global user.email "audius-infra@audius.co"
+          git config --global user.name "audius-infra"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Copy production env
+        run: |
+          cd packages/mobile
+          echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Install Python build dependencies
+        run: |
+          # Python 3.12+ doesn't include distutils, but setuptools provides it
+          # Use --break-system-packages for CI (safe since runner is ephemeral)
+          python3 -m pip install --break-system-packages --upgrade setuptools
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Cache iOS gems
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/ios/vendor/bundle
+          key: gems-ios-${{ hashFiles('packages/mobile/ios/Gemfile.lock') }}
+          restore-keys: |
+            gems-ios-
+
+      - name: Install gems
+        run: |
+          cd packages/mobile/ios
+          sudo gem install bundler:2.5.16
+          bundle check || bundle install --path vendor/bundle
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd packages/mobile/ios
+          bundle exec pod install
+
+      - name: Install Sentry CLI
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
+
+      - name: Build dependencies
+        timeout-minutes: 60
+        run: npx turbo run build --filter=@audius/mobile
+
+      - name: Create iOS bundle
+        run: cd packages/mobile && npx turbo run bundle:ios
+
+      - name: Update fastlane
+        run: cd packages/mobile/ios && sudo bundle update fastlane
+
+      - name: Copy production env to iOS
+        run: cp packages/mobile/.env.prod packages/mobile/ios/
+
+      - name: Build and upload iOS (Production)
+        timeout-minutes: 60
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          cd packages/mobile/ios
+          bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic
+
+  # Android Production: Build and upload (requires approval)
+  mobile-build-upload-production-android-main:
+    name: Android Production Build & Upload
+    runs-on: ubuntu-latest
+    needs: mobile-init
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment:
+      name: mobile-production-android
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Cache Android libs
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/android/libs
+          key: ffmpeg-aar-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            ffmpeg-aar-
+
+      - name: Cache Android gems
+        uses: actions/cache@v4
+        with:
+          path: packages/mobile/android/vendor/bundle
+          key: gems-android-${{ hashFiles('packages/mobile/android/Gemfile.lock') }}
+          restore-keys: |
+            gems-android-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Update bundler
+        run: sudo gem install bundler:1.17.3
+
+      - name: Install pip and ninja
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip ninja-build
+
+      - name: Install Android gems
+        run: |
+          cd packages/mobile/android
+          bundle check || bundle install --path vendor/bundle
+
+      - name: Update fastlane
+        run: cd packages/mobile/android && sudo bundle update fastlane
+
+      - name: Migrate support libraries for AndroidX
+        run: cd packages/mobile && npm run jetifier
+
+      - name: Install ffmpeg-aar
+        run: |
+          cd packages/mobile/android
+          ./gradlew :app:downloadAar
+
+      - name: Setup Play Store API
+        run: |
+          echo "${{ secrets.FASTLANE_PLAYSTORE_JSON }}" | base64 --decode > packages/mobile/android/app/api.json
+
+      - name: Build dependencies
+        timeout-minutes: 60
+        run: npx turbo run build --filter=@audius/mobile
+
+      - name: Release Android (Production)
+        timeout-minutes: 60
+        env:
+          FASTLANE_PLAYSTORE_JSON: ${{ secrets.FASTLANE_PLAYSTORE_JSON }}
+        run: |
+          cd packages/mobile/android
+          bundle exec fastlane prod track:alpha
+

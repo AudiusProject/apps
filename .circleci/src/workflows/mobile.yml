@@ -1,3 +1,5 @@
+# NOTE: Mobile CI/CD has been migrated to GitHub Actions (.github/workflows/mobile.yml)
+# This workflow is disabled via path filtering in config.yml
 when: << pipeline.parameters.run-mobile-workflow >>
 jobs:
   - mobile-init:
