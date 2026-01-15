@@ -108,11 +108,15 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
           {trackProgress.stems.map((stemProgress, stemIdx) => {
             const stemMetadata = track.metadata.stems?.[stemIdx]
             const stemCategory = stemMetadata?.category || 'stem'
+            const stemFile =
+              stemMetadata && 'file' in stemMetadata ? stemMetadata.file : null
+            const stemFileName = stemFile?.name || stemMetadata?.metadata?.title
             return (
               <Flex key={stemIdx} gap='m' alignItems='center' p='s' pl='xl'>
                 <ProgressIndicator status={stemProgress?.audio?.status} />
                 <Text size='s' color='subdued'>
                   {stemCategory.charAt(0).toUpperCase() + stemCategory.slice(1)}
+                  {stemFileName ? ` - ${stemFileName}` : ''}
                 </Text>
               </Flex>
             )
