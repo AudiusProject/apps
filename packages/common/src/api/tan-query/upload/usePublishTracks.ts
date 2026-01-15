@@ -88,7 +88,7 @@ export const publishTracks = async (
             : context.kind === 'album'
               ? 'album'
               : 'playlist'
-        await context.analytics?.track(
+        context.analytics?.track(
           context.analytics.make({
             eventName: Name.TRACK_UPLOAD_SUCCESS,
             endpoint: '',
@@ -98,42 +98,55 @@ export const publishTracks = async (
 
         await Promise.all(
           (param.metadata.stems ?? []).map(async (stem, index) => {
-            const stemUploadResponse = param.stemsUploadResponses?.[index]
-            if (!stemUploadResponse) {
-              throw new Error(`No upload response found for stem ${index}`)
-            }
-            const metadata = {
-              ...snakeMetadata,
-              ...stem.metadata,
-              is_downloadable: true,
-              stem_of: {
-                category: stem.category ?? StemCategory.OTHER,
-                parent_track_id: HashId.parse(res.trackId)
+            try {
+              const stemUploadResponse = param.stemsUploadResponses?.[index]
+              if (!stemUploadResponse) {
+                throw new Error(`No upload response found for stem ${index}`)
               }
+              const metadata = {
+                ...snakeMetadata,
+                ...stem.metadata,
+                is_downloadable: true,
+                stem_of: {
+                  category: stem.category ?? StemCategory.OTHER,
+                  parent_track_id: HashId.parse(res.trackId)
+                }
+              }
+              const stemRes = await sdk.tracks.publishTrack({
+                userId: Id.parse(userId),
+                metadata: trackMetadataForUploadToSdk(metadata),
+                audioUploadResponse: stemUploadResponse,
+                artUploadResponse: param.artUploadResponse
+              })
+              dispatch(
+                updateProgress({
+                  clientId: param.clientId,
+                  stemIndex: index,
+                  key: 'audio',
+                  progress: { status: ProgressStatus.COMPLETE }
+                })
+              )
+              context.analytics?.track(
+                context.analytics.make({
+                  eventName: Name.STEM_COMPLETE_UPLOAD,
+                  id: HashId.parse(stemRes.trackId),
+                  parent_track_id: HashId.parse(res.trackId),
+                  category: stem.category ?? StemCategory.OTHER
+                })
+              )
+              return stemRes
+            } catch (e) {
+              dispatch(
+                updateProgress({
+                  clientId: param.clientId,
+                  stemIndex: index,
+                  key: 'audio',
+                  progress: { status: ProgressStatus.ERROR }
+                })
+              )
+              console.error('Error publishing stem:', e)
+              throw e
             }
-            const stemRes = await sdk.tracks.publishTrack({
-              userId: Id.parse(userId),
-              metadata: trackMetadataForUploadToSdk(metadata),
-              audioUploadResponse: stemUploadResponse,
-              artUploadResponse: param.artUploadResponse
-            })
-            dispatch(
-              updateProgress({
-                clientId: param.clientId,
-                stemIndex: index,
-                key: 'audio',
-                progress: { status: ProgressStatus.COMPLETE }
-              })
-            )
-            await context.analytics?.track(
-              context.analytics.make({
-                eventName: Name.STEM_COMPLETE_UPLOAD,
-                id: Number(Id.parse(stemRes.trackId)),
-                parent_track_id: Number(Id.parse(res.trackId)),
-                category: stem.category ?? StemCategory.OTHER
-              })
-            )
-            return stemRes
           })
         )
 
