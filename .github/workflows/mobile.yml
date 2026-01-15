@@ -261,21 +261,13 @@ jobs:
 
       - name: Slack notification
         if: success()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Deployed co.audius.audiusmusic.releasecandidate <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|v$(jq -r '.version' packages/mobile/package.json)> to mobile ios"
-                  }
-                }
-              ]
-            }
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          deploying_version=$(jq -r '.version' packages/mobile/package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed co.audius.audiusmusic.releasecandidate <${job_url}|v${deploying_version}> to mobile ios\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
 
   # Android Release Candidate: Build and upload
   mobile-build-upload-releasecandidate-android:
@@ -403,21 +395,13 @@ jobs:
 
       - name: Slack notification
         if: success()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Deployed releaseCandidate <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|v$(jq -r '.version' packages/mobile/package.json)> to mobile android"
-                  }
-                }
-              ]
-            }
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          deploying_version=$(jq -r '.version' packages/mobile/package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed releaseCandidate <${job_url}|v${deploying_version}> to mobile android\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
 
   # iOS Production: Build and upload (requires approval)
   mobile-build-upload-production-ios-main:
