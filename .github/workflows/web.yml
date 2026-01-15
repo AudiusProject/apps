@@ -563,11 +563,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.7'
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -689,8 +684,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           cd packages/web
-          npm_config_yes=true npx wrangler@4.54.0 publish --config ./src/ssr/wrangler.toml --env production
-          npm_config_yes=true npx wrangler@4.54.0 publish --config ./wrangler.toml --env production
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env production
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./wrangler.toml --env production
 
       - name: Slack notification
         if: success()

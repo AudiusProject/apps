@@ -167,7 +167,7 @@ class SEOHandlerHead {
       case 'track': {
         title = `${metadata.data[0].title} by ${metadata.data[0].user.name} • Audius`
         h1 = metadata.data[0].title
-        description = `Stream ${metadata.data[0].title} by ${metadata.data[0].user.name} on Audius | Stream similar artists to ${metadata.data[0].user.name} on desktop and mobile`
+        description = `Stream ${metadata.data[0].title} by ${metadata.data[0].user.name} on Audius`
         ogDescription = metadata.data[0].description || description
         image = metadata.data[0].artwork
           ? metadata.data[0].artwork['480x480']
