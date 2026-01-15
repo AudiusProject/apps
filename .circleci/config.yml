@@ -194,7 +194,9 @@ jobs:
 workflows:
   setup:
     when:
-      equal: ['main', << pipeline.parameters.workflow >>]
+      and:
+        - equal: ['main', << pipeline.parameters.workflow >>]
+        - equal: ['disabled', 'enabled']  # Always false - CircleCI disabled
     jobs:
       - generate-config
       - init:
@@ -341,21 +343,26 @@ workflows:
 
   release-create-branch:
     when:
-      equal: ['release-create-branch', << pipeline.parameters.workflow >>]
+      and:
+        - equal: ['release-create-branch', << pipeline.parameters.workflow >>]
+        - equal: ['disabled', 'enabled']  # Always false - CircleCI disabled
     jobs:
       - generate-release-branch
 
   auto-approve-foundation-deploy:
     when:
-      equal:
-        ['auto-approve-foundation-deploy', << pipeline.parameters.workflow >>]
+      and:
+        - equal: ['auto-approve-foundation-deploy', << pipeline.parameters.workflow >>]
+        - equal: ['disabled', 'enabled']  # Always false - CircleCI disabled
     jobs:
       - approve-foundation-deployment-holds:
           context: [slack-secrets, circle-daily-deploy-secrets]
 
   mobile-prod-build:
     when:
-      equal: ['mobile-prod-build', << pipeline.parameters.workflow >>]
+      and:
+        - equal: ['mobile-prod-build', << pipeline.parameters.workflow >>]
+        - equal: ['disabled', 'enabled']  # Always false - CircleCI disabled
     jobs:
       - generate-config
       - init:
