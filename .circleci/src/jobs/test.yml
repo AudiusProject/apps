@@ -3,7 +3,7 @@ parameters:
     description: 'Service to test'
     type: string
 machine: true
-resource_class: audiusproject/gcp-n2-standard-4
+resource_class: xlarge
 working_directory: ~/apps
 steps:
   # - run:
