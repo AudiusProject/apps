@@ -2,6 +2,17 @@ import type { CrossPlatformFile } from '../../types/File'
 import type { LoggerService } from '../Logger'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
+/**
+ * A handle to control an active upload.
+ * Provides methods to interact with the upload without exposing the underlying implementation.
+ */
+export interface UploadHandle {
+  /**
+   * Aborts the upload
+   */
+  abort: () => void
+}
+
 export type StorageServiceConfigInternal = {
   /**
    * Logger service, defaults to console
@@ -51,11 +62,13 @@ export type StorageService = {
   uploadFileV2: ({
     file,
     onProgress,
-    metadata
+    metadata,
+    onUploadCreated
   }: {
     file: CrossPlatformFile
     onProgress: (loadedBytes: number, totalBytes: number) => void
     metadata: FileMetadata
+    onUploadCreated?: (upload: UploadHandle) => void
   }) => Promise<string>
   getUploadStatus: (uploadId: string) => Promise<UploadResponse>
   generatePreview: ({

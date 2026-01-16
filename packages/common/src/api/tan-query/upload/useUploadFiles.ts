@@ -1,4 +1,4 @@
-import type { CrossPlatformFile, FileMetadata } from '@audius/sdk'
+import type { CrossPlatformFile, FileMetadata, UploadHandle } from '@audius/sdk'
 import {
   mutationOptions,
   useMutation,
@@ -11,7 +11,7 @@ import { useQueryContext, type QueryContextType } from '../utils'
 
 import { getUploadStatusOptions } from './useUploadStatus'
 
-const { updateProgress } = uploadActions
+const { updateProgress, resetProgress } = uploadActions
 
 type UploadFilesParams = {
   files: {
@@ -20,6 +20,7 @@ type UploadFilesParams = {
     file: CrossPlatformFile
     metadata: FileMetadata
   }[]
+  onUploadCreated?: (clientId: string, upload: UploadHandle) => void
 }
 
 type UploadFileContext = Pick<QueryContextType, 'audiusSdk' | 'dispatch'>
@@ -31,6 +32,7 @@ const pollFileUploadStatus = async (
   stemIndex: number | null | undefined,
   type: 'audio' | 'art',
   uploadId: string,
+  abortSignal?: AbortSignal,
   timeoutS: number = 3600, // 1 hour
   delayMs: number = 3000 // 3 seconds
 ) => {
@@ -47,6 +49,11 @@ const pollFileUploadStatus = async (
   }, timeoutS * 1000)
 
   while (true) {
+    if (abortSignal?.aborted) {
+      clearTimeout(t)
+      throw new Error('Upload aborted')
+    }
+
     await new Promise((resolve) => setTimeout(resolve, delayMs))
     try {
       await queryContext.client.invalidateQueries({
@@ -103,6 +110,17 @@ const getUploadFilesOptions = (context: UploadFileContext) => {
 
       return await Promise.all(
         params.files.map(async (fileObj) => {
+          const abortController = new AbortController()
+
+          // Always start progress from zero. Useful when the audio file gets replaced
+          context.dispatch(
+            resetProgress({
+              clientId: fileObj.clientId,
+              stemIndex: fileObj.stemIndex ?? null,
+              key: fileObj.metadata.template === 'audio' ? 'audio' : 'art'
+            })
+          )
+
           const uploadId = await sdk.services.storage.uploadFileV2({
             file: fileObj.file,
             onProgress: (loaded, total) =>
@@ -118,17 +136,27 @@ const getUploadFilesOptions = (context: UploadFileContext) => {
                   }
                 })
               ),
-            metadata: fileObj.metadata
+            metadata: fileObj.metadata,
+            onUploadCreated: (upload) => {
+              params.onUploadCreated?.(fileObj.clientId, {
+                abort: () => {
+                  upload.abort()
+                  abortController.abort()
+                }
+              })
+            }
           })
-          const res = await pollFileUploadStatus(
+
+          const transcodeRes = await pollFileUploadStatus(
             context,
             queryContext,
             fileObj.clientId,
             fileObj.stemIndex,
             fileObj.metadata.template === 'audio' ? 'audio' : 'art',
-            uploadId
+            uploadId,
+            abortController.signal
           )
-          return { response: res, clientId: fileObj.clientId }
+          return { response: transcodeRes, clientId: fileObj.clientId }
         })
       )
     }
