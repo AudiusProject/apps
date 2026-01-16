@@ -89,7 +89,16 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/no-unknown-property': ['error', { ignore: ['css'] }],
 
-    'prettier/prettier': ['error', require('../.prettierrc')],
+    // Let Prettier resolve config natively to match editor behavior
+    // This ensures eslint-plugin-prettier uses the same config resolution
+    // as Prettier CLI/editor extensions
+    'prettier/prettier': [
+      'error',
+      {},
+      {
+        usePrettierrc: true
+      }
+    ],
 
     'space-before-function-paren': 'off',
     'generator-star-spacing': 'off',
