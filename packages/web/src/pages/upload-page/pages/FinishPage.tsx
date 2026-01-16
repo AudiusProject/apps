@@ -191,8 +191,7 @@ export const FinishPage = (props: FinishPageProps) => {
 
   const handleViewUpload = useCallback(() => {
     dispatch(make(Name.TRACK_UPLOAD_VIEW_TRACK_PAGE, { uploadType }))
-    onContinue()
-  }, [dispatch, uploadType, onContinue])
+  }, [dispatch, uploadType])
 
   const isUnlistedTrack =
     (formState.tracks &&
