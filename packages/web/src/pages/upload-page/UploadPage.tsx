@@ -22,7 +22,7 @@ import {
   type TrackFormState
 } from '@audius/common/store'
 import { IconCloudUpload } from '@audius/harmony'
-import { HashId } from '@audius/sdk'
+import { HashId, type UploadHandle } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
 
@@ -100,10 +100,15 @@ export const UploadPage = (props: UploadPageProps) => {
     Promise.resolve([])
   )
 
+  const fileUploads = useRef<
+    Map<string, NonNullable<UploadFormState['tracks']>[number]['file']>
+  >(new Map())
+
   const uploadTracks = useCallback(
     async (tracks: TrackForUpload[]) => {
       // Track analytics for each track being uploaded
       tracks.forEach((t) => {
+        fileUploads.current.set(t.clientId, t.file)
         dispatch(
           make(Name.TRACK_UPLOAD_TRACK_UPLOADING, {
             artworkSource:
@@ -135,10 +140,56 @@ export const UploadPage = (props: UploadPageProps) => {
             userWallet: user?.wallet,
             template: 'audio'
           }
-        }))
+        })),
+        onUploadCreated: (clientId, handle) => {
+          uploadHandles.current.set(clientId, handle)
+        }
       })
     },
     [dispatch, uploadFiles, user?.wallet]
+  )
+
+  const uploadHandles = useRef<Map<string, UploadHandle>>(new Map())
+
+  /**
+   * Replace track files that have been changed in the edit form
+   * by aborting their previous upload and re-uploading the new file
+   */
+  const replaceTrackFiles = useCallback(
+    (tracks: TrackForUpload[]) => {
+      // Check if any track files were replaced (same clientId, different File)
+      const tracksWithReplacedFiles =
+        tracks?.filter((track) => {
+          const existingFile = fileUploads.current.get(track.clientId)
+          return existingFile && existingFile !== track.file
+        }) ?? []
+
+      // Abort and remove upload handles for removed or replaced files
+      for (const key of uploadHandles.current.keys()) {
+        const isRemoved = !tracks.find((t) => t.clientId === key)
+        const isReplaced = !!tracksWithReplacedFiles.find(
+          (t) => t.clientId === key
+        )
+        if (isRemoved || isReplaced) {
+          uploadHandles.current.get(key)?.abort()
+          uploadHandles.current.delete(key)
+        }
+      }
+
+      // Keep the existing uploads and add the new uploads for replaced files
+      if (tracksWithReplacedFiles.length > 0) {
+        trackUploadPromise.current = Promise.all([
+          uploadTracks(tracksWithReplacedFiles),
+          trackUploadPromise.current
+        ]).then(([newUploads, oldUploads]) => [
+          ...newUploads,
+          ...oldUploads.filter((oldUpload) => {
+            return !newUploads.find((nu) => nu.clientId === oldUpload.clientId)
+          })
+        ])
+      }
+    },
+    [uploadTracks]
   )
 
   const uploadTrackArtworks = useCallback(
@@ -452,15 +503,20 @@ export const UploadPage = (props: UploadPageProps) => {
   const { onOpen: openUploadConfirmationModal } = useUploadConfirmationModal()
 
   const openUploadConfirmation = useCallback(
-    (hasPublicTracks: boolean) => {
+    (
+      hasPublicTracks: boolean,
+      formState: CollectionFormState | TrackFormState
+    ) => {
       openUploadConfirmationModal({
         hasPublicTracks,
         confirmCallback: () => {
           setPhase(Phase.FINISH)
+          replaceTrackFiles(formState.tracks ?? [])
+          finishUpload(formState)
         }
       })
     },
-    [openUploadConfirmationModal]
+    [finishUpload, openUploadConfirmationModal, replaceTrackFiles]
   )
 
   let page
@@ -493,8 +549,10 @@ export const UploadPage = (props: UploadPageProps) => {
                 formState.tracks?.some(
                   (track) => !track.metadata.is_unlisted
                 ) ?? true
-              finishUpload(formState as CollectionFormState | TrackFormState)
-              openUploadConfirmation(hasPublicTracks && !isPrivateCollection)
+              openUploadConfirmation(
+                hasPublicTracks && !isPrivateCollection,
+                formState as CollectionFormState | TrackFormState
+              )
             }}
           />
         )

@@ -19,7 +19,8 @@ import type {
   StorageService,
   StorageServiceConfig,
   StorageServiceConfigInternal,
-  UploadResponse
+  UploadResponse,
+  UploadHandle
 } from './types'
 
 const MAX_TRACK_TRANSCODE_TIMEOUT = 3600000 // 1 hour
@@ -146,11 +147,13 @@ export class Storage implements StorageService {
   async uploadFileV2({
     file,
     onProgress,
-    metadata
+    metadata,
+    onUploadCreated
   }: {
     file: CrossPlatformFile
     onProgress: (loadedBytes: number, totalBytes: number) => void
     metadata: FileMetadata
+    onUploadCreated?: (upload: UploadHandle) => void
   }): Promise<string> {
     const selectedNode = await this.storageNodeSelector.getSelectedNode()
     if (!selectedNode) {
@@ -168,9 +171,7 @@ export class Storage implements StorageService {
             metadata.filetype || file.type || 'application/octet-stream',
           ...metadata
         },
-        onError: (error) => {
-          reject(error)
-        },
+        onError: reject,
         onProgress,
         onSuccess: () => {
           const uploadId = upload.url?.split('/').pop()
@@ -181,6 +182,9 @@ export class Storage implements StorageService {
           resolve(uploadId)
         }
       })
+
+      // Call callback immediately with upload handle (for cancellation)
+      onUploadCreated?.(upload)
 
       upload.findPreviousUploads().then((previousUploads) => {
         if (previousUploads.length && previousUploads[0]) {

@@ -282,6 +282,11 @@ const TrackEditForm = (
 
         const newFile = files[0]
 
+        // Preserve clientId for upload tracking
+        if ('clientId' in formValues.tracks[trackIdx]) {
+          newFile.clientId = formValues.tracks[trackIdx]?.clientId
+        }
+
         if (isUpload && !isTitleDirty) {
           setTitle(newFile.metadata.title.split('.').shift())
         }
@@ -304,6 +309,8 @@ const TrackEditForm = (
     [
       isPreviewPlaying,
       handleTogglePreview,
+      formValues.tracks,
+      trackIdx,
       isUpload,
       isTitleDirty,
       isArtworkSet,
