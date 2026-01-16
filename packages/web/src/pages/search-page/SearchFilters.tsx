@@ -35,7 +35,25 @@ const messages = {
 const GenreFilter = () => {
   const [urlSearchParams] = useSearchParams()
   const genre = urlSearchParams.get('genre')
-  const updateSearchParams = useUpdateSearchParams('genre')
+  const updateGenreParams = useUpdateSearchParams('genre')
+  const updateBpmParams = useUpdateSearchParams('bpm')
+  const updateKeyParams = useUpdateSearchParams('key')
+
+  const handleGenreChange = (value: string) => {
+    // Clear key and bpm filters when Podcasts is selected
+    if (value === 'Podcasts') {
+      const currentBpm = urlSearchParams.get('bpm')
+      const currentKey = urlSearchParams.get('key')
+      if (currentBpm) {
+        updateBpmParams('')
+      }
+      if (currentKey) {
+        updateKeyParams('')
+      }
+    }
+    
+    updateGenreParams(value)
+  }
 
   return (
     <FilterButton
@@ -46,7 +64,7 @@ const GenreFilter = () => {
         maxHeight: 400
       }}
       value={genre}
-      onChange={updateSearchParams}
+      onChange={handleGenreChange}
       options={GENRES.map((genre) => ({
         label: genre,
         value: convertGenreLabelToValue(genre)

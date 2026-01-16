@@ -35,12 +35,23 @@ const genreOptions = GENRES.map((genre) => ({
 
 export const GenreFilter = () => {
   const [genre, setGenre] = useSearchFilter('genre')
+  const [, setKey] = useSearchFilter('key')
+  const [, setBpm] = useSearchFilter('bpm')
+
+  const handleGenreChange = (value: string | undefined) => {
+    // Clear key and bpm filters when Podcasts is selected
+    if (value === 'Podcasts') {
+      setKey(undefined)
+      setBpm(undefined)
+    }
+    setGenre(value)
+  }
 
   return (
     <FilterButton
       label={messages.genre}
       value={genre}
-      onChange={setGenre}
+      onChange={handleGenreChange}
       options={genreOptions}
       size='small'
     />

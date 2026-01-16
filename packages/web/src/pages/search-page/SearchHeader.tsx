@@ -40,7 +40,19 @@ export const SearchHeader = (props: Partial<HeaderProps>) => {
     [setCategory]
   )
 
-  const filterKeys: string[] = categories[categoryKey].filters
+  const searchParams = useSearchParams()
+  const genre = searchParams.genre
+  const isPodcastGenre = genre === 'Podcasts'
+  
+  const filterKeys: string[] = categories[categoryKey].filters.filter(
+    (filter) => {
+      // Disable key and bpm filters when genre is Podcasts
+      if (isPodcastGenre && (filter === 'key' || filter === 'bpm')) {
+        return false
+      }
+      return true
+    }
+  )
 
   const categoryRadioGroup = (
     <RadioGroup
