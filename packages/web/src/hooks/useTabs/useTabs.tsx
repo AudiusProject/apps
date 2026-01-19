@@ -222,8 +222,8 @@ const TabBar = memo(
     // Ask Michael to explain this if necessary.
     const interpolateScale = (x: number) => {
       const [first, second] = [
-        refsArr.current[0].current,
-        refsArr.current[1].current
+        refsArr.current[0]?.current,
+        refsArr.current[1]?.current
       ]
       if (!(first && second)) {
         return 'scale(1, 1)'
