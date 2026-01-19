@@ -182,7 +182,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     setHeader(null)
   }, [setHeader])
 
-  const messages = getMessages({ name, isOwner })
   const isLoading = status === Status.LOADING
   const isEditing = mode === 'editing'
 
@@ -301,9 +300,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     playArtistTrack,
     pauseArtistTrack,
     playUserFeedTrack,
-    pauseUserFeedTrack,
-    tracksActions,
-    feedActions
+    pauseUserFeedTrack
   ])
 
   // Set Nav-Bar Menu
