@@ -25,7 +25,7 @@ type BottomButtonsProps = {
   toggleSave: () => void
   toggleRepost: () => void
   onClickOverflow: () => void
-  onShare: () => void
+  onShare: (e?: MouseEvent) => void
   onClickGatedUnlockPill?: (e: MouseEvent) => void
   isLoading: boolean
   isOwner: boolean
