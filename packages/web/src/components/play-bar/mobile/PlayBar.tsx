@@ -177,9 +177,13 @@ const PlayBar = ({
                 </div>
               </TrackFlair>
             ) : null}
-            <div className={styles.title}>{title}</div>
-            <div className={styles.separator}>•</div>
-            <div className={styles.artist}>{name}</div>
+            <div className={styles.text}>
+              <div className={styles.titleLine}>
+                <span className={styles.title}>{title}</span>
+                <span className={styles.separator}>•</span>
+                <span className={styles.artist}>{name}</span>
+              </div>
+            </div>
             {shouldShowPreviewLock ? (
               <div className={styles.lockPreview}>
                 <LockedStatusBadge

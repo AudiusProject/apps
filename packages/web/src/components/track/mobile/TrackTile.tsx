@@ -35,9 +35,7 @@ import {
   Flex,
   Box,
   IconButton,
-  IconKebabHorizontal,
-  IconPin,
-  IconText
+  IconKebabHorizontal
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
@@ -103,8 +101,7 @@ export const TrackTile = ({
   containerClassName,
   isFeed = false,
   source,
-  noShimmer,
-  showArtistPick = false
+  noShimmer
 }: ConnectedTrackTileProps) => {
   const dispatch = useDispatch()
 
@@ -172,7 +169,6 @@ export const TrackTile = ({
   } = trackWithFallback
 
   const isOwner = user_id === currentUserId
-  const isArtistPick = partialUser?.artist_pick_track_id === track_id
 
   const { isFetchingNFTAccess, hasStreamAccess } =
     useGatedContentAccess(trackWithFallback)
@@ -391,11 +387,6 @@ export const TrackTile = ({
             alignItems='center'
             className={cn(styles.duration, fadeIn)}
           >
-            {showArtistPick && isArtistPick ? (
-              <IconText icons={[{ icon: IconPin }]}>
-                {messages.artistPick}
-              </IconText>
-            ) : null}
             {duration
               ? formatLineupTileDuration(
                   duration,
@@ -431,7 +422,11 @@ export const TrackTile = ({
               isActive={uid === playingUid || isActive}
               applyHoverStylesToInnerSvg
             >
-              <Text ellipses>{title || messages.loading}</Text>
+              <Text ellipses>
+                {title || messages.loading}
+                {title || messages.loading}
+                {title || messages.loading}
+              </Text>
               {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}
               {loading ? (
                 <Skeleton
