@@ -153,6 +153,10 @@ type QueueableTrack = {
 export const AudioPlayer = () => {
   const track = useCurrentTrack()
   const playing = useSelector(getPlaying)
+  const playingRef = useRef(playing)
+  useEffect(() => {
+    playingRef.current = playing
+  }, [playing])
   const seek = useSelector(getSeek)
   const counter = useSelector(getCounter)
   const repeatMode = useSelector(getRepeat)
@@ -607,8 +611,15 @@ export const AudioPlayer = () => {
       seekToRef.current = null
     }
   }, [])
-
-  TrackPlayer.addEventListener(Event.PlaybackState, handlePlayerStateChange)
+  useEffect(() => {
+    const sub = TrackPlayer.addEventListener(
+      Event.PlaybackState,
+      handlePlayerStateChange
+    )
+    return () => {
+      sub.remove()
+    }
+  }, [handlePlayerStateChange])
 
   // Seek handler
   useEffect(() => {
@@ -748,8 +759,6 @@ export const AudioPlayer = () => {
     } else {
       await TrackPlayer.reset()
 
-      await TrackPlayer.play()
-
       const firstTrack = newQueueTracks[queueIndex]
       if (!firstTrack) return
 
@@ -767,6 +776,15 @@ export const AudioPlayer = () => {
         trackId: firstTrack.track?.track_id ?? 0,
         uid: queueTrackUids[queueIndex]
       })
+
+      // Respect the current desired play/pause state.
+      // Previously we called `TrackPlayer.play()` immediately after reset, which could briefly
+      // autoplay and then get paused by later state sync (especially on slow/buffering starts).
+      if (playingRef.current) {
+        await TrackPlayer.play()
+      } else {
+        await TrackPlayer.pause()
+      }
 
       enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
       await enqueueTracksJobRef.current
