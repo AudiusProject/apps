@@ -422,11 +422,7 @@ export const TrackTile = ({
               isActive={uid === playingUid || isActive}
               applyHoverStylesToInnerSvg
             >
-              <Text ellipses>
-                {title || messages.loading}
-                {title || messages.loading}
-                {title || messages.loading}
-              </Text>
+              <Text ellipses>{title || messages.loading}</Text>
               {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}
               {loading ? (
                 <Skeleton
