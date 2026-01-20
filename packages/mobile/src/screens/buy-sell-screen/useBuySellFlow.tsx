@@ -33,13 +33,11 @@ import { useNavigation } from 'app/hooks/useNavigation'
 import { BuyScreen, ConvertScreen, SellScreen } from './components'
 
 type BuySellFlowProps = {
-  onClose: () => void
   initialTab?: BuySellTab
   coinTicker?: string
 }
 
-export const BuySellFlow = ({
-  onClose,
+export const useBuySellFlow = ({
   initialTab = 'buy',
   coinTicker = AUDIO_TICKER
 }: BuySellFlowProps) => {
