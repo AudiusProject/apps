@@ -9,7 +9,6 @@ import {
 } from 'react'
 
 import { convertHexToRGBA } from '@audius/common/utils'
-import { BlurView } from '@react-native-community/blur'
 import type {
   NativeSyntheticEvent,
   TextInputFocusEventData,
@@ -20,7 +19,6 @@ import type {
 import {
   Platform,
   Keyboard,
-  InputAccessoryView,
   Animated,
   TextInput as RNTextInput,
   View,
@@ -34,19 +32,15 @@ import {
   Flex,
   Text as HarmonyText,
   IconCloseAlt,
-  PlainButton,
   useTheme
 } from '@audius/harmony-native'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
+import { TextInputAccessoryView } from 'app/harmony-native/components/input/TextInput/TextInputAccessoryView'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { mergeRefs } from 'app/utils/mergeRefs'
-import { Theme, useThemeColors, useThemeVariant } from 'app/utils/theme'
-
-const messages = {
-  done: 'Done'
-}
+import { useThemeColors } from 'app/utils/theme'
 
 const useStyles = makeStyles(({ typography, palette, spacing }) => ({
   root: {
@@ -93,14 +87,6 @@ const useStyles = makeStyles(({ typography, palette, spacing }) => ({
   startAdornment: {},
   endAdornment: {
     alignSelf: 'flex-end'
-  },
-  inputAccessory: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
-  },
-  doneButton: {
-    marginRight: spacing(4),
-    marginVertical: spacing(3)
   }
 }))
 
@@ -332,8 +318,6 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
     const { neutral, neutralLight4, secondary, neutralLight7, accentRed } =
       useThemeColors()
 
-    const themeVariant = useThemeVariant()
-
     return (
       <Pressable onPress={handlePressRoot}>
         <Animated.View
@@ -453,21 +437,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
           </Flex>
         </Animated.View>
         {hideInputAccessory ? null : (
-          <InputAccessoryView nativeID={inputAccessoryViewID}>
-            <BlurView
-              blurType={
-                themeVariant === Theme.LIGHT
-                  ? 'thinMaterialLight'
-                  : 'thinMaterialDark'
-              }
-              blurAmount={20}
-              style={styles.inputAccessory}
-            >
-              <PlainButton style={styles.doneButton} onPress={Keyboard.dismiss}>
-                {messages.done}
-              </PlainButton>
-            </BlurView>
-          </InputAccessoryView>
+          <TextInputAccessoryView nativeID={inputAccessoryViewID} />
         )}
       </Pressable>
     )
