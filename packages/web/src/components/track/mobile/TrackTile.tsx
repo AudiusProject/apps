@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { MouseEvent, useCallback, useEffect } from 'react'
 
 import {
   useToggleFavoriteTrack,
@@ -298,7 +298,8 @@ export const TrackTile = ({
 
   const onToggleRepost = useCallback(() => toggleRepost(id), [toggleRepost, id])
 
-  const onClickShare = useCallback(() => {
+  const onClickShare = useCallback((e?: MouseEvent) => {
+    e?.stopPropagation()
     if (!trackId) return
     dispatch(
       requestOpenShareModal({

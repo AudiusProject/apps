@@ -205,7 +205,8 @@ export const TrackTile = ({
     }
   }, [handleRepostTrack, handleUndoRepostTrack, trackId, isReposted, isFeed])
 
-  const onClickShare = useCallback(() => {
+  const onClickShare = useCallback((e?: MouseEvent) => {
+    e?.stopPropagation()
     shareTrack(trackId)
   }, [shareTrack, trackId])
 

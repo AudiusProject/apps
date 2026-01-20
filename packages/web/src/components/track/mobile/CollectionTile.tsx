@@ -374,7 +374,8 @@ export const CollectionTile = ({
     [goToRoute, getRoute]
   )
 
-  const onShare = useCallback(() => {
+  const onShare = useCallback((e?: MouseEvent) => {
+    e?.stopPropagation()
     shareCollection(collection.playlist_id)
   }, [shareCollection, collection.playlist_id])
 
