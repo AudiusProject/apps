@@ -298,17 +298,20 @@ export const TrackTile = ({
 
   const onToggleRepost = useCallback(() => toggleRepost(id), [toggleRepost, id])
 
-  const onClickShare = useCallback((e?: MouseEvent) => {
-    e?.stopPropagation()
-    if (!trackId) return
-    dispatch(
-      requestOpenShareModal({
-        type: 'track',
-        trackId,
-        source: ShareSource.TILE
-      })
-    )
-  }, [dispatch, trackId])
+  const onClickShare = useCallback(
+    (e?: MouseEvent) => {
+      e?.stopPropagation()
+      if (!trackId) return
+      dispatch(
+        requestOpenShareModal({
+          type: 'track',
+          trackId,
+          source: ShareSource.TILE
+        })
+      )
+    },
+    [dispatch, trackId]
+  )
 
   const onClickOverflowMenu = useCallback(
     () => onClickOverflow && onClickOverflow(id),

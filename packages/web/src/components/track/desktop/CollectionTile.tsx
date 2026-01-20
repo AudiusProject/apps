@@ -349,10 +349,13 @@ export const CollectionTile = ({
     isFeed
   ])
 
-  const onClickShare = useCallback((e?: MouseEvent) => {
-    e?.stopPropagation()
-    shareCollection(id)
-  }, [shareCollection, id])
+  const onClickShare = useCallback(
+    (e?: MouseEvent) => {
+      e?.stopPropagation()
+      shareCollection(id)
+    },
+    [shareCollection, id]
+  )
 
   const hasStreamAccess = !!access?.stream
 
