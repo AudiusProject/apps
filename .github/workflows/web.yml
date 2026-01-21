@@ -528,6 +528,11 @@ jobs:
           cp ./robots.txt build
           cp ./robots.txt build-ssr/client
 
+      - name: Copy .well-known files
+        run: |
+          cd packages/web
+          cp -r ./public/.well-known build
+
       - name: Deploy to Cloudflare (Release)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -638,6 +643,11 @@ jobs:
           cd packages/web
           cp ./robots.txt build
           cp ./robots.txt build-ssr/client
+
+      - name: Copy .well-known files
+        run: |
+          cd packages/web
+          cp -r ./public/.well-known build
 
       - name: Deploy to Cloudflare (Production)
         env:
