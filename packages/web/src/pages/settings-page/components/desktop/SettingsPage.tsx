@@ -20,8 +20,10 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  Flex,
   IconAppearance,
   IconEmailAddress,
+  IconError,
   IconKey,
   IconRecoveryEmail as IconMail,
   IconMessage,
@@ -30,6 +32,7 @@ import {
   IconReceive,
   IconSettings,
   IconSignOut,
+  IconVerified,
   Modal,
   ModalContent,
   ModalContentText,
@@ -37,11 +40,12 @@ import {
   ModalHeader,
   ModalTitle,
   SegmentedControl,
+  Text,
   useTheme
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { make, useRecord } from 'common/store/analytics/actions'
@@ -60,6 +64,7 @@ import {
   Permission
 } from 'utils/browserNotifications'
 import { isElectron } from 'utils/clientUtil'
+import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
 import { THEME_KEY } from 'utils/theme/theme'
 
@@ -95,6 +100,7 @@ const {
 const { subscribeBrowserPushNotifications } = accountActions
 
 const {
+  CHECK_PAGE,
   DOWNLOAD_LINK,
   PRIVACY_POLICY,
   PRIVATE_KEY_EXPORTER_SETTINGS_PAGE,
@@ -106,7 +112,15 @@ const EMAIL_TOAST_TIMEOUT = 2000
 
 const messages = {
   title: 'Settings',
-  description: 'Configure your Audius account'
+  description: 'Configure your Audius account',
+  verificationSuccessTitle: 'Verification Submitted',
+  verificationSuccessMessage:
+    'Thank you for completing identity verification. Your request will be processed soon.',
+  verificationErrorTitle: 'Verification Failed',
+  verificationErrorMessage:
+    'We could not verify your account. Please try again another time.',
+  pending: 'Pending',
+  closeButton: 'Close'
 }
 
 export const SettingsPage = () => {
@@ -114,6 +128,7 @@ export const SettingsPage = () => {
   const isManagedAccount = useIsManagedAccount()
   const { authService, identityService } = useQueryContext()
   const { spacing } = useTheme()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
@@ -146,6 +161,33 @@ export const SettingsPage = () => {
   )
   const [, setIsInboxSettingsModalVisible] = useModalState('InboxSettings')
   const [, setIsCommentSettingsModalVisible] = useModalState('CommentSettings')
+
+  // Check for verification query param and show appropriate modal
+  const verificationStatus = searchParams.get('verification')
+  const [isVerificationSuccessModalOpen, setIsVerificationSuccessModalOpen] =
+    useState(false)
+  const [isVerificationErrorModalOpen, setIsVerificationErrorModalOpen] =
+    useState(false)
+
+  useEffect(() => {
+    if (verificationStatus === 'success') {
+      setIsVerificationSuccessModalOpen(true)
+      searchParams.delete('verification')
+      setSearchParams(searchParams, { replace: true })
+    } else if (verificationStatus === 'error') {
+      setIsVerificationErrorModalOpen(true)
+      searchParams.delete('verification')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [verificationStatus, searchParams, setSearchParams])
+
+  const handleCloseVerificationSuccessModal = useCallback(() => {
+    setIsVerificationSuccessModalOpen(false)
+  }, [])
+
+  const handleCloseVerificationErrorModal = useCallback(() => {
+    setIsVerificationErrorModalOpen(false)
+  }, [])
 
   useEffect(() => {
     dispatch(getNotificationSettings())
@@ -246,6 +288,10 @@ export const SettingsPage = () => {
     record(make(Name.EXPORT_PRIVATE_KEY_LINK_CLICKED, { handle, userId }))
   }, [record, handle, userId])
 
+  const goToVerification = useCallback(() => {
+    dispatch(push(CHECK_PAGE))
+  }, [dispatch])
+
   const toggleBrowserPushNotificationPermissions = useCallback(
     (notificationType: BrowserNotificationSetting, isOn: boolean) => {
       if (!isOn) {
@@ -341,7 +387,7 @@ export const SettingsPage = () => {
       <div className={styles.settings}>
         {!isManagedAccount ? (
           <SettingsCard
-            icon={<IconAppearance />}
+            icon={<IconAppearance color='accent' />}
             title={settingsMessages.appearanceTitle}
             description={settingsMessages.appearanceDescription}
             isFull={true}
@@ -358,7 +404,7 @@ export const SettingsPage = () => {
         ) : null}
         {!isManagedAccount ? (
           <SettingsCard
-            icon={<IconMessages />}
+            icon={<IconMessages color='accent' />}
             title={settingsMessages.inboxSettingsCardTitle}
             description={settingsMessages.inboxSettingsCardDescription}
           >
@@ -372,7 +418,7 @@ export const SettingsPage = () => {
           </SettingsCard>
         ) : null}
         <SettingsCard
-          icon={<IconMessage />}
+          icon={<IconMessage color='accent' />}
           title={settingsMessages.commentSettingsCardTitle}
           description={settingsMessages.commentSettingsCardDescription}
         >
@@ -385,7 +431,7 @@ export const SettingsPage = () => {
           </Button>
         </SettingsCard>
         <SettingsCard
-          icon={<IconNotification />}
+          icon={<IconNotification color='accent' />}
           title={settingsMessages.notificationsCardTitle}
           description={settingsMessages.notificationsCardDescription}
         >
@@ -399,7 +445,7 @@ export const SettingsPage = () => {
         </SettingsCard>
         {!isManagedAccount ? (
           <SettingsCard
-            icon={<IconMail />}
+            icon={<IconMail color='accent' />}
             title={settingsMessages.accountRecoveryCardTitle}
             description={settingsMessages.accountRecoveryCardDescription}
           >
@@ -418,7 +464,18 @@ export const SettingsPage = () => {
         ) : null}
         {!isManagedAccount ? (
           <SettingsCard
-            icon={<IconEmailAddress />}
+            icon={<IconVerified color='accent' size='l' />}
+            title={settingsMessages.verificationCardTitle}
+            description={settingsMessages.verificationCardDescription}
+          >
+            <Button onClick={goToVerification} variant='secondary' fullWidth>
+              {settingsMessages.verificationCardButtonText}
+            </Button>
+          </SettingsCard>
+        ) : null}
+        {!isManagedAccount ? (
+          <SettingsCard
+            icon={<IconEmailAddress color='accent' />}
             title={settingsMessages.changeEmailCardTitle}
             description={settingsMessages.changeEmailCardDescription}
           >
@@ -433,7 +490,7 @@ export const SettingsPage = () => {
         ) : null}
         {!isManagedAccount ? (
           <SettingsCard
-            icon={<IconKey />}
+            icon={<IconKey color='accent' />}
             title={settingsMessages.changePasswordCardTitle}
             description={settingsMessages.changePasswordCardDescription}
           >
@@ -451,7 +508,7 @@ export const SettingsPage = () => {
         <AccountsYouManageSettingsCard />
         {isDownloadDesktopEnabled ? (
           <SettingsCard
-            icon={<IconReceive />}
+            icon={<IconReceive color='accent' />}
             title={settingsMessages.desktopAppCardTitle}
             description={settingsMessages.desktopAppCardDescription}
           >
@@ -576,6 +633,81 @@ export const SettingsPage = () => {
         emailFrequency={emailFrequency}
         onClose={closeNotificationSettings}
       />
+      <Modal
+        isOpen={isVerificationSuccessModalOpen}
+        onClose={handleCloseVerificationSuccessModal}
+        size='small'
+      >
+        <ModalHeader>
+          <ModalTitle title={messages.verificationSuccessTitle} />
+        </ModalHeader>
+        <ModalContent>
+          <Flex
+            direction='column'
+            alignItems='center'
+            justifyContent='center'
+            gap='l'
+            pv='l'
+          >
+            <Flex alignItems='center' gap='s'>
+              <IconVerified size='xl' />
+              <Text size='xl' variant='label'>
+                {messages.pending}
+              </Text>
+            </Flex>
+            <Flex justifyContent='center'>
+              <ModalContentText>
+                {messages.verificationSuccessMessage}
+              </ModalContentText>
+            </Flex>
+          </Flex>
+        </ModalContent>
+        <ModalFooter>
+          <Button
+            variant='primary'
+            onClick={handleCloseVerificationSuccessModal}
+            fullWidth
+          >
+            {messages.closeButton}
+          </Button>
+        </ModalFooter>
+      </Modal>
+      <Modal
+        isOpen={isVerificationErrorModalOpen}
+        onClose={handleCloseVerificationErrorModal}
+        size='small'
+      >
+        <ModalHeader>
+          <ModalTitle
+            title={messages.verificationErrorTitle}
+            Icon={IconError}
+          />
+        </ModalHeader>
+        <ModalContent>
+          <Flex
+            direction='column'
+            alignItems='center'
+            justifyContent='center'
+            gap='l'
+            pv='l'
+          >
+            <Flex justifyContent='center'>
+              <ModalContentText>
+                {messages.verificationErrorMessage}
+              </ModalContentText>
+            </Flex>
+          </Flex>
+        </ModalContent>
+        <ModalFooter>
+          <Button
+            variant='primary'
+            onClick={handleCloseVerificationErrorModal}
+            fullWidth
+          >
+            {messages.closeButton}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </Page>
   )
 }

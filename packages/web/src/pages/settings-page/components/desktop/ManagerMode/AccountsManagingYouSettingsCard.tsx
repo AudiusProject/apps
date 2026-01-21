@@ -41,7 +41,7 @@ export const AccountsManagingYouSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconShieldUser />}
+        icon={<IconShieldUser color='accent' />}
         title={messages.accountsManagingYouTitle}
         description={messages.accountsManagingYouDescription}
       >

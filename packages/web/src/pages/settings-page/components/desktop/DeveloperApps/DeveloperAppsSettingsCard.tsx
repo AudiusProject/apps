@@ -26,7 +26,7 @@ export const DeveloperAppsSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconEmbed />}
+        icon={<IconEmbed color='accent' />}
         title={messages.title}
         description={messages.description}
       >

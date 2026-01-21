@@ -25,6 +25,7 @@ export const settingsMessages = {
   changeEmailCardTitle: 'Change Email',
   changePasswordCardTitle: 'Change Password',
   accountsYouManageTitle: 'Accounts You Manage',
+  verificationCardTitle: 'Verification',
   desktopAppCardTitle: 'Download the Desktop App',
 
   appearanceDescription:
@@ -39,11 +40,14 @@ export const settingsMessages = {
   changeEmailCardDescription:
     'Change the email you use to sign in and receive emails.',
   changePasswordCardDescription: 'Change the password to your Audius account.',
+  verificationCardDescription:
+    'Verify your Audius profile by completing identity verification',
   desktopAppCardDescription:
     'For the best experience, we recommend downloading the Audius App.',
   labelAccountCardDescription:
     'Identify as a record label on your Audius profile.',
 
+  verificationCardButtonText: 'Get Verified',
   inboxSettingsButtonText: 'Inbox Settings',
   commentSettingsButtonText: 'Comment Settings',
   notificationsButtonText: 'Configure Notifications',

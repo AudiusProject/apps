@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useAccountStatus, useCurrentAccountUser } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { usePlaidLink } from 'react-plaid-link'
+import { usePlaidLink, PlaidLinkError } from 'react-plaid-link'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router'
 
 import Page from 'components/page/Page'
 import { identityService } from 'services/audius-sdk/identity'
@@ -12,10 +13,11 @@ import { push as pushRoute } from 'utils/navigation'
 
 import './CheckPage.module.css'
 
-const { SIGN_IN_PAGE, TRENDING_PAGE } = route
+const { SIGN_IN_PAGE, SETTINGS_PAGE } = route
 
 const CheckPage = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { data: accountHandle } = useCurrentAccountUser({
     select: (user) => user?.handle
   })
@@ -28,6 +30,7 @@ const CheckPage = () => {
   }, [accountHandle, accountStatus, dispatch])
 
   const [linkToken, setLinkToken] = useState<string | null>(null)
+  const wasSuccessful = useRef(false)
 
   useEffect(() => {
     async function fetchLinkToken() {
@@ -38,12 +41,30 @@ const CheckPage = () => {
   }, [])
 
   const onSuccess = useCallback(() => {
-    dispatch(pushRoute(TRENDING_PAGE))
-  }, [dispatch])
+    wasSuccessful.current = true
+    setTimeout(() => {
+      navigate(`${SETTINGS_PAGE}?verification=success`)
+    }, 500)
+  }, [navigate])
+
+  const onExit = useCallback(
+    (err: PlaidLinkError | null) => {
+      alert('onExit')
+      if (err) {
+        navigate(`${SETTINGS_PAGE}?verification=error`)
+      } else if (wasSuccessful.current) {
+        navigate(`${SETTINGS_PAGE}?verification=success`)
+      } else {
+        navigate(SETTINGS_PAGE)
+      }
+    },
+    [navigate]
+  )
 
   const { open, ready } = usePlaidLink({
     token: linkToken,
-    onSuccess
+    onSuccess,
+    onExit
   })
 
   useEffect(() => {
