@@ -348,6 +348,28 @@ async function handleEvent(request, env, ctx) {
       }
     }
 
+    const isAppleAppSiteAssociation =
+      pathname === '/.well-known/apple-app-site-association' ||
+      pathname === '/apple-app-site-association'
+    if (isAppleAppSiteAssociation) {
+      // Cloudflare's asset handler treats extensionless paths as directories and
+      // attempts to fetch `index.html`. Use a custom mapper that bypasses this.
+      const aasaOptions = {
+        mapRequestToAsset: (req) => {
+          // Return request with exact path, preventing index.html lookup
+          const url = new URL(req.url)
+          url.pathname = '/.well-known/apple-app-site-association'
+          return new Request(url.toString(), req)
+        }
+      }
+      const asset = await getAsset(request, env, ctx, aasaOptions)
+      const response = new Response(asset.body, asset)
+      response.headers.set('Content-Type', 'application/json')
+      response.headers.set('cache-control', BROWSER_CACHE_TTL_SECONDS)
+      response.headers.set('Access-Control-Allow-Origin', '*')
+      return response
+    }
+
     // For now, only SSR for crawlers
     if (SSR && isCrawler(userAgent)) {
       const ssrResponse = await env.SSR.fetch(request.clone())
