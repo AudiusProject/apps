@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 
 import { useCollection, useCurrentUserId } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
@@ -39,7 +39,7 @@ type CollectionCardProps = {
   noNavigation?: boolean
 }
 
-export const CollectionCard = (props: CollectionCardProps) => {
+const CollectionCardComponent = (props: CollectionCardProps) => {
   const { id, onPress, noNavigation } = props
 
   const { data: partialCollection } = useCollection(id, {
@@ -158,3 +158,17 @@ export const CollectionCard = (props: CollectionCardProps) => {
     </Paper>
   )
 }
+
+// Memoize CollectionCard to prevent unnecessary re-renders when props haven't changed
+// This is critical for performance when rendering many cards in a list
+export const CollectionCard = memo(
+  CollectionCardComponent,
+  (prevProps, nextProps) => {
+    // Only re-render if id, onPress, or noNavigation actually change
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.noNavigation === nextProps.noNavigation &&
+      prevProps.onPress === nextProps.onPress
+    )
+  }
+)
