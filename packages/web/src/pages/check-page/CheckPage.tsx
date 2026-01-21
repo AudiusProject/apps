@@ -13,6 +13,15 @@ import { push as pushRoute } from 'utils/navigation'
 
 import './CheckPage.module.css'
 
+// Extend Window interface for React Native WebView
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void
+    }
+  }
+}
+
 const { SIGN_IN_PAGE, SETTINGS_PAGE } = route
 
 const CheckPage = () => {
@@ -40,25 +49,60 @@ const CheckPage = () => {
     fetchLinkToken()
   }, [])
 
+  // Check if we're in a React Native WebView
+  const isInWebView = useRef(
+    typeof window !== 'undefined' && window.ReactNativeWebView !== undefined
+  )
+
+  const sendMessageToWebView = useCallback((type: 'success' | 'error') => {
+    if (isInWebView.current && window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type }))
+    }
+  }, [])
+
   const onSuccess = useCallback(() => {
     wasSuccessful.current = true
-    setTimeout(() => {
-      navigate(`${SETTINGS_PAGE}?verification=success`)
-    }, 500)
-  }, [navigate])
+    if (isInWebView.current) {
+      // In WebView, send message instead of navigating
+      setTimeout(() => {
+        sendMessageToWebView('success')
+      }, 500)
+    } else {
+      // In web, navigate normally
+      setTimeout(() => {
+        navigate(`${SETTINGS_PAGE}?verification=success`)
+      }, 500)
+    }
+  }, [navigate, sendMessageToWebView])
 
   const onExit = useCallback(
     (err: PlaidLinkError | null) => {
-      alert('onExit')
-      if (err) {
-        navigate(`${SETTINGS_PAGE}?verification=error`)
-      } else if (wasSuccessful.current) {
-        navigate(`${SETTINGS_PAGE}?verification=success`)
+      if (isInWebView.current) {
+        // In WebView, send message instead of navigating
+        if (err) {
+          sendMessageToWebView('error')
+        } else if (wasSuccessful.current) {
+          sendMessageToWebView('success')
+        } else {
+          // User exited without completing - just close
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({ type: 'close' })
+            )
+          }
+        }
       } else {
-        navigate(SETTINGS_PAGE)
+        // In web, navigate normally
+        if (err) {
+          navigate(`${SETTINGS_PAGE}?verification=error`)
+        } else if (wasSuccessful.current) {
+          navigate(`${SETTINGS_PAGE}?verification=success`)
+        } else {
+          navigate(SETTINGS_PAGE)
+        }
       }
     },
-    [navigate]
+    [navigate, sendMessageToWebView]
   )
 
   const { open, ready } = usePlaidLink({
