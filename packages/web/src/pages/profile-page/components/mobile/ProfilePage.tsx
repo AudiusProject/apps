@@ -1,4 +1,4 @@
-import { useEffect, useContext, RefObject } from 'react'
+import { useEffect, useContext, RefObject, useMemo } from 'react'
 
 import { Status, User } from '@audius/common/models'
 import {
@@ -182,12 +182,126 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     setHeader(null)
   }, [setHeader])
 
-  const messages = getMessages({ name, isOwner })
-  let content
-  let profileTabs
-  let profileElements
   const isLoading = status === Status.LOADING
   const isEditing = mode === 'editing'
+
+  // Compute tabs and elements before calling useTabs
+  const { profileTabs, profileElements } = useMemo(() => {
+    if (!profile || isLoading || isEditing) {
+      return { profileTabs: [], profileElements: [] }
+    }
+
+    const tabMessages = getMessages({ name, isOwner })
+
+    if (isArtist) {
+      const tabs = artistTabs
+      const elements = [
+        <div className={styles.tracksLineupContainer} key='artistTracks'>
+          {profile.track_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {tabMessages.emptyTracks}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(artistTracks)}
+              leadingElementId={profile.artist_pick_track_id ?? undefined}
+              showArtistPick={true}
+              limit={profile.track_count}
+              loadMore={loadMoreArtistTracks}
+              playTrack={playArtistTrack}
+              pauseTrack={pauseArtistTrack}
+              actions={tracksActions}
+            />
+          )}
+        </div>,
+        <div className={styles.cardLineupContainer} key='artistAlbums'>
+          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>,
+        <div className={styles.cardLineupContainer} key='artistPlaylists'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>,
+        <div className={styles.tracksLineupContainer} key='artistUsers'>
+          {profile.repost_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {tabMessages.emptyReposts}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(userFeed)}
+              count={profile.repost_count}
+              loadMore={loadMoreUserFeed}
+              playTrack={playUserFeedTrack}
+              pauseTrack={pauseUserFeedTrack}
+              actions={feedActions}
+            />
+          )}
+        </div>
+      ]
+      return { profileTabs: tabs, profileElements: elements }
+    } else {
+      const tabs = userTabs
+      const elements = [
+        <div className={styles.tracksLineupContainer} key='tracks'>
+          {profile.repost_count === 0 ? (
+            <EmptyTab
+              message={
+                <>
+                  {tabMessages.emptyReposts}
+                  <i
+                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                  />
+                </>
+              }
+            />
+          ) : (
+            <Lineup
+              {...getLineupProps(userFeed)}
+              count={profile.repost_count}
+              loadMore={loadMoreUserFeed}
+              playTrack={playUserFeedTrack}
+              pauseTrack={pauseUserFeedTrack}
+              actions={feedActions}
+            />
+          )}
+        </div>,
+        <div className={styles.cardLineupContainer} key='playlists'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>
+      ]
+      return { profileTabs: tabs, profileElements: elements }
+    }
+  }, [
+    profile,
+    isLoading,
+    isEditing,
+    isArtist,
+    isOwner,
+    userId,
+    name,
+    artistTracks,
+    userFeed,
+    getLineupProps,
+    loadMoreArtistTracks,
+    loadMoreUserFeed,
+    playArtistTrack,
+    pauseArtistTrack,
+    playUserFeedTrack,
+    pauseUserFeedTrack
+  ])
 
   // Set Nav-Bar Menu
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
@@ -229,8 +343,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
   const { tabs, body } = useTabs({
     didChangeTabsFrom,
-    tabs: isLoading ? [] : profileTabs || [],
-    elements: isLoading ? [] : profileElements || [],
+    tabs: profileTabs,
+    elements: profileElements,
     initialTab: activeTab || undefined,
     pathname: profilePage(handle)
   })
@@ -241,6 +355,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
   const coverPhotoSizes = profile.cover_photo ?? null
 
+  let content
   if (isLoading) {
     content = null
   } else if (isEditing) {
@@ -265,96 +380,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         onUpdateWebsite={updateWebsite}
       />
     )
-  } else {
-    if (isArtist) {
-      profileTabs = artistTabs
-      profileElements = [
-        <div className={styles.tracksLineupContainer} key='artistTracks'>
-          {profile.track_count === 0 ? (
-            <EmptyTab
-              message={
-                <>
-                  {messages.emptyTracks}
-                  <i
-                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                  />
-                </>
-              }
-            />
-          ) : (
-            <Lineup
-              {...getLineupProps(artistTracks)}
-              leadingElementId={profile.artist_pick_track_id ?? undefined}
-              showArtistPick={true}
-              limit={profile.track_count}
-              loadMore={loadMoreArtistTracks}
-              playTrack={playArtistTrack}
-              pauseTrack={pauseArtistTrack}
-              actions={tracksActions}
-            />
-          )}
-        </div>,
-        <div className={styles.cardLineupContainer} key='artistAlbums'>
-          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>,
-        <div className={styles.cardLineupContainer} key='artistPlaylists'>
-          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>,
-        <div className={styles.tracksLineupContainer} key='artistUsers'>
-          {profile.repost_count === 0 ? (
-            <EmptyTab
-              message={
-                <>
-                  {messages.emptyReposts}
-                  <i
-                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                  />
-                </>
-              }
-            />
-          ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              count={profile.repost_count}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
-            />
-          )}
-        </div>
-      ]
-    } else {
-      profileTabs = userTabs
-      profileElements = [
-        <div className={styles.tracksLineupContainer} key='tracks'>
-          {profile.repost_count === 0 ? (
-            <EmptyTab
-              message={
-                <>
-                  {messages.emptyReposts}
-                  <i
-                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                  />
-                </>
-              }
-            />
-          ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              count={profile.repost_count}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
-            />
-          )}
-        </div>,
-        <div className={styles.cardLineupContainer} key='playlists'>
-          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>
-      ]
-    }
   }
 
   if (profile.is_deactivated) {

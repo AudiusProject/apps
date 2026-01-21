@@ -19,12 +19,12 @@
   border-radius: 8px;
   border: 1px solid var(--harmony-n-100);
   justify-content: center;
+  gap: 12px;
 }
 
 .isCompact.container svg {
   height: 28px;
   width: 28px;
-  margin-right: 11px;
 }
 
 .isCompact.container .text {
