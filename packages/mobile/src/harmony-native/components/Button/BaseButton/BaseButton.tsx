@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { Pressable } from 'react-native'
 import type { GestureResponderEvent, ViewStyle } from 'react-native'
@@ -98,6 +98,53 @@ export const BaseButton = (props: BaseButtonProps) => {
     [onPress, haptics]
   )
 
+  // Create animated versions of icon components when animatedProps is present
+  const hasAnimatedProps = !!innerProps?.icon?.animatedProps
+  const AnimatedLeftIcon = useMemo(
+    () =>
+      hasAnimatedProps && LeftIconComponent
+        ? Animated.createAnimatedComponent(LeftIconComponent)
+        : null,
+    [hasAnimatedProps, LeftIconComponent]
+  )
+  const AnimatedRightIcon = useMemo(
+    () =>
+      hasAnimatedProps && RightIconComponent
+        ? Animated.createAnimatedComponent(RightIconComponent)
+        : null,
+    [hasAnimatedProps, RightIconComponent]
+  )
+
+  // Extract icon props, separating animatedProps from regular props
+  const iconProps = innerProps?.icon
+  const { animatedProps, ...restIconProps } = iconProps || {}
+
+  const renderIcon = (
+    IconComponent: typeof LeftIconComponent,
+    AnimatedIcon: React.ComponentType<any> | null
+  ) => {
+    if (!IconComponent) return null
+
+    if (AnimatedIcon && animatedProps) {
+      return (
+        <AnimatedIcon
+          {...restIconProps}
+          animatedProps={animatedProps}
+          style={styles?.icon}
+          color={isStaticIcon ? 'default' : restIconProps?.color}
+        />
+      )
+    }
+
+    return (
+      <IconComponent
+        {...restIconProps}
+        style={styles?.icon}
+        color={isStaticIcon ? 'default' : restIconProps?.color}
+      />
+    )
+  }
+
   return (
     <GestureDetector gesture={tap}>
       <AnimatedPressable
@@ -119,21 +166,11 @@ export const BaseButton = (props: BaseButtonProps) => {
         ) : null}
         {isLoading ? (
           <LoadingSpinner {...innerProps?.loader} />
-        ) : LeftIconComponent ? (
-          <LeftIconComponent
-            {...innerProps?.icon}
-            style={styles?.icon}
-            color={isStaticIcon ? 'default' : innerProps?.icon?.color}
-          />
-        ) : null}
+        ) : (
+          renderIcon(LeftIconComponent, AnimatedLeftIcon)
+        )}
         {childElement}
-        {RightIconComponent ? (
-          <RightIconComponent
-            {...innerProps?.icon}
-            style={styles?.icon}
-            color={isStaticIcon ? 'default' : innerProps?.icon?.color}
-          />
-        ) : null}
+        {renderIcon(RightIconComponent, AnimatedRightIcon)}
       </AnimatedPressable>
     </GestureDetector>
   )
