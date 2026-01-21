@@ -51,7 +51,7 @@ const GenreFilter = () => {
         updateKeyParams('')
       }
     }
-    
+
     updateGenreParams(value)
   }
 

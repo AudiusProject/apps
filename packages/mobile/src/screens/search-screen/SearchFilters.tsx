@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 
+import type { Genre } from '@audius/common/utils'
 import {
   convertGenreLabelToValue,
   GENRES,
@@ -38,7 +39,7 @@ export const GenreFilter = () => {
   const [, setKey] = useSearchFilter('key')
   const [, setBpm] = useSearchFilter('bpm')
 
-  const handleGenreChange = (value: string | undefined) => {
+  const handleGenreChange = (value: Genre | undefined) => {
     // Clear key and bpm filters when Podcasts is selected
     if (value === 'Podcasts') {
       setKey(undefined)

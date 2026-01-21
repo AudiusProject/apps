@@ -110,12 +110,12 @@ export const SearchCategoriesAndFilters = (
 
   const categoryFilters = filtersByCategory[category]
   const isPodcastGenre = filters.genre === 'Podcasts'
-  
+
   // Filter out key and bpm when genre is Podcasts
   const availableFilters = isPodcastGenre
     ? categoryFilters.filter((key) => key !== 'key' && key !== 'bpm')
     : categoryFilters
-  
+
   const activeFilterKeys = availableFilters.filter((key) =>
     Boolean(filters[key])
   )

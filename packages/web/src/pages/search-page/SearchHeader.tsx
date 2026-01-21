@@ -43,7 +43,7 @@ export const SearchHeader = (props: Partial<HeaderProps>) => {
   const searchParams = useSearchParams()
   const genre = searchParams.genre
   const isPodcastGenre = genre === 'Podcasts'
-  
+
   const filterKeys: string[] = categories[categoryKey].filters.filter(
     (filter) => {
       // Disable key and bpm filters when genre is Podcasts
