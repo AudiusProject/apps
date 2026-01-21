@@ -4,7 +4,6 @@ import { times, random } from 'lodash'
 import { View } from 'react-native'
 
 import { Flex } from '@audius/harmony-native'
-import { LineupTileSkeleton } from 'app/components/lineup-tile'
 import Skeleton, { StaticSkeleton } from 'app/components/skeleton'
 import { makeStyles } from 'app/styles'
 
@@ -103,10 +102,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   tab: {
     height: spacing(8),
     width: spacing(15)
-  },
-  lineupTile: {
-    padding: spacing(3),
-    paddingBottom: 0
   }
 }))
 
@@ -183,18 +178,9 @@ export const ProfileHeaderSkeleton = () => {
 export const ProfileTabsSkeleton = () => {
   const styles = useStyles()
 
-  const lineupTile = (
-    <View style={styles.lineupTile}>
-      <LineupTileSkeleton />
-    </View>
-  )
-
   return (
     <>
       <StaticSkeleton style={styles.tabs} />
-      {lineupTile}
-      {lineupTile}
-      {lineupTile}
     </>
   )
 }

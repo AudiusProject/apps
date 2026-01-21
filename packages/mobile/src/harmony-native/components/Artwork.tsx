@@ -87,6 +87,7 @@ export const Artwork = (props: ArtworkProps) => {
             borderRadius={borderRadius}
             h='100%'
             w='100%'
+            noShimmer
             style={{
               zIndex: 2,
               position: 'absolute'

@@ -85,7 +85,7 @@ const CollectionCardComponent = (props: CollectionCardProps) => {
 
   if (!partialCollection) {
     console.warn('Collection missing for CollectionCard, preventing render')
-    return <CollectionCardSkeleton />
+    return <CollectionCardSkeleton noShimmer />
   }
 
   const isOwner = accountId === playlist_owner_id
