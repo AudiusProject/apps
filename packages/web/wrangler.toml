@@ -5,7 +5,6 @@ main = "./scripts/workers-site/index.js"
 
 [site]
 bucket = "./build"
-include = [".well-known/**"]
 
 [env.release]
 name = "audius-release-candidate"
