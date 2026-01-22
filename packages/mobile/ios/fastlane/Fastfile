@@ -87,6 +87,7 @@ platform :ios do
       codesigning_identity: "iPhone Distribution",
       scheme: scheme,
       configuration: configuration,
+      output_directory: "./output/gym",
       xcargs: settings_to_override,
       export_method: "app-store",
       export_options: {

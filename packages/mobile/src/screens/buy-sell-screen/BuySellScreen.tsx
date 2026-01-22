@@ -7,12 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex, Paper, spacing } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
-import { useNavigation } from 'app/hooks/useNavigation'
 
 import type { BuySellScreenParams } from '../../types/navigation'
 
-import { BuySellFlow } from './BuySellFlow'
 import { PoweredByJupiter } from './components/PoweredByJupiter'
+import { useBuySellFlow } from './useBuySellFlow'
 
 type BuySellScreenProps = {
   route: {
@@ -21,16 +20,10 @@ type BuySellScreenProps = {
 }
 
 export const BuySellScreen = ({ route }: BuySellScreenProps) => {
-  const navigation = useNavigation()
   const { params } = route
   const insets = useSafeAreaInsets()
 
-  const handleClose = () => {
-    navigation.goBack()
-  }
-
-  const flowData = BuySellFlow({
-    onClose: handleClose,
+  const flowData = useBuySellFlow({
     initialTab: params?.initialTab,
     coinTicker: params?.coinTicker
   })

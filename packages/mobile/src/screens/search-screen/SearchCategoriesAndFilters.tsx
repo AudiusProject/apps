@@ -109,10 +109,17 @@ export const SearchCategoriesAndFilters = (
   )
 
   const categoryFilters = filtersByCategory[category]
-  const activeFilterKeys = categoryFilters.filter((key) =>
+  const isPodcastGenre = filters.genre === 'Podcasts'
+
+  // Filter out key and bpm when genre is Podcasts
+  const availableFilters = isPodcastGenre
+    ? categoryFilters.filter((key) => key !== 'key' && key !== 'bpm')
+    : categoryFilters
+
+  const activeFilterKeys = availableFilters.filter((key) =>
     Boolean(filters[key])
   )
-  const inactiveFilterKeys = categoryFilters.filter((key) => !filters[key])
+  const inactiveFilterKeys = availableFilters.filter((key) => !filters[key])
   const sortedFilterKeys = [...activeFilterKeys, ...inactiveFilterKeys]
 
   const animatedStyle = useAnimatedStyle(() => ({

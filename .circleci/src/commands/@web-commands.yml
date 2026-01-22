@@ -63,15 +63,6 @@ web-build:
     - checkout
     - attach_workspace:
         at: ./
-    - when:
-        condition:
-          matches: { pattern: '^stage$', value: << parameters.build-type >> }
-        steps:
-          - run:
-              name: apply stage apple-app-site-association
-              command: |
-                cd packages/web/public/.well-known
-                cp apple-app-site-association-stage apple-app-site-association
     - run:
         name: build
         no_output_timeout: 30m

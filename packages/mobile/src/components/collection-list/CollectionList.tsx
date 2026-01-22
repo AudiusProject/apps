@@ -84,7 +84,7 @@ const FullCollectionList = (props: FullCollectionListProps) => {
           collectionType={collectionType}
         />
       ) : (
-        <CollectionCard
+        <MemoizedCollectionCard
           id={item.playlist_id}
           onPress={
             onCollectionPress

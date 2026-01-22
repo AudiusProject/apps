@@ -143,6 +143,9 @@ export function* watchPlay() {
         retries ?? 0
       )
 
+      const isLongFormContent =
+        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
+
       const createEndChannel = async (url: string) => {
         const endChannel = eventChannel((emitter) => {
           audioPlayer.load(
@@ -153,7 +156,10 @@ export function* watchPlay() {
               ),
             () => {
               if (onEnd) {
-                emitter(onEnd({}))
+                const action = onEnd({})
+                if (action) {
+                  emitter(action)
+                }
               }
               if (isLongFormContent) {
                 emitter(
@@ -200,9 +206,6 @@ export function* watchPlay() {
         )
         endChannel = yield* call(createEndChannel, streamUrl)
       }
-
-      const isLongFormContent =
-        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
 
       yield* spawn(actionChannelDispatcher, endChannel)
 
@@ -406,7 +409,13 @@ export function* handleAudioErrors() {
       const { shouldPreview } = calculatePlayerBehavior(track, playerBehavior)
       const streamObj = shouldPreview ? track?.preview : track?.stream
       if (streamObj?.mirrors && streamObj.mirrors.length + 1 > retries) {
-        yield* put(play({ trackId, retries: retries + 1 }))
+        yield* put(
+          play({
+            trackId,
+            retries: retries + 1,
+            onEnd: audioPlayer.onEnd ?? undefined
+          })
+        )
       } else {
         yield* put(
           errorAction({

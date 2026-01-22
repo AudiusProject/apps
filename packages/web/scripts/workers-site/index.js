@@ -167,7 +167,7 @@ class SEOHandlerHead {
       case 'track': {
         title = `${metadata.data[0].title} by ${metadata.data[0].user.name} • Audius`
         h1 = metadata.data[0].title
-        description = `Stream ${metadata.data[0].title} by ${metadata.data[0].user.name} on Audius | Stream similar artists to ${metadata.data[0].user.name} on desktop and mobile`
+        description = `Stream ${metadata.data[0].title} by ${metadata.data[0].user.name} on Audius`
         ogDescription = metadata.data[0].description || description
         image = metadata.data[0].artwork
           ? metadata.data[0].artwork['480x480']
@@ -346,6 +346,28 @@ async function handleEvent(request, env, ctx) {
       options.cacheControl = {
         bypassCache: true
       }
+    }
+
+    const isAppleAppSiteAssociation =
+      pathname === '/.well-known/apple-app-site-association' ||
+      pathname === '/apple-app-site-association'
+    if (isAppleAppSiteAssociation) {
+      // Cloudflare's asset handler treats extensionless paths as directories and
+      // attempts to fetch `index.html`. Use a custom mapper that bypasses this.
+      const aasaOptions = {
+        mapRequestToAsset: (req) => {
+          // Return request with exact path, preventing index.html lookup
+          const url = new URL(req.url)
+          url.pathname = '/.well-known/apple-app-site-association'
+          return new Request(url.toString(), req)
+        }
+      }
+      const asset = await getAsset(request, env, ctx, aasaOptions)
+      const response = new Response(asset.body, asset)
+      response.headers.set('Content-Type', 'application/json')
+      response.headers.set('cache-control', BROWSER_CACHE_TTL_SECONDS)
+      response.headers.set('Access-Control-Allow-Origin', '*')
+      return response
     }
 
     // For now, only SSR for crawlers

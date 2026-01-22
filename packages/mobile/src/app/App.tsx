@@ -33,6 +33,7 @@ import { Drawers } from './Drawers'
 import ErrorBoundary from './ErrorBoundary'
 import { ThemeProvider } from './ThemeProvider'
 import { initSentry, navigationIntegration } from './sentry'
+// hello
 
 initSentry()
 

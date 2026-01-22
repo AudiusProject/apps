@@ -5,19 +5,18 @@ import { reachabilitySelectors } from '@audius/common/store'
 import type { Maybe } from '@audius/common/utils'
 import { useSelector } from 'react-redux'
 
-import { Image, preload, useTheme } from '@audius/harmony-native'
+import { Artwork, preload } from '@audius/harmony-native'
 import type { ImageProps } from '@audius/harmony-native'
 import imageEmpty from 'app/assets/images/imageBlank2x.png'
 import { getLocalCollectionCoverArtPath } from 'app/services/offline-downloader'
 import { getCollectionDownloadStatus } from 'app/store/offline-downloads/selectors'
 import { OfflineDownloadStatus } from 'app/store/offline-downloads/slice'
-import { useThemeColors } from 'app/utils/theme'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
 
 const { getIsReachable } = reachabilitySelectors
 
-const useLocalCollectionImageUri = (collectionId: Maybe<ID>) => {
+export const useLocalCollectionImageUri = (collectionId: Maybe<ID>) => {
   const collectionImageUri = useSelector((state) => {
     if (!collectionId) return null
 
@@ -100,13 +99,7 @@ export const CollectionImage = (props: CollectionImageProps) => {
 
   const localCollectionImageUri = useLocalCollectionImageUri(collectionId)
   const collectionImageSource = useCollectionImage({ collectionId, size })
-  const { cornerRadius } = useTheme()
-  const { skeleton } = useThemeColors()
-  const {
-    source: loadedSource,
-    isFallbackImage,
-    onError: onImageError
-  } = collectionImageSource
+  const { source: loadedSource, onError: onImageError } = collectionImageSource
 
   const source = loadedSource ?? localCollectionImageUri
 
@@ -118,18 +111,12 @@ export const CollectionImage = (props: CollectionImageProps) => {
   }
 
   return (
-    <Image
+    <Artwork
       {...other}
-      style={[
-        { aspectRatio: 1, borderRadius: cornerRadius.s },
-        (isFallbackImage || !source) && {
-          backgroundColor: skeleton
-        },
-        style
-      ]}
       source={source}
       onLoad={onLoad}
       onError={handleError}
+      style={style}
     />
   )
 }

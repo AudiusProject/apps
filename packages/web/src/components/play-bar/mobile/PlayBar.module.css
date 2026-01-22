@@ -47,16 +47,31 @@
 }
 
 .info {
-  flex: 1 1;
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   cursor: pointer;
   height: 100%;
-  width: 100%;
+  min-width: 0;
   margin-right: var(--harmony-unit-2);
   user-select: none;
   padding-top: 20px;
   margin-top: -20px;
+}
+
+.text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 8px;
+}
+
+.titleLine {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: normal;
 }
 
 .separator {
@@ -64,23 +79,12 @@
 }
 
 .title {
-  max-width: calc(66% - 23px);
-  line-height: normal;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  margin-left: 8px;
   color: var(--harmony-neutral);
   font-size: var(--harmony-font-xs);
   font-weight: var(--harmony-font-bold);
 }
 
 .artist {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: normal;
-  max-width: calc(33% - 12px);
   color: var(--harmony-neutral);
   font-size: var(--harmony-font-xs);
   font-weight: var(--harmony-font-medium);
@@ -90,11 +94,13 @@
   margin-left: auto;
   margin-right: 8px;
   justify-self: flex-end;
+  flex: 0 0 auto;
   width: 32px;
 }
 
 .lockPreview {
-  margin-left: auto;
+  flex: 0 0 auto;
+  margin-left: var(--harmony-unit-2);
 }
 
 .lockOverlay {
