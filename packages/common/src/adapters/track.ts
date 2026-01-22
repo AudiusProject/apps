@@ -4,7 +4,6 @@ import {
   type Genre,
   type Mood,
   type NativeFile,
-  type TrackFilesMetadata,
   HashId,
   Id,
   OptionalHashId,
@@ -235,9 +234,7 @@ export const stemTrackMetadataFromSDK = (
   }
 }
 
-export const trackMetadataForUploadToSdk = (
-  input: TrackMetadataForUpload
-): TrackFilesMetadata => ({
+export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => ({
   ...camelcaseKeys(
     pick(input, [
       'license',

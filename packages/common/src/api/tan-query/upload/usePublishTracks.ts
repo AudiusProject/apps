@@ -5,14 +5,13 @@ import {
   useMutation,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { trackMetadataForUploadToSdk } from '~/adapters'
 import {
   isContentUSDCPurchaseGated,
-  StemCategory,
   type USDCPurchaseConditions,
-  Name
+  Name,
+  Feature
 } from '~/models'
 import { ProgressStatus, uploadActions } from '~/store'
 import type { TrackMetadataForUpload } from '~/store'
@@ -23,15 +22,16 @@ import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
+import { publishStems } from './usePublishStems'
 
 const { updateProgress } = uploadActions
 
 type PublishTracksContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch'
+  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
 > & {
-  userId?: number
-  wallet?: string
+  userId: number
+  wallet: string
   kind?: 'tracks' | 'album' | 'playlist'
 }
 
@@ -39,7 +39,7 @@ type PublishTracksParams = {
   clientId: string
   metadata: TrackMetadataForUpload
   audioUploadResponse: UploadResponse
-  artUploadResponse: UploadResponse
+  imageUploadResponse: UploadResponse
   stemsUploadResponses?: UploadResponse[]
 }[]
 
@@ -47,35 +47,45 @@ export const publishTracks = async (
   context: PublishTracksContext,
   params: PublishTracksParams
 ) => {
+  const {
+    userId,
+    wallet,
+    kind,
+    audiusSdk,
+    dispatch,
+    reportToSentry,
+    analytics: { make, track }
+  } = context
+
   if (!context.userId || !context.wallet) {
     throw new Error('User ID and wallet are required to publish tracks')
   }
-  const { userId, wallet, dispatch } = context
-  const sdk = await context.audiusSdk()
+
+  const sdk = await audiusSdk()
   const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
     ethWallet: wallet,
     mint: 'USDC'
   })
   return await Promise.all(
     params.map(async (param) => {
-      try {
-        const snakeMetadata = addPremiumMetadata(
-          userBank.toString(),
-          param.metadata
-        )
+      const snakeMetadata = addPremiumMetadata(
+        userBank.toString(),
+        param.metadata
+      )
 
-        const trackId = await sdk.tracks.generateTrackId()
-        const camelMetadata = trackMetadataForUploadToSdk({
-          ...snakeMetadata,
-          track_id: trackId
-        })
+      const trackId = await sdk.tracks.generateTrackId()
+      const camelMetadata = trackMetadataForUploadToSdk({
+        ...snakeMetadata,
+        track_id: trackId
+      })
 
-        const publishParentTrack = async () => {
+      const publishParentTrack = async () => {
+        try {
           const res = await sdk.tracks.publishTrack({
             userId: Id.parse(userId),
             metadata: camelMetadata,
             audioUploadResponse: param.audioUploadResponse,
-            artUploadResponse: param.artUploadResponse
+            imageUploadResponse: param.imageUploadResponse
           })
           dispatch(
             updateProgress({
@@ -88,90 +98,56 @@ export const publishTracks = async (
 
           // Track success analytics for this individual track
           const analyticsKind =
-            (context.kind ?? 'tracks') === 'tracks'
+            (kind ?? 'tracks') === 'tracks'
               ? params.length > 1
                 ? 'multi_track'
                 : 'single_track'
-              : context.kind === 'album'
+              : kind === 'album'
                 ? 'album'
                 : 'playlist'
-          context.analytics?.track(
-            context.analytics.make({
+          track(
+            make({
               eventName: Name.TRACK_UPLOAD_SUCCESS,
               endpoint: '',
               kind: analyticsKind
             })
           )
-          return res
+          return { result: res, error: null }
+        } catch (e) {
+          dispatch(
+            updateProgress({
+              clientId: param.clientId,
+              stemIndex: null,
+              key: 'audio',
+              progress: { status: ProgressStatus.ERROR }
+            })
+          )
+          reportToSentry({
+            error: e as Error,
+            name: 'Upload: Track Publish',
+            feature: Feature.Upload
+          })
+          console.error('Error publishing track:', e)
+          return { result: null, error: e as Error }
         }
+      }
 
-        const results = await Promise.all([
-          publishParentTrack(),
-          ...(param.metadata.stems ?? []).map(async (stem, index) => {
-            try {
-              const stemUploadResponse = param.stemsUploadResponses?.[index]
-              if (!stemUploadResponse) {
-                throw new Error(`No upload response found for stem ${index}`)
-              }
-              const metadata = {
-                ...snakeMetadata,
-                ...stem.metadata,
-                is_downloadable: true,
-                stem_of: {
-                  category: stem.category ?? StemCategory.OTHER,
-                  parent_track_id: trackId
-                }
-              }
-              const stemRes = await sdk.tracks.publishTrack({
-                userId: Id.parse(userId),
-                metadata: trackMetadataForUploadToSdk(metadata),
-                audioUploadResponse: stemUploadResponse,
-                artUploadResponse: param.artUploadResponse
-              })
-              dispatch(
-                updateProgress({
-                  clientId: param.clientId,
-                  stemIndex: index,
-                  key: 'audio',
-                  progress: { status: ProgressStatus.COMPLETE }
-                })
-              )
-              context.analytics?.track(
-                context.analytics.make({
-                  eventName: Name.STEM_COMPLETE_UPLOAD,
-                  id: HashId.parse(stemRes.trackId),
-                  parent_track_id: trackId,
-                  category: stem.category ?? StemCategory.OTHER
-                })
-              )
-              return stemRes
-            } catch (e) {
-              dispatch(
-                updateProgress({
-                  clientId: param.clientId,
-                  stemIndex: index,
-                  key: 'audio',
-                  progress: { status: ProgressStatus.ERROR }
-                })
-              )
-              console.error('Error publishing stem:', e)
-              throw e
-            }
-          })
-        ])
+      const [trackResult, stemsResults] = await Promise.all([
+        publishParentTrack(),
+        publishStems(context, {
+          clientId: param.clientId,
+          metadata: param.metadata,
+          imageUploadResponse: param.imageUploadResponse,
+          stemsUploadResponses: param.stemsUploadResponses ?? [],
+          parentTrackId: trackId
+        })
+      ])
 
-        return { clientId: param.clientId, trackId: results[0].trackId }
-      } catch (e) {
-        dispatch(
-          updateProgress({
-            clientId: param.clientId,
-            stemIndex: null,
-            key: 'audio',
-            progress: { status: ProgressStatus.ERROR }
-          })
-        )
-        console.error('Error publishing track:', e)
-        return { clientId: param.clientId, error: e }
+      return {
+        clientId: param.clientId,
+        trackId: trackResult.result?.trackId ?? null,
+        stems: stemsResults,
+        error: trackResult.error
       }
     })
   )
@@ -188,8 +164,7 @@ export const usePublishTracks = (
     kind?: 'tracks' | 'album' | 'playlist'
   }
 ) => {
-  const { audiusSdk, analytics } = useQueryContext()
-  const dispatch = useDispatch()
+  const queryContext = useQueryContext()
   const queryClient = useQueryClient()
   const { data: account } = useCurrentAccount()
   const { data: accountUser } = useCurrentAccountUser()
@@ -200,24 +175,24 @@ export const usePublishTracks = (
   return useMutation({
     ...options,
     ...getPublishTracksOptions({
-      audiusSdk,
-      userId,
-      wallet,
-      dispatch,
-      analytics,
+      ...queryContext,
+      userId: userId!,
+      wallet: wallet!,
       kind
     }),
     onSuccess: async (data) => {
-      const sdk = await audiusSdk()
+      const sdk = await queryContext.audiusSdk()
       const batchGetTracks = getTracksBatcher({
         sdk,
         currentUserId: userId,
         queryClient,
-        dispatch
+        dispatch: queryContext.dispatch
       })
       // Prefetch the published tracks into the cache
       await Promise.all(
-        data.map((res) => batchGetTracks.fetch(HashId.parse(res.trackId)))
+        data
+          .filter((res) => !res.error && res.trackId)
+          .map((res) => batchGetTracks.fetch(HashId.parse(res.trackId!)))
       )
 
       // Invalidate the user's data to update track count

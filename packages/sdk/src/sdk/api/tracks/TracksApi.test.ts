@@ -39,25 +39,28 @@ vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
 vitest.mock('./TrackUploadHelper')
 
-vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(async () => {
-  return {
-    id: 'a',
-    status: 'done',
-    results: {
-      '320': 'a'
-    },
-    orig_file_cid:
-      'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
-    orig_filename: 'file.wav',
-    probe: {
-      format: {
-        duration: '10'
-      }
-    },
-    audio_analysis_error_count: 0,
-    audio_analysis_results: {}
-  }
-})
+vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
+  start: async () => {
+    return {
+      id: 'a',
+      status: 'done',
+      results: {
+        '320': 'a'
+      },
+      orig_file_cid:
+        'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
+      orig_filename: 'file.wav',
+      probe: {
+        format: {
+          duration: '10'
+        }
+      },
+      audio_analysis_error_count: 0,
+      audio_analysis_results: {}
+    }
+  },
+  abort: () => {}
+}))
 
 vitest
   .spyOn(TrackUploadHelper.prototype, 'generateId' as any)
@@ -145,7 +148,7 @@ describe('TracksApi', () => {
     it('uploads a track if valid metadata is provided', async () => {
       const result = await tracks.uploadTrack({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -154,7 +157,7 @@ describe('TracksApi', () => {
           genre: Genre.ELECTRONIC,
           mood: Mood.TENDER
         },
-        trackFile: {
+        audioFile: {
           buffer: wavFile,
           name: 'trackArt'
         }
@@ -171,14 +174,14 @@ describe('TracksApi', () => {
       await expect(async () => {
         await tracks.uploadTrack({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
           metadata: {
             title: 'BachGavotte'
           } as any,
-          trackFile: {
+          audioFile: {
             buffer: wavFile,
             name: 'trackArt'
           }
@@ -192,7 +195,7 @@ describe('TracksApi', () => {
       const result = await tracks.updateTrack({
         userId: '7eP5n',
         trackId: 'ogRRByg',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -214,7 +217,7 @@ describe('TracksApi', () => {
         await tracks.updateTrack({
           userId: '7eP5n',
           trackId: 'ogRRByg',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },

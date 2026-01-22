@@ -436,11 +436,15 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     const [coverArtResponse, ...audioResponses] = await Promise.all([
       retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: coverArtFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
@@ -449,14 +453,18 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         async (trackFile, idx) =>
           await retry3(
             async () =>
-              await this.storage.uploadFile({
-                file: trackFile,
-                onProgress,
-                template: 'audio',
-                options: this.trackUploadHelper.extractMediorumUploadOptions(
-                  trackMetadatas[idx]!
-                )
-              }),
+              await this.storage
+                .uploadFile({
+                  file: trackFile,
+                  onProgress,
+                  metadata: {
+                    template: 'audio',
+                    ...this.trackUploadHelper.extractMediorumUploadOptions(
+                      trackMetadatas[idx]!
+                    )
+                  }
+                })
+                .start(),
             (e) => {
               this.logger.info('Retrying uploadTrackAudio', e)
             }
@@ -562,11 +570,15 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       coverArtFile &&
       (await retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: coverArtFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
@@ -612,11 +624,15 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       coverArtFile &&
       (await retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: coverArtFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }

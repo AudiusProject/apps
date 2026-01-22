@@ -31,8 +31,8 @@ export const useNavUploadStatus = () => {
   const upload = useSelector((state: CommonState) => state.upload)
   const uploadType = upload.formState?.uploadType ?? UploadType.INDIVIDUAL_TRACK
   const uploadCompletionRoute = useUploadCompletionRoute({
-    upload,
-    accountHandle,
+    id: upload.completionId,
+    accountHandle: accountHandle || '',
     uploadType
   })
 

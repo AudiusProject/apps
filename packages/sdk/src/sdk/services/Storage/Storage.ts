@@ -1,10 +1,6 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import FormData from 'form-data'
 import * as tus from 'tus-js-client'
 
 import { productionConfig } from '../../config/production'
-import { isNodeFile } from '../../types/File'
-import type { CrossPlatformFile } from '../../types/File'
 import fetch from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
 import { wait } from '../../utils/wait'
@@ -13,14 +9,13 @@ import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
 import { getDefaultStorageServiceConfig } from './getDefaultConfig'
 import type {
-  FileMetadata,
   FileTemplate,
   ProgressHandler,
   StorageService,
   StorageServiceConfig,
   StorageServiceConfigInternal,
   UploadResponse,
-  UploadHandle
+  UploadFileParams
 } from './types'
 
 const MAX_TRACK_TRANSCODE_TIMEOUT = 3600000 // 1 hour
@@ -46,153 +41,93 @@ export class Storage implements StorageService {
   }
 
   /**
-   * Upload a file to a content node
-   * @param file
-   * @param onProgress
-   * @param template
-   * @param options
-   * @returns
+   * Upload a file to a validator
    */
-  async uploadFile({
-    file,
-    onProgress,
-    template,
-    options = {}
-  }: {
-    file: CrossPlatformFile
-    onProgress?: ProgressHandler
-    template: FileTemplate
-    options?: { [key: string]: string }
-  }) {
-    const formData: FormData = new FormData()
-    formData.append('template', template)
-    Object.keys(options).forEach((key) => {
-      formData.append(key, `${options[key]}`)
-    })
+  uploadFile({ file, onProgress, metadata }: UploadFileParams) {
+    const ac = new AbortController()
+    let upload: tus.Upload | undefined
+    let uploadPromise: Promise<UploadResponse> | undefined
 
-    const formDataFile =
-      'uri' in file
-        ? {
-            ...file,
-            // NOTE this is required for react-native
-            // certain characters in the file name make formData invalid
-            name: file.name
-              ? encodeURIComponent(file.name.replace(/[()]/g, ''))
-              : 'blob'
-          }
-        : file
+    return {
+      start: async () => {
+        if (uploadPromise) {
+          return uploadPromise
+        }
+        uploadPromise = new Promise<UploadResponse>((resolve, reject) => {
+          this.storageNodeSelector
+            .getSelectedNode()
+            .then((selectedNode) => {
+              if (!selectedNode) {
+                reject(new Error('No node available'))
+                return
+              }
+              upload = new tus.Upload(file as File, {
+                endpoint: `${selectedNode}/files/`,
+                retryDelays: [0, 3000, 5000, 10000, 20000],
+                chunkSize: 100_000_000, // 100MB
+                removeFingerprintOnSuccess: true,
+                metadata: {
+                  filename: metadata.filename || file.name || 'file',
+                  filetype:
+                    metadata.filetype ||
+                    file.type ||
+                    'application/octet-stream',
+                  template: metadata.template,
+                  ...(metadata.placementHosts
+                    ? { placementHosts: metadata.placementHosts }
+                    : {}),
+                  ...(metadata.previewStartSeconds !== undefined
+                    ? {
+                        previewStartSeconds:
+                          metadata.previewStartSeconds.toString()
+                      }
+                    : {})
+                },
+                onError: reject,
+                onProgress: (bytesUploaded: number, bytesTotal: number) => {
+                  onProgress?.(
+                    metadata.template === 'audio' ? 'audio' : 'image',
+                    {
+                      loaded: bytesUploaded,
+                      total: bytesTotal
+                    }
+                  )
+                },
+                onSuccess: async () => {
+                  const uploadId = upload?.url?.split('/').pop()
+                  if (!uploadId) {
+                    reject(new Error('No upload ID received'))
+                    return
+                  }
+                  const res = await this.pollProcessingStatus(
+                    uploadId,
+                    metadata.template,
+                    onProgress,
+                    ac.signal
+                  )
+                  resolve(res)
+                }
+              })
 
-    formData.append(
-      'files',
-      isNodeFile(formDataFile) ? formDataFile.buffer : formDataFile,
-      file.name ?? 'blob'
-    )
-
-    // Using axios for now because it supports upload progress,
-    // and Node doesn't support XmlHttpRequest
-    let response: AxiosResponse<any> | null = null
-    const request: AxiosRequestConfig = {
-      method: 'post',
-      maxContentLength: Infinity,
-      data: formData,
-      headers: {
-        ...(formData.getBoundary
-          ? {
-              'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`
-            }
-          : undefined)
+              upload
+                ?.findPreviousUploads()
+                .then((previousUpload) => {
+                  if (previousUpload?.length && previousUpload[0]) {
+                    upload?.resumeFromPreviousUpload(previousUpload[0])
+                  }
+                  upload?.start()
+                })
+                .catch(reject)
+            })
+            .catch(reject)
+        })
+        return uploadPromise
       },
-      onUploadProgress: (progressEvent) => {
-        const progress = {
-          upload: { loaded: progressEvent.loaded, total: progressEvent.total }
-        }
-        onProgress?.(
-          template === 'audio' ? { audio: progress } : { art: progress }
-        )
+      abort: (shouldTerminate = false) => {
+        upload?.abort(shouldTerminate)
+        ac.abort()
       }
     }
-
-    let lastErr
-    for (
-      let selectedNode = await this.storageNodeSelector.getSelectedNode();
-      !this.storageNodeSelector.triedSelectingAllNodes();
-      selectedNode = await this.storageNodeSelector.getSelectedNode(true)
-    ) {
-      request.url = `${selectedNode!}/uploads`
-      try {
-        response = await axios(request)
-        // Server will sometimes return empty array in case of error
-        if (response?.data?.length > 0) {
-          break
-        }
-      } catch (e: any) {
-        lastErr = e // keep trying other nodes
-      }
-    }
-
-    // Covers no response or empty response
-    if (!response?.data?.length) {
-      const msg = `Error sending storagev2 upload request, tried all healthy storage nodes. Last error: ${lastErr}`
-      this.logger.error(msg)
-      throw new Error(msg)
-    }
-
-    return await this.pollProcessingStatus(
-      response.data[0].id,
-      template,
-      onProgress
-    )
-  }
-
-  async uploadFileV2({
-    file,
-    onProgress,
-    metadata,
-    onUploadCreated
-  }: {
-    file: CrossPlatformFile
-    onProgress: (loadedBytes: number, totalBytes: number) => void
-    metadata: FileMetadata
-    onUploadCreated?: (upload: UploadHandle) => void
-  }): Promise<string> {
-    const selectedNode = await this.storageNodeSelector.getSelectedNode()
-    if (!selectedNode) {
-      throw new Error('No node available')
-    }
-    return new Promise((resolve, reject) => {
-      const upload = new tus.Upload(file as File, {
-        endpoint: `${selectedNode}/files/`,
-        retryDelays: [0, 3000, 5000, 10000, 20000],
-        chunkSize: 100_000_000, // 100MB
-        removeFingerprintOnSuccess: true,
-        metadata: {
-          filename: metadata.filename || file.name || 'file',
-          filetype:
-            metadata.filetype || file.type || 'application/octet-stream',
-          ...metadata
-        },
-        onError: reject,
-        onProgress,
-        onSuccess: () => {
-          const uploadId = upload.url?.split('/').pop()
-          if (!uploadId) {
-            reject(new Error('No upload ID received'))
-            return
-          }
-          resolve(uploadId)
-        }
-      })
-
-      // Call callback immediately with upload handle (for cancellation)
-      onUploadCreated?.(upload)
-
-      upload.findPreviousUploads().then((previousUploads) => {
-        if (previousUploads.length && previousUploads[0]) {
-          upload.resumeFromPreviousUpload(previousUploads[0])
-        }
-        upload.start()
-      })
-    })
   }
 
   async getUploadStatus(uploadId: string): Promise<UploadResponse> {
@@ -230,12 +165,20 @@ export class Storage implements StorageService {
       throw new Error('No content node available')
     }
 
-    const response = await axios({
-      method: 'post',
-      url: `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`
-    })
+    const response = await fetch(
+      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`,
+      {
+        method: 'POST'
+      }
+    )
+    if (!response.ok) {
+      throw new Error(
+        `Failed to generate preview for cid ${cid} at offset ${secondOffset}, status: ${response.status}`
+      )
+    }
 
-    return response.data.cid
+    const data = await response.json()
+    return data.cid
   }
 
   /**
@@ -247,7 +190,8 @@ export class Storage implements StorageService {
   private async pollProcessingStatus(
     id: string,
     template: FileTemplate,
-    onProgress?: ProgressHandler
+    onProgress?: ProgressHandler,
+    abortSignal?: AbortSignal
   ) {
     const start = Date.now()
     let lastProgressUpdate = Date.now()
@@ -260,6 +204,9 @@ export class Storage implements StorageService {
 
     while (Date.now() - start < maxPollingMs) {
       try {
+        if (abortSignal?.aborted) {
+          throw new Error('Upload aborted')
+        }
         const resp = await this.getProcessingStatus(id)
         if (template === 'audio' && resp.transcode_progress) {
           // Only update lastProgressUpdate if the progress has increased
@@ -275,10 +222,8 @@ export class Storage implements StorageService {
             )
           }
 
-          onProgress?.({
-            audio: {
-              transcode: { decimal: resp.transcode_progress }
-            }
+          onProgress?.(template === 'audio' ? 'audio' : 'image', {
+            transcode: resp.transcode_progress
           })
         }
         if (resp?.status === 'done') {

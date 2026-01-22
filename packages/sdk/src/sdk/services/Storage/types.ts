@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type { CrossPlatformFile } from '../../types/File'
 import type { LoggerService } from '../Logger'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
@@ -8,9 +10,13 @@ import type { StorageNodeSelectorService } from '../StorageNodeSelector'
  */
 export interface UploadHandle {
   /**
+   * Starts the upload
+   */
+  start: () => Promise<UploadResponse>
+  /**
    * Aborts the upload
    */
-  abort: () => void
+  abort: (shouldTerminate?: boolean) => void
 }
 
 export type StorageServiceConfigInternal = {
@@ -27,49 +33,40 @@ export type StorageServiceConfig = Partial<StorageServiceConfigInternal> & {
   storageNodeSelector: StorageNodeSelectorService
 }
 
-export type ProgressHandler = (
-  progress:
-    | {
-        art: {
-          upload?: { loaded: number; total: number }
-          transcode?: { decimal: number }
-          resize?: undefined
-        }
-      }
-    | {
-        audio: {
-          upload?: { loaded: number; total: number }
-          transcode?: { decimal: number }
-          resize?: undefined
-        }
-      }
-) => void
+const ProgressUpdateArgsSchema = z.object({
+  loaded: z.number().optional(),
+  total: z.number().optional(),
+  transcode: z.number().optional()
+})
+
+export const ProgressHandlerSchema = z
+  .function()
+  .args(z.enum(['audio', 'image']), ProgressUpdateArgsSchema)
+  .returns(z.void())
+
+const UploadCreatedHandlerSchema = z
+  .function()
+  .args(
+    z.object({
+      abort: z.function().args(z.boolean().optional()).returns(z.void())
+    })
+  )
+  .returns(z.void())
+
+export type UploadCreatedHandler = z.input<typeof UploadCreatedHandlerSchema>
+
+export type ProgressHandler = z.input<typeof ProgressHandlerSchema>
 
 export type FileTemplate = 'audio' | 'img_square' | 'img_backdrop'
 
+export type UploadFileParams = {
+  file: CrossPlatformFile
+  onProgress?: ProgressHandler
+  metadata: FileMetadata
+}
+
 export type StorageService = {
-  uploadFile: ({
-    file,
-    onProgress,
-    template,
-    options
-  }: {
-    file: CrossPlatformFile
-    onProgress?: ProgressHandler
-    template: FileTemplate
-    options?: { [key: string]: string }
-  }) => Promise<UploadResponse>
-  uploadFileV2: ({
-    file,
-    onProgress,
-    metadata,
-    onUploadCreated
-  }: {
-    file: CrossPlatformFile
-    onProgress: (loadedBytes: number, totalBytes: number) => void
-    metadata: FileMetadata
-    onUploadCreated?: (upload: UploadHandle) => void
-  }) => Promise<string>
+  uploadFile: (params: UploadFileParams) => UploadHandle
   getUploadStatus: (uploadId: string) => Promise<UploadResponse>
   generatePreview: ({
     cid,
@@ -115,6 +112,6 @@ export type FileMetadata = {
   filetype?: string
   template: 'audio' | 'img_square' | 'img_backdrop'
   userWallet?: string
-  previewStartSeconds?: string
+  previewStartSeconds?: number
   placementHosts?: string
 }

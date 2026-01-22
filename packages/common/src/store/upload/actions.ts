@@ -69,7 +69,7 @@ export const uploadTracksFailed = () => {
 export const resetProgress = (payload: {
   clientId: string
   stemIndex: number | null
-  key: 'audio' | 'art'
+  key: 'audio' | 'image'
 }) => {
   return { type: RESET_PROGRESS, payload }
 }
@@ -77,7 +77,7 @@ export const resetProgress = (payload: {
 export const updateProgress = (payload: {
   clientId: string
   stemIndex: number | null
-  key: 'audio' | 'art'
+  key: 'audio' | 'image'
   progress: Progress
 }) => {
   return { type: UPDATE_PROGRESS, payload }

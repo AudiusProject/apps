@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id, type ProgressHandler } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 
@@ -29,7 +29,9 @@ export type UpdateTrackParams = {
   trackId: ID
   userId: ID
   metadata: Partial<TrackMetadataForUpload>
+  audioFile?: File
   coverArtFile?: File
+  onProgress?: ProgressHandler
 }
 
 export const useUpdateTrack = () => {
@@ -44,7 +46,9 @@ export const useUpdateTrack = () => {
       trackId,
       userId,
       metadata,
-      coverArtFile
+      audioFile,
+      coverArtFile,
+      onProgress
     }: UpdateTrackParams) => {
       const sdk = await audiusSdk()
 
@@ -56,12 +60,14 @@ export const useUpdateTrack = () => {
       )
 
       const response = await sdk.tracks.updateTrack({
-        coverArtFile: coverArtFile
+        audioFile: audioFile ? fileToSdk(audioFile, 'audio') : undefined,
+        imageFile: coverArtFile
           ? fileToSdk(coverArtFile, 'cover_art')
           : undefined,
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
-        metadata: sdkMetadata
+        metadata: sdkMetadata,
+        onProgress
       })
 
       // TODO: migrate stem uploads to use tan-query
@@ -103,6 +109,11 @@ export const useUpdateTrack = () => {
 
       // Return context with the previous track and metadata
       return { previousTrack }
+    },
+    onSuccess: (_, params) => {
+      queryClient.invalidateQueries({
+        queryKey: getTrackQueryKey(params.trackId)
+      })
     },
     onError: (
       error,

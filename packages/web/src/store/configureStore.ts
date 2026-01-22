@@ -76,9 +76,6 @@ const statePruner = (state: AppState) => {
       failedTrackIndices: state.upload.failedTrackIndices,
       metadata: state.upload.metadata,
       success: state.upload.success,
-      tracks: (state.upload.tracks || []).map((t) => ({
-        metadata: t.metadata
-      })),
       uploading: state.upload.uploading,
       uploadProgress: state.upload.uploadProgress,
       uploadType: state.upload.uploadType
