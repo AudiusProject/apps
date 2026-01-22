@@ -171,7 +171,7 @@ export const publishTracks = async (
           })
         )
         console.error('Error publishing track:', e)
-        throw e
+        return { clientId: param.clientId, error: true }
       }
     })
   )

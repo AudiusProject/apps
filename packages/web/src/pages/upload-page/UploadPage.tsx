@@ -22,6 +22,7 @@ import {
   type TrackFormState,
   ProgressStatus
 } from '@audius/common/store'
+import { IconCloudUpload } from '@audius/harmony'
 import { HashId, type AudiusSdk } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
@@ -368,8 +369,8 @@ export const UploadPage = (props: UploadPageProps) => {
 
       dispatch(uploadTracksRequested(formState))
 
-      let stems = []
-      let tracks = []
+      let stems: Awaited<ReturnType<typeof uploadStemFiles>> = []
+      let tracks: Awaited<ReturnType<typeof uploadTracks>> = []
       try {
         // Wait for stems and tracks to upload before publishing
         ;[stems, tracks] = await Promise.all([
@@ -494,10 +495,10 @@ export const UploadPage = (props: UploadPageProps) => {
           const publishRes = await publishCollectionAsync({
             collectionMetadata: formState.metadata,
             tracks: formState.tracks!.map((t) => {
-              const artUploadResponse = artwork?.find(
+              const imageUploadResponse = artwork?.find(
                 (a) => a.clientId === t.clientId
               )?.imageUploadResponse
-              if (!artUploadResponse) {
+              if (!imageUploadResponse) {
                 throw new Error(`No artwork found for track ${t.clientId}`)
               }
               const audioUploadResponse = tracks.find(
@@ -510,7 +511,7 @@ export const UploadPage = (props: UploadPageProps) => {
                 clientId: t.clientId,
                 metadata: t.metadata,
                 audioUploadResponse,
-                artUploadResponse
+                imageUploadResponse
               }
             })
           })

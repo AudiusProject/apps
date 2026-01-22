@@ -48,7 +48,7 @@ type PublishCollectionParams = {
     clientId: string
     metadata: TrackMetadataForUpload
     audioUploadResponse: UploadResponse
-    artUploadResponse: UploadResponse
+    imageUploadResponse: UploadResponse
   }[]
 }
 
