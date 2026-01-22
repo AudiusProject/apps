@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { useQueryContext, useTrack, useUpload } from '@audius/common/api'
+import { useTrack, useUpload } from '@audius/common/api'
 import {
   uploadActions,
   UploadFormState,
