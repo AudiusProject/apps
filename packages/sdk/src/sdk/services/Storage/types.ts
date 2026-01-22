@@ -41,7 +41,7 @@ const ProgressUpdateArgsSchema = z.object({
 
 export const ProgressHandlerSchema = z
   .function()
-  .args(z.enum(['audio', 'art']), ProgressUpdateArgsSchema)
+  .args(z.enum(['audio', 'image']), ProgressUpdateArgsSchema)
   .returns(z.void())
 
 const UploadCreatedHandlerSchema = z

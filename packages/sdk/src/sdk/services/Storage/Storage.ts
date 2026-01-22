@@ -86,7 +86,7 @@ export class Storage implements StorageService {
                 onError: reject,
                 onProgress: (bytesUploaded: number, bytesTotal: number) => {
                   onProgress?.(
-                    metadata.template === 'audio' ? 'audio' : 'art',
+                    metadata.template === 'audio' ? 'audio' : 'image',
                     {
                       loaded: bytesUploaded,
                       total: bytesTotal
@@ -222,7 +222,7 @@ export class Storage implements StorageService {
             )
           }
 
-          onProgress?.(template === 'audio' ? 'audio' : 'art', {
+          onProgress?.(template === 'audio' ? 'audio' : 'image', {
             transcode: resp.transcode_progress
           })
         }

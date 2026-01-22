@@ -145,7 +145,7 @@ describe('TracksApi', () => {
     it('uploads a track if valid metadata is provided', async () => {
       const result = await tracks.uploadTrack({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -154,7 +154,7 @@ describe('TracksApi', () => {
           genre: Genre.ELECTRONIC,
           mood: Mood.TENDER
         },
-        trackFile: {
+        audioFile: {
           buffer: wavFile,
           name: 'trackArt'
         }
@@ -171,14 +171,14 @@ describe('TracksApi', () => {
       await expect(async () => {
         await tracks.uploadTrack({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
           metadata: {
             title: 'BachGavotte'
           } as any,
-          trackFile: {
+          audioFile: {
             buffer: wavFile,
             name: 'trackArt'
           }

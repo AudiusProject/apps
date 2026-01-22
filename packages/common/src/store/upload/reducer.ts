@@ -47,7 +47,7 @@ const initialState: UploadState = {
 
 const initialUploadState: ProgressState = {
   clientId: '',
-  art: {
+  image: {
     status: ProgressStatus.UPLOADING,
     loaded: 0,
     total: 0,
@@ -63,7 +63,7 @@ const initialUploadState: ProgressState = {
 }
 const getInitialProgress = (upload: TrackForUpload | StemUploadWithFile) => {
   const res = cloneDeep(initialUploadState)
-  res.art.total =
+  res.image.total =
     upload.metadata.artwork && 'file' in upload.metadata.artwork
       ? (upload.metadata.artwork?.file?.size ?? 0)
       : 0
@@ -185,7 +185,7 @@ const actionsMap = {
     ) {
       newState.uploadProgress[trackIndex].stems[stemIndex] = {
         ...cloneDeep(initialUploadState),
-        art: {
+        image: {
           status: ProgressStatus.COMPLETE,
           loaded: 0,
           total: 0,

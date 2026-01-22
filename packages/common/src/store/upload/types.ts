@@ -80,8 +80,8 @@ export type Progress = {
 
 export type ProgressState = {
   clientId: string
-  /** The progress of the artwork upload. */
-  art: Progress
+  /** The progress of the image upload. */
+  image: Progress
   /** The progress of the audio track upload. */
   audio: Progress
   /** Nested progress for a track's stems (audio only). */
