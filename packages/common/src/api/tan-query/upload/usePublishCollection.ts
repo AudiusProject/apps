@@ -36,10 +36,10 @@ import {
 
 type PublishCollectionContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch'
+  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
 > & {
-  userId?: number
-  wallet?: string
+  userId: number
+  wallet: string
 }
 
 type PublishCollectionParams = {
@@ -55,12 +55,13 @@ type PublishCollectionParams = {
 const getPublishCollectionOptions = (context: PublishCollectionContext) =>
   mutationOptions({
     mutationFn: async (params: PublishCollectionParams) => {
-      const sdk = await context.audiusSdk()
-      if (!context.userId || !context.wallet) {
+      const { audiusSdk, userId, wallet } = context
+      const sdk = await audiusSdk()
+      if (!userId || !wallet) {
         throw new Error('User ID and wallet are required to publish collection')
       }
       const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
-        ethWallet: context.wallet,
+        ethWallet: wallet,
         mint: 'USDC'
       })
 
@@ -108,20 +109,20 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         : undefined
       if (params.collectionMetadata.is_album) {
         return await sdk.albums.createAlbum({
-          userId: Id.parse(context.userId),
+          userId: Id.parse(userId),
           coverArtFile,
           metadata: albumMetadataForCreateWithSDK(params.collectionMetadata),
           trackIds: publishedTracks
-            .filter((t) => !t.error)
+            .filter((t) => t.trackId && !t.error)
             .map((t) => t.trackId!)
         })
       } else {
         return await sdk.playlists.createPlaylist({
-          userId: Id.parse(context.userId),
+          userId: Id.parse(userId),
           coverArtFile,
           metadata: playlistMetadataForCreateWithSDK(params.collectionMetadata),
           trackIds: publishedTracks
-            .filter((t) => !t.error)
+            .filter((t) => t.trackId && !t.error)
             .map((t) => t.trackId!)
         })
       }
@@ -131,7 +132,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
 export const usePublishCollection = (
   options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
 ) => {
-  const { audiusSdk, analytics } = useQueryContext()
+  const { audiusSdk, analytics, reportToSentry } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: account = null } = useCurrentAccount()
@@ -143,10 +144,11 @@ export const usePublishCollection = (
     ...options,
     ...getPublishCollectionOptions({
       audiusSdk,
-      userId,
-      wallet,
+      userId: userId!,
+      wallet: wallet!,
       dispatch,
-      analytics
+      analytics,
+      reportToSentry
     }),
 
     onSuccess: async (playlist) => {

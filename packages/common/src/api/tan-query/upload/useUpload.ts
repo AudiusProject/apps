@@ -351,6 +351,9 @@ export const useUpload = () => {
         }
       })()
 
+      const tracks = formState.tracks ?? []
+      const uploadType = formState.uploadType
+
       // Track start of upload
       track(
         make({
@@ -363,111 +366,81 @@ export const useUpload = () => {
       dispatch(uploadTracksRequested(formState))
 
       // Replace tracks as necessary
-      replaceTrackFiles(formState.tracks ?? [])
+      replaceTrackFiles(tracks)
 
-      let stems: Awaited<ReturnType<typeof uploadStemFiles>> = []
-      let tracks: Awaited<ReturnType<typeof uploadTrackFiles>> = []
-      try {
-        // Wait for stems and tracks to upload before publishing
-        ;[stems, tracks] = await Promise.all([
-          uploadStemFiles(formState.tracks ?? []),
-          trackUploadPromise.current
-        ])
-      } catch (err) {
-        console.error('Error uploading files:', err)
-        track(
-          make({
-            eventName: Name.TRACK_UPLOAD_FAILURE,
-            kind
-          })
-        )
-        reportToSentry({
-          error: err as Error,
-          name: 'Upload: File Upload Failed',
-          additionalInfo: {
-            tracks: formState.tracks?.map((t) => ({
-              title: t.metadata.title,
-              stemCount: t.metadata.stems?.length ?? 0
-            }))
-          },
-          feature: Feature.Upload
-        })
-        dispatch(uploadTracksFailed())
-        return
-      }
+      let stemUploads: Awaited<ReturnType<typeof uploadStemFiles>> = []
+      let trackUploads: Awaited<ReturnType<typeof uploadTrackFiles>> = []
+
+      // Wait for stems and tracks to upload before publishing
+      ;[stemUploads, trackUploads] = await Promise.all([
+        uploadStemFiles(tracks),
+        trackUploadPromise.current
+      ])
 
       if (
-        formState.uploadType === UploadType.INDIVIDUAL_TRACKS ||
-        formState.uploadType === UploadType.INDIVIDUAL_TRACK
+        uploadType === UploadType.INDIVIDUAL_TRACKS ||
+        uploadType === UploadType.INDIVIDUAL_TRACK
       ) {
         try {
-          const artworks = await uploadTrackArtworks(formState.tracks ?? [])
-          const mappedImages = artworks.reduce(
+          const artworks = await uploadTrackArtworks(tracks)
+          const imageUploadMap = artworks.reduce(
             (acc, art) => {
               acc[art.clientId] = art
               return acc
             },
             {} as Record<string, (typeof artworks)[number]>
           )
-          const mappedTracks = tracks.reduce(
+          const audioUploadMap = trackUploads.reduce(
             (acc, track) => {
               acc[track.clientId] = track
               return acc
             },
-            {} as Record<string, (typeof tracks)[number]>
+            {} as Record<string, (typeof trackUploads)[number]>
           )
-          if (
-            formState.tracks!.some(
-              (t) => !mappedTracks[t.clientId]?.audioUploadResponse
-            )
-          ) {
-            throw new Error(
-              'Missing audio upload response for one or more tracks'
-            )
-          }
-          if (
-            formState.tracks!.some(
-              (t) =>
-                t.metadata.artwork &&
-                !mappedImages[t.clientId]?.imageUploadResponse
-            )
-          ) {
-            throw new Error(
-              'Missing artwork upload response for one or more tracks'
-            )
-          }
+
           const publishRes = await publishTracksAsync(
-            formState.tracks!.map((t) => ({
-              clientId: t.clientId,
-              metadata: t.metadata,
-              audioUploadResponse:
-                mappedTracks[t.clientId]!.audioUploadResponse!,
-              imageUploadResponse:
-                mappedImages[t.clientId]!.imageUploadResponse!,
-              stemsUploadResponses: stems
-                .filter(
-                  (su) => su.clientId === t.clientId && su.audioUploadResponse
-                )
-                .map((su) => su.audioUploadResponse!)
-            }))
+            tracks
+              .filter(
+                (t) =>
+                  audioUploadMap[t.clientId]?.audioUploadResponse &&
+                  imageUploadMap[t.clientId]?.imageUploadResponse
+              )
+              .map((t) => ({
+                clientId: t.clientId,
+                metadata: t.metadata,
+                audioUploadResponse:
+                  audioUploadMap[t.clientId]!.audioUploadResponse!,
+                imageUploadResponse:
+                  imageUploadMap[t.clientId]!.imageUploadResponse!,
+                stemsUploadResponses: stemUploads
+                  .filter(
+                    (su) => su.clientId === t.clientId && su.audioUploadResponse
+                  )
+                  .map((su) => su.audioUploadResponse!)
+              }))
           )
+
+          const failedTracks = publishRes.filter((res) => res.error)
+          if (publishRes.length !== tracks.length || failedTracks.length > 0) {
+            throw new Error('Some tracks failed to publish')
+          }
 
           // Track complete upload analytics
           track(
             make({
               eventName: Name.TRACK_UPLOAD_COMPLETE_UPLOAD,
-              count: formState.tracks?.length ?? 0,
+              count: tracks.length,
               kind
             })
           )
 
-          if (formState.uploadType === UploadType.INDIVIDUAL_TRACK) {
+          if (uploadType === UploadType.INDIVIDUAL_TRACK) {
             dispatch(
               uploadTracksSucceeded({
                 id: HashId.parse(publishRes[0]!.trackId)
               })
             )
-          } else if (formState.uploadType === UploadType.INDIVIDUAL_TRACKS) {
+          } else if (uploadType === UploadType.INDIVIDUAL_TRACKS) {
             dispatch(uploadTracksSucceeded({ id: null }))
           }
         } catch (err) {
@@ -478,22 +451,11 @@ export const useUpload = () => {
               kind
             })
           )
-          reportToSentry({
-            error: err as Error,
-            name: 'Upload: Track Publishing Failed',
-            additionalInfo: {
-              tracks: formState.tracks?.map((t) => ({
-                title: t.metadata.title,
-                hasArtwork: !!t.metadata.artwork
-              }))
-            },
-            feature: Feature.Upload
-          })
           dispatch(uploadTracksFailed())
         }
       } else if (
-        formState.uploadType === UploadType.ALBUM ||
-        formState.uploadType === UploadType.PLAYLIST
+        uploadType === UploadType.ALBUM ||
+        uploadType === UploadType.PLAYLIST
       ) {
         try {
           const artwork = await uploadCollectionArtwork(
@@ -501,14 +463,14 @@ export const useUpload = () => {
           )
           const publishRes = await publishCollectionAsync({
             collectionMetadata: formState.metadata,
-            tracks: formState.tracks!.map((t) => {
+            tracks: tracks.map((t) => {
               const imageUploadResponse = artwork?.find(
                 (a) => a.clientId === t.clientId
               )?.imageUploadResponse
               if (!imageUploadResponse) {
                 throw new Error(`No artwork found for track ${t.clientId}`)
               }
-              const audioUploadResponse = tracks.find(
+              const audioUploadResponse = trackUploads.find(
                 (ut) => ut.clientId === t.clientId
               )!.audioUploadResponse
               if (!audioUploadResponse) {
@@ -528,7 +490,7 @@ export const useUpload = () => {
             make({
               eventName: Name.TRACK_UPLOAD_COMPLETE_UPLOAD,
               kind,
-              count: formState.tracks?.length ?? 0
+              count: tracks.length
             })
           )
 
@@ -540,17 +502,16 @@ export const useUpload = () => {
           track(
             make({
               eventName: Name.TRACK_UPLOAD_FAILURE,
-              kind:
-                formState.uploadType === UploadType.ALBUM ? 'album' : 'playlist'
+              kind: uploadType === UploadType.ALBUM ? 'album' : 'playlist'
             })
           )
           reportToSentry({
             error: err as Error,
-            name: 'Upload: Collection Publishing Failed',
+            name: 'Upload: Collection Publish',
             additionalInfo: {
-              collectionType: formState.uploadType,
-              trackCount: formState.tracks?.length,
-              tracks: formState.tracks?.map((t) => ({
+              collectionType: uploadType,
+              trackCount: tracks.length,
+              tracks: tracks.map((t) => ({
                 title: t.metadata.title,
                 hasStems: !!t.metadata.stems?.length
               }))
