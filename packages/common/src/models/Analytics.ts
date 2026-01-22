@@ -1138,7 +1138,7 @@ type TrackUploadOpen = {
 type TrackUploadStartUploading = {
   eventName: Name.TRACK_UPLOAD_START_UPLOADING
   count: number
-  kind: 'tracks' | 'album' | 'playlist'
+  kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
 }
 type TrackUploadTrackUploading = {
   eventName: Name.TRACK_UPLOAD_TRACK_UPLOADING
@@ -1154,25 +1154,22 @@ type TrackUploadTrackUploading = {
 type TrackUploadCompleteUpload = {
   eventName: Name.TRACK_UPLOAD_COMPLETE_UPLOAD
   count: number
-  kind: 'tracks' | 'album' | 'playlist'
+  kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
 }
 
 type TrackUploadSuccess = {
   eventName: Name.TRACK_UPLOAD_SUCCESS
-  endpoint: string
   kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
 }
 
 type TrackUploadFailure = {
   eventName: Name.TRACK_UPLOAD_FAILURE
-  endpoint: string
   kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
   error?: string
 }
 
 type TrackUploadRejected = {
   eventName: Name.TRACK_UPLOAD_REJECTED
-  endpoint: string
   kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
   error?: string
 }
