@@ -58,7 +58,9 @@ import {
   ShareTrackSchema,
   ShareTrackRequest,
   type PublishTrackRequest,
-  PublishTrackSchema
+  PublishTrackSchema,
+  type PublishStemRequest,
+  PublishStemSchema
 } from './types'
 
 // Extend that new class
@@ -222,6 +224,53 @@ export class TracksApi extends GeneratedTracksApi {
         metadata,
         audioUploadResponse,
         imageUploadResponse
+      )
+
+    return this.writeTrackToChain(
+      params.userId,
+      populatedMetadata,
+      advancedOptions
+    )
+  }
+
+  /** @hidden
+   * Publishes a stem that was uploaded using storage node uploadFileV2 uploads.
+   */
+  async publishStem(
+    params: PublishStemRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const {
+      userId,
+      metadata: parsedMetadata,
+      audioUploadResponse
+    } = await parseParams('publishStem', PublishStemSchema)(params)
+
+    const trackMetadata = {
+      title: audioUploadResponse.orig_filename || 'Untitled Stem',
+      isStreamGated: false,
+      streamConditions: undefined,
+      isUnlisted: false,
+      fieldVisibility: {
+        genre: false,
+        mood: false,
+        tags: false,
+        share: false,
+        playCount: false
+      },
+      isDownloadable: true,
+      stemOf: parsedMetadata
+    }
+
+    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      trackMetadata,
+      userId
+    )
+
+    const populatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse
       )
 
     return this.writeTrackToChain(

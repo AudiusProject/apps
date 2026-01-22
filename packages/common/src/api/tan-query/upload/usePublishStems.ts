@@ -1,11 +1,19 @@
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
-import { mutationOptions, useMutation } from '@tanstack/react-query'
+import {
+  mutationOptions,
+  useMutation,
+  useQueryClient
+} from '@tanstack/react-query'
 
-import { trackMetadataForUploadToSdk } from '~/adapters'
-import { StemCategory, Name } from '~/models'
+import {
+  StemCategory,
+  Name,
+  type StemUpload,
+  type TrackMetadata
+} from '~/models'
 import { ProgressStatus, uploadActions } from '~/store'
-import type { TrackMetadataForUpload } from '~/store'
 
+import { getStemsQueryKey } from '../tracks/useStems'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext, type QueryContextType } from '../utils'
 
@@ -21,9 +29,11 @@ type PublishStemsContext = Pick<
 type PublishStemsParams = {
   clientId: string
   parentTrackId: number
-  metadata: TrackMetadataForUpload
-  imageUploadResponse: UploadResponse
-  stemsUploadResponses: UploadResponse[]
+  parentMetadata: Omit<TrackMetadata, 'artwork' | 'track_id'>
+  stems: {
+    metadata: StemUpload
+    audioUploadResponse: UploadResponse
+  }[]
 }
 
 export const publishStems = async (
@@ -43,26 +53,16 @@ export const publishStems = async (
 
   const sdk = await audiusSdk()
   return await Promise.all(
-    (params.metadata.stems ?? []).map(async (stem, index) => {
+    (params.stems ?? []).map(async (stem, index) => {
       try {
-        const stemUploadResponse = params.stemsUploadResponses?.[index]
-        if (!stemUploadResponse) {
-          throw new Error(`No upload response found for stem ${index}`)
-        }
         const metadata = {
-          ...stem.metadata,
-          genre: params.metadata.genre,
-          is_downloadable: true,
-          stem_of: {
-            category: stem.category ?? StemCategory.OTHER,
-            parent_track_id: params.parentTrackId
-          }
+          category: stem.metadata.category ?? StemCategory.OTHER,
+          parentTrackId: Id.parse(params.parentTrackId)
         }
-        const stemRes = await sdk.tracks.publishTrack({
+        const stemRes = await sdk.tracks.publishStem({
           userId: Id.parse(userId),
-          metadata: trackMetadataForUploadToSdk(metadata),
-          audioUploadResponse: stemUploadResponse,
-          imageUploadResponse: params.imageUploadResponse
+          metadata,
+          audioUploadResponse: stem.audioUploadResponse
         })
         dispatch(
           updateProgress({
@@ -77,7 +77,7 @@ export const publishStems = async (
             eventName: Name.STEM_COMPLETE_UPLOAD,
             id: HashId.parse(stemRes.trackId),
             parent_track_id: params.parentTrackId,
-            category: stem.category ?? StemCategory.OTHER
+            category: stem.metadata.category ?? StemCategory.OTHER
           })
         )
         return { trackId: stemRes.trackId, error: null }
@@ -109,10 +109,16 @@ export const usePublishStems = (
   }
 ) => {
   const context = useQueryContext()
+  const queryClient = useQueryClient()
   const { data: userId } = useCurrentUserId()
 
   return useMutation({
     ...options,
-    ...getPublishStemsOptions({ ...context, userId: userId! })
+    ...getPublishStemsOptions({ ...context, userId: userId! }),
+    onSuccess: (_, params) => {
+      queryClient.invalidateQueries({
+        queryKey: getStemsQueryKey(params.parentTrackId)
+      })
+    }
   })
 }

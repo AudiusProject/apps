@@ -287,7 +287,7 @@ def populate_track_record_metadata(track_record: Track, track_metadata, handle, 
                 track_record.remix_of = track_metadata["remix_of"]
 
         elif key == "route_id":
-            if "title" in track_metadata:
+            if "title" in track_metadata and track_metadata["title"] is not None:
                 track_record.route_id = helpers.create_track_route_id(
                     track_metadata["title"], handle
                 )
