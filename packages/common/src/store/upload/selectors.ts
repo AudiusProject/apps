@@ -79,7 +79,7 @@ const getKeyUploadProgress = (state: CommonState, key: 'image' | 'audio') => {
   const transcodeProgress = total === 0 ? 0 : transcoded / total
 
   const overallProgress =
-    key === 'art'
+    key === 'image'
       ? fileUploadProgress
       : UPLOAD_WEIGHT * fileUploadProgress +
         TRANSCODE_WEIGHT * transcodeProgress

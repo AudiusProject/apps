@@ -108,7 +108,9 @@ export class UsersApi extends GeneratedUsersApi {
               .uploadFile({
                 file: profilePictureFile,
                 onProgress,
-                template: 'img_square'
+                metadata: {
+                  template: 'img_square'
+                }
               })
               .start(),
           (e) => {
@@ -122,7 +124,9 @@ export class UsersApi extends GeneratedUsersApi {
               .uploadFile({
                 file: coverArtFile,
                 onProgress,
-                template: 'img_backdrop'
+                metadata: {
+                  template: 'img_backdrop'
+                }
               })
               .start(),
           (e) => {
@@ -214,7 +218,9 @@ export class UsersApi extends GeneratedUsersApi {
               .uploadFile({
                 file: profilePictureFile,
                 onProgress,
-                template: 'img_square'
+                metadata: {
+                  template: 'img_square'
+                }
               })
               .start(),
           (e) => {
@@ -228,7 +234,9 @@ export class UsersApi extends GeneratedUsersApi {
               .uploadFile({
                 file: coverArtFile,
                 onProgress,
-                template: 'img_backdrop'
+                metadata: {
+                  template: 'img_backdrop'
+                }
               })
               .start(),
           (e) => {
