@@ -304,15 +304,18 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     handleClose(entityId)
   }, [entityId, handleClose])
 
-  const handleSheetChanges = useCallback((index: number) => {
-    // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
-    if (index === 0 && bottomSheetModalRef.current) {
-      // Use a small delay to ensure the modal is fully presented
-      setTimeout(() => {
-        bottomSheetModalRef.current?.snapToIndex(1)
-      }, 50)
-    }
-  }, [])
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
+      if (index === 0 && bottomSheetModalRef.current) {
+        // Use a small delay to ensure the modal is fully presented
+        setTimeout(() => {
+          bottomSheetModalRef.current?.snapToIndex(1)
+        }, 50)
+      }
+    },
+    [bottomSheetModalRef]
+  )
 
   return (
     <>

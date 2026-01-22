@@ -213,15 +213,18 @@ const LineupItemTile = memo(
   (prevProps, nextProps) => {
     // Only re-render if the item data actually changed, not just the index
     // Compare item IDs to determine if it's the same item
-    const prevItemId = prevProps.item && 'id' in prevProps.item ? prevProps.item.id : null
-    const nextItemId = nextProps.item && 'id' in nextProps.item ? nextProps.item.id : null
-    
+    const prevItemId =
+      prevProps.item && 'id' in prevProps.item ? prevProps.item.id : null
+    const nextItemId =
+      nextProps.item && 'id' in nextProps.item ? nextProps.item.id : null
+
     // If item IDs are different, it's a different item - allow re-render
     if (prevItemId !== nextItemId) return false
-    
+
     // If both are loading items, don't re-render
-    if ('_loading' in prevProps.item && '_loading' in nextProps.item) return true
-    
+    if ('_loading' in prevProps.item && '_loading' in nextProps.item)
+      return true
+
     // Compare other props that might affect rendering
     return (
       prevProps.isTrending === nextProps.isTrending &&
