@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { fileToSdk } from '@audius/common/adapters'
 import {
-  useCurrentAccountUser,
   usePublishCollection,
   usePublishTracks,
+  useQueryContext,
   useTrack,
   useUploadFiles
 } from '@audius/common/api'
@@ -19,10 +19,10 @@ import {
   TrackMetadataForUpload,
   type TrackForUpload,
   type CollectionFormState,
-  type TrackFormState
+  type TrackFormState,
+  ProgressStatus
 } from '@audius/common/store'
-import { IconCloudUpload } from '@audius/harmony'
-import { HashId, type UploadHandle } from '@audius/sdk'
+import { HashId, type AudiusSdk } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
 
@@ -84,6 +84,7 @@ export const UploadPage = (props: UploadPageProps) => {
   const { scrollToTop } = props
   const dispatch = useDispatch()
   const location = useLocation()
+  const { audiusSdk } = useQueryContext()
   const initialMetadata = (location.state as LocationState)?.initialMetadata
   const formStateFromStore = useSelector(getFormState)
   const uploadSuccess = useSelector(getUploadSuccess)
@@ -91,7 +92,6 @@ export const UploadPage = (props: UploadPageProps) => {
   const [formState, setFormState] = useState<UploadFormState>(
     formStateFromStore ?? initialFormState
   )
-  const { data: user } = useCurrentAccountUser()
   const { mutateAsync: uploadFiles } = useUploadFiles()
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
   const { mutateAsync: publishCollectionAsync } = usePublishCollection()
@@ -102,6 +102,10 @@ export const UploadPage = (props: UploadPageProps) => {
 
   const fileUploads = useRef<
     Map<string, NonNullable<UploadFormState['tracks']>[number]['file']>
+  >(new Map())
+
+  const uploadHandles = useRef<
+    Map<string, ReturnType<AudiusSdk['tracks']['uploadTrackFiles']>>
   >(new Map())
 
   const uploadTracks = useCallback(
@@ -130,26 +134,40 @@ export const UploadPage = (props: UploadPageProps) => {
         )
       })
 
+      const sdk = await audiusSdk?.()
       return await uploadFiles({
-        files: tracks.map((t) => ({
-          clientId: t.clientId,
-          file: fileToSdk(t.file, 'audio'),
-          metadata: {
-            filename: t.file.name ?? undefined,
-            filetype: t.file.type ?? undefined,
-            userWallet: user?.wallet,
-            template: 'audio'
+        files: tracks.map((t) => {
+          const handle = sdk.tracks.uploadTrackFiles({
+            audioFile: fileToSdk(t.file, 'audio'),
+            onProgress: (key, { loaded, total, transcode }) => {
+              dispatch(
+                uploadActions.updateProgress({
+                  clientId: t.clientId,
+                  key,
+                  stemIndex: null,
+                  progress: {
+                    status:
+                      transcode === undefined
+                        ? ProgressStatus.UPLOADING
+                        : ProgressStatus.PROCESSING,
+                    loaded,
+                    total,
+                    transcode
+                  }
+                })
+              )
+            }
+          })
+          uploadHandles.current.set(t.clientId, handle)
+          return {
+            clientId: t.clientId,
+            ...handle
           }
-        })),
-        onUploadCreated: (clientId, handle) => {
-          uploadHandles.current.set(clientId, handle)
-        }
+        })
       })
     },
-    [dispatch, uploadFiles, user?.wallet]
+    [audiusSdk, dispatch, uploadFiles]
   )
-
-  const uploadHandles = useRef<Map<string, UploadHandle>>(new Map())
 
   /**
    * Replace track files that have been changed in the edit form
@@ -194,6 +212,7 @@ export const UploadPage = (props: UploadPageProps) => {
 
   const uploadTrackArtworks = useCallback(
     async (tracks: TrackForUpload[]) => {
+      const sdk = await audiusSdk()
       return await uploadFiles({
         files: tracks
           .filter(
@@ -211,20 +230,35 @@ export const UploadPage = (props: UploadPageProps) => {
               throw new Error('Artwork file missing')
             }
             const file = fileToSdk(t.metadata.artwork.file, 'artwork')
+            const uploadHandle = sdk.tracks.uploadTrackFiles({
+              imageFile: file,
+              onProgress: (key, { loaded, total }) => {
+                dispatch(
+                  uploadActions.updateProgress({
+                    clientId: t.clientId,
+                    key,
+                    stemIndex: null,
+                    progress: {
+                      status:
+                        loaded && total && loaded >= total
+                          ? ProgressStatus.COMPLETE
+                          : ProgressStatus.UPLOADING,
+                      loaded,
+                      total,
+                      transcode: 0
+                    }
+                  })
+                )
+              }
+            })
             return {
               clientId: t.clientId,
-              file,
-              metadata: {
-                filename: file.name ?? undefined,
-                filetype: file.type ?? undefined,
-                userWallet: user?.wallet,
-                template: 'img_square'
-              }
+              ...uploadHandle
             }
           })
       })
     },
-    [uploadFiles, user?.wallet]
+    [audiusSdk, dispatch, uploadFiles]
   )
 
   const uploadCollectionArtwork = useCallback(
@@ -237,47 +271,78 @@ export const UploadPage = (props: UploadPageProps) => {
       ) {
         return
       }
+      const sdk = await audiusSdk()
+      const uploadHandle = sdk.tracks.uploadTrackFiles({
+        imageFile: fileToSdk(formState.metadata.artwork.file, 'artwork'),
+        onProgress: (key, { loaded, total }) => {
+          dispatch(
+            uploadActions.updateProgress({
+              clientId: 'collection-artwork',
+              key,
+              stemIndex: null,
+              progress: {
+                status:
+                  loaded && total && loaded >= total
+                    ? ProgressStatus.COMPLETE
+                    : ProgressStatus.UPLOADING,
+                loaded,
+                total,
+                transcode: 0
+              }
+            })
+          )
+        }
+      })
       return await uploadFiles({
         files: [
           {
             clientId: 'collection-artwork',
-            file: fileToSdk(formState.metadata.artwork.file, 'artwork'),
-            metadata: {
-              filename: 'artwork',
-              filetype: formState.metadata.artwork.file.type ?? undefined,
-              userWallet: user?.wallet,
-              template: 'img_square'
-            }
+            ...uploadHandle
           }
         ]
       })
     },
-    [uploadFiles, user?.wallet]
+    [audiusSdk, dispatch, uploadFiles]
   )
 
   const uploadStemFiles = useCallback(
-    (tracks: TrackForUpload[]) => {
-      return uploadFiles({
+    async (tracks: TrackForUpload[]) => {
+      const sdk = await audiusSdk()
+      return await uploadFiles({
         files: tracks.flatMap(
           (t) =>
             t.metadata.stems?.map((stemFile, index) => {
               const file = (stemFile as StemUploadWithFile).file
+              const uploadHandle = sdk.tracks.uploadTrackFiles({
+                audioFile: fileToSdk(file, 'audio'),
+                onProgress: (key, { loaded, total, transcode }) => {
+                  dispatch(
+                    uploadActions.updateProgress({
+                      clientId: t.clientId,
+                      stemIndex: index,
+                      key,
+                      progress: {
+                        status:
+                          transcode === undefined
+                            ? ProgressStatus.UPLOADING
+                            : ProgressStatus.PROCESSING,
+                        loaded,
+                        total,
+                        transcode
+                      }
+                    })
+                  )
+                }
+              })
               return {
                 clientId: t.clientId,
-                stemIndex: index,
-                file: fileToSdk(file, 'audio'),
-                metadata: {
-                  filename: file.name ?? undefined,
-                  filetype: file.type ?? undefined,
-                  userWallet: user?.wallet,
-                  template: 'audio'
-                }
+                ...uploadHandle
               }
             }) ?? []
         )
       })
     },
-    [uploadFiles, user?.wallet]
+    [audiusSdk, dispatch, uploadFiles]
   )
 
   const finishUpload = useCallback(
@@ -335,19 +400,53 @@ export const UploadPage = (props: UploadPageProps) => {
       ) {
         try {
           const artworks = await uploadTrackArtworks(formState.tracks ?? [])
+          const mappedImages = artworks.reduce(
+            (acc, art) => {
+              acc[art.clientId] = art
+              return acc
+            },
+            {} as Record<string, (typeof artworks)[number]>
+          )
+          const mappedTracks = tracks.reduce(
+            (acc, track) => {
+              acc[track.clientId] = track
+              return acc
+            },
+            {} as Record<string, (typeof tracks)[number]>
+          )
+          if (
+            formState.tracks!.some(
+              (t) => !mappedTracks[t.clientId]?.audioUploadResponse
+            )
+          ) {
+            throw new Error(
+              'Missing audio upload response for one or more tracks'
+            )
+          }
+          if (
+            formState.tracks!.some(
+              (t) =>
+                t.metadata.artwork &&
+                !mappedImages[t.clientId]?.imageUploadResponse
+            )
+          ) {
+            throw new Error(
+              'Missing artwork upload response for one or more tracks'
+            )
+          }
           const publishRes = await publishTracksAsync(
             formState.tracks!.map((t) => ({
               clientId: t.clientId,
               metadata: t.metadata,
-              audioUploadResponse: tracks.find(
-                (ut) => ut.clientId === t.clientId
-              )!.response,
-              artUploadResponse: artworks.find(
-                (a) => a.clientId === t.clientId
-              )!.response,
+              audioUploadResponse:
+                mappedTracks[t.clientId]!.audioUploadResponse!,
+              imageUploadResponse:
+                mappedImages[t.clientId]!.imageUploadResponse!,
               stemsUploadResponses: stems
-                .filter((su) => su.clientId === t.clientId)
-                .map((su) => su.response)
+                .filter(
+                  (su) => su.clientId === t.clientId && su.audioUploadResponse
+                )
+                .map((su) => su.audioUploadResponse!)
             }))
           )
 
@@ -397,16 +496,20 @@ export const UploadPage = (props: UploadPageProps) => {
             tracks: formState.tracks!.map((t) => {
               const artUploadResponse = artwork?.find(
                 (a) => a.clientId === t.clientId
-              )?.response
+              )?.imageUploadResponse
               if (!artUploadResponse) {
                 throw new Error(`No artwork found for track ${t.clientId}`)
+              }
+              const audioUploadResponse = tracks.find(
+                (ut) => ut.clientId === t.clientId
+              )!.audioUploadResponse
+              if (!audioUploadResponse) {
+                throw new Error(`No audio found for track ${t.clientId}`)
               }
               return {
                 clientId: t.clientId,
                 metadata: t.metadata,
-                audioUploadResponse: tracks.find(
-                  (ut) => ut.clientId === t.clientId
-                )!.response,
+                audioUploadResponse,
                 artUploadResponse
               }
             })

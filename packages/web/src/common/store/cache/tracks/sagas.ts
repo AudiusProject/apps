@@ -221,7 +221,7 @@ function* confirmEditTrack(
         yield* call([sdk.tracks, sdk.tracks.updateTrack], {
           userId: Id.parse(userId),
           trackId: Id.parse(trackId),
-          coverArtFile: coverArtFile
+          imageFile: coverArtFile
             ? fileToSdk(coverArtFile, 'cover_art')
             : undefined,
           metadata: trackMetadataForUploadToSdk(formFields),

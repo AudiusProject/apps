@@ -39,7 +39,7 @@ type PublishTracksParams = {
   clientId: string
   metadata: TrackMetadataForUpload
   audioUploadResponse: UploadResponse
-  artUploadResponse: UploadResponse
+  imageUploadResponse: UploadResponse
   stemsUploadResponses?: UploadResponse[]
 }[]
 
@@ -75,7 +75,7 @@ export const publishTracks = async (
             userId: Id.parse(userId),
             metadata: camelMetadata,
             audioUploadResponse: param.audioUploadResponse,
-            artUploadResponse: param.artUploadResponse
+            imageUploadResponse: param.imageUploadResponse
           })
           dispatch(
             updateProgress({
@@ -114,8 +114,8 @@ export const publishTracks = async (
                 throw new Error(`No upload response found for stem ${index}`)
               }
               const metadata = {
-                ...snakeMetadata,
                 ...stem.metadata,
+                genre: param.metadata.genre,
                 is_downloadable: true,
                 stem_of: {
                   category: stem.category ?? StemCategory.OTHER,
@@ -126,7 +126,7 @@ export const publishTracks = async (
                 userId: Id.parse(userId),
                 metadata: trackMetadataForUploadToSdk(metadata),
                 audioUploadResponse: stemUploadResponse,
-                artUploadResponse: param.artUploadResponse
+                imageUploadResponse: param.imageUploadResponse
               })
               dispatch(
                 updateProgress({
@@ -171,7 +171,7 @@ export const publishTracks = async (
           })
         )
         console.error('Error publishing track:', e)
-        return { clientId: param.clientId, error: e }
+        throw e
       }
     })
   )

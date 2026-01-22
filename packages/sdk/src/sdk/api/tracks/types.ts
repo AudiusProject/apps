@@ -2,7 +2,10 @@ import type { WalletAdapter } from '@solana/wallet-adapter-base'
 import { z } from 'zod'
 
 import { PublicKeySchema } from '../../services/Solana'
-import { ProgressHandler } from '../../services/Storage/types'
+import {
+  ProgressHandlerSchema,
+  type ProgressHandler
+} from '../../services/Storage/types'
 import {
   DDEXResourceContributor,
   DDEXCopyright,
@@ -196,10 +199,10 @@ export type TrackMetadata = z.input<typeof UploadTrackMetadataSchema>
 export const UploadTrackSchema = z
   .object({
     userId: HashId,
-    coverArtFile: ImageFile,
+    audioFile: AudioFile,
+    imageFile: ImageFile,
     metadata: UploadTrackMetadataSchema.strict(),
-    onProgress: z.optional(z.function()),
-    trackFile: AudioFile
+    onProgress: z.optional(ProgressHandlerSchema)
   })
   .strict()
 
@@ -214,19 +217,17 @@ export type UploadTrackRequest = Omit<
 
 export const UploadTrackFilesSchema = z
   .object({
-    userId: HashId,
-    coverArtFile: z.optional(ImageFile),
-    metadata: UploadTrackMetadataSchema.extend({
-      genre: z.optional(z.enum(Object.values(Genre) as [Genre, ...Genre[]]))
-    }).strict(),
-    onProgress: z.optional(z.function()),
-    trackFile: AudioFile
+    audioFile: z.optional(AudioFile),
+    imageFile: z.optional(ImageFile),
+    fileMetadata: z
+      .object({
+        placementHosts: z.string().optional(),
+        previewStartSeconds: z.number().optional()
+      })
+      .optional(),
+    onProgress: z.optional(ProgressHandlerSchema)
   })
   .strict()
-
-export type TrackFilesMetadata = z.input<
-  typeof UploadTrackFilesSchema
->['metadata']
 
 export type UploadTrackFilesRequest = Omit<
   z.input<typeof UploadTrackFilesSchema>,
@@ -242,9 +243,10 @@ export const UpdateTrackSchema = z
     userId: HashId,
     trackId: HashId,
     metadata: UploadTrackMetadataSchema.strict().partial(),
+    audioFile: z.optional(AudioFile),
+    imageFile: z.optional(ImageFile),
     generatePreview: z.optional(z.boolean()),
-    coverArtFile: z.optional(ImageFile),
-    onProgress: z.optional(z.function())
+    onProgress: z.optional(ProgressHandlerSchema)
   })
   .strict()
 
@@ -421,11 +423,9 @@ export type UploadResponse = z.input<typeof UploadResponseSchema>
 export const PublishTrackSchema = z
   .object({
     userId: HashId,
-    metadata: UploadTrackMetadataSchema.extend({
-      genre: z.optional(z.enum(Object.values(Genre) as [Genre, ...Genre[]]))
-    }).strict(),
+    metadata: UploadTrackMetadataSchema.strict(),
     audioUploadResponse: UploadResponseSchema,
-    artUploadResponse: UploadResponseSchema,
+    imageUploadResponse: UploadResponseSchema,
     stemsUploadResponses: z.array(UploadResponseSchema).optional()
   })
   .strict()

@@ -5,9 +5,7 @@ import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
 import {
   TrackMetadataForUpload,
   cacheTracksActions,
-  uploadActions,
-  useReplaceTrackConfirmationModal,
-  useReplaceTrackProgressModal
+  useReplaceTrackConfirmationModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
@@ -19,13 +17,12 @@ import { Header } from 'components/header/desktop/Header'
 import LoadingSpinnerFullPage from 'components/loading-spinner-full-page/LoadingSpinnerFullPage'
 import Page from 'components/page/Page'
 import { useIsUnauthorizedForHandleRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
+import { useReplaceTrackAudio } from 'hooks/useReplaceTrackAudio'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { push } from 'utils/navigation'
 
 const { editTrack } = cacheTracksActions
-
-const { updateTrackAudio } = uploadActions
 
 const messages = {
   title: 'Edit Your Track'
@@ -46,7 +43,7 @@ export const EditTrackPage = (props: EditPageProps) => {
   useIsUnauthorizedForHandleRedirect(handle ?? '')
   const { onOpen: openReplaceTrackConfirmation } =
     useReplaceTrackConfirmationModal()
-  const { onOpen: openReplaceTrackProgress } = useReplaceTrackProgressModal()
+  const { replaceTrackAudio } = useReplaceTrackAudio()
 
   const { data: track, status: trackStatus } = useTrackByParams(params)
 
@@ -71,17 +68,14 @@ export const EditTrackPage = (props: EditPageProps) => {
       metadata.artwork = null
     }
 
-    if (replaceFile) {
+    if (replaceFile && replaceFile instanceof File) {
       openReplaceTrackConfirmation({
         confirmCallback: () => {
-          dispatch(
-            updateTrackAudio({
-              trackId,
-              file: replaceFile,
-              metadata
-            })
-          )
-          openReplaceTrackProgress()
+          replaceTrackAudio({
+            trackId,
+            file: replaceFile,
+            metadata
+          })
         }
       })
     } else {
