@@ -136,9 +136,12 @@ export const publishTracks = async (
         publishParentTrack(),
         publishStems(context, {
           clientId: param.clientId,
-          metadata: param.metadata,
-          imageUploadResponse: param.imageUploadResponse,
-          stemsUploadResponses: param.stemsUploadResponses ?? [],
+          parentMetadata: param.metadata,
+          stems:
+            param.metadata.stems?.map((stem, index) => ({
+              metadata: stem,
+              audioUploadResponse: param.stemsUploadResponses?.[index]!
+            })) ?? [],
           parentTrackId: trackId
         })
       ])

@@ -86,6 +86,13 @@ export const USDCPurchaseConditions = z
   })
   .strict()
 
+export const UploadStemMetadataSchema = z.object({
+  category: z
+    .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
+    .default(StemCategory.OTHER),
+  parentTrackId: HashId
+})
+
 export const UploadTrackMetadataSchema = z.object({
   trackId: z.optional(HashId),
   aiAttributionUserId: z.optional(HashId),
@@ -152,14 +159,7 @@ export const UploadTrackMetadataSchema = z.object({
       })
       .strict()
   ),
-  stemOf: z.optional(
-    z.object({
-      category: z
-        .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
-        .default(StemCategory.OTHER),
-      parentTrackId: HashId
-    })
-  ),
+  stemOf: z.optional(UploadStemMetadataSchema.strict()),
   tags: z.optional(z.string()),
   title: z.string({
     required_error: messages.titleRequiredError
@@ -425,9 +425,18 @@ export const PublishTrackSchema = z
     userId: HashId,
     metadata: UploadTrackMetadataSchema.strict(),
     audioUploadResponse: UploadResponseSchema,
-    imageUploadResponse: UploadResponseSchema,
-    stemsUploadResponses: z.array(UploadResponseSchema).optional()
+    imageUploadResponse: UploadResponseSchema
   })
   .strict()
 
 export type PublishTrackRequest = z.input<typeof PublishTrackSchema>
+
+export const PublishStemSchema = z
+  .object({
+    userId: HashId,
+    metadata: UploadStemMetadataSchema.strict(),
+    audioUploadResponse: UploadResponseSchema
+  })
+  .strict()
+
+export type PublishStemRequest = z.input<typeof PublishStemSchema>
