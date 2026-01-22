@@ -109,7 +109,12 @@ export const TrackImage = (props: TrackImageProps) => {
 
   const handleError = (error: any) => {
     try {
-      if (source && typeof source === 'object' && 'uri' in source && typeof onImageError === 'function') {
+      if (
+        source &&
+        typeof source === 'object' &&
+        'uri' in source &&
+        typeof onImageError === 'function'
+      ) {
         onImageError(source.uri as string)
       }
       if (onError && typeof onError === 'function') {

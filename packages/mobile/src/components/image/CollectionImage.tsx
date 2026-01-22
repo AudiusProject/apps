@@ -99,11 +99,7 @@ export const CollectionImage = (props: CollectionImageProps) => {
 
   const localCollectionImageUri = useLocalCollectionImageUri(collectionId)
   const collectionImageSource = useCollectionImage({ collectionId, size })
-  const {
-    source: loadedSource,
-    isFallbackImage,
-    onError: onImageError
-  } = collectionImageSource
+  const { source: loadedSource, onError: onImageError } = collectionImageSource
 
   const source = loadedSource ?? localCollectionImageUri
 

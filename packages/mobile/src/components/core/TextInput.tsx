@@ -34,8 +34,8 @@ import {
   IconCloseAlt,
   useTheme
 } from '@audius/harmony-native'
-import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import { TextInputAccessoryView } from 'app/harmony-native/components/input/TextInput/TextInputAccessoryView'
+import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
