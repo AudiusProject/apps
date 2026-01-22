@@ -304,11 +304,21 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     handleClose(entityId)
   }, [entityId, handleClose])
 
+  const handleSheetChanges = useCallback((index: number) => {
+    // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
+    if (index === 0 && bottomSheetModalRef.current) {
+      // Use a small delay to ensure the modal is fully presented
+      setTimeout(() => {
+        bottomSheetModalRef.current?.snapToIndex(1)
+      }, 50)
+    }
+  }, [])
+
   return (
     <>
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        snapPoints={['66%', '100%']}
+        snapPoints={['50%', '85%', '100%']}
         topInset={insets.top}
         style={{
           borderTopRightRadius: COMMENT_DRAWER_BORDER_RADIUS,
@@ -328,6 +338,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
         )}
         footerComponent={renderFooterComponent}
         onDismiss={handleCloseDrawer}
+        onChange={handleSheetChanges}
         android_keyboardInputMode='adjustResize'
       >
         <CommentSectionProvider

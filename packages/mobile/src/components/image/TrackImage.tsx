@@ -6,12 +6,11 @@ import type { Maybe } from '@audius/common/utils'
 import { useSelector } from 'react-redux'
 
 import type { CornerRadiusOptions, ImageProps } from '@audius/harmony-native'
-import { Image, preload, useTheme } from '@audius/harmony-native'
+import { Artwork, preload } from '@audius/harmony-native'
 import imageEmpty from 'app/assets/images/imageBlank2x.png'
 import { getLocalTrackCoverArtPath } from 'app/services/offline-downloader'
 import { getTrackDownloadStatus } from 'app/store/offline-downloads/selectors'
 import { OfflineDownloadStatus } from 'app/store/offline-downloads/slice'
-import { useThemeColors } from 'app/utils/theme'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
 
@@ -98,43 +97,37 @@ export const TrackImage = (props: TrackImageProps) => {
     size,
     style,
     borderRadius = 's' as const,
-    onLoad,
     onError,
-    ...other
+    children
   } = props
 
   const localTrackImageUri = useLocalTrackImageUri(trackId)
   const trackImageSource = useTrackImage({ trackId, size })
-  const { cornerRadius } = useTheme()
-  const { skeleton } = useThemeColors()
-  const {
-    source: loadedSource,
-    isFallbackImage,
-    onError: onImageError
-  } = trackImageSource
+  const { source: loadedSource, onError: onImageError } = trackImageSource
 
   const source = loadedSource ?? localTrackImageUri
 
-  const handleError = (error: { nativeEvent: { error: string } }) => {
-    if (source && typeof source === 'object' && 'uri' in source) {
-      onImageError?.(source.uri as string)
+  const handleError = (error: any) => {
+    try {
+      if (source && typeof source === 'object' && 'uri' in source && typeof onImageError === 'function') {
+        onImageError(source.uri as string)
+      }
+      if (onError && typeof onError === 'function') {
+        onError(error)
+      }
+    } catch (e) {
+      // Silently handle error handler errors to prevent stack issues
     }
-    onError?.(error)
   }
 
   return (
-    <Image
-      {...other}
-      style={[
-        { aspectRatio: 1, borderRadius: cornerRadius[borderRadius] },
-        (isFallbackImage || !source) && {
-          backgroundColor: skeleton
-        },
-        style
-      ]}
+    <Artwork
       source={source}
-      onLoad={onLoad}
       onError={handleError}
-    />
+      borderRadius={borderRadius}
+      style={style}
+    >
+      {children}
+    </Artwork>
   )
 }

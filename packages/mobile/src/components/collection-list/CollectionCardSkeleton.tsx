@@ -3,7 +3,7 @@ import { Divider, Flex, Paper } from '@audius/harmony-native'
 import { Skeleton } from '../skeleton'
 
 export const CollectionCardSkeleton = ({
-  noShimmer
+  noShimmer = true
 }: {
   noShimmer?: boolean
 }) => {

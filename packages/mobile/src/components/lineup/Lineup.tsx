@@ -177,38 +177,63 @@ const LineupTileView = memo(function LineupTileView({
 
 // Using `memo` because FlatList renders these items
 // And we want to avoid a full render when the props haven't changed
-const LineupItemTile = memo(function LineupItemTile({
-  item,
-  index,
-  isTrending,
-  leadingElementId,
-  rankIconCount,
-  togglePlay,
-  onPress,
-  itemStyles,
-  actions,
-  showArtistPick
-}: LineupItemTileProps) {
-  if (!item) return null
-  if ('_loading' in item) {
-    return <SkeletonTrackTileView itemStyles={itemStyles} />
-  } else {
+const LineupItemTile = memo(
+  function LineupItemTile({
+    item,
+    index,
+    isTrending,
+    leadingElementId,
+    rankIconCount,
+    togglePlay,
+    onPress,
+    itemStyles,
+    actions,
+    showArtistPick
+  }: LineupItemTileProps) {
+    if (!item) return null
+    if ('_loading' in item) {
+      return <SkeletonTrackTileView itemStyles={itemStyles} />
+    } else {
+      return (
+        <LineupTileView
+          item={item}
+          index={index}
+          isTrending={isTrending}
+          leadingElementId={leadingElementId}
+          rankIconCount={rankIconCount}
+          togglePlay={togglePlay}
+          onPress={onPress}
+          itemStyles={itemStyles}
+          actions={actions}
+          showArtistPick={showArtistPick}
+        />
+      )
+    }
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if the item data actually changed, not just the index
+    // Compare item IDs to determine if it's the same item
+    const prevItemId = prevProps.item && 'id' in prevProps.item ? prevProps.item.id : null
+    const nextItemId = nextProps.item && 'id' in nextProps.item ? nextProps.item.id : null
+    
+    // If item IDs are different, it's a different item - allow re-render
+    if (prevItemId !== nextItemId) return false
+    
+    // If both are loading items, don't re-render
+    if ('_loading' in prevProps.item && '_loading' in nextProps.item) return true
+    
+    // Compare other props that might affect rendering
     return (
-      <LineupTileView
-        item={item}
-        index={index}
-        isTrending={isTrending}
-        leadingElementId={leadingElementId}
-        rankIconCount={rankIconCount}
-        togglePlay={togglePlay}
-        onPress={onPress}
-        itemStyles={itemStyles}
-        actions={actions}
-        showArtistPick={showArtistPick}
-      />
+      prevProps.isTrending === nextProps.isTrending &&
+      prevProps.leadingElementId === nextProps.leadingElementId &&
+      prevProps.rankIconCount === nextProps.rankIconCount &&
+      prevProps.togglePlay === nextProps.togglePlay &&
+      prevProps.onPress === nextProps.onPress &&
+      prevProps.showArtistPick === nextProps.showArtistPick &&
+      prevProps.actions === nextProps.actions
     )
   }
-})
+)
 
 /** `Lineup` encapsulates the logic for displaying a list of items such as Tracks (e.g. prefetching items
  * displaying loading states, etc).
