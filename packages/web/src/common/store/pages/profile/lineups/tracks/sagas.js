@@ -27,6 +27,9 @@ const PREFIX = tracksActions.prefix
 
 function* getTracks({ offset, limit, payload, handle }) {
   yield waitForRead()
+  if (!handle) {
+    return []
+  }
   const currentUserId = yield call(queryCurrentUserId)
   const profileHandle = handle.toLowerCase()
 

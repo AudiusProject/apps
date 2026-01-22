@@ -204,7 +204,9 @@ function* fetchLineupMetadatasAsync<T extends Track | Collection>(
         lineupSelector(state, action.handle?.toLowerCase())
       )
       const source = sourceSelector
-        ? yield* select(sourceSelector)
+        ? yield* select((state) =>
+            sourceSelector(state, action.handle?.toLowerCase())
+          )
         : lineup.prefix
 
       const queueUids = Object.keys(yield* select(getPositions)).map((uid) =>
