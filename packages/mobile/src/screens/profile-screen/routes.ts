@@ -1,9 +1,10 @@
 import type { RouteProp } from '@react-navigation/native'
 
 type ProfileTabParamList = {
-  Reposts: { lazy: boolean }
+  Reposts: { lazy?: boolean }
   Albums: {}
   Playlists: {}
+  Tracks: {}
 }
 
 export type ProfileTabRoutes<RouteName extends keyof ProfileTabParamList> =

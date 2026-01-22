@@ -24,7 +24,25 @@ export const Image = (props: ImageProps) => {
     return null
   }
 
-  return <RNImage source={source} onError={onError} {...other} />
+  // Wrap onError to prevent Error objects from being passed as props
+  // This fixes "Error.stack getter called with an invalid receiver" in Hermes
+  const handleError = onError
+    ? (error: { nativeEvent: ImageErrorEventData } | Error) => {
+        // Ensure we always pass the expected event structure, not a raw Error object
+        if (error instanceof Error) {
+          // If we receive an Error object, wrap it in the expected structure
+          onError({
+            nativeEvent: {
+              error: error.message || 'Image load error'
+            }
+          })
+        } else {
+          onError(error)
+        }
+      }
+    : undefined
+
+  return <RNImage source={source} onError={handleError} {...other} />
 }
 
 export const preload = (
