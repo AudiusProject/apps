@@ -4,6 +4,10 @@ import cn from 'classnames'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { getClient } from 'utils/clientUtil'
 
+import styles from './Navigator.module.css'
+import { LeftNav } from './desktop/LeftNav'
+import ConnectedNavBar from './mobile/ConnectedNavBar'
+
 // Extend Window interface for React Native WebView
 declare global {
   interface Window {
@@ -12,10 +16,6 @@ declare global {
     }
   }
 }
-
-import styles from './Navigator.module.css'
-import { LeftNav } from './desktop/LeftNav'
-import ConnectedNavBar from './mobile/ConnectedNavBar'
 
 interface OwnProps {
   className?: string

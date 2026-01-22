@@ -55,7 +55,6 @@ const CheckPage = () => {
     fetchLinkToken()
   }, [])
 
-  // Check if we're in a React Native WebView
   const isInWebView = useRef(
     typeof window !== 'undefined' && window.ReactNativeWebView !== undefined
   )

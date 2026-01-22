@@ -10,6 +10,7 @@ import { WebView } from 'react-native-webview'
 import { useDispatch } from 'react-redux'
 
 import { Flex, LoadingSpinner } from '@audius/harmony-native'
+import { env } from 'app/services/env'
 import { makeStyles } from 'app/styles'
 
 import { ModalScreen, Screen, ScreenContent } from '../../components/core'
@@ -112,8 +113,7 @@ const VerificationWebViewScreen = () => {
     `
     : ''
 
-  // const checkPageUrl = `${env.AUDIUS_URL}/check`
-  const checkPageUrl = 'http://localhost:3002/check'
+  const checkPageUrl = `${env.AUDIUS_URL}/check`
 
   if (!authHeaders) {
     return (

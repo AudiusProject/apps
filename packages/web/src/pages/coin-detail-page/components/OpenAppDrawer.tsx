@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback } from 'react'
 
 import { APP_REDIRECT } from '@audius/common/src/utils/route'
 import { Box, Button, Flex, Text } from '@audius/harmony'
