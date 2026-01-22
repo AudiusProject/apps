@@ -2,24 +2,36 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useQueryContext } from '@audius/common/api'
 import { AuthHeaders } from '@audius/common/services'
+import { modalsActions } from '@audius/common/store'
 import { useNavigation } from '@react-navigation/native'
+import { View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { WebView } from 'react-native-webview'
-import { WebViewNavigation } from 'react-native-webview/lib/WebViewTypes'
+import { useDispatch } from 'react-redux'
 
-import { env } from 'app/services/env'
+import { Flex, LoadingSpinner } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
 
 import { ModalScreen, Screen, ScreenContent } from '../../components/core'
-import LoadingSpinner from '../../components/loading-spinner/LoadingSpinner'
 
-const useStyles = makeStyles(() => ({
-  root: {
-    flex: 1
+const useStyles = makeStyles(({ palette }) => ({
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: palette.background
   },
-  webview: {
-    flex: 1
+  webViewContainer: {
+    flex: 1,
+    backgroundColor: palette.background
   }
 }))
+
+const { setVisibility } = modalsActions
 
 type VerificationResult = {
   type: 'success' | 'error' | 'close'
@@ -27,22 +39,21 @@ type VerificationResult = {
 
 const VerificationWebViewScreen = () => {
   const styles = useStyles()
+  const insets = useSafeAreaInsets()
   const navigation = useNavigation()
+  const dispatch = useDispatch()
   const { identityService } = useQueryContext()
   const [authHeaders, setAuthHeaders] = useState<{
     [AuthHeaders.Message]: string
     [AuthHeaders.Signature]: string
   } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const webViewRef = useRef<WebView>(null)
 
   // Fetch auth headers
   useEffect(() => {
     const fetchAuthHeaders = async () => {
       try {
-        // Access the private method via the service instance
-        // We'll need to expose this or create a public method
-        const headers = await (identityService as any)._getSignatureHeaders()
+        const headers = await identityService.getAuthHeaders()
         setAuthHeaders(headers)
       } catch (error) {
         console.error('Failed to fetch auth headers:', error)
@@ -55,35 +66,39 @@ const VerificationWebViewScreen = () => {
     (event: { nativeEvent: { data: string } }) => {
       try {
         const result: VerificationResult = JSON.parse(event.nativeEvent.data)
-        if (result.type === 'success' || result.type === 'error') {
-          // Navigate back and show the result modal
-          navigation.goBack()
-          // Use a small delay to ensure navigation completes
+        if (result.type === 'success') {
+          if (webViewRef.current) {
+            webViewRef.current.stopLoading()
+          }
           setTimeout(() => {
-            navigation.navigate('AccountSettingsScreen' as never, {
-              verificationResult: result.type
-            } as never)
+            navigation.goBack()
+            dispatch(
+              setVisibility({ modal: 'VerificationSuccess', visible: true })
+            )
+          }, 100)
+        } else if (result.type === 'error') {
+          if (webViewRef.current) {
+            webViewRef.current.stopLoading()
+          }
+          setTimeout(() => {
+            navigation.goBack()
+            dispatch(
+              setVisibility({ modal: 'VerificationError', visible: true })
+            )
           }, 100)
         } else if (result.type === 'close') {
-          navigation.goBack()
+          if (webViewRef.current) {
+            webViewRef.current.stopLoading()
+          }
+          setTimeout(() => {
+            navigation.goBack()
+          }, 100)
         }
       } catch (error) {
         console.error('Failed to parse message from WebView:', error)
       }
     },
-    [navigation]
-  )
-
-  const handleNavigationStateChange = useCallback(
-    (navState: WebViewNavigation) => {
-      // Check if we're navigating away from /check (user completed or exited)
-      const url = navState.url
-      if (url && !url.includes('/check')) {
-        // User navigated away, close the WebView
-        console.log('User navigated away from check page')
-      }
-    },
-    []
+    [navigation, dispatch]
   )
 
   const injectedJavaScript = authHeaders
@@ -92,28 +107,21 @@ const VerificationWebViewScreen = () => {
         // Store auth headers in localStorage for the web app to use
         localStorage.setItem('${AuthHeaders.Message}', '${authHeaders[AuthHeaders.Message]}');
         localStorage.setItem('${AuthHeaders.Signature}', '${authHeaders[AuthHeaders.Signature]}');
-        
-        // Override fetch to inject headers
-        const originalFetch = window.fetch;
-        window.fetch = function(...args) {
-          const [url, options = {}] = args;
-          const headers = new Headers(options.headers || {});
-          headers.set('${AuthHeaders.Message}', '${authHeaders[AuthHeaders.Message]}');
-          headers.set('${AuthHeaders.Signature}', '${authHeaders[AuthHeaders.Signature]}');
-          return originalFetch(url, { ...options, headers });
-        };
       })();
       true;
     `
     : ''
 
-  const checkPageUrl = `${env.AUDIUS_URL}/check`
+  // const checkPageUrl = `${env.AUDIUS_URL}/check`
+  const checkPageUrl = 'http://localhost:3002/check'
 
   if (!authHeaders) {
     return (
       <Screen>
         <ScreenContent>
-          <LoadingSpinner />
+          <Flex justifyContent='center' alignItems='center' flex={1}>
+            <LoadingSpinner />
+          </Flex>
         </ScreenContent>
       </Screen>
     )
@@ -121,19 +129,23 @@ const VerificationWebViewScreen = () => {
 
   return (
     <Screen>
-      <ScreenContent style={styles.root}>
-        <WebView
-          ref={webViewRef}
-          source={{ uri: checkPageUrl }}
-          style={styles.webview}
-          injectedJavaScript={injectedJavaScript}
-          onMessage={handleMessage}
-          onNavigationStateChange={handleNavigationStateChange}
-          onLoadStart={() => setIsLoading(true)}
-          onLoadEnd={() => setIsLoading(false)}
-          startInLoadingState={true}
-          renderLoading={() => <LoadingSpinner />}
-        />
+      <ScreenContent>
+        <View style={[styles.webViewContainer, { paddingTop: insets.top }]}>
+          <WebView
+            ref={webViewRef}
+            source={{ uri: checkPageUrl }}
+            style={styles.webViewContainer}
+            injectedJavaScript={injectedJavaScript}
+            injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
+            onMessage={handleMessage}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.loadingContainer}>
+                <LoadingSpinner />
+              </View>
+            )}
+          />
+        </View>
       </ScreenContent>
     </Screen>
   )
@@ -146,4 +158,3 @@ export const VerificationWebViewModalScreen = () => {
     </ModalScreen>
   )
 }
-

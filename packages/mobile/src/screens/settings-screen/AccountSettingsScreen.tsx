@@ -48,8 +48,8 @@ const messages = {
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
   verifyTitle: 'Verification',
   verifyDescription:
-    'Verify your Audius profile by linking a verified account from Twitter, Instagram, or TikTok.',
-  verifyButtonTitle: 'Get Verified!',
+    'Verify your Audius profile by completing identity verification.',
+  verifyButtonTitle: 'Get Verified',
   emailTitle: 'Change Email',
   emailDescription: 'Change the email you use to sign in and receive emails.',
   emailButtonTitle: 'Change Email',

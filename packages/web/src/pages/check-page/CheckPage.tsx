@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useAccountStatus, useCurrentAccountUser } from '@audius/common/api'
 import { Status } from '@audius/common/models'
+import { AuthHeaders } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import { usePlaidLink, PlaidLinkError } from 'react-plaid-link'
 import { useDispatch } from 'react-redux'
@@ -13,7 +14,6 @@ import { push as pushRoute } from 'utils/navigation'
 
 import './CheckPage.module.css'
 
-// Extend Window interface for React Native WebView
 declare global {
   interface Window {
     ReactNativeWebView?: {
@@ -33,7 +33,13 @@ const CheckPage = () => {
   const { data: accountStatus } = useAccountStatus()
 
   useEffect(() => {
-    if (accountStatus !== Status.LOADING && !accountHandle) {
+    const hasAuthHeaders =
+      typeof window !== 'undefined' &&
+      window.localStorage &&
+      window.localStorage.getItem(AuthHeaders.Message) !== null &&
+      window.localStorage.getItem(AuthHeaders.Signature) !== null
+
+    if (accountStatus !== Status.LOADING && !accountHandle && !hasAuthHeaders) {
       dispatch(pushRoute(SIGN_IN_PAGE))
     }
   }, [accountHandle, accountStatus, dispatch])

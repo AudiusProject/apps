@@ -47,6 +47,8 @@ import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-
 import { TrendingRewardsDrawer } from 'app/components/trending-rewards-drawer'
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
 import { WithdrawUSDCDrawer } from 'app/components/withdraw-usdc-drawer/WithdrawUSDCDrawer'
+import { VerificationErrorDrawer } from 'app/components/verification-error-drawer/VerificationErrorDrawer'
+import { VerificationSuccessDrawer } from 'app/components/verification-success-drawer/VerificationSuccessDrawer'
 import { CoinInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/CoinInsightsOverflowMenu'
 import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/components'
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
@@ -142,7 +144,9 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   WithdrawUSDCModal: WithdrawUSDCDrawer,
   ReceiveTokensModal: ReceiveTokensDrawer,
   SendTokensModal: SendTokensDrawer,
-  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer
+  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer,
+  VerificationSuccess: VerificationSuccessDrawer,
+  VerificationError: VerificationErrorDrawer
 }
 
 const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {

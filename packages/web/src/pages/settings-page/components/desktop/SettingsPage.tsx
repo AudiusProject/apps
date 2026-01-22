@@ -133,10 +133,11 @@ export const SettingsPage = () => {
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
-      userId: user?.user_id
+      userId: user?.user_id,
+      isVerified: user?.is_verified
     })
   })
-  const { handle, userId } = accountData ?? {}
+  const { handle, userId, isVerified } = accountData ?? {}
   const theme = useSelector(getTheme)
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
@@ -468,7 +469,12 @@ export const SettingsPage = () => {
             title={settingsMessages.verificationCardTitle}
             description={settingsMessages.verificationCardDescription}
           >
-            <Button onClick={goToVerification} variant='secondary' fullWidth>
+            <Button
+              disabled={isVerified}
+              onClick={goToVerification}
+              variant='secondary'
+              fullWidth
+            >
               {settingsMessages.verificationCardButtonText}
             </Button>
           </SettingsCard>
