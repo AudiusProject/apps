@@ -113,7 +113,6 @@
     "dayjs": "^1.11.19",
     "electron-log": "5.2.0",
     "electron-updater": "6.3.9",
-    "exact": "^1.0.1",
     "exif-parser": "0.1.12",
     "formik": "2.4.6",
     "gl-audio-analyser": "1.0.3",
