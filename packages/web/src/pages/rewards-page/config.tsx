@@ -4,8 +4,7 @@ import { ChallengeName, ChallengeRewardID } from '@audius/common/models'
 import { Nullable, challengeRewardsConfig, route } from '@audius/common/utils'
 import { IconArrowRight, IconCloudUpload, IconComponent } from '@audius/harmony'
 
-const { EXPLORE_PAGE, LIBRARY_PAGE, TRENDING_PAGE, UPLOAD_PAGE, profilePage } =
-  route
+const { EXPLORE_PAGE, TRENDING_PAGE, UPLOAD_PAGE, profilePage } = route
 
 type LinkButtonType =
   | 'trackUpload'
