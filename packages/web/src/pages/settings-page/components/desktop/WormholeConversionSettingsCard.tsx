@@ -113,7 +113,7 @@ export const WormholeConversionSettingsCard = () => {
 
   return (
     <SettingsCard
-      icon={<IconLogoCircleETH />}
+      icon={<IconLogoCircleETH color='accent' />}
       title={messages.title}
       description={messages.description}
     >

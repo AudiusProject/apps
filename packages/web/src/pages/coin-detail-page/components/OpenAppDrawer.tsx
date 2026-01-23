@@ -19,6 +19,8 @@ const messages = {
     "You'll need to make this purchase in the app or on the web."
 }
 
+const isInWebView = Boolean(window.ReactNativeWebView?.postMessage)
+
 export const OpenAppDrawer = ({ isOpen, onClose }: OpenAppDrawerProps) => {
   const location = useLocation()
 
@@ -28,7 +30,7 @@ export const OpenAppDrawer = ({ isOpen, onClose }: OpenAppDrawerProps) => {
     window.location.href = redirectHref
   }, [location])
 
-  return (
+  return isInWebView ? null : (
     <Drawer
       zIndex={zIndex.BUY_SELL_MODAL}
       isOpen={isOpen}

@@ -41,7 +41,7 @@ export const AuthorizedAppsSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconShieldCheck />}
+        icon={<IconShieldCheck color='accent' />}
         title={messages.title}
         description={messages.description}
       >
