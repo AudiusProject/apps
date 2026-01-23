@@ -41,12 +41,6 @@ const linkButtonMap: Record<LinkButtonType, LinkButtonInfo> = {
     rightIcon: IconArrowRight,
     link: () => TRENDING_PAGE
   },
-  sendFirstTip: {
-    label: 'Send a Tip',
-    leftIcon: null,
-    rightIcon: IconArrowRight,
-    link: () => LIBRARY_PAGE
-  },
   firstPlaylist: {
     label: 'Create A Playlist',
     leftIcon: null,
@@ -76,7 +70,9 @@ type WebChallengeInfo = {
   }
 }
 
-const webChallengesConfig: Record<ChallengeRewardID, WebChallengeInfo> = {
+const webChallengesConfig: Partial<
+  Record<ChallengeRewardID, WebChallengeInfo>
+> = {
   [ChallengeName.Referrals]: {
     icon: <i className='emoji large incoming-envelope' />
   },

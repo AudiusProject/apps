@@ -23,9 +23,8 @@ export type ChallengeRewardsInfo = {
   isVerifiedChallenge?: boolean
 }
 
-export const challengeRewardsConfig: Record<
-  ChallengeRewardID,
-  ChallengeRewardsInfo
+export const challengeRewardsConfig: Partial<
+  Record<ChallengeRewardID, ChallengeRewardsInfo>
 > = {
   [ChallengeName.Referrals]: {
     id: ChallengeName.Referrals,

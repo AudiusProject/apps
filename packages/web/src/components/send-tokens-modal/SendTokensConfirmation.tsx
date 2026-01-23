@@ -40,7 +40,8 @@ const messages = {
   destinationAddress: 'Destination Address',
   user: 'User',
   wallet: 'Wallet',
-  pleaseReview: 'Please review your transaction details. This action cannot be undone.',
+  pleaseReview:
+    'Please review your transaction details. This action cannot be undone.',
   back: 'Back',
   confirm: 'Confirm',
   loadingTokenInformation: 'Loading token information...'

@@ -1,10 +1,6 @@
 import { useState } from 'react'
 
-import {
-  useArtistCoin,
-  transformArtistCoinToTokenInfo,
-  useSendCoins
-} from '@audius/common/api'
+import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import {
   ErrorLevel,
@@ -13,7 +9,6 @@ import {
   User
 } from '@audius/common/models'
 import { useSendTokensModal } from '@audius/common/store'
-import { FixedDecimal } from '@audius/fixed-decimal'
 
 import ResponsiveModal from 'components/modal/ResponsiveModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
@@ -52,9 +47,6 @@ const SendTokensModal = () => {
     signature: ''
   })
   const [error, setError] = useState<string>('')
-
-  const { data: coin } = useArtistCoin(state.selectedMint || (mint ?? ''))
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
   const sendTokensMutation = useSendCoins({
     mint: state.selectedMint || (mint ?? '')
@@ -118,12 +110,12 @@ const SendTokensModal = () => {
       reportToSentry({
         level: ErrorLevel.Error,
         error: error as Error,
-          additionalInfo: {
-            amount: state.amount.toString(),
-            destinationAddress: state.destinationAddress,
-            mint: state.selectedMint,
-            errorString
-          },
+        additionalInfo: {
+          amount: state.amount.toString(),
+          destinationAddress: state.destinationAddress,
+          mint: state.selectedMint,
+          errorString
+        },
         feature: Feature.SendTokens
       })
       setState((prev) => ({ ...prev, step: 'failure' }))
