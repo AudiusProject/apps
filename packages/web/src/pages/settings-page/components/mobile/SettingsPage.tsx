@@ -82,9 +82,8 @@ const messages = {
   audioWallet: '$AUDIO Wallet',
   matrixMode: 'Matrix',
   verificationSuccessMessage:
-    'Thank you for completing identity verification. Your request will be processed soon.',
-  verificationErrorMessage:
-    'We could not verify your account. Please try again another time.',
+    'Verification request received, pending review. Check back soon!',
+  verificationErrorMessage: 'Something went wrong. Please try again later.',
   pending: 'Pending',
   closeButton: 'Close'
 }

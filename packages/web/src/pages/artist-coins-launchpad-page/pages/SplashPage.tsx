@@ -35,8 +35,7 @@ const messages = {
   launchPanelDescription2:
     'It only takes a few steps to set things up and share it with your fans.',
   launchPanelButtonText: 'Get Started!',
-  verifiedOnlyTooltip:
-    'Verified users only. Request account verification in Settings.'
+  verifiedOnlyTooltip: 'Verified users only. Request verification in settings.'
 }
 
 const features = [
