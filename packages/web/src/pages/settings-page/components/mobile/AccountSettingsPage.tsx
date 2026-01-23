@@ -9,6 +9,7 @@ import {
   IconEmailAddress,
   IconKey,
   IconSignOut,
+  IconVerified,
   Flex,
   Text,
   IconComponent,
@@ -28,7 +29,11 @@ import { push } from 'utils/navigation'
 import styles from './AccountSettingsPage.module.css'
 import settingsPageStyles from './SettingsPage.module.css'
 
-const { CHANGE_EMAIL_SETTINGS_PAGE, CHANGE_PASSWORD_SETTINGS_PAGE } = route
+const {
+  CHECK_PAGE,
+  CHANGE_EMAIL_SETTINGS_PAGE,
+  CHANGE_PASSWORD_SETTINGS_PAGE
+} = route
 
 const messages = {
   title: 'Account',
@@ -39,6 +44,10 @@ const messages = {
   recoveryButtonTitle: 'Resend Recovery Email',
   recoveryEmailSent: 'Recovery Email Sent!',
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
+  verifyTitle: 'Verify Your Account',
+  verifyDescription:
+    'Verify your Audius profile by completing identity verification',
+  verifyButtonTitle: 'Get Verified',
   emailTitle: 'Change Email',
   emailDescription: 'Change the email you use to sign in and receive emails.',
   emailButtonTitle: 'Change Email',
@@ -166,6 +175,10 @@ const AccountSettingsPage = () => {
     goToRoute(CHANGE_PASSWORD_SETTINGS_PAGE)
   }, [goToRoute])
 
+  const goToVerification = useCallback(() => {
+    goToRoute(CHECK_PAGE)
+  }, [goToRoute])
+
   const goToChangeEmailSettingsPage = useCallback(() => {
     goToRoute(CHANGE_EMAIL_SETTINGS_PAGE)
   }, [goToRoute])
@@ -193,6 +206,13 @@ const AccountSettingsPage = () => {
           description={messages.recoveryDescription}
           buttonTitle={messages.recoveryButtonTitle}
           onClick={onClickRecover}
+        />
+        <AccountSettingsItem
+          icon={IconVerified}
+          title={messages.verifyTitle}
+          description={messages.verifyDescription}
+          buttonTitle={messages.verifyButtonTitle}
+          onClick={goToVerification}
         />
         <AccountSettingsItem
           icon={IconEmailAddress}

@@ -25,7 +25,7 @@ export const ListeningHistorySettingsCard = () => {
 
   return (
     <SettingsCard
-      icon={<IconListeningHistory />}
+      icon={<IconListeningHistory color='accent' />}
       title={messages.title}
       description={messages.description}
     >

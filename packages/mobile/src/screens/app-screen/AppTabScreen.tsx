@@ -110,6 +110,7 @@ export type AppTabScreenParamList = {
   AccountSettingsScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined
+  VerificationWebView: undefined
   InboxSettingsScreen: undefined
   CommentSettingsScreen: undefined
   DownloadSettingsScreen: undefined

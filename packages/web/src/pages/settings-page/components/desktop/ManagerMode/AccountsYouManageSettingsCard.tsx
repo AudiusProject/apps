@@ -45,7 +45,7 @@ export const AccountsYouManageSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconUserArrowRotate />}
+        icon={<IconUserArrowRotate color='accent' />}
         title={messages.accountsYouManageTitle}
         description={messages.accountsYouManageDescription}
       >

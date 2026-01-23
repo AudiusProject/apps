@@ -45,6 +45,8 @@ import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
 import { SupportersInfoDrawer } from 'app/components/supporters-info-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
 import { TrendingRewardsDrawer } from 'app/components/trending-rewards-drawer'
+import { VerificationErrorDrawer } from 'app/components/verification-error-drawer/VerificationErrorDrawer'
+import { VerificationSuccessDrawer } from 'app/components/verification-success-drawer/VerificationSuccessDrawer'
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
 import { WithdrawUSDCDrawer } from 'app/components/withdraw-usdc-drawer/WithdrawUSDCDrawer'
 import { CoinInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/CoinInsightsOverflowMenu'
@@ -142,7 +144,9 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   WithdrawUSDCModal: WithdrawUSDCDrawer,
   ReceiveTokensModal: ReceiveTokensDrawer,
   SendTokensModal: SendTokensDrawer,
-  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer
+  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer,
+  VerificationSuccess: VerificationSuccessDrawer,
+  VerificationError: VerificationErrorDrawer
 }
 
 const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {

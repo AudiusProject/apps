@@ -12,6 +12,14 @@ import TrendingButton from 'components/bottom-bar/buttons/TrendingButton'
 
 import styles from './BottomBar.module.css'
 
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void
+    }
+  }
+}
+
 const { FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, FAVORITES_PAGE, LIBRARY_PAGE } =
   route
 
@@ -63,7 +71,7 @@ const BottomBar = ({
     [setStackReset, pathname]
   )
 
-  return (
+  return window.ReactNativeWebView?.postMessage ? null : (
     <div className={styles.bottomBar}>
       <FeedButton
         isActive={tempCurrentPage === FEED_PAGE}

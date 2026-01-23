@@ -15,6 +15,7 @@ import { ExternalWalletsModalScreen } from '../external-wallets'
 import { FeatureFlagOverrideScreen } from '../feature-flag-override-screen'
 import { TipArtistModalScreen } from '../tip-artist-screen'
 import { UploadModalScreen } from '../upload-screen'
+import { VerificationWebViewModalScreen } from '../verification-webview-screen'
 
 import { AppTabsScreen } from './AppTabsScreen'
 
@@ -71,6 +72,10 @@ export const AppScreen = () => {
         <Stack.Screen
           name='ChangePassword'
           component={ChangePasswordModalScreen}
+        />
+        <Stack.Screen
+          name='VerificationWebView'
+          component={VerificationWebViewModalScreen}
         />
       </Stack.Group>
     </Stack.Navigator>

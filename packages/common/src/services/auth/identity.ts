@@ -57,8 +57,20 @@ export class IdentityService {
     this.getAudiusWalletClient = audiusWalletClient
   }
 
-  // #region: Internal Functions
-  private async _getSignatureHeaders() {
+  async getAuthHeaders() {
+    // Check if auth headers are provided in localStorage (e.g., from mobile WebView)
+    // This allows mobile apps to inject auth headers for web authentication
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedMessage = window.localStorage.getItem(AuthHeaders.Message)
+      const storedSignature = window.localStorage.getItem(AuthHeaders.Signature)
+      if (storedMessage && storedSignature) {
+        return {
+          [AuthHeaders.Message]: storedMessage,
+          [AuthHeaders.Signature]: storedSignature
+        }
+      }
+    }
+
     const audiusWalletClient = await this.getAudiusWalletClient()
     const [currentAddress] = await audiusWalletClient.getAddresses()
     if (!currentAddress) {
@@ -112,12 +124,10 @@ export class IdentityService {
     }
   }
 
-  // #region: Public Functions
-
   async sendRecoveryInfo(args: RecoveryInfoParams) {
     // This endpoint takes data/signature as body params
     const { [AuthHeaders.Message]: data, [AuthHeaders.Signature]: signature } =
-      await this._getSignatureHeaders()
+      await this.getAuthHeaders()
     return await this._makeRequest<{ status: true }>({
       url: '/recovery',
       method: 'post',
@@ -208,7 +218,7 @@ export class IdentityService {
    * Get the user's email used for notifications and display.
    */
   async getUserEmail() {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     const res = await this._makeRequest<{ email: string | undefined | null }>({
       url: '/user/email',
@@ -226,7 +236,7 @@ export class IdentityService {
    * Change the user's email used for notifications and display.
    */
   async changeEmail({ email, otp }: { email: string; otp?: string }) {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     return await this._makeRequest({
       url: '/user/email',
@@ -239,7 +249,7 @@ export class IdentityService {
   async createStripeSession(
     data: CreateStripeSessionRequest
   ): Promise<CreateStripeSessionResponse> {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     return await this._makeRequest({
       url: '/stripe/session',
@@ -250,7 +260,7 @@ export class IdentityService {
   }
 
   async recordIP() {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     return await this._makeRequest({
       url: '/record_ip',
@@ -260,7 +270,7 @@ export class IdentityService {
   }
 
   async getUserBankTransactionMetadata(transactionId: string) {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     const metadatas = await this._makeRequest<
       Array<{ metadata: InAppAudioPurchaseMetadata }>
@@ -276,7 +286,7 @@ export class IdentityService {
     transactionSignature: string
     metadata: InAppAudioPurchaseMetadata
   }) {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     return await this._makeRequest({
       url: '/transaction_metadata',
@@ -287,7 +297,7 @@ export class IdentityService {
   }
 
   async createPlaidLinkToken() {
-    const headers = await this._getSignatureHeaders()
+    const headers = await this.getAuthHeaders()
 
     return await this._makeRequest<{ linkToken: string }>({
       url: '/create_link_token',

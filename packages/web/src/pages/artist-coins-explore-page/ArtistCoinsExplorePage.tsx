@@ -21,7 +21,8 @@ import {
   IconQuestionCircle,
   spacing,
   PlainButton,
-  IconSearch
+  IconSearch,
+  Tooltip
 } from '@audius/harmony'
 import { useNavigate } from 'react-router'
 
@@ -49,8 +50,8 @@ const messages = {
     'Offer exclusive perks to your fans'
   ],
   help: 'Help',
-  getStartedTooltip: 'Verified users only',
-  alreadyHasCoinTooltip: 'You already have an artist coin'
+  getStartedTooltip:
+    'Verified users only. Request account verification in Settings.'
 }
 
 // Desktop version
@@ -132,26 +133,28 @@ const DesktopArtistCoinsExplorePage = () => {
                   css={{ minWidth: 'max-content' }}
                 >
                   <Text variant='heading'>{messages.launchYourOwn}</Text>
-                  <Flex
-                    pl='s'
-                    gap='s'
-                    alignItems='center'
-                    border='default'
-                    borderRadius='m'
-                    css={{ overflow: 'hidden' }}
-                  >
-                    <Text variant='body' size='s'>
-                      {messages.required}
-                    </Text>
+                  <Tooltip text={messages.getStartedTooltip} placement='top'>
                     <Flex
-                      ph='s'
-                      pv='xs'
-                      backgroundColor='surface2'
-                      borderLeft='default'
+                      pl='s'
+                      gap='s'
+                      alignItems='center'
+                      border='default'
+                      borderRadius='m'
+                      css={{ overflow: 'hidden' }}
                     >
-                      <IconVerified size='s' />
+                      <Text variant='body' size='s'>
+                        {messages.required}
+                      </Text>
+                      <Flex
+                        ph='s'
+                        pv='xs'
+                        backgroundColor='surface2'
+                        borderLeft='default'
+                      >
+                        <IconVerified size='s' />
+                      </Flex>
                     </Flex>
-                  </Flex>
+                  </Tooltip>
                 </Flex>
 
                 <Flex>
