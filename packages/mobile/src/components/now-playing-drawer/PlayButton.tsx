@@ -83,9 +83,14 @@ export const PlayButton = ({ isActive, ...props }: PlayButtonProps) => {
   const animatedIcons = useAnimatedIcons()
 
   const handlePress = useCallback(() => {
+    console.log('[PlayButton] handlePress called - isPlaying:', isPlaying)
     if (isPlaying) {
+      console.log('[PlayButton] Dispatching pause() - isPlaying is true')
+      const error = new Error('[PlayButton] pause dispatch')
+      console.log('[PlayButton] Stack trace:', error.stack)
       dispatch(pause())
     } else {
+      console.log('[PlayButton] Dispatching play() - isPlaying is false')
       dispatch(play())
     }
   }, [isPlaying, dispatch])
