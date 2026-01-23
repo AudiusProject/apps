@@ -1,9 +1,5 @@
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
-import {
-  mutationOptions,
-  useMutation,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { mapValues } from 'lodash'
 import { useDispatch } from 'react-redux'
 
@@ -33,6 +29,7 @@ import {
   addPremiumMetadata,
   getUSDCMetadata
 } from './usePublishTracks'
+import { mutationOptions } from './mutationOptions'
 
 type PublishCollectionContext = Pick<
   QueryContextType,

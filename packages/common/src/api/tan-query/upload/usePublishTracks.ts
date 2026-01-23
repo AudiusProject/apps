@@ -1,10 +1,6 @@
 import { USDC } from '@audius/fixed-decimal'
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
-import {
-  mutationOptions,
-  useMutation,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { trackMetadataForUploadToSdk } from '~/adapters'
 import {
@@ -23,6 +19,7 @@ import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
 import { publishStems } from './usePublishStems'
+import { mutationOptions } from './mutationOptions'
 
 const { updateProgress } = uploadActions
 

@@ -1,9 +1,5 @@
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
-import {
-  mutationOptions,
-  useMutation,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
   StemCategory,
@@ -16,6 +12,7 @@ import { ProgressStatus, uploadActions } from '~/store'
 import { getStemsQueryKey } from '../tracks/useStems'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext, type QueryContextType } from '../utils'
+import { mutationOptions } from './mutationOptions'
 
 const { updateProgress } = uploadActions
 
