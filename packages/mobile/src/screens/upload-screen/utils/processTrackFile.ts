@@ -3,7 +3,8 @@ import type { TrackForUpload } from '@audius/common/store'
 import {
   ALLOWED_MAX_AUDIO_SIZE_BYTES,
   ALLOWED_AUDIO_FILE_EXTENSIONS,
-  ALLOWED_AUDIO_FILE_MIME
+  ALLOWED_AUDIO_FILE_MIME,
+  uuid
 } from '@audius/common/utils'
 import type { DocumentPickerResponse } from '@react-native-documents/picker'
 import { FFprobeKit } from 'ffmpeg-kit-react-native'
@@ -63,6 +64,7 @@ export const processTrackFile = async (
   const title = name?.replace(/\.[^/.]+$/, '') ?? null // strip file extension
 
   return {
+    clientId: uuid(),
     file: { ...trackFile, uri: localCopyUri ?? uri },
     preview: null,
     metadata: newTrackMetadata({
