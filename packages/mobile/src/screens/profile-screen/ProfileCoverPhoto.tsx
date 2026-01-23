@@ -1,12 +1,13 @@
 import { useProfileUser } from '@audius/common/api'
 import { BlurView } from '@react-native-community/blur'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
 
+import { Flex } from '@audius/harmony-native'
 import BadgeArtist from 'app/assets/images/badgeArtist.svg'
 import { CoverPhoto } from 'app/components/image/CoverPhoto'
 import { makeStyles } from 'app/styles'
@@ -62,7 +63,7 @@ export const ProfileCoverPhoto = () => {
   if (!user_id) return null
 
   return (
-    <View pointerEvents='none'>
+    <Flex pointerEvents='none' h={96} backgroundColor='surface2'>
       <CoverPhoto style={styles.coverPhoto} userId={user_id}>
         <AnimatedBlurView
           blurType='dark'
@@ -75,6 +76,6 @@ export const ProfileCoverPhoto = () => {
           <BadgeArtist />
         </Animated.View>
       ) : null}
-    </View>
+    </Flex>
   )
 }

@@ -23,7 +23,7 @@ export const PayoutWalletSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconMoneyBracket />}
+        icon={<IconMoneyBracket color='accent' />}
         title={messages.title}
         description={messages.description}
       >

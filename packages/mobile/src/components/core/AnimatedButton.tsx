@@ -60,6 +60,10 @@ export const AnimatedButton = ({
   const animationRef = useRef<LottieView | null | undefined>(undefined)
   const previousExternalIconIndex = usePrevious(externalIconIndex)
   const previousActiveState = usePrevious(isActive)
+  // Track if animation was triggered by user press (not state change)
+  const wasTriggeredByUserPress = useRef(false)
+
+  const hasMultipleStates = Array.isArray(iconJSON)
 
   // When externalIconIndex is updated, update iconIndex
   // if animation isn't currently playing
@@ -70,10 +74,16 @@ export const AnimatedButton = ({
     iconIndex !== externalIconIndex &&
     !isPlaying
   ) {
+    // Mark that this change was NOT triggered by user press
+    wasTriggeredByUserPress.current = false
     setIconIndex(externalIconIndex)
+    // If we have multiple states and the icon changed, trigger animation
+    // but don't call onPress when it finishes
+    if (hasMultipleStates) {
+      animationRef.current?.play()
+      setIsPlaying(true)
+    }
   }
-
-  const hasMultipleStates = Array.isArray(iconJSON)
   let source: IconJSON
   if (hasMultipleStates) {
     source = iconJSON[iconIndex]
@@ -89,8 +99,10 @@ export const AnimatedButton = ({
   }, [haptics, hapticsConfig, iconIndex])
 
   const handleAnimationFinish = useCallback(() => {
-    if (waitForAnimationFinish) {
+    // Only call onPress if animation was triggered by user press, not state change
+    if (waitForAnimationFinish && wasTriggeredByUserPress.current) {
       onPress?.()
+      wasTriggeredByUserPress.current = false
     }
     if (hasMultipleStates) {
       setIconIndex((iconIndex) => {
@@ -116,6 +128,8 @@ export const AnimatedButton = ({
 
   const handlePress = useCallback(() => {
     handleHaptics()
+    // Mark that this animation was triggered by user press
+    wasTriggeredByUserPress.current = true
 
     if (hasMultipleStates || !isActive) {
       animationRef.current?.play()
@@ -123,6 +137,7 @@ export const AnimatedButton = ({
     }
     if (!waitForAnimationFinish) {
       onPress?.()
+      wasTriggeredByUserPress.current = false
     }
   }, [
     handleHaptics,
@@ -148,6 +163,8 @@ export const AnimatedButton = ({
   useEffect(() => {
     if (hasMultipleStates) {
       if (isActive !== previousActiveState && !isPlaying) {
+        // Mark that this animation was NOT triggered by user press
+        wasTriggeredByUserPress.current = false
         animationRef.current?.play()
         setIsPlaying(true)
       }

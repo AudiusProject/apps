@@ -8,6 +8,15 @@ import styles from './Navigator.module.css'
 import { LeftNav } from './desktop/LeftNav'
 import ConnectedNavBar from './mobile/ConnectedNavBar'
 
+// Extend Window interface for React Native WebView
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void
+    }
+  }
+}
+
 interface OwnProps {
   className?: string
 }
@@ -19,6 +28,14 @@ const Navigator = ({ className }: OwnProps) => {
   const isMobile = useIsMobile()
 
   const isElectron = client === Client.ELECTRON
+
+  // Hide navigation when in a React Native WebView (e.g., mobile app WebView)
+  const isInWebView =
+    typeof window !== 'undefined' && window.ReactNativeWebView !== undefined
+
+  if (isInWebView) {
+    return null
+  }
 
   return (
     <div

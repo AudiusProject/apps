@@ -14,6 +14,14 @@ import { getPathname } from 'utils/route'
 import styles from './AppRedirectPopover.module.css'
 const animatedAny = animated as any
 
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void
+    }
+  }
+}
+
 const { APP_REDIRECT, SIGN_UP_PAGE } = route
 
 const messages = {
@@ -102,6 +110,11 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
     'app-redirect-popover',
     false
   )
+  const [isInWebView, setIsInWebView] = useState(false)
+
+  useEffect(() => {
+    setIsInWebView(Boolean(window.ReactNativeWebView?.postMessage))
+  }, [])
 
   const [animDelay, setAnimDelay] = useState(false)
   useEffect(() => {
@@ -112,7 +125,8 @@ export const AppRedirectPopover = (props: AppRedirectPopoverProps) => {
     !(matchPath('/', location.pathname)?.pathname === location.pathname) &&
     animDelay &&
     !isDismissed &&
-    isMobile
+    isMobile &&
+    !isInWebView
 
   useEffect(() => {
     shouldShow && incrementScroll()

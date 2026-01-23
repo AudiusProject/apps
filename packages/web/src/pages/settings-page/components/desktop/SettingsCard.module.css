@@ -1,5 +1,6 @@
 .settingsCard {
-  flex: 1 1 calc(50% - var(--harmony-unit-3)); /* Leave room for gap */
+  flex: 1 1 calc(50% - var(--harmony-unit-3));
+  /* Leave room for gap */
   min-width: 340px;
   border-radius: 6px;
   background-color: var(--harmony-white);
@@ -15,7 +16,8 @@
 }
 
 .settingsCardFull {
-  flex: 1 1 calc(100% - var(--harmony-unit-3)); /* Leave room for gap */
+  flex: 1 1 calc(100% - var(--harmony-unit-3));
+  /* Leave room for gap */
 }
 
 .title {
@@ -33,10 +35,6 @@
 
 .title svg {
   display: block;
-}
-
-.title path {
-  fill: var(--harmony-secondary);
 }
 
 .description {

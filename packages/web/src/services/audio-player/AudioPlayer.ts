@@ -50,6 +50,7 @@ export class AudioPlayer {
   nextBufferIndex: number
   loadCounter: number
   recordListenedTime: number
+  onEnd: (() => void) | null
   endedListener: ((this: HTMLAudioElement, e: Event) => void) | null
   waitingListener: ((this: HTMLAudioElement, e: Event) => void) | null
   canPlayListener: ((this: HTMLAudioElement, e: Event) => void) | null
@@ -84,6 +85,9 @@ export class AudioPlayer {
     this.loadCounter = 0
 
     this.recordListenedTime = 5 /* seconds */
+
+    this.onEnd = null
+
     // Event listeners
     this.endedListener = null
     this.waitingListener = null
@@ -111,6 +115,7 @@ export class AudioPlayer {
     onEnd: () => void,
     mp3Url: string | null = null
   ) => {
+    this.onEnd = onEnd
     if (mp3Url) {
       this.stop()
       const prevVolume = this.audio.volume

@@ -116,6 +116,8 @@ export type Modals =
   | 'ArtistCoinDetailsModal'
   | 'FinalizeWinnersConfirmation'
   | 'CoinSuccessModal'
+  | 'VerificationSuccess'
+  | 'VerificationError'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState

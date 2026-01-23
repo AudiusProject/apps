@@ -28,7 +28,7 @@ export const LabelAccountSettingsCard = () => {
   return (
     <>
       <SettingsCard
-        icon={<IconUserList />}
+        icon={<IconUserList color='accent' />}
         title={settingsMessages.labelAccountCardTitle}
         description={settingsMessages.labelAccountCardDescription}
       >

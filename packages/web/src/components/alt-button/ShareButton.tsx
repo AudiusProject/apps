@@ -46,8 +46,8 @@ const ShareButton = ({
       })}
       aria-label={messages.share}
       onClick={(e) => {
-        onClick(e)
         stopPropagation && e.stopPropagation()
+        onClick(e)
       }}
     >
       <div

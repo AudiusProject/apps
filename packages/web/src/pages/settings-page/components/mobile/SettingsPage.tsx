@@ -1,4 +1,4 @@
-import { useContext, useEffect, FC } from 'react'
+import { useCallback, useContext, useEffect, useState, FC } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
 import { Name, SquareSizes, Theme } from '@audius/common/models'
@@ -11,12 +11,21 @@ import {
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
+  Button,
+  Flex,
+  IconVerified,
+  Modal,
+  ModalContent,
+  ModalContentText,
+  ModalFooter,
   SegmentedControl,
+  Text,
   IconAudiusLogoHorizontalColor,
   IconLogoCircleUSDCPng
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
@@ -71,7 +80,13 @@ const messages = {
   historyTitle: 'Listening History',
   usdcWallets: 'USDC Wallet',
   audioWallet: '$AUDIO Wallet',
-  matrixMode: 'Matrix'
+  matrixMode: 'Matrix',
+  verificationSuccessMessage:
+    'Thank you for completing identity verification. Your request will be processed soon.',
+  verificationErrorMessage:
+    'We could not verify your account. Please try again another time.',
+  pending: 'Pending',
+  closeButton: 'Close'
 }
 
 type SettingsPageProps = {
@@ -90,6 +105,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
   const { subPage } = props
   const dispatch = useDispatch()
   useScrollToTop()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
@@ -102,6 +118,35 @@ export const SettingsPage = (props: SettingsPageProps) => {
   const theme = useSelector(getTheme)
   const { tier } = useTierAndVerifiedForUser(userId)
   const showMatrix = tier === 'gold' || tier === 'platinum'
+
+  // Check for verification query param and show appropriate modal
+  const verificationStatus = searchParams.get('verification')
+  const [isVerificationSuccessModalOpen, setIsVerificationSuccessModalOpen] =
+    useState(false)
+  const [isVerificationErrorModalOpen, setIsVerificationErrorModalOpen] =
+    useState(false)
+
+  useEffect(() => {
+    if (verificationStatus === 'success') {
+      setIsVerificationSuccessModalOpen(true)
+      // Remove query param from URL
+      searchParams.delete('verification')
+      setSearchParams(searchParams, { replace: true })
+    } else if (verificationStatus === 'error') {
+      setIsVerificationErrorModalOpen(true)
+      // Remove query param from URL
+      searchParams.delete('verification')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [verificationStatus, searchParams, setSearchParams])
+
+  const handleCloseVerificationSuccessModal = useCallback(() => {
+    setIsVerificationSuccessModalOpen(false)
+  }, [])
+
+  const handleCloseVerificationErrorModal = useCallback(() => {
+    setIsVerificationErrorModalOpen(false)
+  }, [])
 
   useEffect(() => {
     dispatch(getPushNotificationSettingsAction())
@@ -237,6 +282,72 @@ export const SettingsPage = (props: SettingsPageProps) => {
           </Grouping>
         </GroupableList>
       </div>
+      <Modal
+        isOpen={isVerificationSuccessModalOpen}
+        onClose={handleCloseVerificationSuccessModal}
+        size='small'
+      >
+        <ModalContent>
+          <Flex
+            direction='column'
+            alignItems='center'
+            justifyContent='center'
+            gap='l'
+            pv='l'
+          >
+            <Flex alignItems='center' gap='s'>
+              <IconVerified size='xl' />
+              <Text size='xl' variant='label'>
+                {messages.pending}
+              </Text>
+            </Flex>
+            <Flex justifyContent='center'>
+              <ModalContentText>
+                {messages.verificationSuccessMessage}
+              </ModalContentText>
+            </Flex>
+          </Flex>
+        </ModalContent>
+        <ModalFooter>
+          <Button
+            variant='primary'
+            onClick={handleCloseVerificationSuccessModal}
+            fullWidth
+          >
+            {messages.closeButton}
+          </Button>
+        </ModalFooter>
+      </Modal>
+      <Modal
+        isOpen={isVerificationErrorModalOpen}
+        onClose={handleCloseVerificationErrorModal}
+        size='small'
+      >
+        <ModalContent>
+          <Flex
+            direction='column'
+            alignItems='center'
+            justifyContent='center'
+            gap='l'
+            pv='l'
+          >
+            <Flex justifyContent='center'>
+              <ModalContentText>
+                {messages.verificationErrorMessage}
+              </ModalContentText>
+            </Flex>
+          </Flex>
+        </ModalContent>
+        <ModalFooter>
+          <Button
+            variant='primary'
+            onClick={handleCloseVerificationErrorModal}
+            fullWidth
+          >
+            {messages.closeButton}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </Page>
   )
 }

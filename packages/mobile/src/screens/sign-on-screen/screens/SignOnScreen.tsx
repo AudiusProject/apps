@@ -66,11 +66,11 @@ const CreateAccountLink = (props: NonLinkProps) => {
           variant='title'
           strength='weak'
           textAlign='center'
-          color='white'
+          color='inverse'
           style={{ justifyContent: 'flex-end' }}
         >
           {messages.newToAudius}{' '}
-          <TextLink variant='inverted' showUnderline onPress={onPress}>
+          <TextLink showUnderline onPress={onPress}>
             {messages.createAccount}
           </TextLink>
         </Text>

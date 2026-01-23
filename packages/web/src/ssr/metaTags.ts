@@ -360,7 +360,7 @@ export const getTrackPageContext = ({
 }) => {
   if (!title || !userName || !permalink) return {}
   const pageTitle = `${title} by ${userName}`
-  const pageDescription = `Stream ${title} by ${userName} on Audius | Stream similar artists to ${userName} on desktop and mobile`
+  const pageDescription = `Stream ${title} by ${userName} on Audius`
   const canonicalUrl = fullTrackPage(permalink)
   const structuredData = {
     '@context': 'http://schema.googleapis.com/',

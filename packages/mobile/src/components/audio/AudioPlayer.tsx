@@ -607,8 +607,15 @@ export const AudioPlayer = () => {
       seekToRef.current = null
     }
   }, [])
-
-  TrackPlayer.addEventListener(Event.PlaybackState, handlePlayerStateChange)
+  useEffect(() => {
+    const sub = TrackPlayer.addEventListener(
+      Event.PlaybackState,
+      handlePlayerStateChange
+    )
+    return () => {
+      sub.remove()
+    }
+  }, [handlePlayerStateChange])
 
   // Seek handler
   useEffect(() => {
@@ -748,8 +755,6 @@ export const AudioPlayer = () => {
     } else {
       await TrackPlayer.reset()
 
-      await TrackPlayer.play()
-
       const firstTrack = newQueueTracks[queueIndex]
       if (!firstTrack) return
 
@@ -767,6 +772,12 @@ export const AudioPlayer = () => {
         trackId: firstTrack.track?.track_id ?? 0,
         uid: queueTrackUids[queueIndex]
       })
+
+      // Always play when starting a new queue (reset + add). This path is only hit when
+      // the user explicitly requests playback (e.g. tap tile). Checking playingRef here
+      // caused "pause after buffer": during async makeTrackData/add, Redux playing could
+      // lag, so we'd call pause() and playback would never start or would stop after buffer.
+      await TrackPlayer.play()
 
       enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
       await enqueueTracksJobRef.current

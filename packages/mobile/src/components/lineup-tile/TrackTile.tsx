@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 
 import {
   useCurrentUserId,
@@ -55,7 +55,7 @@ const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { getTrackPosition } = playbackPositionSelectors
 const { setLockedContentId } = gatedContentActions
 
-export const TrackTile = (props: TrackTileProps) => {
+const TrackTileComponent = (props: TrackTileProps) => {
   const {
     id,
     onPress,
@@ -338,3 +338,7 @@ export const TrackTile = (props: TrackTileProps) => {
     </Paper>
   )
 }
+
+// Memoize TrackTile to prevent unnecessary re-renders when props haven't changed
+// This is critical for performance when rendering many tiles in a list
+export const TrackTile = memo(TrackTileComponent)
