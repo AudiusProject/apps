@@ -180,17 +180,20 @@ const actionsMap = {
 
     if (
       stemIndex !== null &&
-      newState.uploadProgress[trackIndex] &&
-      !newState.uploadProgress[trackIndex]?.stems[stemIndex]
+      !newState.uploadProgress[trackIndex].stems[stemIndex]
     ) {
-      newState.uploadProgress[trackIndex].stems[stemIndex] = {
-        ...cloneDeep(initialUploadState),
-        image: {
-          status: ProgressStatus.COMPLETE,
-          loaded: 0,
-          total: 0,
-          transcode: 0
-        }
+      const stems = newState.uploadProgress[trackIndex].stems
+      while (stems.length <= stemIndex) {
+        stems.push({
+          ...cloneDeep(initialUploadState),
+          image: {
+            status: ProgressStatus.COMPLETE,
+            loaded: 0,
+            total: 0,
+            transcode: 0
+          },
+          clientId
+        })
       }
     }
 

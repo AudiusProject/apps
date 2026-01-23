@@ -1,5 +1,6 @@
 import { type AudiusSdk } from '@audius/sdk'
-import { mutationOptions, useMutation } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
+import { mutationOptions } from './mutationOptions'
 
 type UploadFile = {
   clientId: string

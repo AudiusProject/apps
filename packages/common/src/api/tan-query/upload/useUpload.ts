@@ -518,7 +518,7 @@ export const useUpload = () => {
             },
             feature: Feature.Upload
           })
-          dispatch(uploadActions.uploadTracksFailed())
+          dispatch(uploadTracksFailed())
         }
       }
     },

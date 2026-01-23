@@ -34,23 +34,10 @@ const trackProgressSummary = (
     trackProgress[key].status === ProgressStatus.ERROR
       ? 1
       : (trackProgress[key].transcode ?? 0)
-  const transcodeTotal = 1 + trackProgress.stems.length
 
-  for (const stemProgress of trackProgress.stems) {
-    loaded +=
-      stemProgress[key].status === ProgressStatus.ERROR
-        ? (stemProgress[key].total ?? 0)
-        : (stemProgress[key].loaded ?? 0)
-    total += stemProgress[key].total ?? 0
-    transcode +=
-      stemProgress[key].status === ProgressStatus.ERROR
-        ? 1
-        : (stemProgress[key].transcode ?? 0)
-  }
   return {
-    loaded,
-    total,
-    transcode: key === 'audio' ? transcode / transcodeTotal : 0
+    upload: total === 0 ? 0 : loaded / total,
+    transcode: key === 'audio' ? transcode : 1
   }
 }
 
@@ -65,33 +52,45 @@ const getKeyUploadProgress = (state: CommonState, key: 'image' | 'audio') => {
   const filteredProgress = uploadProgress.filter((progress) => key in progress)
   if (filteredProgress.length === 0) return 0
 
-  let loaded = 0
-  let total = 0
+  let uploaded = 0
   let transcoded = 0
   for (const trackProgress of filteredProgress) {
     const summary = trackProgressSummary(trackProgress, key)
-    loaded += summary.loaded
-    transcoded += summary.transcode * summary.total
-    total += summary.total
+    uploaded += summary.upload
+    transcoded += summary.transcode
+    for (const stemProgress of trackProgress.stems) {
+      const stemSummary = trackProgressSummary(stemProgress, key)
+      uploaded += stemSummary.upload
+      transcoded += stemSummary.transcode
+    }
   }
-
-  const fileUploadProgress = total === 0 ? 0 : loaded / total
-  const transcodeProgress = total === 0 ? 0 : transcoded / total
 
   const overallProgress =
     key === 'image'
-      ? fileUploadProgress
-      : UPLOAD_WEIGHT * fileUploadProgress +
-        TRANSCODE_WEIGHT * transcodeProgress
+      ? uploaded
+      : UPLOAD_WEIGHT * uploaded + TRANSCODE_WEIGHT * transcoded
 
   return overallProgress
 }
 
 export const getCombinedUploadPercentage = (state: CommonState) => {
+  if (
+    state.upload.formState == null ||
+    state.upload.formState.tracks === undefined
+  )
+    return 0
+  const trackCount = state.upload.formState.tracks.length
+  const stemCount = state.upload.formState.tracks.reduce((acc, track) => {
+    return acc + (track.metadata.stems ? track.metadata.stems.length : 0)
+  }, 0)
+  const totalItems = trackCount + stemCount
+  if (totalItems === 0) return 0
+
   const imageProgress = getKeyUploadProgress(state, 'image')
   const audioProgress = getKeyUploadProgress(state, 'audio')
   const percent = floor(
-    100 * (IMAGE_WEIGHT * imageProgress + AUDIO_WEIGHT * audioProgress)
+    (100 * (IMAGE_WEIGHT * imageProgress + AUDIO_WEIGHT * audioProgress)) /
+      totalItems
   )
   return clamp(percent, 0, 100)
 }

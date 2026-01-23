@@ -60,7 +60,7 @@ const ProgressIndicator = (props: { status?: ProgressStatus }) => {
     case ProgressStatus.COMPLETE:
       return <IconValidationCheck className={styles.progressIndicator} />
     case ProgressStatus.ERROR:
-      return <IconError className={styles.progressIndicator} />
+      return <IconError className={styles.progressIndicator} color='danger' />
     default:
       return <div className={styles.emptyProgressIndicator} />
   }
