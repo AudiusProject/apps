@@ -149,27 +149,6 @@ export const challengeRewardsConfig: Record<
     progressLabel: '%0/%1 Uploaded',
     panelButtonText: 'Upload Tracks'
   },
-  'send-first-tip': {
-    id: 'send-first-tip',
-    title: 'Send Your First Tip',
-    description: (_) =>
-      'Show some love to your favorite artist and send them a tip.',
-    fullDescription: () =>
-      'Show some love to your favorite artist and send them a tip.',
-    progressLabel: 'Not Earned',
-    completedLabel: 'Tip Another Artist',
-    panelButtonText: 'Send a Tip'
-  },
-  [ChallengeName.FirstTip]: {
-    id: ChallengeName.FirstTip,
-    title: 'Send Your First Tip',
-    description: (_) =>
-      'Show some love to your favorite artist and send them a tip.',
-    fullDescription: () =>
-      'Show some love to your favorite artist and send them a tip.',
-    progressLabel: 'Not Earned',
-    panelButtonText: 'Send a Tip'
-  },
   'first-playlist': {
     id: 'first-playlist',
     title: 'Create a Playlist',

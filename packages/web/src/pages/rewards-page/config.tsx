@@ -11,7 +11,6 @@ type LinkButtonType =
   | 'trackUpload'
   | 'profile'
   | 'trendingTracks'
-  | 'sendFirstTip'
   | 'firstPlaylist'
   | ChallengeName.AudioMatchingSell
   | ChallengeName.AudioMatchingBuy
@@ -147,22 +146,6 @@ const webChallengesConfig: Record<ChallengeRewardID, WebChallengeInfo> = {
       incomplete: linkButtonMap.trackUpload,
       inProgress: linkButtonMap.trackUpload,
       complete: linkButtonMap.trackUpload
-    }
-  },
-  'send-first-tip': {
-    icon: <i className='emoji large money-wings' />,
-    modalButtonInfo: {
-      incomplete: linkButtonMap.sendFirstTip,
-      inProgress: linkButtonMap.sendFirstTip,
-      complete: linkButtonMap.sendFirstTip
-    }
-  },
-  [ChallengeName.FirstTip]: {
-    icon: <i className='emoji large money-wings' />,
-    modalButtonInfo: {
-      incomplete: linkButtonMap.sendFirstTip,
-      inProgress: linkButtonMap.sendFirstTip,
-      complete: linkButtonMap.sendFirstTip
     }
   },
   'first-playlist': {

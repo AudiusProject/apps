@@ -24,11 +24,16 @@ import SendTokensInput from './SendTokensInput'
 import SendTokensProgress from './SendTokensProgress'
 import SendTokensSuccess from './SendTokensSuccess'
 
+type RecipientType = 'user' | 'wallet'
+
 type SendTokensState = {
   step: 'input' | 'confirm' | 'progress' | 'success' | 'failure'
   amount: bigint
+  amountString: string
   destinationAddress: string
   selectedUser: User | null
+  selectedMint: string
+  recipientType: RecipientType
   signature: string
 }
 
@@ -39,27 +44,38 @@ const SendTokensModal = () => {
   const [state, setState] = useState<SendTokensState>({
     step: 'input',
     amount: BigInt(0),
+    amountString: '',
     destinationAddress: '',
     selectedUser: null,
+    selectedMint: mint ?? '',
+    recipientType: 'user',
     signature: ''
   })
   const [error, setError] = useState<string>('')
 
-  const { data: coin } = useArtistCoin(mint ?? '')
+  const { data: coin } = useArtistCoin(state.selectedMint || (mint ?? ''))
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
+  const sendTokensMutation = useSendCoins({
+    mint: state.selectedMint || (mint ?? '')
+  })
 
   const handleInputContinue = (
     amount: bigint,
     destinationAddress: string,
-    selectedUser: User | null
+    selectedUser: User | null,
+    selectedMint: string,
+    recipientType: RecipientType,
+    amountString: string
   ) => {
     setState({
       step: 'confirm',
       amount,
+      amountString,
       destinationAddress,
       selectedUser,
+      selectedMint,
+      recipientType,
       signature: ''
     })
   }
@@ -102,12 +118,12 @@ const SendTokensModal = () => {
       reportToSentry({
         level: ErrorLevel.Error,
         error: error as Error,
-        additionalInfo: {
-          amount: state.amount.toString(),
-          destinationAddress: state.destinationAddress,
-          mint,
-          errorString
-        },
+          additionalInfo: {
+            amount: state.amount.toString(),
+            destinationAddress: state.destinationAddress,
+            mint: state.selectedMint,
+            errorString
+          },
         feature: Feature.SendTokens
       })
       setState((prev) => ({ ...prev, step: 'failure' }))
@@ -128,8 +144,11 @@ const SendTokensModal = () => {
     setState({
       step: 'input',
       amount: BigInt(0),
+      amountString: '',
       destinationAddress: '',
       selectedUser: null,
+      selectedMint: mint ?? '',
+      recipientType: 'user',
       signature: ''
     })
     setError('')
@@ -141,7 +160,7 @@ const SendTokensModal = () => {
     <ResponsiveModal
       isOpen={isOpen}
       onClose={handleClose}
-      title={walletMessages.send}
+      title={state.step === 'confirm' ? 'Confirm Details' : walletMessages.send}
       size='m'
       dismissOnClickOutside={state.step === 'input'}
       showDismissButton={state.step === 'input'}
@@ -150,21 +169,20 @@ const SendTokensModal = () => {
         <SendTokensInput
           mint={mint}
           onContinue={handleInputContinue}
-          initialAmount={
-            state.amount > 0
-              ? new FixedDecimal(state.amount, tokenInfo?.decimals).toString()
-              : ''
-          }
+          initialAmount={state.amountString}
           initialDestinationAddress={state.destinationAddress}
+          initialSelectedUser={state.selectedUser}
+          initialRecipientType={state.recipientType}
         />
       ) : null}
 
       {state.step === 'confirm' ? (
         <SendTokensConfirmation
-          mint={mint}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
           selectedUser={state.selectedUser}
+          recipientType={state.recipientType}
           onConfirm={handleConfirm}
           onBack={handleBack}
           onClose={handleClose}
@@ -175,7 +193,7 @@ const SendTokensModal = () => {
 
       {state.step === 'success' ? (
         <SendTokensSuccess
-          mint={mint}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
           selectedUser={state.selectedUser}
@@ -186,7 +204,7 @@ const SendTokensModal = () => {
 
       {state.step === 'failure' ? (
         <SendTokensFailure
-          mint={mint}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
           selectedUser={state.selectedUser}

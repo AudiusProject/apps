@@ -1,8 +1,7 @@
-import React, { ChangeEvent, useState } from 'react'
+import React from 'react'
 
 import {
   useArtistCoin,
-  useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
 import { User, SquareSizes } from '@audius/common/models'
@@ -12,37 +11,36 @@ import {
   Text,
   Flex,
   Divider,
-  Hint,
-  Checkbox,
-  useTheme,
-  Avatar
+  Avatar,
+  SegmentedControl
 } from '@audius/harmony'
 
-import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
+import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
+
+type RecipientType = 'user' | 'wallet'
 
 interface SendTokensConfirmationProps {
   mint: string
   amount: bigint
   destinationAddress: string
   selectedUser: User | null
+  recipientType: RecipientType
   onConfirm: () => void
   onBack: () => void
   onClose: () => void
 }
 
 const messages = {
-  sendTitle: 'SEND',
   sending: 'Sending',
   toRecipient: 'To Recipient',
+  toDestinationAddress: 'To Destination Address',
   recipient: 'Recipient',
   destinationAddress: 'Destination Address',
-  reviewDetails: 'Review Details Carefully',
-  reviewDescription:
-    'By proceeding, you accept full responsibility for any errors, including the risk of irreversible loss of funds. Transfers are final and cannot be reversed.',
-  confirmationText:
-    'I have reviewed the information and understand that transfers are final.',
+  user: 'User',
+  wallet: 'Wallet',
+  pleaseReview: 'Please review your transaction details. This action cannot be undone.',
   back: 'Back',
   confirm: 'Confirm',
   loadingTokenInformation: 'Loading token information...'
@@ -53,19 +51,12 @@ const SendTokensConfirmation = ({
   amount,
   destinationAddress,
   selectedUser,
+  recipientType,
   onConfirm,
   onBack
 }: SendTokensConfirmationProps) => {
-  const { color } = useTheme()
-  const [isConfirmed, setIsConfirmed] = useState(false)
-
-  // Get token data and balance using the same hooks as ReceiveTokensModal
+  // Get token data
   const { data: coin } = useArtistCoin(mint)
-  const { data: tokenBalance } = useCoinBalance({
-    mint,
-    includeExternalWallets: false,
-    includeStaked: false
-  })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
   const profilePicture = useProfilePicture({
@@ -83,16 +74,6 @@ const SendTokensConfirmation = ({
     )
   }
 
-  const formattedBalance =
-    tokenBalance?.balance.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }) ?? ''
-
-  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setIsConfirmed(event.target.checked)
-  }
-
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
     return (
@@ -106,54 +87,78 @@ const SendTokensConfirmation = ({
 
   return (
     <Flex column gap='xl' p='xl'>
-      {/* Token Balance Section */}
-      <CryptoBalanceSection
-        tokenInfo={tokenInfo}
-        name={tokenInfo.name}
-        amount={formattedBalance}
+      {/* Segmented Control (not clickable) */}
+      <SegmentedControl
+        options={[
+          { key: 'user', text: messages.user },
+          { key: 'wallet', text: messages.wallet }
+        ]}
+        selected={recipientType}
+        onSelectOption={() => {
+          // Intentionally empty - not clickable on confirmation screen
+        }}
+        disabled
       />
+
+      {/* Please Review Text */}
+      <Text variant='body' size='s' color='subdued'>
+        {messages.pleaseReview}
+      </Text>
 
       <Divider orientation='horizontal' />
 
-      {/* Sending Section */}
-      <Flex column gap='s'>
+      {/* Sending Section - using CryptoBalanceSection format */}
+      <Flex column gap='l'>
         <Text variant='heading' size='s' color='subdued'>
           {messages.sending}
         </Text>
         <Flex alignItems='center' gap='s'>
-          {/* Token logo would go here */}
+          <TokenIcon
+            logoURI={tokenInfo.logoURI}
+            icon={tokenInfo.icon}
+            w='4xl'
+            h='4xl'
+            hex
+          />
           <Flex direction='column' gap='xs'>
-            <Text variant='body' size='m' color='default' strength='strong'>
+            <Text variant='heading' size='s'>
               {tokenInfo.name}
             </Text>
-            <Text variant='heading' size='s' color='default'>
-              {formatAmount(amount)} ${tokenInfo.symbol}
-            </Text>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='title' size='l'>
+                {formatAmount(amount)}
+              </Text>
+              <Text variant='title' size='l' color='subdued'>
+                ${tokenInfo.symbol}
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
 
       <Divider orientation='horizontal' />
 
-      {/* To Recipient Section */}
-      <Flex column gap='s'>
+      {/* To Recipient/Destination Address Section */}
+      <Flex column gap='l'>
         <Text variant='heading' size='s' color='subdued'>
-          {messages.toRecipient}
+          {recipientType === 'user'
+            ? messages.toRecipient
+            : messages.toDestinationAddress}
         </Text>
         {selectedUser ? (
           <Flex alignItems='center' gap='s'>
             <Avatar
-              h={32}
-              w={32}
+              h='4xl'
+              w='4xl'
               src={profilePicture}
               borderWidth='thin'
               css={{ flexShrink: 0 }}
             />
-            <Flex direction='column' flex={1} css={{ minWidth: 0 }}>
+            <Flex direction='column' flex={1} css={{ minWidth: 0 }} gap='xs'>
               <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
                 <Text
-                  variant='body'
-                  size='m'
+                  variant='heading'
+                  size='s'
                   color='default'
                   ellipses
                   strength='strong'
@@ -168,51 +173,23 @@ const SendTokensConfirmation = ({
             </Flex>
           </Flex>
         ) : (
-          <Flex column gap='xs'>
-            <Text variant='heading' size='s' color='subdued'>
-              {messages.destinationAddress}
-            </Text>
-            <Text
-              variant='body'
-              size='m'
-              color='default'
-              css={{ wordBreak: 'break-all' }}
-            >
-              {destinationAddress}
-            </Text>
-          </Flex>
+          <Text
+            variant='body'
+            size='m'
+            color='default'
+            css={{ wordBreak: 'break-all' }}
+          >
+            {destinationAddress}
+          </Text>
         )}
       </Flex>
-
-      {/* Review Details Hint */}
-      <Hint noIcon>
-        <Flex column gap='s'>
-          <Text variant='title' color='default'>
-            {messages.reviewDetails}
-          </Text>
-          <Text variant='body' size='s'>
-            {messages.reviewDescription}
-          </Text>
-          <Flex gap='xl' alignItems='center'>
-            <Checkbox checked={isConfirmed} onChange={handleCheckboxChange} />
-            <Text variant='body' size='s' css={{ color: color.neutral.n600 }}>
-              {messages.confirmationText}
-            </Text>
-          </Flex>
-        </Flex>
-      </Hint>
 
       {/* Action Buttons */}
       <Flex gap='s' row>
         <Button variant='secondary' onClick={onBack} fullWidth>
           {messages.back}
         </Button>
-        <Button
-          variant='primary'
-          onClick={onConfirm}
-          disabled={!isConfirmed}
-          fullWidth
-        >
+        <Button variant='primary' onClick={onConfirm} fullWidth>
           {messages.confirm}
         </Button>
       </Flex>

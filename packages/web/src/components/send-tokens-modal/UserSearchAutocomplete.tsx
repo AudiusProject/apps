@@ -255,8 +255,8 @@ export const UserSearchAutocomplete = ({
         <Scrollbar css={{ maxHeight: '300px', width: '100%' }}>
           {isLoading ? (
             <Flex p='l' alignItems='center' justifyContent='center' gap='m'>
-              <LoadingSpinner />
-              <Text variant='body' size='s' color='subdued'>
+              <LoadingSpinner css={{ width: 24, height: 24 }} />
+              <Text variant='body' color='subdued'>
                 Searching...
               </Text>
             </Flex>
