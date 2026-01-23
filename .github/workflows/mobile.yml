@@ -339,7 +339,9 @@ jobs:
           fi
 
       - name: Update bundler
-        run: sudo gem install bundler:2.5.16
+        run: |
+          sudo gem install bundler:2.5.16
+          sudo gem uninstall bundler -v 1.17.3 --force || true
 
       - name: Install pip and ninja
         run: |
@@ -635,7 +637,9 @@ jobs:
           fi
 
       - name: Update bundler
-        run: sudo gem install bundler:2.5.16
+        run: |
+          sudo gem install bundler:2.5.16
+          sudo gem uninstall bundler -v 1.17.3 --force || true
 
       - name: Install pip and ninja
         run: |
