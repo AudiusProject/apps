@@ -1,3 +1,7 @@
+// TEMPORARY PORT OF TANSTACK QUERY TYPES
+// To avoid dependency issues with newer versions of tanstack query
+// Remove when we can upgrade Tanstack Query without breaking the production static builds
+
 import type { DefaultError, WithRequired } from '@tanstack/query-core'
 import type { UseMutationOptions } from '@tanstack/react-query'
 
