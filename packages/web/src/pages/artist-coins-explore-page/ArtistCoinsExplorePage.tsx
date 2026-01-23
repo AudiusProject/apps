@@ -51,7 +51,7 @@ const messages = {
   ],
   help: 'Help',
   getStartedTooltip:
-    'Verified users only. Request account verification in Settings.'
+    'Verified users only. Request verification in settings.'
 }
 
 // Desktop version
