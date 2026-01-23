@@ -117,8 +117,7 @@ const messages = {
   verificationSuccessMessage:
     'Verification request received, pending review. Check back soon!',
   verificationErrorTitle: 'Verification Failed',
-  verificationErrorMessage:
-    'Something went wrong. Please try again later.',
+  verificationErrorMessage: 'Something went wrong. Please try again later.',
   pending: 'Pending',
   closeButton: 'Close'
 }

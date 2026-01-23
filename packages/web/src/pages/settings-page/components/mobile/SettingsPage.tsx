@@ -83,8 +83,7 @@ const messages = {
   matrixMode: 'Matrix',
   verificationSuccessMessage:
     'Verification request received, pending review. Check back soon!',
-  verificationErrorMessage:
-    'Something went wrong. Please try again later.',
+  verificationErrorMessage: 'Something went wrong. Please try again later.',
   pending: 'Pending',
   closeButton: 'Close'
 }
