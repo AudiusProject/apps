@@ -97,6 +97,10 @@ const config = {
     splPath
   ],
   resolver: {
+    nodeModulesPaths: [
+      path.resolve(__dirname, 'node_modules'),
+      path.resolve(__dirname, '../../node_modules')
+    ],
     unstable_enablePackageExports: false,
     unstable_conditionNames: ['default', 'require', 'react-native'],
     assetExts: [...assetExts.filter((ext) => ext !== 'svg'), 'lottie'],
