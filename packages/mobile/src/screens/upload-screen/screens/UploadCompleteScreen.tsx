@@ -3,11 +3,7 @@ import React, { useCallback } from 'react'
 import { useTrack } from '@audius/common/api'
 import { Name, ShareSource } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
-import {
-  shareModalUIActions,
-  uploadActions,
-  uploadSelectors
-} from '@audius/common/store'
+import { shareModalUIActions, uploadActions } from '@audius/common/store'
 import { make } from '@audius/web/src/common/store/analytics/actions'
 import { View, Image } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,7 +22,6 @@ import { FormScreen } from 'app/screens/form-screen'
 import { makeStyles } from 'app/styles'
 import { getTrackRoute } from 'app/utils/routes'
 
-const { getTracks } = uploadSelectors
 const { reset } = uploadActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
@@ -75,9 +70,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 export const UploadCompleteScreen = () => {
   const styles = useStyles()
-  const trackId = useSelector(
-    (state: CommonState) => getTracks(state)?.[0]?.metadata.track_id
-  )
+  const trackId = useSelector((state: CommonState) => state.upload.completionId)
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const { data: track } = useTrack(trackId)

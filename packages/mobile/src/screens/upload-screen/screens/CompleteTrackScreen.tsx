@@ -28,7 +28,14 @@ export const CompleteTrackScreen = () => {
     (metadata: any) => {
       if (track) {
         navigation.push('UploadingTracks', {
-          tracks: [{ file: track.file, preview: null, metadata }],
+          tracks: [
+            {
+              file: track.file,
+              preview: null,
+              metadata,
+              clientId: track.clientId
+            }
+          ],
           uploadAttempt
         })
 

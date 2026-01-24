@@ -22,9 +22,10 @@ const messages = {
 
 export const ReplaceTrackProgressDrawer = () => {
   const { data, onClose } = useReplaceTrackProgressModal()
-  const { progress, error } = data
+  const { loaded, total, transcode, error } = data
+  const upload = (total ?? 0) === 0 ? 0 : (loaded ?? 0) / total!
 
-  const uploadProgress = Math.min(progress.upload + progress.transcode, 2) / 2
+  const uploadProgress = Math.min(upload + (transcode ?? 0), 2) / 2
   const isUploadComplete = uploadProgress >= 1
 
   return (
