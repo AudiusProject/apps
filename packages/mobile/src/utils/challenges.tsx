@@ -6,7 +6,6 @@ import { ChallengeName } from '@audius/common/models'
 import type { Dayjs } from '@audius/common/utils'
 import { challengeRewardsConfig } from '@audius/common/utils'
 import type { ImageSourcePropType } from 'react-native'
-import { Platform } from 'react-native'
 
 import type { IconComponent } from '@audius/harmony-native'
 import {
@@ -26,7 +25,6 @@ import Headphone from 'app/assets/images/emojis/headphone.png'
 import IncomingEnvelope from 'app/assets/images/emojis/incoming-envelope.png'
 import LoveLetter from 'app/assets/images/emojis/love-letter.png'
 import MobilePhoneWithArrow from 'app/assets/images/emojis/mobile-phone-with-arrow.png'
-import MoneyWings from 'app/assets/images/emojis/money-with-wings.png'
 import MultipleMusicalNotes from 'app/assets/images/emojis/multiple-musical-notes.png'
 import Parachute from 'app/assets/images/emojis/parachute.png'
 import Recycle from 'app/assets/images/emojis/recycle.png'
@@ -80,12 +78,14 @@ export type MobileChallengeConfig = {
   }
 }
 
-const mobileChallengeConfig: Record<
-  Exclude<
-    ChallengeRewardID,
-    'connect-verified' | ChallengeName.ConnectVerified
-  >,
-  MobileChallengeConfig
+const mobileChallengeConfig: Partial<
+  Record<
+    Exclude<
+      ChallengeRewardID,
+      'connect-verified' | ChallengeName.ConnectVerified
+    >,
+    MobileChallengeConfig
+  >
 > = {
   'listen-streak': {
     icon: Headphone,
@@ -136,59 +136,6 @@ const mobileChallengeConfig: Record<
     icon: MultipleMusicalNotes,
     buttonInfo: {
       iconRight: IconCloudUpload
-    }
-  },
-  'send-first-tip': {
-    icon: MoneyWings,
-    title:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipTitleAlt
-        : messages.sendFirstTipTitle,
-    description: () =>
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipDescriptionAlt
-        : messages.sendFirstTipDescription,
-    shortDescription:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipShortDescriptionAlt
-        : messages.sendFirstTipShortDescription,
-    panelButtonText:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipButtonAlt
-        : messages.sendFirstTipButton,
-    completedLabel:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipCompletedLabelAlt
-        : undefined,
-    buttonInfo: {
-      navigation: {
-        screen: 'library'
-      },
-      iconRight: IconArrowRight
-    }
-  },
-  [ChallengeName.FirstTip]: {
-    icon: MoneyWings,
-    title:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipTitleAlt
-        : messages.sendFirstTipTitle,
-    description: () =>
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipDescriptionAlt
-        : messages.sendFirstTipDescription,
-    shortDescription:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipShortDescriptionAlt
-        : messages.sendFirstTipShortDescription,
-    panelButtonText:
-      Platform.OS === 'ios'
-        ? messages.sendFirstTipButtonAlt
-        : messages.sendFirstTipButton,
-    buttonInfo: {
-      navigation: {
-        screen: 'library'
-      }
     }
   },
   'first-playlist': {

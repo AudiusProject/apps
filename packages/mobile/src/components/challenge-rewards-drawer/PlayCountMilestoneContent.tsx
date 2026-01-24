@@ -22,11 +22,11 @@ const { getOptimisticUserChallenges } = challengesSelectors
 
 const messages = {
   description250:
-    challengeRewardsConfig[ChallengeName.PlayCount250].description(),
+    challengeRewardsConfig[ChallengeName.PlayCount250]?.description() ?? '',
   description1000:
-    challengeRewardsConfig[ChallengeName.PlayCount1000].description(),
+    challengeRewardsConfig[ChallengeName.PlayCount1000]?.description() ?? '',
   description10000:
-    challengeRewardsConfig[ChallengeName.PlayCount10000].description(),
+    challengeRewardsConfig[ChallengeName.PlayCount10000]?.description() ?? '',
   progressLabel: 'PLAYS',
   audio: '$AUDIO',
   close: 'Close',

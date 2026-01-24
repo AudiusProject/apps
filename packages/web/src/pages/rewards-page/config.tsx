@@ -234,7 +234,15 @@ const webChallengesConfig: Partial<
   }
 }
 
-export const getChallengeConfig = (id: ChallengeRewardID) => ({
-  ...challengeRewardsConfig[id],
-  ...webChallengesConfig[id]
-})
+export const getChallengeConfig = (id: ChallengeRewardID) => {
+  const commonConfig = challengeRewardsConfig[id]
+  const webConfig = webChallengesConfig[id]
+  return {
+    ...commonConfig,
+    ...webConfig,
+    // Ensure required fields are always present
+    title: commonConfig?.title ?? '',
+    description: commonConfig?.description ?? (() => ''),
+    id: commonConfig?.id ?? id
+  }
+}
