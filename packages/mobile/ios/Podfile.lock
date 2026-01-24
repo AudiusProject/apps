@@ -2019,8 +2019,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNCMaskedView (0.3.1):
+  - RNCMaskedView (0.3.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNDateTimePicker (8.3.0):
     - DoubleConversion
     - glog
@@ -2890,7 +2909,7 @@ SPEC CHECKSUMS:
   RNBootSplash: 85b58e4edba342515528e3507c20b3f862d220e7
   RNCAsyncStorage: efa02b644121f4e1f7f33e712f4f82c30aa4ff4a
   RNCClipboard: f6ac46da875021dd0601899ebbe988445f9e3978
-  RNCMaskedView: 090213d32d8b3bb83a4dcb7d12c18f0152591906
+  RNCMaskedView: 18c76ebdf9752bb75652829f99f6c3d1318cc864
   RNDateTimePicker: 5567e082958470867c4a27dd90cdaf2ea54bde0c
   RNFingerprintjsPro: eeda8165fe366f1039cd8823277295a525cb81b5
   RNFlashList: 73d7cbeadb96a39bfaf80c75f77540eedfabae2c
