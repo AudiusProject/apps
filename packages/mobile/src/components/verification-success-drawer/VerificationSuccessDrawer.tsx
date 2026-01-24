@@ -5,8 +5,7 @@ const MODAL_NAME = 'VerificationSuccess'
 
 const messages = {
   drawerTitle: 'Verification Submitted',
-  message:
-    'Verification request received, pending review. Check back soon!',
+  message: 'Verification request received, pending review. Check back soon!',
   pending: 'Pending',
   closeText: 'Close'
 }
