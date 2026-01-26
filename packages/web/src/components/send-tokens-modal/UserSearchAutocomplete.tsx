@@ -122,7 +122,6 @@ export const UserSearchAutocomplete = ({
     }
   }, [isOpen, query])
 
-
   // Clear query if search state resets
   useEffect(() => {
     if (!lastSearchQuery && hasQuery) {
@@ -213,8 +212,7 @@ export const UserSearchAutocomplete = ({
             const userId = Number(value)
             const user = filteredUsers.find((u) => u.user_id === userId)
             if (!user) return null
-            const isActive =
-              !activeValue ? index === 0 : activeValue === value
+            const isActive = !activeValue ? index === 0 : activeValue === value
             return (
               <MenuItem
                 variant='option'
@@ -286,7 +284,11 @@ export const UserSearchAutocomplete = ({
           }
         />
       </div>
-      <Menu anchorRef={anchorRef} isVisible={isOpen && !!query.trim()} onClose={() => setIsOpen(false)}>
+      <Menu
+        anchorRef={anchorRef}
+        isVisible={isOpen && !!query.trim()}
+        onClose={() => setIsOpen(false)}
+      >
         <MenuContent
           scrollRef={scrollRef}
           width={menuWidth ? `${menuWidth}px` : undefined}
@@ -299,4 +301,3 @@ export const UserSearchAutocomplete = ({
     </div>
   )
 }
-
