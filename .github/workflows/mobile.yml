@@ -351,7 +351,7 @@ jobs:
       - name: Install Android gems
         run: |
           cd packages/mobile/android
-          bundle check || bundle install --path vendor/bundle
+          bundle install --path vendor/bundle
 
       - name: Update fastlane
         run: cd packages/mobile/android && sudo bundle update fastlane
@@ -649,7 +649,7 @@ jobs:
       - name: Install Android gems
         run: |
           cd packages/mobile/android
-          bundle check || bundle install --path vendor/bundle
+          bundle install --path vendor/bundle
 
       - name: Update fastlane
         run: cd packages/mobile/android && sudo bundle update fastlane
