@@ -754,8 +754,7 @@ export const AudioPlayer = () => {
     didOfflineToggleChange,
     didPlayerBehaviorChange,
     queueTrackOwnersMap,
-    makeTrackData,
-    updatePlayerInfo
+    makeTrackData
   ])
 
   const handleQueueIdxChange = useCallback(async () => {
