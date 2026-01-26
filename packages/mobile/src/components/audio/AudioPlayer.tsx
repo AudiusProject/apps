@@ -153,6 +153,10 @@ type QueueableTrack = {
 export const AudioPlayer = () => {
   const track = useCurrentTrack()
   const playing = useSelector(getPlaying)
+  const playingRef = useRef(playing)
+  useEffect(() => {
+    playingRef.current = playing
+  }, [playing])
   const seek = useSelector(getSeek)
   const counter = useSelector(getCounter)
   const repeatMode = useSelector(getRepeat)
@@ -773,11 +777,14 @@ export const AudioPlayer = () => {
         uid: queueTrackUids[queueIndex]
       })
 
-      // Always play when starting a new queue (reset + add). This path is only hit when
-      // the user explicitly requests playback (e.g. tap tile). Checking playingRef here
-      // caused "pause after buffer": during async makeTrackData/add, Redux playing could
-      // lag, so we'd call pause() and playback would never start or would stop after buffer.
-      await TrackPlayer.play()
+      // Respect the current desired play/pause state.
+      // Previously we called `TrackPlayer.play()` immediately after reset, which could briefly
+      // autoplay and then get paused by later state sync (especially on slow/buffering starts).
+      if (playingRef.current) {
+        await TrackPlayer.play()
+      } else {
+        await TrackPlayer.pause()
+      }
 
       enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
       await enqueueTracksJobRef.current
