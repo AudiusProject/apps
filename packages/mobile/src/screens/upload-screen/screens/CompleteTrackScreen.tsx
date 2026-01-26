@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react'
 
 import type { TrackForUpload } from '@audius/common/store'
+import { UploadType } from '@audius/common/store'
 import { useRoute } from '@react-navigation/native'
 
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { EditTrackScreen } from '../../edit-track-screen'
+import { useUploadContext } from '../contexts/UploadContext'
 import type { UploadParamList, UploadRouteProp } from '../types'
 
 export const messages = {
@@ -23,19 +25,26 @@ export const CompleteTrackScreen = () => {
   const { track } = params
   const [uploadAttempt, setUploadAttempt] = useState(1)
   const navigation = useNavigation<UploadParamList>()
+  const { finishUpload } = useUploadContext()
 
   const handleSubmit = useCallback(
     (metadata: any) => {
       if (track) {
+        const updatedTrack = {
+          file: track.file,
+          preview: null,
+          metadata,
+          clientId: track.clientId
+        }
+
+        // Finish upload with updated metadata
+        finishUpload({
+          tracks: [updatedTrack],
+          uploadType: UploadType.INDIVIDUAL_TRACK
+        })
+
         navigation.push('UploadingTracks', {
-          tracks: [
-            {
-              file: track.file,
-              preview: null,
-              metadata,
-              clientId: track.clientId
-            }
-          ],
+          tracks: [updatedTrack],
           uploadAttempt
         })
 
@@ -43,7 +52,7 @@ export const CompleteTrackScreen = () => {
         setUploadAttempt(uploadAttempt + 1)
       }
     },
-    [navigation, track, uploadAttempt]
+    [navigation, track, uploadAttempt, finishUpload]
   )
 
   if (!track) return null

@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react'
 
-import { useUpload } from '@audius/common/api'
 import type { TrackForUpload } from '@audius/common/store'
-import {
-  uploadActions,
-  uploadSelectors,
-  UploadType
-} from '@audius/common/store'
+import { uploadActions, uploadSelectors } from '@audius/common/store'
 import { useRoute } from '@react-navigation/native'
 import { useKeepAwake } from '@thehale/react-native-keep-awake'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { useEffectOnce } from 'react-use'
 
 import { IconCloudUpload } from '@audius/harmony-native'
 import { Screen, ScreenContent, Text, Tile } from 'app/components/core'
@@ -74,24 +68,11 @@ export const UploadingTracksScreen = () => {
   const { neutralLight4 } = useThemeColors()
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { startUpload, finishUpload } = useUpload()
   // Upload error is reset asynchronously after this component mounts.
   // This is used for logic below to detect that we got an error *after*
   // this upload attempt started
   const [uploadStarted, setUploadStarted] = useState(false)
   const { toast } = useToast()
-
-  useEffectOnce(() => {
-    const formState = {
-      tracks,
-      uploadType:
-        tracks.length > 1
-          ? (UploadType.INDIVIDUAL_TRACKS as const)
-          : (UploadType.INDIVIDUAL_TRACK as const)
-    }
-    startUpload(formState)
-    finishUpload(formState)
-  })
 
   const trackUploadProgress = useSelector(getCombinedUploadPercentage)
   const uploadSuccess = useSelector(getUploadSuccess)
