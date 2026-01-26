@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import { useCurrentUserId, useUser } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { ID, statusIsNotFinalized } from '@audius/common/models'
-import { chatSelectors } from '@audius/common/store'
+import { chatSelectors, useSendTokensModal } from '@audius/common/store'
 import {
   IconMessageBlock,
   IconMessageUnblock,
@@ -12,8 +12,11 @@ import {
   IconPencil,
   IconKebabHorizontal,
   IconMessage,
+  IconArrowFromDollar,
   PopupMenu,
   Button,
+  IconButton,
+  Tooltip,
   FollowButton,
   Flex,
   Skeleton,
@@ -24,6 +27,7 @@ import { useSelector } from 'react-redux'
 import { ArtistRecommendationsPopup } from 'components/artist-recommendations/ArtistRecommendationsPopup'
 import Stats, { StatProps } from 'components/stats/Stats'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
+import { env } from 'services/env'
 import { zIndex } from 'utils/zIndex'
 const { getChatPermissionsStatus } = chatSelectors
 
@@ -40,6 +44,8 @@ const messages = {
   cancel: 'Cancel',
   save: 'Save Changes',
   message: 'Send Message',
+  sendTokens: 'Send Tokens',
+  sendArtistCoins: 'Send Artist Coins',
   unblockMessages: 'Unblock Messages',
   blockMessages: 'Block Messages',
   unmuteComments: 'Unmute Comments',
@@ -183,6 +189,7 @@ export const StatBanner = (props: StatsBannerProps) => {
   const { data: isFollowing } = useUser(profileId, {
     select: (user) => user.does_current_user_follow
   })
+  const { onOpen: openSendTokensModal } = useSendTokensModal()
 
   const shareButton = (
     <Button
@@ -258,6 +265,27 @@ export const StatBanner = (props: StatsBannerProps) => {
           )}
 
           <>
+            {mode === 'visitor' ? (
+              <Tooltip
+                text={messages.sendArtistCoins}
+                placement='top'
+                shouldDismissOnClick={false}
+              >
+                <Flex>
+                  <IconButton
+                    icon={IconArrowFromDollar}
+                    size='m'
+                    aria-label={messages.sendArtistCoins}
+                    onClick={() => {
+                      openSendTokensModal({
+                        mint: env.WAUDIO_MINT_ADDRESS,
+                        isOpen: true
+                      })
+                    }}
+                  />
+                </Flex>
+              </Tooltip>
+            ) : null}
             {isFollowing && profileId ? (
               <SubscribeButton userId={profileId} />
             ) : null}
