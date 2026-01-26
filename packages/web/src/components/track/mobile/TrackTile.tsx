@@ -391,12 +391,14 @@ export const TrackTile = ({
             alignItems='center'
             className={cn(styles.duration, fadeIn)}
           >
-            {duration
-              ? formatLineupTileDuration(
-                  duration,
-                  genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
-                )
-              : null}
+            <Text size='xs' color='subdued'>
+              {duration
+                ? formatLineupTileDuration(
+                    duration,
+                    genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
+                  )
+                : null}
+            </Text>
           </Flex>
         </div>
         <div className={styles.metadata}>
