@@ -970,7 +970,7 @@ export const audiusBackend = ({
         mint,
         destination
       })
-    
+
     // Fetch blockhash explicitly to provide better error handling
     let recentBlockhash: string
     try {
