@@ -69,7 +69,9 @@ export const AudioMatchingRewardsModalContent = ({
   errorContent
 }: AudioMatchingChallengeProps) => {
   const navigateToPage = useNavigateToPage()
-  const { fullDescription } = challengeRewardsConfig[challengeName]
+  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
+    fullDescription: () => ''
+  }
   const undisbursedUserChallenges = useSelector(getUndisbursedUserChallenges)
   const claimStatus = useSelector(getClaimStatus)
   const claimInProgress =

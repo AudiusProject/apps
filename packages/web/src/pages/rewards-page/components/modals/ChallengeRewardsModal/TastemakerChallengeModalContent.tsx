@@ -57,7 +57,9 @@ export const TastemakerChallengeModalContent = ({
       }
     : undefined
 
-  const { fullDescription } = challengeRewardsConfig[challengeName]
+  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
+    fullDescription: () => ''
+  }
 
   const progressStatusLabel = userChallenge ? (
     <Flex

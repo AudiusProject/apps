@@ -901,19 +901,34 @@ export const audiusBackend = ({
     amount,
     ethAddress,
     sdk,
-    mint
+    mint,
+    recipientEthAddress
   }: {
     address: string
     amount: AudioWei
     ethAddress: string
     sdk: AudiusSdk
     mint: PublicKey
+    recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
   }) {
-    const tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
-      address,
-      sdk,
-      mint
-    })
+    let tokenAccountAddress: PublicKey
+
+    if (recipientEthAddress) {
+      // When sending to a user, derive their user-bank ATA for this Solana mint
+      // The user-bank is a PDA derived from their Ethereum address and the mint
+      tokenAccountAddress =
+        await sdk.services.claimableTokensClient.deriveUserBank({
+          ethWallet: recipientEthAddress,
+          mint
+        })
+    } else {
+      // When sending to a Solana wallet address directly, use regular ATA logic
+      tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
+        address,
+        sdk,
+        mint
+      })
+    }
 
     const res = await transferTokens({
       destination: tokenAccountAddress,
