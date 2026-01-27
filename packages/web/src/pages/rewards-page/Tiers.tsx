@@ -39,7 +39,7 @@ import styles from './Tiers.module.css'
 const { show } = musicConfettiActions
 
 const messages = {
-  title: 'Reward Perks',
+  title: 'Perks',
   subtitle: 'Keep $AUDIO in your wallet to enjoy perks and exclusive features.',
   noTier: 'No tier',
   currentTier: 'CURRENT TIER',
@@ -157,10 +157,12 @@ const TierBox = ({ tier, message }: { tier: BadgeTier; message?: string }) => {
 const TierColumn = ({
   tier,
   current,
+  isNextTier,
   onClickDiscord
 }: {
   tier: BadgeTier
   current?: boolean
+  isNextTier?: boolean
   onClickDiscord: () => void
 }) => {
   const { color } = useTheme()
@@ -177,7 +179,10 @@ const TierColumn = ({
       css={{
         overflow: 'hidden',
         minWidth: '120px',
-        '@media (max-width: 1100px)': {
+        '@media (max-width: 1200px)': {
+          display: current || isNextTier ? 'flex' : 'none'
+        },
+        '@media (max-width: 1000px)': {
           display: current ? 'flex' : 'none'
         }
       }}
@@ -269,6 +274,7 @@ const TierTable = ({
   tier: BadgeTier
   onClickDiscord: () => void
 }) => {
+  const tiers = ['none', 'bronze', 'silver', 'gold', 'platinum'] as BadgeTier[]
   return (
     <Flex w='100%' justifyContent='space-between' p='xl'>
       <Flex direction='column' flex='1 1 300px'>
@@ -287,17 +293,16 @@ const TierTable = ({
           </Flex>
         ))}
       </Flex>
-      {(['none', 'bronze', 'silver', 'gold', 'platinum'] as BadgeTier[]).map(
-        (displayTier) => (
-          <Flex key={displayTier} direction='column' flex='1 1 200px'>
-            <TierColumn
-              tier={displayTier}
-              current={displayTier === tier}
-              onClickDiscord={onClickDiscord}
-            />
-          </Flex>
-        )
-      )}
+      {tiers.map((displayTier) => (
+        <Flex key={displayTier} direction='column' flex='1 1 200px'>
+          <TierColumn
+            tier={displayTier}
+            current={displayTier === tier}
+            isNextTier={displayTier === tiers[tiers.indexOf(tier) + 1] || false}
+            onClickDiscord={onClickDiscord}
+          />
+        </Flex>
+      ))}
     </Flex>
   )
 }

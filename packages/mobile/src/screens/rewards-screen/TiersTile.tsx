@@ -42,7 +42,7 @@ const audioTierMapSvg: {
 const LEARN_MORE_LINK = 'https://blog.audius.co/article/community-meet-audio'
 
 const messages = {
-  vipTiers: 'Reward Perks',
+  vipTiers: 'Perks',
   vipTiersBody:
     'Keep $AUDIO in your wallet to enjoy perks and exclusive features.',
   launchDiscord: 'Launch the VIP Discord',

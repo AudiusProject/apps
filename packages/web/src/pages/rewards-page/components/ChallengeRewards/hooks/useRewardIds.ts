@@ -28,7 +28,11 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   ChallengeName.Tastemaker,
   ChallengeName.CommentPin,
   ChallengeName.Cosign,
-  ChallengeName.RemixContestWinner
+  ChallengeName.RemixContestWinner,
+  // Trending rewards
+  ChallengeName.TrendingTrack,
+  ChallengeName.TrendingPlaylist,
+  ChallengeName.TrendingUndergroundTrack
 ])
 
 /** Pulls rewards from remoteconfig */

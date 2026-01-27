@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
 import { useFormattedProgressLabel } from '@audius/common/hooks'
 import {
@@ -12,14 +14,13 @@ import {
   CommonState,
   challengesSelectors
 } from '@audius/common/store'
-import { isNewChallenge } from '@audius/common/utils'
+import { getChallengeStatusLabel } from '@audius/common/utils'
 import {
   Box,
   Flex,
   IconCheck,
   IconHeadphones,
   Paper,
-  ProgressBar,
   Text,
   useTheme
 } from '@audius/harmony'
@@ -61,7 +62,6 @@ export const RewardPanel = ({
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
   const location = useLocation()
-
   const openRewardModal = () => {
     openModal(id)
     track(
@@ -87,11 +87,6 @@ export const RewardPanel = ({
     challenge.max_steps > 1 &&
     challenge.challenge_type !== 'aggregate' &&
     !hasDisbursed
-  const shouldShowNewChallengePill =
-    (challenge?.challenge_id &&
-      isNewChallenge(challenge?.challenge_id) &&
-      !needsDisbursement) ??
-    false
 
   const formattedProgressLabel: string = useFormattedProgressLabel({
     challenge,
@@ -99,10 +94,35 @@ export const RewardPanel = ({
     remainingLabel
   })
 
+  // Determine the final label to display
+  // If there's no progress bar, no "Ready to Claim" status, and the formatted label is empty or not meaningful,
+  // show "Available" instead
+  const displayLabel = useMemo(() => {
+    // If there's a progress bar or "Ready to Claim" status, use the formatted label
+    if (shouldShowProgressBar || needsDisbursement) {
+      return formattedProgressLabel
+    }
+
+    // If the formatted label is empty or just whitespace, use getChallengeStatusLabel
+    // which will return "Available" for challenges without meaningful status
+    if (!formattedProgressLabel || formattedProgressLabel.trim() === '') {
+      return getChallengeStatusLabel(challenge, id)
+    }
+
+    // Otherwise use the formatted label
+    return formattedProgressLabel
+  }, [
+    formattedProgressLabel,
+    shouldShowProgressBar,
+    needsDisbursement,
+    challenge,
+    id
+  ])
+
   return (
     <Paper
       onClick={openRewardModal}
-      flex={`1 1 calc(50% - ${spacing.unit4}px)`}
+      flex={`0 0 calc(50% - ${spacing.unit4}px)`}
       column
       m='s'
       shadow='flat'
@@ -110,7 +130,9 @@ export const RewardPanel = ({
       css={{
         minWidth: PANEL_WIDTH,
         minHeight: PANEL_HEIGHT,
-        backgroundColor: hasDisbursed ? color.neutral.n25 : undefined
+        backgroundColor: hasDisbursed ? color.neutral.n25 : undefined,
+        position: 'relative',
+        cursor: 'pointer'
       }}
     >
       <Flex column h='100%'>
@@ -118,12 +140,9 @@ export const RewardPanel = ({
           justifyContent='flex-end'
           p='s'
           w='100%'
-          css={{ position: 'absolute' }}
+          css={{ position: 'absolute', zIndex: 2 }}
         >
-          <StatusPill
-            shouldShowClaimPill={!!needsDisbursement}
-            shouldShowNewChallengePill={shouldShowNewChallengePill}
-          />
+          <StatusPill shouldShowClaimPill={!!needsDisbursement} />
         </Flex>
         <Flex column h='100%' gap='l' ph='xl' pv='unit9'>
           <Flex column alignItems='flex-start' w='100%' gap='s'>
@@ -144,15 +163,43 @@ export const RewardPanel = ({
             ) : null}
             <Box mr='l'>
               <Text variant='label' size='l' color='subdued'>
-                {formattedProgressLabel}
+                {displayLabel}
               </Text>
             </Box>
             {shouldShowProgressBar && challenge.max_steps && (
               <Box flex='1 1 0'>
-                <ProgressBar
-                  value={challenge?.current_step_count ?? 0}
-                  max={challenge?.max_steps}
-                />
+                <Box
+                  w='100%'
+                  h='24px'
+                  borderRadius='3xl'
+                  css={{
+                    backgroundColor: color.neutral.n50,
+                    boxShadow: 'inset 1px 1px 7px -2px rgba(53, 54, 79, 0.25)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <Box
+                    w={`${Math.min(
+                      100,
+                      Math.max(
+                        0,
+                        ((challenge?.current_step_count ?? 0) /
+                          challenge.max_steps) *
+                          100
+                      )
+                    )}%`}
+                    h='100%'
+                    borderRadius='3xl'
+                    css={{
+                      background: color.special.coinGradient,
+                      transition: 'width 0.3s ease-in-out',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0
+                    }}
+                  />
+                </Box>
               </Box>
             )}
           </Flex>

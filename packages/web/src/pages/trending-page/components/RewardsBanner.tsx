@@ -1,9 +1,7 @@
 import { useCallback } from 'react'
 
-import {
-  audioRewardsPageActions,
-  TrendingRewardsModalType
-} from '@audius/common/store'
+import { ChallengeName } from '@audius/common/models'
+import { audioRewardsPageActions } from '@audius/common/store'
 import {
   IconCaretRight,
   IconCrown,
@@ -15,10 +13,10 @@ import {
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
+import { useSetVisibility } from 'common/hooks/useModalState'
 import { useIsMobile } from 'hooks/useIsMobile'
 
-const { setTrendingRewardsModalType } = audioRewardsPageActions
+const { setChallengeRewardsModalType } = audioRewardsPageActions
 
 const messages = {
   learnMore: 'Learn More'
@@ -44,14 +42,22 @@ type RewardsBannerProps = {
 }
 
 const useHandleBannerClick = () => {
-  const [, setModal] = useModalState('TrendingRewardsExplainer')
+  const setVisibility = useSetVisibility()
   const dispatch = useDispatch()
   const onClickBanner = useCallback(
-    (modalType: TrendingRewardsModalType) => {
-      setModal(true)
-      dispatch(setTrendingRewardsModalType({ modalType }))
+    (bannerType: 'tracks' | 'playlists' | 'underground') => {
+      let challengeName: ChallengeName
+      if (bannerType === 'tracks') {
+        challengeName = ChallengeName.TrendingTrack
+      } else if (bannerType === 'playlists') {
+        challengeName = ChallengeName.TrendingPlaylist
+      } else {
+        challengeName = ChallengeName.TrendingUndergroundTrack
+      }
+      dispatch(setChallengeRewardsModalType({ modalType: challengeName }))
+      setVisibility('ChallengeRewards')(true)
     },
-    [dispatch, setModal]
+    [dispatch, setVisibility]
   )
   return onClickBanner
 }

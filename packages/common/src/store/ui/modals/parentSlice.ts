@@ -9,7 +9,6 @@ import {
 
 export const initialState: BasicModalsState = {
   TiersExplainer: { isOpen: false },
-  TrendingRewardsExplainer: { isOpen: false },
   ChallengeRewards: { isOpen: false },
   ClaimAllRewards: { isOpen: false },
   ClaimVestedCoinsModal: { isOpen: false },

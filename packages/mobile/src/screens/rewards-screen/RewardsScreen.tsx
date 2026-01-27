@@ -17,7 +17,6 @@ import { useThemeColors } from 'app/utils/theme'
 import { ChallengeRewardsTile } from './ChallengeRewardsTile'
 import { ClaimAllRewardsTile } from './ClaimAllRewardsTile'
 import { TiersTile } from './TiersTile'
-import { TrendingRewardsTile } from './TrendingRewardsTile'
 
 const { fetchAssociatedWallets } = tokenDashboardPageActions
 
@@ -122,7 +121,6 @@ export const RewardsScreen = () => {
             {audioFeaturesDegradedText ? renderNoticeTile() : null}
             <ClaimAllRewardsTile />
             <ChallengeRewardsTile />
-            <TrendingRewardsTile />
             <TiersTile />
           </Flex>
         </ScrollView>

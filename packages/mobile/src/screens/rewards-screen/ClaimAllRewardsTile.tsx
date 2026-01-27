@@ -1,22 +1,29 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
+import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
 import {
   formatCooldownChallenges,
   useChallengeCooldownSchedule
 } from '@audius/common/hooks'
-import { modalsActions } from '@audius/common/store'
+import { challengesSelectors, modalsActions, CommonState } from '@audius/common/store'
+import { formatNumberCommas } from '@audius/common/utils'
 import { Image, View } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   Button,
+  Divider,
   Flex,
-  Text,
+  IconArrowRight,
+  IconInfo,
   Paper,
-  IconArrowRight
+  Text
 } from '@audius/harmony-native'
+import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
 import TokenStill from 'app/assets/images/tokenSpinStill.png'
 import { makeStyles } from 'app/styles'
+
+const { getOptimisticUserChallenges } = challengesSelectors
 
 const { setVisibility } = modalsActions
 
@@ -76,6 +83,22 @@ export const ClaimAllRewardsTile = () => {
   const dispatch = useDispatch()
   const { cooldownChallenges, cooldownAmount, claimableAmount, isEmpty } =
     useChallengeCooldownSchedule({ multiple: true })
+  const { data: currentAccount } = useCurrentAccount()
+  const { data: currentUser } = useCurrentAccountUser()
+  const optimisticUserChallenges = useSelector((state: CommonState) =>
+    getOptimisticUserChallenges(state, currentAccount, currentUser)
+  )
+
+  // Calculate total claimed amount
+  const totalClaimed = useMemo(() => {
+    return Object.values(optimisticUserChallenges).reduce(
+      (sum, challenge) => sum + (challenge?.disbursed_amount ?? 0),
+      0
+    )
+  }, [optimisticUserChallenges])
+
+  // Pending amount is the cooldown amount
+  const pendingAmount = cooldownAmount
 
   const openClaimAllModal = useCallback(() => {
     dispatch(setVisibility({ modal: 'ClaimAllRewards', visible: true }))
@@ -83,50 +106,87 @@ export const ClaimAllRewardsTile = () => {
 
   if (isEmpty) return null
 
+  const tooltipMessages = {
+    totalClaimed: 'Total amount of $AUDIO you have claimed from all rewards',
+    pending: 'Amount of $AUDIO pending in cooldown period',
+    readyToClaim: 'Amount of $AUDIO ready to claim now'
+  }
+
   return (
     <Paper shadow='near' border='strong' p='l' gap='l'>
-      <Flex direction='row' justifyContent='flex-start' gap='s'>
-        {claimableAmount > 0 ? (
-          <Image style={styles.token} source={TokenStill} />
-        ) : null}
-        <Text variant='heading' color='accent' size='s'>
-          {messages.totalReadyToClaim}
-        </Text>
-      </Flex>
-      {cooldownAmount > 0 ? (
-        <View style={styles.pillContainer}>
-          <Text style={[styles.pillMessage, styles.readyToClaimPill]}>
-            {cooldownAmount} {messages.pending}
-          </Text>
-        </View>
-      ) : null}
-      <Text size='s' variant='body'>
-        {claimableAmount > 0
-          ? `${claimableAmount} ${messages.available} ${messages.now}`
-          : messages.availableMessage(
-              formatCooldownChallenges(cooldownChallenges)
-            )}
+      <Text variant='heading' color='accent' size='s'>
+        Your Rewards
       </Text>
-      <Flex mt='s'>
-        {claimableAmount > 0 ? (
-          <Button
-            onPress={openClaimAllModal}
-            iconRight={IconArrowRight}
-            size='small'
-          >
-            {messages.claimAllRewards}
-          </Button>
-        ) : cooldownAmount > 0 ? (
-          <Button
-            variant='secondary'
-            onPress={openClaimAllModal}
-            iconRight={IconArrowRight}
-            size='small'
-          >
-            {messages.moreInfo}
-          </Button>
-        ) : null}
+      <Flex column gap='l'>
+        {/* First row: Total Claimed and Pending */}
+        <Flex gap='l' alignItems='stretch'>
+          <Flex column gap='xs' flex={1}>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='title' size='m' color='default'>
+                {formatNumberCommas(totalClaimed)}
+              </Text>
+              <Text variant='body' size='m' color='subdued' strength='demi'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='label' size='s' color='default' strength='strong'>
+                TOTAL CLAIMED
+              </Text>
+              <TooltipInfoIcon
+                title='Total Claimed'
+                message={tooltipMessages.totalClaimed}
+              />
+            </Flex>
+          </Flex>
+          <Divider orientation='vertical' />
+          <Flex column gap='xs' flex={1}>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='title' size='m' color='default'>
+                {formatNumberCommas(pendingAmount)}
+              </Text>
+              <Text variant='body' size='m' color='subdued' strength='demi'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex gap='xs' alignItems='center'>
+              <Text variant='label' size='s' color='default' strength='strong'>
+                PENDING
+              </Text>
+              <TooltipInfoIcon title='Pending' message={tooltipMessages.pending} />
+            </Flex>
+          </Flex>
+        </Flex>
+        {/* Second row: Ready to Claim */}
+        <Flex column gap='xs'>
+          <Flex gap='xs' alignItems='center'>
+            <Text variant='title' size='m' color='default'>
+              {formatNumberCommas(claimableAmount)}
+            </Text>
+            <Text variant='body' size='m' color='subdued' strength='demi'>
+              $AUDIO
+            </Text>
+          </Flex>
+          <Flex gap='xs' alignItems='center'>
+            <Text variant='label' size='s' color='default' strength='strong'>
+              READY TO CLAIM
+            </Text>
+            <TooltipInfoIcon
+              title='Ready To Claim'
+              message={tooltipMessages.readyToClaim}
+            />
+          </Flex>
+        </Flex>
       </Flex>
+      {claimableAmount > 0 ? (
+        <Button
+          onPress={openClaimAllModal}
+          iconRight={IconArrowRight}
+          size='small'
+        >
+          Claim All
+        </Button>
+      ) : null}
     </Paper>
   )
 }

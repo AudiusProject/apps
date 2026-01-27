@@ -15,7 +15,6 @@ import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
-import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
 import { getExploreInfo } from 'ssr/metaTags'
 import { BASE_URL } from 'utils/route'
 
@@ -61,9 +60,6 @@ const DesktopTrendingPlaylistPage = ({
       size='large'
       header={header}
     >
-      <div className={styles.bannerContainer}>
-        <RewardsBanner bannerType='playlists' />
-      </div>
       <Lineup {...lineupProps} numPlaylistSkeletonRows={5} />
     </Page>
   )
@@ -84,9 +80,6 @@ const MobileTrendingPlaylistPage = ({
       hasDefaultHeader
     >
       <div className={styles.mobileLineupContainer}>
-        <div className={styles.mobileBannerContainer}>
-          <RewardsBanner bannerType='playlists' />
-        </div>
         <Lineup {...lineupProps} />
       </div>
     </MobilePageContainer>

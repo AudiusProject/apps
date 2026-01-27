@@ -43,7 +43,6 @@ export type CreateChatModalState = {
 
 export type Modals =
   | 'TiersExplainer'
-  | 'TrendingRewardsExplainer'
   | 'ChallengeRewards'
   | 'ClaimAllRewards'
   | 'ClaimVestedCoinsModal'

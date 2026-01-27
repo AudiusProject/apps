@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
 import { useRemoteVar } from '@audius/common/hooks'
@@ -21,9 +21,10 @@ import {
   makeOptimisticChallengeSortComparator
 } from '@audius/common/utils'
 import { useFocusEffect } from '@react-navigation/native'
+import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Flex, Text, Paper } from '@audius/harmony-native'
+import { Flex, SelectablePill, Text, Paper } from '@audius/harmony-native'
 import { GradientText } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
 import type { SummaryTableItem } from 'app/components/summary-table/SummaryTable'
@@ -35,8 +36,11 @@ import { Panel } from './Panel'
 const { setVisibility } = modalsActions
 const { getUserChallenges, getUserChallengesLoading } =
   audioRewardsPageSelectors
-const { fetchUserChallenges, setChallengeRewardsModalType } =
-  audioRewardsPageActions
+const {
+  fetchUserChallenges,
+  setChallengeRewardsModalType,
+  setTrendingRewardsModalType
+} = audioRewardsPageActions
 const { getOptimisticUserChallenges } = challengesSelectors
 
 const validRewardIds: Set<ChallengeRewardID> = new Set([
@@ -64,7 +68,11 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   ChallengeName.Tastemaker,
   ChallengeName.Cosign,
   ChallengeName.CommentPin,
-  ChallengeName.RemixContestWinner
+  ChallengeName.RemixContestWinner,
+  // Trending rewards
+  ChallengeName.TrendingTrack,
+  ChallengeName.TrendingPlaylist,
+  ChallengeName.TrendingUndergroundTrack
 ])
 
 type ClaimableSummaryTableItem = SummaryTableItem & {
@@ -73,7 +81,7 @@ type ClaimableSummaryTableItem = SummaryTableItem & {
 }
 
 const messages = {
-  title: 'Achievement Rewards',
+  title: 'Rewards',
   subheader: 'Earn $AUDIO by completing simple tasks while using Audius.',
   pending: 'Pending',
   claimAllRewards: 'Claim All Rewards',
@@ -131,6 +139,7 @@ export const ChallengeRewardsTile = () => {
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
   const [haveChallengesLoaded, setHaveChallengesLoaded] = useState(false)
+  const [showCompleted, setShowCompleted] = useState(false)
 
   // The referred challenge only needs a tile if the user was referred
   const hideReferredTile = !userChallenges[ChallengeName.Referred]?.is_complete
@@ -151,43 +160,89 @@ export const ChallengeRewardsTile = () => {
   )
 
   const openModal = (modalType: ChallengeRewardsModalType) => {
-    dispatch(setChallengeRewardsModalType({ modalType }))
-    dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
+    // Handle trending rewards - they use a different modal
+    if (modalType === 'tt' || modalType === 'trending-track') {
+      dispatch(setTrendingRewardsModalType({ modalType: 'tracks' }))
+      dispatch(
+        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
+      )
+    } else if (modalType === 'tut' || modalType === 'trending-underground') {
+      dispatch(setTrendingRewardsModalType({ modalType: 'underground' }))
+      dispatch(
+        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
+      )
+    } else if (modalType === 'tp' || modalType === 'trending-playlist') {
+      dispatch(setTrendingRewardsModalType({ modalType: 'playlists' }))
+      dispatch(
+        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
+      )
+    } else {
+      dispatch(setChallengeRewardsModalType({ modalType }))
+      dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
+    }
   }
 
-  const rewardsPanels = rewardIds
-    // Filter out challenges that DN didn't return
-    .map((id) => userChallenges[id]?.challenge_id)
-    .filter(removeNullable)
-    .sort(makeOptimisticChallengeSortComparator(optimisticUserChallenges))
-    .map((id) => {
-      const props = getChallengeConfig(id)
-      const onPress = () => {
-        openModal(id)
-        track(
-          make({
-            eventName: Name.REWARDS_CLAIM_DETAILS_OPENED,
-            challengeId: id
-          })
-        )
-      }
-      return (
-        <Panel
-          {...props}
-          challenge={optimisticUserChallenges[id]}
-          onPress={onPress}
-          key={props.title}
-        />
-      )
+  // Filter completed rewards based on toggle
+  const filteredRewardIds = useMemo(() => {
+    const allRewardIds = rewardIds
+      // Filter out challenges that DN didn't return
+      .map((id) => userChallenges[id]?.challenge_id)
+      .filter(removeNullable)
+      .sort(makeOptimisticChallengeSortComparator(optimisticUserChallenges))
+
+    if (showCompleted) {
+      return allRewardIds
+    }
+    return allRewardIds.filter((id) => {
+      const challenge = optimisticUserChallenges[id]
+      return challenge?.state !== 'disbursed'
     })
+  }, [rewardIds, optimisticUserChallenges, userChallenges, showCompleted])
+
+  const rewardsPanels = filteredRewardIds.map((id) => {
+    const props = getChallengeConfig(id)
+    const onPress = () => {
+      openModal(id)
+      track(
+        make({
+          eventName: Name.REWARDS_CLAIM_DETAILS_OPENED,
+          challengeId: id
+        })
+      )
+    }
+    return (
+      <Panel
+        {...props}
+        challenge={optimisticUserChallenges[id]}
+        onPress={onPress}
+        key={props.title}
+      />
+    )
+  })
 
   return (
     <Paper shadow='near' border='strong' ph='s' pv='xl'>
       <Flex gap='unit10' alignItems='center'>
-        <Flex gap='s'>
-          <GradientText style={styles.title}>{messages.title}</GradientText>
-          <Text textAlign='center'>{messages.subheader}</Text>
-        </Flex>
+        <View style={{ position: 'relative', width: '100%', marginBottom: 16 }}>
+          <Flex gap='s' alignItems='center'>
+            <GradientText style={styles.title}>{messages.title}</GradientText>
+            <Text textAlign='center'>{messages.subheader}</Text>
+          </Flex>
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0
+            }}
+          >
+            <SelectablePill
+              type='button'
+              label={showCompleted ? 'Hide Completed' : 'Show Completed'}
+              isSelected={showCompleted}
+              onPress={() => setShowCompleted(!showCompleted)}
+            />
+          </View>
+        </View>
         {userChallengesLoading && !haveChallengesLoaded ? (
           <LoadingSpinner style={styles.loading} />
         ) : (

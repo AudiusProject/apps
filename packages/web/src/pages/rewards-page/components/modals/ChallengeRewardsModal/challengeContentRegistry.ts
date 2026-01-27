@@ -11,6 +11,7 @@ import { PlayCountMilestoneContent } from './PlayCountMilestoneContent'
 import { ReferralsChallengeModalContent } from './ReferralsChallengeModalContent'
 import { RemixContestWinnerChallengeModalContent } from './RemixContestWinnerChallengeModalContent'
 import { TastemakerChallengeModalContent } from './TastemakerChallengeModalContent'
+import { TrendingRewardsModalContent } from './TrendingRewardsModalContent'
 import {
   type ChallengeContentMap,
   type ChallengeContentComponent
@@ -45,6 +46,12 @@ export const challengeContentRegistry: ChallengeContentMap = {
     PinnedCommentChallengeModalContent as ChallengeContentComponent,
   [ChallengeName.RemixContestWinner]:
     RemixContestWinnerChallengeModalContent as ChallengeContentComponent,
+  [ChallengeName.TrendingTrack]:
+    TrendingRewardsModalContent as ChallengeContentComponent,
+  [ChallengeName.TrendingPlaylist]:
+    TrendingRewardsModalContent as ChallengeContentComponent,
+  [ChallengeName.TrendingUndergroundTrack]:
+    TrendingRewardsModalContent as ChallengeContentComponent,
   default: DefaultChallengeContent as ChallengeContentComponent
 }
 

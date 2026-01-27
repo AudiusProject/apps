@@ -70,9 +70,6 @@ const CreateChatModal = lazy(
   () => import('pages/chat-page/components/CreateChatModal')
 )
 
-const TrendingRewardsModal = lazy(
-  () => import('components/rewards/modals/TrendingRewardsModal')
-)
 
 const InboxSettingsModal = lazy(
   () => import('components/inbox-settings-modal/InboxSettingsModal')
@@ -107,7 +104,6 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   LabelAccount: LabelAccountModal,
   LockedContent: LockedContentModal,
   APIRewardsExplainer: TopAPIModal,
-  TrendingRewardsExplainer: TrendingRewardsModal,
   ChallengeRewards: ChallengeRewardsModal,
   ClaimAllRewards: ClaimAllRewardsModal,
   ClaimVestedCoinsModal,

@@ -15,7 +15,6 @@ import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
-import RewardsBanner from 'pages/trending-page/components/RewardsBanner'
 import { getExploreInfo } from 'ssr/metaTags'
 import { BASE_URL } from 'utils/route'
 
@@ -57,9 +56,6 @@ const MobileTrendingUndergroundPage = ({
       hasDefaultHeader
     >
       <div className={styles.mobileLineupContainer}>
-        <div className={styles.mobileBannerContainer}>
-          <RewardsBanner bannerType='underground' />
-        </div>
         <Lineup {...lineupProps} />
       </div>
     </MobilePageContainer>
@@ -80,9 +76,6 @@ const DesktopTrendingUndergroundPage = ({
       size='large'
       header={header}
     >
-      <div className={styles.bannerContainer}>
-        <RewardsBanner bannerType='underground' />
-      </div>
       <Lineup {...lineupProps} />
     </Page>
   )
