@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react'
+import { memo, useMemo, useState } from 'react'
 
 import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import { createDrawerNavigator } from '@react-navigation/drawer'
@@ -34,14 +34,6 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
   } = props
 
   const drawerNavigation = useNavigation() as any
-
-  // Ensure drawer is closed on mount (fixes issue when switching from new to old architecture)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      drawerHelpers?.closeDrawer()
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [drawerHelpers])
 
   return (
     <AppDrawerContextProvider
