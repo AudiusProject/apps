@@ -59,14 +59,14 @@ export const TrackInfo = (props: TrackInfoProps) => {
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess)
 
+  const handlePressArtist = useCallback(() => {
+    onClose()
+    navigation?.push('Profile', { id: user?.user_id })
+  }, [navigation, user?.user_id, onClose])
+
   if (!user || !track) return null
 
   const { user_id } = user
-
-  const handlePressArtist = useCallback(() => {
-    onClose()
-    navigation?.push('Profile', { id: user_id })
-  }, [navigation, user_id, onClose])
 
   return (
     <View style={styles.root}>
@@ -86,7 +86,11 @@ export const TrackInfo = (props: TrackInfoProps) => {
           </View>
         ) : null}
       </TouchableOpacity>
-      <UserLink variant='visible' userId={user_id} onPress={handlePressArtist} />
+      <UserLink
+        variant='visible'
+        userId={user_id}
+        onPress={handlePressArtist}
+      />
     </View>
   )
 }

@@ -37,21 +37,6 @@ class ErrorBoundary extends PureComponent<ErrorBoundaryProps> {
   }
 
   componentDidCatch(error: Error | null, errorInfo: any) {
-    const errorMessage = error?.message ?? ''
-    
-    // Workaround for Reanimated v3 cleanup error after downgrading from v4
-    // This error occurs when components unmount before Reanimated can clean up properly
-    // It's harmless but causes a white screen if not handled
-    if (
-      errorMessage.includes('Cannot find host instance') &&
-      errorMessage.includes('Reanimated')
-    ) {
-      // Log the error but don't crash the app
-      console.warn('[Reanimated] Cleanup error (harmless):', errorMessage)
-      // Don't set error state or report to Sentry for this known issue
-      return
-    }
-
     // On catch set the error state so it triggers a toast
     this.setState({ error: error?.message })
     reportToSentry({
