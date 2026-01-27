@@ -29,11 +29,9 @@ import { CurrentWalletBanner } from 'components/buy-sell-modal/components/Curren
 import { StaticTokenDisplay } from 'components/buy-sell-modal/components/StaticTokenDisplay'
 import { TokenDropdown } from 'components/buy-sell-modal/components/TokenDropdown'
 
+import { SendTokensInputSkeleton } from './SendTokensConfirmationSkeleton'
 import { UserSearchAutocomplete } from './UserSearchAutocomplete'
 import WalletInput from './WalletInput'
-import {
-  SendTokensInputSkeleton
-} from './SendTokensConfirmationSkeleton'
 
 type RecipientType = 'user' | 'wallet'
 

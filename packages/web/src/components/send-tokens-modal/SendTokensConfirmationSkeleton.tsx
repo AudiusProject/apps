@@ -12,7 +12,7 @@ export const SendTokensConfirmationSkeleton = () => {
           borderRadius: '6px', // Non-standard radius, keep as pixel value
           backgroundColor: 'transparent',
           padding: '3px', // Non-standard spacing, keep as pixel value
-          gap: '3.5px', // Non-standard gap, keep as pixel value
+          gap: '3.5px' // Non-standard gap, keep as pixel value
         }}
         alignItems='center'
       >
@@ -90,7 +90,7 @@ export const SendTokensInputSkeleton = () => {
           borderRadius: '6px', // Non-standard radius, keep as pixel value
           backgroundColor: 'transparent',
           padding: '3px', // Non-standard spacing, keep as pixel value
-          gap: '3.5px', // Non-standard gap, keep as pixel value
+          gap: '3.5px' // Non-standard gap, keep as pixel value
         }}
         alignItems='center'
       >
