@@ -179,7 +179,7 @@ jobs:
       - name: Install CocoaPods dependencies
         run: |
           cd packages/mobile/ios
-          bundle exec pod install
+          RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
 
       - name: Install Sentry CLI
         run: |
@@ -282,6 +282,46 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('packages/mobile/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/sdk
+          key: android-sdk-${{ runner.os }}-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            android-sdk-${{ runner.os }}-
+
+      - name: Free disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          # Remove unnecessary packages and caches
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /opt/microsoft
+          # Clean apt cache
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+          # Clean npm cache
+          npm cache clean --force || true
+          # Clean pip cache
+          pip cache purge || true
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -371,6 +411,28 @@ jobs:
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
+
+      - name: Clean Gradle build cache before build
+        run: |
+          cd packages/mobile/android
+          ./gradlew clean || true
+          # Clean Gradle build cache to free space
+          rm -rf app/build
+          rm -rf .gradle/buildOutputCleanup
+
+      - name: Check disk space before build
+        run: |
+          echo "Disk space before Android build:"
+          df -h
+          echo "Gradle cache size:"
+          du -sh ~/.gradle/caches 2>/dev/null || echo "No Gradle cache found"
+          echo "Android SDK size:"
+          if [ -n "$ANDROID_HOME" ]; then
+            du -sh "$ANDROID_HOME" 2>/dev/null || echo "ANDROID_HOME set but path not found"
+          fi
+          if [ -d ~/.android/sdk ]; then
+            du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
+          fi
 
       - name: Release Android (Release Candidate)
         timeout-minutes: 60
@@ -484,7 +546,7 @@ jobs:
       - name: Install CocoaPods dependencies
         run: |
           cd packages/mobile/ios
-          bundle exec pod install
+          RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
 
       - name: Install Sentry CLI
         run: |
@@ -580,6 +642,46 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('packages/mobile/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/sdk
+          key: android-sdk-${{ runner.os }}-${{ hashFiles('packages/mobile/android/build.gradle') }}
+          restore-keys: |
+            android-sdk-${{ runner.os }}-
+
+      - name: Free disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          # Remove unnecessary packages and caches
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /opt/microsoft
+          # Clean apt cache
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+          # Clean npm cache
+          npm cache clean --force || true
+          # Clean pip cache
+          pip cache purge || true
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -669,6 +771,28 @@ jobs:
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
+
+      - name: Clean Gradle build cache before build
+        run: |
+          cd packages/mobile/android
+          ./gradlew clean || true
+          # Clean Gradle build cache to free space
+          rm -rf app/build
+          rm -rf .gradle/buildOutputCleanup
+
+      - name: Check disk space before build
+        run: |
+          echo "Disk space before Android build:"
+          df -h
+          echo "Gradle cache size:"
+          du -sh ~/.gradle/caches 2>/dev/null || echo "No Gradle cache found"
+          echo "Android SDK size:"
+          if [ -n "$ANDROID_HOME" ]; then
+            du -sh "$ANDROID_HOME" 2>/dev/null || echo "ANDROID_HOME set but path not found"
+          fi
+          if [ -d ~/.android/sdk ]; then
+            du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
+          fi
 
       - name: Release Android (Production)
         timeout-minutes: 60
