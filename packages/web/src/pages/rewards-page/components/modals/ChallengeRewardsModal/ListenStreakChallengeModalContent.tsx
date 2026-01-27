@@ -38,9 +38,7 @@ export const ListenStreakChallengeModalContent = ({
   errorContent
 }: ListenStreakChallengeProps) => {
   const isMobile = useIsMobile()
-  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
-    fullDescription: () => ''
-  }
+  const { fullDescription } = challengeRewardsConfig[challengeName]
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
   const userChallenge = useSelector((state: CommonState) =>

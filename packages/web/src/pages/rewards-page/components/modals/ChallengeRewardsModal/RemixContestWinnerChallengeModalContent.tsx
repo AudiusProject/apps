@@ -56,9 +56,7 @@ export const RemixContestWinnerChallengeModalContent = ({
       }
     : undefined
 
-  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
-    fullDescription: () => ''
-  }
+  const { fullDescription } = challengeRewardsConfig[challengeName]
 
   const progressStatusLabel = userChallenge ? (
     <Flex

@@ -44,10 +44,12 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   'mobile-install',
   'listen-streak',
   'profile-completion',
+  'send-first-tip',
   'first-playlist',
   ChallengeName.AudioMatchingBuy, // $AUDIO matching buyer
   ChallengeName.AudioMatchingSell, // $AUDIO matching seller
   ChallengeName.FirstPlaylist,
+  ChallengeName.FirstTip,
   ChallengeName.ListenStreak,
   ChallengeName.ListenStreakEndless,
   ChallengeName.MobileInstall,

@@ -31,11 +31,11 @@ const messages = {
   title1000: '1,000 PLAYS',
   title10000: '10,000 PLAYS',
   description250:
-    challengeRewardsConfig[ChallengeName.PlayCount250]?.description() ?? '',
+    challengeRewardsConfig[ChallengeName.PlayCount250].description(),
   description1000:
-    challengeRewardsConfig[ChallengeName.PlayCount1000]?.description() ?? '',
+    challengeRewardsConfig[ChallengeName.PlayCount1000].description(),
   description10000:
-    challengeRewardsConfig[ChallengeName.PlayCount10000]?.description() ?? '',
+    challengeRewardsConfig[ChallengeName.PlayCount10000].description(),
   progressLabel: 'PLAYS',
   close: 'Close'
 }

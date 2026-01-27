@@ -89,9 +89,7 @@ export const ReferralsChallengeModalContent = ({
   errorContent
 }: ReferralsChallengeProps) => {
   const isMobile = useIsMobile()
-  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
-    fullDescription: () => ''
-  }
+  const { fullDescription } = challengeRewardsConfig[challengeName]
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
   const userChallenge = useSelector((state: CommonState) =>

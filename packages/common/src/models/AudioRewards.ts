@@ -50,6 +50,7 @@ export enum ChallengeName {
   ConnectVerified = 'v',
   ProfileCompletion = 'p',
   Referred = 'rd',
+  FirstTip = 'ft',
   FirstPlaylist = 'fp',
   ListenStreak = 'l',
   ListenStreakEndless = 'e',
@@ -70,6 +71,7 @@ export type ChallengeRewardID =
   | 'connect-verified'
   | 'listen-streak'
   | 'profile-completion'
+  | 'send-first-tip'
   | 'first-playlist'
   | ChallengeName.AudioMatchingSell // $AUDIO matching seller
   | ChallengeName.AudioMatchingBuy // $AUDIO matching buyer
@@ -88,6 +90,7 @@ export type ChallengeRewardID =
   | ChallengeName.ConnectVerified
   | ChallengeName.ProfileCompletion
   | ChallengeName.Referred
+  | ChallengeName.FirstTip
   | ChallengeName.FirstPlaylist
   | ChallengeName.ListenStreak
   | ChallengeName.ListenStreakEndless
