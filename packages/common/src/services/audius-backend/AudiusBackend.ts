@@ -901,19 +901,34 @@ export const audiusBackend = ({
     amount,
     ethAddress,
     sdk,
-    mint
+    mint,
+    recipientEthAddress
   }: {
     address: string
     amount: AudioWei
     ethAddress: string
     sdk: AudiusSdk
     mint: PublicKey
+    recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
   }) {
-    const tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
-      address,
-      sdk,
-      mint
-    })
+    let tokenAccountAddress: PublicKey
+
+    if (recipientEthAddress) {
+      // When sending to a user, derive their user-bank ATA for this Solana mint
+      // The user-bank is a PDA derived from their Ethereum address and the mint
+      tokenAccountAddress =
+        await sdk.services.claimableTokensClient.deriveUserBank({
+          ethWallet: recipientEthAddress,
+          mint
+        })
+    } else {
+      // When sending to a Solana wallet address directly, use regular ATA logic
+      tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
+        address,
+        sdk,
+        mint
+      })
+    }
 
     const res = await transferTokens({
       destination: tokenAccountAddress,
@@ -955,8 +970,31 @@ export const audiusBackend = ({
         mint,
         destination
       })
+
+    // Fetch blockhash explicitly to provide better error handling
+    let recentBlockhash: string
+    try {
+      const { blockhash } =
+        await sdk.services.solanaClient.connection.getLatestBlockhash()
+      recentBlockhash = blockhash
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      if (
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('Failed to fetch')
+      ) {
+        throw new Error(
+          'Failed to connect to Solana network. Please check your internet connection and try again.'
+        )
+      }
+      throw new Error(`Failed to get recent blockhash: ${errorMessage}`)
+    }
+
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions: [secpTransactionInstruction, transferInstruction]
+      instructions: [secpTransactionInstruction, transferInstruction],
+      recentBlockhash
     })
     const signature =
       await sdk.services.claimableTokensClient.sendTransaction(transaction)

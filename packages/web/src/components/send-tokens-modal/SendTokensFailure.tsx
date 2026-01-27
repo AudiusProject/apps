@@ -3,6 +3,7 @@ import {
   useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
+import { User, SquareSizes } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   Button,
@@ -12,15 +13,20 @@ import {
   CompletionCheck,
   IconExternalLink,
   PlainButton,
-  useMedia
+  Avatar
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
+import UserBadges from 'components/user-badges/UserBadges'
+import { useProfilePicture } from 'hooks/useProfilePicture'
+
+import { SendTokensFailureSkeleton } from './SendTokensConfirmationSkeleton'
 
 interface SendTokensFailureProps {
   mint: string
   amount: bigint
   destinationAddress: string
+  selectedUser: User | null
   error: string
   onTryAgain: () => void
   onClose: () => void
@@ -28,6 +34,7 @@ interface SendTokensFailureProps {
 
 const messages = {
   failed: 'Failed',
+  recipient: 'Recipient',
   destinationAddress: 'Destination Address',
   viewOnSolana: 'View On Solana Block Explorer',
   transactionFailed: 'Your transaction failed to complete.',
@@ -39,11 +46,11 @@ const SendTokensFailure = ({
   mint,
   amount,
   destinationAddress,
+  selectedUser,
   error,
   onTryAgain,
   onClose
 }: SendTokensFailureProps) => {
-  const { isMobile } = useMedia()
   // Get token data and balance using the same hooks as ReceiveTokensModal
   const { data: coin } = useArtistCoin(mint)
   const { data: tokenBalance } = useCoinBalance({
@@ -55,6 +62,11 @@ const SendTokensFailure = ({
   const currentBalance = tokenBalance?.balance
     ? tokenBalance.balance.value
     : BigInt(0)
+
+  const profilePicture = useProfilePicture({
+    userId: selectedUser?.user_id,
+    size: SquareSizes.SIZE_150_BY_150
+  })
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -78,13 +90,7 @@ const SendTokensFailure = ({
 
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
-    return (
-      <Flex direction='column' gap='xl' p='xl' alignItems='center'>
-        <Text variant='body' size='l' color='subdued'>
-          Loading token information...
-        </Text>
-      </Flex>
-    )
+    return <SendTokensFailureSkeleton />
   }
 
   return (
@@ -98,48 +104,83 @@ const SendTokensFailure = ({
 
       <Divider orientation='horizontal' color='default' />
 
-      {/* Amount Info */}
-      <Flex
-        direction={isMobile ? 'column' : 'row'}
-        gap='m'
-        justifyContent='space-between'
-      >
+      {/* Failed Section */}
+      <Flex column gap='s'>
         <Text variant='heading' size='s' color='subdued'>
           {messages.failed}
         </Text>
-        <Text variant='heading' size='s' color='default'>
-          -{formatAmount(amount)} ${tokenInfo.symbol}
-        </Text>
+        <Flex alignItems='center' gap='s'>
+          {/* Token logo would go here */}
+          <Flex direction='column' gap='xs'>
+            <Text variant='body' size='m' color='default' strength='strong'>
+              {tokenInfo.name}
+            </Text>
+            <Text variant='heading' size='s' color='default'>
+              {formatAmount(amount)} ${tokenInfo.symbol}
+            </Text>
+          </Flex>
+        </Flex>
       </Flex>
 
       <Divider orientation='horizontal' color='default' />
 
-      {/* Address Container */}
-      <Flex direction='column' gap='m'>
+      {/* To Recipient Section */}
+      <Flex direction='column' gap='s'>
         <Text variant='heading' size='s' color='subdued'>
-          {messages.destinationAddress}
+          {messages.recipient}
         </Text>
-        <Text
-          variant='body'
-          size='m'
-          color='default'
-          css={{ wordBreak: 'break-all' }}
-        >
-          {destinationAddress}
-        </Text>
-        <PlainButton
-          variant='subdued'
-          css={{ alignSelf: 'flex-start' }}
-          onClick={() => {
-            window.open(
-              `https://explorer.solana.com/address/${destinationAddress}`,
-              '_blank'
-            )
-          }}
-          iconRight={IconExternalLink}
-        >
-          {messages.viewOnSolana}
-        </PlainButton>
+        {selectedUser ? (
+          <Flex alignItems='center' gap='s'>
+            <Avatar
+              h={32}
+              w={32}
+              src={profilePicture}
+              borderWidth='thin'
+              css={{ flexShrink: 0 }}
+            />
+            <Flex direction='column' flex={1} css={{ minWidth: 0 }}>
+              <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
+                <Text
+                  variant='body'
+                  size='m'
+                  color='default'
+                  ellipses
+                  strength='strong'
+                >
+                  {selectedUser.name}
+                </Text>
+                <UserBadges userId={selectedUser.user_id} size='xs' inline />
+              </Flex>
+              <Text variant='body' size='s' color='subdued' ellipses>
+                @{selectedUser.handle}
+              </Text>
+            </Flex>
+          </Flex>
+        ) : (
+          <>
+            <Text
+              variant='body'
+              size='m'
+              color='default'
+              css={{ wordBreak: 'break-all' }}
+            >
+              {destinationAddress}
+            </Text>
+            <PlainButton
+              variant='subdued'
+              css={{ alignSelf: 'flex-start' }}
+              onClick={() => {
+                window.open(
+                  `https://explorer.solana.com/address/${destinationAddress}`,
+                  '_blank'
+                )
+              }}
+              iconRight={IconExternalLink}
+            >
+              {messages.viewOnSolana}
+            </PlainButton>
+          </>
+        )}
       </Flex>
 
       {/* Error Message */}
