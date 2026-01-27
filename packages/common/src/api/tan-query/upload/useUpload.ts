@@ -287,6 +287,16 @@ export const useUpload = () => {
         return
       }
       const sdk = await audiusSdk()
+
+      // Finish the audio progress for the collection (there is none)
+      dispatch(
+        updateProgress({
+          clientId: 'collection-artwork',
+          key: 'audio',
+          stemIndex: null,
+          progress: { status: ProgressStatus.COMPLETE }
+        })
+      )
       const uploadHandle = sdk.tracks.uploadTrackFiles({
         imageFile: fileToSdk(formState.metadata.artwork.file, 'artwork'),
         onProgress: (key, { loaded, total }) => {
