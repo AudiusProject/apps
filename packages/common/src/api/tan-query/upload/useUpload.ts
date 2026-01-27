@@ -30,7 +30,8 @@ const {
   updateProgress,
   uploadTracksRequested,
   uploadTracksFailed,
-  uploadTracksSucceeded
+  uploadTracksSucceeded,
+  updateFormState
 } = uploadActions
 
 const getStemUploadHandles = async (
@@ -338,6 +339,7 @@ export const useUpload = () => {
 
   const finishUpload = useCallback(
     async (formState: CollectionFormState | TrackFormState) => {
+      dispatch(updateFormState(formState))
       const kind = (() => {
         switch (formState.uploadType) {
           case UploadType.ALBUM:

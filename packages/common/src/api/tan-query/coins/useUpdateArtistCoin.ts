@@ -41,10 +41,14 @@ export const useUpdateArtistCoin = () => {
       let bannerImageUrl: string | undefined
 
       if (updateCoinRequest.bannerImageFile) {
-        const uploadResponse = await sdk.services.storage.uploadFile({
-          file: updateCoinRequest.bannerImageFile,
-          template: 'img_backdrop'
-        })
+        const uploadResponse = await sdk.services.storage
+          .uploadFile({
+            file: updateCoinRequest.bannerImageFile,
+            metadata: {
+              template: 'img_backdrop'
+            }
+          })
+          .start()
         const cid = getBannerImageUrl(uploadResponse.results)
         if (!cid) {
           throw new Error('Failed to process banner image upload')

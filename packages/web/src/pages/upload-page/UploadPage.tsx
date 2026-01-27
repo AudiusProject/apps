@@ -25,7 +25,7 @@ import { EditPage } from './pages/EditPage'
 import { FinishPage } from './pages/FinishPage'
 import SelectPage from './pages/SelectPage'
 
-const { updateFormState, reset } = uploadActions
+const { reset } = uploadActions
 const { getFormState, getUploadSuccess, getUploadError } = uploadSelectors
 
 const messages = {
@@ -158,7 +158,6 @@ export const UploadPage = (props: UploadPageProps) => {
             initialMetadata={initialMetadata}
             onContinue={(formState: UploadFormState) => {
               setFormState(formState)
-              dispatch(updateFormState(formState))
               const isPrivateCollection =
                 'metadata' in formState && formState.metadata?.is_private
               const hasPublicTracks =
