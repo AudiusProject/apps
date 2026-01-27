@@ -20,6 +20,8 @@ import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSec
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
+import { SendTokensFailureSkeleton } from './SendTokensConfirmationSkeleton'
+
 interface SendTokensFailureProps {
   mint: string
   amount: bigint
@@ -88,13 +90,7 @@ const SendTokensFailure = ({
 
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
-    return (
-      <Flex direction='column' gap='xl' p='xl' alignItems='center'>
-        <Text variant='body' size='l' color='subdued'>
-          Loading token information...
-        </Text>
-      </Flex>
-    )
+    return <SendTokensFailureSkeleton />
   }
 
   return (

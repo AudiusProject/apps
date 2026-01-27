@@ -22,6 +22,8 @@ import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import { env } from 'services/env'
 
+import { SendTokensSuccessSkeleton } from './SendTokensConfirmationSkeleton'
+
 interface SendTokensSuccessProps {
   mint: string
   amount: bigint
@@ -93,13 +95,7 @@ const SendTokensSuccess = ({
 
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
-    return (
-      <Flex direction='column' gap='xl' p='xl' alignItems='center'>
-        <Text variant='body' size='l' color='subdued'>
-          Loading token information...
-        </Text>
-      </Flex>
-    )
+    return <SendTokensSuccessSkeleton />
   }
 
   return (

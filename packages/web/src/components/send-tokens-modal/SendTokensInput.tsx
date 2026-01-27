@@ -31,6 +31,9 @@ import { TokenDropdown } from 'components/buy-sell-modal/components/TokenDropdow
 
 import { UserSearchAutocomplete } from './UserSearchAutocomplete'
 import WalletInput from './WalletInput'
+import {
+  SendTokensInputSkeleton
+} from './SendTokensConfirmationSkeleton'
 
 type RecipientType = 'user' | 'wallet'
 
@@ -262,13 +265,7 @@ const SendTokensInput = ({
 
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo || coinsLoading || isOwnedCoinsLoading) {
-    return (
-      <Flex direction='column' gap='xl' p='xl' alignItems='center'>
-        <Text variant='body' size='l' color='subdued'>
-          Loading token information...
-        </Text>
-      </Flex>
-    )
+    return <SendTokensInputSkeleton />
   }
 
   if (!selectedToken) {
