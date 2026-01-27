@@ -16,8 +16,10 @@ import {
 } from '@audius/harmony'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
-import UserBadges from 'components/user-badges/UserBadges'
+import { UserLink } from 'components/link'
 import { useProfilePicture } from 'hooks/useProfilePicture'
+
+import { SendTokensConfirmationSkeleton } from './SendTokensConfirmationSkeleton'
 
 type RecipientType = 'user' | 'wallet'
 
@@ -43,8 +45,7 @@ const messages = {
   pleaseReview:
     'Please review your transaction details. This action cannot be undone.',
   back: 'Back',
-  confirm: 'Confirm',
-  loadingTokenInformation: 'Loading token information...'
+  confirm: 'Confirm'
 }
 
 const SendTokensConfirmation = ({
@@ -77,13 +78,7 @@ const SendTokensConfirmation = ({
 
   // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
-    return (
-      <Flex direction='column' gap='xl' p='xl' alignItems='center'>
-        <Text variant='body' size='l' color='subdued'>
-          {messages.loadingTokenInformation}
-        </Text>
-      </Flex>
-    )
+    return <SendTokensConfirmationSkeleton />
   }
 
   return (
@@ -156,19 +151,12 @@ const SendTokensConfirmation = ({
               css={{ flexShrink: 0 }}
             />
             <Flex direction='column' flex={1} css={{ minWidth: 0 }} gap='xs'>
-              <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
-                <Text
-                  variant='heading'
-                  size='s'
-                  color='default'
-                  ellipses
-                  strength='strong'
-                >
-                  {selectedUser.name}
-                </Text>
-                <UserBadges userId={selectedUser.user_id} size='xs' inline />
-              </Flex>
-              <Text variant='body' size='s' color='subdued' ellipses>
+              <UserLink
+                textVariant='heading'
+                size='s'
+                userId={selectedUser.user_id}
+              />
+              <Text variant='body' size='l' ellipses>
                 @{selectedUser.handle}
               </Text>
             </Flex>

@@ -970,8 +970,31 @@ export const audiusBackend = ({
         mint,
         destination
       })
+    
+    // Fetch blockhash explicitly to provide better error handling
+    let recentBlockhash: string
+    try {
+      const { blockhash } =
+        await sdk.services.solanaClient.connection.getLatestBlockhash()
+      recentBlockhash = blockhash
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      if (
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('Failed to fetch')
+      ) {
+        throw new Error(
+          'Failed to connect to Solana network. Please check your internet connection and try again.'
+        )
+      }
+      throw new Error(`Failed to get recent blockhash: ${errorMessage}`)
+    }
+
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions: [secpTransactionInstruction, transferInstruction]
+      instructions: [secpTransactionInstruction, transferInstruction],
+      recentBlockhash
     })
     const signature =
       await sdk.services.claimableTokensClient.sendTransaction(transaction)

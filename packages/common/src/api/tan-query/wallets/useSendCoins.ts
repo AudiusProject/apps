@@ -92,6 +92,15 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         ) {
           throw new Error(errorMessage)
         }
+        // Preserve network-related error messages
+        if (
+          errorMessage.includes('Failed to connect to Solana network') ||
+          errorMessage.includes('Failed to get recent blockhash') ||
+          errorMessage.includes('fetch failed') ||
+          errorMessage.includes('network')
+        ) {
+          throw new Error(errorMessage)
+        }
 
         throw new Error('Something has gone wrong, please try again.')
       }
