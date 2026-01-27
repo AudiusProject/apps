@@ -57,9 +57,7 @@ export const CosignChallengeModalContent = ({
       }
     : undefined
 
-  const { fullDescription } = challengeRewardsConfig[challengeName] ?? {
-    fullDescription: () => ''
-  }
+  const { fullDescription } = challengeRewardsConfig[challengeName]
 
   const progressStatusLabel = userChallenge ? (
     <Flex

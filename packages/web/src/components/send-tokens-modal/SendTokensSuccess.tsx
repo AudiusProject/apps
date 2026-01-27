@@ -3,7 +3,6 @@ import {
   useCoinBalance,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { User, SquareSizes } from '@audius/common/models'
 import { makeSolanaTransactionLink } from '@audius/common/utils'
 import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 import {
@@ -14,26 +13,22 @@ import {
   CompletionCheck,
   IconExternalLink,
   PlainButton,
-  Avatar
+  useMedia
 } from '@audius/harmony'
 
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
-import UserBadges from 'components/user-badges/UserBadges'
-import { useProfilePicture } from 'hooks/useProfilePicture'
 import { env } from 'services/env'
 
 interface SendTokensSuccessProps {
   mint: string
   amount: bigint
   destinationAddress: string
-  selectedUser: User | null
   signature: string
   onClose: () => void
 }
 
 const messages = {
   sent: 'Sent',
-  recipient: 'Recipient',
   destinationAddress: 'Destination Address',
   viewOnSolana: 'View On Solana Block Explorer',
   transactionComplete: 'Your transaction is complete!',
@@ -44,10 +39,10 @@ const SendTokensSuccess = ({
   mint,
   amount,
   destinationAddress,
-  selectedUser,
   signature,
   onClose
 }: SendTokensSuccessProps) => {
+  const { isMobile } = useMedia()
   const { data: coin } = useArtistCoin(mint)
   const { data: tokenBalance } = useCoinBalance({
     mint,
@@ -59,11 +54,6 @@ const SendTokensSuccess = ({
     ? tokenBalance.balance.value
     : BigInt(0)
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
-
-  const profilePicture = useProfilePicture({
-    userId: selectedUser?.user_id,
-    size: SquareSizes.SIZE_150_BY_150
-  })
 
   const formatAmount = (amount: bigint) => {
     return new FixedDecimal(amount, tokenInfo?.decimals).toLocaleString(
@@ -113,80 +103,46 @@ const SendTokensSuccess = ({
 
       <Divider orientation='horizontal' color='default' />
 
-      {/* Sent Section */}
-      <Flex column gap='s'>
+      {/* Amount Info */}
+      <Flex
+        direction={isMobile ? 'column' : 'row'}
+        gap='m'
+        justifyContent='space-between'
+      >
         <Text variant='heading' size='s' color='subdued'>
           {messages.sent}
         </Text>
-        <Flex alignItems='center' gap='s'>
-          {/* Token logo would go here */}
-          <Flex direction='column' gap='xs'>
-            <Text variant='body' size='m' color='default' strength='strong'>
-              {tokenInfo.name}
-            </Text>
-            <Text variant='heading' size='s' color='default'>
-              {formatAmount(amount)} ${tokenInfo.symbol}
-            </Text>
-          </Flex>
-        </Flex>
+        <Text variant='heading' size='s' color='default'>
+          -{formatAmount(amount)} ${tokenInfo.symbol}
+        </Text>
       </Flex>
 
       <Divider orientation='horizontal' color='default' />
 
-      {/* To Recipient Section */}
-      <Flex direction='column' gap='s'>
+      {/* Address Container */}
+      <Flex direction='column' gap='m'>
         <Text variant='heading' size='s' color='subdued'>
-          {messages.recipient}
+          {messages.destinationAddress}
         </Text>
-        {selectedUser ? (
-          <Flex alignItems='center' gap='s'>
-            <Avatar
-              h={32}
-              w={32}
-              src={profilePicture}
-              borderWidth='thin'
-              css={{ flexShrink: 0 }}
-            />
-            <Flex direction='column' flex={1} css={{ minWidth: 0 }}>
-              <Flex alignItems='center' gap='xs' css={{ minWidth: 0 }}>
-                <Text
-                  variant='body'
-                  size='m'
-                  color='default'
-                  ellipses
-                  strength='strong'
-                >
-                  {selectedUser.name}
-                </Text>
-                <UserBadges userId={selectedUser.user_id} size='xs' inline />
-              </Flex>
-              <Text variant='body' size='s' color='subdued' ellipses>
-                @{selectedUser.handle}
-              </Text>
-            </Flex>
-          </Flex>
-        ) : (
-          <Text
-            variant='body'
-            size='m'
-            color='default'
-            css={{ wordBreak: 'break-all' }}
-          >
-            {destinationAddress}
-          </Text>
-        )}
+        <Text
+          variant='body'
+          size='m'
+          color='default'
+          css={{ wordBreak: 'break-all' }}
+        >
+          {destinationAddress}
+        </Text>
+        <PlainButton
+          variant='subdued'
+          css={{ alignSelf: 'flex-start' }}
+          onClick={() => {
+            window.open(makeSolanaTransactionLink(signature), '_blank')
+          }}
+          iconRight={IconExternalLink}
+        >
+          {messages.viewOnSolana}
+        </PlainButton>
       </Flex>
-
-      <PlainButton
-        variant='subdued'
-        css={{ alignSelf: 'flex-start' }}
-        onClick={() => {
-          window.open(makeSolanaTransactionLink(signature), '_blank')
-        }}
-        iconRight={IconExternalLink}
-      >
-        {messages.viewOnSolana}
-      </PlainButton>
 
       <Flex gap='s' alignItems='center'>
         <CompletionCheck value='complete' />

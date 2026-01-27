@@ -4,12 +4,14 @@ import { ChallengeName, ChallengeRewardID } from '@audius/common/models'
 import { Nullable, challengeRewardsConfig, route } from '@audius/common/utils'
 import { IconArrowRight, IconCloudUpload, IconComponent } from '@audius/harmony'
 
-const { EXPLORE_PAGE, TRENDING_PAGE, UPLOAD_PAGE, profilePage } = route
+const { EXPLORE_PAGE, LIBRARY_PAGE, TRENDING_PAGE, UPLOAD_PAGE, profilePage } =
+  route
 
 type LinkButtonType =
   | 'trackUpload'
   | 'profile'
   | 'trendingTracks'
+  | 'sendFirstTip'
   | 'firstPlaylist'
   | ChallengeName.AudioMatchingSell
   | ChallengeName.AudioMatchingBuy
@@ -40,6 +42,12 @@ const linkButtonMap: Record<LinkButtonType, LinkButtonInfo> = {
     rightIcon: IconArrowRight,
     link: () => TRENDING_PAGE
   },
+  sendFirstTip: {
+    label: 'Send a Tip',
+    leftIcon: null,
+    rightIcon: IconArrowRight,
+    link: () => LIBRARY_PAGE
+  },
   firstPlaylist: {
     label: 'Create A Playlist',
     leftIcon: null,
@@ -69,9 +77,7 @@ type WebChallengeInfo = {
   }
 }
 
-const webChallengesConfig: Partial<
-  Record<ChallengeRewardID, WebChallengeInfo>
-> = {
+const webChallengesConfig: Record<ChallengeRewardID, WebChallengeInfo> = {
   [ChallengeName.Referrals]: {
     icon: <i className='emoji large incoming-envelope' />
   },
@@ -141,6 +147,22 @@ const webChallengesConfig: Partial<
       incomplete: linkButtonMap.trackUpload,
       inProgress: linkButtonMap.trackUpload,
       complete: linkButtonMap.trackUpload
+    }
+  },
+  'send-first-tip': {
+    icon: <i className='emoji large money-wings' />,
+    modalButtonInfo: {
+      incomplete: linkButtonMap.sendFirstTip,
+      inProgress: linkButtonMap.sendFirstTip,
+      complete: linkButtonMap.sendFirstTip
+    }
+  },
+  [ChallengeName.FirstTip]: {
+    icon: <i className='emoji large money-wings' />,
+    modalButtonInfo: {
+      incomplete: linkButtonMap.sendFirstTip,
+      inProgress: linkButtonMap.sendFirstTip,
+      complete: linkButtonMap.sendFirstTip
     }
   },
   'first-playlist': {
@@ -234,15 +256,7 @@ const webChallengesConfig: Partial<
   }
 }
 
-export const getChallengeConfig = (id: ChallengeRewardID) => {
-  const commonConfig = challengeRewardsConfig[id]
-  const webConfig = webChallengesConfig[id]
-  return {
-    ...commonConfig,
-    ...webConfig,
-    // Ensure required fields are always present
-    title: commonConfig?.title ?? '',
-    description: commonConfig?.description ?? (() => ''),
-    id: commonConfig?.id ?? id
-  }
-}
+export const getChallengeConfig = (id: ChallengeRewardID) => ({
+  ...challengeRewardsConfig[id],
+  ...webChallengesConfig[id]
+})
