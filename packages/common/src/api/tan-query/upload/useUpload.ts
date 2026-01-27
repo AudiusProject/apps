@@ -465,10 +465,10 @@ export const useUpload = () => {
             collectionMetadata: formState.metadata,
             tracks: tracks.map((t) => {
               const imageUploadResponse = artwork?.find(
-                (a) => a.clientId === t.clientId
+                (a) => a.clientId === 'collection-artwork'
               )?.imageUploadResponse
               if (!imageUploadResponse) {
-                throw new Error(`No artwork found for track ${t.clientId}`)
+                throw new Error('No collection artwork upload found')
               }
               const audioUploadResponse = trackUploads.find(
                 (ut) => ut.clientId === t.clientId
