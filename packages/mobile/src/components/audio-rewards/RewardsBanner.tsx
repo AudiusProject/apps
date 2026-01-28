@@ -1,12 +1,13 @@
 import { useCallback } from 'react'
 
+import { ChallengeName } from '@audius/common/models'
 import { audioRewardsPageActions, modalsActions } from '@audius/common/store'
 import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch } from 'react-redux'
 
 import { IconCrown, Flex, Text, Paper, useTheme } from '@audius/harmony-native'
 const { setVisibility } = modalsActions
-const { setTrendingRewardsModalType } = audioRewardsPageActions
+const { setChallengeRewardsModalType } = audioRewardsPageActions
 
 const messageMap = {
   tracks: {
@@ -33,10 +34,17 @@ export const RewardsBanner = (props: RewardsBannerProps) => {
   const { color } = useTheme()
 
   const handlePress = useCallback(() => {
-    dispatch(setTrendingRewardsModalType({ modalType: bannerType }))
-    dispatch(
-      setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
-    )
+    // Map banner type to ChallengeName
+    let challengeName: ChallengeName
+    if (bannerType === 'tracks') {
+      challengeName = ChallengeName.TrendingTrack
+    } else if (bannerType === 'underground') {
+      challengeName = ChallengeName.TrendingUndergroundTrack
+    } else {
+      challengeName = ChallengeName.TrendingPlaylist
+    }
+    dispatch(setChallengeRewardsModalType({ modalType: challengeName }))
+    dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
   }, [dispatch, bannerType])
 
   // Get message content safely

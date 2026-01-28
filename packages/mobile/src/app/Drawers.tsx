@@ -44,7 +44,6 @@ import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
 import { SupportersInfoDrawer } from 'app/components/supporters-info-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
-import { TrendingRewardsDrawer } from 'app/components/trending-rewards-drawer'
 import { VerificationErrorDrawer } from 'app/components/verification-error-drawer/VerificationErrorDrawer'
 import { VerificationSuccessDrawer } from 'app/components/verification-success-drawer/VerificationSuccessDrawer'
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
@@ -107,7 +106,6 @@ export const NativeDrawer = (props: NativeDrawerProps) => {
 
 const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   TiersExplainer: TiersExplainerDrawer,
-  TrendingRewardsExplainer: TrendingRewardsDrawer,
   ChallengeRewards: ChallengeRewardsDrawer,
   ClaimAllRewards: ClaimAllRewardsDrawer,
   APIRewardsExplainer: ApiRewardsDrawer,

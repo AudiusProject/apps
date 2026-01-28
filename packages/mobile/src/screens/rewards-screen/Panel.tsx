@@ -6,8 +6,8 @@ import type { ChallengeRewardsInfo } from '@audius/common/utils'
 import { isRewardOpenToAll } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
 import type { ProfileTabScreenParamList } from 'app/screens/app-screen/types'
-import { Platform } from 'react-native'
-import { TouchableOpacity, View } from 'react-native-gesture-handler'
+import { Platform, View } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
 import {

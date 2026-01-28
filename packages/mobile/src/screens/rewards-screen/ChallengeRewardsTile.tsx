@@ -36,11 +36,8 @@ import { Panel } from './Panel'
 const { setVisibility } = modalsActions
 const { getUserChallenges, getUserChallengesLoading } =
   audioRewardsPageSelectors
-const {
-  fetchUserChallenges,
-  setChallengeRewardsModalType,
-  setTrendingRewardsModalType
-} = audioRewardsPageActions
+const { fetchUserChallenges, setChallengeRewardsModalType } =
+  audioRewardsPageActions
 const { getOptimisticUserChallenges } = challengesSelectors
 
 const validRewardIds: Set<ChallengeRewardID> = new Set([
@@ -160,26 +157,18 @@ export const ChallengeRewardsTile = () => {
   )
 
   const openModal = (modalType: ChallengeRewardsModalType) => {
-    // Handle trending rewards - they use a different modal
-    if (modalType === 'tt' || modalType === 'trending-track') {
-      dispatch(setTrendingRewardsModalType({ modalType: 'tracks' }))
-      dispatch(
-        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
-      )
-    } else if (modalType === 'tut' || modalType === 'trending-underground') {
-      dispatch(setTrendingRewardsModalType({ modalType: 'underground' }))
-      dispatch(
-        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
-      )
-    } else if (modalType === 'tp' || modalType === 'trending-playlist') {
-      dispatch(setTrendingRewardsModalType({ modalType: 'playlists' }))
-      dispatch(
-        setVisibility({ modal: 'TrendingRewardsExplainer', visible: true })
-      )
-    } else {
-      dispatch(setChallengeRewardsModalType({ modalType }))
-      dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
+    // Map trending reward IDs to ChallengeName enum values for modal
+    let challengeName: ChallengeRewardsModalType = modalType
+    if (modalType === ChallengeName.TrendingTrack) {
+      challengeName = ChallengeName.TrendingTrack
+    } else if (modalType === ChallengeName.TrendingUndergroundTrack) {
+      challengeName = ChallengeName.TrendingUndergroundTrack
+    } else if (modalType === ChallengeName.TrendingPlaylist) {
+      challengeName = ChallengeName.TrendingPlaylist
     }
+
+    dispatch(setChallengeRewardsModalType({ modalType: challengeName }))
+    dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
   }
 
   // Filter completed rewards based on toggle
