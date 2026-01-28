@@ -66,13 +66,13 @@ export const PlayPauseButton = ({
 
   return (
     <Button
-      name={isPreview ? 'preview' : 'play'}
       size='large'
       variant={isPreview ? 'secondary' : 'primary'}
       iconLeft={playing ? IconPause : PlayIconComponent}
       onClick={onPlay}
       minWidth={180}
       disabled={disabled}
+      translate='no'
     >
       {playing ? messages.pause : playText}
     </Button>
