@@ -73,6 +73,7 @@ export const PlayPauseButton = ({
       onClick={onPlay}
       minWidth={180}
       disabled={disabled}
+      translate='no'
     >
       {playing ? messages.pause : playText}
     </Button>
