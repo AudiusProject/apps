@@ -1,51 +1,121 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 
 import {
   useArtistCoin,
+  useCoinBalance,
   transformArtistCoinToTokenInfo,
-  useCoinBalance
+  useCurrentUserId,
+  useTradeableCoins
 } from '@audius/common/api'
-import { walletMessages } from '@audius/common/messages'
+import { useOwnedCoins } from '@audius/common/hooks'
+import { buySellMessages, walletMessages } from '@audius/common/messages'
+import { User } from '@audius/common/models'
+import { isValidSolAddress } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { Keyboard } from 'react-native'
 
 import { Button, Divider, Flex, Text, TextInput } from '@audius/harmony-native'
-import { BalanceSection } from 'app/components/core'
+import { BalanceSection, SegmentedControl } from 'app/components/core'
+import { TokenIcon } from 'app/components/core'
+
+import { UserSearchAutocomplete } from './UserSearchAutocomplete'
+
+type RecipientType = 'user' | 'wallet'
 
 type SendTokensInputProps = {
   mint: string
-  onContinue: (amount: bigint, destinationAddress: string) => void
-  initialAmount: bigint
-  initialDestinationAddress: string
+  onContinue: (
+    amount: bigint,
+    destinationAddress: string,
+    selectedUser: User | null,
+    selectedMint: string,
+    recipientType: RecipientType,
+    amountString: string
+  ) => void
+  initialAmount?: string
+  initialDestinationAddress?: string
+  initialSelectedUser?: User | null
+  initialRecipientType?: RecipientType
 }
 
+const messages = {
+  sending: 'Sending',
+  destinationAddress: 'Destination Address',
+  recipient: 'Recipient',
+  recipientDescriptionUser: 'Search for an Audius user by name or handle.',
+  recipientDescriptionWallet: 'The Solana wallet address to receive funds.',
+  user: 'User',
+  wallet: 'Wallet',
+  continue: 'Continue',
+  insufficientBalance: 'Insufficient balance',
+  validWalletAddressRequired: 'A valid wallet address is required.',
+  amountRequired: 'Amount is required',
+  amountTooLow: 'Amount is too low to send',
+  walletAddress: 'Wallet Address',
+  userRequired: 'Please select a user',
+  userNoWallet:
+    'This user does not have a wallet address set up. Please send to a different user or use a wallet address instead.'
+}
+
+type ValidationError =
+  | 'INSUFFICIENT_BALANCE'
+  | 'INVALID_ADDRESS'
+  | 'AMOUNT_REQUIRED'
+  | 'AMOUNT_TOO_LOW'
+  | 'USER_REQUIRED'
+  | 'USER_NO_WALLET'
+
 export const SendTokensInput = ({
-  mint,
+  mint: initialMint,
   onContinue,
-  initialAmount,
-  initialDestinationAddress
+  initialAmount = '',
+  initialDestinationAddress = '',
+  initialSelectedUser = null,
+  initialRecipientType = 'user'
 }: SendTokensInputProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const [recipientType, setRecipientType] =
+    useState<RecipientType>(initialRecipientType)
+  const [selectedMint, setSelectedMint] = useState<string>(initialMint)
+  const [amount, setAmount] = useState(initialAmount)
+  const [destinationAddress, setDestinationAddress] = useState(
+    initialDestinationAddress
+  )
+  const [selectedUser, setSelectedUser] = useState<User | null>(
+    initialSelectedUser
+  )
+  const [amountError, setAmountError] = useState<ValidationError | null>(null)
+  const [addressError, setAddressError] = useState<ValidationError | null>(null)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  const { data: currentUserId } = useCurrentUserId()
+
+  // Get available tokens
+  const { coinsArray: availableCoins, isLoading: coinsLoading } =
+    useTradeableCoins({
+      includeSol: false
+    })
+  const { ownedCoins, isLoading: isOwnedCoinsLoading } = useOwnedCoins(
+    availableCoins
+  )
+
+  // Get the coin data and balance for selected token
+  const { data: coin } = useArtistCoin(selectedMint)
   const { data: tokenBalance } = useCoinBalance({
-    mint,
+    mint: selectedMint,
     includeExternalWallets: false,
     includeStaked: false
   })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
-  const [amount, setAmount] = useState(
-    initialAmount > 0
-      ? new FixedDecimal(initialAmount, tokenInfo?.decimals).toString()
-      : ''
-  )
-  const [destinationAddress, setDestinationAddress] = useState(
-    initialDestinationAddress
-  )
-  const [errors, setErrors] = useState({
-    amount: '',
-    address: ''
-  })
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  // Find the selected token in owned coins for the dropdown
+  const selectedToken = useMemo(() => {
+    const ownedToken = ownedCoins.find(
+      (token) => token.address === selectedMint
+    )
+    if (ownedToken) return ownedToken
+    // Fallback to available coins if not in owned coins yet (during initial load)
+    return availableCoins.find((token) => token.address === selectedMint)
+  }, [ownedCoins, availableCoins, selectedMint])
 
   // Listen to keyboard events to adjust content height
   useEffect(() => {
@@ -69,112 +139,301 @@ export const SendTokensInput = ({
     }
   }, [])
 
-  const validateInputs = useCallback(() => {
-    const newErrors = { amount: '', address: '' }
+  const handleTokenChange = useCallback((token: typeof selectedToken) => {
+    if (token) {
+      setSelectedMint(token.address)
+      setAmount('') // Reset amount when changing token
+      setAmountError(null)
+    }
+  }, [])
+
+  const handleAmountChange = useCallback((value: string) => {
+    setAmount(value)
+    setAmountError(null)
+  }, [])
+
+  const handleAddressChange = useCallback((text: string) => {
+    setDestinationAddress(text)
+    setAddressError(null)
+  }, [])
+
+  const handleUserChange = useCallback(
+    (user: User | null) => {
+      setSelectedUser(user)
+      setAddressError(null)
+      // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
+      // But we still set spl_wallet for display purposes in the UI
+      if (user?.spl_wallet) {
+        setDestinationAddress(user.spl_wallet)
+      } else {
+        setDestinationAddress('')
+      }
+    },
+    []
+  )
+
+  const handleRecipientTypeChange = useCallback((type: RecipientType) => {
+    setRecipientType(type)
+    setSelectedUser(null)
+    setDestinationAddress('')
+    setAddressError(null)
+  }, [])
+
+  const validateInputs = (): boolean => {
+    let isValid = true
 
     // Validate amount
-    if (!amount || amount === '0') {
-      newErrors.amount = walletMessages.sendTokensAmountRequired
+    if (!amount || parseFloat(amount) <= 0) {
+      setAmountError('AMOUNT_REQUIRED')
+      isValid = false
     } else {
-      try {
-        const parsedAmount = new FixedDecimal(amount, tokenInfo?.decimals || 0)
-        if (parsedAmount.value <= 0) {
-          newErrors.amount = walletMessages.sendTokensAmountInsufficient
-        } else {
-          // Check if amount exceeds available balance
-          const currentBalance = tokenBalance?.balance?.value ?? BigInt(0)
-          if (parsedAmount.value > currentBalance) {
-            newErrors.amount = walletMessages.sendTokensAmountInsufficient
-          }
-        }
-      } catch (error) {
-        newErrors.amount = walletMessages.sendTokensInvalidAmount
+      const currentBalance = tokenBalance?.balance
+        ? tokenBalance.balance.value
+        : BigInt(0)
+      const amountWei = new FixedDecimal(amount, tokenBalance?.decimals).value
+      if (amountWei > currentBalance) {
+        setAmountError('INSUFFICIENT_BALANCE')
+        isValid = false
+      } else if (amountWei < BigInt(1000)) {
+        // Minimum amount
+        setAmountError('AMOUNT_TOO_LOW')
+        isValid = false
       }
     }
 
-    // Validate address
-    if (!destinationAddress.trim()) {
-      newErrors.address = walletMessages.sendTokensInvalidAddress
-    } else if (destinationAddress.length < 32) {
-      newErrors.address = walletMessages.sendTokensInvalidAddress
-    }
-
-    setErrors(newErrors)
-    return !newErrors.amount && !newErrors.address
-  }, [
-    amount,
-    destinationAddress,
-    tokenInfo?.decimals,
-    tokenBalance?.balance?.value
-  ])
-
-  const handleContinue = useCallback(() => {
-    if (validateInputs() && tokenInfo) {
-      try {
-        const parsedAmount = new FixedDecimal(amount, tokenInfo.decimals)
-        onContinue(parsedAmount.value, destinationAddress.trim())
-      } catch (error) {
-        setErrors((prev) => ({
-          ...prev,
-          amount: walletMessages.sendTokensInvalidAmount
-        }))
+    // Validate recipient based on type
+    if (recipientType === 'user') {
+      if (!selectedUser) {
+        setAddressError('USER_REQUIRED')
+        isValid = false
+      } else if (!selectedUser.spl_wallet) {
+        setAddressError('USER_NO_WALLET')
+        isValid = false
+      }
+    } else {
+      // Validate wallet address
+      if (!destinationAddress) {
+        setAddressError('INVALID_ADDRESS')
+        isValid = false
+      } else if (!isValidSolAddress(destinationAddress as any)) {
+        setAddressError('INVALID_ADDRESS')
+        isValid = false
       }
     }
-  }, [validateInputs, tokenInfo, amount, destinationAddress, onContinue])
+
+    return isValid
+  }
+
+  const handleContinue = () => {
+    if (validateInputs()) {
+      const amountWei = new FixedDecimal(amount, tokenInfo?.decimals).value
+      // Use wallet address from user if sending to user, otherwise use input address
+      const finalAddress =
+        recipientType === 'user' && selectedUser?.spl_wallet
+          ? selectedUser.spl_wallet
+          : destinationAddress
+      onContinue(
+        amountWei,
+        finalAddress,
+        recipientType === 'user' ? selectedUser : null,
+        selectedMint,
+        recipientType,
+        amount
+      )
+    }
+  }
+
+  const getErrorText = (error: ValidationError | null) => {
+    switch (error) {
+      case 'INSUFFICIENT_BALANCE':
+        return messages.insufficientBalance
+      case 'INVALID_ADDRESS':
+        return messages.validWalletAddressRequired
+      case 'AMOUNT_REQUIRED':
+        return messages.amountRequired
+      case 'AMOUNT_TOO_LOW':
+        return messages.amountTooLow
+      case 'USER_REQUIRED':
+        return messages.userRequired
+      case 'USER_NO_WALLET':
+        return messages.userNoWallet
+      default:
+        return ''
+    }
+  }
+
+  const hasErrors = amountError || addressError
+
+  // Show loading state if we don't have tokenInfo yet
+  if (!tokenInfo || coinsLoading || isOwnedCoinsLoading) {
+    return (
+      <Flex gap='xl' ph='xl' pb='xl'>
+        <BalanceSection mint={selectedMint} internalWalletOnly />
+        <Divider />
+        <Flex gap='l' flex={1}>
+          <Text variant='body' color='subdued'>
+            Loading...
+          </Text>
+        </Flex>
+      </Flex>
+    )
+  }
+
+  if (!selectedToken) {
+    return (
+      <Flex gap='xl' ph='xl' pb='xl'>
+        <BalanceSection mint={selectedMint} internalWalletOnly />
+        <Divider />
+        <Flex gap='l' flex={1}>
+          <Text variant='body' color='subdued'>
+            Token not found. Please try again.
+          </Text>
+        </Flex>
+      </Flex>
+    )
+  }
 
   return (
     <Flex
       gap='xl'
       ph='xl'
       pb='xl'
-      // Ensure the keyboard doesn't cover the input
       style={{ minHeight: keyboardHeight > 0 ? keyboardHeight + 400 : 'auto' }}
     >
-      <BalanceSection mint={mint} internalWalletOnly />
+      {/* User/Wallet Segmented Control at Top */}
+      <SegmentedControl
+        options={[
+          { key: 'user', text: messages.user },
+          { key: 'wallet', text: messages.wallet }
+        ]}
+        selected={recipientType}
+        onSelectOption={(value) =>
+          handleRecipientTypeChange(value as RecipientType)
+        }
+      />
+
+      <BalanceSection mint={selectedMint} internalWalletOnly />
       <Divider />
 
-      <Flex gap='l' flex={1}>
-        <Flex gap='m'>
-          <Flex gap='xs'>
-            <Text variant='heading' size='s' color='subdued'>
-              {walletMessages.sendTokensAmountToSend}
-            </Text>
-          </Flex>
-          <TextInput
-            label={walletMessages.sendTokensAmount}
-            value={amount}
-            onChangeText={setAmount}
-            placeholder={walletMessages.sendTokensAmount}
-            keyboardType='decimal-pad'
-            error={!!errors.amount}
-            helperText={errors.amount}
-            endAdornmentText={`$${tokenInfo?.symbol}`}
-          />
-        </Flex>
-        <Divider />
+      {/* Sending Section */}
+      <Flex gap='m'>
+        <Text variant='title' size='l' color='default'>
+          {messages.sending}
+        </Text>
 
-        <Flex gap='m'>
-          <Text variant='heading' size='s' color='subdued'>
-            {walletMessages.sendTokensDestinationAddress}
-          </Text>
+        <Flex gap='s'>
           <TextInput
-            label={walletMessages.sendTokensWalletAddress}
-            value={destinationAddress}
-            onChangeText={setDestinationAddress}
-            placeholder={walletMessages.sendTokensWalletAddress}
-            error={!!errors.address}
-            helperText={errors.address}
+            label={tokenInfo.symbol}
+            value={amount}
+            onChangeText={handleAmountChange}
+            placeholder='0.00'
+            keyboardType='decimal-pad'
+            error={!!amountError}
+            helperText={amountError ? getErrorText(amountError) : undefined}
+            endAdornmentText={`$${tokenInfo.symbol}`}
           />
+
+          {ownedCoins.length > 1 ? (
+            <Flex
+              row
+              gap='s'
+              alignItems='center'
+              p='m'
+              backgroundColor='surface1'
+              borderRadius='m'
+              border='default'
+              onPress={() => {
+                // TODO: Implement token picker modal/drawer
+                // For now, just show the current token
+              }}
+            >
+              <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
+              <Flex flex={1}>
+                <Text variant='heading' size='s'>
+                  {tokenInfo.name}
+                </Text>
+                <Text variant='body' size='s' color='subdued'>
+                  ${tokenInfo.symbol}
+                </Text>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex row gap='s' alignItems='center' p='m'>
+              <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
+              <Flex>
+                <Text variant='heading' size='s'>
+                  {tokenInfo.name}
+                </Text>
+                <Text variant='body' size='s' color='subdued'>
+                  ${tokenInfo.symbol}
+                </Text>
+              </Flex>
+            </Flex>
+          )}
         </Flex>
       </Flex>
 
+      <Divider />
+
+      {/* Destination Address/Recipient Section */}
+      <Flex gap='m'>
+        <Flex gap='xs'>
+          <Text variant='heading' size='s' color='subdued'>
+            {recipientType === 'user'
+              ? messages.recipient
+              : messages.destinationAddress}
+          </Text>
+          <Text variant='body' size='s' color='default'>
+            {recipientType === 'user'
+              ? messages.recipientDescriptionUser
+              : messages.recipientDescriptionWallet}
+          </Text>
+        </Flex>
+
+        {/* User or Wallet Input */}
+        {recipientType === 'user' ? (
+          <UserSearchAutocomplete
+            value={selectedUser}
+            onChange={handleUserChange}
+            error={!!addressError}
+            helperText={addressError ? getErrorText(addressError) : undefined}
+            excludedUserIds={currentUserId ? [currentUserId] : undefined}
+          />
+        ) : (
+          <TextInput
+            label={messages.walletAddress}
+            value={destinationAddress}
+            onChangeText={handleAddressChange}
+            placeholder={messages.walletAddress}
+            error={!!addressError}
+            helperText={addressError ? getErrorText(addressError) : undefined}
+          />
+        )}
+      </Flex>
+
+      {/* Terms of Use Link */}
+      <Text variant='body' size='s' color='subdued'>
+        {buySellMessages.termsAgreement}{' '}
+        <Text
+          variant='body'
+          size='s'
+          color='accent'
+          onPress={() => {
+            // TODO: Open terms of service link
+          }}
+        >
+          {buySellMessages.termsOfUse}
+        </Text>
+      </Text>
+
+      {/* Continue Button */}
       <Button
         variant='primary'
-        fullWidth
         onPress={handleContinue}
-        disabled={!amount || !destinationAddress}
+        disabled={!!hasErrors}
+        fullWidth
       >
-        {walletMessages.continue}
+        {messages.continue}
       </Button>
     </Flex>
   )
