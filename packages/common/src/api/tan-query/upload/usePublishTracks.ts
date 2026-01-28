@@ -93,6 +93,15 @@ export const publishTracks = async (
             })
           )
 
+          dispatch(
+            updateProgress({
+              clientId: param.clientId,
+              stemIndex: null,
+              key: 'image',
+              progress: { status: ProgressStatus.COMPLETE }
+            })
+          )
+
           // Track success analytics for this individual track
           const analyticsKind =
             (kind ?? 'tracks') === 'tracks'

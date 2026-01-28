@@ -288,6 +288,16 @@ export const useUpload = () => {
         return
       }
       const sdk = await audiusSdk()
+
+      // Finish the audio progress for the collection (there is none)
+      dispatch(
+        updateProgress({
+          clientId: 'collection-artwork',
+          key: 'audio',
+          stemIndex: null,
+          progress: { status: ProgressStatus.COMPLETE }
+        })
+      )
       const uploadHandle = sdk.tracks.uploadTrackFiles({
         imageFile: fileToSdk(formState.metadata.artwork.file, 'artwork'),
         onProgress: (key, { loaded, total }) => {
@@ -467,10 +477,10 @@ export const useUpload = () => {
             collectionMetadata: formState.metadata,
             tracks: tracks.map((t) => {
               const imageUploadResponse = artwork?.find(
-                (a) => a.clientId === t.clientId
+                (a) => a.clientId === 'collection-artwork'
               )?.imageUploadResponse
               if (!imageUploadResponse) {
-                throw new Error(`No artwork found for track ${t.clientId}`)
+                throw new Error('No collection artwork upload found')
               }
               const audioUploadResponse = trackUploads.find(
                 (ut) => ut.clientId === t.clientId
