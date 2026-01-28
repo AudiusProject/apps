@@ -17,6 +17,7 @@ import {
 } from '@audius/harmony-native'
 import type { ContextualParams } from 'app/hooks/useNavigation'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 
 import { AppDrawerContext } from '../app-drawer-screen'
@@ -57,10 +58,15 @@ export const useAppScreenOptions = <
   const styles = useStyles()
   const navigation = useNavigation()
   const { drawerHelpers } = useContext(AppDrawerContext)
+  const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
 
   const handleOpenLeftNavDrawer = useCallback(() => {
+    // Prevent opening left nav drawer when now-playing drawer is open
+    if (isNowPlayingDrawerOpen) {
+      return
+    }
     drawerHelpers?.openDrawer()
-  }, [drawerHelpers])
+  }, [drawerHelpers, isNowPlayingDrawerOpen])
 
   const handlePressSearch = useCallback(() => {
     navigation.navigate('explore', {

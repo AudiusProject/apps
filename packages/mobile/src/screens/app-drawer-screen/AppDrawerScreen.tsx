@@ -7,6 +7,7 @@ import { Dimensions } from 'react-native'
 
 import { AudioPlayer } from 'app/components/audio/AudioPlayer'
 import { RepeatListener } from 'app/components/audio/RepeatListener'
+import { useDrawer } from 'app/hooks/useDrawer'
 
 import { AppScreen } from '../app-screen'
 
@@ -50,6 +51,7 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
 export const AppDrawerScreen = memo(
   () => {
     const [gesturesDisabled, setGesturesDisabled] = useState(false)
+    const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
 
     const drawerScreenOptions = useMemo(
       () => ({
@@ -57,9 +59,11 @@ export const AppDrawerScreen = memo(
         swipeEdgeWidth: SCREEN_WIDTH,
         drawerType: 'slide' as const,
         drawerStyle: { width: '75%' as const },
-        gestureHandlerProps: { enabled: !gesturesDisabled }
+        gestureHandlerProps: {
+          enabled: !gesturesDisabled && !isNowPlayingDrawerOpen
+        }
       }),
-      [gesturesDisabled]
+      [gesturesDisabled, isNowPlayingDrawerOpen]
     )
 
     const gestureProps = { gesturesDisabled, setGesturesDisabled }
