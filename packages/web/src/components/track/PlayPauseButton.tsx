@@ -66,6 +66,7 @@ export const PlayPauseButton = ({
 
   return (
     <Button
+      name={isPreview ? 'preview' : 'play'}
       size='large'
       variant={isPreview ? 'secondary' : 'primary'}
       iconLeft={playing ? IconPause : PlayIconComponent}
