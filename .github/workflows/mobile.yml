@@ -322,6 +322,12 @@ jobs:
           echo "Disk space after cleanup:"
           df -h
 
+      - name: Setup Java (after disk cleanup)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -365,6 +371,7 @@ jobs:
       - name: Install dependencies
         env:
           CI: true
+          SKIP_ANDROID_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           if [[ -d node_modules ]]; then
@@ -682,6 +689,12 @@ jobs:
           echo "Disk space after cleanup:"
           df -h
 
+      - name: Setup Java (after disk cleanup)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -725,6 +738,7 @@ jobs:
       - name: Install dependencies
         env:
           CI: true
+          SKIP_ANDROID_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           if [[ -d node_modules ]]; then
