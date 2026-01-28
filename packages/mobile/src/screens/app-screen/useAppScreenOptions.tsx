@@ -15,9 +15,9 @@ import {
   IconCaretLeft,
   IconSearch
 } from '@audius/harmony-native'
+import { useDrawer } from 'app/hooks/useDrawer'
 import type { ContextualParams } from 'app/hooks/useNavigation'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 
 import { AppDrawerContext } from '../app-drawer-screen'
