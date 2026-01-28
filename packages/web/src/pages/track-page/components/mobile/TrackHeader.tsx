@@ -80,7 +80,6 @@ const PlayButton = ({ disabled, playing, onPlay }: PlayButtonProps) => {
       iconLeft={playing ? IconPause : IconPlay}
       onClick={onPlay}
       fullWidth
-      translate='no'
     >
       {playing ? messages.pause : messages.play}
     </Button>
@@ -94,7 +93,6 @@ const PreviewButton = ({ playing, onPlay }: PlayButtonProps) => {
       iconLeft={playing ? IconPause : IconPlay}
       onClick={onPlay}
       fullWidth
-      translate='no'
     >
       {playing ? messages.pause : messages.preview}
     </Button>
