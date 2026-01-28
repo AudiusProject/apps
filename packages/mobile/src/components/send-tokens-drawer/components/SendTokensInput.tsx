@@ -8,15 +8,18 @@ import {
   useTradeableCoins
 } from '@audius/common/api'
 import { useOwnedCoins } from '@audius/common/hooks'
-import { buySellMessages, walletMessages } from '@audius/common/messages'
-import { User } from '@audius/common/models'
+import { buySellMessages } from '@audius/common/messages'
+import type { User } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { Keyboard } from 'react-native'
+import { Keyboard, Pressable } from 'react-native'
 
 import { Button, Divider, Flex, Text, TextInput } from '@audius/harmony-native'
-import { BalanceSection, SegmentedControl } from 'app/components/core'
-import { TokenIcon } from 'app/components/core'
+import {
+  BalanceSection,
+  SegmentedControl,
+  TokenIcon
+} from 'app/components/core'
 
 import { UserSearchAutocomplete } from './UserSearchAutocomplete'
 
@@ -75,7 +78,8 @@ export const SendTokensInput = ({
 }: SendTokensInputProps) => {
   const [recipientType, setRecipientType] =
     useState<RecipientType>(initialRecipientType)
-  const [selectedMint, setSelectedMint] = useState<string>(initialMint)
+  const [selectedMint] = useState<string>(initialMint)
+  // setSelectedMint will be used when token picker is implemented
   const [amount, setAmount] = useState(initialAmount)
   const [destinationAddress, setDestinationAddress] = useState(
     initialDestinationAddress
@@ -94,9 +98,8 @@ export const SendTokensInput = ({
     useTradeableCoins({
       includeSol: false
     })
-  const { ownedCoins, isLoading: isOwnedCoinsLoading } = useOwnedCoins(
-    availableCoins
-  )
+  const { ownedCoins, isLoading: isOwnedCoinsLoading } =
+    useOwnedCoins(availableCoins)
 
   // Get the coin data and balance for selected token
   const { data: coin } = useArtistCoin(selectedMint)
@@ -139,13 +142,14 @@ export const SendTokensInput = ({
     }
   }, [])
 
-  const handleTokenChange = useCallback((token: typeof selectedToken) => {
-    if (token) {
-      setSelectedMint(token.address)
-      setAmount('') // Reset amount when changing token
-      setAmountError(null)
-    }
-  }, [])
+  // Token change handler - prepared for future token picker implementation
+  // const handleTokenChange = useCallback((token: typeof selectedToken) => {
+  //   if (token) {
+  //     setSelectedMint(token.address)
+  //     setAmount('') // Reset amount when changing token
+  //     setAmountError(null)
+  //   }
+  // }, [])
 
   const handleAmountChange = useCallback((value: string) => {
     setAmount(value)
@@ -157,20 +161,17 @@ export const SendTokensInput = ({
     setAddressError(null)
   }, [])
 
-  const handleUserChange = useCallback(
-    (user: User | null) => {
-      setSelectedUser(user)
-      setAddressError(null)
-      // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
-      // But we still set spl_wallet for display purposes in the UI
-      if (user?.spl_wallet) {
-        setDestinationAddress(user.spl_wallet)
-      } else {
-        setDestinationAddress('')
-      }
-    },
-    []
-  )
+  const handleUserChange = useCallback((user: User | null) => {
+    setSelectedUser(user)
+    setAddressError(null)
+    // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
+    // But we still set spl_wallet for display purposes in the UI
+    if (user?.spl_wallet) {
+      setDestinationAddress(user.spl_wallet)
+    } else {
+      setDestinationAddress('')
+    }
+  }, [])
 
   const handleRecipientTypeChange = useCallback((type: RecipientType) => {
     setRecipientType(type)
@@ -334,29 +335,32 @@ export const SendTokensInput = ({
           />
 
           {ownedCoins.length > 1 ? (
-            <Flex
-              row
-              gap='s'
-              alignItems='center'
-              p='m'
-              backgroundColor='surface1'
-              borderRadius='m'
-              border='default'
+            <Pressable
               onPress={() => {
                 // TODO: Implement token picker modal/drawer
                 // For now, just show the current token
               }}
             >
-              <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
-              <Flex flex={1}>
-                <Text variant='heading' size='s'>
-                  {tokenInfo.name}
-                </Text>
-                <Text variant='body' size='s' color='subdued'>
-                  ${tokenInfo.symbol}
-                </Text>
+              <Flex
+                row
+                gap='s'
+                alignItems='center'
+                p='m'
+                backgroundColor='surface1'
+                borderRadius='m'
+                border='default'
+              >
+                <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
+                <Flex flex={1}>
+                  <Text variant='heading' size='s'>
+                    {tokenInfo.name}
+                  </Text>
+                  <Text variant='body' size='s' color='subdued'>
+                    ${tokenInfo.symbol}
+                  </Text>
+                </Flex>
               </Flex>
-            </Flex>
+            </Pressable>
           ) : (
             <Flex row gap='s' alignItems='center' p='m'>
               <TokenIcon logoURI={tokenInfo.logoURI} size={32} />

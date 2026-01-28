@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useCurrentUserId, useUsers } from '@audius/common/api'
-import { Status, SquareSizes, User } from '@audius/common/models'
+import type { User } from '@audius/common/models'
+import { Status, SquareSizes } from '@audius/common/models'
 import {
   searchUsersModalActions,
   searchUsersModalSelectors
 } from '@audius/common/store'
-import { useDebounce } from 'react-use'
+import { FlatList, Pressable, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { FlatList, Pressable, View, TouchableWithoutFeedback } from 'react-native'
+import { useDebounce } from 'react-use'
 
-import { Avatar, Flex, Text, TextInput } from '@audius/harmony-native'
+import { Avatar, Flex, Text } from '@audius/harmony-native'
 import { IconSearch } from '@audius/harmony-native'
+import { TextInput } from 'app/components/core'
+import { useProfilePicture } from 'app/components/image/UserImage'
 import LoadingSpinner from 'app/components/loading-spinner'
-import { useProfilePicture } from 'app/hooks/useProfilePicture'
 import { UserLink } from 'app/components/user-link/UserLink'
 
 const messages = {
@@ -131,41 +133,37 @@ export const UserSearchAutocomplete = ({
 
   const isLoading = status === Status.LOADING && hasQuery
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handlePressOutside = () => {
-      setIsOpen(false)
-    }
-
-    // Note: In React Native, we rely on the parent to handle outside presses
-    // This is a simple implementation - for production, consider using a Modal or
-    // a library like react-native-modal
-    return () => {}
-  }, [])
+  // Note: Dropdown closes on blur, which is handled in the TextInput onBlur prop
 
   return (
     <View ref={containerRef} style={{ position: 'relative', width: '100%' }}>
-      <TextInput
-        label={messages.searchUsers}
-        value={displayValue}
-        onChangeText={handleChange}
-        onFocus={() => {
-          // Only open dropdown if there's no selected user or if user starts typing
-          if (!value || query.trim()) {
-            setIsOpen(true)
-          }
-        }}
-        onBlur={() => {
-          // Delay closing to allow for option selection
-          setTimeout(() => setIsOpen(false), 200)
-        }}
-        error={error}
-        helperText={helperText}
-        placeholder='Search by name or handle'
-        Icon={query || value ? undefined : IconSearch}
-        clearable={!!(query || value)}
-        onClear={handleClear}
-      />
+      <Flex gap='xs'>
+        <TextInput
+          label={messages.searchUsers}
+          value={displayValue}
+          onChangeText={handleChange}
+          onFocus={() => {
+            // Only open dropdown if there's no selected user or if user starts typing
+            if (!value || query.trim()) {
+              setIsOpen(true)
+            }
+          }}
+          onBlur={() => {
+            // Delay closing to allow for option selection
+            setTimeout(() => setIsOpen(false), 200)
+          }}
+          error={error}
+          placeholder='Search by name or handle'
+          Icon={query || value ? undefined : IconSearch}
+          clearable={!!(query || value)}
+          onClear={handleClear}
+        />
+        {helperText ? (
+          <Text variant='body' size='s' color='danger'>
+            {helperText}
+          </Text>
+        ) : null}
+      </Flex>
 
       {isOpen && query.trim() && (
         <View
@@ -245,9 +243,7 @@ const UserOption = ({ user, onSelect, isSelected }: UserOptionProps) => {
       })}
     >
       <Avatar
-        h={32}
-        w={32}
-        src={profilePicture}
+        source={profilePicture.source}
         borderWidth='thin'
         style={{ flexShrink: 0 }}
       />

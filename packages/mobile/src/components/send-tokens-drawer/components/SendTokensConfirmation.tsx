@@ -2,15 +2,18 @@ import {
   useArtistCoin,
   transformArtistCoinToTokenInfo
 } from '@audius/common/api'
-import { User, SquareSizes } from '@audius/common/models'
-import { walletMessages } from '@audius/common/messages'
+import type { User } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
 
 import { Button, Flex, Text, Divider, Avatar } from '@audius/harmony-native'
-import { BalanceSection, SegmentedControl } from 'app/components/core'
-import { TokenIcon } from 'app/components/core'
+import {
+  BalanceSection,
+  SegmentedControl,
+  TokenIcon
+} from 'app/components/core'
+import { useProfilePicture } from 'app/components/image/UserImage'
 import { UserLink } from 'app/components/user-link'
-import { useProfilePicture } from 'app/hooks/useProfilePicture'
 
 type RecipientType = 'user' | 'wallet'
 
@@ -138,9 +141,7 @@ export const SendTokensConfirmation = ({
         {selectedUser ? (
           <Flex row alignItems='center' gap='s'>
             <Avatar
-              h={64}
-              w={64}
-              src={profilePicture}
+              source={profilePicture.source}
               borderWidth='thin'
               style={{ flexShrink: 0 }}
             />
@@ -152,12 +153,7 @@ export const SendTokensConfirmation = ({
             </Flex>
           </Flex>
         ) : (
-          <Text
-            variant='body'
-            size='m'
-            color='default'
-            style={{ wordBreak: 'break-all' }}
-          >
+          <Text variant='body' size='m' color='default' numberOfLines={0}>
             {destinationAddress}
           </Text>
         )}
