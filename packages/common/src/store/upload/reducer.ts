@@ -13,9 +13,7 @@ import {
   uploadTracksSucceeded,
   updateProgress,
   updateFormState,
-  UPDATE_FORM_STATE,
-  type resetProgress,
-  RESET_PROGRESS
+  UPDATE_FORM_STATE
 } from './actions'
 import {
   ProgressState,
@@ -96,7 +94,9 @@ const actionsMap = {
     newState.uploading = true
     const existingProgress = state.uploadProgress ?? []
     newState.uploadProgress = tracks?.map(
-      (t, i) => existingProgress[i] ?? getInitialProgress(t)
+      (t) =>
+        existingProgress.find((p) => p && p.clientId === t.clientId) ??
+        getInitialProgress(t)
     )
     newState.metadata =
       action.payload.uploadType === UploadType.ALBUM ||
@@ -128,37 +128,6 @@ const actionsMap = {
     newState.metadata = null
     newState.stems = []
     newState.error = true
-    return newState
-  },
-  [RESET_PROGRESS](
-    state: UploadState,
-    action: ReturnType<typeof resetProgress>
-  ) {
-    const { clientId, stemIndex, key } = action.payload
-
-    const newState = { ...state }
-    newState.uploadProgress = [...(state.uploadProgress ?? [])]
-
-    const trackIndex = newState.uploadProgress.findIndex(
-      (p) => p && p.clientId === clientId
-    )
-
-    if (trackIndex === -1) {
-      return state
-    }
-
-    if (stemIndex !== null) {
-      if (!newState.uploadProgress[trackIndex]?.stems[stemIndex]) {
-        return state
-      }
-      newState.uploadProgress[trackIndex].stems[stemIndex][key] = cloneDeep(
-        initialUploadState[key]
-      )
-    } else {
-      newState.uploadProgress[trackIndex][key] = cloneDeep(
-        initialUploadState[key]
-      )
-    }
     return newState
   },
   [UPDATE_PROGRESS](

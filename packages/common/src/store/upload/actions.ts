@@ -23,7 +23,6 @@ export const UPDATE_TRACK_AUDIO = 'UPLOAD/UPDATE_TRACK_AUDIO'
 export const UPDATE_PERCENT = 'UPLOAD/UPDATE_PERCENT'
 export const INCREMENT_PERCENT = 'UPLOAD/INCREMENT_PERCENT'
 export const UPDATE_PROGRESS = 'UPLOAD/UPDATE_PROGRESS'
-export const RESET_PROGRESS = 'UPLOAD/RESET_PROGRESS'
 export const RESET = 'UPLOAD/RESET'
 export const TOGGLE_MULTI_TRACK_NOTIFICATION =
   'UPLOAD/TOGGLE_MULTI_TRACK_NOTIFICATION'
@@ -64,14 +63,6 @@ export const uploadTracksSucceeded = (payload: { id: number | null }) => {
 
 export const uploadTracksFailed = () => {
   return { type: UPLOAD_TRACKS_FAILED }
-}
-
-export const resetProgress = (payload: {
-  clientId: string
-  stemIndex: number | null
-  key: 'audio' | 'image'
-}) => {
-  return { type: RESET_PROGRESS, payload }
 }
 
 export const updateProgress = (payload: {
