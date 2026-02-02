@@ -70,6 +70,7 @@ import reachabilitySagas from 'store/reachability/sagas'
 import reloadSagas from 'store/reload/sagas'
 import routingSagas from 'store/routing/sagas'
 import signOutSagas from 'store/sign-out/sagas'
+import uploadCompletionSagas from 'store/upload/sagas'
 
 export default function* rootSaga() {
   const sagas = ([] as (() => Generator<any, void, any>)[]).concat(
@@ -148,6 +149,7 @@ export default function* rootSaga() {
     searchUsersModalSagas(),
     stemUploadSagas(),
     userListModalSagas(),
+    uploadCompletionSagas(),
     commonReachabilitySagas(),
 
     // Remote config
