@@ -277,6 +277,7 @@ export const ChallengeRewardsTile = ({
                     alignItems='center'
                     border='default'
                     borderRadius='m'
+                    backgroundColor='surface1'
                     css={{
                       overflow: 'hidden',
                       position: 'absolute',

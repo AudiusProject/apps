@@ -1,23 +1,14 @@
-import { useCurrentAccountUser } from '@audius/common/api'
+import { useMemo } from 'react'
+
 import { useFormattedProgressLabel } from '@audius/common/hooks'
 import type { OptimisticUserChallenge } from '@audius/common/models'
-import { useTierAndVerifiedForUser } from '@audius/common/store/wallet/utils'
 import type { ChallengeRewardsInfo } from '@audius/common/utils'
-import { isRewardOpenToAll } from '@audius/common/utils'
-import { useNavigation } from '@react-navigation/native'
-import type { ProfileTabScreenParamList } from 'app/screens/app-screen/types'
-import { Platform, View } from 'react-native'
+import { getChallengeStatusLabel } from '@audius/common/utils'
+import { Platform } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
-import {
-  Flex,
-  IconCheck,
-  IconLock,
-  PlainButton,
-  Text,
-  useTheme
-} from '@audius/harmony-native'
+import { Flex, IconCheck, Text, useTheme } from '@audius/harmony-native'
 import type { MobileChallengeConfig } from 'app/utils/challenges'
 import { useThemeColors } from 'app/utils/theme'
 
@@ -48,11 +39,6 @@ export const Panel = ({
 }: PanelProps) => {
   const { neutralLight4 } = useThemeColors()
   const { spacing, color } = useTheme()
-  const navigation = useNavigation<ProfileTabScreenParamList>()
-  const { data: currentUser } = useCurrentAccountUser()
-  const { isVerified } = useTierAndVerifiedForUser(currentUser?.user_id)
-  const isOpenToAll = isRewardOpenToAll(id)
-  const requiresVerification = !isOpenToAll && !isVerified
 
   const maxStepCount = challenge?.max_steps ?? 0
   const hasDisbursed = challenge?.state === 'disbursed'
@@ -62,63 +48,45 @@ export const Panel = ({
     !hasDisbursed
   const needsDisbursement = challenge && challenge.claimableAmount > 0
 
-  const shouldShowProgressLabel = !!progressLabel
-
   const formattedProgressLabel: string = useFormattedProgressLabel({
     challenge,
     progressLabel,
     remainingLabel
   })
 
-  const handlePress = () => {
-    if (requiresVerification) {
-      navigation.push('AccountSettingsScreen')
-      return
+  // Determine the final label to display
+  // If there's no progress bar, no "Ready to Claim" status, and the formatted label is empty or not meaningful,
+  // show "Available" instead
+  const displayLabel = useMemo(() => {
+    // If there's a progress bar or "Ready to Claim" status, use the formatted label
+    if (shouldShowProgressBar || needsDisbursement) {
+      return formattedProgressLabel
     }
-    onPress()
-  }
+
+    // If the formatted label is empty or just whitespace, use getChallengeStatusLabel
+    // which will return "Available" for challenges without meaningful status
+    if (!formattedProgressLabel || formattedProgressLabel.trim() === '') {
+      return getChallengeStatusLabel(challenge, id)
+    }
+
+    // Otherwise use the formatted label
+    return formattedProgressLabel
+  }, [
+    formattedProgressLabel,
+    shouldShowProgressBar,
+    needsDisbursement,
+    challenge,
+    id
+  ])
 
   return (
-    <TouchableOpacity
-      onPress={requiresVerification ? undefined : handlePress}
-      activeOpacity={requiresVerification ? 1 : 0.7}
-    >
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <Flex
         border='default'
         borderRadius='l'
         pb='unit10'
         style={{ position: 'relative' }}
       >
-        {requiresVerification ? (
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              borderRadius: spacing.l,
-              zIndex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: spacing.l,
-              gap: spacing.l
-            }}
-          >
-            <IconLock size='3xl' color='subdued' />
-            <Text variant='body' size='m' textAlign='center' strength='strong'>
-              Get verified to start earning rewards!
-            </Text>
-            <PlainButton
-              onPress={() => {
-                navigation.push('AccountSettingsScreen')
-              }}
-            >
-              Settings &gt;
-            </PlainButton>
-          </View>
-        ) : null}
         <Flex
           row
           justifyContent='flex-end'
@@ -149,33 +117,31 @@ export const Panel = ({
             {shortDescription || description(challenge)}
           </Text>
           <Flex mt='l' gap='l'>
-            {shouldShowProgressLabel ? (
-              <Flex row alignItems='center' gap='xs'>
-                {hasDisbursed ? (
-                  <IconCheck fill={neutralLight4} size='s' />
-                ) : null}
-                <Flex row alignItems='center'>
-                  <Text
-                    variant='label'
-                    size='l'
-                    color='subdued'
-                    // iOS has a bug where emojis are not vertically aligned with the text
-                    style={{
-                      lineHeight: Platform.OS === 'ios' ? 0 : undefined
-                    }}
-                  >
-                    {formattedProgressLabel}
-                  </Text>
-                </Flex>
+            <Flex row alignItems='center' gap='xs'>
+              {hasDisbursed ? (
+                <IconCheck fill={neutralLight4} size='s' />
+              ) : null}
+              <Flex row alignItems='center'>
+                <Text
+                  variant='label'
+                  size='l'
+                  color='subdued'
+                  // iOS has a bug where emojis are not vertically aligned with the text
+                  style={{
+                    lineHeight: Platform.OS === 'ios' ? 0 : undefined
+                  }}
+                >
+                  {displayLabel}
+                </Text>
               </Flex>
-            ) : null}
+            </Flex>
             {shouldShowProgressBar ? (
               <Flex
                 w='100%'
                 h={spacing.unit6}
                 borderRadius='3xl'
-                backgroundColor='neutral.n50'
                 style={{
+                  backgroundColor: color.neutral.n50,
                   overflow: 'hidden',
                   position: 'relative'
                 }}
