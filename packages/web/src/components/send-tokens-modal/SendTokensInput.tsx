@@ -63,7 +63,7 @@ const messages = {
   insufficientBalance: 'Insufficient balance',
   validWalletAddressRequired: 'A valid wallet address is required.',
   amountRequired: 'Amount is required',
-  amountTooLow: 'Amount is too low to send',
+  amountTooLow: 'Amount must be at least $0.50',
   walletAddress: 'Wallet Address',
   userRequired: 'Please select a user',
   userNoWallet:
@@ -191,10 +191,22 @@ const SendTokensInput = ({
       if (amountWei > currentBalance) {
         setAmountError('INSUFFICIENT_BALANCE')
         isValid = false
-      } else if (amountWei < BigInt(1000)) {
-        // Minimum amount
-        setAmountError('AMOUNT_TOO_LOW')
-        isValid = false
+      } else {
+        // Check minimum USD value ($0.50)
+        const price =
+          coin?.price === 0 ? coin?.dynamicBondingCurve?.priceUSD : coin?.price
+        if (price && price > 0) {
+          const amountNum = parseFloat(amount)
+          const usdValue = amountNum * price
+          if (usdValue < 0.5) {
+            setAmountError('AMOUNT_TOO_LOW')
+            isValid = false
+          }
+        } else if (amountWei < BigInt(1000)) {
+          // Fallback to minimum token amount if price is not available
+          setAmountError('AMOUNT_TOO_LOW')
+          isValid = false
+        }
       }
     }
 
