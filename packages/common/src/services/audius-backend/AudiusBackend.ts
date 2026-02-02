@@ -13,6 +13,7 @@ import {
   Connection,
   PublicKey,
   Transaction,
+  TransactionInstruction,
   VersionedTransaction
 } from '@solana/web3.js'
 import { getAddress } from 'viem'
@@ -912,6 +913,7 @@ export const audiusBackend = ({
     recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
   }) {
     let tokenAccountAddress: PublicKey
+    let shouldCreateUserBank = false
 
     if (recipientEthAddress) {
       // When sending to a user, derive their user-bank ATA for this Solana mint
@@ -921,6 +923,21 @@ export const audiusBackend = ({
           ethWallet: recipientEthAddress,
           mint
         })
+
+      // Check if the user-bank account exists
+      try {
+        const accountInfo =
+          await sdk.services.solanaClient.connection.getAccountInfo(
+            tokenAccountAddress
+          )
+        if (!accountInfo) {
+          // Account doesn't exist - we'll create it in the transaction
+          shouldCreateUserBank = true
+        }
+      } catch (e) {
+        // Account doesn't exist - we'll create it in the transaction
+        shouldCreateUserBank = true
+      }
     } else {
       // When sending to a Solana wallet address directly, use regular ATA logic
       tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
@@ -935,7 +952,13 @@ export const audiusBackend = ({
       amount,
       ethAddress,
       sdk,
-      mint
+      mint,
+      shouldCreateUserBank: shouldCreateUserBank
+        ? {
+            recipientEthAddress: recipientEthAddress!,
+            mint
+          }
+        : undefined
     })
     return { res, error: null }
   }
@@ -945,31 +968,66 @@ export const audiusBackend = ({
     destination,
     amount,
     sdk,
-    mint
+    mint,
+    shouldCreateUserBank
   }: {
     ethAddress: string
     destination: PublicKey
     amount: AudioWei
     sdk: AudiusSdk
     mint: MintName | PublicKey
+    shouldCreateUserBank?: {
+      recipientEthAddress: string
+      mint: PublicKey
+    }
   }) {
     console.info(
       `Transferring ${amount.toString()} tokens with mint ${mint} to ${destination.toBase58()}`
     )
+
+    const instructions: TransactionInstruction[] = []
+
+    // If we need to create a user-bank account, add the create instruction first
+    if (shouldCreateUserBank) {
+      const { ClaimableTokensProgram } = await import('@audius/spl')
+      const feePayer = await sdk.services.solanaRelay.getFeePayer()
+      const authority = ClaimableTokensProgram.deriveAuthority({
+        programId: sdk.services.claimableTokensClient.programId,
+        mint: shouldCreateUserBank.mint
+      })
+
+      const createUserBankInstruction =
+        ClaimableTokensProgram.createAccountInstruction({
+          ethAddress: shouldCreateUserBank.recipientEthAddress,
+          payer: feePayer,
+          mint: shouldCreateUserBank.mint,
+          authority,
+          userBank: destination,
+          programId: sdk.services.claimableTokensClient.programId
+        })
+      instructions.push(createUserBankInstruction)
+      console.info(
+        `Adding user-bank account creation instruction for ${destination.toBase58()}`
+      )
+    }
 
     const secpTransactionInstruction =
       await sdk.services.claimableTokensClient.createTransferSecpInstruction({
         amount,
         ethWallet: ethAddress,
         mint,
-        destination
+        destination,
+        instructionIndex: instructions.length
       })
+    instructions.push(secpTransactionInstruction)
+
     const transferInstruction =
       await sdk.services.claimableTokensClient.createTransferInstruction({
         ethWallet: ethAddress,
         mint,
         destination
       })
+    instructions.push(transferInstruction)
 
     // Fetch blockhash explicitly to provide better error handling
     let recentBlockhash: string
@@ -993,7 +1051,7 @@ export const audiusBackend = ({
     }
 
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions: [secpTransactionInstruction, transferInstruction],
+      instructions,
       recentBlockhash
     })
     const signature =

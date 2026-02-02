@@ -102,8 +102,11 @@ const SendTokensModal = () => {
         errorString.includes('0x3') ||
         errorString.includes('custom program error: 0x3')
       ) {
+        // This error should no longer occur as we now automatically create
+        // user-bank accounts in the transaction. If it still occurs, it's likely
+        // a different issue or the account creation failed.
         errorMessage =
-          'The recipient wallet does not have a token account for this coin. They may need to receive tokens of this type first, or the transaction needs to create the account automatically.'
+          'Failed to create recipient token account. Please try again.'
       }
 
       setError(errorMessage)
