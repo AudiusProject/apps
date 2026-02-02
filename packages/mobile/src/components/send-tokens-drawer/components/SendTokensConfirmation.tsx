@@ -7,13 +7,10 @@ import { SquareSizes } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
 
 import { Button, Flex, Text, Divider, Avatar } from '@audius/harmony-native'
-import {
-  BalanceSection,
-  SegmentedControl,
-  TokenIcon
-} from 'app/components/core'
+import { BalanceSection, TokenIcon } from 'app/components/core'
 import { useProfilePicture } from 'app/components/image/UserImage'
 import { UserLink } from 'app/components/user-link'
+import { PoweredByJupiter } from 'app/screens/buy-sell-screen/components/PoweredByJupiter'
 
 type RecipientType = 'user' | 'wallet'
 
@@ -87,30 +84,21 @@ export const SendTokensConfirmation = ({
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
-      {/* Segmented Control (not clickable) */}
-      <SegmentedControl
-        options={[
-          { key: 'user', text: messages.user },
-          { key: 'wallet', text: messages.wallet }
-        ]}
-        selected={recipientType}
-        onSelectOption={() => {
-          // Intentionally empty - not clickable on confirmation screen
-        }}
-      />
+      <PoweredByJupiter />
 
       {/* Please Review Text */}
-      <Text variant='body' size='s' color='subdued'>
+      <Text variant='body' size='s'>
         {messages.pleaseReview}
       </Text>
 
-      <Divider />
-
       {/* Sending Section */}
       <Flex gap='l'>
-        <Text variant='heading' size='s' color='subdued'>
-          {messages.sending}
-        </Text>
+        <Flex row alignItems='center' gap='l'>
+          <Text variant='heading' size='s'>
+            {messages.sending}
+          </Text>
+          <Divider w='100%' />
+        </Flex>
         <Flex row alignItems='center' gap='s'>
           <TokenIcon logoURI={tokenInfo.logoURI} size={64} />
           <Flex direction='column' gap='xs'>
@@ -129,15 +117,16 @@ export const SendTokensConfirmation = ({
         </Flex>
       </Flex>
 
-      <Divider />
-
       {/* To Recipient/Destination Address Section */}
       <Flex gap='l'>
-        <Text variant='heading' size='s' color='subdued'>
-          {recipientType === 'user'
-            ? messages.toRecipient
-            : messages.toDestinationAddress}
-        </Text>
+        <Flex row alignItems='center' gap='l'>
+          <Text variant='heading' size='s'>
+            {recipientType === 'user'
+              ? messages.toRecipient
+              : messages.toDestinationAddress}
+          </Text>
+          <Divider w='100%' />
+        </Flex>
         {selectedUser ? (
           <Flex row alignItems='center' gap='s'>
             <Avatar

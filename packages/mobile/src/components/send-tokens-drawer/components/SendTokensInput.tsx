@@ -12,14 +12,10 @@ import { buySellMessages } from '@audius/common/messages'
 import type { User } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { Keyboard, Pressable } from 'react-native'
+import { Keyboard } from 'react-native'
 
 import { Button, Divider, Flex, Text, TextInput } from '@audius/harmony-native'
-import {
-  BalanceSection,
-  SegmentedControl,
-  TokenIcon
-} from 'app/components/core'
+import { BalanceSection, SegmentedControl } from 'app/components/core'
 
 import { UserSearchAutocomplete } from './UserSearchAutocomplete'
 
@@ -39,14 +35,13 @@ type SendTokensInputProps = {
   initialDestinationAddress?: string
   initialSelectedUser?: User | null
   initialRecipientType?: RecipientType
+  onBeforeUserSelectionNavigate?: () => void
 }
 
 const messages = {
   sending: 'Sending',
   destinationAddress: 'Destination Address',
   recipient: 'Recipient',
-  recipientDescriptionUser: 'Search for an Audius user by name or handle.',
-  recipientDescriptionWallet: 'The Solana wallet address to receive funds.',
   user: 'User',
   wallet: 'Wallet',
   continue: 'Continue',
@@ -74,12 +69,12 @@ export const SendTokensInput = ({
   initialAmount = '',
   initialDestinationAddress = '',
   initialSelectedUser = null,
-  initialRecipientType = 'user'
+  initialRecipientType = 'user',
+  onBeforeUserSelectionNavigate
 }: SendTokensInputProps) => {
   const [recipientType, setRecipientType] =
     useState<RecipientType>(initialRecipientType)
-  const [selectedMint] = useState<string>(initialMint)
-  // setSelectedMint will be used when token picker is implemented
+  const [selectedMint, setSelectedMint] = useState<string>(initialMint)
   const [amount, setAmount] = useState(initialAmount)
   const [destinationAddress, setDestinationAddress] = useState(
     initialDestinationAddress
@@ -90,6 +85,30 @@ export const SendTokensInput = ({
   const [amountError, setAmountError] = useState<ValidationError | null>(null)
   const [addressError, setAddressError] = useState<ValidationError | null>(null)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  // Sync state when initial props change (e.g., when navigating back from confirmation)
+  useEffect(() => {
+    setSelectedMint(initialMint)
+  }, [initialMint])
+
+  useEffect(() => {
+    setAmount(initialAmount)
+    setAmountError(null)
+  }, [initialAmount])
+
+  useEffect(() => {
+    setDestinationAddress(initialDestinationAddress)
+    setAddressError(null)
+  }, [initialDestinationAddress])
+
+  useEffect(() => {
+    setSelectedUser(initialSelectedUser)
+    setAddressError(null)
+  }, [initialSelectedUser])
+
+  useEffect(() => {
+    setRecipientType(initialRecipientType)
+  }, [initialRecipientType])
 
   const { data: currentUserId } = useCurrentUserId()
 
@@ -141,16 +160,6 @@ export const SendTokensInput = ({
       keyboardWillHideListener.remove()
     }
   }, [])
-
-  // Token change handler - prepared for future token picker implementation
-  // const handleTokenChange = useCallback((token: typeof selectedToken) => {
-  //   if (token) {
-  //     setSelectedMint(token.address)
-  //     setAmount('') // Reset amount when changing token
-  //     setAmountError(null)
-  //   }
-  // }, [])
-
   const handleAmountChange = useCallback((value: string) => {
     setAmount(value)
     setAmountError(null)
@@ -266,7 +275,8 @@ export const SendTokensInput = ({
   const hasErrors = amountError || addressError
 
   // Show loading state if we don't have tokenInfo yet
-  if (!tokenInfo || coinsLoading || isOwnedCoinsLoading) {
+  // Only show loading if we have a mint to load, otherwise it might be stuck
+  if (selectedMint && (!tokenInfo || coinsLoading || isOwnedCoinsLoading)) {
     return (
       <Flex gap='xl' ph='xl' pb='xl'>
         <BalanceSection mint={selectedMint} internalWalletOnly />
@@ -274,6 +284,21 @@ export const SendTokensInput = ({
         <Flex gap='l' flex={1}>
           <Text variant='body' color='subdued'>
             Loading...
+          </Text>
+        </Flex>
+      </Flex>
+    )
+  }
+
+  // If no mint is selected, show error state
+  if (!selectedMint) {
+    return (
+      <Flex gap='xl' ph='xl' pb='xl'>
+        <BalanceSection mint={selectedMint} internalWalletOnly />
+        <Divider />
+        <Flex gap='l' flex={1}>
+          <Text variant='body' color='subdued'>
+            Please select a token to send.
           </Text>
         </Flex>
       </Flex>
@@ -303,6 +328,7 @@ export const SendTokensInput = ({
     >
       {/* User/Wallet Segmented Control at Top */}
       <SegmentedControl
+        fullWidth
         options={[
           { key: 'user', text: messages.user },
           { key: 'wallet', text: messages.wallet }
@@ -321,59 +347,19 @@ export const SendTokensInput = ({
         <Text variant='title' size='l' color='default'>
           {messages.sending}
         </Text>
-
         <Flex gap='s'>
           <TextInput
-            label={tokenInfo.symbol}
+            label={tokenInfo?.symbol ?? ''}
             value={amount}
             onChangeText={handleAmountChange}
             placeholder='0.00'
             keyboardType='decimal-pad'
             error={!!amountError}
             helperText={amountError ? getErrorText(amountError) : undefined}
-            endAdornmentText={`$${tokenInfo.symbol}`}
+            endAdornmentText={
+              tokenInfo?.symbol ? `$${tokenInfo.symbol}` : undefined
+            }
           />
-
-          {ownedCoins.length > 1 ? (
-            <Pressable
-              onPress={() => {
-                // TODO: Implement token picker modal/drawer
-                // For now, just show the current token
-              }}
-            >
-              <Flex
-                row
-                gap='s'
-                alignItems='center'
-                p='m'
-                backgroundColor='surface1'
-                borderRadius='m'
-                border='default'
-              >
-                <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
-                <Flex flex={1}>
-                  <Text variant='heading' size='s'>
-                    {tokenInfo.name}
-                  </Text>
-                  <Text variant='body' size='s' color='subdued'>
-                    ${tokenInfo.symbol}
-                  </Text>
-                </Flex>
-              </Flex>
-            </Pressable>
-          ) : (
-            <Flex row gap='s' alignItems='center' p='m'>
-              <TokenIcon logoURI={tokenInfo.logoURI} size={32} />
-              <Flex>
-                <Text variant='heading' size='s'>
-                  {tokenInfo.name}
-                </Text>
-                <Text variant='body' size='s' color='subdued'>
-                  ${tokenInfo.symbol}
-                </Text>
-              </Flex>
-            </Flex>
-          )}
         </Flex>
       </Flex>
 
@@ -381,18 +367,11 @@ export const SendTokensInput = ({
 
       {/* Destination Address/Recipient Section */}
       <Flex gap='m'>
-        <Flex gap='xs'>
-          <Text variant='heading' size='s' color='subdued'>
-            {recipientType === 'user'
-              ? messages.recipient
-              : messages.destinationAddress}
-          </Text>
-          <Text variant='body' size='s' color='default'>
-            {recipientType === 'user'
-              ? messages.recipientDescriptionUser
-              : messages.recipientDescriptionWallet}
-          </Text>
-        </Flex>
+        <Text variant='title' size='l' color='default'>
+          {recipientType === 'user'
+            ? messages.recipient
+            : messages.destinationAddress}
+        </Text>
 
         {/* User or Wallet Input */}
         {recipientType === 'user' ? (
@@ -402,13 +381,13 @@ export const SendTokensInput = ({
             error={!!addressError}
             helperText={addressError ? getErrorText(addressError) : undefined}
             excludedUserIds={currentUserId ? [currentUserId] : undefined}
+            onBeforeNavigate={onBeforeUserSelectionNavigate}
           />
         ) : (
           <TextInput
             label={messages.walletAddress}
             value={destinationAddress}
             onChangeText={handleAddressChange}
-            placeholder={messages.walletAddress}
             error={!!addressError}
             helperText={addressError ? getErrorText(addressError) : undefined}
           />
@@ -416,7 +395,7 @@ export const SendTokensInput = ({
       </Flex>
 
       {/* Terms of Use Link */}
-      <Text variant='body' size='s' color='subdued'>
+      <Text variant='body' size='s' color='default'>
         {buySellMessages.termsAgreement}{' '}
         <Text
           variant='body'

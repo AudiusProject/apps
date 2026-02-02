@@ -154,12 +154,14 @@ export const SendTokensDrawer = () => {
     <Drawer isOpen={isOpen} onClose={handleClose} drawerHeader={renderHeader}>
       {state.step === 'input' ? (
         <SendTokensInput
-          mint={mint ?? ''}
+          key={`input-${state.selectedMint || mint || 'default'}`}
+          mint={(state.selectedMint || mint) ?? ''}
           onContinue={handleInputContinue}
           initialAmount={state.amountString}
           initialDestinationAddress={state.destinationAddress}
           initialSelectedUser={state.selectedUser}
           initialRecipientType={state.recipientType}
+          onBeforeUserSelectionNavigate={handleClose}
         />
       ) : null}
 

@@ -1,38 +1,36 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useCurrentUserId, useUsers } from '@audius/common/api'
+import { useCurrentUserId, useUsers, useFollowers } from '@audius/common/api'
+import type { User } from '@audius/common/models'
 import {
   Status,
   statusIsNotFinalized,
-  SquareSizes,
-  User
+  SquareSizes
 } from '@audius/common/models'
 import {
   searchUsersModalActions,
-  searchUsersModalSelectors
+  searchUsersModalSelectors,
+  useSendTokensModal
 } from '@audius/common/store'
-import { View, Image, Pressable } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
+import { Pressable, View } from 'react-native'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import { useDispatch, useSelector } from 'react-redux'
 import { useDebounce } from 'react-use'
 
-import { IconSearch } from '@audius/harmony-native'
-import MagnifyingGlass from 'app/assets/images/leftPointingMagnifyingGlass.png'
+import { IconSearch, Avatar, Flex, Text, Divider } from '@audius/harmony-native'
 import {
   Screen,
   ScreenContent,
-  Text,
   TextInput,
   HeaderShadow
 } from 'app/components/core'
-import { Avatar, Flex } from '@audius/harmony-native'
-import LoadingSpinner from 'app/components/loading-spinner'
-import { useRoute } from 'app/hooks/useRoute'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { makeStyles } from 'app/styles'
 import { useProfilePicture } from 'app/components/image/UserImage'
-import { UserLink } from 'app/components/user-link/UserLink'
+import LoadingSpinner from 'app/components/loading-spinner'
 import { userSelectionCallbacks } from 'app/components/send-tokens-drawer/components/UserSearchAutocomplete'
+import { UserLink } from 'app/components/user-link/UserLink'
+import { useNavigation } from 'app/hooks/useNavigation'
+import { useRoute } from 'app/hooks/useRoute'
 
 const { searchUsers } = searchUsersModalActions
 const { getUserList } = searchUsersModalSelectors
@@ -41,108 +39,7 @@ const DEBOUNCE_MS = 150
 
 const messages = {
   title: 'Select Recipient',
-  search: ' Search Users',
-  emptyTitle: 'Search for Users',
-  emptyDescription: 'Search for users by name or handle to send tokens.'
-}
-
-const useStyles = makeStyles(({ spacing, palette, typography }) => ({
-  rootContainer: {
-    backgroundColor: palette.white,
-    flexGrow: 1
-  },
-  spinnerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexGrow: 1
-  },
-  loadingSpinner: {
-    height: spacing(15),
-    width: spacing(15),
-    marginBottom: spacing(20)
-  },
-  searchContainer: {
-    marginTop: spacing(8),
-    paddingHorizontal: spacing(2),
-    paddingBottom: spacing(2)
-  },
-  searchBorder: {
-    borderBottomColor: palette.neutralLight8,
-    borderBottomWidth: 1
-  },
-  searchInputContainer: {
-    paddingRight: spacing(5),
-    paddingLeft: spacing(4),
-    paddingVertical: spacing(6)
-  },
-  searchInputText: {
-    fontFamily: typography.fontByWeight.demiBold,
-    fontSize: typography.fontSize.large
-  },
-  flatListContainer: {
-    minHeight: '100%',
-    flexGrow: 1
-  },
-  emptyContainer: {
-    marginTop: spacing(6),
-    margin: spacing(2),
-    padding: spacing(6),
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(6),
-    backgroundColor: palette.neutralLight10,
-    borderRadius: spacing(2),
-    borderColor: palette.background,
-    borderWidth: 1
-  },
-  emptyTextContainer: {
-    flexShrink: 1,
-    gap: spacing(2)
-  },
-  magnifyingGlass: {
-    height: spacing(16),
-    width: spacing(16)
-  },
-  emptyTitle: {
-    fontSize: typography.fontSize.xxl,
-    fontFamily: typography.fontByWeight.bold,
-    lineHeight: typography.fontSize.xxl * 1.3
-  },
-  emptyDescription: {
-    fontSize: typography.fontSize.large,
-    lineHeight: typography.fontSize.large * 1.3
-  },
-  icon: {
-    height: spacing(6),
-    width: spacing(6)
-  },
-  footerPadding: {
-    height: spacing(30)
-  },
-  userItem: {
-    paddingHorizontal: spacing(4),
-    paddingVertical: spacing(3),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(3),
-    borderBottomWidth: 1,
-    borderBottomColor: palette.neutralLight8
-  }
-}))
-
-const ListEmpty = () => {
-  const styles = useStyles()
-
-  return (
-    <View style={styles.emptyContainer}>
-      <Image source={MagnifyingGlass} style={styles.magnifyingGlass} />
-      <View style={styles.emptyTextContainer}>
-        <Text style={styles.emptyTitle}>{messages.emptyTitle}</Text>
-        <Text style={styles.emptyDescription}>{messages.emptyDescription}</Text>
-      </View>
-    </View>
-  )
+  search: ' Search Users'
 }
 
 const useQueryUserList = (query: string, excludedUserIds?: number[]) => {
@@ -157,7 +54,7 @@ const useQueryUserList = (query: string, excludedUserIds?: number[]) => {
     if (query.trim()) {
       loadMore()
     }
-  }, [loadMore])
+  }, [loadMore, query])
 
   const filteredUserIds = excludedUserIds
     ? userIds.filter((id) => !excludedUserIds.includes(id))
@@ -172,27 +69,39 @@ type UserItemProps = {
 }
 
 const UserItem = ({ user, onSelect }: UserItemProps) => {
-  const styles = useStyles()
   const profilePicture = useProfilePicture({
     userId: user.user_id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
   return (
-    <Pressable style={styles.userItem} onPress={() => onSelect(user)}>
-      <Avatar source={profilePicture.source} />
-      <Flex flex={1} style={{ minWidth: 0 }}>
-        <UserLink userId={user.user_id} />
-        <Text variant='body' size='s' color='subdued' numberOfLines={1}>
-          @{user.handle}
-        </Text>
+    <Pressable
+      onPress={() => onSelect(user)}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.5 : 1
+      })}
+    >
+      <Flex
+        row
+        gap='s'
+        alignItems='center'
+        ph='m'
+        pv='s'
+        borderBottom='default'
+      >
+        <Avatar source={profilePicture.source} />
+        <Flex flex={1} style={{ minWidth: 0 }}>
+          <UserLink userId={user.user_id} disabled />
+          <Text variant='body' size='s' color='default' numberOfLines={1}>
+            @{user.handle}
+          </Text>
+        </Flex>
       </Flex>
     </Pressable>
   )
 }
 
 export const SendTokensUserSelectionScreen = () => {
-  const styles = useStyles()
   const [query, setQuery] = useState('')
   const [inputValue, setInputValue] = useState('')
   const dispatch = useDispatch()
@@ -200,6 +109,38 @@ export const SendTokensUserSelectionScreen = () => {
   const { params } = useRoute<'SendTokensUserSelection'>()
   const excludedUserIds = params?.excludedUserIds
   const callbackId = params?.callbackId
+  const { onOpen: openSendTokensDrawer } = useSendTokensModal()
+
+  // Reopen the send drawer when navigating back from this screen
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // This runs when the screen loses focus (user navigates back)
+        // If callback still exists, user navigated back without selecting
+        // If callback doesn't exist, user selected someone (callback was deleted in handleSelectUser)
+        if (callbackId && userSelectionCallbacks.has(callbackId)) {
+          // Clean up the callback
+          userSelectionCallbacks.delete(callbackId)
+          // Reopen the send drawer since user navigated back without selecting
+          setTimeout(() => {
+            openSendTokensDrawer()
+          }, 100)
+        }
+      }
+    }, [callbackId, openSendTokensDrawer])
+  )
+
+  const { data: currentUserId } = useCurrentUserId()
+
+  // Fetch current user's followers for zero state
+  const { users: followerUsers, isPending: isLoadingFollowers } = useFollowers(
+    { userId: currentUserId ?? null, pageSize: 20 },
+    { enabled: !!currentUserId }
+  )
+  // Filter out excluded users from followers
+  const filteredFollowerUsers = followerUsers?.filter(
+    (user) => !excludedUserIds?.includes(user.user_id)
+  )
 
   const queryUserList = useQueryUserList(query, excludedUserIds)
 
@@ -241,7 +182,11 @@ export const SendTokensUserSelectionScreen = () => {
     [callbackId, navigation]
   )
 
-  const isLoading = statusIsNotFinalized(status) && userIds.length === 0
+  const isLoading =
+    statusIsNotFinalized(status) &&
+    userIds.length === 0 &&
+    query.trim().length > 0
+  const hasNoQuery = !query.trim()
 
   return (
     <Screen
@@ -253,34 +198,66 @@ export const SendTokensUserSelectionScreen = () => {
     >
       <ScreenContent>
         <HeaderShadow />
-        <View style={styles.rootContainer}>
-          <View
-            style={[
-              styles.searchContainer,
-              users?.length ? styles.searchBorder : null
-            ]}
-          >
+        <Flex style={{ flexGrow: 1 }} backgroundColor='white'>
+          <Flex mt='xl' ph='xs' pb='xs'>
+            {users && users.length > 0 && <Divider />}
             <TextInput
               placeholder={messages.search}
               autoFocus={true}
               Icon={IconSearch}
               styles={{
-                root: styles.searchInputContainer,
-                input: styles.searchInputText
+                root: {
+                  paddingRight: 20,
+                  paddingLeft: 16,
+                  paddingVertical: 24
+                },
+                input: {
+                  fontWeight: '600',
+                  fontSize: 18
+                }
               }}
-              iconProp={styles.icon}
+              iconProp={{ height: 24, width: 24 }}
               onChangeText={setInputValue}
               value={inputValue}
               inputAccessoryViewID='none'
               clearable={true}
               onClear={handleClear}
             />
-          </View>
+          </Flex>
 
-          {isLoading ? (
-            <View style={styles.spinnerContainer}>
-              <LoadingSpinner style={styles.loadingSpinner} />
-            </View>
+          {hasNoQuery ? (
+            isLoadingFollowers ? (
+              <Flex
+                justifyContent='center'
+                alignItems='center'
+                style={{ flexGrow: 1 }}
+              >
+                <LoadingSpinner
+                  style={{ height: 60, width: 60, marginBottom: 80 }}
+                />
+              </Flex>
+            ) : filteredFollowerUsers && filteredFollowerUsers.length > 0 ? (
+              <KeyboardAwareFlatList
+                data={filteredFollowerUsers}
+                renderItem={({ item }) => (
+                  <UserItem user={item} onSelect={handleSelectUser} />
+                )}
+                keyExtractor={(user: User) => user.user_id.toString()}
+                contentContainerStyle={{ minHeight: '100%', flexGrow: 1 }}
+                keyboardShouldPersistTaps='always'
+                ListFooterComponent={<View style={{ height: 120 }} />}
+              />
+            ) : null
+          ) : isLoading ? (
+            <Flex
+              justifyContent='center'
+              alignItems='center'
+              style={{ flexGrow: 1 }}
+            >
+              <LoadingSpinner
+                style={{ height: 60, width: 60, marginBottom: 80 }}
+              />
+            </Flex>
           ) : (
             <KeyboardAwareFlatList
               onEndReached={handleLoadMore}
@@ -289,13 +266,13 @@ export const SendTokensUserSelectionScreen = () => {
                 <UserItem user={item} onSelect={handleSelectUser} />
               )}
               keyExtractor={(user: User) => user.user_id.toString()}
-              contentContainerStyle={styles.flatListContainer}
-              ListEmptyComponent={query ? null : <ListEmpty />}
+              contentContainerStyle={{ minHeight: '100%', flexGrow: 1 }}
+              ListEmptyComponent={null}
               keyboardShouldPersistTaps='always'
-              ListFooterComponent={<View style={styles.footerPadding} />}
+              ListFooterComponent={<View style={{ height: 120 }} />}
             />
           )}
-        </View>
+        </Flex>
       </ScreenContent>
     </Screen>
   )

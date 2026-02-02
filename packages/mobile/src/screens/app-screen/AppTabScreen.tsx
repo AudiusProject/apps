@@ -5,8 +5,7 @@ import type {
   TipSource,
   ID,
   SearchTrack,
-  SearchPlaylist,
-  User
+  SearchPlaylist
 } from '@audius/common/models'
 import type {
   NotificationType,
@@ -32,7 +31,6 @@ import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEm
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
-import { SendTokensUserSelectionScreen } from 'app/screens/send-tokens-user-selection-screen/SendTokensUserSelectionScreen'
 import {
   CoinDetailsScreen,
   EditCoinDetailsScreen,
@@ -43,6 +41,7 @@ import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
 import { RewardsScreen } from 'app/screens/rewards-screen'
+import { SendTokensUserSelectionScreen } from 'app/screens/send-tokens-user-selection-screen/SendTokensUserSelectionScreen'
 import {
   AboutScreen,
   AccountSettingsScreen,
