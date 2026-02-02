@@ -18,8 +18,9 @@ import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
-import { publishStems } from './usePublishStems'
+
 import { mutationOptions } from './mutationOptions'
+import { publishStems } from './usePublishStems'
 
 const { updateProgress } = uploadActions
 
@@ -144,10 +145,20 @@ export const publishTracks = async (
           clientId: param.clientId,
           parentMetadata: param.metadata,
           stems:
-            param.metadata.stems?.map((stem, index) => ({
-              metadata: stem,
-              audioUploadResponse: param.stemsUploadResponses?.[index]!
-            })) ?? [],
+            param.metadata.stems
+              ?.map((stem, index) => {
+                const audioUploadResponse = param.stemsUploadResponses?.[index]
+
+                // This should never be the case, but being defensive
+                if (!audioUploadResponse) return null
+                return {
+                  metadata: stem,
+                  audioUploadResponse
+                }
+              })
+              .filter(
+                (stem): stem is NonNullable<typeof stem> => stem !== null
+              ) ?? [],
           parentTrackId: trackId
         })
       ])

@@ -12,6 +12,7 @@ import { ProgressStatus, uploadActions } from '~/store'
 import { getStemsQueryKey } from '../tracks/useStems'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext, type QueryContextType } from '../utils'
+
 import { mutationOptions } from './mutationOptions'
 
 const { updateProgress } = uploadActions

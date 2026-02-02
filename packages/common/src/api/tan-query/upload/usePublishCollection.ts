@@ -24,12 +24,12 @@ import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
 
+import { mutationOptions } from './mutationOptions'
 import {
   publishTracks,
   addPremiumMetadata,
   getUSDCMetadata
 } from './usePublishTracks'
-import { mutationOptions } from './mutationOptions'
 
 type PublishCollectionContext = Pick<
   QueryContextType,
