@@ -203,27 +203,27 @@ jobs:
         run: |
           # Set up SSH agent
           eval "$(ssh-agent -s)"
-          
+
           # Add GitHub to known_hosts
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          
+
           # Add SSH private key for accessing certs-and-profiles repository
           # Check if secret is set
           if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
             echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
             exit 1
           fi
-          
+
           # Write key and remove any carriage returns (works on both macOS and Linux)
           echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
+
           # Add key to agent (will provide detailed error if format is wrong)
           ssh-add ~/.ssh/id_rsa
-          
+
           # Configure git to use SSH
           git config --global user.email "audius-infra@audius.co"
           git config --global user.name "audius-infra"
@@ -441,6 +441,13 @@ jobs:
             du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
           fi
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Release Android (Release Candidate)
         timeout-minutes: 60
         env:
@@ -577,27 +584,27 @@ jobs:
         run: |
           # Set up SSH agent
           eval "$(ssh-agent -s)"
-          
+
           # Add GitHub to known_hosts
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          
+
           # Add SSH private key for accessing certs-and-profiles repository
           # Check if secret is set
           if [[ -z "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" ]]; then
             echo "Error: AUDIUS_INFRA_SSH_KEY secret is not set"
             exit 1
           fi
-          
+
           # Write key and remove any carriage returns (works on both macOS and Linux)
           echo "${{ secrets.AUDIUS_INFRA_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
+
           # Add key to agent (will provide detailed error if format is wrong)
           ssh-add ~/.ssh/id_rsa
-          
+
           # Configure git to use SSH
           git config --global user.email "audius-infra@audius.co"
           git config --global user.name "audius-infra"
@@ -808,6 +815,13 @@ jobs:
             du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
           fi
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Release Android (Production)
         timeout-minutes: 60
         env:
@@ -815,4 +829,3 @@ jobs:
         run: |
           cd packages/mobile/android
           bundle exec fastlane prod track:alpha
-
