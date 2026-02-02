@@ -1,6 +1,4 @@
 import { TimeRange } from '@audius/common/models'
-import { trendingPageSelectors } from '@audius/common/store'
-import { useSelector } from 'react-redux'
 
 import {
   IconAllTime,
@@ -16,15 +14,9 @@ import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 
 import { TrendingFilterButton } from './TrendingFilterButton'
 import { TrendingLineup } from './TrendingLineup'
-const { getTrendingGenre } = trendingPageSelectors
 
 const ThisWeekTab = () => {
-  return (
-    <TrendingLineup
-      timeRange={TimeRange.WEEK}
-      rankIconCount={5}
-    />
-  )
+  return <TrendingLineup timeRange={TimeRange.WEEK} rankIconCount={5} />
 }
 const ThisMonthTab = () => {
   return <TrendingLineup timeRange={TimeRange.MONTH} />

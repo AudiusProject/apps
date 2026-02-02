@@ -85,17 +85,7 @@ export const ChallengeRewardsTile = ({
   }, [dispatch])
 
   const openModal = (modalType: ChallengeRewardsModalType) => {
-    // Map trending reward IDs to ChallengeName enum values for modal
-    let challengeName: ChallengeRewardsModalType = modalType
-    if (modalType === ChallengeName.TrendingTrack) {
-      challengeName = ChallengeName.TrendingTrack
-    } else if (modalType === ChallengeName.TrendingUndergroundTrack) {
-      challengeName = ChallengeName.TrendingUndergroundTrack
-    } else if (modalType === ChallengeName.TrendingPlaylist) {
-      challengeName = ChallengeName.TrendingPlaylist
-    }
-
-    dispatch(setChallengeRewardsModalType({ modalType: challengeName }))
+    dispatch(setChallengeRewardsModalType({ modalType }))
     setVisibility('ChallengeRewards')(true)
   }
 

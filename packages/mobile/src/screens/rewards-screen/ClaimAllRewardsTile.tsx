@@ -22,7 +22,11 @@ const { getOptimisticUserChallenges } = challengesSelectors
 const { setVisibility } = modalsActions
 
 const messages = {
-  pending: 'Pending',
+  yourRewards: 'Your Rewards',
+  totalClaimed: 'TOTAL CLAIMED',
+  pending: 'PENDING',
+  readyToClaim: 'READY TO CLAIM',
+  claimAll: 'Claim All',
   claimAllRewards: 'Claim All Rewards',
   moreInfo: 'More Info',
   available: '$AUDIO available',
@@ -80,10 +84,9 @@ export const ClaimAllRewardsTile = () => {
   return (
     <Paper shadow='near' border='strong' p='l' style={{ gap: 16 }}>
       <Text variant='heading' color='accent' size='m'>
-        Your Rewards
+        {messages.yourRewards}
       </Text>
       <Flex column style={{ gap: 16, width: '100%' }}>
-        {/* First row: Total Claimed and Pending */}
         <Flex row alignItems='stretch' style={{ gap: 32, width: '100%' }}>
           <Flex column flex={1} style={{ gap: 4 }}>
             <Flex row alignItems='center' style={{ gap: 4 }}>
@@ -96,7 +99,7 @@ export const ClaimAllRewardsTile = () => {
             </Flex>
             <Flex row alignItems='center' style={{ gap: 4 }}>
               <Text variant='label' size='xs' color='default'>
-                TOTAL CLAIMED
+                {messages.totalClaimed}
               </Text>
               <TooltipInfoIcon
                 title='Total Claimed'
@@ -116,7 +119,7 @@ export const ClaimAllRewardsTile = () => {
             </Flex>
             <Flex row alignItems='center' style={{ gap: 4 }}>
               <Text variant='label' size='xs' color='default'>
-                PENDING
+                {messages.pending}
               </Text>
               <TooltipInfoIcon
                 title='Pending'
@@ -137,7 +140,7 @@ export const ClaimAllRewardsTile = () => {
           </Flex>
           <Flex row alignItems='center' style={{ gap: 4 }}>
             <Text variant='label' size='xs' color='default'>
-              READY TO CLAIM
+              {messages.readyToClaim}
             </Text>
             <TooltipInfoIcon
               title='Ready To Claim'
@@ -153,7 +156,7 @@ export const ClaimAllRewardsTile = () => {
           variant='primary'
           size='small'
         >
-          Claim All
+          {messages.claimAll}
         </Button>
       ) : null}
     </Paper>

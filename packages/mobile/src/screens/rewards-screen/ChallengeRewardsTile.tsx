@@ -67,6 +67,11 @@ const messages = {
   moreInfo: 'More Info',
   available: '$AUDIO available',
   now: 'now!',
+  showCompleted: 'Show Completed',
+  hideCompleted: 'Hide Completed',
+  required: 'Required',
+  getVerifiedMessage: 'Get verified for access to even more rewards!',
+  settings: 'Settings',
   availableMessage: (summaryItems: ClaimableSummaryTableItem[]) => {
     const filteredSummaryItems = summaryItems.filter(removeNullable)
     const summaryItem = filteredSummaryItems.pop()
@@ -127,17 +132,7 @@ export const ChallengeRewardsTile = () => {
   )
 
   const openModal = (modalType: ChallengeRewardsModalType) => {
-    // Map trending reward IDs to ChallengeName enum values for modal
-    let challengeName: ChallengeRewardsModalType = modalType
-    if (modalType === ChallengeName.TrendingTrack) {
-      challengeName = ChallengeName.TrendingTrack
-    } else if (modalType === ChallengeName.TrendingUndergroundTrack) {
-      challengeName = ChallengeName.TrendingUndergroundTrack
-    } else if (modalType === ChallengeName.TrendingPlaylist) {
-      challengeName = ChallengeName.TrendingPlaylist
-    }
-
-    dispatch(setChallengeRewardsModalType({ modalType: challengeName }))
+    dispatch(setChallengeRewardsModalType({ modalType }))
     dispatch(setVisibility({ modal: 'ChallengeRewards', visible: true }))
   }
 
@@ -305,7 +300,9 @@ export const ChallengeRewardsTile = () => {
           >
             <SelectablePill
               type='button'
-              label={showCompleted ? 'Hide Completed' : 'Show Completed'}
+              label={
+                showCompleted ? messages.hideCompleted : messages.showCompleted
+              }
               isSelected={showCompleted}
               onPress={() => setShowCompleted(!showCompleted)}
             />
@@ -382,7 +379,7 @@ export const ChallengeRewardsTile = () => {
                       }}
                     >
                       <Text variant='body' size='s'>
-                        Required
+                        {messages.required}
                       </Text>
                       <Flex
                         ph='s'
@@ -400,7 +397,7 @@ export const ChallengeRewardsTile = () => {
                       textAlign='center'
                       strength='strong'
                     >
-                      Get verified for access to even more rewards!
+                      {messages.getVerifiedMessage}
                     </Text>
                     <PlainButton
                       onPress={() => {
@@ -408,7 +405,7 @@ export const ChallengeRewardsTile = () => {
                       }}
                       iconRight={IconCaretRight}
                     >
-                      Settings
+                      {messages.settings}
                     </PlainButton>
                   </View>
                 </View>

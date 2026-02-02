@@ -6,9 +6,9 @@ import type { ChallengeRewardsInfo } from '@audius/common/utils'
 import { getChallengeStatusLabel } from '@audius/common/utils'
 import { Platform } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import LinearGradient from 'react-native-linear-gradient'
 
 import { Flex, IconCheck, Text, useTheme } from '@audius/harmony-native'
+import { ProgressBar } from 'app/components/progress-bar/ProgressBar'
 import type { MobileChallengeConfig } from 'app/utils/challenges'
 import { useThemeColors } from 'app/utils/theme'
 
@@ -136,37 +136,18 @@ export const Panel = ({
               </Flex>
             </Flex>
             {shouldShowProgressBar ? (
-              <Flex
-                w='100%'
-                h={spacing.unit6}
-                borderRadius='3xl'
+              <ProgressBar
+                progress={challenge?.current_step_count ?? 0}
+                max={maxStepCount}
+                variant='coin'
                 style={{
-                  backgroundColor: color.neutral.n50,
-                  overflow: 'hidden',
-                  position: 'relative'
+                  root: {
+                    backgroundColor: color.neutral.n50,
+                    height: spacing.unit6,
+                    borderRadius: spacing['3xl']
+                  }
                 }}
-              >
-                <LinearGradient
-                  {...color.special.coinGradient}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.max(
-                        0,
-                        ((challenge?.current_step_count ?? 0) / maxStepCount) *
-                          100
-                      )
-                    )}%`,
-                    height: '100%',
-                    borderRadius: spacing['3xl'],
-                    position: 'absolute',
-                    left: 0,
-                    top: 0
-                  }}
-                />
-              </Flex>
+              />
             ) : null}
           </Flex>
         </Flex>

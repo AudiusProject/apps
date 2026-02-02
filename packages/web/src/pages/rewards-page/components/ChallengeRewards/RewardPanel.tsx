@@ -28,6 +28,7 @@ import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
 import { useEffectOnce } from 'react-use'
 
+import { CoinProgressBar } from 'components/coin-progress-bar/CoinProgressBar'
 import { make, track } from 'services/analytics'
 import { doesMatchRoute } from 'utils/route'
 
@@ -168,38 +169,10 @@ export const RewardPanel = ({
             </Box>
             {shouldShowProgressBar && challenge.max_steps && (
               <Box flex='1 1 0'>
-                <Box
-                  w='100%'
-                  h='24px'
-                  borderRadius='3xl'
-                  css={{
-                    backgroundColor: color.neutral.n50,
-                    boxShadow: 'inset 1px 1px 7px -2px rgba(53, 54, 79, 0.25)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Box
-                    w={`${Math.min(
-                      100,
-                      Math.max(
-                        0,
-                        ((challenge?.current_step_count ?? 0) /
-                          challenge.max_steps) *
-                          100
-                      )
-                    )}%`}
-                    h='100%'
-                    borderRadius='3xl'
-                    css={{
-                      background: color.special.coinGradient,
-                      transition: 'width 0.3s ease-in-out',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0
-                    }}
-                  />
-                </Box>
+                <CoinProgressBar
+                  progress={challenge?.current_step_count ?? 0}
+                  max={challenge.max_steps}
+                />
               </Box>
             )}
           </Flex>

@@ -70,7 +70,6 @@ const CreateChatModal = lazy(
   () => import('pages/chat-page/components/CreateChatModal')
 )
 
-
 const InboxSettingsModal = lazy(
   () => import('components/inbox-settings-modal/InboxSettingsModal')
 )

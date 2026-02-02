@@ -81,7 +81,6 @@ export const ClaimAllRewardsPanel = () => {
           {messages.yourRewards}
         </Text>
         <Flex column gap='l' w='100%' css={{ gap: '16px' }}>
-          {/* First row: Total Claimed and Pending */}
           <Flex gap='l' alignItems='stretch' w='100%' css={{ gap: '32px' }}>
             <Flex column gap='xs' flex={1} css={{ gap: '4px' }}>
               <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
