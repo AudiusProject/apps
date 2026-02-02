@@ -208,12 +208,24 @@ export const Tooltip = ({
   }, [handleMouseLeave])
 
   // Handle click on trigger
-  const handleClick = useCallback(() => {
-    if (shouldDismissOnClick) {
-      setIsHiddenOverride(true)
-      setIsVisible(false)
-    }
-  }, [shouldDismissOnClick])
+  const handleClick = useCallback(
+    (event: any) => {
+      // Call the original onClick handler from the child if it exists
+      if (isValidElement(children)) {
+        const originalOnClick = (children as ReactElement).props?.onClick
+        if (typeof originalOnClick === 'function') {
+          originalOnClick(event)
+        }
+      }
+
+      // Handle tooltip dismissal
+      if (shouldDismissOnClick) {
+        setIsHiddenOverride(true)
+        setIsVisible(false)
+      }
+    },
+    [shouldDismissOnClick, children]
+  )
 
   // Calculate tooltip position
   useEffect(() => {
