@@ -212,7 +212,9 @@ export const Tooltip = ({
     (event: any) => {
       // Call the original onClick handler from the child if it exists
       if (isValidElement(children)) {
-        const originalOnClick = (children as ReactElement).props?.onClick
+        const originalOnClick = (
+          children as ReactElement<{ onClick?: any }>
+        ).props?.onClick()
         if (typeof originalOnClick === 'function') {
           originalOnClick(event)
         }
