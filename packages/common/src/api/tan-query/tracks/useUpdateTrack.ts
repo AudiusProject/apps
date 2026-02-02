@@ -1,8 +1,8 @@
-import { Id, type ProgressHandler } from '@audius/sdk'
+import { Id, type CrossPlatformFile, type ProgressHandler } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 
-import { fileToSdk, trackMetadataForUploadToSdk } from '~/adapters/track'
+import { trackMetadataForUploadToSdk } from '~/adapters/track'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { UserTrackMetadata } from '~/models'
 import { Feature } from '~/models/ErrorReporting'
@@ -29,8 +29,8 @@ export type UpdateTrackParams = {
   trackId: ID
   userId: ID
   metadata: Partial<TrackMetadataForUpload>
-  audioFile?: File
-  coverArtFile?: File
+  audioFile?: CrossPlatformFile
+  imageFile?: CrossPlatformFile
   onProgress?: ProgressHandler
 }
 
@@ -47,7 +47,7 @@ export const useUpdateTrack = () => {
       userId,
       metadata,
       audioFile,
-      coverArtFile,
+      imageFile,
       onProgress
     }: UpdateTrackParams) => {
       const sdk = await audiusSdk()
@@ -60,10 +60,8 @@ export const useUpdateTrack = () => {
       )
 
       const response = await sdk.tracks.updateTrack({
-        audioFile: audioFile ? fileToSdk(audioFile, 'audio') : undefined,
-        imageFile: coverArtFile
-          ? fileToSdk(coverArtFile, 'cover_art')
-          : undefined,
+        audioFile,
+        imageFile,
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
         metadata: sdkMetadata,
@@ -89,7 +87,12 @@ export const useUpdateTrack = () => {
 
       return response
     },
-    onMutate: async ({ trackId, metadata }): Promise<MutationContext> => {
+    onMutate: async ({
+      trackId,
+      metadata,
+      audioFile,
+      imageFile
+    }): Promise<MutationContext> => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getTrackQueryKey(trackId)
@@ -98,8 +101,10 @@ export const useUpdateTrack = () => {
       // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
 
-      // Optimistically update track
-      if (previousTrack) {
+      // Only perform optimistic update if we're not uploading files
+      // When files are being uploaded, we can't accurately represent the new state
+      // until the upload completes
+      if (previousTrack && !audioFile && !imageFile) {
         primeTrackData({
           tracks: [{ ...previousTrack, ...metadata }] as UserTrackMetadata[],
           queryClient,

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { trackMetadataForUploadToSdk } from '@audius/common/adapters'
+import { fileToSdk, trackMetadataForUploadToSdk } from '@audius/common/adapters'
 import { useCurrentUserId, useUpdateTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import {
@@ -48,13 +48,23 @@ export const useReplaceTrackAudio = () => {
         // Prepare metadata for upload
         const uploadMetadata = trackMetadataForUploadToSdk(metadata)
 
+        // Extract the cover art file if present
+        const imageFile =
+          metadata.artwork &&
+          'file' in metadata.artwork &&
+          metadata.artwork.file
+            ? fileToSdk(metadata.artwork.file, 'cover_art')
+            : undefined
+
         // Update the track using TanStack Query mutation
         await updateTrack({
           trackId,
           userId: currentUserId,
           audioFile: file,
+          imageFile,
           metadata: uploadMetadata,
-          onProgress: (_, progress) => {
+          onProgress: (type, progress) => {
+            if (type !== 'audio') return
             dispatch(
               replaceTrackProgressModalActions.set({
                 ...progress,

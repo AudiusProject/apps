@@ -92,7 +92,7 @@ const getTrackArtworkUploadHandles = async (
       ) {
         throw new Error('Artwork file missing')
       }
-      const file = fileToSdk(t.metadata.artwork.file, 'artwork')
+      const file = fileToSdk(t.metadata.artwork.file, 'cover_art')
       const uploadHandle = sdk.tracks.uploadTrackFiles({
         imageFile: file,
         onProgress: (key, { loaded, total }) => {
