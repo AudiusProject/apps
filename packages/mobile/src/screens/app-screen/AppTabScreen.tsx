@@ -5,7 +5,8 @@ import type {
   TipSource,
   ID,
   SearchTrack,
-  SearchPlaylist
+  SearchPlaylist,
+  User
 } from '@audius/common/models'
 import type {
   NotificationType,
@@ -31,6 +32,7 @@ import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEm
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
+import { SendTokensUserSelectionScreen } from 'app/screens/send-tokens-user-selection-screen/SendTokensUserSelectionScreen'
 import {
   CoinDetailsScreen,
   EditCoinDetailsScreen,
@@ -141,6 +143,12 @@ export type AppTabScreenParamList = {
     | {
         presetMessage?: string
         defaultUserList?: CreateChatModalState['defaultUserList']
+      }
+    | undefined
+  SendTokensUserSelection:
+    | {
+        excludedUserIds?: number[]
+        callbackId?: string
       }
     | undefined
   Chat: {
@@ -296,6 +304,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Group>
         <Stack.Screen name='ChatList' component={ChatListScreen} />
         <Stack.Screen name='ChatUserList' component={ChatUserListScreen} />
+        <Stack.Screen
+          name='SendTokensUserSelection'
+          component={SendTokensUserSelectionScreen}
+        />
         <Stack.Screen
           name='Chat'
           component={ChatScreen}
