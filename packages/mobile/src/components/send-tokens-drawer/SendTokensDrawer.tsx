@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import type { SolanaWalletAddress } from '@audius/common/models'
+import type { SolanaWalletAddress, User } from '@audius/common/models'
 import { ErrorLevel, Feature } from '@audius/common/models'
 import { useSendTokensModal } from '@audius/common/store'
 
@@ -18,10 +18,16 @@ import { SendTokensInput } from './components/SendTokensInput'
 import { SendTokensProgress } from './components/SendTokensProgress'
 import { SendTokensSuccess } from './components/SendTokensSuccess'
 
+type RecipientType = 'user' | 'wallet'
+
 type SendTokensState = {
   step: 'input' | 'confirm' | 'progress' | 'success' | 'failure'
   amount: bigint
+  amountString: string
   destinationAddress: string
+  selectedUser: User | null
+  selectedMint: string
+  recipientType: RecipientType
   signature: string
 }
 
@@ -32,18 +38,35 @@ export const SendTokensDrawer = () => {
   const [state, setState] = useState<SendTokensState>({
     step: 'input',
     amount: BigInt(0),
+    amountString: '',
     destinationAddress: '',
+    selectedUser: null,
+    selectedMint: mint ?? '',
+    recipientType: 'user',
     signature: ''
   })
   const [error, setError] = useState<string>('')
 
-  const sendTokensMutation = useSendCoins({ mint: mint ?? '' })
+  const sendTokensMutation = useSendCoins({
+    mint: state.selectedMint || (mint ?? '')
+  })
 
-  const handleInputContinue = (amount: bigint, destinationAddress: string) => {
+  const handleInputContinue = (
+    amount: bigint,
+    destinationAddress: string,
+    selectedUser: User | null,
+    selectedMint: string,
+    recipientType: RecipientType,
+    amountString: string
+  ) => {
     setState({
       step: 'confirm',
       amount,
+      amountString,
       destinationAddress,
+      selectedUser,
+      selectedMint,
+      recipientType,
       signature: ''
     })
   }
@@ -55,26 +78,47 @@ export const SendTokensDrawer = () => {
     try {
       const { signature } = await sendTokensMutation.mutateAsync({
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
-        amount: state.amount
+        amount: state.amount,
+        // When sending to a user, pass their Ethereum address to derive user-bank ATA
+        recipientEthAddress: state.selectedUser?.erc_wallet
       })
 
       setState((prev) => ({ ...prev, step: 'success', signature }))
     } catch (error) {
-      const errorMessage =
+      let errorMessage =
         error instanceof Error ? error.message : 'An unknown error occurred'
+
+      // Check for specific Solana token account errors
+      const errorString =
+        error instanceof Error ? error.toString() : String(error)
+      if (
+        errorString.includes('Account not associated with this Mint') ||
+        errorString.includes('Custom:3') ||
+        errorString.includes('0x3') ||
+        errorString.includes('custom program error: 0x3')
+      ) {
+        errorMessage =
+          'The recipient wallet does not have a token account for this coin. They may need to receive tokens of this type first, or the transaction needs to create the account automatically.'
+      }
+
       setError(errorMessage)
       reportToSentry({
         level: ErrorLevel.Error,
-        error: error ?? new Error(errorMessage),
+        error: error as Error,
         additionalInfo: {
           amount: state.amount.toString(),
           destinationAddress: state.destinationAddress,
-          mint
+          mint: state.selectedMint,
+          errorString
         },
         feature: Feature.SendTokens
       })
       setState((prev) => ({ ...prev, step: 'failure' }))
     }
+  }
+
+  const handleBack = () => {
+    setState((prev) => ({ ...prev, step: 'input' }))
   }
 
   const handleTryAgain = () => {
@@ -87,7 +131,11 @@ export const SendTokensDrawer = () => {
     setState({
       step: 'input',
       amount: BigInt(0),
+      amountString: '',
       destinationAddress: '',
+      selectedUser: null,
+      selectedMint: mint ?? '',
+      recipientType: 'user',
       signature: ''
     })
     setError('')
@@ -106,19 +154,26 @@ export const SendTokensDrawer = () => {
     <Drawer isOpen={isOpen} onClose={handleClose} drawerHeader={renderHeader}>
       {state.step === 'input' ? (
         <SendTokensInput
-          mint={mint ?? ''}
+          key={`input-${state.selectedMint || mint || 'default'}`}
+          mint={(state.selectedMint || mint) ?? ''}
           onContinue={handleInputContinue}
-          initialAmount={state.amount}
+          initialAmount={state.amountString}
           initialDestinationAddress={state.destinationAddress}
+          initialSelectedUser={state.selectedUser}
+          initialRecipientType={state.recipientType}
+          onBeforeUserSelectionNavigate={handleClose}
         />
       ) : null}
 
       {state.step === 'confirm' ? (
         <SendTokensConfirmation
-          mint={mint ?? ''}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
+          recipientType={state.recipientType}
           onConfirm={handleConfirm}
+          onBack={handleBack}
           onClose={handleClose}
         />
       ) : null}
@@ -127,9 +182,10 @@ export const SendTokensDrawer = () => {
 
       {state.step === 'success' ? (
         <SendTokensSuccess
-          mint={mint ?? ''}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
           signature={state.signature}
           onDone={handleClose}
         />
@@ -137,9 +193,10 @@ export const SendTokensDrawer = () => {
 
       {state.step === 'failure' ? (
         <SendTokensFailure
-          mint={mint ?? ''}
+          mint={state.selectedMint}
           amount={state.amount}
           destinationAddress={state.destinationAddress}
+          selectedUser={state.selectedUser}
           error={error}
           onTryAgain={handleTryAgain}
           onClose={handleClose}
