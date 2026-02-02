@@ -13,8 +13,16 @@
   font-size: var(--harmony-font-m);
 }
 
+.root.medium textarea {
+  font-size: var(--harmony-font-m);
+}
+
 .root.small {
   padding: 6px 0 6px var(--harmony-unit-2);
+  font-size: var(--harmony-font-xs);
+}
+
+.root.small textarea {
   font-size: var(--harmony-font-xs);
 }
 
@@ -106,6 +114,14 @@ textarea.transparentTextArea {
   z-index: 1;
 }
 
+.root.medium .displayElementContainer {
+  font-size: var(--harmony-font-m);
+}
+
+.root.small .displayElementContainer {
+  font-size: var(--harmony-font-xs);
+}
+
 .displayElementContainer {
   left: 0;
   top: 0;
@@ -114,6 +130,7 @@ textarea.transparentTextArea {
   text-align: left;
   pointer-events: none;
   overflow-wrap: anywhere;
+  font-weight: var(--harmony-font-medium);
 }
 
 .displayElementContainer::after {

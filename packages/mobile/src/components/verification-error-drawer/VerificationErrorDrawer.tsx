@@ -5,7 +5,7 @@ const MODAL_NAME = 'VerificationError'
 
 const messages = {
   drawerTitle: 'Verification Failed',
-  message: 'We could not verify your account. Please try again another time.',
+  message: 'Something went wrong. Please try again later.',
   closeText: 'Close'
 }
 

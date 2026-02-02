@@ -115,10 +115,9 @@ const messages = {
   description: 'Configure your Audius account',
   verificationSuccessTitle: 'Verification Submitted',
   verificationSuccessMessage:
-    'Thank you for completing identity verification. Your request will be processed soon.',
+    'Verification request received, pending review. Check back soon!',
   verificationErrorTitle: 'Verification Failed',
-  verificationErrorMessage:
-    'We could not verify your account. Please try again another time.',
+  verificationErrorMessage: 'Something went wrong. Please try again later.',
   pending: 'Pending',
   closeButton: 'Close'
 }

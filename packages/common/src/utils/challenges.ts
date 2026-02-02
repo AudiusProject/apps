@@ -23,9 +23,8 @@ export type ChallengeRewardsInfo = {
   isVerifiedChallenge?: boolean
 }
 
-export const challengeRewardsConfig: Record<
-  ChallengeRewardID,
-  ChallengeRewardsInfo
+export const challengeRewardsConfig: Partial<
+  Record<ChallengeRewardID, ChallengeRewardsInfo>
 > = {
   [ChallengeName.Referrals]: {
     id: ChallengeName.Referrals,
@@ -148,27 +147,6 @@ export const challengeRewardsConfig: Record<
     fullDescription: () => 'Upload 3 tracks to your profile',
     progressLabel: '%0/%1 Uploaded',
     panelButtonText: 'Upload Tracks'
-  },
-  'send-first-tip': {
-    id: 'send-first-tip',
-    title: 'Send Your First Tip',
-    description: (_) =>
-      'Show some love to your favorite artist and send them a tip.',
-    fullDescription: () =>
-      'Show some love to your favorite artist and send them a tip.',
-    progressLabel: 'Not Earned',
-    completedLabel: 'Tip Another Artist',
-    panelButtonText: 'Send a Tip'
-  },
-  [ChallengeName.FirstTip]: {
-    id: ChallengeName.FirstTip,
-    title: 'Send Your First Tip',
-    description: (_) =>
-      'Show some love to your favorite artist and send them a tip.',
-    fullDescription: () =>
-      'Show some love to your favorite artist and send them a tip.',
-    progressLabel: 'Not Earned',
-    panelButtonText: 'Send a Tip'
   },
   'first-playlist': {
     id: 'first-playlist',

@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import { useGatedContentAccess } from '@audius/common/hooks'
 import type { Track, User } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
@@ -7,6 +9,7 @@ import { useSelector } from 'react-redux'
 
 import { LockedStatusBadge, Text } from 'app/components/core'
 import { useDrawer } from 'app/hooks/useDrawer'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
@@ -48,12 +51,18 @@ export const TrackInfo = (props: TrackInfoProps) => {
   const styles = useStyles()
   const { hasStreamAccess } = useGatedContentAccess(track)
   const { onClose } = useDrawer('NowPlaying')
+  const navigation = useNavigation()
   const isPreviewing = useSelector(getPreviewing)
   const shouldShowPreviewLock =
     isPreviewing ||
     (track?.stream_conditions &&
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess)
+
+  const handlePressArtist = useCallback(() => {
+    onClose()
+    navigation?.push('Profile', { id: user?.user_id })
+  }, [navigation, user?.user_id, onClose])
 
   if (!user || !track) return null
 
@@ -77,7 +86,11 @@ export const TrackInfo = (props: TrackInfoProps) => {
           </View>
         ) : null}
       </TouchableOpacity>
-      <UserLink variant='visible' userId={user_id} onPress={onClose} />
+      <UserLink
+        variant='visible'
+        userId={user_id}
+        onPress={handlePressArtist}
+      />
     </View>
   )
 }

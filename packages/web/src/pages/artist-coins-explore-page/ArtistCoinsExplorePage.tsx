@@ -50,8 +50,7 @@ const messages = {
     'Offer exclusive perks to your fans'
   ],
   help: 'Help',
-  getStartedTooltip:
-    'Verified users only. Request account verification in Settings.'
+  getStartedTooltip: 'Verified users only. Request verification in settings.'
 }
 
 // Desktop version

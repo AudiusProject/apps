@@ -14,8 +14,8 @@ import zIndex from 'utils/zIndex'
 import styles from './SomethingWrong.module.css'
 
 const messages = {
-  body1: 'We’re experiencing heavy load!',
-  body2: 'Please try again later.',
+  body1: 'Something went wrong!',
+  body2: 'Please try again.',
   cta: 'Try Again'
 }
 

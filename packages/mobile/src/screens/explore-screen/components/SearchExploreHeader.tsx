@@ -35,6 +35,7 @@ import {
   useTheme
 } from '@audius/harmony-native'
 import imageSearchHeaderBackground from 'app/assets/images/imageSearchHeaderBackground.webp'
+import { useDrawer } from 'app/hooks/useDrawer'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AccountPictureHeader } from 'app/screens/app-screen/AccountPictureHeader'
 import { SearchCategoriesAndFilters } from 'app/screens/search-screen/SearchCategoriesAndFilters'
@@ -66,6 +67,7 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   const { params } = useExploreRoute<'SearchExplore'>()
   const { drawerHelpers } = useContext(AppDrawerContext)
   const navigation = useNavigation()
+  const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const textInputRef = useRef<any>(null)
   const [isFocused, setIsFocused] = useState(!!params?.autoFocus)
   const { top } = useSafeAreaInsets()
@@ -130,8 +132,12 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   })
 
   const handleOpenLeftNavDrawer = useCallback(() => {
+    // Prevent opening left nav drawer when now-playing drawer is open
+    if (isNowPlayingDrawerOpen) {
+      return
+    }
     drawerHelpers?.openDrawer()
-  }, [drawerHelpers])
+  }, [drawerHelpers, isNowPlayingDrawerOpen])
 
   const handleClearSearch = useCallback(() => {
     setInputValue('')

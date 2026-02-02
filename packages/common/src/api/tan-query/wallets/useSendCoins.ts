@@ -18,6 +18,7 @@ import { useCoinBalance } from './useCoinBalance'
 export type SendCoinsParams = {
   recipientWallet: SolanaWalletAddress
   amount: bigint
+  recipientEthAddress?: string // Optional: when sending to a user, provide their ETH address to derive user-bank ATA
 }
 
 export type SendCoinsResult = {
@@ -49,7 +50,8 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
   return useMutation({
     mutationFn: async ({
       recipientWallet,
-      amount
+      amount,
+      recipientEthAddress
     }: SendCoinsParams): Promise<SendCoinsResult> => {
       try {
         const currentUser = walletAddresses?.currentUser
@@ -68,7 +70,8 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
           amount: amount as any, // TODO: Fix type mismatch between bigint and AudioWei
           ethAddress: currentUser,
           sdk,
-          mint: new PublicKey(mint) as any // TODO: Fix type mismatch between string and MintName | PublicKey
+          mint: new PublicKey(mint) as any, // TODO: Fix type mismatch between string and MintName | PublicKey
+          recipientEthAddress // Optional: when provided, derives user-bank ATA instead of regular ATA
         })
 
         return {
@@ -86,6 +89,15 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         if (
           errorMessage ===
           'Recipient has no $AUDIO token account. Please install Phantom-Wallet to create one.'
+        ) {
+          throw new Error(errorMessage)
+        }
+        // Preserve network-related error messages
+        if (
+          errorMessage.includes('Failed to connect to Solana network') ||
+          errorMessage.includes('Failed to get recent blockhash') ||
+          errorMessage.includes('fetch failed') ||
+          errorMessage.includes('network')
         ) {
           throw new Error(errorMessage)
         }
