@@ -84,6 +84,7 @@
     "numeral": "2.0.6",
     "patch-package": "6.5.1",
     "pg": "8.0.3",
+    "persona": "5.5.0",
     "plaid": "30.1.0",
     "rate-limit-redis": "1.6.0",
     "react": "16.11.0",

@@ -617,6 +617,24 @@ const config = convict({
     env: 'plaidTemplateId',
     default: ''
   },
+  personaApiKey: {
+    doc: 'Persona API key',
+    format: String,
+    env: 'personaApiKey',
+    default: ''
+  },
+  personaTemplateId: {
+    doc: 'Persona template ID',
+    format: String,
+    env: 'personaTemplateId',
+    default: ''
+  },
+  personaEnvironmentId: {
+    doc: 'Persona environment ID',
+    format: String,
+    env: 'personaEnvironmentId',
+    default: ''
+  },
   solanaEndpoint: {
     doc: 'The Solana RPC endpoint to make requests against',
     format: String,
