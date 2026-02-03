@@ -302,7 +302,9 @@ export const ChallengeRewardsTile = () => {
               <SelectablePill
                 type='button'
                 label={
-                  showCompleted ? messages.hideCompleted : messages.showCompleted
+                  showCompleted
+                    ? messages.hideCompleted
+                    : messages.showCompleted
                 }
                 isSelected={showCompleted}
                 onPress={() => setShowCompleted(!showCompleted)}

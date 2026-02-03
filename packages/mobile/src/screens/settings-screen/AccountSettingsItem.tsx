@@ -25,7 +25,8 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 export const AccountSettingsItem = (props: AccountSettingsItemProps) => {
-  const { title, titleIcon, description, buttonTitle, onPress, disabled } = props
+  const { title, titleIcon, description, buttonTitle, onPress, disabled } =
+    props
   const styles = useStyles()
 
   return (
