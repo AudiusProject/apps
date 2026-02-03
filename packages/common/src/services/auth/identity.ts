@@ -305,4 +305,14 @@ export class IdentityService {
       headers
     })
   }
+
+  async createPersonaSessionToken() {
+    const headers = await this.getAuthHeaders()
+
+    return await this._makeRequest<{ sessionToken: string }>({
+      url: '/create_session_token',
+      method: 'get',
+      headers
+    })
+  }
 }
