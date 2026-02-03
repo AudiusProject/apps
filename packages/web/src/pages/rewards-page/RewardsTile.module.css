@@ -1,8 +1,9 @@
 .rewardsTile {
   background-color: var(--harmony-white);
   margin-bottom: 32px;
-  padding: 42px 28px 32px;
+  padding: 32px 28px 32px;
 }
+
 .title {
   background: var(--harmony-gradient);
   background-clip: text;
@@ -68,11 +69,12 @@
   font-size: var(--harmony-font-2xl);
   font-weight: var(--harmony-font-bold);
   margin-bottom: 8px;
-  text-align: left;
 }
+
 .rewardTitle i {
   margin-right: 8px;
 }
+
 .rewardTitle.mobile {
   font-size: var(--harmony-font-l);
 }
@@ -83,6 +85,7 @@
   margin-bottom: 24px;
   align-items: center;
 }
+
 .rewardProgress.mobile {
   align-items: flex-start;
   flex-direction: row;
@@ -96,6 +99,7 @@
   text-transform: uppercase;
   margin-right: 16px;
 }
+
 .rewardProgressBar {
   flex: 1 1 0;
 }
@@ -109,6 +113,7 @@
   padding: 1px;
   margin-right: 10px;
 }
+
 .iconCheck path {
   fill: var(--harmony-n-400);
 }

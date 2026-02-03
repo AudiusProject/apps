@@ -19,8 +19,6 @@ import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPag
 import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
 import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
 
-import RewardsBanner from '../RewardsBanner'
-
 import GenreSelectionModal from './GenreSelectionModal'
 import { TrendingGenreFilters } from './TrendingGenreFilters'
 import styles from './TrendingPageContent.module.css'
@@ -219,11 +217,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
       key={`weekly-trending-tracks-${trendingGenre}`}
       className={styles.lineupContainer}
     >
-      {trendingGenre === null ? (
-        <div className={styles.bannerContainer}>
-          <RewardsBanner bannerType='tracks' />
-        </div>
-      ) : null}
       <Lineup
         aria-label='weekly trending tracks'
         ordered

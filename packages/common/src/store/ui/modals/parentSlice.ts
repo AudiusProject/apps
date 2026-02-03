@@ -9,7 +9,6 @@ import {
 
 export const initialState: BasicModalsState = {
   TiersExplainer: { isOpen: false },
-  TrendingRewardsExplainer: { isOpen: false },
   ChallengeRewards: { isOpen: false },
   ClaimAllRewards: { isOpen: false },
   ClaimVestedCoinsModal: { isOpen: false },
@@ -25,6 +24,7 @@ export const initialState: BasicModalsState = {
   FeedFilter: { isOpen: false },
   PurchaseVendor: { isOpen: false },
   TrendingGenreSelection: { isOpen: false },
+  TrendingRewardsExplainer: { isOpen: false },
   SocialProof: { isOpen: false },
   EditFolder: { isOpen: false },
   EditTrack: { isOpen: false },

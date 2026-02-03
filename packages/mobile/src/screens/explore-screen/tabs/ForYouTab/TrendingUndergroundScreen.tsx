@@ -5,7 +5,6 @@ import {
 } from '@audius/common/store'
 import { useSelector } from 'react-redux'
 
-import { RewardsBanner } from 'app/components/audio-rewards'
 import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
 import { Lineup } from 'app/components/lineup'
 const { makeGetLineupMetadatas } = lineupSelectors
@@ -26,7 +25,6 @@ export const TrendingUndergroundScreen = () => {
       <ScreenContent>
         <Lineup
           lineup={lineup}
-          header={<RewardsBanner bannerType='underground' />}
           actions={trendingUndergroundPageLineupActions}
           rankIconCount={5}
           isTrending

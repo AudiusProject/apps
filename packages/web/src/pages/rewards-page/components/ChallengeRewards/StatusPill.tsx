@@ -1,4 +1,4 @@
-import { Flex, IconSparkles, Text, TextProps, useTheme } from '@audius/harmony'
+import { Flex, Text, TextProps, useTheme } from '@audius/harmony'
 
 import { messages } from '../../messages'
 
@@ -42,13 +42,9 @@ const BasePill = ({
 
 type StatusPillProps = {
   shouldShowClaimPill: boolean
-  shouldShowNewChallengePill: boolean
 }
 
-export const StatusPill = ({
-  shouldShowClaimPill,
-  shouldShowNewChallengePill
-}: StatusPillProps) => {
+export const StatusPill = ({ shouldShowClaimPill }: StatusPillProps) => {
   const { color } = useTheme()
 
   if (shouldShowClaimPill) {
@@ -59,23 +55,6 @@ export const StatusPill = ({
         borderColor={color.primary.p400}
       >
         {messages.readyToClaim}
-      </BasePill>
-    )
-  }
-
-  if (shouldShowNewChallengePill) {
-    return (
-      <BasePill
-        color='accent'
-        backgroundColor={color.background.surface1}
-        borderColor={color.border.strong}
-      >
-        <Flex alignItems='center' justifyContent='center' gap='xs'>
-          <IconSparkles size='s' color='accent' />
-          <Text variant='body' size='m' strength='strong' color='accent'>
-            {messages.new}
-          </Text>
-        </Flex>
       </BasePill>
     )
   }

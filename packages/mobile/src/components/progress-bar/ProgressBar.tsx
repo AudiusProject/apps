@@ -2,6 +2,7 @@ import type { ViewStyle } from 'react-native'
 import { View } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 
+import { useTheme } from '@audius/harmony-native'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
@@ -55,28 +56,50 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 type ProgressBarProps = {
   progress: number
   max: number
+  variant?: 'default' | 'coin'
   style?: StylesProp<{
     root: ViewStyle
   }>
 }
 
-export const ProgressBar = ({ progress, max, style }: ProgressBarProps) => {
+export const ProgressBar = ({
+  progress,
+  max,
+  variant = 'default',
+  style
+}: ProgressBarProps) => {
   const styles = useStyles()
   const { pageHeaderGradientColor1, pageHeaderGradientColor2 } =
     useThemeColors()
+  const { color, spacing } = useTheme()
+
+  const progressWidth =
+    progress > max
+      ? '100%'
+      : `${Math.round((progress * 100 * 100.0) / max) / 100.0}%`
+
+  const gradientProps =
+    variant === 'coin'
+      ? {
+          ...color.special.coinGradient,
+          start: { x: 0, y: 0.5 },
+          end: { x: 1, y: 0.5 }
+        }
+      : {
+          colors: [pageHeaderGradientColor1, pageHeaderGradientColor2],
+          useAngle: true,
+          angle: 315
+        }
+
   return (
     <View style={[styles.root, style?.root]}>
       <LinearGradient
-        colors={[pageHeaderGradientColor1, pageHeaderGradientColor2]}
-        useAngle={true}
-        angle={315}
+        {...gradientProps}
         style={[
           styles.progressBar,
           {
-            width:
-              progress > max
-                ? '100%'
-                : `${Math.round((progress * 100 * 100.0) / max) / 100.0}%`
+            width: progressWidth as any,
+            ...(variant === 'coin' && { borderRadius: spacing['3xl'] })
           }
         ]}
       />

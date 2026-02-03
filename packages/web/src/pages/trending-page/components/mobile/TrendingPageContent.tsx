@@ -32,8 +32,6 @@ import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlPa
 import { BASE_URL } from 'utils/route'
 import { scrollWindowToTop } from 'utils/scroll'
 
-import RewardsBanner from '../RewardsBanner'
-
 import TrendingFilterButton from './TrendingFilterButton'
 import styles from './TrendingPageContent.module.css'
 const { TRENDING_PAGE } = route
@@ -113,11 +111,6 @@ const TrendingPageMobileContent = ({
   const lineupElements = useMemo(() => {
     return [
       <>
-        {trendingGenre === null ? (
-          <div className={styles.rewardsContainer}>
-            <RewardsBanner bannerType='tracks' />
-          </div>
-        ) : null}
         <Lineup
           key={`trendingWeek-${trendingGenre}`}
           {...weekProps}

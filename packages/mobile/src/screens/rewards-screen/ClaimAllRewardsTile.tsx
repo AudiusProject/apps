@@ -1,27 +1,32 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import {
-  formatCooldownChallenges,
-  useChallengeCooldownSchedule
-} from '@audius/common/hooks'
-import { modalsActions } from '@audius/common/store'
-import { Image, View } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
+import { useChallengeCooldownSchedule } from '@audius/common/hooks'
+import type { CommonState } from '@audius/common/store'
+import { challengesSelectors, modalsActions } from '@audius/common/store'
+import { formatNumberCommas } from '@audius/common/utils'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   Button,
+  Divider,
   Flex,
-  Text,
+  IconArrowRight,
   Paper,
-  IconArrowRight
+  Text
 } from '@audius/harmony-native'
-import TokenStill from 'app/assets/images/tokenSpinStill.png'
-import { makeStyles } from 'app/styles'
+import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
+
+const { getOptimisticUserChallenges } = challengesSelectors
 
 const { setVisibility } = modalsActions
 
 const messages = {
-  pending: 'Pending',
+  yourRewards: 'Your Rewards',
+  totalClaimed: 'TOTAL CLAIMED',
+  pending: 'PENDING',
+  readyToClaim: 'READY TO CLAIM',
+  claimAll: 'Claim All',
   claimAllRewards: 'Claim All Rewards',
   moreInfo: 'More Info',
   available: '$AUDIO available',
@@ -43,39 +48,26 @@ const messages = {
   }
 }
 
-const useStyles = makeStyles(({ spacing, typography }) => ({
-  pillContainer: {
-    height: spacing(6),
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start'
-  },
-  pillMessage: {
-    paddingVertical: spacing(1),
-    paddingHorizontal: spacing(2),
-    fontSize: typography.fontSize.small,
-    fontFamily: typography.fontByWeight.demiBold,
-    lineHeight: spacing(4),
-    borderWidth: 1,
-    borderRadius: 12,
-    borderColor: 'rgba(133,129,153,0.1)',
-    overflow: 'hidden'
-  },
-  readyToClaimPill: {
-    backgroundColor: 'rgba(133,129,153,0.1)'
-  },
-  token: {
-    width: 24,
-    height: 24
-  }
-}))
-
 export const ClaimAllRewardsTile = () => {
-  const styles = useStyles()
   const dispatch = useDispatch()
-  const { cooldownChallenges, cooldownAmount, claimableAmount, isEmpty } =
+  const { cooldownAmount, claimableAmount, isEmpty } =
     useChallengeCooldownSchedule({ multiple: true })
+  const { data: currentAccount } = useCurrentAccount()
+  const { data: currentUser } = useCurrentAccountUser()
+  const optimisticUserChallenges = useSelector((state: CommonState) =>
+    getOptimisticUserChallenges(state, currentAccount, currentUser)
+  )
+
+  // Calculate total claimed amount
+  const totalClaimed = useMemo(() => {
+    return Object.values(optimisticUserChallenges).reduce(
+      (sum, challenge) => sum + (challenge?.disbursed_amount ?? 0),
+      0
+    )
+  }, [optimisticUserChallenges])
+
+  // Pending amount is the cooldown amount
+  const pendingAmount = cooldownAmount
 
   const openClaimAllModal = useCallback(() => {
     dispatch(setVisibility({ modal: 'ClaimAllRewards', visible: true }))
@@ -83,50 +75,90 @@ export const ClaimAllRewardsTile = () => {
 
   if (isEmpty) return null
 
+  const tooltipMessages = {
+    totalClaimed: 'Total amount of $AUDIO you have claimed from all rewards',
+    pending: 'Amount of $AUDIO pending in cooldown period',
+    readyToClaim: 'Amount of $AUDIO ready to claim now'
+  }
+
   return (
-    <Paper shadow='near' border='strong' p='l' gap='l'>
-      <Flex direction='row' justifyContent='flex-start' gap='s'>
-        {claimableAmount > 0 ? (
-          <Image style={styles.token} source={TokenStill} />
-        ) : null}
-        <Text variant='heading' color='accent' size='s'>
-          {messages.totalReadyToClaim}
-        </Text>
-      </Flex>
-      {cooldownAmount > 0 ? (
-        <View style={styles.pillContainer}>
-          <Text style={[styles.pillMessage, styles.readyToClaimPill]}>
-            {cooldownAmount} {messages.pending}
-          </Text>
-        </View>
-      ) : null}
-      <Text size='s' variant='body'>
-        {claimableAmount > 0
-          ? `${claimableAmount} ${messages.available} ${messages.now}`
-          : messages.availableMessage(
-              formatCooldownChallenges(cooldownChallenges)
-            )}
+    <Paper shadow='near' border='strong' p='l' style={{ gap: 16 }}>
+      <Text variant='heading' color='accent' size='m'>
+        {messages.yourRewards}
       </Text>
-      <Flex mt='s'>
-        {claimableAmount > 0 ? (
-          <Button
-            onPress={openClaimAllModal}
-            iconRight={IconArrowRight}
-            size='small'
-          >
-            {messages.claimAllRewards}
-          </Button>
-        ) : cooldownAmount > 0 ? (
-          <Button
-            variant='secondary'
-            onPress={openClaimAllModal}
-            iconRight={IconArrowRight}
-            size='small'
-          >
-            {messages.moreInfo}
-          </Button>
-        ) : null}
+      <Flex column style={{ gap: 16, width: '100%' }}>
+        <Flex row alignItems='stretch' style={{ gap: 32, width: '100%' }}>
+          <Flex column flex={1} style={{ gap: 4 }}>
+            <Flex row alignItems='center' style={{ gap: 4 }}>
+              <Text variant='title' size='l' color='default'>
+                {formatNumberCommas(totalClaimed)}
+              </Text>
+              <Text variant='body' size='l' strength='strong' color='subdued'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex row alignItems='center' style={{ gap: 4 }}>
+              <Text variant='label' size='xs' color='default'>
+                {messages.totalClaimed}
+              </Text>
+              <TooltipInfoIcon
+                title='Total Claimed'
+                message={tooltipMessages.totalClaimed}
+              />
+            </Flex>
+          </Flex>
+          <Divider orientation='vertical' />
+          <Flex column flex={1} style={{ gap: 4 }}>
+            <Flex row alignItems='center' style={{ gap: 4 }}>
+              <Text variant='title' size='l' color='default'>
+                {formatNumberCommas(pendingAmount)}
+              </Text>
+              <Text variant='body' size='l' strength='strong' color='subdued'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex row alignItems='center' style={{ gap: 4 }}>
+              <Text variant='label' size='xs' color='default'>
+                {messages.pending}
+              </Text>
+              <TooltipInfoIcon
+                title='Pending'
+                message={tooltipMessages.pending}
+              />
+            </Flex>
+          </Flex>
+        </Flex>
+        {/* Second row: Ready to Claim */}
+        <Flex column style={{ gap: 4, width: '100%' }}>
+          <Flex row alignItems='center' style={{ gap: 4 }}>
+            <Text variant='title' size='l' color='default'>
+              {formatNumberCommas(claimableAmount)}
+            </Text>
+            <Text variant='body' size='l' strength='strong' color='subdued'>
+              $AUDIO
+            </Text>
+          </Flex>
+          <Flex row alignItems='center' style={{ gap: 4 }}>
+            <Text variant='label' size='xs' color='default'>
+              {messages.readyToClaim}
+            </Text>
+            <TooltipInfoIcon
+              title='Ready To Claim'
+              message={tooltipMessages.readyToClaim}
+            />
+          </Flex>
+        </Flex>
       </Flex>
+      {claimableAmount > 0 ? (
+        <Button
+          onPress={openClaimAllModal}
+          iconRight={IconArrowRight}
+          variant='primary'
+          size='small'
+        >
+          {messages.claimAll}
+        </Button>
+      ) : null}
     </Paper>
   )
 }
