@@ -1,6 +1,7 @@
 import { useState, useContext, useCallback } from 'react'
 
 import { useQueryContext, useCurrentAccountUser } from '@audius/common/api'
+import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { Name, SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import {
@@ -140,6 +141,7 @@ const AccountSettingsPage = () => {
   const { userId, handle, name } = accountData ?? {}
   const [showModalSignOut, setShowModalSignOut] = useState(false)
   const { toast } = useContext(ToastContext)
+  const { isVerified } = useTierAndVerifiedForUser(userId)
 
   const goToRoute = useCallback(
     (route: string) => dispatch(push(route)),
@@ -213,6 +215,7 @@ const AccountSettingsPage = () => {
           description={messages.verifyDescription}
           buttonTitle={messages.verifyButtonTitle}
           onClick={goToVerification}
+          disabled={isVerified}
         />
         <AccountSettingsItem
           icon={IconEmailAddress}

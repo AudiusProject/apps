@@ -1,11 +1,13 @@
 import { useCallback } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
+import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { pick } from 'lodash'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
+import { Flex, IconVerified, Text } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
@@ -18,13 +20,12 @@ const useStyles = makeStyles(({ typography, spacing, palette }) => ({
   root: { paddingVertical: spacing(4) },
   content: { flexDirection: 'row', alignItems: 'center' },
   profilePicture: { height: 52, width: 52 },
-  info: { marginLeft: spacing(4) },
-  name: { ...typography.h2, color: palette.neutral },
-  handle: {
-    ...typography.h2,
-    color: palette.neutral,
-    fontFamily: typography.fontByWeight.medium
-  }
+  info: { marginLeft: spacing(4) }
+  // handle: {
+  //   ...typography.h2,
+  //   color: palette.neutral,
+  //   fontFamily: typography.fontByWeight.medium
+  // }
 }))
 
 export const AccountSettingsRow = () => {
@@ -35,6 +36,10 @@ export const AccountSettingsRow = () => {
   const { user_id, handle, name } = accountData ?? {}
   const navigation = useNavigation<ProfileTabScreenParamList>()
   const { spacing } = useTheme()
+  const { isVerified } = useTierAndVerifiedForUser(user_id)
+
+  // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
+  const badgeSize = 14
 
   const handlePress = useCallback(() => {
     navigation.push('AccountSettingsScreen')
@@ -51,8 +56,17 @@ export const AccountSettingsRow = () => {
           borderWidth='thin'
         />
         <View style={styles.info}>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.handle}>@{handle}</Text>
+          <Flex row gap='xs' alignItems='center'>
+            <Text variant='title' size='m'>
+              {name}
+            </Text>
+            {isVerified ? (
+              <IconVerified height={badgeSize} width={badgeSize} />
+            ) : null}
+          </Flex>
+          <Text variant='body' size='s'>
+            @{handle}
+          </Text>
         </View>
       </View>
     </SettingsRow>
