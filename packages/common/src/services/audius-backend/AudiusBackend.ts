@@ -36,7 +36,7 @@ import {
 } from '../../store'
 import { getErrorMessage, uuid, Maybe, Nullable } from '../../utils'
 
-import { MintName } from './solana'
+import { MintName, createUserBankIfNeeded } from './solana'
 
 type DisplayEncoding = 'utf8' | 'hex'
 type PhantomEvent = 'disconnect' | 'connect' | 'accountChanged'
@@ -914,13 +914,13 @@ export const audiusBackend = ({
     let tokenAccountAddress: PublicKey
 
     if (recipientEthAddress) {
-      // When sending to a user, derive their user-bank ATA for this Solana mint
-      // The user-bank is a PDA derived from their Ethereum address and the mint
-      tokenAccountAddress =
-        await sdk.services.claimableTokensClient.deriveUserBank({
-          ethWallet: recipientEthAddress,
-          mint
-        })
+      // When sending to a user, ensure their user-bank account exists
+      // This will create it if needed (in a separate transaction)
+      tokenAccountAddress = await createUserBankIfNeeded(sdk, {
+        ethAddress: recipientEthAddress,
+        mint: mint as any,
+        recordAnalytics: () => {} // Analytics handled elsewhere
+      })
     } else {
       // When sending to a Solana wallet address directly, use regular ATA logic
       tokenAccountAddress = await getOrCreateAssociatedTokenAccount({

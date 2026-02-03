@@ -1,6 +1,4 @@
 import { TimeRange } from '@audius/common/models'
-import { trendingPageSelectors } from '@audius/common/store'
-import { useSelector } from 'react-redux'
 
 import {
   IconAllTime,
@@ -8,7 +6,6 @@ import {
   IconCalendarMonth,
   IconTrending
 } from '@audius/harmony-native'
-import { RewardsBanner } from 'app/components/audio-rewards'
 import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
@@ -17,17 +14,9 @@ import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 
 import { TrendingFilterButton } from './TrendingFilterButton'
 import { TrendingLineup } from './TrendingLineup'
-const { getTrendingGenre } = trendingPageSelectors
 
 const ThisWeekTab = () => {
-  const trendingGenre = useSelector(getTrendingGenre)
-  return (
-    <TrendingLineup
-      header={trendingGenre ? null : <RewardsBanner bannerType='tracks' />}
-      timeRange={TimeRange.WEEK}
-      rankIconCount={5}
-    />
-  )
+  return <TrendingLineup timeRange={TimeRange.WEEK} rankIconCount={5} />
 }
 const ThisMonthTab = () => {
   return <TrendingLineup timeRange={TimeRange.MONTH} />

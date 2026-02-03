@@ -4,7 +4,7 @@ import { useAccountStatus, useCurrentAccountUser } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { AuthHeaders } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { usePlaidLink, PlaidLinkError } from 'react-plaid-link'
+import Persona, { Client } from 'persona'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
 
@@ -44,15 +44,16 @@ const CheckPage = () => {
     }
   }, [accountHandle, accountStatus, dispatch])
 
-  const [linkToken, setLinkToken] = useState<string | null>(null)
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  const personaClientRef = useRef<Client | null>(null)
   const wasSuccessful = useRef(false)
 
   useEffect(() => {
-    async function fetchLinkToken() {
-      const { linkToken } = await identityService.createPlaidLinkToken()
-      setLinkToken(linkToken)
+    async function fetchSessionToken() {
+      const { sessionToken } = await identityService.createPersonaSessionToken()
+      setSessionToken(sessionToken)
     }
-    fetchLinkToken()
+    fetchSessionToken()
   }, [])
 
   const isInWebView = useRef(
@@ -65,7 +66,7 @@ const CheckPage = () => {
     }
   }, [])
 
-  const onSuccess = useCallback(() => {
+  const onComplete = useCallback(() => {
     wasSuccessful.current = true
     if (isInWebView.current) {
       // In WebView, send message instead of navigating
@@ -80,52 +81,81 @@ const CheckPage = () => {
     }
   }, [navigate, sendMessageToWebView])
 
-  const onExit = useCallback(
-    (err: PlaidLinkError | null) => {
-      if (isInWebView.current) {
-        // In WebView, send message instead of navigating
-        if (err) {
-          sendMessageToWebView('error')
-        } else if (wasSuccessful.current) {
-          sendMessageToWebView('success')
-        } else {
-          // User exited without completing - just close
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(
-              JSON.stringify({ type: 'close' })
-            )
-          }
-        }
+  const onCancel = useCallback(() => {
+    if (isInWebView.current) {
+      // In WebView, send message instead of navigating
+      if (wasSuccessful.current) {
+        sendMessageToWebView('success')
       } else {
-        // In web, navigate normally
-        if (err) {
-          navigate(`${SETTINGS_PAGE}?verification=error`)
-        } else if (wasSuccessful.current) {
-          navigate(`${SETTINGS_PAGE}?verification=success`)
-        } else {
-          navigate(SETTINGS_PAGE)
+        // User cancelled without completing - just close
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(
+            JSON.stringify({ type: 'close' })
+          )
         }
       }
-    },
-    [navigate, sendMessageToWebView]
-  )
-
-  const { open, ready } = usePlaidLink({
-    token: linkToken,
-    onSuccess,
-    onExit
-  })
-
-  useEffect(() => {
-    if (ready) {
-      const originalWidth = document.body.style.width
-      document.body.style.setProperty('width', '100%', 'important')
-      open()
-      return () => {
-        document.body.style.width = originalWidth
+    } else {
+      // In web, navigate normally
+      if (wasSuccessful.current) {
+        navigate(`${SETTINGS_PAGE}?verification=success`)
+      } else {
+        navigate(SETTINGS_PAGE)
       }
     }
-  }, [ready, open])
+  }, [navigate, sendMessageToWebView])
+
+  const onError = useCallback(() => {
+    if (isInWebView.current) {
+      // In WebView, send message instead of navigating
+      sendMessageToWebView('error')
+    } else {
+      // In web, navigate normally
+      navigate(`${SETTINGS_PAGE}?verification=error`)
+    }
+  }, [navigate, sendMessageToWebView])
+
+  useEffect(() => {
+    if (sessionToken) {
+      try {
+        const config = JSON.parse(sessionToken)
+        const { templateId, referenceId, environmentId } = config
+
+        const originalWidth = document.body.style.width
+        document.body.style.setProperty('width', '100%', 'important')
+
+        const client = new Persona.Client({
+          templateId,
+          referenceId,
+          environmentId,
+          onReady: () => {
+            client.open()
+          },
+          onComplete: () => {
+            onComplete()
+          },
+          onCancel: () => {
+            onCancel()
+          },
+          onError: (error) => {
+            console.error('Persona error:', error)
+            onError()
+          }
+        })
+
+        personaClientRef.current = client
+
+        return () => {
+          document.body.style.width = originalWidth
+          if (personaClientRef.current) {
+            personaClientRef.current = null
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing Persona session token:', error)
+        onError()
+      }
+    }
+  }, [sessionToken, accountHandle, onComplete, onCancel, onError])
 
   return <Page title='Verification' description='Audius account verification' />
 }

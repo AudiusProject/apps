@@ -40,7 +40,32 @@ if (!AAO_AUTH_PASSWORD) {
 }
 
 const rewardAmountRatio = 10
-const skipValidationChallenges = ['dvl']
+const openRewards = [
+  'dvl', // daily volume rewards
+  't',   // tastemaker
+  'tp',  // trending playlists
+  'tt',  // trending
+  'tut', // trending underground
+  'b',   // audio match buy (from verified user)
+  'rd',  // referred (by verified user)
+  'w',   // remix contest winner (from verified user)
+  'cs',  // cosign (from verified user)
+]
+
+const verifiedRewards = [
+  'u',   // uploads
+  's',   // audio match sell
+  'r',   // referral
+  'c',   // first comment
+  'cp',  // comment pin
+  'e',   // listen streak
+  'fp',  // first playlist
+  'm',   // mobile install
+  'p',   // profile completion
+  'p1',  // 250 plays
+  'p2',  // 1000 plays
+  'p3',  // 10000 plays
+]
 
 const sdk = getAudiusSdk()
 
@@ -174,27 +199,21 @@ app.post('/attestation/:handle', async (c) => {
     return c.json({ error: `handle not found: ${handle}` }, 404)
   }
   const user = users[0]!
-
-  if (!skipValidationChallenges.includes(challengeId)) {
-    // pass / fail
+  if (verifiedRewards.includes(challengeId)) {
+    if (!user.isVerified) {
+      return c.json({ error: 'denied' }, 400)
+    }
+  }
+  if (openRewards.includes(challengeId)) {
     const userScore = await getUserNormalizedScore(
       HashId.parse(user.id),
       user.wallet
     )
-
-    // Reward attestation proportional to user score confidence
-    if (userScore.overallScore < (amount as number) / rewardAmountRatio) {
+    if (userScore.overallScore < -1000) {
       return c.json({ error: 'denied' }, 400)
     }
-
-    // Custom rules for specific challenges
-    if (challengeId === 'e') {
-      if (!user.isVerified) {
-        return c.json({ error: 'denied' }, 400)
-      }
-    }
-    console.log('userScore', userScore, user)
   }
+  
   try {
     const bnAmount = SolanaUtils.uiAudioToBNWaudio(amount)
     const identifier = SolanaUtils.constructTransferId(

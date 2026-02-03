@@ -9,7 +9,7 @@ type ClaimableSummaryTableItem = SummaryTableItem & {
 }
 
 export const messages = {
-  title: 'Achievement Rewards',
+  title: 'Rewards',
   description1: 'Earn $AUDIO by completing simple tasks while using Audius.',
   completeLabel: 'COMPLETE',
   claimReward: 'Claim This Reward',

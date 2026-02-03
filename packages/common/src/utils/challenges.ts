@@ -183,29 +183,26 @@ export const challengeRewardsConfig: Partial<
     progressLabel: 'No Recent Activity',
     panelButtonText: 'View Details'
   },
-  'trending-playlist': {
-    id: 'trending-playlist',
-    title: 'Trending Playlists Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More'
-  },
-  tp: {
-    id: 'trending-playlist',
-    title: 'Trending Playlists Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More'
-  },
-  'trending-track': {
+  [ChallengeName.TrendingTrack]: {
+    id: ChallengeName.TrendingTrack,
     title: 'Global Trending Weekly Top 5',
     description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More',
-    id: 'trending-track'
+    fullDescription: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    panelButtonText: 'See More'
   },
-  tt: {
-    title: 'Global Trending Weekly Top 5',
+  [ChallengeName.TrendingPlaylist]: {
+    id: ChallengeName.TrendingPlaylist,
+    title: 'Trending Playlists Weekly Top 5',
     description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More',
-    id: 'trending-track'
+    fullDescription: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    panelButtonText: 'See More'
+  },
+  [ChallengeName.TrendingUndergroundTrack]: {
+    id: ChallengeName.TrendingUndergroundTrack,
+    title: 'Underground Trending Weekly Top 5',
+    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    fullDescription: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    panelButtonText: 'See More'
   },
   'top-api': {
     title: 'API Apps: Monthly Top 10 ',
@@ -219,18 +216,6 @@ export const challengeRewardsConfig: Partial<
       'Verified on Twitter/Instagram? Upload your first track, post it on social media, & tag us.',
     panelButtonText: 'More Info',
     id: 'verified-upload'
-  },
-  'trending-underground': {
-    title: 'Underground Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More',
-    id: 'trending-underground'
-  },
-  tut: {
-    title: 'Underground Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More',
-    id: 'trending-underground'
   },
   [ChallengeName.OneShot]: {
     shortTitle: 'Airdrop 2: Artists',
@@ -281,9 +266,9 @@ export const challengeRewardsConfig: Partial<
     id: ChallengeName.PlayCount1000,
     title: '1,000 Plays',
     description: () =>
-      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward`,
     fullDescription: () =>
-      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 1,000 plays across all of your tracks to earn an $AUDIO Reward`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'
@@ -292,9 +277,9 @@ export const challengeRewardsConfig: Partial<
     id: ChallengeName.PlayCount10000,
     title: '10,000 Plays',
     description: () =>
-      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward`,
     fullDescription: () =>
-      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward (requires verification).`,
+      `Hit 10,000 plays across all of your tracks to earn an $AUDIO Reward`,
     progressLabel: '%0 Plays',
     remainingLabel: '%0 Plays',
     panelButtonText: 'More Info'
@@ -364,7 +349,7 @@ export const makeOptimisticChallengeSortComparator = (
       return 0
     }
 
-    // Priority 1: Claimable challenges come first
+    // Priority 1: Claimable challenges (Ready to Claim) come first
     if (
       userChallenge1.claimableAmount > 0 &&
       userChallenge2.claimableAmount <= 0
@@ -378,7 +363,41 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Priority 2: New and not disbursed challenges come next
+    // Priority 2: Reward Pending challenges come next
+    // Reward Pending = completed with cooldown, or has undisbursed specifiers with cooldown
+    const isRewardPending = (challenge: OptimisticUserChallenge) => {
+      // Completed with cooldown days
+      if (
+        challenge.state === 'completed' &&
+        challenge.cooldown_days &&
+        challenge.cooldown_days > 0 &&
+        challenge.claimableAmount <= 0
+      ) {
+        return true
+      }
+      // Has undisbursed specifiers with cooldown (for Cosign, RemixContestWinner, etc.)
+      if (
+        challenge.undisbursedSpecifiers &&
+        challenge.undisbursedSpecifiers.length > 0 &&
+        challenge.cooldown_days &&
+        challenge.cooldown_days > 0 &&
+        challenge.claimableAmount <= 0
+      ) {
+        return true
+      }
+      return false
+    }
+
+    const isPending1 = isRewardPending(userChallenge1)
+    const isPending2 = isRewardPending(userChallenge2)
+    if (isPending1 && !isPending2) {
+      return -1
+    }
+    if (isPending2 && !isPending1) {
+      return 1
+    }
+
+    // Priority 3: New and not disbursed challenges come next
     const isNewAndNotDisbursed = (userChallenge: OptimisticUserChallenge) =>
       isNewChallenge(userChallenge.challenge_id) &&
       userChallenge.state !== 'disbursed'
@@ -392,7 +411,7 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Priority 3: Non-disbursed come before disbursed
+    // Priority 4: Non-disbursed come before disbursed
     if (
       userChallenge1.state !== 'disbursed' &&
       userChallenge2.state === 'disbursed'
@@ -575,4 +594,24 @@ export const getChallengeStatusLabel = (
       }
       return DEFAULT_STATUS_LABELS.AVAILABLE
   }
+}
+
+/**
+ * Determines if a reward is open to all users or requires verification
+ * @param rewardId The reward ID to check
+ * @returns true if the reward is open to all users, false if it requires verification
+ */
+export const isRewardOpenToAll = (rewardId: ChallengeRewardID): boolean => {
+  const openToAllRewards = new Set<ChallengeRewardID>([
+    ChallengeName.Tastemaker,
+    ChallengeName.TrendingPlaylist,
+    ChallengeName.TrendingTrack,
+    ChallengeName.TrendingUndergroundTrack,
+    ChallengeName.AudioMatchingBuy,
+    ChallengeName.Referred,
+    ChallengeName.RemixContestWinner,
+    ChallengeName.Cosign
+  ])
+
+  return openToAllRewards.has(rewardId)
 }

@@ -20,7 +20,6 @@ import { BASE_URL } from 'utils/route'
 import styles from './RewardsPage.module.css'
 import Tiers from './Tiers'
 import { ChallengeRewardsTile } from './components/ChallengeRewards/ChallengeRewardsTile'
-import { TrendingRewardsTile } from './components/TrendingRewards/TrendingRewardsTile'
 const { REWARDS_PAGE, TRENDING_PAGE } = route
 
 const messages = {
@@ -45,7 +44,6 @@ const RewardsContent = () => {
         </div>
       ) : null}
       <ChallengeRewardsTile className={styles.mobile} />
-      <TrendingRewardsTile className={styles.mobile} />
       <Tiers />
     </>
   )

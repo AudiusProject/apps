@@ -1,124 +1,154 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
+import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
+import { useChallengeCooldownSchedule } from '@audius/common/hooks'
+import { challengesSelectors, CommonState } from '@audius/common/store'
+import { formatNumberCommas } from '@audius/common/utils'
 import {
-  formatCooldownChallenges,
-  useChallengeCooldownSchedule
-} from '@audius/common/hooks'
-import {
-  Box,
   Button,
+  Divider,
   Flex,
   IconArrowRight as IconArrow,
-  IconTokenGold,
+  IconInfo,
   Paper,
-  PlainButton,
   Text,
-  useTheme
+  Tooltip
 } from '@audius/harmony'
+import { useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
-import styles from '../RewardsTile.module.css'
-import { messages } from '../messages'
+const { getOptimisticUserChallenges } = challengesSelectors
+
+const messages = {
+  yourRewards: 'Your Rewards',
+  totalClaimed: 'Total Claimed',
+  pending: 'Pending',
+  readyToClaim: 'Ready to Claim',
+  claimAll: 'Claim All'
+}
 
 export const ClaimAllRewardsPanel = () => {
   const isMobile = useIsMobile() || window.innerWidth < 1080
-  const wm = useWithMobileStyle(styles.mobile)
-  const { cooldownChallenges, cooldownAmount, claimableAmount, isEmpty } =
+  const { cooldownAmount, claimableAmount, isEmpty } =
     useChallengeCooldownSchedule({ multiple: true })
-  const claimable = claimableAmount > 0
   const [, setClaimAllRewardsVisibility] = useModalState('ClaimAllRewards')
-  const { iconSizes } = useTheme()
+  const { data: currentAccount } = useCurrentAccount()
+  const { data: currentUser } = useCurrentAccountUser()
+  const optimisticUserChallenges = useSelector((state: CommonState) =>
+    getOptimisticUserChallenges(state, currentAccount, currentUser)
+  )
+
+  // Calculate total claimed amount
+  const totalClaimed = useMemo(() => {
+    return Object.values(optimisticUserChallenges).reduce(
+      (sum, challenge) => sum + (challenge?.disbursed_amount ?? 0),
+      0
+    )
+  }, [optimisticUserChallenges])
+
+  // Pending amount is the cooldown amount
+  const pendingAmount = cooldownAmount
 
   const onClickClaimAllRewards = useCallback(() => {
     setClaimAllRewardsVisibility(true)
   }, [setClaimAllRewardsVisibility])
 
-  const onClickMoreInfo = useCallback(() => {
-    setClaimAllRewardsVisibility(true)
-  }, [setClaimAllRewardsVisibility])
-
-  const handleClick = useCallback(() => {
-    if (claimable) {
-      onClickClaimAllRewards()
-    } else if (cooldownAmount > 0) {
-      onClickMoreInfo()
-    }
-  }, [claimable, cooldownAmount, onClickClaimAllRewards, onClickMoreInfo])
-
   if (isEmpty) return null
+
+  const tooltipMessages = {
+    totalClaimed: 'Total amount of $AUDIO you have claimed from all rewards',
+    pending: 'Amount of $AUDIO pending in cooldown period',
+    readyToClaim: 'Amount of $AUDIO ready to claim now'
+  }
 
   if (isMobile) {
     return (
       <Paper
         border='strong'
-        alignItems='center'
-        alignSelf='stretch'
-        justifyContent='space-between'
-        css={{ cursor: 'pointer' }}
-        onClick={handleClick}
+        p='l'
         mt='l'
+        css={{
+          padding: '24px',
+          gap: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start'
+        }}
       >
-        <Flex direction='column' alignItems='start' w='100%' p='l'>
-          <Flex gap='s' alignItems='center'>
-            {claimable ? (
-              <IconTokenGold
-                height={iconSizes.l}
-                width={iconSizes.l}
-                aria-label={messages.goldAudioToken}
-              />
-            ) : null}
-            {isEmpty ? null : (
-              <Text color='accent' variant='title' size='l'>
-                {claimable
-                  ? messages.totalReadyToClaim
-                  : messages.totalUpcomingRewards}
-              </Text>
-            )}
+        <Text variant='heading' size='m' color='accent'>
+          {messages.yourRewards}
+        </Text>
+        <Flex column gap='l' w='100%' css={{ gap: '16px' }}>
+          <Flex gap='l' alignItems='stretch' w='100%' css={{ gap: '32px' }}>
+            <Flex column gap='xs' flex={1} css={{ gap: '4px' }}>
+              <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                <Text variant='title' size='l' color='default'>
+                  {formatNumberCommas(totalClaimed)}
+                </Text>
+                <Text variant='body' size='l' strength='strong' color='subdued'>
+                  $AUDIO
+                </Text>
+              </Flex>
+              <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                <Text variant='label' size='xs' color='default'>
+                  {messages.totalClaimed}
+                </Text>
+                <Tooltip text={tooltipMessages.totalClaimed} mount='body'>
+                  <IconInfo size='xs' color='subdued' />
+                </Tooltip>
+              </Flex>
+            </Flex>
+            <Divider orientation='vertical' />
+            <Flex column gap='xs' flex={1} css={{ gap: '4px' }}>
+              <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                <Text variant='title' size='l' color='default'>
+                  {formatNumberCommas(pendingAmount)}
+                </Text>
+                <Text variant='body' size='l' strength='strong' color='subdued'>
+                  $AUDIO
+                </Text>
+              </Flex>
+              <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                <Text variant='label' size='xs' color='default'>
+                  {messages.pending}
+                </Text>
+                <Tooltip text={tooltipMessages.pending} mount='body'>
+                  <IconInfo size='xs' color='subdued' />
+                </Tooltip>
+              </Flex>
+            </Flex>
           </Flex>
-          {cooldownAmount > 0 ? (
-            <Box
-              mt='m'
-              backgroundColor='default'
-              pv='2xs'
-              ph='s'
-              borderRadius='l'
-            >
-              <Text color='accent' variant='body' size='s' strength='strong'>
-                {messages.formatCooldownAmount(cooldownAmount)}
+          {/* Second row: Ready to Claim */}
+          <Flex column gap='xs' w='100%' css={{ gap: '4px' }}>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='title' size='l' color='default'>
+                {formatNumberCommas(claimableAmount)}
               </Text>
-            </Box>
-          ) : null}
-          <Box mt='l' mb='xl'>
-            <Text variant='body' textAlign='left' size='s'>
-              {claimable
-                ? messages.formatClaimableAmount(claimableAmount)
-                : messages.availableMessage(
-                    formatCooldownChallenges(cooldownChallenges)
-                  )}
-            </Text>
-          </Box>
-          {claimable ? (
-            <Button
-              onClick={onClickClaimAllRewards}
-              iconRight={IconArrow}
-              fullWidth
-            >
-              {messages.claimAllRewards}
-            </Button>
-          ) : cooldownAmount > 0 ? (
-            <PlainButton
-              size='large'
-              onClick={onClickMoreInfo}
-              iconRight={IconArrow}
-              fullWidth
-            >
-              {messages.moreInfo}
-            </PlainButton>
-          ) : null}
+              <Text variant='body' size='l' strength='strong' color='subdued'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='label' size='xs' color='default'>
+                {messages.readyToClaim}
+              </Text>
+              <Tooltip text={tooltipMessages.readyToClaim} mount='body'>
+                <IconInfo size='xs' color='subdued' />
+              </Tooltip>
+            </Flex>
+          </Flex>
         </Flex>
+        {claimableAmount > 0 ? (
+          <Button
+            onClick={onClickClaimAllRewards}
+            iconRight={IconArrow}
+            fullWidth
+          >
+            {messages.claimAll}
+          </Button>
+        ) : null}
       </Paper>
     )
   }
@@ -127,59 +157,108 @@ export const ClaimAllRewardsPanel = () => {
     <Paper
       border='strong'
       p='xl'
-      alignItems='center'
-      alignSelf='stretch'
-      justifyContent='space-between'
-      css={{ cursor: 'pointer' }}
-      onClick={handleClick}
+      css={{
+        padding: '24px',
+        gap: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start'
+      }}
     >
-      <Flex gap='l' alignItems='center'>
-        {claimableAmount > 0 ? (
-          <IconTokenGold
-            height={iconSizes['3xl']}
-            width={iconSizes['3xl']}
-            aria-label={messages.goldAudioToken}
-          />
-        ) : null}
-        <Flex direction='column'>
-          <Flex>
-            {isEmpty ? null : (
-              <Text color='accent' size='m' variant='heading'>
-                {claimableAmount > 0
-                  ? messages.totalReadyToClaim
-                  : messages.totalUpcomingRewards}
+      <Text variant='heading' size='m' color='accent'>
+        {messages.yourRewards}
+      </Text>
+      <Flex
+        gap='l'
+        alignItems='center'
+        justifyContent='space-between'
+        w='100%'
+        css={{
+          gap: '32px'
+        }}
+      >
+        <Flex gap='l' alignItems='center' flex={1} css={{ gap: '32px' }}>
+          <Flex column gap='xs' css={{ gap: '4px' }}>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='title' size='l' color='default'>
+                {formatNumberCommas(totalClaimed)}
               </Text>
-            )}
-            {cooldownAmount > 0 ? (
-              <div className={wm(styles.pendingPillContainer)}>
-                <span className={styles.pillMessage}>
-                  {messages.formatCooldownAmount(cooldownAmount)}
-                </span>
-              </div>
-            ) : null}
+              <Text variant='body' size='l' strength='strong' color='subdued'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='label' size='xs' color='default'>
+                {messages.totalClaimed}
+              </Text>
+              <Tooltip text={tooltipMessages.totalClaimed} mount='body'>
+                <IconInfo size='xs' color='subdued' />
+              </Tooltip>
+            </Flex>
           </Flex>
-          <Text variant='body' textAlign='left'>
-            {claimableAmount > 0
-              ? messages.formatClaimableAmount(claimableAmount)
-              : messages.availableMessage(
-                  formatCooldownChallenges(cooldownChallenges)
-                )}
-          </Text>
+          <Divider orientation='vertical' />
+          <Flex column gap='xs' css={{ gap: '4px' }}>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='title' size='l' color='default'>
+                {formatNumberCommas(pendingAmount)}
+              </Text>
+              <Text variant='body' size='l' strength='strong' color='subdued'>
+                $AUDIO
+              </Text>
+            </Flex>
+            <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+              <Text variant='label' size='xs' color='default'>
+                {messages.pending}
+              </Text>
+              <Tooltip text={tooltipMessages.pending} mount='body'>
+                <IconInfo size='xs' color='subdued' />
+              </Tooltip>
+            </Flex>
+          </Flex>
+          <Divider orientation='vertical' />
+          <Flex
+            column
+            gap='xs'
+            flex={1}
+            css={{ gap: '4px', minWidth: '300px' }}
+          >
+            <Flex gap='2xl' alignItems='center' w='100%'>
+              <Flex column gap='xs' css={{ gap: '4px' }}>
+                <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                  <Text variant='title' size='l' color='default'>
+                    {formatNumberCommas(claimableAmount)}
+                  </Text>
+                  <Text
+                    variant='body'
+                    size='l'
+                    strength='strong'
+                    color='subdued'
+                  >
+                    $AUDIO
+                  </Text>
+                </Flex>
+                <Flex gap='xs' alignItems='center' css={{ gap: '4px' }}>
+                  <Text variant='label' size='xs' color='default'>
+                    {messages.readyToClaim}
+                  </Text>
+                  <Tooltip text={tooltipMessages.readyToClaim} mount='body'>
+                    <IconInfo size='xs' color='subdued' />
+                  </Tooltip>
+                </Flex>
+              </Flex>
+              {claimableAmount > 0 ? (
+                <Button
+                  onClick={onClickClaimAllRewards}
+                  iconRight={IconArrow}
+                  css={{ flex: '1 1 0' }}
+                >
+                  {messages.claimAll}
+                </Button>
+              ) : null}
+            </Flex>
+          </Flex>
         </Flex>
       </Flex>
-      {claimableAmount > 0 ? (
-        <Button onClick={onClickClaimAllRewards} iconRight={IconArrow}>
-          {messages.claimAllRewards}
-        </Button>
-      ) : cooldownAmount > 0 ? (
-        <PlainButton
-          size='large'
-          onClick={onClickMoreInfo}
-          iconRight={IconArrow}
-        >
-          {messages.moreInfo}
-        </PlainButton>
-      ) : null}
     </Paper>
   )
 }

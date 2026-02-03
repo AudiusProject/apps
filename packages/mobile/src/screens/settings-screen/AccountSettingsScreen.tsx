@@ -5,7 +5,8 @@ import { Status } from '@audius/common/models'
 import {
   recoveryEmailActions,
   recoveryEmailSelectors,
-  modalsActions
+  modalsActions,
+  useTierAndVerifiedForUser
 } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { pick } from 'lodash'
@@ -13,6 +14,7 @@ import { Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
+  Flex,
   IconEmailAddress,
   IconKey,
   IconRecoveryEmail,
@@ -92,6 +94,10 @@ export const AccountSettingsScreen = () => {
 
   const recoveryEmailStatus = useSelector(getRecoveryEmailStatus)
   const navigation = useNavigation<ProfileTabScreenParamList>()
+  const { isVerified } = useTierAndVerifiedForUser(accountUserId)
+
+  // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
+  const badgeSize = 14
 
   const handlePressRecoveryEmail = useCallback(() => {
     dispatch(resendRecoveryEmail())
@@ -144,7 +150,12 @@ export const AccountSettingsScreen = () => {
               userId={accountUserId}
               style={css({ width: 128, height: 128 })}
             />
-            <Text style={styles.name}>{accountName}</Text>
+            <Flex row gap='xs' alignItems='center' justifyContent='center'>
+              <Text style={styles.name}>{accountName}</Text>
+              {isVerified ? (
+                <IconVerified height={badgeSize} width={badgeSize} />
+              ) : null}
+            </Flex>
             <Text style={styles.handle}>@{accountHandle}</Text>
           </View>
           <AccountSettingsItem
@@ -160,6 +171,7 @@ export const AccountSettingsScreen = () => {
             description={messages.verifyDescription}
             buttonTitle={messages.verifyButtonTitle}
             onPress={handlePressVerification}
+            disabled={isVerified}
           />
           <AccountSettingsItem
             title={messages.emailTitle}

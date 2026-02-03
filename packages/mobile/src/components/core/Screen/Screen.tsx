@@ -56,6 +56,8 @@ export type ScreenProps = {
   variant?: ScreenVariant
   as?: ComponentType<ViewProps>
   header?: () => ReactElement
+  // Callback called when user presses back button
+  onBack?: () => void
 }
 
 export const Screen = (props: ScreenProps) => {
@@ -73,13 +75,25 @@ export const Screen = (props: ScreenProps) => {
     variant = 'primary',
     style,
     as: RootComponent = View,
-    header
+    header,
+    onBack
   } = props
   const palette = useThemePalette()
   const styles = useStyles()
   const backgroundColor = getBackgroundColor(variant, palette)
   const navigation = useNavigation()
   const isSecondary = variant === 'secondary' || variant === 'white'
+
+  // Handle back button press
+  useEffect(() => {
+    if (!onBack) return
+
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      onBack()
+    })
+
+    return unsubscribe
+  }, [navigation, onBack])
 
   // Record screen view
   useEffect(() => {

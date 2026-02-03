@@ -23,7 +23,7 @@ export const useStyles = makeStyles(({ spacing }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing(2),
-    paddingHorizontal: spacing(8),
+    paddingHorizontal: spacing(10),
     zIndex: zIndex.DRAWER_HEADER
   },
 

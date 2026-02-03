@@ -41,6 +41,7 @@ import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
 import { RewardsScreen } from 'app/screens/rewards-screen'
+import { SendTokensUserSelectionScreen } from 'app/screens/send-tokens-user-selection-screen/SendTokensUserSelectionScreen'
 import {
   AboutScreen,
   AccountSettingsScreen,
@@ -141,6 +142,12 @@ export type AppTabScreenParamList = {
     | {
         presetMessage?: string
         defaultUserList?: CreateChatModalState['defaultUserList']
+      }
+    | undefined
+  SendTokensUserSelection:
+    | {
+        excludedUserIds?: number[]
+        callbackId?: string
       }
     | undefined
   Chat: {
@@ -296,6 +303,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Group>
         <Stack.Screen name='ChatList' component={ChatListScreen} />
         <Stack.Screen name='ChatUserList' component={ChatUserListScreen} />
+        <Stack.Screen
+          name='SendTokensUserSelection'
+          component={SendTokensUserSelectionScreen}
+        />
         <Stack.Screen
           name='Chat'
           component={ChatScreen}

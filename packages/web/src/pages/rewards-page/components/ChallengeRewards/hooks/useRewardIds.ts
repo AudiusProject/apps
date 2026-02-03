@@ -9,8 +9,8 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   'listen-streak',
   'profile-completion',
   'first-playlist',
-  ChallengeName.AudioMatchingSell, // $AUDIO matching seller
-  ChallengeName.AudioMatchingBuy, // $AUDIO matching buyer
+  ChallengeName.AudioMatchingSell,
+  ChallengeName.AudioMatchingBuy,
   ChallengeName.FirstPlaylist,
   ChallengeName.MobileInstall,
   ChallengeName.ProfileCompletion,
@@ -28,7 +28,10 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   ChallengeName.Tastemaker,
   ChallengeName.CommentPin,
   ChallengeName.Cosign,
-  ChallengeName.RemixContestWinner
+  ChallengeName.RemixContestWinner,
+  ChallengeName.TrendingTrack,
+  ChallengeName.TrendingPlaylist,
+  ChallengeName.TrendingUndergroundTrack
 ])
 
 /** Pulls rewards from remoteconfig */
