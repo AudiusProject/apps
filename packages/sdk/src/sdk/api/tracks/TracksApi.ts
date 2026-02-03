@@ -60,7 +60,8 @@ import {
   type PublishTrackRequest,
   PublishTrackSchema,
   type PublishStemRequest,
-  PublishStemSchema
+  PublishStemSchema,
+  type UploadTrackFilesTask
 } from './types'
 
 // Extend that new class
@@ -153,7 +154,7 @@ export class TracksApi extends GeneratedTracksApi {
   /** @hidden
    * Upload track files, does not write to chain
    */
-  uploadTrackFiles(params: UploadTrackFilesRequest) {
+  uploadTrackFiles(params: UploadTrackFilesRequest): UploadTrackFilesTask {
     let audioUpload: UploadHandle | null = null
     let imageUpload: UploadHandle | null = null
     return {

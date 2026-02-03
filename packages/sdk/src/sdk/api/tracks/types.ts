@@ -440,3 +440,11 @@ export const PublishStemSchema = z
   .strict()
 
 export type PublishStemRequest = z.input<typeof PublishStemSchema>
+
+export type UploadTrackFilesTask = {
+  start: () => Promise<{
+    audioUploadResponse?: UploadResponse
+    imageUploadResponse?: UploadResponse
+  }>
+  abort: () => void
+}
