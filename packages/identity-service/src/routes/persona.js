@@ -8,15 +8,12 @@ const authMiddleware = require('../authMiddleware')
 const { logger } = require('../logging')
 
 module.exports = function (app) {
-  // Route to create a session token/config for identity verification
   app.get(
     '/create_session_token',
     authMiddleware,
     handleResponse(async (req, res) => {
       const { handle } = req.user
       try {
-        // Persona embedded flow requires templateId, referenceId, and environmentId
-        // We return these as a "sessionToken" object for the frontend
         const sessionToken = {
           templateId: config.get('personaTemplateId'),
           referenceId: handle,
@@ -32,4 +29,3 @@ module.exports = function (app) {
     })
   )
 }
-

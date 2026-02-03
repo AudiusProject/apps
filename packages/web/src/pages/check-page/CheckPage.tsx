@@ -4,7 +4,7 @@ import { useAccountStatus, useCurrentAccountUser } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { AuthHeaders } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import Persona from 'persona'
+import Persona, { Client } from 'persona'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
 
@@ -45,7 +45,7 @@ const CheckPage = () => {
   }, [accountHandle, accountStatus, dispatch])
 
   const [sessionToken, setSessionToken] = useState<string | null>(null)
-  const personaClientRef = useRef<Persona.Client | null>(null)
+  const personaClientRef = useRef<Client | null>(null)
   const wasSuccessful = useRef(false)
 
   useEffect(() => {
