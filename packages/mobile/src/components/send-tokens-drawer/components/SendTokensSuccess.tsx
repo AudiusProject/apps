@@ -12,13 +12,12 @@ import {
   Flex,
   Text,
   Divider,
-  CompletionCheck,
   IconExternalLink,
   Avatar
 } from '@audius/harmony-native'
-import { BalanceSection } from 'app/components/core'
+import { TokenIcon } from 'app/components/core'
 import { useProfilePicture } from 'app/components/image/UserImage'
-import { UserBadges } from 'app/components/user-badges'
+import { UserLink } from 'app/components/user-link'
 import { ExternalLink } from 'app/harmony-native/components/TextLink/ExternalLink'
 
 type SendTokensSuccessProps = {
@@ -31,11 +30,10 @@ type SendTokensSuccessProps = {
 }
 
 const messages = {
-  sent: 'Sent',
+  sentSuccessfully: 'Sent successfully',
   recipient: 'Recipient',
   destinationAddress: 'Destination Address',
   viewOnSolana: 'View On Solana Block Explorer',
-  transactionComplete: 'Your transaction is complete!',
   done: 'Done'
 }
 
@@ -69,8 +67,6 @@ export const SendTokensSuccess = ({
   if (!tokenInfo) {
     return (
       <Flex gap='xl' ph='xl' pb='xl'>
-        <BalanceSection mint={mint} internalWalletOnly />
-        <Divider />
         <Flex gap='l' flex={1}>
           <Text variant='body' color='subdued'>
             Loading...
@@ -82,33 +78,37 @@ export const SendTokensSuccess = ({
 
   return (
     <Flex gap='xl' ph='xl' pb='xl'>
-      {/* Token Balance Section */}
-      <BalanceSection mint={mint} internalWalletOnly />
+      {/* Sent Successfully Message */}
+      <Text variant='title' size='l' color='default'>
+        {messages.sentSuccessfully}
+      </Text>
 
-      <Divider />
-
-      {/* Sent Section */}
-      <Flex column gap='s'>
-        <Text variant='heading' size='s' color='subdued'>
-          {messages.sent}
-        </Text>
+      {/* Sent Amount Section */}
+      <Flex row alignItems='center' gap='s'>
+        <TokenIcon logoURI={tokenInfo.logoURI} size={64} />
         <Flex direction='column' gap='xs'>
-          <Text variant='body' size='m' color='default' strength='strong'>
+          <Text variant='heading' size='s'>
             {tokenInfo.name}
           </Text>
-          <Text variant='heading' size='s' color='default'>
-            {formatAmount(amount)} ${tokenInfo.symbol}
-          </Text>
+          <Flex row gap='xs' alignItems='center'>
+            <Text variant='title' size='l'>
+              {formatAmount(amount)}
+            </Text>
+            <Text variant='title' size='l' color='subdued'>
+              ${tokenInfo.symbol}
+            </Text>
+          </Flex>
         </Flex>
       </Flex>
 
-      <Divider />
-
-      {/* To Recipient Section */}
-      <Flex direction='column' gap='s'>
-        <Text variant='heading' size='s' color='subdued'>
-          {messages.recipient}
-        </Text>
+      {/* Recipient Section */}
+      <Flex gap='l'>
+        <Flex row alignItems='center' gap='l'>
+          <Text variant='heading' size='s'>
+            {messages.recipient}
+          </Text>
+          <Divider w='100%' />
+        </Flex>
         {selectedUser ? (
           <Flex row alignItems='center' gap='s'>
             <Avatar
@@ -116,20 +116,9 @@ export const SendTokensSuccess = ({
               borderWidth='thin'
               style={{ flexShrink: 0 }}
             />
-            <Flex direction='column' flex={1} style={{ minWidth: 0 }}>
-              <Flex row alignItems='center' gap='xs' style={{ minWidth: 0 }}>
-                <Text
-                  variant='body'
-                  size='m'
-                  color='default'
-                  numberOfLines={1}
-                  strength='strong'
-                >
-                  {selectedUser.name}
-                </Text>
-                <UserBadges userId={selectedUser.user_id} badgeSize='xs' />
-              </Flex>
-              <Text variant='body' size='s' color='subdued' numberOfLines={1}>
+            <Flex direction='column' flex={1} style={{ minWidth: 0 }} gap='xs'>
+              <UserLink userId={selectedUser.user_id} />
+              <Text variant='body' size='l' numberOfLines={1}>
                 @{selectedUser.handle}
               </Text>
             </Flex>
@@ -141,6 +130,7 @@ export const SendTokensSuccess = ({
         )}
       </Flex>
 
+      {/* View on Block Explorer */}
       <ExternalLink url={makeSolanaTransactionLink(signature)}>
         <Flex row gap='xs' alignItems='center'>
           <Text variant='title' size='s' color='subdued'>
@@ -150,13 +140,7 @@ export const SendTokensSuccess = ({
         </Flex>
       </ExternalLink>
 
-      <Flex row gap='s' alignItems='center'>
-        <CompletionCheck value='complete' />
-        <Text variant='heading' size='s' color='default'>
-          {messages.transactionComplete}
-        </Text>
-      </Flex>
-
+      {/* Done Button */}
       <Button variant='primary' onPress={onDone} fullWidth>
         {messages.done}
       </Button>

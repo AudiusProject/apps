@@ -36,6 +36,7 @@ type SendTokensInputProps = {
   initialSelectedUser?: User | null
   initialRecipientType?: RecipientType
   onBeforeUserSelectionNavigate?: () => void
+  onUserChange?: (user: User | null) => void
 }
 
 const messages = {
@@ -48,7 +49,7 @@ const messages = {
   insufficientBalance: 'Insufficient balance',
   validWalletAddressRequired: 'A valid wallet address is required.',
   amountRequired: 'Amount is required',
-  amountTooLow: 'Amount is too low to send',
+  amountTooLow: 'Amount must be at least $0.50',
   walletAddress: 'Wallet Address',
   userRequired: 'Please select a user',
   userNoWallet:
@@ -70,7 +71,8 @@ export const SendTokensInput = ({
   initialDestinationAddress = '',
   initialSelectedUser = null,
   initialRecipientType = 'user',
-  onBeforeUserSelectionNavigate
+  onBeforeUserSelectionNavigate,
+  onUserChange
 }: SendTokensInputProps) => {
   const [recipientType, setRecipientType] =
     useState<RecipientType>(initialRecipientType)
@@ -129,6 +131,20 @@ export const SendTokensInput = ({
   })
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
+  // Calculate USD value for display
+  const usdValueInfo = useMemo(() => {
+    if (!amount || parseFloat(amount) <= 0 || !coin) return null
+    const price =
+      coin.price === 0 ? coin.dynamicBondingCurve?.priceUSD : coin.price
+    if (!price || price <= 0) return null
+    const amountNum = parseFloat(amount)
+    const usdValue = amountNum * price
+    return {
+      usdValue,
+      isBelowMinimum: usdValue < 0.5
+    }
+  }, [amount, coin])
+
   // Find the selected token in owned coins for the dropdown
   const selectedToken = useMemo(() => {
     const ownedToken = ownedCoins.find(
@@ -161,7 +177,13 @@ export const SendTokensInput = ({
     }
   }, [])
   const handleAmountChange = useCallback((value: string) => {
-    setAmount(value)
+    // Only allow numbers and a single decimal point
+    const numericValue = value.replace(/[^0-9.]/g, '')
+    // Ensure only one decimal point
+    const parts = numericValue.split('.')
+    const filteredValue =
+      parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericValue
+    setAmount(filteredValue)
     setAmountError(null)
   }, [])
 
@@ -170,17 +192,22 @@ export const SendTokensInput = ({
     setAddressError(null)
   }, [])
 
-  const handleUserChange = useCallback((user: User | null) => {
-    setSelectedUser(user)
-    setAddressError(null)
-    // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
-    // But we still set spl_wallet for display purposes in the UI
-    if (user?.spl_wallet) {
-      setDestinationAddress(user.spl_wallet)
-    } else {
-      setDestinationAddress('')
-    }
-  }, [])
+  const handleUserChange = useCallback(
+    (user: User | null) => {
+      setSelectedUser(user)
+      setAddressError(null)
+      // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
+      // But we still set spl_wallet for display purposes in the UI
+      if (user?.spl_wallet) {
+        setDestinationAddress(user.spl_wallet)
+      } else {
+        setDestinationAddress('')
+      }
+      // Notify parent component of user change
+      onUserChange?.(user)
+    },
+    [onUserChange]
+  )
 
   const handleRecipientTypeChange = useCallback((type: RecipientType) => {
     setRecipientType(type)
@@ -204,10 +231,22 @@ export const SendTokensInput = ({
       if (amountWei > currentBalance) {
         setAmountError('INSUFFICIENT_BALANCE')
         isValid = false
-      } else if (amountWei < BigInt(1000)) {
-        // Minimum amount
-        setAmountError('AMOUNT_TOO_LOW')
-        isValid = false
+      } else {
+        // Check minimum USD value ($0.50)
+        const price =
+          coin?.price === 0 ? coin?.dynamicBondingCurve?.priceUSD : coin?.price
+        if (price && price > 0) {
+          const amountNum = parseFloat(amount)
+          const usdValue = amountNum * price
+          if (usdValue < 0.5) {
+            setAmountError('AMOUNT_TOO_LOW')
+            isValid = false
+          }
+        } else if (amountWei < BigInt(1000)) {
+          // Fallback to minimum token amount if price is not available
+          setAmountError('AMOUNT_TOO_LOW')
+          isValid = false
+        }
       }
     }
 
@@ -360,6 +399,16 @@ export const SendTokensInput = ({
               tokenInfo?.symbol ? `$${tokenInfo.symbol}` : undefined
             }
           />
+          {usdValueInfo && (
+            <Text
+              variant='body'
+              size='s'
+              color={usdValueInfo.isBelowMinimum ? 'danger' : 'subdued'}
+            >
+              ≈ ${usdValueInfo.usdValue.toFixed(2)} USD
+              {usdValueInfo.isBelowMinimum && ' (minimum $0.50)'}
+            </Text>
+          )}
         </Flex>
       </Flex>
 
