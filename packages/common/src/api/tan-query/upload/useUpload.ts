@@ -41,14 +41,14 @@ const { toast } = toastActions
 const failToastParams = {
   content: 'An error occured during upload.',
   link: UPLOAD_PAGE,
-  linkText: 'View Results',
+  linkText: 'View',
   leftIcon: IconCloudUpload,
   rightIcon: IconArrowRight
 }
 const successToastParams = {
   content: 'Your upload is complete!',
   link: UPLOAD_PAGE,
-  linkText: 'View Results',
+  linkText: 'View',
   leftIcon: IconCloudUpload,
   rightIcon: IconArrowRight
 }
