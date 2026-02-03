@@ -1,10 +1,21 @@
+import { useCallback } from 'react'
+
 import { useRecommendedTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
+import {
+  playbackActions,
+  getCurrentTrackId,
+  getLineupId,
+  getIsPlaying
+} from '@audius/common/store'
 import { full } from '@audius/sdk'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'
 import { useDeferredElement } from './useDeferredElement'
+
+const LINEUP_ID = 'explore:for-you'
 
 export const RecommendedTracksSection = () => {
   const { ref, inView } = useDeferredElement()
@@ -18,6 +29,28 @@ export const RecommendedTracksSection = () => {
     }
   )
 
+  const dispatch = useDispatch()
+  const currentTrackId = useSelector(getCurrentTrackId)
+  const currentLineupId = useSelector(getLineupId)
+  const isPlaying = useSelector(getIsPlaying)
+
+  const handlePlay = useCallback(
+    (trackId: number) => {
+      if (
+        currentLineupId === LINEUP_ID &&
+        currentTrackId === trackId &&
+        isPlaying
+      ) {
+        // Already playing this track, pause
+        dispatch(playbackActions.pause({}))
+      } else {
+        // Play this track from the lineup
+        dispatch(playbackActions.play({ lineupId: LINEUP_ID, trackId }))
+      }
+    },
+    [dispatch, currentLineupId, currentTrackId, isPlaying]
+  )
+
   if (isError || (isSuccess && !data?.length)) {
     return null
   }
@@ -27,7 +60,14 @@ export const RecommendedTracksSection = () => {
       {!inView || isLoading || !data ? (
         <TileSkeletons noShimmer />
       ) : (
-        <TilePairs data={data} />
+        <TilePairs
+          data={data}
+          onPlay={handlePlay}
+          currentTrackId={currentTrackId}
+          currentLineupId={currentLineupId}
+          isPlaying={isPlaying}
+          lineupId={LINEUP_ID}
+        />
       )}
     </Carousel>
   )

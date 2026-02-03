@@ -3,7 +3,8 @@ import { ID } from '@audius/common/models'
 import {
   playerSelectors,
   playbackPositionSelectors,
-  CommonState
+  CommonState,
+  getCurrentTrackId
 } from '@audius/common/store'
 import {
   Button,
@@ -43,9 +44,15 @@ export const PlayPauseButton = ({
   const trackPlaybackInfo = useSelector((state: CommonState) =>
     getTrackPosition(state, { trackId, userId: currentUserId })
   )
-  const isCurrentTrack = useSelector(
-    (state: CommonState) => trackId === getTrackId(state)
+  // Check both old and new playback systems
+  const oldCurrentTrackId = useSelector((state: CommonState) =>
+    getTrackId(state)
   )
+  const newCurrentTrackId = useSelector((state: CommonState) =>
+    getCurrentTrackId(state)
+  )
+  const isCurrentTrack =
+    trackId === oldCurrentTrackId || trackId === newCurrentTrackId
 
   let playText
   let PlayIconComponent

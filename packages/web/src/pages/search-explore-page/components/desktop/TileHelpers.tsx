@@ -13,6 +13,64 @@ import { useIsMobile } from 'hooks/useIsMobile'
 
 import { MOBILE_TILE_WIDTH, TILE_WIDTH } from './constants'
 
+// New playback system tile (for For You section)
+const PlayableTileNew = ({
+  id,
+  index,
+  onPlay,
+  isCurrentTrack,
+  isPlaying,
+  lineupId,
+  currentTrackId,
+  currentLineupId
+}: {
+  id: ID
+  index: number
+  onPlay: (trackId: number) => void
+  isCurrentTrack: boolean
+  isPlaying: boolean
+  lineupId: string
+  currentTrackId?: number | null
+  currentLineupId?: string | null
+}) => {
+  const isMobile = useIsMobile()
+  const Tile = isMobile ? MobileTrackTile : DesktopTrackTile
+  const uid = useMemo(() => makeUid(Kind.TRACKS, id, QueueSource.EXPLORE), [id])
+
+  const handleTogglePlay = useCallback(
+    (tileUid: UID, trackId: ID) => {
+      // Call onPlay directly when this tile is clicked
+      if (trackId === id) {
+        onPlay(id)
+      }
+    },
+    [id, onPlay]
+  )
+
+  return (
+    <Tile
+      uid={uid}
+      id={id}
+      index={index}
+      togglePlay={handleTogglePlay}
+      isActive={isCurrentTrack && isPlaying}
+      size={TrackTileSize.SMALL}
+      statSize={isMobile ? 'large' : 'small'}
+      ordered={false}
+      hasLoaded={() => {}}
+      isLoading={false}
+      isTrending={false}
+      isFeed={false}
+      // New playback system props
+      lineupId={lineupId}
+      currentTrackId={currentTrackId}
+      currentLineupId={currentLineupId}
+      isPlaying={isPlaying}
+      onPlay={onPlay}
+    />
+  )
+}
+
 // Wrapper component to make tiles playable
 export const PlayableTile = ({
   id,
@@ -63,10 +121,20 @@ export const PlayableTile = ({
 
 export const TilePairs = ({
   data,
-  source = QueueSource.EXPLORE
+  source = QueueSource.EXPLORE,
+  onPlay,
+  currentTrackId,
+  currentLineupId,
+  isPlaying,
+  lineupId
 }: {
   data: number[]
   source?: QueueSource
+  onPlay?: (trackId: number) => void
+  currentTrackId?: number | null
+  currentLineupId?: string | null
+  isPlaying?: boolean
+  lineupId?: string
 }) => {
   const isMobile = useIsMobile()
   const tileWidth = isMobile ? MOBILE_TILE_WIDTH : TILE_WIDTH
@@ -74,6 +142,10 @@ export const TilePairs = ({
   for (let i = 0; i < data.length; i += 2) {
     pairs.push(data.slice(i, i + 2))
   }
+
+  // Use new playback system if onPlay is provided
+  const useNewPlayback = !!onPlay && !!lineupId
+
   return (
     <>
       {pairs.map((pair, pairIndex) => (
@@ -83,14 +155,33 @@ export const TilePairs = ({
           gap='m'
           css={{ minWidth: tileWidth, width: tileWidth }}
         >
-          {pair.map((id, idIndex) => (
-            <PlayableTile
-              key={id}
-              id={id}
-              index={pairIndex * 2 + idIndex}
-              source={source}
-            />
-          ))}
+          {pair.map((id, idIndex) => {
+            if (useNewPlayback) {
+              return (
+                <PlayableTileNew
+                  key={id}
+                  id={id}
+                  index={pairIndex * 2 + idIndex}
+                  onPlay={onPlay!}
+                  isCurrentTrack={
+                    currentLineupId === lineupId && currentTrackId === id
+                  }
+                  isPlaying={isPlaying ?? false}
+                  lineupId={lineupId!}
+                  currentTrackId={currentTrackId}
+                  currentLineupId={currentLineupId}
+                />
+              )
+            }
+            return (
+              <PlayableTile
+                key={id}
+                id={id}
+                index={pairIndex * 2 + idIndex}
+                source={source}
+              />
+            )
+          })}
         </Flex>
       ))}
     </>

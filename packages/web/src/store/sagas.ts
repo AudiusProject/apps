@@ -13,6 +13,7 @@ import {
   searchUsersModalSagas,
   modalsSagas,
   playerSagas as commonPlayerSagas,
+  playbackSagas,
   playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
@@ -125,6 +126,7 @@ export default function* rootSaga() {
     // Playback
     playerSagas(),
     commonPlayerSagas(),
+    playbackSagas(),
     playbackPositionSagas(),
     queueSagas(),
 

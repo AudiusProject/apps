@@ -28,6 +28,12 @@ import {
   OverflowSource,
   playerSelectors
 } from '@audius/common/store'
+import {
+  getCurrentTrackId,
+  getLineupId,
+  getIsPlaying,
+  getIsBuffering
+} from '@audius/common/store/playback/selectors'
 import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
   IconVolumeLevel2 as IconVolume,
@@ -83,7 +89,14 @@ type ConnectedTrackTileProps = Omit<
   | 'hasCurrentUserSaved'
   | 'artistIsVerified'
   | 'isPlaying'
->
+> & {
+  // New playback system props (optional)
+  lineupId?: string
+  currentTrackId?: ID | null
+  currentLineupId?: string | null
+  isPlaying?: boolean
+  onPlay?: (trackId: ID) => void
+}
 
 export const TrackTile = ({
   uid,
@@ -96,12 +109,18 @@ export const TrackTile = ({
   isLoading,
   hasLoaded,
   isTrending,
-  isActive,
+  isActive: propIsActive,
   variant,
   containerClassName,
   isFeed = false,
   source,
-  noShimmer
+  noShimmer,
+  // New playback system props
+  lineupId,
+  currentTrackId: propCurrentTrackId,
+  currentLineupId: propCurrentLineupId,
+  isPlaying: propIsPlaying,
+  onPlay
 }: ConnectedTrackTileProps) => {
   const dispatch = useDispatch()
 
@@ -118,9 +137,41 @@ export const TrackTile = ({
   })
   const { user_id, handle, name, is_deactivated } =
     getUserWithFallback(partialUser) ?? {}
+
+  // Always call hooks unconditionally (React rules)
+  const newCurrentTrackId = useSelector(getCurrentTrackId)
+  const newCurrentLineupId = useSelector(getLineupId)
+  const newIsPlaying = useSelector(getIsPlaying)
+  const newIsBuffering = useSelector(getIsBuffering)
   const playingUid = useSelector(getUid)
-  const isBuffering = useSelector(getBuffering)
-  const isPlaying = useSelector(getPlaying)
+  const oldIsPlaying = useSelector(getPlaying)
+  const oldIsBuffering = useSelector(getBuffering)
+
+  // Check if using new playback system (props provided)
+  const newPlaybackActive = !!lineupId && !!onPlay
+
+  // Use props if provided, otherwise fall back to Redux selectors
+  const currentTrackId = newPlaybackActive
+    ? propCurrentTrackId !== undefined
+      ? propCurrentTrackId
+      : newCurrentTrackId
+    : null
+  const currentLineupId = newPlaybackActive
+    ? propCurrentLineupId !== undefined
+      ? propCurrentLineupId
+      : newCurrentLineupId
+    : null
+  const isPlayingState = newPlaybackActive
+    ? propIsPlaying !== undefined
+      ? propIsPlaying
+      : newIsPlaying
+    : false
+  const isBufferingState = newPlaybackActive ? newIsBuffering : oldIsBuffering
+
+  const isActive = newPlaybackActive
+    ? currentTrackId === id && currentLineupId === lineupId
+    : uid === playingUid || propIsActive
+
   const { data: currentUserId } = useCurrentUserId()
   const darkMode = useSelector((state: AppState) =>
     shouldShowDark(getTheme(state))
@@ -358,7 +409,12 @@ export const TrackTile = ({
       return
     }
 
-    togglePlay(uid, id)
+    // Use new playback system if available
+    if (newPlaybackActive && onPlay) {
+      onPlay(id)
+    } else {
+      togglePlay(uid, id)
+    }
   }, [
     loading,
     togglePlay,
@@ -367,7 +423,9 @@ export const TrackTile = ({
     trackId,
     hasStreamAccess,
     preview_cid,
-    openLockedContentModal
+    openLockedContentModal,
+    newPlaybackActive,
+    onPlay
   ])
 
   const isReadonly = variant === 'readonly'
@@ -405,8 +463,18 @@ export const TrackTile = ({
           <TrackTileArt
             id={track_id}
             isTrack
-            isPlaying={uid === playingUid && isPlaying}
-            isBuffering={isBuffering}
+            isPlaying={
+              (isActive &&
+                (newPlaybackActive ? isPlayingState : oldIsPlaying)) as
+                | boolean
+                | undefined
+            }
+            isBuffering={
+              (isActive &&
+                (newPlaybackActive ? isBufferingState : oldIsBuffering)) as
+                | boolean
+                | undefined
+            }
             showSkeleton={loading}
             noShimmer={noShimmer}
             coSign={_co_sign}
@@ -425,11 +493,14 @@ export const TrackTile = ({
             <TextLink
               to={permalink}
               textVariant='title'
-              isActive={uid === playingUid || isActive}
+              isActive={isActive}
               applyHoverStylesToInnerSvg
             >
               <Text ellipses>{title || messages.loading}</Text>
-              {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}
+              {isActive &&
+              (newPlaybackActive ? isPlayingState : oldIsPlaying) ? (
+                <IconVolume size='m' />
+              ) : null}
               {loading ? (
                 <Skeleton
                   className={styles.skeleton}
