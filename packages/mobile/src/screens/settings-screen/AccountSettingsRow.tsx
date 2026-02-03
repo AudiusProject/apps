@@ -21,11 +21,6 @@ const useStyles = makeStyles(({ typography, spacing, palette }) => ({
   content: { flexDirection: 'row', alignItems: 'center' },
   profilePicture: { height: 52, width: 52 },
   info: { marginLeft: spacing(4) }
-  // handle: {
-  //   ...typography.h2,
-  //   color: palette.neutral,
-  //   fontFamily: typography.fontByWeight.medium
-  // }
 }))
 
 export const AccountSettingsRow = () => {
