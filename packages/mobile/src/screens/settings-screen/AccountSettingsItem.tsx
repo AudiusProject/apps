@@ -15,6 +15,7 @@ type AccountSettingsItemProps = {
   description: string
   buttonTitle: string
   onPress?: () => void
+  disabled?: boolean
 }
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -24,7 +25,8 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 export const AccountSettingsItem = (props: AccountSettingsItemProps) => {
-  const { title, titleIcon, description, buttonTitle, onPress } = props
+  const { title, titleIcon, description, buttonTitle, onPress, disabled } =
+    props
   const styles = useStyles()
 
   return (
@@ -37,6 +39,7 @@ export const AccountSettingsItem = (props: AccountSettingsItemProps) => {
         size='small'
         fullWidth
         onPress={onPress}
+        disabled={disabled}
       >
         {buttonTitle}
       </Button>
