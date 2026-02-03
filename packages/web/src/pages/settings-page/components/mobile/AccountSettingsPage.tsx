@@ -1,8 +1,8 @@
 import { useState, useContext, useCallback } from 'react'
 
 import { useQueryContext, useCurrentAccountUser } from '@audius/common/api'
-import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { Name, SquareSizes } from '@audius/common/models'
+import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Button,
