@@ -125,6 +125,20 @@ const SendTokensInput = ({
   const { data: currentUserId } = useCurrentUserId()
   const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
 
+  // Calculate USD value for display
+  const usdValueInfo = useMemo(() => {
+    if (!amount || parseFloat(amount) <= 0 || !coin) return null
+    const price =
+      coin.price === 0 ? coin.dynamicBondingCurve?.priceUSD : coin.price
+    if (!price || price <= 0) return null
+    const amountNum = parseFloat(amount)
+    const usdValue = amountNum * price
+    return {
+      usdValue,
+      isBelowMinimum: usdValue < 0.5
+    }
+  }, [amount, coin])
+
   // Find the selected token in owned coins for the dropdown
   // If not found in owned coins, try to find it in available coins (for initial load)
   const selectedToken = useMemo(() => {
@@ -145,7 +159,13 @@ const SendTokensInput = ({
   }, [])
 
   const handleAmountChange = useCallback((value: string, weiAmount: bigint) => {
-    setAmount(value)
+    // Only allow numbers and a single decimal point
+    const numericValue = value.replace(/[^0-9.]/g, '')
+    // Ensure only one decimal point
+    const parts = numericValue.split('.')
+    const filteredValue =
+      parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericValue
+    setAmount(filteredValue)
     setAmountError(null)
   }, [])
 
@@ -348,6 +368,17 @@ const SendTokensInput = ({
               </Flex>
             )}
           </Flex>
+
+          {usdValueInfo && (
+            <Text
+              variant='body'
+              size='s'
+              color={usdValueInfo.isBelowMinimum ? 'danger' : 'subdued'}
+            >
+              ≈ ${usdValueInfo.usdValue.toFixed(2)} USD
+              {usdValueInfo.isBelowMinimum && ' (minimum $0.50)'}
+            </Text>
+          )}
 
           {amountError && (
             <Text variant='body' size='s' color='danger'>

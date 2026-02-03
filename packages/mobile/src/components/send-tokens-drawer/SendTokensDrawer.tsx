@@ -71,6 +71,15 @@ export const SendTokensDrawer = () => {
     })
   }
 
+  const handleUserChange = (user: User | null) => {
+    // Update state when user is selected/reselected
+    setState((prev) => ({
+      ...prev,
+      selectedUser: user,
+      destinationAddress: user?.spl_wallet ?? prev.destinationAddress
+    }))
+  }
+
   const handleConfirm = async () => {
     setState((prev) => ({ ...prev, step: 'progress' }))
     setError('')
@@ -144,6 +153,11 @@ export const SendTokensDrawer = () => {
     setError('')
   }
 
+  const handleBeforeUserSelectionNavigate = () => {
+    // Close the drawer but preserve state so it can be restored when user selects
+    onClose()
+  }
+
   const renderHeader = () => {
     return (
       <Flex pv='l' ph='xl' gap='m' mb='m'>
@@ -164,7 +178,8 @@ export const SendTokensDrawer = () => {
           initialDestinationAddress={state.destinationAddress}
           initialSelectedUser={state.selectedUser}
           initialRecipientType={state.recipientType}
-          onBeforeUserSelectionNavigate={handleClose}
+          onBeforeUserSelectionNavigate={handleBeforeUserSelectionNavigate}
+          onUserChange={handleUserChange}
         />
       ) : null}
 
