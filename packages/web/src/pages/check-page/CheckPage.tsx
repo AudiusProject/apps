@@ -115,7 +115,7 @@ const CheckPage = () => {
   }, [navigate, sendMessageToWebView])
 
   useEffect(() => {
-    if (sessionToken && accountHandle) {
+    if (sessionToken) {
       try {
         const config = JSON.parse(sessionToken)
         const { templateId, referenceId, environmentId } = config
@@ -125,7 +125,7 @@ const CheckPage = () => {
 
         const client = new Persona.Client({
           templateId,
-          referenceId: referenceId ?? accountHandle,
+          referenceId,
           environmentId,
           onReady: () => {
             client.open()
