@@ -24,6 +24,7 @@ export const initialState: BasicModalsState = {
   FeedFilter: { isOpen: false },
   PurchaseVendor: { isOpen: false },
   TrendingGenreSelection: { isOpen: false },
+  TrendingRewardsExplainer: { isOpen: false },
   SocialProof: { isOpen: false },
   EditFolder: { isOpen: false },
   EditTrack: { isOpen: false },
