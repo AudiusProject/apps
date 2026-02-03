@@ -36,7 +36,7 @@ const messages = {
   tracksTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
   playlistTitle: 'Top 5 Playlists Each Week Receive 100 $AUDIO',
   undergroundTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  winners: 'Winners are selected every Friday at Noon PT!',
+  winners: 'Top 5 winners are selected every Friday at Noon PT!',
   lastWeek: "LAST WEEK'S WINNERS",
   tracks: 'Tracks',
   playlists: 'Playlists',

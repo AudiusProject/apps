@@ -291,22 +291,24 @@ export const ChallengeRewardsTile = () => {
             <GradientText style={styles.title}>{messages.title}</GradientText>
             <Text textAlign='center'>{messages.subheader}</Text>
           </Flex>
-          <View
-            style={{
-              position: 'absolute',
-              top: -12,
-              right: 0
-            }}
-          >
-            <SelectablePill
-              type='button'
-              label={
-                showCompleted ? messages.hideCompleted : messages.showCompleted
-              }
-              isSelected={showCompleted}
-              onPress={() => setShowCompleted(!showCompleted)}
-            />
-          </View>
+          {isVerified ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: -12,
+                right: 0
+              }}
+            >
+              <SelectablePill
+                type='button'
+                label={
+                  showCompleted ? messages.hideCompleted : messages.showCompleted
+                }
+                isSelected={showCompleted}
+                onPress={() => setShowCompleted(!showCompleted)}
+              />
+            </View>
+          ) : null}
         </View>
         {userChallengesLoading && !haveChallengesLoaded ? (
           <LoadingSpinner style={styles.loading} />

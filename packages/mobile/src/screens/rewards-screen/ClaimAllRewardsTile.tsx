@@ -15,7 +15,6 @@ import {
   Paper,
   Text
 } from '@audius/harmony-native'
-import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
 
 const { getOptimisticUserChallenges } = challengesSelectors
 
@@ -75,12 +74,6 @@ export const ClaimAllRewardsTile = () => {
 
   if (isEmpty) return null
 
-  const tooltipMessages = {
-    totalClaimed: 'Total amount of $AUDIO you have claimed from all rewards',
-    pending: 'Amount of $AUDIO pending in cooldown period',
-    readyToClaim: 'Amount of $AUDIO ready to claim now'
-  }
-
   return (
     <Paper shadow='near' border='strong' p='l' style={{ gap: 16 }}>
       <Text variant='heading' color='accent' size='m'>
@@ -97,15 +90,9 @@ export const ClaimAllRewardsTile = () => {
                 $AUDIO
               </Text>
             </Flex>
-            <Flex row alignItems='center' style={{ gap: 4 }}>
-              <Text variant='label' size='xs' color='default'>
-                {messages.totalClaimed}
-              </Text>
-              <TooltipInfoIcon
-                title='Total Claimed'
-                message={tooltipMessages.totalClaimed}
-              />
-            </Flex>
+            <Text variant='label' size='xs' color='default'>
+              {messages.totalClaimed}
+            </Text>
           </Flex>
           <Divider orientation='vertical' />
           <Flex column flex={1} style={{ gap: 4 }}>
@@ -117,15 +104,9 @@ export const ClaimAllRewardsTile = () => {
                 $AUDIO
               </Text>
             </Flex>
-            <Flex row alignItems='center' style={{ gap: 4 }}>
-              <Text variant='label' size='xs' color='default'>
-                {messages.pending}
-              </Text>
-              <TooltipInfoIcon
-                title='Pending'
-                message={tooltipMessages.pending}
-              />
-            </Flex>
+            <Text variant='label' size='xs' color='default'>
+              {messages.pending}
+            </Text>
           </Flex>
         </Flex>
         {/* Second row: Ready to Claim */}
@@ -138,15 +119,9 @@ export const ClaimAllRewardsTile = () => {
               $AUDIO
             </Text>
           </Flex>
-          <Flex row alignItems='center' style={{ gap: 4 }}>
-            <Text variant='label' size='xs' color='default'>
-              {messages.readyToClaim}
-            </Text>
-            <TooltipInfoIcon
-              title='Ready To Claim'
-              message={tooltipMessages.readyToClaim}
-            />
-          </Flex>
+          <Text variant='label' size='xs' color='default'>
+            {messages.readyToClaim}
+          </Text>
         </Flex>
       </Flex>
       {claimableAmount > 0 ? (

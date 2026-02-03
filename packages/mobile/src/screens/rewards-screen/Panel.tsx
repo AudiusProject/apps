@@ -114,7 +114,7 @@ export const Panel = ({
             {shortTitle ?? title}
           </Text>
           <Text numberOfLines={2}>
-            {shortDescription || description(challenge)}
+            {shortDescription ?? (description ? description(challenge) : '')}
           </Text>
           <Flex mt='l' gap='l'>
             <Flex row alignItems='center' gap='xs'>
