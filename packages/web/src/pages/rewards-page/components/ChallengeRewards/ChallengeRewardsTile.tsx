@@ -205,20 +205,22 @@ export const ChallengeRewardsTile = ({
               {messages.description1}
             </Text>
           </Flex>
-          <Box
-            css={{
-              position: 'absolute',
-              top: isMobile ? -12 : 0,
-              right: isMobile ? -12 : 0
-            }}
-          >
-            <SelectablePill
-              type='button'
-              label={showCompleted ? 'Hide Completed' : 'Show Completed'}
-              isSelected={showCompleted}
-              onClick={() => setShowCompleted(!showCompleted)}
-            />
-          </Box>
+          {isVerified ? (
+            <Box
+              css={{
+                position: 'absolute',
+                top: isMobile ? -12 : 0,
+                right: isMobile ? -12 : 0
+              }}
+            >
+              <SelectablePill
+                type='button'
+                label={showCompleted ? 'Hide Completed' : 'Show Completed'}
+                isSelected={showCompleted}
+                onClick={() => setShowCompleted(!showCompleted)}
+              />
+            </Box>
+          ) : null}
         </Flex>
         {userChallengesLoading && !haveChallengesLoaded ? (
           <LoadingSpinner className={wm(styles.loadingRewardsTile)} />
