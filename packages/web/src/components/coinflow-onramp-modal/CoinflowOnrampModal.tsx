@@ -82,7 +82,9 @@ export const CoinflowOnrampModal = () => {
           onSuccess={handleSuccess}
           merchantId={MERCHANT_ID || ''}
           env={IS_PRODUCTION ? 'prod' : 'sandbox'}
+          // @ts-ignore types are wrong in the package
           disableGooglePay={isElectron()}
+          // @ts-ignore types are wrong in the package
           disableApplePay={isElectron()}
           blockchain='solana'
           subtotal={{ cents: amount * 100, currency: Currency.USD }}
