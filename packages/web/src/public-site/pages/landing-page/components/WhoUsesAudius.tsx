@@ -1,21 +1,26 @@
+// eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useCallback } from 'react'
 
-import { coinPage } from '@audius/common/src/utils/route'
-import { useNavigate } from 'react-router'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
-import artistTakeover from 'assets/img/publicSite/Artist-Takeover.webp'
+import artistAluna from 'assets/img/publicSite/Artist-Aluna.webp'
+import artistDeadmau5 from 'assets/img/publicSite/Artist-Deadmau5.webp'
+import artistDiplo from 'assets/img/publicSite/Artist-Diplo.webp'
+import artistKennyBeats from 'assets/img/publicSite/Artist-Kenny-Beats.webp'
+import artistLoloZouai from 'assets/img/publicSite/Artist-Lolo-Zouai.webp'
+import artistMattOX from 'assets/img/publicSite/Artist-Matt-OX.webp'
+import artistRezz from 'assets/img/publicSite/Artist-Rezz.webp'
+import artistSkrillex from 'assets/img/publicSite/Artist-Skrillex.webp'
+import artistZedd from 'assets/img/publicSite/Artist-Zedd.webp'
 import useHasViewed from 'hooks/useHasViewed'
-import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import styles from './WhoUsesAudius.module.css'
-const animatedAny = animated as any
 
 const messages = {
   title: 'Who Uses Audius?',
   subtitle:
-    'Hundreds of thousands of artists across dozens of genres—including electronic, hip-hop, and more—use Audius to forge deep relationships with fans.'
+    'Thousands of artists across dozens of genres—including electronic, hip-hop, and more—use Audius to forge unparalleled connections with fans.'
 }
 
 type AristProps = {
@@ -33,10 +38,7 @@ const Artist = (props: AristProps) => {
     >
       <div className={styles.artistContainer}>
         <div className={styles.artistImageWrapper}>
-          <animatedAny.img
-            src={props.imageUrl}
-            className={styles.artistImage}
-          />
+          <animated.img src={props.imageUrl} className={styles.artistImage} />
         </div>
         <div className={styles.artistName}>{props.name}</div>
       </div>
@@ -62,20 +64,59 @@ const MobileArtist = (props: AristProps) => {
   )
 }
 
-const takeoverArtists = ['You', 'Already', 'Know', 'YAK'].map((name) => ({
-  name,
-  handle: 'handle', // TODO: add handle
-  imageUrl: artistTakeover
-}))
+const artists = [
+  {
+    name: 'deadmau5',
+    handle: 'deadmau5',
+    imageUrl: artistDeadmau5
+  },
+  {
+    name: 'Skrillex',
+    handle: 'skrillex',
+    imageUrl: artistSkrillex
+  },
+  {
+    name: 'Zedd',
+    handle: 'zedd',
+    imageUrl: artistZedd
+  },
+  {
+    name: 'Kenny Beats',
+    handle: 'kennybeats',
+    imageUrl: artistKennyBeats
+  },
+  {
+    name: 'Matt OX',
+    handle: 'mattox',
+    imageUrl: artistMattOX
+  },
+  {
+    name: 'Aluna',
+    handle: 'alunaaa',
+    imageUrl: artistAluna
+  },
+  {
+    name: 'Diplo',
+    handle: 'diplo',
+    imageUrl: artistDiplo
+  },
+  {
+    name: 'Lolo Zouai',
+    handle: 'lolozouai',
+    imageUrl: artistLoloZouai
+  },
+  {
+    name: 'Rezz',
+    handle: 'officialrezz',
+    imageUrl: artistRezz
+  }
+]
 
 type WhoUsesAudiusProps = {
   isMobile: boolean
-  setRenderPublicSite: (shouldRender: boolean) => void
 }
 
 const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
-  const navigate = useNavigate()
-
   // Animate in the title and subtitle text
   const [hasViewed, refInView] = useHasViewed()
   const titleStyles = useSpring({
@@ -84,21 +125,16 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
     x: hasViewed ? 0 : 120
   })
 
-  // const goToArtist = useCallback((handle: string) => {
-  //   window.open(`https://audius.co/${handle}`, '_blank')
-  // }, [])
-
-  const goToCoinPage = useCallback(() => {
-    // NOTE: Curried function
-    handleClickRoute(coinPage('YAK'), props.setRenderPublicSite, navigate)()
-  }, [props.setRenderPublicSite, navigate])
+  const goToArtist = useCallback((handle: string) => {
+    window.open(`https://audius.co/${handle}`, '_blank')
+  }, [])
 
   if (props.isMobile) {
     return (
       <div className={styles.mobileContainer}>
         <div ref={refInView} className={styles.content}>
           <div className={styles.animateTitleContainer}>
-            <animatedAny.div
+            <animated.div
               style={{
                 opacity: titleStyles.opacity,
                 transform: titleStyles.x.interpolate(
@@ -109,15 +145,15 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
             >
               <h3 className={styles.title}>{messages.title}</h3>
               <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-            </animatedAny.div>
+            </animated.div>
           </div>
         </div>
         <div className={styles.artistsContainer}>
-          {takeoverArtists.map((artist, i) => (
+          {artists.map((artist, i) => (
             <MobileArtist
-              key={artist.name}
+              key={artist.handle}
               {...artist}
-              goToArtist={goToCoinPage}
+              goToArtist={goToArtist}
             />
           ))}
         </div>
@@ -128,7 +164,7 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
   return (
     <div className={styles.container}>
       <div ref={refInView} className={styles.content}>
-        <animatedAny.div
+        <animated.div
           style={{
             opacity: titleStyles.opacity,
             transform: titleStyles.x.interpolate(
@@ -139,10 +175,10 @@ const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
         >
           <h3 className={styles.title}>{messages.title}</h3>
           <h3 className={styles.subTitle}>{messages.subtitle}</h3>
-        </animatedAny.div>
+        </animated.div>
         <div className={styles.artistsContainer}>
-          {takeoverArtists.map((artist) => (
-            <Artist key={artist.name} {...artist} goToArtist={goToCoinPage} />
+          {artists.map((artist) => (
+            <Artist key={artist.handle} {...artist} goToArtist={goToArtist} />
           ))}
         </div>
       </div>
