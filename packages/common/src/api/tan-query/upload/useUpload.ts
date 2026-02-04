@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react'
 
-import { AudiusSdk, HashId } from '@audius/sdk'
+import { IconArrowRight, IconCloudUpload } from '@audius/harmony'
+import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'
@@ -17,8 +18,10 @@ import {
   type UploadFormState,
   type CollectionFormState,
   type TrackFormState,
-  UploadType
+  UploadType,
+  toastActions
 } from '~/store'
+import { UPLOAD_PAGE } from '~/utils/route'
 
 import { type QueryContextType, useQueryContext } from '../utils'
 
@@ -34,7 +37,23 @@ const {
   updateFormState
 } = uploadActions
 
-const getStemUploadHandles = async (
+const { toast } = toastActions
+const failToastParams = {
+  content: 'An error occured during upload.',
+  link: UPLOAD_PAGE,
+  linkText: 'View',
+  leftIcon: IconCloudUpload,
+  rightIcon: IconArrowRight
+}
+const successToastParams = {
+  content: 'Your upload is complete!',
+  link: UPLOAD_PAGE,
+  linkText: 'View',
+  leftIcon: IconCloudUpload,
+  rightIcon: IconArrowRight
+}
+
+const getStemUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
   tracks: TrackForUpload[]
 ) => {
@@ -43,7 +62,7 @@ const getStemUploadHandles = async (
     (t) =>
       t.metadata.stems?.map((stemFile, index) => {
         const file = (stemFile as StemUploadWithFile).file
-        const uploadHandle = sdk.tracks.uploadTrackFiles({
+        const task = sdk.tracks.uploadTrackFiles({
           audioFile: fileToSdk(file, 'audio'),
           onProgress: (key, { loaded, total, transcode }) => {
             context.dispatch(
@@ -66,13 +85,14 @@ const getStemUploadHandles = async (
         })
         return {
           clientId: t.clientId,
-          ...uploadHandle
+          key: 'audio' as const,
+          ...task
         }
       }) ?? []
   )
 }
 
-const getTrackArtworkUploadHandles = async (
+const getCoverArtUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
   tracks: TrackForUpload[]
 ) => {
@@ -93,7 +113,7 @@ const getTrackArtworkUploadHandles = async (
         throw new Error('Artwork file missing')
       }
       const file = fileToSdk(t.metadata.artwork.file, 'cover_art')
-      const uploadHandle = sdk.tracks.uploadTrackFiles({
+      const task = sdk.tracks.uploadTrackFiles({
         imageFile: file,
         onProgress: (key, { loaded, total }) => {
           context.dispatch(
@@ -116,18 +136,19 @@ const getTrackArtworkUploadHandles = async (
       })
       return {
         clientId: t.clientId,
-        ...uploadHandle
+        key: 'image' as const,
+        ...task
       }
     })
 }
 
-const getTrackUploadHandles = async (
+const getTrackUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
   tracks: TrackForUpload[]
 ) => {
   const sdk = await context.audiusSdk()
   return tracks.map((t) => {
-    const handle = sdk.tracks.uploadTrackFiles({
+    const task = sdk.tracks.uploadTrackFiles({
       audioFile: fileToSdk(t.file, 'audio'),
       onProgress: (key, { loaded, total, transcode }) => {
         context.dispatch(
@@ -150,7 +171,8 @@ const getTrackUploadHandles = async (
     })
     return {
       clientId: t.clientId,
-      ...handle
+      key: 'audio' as const,
+      ...task
     }
   })
 }
@@ -163,31 +185,29 @@ export const useUpload = () => {
     reportToSentry
   } = useQueryContext()
 
-  const { mutateAsync: uploadFiles } = useUploadFiles()
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
   const { mutateAsync: publishCollectionAsync } = usePublishCollection()
+  const uploadFiles = useUploadFiles()
 
   // Holds the upload promise so that uploading tracks can start immediately
   // and then be awaited on the finish step.
-  const trackUploadPromise = useRef<ReturnType<typeof uploadFiles>>(
+  const trackUploadPromise = useRef<ReturnType<typeof uploadTrackFiles>>(
     Promise.resolve([])
   )
 
-  // Tracks individual file uploads so they can be replaced if needed
-  const fileUploads = useRef<
+  // Tracks individual track files so they can be replaced if needed
+  const trackFiles = useRef<
     Map<string, NonNullable<UploadFormState['tracks']>[number]['file']>
   >(new Map())
 
-  // Tracks individual file upload handles so they can be aborted if needed
-  const uploadHandles = useRef<
-    Map<string, ReturnType<AudiusSdk['tracks']['uploadTrackFiles']>>
-  >(new Map())
+  // Tracks individual file upload tasks so they can be aborted if needed
+  const uploadTasks = useRef<Map<string, UploadTrackFilesTask>>(new Map())
 
   const uploadTrackFiles = useCallback(
     async (tracks: TrackForUpload[]) => {
       // Track analytics for each track being uploaded
       tracks.forEach((t) => {
-        fileUploads.current.set(t.clientId, t.file)
+        trackFiles.current.set(t.clientId, t.file)
         track(
           make({
             eventName: Name.TRACK_UPLOAD_TRACK_UPLOADING,
@@ -210,18 +230,16 @@ export const useUpload = () => {
         )
       })
 
-      const handles = await getTrackUploadHandles(
-        { audiusSdk, dispatch },
-        tracks
-      )
-      handles.forEach((handle, i) => {
-        uploadHandles.current.set(tracks[i]!.clientId, handle)
+      const tasks = await getTrackUploadTasks({ audiusSdk, dispatch }, tracks)
+
+      // Store the upload tasks for potential aborting later
+      tasks.forEach((task, i) => {
+        uploadTasks.current.set(tracks[i]!.clientId, task)
       })
-      return await uploadFiles({
-        files: handles
-      })
+
+      return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, make, track, uploadFiles]
+    [audiusSdk, dispatch, uploadFiles, track, make]
   )
 
   /**
@@ -233,19 +251,19 @@ export const useUpload = () => {
       // Check if any track files were replaced (same clientId, different File)
       const tracksWithReplacedFiles =
         tracks?.filter((track) => {
-          const existingFile = fileUploads.current.get(track.clientId)
+          const existingFile = trackFiles.current.get(track.clientId)
           return existingFile && existingFile !== track.file
         }) ?? []
 
-      // Abort and remove upload handles for removed or replaced files
-      for (const key of uploadHandles.current.keys()) {
+      // Abort and remove upload tasks for removed or replaced files
+      for (const key of uploadTasks.current.keys()) {
         const isRemoved = !tracks.find((t) => t.clientId === key)
         const isReplaced = !!tracksWithReplacedFiles.find(
           (t) => t.clientId === key
         )
         if (isRemoved || isReplaced) {
-          uploadHandles.current.get(key)?.abort()
-          uploadHandles.current.delete(key)
+          uploadTasks.current.get(key)?.abort()
+          uploadTasks.current.delete(key)
         }
       }
 
@@ -267,24 +285,22 @@ export const useUpload = () => {
 
   const uploadTrackArtworks = useCallback(
     async (tracks: TrackForUpload[]) => {
-      return await uploadFiles({
-        files: await getTrackArtworkUploadHandles(
-          { audiusSdk, dispatch },
-          tracks
-        )
-      })
+      const tasks = await getCoverArtUploadTasks(
+        { audiusSdk, dispatch },
+        tracks
+      )
+      return await uploadFiles(tasks)
     },
     [audiusSdk, dispatch, uploadFiles]
   )
 
   const uploadCollectionArtwork = useCallback(
     async (formState: CollectionFormState) => {
-      if (
-        !formState.metadata ||
-        !formState.metadata.artwork ||
-        !('file' in formState.metadata.artwork) ||
-        !formState.metadata.artwork.file
-      ) {
+      const imageFile =
+        formState.metadata?.artwork && 'file' in formState.metadata.artwork
+          ? formState.metadata.artwork.file
+          : null
+      if (!imageFile) {
         return
       }
       const sdk = await audiusSdk()
@@ -298,11 +314,12 @@ export const useUpload = () => {
           progress: { status: ProgressStatus.COMPLETE }
         })
       )
-      const uploadHandle = sdk.tracks.uploadTrackFiles({
-        imageFile: fileToSdk(formState.metadata.artwork.file, 'artwork'),
+
+      const uploadTask = sdk.tracks.uploadTrackFiles({
+        imageFile: fileToSdk(imageFile, 'artwork'),
         onProgress: (key, { loaded, total }) => {
           dispatch(
-            uploadActions.updateProgress({
+            updateProgress({
               clientId: 'collection-artwork',
               key,
               stemIndex: null,
@@ -319,23 +336,18 @@ export const useUpload = () => {
           )
         }
       })
-      return await uploadFiles({
-        files: [
-          {
-            clientId: 'collection-artwork',
-            ...uploadHandle
-          }
-        ]
-      })
+
+      return await uploadFiles([
+        { ...uploadTask, clientId: 'collection-artwork', key: 'image' }
+      ])
     },
     [audiusSdk, dispatch, uploadFiles]
   )
 
   const uploadStemFiles = useCallback(
     async (tracks: TrackForUpload[]) => {
-      return await uploadFiles({
-        files: await getStemUploadHandles({ audiusSdk, dispatch }, tracks)
-      })
+      const tasks = await getStemUploadTasks({ audiusSdk, dispatch }, tracks)
+      return await uploadFiles(tasks)
     },
     [audiusSdk, dispatch, uploadFiles]
   )
@@ -388,6 +400,16 @@ export const useUpload = () => {
         uploadStemFiles(tracks),
         trackUploadPromise.current
       ])
+
+      // If every track file failed to upload, fail the entire upload
+      if (trackUploads.every((tu) => tu.error)) {
+        console.error('All track uploads failed')
+        dispatch(uploadTracksFailed())
+        if (window.location.pathname !== UPLOAD_PAGE) {
+          dispatch(toast(failToastParams))
+        }
+        return
+      }
 
       if (
         uploadType === UploadType.INDIVIDUAL_TRACKS ||
@@ -452,6 +474,9 @@ export const useUpload = () => {
                 id: HashId.parse(publishRes[0]!.trackId)
               })
             )
+            if (window.location.pathname !== UPLOAD_PAGE) {
+              dispatch(toast(successToastParams))
+            }
           } else if (uploadType === UploadType.INDIVIDUAL_TRACKS) {
             dispatch(uploadTracksSucceeded({ id: null }))
           }
@@ -464,6 +489,9 @@ export const useUpload = () => {
             })
           )
           dispatch(uploadTracksFailed())
+          if (window.location.pathname !== UPLOAD_PAGE) {
+            dispatch(toast(failToastParams))
+          }
         }
       } else if (
         uploadType === UploadType.ALBUM ||
@@ -476,9 +504,7 @@ export const useUpload = () => {
           const publishRes = await publishCollectionAsync({
             collectionMetadata: formState.metadata,
             tracks: tracks.map((t) => {
-              const imageUploadResponse = artwork?.find(
-                (a) => a.clientId === 'collection-artwork'
-              )?.imageUploadResponse
+              const imageUploadResponse = artwork?.[0].imageUploadResponse
               if (!imageUploadResponse) {
                 throw new Error('No collection artwork upload found')
               }
@@ -509,6 +535,9 @@ export const useUpload = () => {
           dispatch(
             uploadTracksSucceeded({ id: HashId.parse(publishRes.playlistId) })
           )
+          if (window.location.pathname !== UPLOAD_PAGE) {
+            dispatch(toast(successToastParams))
+          }
         } catch (err) {
           console.error('Error publishing collection:', err)
           track(
@@ -531,20 +560,23 @@ export const useUpload = () => {
             feature: Feature.Upload
           })
           dispatch(uploadTracksFailed())
+          if (window.location.pathname !== UPLOAD_PAGE) {
+            dispatch(toast(failToastParams))
+          }
         }
       }
     },
     [
+      dispatch,
       track,
       make,
-      dispatch,
       replaceTrackFiles,
       uploadStemFiles,
-      reportToSentry,
       uploadTrackArtworks,
       publishTracksAsync,
       uploadCollectionArtwork,
-      publishCollectionAsync
+      publishCollectionAsync,
+      reportToSentry
     ]
   )
 

@@ -61,6 +61,9 @@ const initialUploadState: ProgressState = {
 }
 const getInitialProgress = (upload: TrackForUpload | StemUploadWithFile) => {
   const res = cloneDeep(initialUploadState)
+  if ('clientId' in upload) {
+    res.clientId = upload.clientId
+  }
   res.image.total =
     upload.metadata.artwork && 'file' in upload.metadata.artwork
       ? (upload.metadata.artwork?.file?.size ?? 0)
