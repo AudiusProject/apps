@@ -4,7 +4,8 @@ import {
   ReactNode,
   useRef,
   useState,
-  CSSProperties
+  CSSProperties,
+  useMemo
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
@@ -18,9 +19,24 @@ import { getPathname } from 'utils/route'
 
 import { RouterContext, SlideDirection } from './RouterContextProvider'
 const animatedAny = animated as any
-const { SIGN_IN_PAGE, SIGN_UP_PAGE, NOTIFICATION_PAGE } = route
+const {
+  SIGN_IN_PAGE,
+  SIGN_UP_PAGE,
+  NOTIFICATION_PAGE,
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  LIBRARY_PAGE
+} = route
 
-const DISABLED_PAGES = new Set([SIGN_IN_PAGE, SIGN_UP_PAGE])
+const DISABLED_PAGES = new Set([
+  SIGN_IN_PAGE,
+  SIGN_UP_PAGE,
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  LIBRARY_PAGE
+])
 
 if (!getIsIOS()) {
   DISABLED_PAGES.add(NOTIFICATION_PAGE)
@@ -74,21 +90,73 @@ const AnimatedSwitch = ({
   const [disabled, setDisabled] = useState(false)
 
   const location = useLocation()
+  const pathname = getPathname(location)
 
   const [getAnimation, setAnimation] = useInstanceVar(noTransition)
   // Maintain an instance var to track whether the navigation stack is reset (no animations)
   // so that `window.onpopstate` can know whether or not to set animations
   const [getIsStackResetting, setIsStackResetting] = useInstanceVar(false)
 
-  // Go to page
+  // Track last pathname to prevent duplicate animation setup and transitions
+  const lastPathnameRef = useRef(pathname)
+  const isTransitioningRef = useRef(false)
+  // Use state for stable pathname so useMemo can track changes
+  const [stablePathname, setStablePathname] = useState(pathname)
+
+  // Debounce pathname changes to prevent rapid transitions
   useEffect(() => {
+    // If pathname hasn't actually changed, don't do anything
+    if (pathname === stablePathname) {
+      return
+    }
+
+    // Check if navigating between bottom bar pages - if so, use noTransition and update immediately
+    // DISABLED_PAGES already includes FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, LIBRARY_PAGE
+    const isNavigatingBetweenBottomBarPages =
+      DISABLED_PAGES.has(pathname) &&
+      DISABLED_PAGES.has(lastPathnameRef.current)
+
+    // For bottom bar pages, update immediately (no debounce) since we're using noTransition
+    if (isNavigatingBetweenBottomBarPages) {
+      setStablePathname(pathname)
+      lastPathnameRef.current = pathname
+      setAnimation(noTransition)
+      setIsStackResetting(false)
+      return
+    }
+
+    // For other pages, debounce if already transitioning
+    if (isTransitioningRef.current) {
+      const timeoutId = setTimeout(() => {
+        setStablePathname(pathname)
+        lastPathnameRef.current = pathname
+      }, 150)
+      return () => clearTimeout(timeoutId)
+    }
+
+    // Pathname changed and we're not transitioning - start new transition
+    setStablePathname(pathname)
+    lastPathnameRef.current = pathname
+    isTransitioningRef.current = true
+
     const animation =
       slideDirection === SlideDirection.FROM_LEFT
         ? slideInLeftTransition
         : slideInRightTransition
     setAnimation(animation)
     setIsStackResetting(false)
-  }, [location, setAnimation, slideDirection, setIsStackResetting])
+
+    // Reset transition flag after animation duration
+    setTimeout(() => {
+      isTransitioningRef.current = false
+    }, 400)
+  }, [
+    pathname,
+    stablePathname,
+    setAnimation,
+    slideDirection,
+    setIsStackResetting
+  ])
 
   // Reset
   useEffect(() => {
@@ -128,9 +196,13 @@ const AnimatedSwitch = ({
     }
   }, [location, disabled, setDisabled])
 
+  // Use stable pathname to prevent rapid transition creation
+  // For bottom bar pages, stablePathname updates immediately, so this should be in sync
+  const transitionItems = useMemo(() => [stablePathname], [stablePathname])
+
   const transitions = useTransition(
-    location,
-    (location) => getPathname(location),
+    transitionItems,
+    (item) => item,
     getAnimation()
   )
 
@@ -139,6 +211,11 @@ const AnimatedSwitch = ({
     extraStyles.transform = 'none'
   }
 
+  // Check if current pathname has a transition, if not render directly
+  const hasTransitionForCurrentPath = transitions.some(
+    ({ item }) => item === pathname
+  )
+
   return (
     <>
       {transitions.map(({ item, props, state, key }) => {
@@ -146,6 +223,8 @@ const AnimatedSwitch = ({
           return null
         }
         const transitionProps = stackReset ? {} : props
+        // Render Routes for the current pathname (item) to ensure immediate rendering
+        const itemPathname = item
         return (
           <animatedAny.div
             ref={animationRef}
@@ -160,10 +239,17 @@ const AnimatedSwitch = ({
             }}
             key={key}
           >
-            <Routes location={item}>{children}</Routes>
+            {/* Only render if this transition item matches the current pathname */}
+            {itemPathname === pathname && (
+              <Routes location={location}>{children}</Routes>
+            )}
           </animatedAny.div>
         )
       })}
+      {/* If no transition exists for current pathname yet, render directly to avoid delay */}
+      {!hasTransitionForCurrentPath && transitions.length === 0 && (
+        <Routes location={location}>{children}</Routes>
+      )}
     </>
   )
 }

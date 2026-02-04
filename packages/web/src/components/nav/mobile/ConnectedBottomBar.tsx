@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useRef, useEffect } from 'react'
 
 import { selectIsGuestAccount, useCurrentAccountUser } from '@audius/common/api'
 import { route } from '@audius/common/utils'
@@ -27,30 +27,54 @@ const ConnectedBottomBar = () => {
   })
   const { handle, isGuestAccount } = accountData ?? {}
   const userProfilePage = handle ? profilePage(handle) : null
-  const navRoutes = new Set([
-    FEED_PAGE,
-    TRENDING_PAGE,
-    EXPLORE_PAGE,
-    LIBRARY_PAGE,
-    userProfilePage
-  ])
 
-  const [lastNavRoute, setNavRoute] = useState(FEED_PAGE)
+  // Memoize navRoutes to avoid recreating Set on every render
+  // Filter out null values to ensure Set stability
+  const navRoutes = useMemo(() => {
+    const routes = [FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, LIBRARY_PAGE]
+    if (userProfilePage) {
+      routes.push(userProfilePage)
+    }
+    return new Set(routes)
+  }, [userProfilePage])
+
+  // Use ref to track last nav route synchronously (avoids render loops)
+  // This is critical for React Router v7 compatibility where location updates
+  // can happen before component re-renders
+  const lastNavRouteRef = useRef(FEED_PAGE)
   const currentRoute = getPathname(location)
 
-  if (lastNavRoute !== currentRoute) {
-    // If the current route isn't what we memoized, check if it's a nav route
-    // and update the current route if so
+  // Compute current page synchronously: use current route if it's a nav route,
+  // otherwise keep the last nav route. Update ref during computation to avoid useEffect.
+  const currentPage = useMemo(() => {
     if (navRoutes.has(currentRoute)) {
-      setNavRoute(currentRoute)
+      lastNavRouteRef.current = currentRoute
+      return currentRoute
     }
-  }
+    return lastNavRouteRef.current
+  }, [currentRoute, navRoutes])
+
+  // Track if navigation is in progress to prevent rapid re-navigation
+  const navigatingRef = useRef<string | null>(null)
+
+  // Reset navigation flag when location matches the target
+  useEffect(() => {
+    if (navigatingRef.current === currentRoute) {
+      navigatingRef.current = null
+    }
+  }, [currentRoute])
 
   const goToRoute = useCallback(
     (route: string) => {
+      const currentPath = getPathname(location)
+      // Prevent rapid re-navigation that could cause thrashing
+      if (navigatingRef.current === route || currentPath === route) {
+        return
+      }
+      navigatingRef.current = route
       navigate(route)
     },
-    [navigate]
+    [navigate, location]
   )
 
   const handleOpenSignOn = useCallback(() => {
@@ -92,7 +116,7 @@ const ConnectedBottomBar = () => {
 
   return (
     <BottomBar
-      currentPage={lastNavRoute}
+      currentPage={currentPage}
       userProfilePageRoute={userProfilePage}
       onClickFeed={goToFeed}
       onClickTrending={goToTrending}
