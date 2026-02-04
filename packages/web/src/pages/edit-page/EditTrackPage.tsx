@@ -52,7 +52,7 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const { data: stemTracks = [] } = useStems(track?.track_id)
 
-  const onSubmit = async (formValues: TrackEditFormValues) => {
+  const onSubmit = (formValues: TrackEditFormValues) => {
     const metadata = { ...formValues.trackMetadatas[0] }
     const trackId = metadata.track_id
     if (!trackId) {
