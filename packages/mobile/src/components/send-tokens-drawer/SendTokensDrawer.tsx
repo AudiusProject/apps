@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
@@ -33,16 +33,16 @@ type SendTokensState = {
 
 export const SendTokensDrawer = () => {
   const { isOpen, onClose, data } = useSendTokensModal()
-  const { mint } = data ?? {}
+  const { mint, user: prePopulatedUser } = data ?? {}
 
   const [state, setState] = useState<SendTokensState>({
     step: 'input',
     amount: BigInt(0),
     amountString: '',
-    destinationAddress: '',
-    selectedUser: null,
+    destinationAddress: prePopulatedUser?.spl_wallet ?? '',
+    selectedUser: prePopulatedUser ?? null,
     selectedMint: mint ?? '',
-    recipientType: 'user',
+    recipientType: prePopulatedUser ? 'user' : 'user',
     signature: ''
   })
   const [error, setError] = useState<string>('')
@@ -50,6 +50,20 @@ export const SendTokensDrawer = () => {
   const sendTokensMutation = useSendCoins({
     mint: state.selectedMint || (mint ?? '')
   })
+
+  // Reset state when drawer opens with new data (including pre-populated user)
+  useEffect(() => {
+    if (isOpen && state.step === 'input') {
+      setState((prev) => ({
+        ...prev,
+        selectedUser: prePopulatedUser ?? null,
+        destinationAddress: prePopulatedUser?.spl_wallet ?? '',
+        selectedMint: mint ?? prev.selectedMint,
+        recipientType: prePopulatedUser ? 'user' : prev.recipientType
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, prePopulatedUser?.user_id, mint])
 
   const handleInputContinue = (
     amount: bigint,
@@ -140,12 +154,13 @@ export const SendTokensDrawer = () => {
 
   const handleClose = () => {
     onClose()
+    const { user: prePopulatedUser } = data ?? {}
     setState({
       step: 'input',
       amount: BigInt(0),
       amountString: '',
-      destinationAddress: '',
-      selectedUser: null,
+      destinationAddress: prePopulatedUser?.spl_wallet ?? '',
+      selectedUser: prePopulatedUser ?? null,
       selectedMint: mint ?? '',
       recipientType: 'user',
       signature: ''

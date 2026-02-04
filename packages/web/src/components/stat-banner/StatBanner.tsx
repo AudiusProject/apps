@@ -12,7 +12,7 @@ import {
   IconPencil,
   IconKebabHorizontal,
   IconMessage,
-  IconArrowFromDollar,
+  IconMoneySend,
   PopupMenu,
   Button,
   IconButton,
@@ -189,6 +189,7 @@ export const StatBanner = (props: StatsBannerProps) => {
   const { data: isFollowing } = useUser(profileId, {
     select: (user) => user.does_current_user_follow
   })
+  const { data: profileUser } = useUser(profileId)
   const { onOpen: openSendTokensModal } = useSendTokensModal()
 
   const shareButton = (
@@ -273,13 +274,14 @@ export const StatBanner = (props: StatsBannerProps) => {
               >
                 <Flex>
                   <IconButton
-                    icon={IconArrowFromDollar}
+                    icon={IconMoneySend}
                     size='m'
                     aria-label={messages.sendArtistCoins}
                     onClick={() => {
                       openSendTokensModal({
                         mint: env.WAUDIO_MINT_ADDRESS,
-                        isOpen: true
+                        isOpen: true,
+                        user: profileUser ?? undefined
                       })
                     }}
                   />
