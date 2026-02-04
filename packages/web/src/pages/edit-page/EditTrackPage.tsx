@@ -67,7 +67,7 @@ export const EditTrackPage = (props: EditPageProps) => {
         ? fileToSdk(metadata.artwork.file, 'cover_art')
         : undefined
 
-    if (audioFile && audioFile instanceof File) {
+    if (audioFile) {
       openReplaceTrackConfirmation({
         confirmCallback: async () => {
           openReplaceTrackProgress()
