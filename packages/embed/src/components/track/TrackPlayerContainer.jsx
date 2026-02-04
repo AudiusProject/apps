@@ -57,17 +57,43 @@ const TrackPlayerContainer = ({
     if (!track?.id) return null
     const isPurchaseable =
       track.streamConditions && instanceOfPurchaseGate(track.streamConditions)
+
+    // Use the track's stream URL if available (works for private tracks)
+    // The stream field contains pre-authenticated URLs for tracks fetched via permalink
+    let mp3StreamUrl
+    if (track.stream) {
+      // track.stream can be either:
+      // 1. An object with { url, mirrors } (UrlWithMirrors)
+      // 2. A string URL (legacy format)
+      if (typeof track.stream === 'string') {
+        mp3StreamUrl = track.stream
+      } else if (track.stream.url) {
+        mp3StreamUrl = track.stream.url
+      } else if (track.stream.mirrors && track.stream.mirrors.length > 0) {
+        // Fall back to first mirror if primary URL not available
+        mp3StreamUrl = track.stream.mirrors[0]
+      }
+    }
+
+    // If no stream URL from track object, construct the endpoint
+    // This will only work for public tracks
+    // For private tracks accessed via permalink, the stream field should be populated
+    if (!mp3StreamUrl) {
+      mp3StreamUrl = getTrackStreamEndpoint(track.id, isPurchaseable)
+    }
+
     return {
       gateways: formatGateways(track.user.creatorNodeEndpoint),
       title: track.title,
       artistName: track.user.name,
-      mp3StreamUrl: getTrackStreamEndpoint(track.id, isPurchaseable),
+      mp3StreamUrl,
       isPurchaseable
     }
   }, [
     track?.id,
     track?.title,
     track?.streamConditions,
+    track?.stream,
     track?.user?.creatorNodeEndpoint,
     track?.user?.name
   ])

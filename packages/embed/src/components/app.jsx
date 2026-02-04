@@ -12,12 +12,14 @@ import {
   recordOpen,
   recordError
 } from '../analytics/analytics'
-import { ID_ROUTE, HASH_ID_ROUTE } from '../routes'
+import { ID_ROUTE, HASH_ID_ROUTE, PERMALINK_ROUTE } from '../routes'
 import {
   getCollection,
   getCollectionWithHashId,
+  getCollectionByPermalink,
   getTrack,
   getTrackWithHashId,
+  getTrackByPermalink,
   getEntityEvents
 } from '../util/BedtimeClient'
 import { getArtworkUrl } from '../util/getArtworkUrl'
@@ -112,6 +114,22 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
         isTwitter
       }
     }
+    case PERMALINK_ROUTE: {
+      const { handle, slug, isTwitter } = matches
+
+      // Validate handle and slug are present
+      if (!handle || !slug) {
+        return null
+      }
+
+      return {
+        requestType,
+        playerFlavor,
+        handle,
+        slug,
+        isTwitter
+      }
+    }
     default:
       return null
   }
@@ -159,7 +177,9 @@ const App = (props) => {
       const { requestType } = request
       if (requestType === RequestType.TRACK) {
         let track
-        if (request.hashId) {
+        if (request.handle && request.slug) {
+          track = await getTrackByPermalink(request.handle, request.slug)
+        } else if (request.hashId) {
           track = await getTrackWithHashId(request.hashId)
         } else {
           track = await getTrack(request.id)
@@ -196,7 +216,12 @@ const App = (props) => {
         }
       } else if (requestType === RequestType.COLLECTION) {
         let collection
-        if (request.hashId) {
+        if (request.handle && request.slug) {
+          collection = await getCollectionByPermalink(
+            request.handle,
+            request.slug
+          )
+        } else if (request.hashId) {
           collection = await getCollectionWithHashId(request.hashId)
         } else {
           collection = await getCollection(request.id)
