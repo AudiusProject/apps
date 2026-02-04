@@ -60,7 +60,7 @@ export const CreateAlbumSchema = z
   .object({
     albumId: z.optional(HashId),
     userId: HashId,
-    coverArtFile: z.optional(ImageFile),
+    imageFile: z.optional(ImageFile),
     metadata: CreateAlbumMetadataSchema,
     onProgress: z.optional(z.function()),
     trackIds: z.optional(z.array(HashId))
@@ -106,7 +106,7 @@ export const UpdateAlbumMetadataSchema = UploadAlbumMetadataSchema.partial()
 export const UploadAlbumSchema = z
   .object({
     userId: HashId,
-    coverArtFile: ImageFile,
+    imageFile: ImageFile,
     metadata: UploadAlbumMetadataSchema,
     onProgress: z.optional(z.function()),
     /**
@@ -123,7 +123,7 @@ export const UpdateAlbumSchema = z
   .object({
     userId: HashId,
     albumId: HashId,
-    coverArtFile: z.optional(ImageFile),
+    imageFile: z.optional(ImageFile),
     metadata: UpdateAlbumMetadataSchema,
     onProgress: z.optional(z.function())
   })

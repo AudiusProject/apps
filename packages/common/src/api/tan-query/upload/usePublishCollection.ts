@@ -107,7 +107,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       if (params.collectionMetadata.is_album) {
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
-          coverArtFile,
+          imageFile: coverArtFile,
           metadata: albumMetadataForCreateWithSDK(params.collectionMetadata),
           trackIds: publishedTracks
             .filter((t) => t.trackId && !t.error)
@@ -116,7 +116,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       } else {
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
-          coverArtFile,
+          imageFile: coverArtFile,
           metadata: playlistMetadataForCreateWithSDK(params.collectionMetadata),
           trackIds: publishedTracks
             .filter((t) => t.trackId && !t.error)

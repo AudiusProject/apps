@@ -166,7 +166,7 @@ describe('AlbumsApi', () => {
     it('uploads an album if valid metadata is provided', async () => {
       const result = await albums.uploadAlbum({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -199,7 +199,7 @@ describe('AlbumsApi', () => {
       await expect(async () => {
         await albums.uploadAlbum({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -225,7 +225,7 @@ describe('AlbumsApi', () => {
       const result = await albums.updateAlbum({
         userId: '7eP5n',
         albumId: 'x5pJ3Aj',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -247,7 +247,7 @@ describe('AlbumsApi', () => {
         await albums.updateAlbum({
           userId: '7eP5n',
           albumId: 'x5pJ3Aj',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
