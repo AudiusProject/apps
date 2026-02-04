@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useEffect } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { selectIsGuestAccount, useCurrentAccountUser } from '@audius/common/api'
 import { route } from '@audius/common/utils'
@@ -54,24 +54,13 @@ const ConnectedBottomBar = () => {
     return lastNavRouteRef.current
   }, [currentRoute, navRoutes])
 
-  // Track if navigation is in progress to prevent rapid re-navigation
-  const navigatingRef = useRef<string | null>(null)
-
-  // Reset navigation flag when location matches the target
-  useEffect(() => {
-    if (navigatingRef.current === currentRoute) {
-      navigatingRef.current = null
-    }
-  }, [currentRoute])
-
   const goToRoute = useCallback(
     (route: string) => {
       const currentPath = getPathname(location)
-      // Prevent rapid re-navigation that could cause thrashing
-      if (navigatingRef.current === route || currentPath === route) {
+      // Prevent navigating to the same route
+      if (currentPath === route) {
         return
       }
-      navigatingRef.current = route
       navigate(route)
     },
     [navigate, location]

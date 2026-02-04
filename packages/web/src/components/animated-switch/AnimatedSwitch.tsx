@@ -97,13 +97,12 @@ const AnimatedSwitch = ({
   // so that `window.onpopstate` can know whether or not to set animations
   const [getIsStackResetting, setIsStackResetting] = useInstanceVar(false)
 
-  // Track last pathname to prevent duplicate animation setup and transitions
+  // Track last pathname to prevent duplicate animation setup
   const lastPathnameRef = useRef(pathname)
-  const isTransitioningRef = useRef(false)
   // Use state for stable pathname so useMemo can track changes
   const [stablePathname, setStablePathname] = useState(pathname)
 
-  // Debounce pathname changes to prevent rapid transitions
+  // Handle pathname changes
   useEffect(() => {
     // If pathname hasn't actually changed, don't do anything
     if (pathname === stablePathname) {
@@ -116,40 +115,24 @@ const AnimatedSwitch = ({
       DISABLED_PAGES.has(pathname) &&
       DISABLED_PAGES.has(lastPathnameRef.current)
 
-    // For bottom bar pages, update immediately (no debounce) since we're using noTransition
+    // Update stablePathname immediately
+    setStablePathname(pathname)
+    lastPathnameRef.current = pathname
+
+    // For bottom bar pages, use noTransition (instant)
     if (isNavigatingBetweenBottomBarPages) {
-      setStablePathname(pathname)
-      lastPathnameRef.current = pathname
       setAnimation(noTransition)
       setIsStackResetting(false)
       return
     }
 
-    // For other pages, debounce if already transitioning
-    if (isTransitioningRef.current) {
-      const timeoutId = setTimeout(() => {
-        setStablePathname(pathname)
-        lastPathnameRef.current = pathname
-      }, 150)
-      return () => clearTimeout(timeoutId)
-    }
-
-    // Pathname changed and we're not transitioning - start new transition
-    setStablePathname(pathname)
-    lastPathnameRef.current = pathname
-    isTransitioningRef.current = true
-
+    // For other pages, use slide animation
     const animation =
       slideDirection === SlideDirection.FROM_LEFT
         ? slideInLeftTransition
         : slideInRightTransition
     setAnimation(animation)
     setIsStackResetting(false)
-
-    // Reset transition flag after animation duration
-    setTimeout(() => {
-      isTransitioningRef.current = false
-    }, 400)
   }, [
     pathname,
     stablePathname,
@@ -211,11 +194,6 @@ const AnimatedSwitch = ({
     extraStyles.transform = 'none'
   }
 
-  // Check if current pathname has a transition, if not render directly
-  const hasTransitionForCurrentPath = transitions.some(
-    ({ item }) => item === pathname
-  )
-
   return (
     <>
       {transitions.map(({ item, props, state, key }) => {
@@ -246,10 +224,6 @@ const AnimatedSwitch = ({
           </animatedAny.div>
         )
       })}
-      {/* If no transition exists for current pathname yet, render directly to avoid delay */}
-      {!hasTransitionForCurrentPath && transitions.length === 0 && (
-        <Routes location={location}>{children}</Routes>
-      )}
     </>
   )
 }
