@@ -130,7 +130,7 @@ describe('PlaylistsApi', () => {
     it('creates a playlist if valid metadata is provided', async () => {
       const result = await playlists.createPlaylist({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -151,7 +151,7 @@ describe('PlaylistsApi', () => {
       await expect(async () => {
         await playlists.createPlaylist({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -166,7 +166,7 @@ describe('PlaylistsApi', () => {
     it('uploads a playlist if valid metadata is provided', async () => {
       const result = await playlists.uploadPlaylist({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -180,7 +180,7 @@ describe('PlaylistsApi', () => {
             title: 'BachGavotte'
           }
         ],
-        trackFiles: [
+        audioFiles: [
           {
             buffer: wavFile,
             name: 'trackArt'
@@ -199,7 +199,7 @@ describe('PlaylistsApi', () => {
       await expect(async () => {
         await playlists.uploadPlaylist({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -209,7 +209,7 @@ describe('PlaylistsApi', () => {
               title: 'BachGavotte'
             }
           ],
-          trackFiles: [
+          audioFiles: [
             {
               buffer: wavFile,
               name: 'trackArt'
@@ -294,7 +294,7 @@ describe('PlaylistsApi', () => {
       const result = await playlists.updatePlaylist({
         userId: '7eP5n',
         playlistId: 'x5pJ3Aj',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -316,7 +316,7 @@ describe('PlaylistsApi', () => {
         await playlists.updatePlaylist({
           userId: '7eP5n',
           playlistId: 'x5pJ3Aj',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },

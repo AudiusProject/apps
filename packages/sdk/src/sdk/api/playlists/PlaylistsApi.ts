@@ -422,8 +422,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   public async uploadPlaylistInternal<Metadata extends PlaylistMetadata>(
     {
       userId,
-      coverArtFile,
-      trackFiles,
+      imageFile,
+      audioFiles,
       onProgress,
       metadata,
       trackMetadatas
@@ -438,7 +438,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         async () =>
           await this.storage
             .uploadFile({
-              file: coverArtFile,
+              file: imageFile,
               onProgress,
               metadata: {
                 template: 'img_square'
@@ -449,7 +449,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
       ),
-      ...trackFiles.map(
+      ...audioFiles.map(
         async (trackFile, idx) =>
           await retry3(
             async () =>
@@ -557,7 +557,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     {
       userId,
       playlistId,
-      coverArtFile,
+      imageFile,
       onProgress,
       metadata
     }: z.infer<typeof UpdatePlaylistSchema> & {
@@ -567,12 +567,12 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     // Upload cover art to storage node
     const coverArtResponse =
-      coverArtFile &&
+      imageFile &&
       (await retry3(
         async () =>
           await this.storage
             .uploadFile({
-              file: coverArtFile,
+              file: imageFile,
               onProgress,
               metadata: {
                 template: 'img_square'
@@ -611,7 +611,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   public async createPlaylistInternal<Metadata extends PlaylistMetadata>(
     {
       userId,
-      coverArtFile,
+      imageFile,
       metadata,
       onProgress,
       trackIds,
@@ -621,12 +621,12 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     // Upload cover art to storage node
     const coverArtResponse =
-      coverArtFile &&
+      imageFile &&
       (await retry3(
         async () =>
           await this.storage
             .uploadFile({
-              file: coverArtFile,
+              file: imageFile,
               onProgress,
               metadata: {
                 template: 'img_square'
