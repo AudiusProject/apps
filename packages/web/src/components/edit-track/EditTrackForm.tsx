@@ -283,8 +283,9 @@ const TrackEditForm = (
         const newFile = files[0]
 
         // Preserve clientId for upload tracking
-        if ('clientId' in formValues.tracks[trackIdx]) {
-          newFile.clientId = formValues.tracks[trackIdx]?.clientId
+        const track = formValues.tracks[trackIdx]
+        if ('clientId' in track) {
+          newFile.clientId = track.clientId
         }
 
         if (isUpload && !isTitleDirty) {
