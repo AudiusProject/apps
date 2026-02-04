@@ -66,6 +66,7 @@ export const UserSearchAutocomplete = ({
   const [isOpen, setIsOpen] = useState(false)
   const [hasQuery, setHasQuery] = useState(false)
   const [menuWidth, setMenuWidth] = useState<number | undefined>(undefined)
+  const [shouldPositionAbove, setShouldPositionAbove] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const anchorRef = useRef<HTMLDivElement>(null)
@@ -100,24 +101,40 @@ export const UserSearchAutocomplete = ({
     [query, dispatch]
   )
 
-  // Calculate menu width to match input
+  // Calculate menu width to match input and check if we should position above
   useEffect(() => {
-    const updateWidth = () => {
+    const updateWidthAndPosition = () => {
       if (anchorRef.current) {
         const rect = anchorRef.current.getBoundingClientRect()
         setMenuWidth(rect.width)
+
+        // Estimate menu height (approximately 52px per item + padding)
+        // We'll use a conservative estimate of 3 items max based on the search limit
+        const estimatedMenuHeight = 3 * 52 + 32 // 3 items + padding
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
+
+        // Position above if there's not enough space below but there is space above
+        if (
+          spaceBelow < estimatedMenuHeight &&
+          spaceAbove > estimatedMenuHeight
+        ) {
+          setShouldPositionAbove(true)
+        } else {
+          setShouldPositionAbove(false)
+        }
       }
     }
 
     if (isOpen && query.trim()) {
       // Calculate immediately and after a brief delay to ensure input is rendered
-      updateWidth()
-      const timeoutId = setTimeout(updateWidth, 0)
+      updateWidthAndPosition()
+      const timeoutId = setTimeout(updateWidthAndPosition, 0)
 
-      window.addEventListener('resize', updateWidth)
+      window.addEventListener('resize', updateWidthAndPosition)
       return () => {
         clearTimeout(timeoutId)
-        window.removeEventListener('resize', updateWidth)
+        window.removeEventListener('resize', updateWidthAndPosition)
       }
     }
   }, [isOpen, query])
@@ -288,6 +305,22 @@ export const UserSearchAutocomplete = ({
         anchorRef={anchorRef}
         isVisible={isOpen && !!query.trim()}
         onClose={() => setIsOpen(false)}
+        anchorOrigin={{
+          horizontal: 'center',
+          vertical: shouldPositionAbove ? 'top' : 'bottom'
+        }}
+        transformOrigin={{
+          horizontal: 'center',
+          vertical: shouldPositionAbove ? 'bottom' : 'top'
+        }}
+        PaperProps={
+          shouldPositionAbove
+            ? {
+                mt: 0,
+                mb: 's'
+              }
+            : undefined
+        }
       >
         <MenuContent
           scrollRef={scrollRef}
