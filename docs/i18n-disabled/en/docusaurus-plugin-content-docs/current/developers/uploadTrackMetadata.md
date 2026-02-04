@@ -1,5 +1,5 @@
 ---
-title: "Interface: UploadTrackMetadata"
+title: 'Interface: UploadTrackMetadata'
 ---
 
 # **`interface`** UploadTrackMetadata
@@ -44,32 +44,32 @@ Contains required and optional fields for uploading a track.
 ## Example with all fields specified
 
 ```typescript
-import { Mood, Genre } from "@audius/sdk";
-import fs from "fs";
+import { Mood, Genre } from '@audius/sdk'
+import fs from 'fs'
 
-const coverArtBuffer = fs.readFileSync("path/to/cover-art.png");
-const trackBuffer = fs.readFileSync("path/to/track.mp3");
+const coverArtBuffer = fs.readFileSync('path/to/cover-art.png')
+const trackBuffer = fs.readFileSync('path/to/track.mp3')
 
 const { trackId } = await audiusSdk.tracks.uploadTrack({
-  userId: "7eP5n",
-  coverArtFile: {
+  userId: '7eP5n',
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
-    name: "coverArt",
+    name: 'coverArt',
   },
   metadata: {
-    title: "Monstera",
+    title: 'Monstera',
     genre: Genre.METAL,
 
     // Optional metadata:
-    description: "Dedicated to my favorite plant",
+    description: 'Dedicated to my favorite plant',
     mood: Mood.DEVOTIONAL,
-    releaseDate: new Date("2022-09-30"),
-    tags: "plantlife,love,monstera",
-    remixOf: { tracks: [{ parentTrackId: "KVx2xpO" }] },
-    aiAttributionUserId: "3aE1p",
+    releaseDate: new Date('2022-09-30'),
+    tags: 'plantlife,love,monstera',
+    remixOf: { tracks: [{ parentTrackId: 'KVx2xpO' }] },
+    aiAttributionUserId: '3aE1p',
     isStreamGated: true,
     streamConditions: {
-      tipUserId: "7eP5n", // Require tipping user to unlock track
+      tipUserId: '7eP5n', // Require tipping user to unlock track
     },
     isUnlisted: true,
     fieldVisibility: {
@@ -80,15 +80,15 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
       playCount: false,
       remixes: true,
     },
-    isrc: "USAT21812345",
-    iswc: "T-123.456.789-0",
-    license: "Attribution-NonCommercial-ShareAlike CC BY-NC-SA",
+    isrc: 'USAT21812345',
+    iswc: 'T-123.456.789-0',
+    license: 'Attribution-NonCommercial-ShareAlike CC BY-NC-SA',
   },
-  trackFile: {
+  audioFile: {
     buffer: Buffer.from(trackArtBuffer),
-    name: "monsteraAudio",
+    name: 'monsteraAudio',
   },
-});
+})
 ```
 
 ## Specifying Stream Conditions
@@ -108,10 +108,10 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     // ...
     isStreamGated: true,
     streamConditions: {
-      tipUserId: "7eP5n", // Require tipping user with user ID "7eP5n" to unlock track
+      tipUserId: '7eP5n', // Require tipping user with user ID "7eP5n" to unlock track
     },
   },
-});
+})
 ```
 
 ### Follow-gated
@@ -127,10 +127,10 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     // ...
     isStreamGated: true,
     streamConditions: {
-      followUserId: "7eP5n", // Require following user with user ID "7eP5n" to unlock track
+      followUserId: '7eP5n', // Require following user with user ID "7eP5n" to unlock track
     },
   },
-});
+})
 ```
 
 ### NFT-gated
@@ -146,16 +146,16 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     // ...
     isStreamGated: true,
     streamConditions: {
-      chain: "eth",
-      address: "0xAbCdEfGhIjKlMnOpQrStUvWxYz", // The Ethereum address of the NFT contract
-      standard: "ERC-721", // The standard followed by the NFT - either "ERC-721" or "ERC-1155"
-      name: "Example NFT", // The name of the NFT
-      slug: "example-nft", // The slug of the NFT collection. E.g. if your collection is located at https://opensea.io/collection/example-nft, the slug is "example-nft".
-      imageUrl: "https://www.example.com/nft-image.png", // Optional: URL to the image representing the NFT
-      externalLink: "https://www.example.com/nft-details", // Optional: URL to an external resource providing more details about the NFT
+      chain: 'eth',
+      address: '0xAbCdEfGhIjKlMnOpQrStUvWxYz', // The Ethereum address of the NFT contract
+      standard: 'ERC-721', // The standard followed by the NFT - either "ERC-721" or "ERC-1155"
+      name: 'Example NFT', // The name of the NFT
+      slug: 'example-nft', // The slug of the NFT collection. E.g. if your collection is located at https://opensea.io/collection/example-nft, the slug is "example-nft".
+      imageUrl: 'https://www.example.com/nft-image.png', // Optional: URL to the image representing the NFT
+      externalLink: 'https://www.example.com/nft-details', // Optional: URL to an external resource providing more details about the NFT
     },
   },
-});
+})
 ```
 
 #### Solana NFT example
@@ -167,12 +167,12 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     // ...
     isStreamGated: true,
     streamConditions: {
-      chain: "sol",
-      address: "ABCDEF1234567890", // The address of the NFT on the Solana blockchain
-      name: "Example NFT", // The name of the NFT
-      imageUrl: "https://www.example.com/nft-image.png", // Optional: URL to the image representing the NFT
-      externalLink: "https://www.example.com/nft-details", // Optional: URL to an external resource providing more details about the NFT
+      chain: 'sol',
+      address: 'ABCDEF1234567890', // The address of the NFT on the Solana blockchain
+      name: 'Example NFT', // The name of the NFT
+      imageUrl: 'https://www.example.com/nft-image.png', // Optional: URL to the image representing the NFT
+      externalLink: 'https://www.example.com/nft-details', // Optional: URL to an external resource providing more details about the NFT
     },
   },
-});
+})
 ```

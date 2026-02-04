@@ -328,7 +328,7 @@ const trackBuffer = fs.readFileSync('path/to/track.mp3')
 
 const { trackId } = await audiusSdk.tracks.uploadTrack({
   userId: '7eP5n',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -338,7 +338,7 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     genre: Genre.METAL,
     mood: Mood.DEVOTIONAL,
   },
-  trackFile: {
+  audioFile: {
     buffer: Buffer.from(trackArtBuffer),
     name: 'monsteraAudio',
   },
@@ -350,13 +350,13 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name           | Type                                                     | Description                                                             | Required?    |
-| :------------- | :------------------------------------------------------- | :---------------------------------------------------------------------- | :----------- |
-| `coverArtFile` | `File`                                                   | A file that will be used as the cover art for the track                 | _Optional_   |
-| `metadata`     | [`UploadTrackMetadata`](/developers/UploadTrackMetadata) | An object containing the details of the track                           | **Required** |
-| `onProgress`   | `(progress: number) => void`                             | A function that will be called with progress events as the files upload | _Optional_   |
-| `trackFile`    | `File`                                                   | The audio file of the track                                             | **Required** |
-| `userId`       | `string`                                                 | The ID of the user                                                      | **Required** |
+| Name         | Type                                                                                                  | Description                                                             | Required?    |
+| :----------- | :---------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :----------- |
+| `imageFile`  | `File`                                                                                                | A file that will be used as the cover art for the track                 | _Optional_   |
+| `metadata`   | [`UploadTrackMetadata`](/developers/UploadTrackMetadata)                                              | An object containing the details of the track                           | **Required** |
+| `onProgress` | `(key: 'audio' \|'image', progress: { transcode?: number, loaded?: number, total?: number }) => void` | A function that will be called with progress events as the files upload | _Optional_   |
+| `audioFile`  | `File`                                                                                                | The audio file of the track                                             | **Required** |
+| `userId`     | `string`                                                                                              | The ID of the user                                                      | **Required** |
 
 #### `advancedOptions`
 
@@ -397,7 +397,7 @@ const coverArtBuffer = fs.readFileSync('path/to/updated-cover-art.png')
 
 const { trackId } = await audiusSdk.tracks.updateTrack({
   trackId: 'h5pJ3Bz',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -417,13 +417,13 @@ const { trackId } = await audiusSdk.tracks.updateTrack({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name           | Type                                                                  | Description                                                                   | Required?    |
-| :------------- | :-------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `trackId`      | `string`                                                              | The ID of the track                                                           | **Required** |
-| `userId`       | `string`                                                              | The ID of the user                                                            | **Required** |
-| `coverArtFile` | `File`                                                                | A file that will be used as the cover art for the track                       | _Optional_   |
-| `metadata`     | `Partial<`[`UploadTrackMetadata`](/developers/UploadTrackMetadata)`>` | An object containing the details of the track                                 | **Required** |
-| `onProgress`   | `(progress: number) => void`                                          | A function that will be called with progress events as the image file uploads | _Optional_   |
+| Name         | Type                                                                  | Description                                                                   | Required?    |
+| :----------- | :-------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `trackId`    | `string`                                                              | The ID of the track                                                           | **Required** |
+| `userId`     | `string`                                                              | The ID of the user                                                            | **Required** |
+| `imageFile`  | `File`                                                                | A file that will be used as the cover art for the track                       | _Optional_   |
+| `metadata`   | `Partial<`[`UploadTrackMetadata`](/developers/UploadTrackMetadata)`>` | An object containing the details of the track                                 | **Required** |
+| `onProgress` | `(progress: number) => void`                                          | A function that will be called with progress events as the image file uploads | _Optional_   |
 
 #### `advancedOptions`
 

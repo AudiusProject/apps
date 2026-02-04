@@ -179,7 +179,7 @@ const trackBuffer3 = fs.readFileSync('path/to/track3.mp3')
 
 const { albumId } = await audiusSdk.albums.uploadTrack({
   userId: '7eP5n',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -202,7 +202,7 @@ const { albumId } = await audiusSdk.albums.uploadTrack({
       title: 'Bush',
     },
   ],
-  trackFiles: [
+  audioFiles: [
     {
       buffer: Buffer.from(trackBuffer1),
       name: 'OakTrack',
@@ -226,10 +226,10 @@ example above.
 
 | Name             | Type                                                           | Description                                                                   | Required?    |
 | :--------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `coverArtFile`   | `File`                                                         | A file that will be used as the cover art for the album                       | _Optional_   |
+| `imageFile`      | `File`                                                         | A file that will be used as the cover art for the album                       | _Optional_   |
 | `metadata`       | _see code block below_                                         | An object containing the details of the album                                 | **Required** |
 | `onProgress`     | `(progress: number) => void`                                   | A function that will be called with progress events as the image file uploads | _Optional_   |
-| `trackFiles`     | `Array<File>`                                                  | An array of track audio files                                                 | **Required** |
+| `audioFiles`     | `Array<File>`                                                  | An array of track audio files                                                 | **Required** |
 | `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]` | An array of track files                                                       | _Optional_   |
 | `userId`         | `string`                                                       | The ID of the user                                                            | **Required** |
 
@@ -282,7 +282,7 @@ const coverArtBuffer = fs.readFileSync('path/to/updated-cover-art.png')
 
 const { albumId } = await audiusSdk.albums.updateAlbum({
   albumId: 'x5pJ3Az',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -301,13 +301,13 @@ const { albumId } = await audiusSdk.albums.updateAlbum({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name           | Type                         | Description                                                                   | Required?    |
-| :------------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `albumId`      | `string`                     | The ID of the album                                                           | **Required** |
-| `userId`       | `string`                     | The ID of the User                                                            | **Required** |
-| `coverArtFile` | `string`                     | A file that will be used as the cover art for the album                       | _Optional_   |
-| `metadata`     | _see code block below_       | An object containing the details of the album                                 | **Required** |
-| `onProgress`   | `(progress: number) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| Name         | Type                         | Description                                                                   | Required?    |
+| :----------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `albumId`    | `string`                     | The ID of the album                                                           | **Required** |
+| `userId`     | `string`                     | The ID of the User                                                            | **Required** |
+| `imageFile`  | `string`                     | A file that will be used as the cover art for the album                       | _Optional_   |
+| `metadata`   | _see code block below_       | An object containing the details of the album                                 | **Required** |
+| `onProgress` | `(progress: number) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
 
 ```json title="updateAlbum metadata payload"
 {
