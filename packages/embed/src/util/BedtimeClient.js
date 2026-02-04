@@ -87,6 +87,14 @@ export const getTrackWithHashId = async (hashId) => {
   return res.data
 }
 
+export const getTrackByPermalink = async (handle, slug) => {
+  const permalink = `/${handle}/${slug}`
+  const res = await audiusSdk.full.tracks.getBulkTracks({
+    permalink: [permalink]
+  })
+  return res.data?.[0] || null
+}
+
 export const getCollection = async (id) => {
   const res = await audiusSdk.full.playlists.getPlaylist({
     playlistId: encodeHashId(id)

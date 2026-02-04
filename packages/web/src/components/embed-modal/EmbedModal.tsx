@@ -34,7 +34,22 @@ const KindMap = {
   [PlayableType.ALBUM]: 'album'
 }
 
-const constructUrl = (kind: PlayableType, id: ID, size: Size) => {
+const constructUrl = (
+  kind: PlayableType,
+  id: ID,
+  size: Size,
+  permalink?: string
+) => {
+  // For tracks, use permalink format if available (needed for private tracks)
+  if (kind === PlayableType.TRACK && permalink) {
+    // Permalink format is /{handle}/{slug}, remove leading slash
+    const permalinkPath = permalink.startsWith('/')
+      ? permalink.slice(1)
+      : permalink
+    return `${BASE_EMBED_URL}/${KindMap[kind]}/${permalinkPath}?flavor=${
+      FlavorMap[size]
+    }`
+  }
   return `${BASE_EMBED_URL}/${KindMap[kind]}/${Id.parse(id)}?flavor=${
     FlavorMap[size]
   }`
@@ -118,18 +133,32 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   }, [kind, id, record, size])
 
   // Configure frames
+  const trackPermalink =
+    kind === PlayableType.TRACK && metadata
+      ? (metadata as Track).permalink
+      : undefined
+
   const standardFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
-    return formatIFrame(constructUrl(kind, id, Size.STANDARD), Size.STANDARD)
-  }, [kind, id, metadata])
+    return formatIFrame(
+      constructUrl(kind, id, Size.STANDARD, trackPermalink),
+      Size.STANDARD
+    )
+  }, [kind, id, metadata, trackPermalink])
   const compactFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
-    return formatIFrame(constructUrl(kind, id, Size.COMPACT), Size.COMPACT)
-  }, [kind, id, metadata])
+    return formatIFrame(
+      constructUrl(kind, id, Size.COMPACT, trackPermalink),
+      Size.COMPACT
+    )
+  }, [kind, id, metadata, trackPermalink])
   const tinyFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
-    return formatIFrame(constructUrl(kind, id, Size.TINY), Size.TINY)
-  }, [kind, id, metadata])
+    return formatIFrame(
+      constructUrl(kind, id, Size.TINY, trackPermalink),
+      Size.TINY
+    )
+  }, [kind, id, metadata, trackPermalink])
 
   const tabOptions = [
     {
