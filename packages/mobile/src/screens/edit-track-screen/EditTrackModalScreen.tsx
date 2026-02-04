@@ -1,10 +1,8 @@
 import { useCallback } from 'react'
 
-import { useTrack } from '@audius/common/api'
+import { useTrack, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import type { TrackMetadataForUpload } from '@audius/common/store'
-import { cacheTracksActions } from '@audius/common/store'
-import { useDispatch } from 'react-redux'
 
 import { ModalScreen } from 'app/components/core'
 import { useTrackImage } from 'app/components/image/TrackImage'
@@ -14,8 +12,6 @@ import { isImageUriSource } from 'app/utils/image'
 
 import { EditTrackScreen } from './EditTrackScreen'
 
-const { editTrack } = cacheTracksActions
-
 const messages = {
   title: 'Edit Track',
   save: 'Save'
@@ -24,10 +20,10 @@ const messages = {
 export const EditTrackModalScreen = () => {
   const { params } = useRoute<'EditTrack'>()
   const { id } = params
-  const dispatch = useDispatch()
   const navigation = useNavigation()
 
   const { data: track } = useTrack(id)
+  const { mutateAsync: updateTrack } = useUpdateTrack()
 
   const trackImage = useTrackImage({
     trackId: track?.track_id,
@@ -35,11 +31,14 @@ export const EditTrackModalScreen = () => {
   })
 
   const handleSubmit = useCallback(
-    (metadata: TrackMetadataForUpload) => {
-      dispatch(editTrack(id, metadata))
+    async (metadata: TrackMetadataForUpload) => {
+      await updateTrack({
+        trackId: id,
+        metadata
+      })
       navigation.navigate('Track', { trackId: id })
     },
-    [dispatch, id, navigation]
+    [id, navigation, updateTrack]
   )
 
   if (!track) return null
