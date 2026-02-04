@@ -33,15 +33,24 @@ export type StorageServiceConfig = Partial<StorageServiceConfigInternal> & {
   storageNodeSelector: StorageNodeSelectorService
 }
 
-const ProgressUpdateArgsSchema = z.object({
-  loaded: z.number().optional(),
-  total: z.number().optional(),
-  transcode: z.number().optional()
+export const ProgressEventSchema = z.object({
+  /**
+   * Number of bytes loaded so far
+   */
+  loaded: z.number(),
+  /**
+   * Total number of bytes to be loaded
+   */
+  total: z.number(),
+  /**
+   * Progress of the transcoding process (0-1)
+   */
+  transcode: z.number()
 })
 
-export const ProgressHandlerSchema = z
+export const ProgressEventHandlerSchema = z
   .function()
-  .args(z.enum(['audio', 'image']), ProgressUpdateArgsSchema)
+  .args(ProgressEventSchema)
   .returns(z.void())
 
 const UploadCreatedHandlerSchema = z
@@ -55,7 +64,7 @@ const UploadCreatedHandlerSchema = z
 
 export type UploadCreatedHandler = z.input<typeof UploadCreatedHandlerSchema>
 
-export type ProgressHandler = z.input<typeof ProgressHandlerSchema>
+export type ProgressHandler = z.input<typeof ProgressEventHandlerSchema>
 
 export type FileTemplate = 'audio' | 'img_square' | 'img_backdrop'
 

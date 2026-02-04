@@ -2,10 +2,7 @@ import type { WalletAdapter } from '@solana/wallet-adapter-base'
 import { z } from 'zod'
 
 import { PublicKeySchema } from '../../services/Solana'
-import {
-  ProgressHandlerSchema,
-  type ProgressHandler
-} from '../../services/Storage/types'
+import { ProgressEventSchema } from '../../services/Storage/types'
 import {
   DDEXResourceContributor,
   DDEXCopyright,
@@ -196,13 +193,43 @@ export const UploadTrackMetadataSchema = z.object({
 
 export type TrackMetadata = z.input<typeof UploadTrackMetadataSchema>
 
+export const UploadTrackFilesProgressEventSchema = ProgressEventSchema.extend({
+  /**
+   * Whether the event is for the audio or image file
+   */
+  key: z.enum(['audio', 'image'])
+})
+
+/**
+ * The progress event emitted during track file uploads
+ */
+type UploadTrackFilesProgressEvent = z.input<
+  typeof UploadTrackFilesProgressEventSchema
+>
+
+export const UploadTrackFilesProgressHandlerSchema = z
+  .function()
+  .args(z.number(), UploadTrackFilesProgressEventSchema)
+  .returns(z.void())
+
+export type UploadTrackFilesProgressHandler = (
+  /**
+   * Overall progress percentage (0-1)
+   */
+  progress: number,
+  /**
+   * The progress event
+   */
+  event: UploadTrackFilesProgressEvent
+) => void
+
 export const UploadTrackSchema = z
   .object({
     userId: HashId,
     audioFile: AudioFile,
     imageFile: ImageFile,
     metadata: UploadTrackMetadataSchema.strict(),
-    onProgress: z.optional(ProgressHandlerSchema)
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
 
@@ -212,7 +239,7 @@ export type UploadTrackRequest = Omit<
 > & {
   // Typing function manually because z.function() does not
   // support argument names
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const UploadTrackFilesSchema = z
@@ -225,7 +252,7 @@ export const UploadTrackFilesSchema = z
         previewStartSeconds: z.number().optional()
       })
       .optional(),
-    onProgress: z.optional(ProgressHandlerSchema)
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
 
@@ -235,7 +262,7 @@ export type UploadTrackFilesRequest = Omit<
 > & {
   // Typing function manually because z.function() does not
   // support argument names
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const UpdateTrackSchema = z
@@ -246,7 +273,7 @@ export const UpdateTrackSchema = z
     audioFile: z.optional(AudioFile),
     imageFile: z.optional(ImageFile),
     generatePreview: z.optional(z.boolean()),
-    onProgress: z.optional(ProgressHandlerSchema)
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
 
@@ -254,7 +281,7 @@ export type UpdateTrackRequest = Omit<
   z.input<typeof UpdateTrackSchema>,
   'onProgress'
 > & {
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const DeleteTrackSchema = z

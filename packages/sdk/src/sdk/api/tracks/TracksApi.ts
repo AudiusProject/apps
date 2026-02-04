@@ -157,6 +157,7 @@ export class TracksApi extends GeneratedTracksApi {
   uploadTrackFiles(params: UploadTrackFilesRequest): UploadTrackFilesTask {
     let audioUpload: UploadHandle | null = null
     let imageUpload: UploadHandle | null = null
+    let totalProgressPercentage = 0
     return {
       start: async () => {
         const { audioFile, imageFile, fileMetadata, onProgress } =
@@ -165,7 +166,11 @@ export class TracksApi extends GeneratedTracksApi {
         imageUpload = imageFile
           ? this.storage.uploadFile({
               file: imageFile,
-              onProgress,
+              onProgress: (progress) =>
+                onProgress?.(totalProgressPercentage, {
+                  key: 'image',
+                  ...progress
+                }),
               metadata: {
                 template: 'img_square',
                 filename: imageFile.name ?? undefined,
@@ -177,7 +182,16 @@ export class TracksApi extends GeneratedTracksApi {
         audioUpload = audioFile
           ? this.storage.uploadFile({
               file: audioFile,
-              onProgress,
+              onProgress: (progress) => {
+                // Only audio affects the total progress
+                totalProgressPercentage =
+                  (progress.loaded / progress.total) * 0.5 +
+                  progress.transcode * 0.5
+                onProgress?.(totalProgressPercentage, {
+                  key: 'audio',
+                  ...progress
+                })
+              },
               metadata: {
                 template: 'audio',
                 filename: audioFile.name ?? undefined,

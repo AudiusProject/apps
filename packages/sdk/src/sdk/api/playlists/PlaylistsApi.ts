@@ -432,6 +432,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     },
     advancedOptions?: AdvancedOptions
   ) {
+    const progresses = audioFiles.map(() => 0)
     // Upload track audio and cover art to storage node
     const [coverArtResponse, ...audioResponses] = await Promise.all([
       retry3(
@@ -439,7 +440,11 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
           await this.storage
             .uploadFile({
               file: imageFile,
-              onProgress,
+              onProgress: (progress) =>
+                onProgress?.(
+                  progresses.reduce((a, b) => a + b, 0) / audioFiles.length,
+                  { ...progress, key: 'image' }
+                ),
               metadata: {
                 template: 'img_square'
               }
@@ -456,7 +461,17 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
               await this.storage
                 .uploadFile({
                   file: trackFile,
-                  onProgress,
+                  onProgress: (progress) => {
+                    progresses[idx] =
+                      (progress.loaded / progress.total) * 0.5 +
+                      progress.transcode * 0.5
+                    const overallProgress =
+                      progresses.reduce((a, b) => a + b, 0) / audioFiles.length
+                    onProgress?.(overallProgress, {
+                      ...progress,
+                      key: idx
+                    })
+                  },
                   metadata: {
                     template: 'audio',
                     ...this.trackUploadHelper.extractMediorumUploadOptions(
