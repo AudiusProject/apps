@@ -4,7 +4,8 @@ import {
   ReactNode,
   useRef,
   useState,
-  CSSProperties
+  CSSProperties,
+  useMemo
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
@@ -18,9 +19,24 @@ import { getPathname } from 'utils/route'
 
 import { RouterContext, SlideDirection } from './RouterContextProvider'
 const animatedAny = animated as any
-const { SIGN_IN_PAGE, SIGN_UP_PAGE, NOTIFICATION_PAGE } = route
+const {
+  SIGN_IN_PAGE,
+  SIGN_UP_PAGE,
+  NOTIFICATION_PAGE,
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  LIBRARY_PAGE
+} = route
 
-const DISABLED_PAGES = new Set([SIGN_IN_PAGE, SIGN_UP_PAGE])
+const DISABLED_PAGES = new Set([
+  SIGN_IN_PAGE,
+  SIGN_UP_PAGE,
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  LIBRARY_PAGE
+])
 
 if (!getIsIOS()) {
   DISABLED_PAGES.add(NOTIFICATION_PAGE)
@@ -74,21 +90,56 @@ const AnimatedSwitch = ({
   const [disabled, setDisabled] = useState(false)
 
   const location = useLocation()
+  const pathname = getPathname(location)
 
   const [getAnimation, setAnimation] = useInstanceVar(noTransition)
   // Maintain an instance var to track whether the navigation stack is reset (no animations)
   // so that `window.onpopstate` can know whether or not to set animations
   const [getIsStackResetting, setIsStackResetting] = useInstanceVar(false)
 
-  // Go to page
+  // Track last pathname to prevent duplicate animation setup
+  const lastPathnameRef = useRef(pathname)
+  // Use state for stable pathname so useMemo can track changes
+  const [stablePathname, setStablePathname] = useState(pathname)
+
+  // Handle pathname changes
   useEffect(() => {
+    // If pathname hasn't actually changed, don't do anything
+    if (pathname === stablePathname) {
+      return
+    }
+
+    // Check if navigating between bottom bar pages - if so, use noTransition and update immediately
+    // DISABLED_PAGES already includes FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, LIBRARY_PAGE
+    const isNavigatingBetweenBottomBarPages =
+      DISABLED_PAGES.has(pathname) &&
+      DISABLED_PAGES.has(lastPathnameRef.current)
+
+    // Update stablePathname immediately
+    setStablePathname(pathname)
+    lastPathnameRef.current = pathname
+
+    // For bottom bar pages, use noTransition (instant)
+    if (isNavigatingBetweenBottomBarPages) {
+      setAnimation(noTransition)
+      setIsStackResetting(false)
+      return
+    }
+
+    // For other pages, use slide animation
     const animation =
       slideDirection === SlideDirection.FROM_LEFT
         ? slideInLeftTransition
         : slideInRightTransition
     setAnimation(animation)
     setIsStackResetting(false)
-  }, [location, setAnimation, slideDirection, setIsStackResetting])
+  }, [
+    pathname,
+    stablePathname,
+    setAnimation,
+    slideDirection,
+    setIsStackResetting
+  ])
 
   // Reset
   useEffect(() => {
@@ -128,9 +179,13 @@ const AnimatedSwitch = ({
     }
   }, [location, disabled, setDisabled])
 
+  // Use stable pathname to prevent rapid transition creation
+  // For bottom bar pages, stablePathname updates immediately, so this should be in sync
+  const transitionItems = useMemo(() => [stablePathname], [stablePathname])
+
   const transitions = useTransition(
-    location,
-    (location) => getPathname(location),
+    transitionItems,
+    (item) => item,
     getAnimation()
   )
 
@@ -146,6 +201,8 @@ const AnimatedSwitch = ({
           return null
         }
         const transitionProps = stackReset ? {} : props
+        // Render Routes for the current pathname (item) to ensure immediate rendering
+        const itemPathname = item
         return (
           <animatedAny.div
             ref={animationRef}
@@ -160,7 +217,10 @@ const AnimatedSwitch = ({
             }}
             key={key}
           >
-            <Routes location={item}>{children}</Routes>
+            {/* Only render if this transition item matches the current pathname */}
+            {itemPathname === pathname && (
+              <Routes location={location}>{children}</Routes>
+            )}
           </animatedAny.div>
         )
       })}
