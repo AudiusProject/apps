@@ -79,15 +79,6 @@ const TrackPlayerContainer = ({
     // This will only work for public tracks
     // For private tracks accessed via permalink, the stream field should be populated
     if (!mp3StreamUrl) {
-      // Log for debugging - remove in production if needed
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Track stream URL not found in track object:', {
-          trackId: track.id,
-          hasStream: !!track.stream,
-          streamType: typeof track.stream,
-          streamKeys: track.stream ? Object.keys(track.stream) : null
-        })
-      }
       mp3StreamUrl = getTrackStreamEndpoint(track.id, isPurchaseable)
     }
 

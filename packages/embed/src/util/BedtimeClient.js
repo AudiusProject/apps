@@ -107,6 +107,14 @@ export const getCollectionWithHashId = async (hashId) => {
   return getFormattedCollectionResponse(res.data)
 }
 
+export const getCollectionByPermalink = async (handle, slug) => {
+  const res = await audiusSdk.full.playlists.getPlaylistByHandleAndSlug({
+    handle,
+    slug
+  })
+  return getFormattedCollectionResponse(res.data)
+}
+
 export const getEntityEvents = async (entityId, entityType) => {
   const res = await audiusSdk.events.getEntityEvents({
     entityId: [entityId],

@@ -1,7 +1,13 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 
 import { useCollection, useTrack } from '@audius/common/api'
-import { Name, PlayableType, ID, Track } from '@audius/common/models'
+import {
+  Name,
+  PlayableType,
+  ID,
+  Track,
+  Collection
+} from '@audius/common/models'
 import { Button, Modal, SegmentedControl } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import cn from 'classnames'
@@ -40,12 +46,29 @@ const constructUrl = (
   size: Size,
   permalink?: string
 ) => {
-  // For tracks, use permalink format if available (needed for private tracks)
-  if (kind === PlayableType.TRACK && permalink) {
-    // Permalink format is /{handle}/{slug}, remove leading slash
-    const permalinkPath = permalink.startsWith('/')
+  // Use permalink format if available (needed for private tracks/collections)
+  if (permalink) {
+    // Track permalink format: /{handle}/{slug}
+    // Collection permalink format: /{handle}/playlist/{slug} or /{handle}/album/{slug}
+    let permalinkPath = permalink.startsWith('/')
       ? permalink.slice(1)
       : permalink
+
+    // For collections, extract handle and slug from permalink
+    // Permalink is /{handle}/playlist/{slug} or /{handle}/album/{slug}
+    if (
+      (kind === PlayableType.PLAYLIST || kind === PlayableType.ALBUM) &&
+      permalinkPath.includes('/')
+    ) {
+      const parts = permalinkPath.split('/')
+      if (parts.length >= 3) {
+        // Extract handle and slug, skip the middle part (playlist/album)
+        const handle = parts[0]
+        const slug = parts[2]
+        permalinkPath = `${handle}/${slug}`
+      }
+    }
+
     return `${BASE_EMBED_URL}/${KindMap[kind]}/${permalinkPath}?flavor=${
       FlavorMap[size]
     }`
@@ -133,32 +156,32 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   }, [kind, id, record, size])
 
   // Configure frames
-  const trackPermalink =
-    kind === PlayableType.TRACK && metadata
+  const permalink =
+    metadata && kind === PlayableType.TRACK
       ? (metadata as Track).permalink
-      : undefined
+      : metadata &&
+          (kind === PlayableType.PLAYLIST || kind === PlayableType.ALBUM)
+        ? (metadata as Collection).permalink
+        : undefined
 
   const standardFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
     return formatIFrame(
-      constructUrl(kind, id, Size.STANDARD, trackPermalink),
+      constructUrl(kind, id, Size.STANDARD, permalink),
       Size.STANDARD
     )
-  }, [kind, id, metadata, trackPermalink])
+  }, [kind, id, metadata, permalink])
   const compactFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
     return formatIFrame(
-      constructUrl(kind, id, Size.COMPACT, trackPermalink),
+      constructUrl(kind, id, Size.COMPACT, permalink),
       Size.COMPACT
     )
-  }, [kind, id, metadata, trackPermalink])
+  }, [kind, id, metadata, permalink])
   const tinyFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
-    return formatIFrame(
-      constructUrl(kind, id, Size.TINY, trackPermalink),
-      Size.TINY
-    )
-  }, [kind, id, metadata, trackPermalink])
+    return formatIFrame(constructUrl(kind, id, Size.TINY, permalink), Size.TINY)
+  }, [kind, id, metadata, permalink])
 
   const tabOptions = [
     {

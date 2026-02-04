@@ -16,6 +16,7 @@ import { ID_ROUTE, HASH_ID_ROUTE, PERMALINK_ROUTE } from '../routes'
 import {
   getCollection,
   getCollectionWithHashId,
+  getCollectionByPermalink,
   getTrack,
   getTrackWithHashId,
   getTrackByPermalink,
@@ -116,11 +117,6 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
     case PERMALINK_ROUTE: {
       const { handle, slug, isTwitter } = matches
 
-      // Only tracks support permalink routes currently
-      if (requestType !== RequestType.TRACK) {
-        return null
-      }
-
       // Validate handle and slug are present
       if (!handle || !slug) {
         return null
@@ -220,7 +216,12 @@ const App = (props) => {
         }
       } else if (requestType === RequestType.COLLECTION) {
         let collection
-        if (request.hashId) {
+        if (request.handle && request.slug) {
+          collection = await getCollectionByPermalink(
+            request.handle,
+            request.slug
+          )
+        } else if (request.hashId) {
           collection = await getCollectionWithHashId(request.hashId)
         } else {
           collection = await getCollection(request.id)
