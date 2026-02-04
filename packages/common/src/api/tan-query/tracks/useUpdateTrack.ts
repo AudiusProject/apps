@@ -1,4 +1,4 @@
-import { Id, type CrossPlatformFile, type ProgressHandler } from '@audius/sdk'
+import { Id, type CrossPlatformFile } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 
@@ -9,6 +9,7 @@ import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { CommonState } from '~/store/commonStore'
 import { stemsUploadSelectors } from '~/store/stems-upload'
+import { replaceTrackProgressModalActions } from '~/store/ui/modals/replace-track-progress-modal'
 import { TrackMetadataForUpload } from '~/store/upload'
 
 import { TQTrack } from '../models'
@@ -31,7 +32,6 @@ export type UpdateTrackParams = {
   metadata: Partial<TrackMetadataForUpload>
   audioFile?: CrossPlatformFile
   imageFile?: CrossPlatformFile
-  onProgress?: ProgressHandler
 }
 
 export const useUpdateTrack = () => {
@@ -47,8 +47,7 @@ export const useUpdateTrack = () => {
       trackId,
       metadata,
       audioFile,
-      imageFile,
-      onProgress
+      imageFile
     }: UpdateTrackParams) => {
       const sdk = await audiusSdk()
 
@@ -65,7 +64,16 @@ export const useUpdateTrack = () => {
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
         metadata: sdkMetadata,
-        onProgress
+        onProgress: (type, progress) => {
+          if (type === 'audio') {
+            dispatch(
+              replaceTrackProgressModalActions.set({
+                ...progress,
+                error: false
+              })
+            )
+          }
+        }
       })
 
       // TODO: migrate stem uploads to use tan-query
@@ -97,6 +105,15 @@ export const useUpdateTrack = () => {
       await queryClient.cancelQueries({
         queryKey: getTrackQueryKey(trackId)
       })
+
+      dispatch(
+        replaceTrackProgressModalActions.set({
+          error: false,
+          loaded: 0,
+          total: 0,
+          transcode: 0
+        })
+      )
 
       // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
@@ -145,6 +162,15 @@ export const useUpdateTrack = () => {
             )
           }
         }
+      )
+
+      dispatch(
+        replaceTrackProgressModalActions.set({
+          error: true,
+          loaded: 0,
+          total: 0,
+          transcode: 0
+        })
       )
 
       reportToSentry({

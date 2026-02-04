@@ -5,12 +5,10 @@ import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
 import {
   TrackMetadataForUpload,
-  replaceTrackProgressModalActions,
   useReplaceTrackConfirmationModal,
   useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
-import { useDispatch } from 'react-redux'
 import { useNavigate, useParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'
@@ -36,7 +34,6 @@ export const EditTrackPage = (props: EditPageProps) => {
   const { scrollToTop } = props
   const params = useParams<{ handle?: string; slug?: string }>()
   const { handle } = params
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   useRequiresAccount()
   useIsUnauthorizedForHandleRedirect(handle ?? '')
@@ -52,7 +49,7 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const { data: stemTracks = [] } = useStems(track?.track_id)
 
-  const onSubmit = (formValues: TrackEditFormValues) => {
+  const onSubmit = async (formValues: TrackEditFormValues) => {
     const metadata = { ...formValues.trackMetadatas[0] }
     const trackId = metadata.track_id
     if (!trackId) {
@@ -70,46 +67,28 @@ export const EditTrackPage = (props: EditPageProps) => {
         ? fileToSdk(metadata.artwork.file, 'cover_art')
         : undefined
 
-    const editAndNavigate = async () => {
-      try {
-        await updateTrack({
-          trackId,
-          metadata,
-          audioFile,
-          imageFile,
-          onProgress: (type, progress) => {
-            if (type !== 'audio') return
-            dispatch(
-              replaceTrackProgressModalActions.set({
-                ...progress,
-                error: false
-              })
-            )
-          }
-        })
-        navigate(metadata.permalink)
-      } catch (err) {
-        dispatch(
-          replaceTrackProgressModalActions.set({
-            error: true,
-            loaded: 0,
-            total: 0,
-            transcode: 0
-          })
-        )
-      }
-    }
-
     if (audioFile && audioFile instanceof File) {
       openReplaceTrackConfirmation({
         confirmCallback: async () => {
           openReplaceTrackProgress()
-          await editAndNavigate()
+          await updateTrack({
+            trackId,
+            metadata,
+            audioFile,
+            imageFile
+          })
+          navigate(metadata.permalink)
           closeReplaceTrackProgress()
         }
       })
     } else {
-      editAndNavigate()
+      await updateTrack({
+        trackId,
+        metadata,
+        audioFile,
+        imageFile
+      })
+      navigate(metadata.permalink)
     }
   }
 

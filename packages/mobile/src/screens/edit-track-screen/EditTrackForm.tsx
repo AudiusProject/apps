@@ -9,8 +9,7 @@ import {
   useReplaceTrackProgressModal,
   useEarlyReleaseConfirmationModal,
   useHideContentConfirmationModal,
-  usePublishConfirmationModal,
-  replaceTrackProgressModalActions
+  usePublishConfirmationModal
 } from '@audius/common/store'
 import { useField } from 'formik'
 import { Keyboard } from 'react-native'
@@ -244,34 +243,13 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     const metadata = getUploadMetadataFromFormValues(values, initialValues)
 
     openReplaceTrackProgress()
-    try {
-      await updateTrack({
-        trackId: values.track_id,
-        metadata,
-        audioFile: selectedTrack.file,
-        onProgress: (type, progress) => {
-          if (type !== 'audio') return
-          dispatch(
-            replaceTrackProgressModalActions.set({
-              ...progress,
-              error: false
-            })
-          )
-        }
-      })
-      navigation.navigate('Track', { trackId: values.track_id })
-    } catch (error) {
-      dispatch(
-        replaceTrackProgressModalActions.set({
-          error: true,
-          loaded: 0,
-          total: 0,
-          transcode: 0
-        })
-      )
-    }
+    await updateTrack({
+      trackId: values.track_id,
+      metadata,
+      audioFile: selectedTrack.file
+    })
+    navigation.navigate('Track', { trackId: values.track_id })
   }, [
-    dispatch,
     initialValues,
     navigation,
     openReplaceTrackProgress,
