@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useUpdateTrack } from '@audius/common/api'
 import { DownloadQuality, Name } from '@audius/common/models'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
-  uploadActions,
   useReplaceTrackConfirmationModal,
   useReplaceTrackProgressModal,
   useEarlyReleaseConfirmationModal,
@@ -51,8 +51,6 @@ import {
 } from './fields'
 import type { EditTrackFormProps } from './types'
 import { getUploadMetadataFromFormValues } from './util'
-
-const { updateTrackAudio } = uploadActions
 
 const messages = {
   trackName: 'Track Name',
@@ -143,6 +141,8 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   const { onOpen: openPublishConfirmation } = usePublishConfirmationModal()
   const { onOpen: openWaitForDownload } = useWaitForDownloadModal()
 
+  const { mutateAsync: updateTrack } = useUpdateTrack()
+
   const handleReplace = useCallback(() => {
     if (!selectFile) {
       console.warn(
@@ -232,7 +232,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     }
   }, [dirty, navigation, dispatch])
 
-  const handleReplaceAudio = useCallback(() => {
+  const handleReplaceAudio = useCallback(async () => {
     if (!selectedTrack || !values.track_id) {
       console.warn(
         'Track replacement not available - missing track or track ID'
@@ -242,21 +242,19 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
 
     const metadata = getUploadMetadataFromFormValues(values, initialValues)
 
-    dispatch(
-      updateTrackAudio({
-        trackId: values.track_id,
-        file: selectedTrack.file,
-        metadata
-      })
-    )
+    await updateTrack({
+      trackId: values.track_id,
+      metadata,
+      audioFile: selectedTrack.file
+    })
     openReplaceTrackProgress()
     navigation.navigate('Track', { trackId: values.track_id })
   }, [
-    dispatch,
     initialValues,
     navigation,
     openReplaceTrackProgress,
     selectedTrack,
+    updateTrack,
     values
   ])
 

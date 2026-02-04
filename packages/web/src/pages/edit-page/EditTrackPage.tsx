@@ -1,15 +1,17 @@
 import { createContext } from 'react'
 
-import { useStems, useTrackByParams } from '@audius/common/api'
+import { fileToSdk } from '@audius/common/adapters'
+import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
 import {
   TrackMetadataForUpload,
-  cacheTracksActions,
-  useReplaceTrackConfirmationModal
+  replaceTrackProgressModalActions,
+  useReplaceTrackConfirmationModal,
+  useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'
 import { TrackEditFormValues } from 'components/edit-track/types'
@@ -17,12 +19,8 @@ import { Header } from 'components/header/desktop/Header'
 import LoadingSpinnerFullPage from 'components/loading-spinner-full-page/LoadingSpinnerFullPage'
 import Page from 'components/page/Page'
 import { useIsUnauthorizedForHandleRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
-import { useReplaceTrackAudio } from 'hooks/useReplaceTrackAudio'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
-import { push } from 'utils/navigation'
-
-const { editTrack } = cacheTracksActions
 
 const messages = {
   title: 'Edit Your Track'
@@ -39,17 +37,22 @@ export const EditTrackPage = (props: EditPageProps) => {
   const params = useParams<{ handle?: string; slug?: string }>()
   const { handle } = params
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   useRequiresAccount()
   useIsUnauthorizedForHandleRedirect(handle ?? '')
   const { onOpen: openReplaceTrackConfirmation } =
     useReplaceTrackConfirmationModal()
-  const { replaceTrackAudio } = useReplaceTrackAudio()
+  const {
+    onOpen: openReplaceTrackProgress,
+    onClose: closeReplaceTrackProgress
+  } = useReplaceTrackProgressModal()
+  const { mutateAsync: updateTrack } = useUpdateTrack()
 
   const { data: track, status: trackStatus } = useTrackByParams(params)
 
   const { data: stemTracks = [] } = useStems(track?.track_id)
 
-  const onSubmit = (formValues: TrackEditFormValues) => {
+  const onSubmit = async (formValues: TrackEditFormValues) => {
     const metadata = { ...formValues.trackMetadatas[0] }
     const trackId = metadata.track_id
     if (!trackId) {
@@ -57,30 +60,56 @@ export const EditTrackPage = (props: EditPageProps) => {
       return
     }
 
-    const replaceFile =
-      'file' in formValues.tracks[0] ? formValues.tracks[0].file : null
+    // Extract the audio file if present
+    const audioFile =
+      'file' in formValues.tracks[0] ? formValues.tracks[0].file : undefined
 
-    if (
-      metadata.artwork &&
-      'file' in metadata.artwork &&
-      !metadata.artwork?.file
-    ) {
-      metadata.artwork = null
+    // Extract the cover art file if present
+    const imageFile =
+      metadata.artwork && 'file' in metadata.artwork && metadata.artwork.file
+        ? fileToSdk(metadata.artwork.file, 'cover_art')
+        : undefined
+
+    const editAndNavigate = async () => {
+      try {
+        await updateTrack({
+          trackId,
+          metadata,
+          audioFile,
+          imageFile,
+          onProgress: (type, progress) => {
+            if (type !== 'audio') return
+            dispatch(
+              replaceTrackProgressModalActions.set({
+                ...progress,
+                error: false
+              })
+            )
+          }
+        })
+        navigate(metadata.permalink)
+      } catch (err) {
+        dispatch(
+          replaceTrackProgressModalActions.set({
+            error: true,
+            loaded: 0,
+            total: 0,
+            transcode: 0
+          })
+        )
+      }
     }
 
-    if (replaceFile && replaceFile instanceof File) {
+    if (audioFile && audioFile instanceof File) {
       openReplaceTrackConfirmation({
-        confirmCallback: () => {
-          replaceTrackAudio({
-            trackId,
-            file: replaceFile,
-            metadata
-          })
+        confirmCallback: async () => {
+          openReplaceTrackProgress()
+          await editAndNavigate()
+          closeReplaceTrackProgress()
         }
       })
     } else {
-      dispatch(editTrack(trackId, metadata))
-      dispatch(push(metadata.permalink))
+      editAndNavigate()
     }
   }
 

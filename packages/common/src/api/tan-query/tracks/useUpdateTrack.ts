@@ -13,6 +13,7 @@ import { TrackMetadataForUpload } from '~/store/upload'
 
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { handleStemUpdates } from '../utils/handleStemUpdates'
 import { primeTrackData } from '../utils/primeTrackData'
 
@@ -27,7 +28,6 @@ type MutationContext = {
 
 export type UpdateTrackParams = {
   trackId: ID
-  userId: ID
   metadata: Partial<TrackMetadataForUpload>
   audioFile?: CrossPlatformFile
   imageFile?: CrossPlatformFile
@@ -40,11 +40,11 @@ export const useUpdateTrack = () => {
   const dispatch = useDispatch()
   const store = useStore()
   const { mutate: deleteTrack } = useDeleteTrack()
+  const { data: userId } = useCurrentUserId()
 
   return useMutation({
     mutationFn: async ({
       trackId,
-      userId,
       metadata,
       audioFile,
       imageFile,
@@ -120,11 +120,7 @@ export const useUpdateTrack = () => {
         queryKey: getTrackQueryKey(params.trackId)
       })
     },
-    onError: (
-      error,
-      { trackId, userId, metadata },
-      context?: MutationContext
-    ) => {
+    onError: (error, { trackId, metadata }, context?: MutationContext) => {
       // If the mutation fails, roll back track data
       if (context?.previousTrack) {
         primeTrackData({
