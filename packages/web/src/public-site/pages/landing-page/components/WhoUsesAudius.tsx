@@ -1,8 +1,6 @@
-// eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useCallback } from 'react'
 
-// eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
-import { useSpring, animated } from 'react-spring'
+import { useSpring, animated } from '@react-spring/web'
 
 import artistAluna from 'assets/img/publicSite/Artist-Aluna.webp'
 import artistDeadmau5 from 'assets/img/publicSite/Artist-Deadmau5.webp'
@@ -38,7 +36,11 @@ const Artist = (props: AristProps) => {
     >
       <div className={styles.artistContainer}>
         <div className={styles.artistImageWrapper}>
-          <animated.img src={props.imageUrl} className={styles.artistImage} />
+          <img
+            src={props.imageUrl}
+            className={styles.artistImage}
+            alt={props.name}
+          />
         </div>
         <div className={styles.artistName}>{props.name}</div>
       </div>
@@ -114,6 +116,7 @@ const artists = [
 
 type WhoUsesAudiusProps = {
   isMobile: boolean
+  setRenderPublicSite?: (shouldRender: boolean) => void
 }
 
 const WhoUsesAudius = (props: WhoUsesAudiusProps) => {
