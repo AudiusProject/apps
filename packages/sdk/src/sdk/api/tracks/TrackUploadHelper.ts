@@ -58,34 +58,44 @@ export class TrackUploadHelper extends BaseAPI {
   }
 
   public populateTrackMetadataWithUploadResponse(
-    trackMetadata: PlaylistTrackMetadata,
-    audioResponse: UploadResponse,
+    trackMetadata: Partial<PlaylistTrackMetadata>,
+    audioResponse?: UploadResponse,
     coverArtResponse?: UploadResponse
   ) {
-    return {
-      ...trackMetadata,
-      trackSegments: [],
-      trackCid: audioResponse.results['320'],
-      previewCid:
-        trackMetadata.previewStartSeconds !== undefined &&
-        trackMetadata.previewStartSeconds !== null
-          ? audioResponse.results[
-              `320_preview|${trackMetadata.previewStartSeconds}`
-            ]
-          : trackMetadata.previewCid,
-      origFileCid: audioResponse.orig_file_cid,
-      origFilename: audioResponse.orig_filename || trackMetadata.origFilename,
-      audioUploadId: audioResponse.id,
-      coverArtSizes: coverArtResponse?.id,
-      duration: parseInt(audioResponse.probe.format.duration, 10),
-      bpm: audioResponse.audio_analysis_results?.bpm
-        ? audioResponse.audio_analysis_results.bpm
-        : trackMetadata.bpm,
-      musicalKey: audioResponse.audio_analysis_results?.key
-        ? audioResponse.audio_analysis_results.key
-        : trackMetadata.musicalKey,
-      audioAnalysisErrorCount: audioResponse.audio_analysis_error_count || 0
+    let updated: Partial<PlaylistTrackMetadata> & { coverArtSizes?: string } = {
+      ...trackMetadata
     }
+    if (audioResponse) {
+      updated = {
+        ...updated,
+        trackCid: audioResponse.results['320'],
+        previewCid:
+          trackMetadata.previewStartSeconds !== undefined &&
+          trackMetadata.previewStartSeconds !== null
+            ? audioResponse.results[
+                `320_preview|${trackMetadata.previewStartSeconds}`
+              ]
+            : trackMetadata.previewCid,
+        origFileCid: audioResponse.orig_file_cid,
+        origFilename: audioResponse.orig_filename || trackMetadata.origFilename,
+        audioUploadId: audioResponse.id,
+        duration: parseInt(audioResponse?.probe?.format?.duration ?? '0', 10),
+        bpm: audioResponse.audio_analysis_results?.bpm
+          ? audioResponse.audio_analysis_results.bpm
+          : trackMetadata.bpm,
+        musicalKey: audioResponse.audio_analysis_results?.key
+          ? audioResponse.audio_analysis_results.key
+          : trackMetadata.musicalKey,
+        audioAnalysisErrorCount: audioResponse.audio_analysis_error_count || 0
+      }
+    }
+    if (coverArtResponse) {
+      updated = {
+        ...updated,
+        coverArtSizes: coverArtResponse.orig_file_cid
+      }
+    }
+    return updated
   }
 
   public extractMediorumUploadOptions(metadata: PlaylistTrackMetadata) {

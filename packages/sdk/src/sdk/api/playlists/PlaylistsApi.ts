@@ -422,8 +422,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   public async uploadPlaylistInternal<Metadata extends PlaylistMetadata>(
     {
       userId,
-      coverArtFile,
-      trackFiles,
+      imageFile,
+      audioFiles,
       onProgress,
       metadata,
       trackMetadatas
@@ -432,31 +432,54 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     },
     advancedOptions?: AdvancedOptions
   ) {
+    const progresses = audioFiles.map(() => 0)
     // Upload track audio and cover art to storage node
     const [coverArtResponse, ...audioResponses] = await Promise.all([
       retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: imageFile,
+              onProgress: (progress) =>
+                onProgress?.(
+                  progresses.reduce((a, b) => a + b, 0) / audioFiles.length,
+                  { ...progress, key: 'image' }
+                ),
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
       ),
-      ...trackFiles.map(
+      ...audioFiles.map(
         async (trackFile, idx) =>
           await retry3(
             async () =>
-              await this.storage.uploadFile({
-                file: trackFile,
-                onProgress,
-                template: 'audio',
-                options: this.trackUploadHelper.extractMediorumUploadOptions(
-                  trackMetadatas[idx]!
-                )
-              }),
+              await this.storage
+                .uploadFile({
+                  file: trackFile,
+                  onProgress: (progress) => {
+                    progresses[idx] =
+                      (progress.loaded / progress.total) * 0.5 +
+                      progress.transcode * 0.5
+                    const overallProgress =
+                      progresses.reduce((a, b) => a + b, 0) / audioFiles.length
+                    onProgress?.(overallProgress, {
+                      ...progress,
+                      key: idx
+                    })
+                  },
+                  metadata: {
+                    template: 'audio',
+                    ...this.trackUploadHelper.extractMediorumUploadOptions(
+                      trackMetadatas[idx]!
+                    )
+                  }
+                })
+                .start(),
             (e) => {
               this.logger.info('Retrying uploadTrackAudio', e)
             }
@@ -518,7 +541,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         trackId,
         timestamp
       })),
-      playlistImageSizesMultihash: coverArtResponse.id
+      playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 
     // Write playlist metadata to chain
@@ -549,7 +572,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     {
       userId,
       playlistId,
-      coverArtFile,
+      imageFile,
       onProgress,
       metadata
     }: z.infer<typeof UpdatePlaylistSchema> & {
@@ -559,14 +582,18 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     // Upload cover art to storage node
     const coverArtResponse =
-      coverArtFile &&
+      imageFile &&
       (await retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: imageFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
@@ -575,7 +602,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     const updatedMetadata = {
       ...metadata,
       ...(coverArtResponse
-        ? { playlistImageSizesMultihash: coverArtResponse.id }
+        ? { playlistImageSizesMultihash: coverArtResponse.orig_file_cid }
         : {})
     }
 
@@ -599,7 +626,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   public async createPlaylistInternal<Metadata extends PlaylistMetadata>(
     {
       userId,
-      coverArtFile,
+      imageFile,
       metadata,
       onProgress,
       trackIds,
@@ -609,14 +636,18 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     // Upload cover art to storage node
     const coverArtResponse =
-      coverArtFile &&
+      imageFile &&
       (await retry3(
         async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
+          await this.storage
+            .uploadFile({
+              file: imageFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start(),
         (e) => {
           this.logger.info('Retrying uploadPlaylistCoverArt', e)
         }
@@ -632,7 +663,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         trackId,
         timestamp
       })),
-      playlistImageSizesMultihash: coverArtResponse?.id ?? metadata.coverArtCid
+      playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 
     // Write playlist metadata to chain

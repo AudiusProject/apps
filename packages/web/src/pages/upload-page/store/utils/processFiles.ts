@@ -88,6 +88,7 @@ export const processFiles = (
     // @ts-ignore preview is present on `file` in the browser context
     audio.src = file.preview
     return {
+      clientId: crypto.randomUUID() as string,
       file,
       preview: audio,
       metadata: newTrackMetadata({

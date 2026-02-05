@@ -15,7 +15,7 @@ import {
 } from '../../services/EntityManager/types'
 import type { LoggerService } from '../../services/Logger'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
-import type { StorageService } from '../../services/Storage'
+import type { StorageService, UploadHandle } from '../../services/Storage'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { getLocation } from '../../utils/location'
 import { parseParams } from '../../utils/parseParams'
@@ -56,7 +56,12 @@ import {
   UpdateTrackSchema,
   UploadTrackFilesSchema,
   ShareTrackSchema,
-  ShareTrackRequest
+  ShareTrackRequest,
+  type PublishTrackRequest,
+  PublishTrackSchema,
+  type PublishStemRequest,
+  PublishStemSchema,
+  type UploadTrackFilesTask
 } from './types'
 
 // Extend that new class
@@ -149,60 +154,144 @@ export class TracksApi extends GeneratedTracksApi {
   /** @hidden
    * Upload track files, does not write to chain
    */
-  async uploadTrackFiles(params: UploadTrackFilesRequest) {
-    // Parse inputs
-    this.logger.info('Parsing inputs')
+  uploadTrackFiles(params: UploadTrackFilesRequest): UploadTrackFilesTask {
+    let audioUpload: UploadHandle | null = null
+    let imageUpload: UploadHandle | null = null
+    let totalProgressPercentage = 0
+    return {
+      start: async () => {
+        const { audioFile, imageFile, fileMetadata, onProgress } =
+          await parseParams('uploadTrackFiles', UploadTrackFilesSchema)(params)
+
+        imageUpload = imageFile
+          ? this.storage.uploadFile({
+              file: imageFile,
+              onProgress: (progress) =>
+                onProgress?.(totalProgressPercentage, {
+                  key: 'image',
+                  ...progress
+                }),
+              metadata: {
+                template: 'img_square',
+                filename: imageFile.name ?? undefined,
+                filetype: imageFile.type ?? undefined
+              }
+            })
+          : null
+
+        audioUpload = audioFile
+          ? this.storage.uploadFile({
+              file: audioFile,
+              onProgress: (progress) => {
+                // Only audio affects the total progress
+                totalProgressPercentage =
+                  (progress.loaded / progress.total) * 0.5 +
+                  progress.transcode * 0.5
+                onProgress?.(totalProgressPercentage, {
+                  key: 'audio',
+                  ...progress
+                })
+              },
+              metadata: {
+                template: 'audio',
+                filename: audioFile.name ?? undefined,
+                filetype: audioFile.type ?? undefined,
+                placementHosts: fileMetadata?.placementHosts,
+                previewStartSeconds: fileMetadata?.previewStartSeconds
+              }
+            })
+          : null
+        const [audioUploadResponse, imageUploadResponse] = await Promise.all([
+          audioUpload?.start(),
+          imageUpload?.start()
+        ])
+        this.logger.info('Successfully uploaded track files')
+        return { audioUploadResponse, imageUploadResponse }
+      },
+      abort: (shouldTerminate?: boolean) => {
+        audioUpload?.abort(shouldTerminate)
+        imageUpload?.abort(shouldTerminate)
+      }
+    }
+  }
+
+  /** @hidden
+   * Publishes a track that was uploaded using storage node uploadFileV2 uploads.
+   */
+  async publishTrack(
+    params: PublishTrackRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
     const {
       userId,
-      trackFile,
-      coverArtFile,
       metadata: parsedMetadata,
-      onProgress
-    } = await parseParams('uploadTrackFiles', UploadTrackFilesSchema)(params)
+      audioUploadResponse,
+      imageUploadResponse
+    } = await parseParams('publishTrack', PublishTrackSchema)(params)
 
-    // Transform metadata
-    this.logger.info('Transforming metadata')
     const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
       parsedMetadata,
       userId
     )
 
-    // Upload track audio and cover art to storage node
-    this.logger.info('Uploading track audio and cover art')
-    const [coverArtResponse, audioResponse] = await Promise.all([
-      coverArtFile
-        ? retry3(
-            async () =>
-              await this.storage.uploadFile({
-                file: coverArtFile,
-                onProgress,
-                template: 'img_square'
-              }),
-            (e) => {
-              this.logger.info('Retrying uploadTrackCoverArt', e)
-            }
-          )
-        : Promise.resolve(undefined),
-      retry3(
-        async () =>
-          await this.storage.uploadFile({
-            file: trackFile,
-            onProgress,
-            template: 'audio',
-            options:
-              this.trackUploadHelper.extractMediorumUploadOptions(metadata)
-          }),
-        (e) => {
-          this.logger.info('Retrying uploadTrackAudio', e)
-        }
+    const populatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse,
+        imageUploadResponse
       )
-    ])
 
-    // Update metadata to include uploaded CIDs
-    return this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
-      metadata,
-      audioResponse,
-      coverArtResponse
+    return this.writeTrackToChain(
+      params.userId,
+      populatedMetadata,
+      advancedOptions
+    )
+  }
+
+  /** @hidden
+   * Publishes a stem that was uploaded using storage node uploadFileV2 uploads.
+   */
+  async publishStem(
+    params: PublishStemRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const {
+      userId,
+      metadata: parsedMetadata,
+      audioUploadResponse
+    } = await parseParams('publishStem', PublishStemSchema)(params)
+
+    const trackMetadata = {
+      title: audioUploadResponse.orig_filename || 'Untitled Stem',
+      isStreamGated: false,
+      streamConditions: undefined,
+      isUnlisted: false,
+      fieldVisibility: {
+        genre: false,
+        mood: false,
+        tags: false,
+        share: false,
+        playCount: false
+      },
+      isDownloadable: true,
+      stemOf: parsedMetadata
+    }
+
+    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      trackMetadata,
+      userId
+    )
+
+    const populatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse
+      )
+
+    return this.writeTrackToChain(
+      params.userId,
+      populatedMetadata,
+      advancedOptions
     )
   }
 
@@ -237,6 +326,7 @@ export class TracksApi extends GeneratedTracksApi {
         cid: '',
         data: {
           ...snakecaseKeys(metadata),
+          owner_id: decodedUserId,
           download_conditions:
             metadata.downloadConditions &&
             snakecaseKeys(metadata.downloadConditions),
@@ -256,7 +346,7 @@ export class TracksApi extends GeneratedTracksApi {
     }
   }
 
-  /** @hidden
+  /**
    * Upload a track
    */
   async uploadTrack(
@@ -267,12 +357,23 @@ export class TracksApi extends GeneratedTracksApi {
     await parseParams('uploadTrack', UploadTrackSchema)(params)
 
     // Upload track files
-    const metadata = await this.uploadTrackFiles(
-      params as UploadTrackFilesRequest
-    )
+    const { audioUploadResponse, imageUploadResponse } =
+      await this.uploadTrackFiles(params as UploadTrackFilesRequest).start()
+
+    if (!audioUploadResponse || !imageUploadResponse) {
+      throw new Error('uploadTrack: Missing upload responses')
+    }
 
     // Write track metadata to chain
-    return this.writeTrackToChain(params.userId, metadata, advancedOptions)
+    return this.publishTrack(
+      {
+        userId: params.userId,
+        metadata: params.metadata,
+        audioUploadResponse,
+        imageUploadResponse
+      },
+      advancedOptions
+    )
   }
 
   /** @hidden
@@ -286,7 +387,8 @@ export class TracksApi extends GeneratedTracksApi {
     const {
       userId,
       trackId,
-      coverArtFile,
+      audioFile,
+      imageFile,
       metadata: parsedMetadata,
       onProgress,
       generatePreview
@@ -298,28 +400,28 @@ export class TracksApi extends GeneratedTracksApi {
       userId
     )
 
-    // Upload track cover art to storage node
-    const coverArtResp =
-      coverArtFile &&
-      (await retry3(
-        async () =>
-          await this.storage.uploadFile({
-            file: coverArtFile,
-            onProgress,
-            template: 'img_square'
-          }),
-        (e) => {
-          this.logger.info('Retrying uploadTrackCoverArt', e)
-        }
-      ))
+    const { audioUploadResponse, imageUploadResponse } =
+      await this.uploadTrackFiles({
+        audioFile,
+        imageFile,
+        fileMetadata: {
+          placementHosts: parsedMetadata.placementHosts,
+          previewStartSeconds: parsedMetadata.previewStartSeconds
+        },
+        onProgress
+      }).start()
 
     // Update metadata to include uploaded CIDs
-    const updatedMetadata = {
-      ...metadata,
-      ...(coverArtResp ? { coverArtSizes: coverArtResp.id } : {})
-    }
+    const updatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse,
+        imageUploadResponse
+      )
 
-    if (generatePreview) {
+    // Generate preview if requested and no audio file was uploaded
+    // (as that would handle the preview generation already)
+    if (generatePreview && !audioFile) {
       if (updatedMetadata.previewStartSeconds === undefined) {
         throw new Error('No track preview start time specified')
       }
@@ -327,7 +429,6 @@ export class TracksApi extends GeneratedTracksApi {
         throw new Error('Missing required audio_upload_id')
       }
 
-      // Generate track preview
       const previewCid = await retry3(
         async () =>
           await this.storage.generatePreview({

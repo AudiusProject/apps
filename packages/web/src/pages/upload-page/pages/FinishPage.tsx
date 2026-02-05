@@ -21,7 +21,9 @@ import {
   IconValidationCheck,
   Text,
   PlainButton,
-  ProgressBar
+  ProgressBar,
+  Box,
+  Flex
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
@@ -58,7 +60,7 @@ const ProgressIndicator = (props: { status?: ProgressStatus }) => {
     case ProgressStatus.COMPLETE:
       return <IconValidationCheck className={styles.progressIndicator} />
     case ProgressStatus.ERROR:
-      return <IconError className={styles.progressIndicator} />
+      return <IconError className={styles.progressIndicator} color='danger' />
     default:
       return <div className={styles.emptyProgressIndicator} />
   }
@@ -86,18 +88,42 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
       ? track.metadata.artwork?.url
       : null
 
+  const hasStems = trackProgress?.stems && trackProgress.stems.length > 0
+
   return (
-    <div className={styles.uploadTrackItem} {...otherProps}>
-      <ProgressIndicator status={trackProgress?.audio?.status} />
-      {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
-      {displayArtwork ? (
-        <DynamicImage
-          wrapperClassName={styles.trackItemArtwork}
-          image={artworkUrl || placeholderArt}
-        />
+    <Box>
+      <Flex gap='m' alignItems='center' p='s' {...otherProps}>
+        <ProgressIndicator status={trackProgress?.audio?.status} />
+        {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
+        {displayArtwork ? (
+          <DynamicImage
+            wrapperClassName={styles.trackItemArtwork}
+            image={artworkUrl || placeholderArt}
+          />
+        ) : null}
+        <Text size='s'>{track.metadata.title}</Text>
+      </Flex>
+      {hasStems ? (
+        <Box ml='3xl'>
+          {trackProgress.stems.map((stemProgress, stemIdx) => {
+            const stemMetadata = track.metadata.stems?.[stemIdx]
+            const stemCategory = stemMetadata?.category || 'stem'
+            const stemFile =
+              stemMetadata && 'file' in stemMetadata ? stemMetadata.file : null
+            const stemFileName = stemFile?.name || stemMetadata?.metadata?.title
+            return (
+              <Flex key={stemIdx} gap='m' alignItems='center' p='s' pl='xl'>
+                <ProgressIndicator status={stemProgress?.audio?.status} />
+                <Text size='s' color='subdued'>
+                  {stemCategory.charAt(0).toUpperCase() + stemCategory.slice(1)}
+                  {stemFileName ? ` - ${stemFileName}` : ''}
+                </Text>
+              </Flex>
+            )
+          })}
+        </Box>
       ) : null}
-      <Text size='s'>{track.metadata.title}</Text>
-    </div>
+    </Box>
   )
 }
 
@@ -128,8 +154,8 @@ export const FinishPage = (props: FinishPageProps) => {
     return upload.uploadProgress.reduce((acc, progress) => {
       return (
         acc &&
-        (progress.art.status === ProgressStatus.COMPLETE ||
-          progress.art.status === ProgressStatus.ERROR) &&
+        (progress.image.status === ProgressStatus.COMPLETE ||
+          progress.image.status === ProgressStatus.ERROR) &&
         (progress.audio.status === ProgressStatus.COMPLETE ||
           progress.audio.status === ProgressStatus.ERROR)
       )
@@ -149,29 +175,28 @@ export const FinishPage = (props: FinishPageProps) => {
       case UploadType.PLAYLIST:
         return messages.visitPlaylist
       default:
-        if (!upload.tracks || upload.tracks.length > 1) {
+        if (!formState.tracks || formState.tracks.length > 1) {
           return messages.visitProfile
         } else {
           return messages.visitTrack
         }
     }
-  }, [upload.tracks, uploadType])
+  }, [formState.tracks, uploadType])
 
   const visitButtonPath = useUploadCompletionRoute({
+    id: upload.completionId,
     uploadType,
-    upload,
-    accountHandle: accountHandle as string | null
+    accountHandle: accountHandle!
   })
 
   const handleViewUpload = useCallback(() => {
     dispatch(make(Name.TRACK_UPLOAD_VIEW_TRACK_PAGE, { uploadType }))
-    onContinue()
-  }, [dispatch, uploadType, onContinue])
+  }, [dispatch, uploadType])
 
   const isUnlistedTrack =
-    (upload.tracks &&
-      upload.tracks.length === 1 &&
-      upload.tracks[0].metadata.is_unlisted) ??
+    (formState.tracks &&
+      formState.tracks.length === 1 &&
+      formState.tracks[0].metadata.is_unlisted) ??
     false
 
   return (

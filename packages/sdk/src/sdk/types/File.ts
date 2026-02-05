@@ -67,6 +67,9 @@ const getFileType = async (file: CrossPlatformFile) => {
   let fileTypeBrowser: any
   if (typeof window !== 'undefined' && window) {
     fileTypeBrowser = await import('file-type/browser')
+    if ('default' in fileTypeBrowser) {
+      fileTypeBrowser = fileTypeBrowser.default
+    }
   }
 
   if (isNodeFile(file)) {

@@ -14,7 +14,6 @@ import { TOKEN_LISTING_MAP } from '~/store'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
-import { QueryOptions } from '../types'
 
 type TokenAccount = {
   account: string
@@ -122,7 +121,7 @@ export const useExternalWalletBalance = (
     walletAddress,
     mint
   }: { walletAddress: string | undefined; mint: string | undefined },
-  options?: QueryOptions
+  options?: Partial<ReturnType<typeof getExternalWalletBalanceOptions>>
 ) => {
   const context = useQueryContext()
 

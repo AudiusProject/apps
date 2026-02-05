@@ -2,14 +2,7 @@ import { NativeFile } from '@audius/sdk'
 
 import { CollectionValues } from '~/schemas'
 
-import {
-  Collection,
-  CollectionMetadata,
-  StemUpload,
-  StemUploadWithFile,
-  Track,
-  TrackMetadata
-} from '../../models'
+import { StemUpload, StemUploadWithFile, TrackMetadata } from '../../models'
 import { Nullable } from '../../utils/typeUtils'
 
 export enum UploadType {
@@ -23,6 +16,7 @@ export enum UploadType {
  * Represents a track file, its metadata prior to upload, and a preview.
  */
 export interface TrackForUpload {
+  clientId: string
   file: File | NativeFile
   preview?: any // Basically the Howler.js API, but with underscores.
   metadata: TrackMetadataForUpload
@@ -61,25 +55,6 @@ export interface TrackMetadataForUpload
    */
   track_id?: number
 }
-/**
- * Unlike normal CollectionMetadata, CollectionMetadataForUpload has artwork
- * and track details to be passed to its descendant tracks.
- */
-export interface CollectionMetadataForUpload
-  extends Omit<CollectionMetadata, 'artwork'> {
-  artwork?:
-    | Nullable<{
-        file?: Blob | NativeFile
-        url: string
-        source?: string
-      }>
-    | CollectionMetadata['artwork']
-  trackDetails: {
-    genre: string
-    mood: string
-    tags: string
-  }
-}
 
 export enum ProgressStatus {
   /** The file is being uploaded to the storage node. */
@@ -104,8 +79,9 @@ export type Progress = {
 }
 
 export type ProgressState = {
-  /** The progress of the artwork upload. */
-  art: Progress
+  clientId: string
+  /** The progress of the image upload. */
+  image: Progress
   /** The progress of the audio track upload. */
   audio: Progress
   /** Nested progress for a track's stems (audio only). */
@@ -136,7 +112,6 @@ export type UploadFormState =
 
 type UploadStateBase = {
   openMultiTrackNotification: boolean
-  tracks: Nullable<TrackForUpload[]>
   metadata: Nullable<CollectionValues>
   uploading: boolean
   uploadProgress: Nullable<ProgressState[]>
@@ -150,12 +125,10 @@ type UploadStateBase = {
 
 type UploadStateForTracks = UploadStateBase & {
   uploadType: UploadType.INDIVIDUAL_TRACK | UploadType.INDIVIDUAL_TRACKS | null
-  completedEntity?: Track
 }
 
 type UploadStateForCollection = UploadStateBase & {
   uploadType: UploadType.ALBUM | UploadType.PLAYLIST | null
-  completedEntity?: Collection
 }
 
 /** The type for the upload reducer state of the store. */

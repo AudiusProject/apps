@@ -179,7 +179,7 @@ function* confirmEditPlaylist(
 
         if (formFields.is_album) {
           yield* call([sdk.albums, sdk.albums.updateAlbum], {
-            coverArtFile: coverArtFile
+            imageFile: coverArtFile
               ? fileToSdk(coverArtFile, 'cover_art')
               : undefined,
             metadata: albumMetadataForUpdateWithSDK(formFields),
@@ -188,7 +188,7 @@ function* confirmEditPlaylist(
           })
         } else {
           yield* call([sdk.playlists, sdk.playlists.updatePlaylist], {
-            coverArtFile: coverArtFile
+            imageFile: coverArtFile
               ? fileToSdk(coverArtFile, 'cover_art')
               : undefined,
             metadata: playlistMetadataForUpdateWithSDK(formFields),
@@ -310,7 +310,7 @@ function* confirmRemoveTrackFromPlaylist(
           metadata: playlistMetadataForUpdateWithSDK(playlist),
           userId: Id.parse(userId),
           playlistId: Id.parse(playlistId),
-          coverArtFile: coverArtFile
+          imageFile: coverArtFile
             ? fileToSdk(coverArtFile, 'cover_art')
             : undefined
         })

@@ -49,13 +49,6 @@
   padding: 16px;
 }
 
-.uploadTrackItem {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 8px;
-}
-
 .trackItemArtwork {
   height: 40px;
   width: 40px;
@@ -74,8 +67,4 @@
 .progressIndicator {
   height: 16px;
   width: 16px;
-}
-
-.visitLink:hover {
-  text-decoration: none !important;
 }

@@ -2,7 +2,7 @@ import { NativeFile } from '@audius/sdk'
 
 import { CollectionValues } from '~/schemas'
 
-import { Collection, ID, Track } from '../../models'
+import { ID } from '../../models'
 
 import {
   Progress,
@@ -54,23 +54,10 @@ export const uploadTracksRequested = (payload: UploadPayload) => {
   }
 }
 
-export const uploadTracksSucceeded = ({
-  id,
-  trackMetadatas,
-  completedEntity,
-  uploadType
-}: {
-  id: number | null
-  trackMetadatas: Partial<Track>[]
-  completedEntity: Track | Collection
-  uploadType: UploadType
-}) => {
+export const uploadTracksSucceeded = (payload: { id: number | null }) => {
   return {
     type: UPLOAD_TRACKS_SUCCEEDED,
-    id: id ?? null,
-    trackMetadatas,
-    completedEntity,
-    uploadType
+    ...payload
   }
 }
 
@@ -79,9 +66,9 @@ export const uploadTracksFailed = () => {
 }
 
 export const updateProgress = (payload: {
-  trackIndex: number
+  clientId: string
   stemIndex: number | null
-  key: 'audio' | 'art'
+  key: 'audio' | 'image'
   progress: Progress
 }) => {
   return { type: UPDATE_PROGRESS, payload }

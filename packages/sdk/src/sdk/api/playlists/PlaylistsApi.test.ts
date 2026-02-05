@@ -30,25 +30,28 @@ vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../generated/default/apis/PlaylistsApi')
 
-vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(async () => {
-  return {
-    id: 'a',
-    status: 'done',
-    results: {
-      '320': 'a'
-    },
-    orig_file_cid:
-      'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
-    orig_filename: 'file.wav',
-    probe: {
-      format: {
-        duration: '10'
-      }
-    },
-    audio_analysis_error_count: 0,
-    audio_analysis_results: {}
-  }
-})
+vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
+  start: async () => {
+    return {
+      id: 'a',
+      status: 'done',
+      results: {
+        '320': 'a'
+      },
+      orig_file_cid:
+        'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
+      orig_filename: 'file.wav',
+      probe: {
+        format: {
+          duration: '10'
+        }
+      },
+      audio_analysis_error_count: 0,
+      audio_analysis_results: {}
+    }
+  },
+  abort: () => {}
+}))
 
 vitest
   .spyOn(TrackUploadHelper.prototype, 'generateId' as any)
@@ -127,7 +130,7 @@ describe('PlaylistsApi', () => {
     it('creates a playlist if valid metadata is provided', async () => {
       const result = await playlists.createPlaylist({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -148,7 +151,7 @@ describe('PlaylistsApi', () => {
       await expect(async () => {
         await playlists.createPlaylist({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -163,7 +166,7 @@ describe('PlaylistsApi', () => {
     it('uploads a playlist if valid metadata is provided', async () => {
       const result = await playlists.uploadPlaylist({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -177,7 +180,7 @@ describe('PlaylistsApi', () => {
             title: 'BachGavotte'
           }
         ],
-        trackFiles: [
+        audioFiles: [
           {
             buffer: wavFile,
             name: 'trackArt'
@@ -196,7 +199,7 @@ describe('PlaylistsApi', () => {
       await expect(async () => {
         await playlists.uploadPlaylist({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -206,7 +209,7 @@ describe('PlaylistsApi', () => {
               title: 'BachGavotte'
             }
           ],
-          trackFiles: [
+          audioFiles: [
             {
               buffer: wavFile,
               name: 'trackArt'
@@ -291,7 +294,7 @@ describe('PlaylistsApi', () => {
       const result = await playlists.updatePlaylist({
         userId: '7eP5n',
         playlistId: 'x5pJ3Aj',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -313,7 +316,7 @@ describe('PlaylistsApi', () => {
         await playlists.updatePlaylist({
           userId: '7eP5n',
           playlistId: 'x5pJ3Aj',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },

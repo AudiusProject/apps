@@ -21,7 +21,6 @@ import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { queryCurrentUserId, queryUser } from '../saga-utils'
-import { QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUser } from '../users/useUser'
 
@@ -171,12 +170,17 @@ type UseAudioBalanceParams = {
   userId?: ID
 }
 
+export type UseAudioBalanceOptions = Omit<
+  Partial<ReturnType<typeof getWalletAudioBalanceOptions>>,
+  'queryKey' | 'queryFn'
+>
+
 /**
  * Hook for getting the AUDIO balance of the current user, optionally including connected wallets.
  */
 export const useAudioBalance = (
   params: UseAudioBalanceParams = {},
-  options?: QueryOptions
+  options?: UseAudioBalanceOptions
 ) => {
   const {
     includeConnectedWallets: includeConnectedWalletsParam = true,

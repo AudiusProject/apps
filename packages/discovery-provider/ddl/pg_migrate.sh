@@ -154,7 +154,7 @@ migrate() {
 
         migrate_dir "utils"
         migrate_dir "migrations"
-        migrate_dir "functions"
+        #migrate_dir "functions"
 
         # "preflight" files run before server starts
         # to satisfy any necessary preconditions (e.g. inserting initial block)

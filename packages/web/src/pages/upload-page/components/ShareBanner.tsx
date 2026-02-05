@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
+import { useUploadCompletionRoute } from '@audius/common/hooks'
 import { Name, ShareSource } from '@audius/common/models'
 import {
   UploadType,
@@ -59,7 +60,7 @@ export const ShareBanner = (props: ShareBannerProps) => {
     if (!accountUser) return
     switch (uploadType) {
       case UploadType.INDIVIDUAL_TRACK: {
-        const trackId = upload.tracks?.[0].metadata.track_id
+        const trackId = upload.completionId
         if (!trackId) return
         dispatch(
           requestOpenShareModal({
@@ -94,39 +95,26 @@ export const ShareBanner = (props: ShareBannerProps) => {
         break
       }
     }
-  }, [accountUser, dispatch, upload.completionId, upload.tracks, uploadType])
+  }, [accountUser, dispatch, upload.completionId, uploadType])
+
+  const shareLink = useUploadCompletionRoute({
+    id: upload.completionId,
+    uploadType,
+    accountHandle: accountUser?.handle || ''
+  })
 
   const handleShareToDirectMessage = useCallback(async () => {
     if (!accountUser) return
-    let permalink: string | undefined
-    switch (uploadType) {
-      case UploadType.INDIVIDUAL_TRACK:
-        permalink = upload.tracks?.[0].metadata.permalink
-        break
-      case UploadType.INDIVIDUAL_TRACKS:
-        permalink = accountUser.handle
-        break
-      case UploadType.ALBUM:
-      case UploadType.PLAYLIST:
-        permalink = upload.completedEntity?.permalink
-        break
-    }
 
     dispatch(
       openCreateChatModal({
         // Just care about the link
-        presetMessage: permalink ? getCopyableLink(`/${permalink}`) : undefined,
+        presetMessage: shareLink ? getCopyableLink(shareLink) : undefined,
         defaultUserList: 'chats'
       })
     )
     dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'upload' }))
-  }, [
-    accountUser,
-    dispatch,
-    upload.completedEntity?.permalink,
-    upload.tracks,
-    uploadType
-  ])
+  }, [accountUser, dispatch, shareLink])
 
   return (
     <div

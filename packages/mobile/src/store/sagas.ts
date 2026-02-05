@@ -48,7 +48,6 @@ import queueSagas from 'common/store/queue/sagas'
 import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import socialSagas from 'common/store/social/sagas'
-import uploadSagas from 'common/store/upload/sagas'
 import { all, spawn } from 'typed-redux-saga'
 
 import collectionsSagas from 'app/store/cache/collections/sagas'
@@ -141,7 +140,6 @@ export default function* rootSaga() {
     ...shareModalSagas(),
     ...themeSagas(),
     ...tokenDashboardSagas(),
-    ...uploadSagas(),
     ...offlineDownloadSagas(),
     ...reachabilitySagas(),
     ...toastSagas(),

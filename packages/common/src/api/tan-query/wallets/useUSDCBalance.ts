@@ -27,6 +27,11 @@ export const getUSDCBalanceQueryKey = (
     commitment
   ] as unknown as QueryKey<UsdcWei | null>
 
+export type UseUSDCBalanceOptions<TResult> = SelectableQueryOptions<
+  UsdcWei | null,
+  TResult
+>
+
 /**
  * Hook to get the USDC balance for the current user.
  * Uses TanStack Query for data fetching and caching.
@@ -43,7 +48,7 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
   isPolling?: boolean
   pollingInterval?: number
   commitment?: Commitment
-} & SelectableQueryOptions<UsdcWei | null, TResult> = {}) => {
+} & UseUSDCBalanceOptions<TResult> = {}) => {
   const { audiusSdk } = useQueryContext()
   const { data: user } = useCurrentAccountUser()
   const ethAddress = user?.wallet ?? null

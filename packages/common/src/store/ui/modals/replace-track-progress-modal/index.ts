@@ -1,10 +1,10 @@
 import { createModal } from '../createModal'
 
 export type ReplaceTrackProgressModalState = {
-  progress: {
-    upload: number
-    transcode: number
-  }
+  loaded?: number
+  total?: number
+  transcode?: number
+
   error: boolean
 }
 
@@ -12,10 +12,9 @@ const replaceTrackProgressModal = createModal<ReplaceTrackProgressModalState>({
   reducerPath: 'ReplaceTrackProgress',
   initialState: {
     isOpen: false,
-    progress: {
-      upload: 0,
-      transcode: 0
-    },
+    loaded: 0,
+    total: 0,
+    transcode: 0,
     error: false
   },
   sliceSelector: (state) => state.ui.modals

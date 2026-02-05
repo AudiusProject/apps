@@ -187,7 +187,7 @@ function* confirmAddTrackToPlaylist(
           metadata: playlistMetadataForUpdateWithSDK(playlist),
           userId: Id.parse(userId),
           playlistId: Id.parse(playlistId),
-          coverArtFile: coverArtFile
+          imageFile: coverArtFile
             ? fileToSdk(coverArtFile, 'cover_art')
             : undefined
         })

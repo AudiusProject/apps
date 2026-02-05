@@ -42,23 +42,26 @@ vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../generated/default/apis/PlaylistsApi')
 
-vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(async () => {
+vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => {
   return {
-    id: 'a',
-    status: 'done',
-    results: {
-      '320': 'a'
-    },
-    orig_file_cid:
-      'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
-    orig_filename: 'file.wav',
-    probe: {
-      format: {
-        duration: '10'
-      }
-    },
-    audio_analysis_error_count: 0,
-    audio_analysis_results: {}
+    start: async () => ({
+      id: 'a',
+      status: 'done',
+      results: {
+        '320': 'a'
+      },
+      orig_file_cid:
+        'baeaaaiqsea7fukrfrjrugqts6jqfmqhcb5ruc5pjmdk3anj7amoht4d4gemvq',
+      orig_filename: 'file.wav',
+      probe: {
+        format: {
+          duration: '10'
+        }
+      },
+      audio_analysis_error_count: 0,
+      audio_analysis_results: {}
+    }),
+    abort: () => {}
   }
 })
 
@@ -163,7 +166,7 @@ describe('AlbumsApi', () => {
     it('uploads an album if valid metadata is provided', async () => {
       const result = await albums.uploadAlbum({
         userId: '7eP5n',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -177,7 +180,7 @@ describe('AlbumsApi', () => {
             title: 'BachGavotte'
           }
         ],
-        trackFiles: [
+        audioFiles: [
           {
             buffer: wavFile,
             name: 'trackArt'
@@ -196,7 +199,7 @@ describe('AlbumsApi', () => {
       await expect(async () => {
         await albums.uploadAlbum({
           userId: '7eP5n',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
@@ -206,7 +209,7 @@ describe('AlbumsApi', () => {
               title: 'BachGavotte'
             }
           ],
-          trackFiles: [
+          audioFiles: [
             {
               buffer: wavFile,
               name: 'trackArt'
@@ -222,7 +225,7 @@ describe('AlbumsApi', () => {
       const result = await albums.updateAlbum({
         userId: '7eP5n',
         albumId: 'x5pJ3Aj',
-        coverArtFile: {
+        imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
@@ -244,7 +247,7 @@ describe('AlbumsApi', () => {
         await albums.updateAlbum({
           userId: '7eP5n',
           albumId: 'x5pJ3Aj',
-          coverArtFile: {
+          imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },

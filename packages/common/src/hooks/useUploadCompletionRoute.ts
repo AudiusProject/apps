@@ -1,39 +1,39 @@
-import { useMemo } from 'react'
-
-import { UploadState, UploadType } from '~/store'
+import { useCollection } from '~/api'
+import { useTrack } from '~/api/tan-query/tracks/useTrack'
+import { UploadType } from '~/store'
 import { collectionPage, profilePage } from '~/utils/route'
 
 export const useUploadCompletionRoute = ({
+  id,
   uploadType,
-  upload,
   accountHandle
 }: {
+  id: number | null | undefined
   uploadType: UploadType
-  upload: UploadState
-  accountHandle: string | undefined | null
+  accountHandle: string
 }) => {
-  const route = useMemo(() => {
-    switch (uploadType) {
-      case UploadType.INDIVIDUAL_TRACK:
-        return upload.tracks?.[0].metadata.permalink
-      case UploadType.ALBUM:
-      case UploadType.PLAYLIST:
-        return upload.completedEntity
-          ? collectionPage(
-              null,
-              null,
-              null,
-              upload.completedEntity.permalink,
-              uploadType === UploadType.ALBUM
-            )
-          : ''
-      default:
-        if (accountHandle && (!upload.tracks || upload.tracks.length > 1)) {
-          return profilePage(accountHandle)
-        } else {
-          return upload.tracks?.[0].metadata.permalink
-        }
-    }
-  }, [upload.completedEntity, upload.tracks, uploadType, accountHandle])
-  return route
+  const { data: track } = useTrack(id!, {
+    enabled:
+      !!id &&
+      (uploadType === UploadType.INDIVIDUAL_TRACK ||
+        uploadType === UploadType.INDIVIDUAL_TRACKS)
+  })
+  const { data: collection } = useCollection(id!, {
+    enabled:
+      !!id &&
+      (uploadType === UploadType.ALBUM || uploadType === UploadType.PLAYLIST)
+  })
+  if (track) {
+    return track.permalink
+  }
+  if (collection) {
+    return collectionPage(
+      null,
+      null,
+      null,
+      collection.permalink,
+      uploadType === UploadType.ALBUM
+    )
+  }
+  return profilePage(accountHandle)
 }

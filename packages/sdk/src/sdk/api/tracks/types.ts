@@ -2,7 +2,7 @@ import type { WalletAdapter } from '@solana/wallet-adapter-base'
 import { z } from 'zod'
 
 import { PublicKeySchema } from '../../services/Solana'
-import { ProgressHandler } from '../../services/Storage/types'
+import { ProgressEventSchema } from '../../services/Storage/types'
 import {
   DDEXResourceContributor,
   DDEXCopyright,
@@ -83,6 +83,13 @@ export const USDCPurchaseConditions = z
   })
   .strict()
 
+export const UploadStemMetadataSchema = z.object({
+  category: z
+    .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
+    .default(StemCategory.OTHER),
+  parentTrackId: HashId
+})
+
 export const UploadTrackMetadataSchema = z.object({
   trackId: z.optional(HashId),
   aiAttributionUserId: z.optional(HashId),
@@ -149,14 +156,7 @@ export const UploadTrackMetadataSchema = z.object({
       })
       .strict()
   ),
-  stemOf: z.optional(
-    z.object({
-      category: z
-        .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
-        .default(StemCategory.OTHER),
-      parentTrackId: HashId
-    })
-  ),
+  stemOf: z.optional(UploadStemMetadataSchema.strict()),
   tags: z.optional(z.string()),
   title: z.string({
     required_error: messages.titleRequiredError
@@ -193,13 +193,43 @@ export const UploadTrackMetadataSchema = z.object({
 
 export type TrackMetadata = z.input<typeof UploadTrackMetadataSchema>
 
+export const UploadTrackFilesProgressEventSchema = ProgressEventSchema.extend({
+  /**
+   * Whether the event is for the audio or image file
+   */
+  key: z.enum(['audio', 'image'])
+})
+
+/**
+ * The progress event emitted during track file uploads
+ */
+type UploadTrackFilesProgressEvent = z.input<
+  typeof UploadTrackFilesProgressEventSchema
+>
+
+export const UploadTrackFilesProgressHandlerSchema = z
+  .function()
+  .args(z.number(), UploadTrackFilesProgressEventSchema)
+  .returns(z.void())
+
+export type UploadTrackFilesProgressHandler = (
+  /**
+   * Overall progress percentage (0-1)
+   */
+  progress: number,
+  /**
+   * The progress event
+   */
+  event: UploadTrackFilesProgressEvent
+) => void
+
 export const UploadTrackSchema = z
   .object({
     userId: HashId,
-    coverArtFile: ImageFile,
+    audioFile: AudioFile,
+    imageFile: ImageFile,
     metadata: UploadTrackMetadataSchema.strict(),
-    onProgress: z.optional(z.function()),
-    trackFile: AudioFile
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
 
@@ -209,24 +239,22 @@ export type UploadTrackRequest = Omit<
 > & {
   // Typing function manually because z.function() does not
   // support argument names
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const UploadTrackFilesSchema = z
   .object({
-    userId: HashId,
-    coverArtFile: z.optional(ImageFile),
-    metadata: UploadTrackMetadataSchema.extend({
-      genre: z.optional(z.enum(Object.values(Genre) as [Genre, ...Genre[]]))
-    }).strict(),
-    onProgress: z.optional(z.function()),
-    trackFile: AudioFile
+    audioFile: z.optional(AudioFile),
+    imageFile: z.optional(ImageFile),
+    fileMetadata: z
+      .object({
+        placementHosts: z.string().optional(),
+        previewStartSeconds: z.number().optional()
+      })
+      .optional(),
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
-
-export type TrackFilesMetadata = z.input<
-  typeof UploadTrackFilesSchema
->['metadata']
 
 export type UploadTrackFilesRequest = Omit<
   z.input<typeof UploadTrackFilesSchema>,
@@ -234,7 +262,7 @@ export type UploadTrackFilesRequest = Omit<
 > & {
   // Typing function manually because z.function() does not
   // support argument names
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const UpdateTrackSchema = z
@@ -242,9 +270,10 @@ export const UpdateTrackSchema = z
     userId: HashId,
     trackId: HashId,
     metadata: UploadTrackMetadataSchema.strict().partial(),
+    audioFile: z.optional(AudioFile),
+    imageFile: z.optional(ImageFile),
     generatePreview: z.optional(z.boolean()),
-    coverArtFile: z.optional(ImageFile),
-    onProgress: z.optional(z.function())
+    onProgress: z.optional(UploadTrackFilesProgressHandlerSchema)
   })
   .strict()
 
@@ -252,7 +281,7 @@ export type UpdateTrackRequest = Omit<
   z.input<typeof UpdateTrackSchema>,
   'onProgress'
 > & {
-  onProgress?: ProgressHandler
+  onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const DeleteTrackSchema = z
@@ -382,3 +411,67 @@ export const PurchaseTrackSchema = z
   .strict()
 
 export type PurchaseTrackRequest = z.input<typeof PurchaseTrackSchema>
+
+const UploadResponseSchema = z.object({
+  id: z.string(),
+  status: z.enum([
+    'new',
+    'error',
+    'busy',
+    'timeout',
+    'audio_analysis',
+    'busy_audio_analysis',
+    'done'
+  ]),
+  orig_file_cid: z.string(),
+  orig_filename: z.string(),
+  results: z.record(z.string(), z.string()),
+  probe: z
+    .object({
+      format: z
+        .object({
+          duration: z.string().optional()
+        })
+        .optional()
+    })
+    .optional(),
+  audio_analysis_results: z
+    .object({
+      bpm: z.number().optional(),
+      key: z.string().optional()
+    })
+    .optional()
+    .nullable(),
+  audio_analysis_error_count: z.number()
+})
+
+export type UploadResponse = z.input<typeof UploadResponseSchema>
+
+export const PublishTrackSchema = z
+  .object({
+    userId: HashId,
+    metadata: UploadTrackMetadataSchema.strict(),
+    audioUploadResponse: UploadResponseSchema,
+    imageUploadResponse: UploadResponseSchema
+  })
+  .strict()
+
+export type PublishTrackRequest = z.input<typeof PublishTrackSchema>
+
+export const PublishStemSchema = z
+  .object({
+    userId: HashId,
+    metadata: UploadStemMetadataSchema.strict(),
+    audioUploadResponse: UploadResponseSchema
+  })
+  .strict()
+
+export type PublishStemRequest = z.input<typeof PublishStemSchema>
+
+export type UploadTrackFilesTask = {
+  start: () => Promise<{
+    audioUploadResponse?: UploadResponse
+    imageUploadResponse?: UploadResponse
+  }>
+  abort: () => void
+}

@@ -13,7 +13,8 @@ services:
         condition: service_healthy
     ports:
       - 1323:1323
-    command: ['/bin/sh', '-c', 'bridge es-indexer drop && bridge']
+    command:
+      ["/bin/sh", "-c", "bridge es-indexer drop && runMigrations=true bridge"]
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
@@ -25,7 +26,7 @@ services:
       - node.name=cluster1-node1
       - xpack.license.self_generated.type=basic
       - xpack.security.enabled=false
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
@@ -33,7 +34,7 @@ services:
     ports:
       - 9200:9200
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9200']
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 10s
       timeout: 10s
       retries: 20

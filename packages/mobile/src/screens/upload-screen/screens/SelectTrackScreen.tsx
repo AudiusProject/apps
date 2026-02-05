@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { Name } from '@audius/common/models'
+import { UploadType } from '@audius/common/store'
 import { useFocusEffect, useRoute } from '@react-navigation/native'
 
 import { IconClose, IconCloudUpload, Button } from '@audius/harmony-native'
@@ -19,6 +20,7 @@ import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
 
 import { TopBarIconButton } from '../../app-screen'
+import { useUploadContext } from '../contexts/UploadContext'
 import type { UploadParamList, UploadRouteProp } from '../types'
 
 const messages = {
@@ -54,6 +56,7 @@ export const SelectTrackScreen = () => {
   const { params } = useRoute<UploadRouteProp<'SelectTrack'>>()
   const [navigatedBack, setNavigatedBack] = useState(false)
   const { track, loading, error, selectFile } = useTrackFileSelector()
+  const { startUpload } = useUploadContext()
 
   useEffect(() => {
     if (track) {
@@ -64,12 +67,19 @@ export const SelectTrackScreen = () => {
           ...params.initialMetadata
         }
       }
+
+      // Start uploading the track files immediately
+      startUpload({
+        tracks: [track],
+        uploadType: UploadType.INDIVIDUAL_TRACK
+      })
+
       navigation.push('CompleteTrack', {
         track,
         initialMetadata: params?.initialMetadata
       })
     }
-  }, [track, navigation, params?.initialMetadata])
+  }, [track, navigation, params?.initialMetadata, startUpload])
 
   useFocusEffect(
     useCallback(() => {

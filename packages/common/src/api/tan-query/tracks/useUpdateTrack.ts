@@ -1,18 +1,20 @@
-import { Id } from '@audius/sdk'
+import { Id, type CrossPlatformFile } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 
-import { fileToSdk, trackMetadataForUploadToSdk } from '~/adapters/track'
+import { trackMetadataForUploadToSdk } from '~/adapters/track'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { UserTrackMetadata } from '~/models'
 import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { CommonState } from '~/store/commonStore'
 import { stemsUploadSelectors } from '~/store/stems-upload'
+import { replaceTrackProgressModalActions } from '~/store/ui/modals/replace-track-progress-modal'
 import { TrackMetadataForUpload } from '~/store/upload'
 
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { handleStemUpdates } from '../utils/handleStemUpdates'
 import { primeTrackData } from '../utils/primeTrackData'
 
@@ -27,9 +29,9 @@ type MutationContext = {
 
 export type UpdateTrackParams = {
   trackId: ID
-  userId: ID
   metadata: Partial<TrackMetadataForUpload>
-  coverArtFile?: File
+  audioFile?: CrossPlatformFile
+  imageFile?: CrossPlatformFile
 }
 
 export const useUpdateTrack = () => {
@@ -38,13 +40,14 @@ export const useUpdateTrack = () => {
   const dispatch = useDispatch()
   const store = useStore()
   const { mutate: deleteTrack } = useDeleteTrack()
+  const { data: userId } = useCurrentUserId()
 
   return useMutation({
     mutationFn: async ({
       trackId,
-      userId,
       metadata,
-      coverArtFile
+      audioFile,
+      imageFile
     }: UpdateTrackParams) => {
       const sdk = await audiusSdk()
 
@@ -56,12 +59,21 @@ export const useUpdateTrack = () => {
       )
 
       const response = await sdk.tracks.updateTrack({
-        coverArtFile: coverArtFile
-          ? fileToSdk(coverArtFile, 'cover_art')
-          : undefined,
+        audioFile,
+        imageFile,
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
-        metadata: sdkMetadata
+        metadata: sdkMetadata,
+        onProgress: (_, progress) => {
+          if (progress.key === 'audio') {
+            dispatch(
+              replaceTrackProgressModalActions.set({
+                ...progress,
+                error: false
+              })
+            )
+          }
+        }
       })
 
       // TODO: migrate stem uploads to use tan-query
@@ -83,17 +95,33 @@ export const useUpdateTrack = () => {
 
       return response
     },
-    onMutate: async ({ trackId, metadata }): Promise<MutationContext> => {
+    onMutate: async ({
+      trackId,
+      metadata,
+      audioFile,
+      imageFile
+    }): Promise<MutationContext> => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getTrackQueryKey(trackId)
       })
 
+      dispatch(
+        replaceTrackProgressModalActions.set({
+          error: false,
+          loaded: 0,
+          total: 0,
+          transcode: 0
+        })
+      )
+
       // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
 
-      // Optimistically update track
-      if (previousTrack) {
+      // Only perform optimistic update if we're not uploading files
+      // When files are being uploaded, we can't accurately represent the new state
+      // until the upload completes
+      if (previousTrack && !audioFile && !imageFile) {
         primeTrackData({
           tracks: [{ ...previousTrack, ...metadata }] as UserTrackMetadata[],
           queryClient,
@@ -104,11 +132,12 @@ export const useUpdateTrack = () => {
       // Return context with the previous track and metadata
       return { previousTrack }
     },
-    onError: (
-      error,
-      { trackId, userId, metadata },
-      context?: MutationContext
-    ) => {
+    onSuccess: (_, params) => {
+      queryClient.invalidateQueries({
+        queryKey: getTrackQueryKey(params.trackId)
+      })
+    },
+    onError: (error, { trackId, metadata }, context?: MutationContext) => {
       // If the mutation fails, roll back track data
       if (context?.previousTrack) {
         primeTrackData({
@@ -135,6 +164,15 @@ export const useUpdateTrack = () => {
         }
       )
 
+      dispatch(
+        replaceTrackProgressModalActions.set({
+          error: true,
+          loaded: 0,
+          total: 0,
+          transcode: 0
+        })
+      )
+
       reportToSentry({
         error,
         additionalInfo: {
@@ -145,10 +183,6 @@ export const useUpdateTrack = () => {
         feature: Feature.Edit,
         name: 'Edit Track'
       })
-    },
-    onSettled: (_, __, { trackId }) => {
-      // Always refetch after error or success to ensure cache is in sync with server
-      // queryClient.invalidateQueries({ queryKey: getTrackQueryKey(trackId) })
     }
   })
 }

@@ -1,0 +1,22 @@
+# openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout key.pem -out cert.pem -config dev.cnf
+
+[req]
+default_bits = 4096
+prompt = no
+default_md = sha256
+x509_extensions = req_ext
+distinguished_name = dn
+
+[dn]
+CN = oap.devnet
+
+[req_ext]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = *.oap.devnet
+DNS.2 = oap.devnet
+DNS.3 = node1.oap.devnet
+DNS.4 = node2.oap.devnet
+DNS.5 = node3.oap.devnet
+DNS.6 = node4.oap.devnet

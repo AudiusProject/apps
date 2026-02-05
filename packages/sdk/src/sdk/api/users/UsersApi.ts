@@ -104,11 +104,15 @@ export class UsersApi extends GeneratedUsersApi {
       profilePictureFile &&
         retry3(
           async () =>
-            await this.storage.uploadFile({
-              file: profilePictureFile,
-              onProgress,
-              template: 'img_square'
-            }),
+            await this.storage
+              .uploadFile({
+                file: profilePictureFile,
+                onProgress,
+                metadata: {
+                  template: 'img_square'
+                }
+              })
+              .start(),
           (e) => {
             this.logger.info('Retrying uploadProfilePicture', e)
           }
@@ -116,11 +120,15 @@ export class UsersApi extends GeneratedUsersApi {
       coverArtFile &&
         retry3(
           async () =>
-            await this.storage.uploadFile({
-              file: coverArtFile,
-              onProgress,
-              template: 'img_backdrop'
-            }),
+            await this.storage
+              .uploadFile({
+                file: coverArtFile,
+                onProgress,
+                metadata: {
+                  template: 'img_backdrop'
+                }
+              })
+              .start(),
           (e) => {
             this.logger.info('Retrying uploadProfileCoverArt', e)
           }
@@ -206,11 +214,15 @@ export class UsersApi extends GeneratedUsersApi {
       profilePictureFile &&
         retry3(
           async () =>
-            await this.storage.uploadFile({
-              file: profilePictureFile,
-              onProgress,
-              template: 'img_square'
-            }),
+            await this.storage
+              .uploadFile({
+                file: profilePictureFile,
+                onProgress,
+                metadata: {
+                  template: 'img_square'
+                }
+              })
+              .start(),
           (e) => {
             this.logger.info('Retrying uploadProfilePicture', e)
           }
@@ -218,11 +230,15 @@ export class UsersApi extends GeneratedUsersApi {
       coverArtFile &&
         retry3(
           async () =>
-            await this.storage.uploadFile({
-              file: coverArtFile,
-              onProgress,
-              template: 'img_backdrop'
-            }),
+            await this.storage
+              .uploadFile({
+                file: coverArtFile,
+                onProgress,
+                metadata: {
+                  template: 'img_backdrop'
+                }
+              })
+              .start(),
           (e) => {
             this.logger.info('Retrying uploadProfileCoverArt', e)
           }

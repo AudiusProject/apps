@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useTrack } from '@audius/common/api'
+import { useTrack, useUpload } from '@audius/common/api'
 import {
   uploadActions,
   UploadFormState,
   uploadSelectors,
   UploadType,
   useUploadConfirmationModal,
-  TrackMetadataForUpload
+  TrackMetadataForUpload,
+  type CollectionFormState,
+  type TrackFormState
 } from '@audius/common/store'
 import { IconCloudUpload } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
@@ -23,9 +25,8 @@ import { EditPage } from './pages/EditPage'
 import { FinishPage } from './pages/FinishPage'
 import SelectPage from './pages/SelectPage'
 
-const { uploadTracks, updateFormState, reset } = uploadActions
-const { getFormState, getUploadSuccess, getUploadError, getIsUploading } =
-  uploadSelectors
+const { reset } = uploadActions
+const { getFormState, getUploadSuccess, getUploadError } = uploadSelectors
 
 const messages = {
   selectPageTitle: 'Upload Your Music',
@@ -68,10 +69,11 @@ export const UploadPage = (props: UploadPageProps) => {
   const formStateFromStore = useSelector(getFormState)
   const uploadSuccess = useSelector(getUploadSuccess)
   const uploadError = useSelector(getUploadError)
-  const isUploading = useSelector(getIsUploading)
   const [formState, setFormState] = useState<UploadFormState>(
     formStateFromStore ?? initialFormState
   )
+
+  const { startUpload, finishUpload } = useUpload()
 
   // For navigating back to a remix contest page
   const { data: originalTrack } = useTrack(
@@ -118,15 +120,19 @@ export const UploadPage = (props: UploadPageProps) => {
   const { onOpen: openUploadConfirmationModal } = useUploadConfirmationModal()
 
   const openUploadConfirmation = useCallback(
-    (hasPublicTracks: boolean) => {
+    (
+      hasPublicTracks: boolean,
+      formState: CollectionFormState | TrackFormState
+    ) => {
       openUploadConfirmationModal({
         hasPublicTracks,
         confirmCallback: () => {
           setPhase(Phase.FINISH)
+          finishUpload(formState)
         }
       })
     },
-    [openUploadConfirmationModal]
+    [finishUpload, openUploadConfirmationModal]
   )
 
   let page
@@ -139,6 +145,7 @@ export const UploadPage = (props: UploadPageProps) => {
           onContinue={(formState: UploadFormState) => {
             setFormState(formState)
             setPhase(Phase.EDIT)
+            startUpload(formState as CollectionFormState | TrackFormState)
           }}
         />
       )
@@ -151,14 +158,16 @@ export const UploadPage = (props: UploadPageProps) => {
             initialMetadata={initialMetadata}
             onContinue={(formState: UploadFormState) => {
               setFormState(formState)
-              dispatch(updateFormState(formState))
               const isPrivateCollection =
                 'metadata' in formState && formState.metadata?.is_private
               const hasPublicTracks =
                 formState.tracks?.some(
                   (track) => !track.metadata.is_unlisted
                 ) ?? true
-              openUploadConfirmation(hasPublicTracks && !isPrivateCollection)
+              openUploadConfirmation(
+                hasPublicTracks && !isPrivateCollection,
+                formState as CollectionFormState | TrackFormState
+              )
             }}
           />
         )
@@ -182,20 +191,6 @@ export const UploadPage = (props: UploadPageProps) => {
         )
       }
   }
-
-  const handleUpload = useCallback(() => {
-    if (!formState.tracks) return
-    dispatch(uploadTracks(formState))
-  }, [dispatch, formState])
-
-  useEffect(() => {
-    // Actually trigger the upload when the user is on the finish page
-    // and there is not already existing upload progress
-    const isUploadPending = !isUploading && !uploadSuccess && !uploadError
-    if (phase === Phase.FINISH && isUploadPending) {
-      handleUpload()
-    }
-  }, [handleUpload, phase, isUploading, uploadSuccess, uploadError])
 
   const handleBack = useCallback(() => {
     if (phase === Phase.EDIT && originalTrack) {

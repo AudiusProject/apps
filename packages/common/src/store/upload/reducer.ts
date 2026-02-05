@@ -25,7 +25,6 @@ import {
 
 const initialState: UploadState = {
   openMultiTrackNotification: true,
-  tracks: null,
   metadata: null,
   uploadType: null,
   stems: [],
@@ -45,7 +44,8 @@ const initialState: UploadState = {
 }
 
 const initialUploadState: ProgressState = {
-  art: {
+  clientId: '',
+  image: {
     status: ProgressStatus.UPLOADING,
     loaded: 0,
     total: 0,
@@ -61,7 +61,10 @@ const initialUploadState: ProgressState = {
 }
 const getInitialProgress = (upload: TrackForUpload | StemUploadWithFile) => {
   const res = cloneDeep(initialUploadState)
-  res.art.total =
+  if ('clientId' in upload) {
+    res.clientId = upload.clientId
+  }
+  res.image.total =
     upload.metadata.artwork && 'file' in upload.metadata.artwork
       ? (upload.metadata.artwork?.file?.size ?? 0)
       : 0
@@ -92,8 +95,12 @@ const actionsMap = {
     const newState = { ...state }
     const { tracks, uploadType } = action.payload
     newState.uploading = true
-    newState.tracks = tracks ?? null
-    newState.uploadProgress = tracks?.map(getInitialProgress)
+    const existingProgress = state.uploadProgress ?? []
+    newState.uploadProgress = tracks?.map(
+      (t) =>
+        existingProgress.find((p) => p && p.clientId === t.clientId) ??
+        getInitialProgress(t)
+    )
     newState.metadata =
       action.payload.uploadType === UploadType.ALBUM ||
       action.payload.uploadType === UploadType.PLAYLIST
@@ -108,33 +115,19 @@ const actionsMap = {
     state: UploadState,
     action: ReturnType<typeof uploadTracksSucceeded>
   ) {
-    const { id, trackMetadatas } = action
+    const { id } = action
     const newState = { ...state }
     newState.uploading = false
     newState.success = true
     newState.completionId = id
     newState.uploadType = null
     newState.stems = []
-
-    // Update the upload tracks with resulting metadata. This is used for TikTok sharing
-    if (trackMetadatas) {
-      newState.tracks =
-        state.tracks?.map((t, i) => ({
-          ...t,
-          metadata: {
-            ...t.metadata,
-            ...trackMetadatas[i]
-          }
-        })) ?? null
-    }
-    newState.completedEntity = action.completedEntity
     return newState
   },
   [UPLOAD_TRACKS_FAILED](state: UploadState) {
     const newState = { ...state }
     newState.uploading = false
     newState.uploadType = null
-    newState.tracks = null
     newState.metadata = null
     newState.stems = []
     newState.error = true
@@ -144,19 +137,45 @@ const actionsMap = {
     state: UploadState,
     action: ReturnType<typeof updateProgress>
   ) {
-    const { key, trackIndex, stemIndex, progress } = action.payload
+    const { key, clientId, stemIndex, progress } = action.payload
     const newState = { ...state }
     newState.uploadProgress = [...(state.uploadProgress ?? [])]
-    if (!newState.uploadProgress[trackIndex]) {
-      newState.uploadProgress[trackIndex] = cloneDeep(initialUploadState)
+    if (!newState.uploadProgress.find((p) => p && p.clientId === clientId)) {
+      newState.uploadProgress.push({
+        ...cloneDeep(initialUploadState),
+        clientId
+      })
     }
+    const trackIndex = newState.uploadProgress.findIndex(
+      (p) => p && p.clientId === clientId
+    )
+
+    if (
+      stemIndex !== null &&
+      !newState.uploadProgress[trackIndex].stems[stemIndex]
+    ) {
+      const stems = newState.uploadProgress[trackIndex].stems
+      while (stems.length <= stemIndex) {
+        stems.push({
+          ...cloneDeep(initialUploadState),
+          image: {
+            status: ProgressStatus.COMPLETE,
+            loaded: 0,
+            total: 0,
+            transcode: 0
+          },
+          clientId
+        })
+      }
+    }
+
     const prevProgress =
       stemIndex === null
         ? newState.uploadProgress[trackIndex]?.[key]
         : newState.uploadProgress[trackIndex]?.stems[stemIndex][key]
     const nextProgress = { ...prevProgress }
     nextProgress.status = progress.status
-    if (progress.loaded && progress.total) {
+    if (progress.loaded !== undefined && progress.total !== undefined) {
       // Don't allow progress to jump backwards on retries
       nextProgress.loaded = Math.max(nextProgress.loaded ?? 0, progress.loaded)
       nextProgress.total = progress.total

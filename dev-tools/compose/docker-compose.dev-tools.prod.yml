@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   ingress:
@@ -7,8 +7,11 @@ services:
     volumes:
       - ./nginx_ingress.conf:/etc/nginx/conf.d/default.conf
       - ${PROJECT_ROOT}/comms/nginx/ingress.conf:/usr/local/openresty/nginx/conf/comms_ingress.conf
+      - ../tls/cert.pem:/tmp/cert.pem
+      - ../tls/key.pem:/tmp/key.pem
     ports:
       - 80:80
+      - 443:443
 
   autoheal:
     image: willfarrell/autoheal:latest
@@ -23,33 +26,33 @@ services:
   audius-cmd:
     build:
       args:
-        TURBO_TEAM: '${TURBO_TEAM:-}'
-        TURBO_TOKEN: '${TURBO_TOKEN:-}'
+        TURBO_TEAM: "${TURBO_TEAM:-}"
+        TURBO_TOKEN: "${TURBO_TOKEN:-}"
       context: ${PROJECT_ROOT}
       dockerfile: ${PROJECT_ROOT}/packages/commands/Dockerfile.prod
     environment:
-      ETH_TOKEN_ADDRESS: '${ETH_TOKEN_ADDRESS}'
-      ETH_REGISTRY_ADDRESS: '${ETH_REGISTRY_ADDRESS}'
-      ETH_PROVIDER_URL: 'http://eth-ganache:8545'
-      ETH_OWNER_WALLET: '${ETH_OWNER_WALLET}'
+      ETH_TOKEN_ADDRESS: "${ETH_TOKEN_ADDRESS}"
+      ETH_REGISTRY_ADDRESS: "${ETH_REGISTRY_ADDRESS}"
+      ETH_PROVIDER_URL: "http://eth-ganache:8545"
+      ETH_OWNER_WALLET: "${ETH_OWNER_WALLET}"
 
-      POA_REGISTRY_ADDRESS: '${POA_REGISTRY_ADDRESS}'
-      ENTITY_MANAGER_ADDRESS: '${ENTITY_MANAGER_ADDRESS}'
-      POA_PROVIDER_URL: 'http://poa-ganache:8545'
+      POA_REGISTRY_ADDRESS: "${POA_REGISTRY_ADDRESS}"
+      ENTITY_MANAGER_ADDRESS: "${ENTITY_MANAGER_ADDRESS}"
+      POA_PROVIDER_URL: "http://poa-ganache:8545"
 
-      SOLANA_ENDPOINT: 'http://solana-test-validator:8899'
-      SOLANA_OWNER_SECRET_KEY: '${SOLANA_OWNER_SECRET_KEY}'
-      SOLANA_TOKEN_MINT_PUBLIC_KEY: '${SOLANA_TOKEN_MINT_PUBLIC_KEY}'
-      SOLANA_USDC_TOKEN_MINT_PUBLIC_KEY: '${SOLANA_USDC_TOKEN_MINT_PUBLIC_KEY}'
-      SOLANA_CLAIMABLE_TOKENS_PUBLIC_KEY: '${SOLANA_CLAIMABLE_TOKENS_PUBLIC_KEY}'
-      SOLANA_REWARD_MANAGER_PUBLIC_KEY: '${SOLANA_REWARD_MANAGER_PUBLIC_KEY}'
-      SOLANA_REWARD_MANAGER_PDA_PUBLIC_KEY: '${SOLANA_REWARD_MANAGER_PDA_PUBLIC_KEY}'
-      SOLANA_REWARD_MANAGER_TOKEN_PDA_PUBLIC_KEY: '${SOLANA_REWARD_MANAGER_TOKEN_PDA_PUBLIC_KEY}'
-      SOLANA_PAYMENT_ROUTER_PUBLIC_KEY: '${SOLANA_PAYMENT_ROUTER_PUBLIC_KEY}'
-      SOLANA_FEEPAYER_SECRET_KEY: '${SOLANA_FEEPAYER_SECRET_KEY}'
+      SOLANA_ENDPOINT: "http://solana-test-validator:8899"
+      SOLANA_OWNER_SECRET_KEY: "${SOLANA_OWNER_SECRET_KEY}"
+      SOLANA_TOKEN_MINT_PUBLIC_KEY: "${SOLANA_TOKEN_MINT_PUBLIC_KEY}"
+      SOLANA_USDC_TOKEN_MINT_PUBLIC_KEY: "${SOLANA_USDC_TOKEN_MINT_PUBLIC_KEY}"
+      SOLANA_CLAIMABLE_TOKENS_PUBLIC_KEY: "${SOLANA_CLAIMABLE_TOKENS_PUBLIC_KEY}"
+      SOLANA_REWARD_MANAGER_PUBLIC_KEY: "${SOLANA_REWARD_MANAGER_PUBLIC_KEY}"
+      SOLANA_REWARD_MANAGER_PDA_PUBLIC_KEY: "${SOLANA_REWARD_MANAGER_PDA_PUBLIC_KEY}"
+      SOLANA_REWARD_MANAGER_TOKEN_PDA_PUBLIC_KEY: "${SOLANA_REWARD_MANAGER_TOKEN_PDA_PUBLIC_KEY}"
+      SOLANA_PAYMENT_ROUTER_PUBLIC_KEY: "${SOLANA_PAYMENT_ROUTER_PUBLIC_KEY}"
+      SOLANA_FEEPAYER_SECRET_KEY: "${SOLANA_FEEPAYER_SECRET_KEY}"
 
-      IDENTITY_SERVICE_URL: 'http://identity-service:7000'
-      FALLBACK_CREATOR_NODE_URL: 'http://creator-node:4000' # this should choose a random cn everytime this is run
+      IDENTITY_SERVICE_URL: "http://identity-service:7000"
+      FALLBACK_CREATOR_NODE_URL: "http://creator-node:4000" # this should choose a random cn everytime this is run
     deploy:
       mode: global
     volumes:

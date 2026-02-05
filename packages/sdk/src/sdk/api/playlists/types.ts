@@ -1,5 +1,9 @@
 import { z } from 'zod'
 
+import {
+  ProgressEventHandlerSchema,
+  ProgressEventSchema
+} from '../../services/Storage/types'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
 import { Genre } from '../../types/Genre'
@@ -35,7 +39,7 @@ export type CreatePlaylistMetadata = z.input<
 export const CreatePlaylistSchema = z
   .object({
     playlistId: z.optional(HashId),
-    coverArtFile: z.optional(ImageFile),
+    imageFile: z.optional(ImageFile),
     metadata: CreatePlaylistMetadataSchema,
     onProgress: z.optional(z.function()),
     trackIds: z.optional(z.array(HashId)),
@@ -88,29 +92,64 @@ export const UpdatePlaylistSchema = z
   .object({
     userId: HashId,
     playlistId: HashId,
-    coverArtFile: z.optional(ImageFile),
+    imageFile: z.optional(ImageFile),
     metadata: UpdatePlaylistMetadataSchema,
-    onProgress: z.optional(z.function())
+    onProgress: ProgressEventHandlerSchema.optional()
+  })
+  .strict()
+
+export const UploadPlaylistProgressEventSchema = ProgressEventSchema.extend({
+  /**
+   * Index of the track being uploaded in the playlist tracks array, or 'image' if for the image
+   */
+  key: z.number().or(z.literal('image'))
+})
+
+/**
+ * The progress event for updating a playlist
+ */
+type UploadPlaylistProgressEvent = z.input<
+  typeof UploadPlaylistProgressEventSchema
+>
+
+export const UploadPlaylistProgressHandlerSchema = z
+  .function()
+  .args(z.number(), UploadPlaylistProgressEventSchema)
+  .returns(z.void())
+
+export type UploadPlaylistProgressHandler = (
+  /**
+   * Overall progress percentage (0-1)
+   */
+  progress: number,
+  /**
+   * The progress event
+   */
+  event: UploadPlaylistProgressEvent
+) => void
+
+export const UploadPlaylistSchema = z
+  .object({
+    userId: HashId,
+    imageFile: ImageFile,
+    metadata: UploadPlaylistMetadataSchema,
+    onProgress: z.optional(UploadPlaylistProgressHandlerSchema),
+    /**
+     * Track metadata is populated from the playlist if fields are missing
+     */
+    trackMetadatas: z.array(PlaylistTrackMetadataSchema),
+    audioFiles: z.array(AudioFile)
   })
   .strict()
 
 export type UpdatePlaylistRequest = z.input<typeof UpdatePlaylistSchema>
 
-export const UploadPlaylistSchema = z
-  .object({
-    userId: HashId,
-    coverArtFile: ImageFile,
-    metadata: UploadPlaylistMetadataSchema,
-    onProgress: z.optional(z.function()),
-    /**
-     * Track metadata is populated from the playlist if fields are missing
-     */
-    trackMetadatas: z.array(PlaylistTrackMetadataSchema),
-    trackFiles: z.array(AudioFile)
-  })
-  .strict()
-
-export type UploadPlaylistRequest = z.input<typeof UploadPlaylistSchema>
+export type UploadPlaylistRequest = Omit<
+  z.input<typeof UploadPlaylistSchema>,
+  'onProgress'
+> & {
+  onProgress?: UploadPlaylistProgressHandler
+}
 
 export const PublishPlaylistSchema = z
   .object({
