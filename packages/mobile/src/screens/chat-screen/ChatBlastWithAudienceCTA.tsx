@@ -2,11 +2,7 @@ import { useCallback } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { useCanSendChatBlast } from '@audius/common/hooks'
-import {
-  chatActions,
-  followersUserListSelectors,
-  topSupportersUserListSelectors
-} from '@audius/common/store'
+import { chatActions, followersUserListSelectors } from '@audius/common/store'
 import { ChatBlastAudience } from '@audius/sdk'
 import { TouchableHighlight } from 'react-native-gesture-handler'
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,18 +18,13 @@ import {
 const { createChatBlast } = chatActions
 
 const getMessages = (audience: ChatBlastAudience) => {
-  switch (audience) {
-    case ChatBlastAudience.FOLLOWERS:
-      return {
-        title: 'Message Blast Your Followers',
-        description: 'Send bulk messages to your followers.'
-      }
-    case ChatBlastAudience.TIPPERS:
-      return {
-        title: 'Message Blast Your Tip Supporters',
-        description: 'Bulk message everyone who’s sent you a tip.'
-      }
+  if (audience === ChatBlastAudience.FOLLOWERS) {
+    return {
+      title: 'Message Blast Your Followers',
+      description: 'Send bulk messages to your followers.'
+    }
   }
+  return null
 }
 
 type ChatBlastWithAudienceCTAProps = {
@@ -48,11 +39,7 @@ export const ChatBlastWithAudienceCTA = (
   const { data: currentUserId } = useCurrentUserId()
 
   const followersUserId = useSelector(followersUserListSelectors.getId)
-  const supportersUserId = useSelector(topSupportersUserListSelectors.getId)
-  const targetUserId =
-    audience === ChatBlastAudience.FOLLOWERS
-      ? followersUserId
-      : supportersUserId
+  const targetUserId = followersUserId
 
   const isOwner = currentUserId === targetUserId
 

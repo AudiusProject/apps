@@ -62,7 +62,6 @@ import savedCollectionsReducer from './saved-collections/slice'
 import searchReducer from './search/slice'
 import { SearchState } from './search/types'
 import stemsUpload from './stems-upload/slice'
-import tippingReducer from './tipping/slice'
 import {
   searchUsersModalReducer,
   SearchUsersModalState,
@@ -102,8 +101,6 @@ import purchasersUserListReducer from './user-list/purchasers/reducers'
 import relatedArtistsListReducer from './user-list/related-artists/reducers'
 import remixersUserListReducer from './user-list/remixers/reducers'
 import repostsUserListReducer from './user-list/reposts/reducers'
-import supportingUserListReducer from './user-list/supporting/reducers'
-import topSupportersUserListReducer from './user-list/top-supporters/reducers'
 import wallet from './wallet/slice'
 
 /**
@@ -162,8 +159,6 @@ export const reducers = (storage: Storage, history?: History) => ({
       following: followingUserListReducer,
       reposts: repostsUserListReducer,
       favorites: favoritesUserListReducer,
-      topSupporters: topSupportersUserListReducer,
-      supporting: supportingUserListReducer,
       mutuals: mutualsUserListReducer,
       notifications: notificationsUserListReducer,
       relatedArtists: relatedArtistsListReducer,
@@ -199,9 +194,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   }),
   search: searchReducer(storage),
   stemsUpload,
-
-  // Tipping
-  tipping: tippingReducer,
 
   // Gated content
   buyUSDC: buyUSDCReducer,
@@ -271,8 +263,6 @@ export type CommonState = {
       following: ReturnType<typeof followingUserListReducer>
       reposts: ReturnType<typeof repostsUserListReducer>
       favorites: ReturnType<typeof favoritesUserListReducer>
-      topSupporters: ReturnType<typeof topSupportersUserListReducer>
-      supporting: ReturnType<typeof supportingUserListReducer>
       relatedArtists: ReturnType<typeof relatedArtistsListReducer>
       purchasers: ReturnType<typeof purchasersUserListReducer>
       remixers: ReturnType<typeof remixersUserListReducer>
@@ -309,9 +299,6 @@ export type CommonState = {
 
   // USDC
   buyUSDC: ReturnType<typeof buyUSDCReducer>
-
-  // Tipping
-  tipping: ReturnType<typeof tippingReducer>
 
   // Gated content
   purchaseContent: ReturnType<typeof purchaseContentReducer>

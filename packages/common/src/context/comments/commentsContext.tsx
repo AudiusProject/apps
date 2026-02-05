@@ -18,7 +18,6 @@ import {
   QUERY_KEYS,
   useTrackCommentCount,
   resetPreviousCommentCount,
-  useSupporters,
   useTrack,
   useCurrentUserId
 } from '~/api'
@@ -100,10 +99,6 @@ export function CommentSectionProvider<NavigationProp>(
     lineupActions
   } = props
   const { data: track } = useTrack(entityId)
-  const trackOwnerId = track?.owner_id
-
-  // Prefetch the track owner's supporters
-  useSupporters({ userId: trackOwnerId })
 
   const {
     analytics: { make, track: trackEvent }

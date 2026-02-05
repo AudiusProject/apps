@@ -13,7 +13,6 @@ import { EditCollectionScreen } from '../edit-collection-screen'
 import { EditTrackModalScreen } from '../edit-track-screen'
 import { ExternalWalletsModalScreen } from '../external-wallets'
 import { FeatureFlagOverrideScreen } from '../feature-flag-override-screen'
-import { TipArtistModalScreen } from '../tip-artist-screen'
 import { UploadModalScreen } from '../upload-screen'
 import { VerificationWebViewModalScreen } from '../verification-webview-screen'
 
@@ -39,14 +38,6 @@ export const AppScreen = () => {
     >
       <Stack.Screen name='AppTabs' component={AppTabsScreen} />
       <Stack.Group screenOptions={{ presentation: 'fullScreenModal' }}>
-        <Stack.Screen
-          name='TipArtist'
-          component={TipArtistModalScreen}
-          // Drop animation on android to fix blank tip screen
-          options={
-            Platform.OS === MobileOS.ANDROID ? { animation: 'none' } : undefined
-          }
-        />
         <Stack.Screen name='Upload' component={UploadModalScreen} />
         <Stack.Screen name='BuySell' component={BuySellModalScreen} />
         <Stack.Screen

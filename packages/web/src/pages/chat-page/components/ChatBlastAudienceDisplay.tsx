@@ -51,9 +51,6 @@ export const ChatBlastAudienceDisplay = (
     case ChatBlastAudience.FOLLOWERS:
       userListType = UserListType.FOLLOWER
       break
-    case ChatBlastAudience.TIPPERS:
-      userListType = UserListType.SUPPORTER
-      break
     case ChatBlastAudience.CUSTOMERS:
       userListType = UserListType.PURCHASER
       break

@@ -62,8 +62,6 @@ export type UserMetadata = {
   repost_count: number
   spl_wallet: Nullable<SolanaWalletAddress>
   spl_usdc_payout_wallet?: Nullable<SolanaWalletAddress>
-  supporter_count: number
-  supporting_count: number
   total_balance?: Nullable<StringWei>
   track_count: number
   user_id: number

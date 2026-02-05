@@ -5,7 +5,6 @@ import {
   priceAndAudienceScreenName
 } from 'app/components/edit/PriceAndAudienceField'
 import { VisibilityScreen } from 'app/components/edit/VisibilityField'
-import { SupportersInfoDrawer } from 'app/components/supporters-info-drawer'
 import { useAppScreenOptions } from 'app/screens/app-screen/useAppScreenOptions'
 
 import { messages as completeMessages } from '../upload-screen/screens/CompleteTrackScreen'
@@ -74,7 +73,6 @@ export const EditTrackNavigator = (props: EditTrackNavigatorProps) => {
           component={CoverAttributionScreen}
         />
       </Stack.Navigator>
-      <SupportersInfoDrawer />
       <EditAccessConfirmationDrawer />
       <HideContentConfirmationDrawer />
       <PublishConfirmationDrawer />

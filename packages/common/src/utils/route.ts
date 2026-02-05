@@ -156,8 +156,6 @@ export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
 export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
 export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
   '/coins/:ticker/exclusive-tracks/mobile'
-export const SUPPORTING_USERS_ROUTE = '/supporting'
-export const TOP_SUPPORTERS_USERS_ROUTE = '/top-supporters'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
 export const NOTIFICATION_SETTINGS_PAGE = '/settings/notifications'
 export const ABOUT_SETTINGS_PAGE = '/settings/about'
@@ -320,8 +318,6 @@ export const orderedRoutes = [
   FAVORITING_USERS_ROUTE,
   FOLLOWING_USERS_ROUTE,
   FOLLOWERS_USERS_ROUTE,
-  SUPPORTING_USERS_ROUTE,
-  TOP_SUPPORTERS_USERS_ROUTE,
   PROFILE_PAGE_COMMENTS,
   PROFILE_PAGE
 ]
@@ -380,8 +376,6 @@ export const staticRoutes = new Set([
   FAVORITING_USERS_ROUTE,
   FOLLOWING_USERS_ROUTE,
   FOLLOWERS_USERS_ROUTE,
-  SUPPORTING_USERS_ROUTE,
-  TOP_SUPPORTERS_USERS_ROUTE,
   ACCOUNT_SETTINGS_PAGE,
   NOTIFICATION_SETTINGS_PAGE,
   ABOUT_SETTINGS_PAGE,

@@ -22,18 +22,11 @@ export const useFirstAvailableBlastAudience = () => {
 
   const firstAvailableAudience = useMemo(() => {
     if (user?.follower_count) return ChatBlastAudience.FOLLOWERS
-    if (user?.supporter_count) return ChatBlastAudience.TIPPERS
     if (purchasersCount) return ChatBlastAudience.CUSTOMERS
     if (remixersCount) return ChatBlastAudience.REMIXERS
     if (coinMembersCount) return ChatBlastAudience.COIN_HOLDERS
     return null
-  }, [
-    user?.follower_count,
-    user?.supporter_count,
-    purchasersCount,
-    remixersCount,
-    coinMembersCount
-  ])
+  }, [user?.follower_count, purchasersCount, remixersCount, coinMembersCount])
 
   return firstAvailableAudience
 }

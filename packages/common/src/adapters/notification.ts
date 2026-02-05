@@ -112,32 +112,6 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
-    case 'tip_send': {
-      const data = notification.actions[0].data
-      const amount = data.amount
-      const receiverUserId = HashId.parse(data.receiverUserId)
-      return {
-        type: NotificationType.TipSend,
-        entityId: receiverUserId,
-        entityType: Entity.User,
-        amount: amount!.toString() as StringWei,
-        ...formatBaseNotification(notification)
-      }
-    }
-    case 'tip_receive': {
-      const data = notification.actions[0].data
-      const amount = data.amount
-      const senderUserId = HashId.parse(data.senderUserId)
-      return {
-        type: NotificationType.TipReceive,
-        entityId: senderUserId,
-        amount: amount!.toString() as StringWei,
-        entityType: Entity.User,
-        tipTxSignature: data.tipTxSignature,
-        reactionValue: data.reactionValue,
-        ...formatBaseNotification(notification)
-      }
-    }
     case 'track_added_to_purchased_album': {
       let trackId = 0
       let playlistId = 0
@@ -185,38 +159,6 @@ export const notificationFromSDK = (
         entityType: Entity.Track,
         entityId: HashId.parse(data.tastemakerItemId),
         userId: HashId.parse(data.tastemakerItemOwnerId), // owner of the tastemaker track
-        ...formatBaseNotification(notification)
-      }
-    }
-    case 'supporter_rank_up': {
-      const data = notification.actions[0].data
-      const senderUserId = HashId.parse(data.senderUserId)
-      return {
-        type: NotificationType.SupporterRankUp,
-        entityId: senderUserId,
-        rank: data.rank,
-        entityType: Entity.User,
-        ...formatBaseNotification(notification)
-      }
-    }
-    case 'supporting_rank_up': {
-      const data = notification.actions[0].data
-      const receiverUserId = HashId.parse(data.receiverUserId)
-      return {
-        type: NotificationType.SupportingRankUp,
-        entityId: receiverUserId,
-        rank: data.rank,
-        entityType: Entity.User,
-        ...formatBaseNotification(notification)
-      }
-    }
-    case 'supporter_dethroned': {
-      const data = notification.actions[0].data
-      return {
-        type: NotificationType.SupporterDethroned,
-        entityType: Entity.User,
-        entityId: HashId.parse(data.senderUserId),
-        supportedUserId: HashId.parse(data.receiverUserId),
         ...formatBaseNotification(notification)
       }
     }
@@ -418,22 +360,6 @@ export const notificationFromSDK = (
         shortDescription: data.shortDescription,
         longDescription: data.longDescription,
         route: data.route,
-        ...formatBaseNotification(notification)
-      }
-    }
-    case 'reaction': {
-      const data = notification.actions[0].data
-      return {
-        type: NotificationType.Reaction,
-        entityId: HashId.parse(data.receiverUserId),
-        entityType: Entity.User,
-        reactionValue: data.reactionValue,
-        reactionType: data.reactionType,
-        reactedToEntity: {
-          tx_signature: data.reactedTo,
-          amount: data.tipAmount as StringWei,
-          tip_sender_id: HashId.parse(data.senderUserId)
-        },
         ...formatBaseNotification(notification)
       }
     }

@@ -4,17 +4,12 @@ import { useCurrentUserId } from '@audius/common/api'
 import { priceAndAudienceMessages } from '@audius/common/messages'
 import {
   isContentFollowGated,
-  isContentTipGated,
   StreamTrackAvailabilityType
 } from '@audius/common/models'
 import type { AccessConditions } from '@audius/common/models'
 import type { Nullable } from '@audius/common/utils'
-import { useDispatch } from 'react-redux'
 
 import {
-  Flex,
-  IconButton,
-  IconInfo,
   IconSparkles,
   Paper,
   Radio,
@@ -22,13 +17,12 @@ import {
   RadioGroupContext
 } from '@audius/harmony-native'
 import { useSetEntityAvailabilityFields } from 'app/hooks/useSetTrackAvailabilityFields'
-import { setVisibility } from 'app/store/drawers/slice'
 
 import { ExpandableRadio } from '../ExpandableRadio'
 
 const { specialAccessRadio: messages } = priceAndAudienceMessages
 
-type SpecialAccessValue = 'followers' | 'supporters'
+type SpecialAccessValue = 'followers'
 
 type SpecialAccessRadioFieldProps = {
   disabled?: boolean
@@ -39,7 +33,6 @@ export const SpecialAccessRadioField = (
   props: SpecialAccessRadioFieldProps
 ) => {
   const { disabled = false, previousStreamConditions } = props
-  const dispatch = useDispatch()
 
   const { value } = useContext(RadioGroupContext)
   const selected = value === StreamTrackAvailabilityType.SPECIAL_ACCESS
@@ -50,8 +43,7 @@ export const SpecialAccessRadioField = (
     ? { follow_user_id: currentUserId }
     : null
   const [selectedSpecialAccessGate, setSelectedSpecialAccessGate] = useState(
-    isContentFollowGated(previousStreamConditions) ||
-      isContentTipGated(previousStreamConditions)
+    isContentFollowGated(previousStreamConditions)
       ? (previousStreamConditions ?? defaultSpecialAccess)
       : defaultSpecialAccess
   )
@@ -68,23 +60,14 @@ export const SpecialAccessRadioField = (
     }
   }, [selected, selectedSpecialAccessGate, setFields])
 
-  const handleInfoPress = useCallback(() => {
-    dispatch(setVisibility({ drawer: 'SupportersInfo', visible: true }))
-  }, [dispatch])
-
-  const [specialAccess, setSpecialAccess] = useState<SpecialAccessValue>(
-    isContentTipGated(selectedSpecialAccessGate) ? 'supporters' : 'followers'
-  )
+  const [specialAccess, setSpecialAccess] =
+    useState<SpecialAccessValue>('followers')
 
   const handleAccessChange = useCallback(
     (value: SpecialAccessValue) => {
       if (!currentUserId || !selected) return
       setSpecialAccess(value)
-      setSelectedSpecialAccessGate(
-        value === 'followers'
-          ? { follow_user_id: currentUserId }
-          : { tip_user_id: currentUserId }
-      )
+      setSelectedSpecialAccessGate({ follow_user_id: currentUserId })
     },
     [currentUserId, selected]
   )
@@ -108,19 +91,6 @@ export const SpecialAccessRadioField = (
               label={messages.followersOnly}
               disabled={disabled}
             />
-            <Flex direction='row' alignItems='center'>
-              <Radio
-                value='supporters'
-                label={messages.supportersOnly}
-                disabled={disabled}
-              />
-              <IconButton
-                icon={IconInfo}
-                size='s'
-                color='subdued'
-                onPress={handleInfoPress}
-              />
-            </Flex>
           </RadioGroup>
         </Paper>
       }

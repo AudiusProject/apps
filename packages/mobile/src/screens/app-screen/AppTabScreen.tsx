@@ -2,7 +2,6 @@ import { useCallback, useContext, useEffect } from 'react'
 
 import type {
   FavoriteType,
-  TipSource,
   ID,
   SearchTrack,
   SearchPlaylist
@@ -62,8 +61,6 @@ import {
   NotificationUsersScreen,
   MutualsScreen,
   RelatedArtistsScreen,
-  TopSupportersScreen,
-  SupportingUsersScreen,
   CoinLeaderboardScreen
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
@@ -96,15 +93,12 @@ export type AppTabScreenParamList = {
   Following: { userId: ID }
   Mutuals: { userId: ID }
   RelatedArtists: { userId: ID }
-  SupportingUsers: { userId: ID }
-  TopSupporters: { userId: ID; source: TipSource }
   CoinLeaderboard: { mint: string }
   NotificationUsers: {
     notification: any
     notificationType: NotificationType
     count: number
   }
-  TipArtist: undefined
   SettingsScreen: undefined
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
@@ -240,8 +234,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         />
       </Stack.Group>
       <Stack.Screen name='Reposts' component={RepostsScreen} />
-      <Stack.Screen name='TopSupporters' component={TopSupportersScreen} />
-      <Stack.Screen name='SupportingUsers' component={SupportingUsersScreen} />
       <Stack.Screen name='CoinLeaderboard' component={CoinLeaderboardScreen} />
 
       <Stack.Screen name='AudioScreen' component={AudioScreen} />

@@ -3,11 +3,7 @@ import { ChatPermission, Genre } from '@audius/sdk'
 import { FeedFilter } from '~/models/FeedFilter'
 import { ID, PlayableType } from '~/models/Identifiers'
 import { TimeRange } from '~/models/TimeRange'
-import {
-  SolanaWalletAddress,
-  StringAudio,
-  WalletAddress
-} from '~/models/Wallet'
+import { WalletAddress } from '~/models/Wallet'
 import { Nullable } from '~/utils/typeUtils'
 
 import { Chain } from './Chain'
@@ -214,7 +210,6 @@ export enum Name {
 
   // Gated Track Uploads
   TRACK_UPLOAD_FOLLOW_GATED = 'Track Upload: Follow Gated',
-  TRACK_UPLOAD_TIP_GATED = 'Track Upload: Tip Gated',
   TRACK_UPLOAD_USDC_GATED = 'Track Upload: USDC Gated',
   TRACK_UPLOAD_TOKEN_GATED = 'Track Upload: Token Gated',
   TRACK_UPLOAD_CLICK_USDC_WAITLIST_LINK = 'Track Upload: Clicked USDC Waitlist Link',
@@ -248,7 +243,6 @@ export enum Name {
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
   USDC_PURCHASE_GATED_COLLECTION_UNLOCKED = 'USDC Gated: Collection Unlocked',
   FOLLOW_GATED_TRACK_UNLOCKED = 'Follow Gated: Track Unlocked',
-  TIP_GATED_TRACK_UNLOCKED = 'Tip Gated: Track Unlocked',
   TOKEN_GATED_TRACK_UNLOCKED = 'Token Gated: Track Unlocked',
   // Unlocked Download-Only Gated Tracks
   USDC_PURCHASE_GATED_DOWNLOAD_TRACK_UNLOCKED = 'USDC Gated: Download Track Unlocked',
@@ -267,12 +261,7 @@ export enum Name {
   NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE = 'Notifications: Clicked Milestone Twitter Share',
   NOTIFICATIONS_CLICK_REMIX_CREATE_TWITTER_SHARE = 'Notifications: Clicked Remix Create Twitter Share',
   NOTIFICATIONS_CLICK_REMIX_COSIGN_TWITTER_SHARE = 'Notifications: Clicked Remix Co-Sign Twitter Share',
-  NOTIFICATIONS_CLICK_TIP_REACTION_TWITTER_SHARE = 'Notifications: Clicked Tip Reaction Twitter Share',
-  NOTIFICATIONS_CLICK_TIP_RECEIVED_TWITTER_SHARE = 'Notifications: Clicked Tip Received Twitter Share',
-  NOTIFICATIONS_CLICK_TIP_SENT_TWITTER_SHARE = 'Notifications: Clicked Tip Sent Twitter Share',
   NOTIFICATIONS_CLICK_DETHRONED_TWITTER_SHARE = 'Notifications: Clicked Dethroned Twitter Share',
-  NOTIFICATIONS_CLICK_SUPPORTER_RANK_UP_TWITTER_SHARE = 'Notifications: Clicked Supporter Rank Up Twitter Share',
-  NOTIFICATIONS_CLICK_SUPPORTING_RANK_UP_TWITTER_SHARE = 'Notifications: Clicked Supporting Rank Up Twitter Share',
   NOTIFICATIONS_CLICK_TRENDING_TRACK_TWITTER_SHARE = 'Notifications: Clicked Trending Track Twitter Share',
   NOTIFICATIONS_CLICK_TRENDING_PLAYLIST_TWITTER_SHARE = 'Notifications: Clicked Trending Playlist Twitter Share',
   NOTIFICATIONS_CLICK_TRENDING_UNDERGROUND_TWITTER_SHARE = 'Notifications: Clicked Trending Underground Twitter Share',
@@ -381,13 +370,6 @@ export enum Name {
   REWARDS_CLAIM_SUCCESS = 'Rewards Claim: Success',
   REWARDS_CLAIM_BLOCKED = 'Rewards Claim: Blocked',
 
-  // Tipping
-  TIP_AUDIO_REQUEST = 'Tip Audio: Request',
-  TIP_AUDIO_SUCCESS = 'Tip Audio: Success',
-  TIP_AUDIO_FAILURE = 'Tip Audio: Failure',
-  TIP_AUDIO_TWITTER_SHARE = 'Tip Audio: Twitter Share',
-  TIP_FEED_TILE_DISMISS = 'Tip Feed Tile: Dismiss',
-
   // Social Proof
   SOCIAL_PROOF_OPEN = 'Social Proof: Open',
   SOCIAL_PROOF_SUCCESS = 'Social Proof: Success',
@@ -495,7 +477,6 @@ export enum Name {
   SEND_MESSAGE_REACTION_FAILURE = 'Send Message Reaction: Failure',
   MESSAGE_UNFURL_TRACK = 'Message Unfurl: Track',
   MESSAGE_UNFURL_PLAYLIST = 'Message Unfurl: Playlist',
-  TIP_UNLOCKED_CHAT = 'Unlocked Chat: Tip',
   CHAT_REPORT_USER = 'Report User: Chat',
   CHAT_ENTRY_POINT = 'Chat Entry Point',
   CHAT_WEBSOCKET_ERROR = 'Chat Websocket Error',
@@ -1199,13 +1180,6 @@ type TrackUploadFollowGated = {
   lossless: boolean
 }
 
-type TrackUploadTipGated = {
-  eventName: Name.TRACK_UPLOAD_TIP_GATED
-  kind: 'tracks'
-  downloadable: boolean
-  lossless: boolean
-}
-
 type TrackUploadUSDCGated = {
   eventName: Name.TRACK_UPLOAD_USDC_GATED
   price: number
@@ -1333,11 +1307,6 @@ type FollowGatedTrackUnlocked = {
   trackId: number
 }
 
-type TipGatedTrackUnlocked = {
-  eventName: Name.TIP_GATED_TRACK_UNLOCKED
-  trackId: number
-}
-
 type TokenGatedTrackUnlocked = {
   eventName: Name.TOKEN_GATED_TRACK_UNLOCKED
   trackId: number
@@ -1393,28 +1362,8 @@ type NotificationsClickRemixCosign = {
   eventName: Name.NOTIFICATIONS_CLICK_REMIX_COSIGN_TWITTER_SHARE
   text: string
 }
-type NotificationsClickTipReaction = {
-  eventName: Name.NOTIFICATIONS_CLICK_TIP_REACTION_TWITTER_SHARE
-  text: string
-}
-type NotificationsClickTipReceived = {
-  eventName: Name.NOTIFICATIONS_CLICK_TIP_RECEIVED_TWITTER_SHARE
-  text: string
-}
-type NotificationsClickTipSent = {
-  eventName: Name.NOTIFICATIONS_CLICK_TIP_SENT_TWITTER_SHARE
-  text: string
-}
 type NotificationsClickDethroned = {
   eventName: Name.NOTIFICATIONS_CLICK_DETHRONED_TWITTER_SHARE
-  text: string
-}
-type NotificationsClickSupporterRankUp = {
-  eventName: Name.NOTIFICATIONS_CLICK_SUPPORTER_RANK_UP_TWITTER_SHARE
-  text: string
-}
-type NotificationsClickSupportingRankUp = {
-  eventName: Name.NOTIFICATIONS_CLICK_SUPPORTING_RANK_UP_TWITTER_SHARE
   text: string
 }
 type NotificationsClickAddTrackToPlaylist = {
@@ -1828,68 +1777,6 @@ type RewardsClaimAllBlocked = {
   eventName: Name.REWARDS_CLAIM_ALL_BLOCKED
   count: number
   code: number
-}
-
-export type TipSource =
-  | 'profile'
-  | 'feed'
-  | 'dethroned'
-  | 'buyAudio'
-  | 'trackPage'
-  | 'howToUnlockTrackPage'
-  | 'howToUnlockModal'
-  | 'inboxUnavailableModal'
-
-type TipAudioRequest = {
-  eventName: Name.TIP_AUDIO_REQUEST
-  amount: StringAudio
-  senderWallet?: SolanaWalletAddress
-  recipientWallet?: SolanaWalletAddress
-  senderHandle: string
-  recipientHandle: string
-  source: TipSource
-  device: 'web' | 'native'
-}
-
-type TipAudioSuccess = {
-  eventName: Name.TIP_AUDIO_SUCCESS
-  amount: StringAudio
-  senderWallet?: SolanaWalletAddress
-  recipientWallet?: SolanaWalletAddress
-  senderHandle: string
-  recipientHandle: string
-  source: TipSource
-  device: 'web' | 'native'
-}
-
-type TipAudioFailure = {
-  eventName: Name.TIP_AUDIO_FAILURE
-  amount: StringAudio
-  senderWallet?: SolanaWalletAddress
-  recipientWallet?: SolanaWalletAddress
-  senderHandle: string
-  recipientHandle: string
-  error: string
-  source: TipSource
-  device: 'web' | 'native'
-}
-
-type TipAudioTwitterShare = {
-  eventName: Name.TIP_AUDIO_TWITTER_SHARE
-  amount: StringAudio
-  senderWallet?: SolanaWalletAddress
-  recipientWallet?: SolanaWalletAddress
-  senderHandle: string
-  recipientHandle: string
-  source: TipSource
-  device: 'web' | 'native'
-}
-
-type TipFeedTileDismiss = {
-  eventName: Name.TIP_FEED_TILE_DISMISS
-  accountId: string
-  receiverId: string
-  device: 'web' | 'native'
 }
 
 type SocialProofOpen = {
@@ -2468,11 +2355,6 @@ type MessageUnfurlTrack = {
 
 type MessageUnfurlPlaylist = {
   eventName: Name.MESSAGE_UNFURL_PLAYLIST
-}
-
-type TipUnlockedChat = {
-  eventName: Name.TIP_UNLOCKED_CHAT
-  recipientUserId: ID
 }
 
 type ChatReportUser = {
@@ -3181,7 +3063,6 @@ export type AllTrackingEvents =
   | TrackUploadTrackUploading
   | TrackUploadCompleteUpload
   | TrackUploadFollowGated
-  | TrackUploadTipGated
   | TrackUploadUSDCGated
   | TrackUploadTokenGated
   | TrackUploadClickUSDCWaitListLink
@@ -3208,7 +3089,6 @@ export type AllTrackingEvents =
   | TrackUploadViewTrackPage
   | USDCGatedTrackUnlocked
   | FollowGatedTrackUnlocked
-  | TipGatedTrackUnlocked
   | TokenGatedTrackUnlocked
   | USDCGatedDownloadTrackUnlocked
   | FollowGatedDownloadTrackUnlocked
@@ -3220,12 +3100,7 @@ export type AllTrackingEvents =
   | NotificationsClickMilestone
   | NotificationsClickRemixCreate
   | NotificationsClickRemixCosign
-  | NotificationsClickTipReaction
-  | NotificationsClickTipReceived
-  | NotificationsClickTipSent
   | NotificationsClickDethroned
-  | NotificationsClickSupporterRankUp
-  | NotificationsClickSupportingRankUp
   | NotificationsClickAddTrackToPlaylist
   | NotificationsClickTrendingPlaylist
   | NotificationsClickTrendingTrack
@@ -3299,11 +3174,6 @@ export type AllTrackingEvents =
   | RewardsClaimAllSuccess
   | RewardsClaimAllFailure
   | RewardsClaimAllBlocked
-  | TipAudioRequest
-  | TipAudioSuccess
-  | TipAudioFailure
-  | TipAudioTwitterShare
-  | TipFeedTileDismiss
   | SocialProofOpen
   | SocialProofSuccess
   | SocialProofError
@@ -3403,7 +3273,6 @@ export type AllTrackingEvents =
   | SendMessageReactionFailure
   | MessageUnfurlTrack
   | MessageUnfurlPlaylist
-  | TipUnlockedChat
   | ChatReportUser
   | DeveloperAppCreateSubmit
   | DeveloperAppCreateSuccess

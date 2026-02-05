@@ -5,8 +5,6 @@ import {
   useCurrentUserId,
   useMutualFollowers,
   useRelatedArtistsUsers,
-  useSupportedUsers,
-  useSupporters,
   useUserComments,
   useUsers,
   useProfileUser
@@ -24,8 +22,6 @@ import {
   IconUserFollowing,
   IconUserGroup,
   Text,
-  IconTrophy,
-  IconTipping,
   IconMessage,
   useTheme,
   Paper
@@ -77,9 +73,7 @@ const messages = {
   comments: 'Comments',
   mutuals: 'Mutuals',
   relatedArtists: 'Related Artists',
-  viewAll: 'View All',
-  topSupporters: 'Top Supporters',
-  supportedUsers: 'Supporting'
+  viewAll: 'View All'
 }
 
 type ProfileInfoTileProps = {
@@ -205,70 +199,6 @@ const MutualsTile = ({
   )
 }
 
-const SupportersTile = ({
-  userId,
-  count
-}: {
-  userId: number
-  count: number
-}) => {
-  const { data: supporterRecords = [], isLoading } = useSupporters({
-    userId,
-    pageSize: MAX_CARD_PROFILE_PICTURES
-  })
-
-  const supporters = useMemo(() => {
-    return supporterRecords.map((supporter) => supporter.sender)
-  }, [supporterRecords])
-
-  return (
-    <ProfileInfoTile
-      screen='TopSupporters'
-      icon={IconTrophy}
-      title={messages.topSupporters}
-      content={
-        <UserListWithCount
-          users={supporters}
-          count={count}
-          loading={isLoading}
-        />
-      }
-    />
-  )
-}
-
-const SupportedUsersTile = ({
-  userId,
-  count
-}: {
-  userId: number
-  count: number
-}) => {
-  const { data: supportedUserRecords = [], isLoading } = useSupportedUsers({
-    userId,
-    pageSize: MAX_CARD_PROFILE_PICTURES
-  })
-
-  const supportedUsers = useMemo(() => {
-    return supportedUserRecords.map((supportedUser) => supportedUser.receiver)
-  }, [supportedUserRecords])
-
-  return (
-    <ProfileInfoTile
-      screen='SupportingUsers'
-      icon={IconTipping}
-      title={messages.supportedUsers}
-      content={
-        <UserListWithCount
-          loading={isLoading}
-          users={supportedUsers}
-          count={count}
-        />
-      }
-    />
-  )
-}
-
 const RelatedArtistsTile = ({ userId }: { userId: number }) => {
   const { data: relatedArtists = [], isLoading } = useRelatedArtistsUsers({
     artistId: userId,
@@ -318,16 +248,9 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 export const ProfileInfoTiles = () => {
   const styles = useStyles()
-  const {
-    user_id,
-    current_user_followee_follow_count,
-    supporting_count,
-    supporter_count
-  } =
+  const { user_id, current_user_followee_follow_count } =
     useProfileUser({
       select: (user) => ({
-        supporting_count: user.supporting_count,
-        supporter_count: user.supporter_count,
         current_user_followee_follow_count:
           user.current_user_followee_follow_count,
         user_id: user.user_id
@@ -410,19 +333,12 @@ export const ProfileInfoTiles = () => {
             style={styles.staticTilesContainer}
             layout={layoutAnimation}
           >
-            {supporting_count && supporting_count > 0 ? (
-              <SupportedUsersTile userId={user_id} count={supporting_count} />
-            ) : null}
             {hasMutuals ? (
               <MutualsTile
                 userId={user_id}
                 count={current_user_followee_follow_count}
               />
             ) : null}
-            {supporter_count && supporter_count > 0 ? (
-              <SupportersTile userId={user_id} count={supporter_count} />
-            ) : null}
-
             <RelatedArtistsTile userId={user_id} />
           </Animated.View>
         </LayoutAnimationConfig>

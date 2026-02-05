@@ -55,7 +55,7 @@ export const AddTrackToPlaylistNotification = (
         playlist as CollectionEntity
       )
       const analytics = make(
-        Name.NOTIFICATIONS_CLICK_TIP_REACTION_TWITTER_SHARE,
+        Name.NOTIFICATIONS_CLICK_ADD_TRACK_TO_PLAYLIST_TWITTER_SHARE,
         { text: shareText }
       )
       return { shareText, analytics }

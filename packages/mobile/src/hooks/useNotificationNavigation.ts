@@ -24,17 +24,6 @@ import type {
   TrendingTrackNotification,
   ChallengeRewardNotification,
   TierChangeNotification,
-  ReactionNotification,
-  ReactionPushNotification,
-  TipReceiveNotification,
-  TipReceivePushNotification,
-  TipSendNotification,
-  TipSendPushNotification,
-  SupporterRankUpNotification,
-  SupporterRankUpPushNotification,
-  SupportingRankUpNotification,
-  SupportingRankUpPushNotification,
-  SupporterDethronedNotification,
   AddTrackToPlaylistNotification,
   AddTrackToPlaylistPushNotification,
   MessagePushNotification,
@@ -53,17 +42,12 @@ import {
   NotificationType,
   PushNotificationType,
   Entity,
-  Achievement,
-  tippingActions
+  Achievement
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
-import type { AppState } from '@audius/web/src/store/types'
 import { useLinkTo } from '@react-navigation/native'
-import { useDispatch, useStore } from 'react-redux'
 
 import { useNavigation } from './useNavigation'
-
-const { beginTip } = tippingActions
 
 /**
  * Navigator for notifications
@@ -72,8 +56,6 @@ const { beginTip } = tippingActions
  */
 export const useNotificationNavigation = () => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
-  const store = useStore<AppState>()
   const linkTo = useLinkTo()
 
   const socialActionHandler = useCallback(
@@ -196,30 +178,6 @@ export const useNotificationNavigation = () => {
     [navigation]
   )
 
-  const profileHandler = useCallback(
-    (
-      notification:
-        | ReactionNotification
-        | ReactionPushNotification
-        | SupporterRankUpNotification
-        | SupporterRankUpPushNotification
-        | SupportingRankUpNotification
-        | SupportingRankUpPushNotification
-        | TipReceiveNotification
-        | TipReceivePushNotification
-        | TipSendNotification
-        | TipSendPushNotification
-    ) => {
-      navigation.navigate('Profile', {
-        id:
-          'entityId' in notification
-            ? notification.entityId
-            : notification.initiator
-      })
-    },
-    [navigation]
-  )
-
   const messagesHandler = useCallback(
     (
       notification: MessagePushNotification | MessageReactionPushNotification
@@ -276,7 +234,6 @@ export const useNotificationNavigation = () => {
       [PushNotificationType.MilestoneListen]: milestoneHandler,
       [PushNotificationType.MilestoneRepost]: milestoneHandler,
       [NotificationType.Milestone]: milestoneHandler,
-      [NotificationType.Reaction]: profileHandler,
       [NotificationType.RemixCosign]: (
         notification: RemixCosignNotification | RemixCosignPushNotification
       ) => {
@@ -307,25 +264,9 @@ export const useNotificationNavigation = () => {
       [PushNotificationType.RepostOfRepostTrack]: socialActionHandler,
       [NotificationType.Repost]: socialActionHandler,
       [NotificationType.RepostOfRepost]: entityHandler,
-      [NotificationType.SupporterDethroned]: (
-        notification: SupporterDethronedNotification
-      ) => {
-        // TODO: Need to handle the payload from identity
-        const { supportedUserId } = notification
-        const supportedUser = store.getState().users.entries[supportedUserId]
-
-        dispatch(
-          beginTip({ user: supportedUser?.metadata, source: 'dethroned' })
-        )
-        navigation.navigate('TipArtist')
-      },
-      [NotificationType.SupporterRankUp]: profileHandler,
-      [NotificationType.SupportingRankUp]: profileHandler,
       [NotificationType.TierChange]: (notification: TierChangeNotification) => {
         navigation.navigate('AudioScreen')
       },
-      [NotificationType.TipReceive]: profileHandler,
-      [NotificationType.TipSend]: profileHandler,
       [NotificationType.TrendingTrack]: (
         notification: TrendingTrackNotification
       ) => {
@@ -384,12 +325,9 @@ export const useNotificationNavigation = () => {
       socialActionHandler,
       entityHandler,
       milestoneHandler,
-      profileHandler,
       userIdHandler,
       messagesHandler,
-      navigation,
-      store,
-      dispatch
+      navigation
     ]
   )
 

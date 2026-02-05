@@ -8,7 +8,6 @@ import {
 import {
   Modal,
   Scrollbar,
-  IconTipping as IconTip,
   IconUser,
   IconUserGroup,
   IconTrophy,
@@ -31,8 +30,6 @@ import { PurchasersUserList } from 'components/user-list/lists/PurchasersUserLis
 import { RelatedArtistsUserList } from 'components/user-list/lists/RelatedArtistsUserList'
 import { RemixersUserList } from 'components/user-list/lists/RemixersUserList'
 import { RepostsUserList } from 'components/user-list/lists/RepostsUserList'
-import { SupportingUserList } from 'components/user-list/lists/SupportingUserList'
-import { TopSupportersUserList } from 'components/user-list/lists/TopSupportersUserList'
 import { ChatBlastWithAudienceCTA } from 'pages/chat-page/components/ChatBlastWithAudienceCTA'
 import {
   getUserListType,
@@ -49,8 +46,6 @@ const messages = {
   favorites: 'Favorites',
   followers: 'Followers',
   following: 'Following',
-  topSupporters: 'Top Supporters',
-  supporting: 'Supporting',
   relatedArtists: 'Related Artists',
   mutuals: 'Mutuals',
   purchasers: 'Purchasers',
@@ -114,18 +109,6 @@ export const UserListModal = () => {
           Icon: IconTrophy,
           title: notificationTitle
         }
-      case UserListType.SUPPORTER:
-        return {
-          component: <TopSupportersUserList />,
-          Icon: IconTrophy,
-          title: messages.topSupporters
-        }
-      case UserListType.SUPPORTING:
-        return {
-          component: <SupportingUserList />,
-          Icon: IconTip,
-          title: messages.supporting
-        }
       case UserListType.MUTUAL_FOLLOWER:
         return {
           component: <MutualsUserList />,
@@ -175,15 +158,9 @@ export const UserListModal = () => {
         <ModalTitle title={title} Icon={Icon} />
       </ModalHeader>
       <Scrollbar>{component}</Scrollbar>
-      {!isChatBlastPath &&
-      (userListType === UserListType.FOLLOWER ||
-        userListType === UserListType.SUPPORTER) ? (
+      {!isChatBlastPath && userListType === UserListType.FOLLOWER ? (
         <ChatBlastWithAudienceCTA
-          audience={
-            userListType === UserListType.FOLLOWER
-              ? ChatBlastAudience.FOLLOWERS
-              : ChatBlastAudience.TIPPERS
-          }
+          audience={ChatBlastAudience.FOLLOWERS}
           onClick={onClose}
         />
       ) : null}

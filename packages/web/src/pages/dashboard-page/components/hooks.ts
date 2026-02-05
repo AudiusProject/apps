@@ -9,7 +9,6 @@ import {
   Collection,
   Track,
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import {
@@ -85,9 +84,7 @@ const useSegregatedTrackData = () => {
     )
     const specialAccessTracks = tracks.filter(
       (data) =>
-        data.is_stream_gated &&
-        (isContentFollowGated(data.stream_conditions) ||
-          isContentTipGated(data.stream_conditions))
+        data.is_stream_gated && isContentFollowGated(data.stream_conditions)
     )
     const hiddenTracks = tracks.filter((data) => !!data.is_unlisted)
     const premiumTracks = tracks.filter(

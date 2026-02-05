@@ -20,7 +20,6 @@ import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
-import { TipAudioButton } from '../TipAudioButton'
 import { UploadTrackButton } from '../UploadTrackButton'
 
 import { ArtistProfilePicture } from './ArtistProfilePicture'
@@ -44,8 +43,7 @@ export const ProfileHeader = memo(() => {
     website,
     twitter_handle: twitterHandle,
     instagram_handle: instagramHandle,
-    tiktok_handle: tikTokHandle,
-    supporting_count: supportingCount
+    tiktok_handle: tikTokHandle
   } = useProfileUser({
     select: (user) => ({
       user_id: user.user_id,
@@ -55,8 +53,7 @@ export const ProfileHeader = memo(() => {
       website: user.website,
       twitter_handle: user.twitter_handle,
       instagram_handle: user.instagram_handle,
-      tiktok_handle: user.tiktok_handle,
-      supporting_count: user.supporting_count
+      tiktok_handle: user.tiktok_handle
     })
   }).user ?? {}
 
@@ -73,14 +70,12 @@ export const ProfileHeader = memo(() => {
   const hasMultipleSocials =
     [website, twitterHandle, instagramHandle, tikTokHandle].filter(Boolean)
       .length > 1
-  const isSupporting = supportingCount && supportingCount > 0
 
   // Note: we also if the profile bio is longer than 3 lines, but that's handled in the Bio component.
   const shouldExpand =
     hasTier ||
     hasMutuals ||
     hasMultipleSocials ||
-    isSupporting ||
     (comments && comments?.length > 0)
 
   useEffect(() => {
@@ -158,11 +153,9 @@ export const ProfileHeader = memo(() => {
           <Flex pointerEvents='box-none' mt='s'>
             {isOwner ? (
               <UploadTrackButton />
-            ) : isArtistCoinLoading ? null : userId && artistCoin?.mint ? (
+            ) : !isArtistCoinLoading && userId && artistCoin?.mint ? (
               <BuyArtistCoinButton userId={userId} />
-            ) : (
-              <TipAudioButton />
-            )}
+            ) : null}
           </Flex>
         </OnlineOnly>
       </Flex>

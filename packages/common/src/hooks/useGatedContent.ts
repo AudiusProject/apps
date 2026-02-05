@@ -16,7 +16,6 @@ import {
   AccessConditions,
   Track,
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '~/models/Track'
@@ -136,23 +135,16 @@ export const useStreamConditionsEntity = (
   const followUserId = isContentFollowGated(streamConditions)
     ? streamConditions?.follow_user_id
     : null
-  const tipUserId = isContentTipGated(streamConditions)
-    ? streamConditions?.tip_user_id
-    : null
   const tokenMint = isContentTokenGated(streamConditions)
     ? streamConditions?.token_gate.token_mint
     : null
 
-  const { byId: usersById } = useUsers(
-    [followUserId, tipUserId].filter(removeNullable)
-  )
+  const { byId: usersById } = useUsers([followUserId].filter(removeNullable))
   const followee = followUserId ? usersById[followUserId] : null
-  const tippedUser = tipUserId ? usersById[tipUserId] : null
   const { data: token } = useArtistCoin(tokenMint)
 
   return {
     followee,
-    tippedUser,
     token
   }
 }

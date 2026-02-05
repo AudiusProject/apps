@@ -65,8 +65,6 @@ export * from './tan-query/purchases/usePurchasersCount'
 export * from './tan-query/purchases/useSalesAggregate'
 
 // Reactions
-export * from './tan-query/reactions/useReaction'
-export * from './tan-query/reactions/useWriteReaction'
 export * from './tan-query/reactions/types'
 export * from './tan-query/reactions/utils'
 
@@ -120,9 +118,6 @@ export * from './tan-query/users/useMutualFollowers'
 export * from './tan-query/users/useMutedUsers'
 export * from './tan-query/users/useRelatedArtists'
 export * from './tan-query/users/useSuggestedArtists'
-export * from './tan-query/users/useSupporter'
-export * from './tan-query/users/useSupporters'
-export * from './tan-query/users/useSupportedUsers'
 export * from './tan-query/users/useTopArtists'
 export * from './tan-query/users/useTopArtistsInGenre'
 export * from './tan-query/users/useUserAlbums'

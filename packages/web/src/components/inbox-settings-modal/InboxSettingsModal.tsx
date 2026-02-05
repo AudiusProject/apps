@@ -30,8 +30,6 @@ const messages = {
   error: 'Something went wrong. Please try again.',
   allTitle: 'Allow Messages from Everyone',
   followeeTitle: 'People You Follow',
-  tipperTitle: 'Tip Supporters',
-  tippedArtistsTitle: "Artists You've Tipped",
   followersTitle: 'Your Followers',
   verifiedTitle: 'Verified Users'
 }
@@ -40,14 +38,6 @@ const options = [
   {
     title: messages.followeeTitle,
     value: ChatPermission.FOLLOWEES
-  },
-  {
-    title: messages.tipperTitle,
-    value: ChatPermission.TIPPERS
-  },
-  {
-    title: messages.tippedArtistsTitle,
-    value: ChatPermission.TIPPEES
   },
   {
     title: messages.followersTitle,

@@ -3,7 +3,6 @@ import { ReactNode } from 'react'
 import {
   IconAudiusLogo,
   useTheme,
-  IconTipping as IconTipBase,
   IconHeart,
   IconPlaylists as IconPlaylist,
   IconRemix as IconRemixBase,
@@ -60,10 +59,6 @@ export const IconTier = ({ children }: { children: ReactNode }) => {
 
 export const IconRemix = () => {
   return <IconRemixBase color='accent' className={styles.iconRemix} />
-}
-
-export const IconTip = () => {
-  return <IconTipBase color='accent' className={styles.iconTip} />
 }
 
 export const IconAnnouncement = () => {

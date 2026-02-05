@@ -14,8 +14,6 @@ import { useProfilePicture } from 'hooks/useProfilePicture'
 
 import styles from './ArtistChip.module.css'
 import { ArtistChipFollowers } from './ArtistChipFollowers'
-import { ArtistChipSupportFor } from './ArtistChipSupportFor'
-import { ArtistChipSupportFrom } from './ArtistChipSupportFrom'
 
 type ArtistIdentifierProps = {
   userId: ID
@@ -71,8 +69,6 @@ export type ArtistChipProps = {
   onClickArtistName?: () => void
   showPopover?: boolean
   showFollowsYou?: boolean
-  showSupportFor?: ID
-  showSupportFrom?: ID
   className?: string
   popoverMount?: MountPlacement
   customChips?: React.ReactNode
@@ -84,8 +80,6 @@ const ArtistChip = ({
   onClickArtistName,
   showPopover = true,
   showFollowsYou = true,
-  showSupportFor,
-  showSupportFrom,
   className = '',
   popoverMount = MountPlacement.PAGE,
   customChips = null,
@@ -180,15 +174,6 @@ const ArtistChip = ({
               userId={userId}
               followerCount={follower_count}
             />
-            {showSupportFor ? (
-              <ArtistChipSupportFor artistId={userId} userId={showSupportFor} />
-            ) : null}
-            {showSupportFrom ? (
-              <ArtistChipSupportFrom
-                artistId={userId}
-                userId={showSupportFrom}
-              />
-            ) : null}
           </>
         )}
       </div>

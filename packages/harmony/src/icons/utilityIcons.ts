@@ -126,7 +126,6 @@ import IconSupportSVG from '../assets/icons/Support.svg'
 import IconTastemakerSVG from '../assets/icons/Tastemaker.svg'
 import IconThumbsDownSVG from '../assets/icons/ThumbsDown.svg'
 import IconThumbsUpSVG from '../assets/icons/ThumbsUp.svg'
-import IconTippingSVG from '../assets/icons/Tipping.svg'
 import IconTowerBroadcastSVG from '../assets/icons/TowerBroadcast.svg'
 import IconTransactionSVG from '../assets/icons/Transaction.svg'
 import IconTrashSVG from '../assets/icons/Trash.svg'
@@ -223,7 +222,6 @@ export const IconThumbsUp = IconThumbsUpSVG as IconComponent
 export const IconCloseAlt = IconCloseAltSVG as IconComponent
 export const IconMood = IconMoodSVG as IconComponent
 export const IconMoneyBracket = IconMoneyBracketSVG as IconComponent
-export const IconTipping = IconTippingSVG as IconComponent
 export const IconCloudDownload = IconCloudDownloadSVG as IconComponent
 export const IconNoWifi = IconNoWifiSVG as IconComponent
 export const IconTransaction = IconTransactionSVG as IconComponent

@@ -9,7 +9,6 @@ import Stats, { StatProps } from 'components/stats/Stats'
 
 import styles from './ArtistCard.module.css'
 import { ArtistCardCover } from './ArtistCardCover'
-import { ArtistSupporting } from './ArtistSupporting'
 const { followUser, unfollowUser } = usersSocialActions
 
 type ArtistCardProps = {
@@ -95,7 +94,6 @@ export const ArtistCard = (props: ArtistCardProps) => {
         </div>
         <div className={styles.contentContainer}>
           <div>
-            <ArtistSupporting artist={artist} onNavigateAway={onNavigateAway} />
             <div className={styles.description}>{bio}</div>
             <FollowButton
               isFollowing={does_current_user_follow}

@@ -6,7 +6,6 @@ import {
   FollowSource,
   ModalSource,
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated,
   ID,
   AccessConditions,
@@ -15,7 +14,6 @@ import {
 } from '@audius/common/models'
 import {
   usersSocialActions as socialActions,
-  tippingActions,
   usePremiumContentPurchaseModal,
   gatedContentSelectors,
   PurchaseableContentType,
@@ -30,7 +28,6 @@ import {
   IconSparkles,
   Button,
   IconUserFollow,
-  IconTipping,
   IconArtistCoin
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -49,7 +46,6 @@ import { LockedStatusBadge } from '../locked-status-badge'
 
 import styles from './GiantTrackTile.module.css'
 
-const { beginTip } = tippingActions
 const { getGatedContentStatusMap } = gatedContentSelectors
 
 const BUY_BUTTON_WIDTH = 250
@@ -62,7 +58,6 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlocked: 'unlocked',
   coinGated: 'COIN GATED',
   specialAccess: 'SPECIAL ACCESS',
-  sendTip: 'Send Tip',
   followArtist: 'Follow Artist',
   buyArtistCoin: 'Buy Artist Coin',
   period: '.',
@@ -71,12 +66,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlockFollowGatedContentPrefix: 'Follow',
   thankYouForFollowing: 'Thank you for following',
   unlockedFollowGatedContentSuffix: `! This ${contentType} is now available.`,
-  ownTipGated: 'Users can unlock access by sending you a tip!',
-  unlockTipGatedContentPrefix: 'Send',
-  unlockTipGatedContentSuffix: 'a tip.',
   thankYouForSupporting: 'Thank you for supporting',
-  unlockingTipGatedContentSuffix: 'by sending them a tip!',
-  unlockedTipGatedContentSuffix: `by sending them a tip! This ${contentType} is now available.`,
   unlockWithPurchase: `Unlock this ${contentType} with a one-time purchase!`,
   ofArtistsCoin: "of the artist's coin",
   artistCoin: 'Artist coin',
@@ -98,7 +88,6 @@ type GatedContentAccessSectionProps = {
   trackOwner: Nullable<User>
   streamConditions: AccessConditions
   followee: Nullable<User>
-  tippedUser: Nullable<User>
   isOwner: boolean
   className?: string
   buttonClassName?: string
@@ -110,7 +99,6 @@ const LockedGatedContentSection = ({
   contentType,
   streamConditions,
   followee,
-  tippedUser,
   className,
   buttonClassName,
   source
@@ -126,9 +114,6 @@ const LockedGatedContentSection = ({
       ? streamConditions.token_gate.token_mint
       : ''
   )
-  const tipSource = lockedContentModalVisibility
-    ? 'howToUnlockModal'
-    : 'howToUnlockTrackPage'
   const followSource = lockedContentModalVisibility
     ? FollowSource.HOW_TO_UNLOCK_MODAL
     : FollowSource.HOW_TO_UNLOCK_TRACK_PAGE
@@ -198,23 +183,6 @@ const LockedGatedContentSection = ({
     setLockedContentModalVisibility
   ])
 
-  const handleSendTip = useRequiresAccountCallback(() => {
-    dispatch(
-      beginTip({ user: tippedUser, source: tipSource, trackId: contentId })
-    )
-
-    if (lockedContentModalVisibility) {
-      setLockedContentModalVisibility(false)
-    }
-  }, [
-    dispatch,
-    tippedUser,
-    tipSource,
-    contentId,
-    lockedContentModalVisibility,
-    setLockedContentModalVisibility
-  ])
-
   const handleFollow = useRequiresAccountCallback(() => {
     if (isContentFollowGated(streamConditions)) {
       dispatch(
@@ -244,16 +212,6 @@ const LockedGatedContentSection = ({
         <Text variant='body' strength='strong'>
           {messages.unlockFollowGatedContentPrefix}{' '}
           <UserLink userId={followee.user_id} />
-        </Text>
-      )
-    }
-
-    if (isContentTipGated(streamConditions) && tippedUser) {
-      return (
-        <Text variant='body' strength='strong'>
-          {messages.unlockTipGatedContentPrefix}{' '}
-          <UserLink userId={tippedUser.user_id} />{' '}
-          {messages.unlockTipGatedContentSuffix}
         </Text>
       )
     }
@@ -301,20 +259,6 @@ const LockedGatedContentSection = ({
           fullWidth
         >
           {messages.followArtist}
-        </Button>
-      )
-    }
-
-    if (isContentTipGated(streamConditions)) {
-      return (
-        <Button
-          variant='primary'
-          color='blue'
-          onClick={handleSendTip}
-          iconRight={IconTipping}
-          fullWidth
-        >
-          {messages.sendTip}
         </Button>
       )
     }
@@ -404,7 +348,6 @@ const UnlockingGatedContentSection = ({
   contentType,
   streamConditions,
   followee,
-  tippedUser,
   className
 }: Omit<
   GatedContentAccessSectionProps,
@@ -419,18 +362,6 @@ const UnlockingGatedContentSection = ({
           <UserLink userId={followee.user_id} />
           {messages.exclamationMark}
         </Text>
-      )
-    }
-
-    if (isContentTipGated(streamConditions) && tippedUser) {
-      return (
-        <div>
-          <span>{messages.thankYouForSupporting}&nbsp;</span>
-          <UserLink userId={tippedUser.user_id} />
-          <span className={styles.suffix}>
-            {messages.unlockingTipGatedContentSuffix}
-          </span>
-        </div>
       )
     }
 
@@ -476,7 +407,6 @@ const UnlockedGatedContentSection = ({
   contentType,
   streamConditions,
   followee,
-  tippedUser,
   isOwner,
   trackOwner,
   className
@@ -499,18 +429,6 @@ const UnlockedGatedContentSection = ({
         <>
           {messages.thankYouForFollowing} <UserLink userId={followee.user_id} />
           {messages.unlockedFollowGatedContentSuffix}
-        </>
-      )
-    }
-
-    if (isContentTipGated(streamConditions) && tippedUser) {
-      return isOwner ? (
-        messages.ownTipGated
-      ) : (
-        <>
-          {messages.thankYouForSupporting}{' '}
-          <UserLink userId={tippedUser.user_id} />
-          {messages.unlockedTipGatedContentSuffix}
         </>
       )
     }
@@ -636,22 +554,18 @@ export const GatedContentSection = ({
   const gatedContentStatus = gatedContentStatusMap[contentId] ?? null
 
   const isFollowGated = isContentFollowGated(streamConditions)
-  const isTipGated = isContentTipGated(streamConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
-  const shouldDisplay =
-    isFollowGated || isTipGated || isUSDCPurchaseGated || isTokenGated
+  const shouldDisplay = isFollowGated || isUSDCPurchaseGated || isTokenGated
   const { byId: users } = useUsers(
     [
       isFollowGated ? streamConditions.follow_user_id : null,
-      isTipGated ? streamConditions.tip_user_id : null,
       isUSDCPurchaseGated ? ownerId : null
     ].filter(removeNullable)
   )
   const followee = isFollowGated ? users[streamConditions.follow_user_id] : null
   const trackOwner =
     isUSDCPurchaseGated && ownerId !== null ? users[ownerId] : null
-  const tippedUser = isTipGated ? users[streamConditions.tip_user_id] : null
 
   const fadeIn = {
     [styles.show]: !isLoading,
@@ -670,7 +584,6 @@ export const GatedContentSection = ({
           contentType={contentType}
           streamConditions={streamConditions}
           followee={followee}
-          tippedUser={tippedUser}
           isOwner={isOwner}
           className={className}
           trackOwner={trackOwner}
@@ -688,7 +601,6 @@ export const GatedContentSection = ({
           contentType={contentType}
           streamConditions={streamConditions}
           followee={followee}
-          tippedUser={tippedUser}
           isOwner={isOwner}
           className={className}
         />
@@ -704,7 +616,6 @@ export const GatedContentSection = ({
         trackOwner={trackOwner}
         streamConditions={streamConditions}
         followee={followee}
-        tippedUser={tippedUser}
         isOwner={isOwner}
         className={cn(styles.gatedContentSectionLocked, className)}
         buttonClassName={buttonClassName}

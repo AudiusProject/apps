@@ -46,8 +46,6 @@ export type RemixOf = {
 // Gated content
 export type FollowGatedConditions = { follow_user_id: number }
 
-export type TipGatedConditions = { tip_user_id: number }
-
 export type TokenGatedConditions = {
   token_gate: {
     token_mint: string
@@ -76,7 +74,6 @@ export type USDCPurchaseConditions = {
 
 export type AccessConditions =
   | FollowGatedConditions
-  | TipGatedConditions
   | USDCPurchaseConditions
   | TokenGatedConditions
   | NftGatedConditions
@@ -94,7 +91,6 @@ export enum GatedContentType {
 
 export enum TrackAccessType {
   PUBLIC = 'public',
-  TIP_GATED = 'tip_gated',
   FOLLOW_GATED = 'follow_gated',
   USDC_GATED = 'usdc_gated',
   TOKEN_GATED = 'token_gated'
@@ -104,11 +100,6 @@ export const isContentFollowGated = (
   gatedConditions?: Nullable<AccessConditions>
 ): gatedConditions is FollowGatedConditions =>
   !!gatedConditions && 'follow_user_id' in (gatedConditions ?? {})
-
-export const isContentTipGated = (
-  gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is TipGatedConditions =>
-  !!gatedConditions && 'tip_user_id' in (gatedConditions ?? {})
 
 export const isContentTokenGated = (
   gatedConditions?: Nullable<AccessConditions>
@@ -122,8 +113,8 @@ export const isContentNftGated = (
 
 export const isContentSpecialAccess = (
   gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is TipGatedConditions | FollowGatedConditions =>
-  isContentFollowGated(gatedConditions) || isContentTipGated(gatedConditions)
+): gatedConditions is FollowGatedConditions =>
+  isContentFollowGated(gatedConditions)
 
 export const isContentUSDCPurchaseGated = (
   gatedConditions?: Nullable<

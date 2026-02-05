@@ -42,7 +42,6 @@ import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
 import { ShareDrawer } from 'app/components/share-drawer'
 import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-drawer'
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
-import { SupportersInfoDrawer } from 'app/components/supporters-info-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
 import { VerificationErrorDrawer } from 'app/components/verification-error-drawer/VerificationErrorDrawer'
 import { VerificationSuccessDrawer } from 'app/components/verification-success-drawer/VerificationSuccessDrawer'
@@ -165,7 +164,6 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   BlockMessages: BlockMessagesDrawer,
   MuteComments: MuteCommentsConfirmationDrawer,
   DeleteChat: DeleteChatDrawer,
-  SupportersInfo: SupportersInfoDrawer,
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,

@@ -4,7 +4,6 @@ import { useFeatureFlag, useAccessAndRemixSettings } from '@audius/common/hooks'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import {
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated,
   StreamTrackAvailabilityType
@@ -63,10 +62,7 @@ export const PriceAndAudienceScreen = () => {
     if (isContentTokenGated(streamConditions)) {
       return StreamTrackAvailabilityType.TOKEN_GATED
     }
-    if (
-      isContentFollowGated(streamConditions) ||
-      isContentTipGated(streamConditions)
-    ) {
+    if (isContentFollowGated(streamConditions)) {
       return StreamTrackAvailabilityType.SPECIAL_ACCESS
     }
     return StreamTrackAvailabilityType.PUBLIC
@@ -132,16 +128,13 @@ export const PriceAndAudienceScreen = () => {
   const navigation = useNavigation()
   const [usersMayLoseAccess, setUsersMayLoseAccess] = useState(false)
   const [specialAccessType, setSpecialAccessType] = useState<
-    'follow' | 'tip' | undefined
+    'follow' | undefined
   >(undefined)
 
-  // We do not know whether or not the special access is of type follow or tip.
-  // So we do that check here.
+  // Set the special access type based on stream conditions.
   useEffect(() => {
     if (isContentFollowGated(streamConditions)) {
       setSpecialAccessType('follow')
-    } else if (isContentTipGated(streamConditions)) {
-      setSpecialAccessType('tip')
     }
   }, [streamConditions])
 

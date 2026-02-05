@@ -209,12 +209,6 @@ const ExplorePage = lazy(() =>
   }))
 )
 const SettingsPage = lazy(() => import('pages/settings-page/SettingsPage'))
-const SupportingPage = lazy(
-  () => import('pages/supporting-page/SupportingPage')
-)
-const TopSupportersPage = lazy(
-  () => import('pages/top-supporters-page/TopSupportersPage')
-)
 const TrackCommentsPage = lazy(() =>
   import('pages/track-page/TrackCommentsPage').then((m) => ({
     default: m.TrackCommentsPage
@@ -291,8 +285,6 @@ const {
   CHECK_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   DEACTIVATE_PAGE,
-  SUPPORTING_USERS_ROUTE,
-  TOP_SUPPORTERS_USERS_ROUTE,
   publicSiteRoutes,
   CHAT_PAGE,
   PROFILE_PAGE_COMMENTS,
@@ -1183,14 +1175,6 @@ const WebPlayer = (props: WebPlayerProps) => {
                       path={COIN_DETAIL_MOBILE_WEB_ROUTE}
                       element={<ArtistCoinDetailsPage />}
                     />
-                    <Route
-                      path={SUPPORTING_USERS_ROUTE}
-                      element={<SupportingPage />}
-                    />
-                    <Route
-                      path={TOP_SUPPORTERS_USERS_ROUTE}
-                      element={<TopSupportersPage />}
-                    />
                     <Route path={EMPTY_PAGE} element={<EmptyPage />} />
                   </>
                 ) : (
@@ -1217,14 +1201,6 @@ const WebPlayer = (props: WebPlayerProps) => {
                     />
                     <Route
                       path={COIN_DETAIL_MOBILE_WEB_ROUTE}
-                      element={<Navigate to={TRENDING_PAGE} replace />}
-                    />
-                    <Route
-                      path={SUPPORTING_USERS_ROUTE}
-                      element={<Navigate to={TRENDING_PAGE} replace />}
-                    />
-                    <Route
-                      path={TOP_SUPPORTERS_USERS_ROUTE}
                       element={<Navigate to={TRENDING_PAGE} replace />}
                     />
                     <Route
@@ -1518,14 +1494,6 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={COIN_DETAIL_MOBILE_WEB_ROUTE}
-                  element={<Navigate to={TRENDING_PAGE} replace />}
-                />
-                <Route
-                  path={SUPPORTING_USERS_ROUTE}
-                  element={<Navigate to={TRENDING_PAGE} replace />}
-                />
-                <Route
-                  path={TOP_SUPPORTERS_USERS_ROUTE}
                   element={<Navigate to={TRENDING_PAGE} replace />}
                 />
                 <Route

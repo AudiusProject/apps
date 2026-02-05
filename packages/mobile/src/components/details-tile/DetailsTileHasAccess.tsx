@@ -4,7 +4,6 @@ import type { Coin } from '@audius/common/adapters'
 import { useStreamConditionsEntity } from '@audius/common/hooks'
 import {
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
@@ -42,10 +41,6 @@ const messages = {
   unlockedFollowGatedSuffix: (contentType: PurchaseableContentType) =>
     `! This ${contentType} is now available.`,
   ownerFollowGated: 'Users can unlock access by following your account!',
-  unlockedTipGatedPrefix: 'Thank you for supporting ',
-  unlockedTipGatedSuffix: (contentType: PurchaseableContentType) =>
-    ` by sending them a tip! This ${contentType} is now available.`,
-  ownerTipGated: 'Users can unlock access by sending you a tip!',
   unlockedUSDCPurchasePrefix: (contentType: PurchaseableContentType) =>
     `You've purchased this ${contentType}. Thank you for supporting `,
   unlockedUSDCPurchaseSuffix: '.',
@@ -104,10 +99,7 @@ const DetailsTileOwnerSection = ({
   const styles = useStyles()
   const neutral = useColor('neutral')
 
-  if (
-    isContentFollowGated(streamConditions) ||
-    isContentTipGated(streamConditions)
-  ) {
+  if (isContentFollowGated(streamConditions)) {
     return (
       <Flex
         p='l'
@@ -122,11 +114,7 @@ const DetailsTileOwnerSection = ({
         </View>
         <View style={styles.descriptionContainer}>
           <Text>
-            <Text style={styles.description}>
-              {isContentFollowGated(streamConditions)
-                ? messages.ownerFollowGated
-                : messages.ownerTipGated}
-            </Text>
+            <Text style={styles.description}>{messages.ownerFollowGated}</Text>
           </Text>
         </View>
       </Flex>
@@ -213,7 +201,7 @@ export const DetailsTileHasAccess = ({
   const styles = useStyles()
   const navigation = useNavigation()
 
-  const { followee, tippedUser } = useStreamConditionsEntity(streamConditions)
+  const { followee } = useStreamConditionsEntity(streamConditions)
 
   const handlePressArtistName = useCallback(
     (handle: string) => () => {
@@ -263,14 +251,6 @@ export const DetailsTileHasAccess = ({
         suffix: messages.unlockedFollowGatedSuffix(contentType)
       })
     }
-    if (isContentTipGated(streamConditions)) {
-      if (!tippedUser) return null
-      return renderUnlockedSpecialAccessDescription({
-        entity: tippedUser,
-        prefix: messages.unlockedTipGatedPrefix,
-        suffix: messages.unlockedTipGatedSuffix(contentType)
-      })
-    }
     if (isContentUSDCPurchaseGated(streamConditions)) {
       if (!trackArtist) return null
       return renderUnlockedSpecialAccessDescription({
@@ -307,7 +287,6 @@ export const DetailsTileHasAccess = ({
     contentType,
     followee,
     renderUnlockedSpecialAccessDescription,
-    tippedUser,
     trackArtist,
     handleTokenPress,
     token?.ticker

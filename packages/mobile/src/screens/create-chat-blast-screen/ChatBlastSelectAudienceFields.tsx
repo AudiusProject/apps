@@ -27,10 +27,6 @@ const messages = {
     label: 'My Followers',
     description: 'Send a bulk message to all of your followers.'
   },
-  supporters: {
-    label: 'Tip Supporters',
-    description: 'Send a bulk message to everyone who has tipped you.'
-  },
   purchasers: {
     label: 'Past Purchasers',
     description:
@@ -61,7 +57,6 @@ export const ChatBlastSelectAudienceFields = () => {
   return (
     <ExpandableRadioGroup value={value} onValueChange={setValue}>
       <FollowersMessageField />
-      <TipSupportersMessageField />
       <PastPurchasersMessageField />
       <RemixCreatorsMessageField />
       <CoinHoldersMessageField />
@@ -104,28 +99,6 @@ const FollowersMessageField = () => {
         />
       }
       description={messages.followers.description}
-    />
-  )
-}
-
-const TipSupportersMessageField = () => {
-  const { data: user } = useCurrentAccountUser()
-  const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
-  const isSelected = targetAudience === ChatBlastAudience.TIPPERS
-  const isDisabled = user?.supporter_count === 0
-
-  return (
-    <ExpandableRadio
-      value={ChatBlastAudience.TIPPERS}
-      disabled={isDisabled}
-      label={
-        <LabelWithCount
-          label={messages.supporters.label}
-          count={user?.supporter_count}
-          isSelected={isSelected}
-        />
-      }
-      description={messages.supporters.description}
     />
   )
 }

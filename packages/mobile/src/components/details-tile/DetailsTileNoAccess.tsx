@@ -7,7 +7,6 @@ import {
   FollowSource,
   ModalSource,
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated,
   isContentTokenGated
 } from '@audius/common/models'
@@ -16,7 +15,6 @@ import { FeatureFlags } from '@audius/common/services'
 import {
   PurchaseableContentType,
   usersSocialActions,
-  tippingActions,
   usePremiumContentPurchaseModal,
   gatedContentSelectors
 } from '@audius/common/store'
@@ -25,13 +23,7 @@ import type { ViewStyle } from 'react-native'
 import { Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  IconUserFollow,
-  IconTipping,
-  Flex,
-  Button,
-  useTheme
-} from '@audius/harmony-native'
+import { IconUserFollow, Flex, Button, useTheme } from '@audius/harmony-native'
 import { LockedStatusBadge } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { UserBadges } from 'app/components/user-badges'
@@ -43,22 +35,16 @@ import { EventNames } from 'app/types/analytics'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
 const { followUser } = usersSocialActions
-const { beginTip } = tippingActions
 
 const messages = {
   unlocking: 'UNLOCKING',
   howToUnlock: 'HOW TO UNLOCK',
   goToCollection: 'Go To Collection',
   followArtist: 'Follow Artist',
-  sendTip: 'Send Tip',
   buy: (price: string) => `Buy ${price}`,
   lockedFollowGatedPrefix: 'Follow ',
   unlockingFollowGatedPrefix: 'Thank you for following ',
   unlockingFollowGatedSuffix: '!',
-  lockedTipGatedPrefix: 'Send ',
-  lockedTipGatedSuffix: ' a tip.',
-  unlockingTipGatedPrefix: 'Thank you for supporting ',
-  unlockingTipGatedSuffix: ' by sending them a tip!',
   lockedTokenGatedPrefix: 'You must hold at least ',
   lockedTokenGatedSuffix: ' in a connected wallet.',
   buyArtistCoin: 'Buy Artist Coin',
@@ -187,13 +173,12 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const { color } = useTheme()
-  const source = isModalOpen ? 'howToUnlockModal' : 'howToUnlockTrackPage'
   const followSource = isModalOpen
     ? FollowSource.HOW_TO_UNLOCK_MODAL
     : FollowSource.HOW_TO_UNLOCK_TRACK_PAGE
   const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
   const gatedTrackStatus = gatedTrackStatusMap[trackId] ?? null
-  const { followee, tippedUser } = useStreamConditionsEntity(streamConditions)
+  const { followee } = useStreamConditionsEntity(streamConditions)
   const { isEnabled: isUsdcPurchasesEnabled } = useFeatureFlag(
     FeatureFlags.USDC_PURCHASES
   )
@@ -203,12 +188,6 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
       dispatch(followUser(followee.user_id, followSource, trackId))
     }
   }, [followee, dispatch, followSource, trackId])
-
-  const handleSendTip = useCallback(() => {
-    onClose()
-    dispatch(beginTip({ user: tippedUser, source, trackId }))
-    navigation.navigate('TipArtist')
-  }, [dispatch, tippedUser, source, trackId, navigation, onClose])
 
   const handlePurchasePress = useCallback(() => {
     track(
@@ -294,21 +273,6 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
         </>
       )
     }
-    if (isContentTipGated(streamConditions)) {
-      if (!tippedUser) return null
-      return (
-        <>
-          {renderLockedSpecialAccessDescription({
-            entity: tippedUser,
-            prefix: messages.lockedTipGatedPrefix,
-            suffix: messages.lockedTipGatedSuffix
-          })}
-          <Button iconRight={IconTipping} onPress={handleSendTip} fullWidth>
-            {messages.sendTip}
-          </Button>
-        </>
-      )
-    }
     if (isContentTokenGated(streamConditions)) {
       return (
         <Flex column gap='xl'>
@@ -368,8 +332,6 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     followee,
     renderLockedSpecialAccessDescription,
     handleFollowArtist,
-    tippedUser,
-    handleSendTip,
     handleTokenPress,
     token?.ticker,
     handleBuyTokenPress,
@@ -407,19 +369,12 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
         suffix: messages.unlockingFollowGatedSuffix
       })
     }
-    if (tippedUser) {
-      return renderUnlockingSpecialAccessDescription({
-        entity: tippedUser,
-        prefix: messages.unlockingTipGatedPrefix,
-        suffix: messages.unlockingTipGatedSuffix
-      })
-    }
 
     console.warn(
       'No entity for stream conditions... should not have reached here.'
     )
     return null
-  }, [followee, tippedUser, renderUnlockingSpecialAccessDescription])
+  }, [followee, renderUnlockingSpecialAccessDescription])
 
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
 
