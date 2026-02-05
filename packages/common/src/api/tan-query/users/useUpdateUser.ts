@@ -66,7 +66,7 @@ export const useUpdateUser = () => {
       // Return context with the previous user
       return { previousUser }
     },
-    onError: (_err, { userId }, context?: MutationContext) => {
+    onError: (_err, _, context?: MutationContext) => {
       // If the mutation fails, roll back user data
       if (context?.previousUser) {
         primeUserData({

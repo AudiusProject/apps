@@ -64,7 +64,7 @@ const getStemUploadTasks = async (
         const file = (stemFile as StemUploadWithFile).file
         const task = sdk.tracks.uploadTrackFiles({
           audioFile: fileToSdk(file, 'audio'),
-          onProgress: (key, { loaded, total, transcode }) => {
+          onProgress: (_, { key, loaded, total, transcode }) => {
             context.dispatch(
               updateProgress({
                 clientId: t.clientId,
@@ -115,7 +115,7 @@ const getCoverArtUploadTasks = async (
       const file = fileToSdk(t.metadata.artwork.file, 'cover_art')
       const task = sdk.tracks.uploadTrackFiles({
         imageFile: file,
-        onProgress: (key, { loaded, total }) => {
+        onProgress: (_, { key, loaded, total }) => {
           context.dispatch(
             uploadActions.updateProgress({
               clientId: t.clientId,
@@ -150,7 +150,7 @@ const getTrackUploadTasks = async (
   return tracks.map((t) => {
     const task = sdk.tracks.uploadTrackFiles({
       audioFile: fileToSdk(t.file, 'audio'),
-      onProgress: (key, { loaded, total, transcode }) => {
+      onProgress: (_, { key, loaded, total, transcode }) => {
         context.dispatch(
           uploadActions.updateProgress({
             clientId: t.clientId,
@@ -317,7 +317,7 @@ export const useUpload = () => {
 
       const uploadTask = sdk.tracks.uploadTrackFiles({
         imageFile: fileToSdk(imageFile, 'artwork'),
-        onProgress: (key, { loaded, total }) => {
+        onProgress: (_, { key, loaded, total }) => {
           dispatch(
             updateProgress({
               clientId: 'collection-artwork',

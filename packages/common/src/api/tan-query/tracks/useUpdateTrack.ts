@@ -64,8 +64,8 @@ export const useUpdateTrack = () => {
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
         metadata: sdkMetadata,
-        onProgress: (type, progress) => {
-          if (type === 'audio') {
+        onProgress: (_, progress) => {
+          if (progress.key === 'audio') {
             dispatch(
               replaceTrackProgressModalActions.set({
                 ...progress,
@@ -183,10 +183,6 @@ export const useUpdateTrack = () => {
         feature: Feature.Edit,
         name: 'Edit Track'
       })
-    },
-    onSettled: (_, __, { trackId }) => {
-      // Always refetch after error or success to ensure cache is in sync with server
-      // queryClient.invalidateQueries({ queryKey: getTrackQueryKey(trackId) })
     }
   })
 }

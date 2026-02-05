@@ -117,7 +117,7 @@ export const useUpdateCollection = () => {
       )
 
       const response = await sdk.playlists.updatePlaylist({
-        coverArtFile: coverArtFile
+        imageFile: coverArtFile
           ? fileToSdk(coverArtFile, 'cover_art')
           : undefined,
         playlistId: Id.parse(collectionId),
@@ -176,7 +176,7 @@ export const useUpdateCollection = () => {
       // Return context with the previous collection
       return { previousCollection, collectionUpdate }
     },
-    onError: (_err, { collectionId }, context?: MutationContext) => {
+    onError: (_err, _, context?: MutationContext) => {
       // If the mutation fails, roll back collection data
       if (context?.previousCollection) {
         primeCollectionData({

@@ -113,7 +113,7 @@ export const UploadAlbumSchema = z
      * Track metadata is populated from the album if fields are missing
      */
     trackMetadatas: z.array(AlbumTrackMetadataSchema),
-    trackFiles: z.array(AudioFile)
+    audioFiles: z.array(AudioFile)
   })
   .strict()
 

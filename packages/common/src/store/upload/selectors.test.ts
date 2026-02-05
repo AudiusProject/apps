@@ -15,7 +15,8 @@ describe('upload selectors', () => {
   it('starts at 0%', () => {
     const zero = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -26,7 +27,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -37,7 +39,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '3',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -54,7 +57,8 @@ describe('upload selectors', () => {
   it('is at 50% when uploading finished', () => {
     const half = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -65,7 +69,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -76,7 +81,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '3',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -93,7 +99,8 @@ describe('upload selectors', () => {
   it('is at 33% when two thirds transferred', () => {
     const twoThirdsUploaded = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -104,7 +111,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -115,7 +123,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '3',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -132,7 +141,8 @@ describe('upload selectors', () => {
   it('weights upload by file size', () => {
     const nearlyUploaded = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -143,7 +153,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -154,7 +165,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '3',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -171,7 +183,8 @@ describe('upload selectors', () => {
   it('includes stems tracks correctly', () => {
     const nearlyUploaded = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -181,7 +194,8 @@ describe('upload selectors', () => {
         },
         stems: [
           {
-            art: {
+            clientId: '1-1',
+            image: {
               status: ProgressStatus.UPLOADING
             },
             audio: {
@@ -192,7 +206,8 @@ describe('upload selectors', () => {
             stems: []
           },
           {
-            art: {
+            clientId: '1-2',
+            image: {
               status: ProgressStatus.UPLOADING
             },
             audio: {
@@ -203,7 +218,8 @@ describe('upload selectors', () => {
             stems: []
           },
           {
-            art: {
+            clientId: '1-3',
+            image: {
               status: ProgressStatus.UPLOADING
             },
             audio: {
@@ -216,7 +232,8 @@ describe('upload selectors', () => {
         ]
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -227,7 +244,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '3',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -244,7 +262,8 @@ describe('upload selectors', () => {
   it('caps to 100%', () => {
     const completed = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -262,7 +281,8 @@ describe('upload selectors', () => {
   it('weights transcode by file size', () => {
     const completed = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -274,7 +294,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -292,7 +313,8 @@ describe('upload selectors', () => {
   it('treats errors as completed', () => {
     const completed = [
       {
-        art: {
+        clientId: '1',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {
@@ -304,7 +326,8 @@ describe('upload selectors', () => {
         stems: []
       },
       {
-        art: {
+        clientId: '2',
+        image: {
           status: ProgressStatus.UPLOADING
         },
         audio: {

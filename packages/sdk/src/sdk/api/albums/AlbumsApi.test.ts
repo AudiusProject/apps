@@ -180,7 +180,7 @@ describe('AlbumsApi', () => {
             title: 'BachGavotte'
           }
         ],
-        trackFiles: [
+        audioFiles: [
           {
             buffer: wavFile,
             name: 'trackArt'
@@ -209,7 +209,7 @@ describe('AlbumsApi', () => {
               title: 'BachGavotte'
             }
           ],
-          trackFiles: [
+          audioFiles: [
             {
               buffer: wavFile,
               name: 'trackArt'

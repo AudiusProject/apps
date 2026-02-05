@@ -47,6 +47,7 @@ export class Storage implements StorageService {
     const ac = new AbortController()
     let upload: tus.Upload | undefined
     let uploadPromise: Promise<UploadResponse> | undefined
+    let cachedTotal = 0
 
     return {
       start: async () => {
@@ -84,14 +85,13 @@ export class Storage implements StorageService {
                     : {})
                 },
                 onError: reject,
-                onProgress: (bytesUploaded: number, bytesTotal: number) => {
-                  onProgress?.(
-                    metadata.template === 'audio' ? 'audio' : 'image',
-                    {
-                      loaded: bytesUploaded,
-                      total: bytesTotal
-                    }
-                  )
+                onProgress: (loaded: number, total: number) => {
+                  cachedTotal = total
+                  onProgress?.({
+                    loaded,
+                    total,
+                    transcode: 0
+                  })
                 },
                 onSuccess: async () => {
                   const uploadId = upload?.url?.split('/').pop()
@@ -102,6 +102,7 @@ export class Storage implements StorageService {
                   const res = await this.pollProcessingStatus(
                     uploadId,
                     metadata.template,
+                    cachedTotal,
                     onProgress,
                     ac.signal
                   )
@@ -190,6 +191,7 @@ export class Storage implements StorageService {
   private async pollProcessingStatus(
     id: string,
     template: FileTemplate,
+    total: number,
     onProgress?: ProgressHandler,
     abortSignal?: AbortSignal
   ) {
@@ -221,8 +223,9 @@ export class Storage implements StorageService {
               `No transcoding progress increase for ${MAX_TRACK_TRANSCODE_NO_PROGRESS_TIMEOUT}ms. Progress stuck at ${lastTranscodeProgress}. id=${id}`
             )
           }
-
-          onProgress?.(template === 'audio' ? 'audio' : 'image', {
+          onProgress?.({
+            loaded: total,
+            total,
             transcode: resp.transcode_progress
           })
         }
