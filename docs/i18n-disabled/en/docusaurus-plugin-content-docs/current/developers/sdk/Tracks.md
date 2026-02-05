@@ -417,13 +417,15 @@ const { trackId } = await audiusSdk.tracks.updateTrack({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type                                                                  | Description                                                                   | Required?    |
-| :----------- | :-------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `trackId`    | `string`                                                              | The ID of the track                                                           | **Required** |
-| `userId`     | `string`                                                              | The ID of the user                                                            | **Required** |
-| `imageFile`  | `File`                                                                | A file that will be used as the cover art for the track                       | _Optional_   |
-| `metadata`   | `Partial<`[`UploadTrackMetadata`](/developers/UploadTrackMetadata)`>` | An object containing the details of the track                                 | **Required** |
-| `onProgress` | `(progress: number) => void`                                          | A function that will be called with progress events as the image file uploads | _Optional_   |
+| Name             | Type                                                                  | Description                                                                               | Required?    |
+| :--------------- | :-------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- | :----------- |
+| `trackId`        | `string`                                                              | The ID of the track                                                                       | **Required** |
+| `userId`         | `string`                                                              | The ID of the user                                                                        | **Required** |
+| `imageFile`      | `File`                                                                | A file that will be used as the cover art for the track                                   | _Optional_   |
+| `audioFile`      | `File`                                                                | A file that will be used as the audio for the track                                       | _Optional_   |
+| `generatePreview`| `boolean`                                                             | Whether to generate or regenerate a preview for the track when updating the audio file    | _Optional_   |
+| `metadata`       | `Partial<`[`UploadTrackMetadata`](/developers/UploadTrackMetadata)`>` | An object containing the details of the track                                             | **Required** |
+| `onProgress`     | `(progress: number) => void`                                          | A function that will be called with progress events as the media file uploads             | _Optional_   |
 
 #### `advancedOptions`
 
