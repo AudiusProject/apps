@@ -5,10 +5,10 @@ import { UserCard, UserCardSkeleton } from 'components/user-card'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const ArtistSpotlightSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Artist Spotlight')
   const { data, isLoading, isError, isSuccess } = useExploreContent({
     enabled: inView
   })

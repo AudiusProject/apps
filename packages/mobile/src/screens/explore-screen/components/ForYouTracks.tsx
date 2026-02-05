@@ -5,13 +5,14 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { QueueSource } from '@audius/common/store'
 import { full } from '@audius/sdk'
 
-import { useDeferredElement } from 'app/hooks/useDeferredElement'
+import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
 import { ExploreSection } from './ExploreSection'
 import { TrackTileCarousel } from './TrackTileCarousel'
 
 export const ForYouTracks = () => {
-  const { inView, InViewWrapper } = useDeferredElement()
+  const { inView, InViewWrapper } =
+    useExploreSectionTracking('Recommended Tracks')
   const { data: recommendedTracks, isPending } = useRecommendedTracks(
     { pageSize: 10, timeRange: full.GetRecommendedTracksTimeEnum.Week },
     { enabled: inView }

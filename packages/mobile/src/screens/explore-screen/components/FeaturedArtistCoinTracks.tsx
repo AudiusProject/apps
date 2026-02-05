@@ -4,13 +4,14 @@ import { useExploreContent } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { QueueSource } from '@audius/common/store'
 
-import { useDeferredElement } from '../../../hooks/useDeferredElement'
+import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
 import { ExploreSection } from './ExploreSection'
 import { TrackTileCarousel } from './TrackTileCarousel'
 
 export const FeaturedArtistCoinTracks = () => {
-  const { InViewWrapper, inView } = useDeferredElement()
+  const { InViewWrapper, inView } =
+    useExploreSectionTracking('Artist Coin Tracks')
   const { data, isPending } = useExploreContent({ enabled: inView })
 
   return (

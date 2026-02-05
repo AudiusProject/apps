@@ -3,10 +3,10 @@ import { exploreMessages as messages } from '@audius/common/messages'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const ArtistCoinTracksSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Artist Coin Tracks')
 
   const { data, isLoading, isError, isSuccess } = useExploreContent({
     enabled: inView

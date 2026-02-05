@@ -308,6 +308,10 @@ export enum Name {
   SEARCH_RESULT_SELECT = 'Search: Result Select',
   SEARCH_TAB_CLICK = 'Search: Tab Click',
 
+  // Explore
+  EXPLORE_SECTION_VIEW = 'Explore: Section View',
+  EXPLORE_SECTION_CLICK = 'Explore: Section Click',
+
   // Errors
   ERROR_PAGE = 'Error Page',
   NOT_FOUND_PAGE = 'Not Found Page',
@@ -1550,6 +1554,42 @@ type SearchResultSelect = {
   source: SearchSource
   id: ID
   kind: 'track' | 'profile' | 'playlist' | 'album'
+}
+
+// Explore
+export type ExploreSectionName =
+  | 'Recommended Tracks'
+  | 'Artist Coin Tracks'
+  | 'Recently Played'
+  | 'Quick Search'
+  | 'Featured Playlists'
+  | 'Featured Remix Contests'
+  | 'Underground Trending Tracks'
+  | 'Artist Spotlight'
+  | 'Label Spotlight'
+  | 'Active Discussions'
+  | 'Downloads Available'
+  | 'Mood Grid'
+  | 'Trending Playlists'
+  | 'Most Shared'
+  | 'Best Selling'
+  | 'Recent Premium Tracks'
+  | 'Feeling Lucky'
+  | 'Recent Searches'
+
+type ExploreSectionView = {
+  eventName: Name.EXPLORE_SECTION_VIEW
+  section: ExploreSectionName
+  source: 'web' | 'mobile'
+}
+
+type ExploreSectionClick = {
+  eventName: Name.EXPLORE_SECTION_CLICK
+  section: ExploreSectionName
+  source: 'web' | 'mobile'
+  id?: ID
+  kind?: 'track' | 'profile' | 'playlist' | 'album' | 'mood' | 'preset'
+  link?: string
 }
 
 type ListenGated = {
@@ -3127,6 +3167,8 @@ export type AllTrackingEvents =
   | SearchTag
   | SearchMoreResults
   | SearchResultSelect
+  | ExploreSectionView
+  | ExploreSectionClick
   | ListenGated
   | ErrorPage
   | NotFoundPage

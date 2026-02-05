@@ -17,7 +17,7 @@ import {
   MOBILE_TILE_WIDTH,
   TILE_WIDTH
 } from './constants'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 type TileType = typeof DesktopCollectionTile | typeof MobileCollectionTile
 
@@ -119,7 +119,7 @@ const CollectionLineupCarousel = ({
 }
 
 export const TrendingPlaylistsSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Trending Playlists')
   const isMobile = useIsMobile()
   const size = isMobile ? TrackTileSize.SMALL : TrackTileSize.LARGE
   const { lineup, isError, isSuccess, isLoading, play, pause, togglePlay } =

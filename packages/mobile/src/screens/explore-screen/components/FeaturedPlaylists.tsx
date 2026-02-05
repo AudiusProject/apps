@@ -6,13 +6,14 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { useTheme } from '@audius/harmony-native'
 import { CollectionList } from 'app/components/collection-list'
 
-import { useDeferredElement } from '../../../hooks/useDeferredElement'
+import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
 import { ExploreSection } from './ExploreSection'
 
 export const FeaturedPlaylists = () => {
   const { spacing } = useTheme()
-  const { InViewWrapper, inView } = useDeferredElement()
+  const { InViewWrapper, inView } =
+    useExploreSectionTracking('Featured Playlists')
 
   const { data: exploreContent } = useExploreContent({ enabled: inView })
   const { data: playlists } = useCollections(

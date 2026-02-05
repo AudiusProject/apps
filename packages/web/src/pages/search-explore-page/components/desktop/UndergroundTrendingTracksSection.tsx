@@ -6,10 +6,12 @@ import { Status } from '@audius/common/models'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const UndergroundTrendingTracksSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking(
+    'Underground Trending Tracks'
+  )
   const {
     data: undergroundTrendingTracks,
     isLoading,
