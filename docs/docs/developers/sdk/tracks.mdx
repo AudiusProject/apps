@@ -601,7 +601,7 @@ example above.
 | :----------- | :----------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :----------- |
 | `imageFile`  | `File`                                                                                                                         | A file that will be used as the cover art for the track                 | _Optional_   |
 | `metadata`   | [`UploadTrackMetadata`](/developers/upload-track-metadata)                                                                     | An object containing the details of the track                           | **Required** |
-| `onProgress` | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#UploadTrackProgressEvent)` ) => void` | A function that will be called with progress events as the files upload | _Optional_   |
+| `onProgress` | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#uploadtrackprogressevent)` ) => void` | A function that will be called with progress events as the files upload | _Optional_   |
 | `audioFile`  | `File`                                                                                                                         | The audio file of the track                                             | **Required** |
 | `userId`     | `string`                                                                                                                       | The ID of the user                                                      | **Required** |
 
@@ -687,7 +687,7 @@ example above.
 | `imageFile`       | `File`                                                                                                                        | A file that will be used as the cover art for the track                        | _Optional_   |
 | `metadata`        | `Partial<`[`UploadTrackMetadata`](/developers/upload-track-metadata)`>`                                                       | An object containing the details of the track                                  | **Required** |
 | `generatePreview` | `boolean`                                                                                                                     | Whether to regenerate the track preview (used when preview start time changes) | _Optional_   |
-| `onProgress`      | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#UploadTrackProgressEvent)`) => void` | A function that will be called with progress events as files upload            | _Optional_   |
+| `onProgress`      | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#uploadtrackprogressevent)`) => void` | A function that will be called with progress events as files upload            | _Optional_   |
 
 > #### `advancedOptions`
 

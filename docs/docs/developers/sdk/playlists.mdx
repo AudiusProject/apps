@@ -317,7 +317,7 @@ example above.
 | :----------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
 | `imageFile`  | `File`                                                                                                                       | A file that will be used as the cover art for the playlist                    | _Optional_   |
 | `metadata`   | _see code block below_                                                                                                       | An object containing the details of the playlist                              | **Required** |
-| `onProgress` | `(progress: number, `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#UploadPlaylistProgressEvent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| `onProgress` | `(progress: number, `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
 | `trackIds`   | `Array<string>`                                                                                                              | An array of track IDs to be included in the playlist                          | **Required** |
 | `userId`     | `string`                                                                                                                     | The ID of the user                                                            | **Required** |
 
@@ -421,7 +421,7 @@ example above.
 | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :----------- |
 | `imageFile`      | `File`                                                                                                                              | A file that will be used as the cover art for the playlist                                   | _Optional_   |
 | `metadata`       | _see code sample below_                                                                                                             | An object containing the details of the playlist                                             | **Required** |
-| `onProgress`     | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#UploadPlaylistProgressEvent)`) => void` | A function that will be called with progress events as the image file and audio files upload | _Optional_   |
+| `onProgress`     | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file and audio files upload | _Optional_   |
 | `audioFiles`     | `Array<File>`                                                                                                                       | An array of track audio files                                                                | **Required** |
 | `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]`                                                                      | An array of track files                                                                      | _Optional_   |
 | `userId`         | `string`                                                                                                                            | The ID of the user                                                                           | **Required** |
@@ -605,7 +605,7 @@ example above.
 | `userId`     | `string`                                                                                                                            | The ID of the User                                                            | **Required** |
 | `imageFile`  | `string`                                                                                                                            | A file that will be used as the cover art for the playlist                    | _Optional_   |
 | `metadata`   | _see code block below_                                                                                                              | An object containing the details of the playlist                              | **Required** |
-| `onProgress` | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#UploadPlaylistProgressEvent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| `onProgress` | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
 
 ```json title="updatePlaylist metadata payload"
 {
