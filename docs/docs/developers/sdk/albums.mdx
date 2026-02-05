@@ -177,7 +177,7 @@ const trackBuffer1 = fs.readFileSync('path/to/track1.mp3')
 const trackBuffer2 = fs.readFileSync('path/to/track2.mp3')
 const trackBuffer3 = fs.readFileSync('path/to/track3.mp3')
 
-const { albumId } = await audiusSdk.albums.uploadTrack({
+const { albumId } = await audiusSdk.albums.uploadAlbum({
   userId: '7eP5n',
   imageFile: {
     buffer: Buffer.from(coverArtBuffer),
