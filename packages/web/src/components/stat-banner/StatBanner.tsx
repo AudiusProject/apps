@@ -15,8 +15,6 @@ import {
   IconMoneySend,
   PopupMenu,
   Button,
-  IconButton,
-  Tooltip,
   FollowButton,
   Flex,
   Skeleton,
@@ -267,26 +265,19 @@ export const StatBanner = (props: StatsBannerProps) => {
 
           <>
             {mode === 'visitor' ? (
-              <Tooltip
-                text={messages.sendArtistCoins}
-                placement='top'
-                shouldDismissOnClick={false}
-              >
-                <Flex>
-                  <IconButton
-                    icon={IconMoneySend}
-                    size='m'
-                    aria-label={messages.sendArtistCoins}
-                    onClick={() => {
-                      openSendTokensModal({
-                        mint: env.WAUDIO_MINT_ADDRESS,
-                        isOpen: true,
-                        user: profileUser ?? undefined
-                      })
-                    }}
-                  />
-                </Flex>
-              </Tooltip>
+              <Button
+                variant='secondary'
+                size='small'
+                iconLeft={IconMoneySend}
+                aria-label={messages.sendArtistCoins}
+                onClick={() => {
+                  openSendTokensModal({
+                    mint: env.WAUDIO_MINT_ADDRESS,
+                    isOpen: true,
+                    user: profileUser ?? undefined
+                  })
+                }}
+              />
             ) : null}
             {isFollowing && profileId ? (
               <SubscribeButton userId={profileId} />
