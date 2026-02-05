@@ -405,8 +405,9 @@ const { trackId } = await audiusSdk.tracks.updateTrack({
     description: 'Dedicated to my favorite plant... new cover art!',
     mood: Mood.YEARNING,
   },
-  onProgress: (progress) => {
-    console.log('Progress: ', progress / 100)
+  onProgress: (progress, event) => {
+    console.log('Progress: ', progress)
+    console.log('Event: ', event)
   },
   userId: '7eP5n',
 })
@@ -425,7 +426,7 @@ example above.
 | `audioFile`      | `File`                                                                | A file that will be used as the audio for the track                                       | _Optional_   |
 | `generatePreview`| `boolean`                                                             | Whether to generate or regenerate a preview for the track when updating the audio file    | _Optional_   |
 | `metadata`       | `Partial<`[`UploadTrackMetadata`](/developers/UploadTrackMetadata)`>` | An object containing the details of the track                                             | **Required** |
-| `onProgress`     | `(progress: number) => void`                                          | A function that will be called with progress events as the media file uploads             | _Optional_   |
+| `onProgress`     | `(progress: number, event: UploadTrackProgressEvent) => void`         | A function that will be called with progress events as the media file uploads             | _Optional_   |
 
 #### `advancedOptions`
 
