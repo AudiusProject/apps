@@ -8,7 +8,7 @@ import {
 } from '@audius/common/utils'
 import type { FixedDecimal } from '@audius/fixed-decimal'
 import { AUDIO } from '@audius/fixed-decimal'
-import { Platform, Image } from 'react-native'
+import { Image } from 'react-native'
 
 import { IconAudiusLogo } from '@audius/harmony-native'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
@@ -100,11 +100,7 @@ export const ChallengeRewardNotification = (
           ) : undefined
         }
       >
-        <NotificationTitle>
-          {Platform.OS === 'ios' && title.includes('Tip')
-            ? title.replace('Tip', '$AUDIO')
-            : title}
-        </NotificationTitle>
+        <NotificationTitle>{title}</NotificationTitle>
       </NotificationHeader>
       <NotificationText>{notificationText}</NotificationText>
       <NotificationXButton type='static' shareText={messages.xShareText} />

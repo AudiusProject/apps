@@ -5,9 +5,7 @@ import { FollowSource, User } from '@audius/common/models'
 import {
   chatActions,
   chatSelectors,
-  makeChatId,
   ChatPermissionAction,
-  tippingActions,
   useInboxUnavailableModal,
   usersSocialActions
 } from '@audius/common/store'
@@ -20,7 +18,6 @@ import {
   ModalFooter,
   IconMessageUnblock as IconUnblockMessages,
   IconMessageLocked,
-  IconTipping,
   Button,
   ModalContentText
 } from '@audius/harmony'
@@ -31,20 +28,12 @@ import { UserLink } from 'components/link/UserLink'
 
 const { unblockUser, createChat } = chatActions
 const { followUser } = usersSocialActions
-const { beginTip } = tippingActions
 const { useCanCreateChat } = chatSelectors
 
 const messages = {
   title: 'Inbox Unavailable',
   content: "You can't send messages to this person.",
   button: 'Learn More',
-  tipContent: (displayName: ReactNode) => (
-    <>
-      {'You must send '}
-      {displayName}
-      {' a tip before you can send them messages.'}
-    </>
-  ),
   followRequired: (displayName: ReactNode) => (
     <>
       {'You must follow '}
@@ -52,7 +41,6 @@ const messages = {
       {' before you can send them messages.'}
     </>
   ),
-  tipButton: 'Send $AUDIO',
   follow: 'Follow',
   unblockContent: 'You cannot send messages to users you have blocked.',
   unblockButton: 'Unblock',
@@ -74,14 +62,6 @@ const actionToContent = ({
         content: messages.content,
         buttonText: messages.button,
         buttonIcon: null
-      }
-    case ChatPermissionAction.TIP:
-      return {
-        content: messages.tipContent(
-          user ? <UserLink userId={user.user_id} /> : messages.defaultUsername
-        ),
-        buttonText: messages.tipButton,
-        buttonIcon: IconTipping
       }
     case ChatPermissionAction.FOLLOW:
       return {
@@ -114,7 +94,6 @@ export const InboxUnavailableModal = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { callToAction } = useCanCreateChat(userId)
   const hasAction =
-    callToAction === ChatPermissionAction.TIP ||
     callToAction === ChatPermissionAction.FOLLOW ||
     callToAction === ChatPermissionAction.UNBLOCK
 
@@ -125,31 +104,7 @@ export const InboxUnavailableModal = () => {
       )
       return
     }
-    if (callToAction === ChatPermissionAction.TIP && currentUserId) {
-      const chatId = makeChatId([currentUserId, userId])
-      const tipSuccessActions: Action[] = [
-        chatActions.goToChat({
-          chatId,
-          presetMessage
-        })
-      ]
-      if (onSuccessAction) {
-        tipSuccessActions.push(onSuccessAction)
-      }
-      dispatch(
-        beginTip({
-          user,
-          source: 'inboxUnavailableModal',
-          onSuccessActions: tipSuccessActions,
-          onSuccessConfirmedActions: [
-            chatActions.createChat({
-              userIds: [userId],
-              skipNavigation: true
-            })
-          ]
-        })
-      )
-    } else if (callToAction === ChatPermissionAction.FOLLOW && currentUserId) {
+    if (callToAction === ChatPermissionAction.FOLLOW && currentUserId) {
       const followSuccessActions: Action[] = [
         chatActions.createChat({
           userIds: [userId]
@@ -177,7 +132,6 @@ export const InboxUnavailableModal = () => {
     }
     onClose()
   }, [
-    user,
     userId,
     callToAction,
     currentUserId,

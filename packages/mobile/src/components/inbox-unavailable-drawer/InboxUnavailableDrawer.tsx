@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react'
 import { useCallback } from 'react'
 
-import { useCurrentUserId, useUser } from '@audius/common/api'
+import { useUser } from '@audius/common/api'
 import { FollowSource } from '@audius/common/models'
 import {
   useInboxUnavailableModal,
   chatActions,
   chatSelectors,
-  makeChatId,
   ChatPermissionAction,
-  tippingActions,
   usersSocialActions
 } from '@audius/common/store'
 import { CHAT_BLOG_POST_URL } from '@audius/common/utils'
@@ -17,10 +15,9 @@ import type { Action } from '@reduxjs/toolkit'
 import { View } from 'react-native'
 import { useDispatch } from 'react-redux'
 
-import { IconMessageLocked, IconTipping, Button } from '@audius/harmony-native'
+import { IconMessageLocked, Button } from '@audius/harmony-native'
 import { Text, useLink } from 'app/components/core'
 import Drawer from 'app/components/drawer'
-import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles, flexRowCentered } from 'app/styles'
 import { useColor } from 'app/utils/theme'
 
@@ -29,18 +26,10 @@ const { followUser } = usersSocialActions
 
 const { unblockUser, createChat } = chatActions
 const { useCanCreateChat } = chatSelectors
-const { beginTip } = tippingActions
 
 const messages = {
   title: 'Inbox Unavailable',
   blockee: 'You cannot send messages to users you have blocked.',
-  tipGated: (displayName: ReactNode) => (
-    <>
-      {'You must send '}
-      {displayName}
-      {' a tip before you can send them messages.'}
-    </>
-  ),
   followRequired: (displayName: ReactNode) => (
     <>
       {'You must follow '}
@@ -52,7 +41,6 @@ const messages = {
   info: 'This will not affect their ability to view your profile or interact with your content.',
   unblockUser: 'Unblock User',
   learnMore: 'Learn More',
-  sendAudio: 'Send $AUDIO',
   follow: 'Follow',
   cancel: 'Cancel'
 }
@@ -109,9 +97,6 @@ type DrawerContentProps = {
 const DrawerContent = ({ data, onClose }: DrawerContentProps) => {
   const styles = useStyles()
   const dispatch = useDispatch()
-  const navigation = useNavigation()
-
-  const { data: currentUserId } = useCurrentUserId()
   const { userId, presetMessage } = data
   const { data: user } = useUser(userId)
   const { callToAction } = useCanCreateChat(userId)
@@ -133,36 +118,6 @@ const DrawerContent = ({ data, onClose }: DrawerContentProps) => {
     onPressLearnMore()
     onClose()
   }, [onClose, onPressLearnMore])
-
-  const handleTipPress = useCallback(() => {
-    if (!currentUserId || !user) {
-      console.error(
-        'Unexpected undefined currentUserId or user when starting tip'
-      )
-      return
-    }
-    const chatId = makeChatId([currentUserId, user.user_id])
-    dispatch(
-      beginTip({
-        user,
-        source: 'inboxUnavailableModal',
-        onSuccessActions: [
-          chatActions.goToChat({
-            chatId,
-            presetMessage
-          })
-        ],
-        onSuccessConfirmedActions: [
-          chatActions.createChat({
-            userIds: [user.user_id],
-            skipNavigation: true
-          })
-        ]
-      })
-    )
-    navigation.navigate('TipArtist')
-    onClose()
-  }, [onClose, currentUserId, dispatch, navigation, user, presetMessage])
 
   const handleFollowPress = useCallback(() => {
     if (userId) {
@@ -206,32 +161,6 @@ const DrawerContent = ({ data, onClose }: DrawerContentProps) => {
             fullWidth
           >
             {messages.follow}
-          </Button>
-        </>
-      )
-    case ChatPermissionAction.TIP:
-      return (
-        <>
-          <Text style={styles.callToActionText}>
-            {messages.tipGated(
-              user ? (
-                <View
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-                >
-                  <Text style={styles.callToActionText}>{user.name}</Text>
-                  <UserBadges userId={user.user_id} badgeSize='xs' />
-                </View>
-              ) : null
-            )}
-          </Text>
-          <Button
-            key={messages.sendAudio}
-            onPress={handleTipPress}
-            variant='primary'
-            iconLeft={IconTipping}
-            fullWidth
-          >
-            {messages.sendAudio}
           </Button>
         </>
       )

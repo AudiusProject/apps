@@ -46,14 +46,6 @@ type UserListProps<T> = {
    */
   fetchNextPage?: () => void
   /**
-   * Optional user ID to show support for (used in top supporters list)
-   */
-  showSupportFor?: ID
-  /**
-   * Optional user ID to show support from (used in supporting list)
-   */
-  showSupportFrom?: ID
-  /**
    * Whether to show ranks (1, 2, 3, etc.) next to users
    */
   showRank?: boolean
@@ -70,8 +62,6 @@ export const UserList = <T extends UserListDataItem>({
   isFetchingNextPage,
   isPending,
   fetchNextPage,
-  showSupportFor,
-  showSupportFrom,
   showRank = false,
   renderRightContent
 }: UserListProps<T>) => {
@@ -89,23 +79,14 @@ export const UserList = <T extends UserListDataItem>({
   const loadedCount = data?.length ?? 0
 
   const skeletonData = useMemo(() => {
-    // Determine the tag for skeleton items based on whether we're showing support info
-    let skeletonTag: string | undefined
-    if (showSupportFor) {
-      skeletonTag = 'TOP SUPPORTERS'
-    } else if (showSupportFrom) {
-      skeletonTag = 'SUPPORTING'
-    }
-
     const skeletonCount = totalCount
       ? Math.min(totalCount - loadedCount, DEFAULT_SKELETON_COUNT)
       : DEFAULT_SKELETON_COUNT
 
     return range(skeletonCount).map((index) => ({
-      key: `skeleton ${index}`,
-      tag: skeletonTag
+      key: `skeleton ${index}`
     }))
-  }, [totalCount, showSupportFor, showSupportFrom, loadedCount])
+  }, [totalCount, loadedCount])
 
   const defaultRenderRightContent = (item: T, index: number) => {
     const userId = getUserId(item)
@@ -162,11 +143,7 @@ export const UserList = <T extends UserListDataItem>({
                     {rank}
                   </Text>
                 )}
-                <UserListArtistChip
-                  userId={userId}
-                  showSupportFor={showSupportFor}
-                  showSupportFrom={showSupportFrom}
-                />
+                <UserListArtistChip userId={userId} />
               </Flex>
               {renderRightContent
                 ? renderRightContent(item, index)
@@ -176,7 +153,7 @@ export const UserList = <T extends UserListDataItem>({
         })}
         {showSkeletons
           ? skeletonData.map((skeleton) => (
-              <UserListItemSkeleton key={skeleton.key} tag={skeleton.tag} />
+              <UserListItemSkeleton key={skeleton.key} />
             ))
           : null}
       </InfiniteScroll>

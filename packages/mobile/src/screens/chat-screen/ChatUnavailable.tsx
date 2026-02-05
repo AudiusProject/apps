@@ -19,9 +19,6 @@ const messages = {
   follow: (user: ReactNode) => (
     <Text>You must follow {user} before you can send them messages.</Text>
   ),
-  tip: (user: ReactNode) => (
-    <Text>You must send {user} a tip before you can send them messages.</Text>
-  ),
   blockee: 'You cannot send messages to users you have blocked. ',
   learnMore: 'Learn More.',
   unblockUser: 'Unblock User'
@@ -73,18 +70,6 @@ export const ChatUnavailable = ({ chatId }: ChatUnavailableProps) => {
         otherUser ? (
           <>
             {messages.follow(
-              <UserLink
-                textVariant='body'
-                userId={otherUser.user_id}
-                textLinkStyle={{ lineHeight: 0 }}
-              />
-            )}
-          </>
-        ) : null,
-      [ChatPermissionAction.TIP]: () =>
-        otherUser ? (
-          <>
-            {messages.tip(
               <UserLink
                 textVariant='body'
                 userId={otherUser.user_id}

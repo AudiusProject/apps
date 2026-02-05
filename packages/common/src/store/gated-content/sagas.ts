@@ -18,7 +18,6 @@ import {
   ID,
   Name,
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated,
   GatedContentStatus,
@@ -29,7 +28,6 @@ import { IntKeys } from '~/services/remote-config'
 import { getContext } from '~/store/effects'
 import { musicConfettiActions } from '~/store/music-confetti'
 import { usersSocialActions } from '~/store/social'
-import { tippingActions } from '~/store/tipping'
 import { Nullable } from '~/utils/typeUtils'
 
 import { PurchaseableContentType } from '../purchase-content'
@@ -44,12 +42,9 @@ const {
   updateGatedContentStatus,
   updateGatedContentStatuses,
   addFolloweeId,
-  removeFolloweeId,
-  addTippedUserId,
-  removeTippedUserId
+  removeFolloweeId
 } = gatedContentActions
 
-const { refreshTipGatedTracks } = tippingActions
 const { show: showConfetti } = musicConfettiActions
 
 export function* pollGatedContent({
@@ -122,7 +117,6 @@ export function* pollGatedContent({
       yield* put(updateGatedContentStatus({ contentId, status: 'UNLOCKED' }))
       // note: if necessary, update some ui status to show that the download is unlocked
       yield* put(removeFolloweeId({ id: ownerId }))
-      yield* put(removeTippedUserId({ id: ownerId }))
 
       // Show confetti if track is unlocked from the how to unlock section on track/collection page or modal
       if (isSourceTrack) {
@@ -141,9 +135,6 @@ export function* pollGatedContent({
         }
         if (isContentFollowGated(apiEntity.stream_conditions)) {
           return Name.FOLLOW_GATED_TRACK_UNLOCKED
-        }
-        if (isContentTipGated(apiEntity.stream_conditions)) {
-          return Name.TIP_GATED_TRACK_UNLOCKED
         }
         if (isContentTokenGated(apiEntity.stream_conditions)) {
           return Name.TOKEN_GATED_TRACK_UNLOCKED
@@ -199,27 +190,22 @@ export function* pollGatedContent({
 }
 
 /**
- * 1. Get follow or tip gated tracks of user
+ * 1. Get follow gated tracks of user
  * 2. Set those track statuses to 'UNLOCKING'
  * 3. Poll for access for those tracks
  * 4. When access is returned, set those track statuses as 'UNLOCKED'
  */
 function* updateSpecialAccessTracks(
   trackOwnerId: ID,
-  gate: 'follow' | 'tip',
   sourceTrackId?: Nullable<ID>
 ) {
   const currentUser = yield* call(queryAccountUser)
   const currentUserId = currentUser?.user_id
   if (!currentUserId) return
 
-  // Add followee or tipped user id to gated content store to subscribe to
+  // Add followee id to gated content store to subscribe to
   // polling their newly loaded gated track signatures.
-  if (gate === 'follow') {
-    yield* put(addFolloweeId({ id: trackOwnerId }))
-  } else {
-    yield* put(addTippedUserId({ id: trackOwnerId }))
-  }
+  yield* put(addFolloweeId({ id: trackOwnerId }))
 
   const statusMap: { [id: ID]: GatedContentStatus } = {}
   const tracksToPoll: Set<ID> = new Set()
@@ -232,14 +218,8 @@ function* updateSpecialAccessTracks(
       stream_conditions: streamConditions,
       download_conditions: downloadConditions
     } = cachedTracks[id]
-    const isTrackStreamGated =
-      gate === 'follow'
-        ? isContentFollowGated(streamConditions)
-        : isContentTipGated(streamConditions)
-    const isTrackDownloadGated =
-      gate === 'follow'
-        ? isContentFollowGated(downloadConditions)
-        : isContentTipGated(downloadConditions)
+    const isTrackStreamGated = isContentFollowGated(streamConditions)
+    const isTrackDownloadGated = isContentFollowGated(downloadConditions)
     if (isTrackStreamGated && ownerId === trackOwnerId) {
       statusMap[id] = 'UNLOCKING'
       // note: if necessary, update some ui status to show that the track download is unlocking
@@ -306,23 +286,7 @@ function* handleUnfollowUser(
 function* handleFollowUser(
   action: ReturnType<typeof usersSocialActions.followUser>
 ) {
-  yield* call(
-    updateSpecialAccessTracks,
-    action.userId,
-    'follow',
-    action.trackId
-  )
-}
-
-function* handleTipGatedTracks(
-  action: ReturnType<typeof refreshTipGatedTracks>
-) {
-  yield* call(
-    updateSpecialAccessTracks,
-    action.payload.userId,
-    'tip',
-    action.payload.trackId
-  )
+  yield* call(updateSpecialAccessTracks, action.userId, action.trackId)
 }
 
 /**
@@ -350,19 +314,10 @@ function* watchUnfollowGatedTracks() {
   yield* takeEvery(usersSocialActions.UNFOLLOW_USER, handleUnfollowUser)
 }
 
-function* watchTipGatedTracks() {
-  yield* takeEvery(refreshTipGatedTracks.type, handleTipGatedTracks)
-}
-
 function* watchRevokeAccess() {
   yield* takeEvery(revokeAccess.type, handleRevokeAccess)
 }
 
 export const sagas = () => {
-  return [
-    watchFollowGatedTracks,
-    watchUnfollowGatedTracks,
-    watchTipGatedTracks,
-    watchRevokeAccess
-  ]
+  return [watchFollowGatedTracks, watchUnfollowGatedTracks, watchRevokeAccess]
 }

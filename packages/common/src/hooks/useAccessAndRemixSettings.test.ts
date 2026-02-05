@@ -137,24 +137,6 @@ describe('useAccessAndRemixSettings', () => {
       }
       expect(actual).toEqual(expected)
     })
-    it('tip gated - should enable everything', () => {
-      const actual = useAccessAndRemixSettings({
-        isUpload: false,
-        isRemix: false,
-        isAlbum: undefined,
-        isInitiallyUnlisted: false,
-        isScheduledRelease: false
-      })
-      const expected = {
-        disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
-        disableTokenGate: false,
-        disableTokenGateFields: false,
-        disableHidden: false
-      }
-      expect(actual).toEqual(expected)
-    })
     it('usdc gated - should enable everything', () => {
       const actual = useAccessAndRemixSettings({
         isUpload: false,

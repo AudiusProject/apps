@@ -44,10 +44,6 @@ const messages = {
     label: 'My Followers',
     description: 'Send a bulk message to all of your followers.'
   },
-  supporters: {
-    label: 'Tip Supporters',
-    description: 'Send a bulk message to everyone who has tipped you.'
-  },
   purchasers: {
     label: 'Past Purchasers',
     description:
@@ -172,7 +168,6 @@ const ChatBlastsFields = () => {
     <RadioGroup {...field}>
       <Flex direction='column' gap='xl'>
         <FollowersMessageField />
-        <TipSupportersMessageField />
         <PastPurchasersMessageField />
         <RemixCreatorsMessageField />
         <CoinHoldersMessageField />
@@ -224,34 +219,6 @@ const FollowersMessageField = () => {
         />
         {selected ? (
           <Text size='s'>{messages.followers.description}</Text>
-        ) : null}
-      </Flex>
-    </Flex>
-  )
-}
-
-const TipSupportersMessageField = () => {
-  const { data: user } = useCurrentAccountUser()
-  const [{ value }] = useField(TARGET_AUDIENCE_FIELD)
-  const selected = value === ChatBlastAudience.TIPPERS
-  const isDisabled = user?.supporter_count === 0
-  return (
-    <Flex
-      as='label'
-      gap='l'
-      css={{
-        opacity: isDisabled ? 0.5 : 1
-      }}
-    >
-      <Radio value={ChatBlastAudience.TIPPERS} disabled={isDisabled} />
-      <Flex direction='column' gap='xs' css={{ cursor: 'pointer' }}>
-        <LabelWithCount
-          label={messages.supporters.label}
-          count={user?.supporter_count}
-          isSelected={selected}
-        />
-        {selected ? (
-          <Text size='s'>{messages.supporters.description}</Text>
         ) : null}
       </Flex>
     </Flex>

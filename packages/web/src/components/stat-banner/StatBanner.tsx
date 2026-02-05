@@ -12,11 +12,9 @@ import {
   IconPencil,
   IconKebabHorizontal,
   IconMessage,
-  IconArrowFromDollar,
+  IconMoneySend,
   PopupMenu,
   Button,
-  IconButton,
-  Tooltip,
   FollowButton,
   Flex,
   Skeleton,
@@ -45,7 +43,7 @@ const messages = {
   save: 'Save Changes',
   message: 'Send Message',
   sendTokens: 'Send Tokens',
-  sendArtistCoins: 'Send Artist Coins',
+  sendArtistCoins: 'Send Coins',
   unblockMessages: 'Unblock Messages',
   blockMessages: 'Block Messages',
   unmuteComments: 'Unmute Comments',
@@ -189,6 +187,7 @@ export const StatBanner = (props: StatsBannerProps) => {
   const { data: isFollowing } = useUser(profileId, {
     select: (user) => user.does_current_user_follow
   })
+  const { data: profileUser } = useUser(profileId)
   const { onOpen: openSendTokensModal } = useSendTokensModal()
 
   const shareButton = (
@@ -266,25 +265,19 @@ export const StatBanner = (props: StatsBannerProps) => {
 
           <>
             {mode === 'visitor' ? (
-              <Tooltip
-                text={messages.sendArtistCoins}
-                placement='top'
-                shouldDismissOnClick={false}
-              >
-                <Flex>
-                  <IconButton
-                    icon={IconArrowFromDollar}
-                    size='m'
-                    aria-label={messages.sendArtistCoins}
-                    onClick={() => {
-                      openSendTokensModal({
-                        mint: env.WAUDIO_MINT_ADDRESS,
-                        isOpen: true
-                      })
-                    }}
-                  />
-                </Flex>
-              </Tooltip>
+              <Button
+                variant='secondary'
+                size='small'
+                iconLeft={IconMoneySend}
+                aria-label={messages.sendArtistCoins}
+                onClick={() => {
+                  openSendTokensModal({
+                    mint: env.WAUDIO_MINT_ADDRESS,
+                    isOpen: true,
+                    user: profileUser ?? undefined
+                  })
+                }}
+              />
             ) : null}
             {isFollowing && profileId ? (
               <SubscribeButton userId={profileId} />

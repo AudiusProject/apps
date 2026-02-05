@@ -65,9 +65,7 @@ const messages = {
   amountRequired: 'Amount is required',
   amountTooLow: 'Amount must be at least $0.50',
   walletAddress: 'Wallet Address',
-  userRequired: 'Please select a user',
-  userNoWallet:
-    'This user does not have a wallet address set up. Please send to a different user or use a wallet address instead.'
+  userRequired: 'Please select a user'
 }
 
 const { TERMS_OF_SERVICE } = route
@@ -78,7 +76,6 @@ type ValidationError =
   | 'AMOUNT_REQUIRED'
   | 'AMOUNT_TOO_LOW'
   | 'USER_REQUIRED'
-  | 'USER_NO_WALLET'
 
 const SendTokensInput = ({
   mint: initialMint,
@@ -235,9 +232,6 @@ const SendTokensInput = ({
       if (!selectedUser) {
         setAddressError('USER_REQUIRED')
         isValid = false
-      } else if (!selectedUser.spl_wallet) {
-        setAddressError('USER_NO_WALLET')
-        isValid = false
       }
     } else {
       // Validate wallet address
@@ -284,8 +278,6 @@ const SendTokensInput = ({
         return messages.amountTooLow
       case 'USER_REQUIRED':
         return messages.userRequired
-      case 'USER_NO_WALLET':
-        return messages.userNoWallet
       default:
         return ''
     }

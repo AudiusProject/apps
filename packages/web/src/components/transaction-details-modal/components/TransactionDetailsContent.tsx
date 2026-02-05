@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 
-import { useUser } from '@audius/common/api'
 import { ChallengeRewardID, SolanaWalletAddress } from '@audius/common/models'
 import {
   TransactionType,
@@ -12,8 +11,7 @@ import {
   formatCapitalizeString,
   isNullOrUndefined,
   makeSolanaAccountLink,
-  makeSolanaTransactionLink,
-  route
+  makeSolanaTransactionLink
 } from '@audius/common/utils'
 import { wAUDIO } from '@audius/fixed-decimal'
 import {
@@ -21,22 +19,15 @@ import {
   IconLogoLinkByStripe as LogoStripeLink
 } from '@audius/harmony'
 import cn from 'classnames'
-import { pick } from 'lodash'
-import { useDispatch } from 'react-redux'
 
-import { useSetVisibility } from 'common/hooks/useModalState'
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { isChangePositive } from 'components/audio-transactions-table/AudioTransactionsTable'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
-import UserBadges from 'components/user-badges/UserBadges'
 import { getChallengeConfig } from 'pages/rewards-page/config'
-import { push } from 'utils/navigation'
 
 import { Block, BlockContainer } from './Block'
 import styles from './TransactionDetailsContent.module.css'
 import { TransactionPurchaseMetadata } from './TransactionPurchaseMetadata'
-
-const { profilePage } = route
 
 const messages = {
   transaction: 'Transaction',
@@ -53,49 +44,14 @@ const messages = {
   transferDescription: '$AUDIO ',
   transferSentHeader: 'Destination Wallet',
   transferReceivedHeader: 'Origin Wallet',
-  tipDescription: 'Tip ',
-  tipSentHeader: 'To User',
-  tipReceivedHeader: 'From User',
   unknown: 'Unknown'
 }
 
 const transactionDescriptions: Record<TransactionType, string> = {
   [TransactionType.PURCHASE]: messages.purchaseDescription,
-  [TransactionType.TIP]: messages.tipDescription,
   [TransactionType.TRANSFER]: messages.transferDescription,
   [TransactionType.TRENDING_REWARD]: messages.trendingRewardDescription,
   [TransactionType.CHALLENGE_REWARD]: messages.challengeRewardDescription
-}
-
-type UserDetailsProps = {
-  userId: number
-}
-
-const UserDetails = ({ userId }: UserDetailsProps) => {
-  const setVisibility = useSetVisibility()
-  const dispatch = useDispatch()
-  const { data: user, isPending } = useUser(userId, {
-    select: (user) => pick(user, 'handle', 'name')
-  })
-  const { handle, name } = user ?? {}
-  return (
-    <>
-      {isPending || !handle ? (
-        <LoadingSpinner className={styles.spinnerSmall} />
-      ) : (
-        <div
-          className={styles.name}
-          onClick={() => {
-            setVisibility('TransactionDetails')(false)
-            dispatch(push(profilePage(handle)))
-          }}
-        >
-          <span>{name}</span>
-          <UserBadges userId={userId} className={styles.badge} inline />
-        </div>
-      )}
-    </>
-  )
 }
 
 const dateAndMetadataBlocks = ({
@@ -134,25 +90,6 @@ const dateAndMetadataBlocks = ({
       return (
         <>
           <Block header={messages.dateEarned}>{transactionDetails.date}</Block>
-        </>
-      )
-    }
-    case TransactionType.TIP: {
-      return (
-        <>
-          <Block header={messages.dateTransaction}>
-            {transactionDetails.date}
-          </Block>
-          <Block
-            className={styles.header}
-            header={
-              transactionDetails.method === TransactionMethod.SEND
-                ? messages.tipSentHeader
-                : messages.tipReceivedHeader
-            }
-          >
-            <UserDetails userId={Number(transactionDetails.metadata)} />
-          </Block>
         </>
       )
     }
@@ -227,9 +164,7 @@ export const TransactionDetailsContent = ({
           <div className={styles.flexHorizontal}>
             <Block header={messages.transaction}>
               {transactionDescriptions[transactionDetails.transactionType] +
-                ([TransactionType.TIP, TransactionType.TRANSFER].includes(
-                  transactionDetails.transactionType
-                )
+                (transactionDetails.transactionType === TransactionType.TRANSFER
                   ? formatCapitalizeString(transactionDetails.method)
                   : '')}
             </Block>

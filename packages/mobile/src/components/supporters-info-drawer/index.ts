@@ -1,1 +1,0 @@
-export { SupportersInfoDrawer } from './SupportersInfoDrawer'

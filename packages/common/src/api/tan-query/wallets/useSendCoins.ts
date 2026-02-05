@@ -41,7 +41,7 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
 
   const { data: coinBalance } = useCoinBalance({
     mint,
-    includeExternalWallets: false,
+    includeExternalWallets: true,
     includeStaked: false
   })
 

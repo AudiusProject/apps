@@ -24,7 +24,7 @@ const MemoryRouterNavigationSetup = ({
   const navigate = useNavigate()
 
   useEffect(() => {
-    setNavigateRef(navigate)
+    setNavigateRef(navigate as any)
     return () => {
       setNavigateRef(null as any)
     }

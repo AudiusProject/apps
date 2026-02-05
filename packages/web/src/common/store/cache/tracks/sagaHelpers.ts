@@ -3,7 +3,6 @@ import {
   Name,
   TrackAccessType,
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated,
   Track
@@ -19,8 +18,6 @@ function getTrackAccess({
   if (is_stream_gated && stream_conditions) {
     if (isContentFollowGated(stream_conditions)) {
       return TrackAccessType.FOLLOW_GATED
-    } else if (isContentTipGated(stream_conditions)) {
-      return TrackAccessType.TIP_GATED
     } else if (isContentTokenGated(stream_conditions)) {
       return TrackAccessType.TOKEN_GATED
     } else if (isContentUSDCPurchaseGated(stream_conditions)) {

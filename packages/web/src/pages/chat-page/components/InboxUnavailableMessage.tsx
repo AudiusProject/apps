@@ -16,12 +16,6 @@ const messages = {
       can send them messages.
     </>
   ),
-  tip: (userId: ID) => (
-    <>
-      You must send <UserLink variant='visible' userId={userId} /> a tip before
-      you can send them them messages.
-    </>
-  ),
   unblock: 'You cannot send messages to users you have blocked. ',
   default: (userId: ID) => (
     <Text>
@@ -62,9 +56,6 @@ export const InboxUnavailableMessage = ({
   switch (action) {
     case ChatPermissionAction.FOLLOW:
       content = messages.follow(userId)
-      break
-    case ChatPermissionAction.TIP:
-      content = messages.tip(userId)
       break
     case ChatPermissionAction.UNBLOCK:
       content = (

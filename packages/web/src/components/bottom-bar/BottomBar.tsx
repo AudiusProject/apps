@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState, useEffect } from 'react'
+import { memo, useCallback, useContext } from 'react'
 
 import { route } from '@audius/common/utils'
 import { useLocation } from 'react-router'
@@ -47,14 +47,6 @@ const BottomBar = ({
   isMatrixMode
 }: Props) => {
   const { setStackReset } = useContext(RouterContext)
-  const [tempCurrentPage, setTempCurrentPage] = useState<string | null>(
-    currentPage
-  )
-
-  useEffect(() => {
-    setTempCurrentPage(currentPage)
-  }, [currentPage, setTempCurrentPage])
-
   const location = useLocation()
   const { pathname } = location
 
@@ -63,9 +55,8 @@ const BottomBar = ({
       if (page === pathname) {
         window.scrollTo(0, 0)
       } else {
-        setTempCurrentPage(page)
         setStackReset(true)
-        setImmediate(callback)
+        callback()
       }
     },
     [setStackReset, pathname]
@@ -74,7 +65,7 @@ const BottomBar = ({
   return window.ReactNativeWebView?.postMessage ? null : (
     <div className={styles.bottomBar}>
       <FeedButton
-        isActive={tempCurrentPage === FEED_PAGE}
+        isActive={currentPage === FEED_PAGE}
         darkMode={isDarkMode}
         onClick={onClick(onClickFeed, FEED_PAGE)}
         href={FEED_PAGE}
@@ -82,7 +73,7 @@ const BottomBar = ({
         aria-label='Feed Page'
       />
       <TrendingButton
-        isActive={tempCurrentPage === TRENDING_PAGE}
+        isActive={currentPage === TRENDING_PAGE}
         darkMode={isDarkMode}
         onClick={onClick(onClickTrending, TRENDING_PAGE)}
         href={TRENDING_PAGE}
@@ -90,7 +81,7 @@ const BottomBar = ({
         aria-label='Trending Page'
       />
       <ExploreButton
-        isActive={tempCurrentPage === EXPLORE_PAGE}
+        isActive={currentPage === EXPLORE_PAGE}
         darkMode={isDarkMode}
         onClick={onClick(onClickExplore, EXPLORE_PAGE)}
         href={EXPLORE_PAGE}
@@ -99,7 +90,7 @@ const BottomBar = ({
       />
       <LibraryButton
         isActive={
-          tempCurrentPage === FAVORITES_PAGE || tempCurrentPage === LIBRARY_PAGE
+          currentPage === FAVORITES_PAGE || currentPage === LIBRARY_PAGE
         }
         darkMode={isDarkMode}
         onClick={onClick(onClickLibrary, LIBRARY_PAGE)}
@@ -108,7 +99,7 @@ const BottomBar = ({
         aria-label='Library Page'
       />
       <ProfileButton
-        isActive={tempCurrentPage === userProfilePageRoute}
+        isActive={currentPage === userProfilePageRoute}
         darkMode={isDarkMode}
         onClick={onClick(onClickProfile, userProfilePageRoute)}
         href={userProfilePageRoute || undefined}

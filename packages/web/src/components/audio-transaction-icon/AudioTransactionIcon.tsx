@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react'
 
 import { TransactionType, TransactionMethod } from '@audius/common/store'
 import {
-  IconTipping as IconTip,
   IconReceive as IconReceiveMini,
   IconSend as IconSendMini,
   IconTransaction,
@@ -30,7 +29,6 @@ type IconProps = {
 const typeIconSvgMap: Record<TransactionType, IconComponent | null> = {
   [TransactionType.CHALLENGE_REWARD]: IconTrophy,
   [TransactionType.PURCHASE]: null, // Not needed, AppLogo is used for purchases
-  [TransactionType.TIP]: IconTip,
   [TransactionType.TRANSFER]: IconTransaction,
   [TransactionType.TRENDING_REWARD]: IconTrophy
 } as const
@@ -55,7 +53,6 @@ const typeIconMap: Record<
 > = {
   [TransactionType.CHALLENGE_REWARD]: TypeIcon,
   [TransactionType.PURCHASE]: AppLogo,
-  [TransactionType.TIP]: TypeIcon,
   [TransactionType.TRANSFER]: TypeIcon,
   [TransactionType.TRENDING_REWARD]: TypeIcon
 } as const

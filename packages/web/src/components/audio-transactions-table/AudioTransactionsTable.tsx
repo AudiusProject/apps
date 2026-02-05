@@ -22,7 +22,6 @@ const transactionTypeLabelMap: Record<TransactionType, string> = {
   [TransactionType.TRANSFER]: '$AUDIO',
   [TransactionType.CHALLENGE_REWARD]: '$AUDIO Reward Earned',
   [TransactionType.TRENDING_REWARD]: 'Trending Competition Award',
-  [TransactionType.TIP]: 'Tip',
   [TransactionType.PURCHASE]: 'Purchased $AUDIO'
 }
 
@@ -76,9 +75,7 @@ const renderTransactionTypeCell = (cellInfo: TransactionCell) => {
   const methodText =
     transactionMethodLabelMap[method as TransactionMethod] ?? ''
 
-  const isTransferType =
-    transactionType === TransactionType.TIP ||
-    transactionType === TransactionType.TRANSFER
+  const isTransferType = transactionType === TransactionType.TRANSFER
   return (
     <>
       <div className={styles.icon}>

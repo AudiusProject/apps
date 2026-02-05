@@ -34,7 +34,6 @@ import { ArtistRecommendationsDropdown } from 'components/artist-recommendations
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Skeleton from 'components/skeleton/Skeleton'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
-import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
 import ProfilePageBadge from 'components/user-badges/ProfilePageBadge'
 import UserBadges from 'components/user-badges/UserBadges'
@@ -453,13 +452,9 @@ const ProfileHeader = ({
           />
 
           {/* Artist coin buy button or tip button */}
-          {mode !== 'owner' &&
-            !isArtistCoinLoading &&
-            (artistCoin?.mint ? (
-              <BuyArtistCoinButton userId={userId} />
-            ) : (
-              <TipAudioButton />
-            ))}
+          {mode !== 'owner' && !isArtistCoinLoading && artistCoin?.mint && (
+            <BuyArtistCoinButton userId={userId} />
+          )}
         </div>
       )}
       {mode === 'owner' && !isEditing && <UploadButton />}

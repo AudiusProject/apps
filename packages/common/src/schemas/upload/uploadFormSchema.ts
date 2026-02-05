@@ -26,13 +26,6 @@ const FollowGatedConditionsSchema = z
   })
   .strict()
 
-/** Same as SDK but snake-cased */
-const TipGatedConditionsSchema = z
-  .object({
-    tip_user_id: z.number()
-  })
-  .strict()
-
 const TokenGatedConditionsSchema = z
   .object({
     token_gate: z.object({
@@ -94,7 +87,6 @@ const premiumMetadataSchema = z.object({
     .optional(
       z.union([
         FollowGatedConditionsSchema,
-        TipGatedConditionsSchema,
         USDCPurchaseConditionsSchema,
         TokenGatedConditionsSchema
       ])
@@ -105,7 +97,6 @@ const premiumMetadataSchema = z.object({
     .optional(
       z.union([
         FollowGatedConditionsSchema,
-        TipGatedConditionsSchema,
         USDCPurchaseConditionsSchema,
         TokenGatedConditionsSchema
       ])

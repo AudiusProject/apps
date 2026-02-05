@@ -26,7 +26,6 @@ export const priceAndAudienceMessages = {
   coinGated: 'Coin Gated',
   hidden: 'Hidden',
   followersOnly: 'Followers Only',
-  supportersOnly: 'Supporters Only',
   markedAsRemix:
     'This track is marked as a remix. To enable additional availability options, unmark within Remix Settings.',
   done: 'Done',
@@ -53,8 +52,7 @@ export const priceAndAudienceMessages = {
   specialAccessRadio: {
     title: 'Special Access',
     description: 'Anyone who meets your selected criteria can stream.',
-    followersOnly: 'Followers Only',
-    supportersOnly: 'Supporters Only'
+    followersOnly: 'Followers Only'
   },
   tokenGatedRadio: {
     title: 'Coin Gated',

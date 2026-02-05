@@ -1,7 +1,6 @@
 import {
   AccessConditions,
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated,
   StreamTrackAvailabilityType
 } from '~/models'
@@ -21,7 +20,6 @@ export const getUsersMayLoseAccess = ({
   const isInitiallyUsdcGated = isContentUSDCPurchaseGated(
     initialStreamConditions
   )
-  const isInitiallyTipGated = isContentTipGated(initialStreamConditions)
   const isInitiallyFollowGated = isContentFollowGated(initialStreamConditions)
 
   const stillUsdcGated =
@@ -31,11 +29,7 @@ export const getUsersMayLoseAccess = ({
     isInitiallyFollowGated &&
     availability === StreamTrackAvailabilityType.SPECIAL_ACCESS &&
     specialAccessType === 'follow'
-  const stillTipGated =
-    isInitiallyTipGated &&
-    availability === StreamTrackAvailabilityType.SPECIAL_ACCESS &&
-    specialAccessType === 'tip'
-  const stillSameGate = stillUsdcGated || stillFollowGated || stillTipGated
+  const stillSameGate = stillUsdcGated || stillFollowGated
 
   return (
     !stillSameGate &&

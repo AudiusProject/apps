@@ -5,11 +5,9 @@ import { useUSDCPurchaseConfig } from '@audius/common/hooks'
 import { priceAndAudienceMessages } from '@audius/common/messages'
 import {
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated,
   StreamTrackAvailabilityType,
   FollowGatedConditions,
-  TipGatedConditions,
   USDCPurchaseConditions,
   AccessConditions,
   isContentTokenGated,
@@ -204,7 +202,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     useEditAccessConfirmationModal()
 
   const isUsdcGated = isContentUSDCPurchaseGated(savedStreamConditions)
-  const isTipGated = isContentTipGated(savedStreamConditions)
   const isFollowGated = isContentFollowGated(savedStreamConditions)
   const isTokenGated = isContentTokenGated(savedStreamConditions)
 
@@ -231,7 +228,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           : undefined
       )
     }
-    if (isFollowGated || isTipGated) {
+    if (isFollowGated) {
       availabilityType = StreamTrackAvailabilityType.SPECIAL_ACCESS
     }
     if (isTokenGated) {
@@ -243,7 +240,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     set(
       initialValues,
       SPECIAL_ACCESS_TYPE,
-      isTipGated ? SpecialAccessType.TIP : SpecialAccessType.FOLLOW
+      isFollowGated ? SpecialAccessType.FOLLOW : null
     )
     return initialValues as AccessAndSaleFormValues
   }, [
@@ -258,7 +255,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     isOwnedByUser,
     isUsdcGated,
     isFollowGated,
-    isTipGated,
     isTokenGated,
     fieldVisibility,
     preview
@@ -268,7 +264,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     (values: AccessAndSaleFormValues) => {
       const availabilityType = get(values, STREAM_AVAILABILITY_TYPE)
       const preview = get(values, PREVIEW)
-      const specialAccessType = get(values, SPECIAL_ACCESS_TYPE)
       const fieldVisibility = get(values, FIELD_VISIBILITY)
       const streamConditions = get(values, STREAM_CONDITIONS)
       const lastGateKeeper = get(values, LAST_GATE_KEEPER)
@@ -319,15 +314,9 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           break
         }
         case StreamTrackAvailabilityType.SPECIAL_ACCESS: {
-          if (specialAccessType === SpecialAccessType.FOLLOW) {
-            const { follow_user_id } = streamConditions as FollowGatedConditions
-            setStreamConditionsValue({ follow_user_id })
-            setDownloadConditionsValue({ follow_user_id })
-          } else {
-            const { tip_user_id } = streamConditions as TipGatedConditions
-            setStreamConditionsValue({ tip_user_id })
-            setDownloadConditionsValue({ tip_user_id })
-          }
+          const { follow_user_id } = streamConditions as FollowGatedConditions
+          setStreamConditionsValue({ follow_user_id })
+          setDownloadConditionsValue({ follow_user_id })
           setIsStreamGated(true)
           setIsDownloadGated(true)
           setLastGateKeeper({
@@ -432,8 +421,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       }
     } else if (isContentFollowGated(savedStreamConditions)) {
       selectedValues = [specialAccessValue, messages.followersOnly]
-    } else if (isContentTipGated(savedStreamConditions)) {
-      selectedValues = [specialAccessValue, messages.supportersOnly]
     } else if (isContentTokenGated(savedStreamConditions)) {
       selectedValues = [
         {
@@ -479,12 +466,10 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       initialValues={initialValues}
       onSubmit={(values) => {
         const availabilityType = get(values, STREAM_AVAILABILITY_TYPE)
-        const specialAccessType = get(values, SPECIAL_ACCESS_TYPE)
         const usersMayLoseAccess = getUsersMayLoseAccess({
           availability: availabilityType,
           initialStreamConditions: parentFormInitialStreamConditions,
-          specialAccessType:
-            specialAccessType === SpecialAccessType.FOLLOW ? 'follow' : 'tip'
+          specialAccessType: 'follow'
         })
 
         if (!isUpload && usersMayLoseAccess) {

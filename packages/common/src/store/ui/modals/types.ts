@@ -1,5 +1,6 @@
 import { Action } from '@reduxjs/toolkit'
 
+import { User } from '~/models'
 import { ModalSource } from '~/models/Analytics'
 
 import { AddCashModalState } from './add-cash-modal'
@@ -166,6 +167,7 @@ export type ReceiveTokensModalState = BaseModalState & {
 
 export type SendTokensModalState = BaseModalState & {
   mint?: string
+  user?: User
 }
 
 export type ArtistCoinDetailsModalState = BaseModalState & {

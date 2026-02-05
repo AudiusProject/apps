@@ -5,7 +5,7 @@ import { Route, Routes, BrowserRouter } from 'react-router'
 
 import './util/initWeb3'
 import App from './components/app'
-import { HASH_ID_ROUTE, ID_ROUTE } from './routes'
+import { HASH_ID_ROUTE, ID_ROUTE, PERMALINK_ROUTE } from './routes'
 
 const Index = () => (
   <BrowserRouter>
@@ -15,6 +15,11 @@ const Index = () => (
         exact
         path={HASH_ID_ROUTE}
         element={<App path={HASH_ID_ROUTE} />}
+      />
+      <Route
+        exact
+        path={PERMALINK_ROUTE}
+        element={<App path={PERMALINK_ROUTE} />}
       />
     </Routes>
   </BrowserRouter>

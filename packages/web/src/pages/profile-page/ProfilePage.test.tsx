@@ -16,8 +16,6 @@ import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 import {
   mockUserByHandle,
-  mockSupportingUsers,
-  mockSupporterUsers,
   mockRelatedUsers,
   mockUserConnectedWallets,
   mockNfts,
@@ -67,8 +65,6 @@ const ProfilePageWithRef = () => {
 export function renderProfilePage(user: any, options?: RenderOptions) {
   mswServer.use(
     mockUserByHandle(user),
-    mockSupportingUsers(user),
-    mockSupporterUsers(user),
     mockRelatedUsers(user),
     mockUserConnectedWallets(user),
     mockNfts(),
@@ -195,10 +191,6 @@ describe('ProfilePage', () => {
     // TODO: test bio
 
     // TODO: test recent comments block
-
-    // TODO: supporting block
-
-    // TODO: supporters block
 
     // TODO: show share button
   })

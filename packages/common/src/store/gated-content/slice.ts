@@ -8,15 +8,13 @@ type GatedContentState = {
   statusMap: { [id: ID]: GatedContentStatus }
   lockedContentId: Nullable<ID>
   followeeIds: ID[]
-  tippedUserIds: ID[]
 }
 
 const initialState: GatedContentState = {
   nftAccessSignatureMap: {},
   statusMap: {},
   lockedContentId: null,
-  followeeIds: [],
-  tippedUserIds: []
+  followeeIds: []
 }
 
 type UpdateNftAccessSignaturesPayload = {
@@ -84,14 +82,6 @@ const slice = createSlice({
       state.followeeIds = state.followeeIds.filter(
         (id) => id !== action.payload.id
       )
-    },
-    addTippedUserId: (state, action: PayloadAction<IdPayload>) => {
-      state.tippedUserIds.push(action.payload.id)
-    },
-    removeTippedUserId: (state, action: PayloadAction<IdPayload>) => {
-      state.tippedUserIds = state.tippedUserIds.filter(
-        (id) => id !== action.payload.id
-      )
     }
   }
 })
@@ -104,9 +94,7 @@ export const {
   setLockedContentId,
   resetLockedContentId,
   addFolloweeId,
-  removeFolloweeId,
-  addTippedUserId,
-  removeTippedUserId
+  removeFolloweeId
 } = slice.actions
 
 export const actions = slice.actions

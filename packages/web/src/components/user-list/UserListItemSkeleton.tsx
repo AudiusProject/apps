@@ -1,15 +1,6 @@
 import { Flex, Skeleton } from '@audius/harmony'
 
-type Props = {
-  /**
-   * Type of user list (e.g. 'SUPPORTING', 'TOP SUPPORTERS')
-   */
-  tag?: string
-}
-
-export const UserListItemSkeleton = ({ tag }: Props) => {
-  const isSupporterTile = tag && ['SUPPORTING', 'TOP SUPPORTERS'].includes(tag)
-
+export const UserListItemSkeleton = () => {
   return (
     <Flex
       direction='row'
@@ -27,12 +18,6 @@ export const UserListItemSkeleton = ({ tag }: Props) => {
             <Skeleton w={100} h={16} noShimmer />
           </Flex>
           <Skeleton w={200} h={18} noShimmer />
-          {isSupporterTile && (
-            <Flex direction='row' justifyContent='space-between'>
-              <Skeleton w={100} h={18} noShimmer />
-              <Skeleton w={100} h={18} noShimmer />
-            </Flex>
-          )}
         </Flex>
       </Flex>
       <Flex alignItems='center'>

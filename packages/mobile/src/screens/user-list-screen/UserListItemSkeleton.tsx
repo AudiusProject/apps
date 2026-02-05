@@ -10,14 +10,11 @@ type Props = {
 
 const profileStyle = css({ height: 74, width: 74, borderRadius: 74 })
 
-export const UserListItemSkeleton = (props: Props) => {
-  const { tag } = props
-  const isSupporterTile = ['SUPPORTING', 'TOP SUPPORTERS'].includes(tag)
-  const itemHeight = isSupporterTile ? 171 : 154
+export const UserListItemSkeleton = (_props: Props) => {
   const { cornerRadius } = useTheme()
 
   return (
-    <Flex direction='column' p='l' gap='s' h={itemHeight}>
+    <Flex direction='column' p='l' gap='s' h={154}>
       <Flex gap='s' direction='row'>
         <StaticSkeleton style={profileStyle} />
         <Flex direction='column' gap='m' flex={1}>
@@ -26,12 +23,6 @@ export const UserListItemSkeleton = (props: Props) => {
             <StaticSkeleton width={100} height={16} />
           </Flex>
           <StaticSkeleton width={200} height={18} />
-          {isSupporterTile ? (
-            <Flex direction='row' justifyContent='space-between'>
-              <StaticSkeleton width={100} height={18} />
-              <StaticSkeleton width={100} height={18} />
-            </Flex>
-          ) : null}
         </Flex>
       </Flex>
       <StaticSkeleton

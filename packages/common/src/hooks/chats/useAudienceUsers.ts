@@ -7,7 +7,6 @@ import {
   useFollowers,
   usePurchasers,
   useRemixers,
-  useSupporters,
   useUsers
 } from '~/api'
 import { UserMetadata } from '~/models'
@@ -21,10 +20,6 @@ export const useAudienceUsers = (chat: ChatBlast, limit?: number) => {
     pageSize: limit
   })
   const { data: followers } = useUsers(followerIds)
-  const { data: supporters } = useSupporters(
-    { userId: currentUserId, pageSize: limit },
-    { enabled: chat.audience === ChatBlastAudience.TIPPERS }
-  )
   const { data: purchasers } = usePurchasers(
     {
       contentId: OptionalHashId.parse(chat.audience_content_id),
@@ -65,9 +60,6 @@ export const useAudienceUsers = (chat: ChatBlast, limit?: number) => {
   switch (chat.audience) {
     case ChatBlastAudience.FOLLOWERS:
       users = followers ?? []
-      break
-    case ChatBlastAudience.TIPPERS:
-      users = supporters?.map((supporter) => supporter.sender) ?? []
       break
     case ChatBlastAudience.CUSTOMERS:
       users = purchasersUsers ?? []

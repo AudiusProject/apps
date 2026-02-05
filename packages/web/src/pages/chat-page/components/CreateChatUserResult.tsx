@@ -36,7 +36,6 @@ const messages = {
   block: 'Block Messages',
   unblock: 'Unblock Messages',
   notPermitted: 'Cannot Be Messaged',
-  sendTipRequired: 'Send a Tip to Message',
   unblockRequired: 'Blocked',
   followRequired: 'Follow to Message'
 }
@@ -66,13 +65,6 @@ const renderTrigger = (
 
 const renderCustomChip = (callToAction: ChatPermissionAction) => {
   switch (callToAction) {
-    case ChatPermissionAction.TIP:
-      return (
-        <div className={styles.notPermitted}>
-          <IconMessageSlash size='s' color='default' />
-          <span>{messages.sendTipRequired}</span>
-        </div>
-      )
     case ChatPermissionAction.FOLLOW:
       return (
         <div className={styles.notPermitted}>

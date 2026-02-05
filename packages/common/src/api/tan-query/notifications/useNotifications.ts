@@ -107,24 +107,12 @@ const collectEntityIds = (notifications: Notification[]): EntityIds => {
       collectionIds.add(notification.entityId)
     }
     if (
-      type === NotificationType.TipSend ||
-      type === NotificationType.TipReceive ||
-      type === NotificationType.SupporterRankUp ||
-      type === NotificationType.SupportingRankUp ||
-      type === NotificationType.Reaction
-    ) {
-      userIds.add(notification.entityId)
-    }
-    if (
       type === NotificationType.AddTrackToPlaylist ||
       type === NotificationType.TrackAddedToPurchasedAlbum
     ) {
       trackIds.add(notification.trackId)
       userIds.add(notification.playlistOwnerId)
       collectionIds.add(notification.playlistId)
-    }
-    if (type === NotificationType.SupporterDethroned) {
-      userIds.add(notification.supportedUserId).add(notification.entityId)
     }
     if (type === NotificationType.Tastemaker) {
       userIds.add(notification.userId)

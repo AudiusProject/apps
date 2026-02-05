@@ -4,7 +4,6 @@ import {
   AccessConditions,
   DownloadTrackAvailabilityType,
   isContentFollowGated,
-  isContentTipGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
@@ -62,9 +61,7 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
   const [{ value: streamConditions }] =
     useTrackField<Nullable<AccessConditions>>(STREAM_CONDITIONS)
   const isUsdcGated = isContentUSDCPurchaseGated(streamConditions)
-  const isSpecialAccess =
-    isContentFollowGated(streamConditions) ||
-    isContentTipGated(streamConditions)
+  const isSpecialAccess = isContentFollowGated(streamConditions)
   const shouldRenderCallout = isUsdcGated || isSpecialAccess
 
   const getCalloutMessage = useCallback(() => {

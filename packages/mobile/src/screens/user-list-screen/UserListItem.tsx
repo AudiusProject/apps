@@ -16,9 +16,6 @@ import { useColorAnimation } from 'app/hooks/usePressColorAnimation'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
-import { SupporterInfo } from './SupporterInfo'
-import { SupportingInfo } from './SupportingInfo'
-
 const messages = {
   followers: (followerCount: number) =>
     followerCount === 1 ? 'Follower' : 'Followers'
@@ -42,7 +39,7 @@ type UserListItemProps = {
 }
 
 export const UserListItem = (props: UserListItemProps) => {
-  const { tag, userId, showRank, rank, renderRightContent } = props
+  const { userId, showRank, rank, renderRightContent } = props
   const { data: user } = useUser(userId, {
     select: (user) => pick(user, ['handle', 'follower_count'])
   })
@@ -97,10 +94,6 @@ export const UserListItem = (props: UserListItemProps) => {
               </Flex>
               <FollowsYouBadge userId={userId} />
             </Flex>
-            {tag === 'SUPPORTING' ? <SupportingInfo userId={userId} /> : null}
-            {tag === 'TOP SUPPORTERS' ? (
-              <SupporterInfo userId={userId} />
-            ) : null}
           </Flex>
           {renderRightContent && (
             <Flex alignItems='center'>
