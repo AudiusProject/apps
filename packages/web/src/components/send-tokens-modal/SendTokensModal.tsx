@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
@@ -35,6 +35,59 @@ type SendTokensState = {
 const SendTokensModal = () => {
   const { isOpen, onClose: closeModal, data } = useSendTokensModal()
   const { mint, user: prePopulatedUser } = data ?? {}
+  const isAppKitModalOpenRef = useRef(false)
+
+  // Monitor for AppKit modal opening/closing
+  useEffect(() => {
+    if (!isOpen) return
+
+    const checkIfAppKitOpen = () => {
+      const backdrop = document.querySelector('[data-reown-backdrop]')
+      if (!backdrop) return false
+      const style = window.getComputedStyle(backdrop)
+      return (
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        parseFloat(style.opacity) > 0
+      )
+    }
+
+    // Use MutationObserver to detect when AppKit modal appears/disappears
+    const observer = new MutationObserver(() => {
+      isAppKitModalOpenRef.current = checkIfAppKitOpen()
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    })
+
+    // Check initial state
+    isAppKitModalOpenRef.current = checkIfAppKitOpen()
+
+    // Listen for clicks on connect links to prevent immediate close
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const connectLink = target.closest('a[href="#"]')
+      if (connectLink && connectLink.textContent?.includes('Connect')) {
+        // Prevent closing for 1 second to allow AppKit modal to open
+        isAppKitModalOpenRef.current = true
+        setTimeout(() => {
+          isAppKitModalOpenRef.current = checkIfAppKitOpen()
+        }, 1000)
+      }
+    }
+
+    document.addEventListener('click', handleClick, true)
+
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('click', handleClick, true)
+      isAppKitModalOpenRef.current = false
+    }
+  }, [isOpen])
 
   const [state, setState] = useState<SendTokensState>({
     step: 'input',
@@ -95,7 +148,9 @@ const SendTokensModal = () => {
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
         amount: state.amount,
         // When sending to a user, pass their Ethereum address to derive user-bank ATA
-        recipientEthAddress: state.selectedUser?.erc_wallet
+        // Use erc_wallet first, fallback to wallet field
+        recipientEthAddress:
+          state.selectedUser?.erc_wallet ?? state.selectedUser?.wallet
       })
 
       setState((prev) => ({
@@ -149,6 +204,10 @@ const SendTokensModal = () => {
   }
 
   const handleClose = () => {
+    // Don't close if AppKit modal is open (wallet connection in progress)
+    if (isAppKitModalOpenRef.current) {
+      return
+    }
     closeModal()
     const { user: prePopulatedUser } = data ?? {}
     setState({
@@ -172,7 +231,9 @@ const SendTokensModal = () => {
       onClose={handleClose}
       title={state.step === 'confirm' ? 'Confirm Details' : walletMessages.send}
       size='m'
-      dismissOnClickOutside={state.step === 'input'}
+      dismissOnClickOutside={
+        state.step === 'input' && !isAppKitModalOpenRef.current
+      }
       showDismissButton={state.step === 'input'}
     >
       {state.step === 'input' ? (
