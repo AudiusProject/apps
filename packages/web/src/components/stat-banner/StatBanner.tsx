@@ -43,7 +43,7 @@ const messages = {
   save: 'Save Changes',
   message: 'Send Message',
   sendTokens: 'Send Tokens',
-  sendArtistCoins: 'Send Artist Coins',
+  sendArtistCoins: 'Send Coins',
   unblockMessages: 'Unblock Messages',
   blockMessages: 'Block Messages',
   unmuteComments: 'Unmute Comments',
