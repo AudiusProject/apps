@@ -5,7 +5,6 @@ import { Nullable } from '../../../utils/typeUtils'
 
 export enum TransactionType {
   PURCHASE = 'PURCHASE',
-  TIP = 'TIP',
   CHALLENGE_REWARD = 'CHALLENGE_REWARD',
   TRENDING_REWARD = 'TRENDING_REWARD',
   TRANSFER = 'TRANSFER'
@@ -51,7 +50,7 @@ export type TransactionDetails =
     }
   | {
       signature: string
-      transactionType: TransactionType.TIP | TransactionType.TRANSFER
+      transactionType: TransactionType.TRANSFER
       method: TransactionMethod.SEND | TransactionMethod.RECEIVE
       date: string
       change: StringAudio

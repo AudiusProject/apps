@@ -80,7 +80,6 @@ export { default as IconMinus } from '@audius/harmony/src/assets/icons/Minus.svg
 export { default as IconThumbsUp } from '@audius/harmony/src/assets/icons/ThumbsUp.svg'
 export { default as IconCloseAlt } from '@audius/harmony/src/assets/icons/CloseAlt.svg'
 export { default as IconMood } from '@audius/harmony/src/assets/icons/Mood.svg'
-export { default as IconTipping } from '@audius/harmony/src/assets/icons/Tipping.svg'
 export { default as IconCloudDownload } from '@audius/harmony/src/assets/icons/CloudDownload.svg'
 export { default as IconNoWifi } from '@audius/harmony/src/assets/icons/NoWifi.svg'
 export { default as IconTowerBroadcast } from '@audius/harmony/src/assets/icons/TowerBroadcast.svg'

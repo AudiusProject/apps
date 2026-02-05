@@ -282,8 +282,6 @@ export const useCanCreateChat = (userId: ID | null | undefined) => {
       action = ChatPermissionAction.UNBLOCK
     } else if (userPermissions.permit_list.includes(ChatPermission.FOLLOWERS)) {
       action = ChatPermissionAction.FOLLOW
-    } else if (userPermissions.permit_list.includes(ChatPermission.TIPPERS)) {
-      action = ChatPermissionAction.TIP
     } else {
       action = ChatPermissionAction.NONE
     }

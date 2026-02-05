@@ -6,7 +6,6 @@ import type {
 } from '@audius/common/models'
 import {
   isContentFollowGated,
-  isContentTipGated,
   isContentSpecialAccess,
   isContentUSDCPurchaseGated,
   isContentTokenGated
@@ -41,7 +40,6 @@ export const DetailsTileGatedAccess = ({
   )
   const shouldDisplay =
     isContentFollowGated(streamConditions) ||
-    isContentTipGated(streamConditions) ||
     isContentTokenGated(streamConditions) ||
     isContentSpecialAccess(streamConditions) ||
     isContentUSDCPurchaseGated(streamConditions)

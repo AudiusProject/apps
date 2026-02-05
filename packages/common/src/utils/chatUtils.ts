@@ -19,21 +19,18 @@ export const CHAT_BLOG_POST_URL =
 
 const messages = {
   blastTitleFollowers: 'All Followers',
-  blastTitleSupporters: 'Tip Supporters',
   blastTitleCustomers: 'Purchasers',
   blastTitleRemixers: 'Remix Creators',
   blastTitleCustomers2: 'All Purchasers',
   blastTitleRemixers2: 'Remixed',
   blastTitleCoinHolders: (ticker: string) => `$${ticker} Members`,
   blastFollowersDescription: 'Everyone who follows you.',
-  blastSupportersDescription: 'Everyone who has sent you a tip.',
   blastCustomersDescription: 'Everyone who has paid for your content.',
   blastRemixersDescription: 'Everyone who has remixed your tracks.',
   blastCoinHoldersDescription: (symbol: string) =>
     `Everyone who holds $${symbol}.`,
   blastCTABase: 'Send a message blast to ',
   blastCTAFollowers: 'each of your followers',
-  blastCTASupporters: 'everyone who has sent you a tip',
   blastCTACustomers: (audienceContentId?: string) =>
     audienceContentId
       ? 'all purchasers'
@@ -195,14 +192,14 @@ export const getChatBlastTitle = ({
   switch (audience) {
     case ChatBlastAudience.FOLLOWERS:
       return messages.blastTitleFollowers
-    case ChatBlastAudience.TIPPERS:
-      return messages.blastTitleSupporters
     case ChatBlastAudience.CUSTOMERS:
       return messages.blastTitleCustomers
     case ChatBlastAudience.REMIXERS:
       return messages.blastTitleRemixers
     case ChatBlastAudience.COIN_HOLDERS:
       return messages.blastTitleCoinHolders(coinSymbol ?? '')
+    default:
+      return ''
   }
 }
 
@@ -218,8 +215,6 @@ export const getChatBlastSecondaryTitle = ({
   switch (audience) {
     case ChatBlastAudience.FOLLOWERS:
       return messages.blastTitleFollowers
-    case ChatBlastAudience.TIPPERS:
-      return messages.blastTitleSupporters
     case ChatBlastAudience.CUSTOMERS:
       return audienceContentId
         ? messages.blastTitleCustomers
@@ -230,6 +225,8 @@ export const getChatBlastSecondaryTitle = ({
         : messages.blastTitleRemixers
     case ChatBlastAudience.COIN_HOLDERS:
       return messages.blastTitleCoinHolders(coinSymbol ?? '')
+    default:
+      return ''
   }
 }
 
@@ -243,14 +240,14 @@ export const getChatBlastAudienceDescription = ({
   switch (audience) {
     case ChatBlastAudience.FOLLOWERS:
       return messages.blastFollowersDescription
-    case ChatBlastAudience.TIPPERS:
-      return messages.blastSupportersDescription
     case ChatBlastAudience.CUSTOMERS:
       return messages.blastCustomersDescription
     case ChatBlastAudience.REMIXERS:
       return messages.blastRemixersDescription
     case ChatBlastAudience.COIN_HOLDERS:
       return messages.blastCoinHoldersDescription(coinSymbol ?? '')
+    default:
+      return ''
   }
 }
 
@@ -266,8 +263,6 @@ export const getChatBlastCTA = ({
   switch (audience) {
     case ChatBlastAudience.FOLLOWERS:
       return messages.blastCTABase + messages.blastCTAFollowers
-    case ChatBlastAudience.TIPPERS:
-      return messages.blastCTABase + messages.blastCTASupporters
     case ChatBlastAudience.CUSTOMERS:
       return (
         messages.blastCTABase + messages.blastCTACustomers(audienceContentId)
@@ -280,6 +275,8 @@ export const getChatBlastCTA = ({
       return (
         messages.blastCTABase + messages.blastCTACoinHolders(coinSymbol ?? '')
       )
+    default:
+      return ''
   }
 }
 
@@ -287,8 +284,6 @@ export const defaultChatPermitMap: InboxSettingsFormValues = {
   [ChatPermission.ALL]: false,
   [ChatPermission.FOLLOWERS]: false,
   [ChatPermission.FOLLOWEES]: false,
-  [ChatPermission.TIPPERS]: false,
-  [ChatPermission.TIPPEES]: false,
   [ChatPermission.VERIFIED]: false
 }
 

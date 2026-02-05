@@ -18,13 +18,7 @@ import {
   TrendingPlaylistNotification,
   TrendingTrackNotification,
   TrendingUndergroundNotification,
-  TopSupporterNotification,
-  TopSupportingNotification,
-  TipReactionNotification,
-  TipSentNotification,
-  TipReceivedNotification,
   AddTrackToPlaylistNotification,
-  SupporterDethronedNotification,
   RepostOfRepostNotification,
   FavoriteOfRepostNotification,
   TastemakerNotification,
@@ -50,7 +44,7 @@ type NotificationListItemProps = {
   isVisible: boolean
 }
 export const NotificationListItem = (props: NotificationListItemProps) => {
-  const { notification, isVisible } = props
+  const { notification } = props
 
   const renderNotification = () => {
     switch (notification.type) {
@@ -80,26 +74,6 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return <TastemakerNotification notification={notification} />
       case NotificationType.TierChange:
         return <TierChangeNotification notification={notification} />
-      case NotificationType.Reaction:
-        return (
-          <TipReactionNotification
-            notification={notification}
-            isVisible={isVisible}
-          />
-        )
-      case NotificationType.TipReceive:
-        return (
-          <TipReceivedNotification
-            notification={notification}
-            isVisible={props.isVisible}
-          />
-        )
-      case NotificationType.TipSend:
-        return <TipSentNotification notification={notification} />
-      case NotificationType.SupporterRankUp:
-        return <TopSupporterNotification notification={notification} />
-      case NotificationType.SupportingRankUp:
-        return <TopSupportingNotification notification={notification} />
       case NotificationType.TrendingPlaylist:
         return <TrendingPlaylistNotification notification={notification} />
       case NotificationType.TrendingTrack:
@@ -114,8 +88,6 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return (
           <TrackAddedToPurchasedAlbumNotification notification={notification} />
         )
-      case NotificationType.SupporterDethroned:
-        return <SupporterDethronedNotification notification={notification} />
       case NotificationType.USDCPurchaseSeller:
         return <USDCPurchaseSellerNotification notification={notification} />
       case NotificationType.USDCPurchaseBuyer:

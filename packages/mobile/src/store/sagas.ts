@@ -48,7 +48,6 @@ import queueSagas from 'common/store/queue/sagas'
 import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import socialSagas from 'common/store/social/sagas'
-import tippingSagas from 'common/store/tipping/sagas'
 import uploadSagas from 'common/store/upload/sagas'
 import { all, spawn } from 'typed-redux-saga'
 
@@ -94,9 +93,6 @@ export default function* rootSaga() {
 
     // Sign up
     ...signUpSagas(),
-
-    // Tipping
-    ...tippingSagas(),
 
     // Premium content
     ...gatedContentSagas(),

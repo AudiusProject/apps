@@ -14,7 +14,6 @@ export const audioTransactionFromSdk = (
     purchase_coinbase: TransactionType.PURCHASE,
     purchase_unknown: TransactionType.PURCHASE,
     'purchase unknown': TransactionType.PURCHASE,
-    tip: TransactionType.TIP,
     user_reward: TransactionType.CHALLENGE_REWARD,
     trending_reward: TransactionType.TRENDING_REWARD,
     transfer: TransactionType.TRANSFER
@@ -48,7 +47,6 @@ export const audioTransactionFromSdk = (
         balance: tx.balance,
         metadata: undefined
       }
-    case TransactionType.TIP:
     case TransactionType.TRANSFER:
       return {
         signature: tx.signature,

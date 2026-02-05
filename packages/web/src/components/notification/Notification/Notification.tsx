@@ -31,14 +31,8 @@ import { RemixCreateNotification } from './RemixCreateNotification'
 import { RepostNotification } from './RepostNotification'
 import { RepostOfRepostNotification } from './RepostOfRepostNotification'
 import { RequestManagerNotification } from './RequestManagerNotification'
-import { SupporterDethronedNotification } from './SupporterDethronedNotification'
 import { TastemakerNotification } from './TastemakerNotification'
 import { TierChangeNotification } from './TierChangeNotification'
-import { TipReactionNotification } from './TipReactionNotification'
-import { TipReceivedNotification } from './TipReceivedNotification'
-import { TipSentNotification } from './TipSentNotification'
-import { TopSupporterNotification } from './TopSupporterNotification'
-import { TopSupportingNotification } from './TopSupportingNotification'
 import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedAlbumNotification'
 import { TrendingPlaylistNotification } from './TrendingPlaylistNotification'
 import { TrendingTrackNotification } from './TrendingTrackNotification'
@@ -95,21 +89,6 @@ export const Notification = (props: NotificationProps) => {
       case NotificationType.TierChange: {
         return <TierChangeNotification notification={notification} />
       }
-      case NotificationType.Reaction: {
-        return <TipReactionNotification notification={notification} />
-      }
-      case NotificationType.TipReceive: {
-        return <TipReceivedNotification notification={notification} />
-      }
-      case NotificationType.TipSend: {
-        return <TipSentNotification notification={notification} />
-      }
-      case NotificationType.SupporterRankUp: {
-        return <TopSupporterNotification notification={notification} />
-      }
-      case NotificationType.SupportingRankUp: {
-        return <TopSupportingNotification notification={notification} />
-      }
       case NotificationType.TrendingPlaylist: {
         return <TrendingPlaylistNotification notification={notification} />
       }
@@ -141,9 +120,6 @@ export const Notification = (props: NotificationProps) => {
         return (
           <TrackAddedToPurchasedAlbumNotification notification={notification} />
         )
-      }
-      case NotificationType.SupporterDethroned: {
-        return <SupporterDethronedNotification notification={notification} />
       }
       case NotificationType.Comment: {
         return <CommentNotification notification={notification} />

@@ -11,7 +11,6 @@ import {
 } from '@audius/harmony'
 
 import Input from 'components/data-entry/Input'
-import { TipAudioButton } from 'components/tipping/tip-audio/TipAudioButton'
 import UploadChip from 'components/upload/UploadChip'
 import { Type } from 'pages/profile-page/components/SocialLink'
 import { ProfileTopTags } from 'pages/profile-page/components/desktop/ProfileTopTags'
@@ -25,8 +24,6 @@ import { ProfileBio } from './ProfileBio'
 import { ProfileMutuals } from './ProfileMutuals'
 import { RecentComments } from './RecentComments'
 import { RelatedArtists } from './RelatedArtists'
-import { SupportingList } from './SupportingList'
-import { TopSupporters } from './TopSupporters'
 import { PROFILE_LEFT_COLUMN_WIDTH_PX } from './constants'
 
 const messages = {
@@ -235,14 +232,8 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
         />
 
         {/* For artist coin owners, replace the tip CTA with their coin */}
-        {showArtistCoinCTA ? (
-          <BuyArtistCoinCard mint={ownedCoin.mint} />
-        ) : !isArtistCoinLoading && !isOwner ? (
-          <TipAudioButton />
-        ) : null}
+        {showArtistCoinCTA ? <BuyArtistCoinCard mint={ownedCoin.mint} /> : null}
         <RecentComments userId={userId} />
-        <SupportingList />
-        <TopSupporters />
         <ProfileMutuals />
         <RelatedArtists />
         {isArtist ? <ProfileTopTags /> : null}

@@ -11,6 +11,3 @@ export const getLockedContentId = (state: CommonState) =>
 
 export const getFolloweeIds = (state: CommonState) =>
   state.gatedContent.followeeIds
-
-export const getTippedUserIds = (state: CommonState) =>
-  state.gatedContent.tippedUserIds

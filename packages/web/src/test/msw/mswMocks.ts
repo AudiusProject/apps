@@ -34,22 +34,6 @@ export const mockUserByHandle = (user: typeof artistUser) =>
     HttpResponse.json({ data: [user] })
   )
 
-export const mockSupportingUsers = (
-  user: typeof artistUser,
-  supportingUsers?: TestUser[]
-) =>
-  http.get(`${apiEndpoint}/v1/full/users/${user.id}/supporting`, () =>
-    HttpResponse.json({ data: supportingUsers ?? [] })
-  )
-
-export const mockSupporterUsers = (
-  user: typeof artistUser,
-  supporterUsers?: TestUser[]
-) =>
-  http.get(`${apiEndpoint}/v1/full/users/${user.id}/supporters`, () =>
-    HttpResponse.json({ data: supporterUsers ?? [] })
-  )
-
 export const mockRelatedUsers = (
   user: typeof artistUser,
   relatedUsers?: TestUser[]

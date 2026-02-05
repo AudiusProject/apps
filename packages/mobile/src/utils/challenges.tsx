@@ -35,23 +35,6 @@ import TrebleClef from 'app/assets/images/emojis/treble-clef.png'
 import Trophy from 'app/assets/images/emojis/trophy.png'
 import type { SummaryTableItem } from 'app/components/summary-table/SummaryTable'
 
-export const messages = {
-  sendFirstTipTitle: 'Send Your First Tip',
-  // NOTE: Send tip -> Send $AUDIO change
-  sendFirstTipTitleAlt: 'Send Your First $AUDIO', // iOS only
-  sendFirstTipDescription:
-    'Show some love to your favorite artist and send them a tip',
-  sendFirstTipShortDescription:
-    'Show some love to your favorite artist and send them a tip',
-  sendFirstTipDescriptionAlt:
-    'Show some love to your favorite artist and send them $AUDIO', // iOS only
-  sendFirstTipShortDescriptionAlt:
-    'Show some love to your favorite artist and send them $AUDIO', // iOS only
-  sendFirstTipButton: 'Send a Tip',
-  sendFirstTipButtonAlt: 'Find Artists to Support', // iOS only
-  sendFirstTipCompletedLabelAlt: 'Support Another Artist' // iOS only
-}
-
 export type ChallengesParamList = {
   trending: undefined
   explore: undefined

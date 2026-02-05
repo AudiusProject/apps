@@ -8,7 +8,6 @@ import {
 import { Nullable } from '@audius/common/utils'
 
 export enum SpecialAccessType {
-  TIP = 'tip',
   FOLLOW = 'follow'
 }
 

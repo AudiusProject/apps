@@ -3,7 +3,6 @@ import type { TrackMetadata } from '@audius/sdk'
 import {
   AccessConditions,
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '~/models'
@@ -25,10 +24,6 @@ export const accessConditionsToSDK = (
         tokenMint: input.token_gate.token_mint,
         tokenAmount: input.token_gate.token_amount
       }
-    }
-  } else if (isContentTipGated(input)) {
-    return {
-      tipUserId: input.tip_user_id
     }
   } else {
     throw new Error(

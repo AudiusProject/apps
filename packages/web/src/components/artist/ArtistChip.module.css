@@ -82,57 +82,19 @@
   fill: var(--harmony-n-400);
 }
 
-.followersContainer,
-.tipContainer {
+.followersContainer {
   display: flex;
   align-items: center;
 }
-.followersContainer .followers,
-.tipContainer .amount {
+.followersContainer .followers {
   display: flex;
   align-items: center;
   font-weight: var(--harmony-font-medium);
   color: var(--harmony-n-400) !important;
-}
-.followersContainer .followers {
   width: 136px !important;
   margin-right: 8px;
 }
-.followersContainer .value,
-.tipContainer .value {
+.followersContainer .value {
   margin-right: 4px;
   font-weight: var(--harmony-font-bold);
-}
-
-.tipContainer .rank {
-  margin-right: 24px;
-}
-.tipContainer .topSupporter,
-.tipContainer .supporter {
-  display: flex;
-  align-items: center;
-  font-size: var(--harmony-font-s);
-  font-weight: var(--harmony-font-medium);
-}
-.tipContainer .topSupporter {
-  color: var(--harmony-secondary);
-}
-.tipContainer .topRankNumber {
-  font-weight: var(--harmony-font-bold);
-  margin-right: 4px;
-}
-.tipContainer .rankNumber {
-  font-weight: var(--harmony-font-bold);
-}
-.tipContainer .topSupporter .icon path {
-  fill: var(--harmony-secondary);
-}
-.tipContainer .supporter {
-  color: var(--harmony-n-400);
-}
-.tipContainer .amount {
-  font-size: var(--harmony-font-s);
-}
-.tipContainer {
-  margin-top: 8px;
 }

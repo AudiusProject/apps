@@ -8,8 +8,6 @@ export enum ChatPermissionAction {
   NOT_APPLICABLE,
   /** Nothing current user can do (they're blocked or other user has closed inbox) */
   NONE,
-  /** Current user can tip user */
-  TIP,
   /** Current user can follow user */
   FOLLOW,
   /** Current user can unblock user */
@@ -38,8 +36,6 @@ export class ChatWebsocketError extends Error {
 export type InboxSettingsFormValues = {
   [ChatPermission.ALL]: boolean
   [ChatPermission.FOLLOWEES]: boolean
-  [ChatPermission.TIPPERS]: boolean
-  [ChatPermission.TIPPEES]: boolean
   [ChatPermission.FOLLOWERS]: boolean
   [ChatPermission.VERIFIED]: boolean
 }

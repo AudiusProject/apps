@@ -32,14 +32,8 @@ export enum NotificationType {
   ChallengeReward = 'ChallengeReward',
   ClaimableReward = 'ClaimableReward',
   TierChange = 'TierChange',
-  Reaction = 'Reaction',
-  TipReceive = 'TipReceive',
-  TipSend = 'TipSend',
-  SupporterRankUp = 'SupporterRankUp',
-  SupportingRankUp = 'SupportingRankUp',
   AddTrackToPlaylist = 'AddTrackToPlaylist',
   TrackAddedToPurchasedAlbum = 'TrackAddedToPurchasedAlbum',
-  SupporterDethroned = 'SupporterDethroned',
   USDCPurchaseSeller = 'USDCPurchaseSeller',
   USDCPurchaseBuyer = 'USDCPurchaseBuyer',
   RequestManager = 'RequestManager',
@@ -83,13 +77,6 @@ export enum PushNotificationType {
   Tastemaker = 'Tastemaker',
   TierChange = 'TierChange',
   PlaylistUpdate = 'PlaylistUpdate',
-  Tip = 'Tip',
-  TipReceive = 'TipReceive',
-  TipSend = 'TipSend',
-  Reaction = 'Reaction',
-  SupporterRankUp = 'SupporterRankUp',
-  SupportingRankUp = 'SupportingRankUp',
-  SupporterDethroned = 'SupporterDethroned',
   AddTrackToPlaylist = 'AddTrackToPlaylist',
   TrackAddedToPurchasedAlbum = 'TrackAddedToPurchasedAlbum',
   Message = 'Message',
@@ -495,124 +482,6 @@ export type TierChangeNotification = BaseNotification & {
   tier: BadgeTier
 }
 
-// TODO: when we support multiple reaction types, reactedToEntity type
-// should differ in a discrimated union reactionType
-export type ReactionNotification = BaseNotification & {
-  type: NotificationType.Reaction
-  entityId: ID
-  entityType: Entity.User
-  reactionValue: number
-  reactionType: string
-  reactedToEntity: {
-    tx_signature: string
-    amount: StringWei
-    tip_sender_id: ID
-  }
-}
-
-export type ReactionPushNotification = {
-  type: PushNotificationType.Reaction
-  initiator: ID
-  slot: number
-  metadata: {
-    // TODO: Need to verify camelCase vs snake_case
-    reaction_value: number
-    reacted_to_entity: {
-      tx_signature: string
-      tip_sender_id: ID
-      amount: string
-    }
-    reaction_type: string
-  }
-}
-
-export type TipReceiveNotification = BaseNotification & {
-  type: NotificationType.TipReceive
-  amount: StringWei
-  reactionValue: number
-  entityId: ID
-  entityType: Entity.User
-  tipTxSignature: string
-}
-
-export type TipReceivePushNotification = {
-  type: PushNotificationType.TipReceive
-  slot: number
-  initiator: ID
-  metadata: {
-    entity_id: ID
-    entity_type: Entity.User
-    amount: StringWei
-    tx_signature: string
-  }
-}
-
-export type TipSendNotification = BaseNotification & {
-  type: NotificationType.TipSend
-  amount: StringWei
-  entityId: ID
-  entityType: Entity.User
-}
-
-export type TipSendPushNotification = {
-  type: PushNotificationType.TipSend
-  slot: number
-  initiator: ID
-  metadata: {
-    // TODO: Need to verify camelCase vs snake_case
-    entityId: ID
-    entityType: Entity.User
-    amount: StringWei
-    tipTxSignature: string
-  }
-}
-
-export type SupporterRankUpNotification = BaseNotification & {
-  type: NotificationType.SupporterRankUp
-  rank: number
-  entityId: ID
-  entityType: Entity.User
-}
-
-export type SupporterRankUpPushNotification = {
-  initiator: ID
-  slot: number
-  type: PushNotificationType.SupporterRankUp
-  metadata: {
-    rank: number
-    entity_type: Entity.User
-    entity_id: ID
-  }
-}
-
-export type SupportingRankUpNotification = BaseNotification & {
-  type: NotificationType.SupportingRankUp
-  rank: number
-  entityId: ID
-  entityType: Entity.User
-}
-
-export type SupportingRankUpPushNotification = {
-  initiator: ID
-  slot: number
-  type: PushNotificationType.SupportingRankUp
-  metadata: {
-    rank: number
-    entity_type: Entity.User
-    entity_id: ID
-  }
-}
-
-export type SupporterDethronedNotification = BaseNotification & {
-  type: NotificationType.SupporterDethroned
-  entityType: Entity.User
-  entityId: ID // The usurping user
-  supportedUserId: ID
-  // Not currently used:
-  // newAmount	"3000000000000000000"
-  // oldAmount	"2000000000000000000"
-}
-
 export type AddTrackToPlaylistNotification = BaseNotification & {
   type: NotificationType.AddTrackToPlaylist
   trackId: ID
@@ -782,12 +651,6 @@ export type Notification =
   | ChallengeRewardNotification
   | ClaimableRewardNotification
   | TierChangeNotification
-  | ReactionNotification
-  | TipReceiveNotification
-  | TipSendNotification
-  | SupporterRankUpNotification
-  | SupportingRankUpNotification
-  | SupporterDethronedNotification
   | AddTrackToPlaylistNotification
   | TrackAddedToPurchasedAlbumNotification
   | USDCPurchaseSellerNotification

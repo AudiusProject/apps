@@ -39,7 +39,6 @@ import { ReplaceTrackProgressModal } from 'components/replace-track-progress-mod
 import { ClaimAllRewardsModal } from 'components/rewards/modals/ClaimAllRewardsModal'
 import TopAPIModal from 'components/rewards/modals/TopAPI'
 import { SendTokensModal } from 'components/send-tokens-modal'
-import { TipAudioModal } from 'components/tipping/tip-audio/TipAudioModal'
 import ConnectedMobileOverflowModal from 'components/track-overflow-modal/ConnectedMobileOverflowModal'
 import { TransactionDetailsModal } from 'components/transaction-details-modal'
 import UnfollowConfirmationModal from 'components/unfollow-confirmation-modal/UnfollowConfirmationModal'
@@ -162,7 +161,6 @@ const Modals = () => {
           <FeatureFlagOverrideModal />
         </>
       )}
-      <TipAudioModal />
       <CoinSuccessModal />
     </>
   )

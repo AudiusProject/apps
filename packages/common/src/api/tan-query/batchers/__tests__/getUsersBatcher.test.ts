@@ -32,8 +32,6 @@ describe('getUsersBatcher', () => {
     doesCurrentUserFollow: false,
     currentUserFolloweeFollowCount: 0,
     ercWallet: '',
-    supporterCount: 0,
-    supportingCount: 0,
     coverPhotoLegacy: undefined,
     profilePictureLegacy: undefined,
     coverPhotoCids: undefined,

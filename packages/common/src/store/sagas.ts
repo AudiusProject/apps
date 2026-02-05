@@ -85,8 +85,6 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   // pages/user-list/reposts/sagas.ts
   // pages/user-list/favorites/sagas.ts
   // pages/user-list/mutuals/sagas.ts
-  // pages/user-list/supporting/sagas.ts
-  // pages/user-list/top-supporters/sagas.ts
   // pages/search-explore-page/store/sagas.ts
   // pages/search-explore-page/store/exploreCollections/sagas.ts
   // store/solana/sagas.ts

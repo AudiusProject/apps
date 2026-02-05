@@ -5,7 +5,6 @@ import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import type { AccessConditions } from '@audius/common/models'
 import {
   isContentFollowGated,
-  isContentTipGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
@@ -42,9 +41,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     }
     if (isContentFollowGated(streamConditions)) {
       return [messages.specialAccess, messages.followersOnly]
-    }
-    if (isContentTipGated(streamConditions)) {
-      return [messages.specialAccess, messages.supportersOnly]
     }
     if (isContentTokenGated(streamConditions)) {
       return [messages.coinGated]

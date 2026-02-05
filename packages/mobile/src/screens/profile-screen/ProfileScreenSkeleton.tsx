@@ -141,7 +141,6 @@ export const ExpandableSectionSkeleton = () => {
           <StaticSkeleton style={styles.socialLink} />
         </View>
       </Flex>
-      {/* TODO: add tip button and supporters skeletons */}
     </Flex>
   )
 }

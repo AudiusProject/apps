@@ -12,7 +12,6 @@ export const getCombinedDefaultGatedConditionValues = (
 ) => ({
   usdc_purchase: { price: null, albumTrackPrice: null },
   follow_user_id: userId,
-  tip_user_id: userId,
   token_gate: {
     token_mint: '',
     token_amount: 0

@@ -81,8 +81,6 @@ describe('getCollectionsBatcher', () => {
       isAvailable: true,
       ercWallet: '',
       splWallet: '',
-      supporterCount: 0,
-      supportingCount: 0,
       totalAudioBalance: 0,
       wallet: '',
       balance: '0',
@@ -106,7 +104,12 @@ describe('getCollectionsBatcher', () => {
       profilePictureCids: undefined,
       profilePictureLegacy: undefined,
       playlistLibrary: undefined,
-      allowAiAttribution: false
+      allowAiAttribution: false,
+      supporterCount: 0,
+      supportingCount: 0,
+      artistCoinBadge: undefined,
+      splUsdcWallet: undefined,
+      hasCollectibles: false
     }
   })
 

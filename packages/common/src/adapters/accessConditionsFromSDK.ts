@@ -1,6 +1,5 @@
 import type { full } from '@audius/sdk'
 import {
-  instanceOfTipGate,
   instanceOfFollowGate,
   instanceOfPurchaseGate,
   instanceOfTokenGate,
@@ -16,8 +15,6 @@ export const accessConditionsFromSDK = (
     return { follow_user_id: input.followUserId }
   } else if (instanceOfPurchaseGate(input)) {
     return { usdc_purchase: input.usdcPurchase }
-  } else if (instanceOfTipGate(input)) {
-    return { tip_user_id: input.tipUserId }
   } else if (instanceOfTokenGate(input)) {
     return {
       token_gate: {

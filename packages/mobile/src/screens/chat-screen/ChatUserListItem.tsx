@@ -28,7 +28,6 @@ const messages = {
   followsYou: 'Follows You',
   followers: 'Followers',
   ctaNone: 'Cannot Be Messaged',
-  ctaTip: 'Send a Tip To Message',
   ctaFollow: 'Follow to Message',
   ctaBlock: 'Blocked'
 }
@@ -129,7 +128,6 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
 }))
 
 const ctaToTextMap: Record<ChatPermissionAction, string> = {
-  [ChatPermissionAction.TIP]: messages.ctaTip,
   [ChatPermissionAction.FOLLOW]: messages.ctaFollow,
   [ChatPermissionAction.UNBLOCK]: messages.ctaBlock,
   [ChatPermissionAction.NONE]: messages.ctaNone,

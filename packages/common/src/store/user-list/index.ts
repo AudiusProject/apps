@@ -7,14 +7,6 @@ export * as coinLeaderboardUserListSelectors from './coin-leaderboard/selectors'
 export * from './coin-leaderboard/types'
 export { default as coinLeaderboardUserListReducer } from './coin-leaderboard/reducers'
 
-export * as topSupportersUserListActions from './top-supporters/actions'
-export * as topSupportersUserListSelectors from './top-supporters/selectors'
-export * from './top-supporters/types'
-
-export * as supportingUserListActions from './supporting/actions'
-export * as supportingUserListSelectors from './supporting/selectors'
-export * from './supporting/types'
-
 export * as repostsUserListActions from './reposts/actions'
 export * as repostsUserListSelectors from './reposts/selectors'
 export * from './reposts/types'

@@ -52,7 +52,6 @@ import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import searchAiBarSagas from 'common/store/search-ai-bar/sagas'
 import socialSagas from 'common/store/social/sagas'
-import tippingSagas from 'common/store/tipping/sagas'
 import uploadSagas from 'common/store/upload/sagas'
 import firstUploadModalSagas from 'components/first-upload-modal/store/sagas'
 import passwordResetSagas from 'components/password-reset/store/sagas'
@@ -154,9 +153,6 @@ export default function* rootSaga() {
 
     // Remote config
     remoteConfigSagas(),
-
-    // Tipping
-    tippingSagas(),
 
     // Gated content
     gatedContentSagas(),

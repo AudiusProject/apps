@@ -118,8 +118,6 @@ describe('getTracksBatcher', () => {
       isAvailable: true,
       ercWallet: '',
       splWallet: '',
-      supporterCount: 0,
-      supportingCount: 0,
       totalAudioBalance: 0,
       wallet: '',
       balance: '0',

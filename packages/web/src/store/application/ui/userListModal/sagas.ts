@@ -1,8 +1,6 @@
 import { FavoriteType } from '@audius/common/models'
 import {
   coinLeaderboardUserListActions,
-  topSupportersUserListActions as topSupporterActions,
-  supportingUserListActions as supportingActions,
   repostsUserListActions as repostActions,
   notificationsUserListActions as notificationActions,
   mutualsUserListActions,
@@ -79,12 +77,6 @@ function* watchSetUsers() {
             break
           case UserListType.RELATED_ARTISTS:
             yield put(setRelatedArtists(id))
-            break
-          case UserListType.SUPPORTER:
-            yield put(topSupporterActions.setTopSupporters(id))
-            break
-          case UserListType.SUPPORTING:
-            yield put(supportingActions.setSupporting(id))
             break
           case UserListType.REMIXER:
             yield put(remixersUserListActions.setRemixers(id))

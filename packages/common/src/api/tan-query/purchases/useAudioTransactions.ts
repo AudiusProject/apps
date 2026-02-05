@@ -1,21 +1,15 @@
-import { useMemo } from 'react'
-
 import { full, Id } from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
 
 import { audioTransactionFromSdk } from '~/adapters/audioTransactions'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
-import {
-  TransactionDetails,
-  TransactionType
-} from '~/store/ui/transaction-details/types'
-import { Nullable, removeNullable } from '~/utils/typeUtils'
+import { TransactionDetails } from '~/store/ui/transaction-details/types'
+import { Nullable } from '~/utils/typeUtils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { useUsers } from '../users/useUsers'
 
 type GetAudioTransactionsArgs = {
   page?: number
@@ -84,24 +78,6 @@ export const useAudioTransactions = (
     ...options,
     enabled: options?.enabled !== false && !!userId
   })
-
-  // Get user IDs from tip transactions
-  const userIds = useMemo(
-    () =>
-      queryResults.data
-        ?.map((tx: TransactionDetails) => {
-          if (tx.transactionType === TransactionType.TIP) {
-            return tx.metadata
-          }
-          return null
-        })
-        .filter((tx: string | null) => tx !== null)
-        .filter(removeNullable)
-        .map((id: string) => parseInt(id)),
-    [queryResults.data]
-  )
-
-  useUsers(userIds)
 
   return queryResults
 }
