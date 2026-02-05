@@ -291,7 +291,7 @@ import fs from 'fs'
 const coverArtBuffer = fs.readFileSync('path/to/cover-art.png')
 
 const { playlistId } = await audiusSdk.playlists.createPlaylist({
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -313,13 +313,13 @@ const { playlistId } = await audiusSdk.playlists.createPlaylist({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name           | Type                         | Description                                                                   | Required?    |
-| :------------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `coverArtFile` | `File`                       | A file that will be used as the cover art for the playlist                    | _Optional_   |
-| `metadata`     | _see code block below_       | An object containing the details of the playlist                              | **Required** |
-| `onProgress`   | `(progress: number) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
-| `trackIds`     | `Array<string>`              | An array of track IDs to be included in the playlist                          | **Required** |
-| `userId`       | `string`                     | The ID of the user                                                            | **Required** |
+| Name         | Type                                                                                                                         | Description                                                                   | Required?    |
+| :----------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `imageFile`  | `File`                                                                                                                       | A file that will be used as the cover art for the playlist                    | _Optional_   |
+| `metadata`   | _see code block below_                                                                                                       | An object containing the details of the playlist                              | **Required** |
+| `onProgress` | `(progress: number, `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| `trackIds`   | `Array<string>`                                                                                                              | An array of track IDs to be included in the playlist                          | **Required** |
+| `userId`     | `string`                                                                                                                     | The ID of the user                                                            | **Required** |
 
 ```json title="createPlaylist metadata payload"
 {
@@ -373,7 +373,7 @@ const trackBuffer3 = fs.readFileSync('path/to/track3.mp3')
 
 const { playlistId } = await audiusSdk.playlists.uploadPlaylist({
   userId: '7eP5n',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -395,7 +395,7 @@ const { playlistId } = await audiusSdk.playlists.uploadPlaylist({
       title: 'Bush',
     },
   ],
-  trackFiles: [
+  audioFiles: [
     {
       buffer: Buffer.from(trackBuffer1),
       name: 'OakTrmp3',
@@ -417,14 +417,14 @@ const { playlistId } = await audiusSdk.playlists.uploadPlaylist({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name             | Type                                                           | Description                                                                   | Required?    |
-| :--------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `coverArtFile`   | `File`                                                         | A file that will be used as the cover art for the playlist                    | _Optional_   |
-| `metadata`       | _see code sample below_                                        | An object containing the details of the playlist                              | **Required** |
-| `onProgress`     | `(progress: number) => void`                                   | A function that will be called with progress events as the image file uploads | _Optional_   |
-| `trackFiles`     | `Array<File>`                                                  | An array of track audio files                                                 | **Required** |
-| `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]` | An array of track files                                                       | _Optional_   |
-| `userId`         | `string`                                                       | The ID of the user                                                            | **Required** |
+| Name             | Type                                                                                                                                | Description                                                                                  | Required?    |
+| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :----------- |
+| `imageFile`      | `File`                                                                                                                              | A file that will be used as the cover art for the playlist                                   | _Optional_   |
+| `metadata`       | _see code sample below_                                                                                                             | An object containing the details of the playlist                                             | **Required** |
+| `onProgress`     | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file and audio files upload | _Optional_   |
+| `audioFiles`     | `Array<File>`                                                                                                                       | An array of track audio files                                                                | **Required** |
+| `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]`                                                                      | An array of track files                                                                      | _Optional_   |
+| `userId`         | `string`                                                                                                                            | The ID of the user                                                                           | **Required** |
 
 ```json
 {
@@ -571,7 +571,7 @@ const coverArtBuffer = fs.readFileSync('path/to/updated-cover-art.png')
 
 const { playlistId } = await audiusSdk.playlists.updatePlaylist({
   playlistId: 'x5pJ3Az',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -599,13 +599,13 @@ const { playlistId } = await audiusSdk.playlists.updatePlaylist({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name           | Type                         | Description                                                                   | Required?    |
-| :------------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `playlistId`   | `string`                     | The ID of the playlist                                                        | **Required** |
-| `userId`       | `string`                     | The ID of the User                                                            | **Required** |
-| `coverArtFile` | `string`                     | A file that will be used as the cover art for the playlist                    | _Optional_   |
-| `metadata`     | _see code block below_       | An object containing the details of the playlist                              | **Required** |
-| `onProgress`   | `(progress: number) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| Name         | Type                                                                                                                                | Description                                                                   | Required?    |
+| :----------- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `playlistId` | `string`                                                                                                                            | The ID of the playlist                                                        | **Required** |
+| `userId`     | `string`                                                                                                                            | The ID of the User                                                            | **Required** |
+| `imageFile`  | `string`                                                                                                                            | A file that will be used as the cover art for the playlist                    | _Optional_   |
+| `metadata`   | _see code block below_                                                                                                              | An object containing the details of the playlist                              | **Required** |
+| `onProgress` | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#uploadplaylistprogressevent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
 
 ```json title="updatePlaylist metadata payload"
 {

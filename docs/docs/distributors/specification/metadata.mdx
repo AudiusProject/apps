@@ -25,11 +25,11 @@ Please note that exact DDEX fields will depend on the specific ERN version.
 The following metadata fields are required for content to be listed on Audius and are examined and
 pulled from a DDEX delivery in cascading precedence.
 
-#### coverArtFile
+#### imageFile
 
 :::note
 
-The `coverArtFile` maps to two DDEX Fields
+The `imageFile` maps to two DDEX Fields
 
 :::
 
@@ -149,14 +149,14 @@ the separate DDEX server but not in the Audius network.
 
 :::
 
-#### trackFile
+#### audioFile
 
 This is the actual audio file, not technically an Audius SDK metadata field, but uploaded in the
 same SDK function. Note that this DDEX field is a relative path to the file within the delivery
 
 :::note
 
-The `trackFile` maps to two DDEX Fields
+The `audioFile` maps to two DDEX Fields
 
 :::
 
@@ -281,7 +281,7 @@ the separate DDEX server but not in the Audius network.
 1. `/ReleaseList/Release/ReleaseDetailsByTerritory[TerritoryCode="Worldwide"]/Genre/SubGenre`
 2. `/ReleaseList/Release/ReleaseDetailsByTerritory[TerritoryCode="Worldwide"]/Genre/GenreText`
 
-#### trackFiles
+#### audioFiles
 
 This is an array of audio files which the album is comprised of, not technically an Audius SDK
 metadata field, but uploaded as part of the album.

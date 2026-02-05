@@ -55,7 +55,7 @@ const trackBuffer = fs.readFileSync('path/to/track.mp3')
 
 const { trackId } = await audiusSdk.tracks.uploadTrack({
   userId: '7eP5n',
-  coverArtFile: {
+  imageFile: {
     buffer: Buffer.from(coverArtBuffer),
     name: 'coverArt',
   },
@@ -97,8 +97,8 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     iswc: 'T-123.456.789-0',
     license: 'Attribution-NonCommercial-ShareAlike CC BY-NC-SA',
   },
-  trackFile: {
-    buffer: Buffer.from(trackArtBuffer),
+  audioFile: {
+    buffer: Buffer.from(trackBuffer),
     name: 'monsteraAudio',
   },
 })
