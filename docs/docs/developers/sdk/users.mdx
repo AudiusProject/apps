@@ -867,7 +867,9 @@ await audiusSdk.users.updateProfile({
   metadata: {
     bio: 'up and coming artist from the Bronx',
   },
-  onProgress: (progress) => console.log('Progress: ', progress),
+  onProgress: (progress) => {
+    console.log(`Uploading: ${Math.round((progress.loaded / progress.total) * 100)}%`)
+  },
 })
 ```
 
@@ -876,21 +878,32 @@ await audiusSdk.users.updateProfile({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name                 | Type                         | Description                                                                   | Required?    |
-| :------------------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `profilePictureFile` | `File`                       | A file to be used as the profile picture                                      | _Optional_   |
-| `coverArtFile`       | `File`                       | A file to be used as the cover art. This is the header on a profile page      | _Optional_   |
-| `metadata`           | _see code block below_       | An object with details about the user                                         | **Required** |
-| `onProgress`         | `(progress: number) => void` | A function that will be called with progress events as the image files upload | _Optional_   |
-| `userId`             | `string`                     | The ID of the user                                                            | **Required** |
+| Name                 | Type                                                                              | Description                                                                   | Required?    |
+| :------------------- | :-------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `profilePictureFile` | `File`                                                                            | A file to be used as the profile picture                                      | _Optional_   |
+| `coverArtFile`       | `File`                                                                            | A file to be used as the cover art. This is the header on a profile page      | _Optional_   |
+| `metadata`           | _see code block below_                                                            | An object with details about the user                                         | **Required** |
+| `onProgress`         | `(progress: { loaded: number, total: number, transcode: number }) => void` | A function that will be called with progress events as the image files upload | _Optional_   |
+| `userId`             | `string`                                                                          | The ID of the user                                                            | **Required** |
 
 ```json title="updateProfile metadata payload"
 {
   name?: string;
+  handle?: string;
   bio?: string;
+  website?: string;
+  donation?: string;
   location?: string;
+  profileType?: 'label' | null;
+  metadataMultihash?: string;
   isDeactivated?: boolean;
   artistPickTrackId?: string;
+  allowAiAttribution?: boolean;
+  twitterHandle?: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
+  splUsdcPayoutWallet?: string | null;
+  coinFlairMint?: string | null;
 }
 ```
 
@@ -1055,9 +1068,9 @@ Example:
 
 ```ts
 await audiusSdk.users.unsubscribeFromUser({
-  trackId: 'x5pJ3Az'
-  userId: "7eP5n",
-});
+  userId: '7eP5n',
+  subscribeeUserId: '2kN2a', // User id to unsubscribe from
+})
 ```
 
 #### `params`

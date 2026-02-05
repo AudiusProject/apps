@@ -224,14 +224,14 @@ const { albumId } = await audiusSdk.albums.uploadTrack({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name             | Type                                                           | Description                                                                   | Required?    |
-| :--------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `imageFile`      | `File`                                                         | A file that will be used as the cover art for the album                       | _Optional_   |
-| `metadata`       | _see code block below_                                         | An object containing the details of the album                                 | **Required** |
-| `onProgress`     | `(progress: number) => void`                                   | A function that will be called with progress events as the image file uploads | _Optional_   |
-| `audioFiles`     | `Array<File>`                                                  | An array of track audio files                                                 | **Required** |
-| `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]` | An array of track files                                                       | _Optional_   |
-| `userId`         | `string`                                                       | The ID of the user                                                            | **Required** |
+| Name             | Type                                                                                                                                | Description                                                                   | Required?    |
+| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `imageFile`      | `File`                                                                                                                              | A file that will be used as the cover art for the album                       | _Optional_   |
+| `metadata`       | _see code block below_                                                                                                              | An object containing the details of the album                                 | **Required** |
+| `onProgress`     | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#UploadPlaylistProgressEvent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| `audioFiles`     | `Array<File>`                                                                                                                       | An array of track audio files                                                 | **Required** |
+| `trackMetadatas` | [`UploadTrackMetadata`](/developers/upload-track-metadata)`[]`                                                                      | An array of track files                                                       | _Optional_   |
+| `userId`         | `string`                                                                                                                            | The ID of the user                                                            | **Required** |
 
 ```json title="uploadAlbum metadata payload"
 {
@@ -301,13 +301,13 @@ const { albumId } = await audiusSdk.albums.updateAlbum({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type                         | Description                                                                   | Required?    |
-| :----------- | :--------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `albumId`    | `string`                     | The ID of the album                                                           | **Required** |
-| `userId`     | `string`                     | The ID of the User                                                            | **Required** |
-| `imageFile`  | `string`                     | A file that will be used as the cover art for the album                       | _Optional_   |
-| `metadata`   | _see code block below_       | An object containing the details of the album                                 | **Required** |
-| `onProgress` | `(progress: number) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
+| Name         | Type                                                                                                                                | Description                                                                   | Required?    |
+| :----------- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `albumId`    | `string`                                                                                                                            | The ID of the album                                                           | **Required** |
+| `userId`     | `string`                                                                                                                            | The ID of the User                                                            | **Required** |
+| `imageFile`  | `string`                                                                                                                            | A file that will be used as the cover art for the album                       | _Optional_   |
+| `metadata`   | _see code block below_                                                                                                              | An object containing the details of the album                                 | **Required** |
+| `onProgress` | `(progress: number, event: `[`UploadPlaylistProgressEvent`](/developers/sdk/progress-events#UploadPlaylistProgressEvent)`) => void` | A function that will be called with progress events as the image file uploads | _Optional_   |
 
 ```json title="updateAlbum metadata payload"
 {
