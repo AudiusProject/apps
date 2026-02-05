@@ -407,7 +407,8 @@ const { trackId } = await audiusSdk.tracks.updateTrack({
   },
   onProgress: (progress, event) => {
     console.log('Progress: ', progress)
-    console.log('Event: ', event)
+    console.log('File: ', event.key)
+    console.log('Uploaded: ', event.loaded, '/', event.total)
   },
   userId: '7eP5n',
 })
