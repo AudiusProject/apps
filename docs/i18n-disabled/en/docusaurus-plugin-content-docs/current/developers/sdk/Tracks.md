@@ -339,7 +339,7 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     mood: Mood.DEVOTIONAL,
   },
   audioFile: {
-    buffer: Buffer.from(trackArtBuffer),
+    buffer: Buffer.from(trackBuffer),
     name: 'monsteraAudio',
   },
 })
