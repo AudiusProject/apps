@@ -85,7 +85,7 @@ const { trackId } = await audiusSdk.tracks.uploadTrack({
     license: 'Attribution-NonCommercial-ShareAlike CC BY-NC-SA',
   },
   audioFile: {
-    buffer: Buffer.from(trackArtBuffer),
+    buffer: Buffer.from(trackBuffer),
     name: 'monsteraAudio',
   },
 })
