@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import type { TrackForUpload } from '@audius/common/store'
 import { uploadActions, uploadSelectors } from '@audius/common/store'
 import { useRoute } from '@react-navigation/native'
-import { useKeepAwake } from '@thehale/react-native-keep-awake'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -61,7 +60,6 @@ export type UploadingTracksParams = {
 }
 
 export const UploadingTracksScreen = () => {
-  useKeepAwake()
   const { params } = useRoute<UploadRouteProp<'UploadingTracks'>>()
   const { tracks } = params
   const styles = useStyles()

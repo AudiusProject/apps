@@ -25,12 +25,12 @@ const trackProgressSummary = (
   trackProgress: ProgressState,
   key: 'image' | 'audio'
 ) => {
-  let loaded =
+  const loaded =
     trackProgress[key].status === ProgressStatus.ERROR
       ? (trackProgress[key].total ?? 0)
       : (trackProgress[key].loaded ?? 0)
-  let total = trackProgress[key].total ?? 0
-  let transcode =
+  const total = trackProgress[key].total ?? 0
+  const transcode =
     trackProgress[key].status === ProgressStatus.ERROR
       ? 1
       : (trackProgress[key].transcode ?? 0)
