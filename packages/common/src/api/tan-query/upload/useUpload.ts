@@ -1,6 +1,5 @@
 import { useRef, useCallback } from 'react'
 
-import { IconArrowRight, IconCloudUpload } from '@audius/harmony'
 import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
@@ -18,10 +17,8 @@ import {
   type UploadFormState,
   type CollectionFormState,
   type TrackFormState,
-  UploadType,
-  toastActions
+  UploadType
 } from '~/store'
-import { UPLOAD_PAGE } from '~/utils/route'
 
 import { type QueryContextType, useQueryContext } from '../utils'
 
@@ -36,22 +33,6 @@ const {
   uploadTracksSucceeded,
   updateFormState
 } = uploadActions
-
-const { toast } = toastActions
-const failToastParams = {
-  content: 'An error occured during upload.',
-  link: UPLOAD_PAGE,
-  linkText: 'View',
-  leftIcon: IconCloudUpload,
-  rightIcon: IconArrowRight
-}
-const successToastParams = {
-  content: 'Your upload is complete!',
-  link: UPLOAD_PAGE,
-  linkText: 'View',
-  leftIcon: IconCloudUpload,
-  rightIcon: IconArrowRight
-}
 
 const getStemUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
@@ -177,7 +158,10 @@ const getTrackUploadTasks = async (
   })
 }
 
-export const useUpload = () => {
+export const useUpload = (
+  onSuccess?: () => void,
+  onError?: (error: Error) => void
+) => {
   const dispatch = useDispatch()
   const {
     audiusSdk,
@@ -403,11 +387,10 @@ export const useUpload = () => {
 
       // If every track file failed to upload, fail the entire upload
       if (trackUploads.every((tu) => tu.error)) {
-        console.error('All track uploads failed')
+        const error = new Error('All track uploads failed')
+        console.error(error.message)
         dispatch(uploadTracksFailed())
-        if (window.location.pathname !== UPLOAD_PAGE) {
-          dispatch(toast(failToastParams))
-        }
+        onError?.(error)
         return
       }
 
@@ -474,11 +457,10 @@ export const useUpload = () => {
                 id: HashId.parse(publishRes[0]!.trackId)
               })
             )
-            if (window.location.pathname !== UPLOAD_PAGE) {
-              dispatch(toast(successToastParams))
-            }
+            onSuccess?.()
           } else if (uploadType === UploadType.INDIVIDUAL_TRACKS) {
             dispatch(uploadTracksSucceeded({ id: null }))
+            onSuccess?.()
           }
         } catch (err) {
           console.error('Error publishing tracks:', err)
@@ -489,9 +471,7 @@ export const useUpload = () => {
             })
           )
           dispatch(uploadTracksFailed())
-          if (window.location.pathname !== UPLOAD_PAGE) {
-            dispatch(toast(failToastParams))
-          }
+          onError?.(err as Error)
         }
       } else if (
         uploadType === UploadType.ALBUM ||
@@ -535,9 +515,7 @@ export const useUpload = () => {
           dispatch(
             uploadTracksSucceeded({ id: HashId.parse(publishRes.playlistId) })
           )
-          if (window.location.pathname !== UPLOAD_PAGE) {
-            dispatch(toast(successToastParams))
-          }
+          onSuccess?.()
         } catch (err) {
           console.error('Error publishing collection:', err)
           track(
@@ -560,9 +538,7 @@ export const useUpload = () => {
             feature: Feature.Upload
           })
           dispatch(uploadTracksFailed())
-          if (window.location.pathname !== UPLOAD_PAGE) {
-            dispatch(toast(failToastParams))
-          }
+          onError?.(err as Error)
         }
       }
     },
@@ -576,7 +552,9 @@ export const useUpload = () => {
       publishTracksAsync,
       uploadCollectionArtwork,
       publishCollectionAsync,
-      reportToSentry
+      reportToSentry,
+      onError,
+      onSuccess
     ]
   )
 
