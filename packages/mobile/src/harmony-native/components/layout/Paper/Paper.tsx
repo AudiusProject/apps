@@ -2,14 +2,15 @@ import { forwardRef } from 'react'
 
 import { MobileOS } from '@audius/common/models'
 import type { View } from 'react-native'
-import { Platform, Pressable } from 'react-native'
+import { Platform } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withTiming
+  withTiming,
+  runOnJS
 } from 'react-native-reanimated'
 
 import { useTheme } from '../../../foundations/theme'
@@ -18,6 +19,9 @@ import { Flex } from '../Flex/Flex'
 import type { PaperProps } from './types'
 
 const AnimatedFlex = Animated.createAnimatedComponent(Flex)
+
+// Threshold for detecting a swipe (in pixels)
+const SWIPE_THRESHOLD = 10
 
 /**
  * Base layout component used as a building block for creating pages
@@ -46,6 +50,18 @@ export const Paper = forwardRef<View, PaperProps>((props, ref) => {
     .onFinalize(() => {
       pressed.value = withTiming(0, motion.press)
     })
+    .onEnd((e) => {
+      'worklet'
+      // Tap will only fire if maxDeltaX/Y constraints are met (no significant movement)
+      if (onPress) {
+        runOnJS(onPress)(e)
+      }
+    })
+    .maxDuration(250)
+    // Prevent tap from firing if there's any significant movement
+    // This allows swipes to bubble up to parent gestures (scroll view, drawer)
+    .maxDeltaX(SWIPE_THRESHOLD)
+    .maxDeltaY(SWIPE_THRESHOLD)
 
   const interactiveStyles = useAnimatedStyle(
     () => ({
@@ -93,16 +109,18 @@ export const Paper = forwardRef<View, PaperProps>((props, ref) => {
     return <Flex ref={ref} style={style} {...flexProps} {...other} />
   }
 
+  // Tap gesture with maxDeltaX/Y will automatically fail if there's movement
+  // This allows swipes to bubble up to parent gestures naturally
+  const composedGesture = tap
+
   return (
-    <GestureDetector gesture={tap}>
-      <Pressable onPress={onPress}>
-        <AnimatedFlex
-          ref={ref}
-          style={[interactiveStyles, style]}
-          {...flexProps}
-          {...other}
-        />
-      </Pressable>
+    <GestureDetector gesture={composedGesture}>
+      <AnimatedFlex
+        ref={ref}
+        style={[interactiveStyles, style]}
+        {...flexProps}
+        {...other}
+      />
     </GestureDetector>
   )
 })
