@@ -197,7 +197,6 @@ const SearchExplorePage = ({
   const showPlaylistContent =
     categoryKey === 'playlists' || categoryKey === 'all'
   const showUserContent = categoryKey === 'profiles' || categoryKey === 'all'
-  const showAlbumContent = categoryKey === 'albums' || categoryKey === 'all'
 
   return (
     <Page
