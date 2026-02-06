@@ -82,7 +82,6 @@
     "@stripe/crypto": "0.0.4",
     "@stripe/stripe-js": "1.54.1",
     "@tanstack/react-query": "5.62.7",
-    "@thehale/react-native-keep-awake": "0.2.0",
     "array.prototype.flat": "1.2.5",
     "big-integer": "1.6.51",
     "bs58": "5.0.0",
