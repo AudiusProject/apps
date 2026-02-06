@@ -1,1 +1,0 @@
-export { BestSellingCard } from './BestSellingCard'

@@ -3,7 +3,7 @@ import type { ComponentType } from 'react'
 import type { ImageSourcePropType } from 'react-native'
 import type { SvgProps } from 'react-native-svg'
 
-import { IconCart, IconPlaylists, IconRemix } from '@audius/harmony-native'
+import { IconCart, IconPlaylists } from '@audius/harmony-native'
 import IconCassette from 'app/assets/images/iconCassette.svg'
 
 export type ExploreCollection = {
@@ -33,15 +33,6 @@ export const PREMIUM_TRACKS: ExploreCollection = {
   icon: IconCart
 }
 
-export const DOWNLOADS_AVAILABLE: ExploreCollection = {
-  title: 'Downloads Available',
-  description: 'Popular tracks with downloads you can use in your own tracks.',
-  gradientColors: ['#FF00F5', '#00D1FF'],
-  gradientAngle: 135,
-  shadowColor: 'rgba(196,81,193)',
-  shadowOpacity: 0.25,
-  icon: IconRemix
-}
 
 export const TRENDING_PLAYLISTS: ExploreCollection = {
   title: 'Trending Playlists',
