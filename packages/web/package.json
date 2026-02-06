@@ -10,6 +10,7 @@
     "analyze": "env-cmd ./env/.env.bundle npm run build:prod",
     "analyze:ssr": "env-cmd ./env/.env.bundle npm run build:ssr:prod",
     "bundlesize:prod": "bundlesize --config bundlesize.prod.config.json",
+    "postinstall": "node scripts/apply-bundlesize-patch.js",
     "build:dev": "env-cmd ./env/.env.dev turbo run build && rm -rf build-development && mv build build-development",
     "build:prod-source-maps": "env-cmd ./env/.env.prod env-cmd ./env/.env.source-maps turbo run build && rm -rf build-production && mv build build-production",
     "build:prod": "env-cmd ./env/.env.prod turbo run build && rm -rf build-production && mv build build-production",

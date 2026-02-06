@@ -1400,7 +1400,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-netinfo (11.2.1):
+  - react-native-netinfo (11.4.1):
     - React-Core
   - react-native-notifications (5.1.0):
     - React-Core
@@ -1814,7 +1814,7 @@ PODS:
     - React-Core
   - RNCAsyncStorage (2.2.0):
     - React-Core
-  - RNCClipboard (1.13.2):
+  - RNCClipboard (1.16.3):
     - React-Core
   - RNCMaskedView (0.3.2):
     - DoubleConversion
@@ -2194,7 +2194,7 @@ DEPENDENCIES:
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
   - react-native-keyboard-controller (from `../../../node_modules/react-native-keyboard-controller`)
-  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-pager-view (from `../../../node_modules/react-native-pager-view`)
   - react-native-randombytes (from `../../../node_modules/react-native-randombytes`)
@@ -2236,7 +2236,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNBootSplash (from `../../../node_modules/react-native-bootsplash`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
-  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
+  - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
   - "RNCMaskedView (from `../node_modules/@react-native-masked-view/masked-view`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFingerprintjsPro (from `../../../node_modules/@fingerprintjs/fingerprintjs-pro-react-native`)"
@@ -2380,7 +2380,7 @@ EXTERNAL SOURCES:
   react-native-keyboard-controller:
     :path: "../../../node_modules/react-native-keyboard-controller"
   react-native-netinfo:
-    :path: "../node_modules/@react-native-community/netinfo"
+    :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-notifications:
     :path: "../node_modules/react-native-notifications"
   react-native-pager-view:
@@ -2464,7 +2464,7 @@ EXTERNAL SOURCES:
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
-    :path: "../node_modules/@react-native-clipboard/clipboard"
+    :path: "../../../node_modules/@react-native-clipboard/clipboard"
   RNCMaskedView:
     :path: "../node_modules/@react-native-masked-view/masked-view"
   RNDateTimePicker:
@@ -2561,7 +2561,7 @@ SPEC CHECKSUMS:
   react-native-image-picker: f104798044ef2c9211c42a48025d0693b5f34981
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keyboard-controller: 7c1271a9fe703b7ee588b75d6c486eda79e5081b
-  react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
+  react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-pager-view: d4742f3ffb0aacc4bb8d5c7b4f1805ef1ab0589a
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
@@ -2603,7 +2603,7 @@ SPEC CHECKSUMS:
   ReactCommon: 7ea8ee50e489e9cc75922f19a06ea45c1b59b4bd
   RNBootSplash: c2ae3f80f6c90979ee57977672f57e74981f85a5
   RNCAsyncStorage: 23e56519cc41d3bade3c8d4479f7760cb1c11996
-  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
+  RNCClipboard: dfeb43751adff21e588657b5b6c888c72f3aa68e
   RNCMaskedView: 6d4bf14f158d1a93484edf30850cbbd7ccbb8668
   RNDateTimePicker: a793ed8822283f576dd0a205a0916c5098c2611f
   RNFingerprintjsPro: eeda8165fe366f1039cd8823277295a525cb81b5
