@@ -3,8 +3,7 @@ import { ComponentType, SVGProps } from 'react'
 import { route } from '@audius/common/utils'
 import {
   IconPlaylists as IconExploreTopPlaylists,
-  IconCart,
-  IconRemix
+  IconCart
 } from '@audius/harmony'
 
 import IconCassette from 'assets/img/iconCassette.svg'
@@ -12,8 +11,7 @@ import IconCassette from 'assets/img/iconCassette.svg'
 const {
   TRENDING_PLAYLISTS_PAGE,
   TRENDING_UNDERGROUND_PAGE,
-  SEARCH_PREMIUM_TRACKS,
-  SEARCH_DOWNLOADS_AVAILABLE
+  SEARCH_PREMIUM_TRACKS
 } = route
 
 export type ExploreCollection = {
@@ -41,14 +39,6 @@ export const PREMIUM_TRACKS: ExploreCollection = {
   link: SEARCH_PREMIUM_TRACKS
 }
 
-export const DOWNLOADS_AVAILABLE: ExploreCollection = {
-  title: 'Downloads Available',
-  subtitle: 'Popular tracks with downloads you can use in your own tracks.',
-  gradient: 'linear-gradient(138deg, #FF00F5 -5.01%, #00D1FF 110.47%)',
-  shadow: 'rgba(9, 175, 233, 0.35)',
-  icon: IconRemix,
-  link: SEARCH_DOWNLOADS_AVAILABLE
-}
 
 export const TRENDING_PLAYLISTS: ExploreCollection = {
   title: 'Trending Playlists',

@@ -39,19 +39,12 @@ import {
   viewLayoutOptions
 } from 'pages/search-page/types'
 
-import { ActiveDiscussionsSection } from './ActiveDiscussionsSection'
 import { ArtistCoinTracksSection } from './ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
-import { BestSellingSection } from './BestSellingSection'
-import { DownloadsAvailableSection } from './DownloadsAvailableSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
 import { LabelSpotlightSection } from './LabelSpotlightSection'
-import { MoodGrid } from './MoodGrid'
-import { MostSharedSection } from './MostSharedSection'
-import { QuickSearchGrid } from './QuickSearchGrid'
-import { RecentPremiumTracksSection } from './RecentPremiumTracksSection'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
@@ -327,25 +320,12 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent && (
               <RecentlyPlayedSection />
             )}
-            {showTrackContent && <QuickSearchGrid />}
             {showPlaylistContent && <FeaturedPlaylistsSection />}
             {showTrackContent && <FeaturedRemixContestsSection />}
             {showTrackContent && <UndergroundTrendingTracksSection />}
             {showUserContent && <ArtistSpotlightSection />}
             {showUserContent && <LabelSpotlightSection />}
-            {showTrackContent && (
-              <>
-                <ActiveDiscussionsSection />
-                <DownloadsAvailableSection />
-              </>
-            )}
-            {(showTrackContent || showAlbumContent || showPlaylistContent) && (
-              <MoodGrid />
-            )}
             {showPlaylistContent && <TrendingPlaylistsSection />}
-            {showTrackContent && <MostSharedSection />}
-            {(showTrackContent || showAlbumContent) && <BestSellingSection />}
-            {showTrackContent && <RecentPremiumTracksSection />}
             {showTrackContent && showUserContextualContent && (
               <FeelingLuckySection />
             )}
