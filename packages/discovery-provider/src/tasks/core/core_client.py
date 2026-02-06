@@ -39,13 +39,12 @@ class CoreClient:
 
     def __init__(self):
         self.endpoint = self.get_core_endpoint()
-        self.channel = grpc.insecure_channel(self.endpoint)
+        creds = grpc.ssl_channel_credentials()
+        self.channel = grpc.secure_channel(self.endpoint, creds)
         self.rpc = ProtocolStub(channel=self.channel)
 
     def get_core_endpoint(self) -> str:
-        if environment == "prod" or environment == "stage":
-            return "core:50051"
-        return "audiusd-1:50051"
+        return "grpc.audius.engineering:443"
 
     def ping(self) -> LegacyPingResponse:
         return self.rpc.Ping(LegacyPingRequest())
@@ -70,13 +69,12 @@ class AudiusdClient(CoreClient):
 
     def __init__(self):
         self.endpoint = self.get_audiusd_endpoint()
-        self.channel = grpc.insecure_channel(self.endpoint)
+        creds = grpc.ssl_channel_credentials()
+        self.channel = grpc.secure_channel(self.endpoint, creds)
         self.core_service = CoreServiceStub(channel=self.channel)
 
     def get_audiusd_endpoint(self) -> str:
-        if environment == "prod" or environment == "stage":
-            return "core:50051"
-        return "openaudio-1:50051"
+        return "grpc.audius.engineering:443"
 
     def get_core_endpoint(self) -> str:
         # For compatibility with CoreClient interface
