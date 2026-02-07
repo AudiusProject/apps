@@ -33,7 +33,6 @@ export const PREMIUM_TRACKS: ExploreCollection = {
   icon: IconCart
 }
 
-
 export const TRENDING_PLAYLISTS: ExploreCollection = {
   title: 'Trending Playlists',
   description: 'The top playlists on Audius right now',

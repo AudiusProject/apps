@@ -26,7 +26,6 @@ export const ExploreContent = () => {
   const showTrackContent = category === 'tracks' || category === 'all'
   const showPlaylistContent = category === 'playlists' || category === 'all'
   const showUserContent = category === 'users' || category === 'all'
-  const showAlbumContent = category === 'albums' || category === 'all'
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>

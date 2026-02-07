@@ -50,11 +50,11 @@ export const Paper = forwardRef<View, PaperProps>((props, ref) => {
     .onFinalize(() => {
       pressed.value = withTiming(0, motion.press)
     })
-    .onEnd((e) => {
+    .onEnd(() => {
       'worklet'
       // Tap will only fire if maxDeltaX/Y constraints are met (no significant movement)
       if (onPress) {
-        runOnJS(onPress)(e)
+        runOnJS(onPress)()
       }
     })
     .maxDuration(250)

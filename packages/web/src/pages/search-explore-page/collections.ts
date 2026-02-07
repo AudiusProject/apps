@@ -39,7 +39,6 @@ export const PREMIUM_TRACKS: ExploreCollection = {
   link: SEARCH_PREMIUM_TRACKS
 }
 
-
 export const TRENDING_PLAYLISTS: ExploreCollection = {
   title: 'Trending Playlists',
   subtitle: 'The top playlists on Audius right now',
