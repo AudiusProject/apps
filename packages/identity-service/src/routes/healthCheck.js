@@ -329,9 +329,8 @@ module.exports = function (app) {
       let { maxBlockDifference, maxDrift } = req.query
       maxBlockDifference = maxBlockDifference || 100
 
-      let highestBlockNumber = await models.NotificationAction.max(
-        'blocknumber'
-      )
+      let highestBlockNumber =
+        await models.NotificationAction.max('blocknumber')
       if (!highestBlockNumber) {
         highestBlockNumber = config.get('notificationStartBlock')
       }
