@@ -17,6 +17,7 @@ import { Dispatch } from 'redux'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import UserBadges from 'components/user-badges/UserBadges'
+import { useIsMobile } from 'hooks/useIsMobile'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import {
   setUsers,
@@ -70,7 +71,7 @@ const UserArtCard = g(
   }) => {
     const { user_id, name, handle, follower_count } = user
     const { trackEvent } = useAnalytics()
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const isMobile = useIsMobile()
 
     const goToProfile = useCallback(() => {
       if (sectionName) {
