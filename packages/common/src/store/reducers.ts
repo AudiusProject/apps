@@ -25,7 +25,7 @@ import {
   DeactivateAccountState
 } from './pages/deactivate-account'
 import exclusiveTracks from './pages/exclusive-tracks/slice'
-import feed from './pages/feed/reducer'
+import feedReducer from './pages/feed/reducer'
 import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
 import { persistedLibraryPageReducer } from './pages/library-page/reducer'
@@ -175,7 +175,7 @@ export const reducers = (storage: Storage, history?: History) => ({
     chat: chatReducer,
     collection,
     deactivateAccount: deactivateAccountReducer,
-    feed,
+    feed: feedReducer(storage),
     historyPage: historyPageReducer,
     pickWinners,
     profile: profileReducer,

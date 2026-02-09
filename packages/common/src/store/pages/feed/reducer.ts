@@ -1,3 +1,6 @@
+import type { Storage } from 'redux-persist'
+import { persistReducer } from 'redux-persist'
+
 import { LineupActions, asLineup } from '~/store/lineup/reducer'
 import {
   SET_FEED_FILTER,
@@ -29,7 +32,7 @@ const actionsMap = {
 
 const feedLineupReducer = asLineup(FeedPrefix, feedReducer)
 
-const reducer = (
+const feedPageReducer = (
   state = initialState,
   action: FeedPageAction | LineupActions<Track>
 ) => {
@@ -41,4 +44,14 @@ const reducer = (
   return matchingReduceFunction(state, action as FeedPageAction)
 }
 
-export default reducer
+export const feedPagePersistConfig = (storage: Storage) => ({
+  key: 'feed-page',
+  storage,
+  whitelist: ['feedFilter']
+})
+
+const persistedFeedPageReducer = (storage: Storage) => {
+  return persistReducer(feedPagePersistConfig(storage), feedPageReducer)
+}
+
+export default persistedFeedPageReducer
