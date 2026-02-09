@@ -8,10 +8,10 @@ import {
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const FeaturedRemixContestsSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Featured Remix Contests')
 
   const { data, isLoading, isError, isSuccess } = useExploreContent({
     enabled: inView

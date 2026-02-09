@@ -5,10 +5,10 @@ import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const FeaturedPlaylistsSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Featured Playlists')
 
   const { data, isLoading, isError, isSuccess } = useExploreContent({
     enabled: inView

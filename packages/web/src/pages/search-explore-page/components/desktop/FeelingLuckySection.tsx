@@ -13,10 +13,10 @@ import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
 import { TrackTileSize } from 'components/track/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const FeelingLuckySection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Feeling Lucky')
   const isMobile = useIsMobile()
   const {
     data: feelingLuckyTrack,

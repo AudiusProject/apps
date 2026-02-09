@@ -4,10 +4,10 @@ import { full } from '@audius/sdk'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const RecommendedTracksSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Recommended Tracks')
   const { data, isLoading, isError, isSuccess } = useRecommendedTracks(
     {
       pageSize: 10,

@@ -3,10 +3,10 @@ import { Flex } from '@audius/harmony'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { RecentSearches } from 'pages/search-page/RecentSearches'
 
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const RecentSearchesSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Recent Searches')
   const isMobile = useIsMobile()
 
   return (

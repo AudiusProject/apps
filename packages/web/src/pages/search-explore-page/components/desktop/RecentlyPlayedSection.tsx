@@ -5,10 +5,10 @@ import { TrackCard, TrackCardSkeleton } from 'components/track/TrackCard'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
-import { useDeferredElement } from './useDeferredElement'
+import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 export const RecentlyPlayedSection = () => {
-  const { ref, inView } = useDeferredElement()
+  const { ref, inView } = useExploreSectionTracking('Recently Played')
   const { data, isLoading, isError, isSuccess } = useRecentlyPlayedTracks(
     { pageSize: 10 },
     { enabled: inView }

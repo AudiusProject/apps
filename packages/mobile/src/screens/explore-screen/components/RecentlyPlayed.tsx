@@ -5,13 +5,14 @@ import { exploreMessages as messages } from '@audius/common/messages'
 
 import { useTheme } from '@audius/harmony-native'
 import { TrackCardList } from 'app/components/track-card-list'
-import { useDeferredElement } from 'app/hooks/useDeferredElement'
+
+import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
 import { ExploreSection } from './ExploreSection'
 
 export const RecentlyPlayedTracks = () => {
   const { spacing } = useTheme()
-  const { InViewWrapper, inView } = useDeferredElement()
+  const { InViewWrapper, inView } = useExploreSectionTracking('Recently Played')
   const { data: recentlyPlayedTracks } = useRecentlyPlayedTracks(
     { pageSize: 10 },
     { enabled: inView }
