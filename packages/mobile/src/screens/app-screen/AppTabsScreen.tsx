@@ -35,9 +35,13 @@ export const AppTabsScreen = () => {
   usePrefetchNotifications()
 
   return (
-    <Tab.Navigator tabBar={tabBar} screenOptions={screenOptions}>
-      <Tab.Screen name='feed' component={FeedTabScreen} />
+    <Tab.Navigator
+      tabBar={tabBar}
+      screenOptions={screenOptions}
+      initialRouteName='trending'
+    >
       <Tab.Screen name='trending' component={TrendingTabScreen} />
+      <Tab.Screen name='feed' component={FeedTabScreen} />
       <Tab.Screen name='explore' component={ExploreTabScreen} />
       <Tab.Screen name='library' component={FavoritesTabScreen} />
       <Tab.Screen name='notifications' component={NotificationsTabScreen} />
