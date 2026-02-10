@@ -13,7 +13,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/spl"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/spl"
   },
   "author": "Audius",
   "license": "Apache-2.0",

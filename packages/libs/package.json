@@ -165,7 +165,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/libs"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/libs"
   },
   "engines": {
     "node": ">=14.0.0"

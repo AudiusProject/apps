@@ -8,9 +8,12 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  NODE_VERSION: "22.21.1"
 
 jobs:
   changes:
@@ -40,7 +43,7 @@ jobs:
   publish-packages:
     name: Publish Packages to NPM
     needs: changes
-    if: ${{ needs.changes.outputs.public-packages == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.public-packages == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -49,18 +52,75 @@ jobs:
       - name: Check wildcard dependencies
         run: bash ./scripts/check-wildcard-deps.sh
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22.21.1
+          # registry-url for correct registry targeting, but do NOT use always-auth
+          # (that's for token auth, not OIDC)
           registry-url: "https://registry.npmjs.org"
 
-      - uses: actions/cache@v3
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('packages/*/patches/*.patch') }}
+      - name: Upgrade npm for OIDC support
+        run: |
+          echo "Current npm version: $(npm --version)"
+          # OIDC trusted publishing requires npm 11.5.1+
+          npm install -g npm@latest
+          echo "Updated npm version: $(npm --version)"
 
-      - name: Install Dependencies
-        run: npm i
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/web/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          # Clear npm cache to avoid EEXIST conflicts
+          npm cache clean --force || true
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Ensure OIDC trusted publishing (no token auth)
+        run: |
+          echo "Checking GitHub OIDC environment variables..."
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_URL" && echo "✓ ACTIONS_ID_TOKEN_REQUEST_URL present" || echo "✗ ACTIONS_ID_TOKEN_REQUEST_URL missing"
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" && echo "✓ ACTIONS_ID_TOKEN_REQUEST_TOKEN present" || echo "✗ ACTIONS_ID_TOKEN_REQUEST_TOKEN missing"
+
+          echo "Removing any .npmrc files that could force token auth..."
+          rm -f ~/.npmrc .npmrc "$HOME/.npmrc" || true
+
+          echo "Unsetting token environment variables..."
+          unset NPM_TOKEN || true
+          unset NODE_AUTH_TOKEN || true
+
+          echo "npm version: $(npm --version)"
+          echo "node version: $(node --version)"
+        env:
+          NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -70,6 +130,9 @@ jobs:
           version: bash ./scripts/version-packages.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Explicitly unset token env vars to ensure OIDC is used
+          NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
           CI: true
 
       - name: Generate Slack Payload
