@@ -75,7 +75,7 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
   const isNative = yield* getContext('isNativeMobile')
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId)
+  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
   const playlistTracks = yield* call(
     queryTracks,
     playlist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
