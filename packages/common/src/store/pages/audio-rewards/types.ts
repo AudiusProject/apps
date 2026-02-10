@@ -1,6 +1,6 @@
 import { ChallengeRewardID, SpecifierWithAmount } from '../../../models'
 
-export type TrendingRewardsModalType = 'tracks' | 'playlists' | 'underground'
+export type TrendingRewardsModalType = 'tracks' | 'underground'
 export type ChallengeRewardsModalType = ChallengeRewardID
 
 export type ClaimState =

@@ -14,7 +14,6 @@ import { FeelingLucky } from './FeelingLucky'
 import { ForYouTracks } from './ForYouTracks'
 import { LabelSpotlight } from './LabelSpotlight'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
-import { TrendingPlaylists } from './TrendingPlaylists'
 import { UndergroundTrendingTracks } from './UndergroundTrendingTracks'
 
 export const ExploreContent = () => {
@@ -39,7 +38,6 @@ export const ExploreContent = () => {
       {showTrackContent && <UndergroundTrendingTracks />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
-      {showPlaylistContent && <TrendingPlaylists />}
       {showTrackContent && showUserContextualContent && <FeelingLucky />}
       {showUserContextualContent && <RecentSearches />}
     </Flex>

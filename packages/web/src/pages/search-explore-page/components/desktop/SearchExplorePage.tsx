@@ -48,7 +48,6 @@ import { LabelSpotlightSection } from './LabelSpotlightSection'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
-import { TrendingPlaylistsSection } from './TrendingPlaylistsSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
@@ -324,7 +323,6 @@ const SearchExplorePage = ({
             {showTrackContent && <UndergroundTrendingTracksSection />}
             {showUserContent && <ArtistSpotlightSection />}
             {showUserContent && <LabelSpotlightSection />}
-            {showPlaylistContent && <TrendingPlaylistsSection />}
             {showTrackContent && showUserContextualContent && (
               <FeelingLuckySection />
             )}

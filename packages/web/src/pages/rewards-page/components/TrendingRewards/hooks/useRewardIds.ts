@@ -5,7 +5,6 @@ import { useRemoteVar } from 'hooks/useRemoteConfig'
 
 const validRewardIds: Set<ChallengeRewardID> = new Set([
   'trending-track',
-  'trending-playlist',
   'top-api',
   'verified-upload',
   'trending-underground'

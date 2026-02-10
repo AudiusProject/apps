@@ -191,14 +191,6 @@ export const challengeRewardsConfig: Partial<
       'Top 5 winners are selected every Friday at Noon PT!',
     panelButtonText: 'See More'
   },
-  [ChallengeName.TrendingPlaylist]: {
-    id: ChallengeName.TrendingPlaylist,
-    title: 'Trending Playlists Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
-    fullDescription: () =>
-      'Top 5 winners are selected every Friday at Noon PT!',
-    panelButtonText: 'See More'
-  },
   [ChallengeName.TrendingUndergroundTrack]: {
     id: ChallengeName.TrendingUndergroundTrack,
     title: 'Underground Trending Weekly Top 5',
@@ -607,7 +599,6 @@ export const getChallengeStatusLabel = (
 export const isRewardOpenToAll = (rewardId: ChallengeRewardID): boolean => {
   const openToAllRewards = new Set<ChallengeRewardID>([
     ChallengeName.Tastemaker,
-    ChallengeName.TrendingPlaylist,
     ChallengeName.TrendingTrack,
     ChallengeName.TrendingUndergroundTrack,
     ChallengeName.AudioMatchingBuy,

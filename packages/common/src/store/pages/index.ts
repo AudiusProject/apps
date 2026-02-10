@@ -4,12 +4,6 @@ export { trendingUndergroundPageLineupActions } from './trending-underground/lin
 
 export { default as trendingUndergroundPageReducer } from './trending-underground/slice'
 
-export { default as trendingPlaylistsPageLineupReducer } from './trending-playlists/lineups/reducer'
-export * as trendingPlaylistsPageLineupSelectors from './trending-playlists/lineups/selectors'
-export { trendingPlaylistsPageLineupActions } from './trending-playlists/lineups/actions'
-
-export { default as trendingPlaylistsPageReducer } from './trending-playlists/slice'
-
 export * as trendingPageLineupReducer from './trending/lineup/reducer'
 export * as trendingPageLineupSelectors from './trending/lineup/selectors'
 export * as trendingPageLineupActions from './trending/lineup/actions'

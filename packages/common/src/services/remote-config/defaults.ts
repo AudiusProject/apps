@@ -63,7 +63,7 @@ export const remoteConfigStringDefaults: {
   // Audius user id
   [StringKeys.TRENDING_PLAYLIST_OMITTED_USER_IDS]: '51',
   [StringKeys.TRENDING_REWARD_IDS]:
-    'trending-track,trending-playlist,trending-underground,top-api',
+    'trending-track,trending-underground,top-api',
   [StringKeys.CHALLENGE_REWARD_IDS]:
     'track-upload,invite-friends,mobile-app,listen-streak,profile-completion,first-playlist',
   [StringKeys.REWARDS_TWEET_ID_TRACKS]: '1374856377651187713',

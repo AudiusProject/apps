@@ -79,7 +79,6 @@ export const QUERY_KEYS = {
   profileReposts: 'profileReposts',
   profileTracks: 'profileTracks',
   trendingIds: 'trendingIds',
-  trendingPlaylists: 'trendingPlaylists',
   trendingUnderground: 'trendingUnderground',
   trackPageLineup: 'trackPageLineup',
   connectedWallets: 'connectedWallets',

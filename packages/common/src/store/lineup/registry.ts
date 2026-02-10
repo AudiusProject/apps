@@ -19,8 +19,6 @@ import {
   searchResultsPageTracksLineupActions,
   trendingPageLineupActions,
   trendingPageSelectors,
-  trendingPlaylistsPageLineupActions,
-  trendingPlaylistsPageLineupSelectors,
   trendingUndergroundPageLineupActions,
   trendingUndergroundPageLineupSelectors
 } from '~/store/pages'
@@ -80,10 +78,6 @@ export const lineupRegistry: Record<string, LineupEntry> = {
   [trendingPageLineupActions.trendingAllTimeActions.prefix]: {
     actions: trendingPageLineupActions.trendingAllTimeActions,
     selector: trendingPageSelectors.getDiscoverTrendingAllTimeLineup
-  },
-  [trendingPlaylistsPageLineupActions.prefix]: {
-    actions: trendingPlaylistsPageLineupActions,
-    selector: trendingPlaylistsPageLineupSelectors.getLineup
   },
   [trendingUndergroundPageLineupActions.prefix]: {
     actions: trendingUndergroundPageLineupActions,
