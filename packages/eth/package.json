@@ -12,7 +12,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/eth"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/eth"
   },
   "author": "Audius",
   "license": "Apache-2.0",

@@ -19,7 +19,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps.git#main"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/sp-actions"
   },
   "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/sp-actions",
   "prettier": {

@@ -83,5 +83,14 @@
   "peerDependencies": {
     "react": "19.0.0",
     "react-dom": "19.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/harmony"
+  },
+  "bugs": {
+    "url": "https://github.com/AudiusProject/apps/issues"
+  },
+  "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/harmony"
 }

@@ -165,7 +165,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps/tree/main/packages/sdk"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/sdk"
   },
   "engines": {
     "node": ">=22.0.0"

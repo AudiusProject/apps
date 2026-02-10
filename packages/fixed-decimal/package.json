@@ -19,7 +19,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AudiusProject/apps.git#main"
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/fixed-decimal"
   },
   "author": "Audius",
   "license": "Apache-2.0",
