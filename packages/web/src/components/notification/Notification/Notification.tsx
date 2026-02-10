@@ -34,7 +34,6 @@ import { RequestManagerNotification } from './RequestManagerNotification'
 import { TastemakerNotification } from './TastemakerNotification'
 import { TierChangeNotification } from './TierChangeNotification'
 import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedAlbumNotification'
-import { TrendingPlaylistNotification } from './TrendingPlaylistNotification'
 import { TrendingTrackNotification } from './TrendingTrackNotification'
 import { TrendingUndergroundNotification } from './TrendingUndergroundNotification'
 import { USDCPurchaseBuyerNotification } from './USDCPurchaseBuyerNotification'
@@ -88,9 +87,6 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.TierChange: {
         return <TierChangeNotification notification={notification} />
-      }
-      case NotificationType.TrendingPlaylist: {
-        return <TrendingPlaylistNotification notification={notification} />
       }
       case NotificationType.TrendingTrack: {
         return <TrendingTrackNotification notification={notification} />

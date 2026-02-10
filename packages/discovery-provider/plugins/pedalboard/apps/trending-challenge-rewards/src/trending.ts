@@ -8,7 +8,6 @@ import { Table, TrendingResults, Users } from '@pedalboard/storage'
 
 enum TrendingTypes {
   Tracks = 'TrendingType.TRACKS',
-  Playlists = 'TrendingType.PLAYLISTS',
   UndergroundTracks = 'TrendingType.UNDERGROUND_TRACKS'
 }
 
@@ -25,13 +24,12 @@ export const announceTopFiveTrending = async (
 
   console.log('getting top trending for week ', week)
 
-  const [tracks, playlists, undergroundTracks] = await queryTopFiveTrending(
+  const [tracks, undergroundTracks] = await queryTopFiveTrending(
     discoveryDb,
     week
   )
 
   const trackHandles = await queryHandles(discoveryDb, identityDb, tracks)
-  const playlistHandles = await queryHandles(discoveryDb, identityDb, playlists)
   const undergroundHandles = await queryHandles(
     discoveryDb,
     identityDb,
@@ -39,25 +37,18 @@ export const announceTopFiveTrending = async (
   )
 
   const trackEntries = assembleEntries(trackHandles, tracks)
-  const playlistEntries = assembleEntries(playlistHandles, playlists)
   const undergroundEntries = assembleEntries(
     undergroundHandles,
     undergroundTracks
   )
 
   console.log('track entries', JSON.stringify(trackEntries))
-  console.log('playlist entries', JSON.stringify(playlistEntries))
   console.log('underground entries', JSON.stringify(undergroundEntries))
 
   const trendingTracksTweet = composeTweet(
     'Top 5 Trending Tracks 🔥',
     week,
     trackEntries
-  )
-  const trendingPlaylistTweet = composeTweet(
-    'Top 5 Trending Playlists 🎚️',
-    week,
-    playlistEntries
   )
   const trendingUndergroundTweet = composeTweet(
     'Top 5 Trending Underground 🎵',
@@ -69,7 +60,7 @@ export const announceTopFiveTrending = async (
   const webClient = new WebClient(slackBotToken)
   await sendTweet(
     webClient,
-    [trendingTracksTweet, trendingPlaylistTweet, trendingUndergroundTweet],
+    [trendingTracksTweet, trendingUndergroundTweet],
     slackChannel
   )
 }
@@ -84,12 +75,6 @@ export const queryTopFiveTrending = async (
     .orderBy('rank')
     .limit(5)
 
-  const playlists = await discoveryDb<TrendingResults>(Table.TrendingResults)
-    .where('type', '=', TrendingTypes.Playlists)
-    .where('week', '=', week)
-    .orderBy('rank')
-    .limit(5)
-
   const undergroundTracks = await discoveryDb<TrendingResults>(
     Table.TrendingResults
   )
@@ -98,7 +83,7 @@ export const queryTopFiveTrending = async (
     .orderBy('rank')
     .limit(5)
 
-  return [tracks, playlists, undergroundTracks]
+  return [tracks, undergroundTracks]
 }
 
 export const queryHandles = async (

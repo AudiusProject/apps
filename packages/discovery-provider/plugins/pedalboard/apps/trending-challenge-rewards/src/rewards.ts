@@ -26,12 +26,7 @@ type Challenge = {
 
 const TRENDING_ID = 'tt'
 const UNDERGROUND_TRENDING_ID = 'tut'
-const PLAYLIST_TRENDING_ID = 'tp'
-const TRENDING_REWARD_IDS = [
-  TRENDING_ID,
-  PLAYLIST_TRENDING_ID,
-  UNDERGROUND_TRENDING_ID
-]
+const TRENDING_REWARD_IDS = [TRENDING_ID, UNDERGROUND_TRENDING_ID]
 
 // TODO: move something like this into App so results are commonplace for handlers
 export const disburseTrendingRewards = async (

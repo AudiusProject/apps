@@ -15,7 +15,6 @@ import {
   AnnouncementNotification,
   TierChangeNotification,
   TrackAddedToPurchasedAlbumNotification,
-  TrendingPlaylistNotification,
   TrendingTrackNotification,
   TrendingUndergroundNotification,
   AddTrackToPlaylistNotification,
@@ -74,8 +73,6 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return <TastemakerNotification notification={notification} />
       case NotificationType.TierChange:
         return <TierChangeNotification notification={notification} />
-      case NotificationType.TrendingPlaylist:
-        return <TrendingPlaylistNotification notification={notification} />
       case NotificationType.TrendingTrack:
         return <TrendingTrackNotification notification={notification} />
       case NotificationType.TrendingUnderground:

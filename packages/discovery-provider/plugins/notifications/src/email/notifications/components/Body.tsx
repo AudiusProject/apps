@@ -90,10 +90,6 @@ const snippetMap = {
       return `You have reached over ${notification.value} Followers`
     }
   },
-  ['trending_playlist'](notification) {
-    const { entity, rank } = notification
-    return `${entity.title} is the #${rank} trending playlist on Audius right now!`
-  },
   ['trending'](notification) {
     const { entity, rank } = notification
     return `${entity.title} is #${rank} on Trending right now!`

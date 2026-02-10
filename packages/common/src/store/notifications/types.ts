@@ -27,7 +27,6 @@ export enum NotificationType {
   FanRemixContestWinnersSelected = 'FanRemixContestWinnersSelected',
   Tastemaker = 'Tastemaker',
   TrendingTrack = 'TrendingTrack',
-  TrendingPlaylist = 'TrendingPlaylist',
   TrendingUnderground = 'TrendingUnderground',
   ChallengeReward = 'ChallengeReward',
   ClaimableReward = 'ClaimableReward',
@@ -428,15 +427,6 @@ export type RemixCosignPushNotification = {
   ]
 }
 
-export type TrendingPlaylistNotification = BaseNotification & {
-  type: NotificationType.TrendingPlaylist
-  rank: number
-  genre: string
-  time: 'week' | 'month' | 'year'
-  entityType: Entity.Playlist
-  entityId: ID
-}
-
 export type TrendingTrackNotification = BaseNotification & {
   type: NotificationType.TrendingTrack
   rank: number
@@ -645,7 +635,6 @@ export type Notification =
   | FanRemixContestStartedNotification
   | FanRemixContestEndingSoonNotification
   | TastemakerNotification
-  | TrendingPlaylistNotification
   | TrendingTrackNotification
   | TrendingUndergroundNotification
   | ChallengeRewardNotification

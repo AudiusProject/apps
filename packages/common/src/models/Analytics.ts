@@ -263,7 +263,6 @@ export enum Name {
   NOTIFICATIONS_CLICK_REMIX_COSIGN_TWITTER_SHARE = 'Notifications: Clicked Remix Co-Sign Twitter Share',
   NOTIFICATIONS_CLICK_DETHRONED_TWITTER_SHARE = 'Notifications: Clicked Dethroned Twitter Share',
   NOTIFICATIONS_CLICK_TRENDING_TRACK_TWITTER_SHARE = 'Notifications: Clicked Trending Track Twitter Share',
-  NOTIFICATIONS_CLICK_TRENDING_PLAYLIST_TWITTER_SHARE = 'Notifications: Clicked Trending Playlist Twitter Share',
   NOTIFICATIONS_CLICK_TRENDING_UNDERGROUND_TWITTER_SHARE = 'Notifications: Clicked Trending Underground Twitter Share',
   NOTIFICATIONS_CLICK_TASTEMAKER_TWITTER_SHARE = 'Notifications: Clicked Tastemaker Twitter Share',
   NOTIFICATIONS_CLICK_ADD_TRACK_TO_PLAYLIST_TWITTER_SHARE = 'Notifications: Clicked Add Track to Playlist Twitter Share',
@@ -1379,10 +1378,6 @@ type NotificationsClickTrendingTrack = {
   eventName: Name.NOTIFICATIONS_CLICK_TRENDING_TRACK_TWITTER_SHARE
   text: string
 }
-type NotificationsClickTrendingPlaylist = {
-  eventName: Name.NOTIFICATIONS_CLICK_TRENDING_PLAYLIST_TWITTER_SHARE
-  text: string
-}
 type NotificationsClickTrendingUnderground = {
   eventName: Name.NOTIFICATIONS_CLICK_TRENDING_UNDERGROUND_TWITTER_SHARE
   text: string
@@ -1570,7 +1565,6 @@ export type ExploreSectionName =
   | 'Active Discussions'
   | 'Downloads Available'
   | 'Mood Grid'
-  | 'Trending Playlists'
   | 'Most Shared'
   | 'Best Selling'
   | 'Recent Premium Tracks'
@@ -3139,7 +3133,6 @@ export type AllTrackingEvents =
   | NotificationsClickRemixCosign
   | NotificationsClickDethroned
   | NotificationsClickAddTrackToPlaylist
-  | NotificationsClickTrendingPlaylist
   | NotificationsClickTrendingTrack
   | NotificationsClickTrendingUnderground
   | NotificationsClickUSDCPurchaseBuyer

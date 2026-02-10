@@ -43,7 +43,6 @@ const rewardAmountRatio = 10
 const openRewards = [
   'dvl', // daily volume rewards
   't',   // tastemaker
-  'tp',  // trending playlists
   'tt',  // trending
   'tut', // trending underground
   'b',   // audio match buy (from verified user)
