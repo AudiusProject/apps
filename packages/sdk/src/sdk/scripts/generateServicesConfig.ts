@@ -39,7 +39,7 @@ const productionConfig: SdkServicesConfig = {
     rewardManagerStateAddress: '71hWFVYokLaN1PNYzTAWi13EfJ7Xt9VbSWUKsXUT8mxE',
     paymentRouterProgramAddress: 'paytYpX3LPN98TAeen6bFFeraGSuWnomZmCXjAsoqPa',
     stakingBridgeProgramAddress: 'stkB5DZziVJT1C1VmzvDdRtdWxfs5nwcHViiaNBDK31',
-    rpcEndpoint: 'https://audius-fe.rpcpool.com',
+    rpcEndpoint: 'https://carolina-8qh733-fast-mainnet.helius-rpc.com',
     usdcTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     wAudioTokenMint: '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM',
     rewardManagerLookupTableAddress:

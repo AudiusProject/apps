@@ -60,7 +60,7 @@ npx dapp-store validate release -k app-keypair.json -b $ANDROID_HOME/build-tools
 
 ### Publishing the apk
 ```
-npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0 -u https://audius-fe.rpcpool.com
+npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/35.0.0 -u https://carolina-8qh733-fast-mainnet.helius-rpc.com
 ```
 > You may not have specified ANDROID_HOME, or have a different build tools version, modify accordingly.
 
@@ -68,7 +68,7 @@ npx dapp-store create release -k app-keypair.json -b $ANDROID_HOME/build-tools/3
 
 ### Submit dApp update request
 ```
-npx dapp-store publish update -k app-keypair.json -u https://audius-fe.rpcpool.com --requestor-is-authorized --complies-with-solana-dapp-store-policies
+npx dapp-store publish update -k app-keypair.json -u https://carolina-8qh733-fast-mainnet.helius-rpc.com --requestor-is-authorized --complies-with-solana-dapp-store-policies
 ```
 
 ### Resoures
