@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - main
+      - rj-manual-publish
   workflow_dispatch:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -53,6 +54,7 @@ jobs:
         with:
           node-version: 22.21.1
           registry-url: "https://registry.npmjs.org"
+          always-auth: true
 
       - uses: actions/cache@v3
         with:
