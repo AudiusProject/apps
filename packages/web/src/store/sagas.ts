@@ -41,7 +41,6 @@ import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/trac
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import trendingPageSagas from 'common/store/pages/trending/sagas'
-import trendingPlaylistSagas from 'common/store/pages/trending-playlists/sagas'
 import trendingUndergroundSagas from 'common/store/pages/trending-underground/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
@@ -105,7 +104,6 @@ export default function* rootSaga() {
     socialSagas(),
     trackPageSagas(),
     trendingPageSagas(),
-    trendingPlaylistSagas(),
     trendingUndergroundSagas(),
     premiumTracksSagas(),
     exclusiveTracksSagas(),
@@ -198,7 +196,6 @@ export function* testRootSaga() {
     // socialSagas(),
     // trackPageSagas(),
     // trendingPageSagas(),
-    // trendingPlaylistSagas(),
     // trendingUndergroundSagas(),
     // uploadSagas(),
     // premiumTracksSagas(),

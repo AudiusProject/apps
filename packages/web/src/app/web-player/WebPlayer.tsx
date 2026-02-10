@@ -216,9 +216,6 @@ const TrackCommentsPage = lazy(() =>
 )
 const TrackPage = lazy(() => import('pages/track-page/TrackPage'))
 const TrendingPage = lazy(() => import('pages/trending-page/TrendingPage'))
-const TrendingPlaylistsPage = lazy(
-  () => import('pages/trending-playlists/TrendingPlaylistPage')
-)
 const TrendingUndergroundPage = lazy(
   () => import('pages/trending-underground/TrendingUndergroundPage')
 )
@@ -274,7 +271,6 @@ const {
   TRACK_ID_PAGE,
   USER_ID_PAGE,
   PLAYLIST_ID_PAGE,
-  TRENDING_PLAYLISTS_PAGE,
   PROFILE_PAGE_TRACKS,
   PROFILE_PAGE_ALBUMS,
   PROFILE_PAGE_PLAYLISTS,
@@ -283,6 +279,7 @@ const {
   COIN_EXCLUSIVE_TRACKS_PAGE,
   COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE,
   CHECK_PAGE,
+  TRENDING_PLAYLISTS_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   DEACTIVATE_PAGE,
   publicSiteRoutes,
@@ -817,15 +814,11 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={TRENDING_PLAYLISTS_PAGE_LEGACY}
-                  element={<Navigate to={TRENDING_PLAYLISTS_PAGE} replace />}
+                  element={<Navigate to={EXPLORE_PAGE} replace />}
                 />
                 <Route
                   path={TRENDING_PLAYLISTS_PAGE}
-                  element={
-                    <TrendingPlaylistsPage
-                      containerRef={mainContentRef.current!}
-                    />
-                  }
+                  element={<Navigate to={EXPLORE_PAGE} replace />}
                 />
                 <Route
                   path={TRENDING_UNDERGROUND_PAGE}
@@ -1250,15 +1243,11 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={TRENDING_PLAYLISTS_PAGE_LEGACY}
-                  element={<Navigate to={TRENDING_PLAYLISTS_PAGE} replace />}
+                  element={<Navigate to={EXPLORE_PAGE} replace />}
                 />
                 <Route
                   path={TRENDING_PLAYLISTS_PAGE}
-                  element={
-                    <TrendingPlaylistsPage
-                      containerRef={mainContentRef.current!}
-                    />
-                  }
+                  element={<Navigate to={EXPLORE_PAGE} replace />}
                 />
                 <Route
                   path={TRENDING_UNDERGROUND_PAGE}

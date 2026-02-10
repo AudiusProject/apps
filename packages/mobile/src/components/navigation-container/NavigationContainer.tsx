@@ -203,7 +203,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                       screens: {
                         Explore: 'explore',
                         PremiumTracks: 'explore/premium-tracks',
-                        TrendingPlaylists: 'explore/playlists',
                         TrendingUnderground: 'explore/underground',
                         LetThemDJ: 'explore/let-them-dj',
                         TopAlbums: 'explore/top-albums',

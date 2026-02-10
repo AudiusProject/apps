@@ -33,7 +33,7 @@ type useLineupPropsProps = {
 /**
  * Returns props for a Lineup component.
  * Requires at least a selector and actions
- * See example usage in `TrendingPlaylistPage`
+ * See example usage in `TrendingUndergroundPage`
  * */
 export const useLineupProps = ({
   getLineupSelector,

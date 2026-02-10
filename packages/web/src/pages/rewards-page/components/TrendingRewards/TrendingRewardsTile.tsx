@@ -35,10 +35,6 @@ export const TrendingRewardsTile = ({
       dispatch(setTrendingRewardsModalType({ modalType: 'tracks' }))
       setVisibility('TrendingRewardsExplainer')(true)
     },
-    'trending-playlist': () => {
-      dispatch(setTrendingRewardsModalType({ modalType: 'playlists' }))
-      setVisibility('TrendingRewardsExplainer')(true)
-    },
     'trending-underground': () => {
       dispatch(setTrendingRewardsModalType({ modalType: 'underground' }))
       setVisibility('TrendingRewardsExplainer')(true)

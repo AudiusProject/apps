@@ -16,7 +16,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { IconArrowRight, Button } from '@audius/harmony-native'
 import BarChart from 'app/assets/images/emojis/chart-bar.png'
 import ChartIncreasing from 'app/assets/images/emojis/chart-increasing.png'
-import ArrowUp from 'app/assets/images/emojis/right-arrow-curving-up.png'
 import { SegmentedControl, Text, GradientText, Link } from 'app/components/core'
 import TweetEmbed from 'app/components/tweet-embed'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -34,29 +33,19 @@ const TOS_URL = 'https://blog.audius.co/article/audio-rewards'
 
 const messages = {
   tracksTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  playlistTitle: 'Top 5 Playlists Each Week Receive 100 $AUDIO',
   undergroundTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
   winners: 'Top 5 winners are selected every Friday at Noon PT!',
   lastWeek: "LAST WEEK'S WINNERS",
   tracks: 'Tracks',
-  playlists: 'Playlists',
   underground: 'Underground',
   terms: 'Terms and Conditions Apply',
   tracksModalTitle: 'Top 5 Trending Tracks',
-  playlistsModalTitle: 'Top 5 Trending Playlists',
   undergroundModalTitle: 'Top 5 Underground Trending Tracks',
   buttonTextTracks: 'Trending Tracks',
-  buttonTextPlaylists: 'Trending Playlists',
   buttonTextUnderground: 'Underground Trending Tracks'
 }
 
 const textMap = {
-  playlists: {
-    modalTitle: messages.playlistsModalTitle,
-    title: messages.playlistTitle,
-    button: messages.buttonTextPlaylists,
-    icon: ArrowUp
-  },
   tracks: {
     modalTitle: messages.tracksModalTitle,
     title: messages.tracksTitle,
@@ -145,11 +134,9 @@ const useRewardsType = (): [
 
 const useTweetId = (type: TrendingRewardsModalType) => {
   const tracksId = useRemoteVar(StringKeys.REWARDS_TWEET_ID_TRACKS)
-  const playlistsId = useRemoteVar(StringKeys.REWARDS_TWEET_ID_PLAYLISTS)
   const undergroundId = useRemoteVar(StringKeys.REWARDS_TWEET_ID_UNDERGROUND)
   return {
     tracks: tracksId,
-    playlists: playlistsId,
     underground: undergroundId
   }[type]
 }
@@ -181,10 +168,6 @@ export const TrendingRewardsDrawer = (titleIcon) => {
       text: messages.tracks
     },
     {
-      key: 'playlists',
-      text: messages.playlists
-    },
-    {
       key: 'underground',
       text: messages.underground
     }
@@ -194,10 +177,6 @@ export const TrendingRewardsDrawer = (titleIcon) => {
     switch (modalType) {
       case 'tracks': {
         navigation.navigate('trending', { screen: 'Trending' })
-        break
-      }
-      case 'playlists': {
-        navigation.navigate('explore', { screen: 'TrendingPlaylists' })
         break
       }
       case 'underground': {

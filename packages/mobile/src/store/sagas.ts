@@ -39,7 +39,6 @@ import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import trendingPageSagas from 'common/store/pages/trending/sagas'
-import trendingPlaylistSagas from 'common/store/pages/trending-playlists/sagas'
 import trendingUndergroundSagas from 'common/store/pages/trending-underground/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
@@ -112,7 +111,6 @@ export default function* rootSaga() {
     ...collectionPageSagas(),
     ...feedPageSagas(),
     ...trendingPageSagas(),
-    ...trendingPlaylistSagas(),
     ...trendingUndergroundSagas(),
     ...librarySagas(),
     ...profileSagas(),

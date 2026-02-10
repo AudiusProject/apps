@@ -21,7 +21,6 @@ const messages = {
 
 const validRewardIds: Set<ChallengeRewardID> = new Set([
   'trending-track',
-  'trending-playlist',
   'top-api',
   'verified-upload',
   'trending-underground'
@@ -56,10 +55,6 @@ export const TrendingRewards = () => {
     switch (trendingRewardId) {
       case 'top-api':
         modal = 'APIRewardsExplainer'
-        break
-      case 'trending-playlist':
-        modal = 'TrendingRewardsExplainer'
-        modalType = 'playlists'
         break
       case 'trending-track':
         modal = 'TrendingRewardsExplainer'

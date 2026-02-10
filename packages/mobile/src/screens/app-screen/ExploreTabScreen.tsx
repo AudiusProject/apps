@@ -1,7 +1,6 @@
 import type { SearchCategory, SearchFilters } from '@audius/common/api'
 
 import { SearchExploreScreen } from '../explore-screen/SearchExploreScreen'
-import { TrendingPlaylistsScreen } from '../explore-screen/tabs/ForYouTab/TrendingPlaylistsScreen'
 import { TrendingUndergroundScreen } from '../explore-screen/tabs/ForYouTab/TrendingUndergroundScreen'
 
 import type { AppTabScreenParamList } from './AppTabScreen'
@@ -14,7 +13,6 @@ export type ExploreTabScreenParamList = AppTabScreenParamList & {
     category?: SearchCategory
     filters?: SearchFilters
   }
-  TrendingPlaylists: undefined
   TrendingUnderground: undefined
 }
 
@@ -23,10 +21,6 @@ export const ExploreTabScreen =
     return (
       <>
         <Stack.Screen name='SearchExplore' component={SearchExploreScreen} />
-        <Stack.Screen
-          name='TrendingPlaylists'
-          component={TrendingPlaylistsScreen}
-        />
         <Stack.Screen
           name='TrendingUnderground'
           component={TrendingUndergroundScreen}

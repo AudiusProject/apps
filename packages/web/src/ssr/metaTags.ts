@@ -14,8 +14,6 @@ export const SIGNUP_REF_IMAGE_URL =
   'https://download.audius.co/static-resources/signup_referral.png'
 
 // Explore page image URLs
-const TOP_PLAYLISTS_URL =
-  'https://download.audius.co/static-resources/top-playlists.png'
 const UNDERGROUND_TRENDING_URL =
   'https://download.audius.co/static-resources/underground-trending.png'
 
@@ -86,11 +84,6 @@ export const getWebUrl = (path: string): string => {
  * Explore type to metadata mapping
  */
 export const exploreMap: Record<string, ExploreInfo> = {
-  'trending-playlists': {
-    title: 'Trending Playlists',
-    description: createSeoDescription('Trending Playlists on Audius'),
-    image: TOP_PLAYLISTS_URL
-  },
   underground: {
     title: 'Underground Trending',
     description: createSeoDescription(

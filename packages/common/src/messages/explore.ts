@@ -16,6 +16,5 @@ export const exploreMessages = {
   imFeelingLucky: "I'm Feeling Lucky",
   recentlyPlayed: 'Recently Played',
   undergroundTrending: 'Underground Trending',
-  trendingPlaylists: 'Trending Playlists',
   verified: 'Verified'
 }

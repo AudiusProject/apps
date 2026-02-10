@@ -5,8 +5,11 @@ import { CommonState } from '../../commonStore'
 
 import { ClaimStatus } from './types'
 
-export const getTrendingRewardsModalType = (state: CommonState) =>
-  state.pages.audioRewards.trendingRewardsModalType
+export const getTrendingRewardsModalType = (state: CommonState) => {
+  const type = state.pages.audioRewards.trendingRewardsModalType as string
+  // 'playlists' is deprecated; treat as 'tracks'
+  return type === 'playlists' ? 'tracks' : (type as 'tracks' | 'underground')
+}
 
 export const getChallengeRewardsModalType = (state: CommonState) =>
   state.pages.audioRewards.challengeRewardsModalType
