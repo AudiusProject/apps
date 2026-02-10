@@ -29,7 +29,6 @@ import {
   AnnouncementNotification,
   TrendingTrackNotification,
   TrendingUndergroundNotification,
-  TrendingPlaylistNotification,
   USDCPurchaseBuyerNotification,
   USDCWithdrawalNotification,
   USDCTransferNotification,
@@ -74,7 +73,6 @@ import { TrendingTrack } from './trendingTrack'
 import { Tastemaker } from './tastemaker'
 import { SaveOfRepost } from './saveOfRepost'
 import { TrendingUnderground } from './trendingUnderground'
-import { TrendingPlaylist } from './trendingPlaylist'
 import { USDCPurchaseSeller } from './usdcPurchaseSeller'
 import { USDCPurchaseBuyer } from './usdcPurchaseBuyer'
 import { USDCWithdrawal } from './usdcWithdrawal'
@@ -250,11 +248,6 @@ const mapNotification = (
       data: TrendingUndergroundNotification
     }
     return new TrendingUnderground(dnDb, identityDb, trendingNotification)
-  } else if (notification.type == 'trending_playlist') {
-    const trendingNotification = notification as NotificationRow & {
-      data: TrendingPlaylistNotification
-    }
-    return new TrendingPlaylist(dnDb, identityDb, trendingNotification)
   } else if (notification.type == 'tastemaker') {
     const tastemakerNotification = notification as NotificationRow & {
       data: TastemakerNotification

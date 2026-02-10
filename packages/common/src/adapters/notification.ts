@@ -267,19 +267,6 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
-    case 'trending_playlist': {
-      const data = notification.actions[0].data
-
-      return {
-        type: NotificationType.TrendingPlaylist,
-        rank: data.rank,
-        genre: data.genre,
-        time: data.timeRange,
-        entityType: Entity.Playlist,
-        entityId: HashId.parse(data.playlistId),
-        ...formatBaseNotification(notification)
-      }
-    }
     case 'trending': {
       const data = notification.actions[0].data
 

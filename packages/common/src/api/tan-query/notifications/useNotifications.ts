@@ -103,9 +103,6 @@ const collectEntityIds = (notifications: Notification[]): EntityIds => {
     ) {
       trackIds.add(notification.entityId)
     }
-    if (type === NotificationType.TrendingPlaylist) {
-      collectionIds.add(notification.entityId)
-    }
     if (
       type === NotificationType.AddTrackToPlaylist ||
       type === NotificationType.TrackAddedToPurchasedAlbum

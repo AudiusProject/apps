@@ -77,7 +77,6 @@ export const notificationTypeMapping = {
   create: MappingVariable.PushCreate,
   trending: MappingVariable.PushTrending,
   trending_underground: MappingVariable.PushTrendingUnderground,
-  trending_playlist: MappingVariable.PushTrendingPlaylist,
   tastemaker: MappingVariable.PushTastemaker,
   usdc_purchase_seller: MappingVariable.PushUSDCPurchaseSeller,
   usdc_purchase_buyer: MappingVariable.PushUSDCPurchaseBuyer,

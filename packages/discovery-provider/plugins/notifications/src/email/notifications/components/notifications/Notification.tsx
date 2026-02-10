@@ -248,18 +248,6 @@ const notificationMap = {
       )
     }
   },
-  ['trending_playlist'](notification) {
-    const highlight = notification.entity.title
-    const rank = notification.rank
-    return (
-      <span className={'notificationText'}>
-        <HighlightText text={highlight} />
-        <BodyText
-          text={` is the #${rank} trending playlist on Audius right now! 🍾`}
-        />
-      </span>
-    )
-  },
   ['trending'](notification) {
     const highlight = notification.entity.title
     const rank = notification.rank
@@ -633,17 +621,6 @@ const getTwitter = (notification) => {
       const text = `My remix of ${parentTrack.title} was Co-Signed by ${twitterHandle} on @audius`
       return {
         message: 'Share With Your Friends',
-        href: `http://twitter.com/share?url=${encodeURIComponent(
-          url
-        )}&text=${encodeURIComponent(text)}`
-      }
-    }
-    case 'trending_playlist': {
-      const { entity } = notification
-      const url = getTrackLink(entity)
-      const text = `My playlist ${entity.title} is trending on @audius! Check it out!`
-      return {
-        message: 'Share this Milestone',
         href: `http://twitter.com/share?url=${encodeURIComponent(
           url
         )}&text=${encodeURIComponent(text)}`
