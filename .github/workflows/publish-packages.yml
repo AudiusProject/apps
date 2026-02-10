@@ -56,6 +56,13 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           always-auth: true
 
+      - name: Upgrade npm for OIDC support
+        run: |
+          echo "Current npm version: $(npm --version)"
+          # OIDC trusted publishing requires npm 11.5.1+
+          npm install -g npm@latest
+          echo "Updated npm version: $(npm --version)"
+
       - uses: actions/cache@v3
         with:
           path: "**/node_modules"
@@ -81,7 +88,7 @@ jobs:
           fi
           echo "Checking .npmrc..."
           if [ -f "$HOME/.npmrc" ]; then
-            echo ".npmrc exists at $HOME/.npmrc"
+            echo "✓ .npmrc exists at $HOME/.npmrc"
             # Don't print the full token, just confirm it exists
             if grep -q "registry.npmjs.org" "$HOME/.npmrc"; then
               echo "✓ .npmrc contains registry.npmjs.org configuration"
@@ -92,6 +99,15 @@ jobs:
             fi
           else
             echo "✗ WARNING: .npmrc not found at $HOME/.npmrc"
+            echo "Creating .npmrc with OIDC token..."
+            if [ -n "$NODE_AUTH_TOKEN" ]; then
+              echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "$HOME/.npmrc"
+              echo "registry=https://registry.npmjs.org/" >> "$HOME/.npmrc"
+              echo "always-auth=true" >> "$HOME/.npmrc"
+              echo "✓ Created .npmrc with OIDC token"
+            else
+              echo "✗ Cannot create .npmrc - NODE_AUTH_TOKEN is not set"
+            fi
           fi
           echo "npm version: $(npm --version)"
           echo "node version: $(node --version)"
