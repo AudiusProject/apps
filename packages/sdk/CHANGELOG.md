@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 12.0.1
+
+### Patch Changes
+
+- 5233e16: Fix test
+
 ## 12.0.0
 
 ### Major Changes
