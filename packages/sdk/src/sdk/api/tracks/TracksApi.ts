@@ -358,7 +358,15 @@ export class TracksApi extends GeneratedTracksApi {
 
     // Upload track files
     const { audioUploadResponse, imageUploadResponse } =
-      await this.uploadTrackFiles(params as UploadTrackFilesRequest).start()
+      await this.uploadTrackFiles({
+        audioFile: params.audioFile,
+        imageFile: params.imageFile,
+        fileMetadata: {
+          placementHosts: params.metadata.placementHosts,
+          previewStartSeconds: params.metadata.previewStartSeconds
+        },
+        onProgress: params.onProgress
+      }).start()
 
     if (!audioUploadResponse || !imageUploadResponse) {
       throw new Error('uploadTrack: Missing upload responses')
