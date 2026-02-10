@@ -67,7 +67,8 @@ export const env: Env = {
   SENTRY_DSN: 'https://e26d2b01488f4b538ea235de6466c40a@s.audius.co/1457231',
   SOL_BRIDGE_ADDRESS: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
   SOL_TOKEN_BRIDGE_ADDRESS: 'wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb',
-  SOLANA_CLUSTER_ENDPOINT: 'https://audius-fe.rpcpool.com',
+  SOLANA_CLUSTER_ENDPOINT:
+    'https://carolina-8qh733-fast-mainnet.helius-rpc.com',
   SOLANA_FEE_PAYER_ADDRESS: 'pqx3fvvh6b2eZBfLhTtQ5KxzU3CginmgGTmDCjk8TPP',
   SOLANA_RELAY_ENDPOINT: 'https://discoveryprovider.audius.co',
   SOLANA_TOKEN_PROGRAM_ADDRESS: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
