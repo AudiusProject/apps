@@ -43,7 +43,7 @@ jobs:
   publish-packages:
     name: Publish Packages to NPM
     needs: changes
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.public-packages == 'true' }}
+    if: ${{ needs.changes.outputs.public-packages == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

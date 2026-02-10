@@ -1,6 +1,6 @@
 {
   "name": "@audius/harmony",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The Audius Design System",
   "license": "ISC",
   "author": "Audius",
@@ -21,7 +21,8 @@
     "stylelint": "stylelint 'src/**/*.css'",
     "stylelint:fix": "npm run stylelint -- --fix",
     "typecheck": "tsc --noEmit",
-    "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:stylelint\""
+    "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:stylelint\"",
+    "prepack": "turbo run build"
   },
   "devDependencies": {
     "@babel/preset-env": "7.22.15",

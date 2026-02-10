@@ -8,6 +8,7 @@ echo "Running build, lint, typecheck, and test..."
 # otherwise they won't get built/linted/tested before being published
 npx turbo run build lint typecheck test \
     --filter=create-audius-app \
+    --filter=@audius/harmony \
     --filter=@audius/sp-actions \
     --filter=@audius/fixed-decimal \
     --filter=@audius/sdk \
