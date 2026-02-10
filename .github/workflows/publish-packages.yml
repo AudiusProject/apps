@@ -13,6 +13,9 @@ permissions:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+env:
+  NODE_VERSION: "22.21.1"
+
 jobs:
   changes:
     name: Check for changes to public packages
