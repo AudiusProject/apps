@@ -54,7 +54,11 @@ import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/compone
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
-import { TrendingFilterDrawer } from 'app/screens/trending-screen'
+import {
+  TrendingCategoryDrawer,
+  TrendingFilterDrawer,
+  TrendingTimeRangeDrawer
+} from 'app/screens/trending-screen'
 import { WalletRowOverflowMenu } from 'app/screens/wallet-screen/components/LinkedWallets'
 
 import { useDrawerState } from '../components/drawer'
@@ -113,6 +117,8 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
+  TrendingCategory: TrendingCategoryDrawer,
+  TrendingTimeRange: TrendingTimeRangeDrawer,
   Overflow: OverflowMenuDrawer,
   SignOutConfirmation: SignOutConfirmationDrawer,
   AddToCollection: AddToCollectionDrawer,

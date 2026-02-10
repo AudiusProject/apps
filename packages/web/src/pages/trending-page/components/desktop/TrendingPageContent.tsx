@@ -1,17 +1,31 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Name, Status, TimeRange } from '@audius/common/models'
-import { trendingPageLineupActions } from '@audius/common/store'
-import { ELECTRONIC_PREFIX, TRENDING_GENRES } from '@audius/common/utils'
-import { IconTrending } from '@audius/harmony'
+import {
+  trendingPageLineupActions,
+  trendingUndergroundPageLineupActions,
+  trendingUndergroundPageLineupSelectors
+} from '@audius/common/store'
+import {
+  ELECTRONIC_PREFIX,
+  getCanonicalName,
+  TRENDING_GENRES
+} from '@audius/common/utils'
+import {
+  FilterButton,
+  Flex,
+  IconTrending,
+  SelectablePill
+} from '@audius/harmony'
+import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
+import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
-import useTabs from 'hooks/useTabs/useTabs'
 import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
 import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
 import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
@@ -19,20 +33,24 @@ import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPag
 import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
 import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
 
-import GenreSelectionModal from './GenreSelectionModal'
-import { TrendingGenreFilters } from './TrendingGenreFilters'
 import styles from './TrendingPageContent.module.css'
 const { trendingAllTimeActions, trendingMonthActions, trendingWeekActions } =
   trendingPageLineupActions
+const { getLineup } = trendingUndergroundPageLineupSelectors
 
 const messages = {
+  tracks: 'Tracks',
+  underground: 'Underground',
   thisWeek: 'This Week',
   thisMonth: 'This Month',
   allTime: 'All Time',
   allGenres: 'All Genres',
+  genres: 'Genres',
   endOfLineupDescription: "Looks like you've reached the end of this list...",
   disabledTabTooltip: 'Nothing available'
 }
+
+type TrendingCategory = 'tracks' | 'underground'
 
 type TrendingPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
@@ -59,13 +77,31 @@ const getRangesToDisable = (timeRange: TimeRange) => {
   }
 }
 
+const useTrendingUndergroundLineup = (
+  scrollParent: HTMLElement | undefined
+) => {
+  return useLineupProps({
+    actions: trendingUndergroundPageLineupActions,
+    getLineupSelector: getLineup,
+    variant: LineupVariant.MAIN,
+    scrollParent: scrollParent ?? undefined,
+    isTrending: true,
+    isOrdered: true
+  })
+}
+
 const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
+  const dispatch = useDispatch()
+  const [category, setCategory] = useState<TrendingCategory>('tracks')
   const trendingPageState = useTrendingPageState()
   const actions = useTrendingActions()
   const lineups = useTrendingLineups({
     trendingPageState,
     containerRef: containerRef || undefined
   })
+  const undergroundLineupProps = useTrendingUndergroundLineup(
+    containerRef?.current ?? undefined
+  )
 
   useTrendingUrlParams({
     trendingPageState,
@@ -75,6 +111,12 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   })
 
   useTrendingPageCleanup({ trendingPageState, actions })
+
+  useEffect(() => {
+    return () => {
+      dispatch(trendingUndergroundPageLineupActions.reset())
+    }
+  }, [dispatch])
 
   const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
   const {
@@ -212,110 +254,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     variant: LineupVariant.MAIN
   }
 
-  const trendingLineups = [
-    <div
-      key={`weekly-trending-tracks-${trendingGenre}`}
-      className={styles.lineupContainer}
-    >
-      <Lineup
-        aria-label='weekly trending tracks'
-        ordered
-        {...weekProps}
-        setInView={makeSetInView(TimeRange.WEEK)}
-        loadMore={makeLoadMore(TimeRange.WEEK)}
-        playTrack={makePlayTrack(TimeRange.WEEK)}
-        pauseTrack={makePauseTrack(TimeRange.WEEK)}
-        actions={trendingWeekActions}
-        endOfLineup={
-          <EndOfLineup description={messages.endOfLineupDescription} />
-        }
-        {...mainLineupProps}
-      />
-    </div>,
-    <div
-      key={`monthly-trending-tracks-${trendingGenre}`}
-      className={styles.lineupContainer}
-    >
-      <Lineup
-        aria-label='monthly trending tracks'
-        ordered
-        {...monthProps}
-        setInView={makeSetInView(TimeRange.MONTH)}
-        loadMore={makeLoadMore(TimeRange.MONTH)}
-        playTrack={makePlayTrack(TimeRange.MONTH)}
-        pauseTrack={makePauseTrack(TimeRange.MONTH)}
-        endOfLineup={
-          <EndOfLineup description={messages.endOfLineupDescription} />
-        }
-        actions={trendingMonthActions}
-        {...mainLineupProps}
-      />
-    </div>,
-    <div
-      key={`all-time-trending-tracks-${trendingGenre}`}
-      className={styles.lineupContainer}
-    >
-      <Lineup
-        aria-label='all-time trending tracks'
-        ordered
-        {...allTimeProps}
-        setInView={makeSetInView(TimeRange.ALL_TIME)}
-        loadMore={makeLoadMore(TimeRange.ALL_TIME)}
-        playTrack={makePlayTrack(TimeRange.ALL_TIME)}
-        pauseTrack={makePauseTrack(TimeRange.ALL_TIME)}
-        actions={trendingAllTimeActions}
-        endOfLineup={
-          <EndOfLineup description={messages.endOfLineupDescription} />
-        }
-        {...mainLineupProps}
-      />
-    </div>
-  ]
   const record = useRecord()
-
-  // Setup tabs
-  const didChangeTabs = (from: string, to: string) => {
-    setTrendingTimeRange(to as TimeRange)
-    scrollToTop(to as TimeRange)
-    record(
-      make(Name.TRENDING_CHANGE_VIEW, {
-        timeframe: to as TimeRange,
-        genre: trendingGenre || ''
-      })
-    )
-  }
-
-  const tabIsDisabled = (timeRange: TimeRange) =>
-    emptyTimeGenreSet.current.has(
-      getTimeGenreCacheKey(timeRange, trendingGenre)
-    )
-  const { tabs, body } = useTabs({
-    isMobile: false,
-    tabs: [
-      {
-        text: messages.thisWeek,
-        label: TimeRange.WEEK,
-        disabled: tabIsDisabled(TimeRange.WEEK)
-      },
-      {
-        text: messages.thisMonth,
-        label: TimeRange.MONTH,
-        disabled: tabIsDisabled(TimeRange.MONTH)
-      },
-      {
-        text: messages.allTime,
-        label: TimeRange.ALL_TIME,
-        disabled: tabIsDisabled(TimeRange.ALL_TIME)
-      }
-    ],
-    selectedTabLabel: trendingTimeRange,
-    elements: trendingLineups,
-    didChangeTabsFrom: didChangeTabs,
-    bodyClassName: styles.tabBody,
-    elementClassName: styles.tabElement,
-    interElementSpacing: 100,
-    disabledTabTooltipText: messages.disabledTabTooltip
-  })
 
   const setGenre = useCallback(
     (genre: string | null) => {
@@ -323,37 +262,187 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
       record(
         make(Name.TRENDING_CHANGE_VIEW, {
           timeframe: trendingTimeRange,
-          genre: genre || ''
+          genre: genre ?? ''
         })
       )
     },
     [setGenreAndRefresh, record, trendingTimeRange]
   )
 
-  // Setup Modal
-  const [modalIsOpen, setModalIsOpen] = useState(false)
-  const didSelectModalGenre = (genre: string | null) => {
-    const trimmedGenre =
-      genre !== null ? genre.replace(ELECTRONIC_PREFIX, '') : genre
-    setGenre(trimmedGenre)
-    setModalIsOpen(false)
-  }
+  const handleTimeRangeChange = useCallback(
+    (value: string) => {
+      const timeRange = value as TimeRange
+      setTrendingTimeRange(timeRange)
+      scrollToTop(timeRange)
+      record(
+        make(Name.TRENDING_CHANGE_VIEW, {
+          timeframe: timeRange,
+          genre: trendingGenre ?? ''
+        })
+      )
+    },
+    [setTrendingTimeRange, scrollToTop, record, trendingGenre]
+  )
+
+  const handleGenreChange = useCallback(
+    (value: string) => {
+      setGenre(value === 'all' ? null : value)
+    },
+    [setGenre]
+  )
+
+  const timeRangeOptions = [
+    { label: messages.thisWeek, value: TimeRange.WEEK },
+    { label: messages.thisMonth, value: TimeRange.MONTH },
+    { label: messages.allTime, value: TimeRange.ALL_TIME }
+  ]
+
+  const genreOptions = [
+    { label: messages.allGenres, value: 'all' },
+    ...TRENDING_GENRES.map((g) => ({
+      label: getCanonicalName(g),
+      value: g
+    }))
+  ]
+
+  // Bottom bar: category tabs (Tracks | Underground) on left;
+  // when Tracks, dropdown buttons for time range + genres on right (per design)
+  const bottomBar = (
+    <Flex
+      w='100%'
+      alignItems='center'
+      justifyContent='space-between'
+      gap='m'
+      p='l'
+    >
+      <Flex gap='s' role='tablist'>
+        <SelectablePill
+          type='button'
+          label={messages.tracks}
+          size='large'
+          isSelected={category === 'tracks'}
+          onClick={() => setCategory('tracks')}
+        />
+        <SelectablePill
+          type='button'
+          label={messages.underground}
+          size='large'
+          isSelected={category === 'underground'}
+          onClick={() => setCategory('underground')}
+        />
+      </Flex>
+      {category === 'tracks' ? (
+        <Flex gap='s' alignItems='center'>
+          <FilterButton
+            label={messages.thisWeek}
+            value={trendingTimeRange}
+            variant='replaceLabel'
+            onChange={handleTimeRangeChange}
+            options={timeRangeOptions}
+          />
+          <FilterButton
+            label={messages.allGenres}
+            value={trendingGenre ?? 'all'}
+            variant='replaceLabel'
+            onChange={handleGenreChange}
+            options={genreOptions}
+            virtualized
+            menuProps={{ maxHeight: 320, width: 240 }}
+          />
+        </Flex>
+      ) : null}
+    </Flex>
+  )
 
   // Setup Header
   const header = (
-    <Header
-      icon={IconTrending}
-      primary={trendingTitle}
-      bottomBar={tabs}
-      rightDecorator={
-        <TrendingGenreFilters
-          currentGenre={trendingGenre}
-          didSelectGenre={setGenre}
-          didSelectMore={() => setModalIsOpen(true)}
-        />
-      }
-    />
+    <Header icon={IconTrending} primary={trendingTitle} bottomBar={bottomBar} />
   )
+
+  const getTracksLineupForRange = (timeRange: TimeRange) => {
+    const lineupMap = {
+      [TimeRange.WEEK]: (
+        <div
+          key={`weekly-trending-tracks-${trendingGenre}`}
+          className={styles.lineupContainer}
+        >
+          <Lineup
+            aria-label='weekly trending tracks'
+            ordered
+            {...weekProps}
+            setInView={makeSetInView(TimeRange.WEEK)}
+            loadMore={makeLoadMore(TimeRange.WEEK)}
+            playTrack={makePlayTrack(TimeRange.WEEK)}
+            pauseTrack={makePauseTrack(TimeRange.WEEK)}
+            actions={trendingWeekActions}
+            endOfLineup={
+              <EndOfLineup description={messages.endOfLineupDescription} />
+            }
+            {...mainLineupProps}
+          />
+        </div>
+      ),
+      [TimeRange.MONTH]: (
+        <div
+          key={`monthly-trending-tracks-${trendingGenre}`}
+          className={styles.lineupContainer}
+        >
+          <Lineup
+            aria-label='monthly trending tracks'
+            ordered
+            {...monthProps}
+            setInView={makeSetInView(TimeRange.MONTH)}
+            loadMore={makeLoadMore(TimeRange.MONTH)}
+            playTrack={makePlayTrack(TimeRange.MONTH)}
+            pauseTrack={makePauseTrack(TimeRange.MONTH)}
+            endOfLineup={
+              <EndOfLineup description={messages.endOfLineupDescription} />
+            }
+            actions={trendingMonthActions}
+            {...mainLineupProps}
+          />
+        </div>
+      ),
+      [TimeRange.ALL_TIME]: (
+        <div
+          key={`all-time-trending-tracks-${trendingGenre}`}
+          className={styles.lineupContainer}
+        >
+          <Lineup
+            aria-label='all-time trending tracks'
+            ordered
+            {...allTimeProps}
+            setInView={makeSetInView(TimeRange.ALL_TIME)}
+            loadMore={makeLoadMore(TimeRange.ALL_TIME)}
+            playTrack={makePlayTrack(TimeRange.ALL_TIME)}
+            pauseTrack={makePauseTrack(TimeRange.ALL_TIME)}
+            actions={trendingAllTimeActions}
+            endOfLineup={
+              <EndOfLineup description={messages.endOfLineupDescription} />
+            }
+            {...mainLineupProps}
+          />
+        </div>
+      )
+    }
+    return lineupMap[timeRange]
+  }
+
+  const pageContent =
+    category === 'tracks' ? (
+      getTracksLineupForRange(trendingTimeRange)
+    ) : (
+      <div className={styles.lineupContainer}>
+        <Lineup
+          aria-label='underground trending tracks'
+          {...undergroundLineupProps}
+          endOfLineup={
+            <EndOfLineup description={messages.endOfLineupDescription} />
+          }
+          variant={LineupVariant.MAIN}
+        />
+      </div>
+    )
 
   return (
     <>
@@ -363,17 +452,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         size='large'
         header={header}
       >
-        {body}
+        {pageContent}
       </Page>
-      <GenreSelectionModal
-        genres={TRENDING_GENRES}
-        selectedGenre={trendingGenre}
-        didClose={() => {
-          setModalIsOpen(false)
-        }}
-        didSelectGenre={didSelectModalGenre}
-        isOpen={modalIsOpen}
-      />
     </>
   )
 }

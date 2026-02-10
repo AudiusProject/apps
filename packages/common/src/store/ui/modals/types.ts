@@ -59,6 +59,8 @@ export type Modals =
   | 'FeedFilter'
   | 'PurchaseVendor'
   | 'TrendingGenreSelection'
+  | 'TrendingCategory'
+  | 'TrendingTimeRange'
   | 'TrendingRewardsExplainer'
   | 'SocialProof'
   | 'EditFolder'
