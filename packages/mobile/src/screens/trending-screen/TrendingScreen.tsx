@@ -1,66 +1,60 @@
-import { TimeRange } from '@audius/common/models'
+import { useCallback } from 'react'
 
-import {
-  IconAllTime,
-  IconCalendarDay,
-  IconCalendarMonth,
-  IconTrending
-} from '@audius/harmony-native'
+import { modalsActions, trendingPageSelectors } from '@audius/common/store'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { IconTrending } from '@audius/harmony-native'
 import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
-import { TopTabNavigator } from 'app/components/top-tab-bar'
+import { TrendingDropdownButton } from 'app/components/trending-dropdown-button'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 
-import { TrendingFilterButton } from './TrendingFilterButton'
-import { TrendingLineup } from './TrendingLineup'
+import { TRENDING_CATEGORY_MODAL } from './TrendingCategoryDrawer'
+import { TrendingFilterRow } from './TrendingFilterRow'
+import { TrendingTracksLineup } from './TrendingTracksLineup'
+import { TrendingUndergroundLineup } from './TrendingUndergroundLineup'
 
-const ThisWeekTab = () => {
-  return <TrendingLineup timeRange={TimeRange.WEEK} rankIconCount={5} />
-}
-const ThisMonthTab = () => {
-  return <TrendingLineup timeRange={TimeRange.MONTH} />
-}
+const { getTrendingCategory } = trendingPageSelectors
+const { setVisibility } = modalsActions
 
-const AllTimeTab = () => {
-  return <TrendingLineup timeRange={TimeRange.ALL_TIME} />
-}
-
-const trendingScreens = [
-  {
-    name: 'This Week',
-    Icon: IconCalendarDay,
-    component: ThisWeekTab
-  },
-  {
-    name: 'This Month',
-    Icon: IconCalendarMonth,
-    component: ThisMonthTab
-  },
-  {
-    name: 'All Time',
-    Icon: IconAllTime,
-    component: AllTimeTab
-  }
-]
+const categoryLabels = {
+  tracks: 'Tracks',
+  underground: 'Underground'
+} as const
 
 export const TrendingScreen = () => {
   useAppTabScreen()
+  const dispatch = useDispatch()
+  const category = useSelector(getTrendingCategory) ?? 'tracks'
+
+  const handleOpenCategoryDrawer = useCallback(() => {
+    dispatch(setVisibility({ modal: TRENDING_CATEGORY_MODAL, visible: true }))
+  }, [dispatch])
 
   return (
     <Screen url='Trending'>
       <ScreenPrimaryContent>
         <ScreenHeader text='Trending' icon={IconTrending}>
-          <TrendingFilterButton />
+          <TrendingDropdownButton
+            label={categoryLabels[category]}
+            onPress={handleOpenCategoryDrawer}
+          />
         </ScreenHeader>
       </ScreenPrimaryContent>
       <ScreenContent>
-        <ScreenSecondaryContent>
-          <TopTabNavigator
-            screens={trendingScreens}
-            screenOptions={{ lazy: true }}
-          />
-        </ScreenSecondaryContent>
+        {category === 'tracks' ? (
+          <>
+            <TrendingFilterRow />
+            <ScreenSecondaryContent>
+              <TrendingTracksLineup />
+            </ScreenSecondaryContent>
+          </>
+        ) : (
+          <ScreenSecondaryContent>
+            <TrendingUndergroundLineup />
+          </ScreenSecondaryContent>
+        )}
       </ScreenContent>
     </Screen>
   )

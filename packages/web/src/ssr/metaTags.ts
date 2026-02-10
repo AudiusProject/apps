@@ -13,10 +13,6 @@ export const AUDIO_REWARDS_IMAGE_URL =
 export const SIGNUP_REF_IMAGE_URL =
   'https://download.audius.co/static-resources/signup_referral.png'
 
-// Explore page image URLs
-const UNDERGROUND_TRENDING_URL =
-  'https://download.audius.co/static-resources/underground-trending.png'
-
 // Regex to detect Twitter/Discord bots that can embed players
 const CAN_EMBED_USER_AGENT_REGEX = /(twitter|discord)/i
 
@@ -83,15 +79,7 @@ export const getWebUrl = (path: string): string => {
 /**
  * Explore type to metadata mapping
  */
-export const exploreMap: Record<string, ExploreInfo> = {
-  underground: {
-    title: 'Underground Trending',
-    description: createSeoDescription(
-      "Listen to what's trending on the Audius platform"
-    ),
-    image: UNDERGROUND_TRENDING_URL
-  }
-}
+export const exploreMap: Record<string, ExploreInfo> = {}
 
 /**
  * Get explore info for a given type

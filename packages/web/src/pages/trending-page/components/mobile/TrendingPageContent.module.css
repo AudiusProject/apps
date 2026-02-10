@@ -30,8 +30,50 @@
   z-index: 10;
 }
 
+.filterRow {
+  position: fixed;
+  top: 92px;
+  top: calc(92px + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--harmony-white);
+  border-bottom: 1px solid var(--harmony-n-100);
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin: 0;
+  border: none;
+  border-radius: 20px;
+  background: var(--harmony-n-100);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.filterButton:active {
+  opacity: 0.8;
+}
+
+.filterButtonLabel {
+  white-space: nowrap;
+}
+
 .tabBodyHolder {
-  margin-top: 60px;
+  margin-top: 0;
+}
+
+.tabBodyHolder.hasFilterRow {
+  /* Clear the fixed filter row (header 92px + filter row ~56px) */
+  margin-top: 56px;
 }
 
 .rewardsContainer {

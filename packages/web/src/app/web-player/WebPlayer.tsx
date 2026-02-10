@@ -216,9 +216,6 @@ const TrackCommentsPage = lazy(() =>
 )
 const TrackPage = lazy(() => import('pages/track-page/TrackPage'))
 const TrendingPage = lazy(() => import('pages/trending-page/TrendingPage'))
-const TrendingUndergroundPage = lazy(
-  () => import('pages/trending-underground/TrendingUndergroundPage')
-)
 const Visualizer = lazy(() => import('pages/visualizer/Visualizer'))
 const WalletPage = lazy(() =>
   import('pages/wallet-page').then((m) => ({ default: m.WalletPage }))
@@ -822,11 +819,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={TRENDING_UNDERGROUND_PAGE}
-                  element={
-                    <TrendingUndergroundPage
-                      containerRef={mainContentRef.current!}
-                    />
-                  }
+                  element={<Navigate to={TRENDING_PAGE} replace />}
                 />
                 <Route path={EXPLORE_PAGE} element={<ExplorePage />} />
                 <Route
@@ -1251,11 +1244,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={TRENDING_UNDERGROUND_PAGE}
-                  element={
-                    <TrendingUndergroundPage
-                      containerRef={mainContentRef.current!}
-                    />
-                  }
+                  element={<Navigate to={TRENDING_PAGE} replace />}
                 />
                 <Route path={EXPLORE_PAGE} element={<ExplorePage />} />
                 <Route

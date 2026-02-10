@@ -2,8 +2,11 @@ import { Genre } from '~/utils'
 
 import { TimeRange } from '../../../models'
 
+import type { TrendingCategory } from './types'
+
 export const SET_TRENDING_GENRE = 'TRENDING/SET_TRENDING_GENRE'
 export const SET_TRENDING_TIME_RANGE = 'TRENDING/SET_TRENDING_TIME_RANGE'
+export const SET_TRENDING_CATEGORY = 'TRENDING/SET_TRENDING_CATEGORY'
 export const SET_LAST_FETCHED_TRENDING_GENRE =
   'TRENDING/SET_LAST_FETCHED_TRENDING_GENRE'
 
@@ -17,6 +20,11 @@ export type SetTrendingTimeRangeAction = {
   timeRange: TimeRange
 }
 
+export type SetTrendingCategoryAction = {
+  type: typeof SET_TRENDING_CATEGORY
+  category: TrendingCategory
+}
+
 export type SetLastFetchedTrendingGenreAction = {
   type: typeof SET_LAST_FETCHED_TRENDING_GENRE
   genre: Genre | null
@@ -25,11 +33,17 @@ export type SetLastFetchedTrendingGenreAction = {
 export type TrendingPageAction =
   | SetTrendingGenreAction
   | SetTrendingTimeRangeAction
+  | SetTrendingCategoryAction
   | SetLastFetchedTrendingGenreAction
 
 export const setTrendingGenre = (genre: Genre | null) => ({
   type: SET_TRENDING_GENRE,
   genre
+})
+
+export const setTrendingCategory = (category: TrendingCategory) => ({
+  type: SET_TRENDING_CATEGORY,
+  category
 })
 
 export const setTrendingTimeRange = (timeRange: TimeRange) => ({
