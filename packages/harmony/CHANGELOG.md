@@ -1,5 +1,11 @@
 # @audius/harmony
 
+## 0.5.2
+
+### Patch Changes
+
+- 2c0ed54: Harmony 0.5.1 build fix
+
 ## 0.5.0
 
 ### Minor Changes
