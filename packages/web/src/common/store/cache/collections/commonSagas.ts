@@ -56,7 +56,8 @@ const { manualClearToast, toast } = toastActions
 const messages = {
   editToast: 'Changes saved!',
   removingTrack: 'Removing track...',
-  removedTrack: 'Removed track'
+  removedTrack: 'Removed track',
+  reorderStale: 'This collection was updated elsewhere. Try again.'
 }
 
 /** Counts instances of trackId in a playlist. */
@@ -101,7 +102,9 @@ function* editPlaylistAsync(
   )
 
   let playlist: Collection = { ...formFields }
-  const playlistTracks = yield* call(queryCollectionTracks, playlistId)
+  const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
+    staleTime: 0
+  })
   const updatedTracks = (yield* all(
     formFields.playlist_contents.track_ids.map(({ track }) =>
       call(queryTrack, track)
@@ -240,8 +243,10 @@ function* removeTrackFromPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId)
-  const playlistTracks = yield* call(queryCollectionTracks, playlistId)
+  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
+  const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
+    staleTime: 0
+  })
   const removedTrack = yield* queryTrack(trackId)
 
   const updatedPlaylist = yield* call(
@@ -367,8 +372,42 @@ function* orderPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId)
-  const tracks = yield* call(queryCollectionTracks, playlistId)
+  const oldPlaylist = yield* queryCollection(playlistId)
+  const freshPlaylist = yield* queryCollection(playlistId, { staleTime: 0 })
+  const tracks = yield* call(queryCollectionTracks, playlistId, {
+    staleTime: 0
+  })
+
+  const oldTracks =
+    oldPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
+  const freshTracks =
+    freshPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
+
+  // If the lengths don't match or tracks are in a different order, the collection is stale
+  const isStale =
+    freshTracks.length !== oldTracks.length ||
+    !freshTracks.every((t, i) => t === oldTracks[i])
+
+  if (isStale) {
+    // Collection has been modified elsewhere - fail the operation
+    yield* put(
+      toast({
+        content: messages.reorderStale
+      })
+    )
+    return
+  }
+
+  if (!freshPlaylist || !tracks) {
+    yield* put(
+      collectionActions.orderPlaylistFailed(
+        new Error('Playlist or tracks not found'),
+        { userId, playlistId },
+        {}
+      )
+    )
+    return
+  }
 
   const trackIds = trackIdsAndTimes.map(({ id }) => id)
 
@@ -378,8 +417,8 @@ function* orderPlaylistAsync(
 
   const updatedPlaylist = yield* call(
     updatePlaylistArtwork,
-    playlist!,
-    tracks!,
+    freshPlaylist,
+    tracks,
     { reordered: orderedTracks },
     { generateImage: generatePlaylistArtwork }
   )
