@@ -1,5 +1,11 @@
 # @audius/harmony
 
+## 0.5.0
+
+### Minor Changes
+
+- 45637ea: React 19.0.0
+
 ## 0.4.3
 
 ### Patch Changes
