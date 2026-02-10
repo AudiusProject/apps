@@ -14,4 +14,6 @@ npx turbo run build lint typecheck test \
     --filter=@audius/spl \
 
 echo "Publishing packages..."
+
+export NPM_CONFIG_PROVENANCE=true
 npx changeset publish
