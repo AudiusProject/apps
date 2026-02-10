@@ -64,6 +64,41 @@ jobs:
       - name: Install Dependencies
         run: npm i
 
+      - name: Verify OIDC Authentication
+        run: |
+          echo "Checking npm authentication..."
+          # Ensure NPM_TOKEN doesn't interfere with OIDC
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "WARNING: NPM_TOKEN is set - this may interfere with OIDC"
+            echo "Unsetting NPM_TOKEN to ensure OIDC is used"
+            unset NPM_TOKEN
+          fi
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "✓ NODE_AUTH_TOKEN is set (OIDC token)"
+            echo "Token length: ${#NODE_AUTH_TOKEN}"
+          else
+            echo "✗ WARNING: NODE_AUTH_TOKEN is not set - OIDC authentication failed"
+          fi
+          echo "Checking .npmrc..."
+          if [ -f "$HOME/.npmrc" ]; then
+            echo ".npmrc exists at $HOME/.npmrc"
+            # Don't print the full token, just confirm it exists
+            if grep -q "registry.npmjs.org" "$HOME/.npmrc"; then
+              echo "✓ .npmrc contains registry.npmjs.org configuration"
+              # Check if it's using OIDC (should have //registry.npmjs.org/:_authToken)
+              if grep -q "//registry.npmjs.org/:_authToken" "$HOME/.npmrc"; then
+                echo "✓ .npmrc appears to be configured for OIDC"
+              fi
+            fi
+          else
+            echo "✗ WARNING: .npmrc not found at $HOME/.npmrc"
+          fi
+          echo "npm version: $(npm --version)"
+          echo "node version: $(node --version)"
+        env:
+          # Explicitly unset NPM_TOKEN if it exists
+          NPM_TOKEN: ""
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
@@ -72,6 +107,8 @@ jobs:
           version: bash ./scripts/version-packages.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Explicitly unset NPM_TOKEN to ensure OIDC is used
+          NPM_TOKEN: ""
           CI: true
 
       - name: Generate Slack Payload
