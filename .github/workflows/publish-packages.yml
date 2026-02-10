@@ -50,11 +50,13 @@ jobs:
       - name: Check wildcard dependencies
         run: bash ./scripts/check-wildcard-deps.sh
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22.21.1
+          # registry-url for correct registry targeting, but do NOT use always-auth
+          # (that's for token auth, not OIDC)
           registry-url: "https://registry.npmjs.org"
-          always-auth: true
 
       - name: Upgrade npm for OIDC support
         run: |
@@ -99,49 +101,24 @@ jobs:
           # Try npm ci first, fallback to npm install if lock file is out of sync
           npm ci --prefer-offline || npm install --prefer-offline
 
-      - name: Verify OIDC Authentication
+      - name: Ensure OIDC trusted publishing (no token auth)
         run: |
-          echo "Checking npm authentication..."
-          # Ensure NPM_TOKEN doesn't interfere with OIDC
-          if [ -n "$NPM_TOKEN" ]; then
-            echo "WARNING: NPM_TOKEN is set - this may interfere with OIDC"
-            echo "Unsetting NPM_TOKEN to ensure OIDC is used"
-            unset NPM_TOKEN
-          fi
-          if [ -n "$NODE_AUTH_TOKEN" ]; then
-            echo "✓ NODE_AUTH_TOKEN is set (OIDC token)"
-            echo "Token length: ${#NODE_AUTH_TOKEN}"
-          else
-            echo "✗ WARNING: NODE_AUTH_TOKEN is not set - OIDC authentication failed"
-          fi
-          echo "Checking .npmrc..."
-          if [ -f "$HOME/.npmrc" ]; then
-            echo "✓ .npmrc exists at $HOME/.npmrc"
-            # Don't print the full token, just confirm it exists
-            if grep -q "registry.npmjs.org" "$HOME/.npmrc"; then
-              echo "✓ .npmrc contains registry.npmjs.org configuration"
-              # Check if it's using OIDC (should have //registry.npmjs.org/:_authToken)
-              if grep -q "//registry.npmjs.org/:_authToken" "$HOME/.npmrc"; then
-                echo "✓ .npmrc appears to be configured for OIDC"
-              fi
-            fi
-          else
-            echo "✗ WARNING: .npmrc not found at $HOME/.npmrc"
-            echo "Creating .npmrc with OIDC token..."
-            if [ -n "$NODE_AUTH_TOKEN" ]; then
-              echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "$HOME/.npmrc"
-              echo "registry=https://registry.npmjs.org/" >> "$HOME/.npmrc"
-              echo "always-auth=true" >> "$HOME/.npmrc"
-              echo "✓ Created .npmrc with OIDC token"
-            else
-              echo "✗ Cannot create .npmrc - NODE_AUTH_TOKEN is not set"
-            fi
-          fi
+          echo "Checking GitHub OIDC environment variables..."
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_URL" && echo "✓ ACTIONS_ID_TOKEN_REQUEST_URL present" || echo "✗ ACTIONS_ID_TOKEN_REQUEST_URL missing"
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" && echo "✓ ACTIONS_ID_TOKEN_REQUEST_TOKEN present" || echo "✗ ACTIONS_ID_TOKEN_REQUEST_TOKEN missing"
+
+          echo "Removing any .npmrc files that could force token auth..."
+          rm -f ~/.npmrc .npmrc "$HOME/.npmrc" || true
+
+          echo "Unsetting token environment variables..."
+          unset NPM_TOKEN || true
+          unset NODE_AUTH_TOKEN || true
+
           echo "npm version: $(npm --version)"
           echo "node version: $(node --version)"
         env:
-          # Explicitly unset NPM_TOKEN if it exists
           NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -151,8 +128,9 @@ jobs:
           version: bash ./scripts/version-packages.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Explicitly unset NPM_TOKEN to ensure OIDC is used
+          # Explicitly unset token env vars to ensure OIDC is used
           NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
           CI: true
 
       - name: Generate Slack Payload

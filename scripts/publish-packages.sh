@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 echo "Running build, lint, typecheck, and test..."
 # Ensure that all public packages are in this list,
@@ -11,9 +11,18 @@ npx turbo run build lint typecheck test \
     --filter=@audius/sp-actions \
     --filter=@audius/fixed-decimal \
     --filter=@audius/sdk \
-    --filter=@audius/spl \
+    --filter=@audius/spl
+
+echo "Preparing for OIDC trusted publishing..."
+# Remove any leftover token-based auth config
+rm -f "$HOME/.npmrc" .npmrc || true
+
+# Ensure we don't accidentally use classic tokens
+unset NPM_TOKEN || true
+unset NODE_AUTH_TOKEN || true
+
+# Enable provenance (required/expected for OIDC trusted publishing)
+export NPM_CONFIG_PROVENANCE=true
 
 echo "Publishing packages..."
-
-export NPM_CONFIG_PROVENANCE=true
 npx changeset publish
