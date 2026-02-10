@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
@@ -47,22 +51,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.21.1
+          registry-url: "https://registry.npmjs.org"
 
       - uses: actions/cache@v3
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('packages/*/patches/*.patch') }}
 
       - name: Install Dependencies
         run: npm i
-
-      - name: Update .npmrc
-        run: |
-          cat << EOF > "$HOME/.npmrc"
-            //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -87,7 +84,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         if: steps.changesets.outputs.published == 'true'
         with:
-          channel-id: 'C03EK0C69QD'
+          channel-id: "C03EK0C69QD"
           payload: ${{ steps.generate-slack-payload.outputs.payload }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_TOKEN }}
