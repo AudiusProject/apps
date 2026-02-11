@@ -162,7 +162,7 @@ export const mockUserCreatedCoin = (
  * Collections
  */
 export const mockCollectionById = (collection: typeof testCollection & any) =>
-  http.get(`${apiEndpoint}/v1/full/playlists`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/playlists`, ({ request }) => {
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
 

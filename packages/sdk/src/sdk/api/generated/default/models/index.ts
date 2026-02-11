@@ -102,6 +102,7 @@ export * from './RemixersResponse';
 export * from './RemixesResponse';
 export * from './RemixingResponse';
 export * from './ReplyComment';
+export * from './Repost';
 export * from './Reposts';
 export * from './RewardCodeErrorResponse';
 export * from './RewardCodeResponse';
