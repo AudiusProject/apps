@@ -1,4 +1,4 @@
-import { full, GetBulkUsersRequest, HashId, Id, OptionalId, User } from '@audius/sdk'
+import { GetBulkUsersRequest, HashId, Id, OptionalId, User } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest'
 
@@ -169,8 +169,7 @@ describe('getUsersBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkUsers = mockSdk.users
-      .getBulkUsers as unknown as MockInstance<
+    const mockBulkUsers = mockSdk.users.getBulkUsers as unknown as MockInstance<
       [GetBulkUsersRequest],
       Promise<{ data: User[] }>
     >

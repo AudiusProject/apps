@@ -38,6 +38,34 @@ export const userMetadataFromSDK = (
     return undefined
   }
 
+  // Type guard to check if coverPhoto has mirrors (full SDK type)
+  const hasMirrors = (
+    photo: User['coverPhoto'] | full.UserFull['coverPhoto']
+  ): photo is full.CoverPhotoFull => {
+    return photo !== null && photo !== undefined && 'mirrors' in photo
+  }
+
+  // Type guard to check if profilePicture has mirrors (full SDK type)
+  const hasProfileMirrors = (
+    picture: User['profilePicture'] | full.UserFull['profilePicture']
+  ): picture is full.ProfilePictureFull => {
+    return picture !== null && picture !== undefined && 'mirrors' in picture
+  }
+
+  // Type guard for artistCoinBadge
+  const isFullArtistCoinBadge = (
+    badge: User['artistCoinBadge'] | full.UserFull['artistCoinBadge']
+  ): badge is full.UserFullArtistCoinBadge => {
+    return (
+      badge !== null &&
+      badge !== undefined &&
+      typeof badge === 'object' &&
+      'mint' in badge &&
+      'logoUri' in badge &&
+      'ticker' in badge
+    )
+  }
+
   const newUser: UserMetadata = {
     // Fields from API that are omitted in this model
     ...omit(snakecaseKeys(input), [
@@ -67,11 +95,14 @@ export const userMetadataFromSDK = (
     user_id: decodedUserId,
     spl_wallet: input.splWallet as SolanaWalletAddress,
     spl_usdc_payout_wallet: input.splUsdcPayoutWallet as SolanaWalletAddress,
+    blocknumber: input.blocknumber ?? 0,
     cover_photo: input.coverPhoto
       ? {
           '640x': input.coverPhoto._640x,
           '2000x': input.coverPhoto._2000x,
-          mirrors: input.coverPhoto.mirrors
+          ...(hasMirrors(input.coverPhoto)
+            ? { mirrors: input.coverPhoto.mirrors }
+            : {})
         }
       : {},
     profile_picture: input.profilePicture
@@ -79,7 +110,9 @@ export const userMetadataFromSDK = (
           '150x150': input.profilePicture._150x150,
           '480x480': input.profilePicture._480x480,
           '1000x1000': input.profilePicture._1000x1000,
-          mirrors: input.profilePicture.mirrors
+          ...(hasProfileMirrors(input.profilePicture)
+            ? { mirrors: input.profilePicture.mirrors }
+            : {})
         }
       : {},
     // Required Nullable fields
@@ -95,7 +128,7 @@ export const userMetadataFromSDK = (
     profile_picture_sizes: input.profilePictureSizes ?? null,
 
     // Explicit handling for artist_coin_badge to convert nested logoUri to logo_uri
-    artist_coin_badge: input.artistCoinBadge
+    artist_coin_badge: isFullArtistCoinBadge(input.artistCoinBadge)
       ? {
           mint: input.artistCoinBadge.mint ?? '',
           logo_uri: input.artistCoinBadge.logoUri ?? '',

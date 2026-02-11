@@ -33,6 +33,7 @@ export const getUserByHandleQueryFn = async (
     handle: handle.toLowerCase(),
     userId: OptionalId.parse(currentUserId)
   })
+  if (!data) return undefined
   const user = userMetadataFromSDK(data)
   if (!user) return undefined
 
