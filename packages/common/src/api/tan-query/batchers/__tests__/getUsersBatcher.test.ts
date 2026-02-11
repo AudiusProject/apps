@@ -1,4 +1,4 @@
-import { full, GetBulkUsersRequest, HashId, Id, OptionalId } from '@audius/sdk'
+import { GetBulkUsersRequest, HashId, Id, OptionalId, User } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest'
 
@@ -8,7 +8,7 @@ import { getUsersBatcher } from '../getUsersBatcher'
 import type { BatchContext } from '../types'
 
 describe('getUsersBatcher', () => {
-  const createMockSdkUser = (id: number): full.UserFull => ({
+  const createMockSdkUser = (id: number): User => ({
     id: Id.parse(id),
     handle: `test-user-${id}`,
     name: `Test User ${id}`,
@@ -61,17 +61,15 @@ describe('getUsersBatcher', () => {
   })
 
   const mockSdk = {
-    full: {
-      users: {
-        getBulkUsers: vi
-          .fn()
-          .mockImplementation((params: GetBulkUsersRequest) => {
-            const users = params.id?.map((userId) =>
-              createMockSdkUser(HashId.parse(userId))
-            )
-            return Promise.resolve({ data: users })
-          })
-      }
+    users: {
+      getBulkUsers: vi
+        .fn()
+        .mockImplementation((params: GetBulkUsersRequest) => {
+          const users = params.id?.map((userId) =>
+            createMockSdkUser(HashId.parse(userId))
+          )
+          return Promise.resolve({ data: users })
+        })
     }
   } as unknown as BatchContext['sdk']
 
@@ -91,7 +89,7 @@ describe('getUsersBatcher', () => {
     const id = 1
     const result = await batcher.fetch(id)
 
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: [Id.parse(id)],
       userId: OptionalId.parse(null)
     })
@@ -109,7 +107,7 @@ describe('getUsersBatcher', () => {
 
     // Verify single bulk request was made
     expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -171,10 +169,9 @@ describe('getUsersBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkUsers = mockSdk.full.users
-      .getBulkUsers as unknown as MockInstance<
+    const mockBulkUsers = mockSdk.users.getBulkUsers as unknown as MockInstance<
       [GetBulkUsersRequest],
-      Promise<{ data: full.UserFull[] }>
+      Promise<{ data: User[] }>
     >
     mockBulkUsers.mockImplementationOnce((params: GetBulkUsersRequest) => {
       const users =
@@ -200,7 +197,7 @@ describe('getUsersBatcher', () => {
 
     // Verify single batch request was made with both IDs
     expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })

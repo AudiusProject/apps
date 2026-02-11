@@ -3,6 +3,7 @@ import {
   OptionalHashId,
   OptionalId,
   type full,
+  type User,
   type UpdateProfileRequest
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
@@ -28,13 +29,41 @@ import {
 import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
-/** Converts a SDK `full.UserFull` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
+/** Converts a SDK `User` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
 export const userMetadataFromSDK = (
-  input: full.UserFull
+  input: User | full.UserFull
 ): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
     return undefined
+  }
+
+  // Type guard to check if coverPhoto has mirrors (full SDK type)
+  const hasMirrors = (
+    photo: User['coverPhoto'] | full.UserFull['coverPhoto']
+  ): photo is full.CoverPhotoFull => {
+    return photo !== null && photo !== undefined && 'mirrors' in photo
+  }
+
+  // Type guard to check if profilePicture has mirrors (full SDK type)
+  const hasProfileMirrors = (
+    picture: User['profilePicture'] | full.UserFull['profilePicture']
+  ): picture is full.ProfilePictureFull => {
+    return picture !== null && picture !== undefined && 'mirrors' in picture
+  }
+
+  // Type guard for artistCoinBadge
+  const isFullArtistCoinBadge = (
+    badge: User['artistCoinBadge'] | full.UserFull['artistCoinBadge']
+  ): badge is full.UserFullArtistCoinBadge => {
+    return (
+      badge !== null &&
+      badge !== undefined &&
+      typeof badge === 'object' &&
+      'mint' in badge &&
+      'logoUri' in badge &&
+      'ticker' in badge
+    )
   }
 
   const newUser: UserMetadata = {
@@ -64,13 +93,36 @@ export const userMetadataFromSDK = (
     associated_wallets_balance: input.associatedWalletsBalance as StringWei,
     total_balance: input.totalBalance as StringWei,
     user_id: decodedUserId,
+    album_count: input.albumCount ?? 0,
+    follower_count: input.followerCount ?? 0,
+    followee_count: input.followeeCount ?? 0,
+    handle: input.handle ?? '',
+    handle_lc: input.handleLc ?? input.handle?.toLowerCase() ?? '',
+    is_deactivated: input.isDeactivated ?? false,
+    is_verified: input.isVerified ?? false,
+    verified_with_twitter: input.verifiedWithTwitter ?? false,
+    verified_with_instagram: input.verifiedWithInstagram ?? false,
+    verified_with_tiktok: input.verifiedWithTiktok ?? false,
+    name: input.name ?? '',
+    playlist_count: input.playlistCount ?? 0,
+    repost_count: input.repostCount ?? 0,
+    track_count: input.trackCount ?? 0,
+    created_at: input.createdAt ? new Date(input.createdAt).toISOString() : '',
+    updated_at: input.updatedAt ? new Date(input.updatedAt).toISOString() : '',
     spl_wallet: input.splWallet as SolanaWalletAddress,
     spl_usdc_payout_wallet: input.splUsdcPayoutWallet as SolanaWalletAddress,
+    blocknumber: input.blocknumber ?? 0,
+    current_user_followee_follow_count:
+      input.currentUserFolloweeFollowCount ?? 0,
+    does_current_user_follow: input.doesCurrentUserFollow ?? false,
+    does_follow_current_user: input.doesFollowCurrentUser ?? false,
     cover_photo: input.coverPhoto
       ? {
           '640x': input.coverPhoto._640x,
           '2000x': input.coverPhoto._2000x,
-          mirrors: input.coverPhoto.mirrors
+          ...(hasMirrors(input.coverPhoto)
+            ? { mirrors: input.coverPhoto.mirrors }
+            : {})
         }
       : {},
     profile_picture: input.profilePicture
@@ -78,7 +130,9 @@ export const userMetadataFromSDK = (
           '150x150': input.profilePicture._150x150,
           '480x480': input.profilePicture._480x480,
           '1000x1000': input.profilePicture._1000x1000,
-          mirrors: input.profilePicture.mirrors
+          ...(hasProfileMirrors(input.profilePicture)
+            ? { mirrors: input.profilePicture.mirrors }
+            : {})
         }
       : {},
     // Required Nullable fields
@@ -94,7 +148,7 @@ export const userMetadataFromSDK = (
     profile_picture_sizes: input.profilePictureSizes ?? null,
 
     // Explicit handling for artist_coin_badge to convert nested logoUri to logo_uri
-    artist_coin_badge: input.artistCoinBadge
+    artist_coin_badge: isFullArtistCoinBadge(input.artistCoinBadge)
       ? {
           mint: input.artistCoinBadge.mint ?? '',
           logo_uri: input.artistCoinBadge.logoUri ?? '',
@@ -106,7 +160,7 @@ export const userMetadataFromSDK = (
   return newUser
 }
 
-export const userMetadataListFromSDK = (input?: full.UserFull[]) =>
+export const userMetadataListFromSDK = (input?: (User | full.UserFull)[]) =>
   input ? input.map((d) => userMetadataFromSDK(d)).filter(removeNullable) : []
 
 export const managedUserFromSDK = (

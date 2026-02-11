@@ -290,12 +290,14 @@ export interface GetSupportedUsersRequest {
     id: string;
     offset?: number;
     limit?: number;
+    userId?: string;
 }
 
 export interface GetSupportersRequest {
     id: string;
     offset?: number;
     limit?: number;
+    userId?: string;
 }
 
 export interface GetTopTrackTagsRequest {
@@ -321,6 +323,7 @@ export interface GetTracksByUserRequest {
 
 export interface GetUserRequest {
     id: string;
+    userId?: string;
 }
 
 export interface GetUserBalanceHistoryRequest {
@@ -1415,6 +1418,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['limit'] = params.limit;
         }
 
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -1452,6 +1459,10 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -1600,6 +1611,10 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
