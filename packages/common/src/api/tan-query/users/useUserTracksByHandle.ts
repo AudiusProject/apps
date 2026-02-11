@@ -1,5 +1,4 @@
 import { OptionalId } from '@audius/sdk'
-import type { full } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
@@ -15,7 +14,7 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 type GetTracksByUserHandleArgs = {
   handle: string | null | undefined
-  filterTracks?: full.GetTracksByUserHandleFilterTracksEnum
+  filterTracks?: 'all' | 'public'
   sort?: 'date' | 'plays'
   limit?: number
   offset?: number
@@ -51,7 +50,7 @@ export const useUserTracksByHandle = (
     queryKey: getUserTracksByHandleQueryKey(args),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getTracksByUserHandle({
+      const { data = [] } = await sdk.users.getTracksByUserHandle({
         handle: handle!,
         userId: OptionalId.parse(currentUserId),
         filterTracks,

@@ -36,24 +36,12 @@ function* getTrendingUnderground({
   const TF = new Set(
     remoteConfigInstance.getRemoteVar(StringKeys.UTF)?.split(',') ?? []
   )
-  const version = remoteConfigInstance.getRemoteVar(
-    StringKeys.UNDERGROUND_TRENDING_EXPERIMENT
-  )
-
   const currentUserId = yield* call(queryCurrentUserId)
 
-  const { data = [] } = version
-    ? yield* call(
-        [
-          sdk.full.tracks,
-          sdk.full.tracks.getUndergroundTrendingTracksWithVersion
-        ],
-        { version, offset, limit, userId: OptionalId.parse(currentUserId) }
-      )
-    : yield* call(
-        [sdk.full.tracks, sdk.full.tracks.getUndergroundTrendingTracks],
-        { offset, limit, userId: OptionalId.parse(currentUserId) }
-      )
+  const { data = [] } = yield* call(
+    [sdk.tracks, sdk.tracks.getUndergroundTrendingTracks],
+    { offset, limit, userId: OptionalId.parse(currentUserId) }
+  )
 
   let tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
 

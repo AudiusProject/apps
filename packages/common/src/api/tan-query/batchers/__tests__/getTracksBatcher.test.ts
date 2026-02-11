@@ -1,4 +1,4 @@
-import { full, GetBulkTracksRequest, HashId, Id, OptionalId } from '@audius/sdk'
+import { GetBulkTracksRequest, HashId, Id, OptionalId } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { omit } from 'lodash'
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest'
@@ -9,165 +9,164 @@ import { getTracksBatcher } from '../getTracksBatcher'
 import type { BatchContext } from '../types'
 
 describe('getTracksBatcher', () => {
-  const createMockSdkTrack = (id: number): full.TrackFull => ({
-    id: Id.parse(id),
-    title: `Test Track ${id}`,
-    userId: Id.parse(1),
-    duration: 180,
-    genre: 'Electronic',
-    mood: 'Excited',
-    tags: '',
-    description: '',
-    artwork: {
-      _150x150: '',
-      _480x480: '',
-      _1000x1000: '',
-      mirrors: []
-    },
-    releaseDate: '',
-    isrc: undefined,
-    iswc: undefined,
-    license: '',
-    fieldVisibility: {
-      mood: true,
-      tags: true,
-      genre: true,
-      share: true,
-      playCount: true,
-      remixes: true
-    },
-    stemOf: {
-      category: '',
-      parentTrackId: 0
-    },
-    download: {
-      url: '',
-      mirrors: []
-    },
-    stream: {
-      url: '',
-      mirrors: []
-    },
-    preview: {
-      url: '',
-      mirrors: []
-    },
-    isUnlisted: false,
-    isDelete: false,
-    isAvailable: true,
-    isStreamable: true,
-    isDownloadable: false,
-    isOriginalAvailable: true,
-    isScheduledRelease: false,
-    isDownloadGated: false,
-    isOwnedByUser: false,
-    followeeReposts: [],
-    followeeFavorites: [],
-    repostCount: 0,
-    favoriteCount: 0,
-    playCount: 0,
-    permalink: '',
-    routeId: '',
-    blocknumber: 0,
-    createdAt: '',
-    updatedAt: '',
-    coverArtSizes: '',
-    remixOf: {
-      tracks: []
-    },
-    hasCurrentUserReposted: false,
-    hasCurrentUserSaved: false,
-    trackSegments: [],
-    access: {
-      stream: true,
-      download: true
-    },
-    user: {
-      albumCount: 0,
-      artistPickTrackId: undefined,
-      bio: '',
-      coverPhoto: {
-        _640x: '',
-        _2000x: '',
-        mirrors: []
-      },
-      followeeCount: 0,
-      followerCount: 0,
-      handle: 'test',
-      id: Id.parse(1),
-      isVerified: false,
-      twitterHandle: '',
-      instagramHandle: '',
-      tiktokHandle: '',
-      verifiedWithTwitter: false,
-      verifiedWithInstagram: false,
-      verifiedWithTiktok: false,
-      website: '',
-      location: '',
-      name: 'Test User',
-      playlistCount: 0,
-      profilePicture: {
+  const createMockSdkTrack = (id: number) =>
+    ({
+      id: Id.parse(id),
+      title: `Test Track ${id}`,
+      userId: Id.parse(1),
+      duration: 180,
+      genre: 'Electronic',
+      mood: 'Excited',
+      tags: '',
+      description: '',
+      artwork: {
         _150x150: '',
         _480x480: '',
         _1000x1000: '',
         mirrors: []
       },
-      repostCount: 0,
-      trackCount: 0,
-      isDeactivated: false,
+      releaseDate: '',
+      isrc: undefined,
+      iswc: undefined,
+      license: '',
+      fieldVisibility: {
+        mood: true,
+        tags: true,
+        genre: true,
+        share: true,
+        playCount: true,
+        remixes: true
+      },
+      stemOf: {
+        category: '',
+        parentTrackId: 0
+      },
+      download: {
+        url: '',
+        mirrors: []
+      },
+      stream: {
+        url: '',
+        mirrors: []
+      },
+      preview: {
+        url: '',
+        mirrors: []
+      },
+      isUnlisted: false,
+      isDelete: false,
       isAvailable: true,
-      ercWallet: '',
-      splWallet: '',
-      totalAudioBalance: 0,
-      wallet: '',
-      balance: '0',
-      associatedWalletsBalance: '0',
-      totalBalance: '0',
-      waudioBalance: '0',
-      associatedSolWalletsBalance: '0',
+      isStreamable: true,
+      isDownloadable: false,
+      isOriginalAvailable: true,
+      isScheduledRelease: false,
+      isDownloadGated: false,
+      isOwnedByUser: false,
+      followeeReposts: [],
+      followeeFavorites: [],
+      repostCount: 0,
+      favoriteCount: 0,
+      playCount: 0,
+      permalink: '',
+      routeId: '',
       blocknumber: 0,
       createdAt: '',
-      isStorageV2: false,
-      currentUserFolloweeFollowCount: 0,
-      doesCurrentUserFollow: false,
-      doesCurrentUserSubscribe: false,
-      doesFollowCurrentUser: false,
-      handleLc: 'test',
       updatedAt: '',
-      coverPhotoSizes: '',
-      coverPhotoCids: undefined,
-      coverPhotoLegacy: undefined,
-      profilePictureSizes: '',
-      profilePictureCids: undefined,
-      profilePictureLegacy: undefined,
-      playlistLibrary: undefined,
-      allowAiAttribution: false
-    },
-    origFileCid: undefined,
-    origFilename: undefined,
-    commentCount: 0,
-    playlistsContainingTrack: [],
-    pinnedCommentId: undefined,
-    albumBacklink: undefined,
-    createDate: undefined,
-    coverArtCids: undefined,
-    isStreamGated: false,
-    streamConditions: undefined,
-    downloadConditions: undefined
-  })
+      coverArtSizes: '',
+      remixOf: {
+        tracks: []
+      },
+      hasCurrentUserReposted: false,
+      hasCurrentUserSaved: false,
+      trackSegments: [],
+      access: {
+        stream: true,
+        download: true
+      },
+      user: {
+        albumCount: 0,
+        artistPickTrackId: undefined,
+        bio: '',
+        coverPhoto: {
+          _640x: '',
+          _2000x: '',
+          mirrors: []
+        },
+        followeeCount: 0,
+        followerCount: 0,
+        handle: 'test',
+        id: Id.parse(1),
+        isVerified: false,
+        twitterHandle: '',
+        instagramHandle: '',
+        tiktokHandle: '',
+        verifiedWithTwitter: false,
+        verifiedWithInstagram: false,
+        verifiedWithTiktok: false,
+        website: '',
+        location: '',
+        name: 'Test User',
+        playlistCount: 0,
+        profilePicture: {
+          _150x150: '',
+          _480x480: '',
+          _1000x1000: '',
+          mirrors: []
+        },
+        repostCount: 0,
+        trackCount: 0,
+        isDeactivated: false,
+        isAvailable: true,
+        ercWallet: '',
+        splWallet: '',
+        totalAudioBalance: 0,
+        wallet: '',
+        balance: '0',
+        associatedWalletsBalance: '0',
+        totalBalance: '0',
+        waudioBalance: '0',
+        associatedSolWalletsBalance: '0',
+        blocknumber: 0,
+        createdAt: '',
+        isStorageV2: false,
+        currentUserFolloweeFollowCount: 0,
+        doesCurrentUserFollow: false,
+        doesCurrentUserSubscribe: false,
+        doesFollowCurrentUser: false,
+        handleLc: 'test',
+        updatedAt: '',
+        coverPhotoSizes: '',
+        coverPhotoCids: undefined,
+        coverPhotoLegacy: undefined,
+        profilePictureSizes: '',
+        profilePictureCids: undefined,
+        profilePictureLegacy: undefined,
+        playlistLibrary: undefined,
+        allowAiAttribution: false
+      },
+      origFileCid: undefined,
+      origFilename: undefined,
+      commentCount: 0,
+      playlistsContainingTrack: [],
+      pinnedCommentId: undefined,
+      albumBacklink: undefined,
+      createDate: undefined,
+      coverArtCids: undefined,
+      isStreamGated: false,
+      streamConditions: undefined,
+      downloadConditions: undefined
+    }) as any
 
   const mockSdk = {
-    full: {
-      tracks: {
-        getBulkTracks: vi
-          .fn()
-          .mockImplementation((params: GetBulkTracksRequest) => {
-            const tracks = params.id?.map((trackId) =>
-              createMockSdkTrack(HashId.parse(trackId))
-            )
-            return Promise.resolve({ data: tracks })
-          })
-      }
+    tracks: {
+      getBulkTracks: vi
+        .fn()
+        .mockImplementation((params: GetBulkTracksRequest) => {
+          const tracks = params.id?.map((trackId) =>
+            createMockSdkTrack(HashId.parse(trackId))
+          )
+          return Promise.resolve({ data: tracks })
+        })
     }
   } as unknown as BatchContext['sdk']
 
@@ -187,7 +186,7 @@ describe('getTracksBatcher', () => {
     const id = 1
     const result = await batcher.fetch(id)
 
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: [Id.parse(id)],
       userId: OptionalId.parse(null)
     })
@@ -204,8 +203,8 @@ describe('getTracksBatcher', () => {
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
     // Verify single bulk request was made
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -237,12 +236,12 @@ describe('getTracksBatcher', () => {
     )
 
     // Verify two separate bulk requests were made
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(2)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenNthCalledWith(1, {
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(2)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenNthCalledWith(2, {
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenNthCalledWith(2, {
       id: secondBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -273,10 +272,10 @@ describe('getTracksBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkTracks = mockSdk.full.tracks
+    const mockBulkTracks = mockSdk.tracks
       .getBulkTracks as unknown as MockInstance<
       [GetBulkTracksRequest],
-      Promise<{ data: full.TrackFull[] }>
+      Promise<{ data: any[] }>
     >
     mockBulkTracks.mockImplementationOnce((params: GetBulkTracksRequest) => {
       const tracks =
@@ -301,8 +300,8 @@ describe('getTracksBatcher', () => {
     expect(missingResult).toBeNull()
 
     // Verify single batch request was made with both IDs
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })

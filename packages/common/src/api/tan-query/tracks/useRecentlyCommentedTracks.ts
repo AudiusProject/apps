@@ -55,7 +55,7 @@ export const useRecentlyCommentedTracks = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.tracks.getTracksWithRecentComments({
+      const { data = [] } = await sdk.tracks.getTracksWithRecentComments({
         ...args,
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,

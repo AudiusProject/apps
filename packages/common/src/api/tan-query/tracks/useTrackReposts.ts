@@ -49,7 +49,7 @@ export const useTrackReposts = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.tracks.getUsersFromReposts({
+      const { data } = await sdk.tracks.getUsersFromReposts({
         trackId: Id.parse(trackId),
         limit: pageSize,
         offset: pageParam,

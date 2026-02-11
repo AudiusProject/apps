@@ -49,7 +49,7 @@ export const useTrackFavorites = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.tracks.getUsersFromFavorites({
+      const { data } = await sdk.tracks.getUsersFromFavorites({
         trackId: Id.parse(trackId),
         limit: pageSize,
         offset: pageParam,

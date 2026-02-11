@@ -44,8 +44,8 @@ describe('getUsersBatcher', () => {
     instagramHandle: undefined,
     tiktokHandle: undefined,
     website: undefined,
-    createdAt: '',
-    updatedAt: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
     splWallet: '',
     totalAudioBalance: 0,
     wallet: '',
@@ -57,7 +57,10 @@ describe('getUsersBatcher', () => {
     blocknumber: 0,
     isStorageV2: false,
     doesCurrentUserSubscribe: false,
-    allowAiAttribution: false
+    allowAiAttribution: false,
+    splUsdcWallet: '',
+    supporterCount: 0,
+    supportingCount: 0
   })
 
   const mockSdk = {

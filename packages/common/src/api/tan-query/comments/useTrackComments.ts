@@ -51,7 +51,7 @@ export const useTrackComments = (
     queryKey: getTrackCommentListQueryKey({ trackId, sortMethod, pageSize }),
     queryFn: async ({ pageParam }): Promise<ID[]> => {
       const sdk = await audiusSdk()
-      const commentsRes = await sdk.full.tracks.getTrackComments({
+      const commentsRes = await sdk.tracks.getTrackComments({
         trackId: Id.parse(trackId),
         offset: pageParam,
         limit: pageSize,
@@ -64,7 +64,10 @@ export const useTrackComments = (
         commentFromSDK
       )
 
-      primeRelatedData({ related: commentsRes.related, queryClient })
+      primeRelatedData({
+        related: (commentsRes as any).related,
+        queryClient
+      })
 
       // Prime comment data in the cache
       primeCommentData({ comments: commentList, queryClient })

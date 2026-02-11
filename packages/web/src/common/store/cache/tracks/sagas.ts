@@ -228,10 +228,10 @@ function* confirmEditTrack(
           generatePreview
         })
 
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          { trackId: Id.parse(trackId), userId: OptionalId.parse(userId) }
-        )
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId),
+          userId: OptionalId.parse(userId)
+        })
         return data ? userTrackMetadataFromSDK(data) : null
       },
       function* (confirmedTrack: TrackMetadataForUpload & Track) {
@@ -313,10 +313,10 @@ function* confirmDeleteTrack(track: Track) {
         const track = yield* queryTrack(trackId)
 
         if (!track) return
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          { trackId: Id.parse(trackId), userId: OptionalId.parse(userId) }
-        )
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId),
+          userId: OptionalId.parse(userId)
+        })
         return data ? userTrackMetadataFromSDK(data) : null
       },
       function* (deletedTrack: Track) {
