@@ -20,7 +20,10 @@ import {
   mockUserConnectedWallets,
   mockNfts,
   mockEvents,
-  mockUserCreatedCoin
+  mockUserCreatedCoin,
+  mockUsersById,
+  mockUserTracks,
+  mockUserTracksCount
 } from 'test/msw/mswMocks'
 import {
   RenderOptions,
@@ -64,9 +67,12 @@ const ProfilePageWithRef = () => {
 
 export function renderProfilePage(user: any, options?: RenderOptions) {
   mswServer.use(
-    mockUserByHandle(user),
+    ...mockUserByHandle(user),
     mockRelatedUsers(user),
     mockUserConnectedWallets(user),
+    mockUsersById([user]),
+    mockUserTracks(),
+    mockUserTracksCount(),
     mockNfts(),
     mockEvents()
   )

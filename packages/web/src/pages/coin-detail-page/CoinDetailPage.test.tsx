@@ -26,7 +26,10 @@ import {
   mockCoinMembersList,
   mockCurrentAccount,
   mockUserCoinsByMint,
-  mockUsers
+  mockUserTracks,
+  mockUserTracksCount,
+  mockUsers,
+  mockUsersById
 } from 'test/msw/mswMocks'
 import {
   RenderOptions,
@@ -54,6 +57,7 @@ export function renderCoinDetailPage(
   options?: RenderOptions
 ) {
   const randomUsers = generateRandomTestUsers(10)
+  const allUsers = [nonArtistUser, artistUser, ...randomUsers]
   mswServer.use(
     mockCoinMembersList(
       coin.mint,
@@ -64,7 +68,9 @@ export function renderCoinDetailPage(
     )
   )
   mswServer.use(mockCoinMembersCount(coin.mint, randomUsers.length))
-  mswServer.use(mockUsers([nonArtistUser, artistUser, ...randomUsers]))
+  mswServer.use(mockUsers(allUsers))
+  mswServer.use(mockUsersById(allUsers))
+  mswServer.use(mockUserTracks(), mockUserTracksCount())
   mswServer.use(mockCoinByTicker(coin))
 
   const initialPath = coinPage(coin.ticker)

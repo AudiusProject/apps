@@ -10,7 +10,12 @@ import { setNavigateRef } from 'store/navigationMiddleware'
 import { mockNotification } from 'test/mocks/fixtures/notifications'
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser } from 'test/mocks/fixtures/users'
-import { mockUsers, mockTracks } from 'test/msw/mswMocks'
+import {
+  mockUsers,
+  mockUsersById,
+  mockTracks,
+  mockTrackById
+} from 'test/msw/mswMocks'
 import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { Notification } from './Notification'
@@ -34,7 +39,12 @@ const MemoryRouterNavigationSetup = ({
 }
 
 const renderNotification = (notification: NotificationObjectType) => {
-  mswServer.use(mockUsers([artistUser]), mockTracks([testTrack]))
+  mswServer.use(
+    mockUsers([artistUser]),
+    mockUsersById([artistUser]),
+    mockTracks([testTrack]),
+    ...mockTrackById(testTrack)
+  )
 
   return render(
     <MemoryRouter initialEntries={['/']}>

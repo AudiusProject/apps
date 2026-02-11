@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { artistUser } from 'test/mocks/fixtures/users'
-import { mockUsers } from 'test/msw/mswMocks'
+import { mockUsers, mockUsersById } from 'test/msw/mswMocks'
 import { RenderOptions, mswServer, render, screen, it } from 'test/test-utils'
 
 import { UserCard } from './UserCard'
@@ -13,7 +13,7 @@ function renderUserCard(
   user: typeof artistUser & any,
   options?: RenderOptions
 ) {
-  mswServer.use(mockUsers([user]))
+  mswServer.use(mockUsers([user]), mockUsersById([user]))
 
   return render(
     <MemoryRouter initialEntries={['/']}>
