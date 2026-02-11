@@ -193,3 +193,18 @@
 .formArea {
   padding-bottom: var(--harmony-unit-8);
 }
+
+/* Add spacing between labels and input fields */
+.emailInput {
+  margin-top: var(--harmony-unit-2);
+}
+
+/* Add spacing for Harmony TextInput - add margin-top to create space above the input */
+.oauthInputLabel {
+  margin-top: var(--harmony-unit-3);
+}
+
+/* Add spacing for PasswordInput - add margin-top to create space above the input */
+.oauthPasswordInput {
+  margin-top: var(--harmony-unit-3);
+}
