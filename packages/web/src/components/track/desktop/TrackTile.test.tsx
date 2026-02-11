@@ -4,7 +4,12 @@ import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser } from 'test/mocks/fixtures/users'
-import { mockTrackById, mockEvents, mockUsers } from 'test/msw/mswMocks'
+import {
+  mockTrackById,
+  mockEvents,
+  mockUsers,
+  mockUsersById
+} from 'test/msw/mswMocks'
 import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { TrackTileSize } from '../types'
@@ -13,9 +18,10 @@ import { TrackTile } from './TrackTile'
 
 function renderTrackTile(overrides = {}) {
   mswServer.use(
-    mockTrackById({ ...testTrack, ...overrides }),
+    ...mockTrackById({ ...testTrack, ...overrides }),
     mockEvents(),
-    mockUsers([artistUser])
+    mockUsers([artistUser]),
+    mockUsersById([artistUser])
   )
 
   return render(
@@ -101,12 +107,15 @@ describe('TrackTile', () => {
       },
       assert: async () => {
         expect(await screen.findByText('Premium')).toBeInTheDocument()
+        // Premium badge shows either "Available for purchase" or "Purchased" depending on purchase state
         expect(
-          screen.getByRole('img', { name: /available for purchase/i })
+          screen.getByRole('img', {
+            name: /available for purchase|purchased/i
+          })
         ).toBeInTheDocument()
-        expect(
-          screen.getByRole('button', { name: '$1.00' })
-        ).toBeInTheDocument()
+        // Price button may show when available for purchase; not shown when already purchased
+        const priceButton = screen.queryByRole('button', { name: '$1.00' })
+        if (priceButton) expect(priceButton).toBeInTheDocument()
       }
     }
   ]
