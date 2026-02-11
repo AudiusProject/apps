@@ -98,7 +98,12 @@ export const OAuthPickDisplayNamePage = ({
             )}
             {error ? (
               <Flex direction='column' alignItems='center' mt='l'>
-                <Text variant='body' size='m' color='danger' css={{ fontWeight: 'bold' }}>
+                <Text
+                  variant='body'
+                  size='m'
+                  color='danger'
+                  css={{ fontWeight: 'bold' }}
+                >
                   {error}
                 </Text>
               </Flex>

@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 
 import { accountFromSDK } from '@audius/common/adapters'
 import { Name, ErrorLevel } from '@audius/common/models'
-import { getLocation } from '@audius/sdk/dist/sdk/utils/location'
 import { Flex, Text } from '@audius/harmony'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router'
 
@@ -121,24 +120,11 @@ export const OAuthSignUpPage = () => {
       const sdk = await audiusSdk()
       const [wallet] = await sdk.services.audiusWalletClient.getAddresses()
 
-      let locationString: string | undefined
-      try {
-        const locationData = await getLocation()
-        if (locationData?.city) {
-          locationString = locationData.region
-            ? `${locationData.city}, ${locationData.region}`
-            : locationData.city
-        }
-      } catch (e) {
-        console.debug('Failed to get location:', e)
-      }
-
-      const { metadata, blockHash, blockNumber } = await sdk.users.createUser({
+      const { blockHash, blockNumber } = await sdk.users.createUser({
         metadata: {
           handle: data.handle,
           name: data.displayName.trim(),
-          wallet,
-          location: locationString
+          wallet
         }
       })
 

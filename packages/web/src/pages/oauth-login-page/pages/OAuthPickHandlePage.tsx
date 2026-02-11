@@ -136,7 +136,9 @@ const HandleFieldContent = ({
             error={!!error}
             value={handle}
             endIcon={
-              !isWaitingForValidation && !error && handle ? IconCheck : undefined
+              !isWaitingForValidation && !error && handle
+                ? IconCheck
+                : undefined
             }
             IconProps={{ size: 'l', color: 'default' }}
             onChange={(e) => {
