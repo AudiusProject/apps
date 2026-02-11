@@ -3,6 +3,7 @@ import {
   OptionalHashId,
   OptionalId,
   type full,
+  type User,
   type UpdateProfileRequest
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
@@ -28,9 +29,9 @@ import {
 import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
-/** Converts a SDK `full.UserFull` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
+/** Converts a SDK `User` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
 export const userMetadataFromSDK = (
-  input: full.UserFull
+  input: User | full.UserFull
 ): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
@@ -106,7 +107,7 @@ export const userMetadataFromSDK = (
   return newUser
 }
 
-export const userMetadataListFromSDK = (input?: full.UserFull[]) =>
+export const userMetadataListFromSDK = (input?: (User | full.UserFull)[]) =>
   input ? input.map((d) => userMetadataFromSDK(d)).filter(removeNullable) : []
 
 export const managedUserFromSDK = (
