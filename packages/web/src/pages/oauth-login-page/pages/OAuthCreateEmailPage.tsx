@@ -4,6 +4,7 @@ import { useQueryContext } from '@audius/common/api'
 import { createEmailPageMessages } from '@audius/common/messages'
 import { emailSchema, emailSchemaMessages } from '@audius/common/schemas'
 import {
+  Divider,
   Flex,
   Hint,
   IconArrowRight,
@@ -112,6 +113,7 @@ export const OAuthCreateEmailPage = ({
         </Text>
       </Flex>
       <Flex direction='column' pb='4xl'>
+        <Divider color='default' />
         <Formik
           initialValues={initialValues}
           onSubmit={handleSubmit}
