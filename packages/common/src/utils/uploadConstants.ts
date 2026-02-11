@@ -1,4 +1,4 @@
-export const ALLOWED_MAX_AUDIO_SIZE_BYTES = 500 * 1000 * 1000
+export const ALLOWED_MAX_AUDIO_SIZE_BYTES = 2 * 1000 * 1000 * 1000
 
 export const ALLOWED_AUDIO_FILE_EXTENSIONS = [
   'mp2',
