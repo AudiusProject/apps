@@ -58,7 +58,7 @@ export const useUserPlaylists = (
 
       const sdk = await audiusSdk()
 
-      const { data } = await sdk.full.users.getPlaylistsByUser({
+      const response = await sdk.users.getPlaylistsByUser({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
@@ -66,6 +66,7 @@ export const useUserPlaylists = (
         sortMethod,
         query
       })
+      const data = response?.data ?? []
 
       const collections = transformAndCleanList(
         data,
