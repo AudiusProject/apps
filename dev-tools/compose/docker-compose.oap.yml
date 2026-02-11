@@ -1,7 +1,6 @@
 services:
   openaudio-1:
     image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
-    restart: unless-stopped
     env_file:
       - ../environment/openaudio-1.env
     extra_hosts:
@@ -15,18 +14,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    volumes:
-      - ./cmd:/app/cmd
-      - ./pkg:/app/pkg
-      - ./go.mod:/app/go.mod
-      - ./go.sum:/app/go.sum
     profiles:
       - discovery
       - storage
+    depends_on:
+      eth-ganache:
+        condition: service_healthy
 
   openaudio-2:
     image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
-    restart: unless-stopped
     env_file:
       - ../environment/openaudio-2.env
     extra_hosts:
@@ -40,18 +36,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    volumes:
-      - ./cmd:/app/cmd
-      - ./pkg:/app/pkg
-      - ./go.mod:/app/go.mod
-      - ./go.sum:/app/go.sum
     profiles:
       - discovery
       - storage
+    depends_on:
+      eth-ganache:
+        condition: service_healthy
 
   openaudio-3:
     image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
-    restart: unless-stopped
     env_file:
       - ../environment/openaudio-3.env
     extra_hosts:
@@ -65,18 +58,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    volumes:
-      - ./cmd:/app/cmd
-      - ./pkg:/app/pkg
-      - ./go.mod:/app/go.mod
-      - ./go.sum:/app/go.sum
     profiles:
       - discovery
       - storage
+    depends_on:
+      eth-ganache:
+        condition: service_healthy
 
   openaudio-4:
     image: ${OPENAUDIO_IMAGE:-openaudio/go-openaudio:dev}
-    restart: unless-stopped
     env_file:
       - ../environment/openaudio-4.env
     extra_hosts:
@@ -90,11 +80,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    volumes:
-      - ./cmd:/app/cmd
-      - ./pkg:/app/pkg
-      - ./go.mod:/app/go.mod
-      - ./go.sum:/app/go.sum
     profiles:
       - discovery
       - storage
+    depends_on:
+      eth-ganache:
+        condition: service_healthy
