@@ -53,5 +53,15 @@ export const messages = {
   invalidApiKeyError: 'Whoops, this is an invalid link (app API Key invalid)',
   approveTxToConnectProfile:
     'Approve the pending transaction in your wallet to finish connecting your Audius profile.',
-  back: 'Back'
+  back: 'Back',
+  signUpEmailTitle: 'Create Your Account',
+  signUpEmailDescription: 'Enter your email to get started',
+  signUpPasswordTitle: 'Create Your Password',
+  signUpPasswordDescription: 'Choose a secure password for your account',
+  signUpHandleTitle: 'Choose Your Handle',
+  signUpHandleDescription: 'Your handle is your unique identifier on Audius',
+  signUpDisplayNameTitle: 'What should we call you?',
+  signUpDisplayNameDescription: 'This is how other users will see you',
+  creatingAccount: 'Creating your account...',
+  accountCreated: 'Account created successfully!'
 }

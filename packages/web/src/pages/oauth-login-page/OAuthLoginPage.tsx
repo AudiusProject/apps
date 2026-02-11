@@ -11,7 +11,6 @@ import { useAccountSwitcher } from '@audius/common/hooks'
 import { Name, ErrorLevel, UserMetadata } from '@audius/common/models'
 import { SignInResponse } from '@audius/common/services'
 import { signOutActions } from '@audius/common/store'
-import { route } from '@audius/common/utils'
 import {
   Flex,
   IconCaretLeft,
@@ -25,6 +24,7 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
+import { Link, useLocation } from 'react-router'
 
 import AppIcon from 'assets/img/appIcon.png'
 import { make, useRecord } from 'common/store/analytics/actions'
@@ -45,13 +45,13 @@ import { useOAuthSetup } from './hooks'
 import { messages } from './messages'
 import { WriteOnceTx } from './utils'
 
-const { SIGN_UP_PAGE } = route
 const { signOut } = signOutActions
 
 export const OAuthLoginPage = () => {
   const record = useRecord()
   const { data: account } = useCurrentAccountUser()
   const isLoggedIn = Boolean(account?.user_id)
+  const location = useLocation()
 
   const dispatch = useDispatch()
 
@@ -489,14 +489,12 @@ export const OAuthLoginPage = () => {
                   </CTAButton>
                 </form>
                 <div className={styles.signUpButtonContainer}>
-                  <a
+                  <Link
                     className={styles.linkButton}
-                    href={SIGN_UP_PAGE}
-                    target='_blank'
-                    rel='noopener noreferrer'
+                    to={`/oauth/auth/signup${location.search}`}
                   >
                     {messages.signUp}
-                  </a>
+                  </Link>
                 </div>
               </div>
             )}

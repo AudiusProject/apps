@@ -33,6 +33,11 @@ const {
 // Lazy load pages for code splitting
 const SignOnPage = lazy(() => import('pages/sign-on-page'))
 const OAuthLoginPage = lazy(() => import('pages/oauth-login-page'))
+const OAuthSignUpPage = lazy(() =>
+  import('pages/oauth-login-page/OAuthSignUpPage').then((m) => ({
+    default: m.OAuthSignUpPage
+  }))
+)
 const OAuthPayPage = lazy(() => import('pages/oauth-pay-page'))
 const PrivateKeyExporterPage = lazy(
   () => import('pages/private-key-exporter-page/PrivateKeyExporterPage')
@@ -148,6 +153,10 @@ export const createRoutes = (): RouteObject[] => {
         {
           path: '/oauth/auth',
           element: <OAuthLoginPage />
+        },
+        {
+          path: '/oauth/auth/signup/*',
+          element: <OAuthSignUpPage />
         },
         // Private key exporter routes
         {

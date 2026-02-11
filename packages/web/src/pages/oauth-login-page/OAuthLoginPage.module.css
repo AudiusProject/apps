@@ -189,7 +189,3 @@
   font-size: var(--harmony-font-m);
   line-height: 120%;
 }
-
-.formArea {
-  padding-bottom: var(--harmony-unit-8);
-}
