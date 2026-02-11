@@ -173,33 +173,35 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
     return HttpResponse.json({ data: [] })
   })
 
-const tracksByIdHandler = (track: typeof testTrack & any) => ({ request }: { request: Request }) => {
-  const url = new URL(request.url)
-  const idParam = url.searchParams.get('id')
-  const idArrayParams = url.searchParams.getAll('id[]')
-  const ids =
-    idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
+const tracksByIdHandler =
+  (track: typeof testTrack & any) =>
+  ({ request }: { request: Request }) => {
+    const url = new URL(request.url)
+    const idParam = url.searchParams.get('id')
+    const idArrayParams = url.searchParams.getAll('id[]')
+    const ids =
+      idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
 
-  const trackIdStr = track.id?.toString()
-  const trackTrackIdStr = track.track_id?.toString()
-  const trackIdNum = track.id
-  const trackTrackIdNum = track.track_id
+    const trackIdStr = track.id?.toString()
+    const trackTrackIdStr = track.track_id?.toString()
+    const trackIdNum = track.id
+    const trackTrackIdNum = track.track_id
 
-  const matches = ids.some((id) => {
-    const idNum = Number(id)
-    return (
-      id === trackIdStr ||
-      id === trackTrackIdStr ||
-      (!isNaN(idNum) &&
-        (idNum === Number(trackIdNum) || idNum === Number(trackTrackIdNum)))
-    )
-  })
+    const matches = ids.some((id) => {
+      const idNum = Number(id)
+      return (
+        id === trackIdStr ||
+        id === trackTrackIdStr ||
+        (!isNaN(idNum) &&
+          (idNum === Number(trackIdNum) || idNum === Number(trackTrackIdNum)))
+      )
+    })
 
-  if (ids.length === 0 || matches) {
-    return HttpResponse.json({ data: [track] })
+    if (ids.length === 0 || matches) {
+      return HttpResponse.json({ data: [track] })
+    }
+    return HttpResponse.json({ data: [] })
   }
-  return HttpResponse.json({ data: [] })
-}
 
 /**
  * Tracks (matches both v1/full/tracks and v1/tracks for migration)
@@ -274,18 +276,15 @@ export const mockUserTracksCount = (
   count?: number
 ): ReturnType<typeof http.get> => {
   if (userIdOrCount === undefined) {
-    return http.get(v1UserTracksCountPath, () =>
-      HttpResponse.json({ data: 0 })
-    )
+    return http.get(v1UserTracksCountPath, () => HttpResponse.json({ data: 0 }))
   }
   if (typeof userIdOrCount === 'number') {
     return http.get(v1UserTracksCountPath, () =>
       HttpResponse.json({ data: userIdOrCount })
     )
   }
-  return http.get(
-    `${apiEndpoint}/v1/users/${userIdOrCount}/tracks/count`,
-    () => HttpResponse.json({ data: count ?? 0 })
+  return http.get(`${apiEndpoint}/v1/users/${userIdOrCount}/tracks/count`, () =>
+    HttpResponse.json({ data: count ?? 0 })
   )
 }
 
