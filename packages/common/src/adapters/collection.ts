@@ -4,6 +4,7 @@ import {
   full,
   Id,
   OptionalHashId,
+  type Playlist,
   UpdateAlbumRequest,
   UpdatePlaylistRequest
 } from '@audius/sdk'
@@ -48,13 +49,16 @@ const addedTimestampToPlaylistTrackId = ({
 
 export const userCollectionMetadataFromSDK = (
   input:
+    | Playlist
     | full.PlaylistFullWithoutTracks
     | full.SearchPlaylistFull
     | full.PlaylistFull
 ): UserCollectionMetadata | undefined => {
   try {
+    const userId =
+      'userId' in input && input.userId ? input.userId : input.user?.id
     const decodedPlaylistId = OptionalHashId.parse(input.id)
-    const decodedOwnerId = OptionalHashId.parse(input.userId ?? input.user.id)
+    const decodedOwnerId = OptionalHashId.parse(userId)
     const user = userMetadataFromSDK(input.user)
     if (!decodedPlaylistId || !decodedOwnerId || !user) {
       return undefined
@@ -74,35 +78,47 @@ export const userCollectionMetadataFromSDK = (
             '150x150': input.artwork._150x150,
             '480x480': input.artwork._480x480,
             '1000x1000': input.artwork._1000x1000,
-            mirrors: input.artwork.mirrors
+            ...('mirrors' in input.artwork
+              ? { mirrors: input.artwork.mirrors }
+              : {})
           }
         : {},
       variant: Variant.USER_GENERATED,
+      is_album: input.isAlbum ?? false,
+      track_count: input.trackCount ?? 0,
+      repost_count: input.repostCount ?? 0,
+      permalink: input.permalink ?? '',
+      playlist_name: input.playlistName ?? '',
+      access: input.access,
 
       // Conversions
       playlist_id: decodedPlaylistId,
       playlist_owner_id: decodedOwnerId,
       // TODO: Remove this when api is fixed to return UTC dates
-      release_date: input.releaseDate
-        ? dayjs.utc(input.releaseDate).local().toString()
-        : null,
+      release_date:
+        'releaseDate' in input && input.releaseDate
+          ? dayjs.utc(input.releaseDate).local().toString()
+          : null,
 
       // Nested Transformed Fields
-      artists: input.artists
-        ? transformAndCleanList(input.artists, resourceContributorFromSDK)
-        : null,
-      copyright_line: input.copyrightLine
-        ? (snakecaseKeys(input.copyrightLine) as Copyright)
-        : null,
-      cover_art_cids: input.coverArtCids
-        ? coverArtSizesCIDsFromSDK(input.coverArtCids)
-        : null,
+      artists:
+        'artists' in input && input.artists
+          ? transformAndCleanList(input.artists, resourceContributorFromSDK)
+          : null,
+      copyright_line:
+        'copyrightLine' in input && input.copyrightLine
+          ? (snakecaseKeys(input.copyrightLine) as Copyright)
+          : null,
+      cover_art_cids:
+        'coverArtCids' in input && input.coverArtCids
+          ? coverArtSizesCIDsFromSDK(input.coverArtCids)
+          : null,
       followee_reposts: transformAndCleanList(
-        input.followeeReposts,
+        'followeeReposts' in input ? input.followeeReposts : [],
         repostFromSDK
       ),
       followee_saves: transformAndCleanList(
-        input.followeeFavorites,
+        'followeeFavorites' in input ? input.followeeFavorites : [],
         favoriteFromSDK
       ),
       playlist_contents: {
@@ -111,22 +127,55 @@ export const userCollectionMetadataFromSDK = (
           addedTimestampToPlaylistTrackId
         )
       },
-      producer_copyright_line: input.producerCopyrightLine
-        ? (snakecaseKeys(input.producerCopyrightLine) as Copyright)
-        : null,
-      stream_conditions: input.streamConditions
-        ? accessConditionsFromSDK(input.streamConditions)
-        : null,
-      tracks: transformAndCleanList(input.tracks, userTrackMetadataFromSDK),
+      producer_copyright_line:
+        'producerCopyrightLine' in input && input.producerCopyrightLine
+          ? (snakecaseKeys(input.producerCopyrightLine) as Copyright)
+          : null,
+      stream_conditions:
+        'streamConditions' in input && input.streamConditions
+          ? accessConditionsFromSDK(input.streamConditions)
+          : null,
+      tracks: transformAndCleanList(
+        'tracks' in input ? input.tracks : [],
+        userTrackMetadataFromSDK
+      ),
       user,
 
       // Retypes / Renames
-      save_count: input.favoriteCount,
+      save_count: input.favoriteCount ?? 0,
 
       // Nullable fields
-      cover_art: input.coverArt ?? null,
-      cover_art_sizes: input.coverArtSizes ?? null,
-      description: input.description ?? null
+      cover_art: 'coverArt' in input ? (input.coverArt ?? null) : null,
+      cover_art_sizes:
+        'coverArtSizes' in input ? (input.coverArtSizes ?? null) : null,
+      description: input.description ?? null,
+
+      // Required defaults for fields not always returned by default endpoints
+      blocknumber: 'blocknumber' in input ? (input.blocknumber ?? 0) : 0,
+      has_current_user_reposted:
+        'hasCurrentUserReposted' in input
+          ? (input.hasCurrentUserReposted ?? false)
+          : false,
+      has_current_user_saved:
+        'hasCurrentUserSaved' in input
+          ? (input.hasCurrentUserSaved ?? false)
+          : false,
+      is_delete: 'isDelete' in input ? (input.isDelete ?? false) : false,
+      is_private: 'isPrivate' in input ? (input.isPrivate ?? false) : false,
+      created_at:
+        'createdAt' in input && input.createdAt
+          ? dayjs(input.createdAt).toISOString()
+          : '',
+      updated_at:
+        'updatedAt' in input && input.updatedAt
+          ? dayjs(input.updatedAt).toISOString()
+          : '',
+      is_scheduled_release:
+        'isScheduledRelease' in input
+          ? (input.isScheduledRelease ?? false)
+          : false,
+      is_stream_gated:
+        'isStreamGated' in input ? (input.isStreamGated ?? false) : false
     }
 
     return newCollection
