@@ -31,7 +31,7 @@ export function* retrieveUserTracks({
 }: RetrieveUserTracksArgs): Generator<any, Track[], any> {
   const sdk = yield* getSDK()
   const { data = [] } = yield* call(
-    [sdk.full.users, sdk.full.users.getTracksByUserHandle],
+    [sdk.full.users, sdk.users.getTracksByUserHandle],
     {
       handle,
       sort,

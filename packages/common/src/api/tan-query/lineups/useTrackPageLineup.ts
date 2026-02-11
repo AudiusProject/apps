@@ -105,7 +105,7 @@ export const useTrackPageLineup = (
         heroTrack.remix_of?.tracks?.[0]?.parent_track_id
 
       if (heroTrackRemixParentTrackId) {
-        const remixParentTrack = await sdk.full.tracks.getTrack({
+        const remixParentTrack = await sdk.tracks.getTrack({
           trackId: Id.parse(heroTrackRemixParentTrackId),
           userId: OptionalId.parse(currentUserId)
         })
@@ -119,7 +119,7 @@ export const useTrackPageLineup = (
         }
       } else {
         // If hero track is remixable (not a remix), get its remixes
-        const { data: remixesData } = await sdk.full.tracks.getTrackRemixes({
+        const remixesData = await sdk.tracks.getTrackRemixes({
           trackId: Id.parse(trackId),
           userId: OptionalId.parse(currentUserId),
           limit: pageSize,
@@ -140,7 +140,7 @@ export const useTrackPageLineup = (
       }
 
       // Get more tracks by the artist
-      const { data = [] } = await sdk.full.users.getTracksByUserHandle({
+      const { data = [] } = await sdk.users.getTracksByUserHandle({
         handle: ownerHandle,
         userId: OptionalId.parse(currentUserId),
         sort: 'plays',
@@ -167,8 +167,8 @@ export const useTrackPageLineup = (
       }
 
       // If there are no remixes, get recommended tracks based on genre
-      if (indices.remixesSection.index === null) {
-        const { data: trendingData } = await sdk.full.tracks.getTrendingTracks({
+      if (indices.remixesSection.index === undefined) {
+        const { data: trendingData } = await sdk.tracks.getTrendingTracks({
           genre: heroTrack.genre,
           limit: pageSize
         })

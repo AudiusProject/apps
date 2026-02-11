@@ -292,13 +292,10 @@ function* pollForPurchaseConfirmation({
     ) {
       const sdk = yield* getSDK()
       for (const trackId of metadata.playlist_contents.track_ids) {
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          {
-            trackId: Id.parse(trackId.track),
-            userId: OptionalId.parse(currentUserId)
-          }
-        )
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId.track),
+          userId: OptionalId.parse(currentUserId)
+        })
         const track = data ? userTrackMetadataFromSDK(data) : null
 
         if (track) {

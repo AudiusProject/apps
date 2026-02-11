@@ -19,15 +19,12 @@ export function* getRecommendedTracks(
 
   const sdk = yield* getSDK()
 
-  const { data } = yield* call(
-    [sdk.full.tracks, sdk.full.tracks.getRecommendedTracks],
-    {
-      genre,
-      exclusionList,
-      limit: remoteConfigInstance.getRemoteVar(IntKeys.AUTOPLAY_LIMIT) || 10,
-      userId: OptionalId.parse(currentUserId)
-    }
-  )
+  const { data } = yield* call([sdk.tracks, sdk.tracks.getRecommendedTracks], {
+    genre,
+    exclusionList,
+    limit: remoteConfigInstance.getRemoteVar(IntKeys.AUTOPLAY_LIMIT) || 10,
+    userId: OptionalId.parse(currentUserId)
+  })
   const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
   yield* call(primeTrackDataSaga, tracks)
   return tracks

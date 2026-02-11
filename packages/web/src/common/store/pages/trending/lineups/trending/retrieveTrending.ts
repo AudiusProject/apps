@@ -46,10 +46,6 @@ export function* retrieveTrending({
     remoteConfigInstance.getRemoteVar(StringKeys.TF)?.split(',') ?? []
   )
 
-  const version = remoteConfigInstance.getRemoteVar(
-    StringKeys.TRENDING_EXPERIMENT
-  )
-
   const cachedTracks: ReturnType<ReturnType<typeof getTrendingEntries>> =
     yield select(getTrendingEntries(timeRange))
 
@@ -72,9 +68,7 @@ export function* retrieveTrending({
     userId: OptionalId.parse(currentUserId)
   }
 
-  const { data = [] } = version
-    ? yield sdk.full.tracks.getTrendingTracksWithVersion({ ...args, version })
-    : yield sdk.full.tracks.getTrendingTracks(args)
+  const { data = [] } = yield sdk.tracks.getTrendingTracks(args)
   let apiTracks = transformAndCleanList(data, userTrackMetadataFromSDK)
 
   // DN may return hidden tracks in trending because of its cache

@@ -11,7 +11,6 @@ import { transformAndCleanList } from '~/adapters/utils'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { PlaybackSource } from '~/models'
 import { TimeRange } from '~/models/TimeRange'
-import { StringKeys } from '~/services/remote-config'
 import {
   trendingAllTimeActions,
   trendingMonthActions,
@@ -61,7 +60,7 @@ export const useTrending = (
   }: GetTrendingArgs,
   options?: QueryOptions
 ) => {
-  const { audiusSdk, remoteConfigInstance } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
   const dispatch = useDispatch()
@@ -82,28 +81,16 @@ export const useTrending = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const version = remoteConfigInstance.getRemoteVar(
-        StringKeys.TRENDING_EXPERIMENT
-      )
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
 
-      const { data: sdkResponse = [] } = version
-        ? await sdk.full.tracks.getTrendingTracksWithVersion({
-            time: timeRange,
-            genre: (genre as string) || undefined,
-            userId: OptionalId.parse(currentUserId),
-            limit: currentPageSize,
-            offset: pageParam,
-            version
-          })
-        : await sdk.full.tracks.getTrendingTracks({
-            time: timeRange,
-            genre: (genre as string) || undefined,
-            userId: OptionalId.parse(currentUserId),
-            limit: currentPageSize,
-            offset: pageParam
-          })
+      const { data: sdkResponse = [] } = await sdk.tracks.getTrendingTracks({
+        time: timeRange,
+        genre: (genre as string) || undefined,
+        userId: OptionalId.parse(currentUserId),
+        limit: currentPageSize,
+        offset: pageParam
+      })
 
       const tracks = transformAndCleanList(
         sdkResponse,
