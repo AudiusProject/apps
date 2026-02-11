@@ -13,7 +13,6 @@ import { toFormikValidationSchema } from 'zod-formik-adapter'
 import { HarmonyTextField } from 'components/form-fields/HarmonyTextField'
 import { restrictedHandles } from 'utils/restrictedHandles'
 
-import styles from '../OAuthLoginPage.module.css'
 import { CTAButton } from '../components/CTAButton'
 import { messages } from '../messages'
 
@@ -28,7 +27,7 @@ type PickHandleValues = {
 export const OAuthPickHandlePage = ({ onNext }: OAuthPickHandlePageProps) => {
   const queryContext = useQueryContext()
   const queryClient = useQueryClient()
-  const handleInputRef = useRef<HTMLInputElement>(null)
+  const handleInputRef = useRef<HTMLInputElement | null>(null)
 
   const validationSchema = useMemo(
     () =>
@@ -51,7 +50,17 @@ export const OAuthPickHandlePage = ({ onNext }: OAuthPickHandlePageProps) => {
   }
 
   return (
-    <div className={styles.container}>
+    <Flex
+      direction='column'
+      w='375px'
+      ph='l'
+      pt='4xl'
+      css={{
+        '@media (max-width: 375px)': {
+          width: '100%'
+        }
+      }}
+    >
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -74,7 +83,7 @@ export const OAuthPickHandlePage = ({ onNext }: OAuthPickHandlePageProps) => {
           )
         }}
       </Formik>
-    </div>
+    </Flex>
   )
 }
 
@@ -89,7 +98,7 @@ const HandleFieldContent = ({
   error?: string
   onHandleChange: (value: string) => void
   isValid: boolean
-  inputRef: React.RefObject<HTMLInputElement>
+  inputRef: React.RefObject<HTMLInputElement | null>
 }) => {
   const { isWaitingForValidation, handleChange } = useIsWaitingForValidation()
 
@@ -104,45 +113,38 @@ const HandleFieldContent = ({
 
   return (
     <Form>
-      <Text variant='heading' size='m' mb='s'>
-        {messages.signUpHandleTitle}
-      </Text>
-      <Text
-        variant='body'
-        size='m'
-        mb='l'
-        css={{ color: 'var(--harmony-n-600)' }}
-      >
-        {messages.signUpHandleDescription}
-      </Text>
+      <Flex direction='column' gap='s' mb='l'>
+        <Text variant='heading' size='m'>
+          {messages.signUpHandleTitle}
+        </Text>
+        <Text variant='body' size='m' color='subdued'>
+          {messages.signUpHandleDescription}
+        </Text>
+      </Flex>
       <Flex direction='column' gap='xl' mb='xl'>
-        <HarmonyTextField
-          ref={inputRef}
-          name='handle'
-          label={handleMessages.handle}
-          helperText={helperText ?? undefined}
-          maxLength={MAX_HANDLE_LENGTH}
-          startAdornmentText='@'
-          placeholder={handleMessages.handle}
-          transformValueOnChange={formatHandleValue}
-          debouncedValidationMs={1000}
-          error={!!error}
-          value={handle}
-          endIcon={
-            !isWaitingForValidation && !error && handle ? IconCheck : undefined
-          }
-          IconProps={{ size: 'l', color: 'default' }}
-          onChange={(e) => {
-            onHandleChange(e.currentTarget.value)
-            handleChange()
-          }}
-          className={styles.oauthInputLabel}
-          css={{
-            '& [data-testid="helper-text"], & [class*="helper"], & p': {
-              marginTop: 'var(--harmony-unit-2)'
+        <Flex direction='column' gap='s' mt='m'>
+          <HarmonyTextField
+            ref={inputRef}
+            name='handle'
+            label={handleMessages.handle}
+            helperText={helperText ?? undefined}
+            maxLength={MAX_HANDLE_LENGTH}
+            startAdornmentText='@'
+            placeholder={handleMessages.handle}
+            transformValueOnChange={formatHandleValue}
+            debouncedValidationMs={1000}
+            error={!!error}
+            value={handle}
+            endIcon={
+              !isWaitingForValidation && !error && handle ? IconCheck : undefined
             }
-          }}
-        />
+            IconProps={{ size: 'l', color: 'default' }}
+            onChange={(e) => {
+              onHandleChange(e.currentTarget.value)
+              handleChange()
+            }}
+          />
+        </Flex>
       </Flex>
       <CTAButton
         type='submit'

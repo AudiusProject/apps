@@ -8,7 +8,6 @@ import { Form, Formik } from 'formik'
 import { HarmonyTextField } from 'components/form-fields/HarmonyTextField'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
-import styles from '../OAuthLoginPage.module.css'
 import { CTAButton } from '../components/CTAButton'
 import { messages } from '../messages'
 
@@ -43,39 +42,42 @@ export const OAuthPickDisplayNamePage = ({
   }
 
   return (
-    <div className={styles.container}>
+    <Flex
+      direction='column'
+      w='375px'
+      ph='l'
+      pt='4xl'
+      css={{
+        '@media (max-width: 375px)': {
+          width: '100%'
+        }
+      }}
+    >
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, setFieldValue, isValid, dirty }) => (
           <Form>
-            <Text variant='heading' size='m' mb='s'>
-              {messages.signUpDisplayNameTitle}
-            </Text>
-            <Text
-              variant='body'
-              size='m'
-              mb='l'
-              css={{ color: 'var(--harmony-n-600)' }}
-            >
-              {messages.signUpDisplayNameDescription}
-            </Text>
+            <Flex direction='column' gap='s' mb='l'>
+              <Text variant='heading' size='m'>
+                {messages.signUpDisplayNameTitle}
+              </Text>
+              <Text variant='body' size='m' color='subdued'>
+                {messages.signUpDisplayNameDescription}
+              </Text>
+            </Flex>
             <Flex direction='column' gap='xl' mb='xl'>
-              <HarmonyTextField
-                ref={displayNameInputRef}
-                name='displayName'
-                label={finishProfilePageMessages.displayName}
-                placeholder={finishProfilePageMessages.inputPlaceholder}
-                maxLength={MAX_DISPLAY_NAME_LENGTH}
-                onChange={(e) =>
-                  setFieldValue('displayName', e.currentTarget.value)
-                }
-                value={values.displayName}
-                className={styles.oauthInputLabel}
-                css={{
-                  '& [data-testid="helper-text"], & [class*="helper"], & p': {
-                    marginTop: 'var(--harmony-unit-2)'
+              <Flex direction='column' gap='s' mt='m'>
+                <HarmonyTextField
+                  ref={displayNameInputRef}
+                  name='displayName'
+                  label={finishProfilePageMessages.displayName}
+                  placeholder={finishProfilePageMessages.inputPlaceholder}
+                  maxLength={MAX_DISPLAY_NAME_LENGTH}
+                  onChange={(e) =>
+                    setFieldValue('displayName', e.currentTarget.value)
                   }
-                }}
-              />
+                  value={values.displayName}
+                />
+              </Flex>
             </Flex>
             {isCreatingAccount ? (
               <Flex direction='column' alignItems='center' gap='l'>
@@ -95,16 +97,15 @@ export const OAuthPickDisplayNamePage = ({
               </CTAButton>
             )}
             {error ? (
-              <div
-                className={styles.generalErrorContainer}
-                style={{ marginTop: 'var(--harmony-unit-4)' }}
-              >
-                <span className={styles.errorText}>{error}</span>
-              </div>
+              <Flex direction='column' alignItems='center' mt='l'>
+                <Text variant='body' size='m' color='danger' css={{ fontWeight: 'bold' }}>
+                  {error}
+                </Text>
+              </Flex>
             ) : null}
           </Form>
         )}
       </Formik>
-    </div>
+    </Flex>
   )
 }

@@ -21,7 +21,6 @@ import AppIcon from 'assets/img/appIcon.png'
 import Input from 'components/data-entry/Input'
 import { identify } from 'services/analytics'
 
-import styles from '../OAuthLoginPage.module.css'
 import { CTAButton } from '../components/CTAButton'
 import { messages } from '../messages'
 
@@ -74,8 +73,18 @@ export const OAuthCreateEmailPage = ({
   )
 
   return (
-    <div className={styles.container}>
-      <Flex alignItems='center' direction='column'>
+    <Flex
+      direction='column'
+      w='375px'
+      ph='l'
+      pt='4xl'
+      css={{
+        '@media (max-width: 375px)': {
+          width: '100%'
+        }
+      }}
+    >
+      <Flex alignItems='center' direction='column' mb='l'>
         <Flex gap='l' alignItems='center' mb='l'>
           <Flex h='88px' w='88px'>
             <img src={AppIcon} alt='Audius Logo' />
@@ -92,10 +101,7 @@ export const OAuthCreateEmailPage = ({
                 borderRadius='l'
                 css={{ backgroundColor: 'var(--harmony-n-200)' }}
               >
-                <IconEmbed
-                  color='subdued'
-                  css={{ width: '48px', height: '48px' }}
-                />
+                <IconEmbed color='subdued' size='xl' />
               </Flex>
             )}
           </Flex>
@@ -105,7 +111,7 @@ export const OAuthCreateEmailPage = ({
           {appName}
         </Text>
       </Flex>
-      <div className={styles.formArea}>
+      <Flex direction='column' pb='4xl'>
         <Formik
           initialValues={initialValues}
           onSubmit={handleSubmit}
@@ -115,19 +121,11 @@ export const OAuthCreateEmailPage = ({
         >
           {({ isSubmitting, setFieldValue }) => (
             <Form>
-              <Flex
-                direction='column'
-                gap='l'
-                css={{ marginTop: 'var(--harmony-unit-8)' }}
-              >
+              <Flex direction='column' gap='l' mt='2xl'>
                 <Text variant='heading' size='m'>
                   {messages.signUpEmailTitle}
                 </Text>
-                <Text
-                  variant='body'
-                  size='m'
-                  css={{ color: 'var(--harmony-n-600)' }}
-                >
+                <Text variant='body' size='m' color='subdued'>
                   {messages.signUpEmailDescription}
                 </Text>
               </Flex>
@@ -139,16 +137,16 @@ export const OAuthCreateEmailPage = ({
               >
                 Continue
               </CTAButton>
-              <div className={styles.signUpButtonContainer}>
-                <Text variant='body' size='s'>
+              <Flex direction='column' alignItems='center' mt='l'>
+                <Text variant='body' size='s' textAlign='center'>
                   {createEmailPageMessages.haveAccount} {signInLink}
                 </Text>
-              </div>
+              </Flex>
             </Form>
           )}
         </Formik>
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -171,7 +169,7 @@ const EmailInputWithError = ({
   )
 
   return (
-    <Flex direction='column' gap='s'>
+    <Flex direction='column' gap='s' mt='s'>
       {/* @ts-ignore */}
       <Input
         placeholder='Email'
@@ -179,14 +177,12 @@ const EmailInputWithError = ({
         type='email'
         name='email'
         id='email-input'
-        isRequired
         autoComplete='username'
         value={field.value}
         onChange={(value: string) => {
           setFieldValue('email', value)
         }}
         onBlur={field.onBlur}
-        className={styles.emailInput}
       />
       {touched && error && emailInUse ? (
         <Hint icon={IconError}>

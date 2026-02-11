@@ -9,7 +9,6 @@ import { toFormikValidationSchema } from 'zod-formik-adapter'
 import { PasswordField } from 'components/form-fields/PasswordField'
 import { PasswordCompletionChecklist } from 'pages/sign-up-page/components/PasswordCompletionChecklist'
 
-import styles from '../OAuthLoginPage.module.css'
 import { CTAButton } from '../components/CTAButton'
 import { messages } from '../messages'
 
@@ -45,25 +44,32 @@ export const OAuthCreatePasswordPage = ({
   )
 
   return (
-    <div className={styles.container}>
+    <Flex
+      direction='column'
+      w='375px'
+      ph='l'
+      pt='4xl'
+      css={{
+        '@media (max-width: 375px)': {
+          width: '100%'
+        }
+      }}
+    >
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={passwordFormikSchema}
       >
-        {({ isValid, dirty, values, setFieldValue }) => (
+        {({ isValid, dirty }) => (
           <Form>
-            <Text variant='heading' size='m' mb='s'>
-              {messages.signUpPasswordTitle}
-            </Text>
-            <Text
-              variant='body'
-              size='m'
-              mb='xl'
-              css={{ color: 'var(--harmony-n-600)' }}
-            >
-              {messages.signUpPasswordDescription}
-            </Text>
+            <Flex direction='column' gap='s' mb='xl'>
+              <Text variant='heading' size='m'>
+                {messages.signUpPasswordTitle}
+              </Text>
+              <Text variant='body' size='m' color='subdued'>
+                {messages.signUpPasswordDescription}
+              </Text>
+            </Flex>
             <Flex direction='column' gap='l' mb='l'>
               <Flex direction='column' gap='xs'>
                 <Text variant='label' size='xs'>
@@ -73,17 +79,19 @@ export const OAuthCreatePasswordPage = ({
                   {email}
                 </Text>
               </Flex>
-              <PasswordField
-                name='password'
-                label={passwordMessages.passwordLabel}
-                ref={passwordInputRef}
-                className={styles.oauthPasswordInput}
-              />
-              <PasswordField
-                name='confirmPassword'
-                label={passwordMessages.confirmPasswordLabel}
-                className={styles.oauthPasswordInput}
-              />
+              <Flex direction='column' gap='s' mt='m'>
+                <PasswordField
+                  name='password'
+                  label={passwordMessages.passwordLabel}
+                  ref={passwordInputRef}
+                />
+              </Flex>
+              <Flex direction='column' gap='s' mt='m'>
+                <PasswordField
+                  name='confirmPassword'
+                  label={passwordMessages.confirmPasswordLabel}
+                />
+              </Flex>
               <PasswordCompletionChecklist />
             </Flex>
             <CTAButton
@@ -97,6 +105,6 @@ export const OAuthCreatePasswordPage = ({
           </Form>
         )}
       </Formik>
-    </div>
+    </Flex>
   )
 }

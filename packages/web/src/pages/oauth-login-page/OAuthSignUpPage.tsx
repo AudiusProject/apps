@@ -2,8 +2,8 @@ import { useRef, useState } from 'react'
 
 import { accountFromSDK } from '@audius/common/adapters'
 import { Name, ErrorLevel } from '@audius/common/models'
-import { Flex } from '@audius/harmony'
-import cn from 'classnames'
+import { getLocation } from '@audius/sdk/dist/sdk/utils/location'
+import { Flex, Text } from '@audius/harmony'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
@@ -11,7 +11,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { audiusSdk, authService } from 'services/audius-sdk'
 import { reportToSentry } from 'store/errors/reportToSentry'
 
-import styles from './OAuthLoginPage.module.css'
 import { ContentWrapper } from './components/ContentWrapper'
 import { useOAuthSetup } from './hooks'
 import { messages } from './messages'
@@ -38,10 +37,9 @@ export const OAuthSignUpPage = () => {
   const oauthContextRef = useRef<{
     apiKey?: string | string[] | null
     appName?: string | string[] | null
-    scope?: string | string[]
+    scope?: string | string[] | null
   }>({})
 
-  // Helper to navigate to a step while preserving query params
   const navigateToStep = (step: string) => {
     const basePath =
       location.pathname.split('/').slice(0, -1).join('/') ||
@@ -49,7 +47,6 @@ export const OAuthSignUpPage = () => {
     navigate(`${basePath}/${step}${location.search}`, { replace: true })
   }
 
-  // Get query string to preserve across navigation
   const queryString = location.search
 
   const {
@@ -74,8 +71,7 @@ export const OAuthSignUpPage = () => {
       setIsCreatingAccount(false)
       setError(errorMessage)
       const getAppId = () => {
-        const apiKey = oauthContextRef.current.apiKey
-        const appName = oauthContextRef.current.appName
+        const { apiKey, appName } = oauthContextRef.current
         if (Array.isArray(apiKey) && apiKey[0]) return String(apiKey[0])
         if (Array.isArray(appName) && appName[0]) return String(appName[0])
         if (typeof apiKey === 'string') return apiKey
@@ -84,7 +80,7 @@ export const OAuthSignUpPage = () => {
       }
 
       const getScope = () => {
-        const scope = oauthContextRef.current.scope
+        const { scope } = oauthContextRef.current
         if (Array.isArray(scope) && scope[0]) return String(scope[0])
         if (typeof scope === 'string') return scope
         return ''
@@ -106,7 +102,6 @@ export const OAuthSignUpPage = () => {
     onReceiveTransactionApproval: () => {}
   })
 
-  // Update ref with current values
   oauthContextRef.current = { apiKey, appName, scope }
 
   const updateSignUpData = (updates: Partial<SignUpData>) => {
@@ -118,7 +113,6 @@ export const OAuthSignUpPage = () => {
     setError(null)
 
     try {
-      // Sign up via Hedgehog
       await authService.hedgehogInstance.signUp({
         username: data.email,
         password: data.password
@@ -127,21 +121,18 @@ export const OAuthSignUpPage = () => {
       const sdk = await audiusSdk()
       const [wallet] = await sdk.services.audiusWalletClient.getAddresses()
 
-      // Get location for account creation (format: "City, Region" or null)
       let locationString: string | undefined
       try {
-        const locationData = await sdk.utils.getLocation()
+        const locationData = await getLocation()
         if (locationData?.city) {
           locationString = locationData.region
             ? `${locationData.city}, ${locationData.region}`
             : locationData.city
         }
       } catch (e) {
-        // Location is optional, continue without it
         console.debug('Failed to get location:', e)
       }
 
-      // Create user on chain
       const { metadata, blockHash, blockNumber } = await sdk.users.createUser({
         metadata: {
           handle: data.handle,
@@ -151,7 +142,6 @@ export const OAuthSignUpPage = () => {
         }
       })
 
-      // Wait for transaction confirmation
       if (blockHash && blockNumber) {
         await sdk.services.entityManager.confirmWrite({
           blockHash,
@@ -159,13 +149,11 @@ export const OAuthSignUpPage = () => {
         })
       }
 
-      // Wait for account to be available - try by wallet first, then by userId
       let accountData
       let retries = 0
       const maxRetries = 15
       while (retries < maxRetries) {
         try {
-          // Try fetching by wallet first (faster)
           const response = await sdk.full.users.getUserAccount({
             wallet
           })
@@ -174,18 +162,7 @@ export const OAuthSignUpPage = () => {
             break
           }
         } catch (e) {
-          // Try by userId as fallback
-          try {
-            const response = await sdk.full.users.getUserAccount({
-              userId: metadata.user_id
-            })
-            if (response.data) {
-              accountData = response.data
-              break
-            }
-          } catch (e2) {
-            // Account not ready yet, wait and retry
-          }
+          // Account not ready yet
         }
         await new Promise((resolve) => setTimeout(resolve, 1000))
         retries++
@@ -200,7 +177,6 @@ export const OAuthSignUpPage = () => {
         throw new Error('Invalid account data')
       }
 
-      // Authorize the app
       await authorize({
         account: account.user
       })
@@ -246,9 +222,16 @@ export const OAuthSignUpPage = () => {
   if (queryParamsError) {
     return (
       <ContentWrapper display={display ?? 'popup'}>
-        <div className={cn(styles.centeredContent, styles.titleContainer)}>
-          <span className={styles.errorText}>{queryParamsError}</span>
-        </div>
+        <Flex
+          direction='column'
+          alignItems='center'
+          justifyContent='center'
+          mt='s'
+        >
+          <Text variant='body' size='m' color='danger'>
+            {queryParamsError}
+          </Text>
+        </Flex>
       </ContentWrapper>
     )
   }
@@ -257,7 +240,7 @@ export const OAuthSignUpPage = () => {
     return (
       <ContentWrapper display={display ?? 'popup'}>
         <Flex p='4xl' alignItems='center' justifyContent='center'>
-          <LoadingSpinner className={styles.loadingStateSpinner} />
+          <LoadingSpinner />
         </Flex>
       </ContentWrapper>
     )
