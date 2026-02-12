@@ -17,56 +17,41 @@ internet. Query, stream, and search for tracks, users, and playlists across the
 
 ## API Endpoints
 
-We provide two API versions:
+(`https://api.audius.co/v1`) provides all essential endpoints for querying tracks, users, playlists,
+and more. This is the recommended starting point for most integrations.
 
-### Basic API
-
-The **Basic API** (`https://api.audius.co/v1`) provides all essential endpoints for querying tracks,
-users, playlists, and more. This is the recommended starting point for most integrations.
-
-**View Basic API:** [Interactive Swagger UI](https://api.audius.co/v1) |
+[Interactive Swagger UI](https://api.audius.co/v1) |
 [Swagger YAML](https://api.audius.co/v1/swagger.yaml)
-
-### Full API
-
-The **Full API** (`https://api.audius.co/v1/full`) includes additional data for advanced use cases.
-Every basic API endpoint also has a full version available. Fields in the full API may change over
-time and are not guaranteed to be backwards compatible.
-
-**View Full API:** [Interactive Swagger UI](https://api.audius.co/v1/full) |
-[Swagger YAML](https://api.audius.co/v1/full/swagger.yaml)
 
 :::tip
 
-If you're developing with AI, upload the swagger.yaml file to your development environment.
+If you're developing with AI, include the swagger.yaml file to your development environment.
 
 :::
 
 ## Usage
 
-### 1. Include App Name
+### 1. Create an API Key
 
-Always include the `app_name` parameter in your requests to identify your application:
+Creating an API key is free and grants you higher rate limits and user authentication features.
+
+Visit [api.audius.co/plans](https://api.audius.co/plans) or
+[audius.co/settings](https://audius.co/settings) to register an API key.
+
+### 2. Send Requests
+
+Send requests using either your API Secret or Bearer Token.
 
 ```bash
-curl "https://api.audius.co/v1/tracks/trending?app_name=MyAwesomeApp"
+curl -X GET "https://api.audius.co/v1/tracks/trending" -H "Authorization: Bearer <YOUR-API-BEARER-TOKEN>"
 ```
 
-You may also create a developer app on audius.co/settings and provide that instead of your app name
+:::note
 
-```bash
-curl "https://api.audius.co/v1/tracks/trending?api_key=8acf5eb7436ea403ee536a7334faa5e9ada4b50f"
-```
+Your API Secret is like a wallet password. It is unchangeable and should be stored securely. Using a
+bearer token is preferable as it can be rotated.
 
-### 2. Rate Limits
-
-The Audius API is **free to use with zero rate limits**. We ask that you respect artist rights and
-proper attribution.
-
-### 3. Authentication
-
-Most endpoints are public and don't require authentication. For operations that require
-authentication (like uploading content or managing your profile), refer to the [SDK Docs](/sdk).
+:::
 
 ---
 
