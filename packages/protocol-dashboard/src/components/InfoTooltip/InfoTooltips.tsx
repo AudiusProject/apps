@@ -75,8 +75,8 @@ const CTA_HREFS = {
   uniqueUsers:
     'https://help.audius.co/help/How-Are-User-Numbers-Calculated-on-Audius-718e9',
   registerNode:
-    'https://docs.audius.org/token/running-a-node/setup/registration',
-  apiCalls: 'https://docs.audius.org/developers'
+    'https://docs.audius.co/token/running-a-node/setup/registration',
+  apiCalls: 'https://docs.audius.co/developers'
 }
 
 export type AppliedInfoTooltipProps = {

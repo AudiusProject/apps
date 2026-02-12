@@ -10,7 +10,7 @@ const messages = {
 const links = {
   privacy: 'https://audius.co/legal/privacy-policy',
   terms: 'https://audius.co/legal/terms-of-use',
-  developers: 'https://docs.audius.org',
+  developers: 'https://docs.audius.co',
   audius: 'https://audius.co'
 }
 

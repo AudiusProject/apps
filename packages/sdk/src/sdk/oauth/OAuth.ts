@@ -134,7 +134,7 @@ export class OAuth {
   constructor(private readonly config: OAuthConfig) {
     if (typeof window === 'undefined') {
       throw new Error(
-        'Audius OAuth SDK functions are only available in browser. Refer to our documentation to learn how to implement Audius OAuth manually: https://docs.audius.org/developers/log-in-with-audius#manual-implementation.'
+        'Audius OAuth SDK functions are only available in browser. Refer to our documentation to learn how to implement Audius OAuth manually: https://docs.audius.co/developers/log-in-with-audius#manual-implementation.'
       )
     }
     this.apiKey = config.apiKey ?? null

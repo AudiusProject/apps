@@ -19,7 +19,7 @@
 
 Audius is a decentralized, community-owned music-sharing protocol
 
-For details on operating an Audius service, getting started with the Token and the API, see [docs.audius.org](https://docs.audius.org/).
+For details on operating an Audius service, getting started with the Token and the API, see [docs.audius.co](https://docs.audius.co/).
 
 ## Packages
 
