@@ -140,12 +140,15 @@ export class UsersApi extends GeneratedUsersApi {
       userId,
       ...(profilePictureResp
         ? {
-            profilePicture: profilePictureResp?.id,
-            profilePictureSizes: profilePictureResp?.id
+            profilePicture: profilePictureResp?.orig_file_cid,
+            profilePictureSizes: profilePictureResp?.orig_file_cid
           }
         : {}),
       ...(coverArtResp
-        ? { coverPhoto: coverArtResp?.id, coverPhotoSizes: coverArtResp?.id }
+        ? {
+            coverPhoto: coverArtResp?.orig_file_cid,
+            coverPhotoSizes: coverArtResp?.orig_file_cid
+          }
         : {})
     }
 
@@ -249,12 +252,15 @@ export class UsersApi extends GeneratedUsersApi {
       ...metadata,
       ...(profilePictureResp
         ? {
-            profilePicture: profilePictureResp?.id,
-            profilePictureSizes: profilePictureResp?.id
+            profilePicture: profilePictureResp?.orig_file_cid,
+            profilePictureSizes: profilePictureResp?.orig_file_cid
           }
         : {}),
       ...(coverArtResp
-        ? { coverPhoto: coverArtResp?.id, coverPhotoSizes: coverArtResp?.id }
+        ? {
+            coverPhoto: coverArtResp?.orig_file_cid,
+            coverPhotoSizes: coverArtResp?.orig_file_cid
+          }
         : {})
     })
 
