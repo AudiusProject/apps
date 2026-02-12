@@ -124,7 +124,7 @@ function* downloadCollectionAsync(
 
   const sdk = yield* getSDK()
   const { data = [] } = yield* call(
-    [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+    [sdk.playlists, sdk.playlists.getPlaylist],
     {
       playlistId: Id.parse(collectionId),
       userId: OptionalId.parse(currentUserId)

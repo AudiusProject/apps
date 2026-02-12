@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck - Custom API overrides use different param/return types than generated base
 import { pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 import type { z } from 'zod'
@@ -17,6 +19,7 @@ import {
   Configuration,
   PlaylistsApi as GeneratedPlaylistsApi
 } from '../generated/default'
+import type { PlaylistsApi as PlaylistsApiFull } from '../generated/full'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
 
 import {
@@ -61,11 +64,32 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     configuration: Configuration,
     private readonly storage: StorageService,
     private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService
+    private readonly logger: LoggerService,
+    private readonly playlistsApiFullDefaultPath?: PlaylistsApiFull
   ) {
     super(configuration)
     this.trackUploadHelper = new TrackUploadHelper(configuration)
     this.logger = logger.createPrefixedLogger('[playlists-api]')
+  }
+
+  /** Get users who favorited a playlist (delegates to full API when configured). */
+  getUsersFromPlaylistFavorites(
+    params: Parameters<PlaylistsApiFull['getUsersFromPlaylistFavorites']>[0]
+  ) {
+    if (!this.playlistsApiFullDefaultPath)
+      throw new Error('PlaylistsApi full default path not configured')
+    return this.playlistsApiFullDefaultPath.getUsersFromPlaylistFavorites(
+      params
+    )
+  }
+
+  /** Get users who reposted a playlist (delegates to full API when configured). */
+  getUsersFromPlaylistReposts(
+    params: Parameters<PlaylistsApiFull['getUsersFromPlaylistReposts']>[0]
+  ) {
+    if (!this.playlistsApiFullDefaultPath)
+      throw new Error('PlaylistsApi full default path not configured')
+    return this.playlistsApiFullDefaultPath.getUsersFromPlaylistReposts(params)
   }
 
   /** @hidden

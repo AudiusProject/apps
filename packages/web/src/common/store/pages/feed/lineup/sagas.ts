@@ -59,18 +59,15 @@ function* getTracks({
   const followeeUserIds = yield* select(getFollowIds)
 
   const userId = Id.parse(currentUserId)
-  const { data = [] } = yield* call(
-    [sdk.full.users, sdk.full.users.getUserFeed],
-    {
-      id: userId,
-      userId,
-      filter,
-      limit,
-      offset,
-      followeeUserId: followeeUserIds.length ? followeeUserIds : undefined,
-      withUsers: true
-    }
-  )
+  const { data = [] } = yield* call([sdk.users, sdk.users.getUserFeed], {
+    id: userId,
+    userId,
+    filter,
+    limit,
+    offset,
+    followeeUserId: followeeUserIds.length ? followeeUserIds : undefined,
+    withUsers: true
+  })
   const feed = transformAndCleanList(data, userFeedItemFromSDK).map(
     ({ item }) => item
   )

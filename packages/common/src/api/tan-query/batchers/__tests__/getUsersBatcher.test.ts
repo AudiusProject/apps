@@ -109,7 +109,7 @@ describe('getUsersBatcher', () => {
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
     // Verify single bulk request was made
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(1)
     expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
@@ -142,12 +142,12 @@ describe('getUsersBatcher', () => {
     )
 
     // Verify two separate bulk requests were made
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(2)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenNthCalledWith(1, {
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(2)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenNthCalledWith(2, {
+    expect(mockSdk.users.getBulkUsers).toHaveBeenNthCalledWith(2, {
       id: secondBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -199,7 +199,7 @@ describe('getUsersBatcher', () => {
     expect(missingResult).toBeNull()
 
     // Verify single batch request was made with both IDs
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(1)
     expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)

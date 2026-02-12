@@ -48,7 +48,7 @@ export function* retrieveUserReposts({
   yield* waitForRead()
   const sdk = yield* getSDK()
 
-  const { data: repostsSDKData } = yield sdk.full.users.getRepostsByHandle({
+  const { data: repostsSDKData } = yield sdk.users.getRepostsByHandle({
     handle,
     userId: OptionalId.parse(currentUserId),
     limit,

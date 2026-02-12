@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck - Custom API overrides use different param/return types than generated base
 import { wAUDIO } from '@audius/fixed-decimal'
 import snakecaseKeys from 'snakecase-keys'
 
@@ -25,6 +27,7 @@ import {
   UsersApi as GeneratedUsersApi
 } from '../generated/default'
 import * as runtime from '../generated/default/runtime'
+import type { UsersApi as UsersApiFull } from '../generated/full'
 
 import {
   AddAssociatedWalletRequest,
@@ -61,10 +64,66 @@ export class UsersApi extends GeneratedUsersApi {
     private readonly logger: LoggerService,
     private readonly claimableTokens: ClaimableTokensClient,
     private readonly solanaClient: SolanaClient,
-    private readonly emailEncryption: EmailEncryptionService
+    private readonly emailEncryption: EmailEncryptionService,
+    private readonly usersApiFullDefaultPath?: UsersApiFull
   ) {
     super(configuration)
     this.logger = logger.createPrefixedLogger('[users-api]')
+  }
+
+  /** Get user account by wallet (delegates to full API with default basePath). */
+  getUserAccount(params: {
+    wallet: string
+    encodedDataMessage?: string
+    encodedDataSignature?: string
+  }) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getUserAccount(params)
+  }
+
+  /** Get managers for a user (delegates to full API with default basePath). */
+  getManagers(params: Parameters<UsersApiFull['getManagers']>[0]) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getManagers(params)
+  }
+
+  /** Get audio transactions for a user (delegates to full API with default basePath). */
+  getAudioTransactions(
+    params: Parameters<UsersApiFull['getAudioTransactions']>[0]
+  ) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getAudioTransactions(params)
+  }
+
+  /** Get reposts by handle (delegates to full API with default basePath). */
+  getRepostsByHandle(params: {
+    handle: string
+    userId?: string
+    limit?: number
+    offset?: number
+  }) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getRepostsByHandle(params)
+  }
+
+  /** Get user feed (delegates to full API with default basePath). */
+  getUserFeed(params: Parameters<UsersApiFull['getUserFeed']>[0]) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getUserFeed(params)
+  }
+
+  /** Get user library tracks (delegates to full API with default basePath). */
+  getUserLibraryTracks(
+    params: Parameters<UsersApiFull['getUserLibraryTracks']>[0]
+  ) {
+    if (!this.usersApiFullDefaultPath)
+      throw new Error('UsersApiFull (default path) not configured')
+    return this.usersApiFullDefaultPath.getUserLibraryTracks(params)
   }
 
   /** @hidden

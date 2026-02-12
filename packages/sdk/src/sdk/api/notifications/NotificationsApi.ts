@@ -1,4 +1,5 @@
 import type { Configuration } from '../../api/generated/default'
+import type { NotificationsApi as NotificationsApiFull } from '../../api/generated/full'
 import type { EntityManagerService } from '../../services'
 import { Action, EntityType } from '../../services/EntityManager/types'
 import { parseParams } from '../../utils/parseParams'
@@ -14,8 +15,27 @@ export class NotificationsApi {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     _config: Configuration,
-    private readonly entityManager: EntityManagerService
+    private readonly entityManager: EntityManagerService,
+    private readonly notificationsApiFullDefaultPath?: NotificationsApiFull
   ) {}
+
+  /** Get notifications for a user (delegates to full API with default basePath). */
+  getNotifications(
+    params: Parameters<NotificationsApiFull['getNotifications']>[0]
+  ) {
+    if (!this.notificationsApiFullDefaultPath)
+      throw new Error('NotificationsApiFull (default path) not configured')
+    return this.notificationsApiFullDefaultPath.getNotifications(params)
+  }
+
+  /** Get playlist updates for a user (delegates to full API with default basePath). */
+  getPlaylistUpdates(
+    params: Parameters<NotificationsApiFull['getPlaylistUpdates']>[0]
+  ) {
+    if (!this.notificationsApiFullDefaultPath)
+      throw new Error('NotificationsApiFull (default path) not configured')
+    return this.notificationsApiFullDefaultPath.getPlaylistUpdates(params)
+  }
 
   /**
    * When a user views all of their notifications

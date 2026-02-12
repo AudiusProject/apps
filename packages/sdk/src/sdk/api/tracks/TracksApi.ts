@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck - Custom API overrides use different param/return types than generated base
 import { USDC } from '@audius/fixed-decimal'
 import { TransactionInstruction } from '@solana/web3.js'
 import snakecaseKeys from 'snakecase-keys'

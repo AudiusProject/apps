@@ -16,15 +16,44 @@
 
 import * as runtime from '../runtime';
 import type {
+  CreateComment201Response,
+  CreateDeveloperAppRequest,
+  DeveloperApp,
   DeveloperAppResponse,
+  UpdateDeveloperAppRequest,
 } from '../models';
 import {
+    CreateComment201ResponseFromJSON,
+    CreateComment201ResponseToJSON,
+    CreateDeveloperAppRequestFromJSON,
+    CreateDeveloperAppRequestToJSON,
+    DeveloperAppFromJSON,
+    DeveloperAppToJSON,
     DeveloperAppResponseFromJSON,
     DeveloperAppResponseToJSON,
+    UpdateDeveloperAppRequestFromJSON,
+    UpdateDeveloperAppRequestToJSON,
 } from '../models';
+
+export interface CreateDeveloperAppOperationRequest {
+    createDeveloperAppRequest: CreateDeveloperAppRequest;
+}
+
+export interface DeleteDeveloperAppRequest {
+    address: string;
+}
 
 export interface GetDeveloperAppRequest {
     address: string;
+}
+
+export interface GetDeveloperAppByAddressRequest {
+    address: string;
+}
+
+export interface UpdateDeveloperAppOperationRequest {
+    address: string;
+    updateDeveloperAppRequest: UpdateDeveloperAppRequest;
 }
 
 /**
@@ -34,11 +63,107 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets developer app matching given address (API key)
+     * Creates a new developer app
      */
-    async getDeveloperAppRaw(params: GetDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeveloperAppResponse>> {
+    async createDeveloperAppRaw(params: CreateDeveloperAppOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.createDeveloperAppRequest === null || params.createDeveloperAppRequest === undefined) {
+            throw new runtime.RequiredError('createDeveloperAppRequest','Required parameter params.createDeveloperAppRequest was null or undefined when calling createDeveloperApp.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/developer-apps`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateDeveloperAppRequestToJSON(params.createDeveloperAppRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new developer app
+     */
+    async createDeveloperApp(params: CreateDeveloperAppOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.createDeveloperAppRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Deletes a developer app
+     */
+    async deleteDeveloperAppRaw(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling deleteDeveloperApp.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a developer app
+     */
+    async deleteDeveloperApp(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.deleteDeveloperAppRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a developer app by address
+     */
+    async getDeveloperAppRaw(params: GetDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeveloperApp>> {
         if (params.address === null || params.address === undefined) {
             throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling getDeveloperApp.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DeveloperAppFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a developer app by address
+     */
+    async getDeveloperApp(params: GetDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperApp> {
+        const response = await this.getDeveloperAppRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets developer app matching given address (API key)
+     */
+    async getDeveloperAppByAddressRaw(params: GetDeveloperAppByAddressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeveloperAppResponse>> {
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling getDeveloperAppByAddress.');
         }
 
         const queryParameters: any = {};
@@ -58,8 +183,46 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
     /**
      * Gets developer app matching given address (API key)
      */
-    async getDeveloperApp(params: GetDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperAppResponse> {
-        const response = await this.getDeveloperAppRaw(params, initOverrides);
+    async getDeveloperAppByAddress(params: GetDeveloperAppByAddressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperAppResponse> {
+        const response = await this.getDeveloperAppByAddressRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing developer app
+     */
+    async updateDeveloperAppRaw(params: UpdateDeveloperAppOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling updateDeveloperApp.');
+        }
+
+        if (params.updateDeveloperAppRequest === null || params.updateDeveloperAppRequest === undefined) {
+            throw new runtime.RequiredError('updateDeveloperAppRequest','Required parameter params.updateDeveloperAppRequest was null or undefined when calling updateDeveloperApp.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateDeveloperAppRequestToJSON(params.updateDeveloperAppRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing developer app
+     */
+    async updateDeveloperApp(params: UpdateDeveloperAppOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.updateDeveloperAppRaw(params, initOverrides);
         return await response.value();
     }
 

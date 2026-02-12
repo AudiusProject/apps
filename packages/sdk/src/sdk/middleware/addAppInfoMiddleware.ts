@@ -47,11 +47,10 @@ export const addAppInfoMiddleware = ({
           providedApiKey ??
           (await services.audiusWalletClient.getAddresses())[0]
         if (apiKey) {
-          appName = (
-            await developerApps.getDeveloperApp({
-              address: apiKey
-            })
-          ).data?.name
+          const app = (await developerApps.getDeveloperApp({
+            address: apiKey
+          })) as { name?: string; data?: { name?: string } }
+          appName = app?.data?.name ?? app?.name
         }
       }
 

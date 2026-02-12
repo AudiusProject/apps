@@ -63,7 +63,7 @@ export const useAudioTransactions = (
       if (!userId) return []
 
       const sdk = await audiusSdk()
-      const response = await sdk.full.users.getAudioTransactions({
+      const response = await sdk.users.getAudioTransactions({
         id: Id.parse(userId),
         offset: page * pageSize,
         limit: pageSize,

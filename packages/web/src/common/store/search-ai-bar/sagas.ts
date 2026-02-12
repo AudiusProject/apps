@@ -20,16 +20,13 @@ function* getSearchResults(searchText: string) {
   const sdk = yield* getSDK()
   const userId = yield* call(queryCurrentUserId)
 
-  const { data } = yield* call(
-    [sdk.full.search, sdk.full.search.searchAutocomplete],
-    {
-      userId: OptionalId.parse(userId),
-      query: searchText,
-      limit: 10,
-      offset: 0,
-      kind: SearchKind.USERS
-    }
-  )
+  const { data } = yield* call([sdk.search, sdk.search.searchAutocomplete], {
+    userId: OptionalId.parse(userId),
+    query: searchText,
+    limit: 10,
+    offset: 0,
+    kind: SearchKind.USERS
+  })
   const results = limitAutocompleteResults(searchResultsFromSDK(data))
 
   const { users } = results

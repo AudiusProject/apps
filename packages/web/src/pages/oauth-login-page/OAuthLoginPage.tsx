@@ -199,7 +199,7 @@ export const OAuthLoginPage = () => {
       )
 
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getUserAccount({
+      const { data } = await sdk.users.getUserAccount({
         wallet: signInResponse.walletAddress
       })
       if (!data) {

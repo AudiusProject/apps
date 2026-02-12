@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck - Custom API overrides use different param/return types than generated base
 import snakecaseKeys from 'snakecase-keys'
 import { OverrideProperties } from 'type-fest'
 

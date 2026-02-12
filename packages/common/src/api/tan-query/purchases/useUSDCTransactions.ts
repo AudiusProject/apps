@@ -99,7 +99,7 @@ export const useUSDCTransactions = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUSDCTransactions({
+      const { data = [] } = await sdk.users.getUSDCTransactions({
         id: Id.parse(currentUserId),
         limit: pageSize,
         offset: pageParam,

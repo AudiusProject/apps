@@ -598,15 +598,17 @@ function* collectEmailAfterPurchase({
       return
     }
 
-    const { data: managers } = yield* call(
-      [sdk.full.users, sdk.full.users.getManagers],
-      {
+    const managersResponse = (yield* call(() =>
+      sdk.users.getManagers({
         id: Id.parse(sellerId),
         isApproved: true
-      }
-    )
+      })
+    )) as { data?: Array<{ manager: { id: string } }> } | undefined
+    const managers = managersResponse?.data
 
-    const grantees = managers?.map((m) => m.manager.id)
+    const grantees = managers?.map(
+      (m: { manager: { id: string } }) => m.manager.id
+    )
 
     const { EMAIL_ENCRYPTION_UUID } = yield* getContext('env')
     yield* call([sdk.users, sdk.users.shareEmail], {

@@ -5,6 +5,7 @@ import {
   Id,
   OptionalHashId,
   type Playlist,
+  type PlaylistFullWithoutTracks as DefaultPlaylistFullWithoutTracks,
   UpdateAlbumRequest,
   UpdatePlaylistRequest
 } from '@audius/sdk'
@@ -52,6 +53,7 @@ type CollectionFromSDK =
   | full.PlaylistFullWithoutTracks
   | full.SearchPlaylistFull
   | full.PlaylistFull
+  | DefaultPlaylistFullWithoutTracks
 
 function collectionArtworkFromSDK(
   art: CollectionFromSDK['artwork']
@@ -138,7 +140,9 @@ export const userCollectionMetadataFromSDK = (
           ? accessConditionsFromSDK(input.streamConditions as full.AccessGate)
           : null,
       tracks: transformAndCleanList(
-        'tracks' in input ? (input.tracks ?? []) : [],
+        ('tracks' in input ? (input.tracks ?? []) : []) as Parameters<
+          typeof userTrackMetadataFromSDK
+        >[0][],
         userTrackMetadataFromSDK
       ),
       cover_art: 'coverArt' in input ? (input.coverArt ?? null) : null,

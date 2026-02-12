@@ -140,7 +140,7 @@ export const OAuthSignUpPage = () => {
       const maxRetries = 15
       while (retries < maxRetries) {
         try {
-          const response = await sdk.full.users.getUserAccount({
+          const response = await sdk.users.getUserAccount({
             wallet
           })
           if (response.data) {

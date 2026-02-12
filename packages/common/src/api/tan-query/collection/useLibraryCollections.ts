@@ -94,8 +94,8 @@ export const useLibraryCollections = (
 
       const { data: activities = [] } =
         collectionType === 'albums'
-          ? await sdk.full.users.getUserLibraryAlbums(requestParams)
-          : await sdk.full.users.getUserLibraryPlaylists(requestParams)
+          ? await sdk.users.getUserLibraryAlbums(requestParams)
+          : await sdk.users.getUserLibraryPlaylists(requestParams)
 
       const collections = transformAndCleanList(activities, ({ item }) =>
         userCollectionMetadataFromSDK(item)

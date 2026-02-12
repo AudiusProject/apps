@@ -40,7 +40,7 @@ function* handleRequestOpen(action: ShareModalRequestOpenAction) {
       let collection = yield* queryCollection(collectionId)
       if (!collection) {
         const { data = [] } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             playlistId: Id.parse(collectionId)
           }
@@ -57,11 +57,12 @@ function* handleRequestOpen(action: ShareModalRequestOpenAction) {
 
       let owner = yield* queryUser(collection.playlist_owner_id)
       if (!owner) {
-        const { data } = yield* call([sdk.full.users, sdk.full.users.getUser], {
+        const data = yield* call([sdk.users, sdk.users.getUser], {
           id: Id.parse(collection.playlist_owner_id)
         })
+        const list = Array.isArray(data) ? data : data != null ? [data] : []
         const [transformedUser] = transformAndCleanList(
-          data ?? [],
+          list as import('@audius/sdk').User[],
           userMetadataFromSDK
         )
         if (transformedUser) {

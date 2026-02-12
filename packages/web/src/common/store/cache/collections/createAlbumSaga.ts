@@ -176,7 +176,7 @@ function* createAndConfirmAlbum(
     })
 
     const { data: album } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(albumId)

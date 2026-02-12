@@ -28,7 +28,7 @@ export const usePurchasesCount = (
     queryKey: getPurchasesCountQueryKey({ userId }),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = 0 } = await sdk.full.users.getPurchasesCount({
+      const { data = 0 } = await sdk.users.getPurchasesCount({
         id: Id.parse(userId),
         userId: Id.parse(userId)
       })

@@ -17,6 +17,12 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
+  CreateComment201Response,
+  CreateTrack201Response,
+  CreateTrackRequest,
+  FullTracksResponse,
+  RecordTrackDownloadRequest,
+  RemixablesResponse,
   RemixesResponse,
   RemixingResponse,
   StemsResponse,
@@ -33,10 +39,23 @@ import type {
   TrackSearch,
   TracksResponse,
   TrendingIdsResponse,
+  UpdateTrackRequest,
 } from '../models';
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
+    CreateComment201ResponseFromJSON,
+    CreateComment201ResponseToJSON,
+    CreateTrack201ResponseFromJSON,
+    CreateTrack201ResponseToJSON,
+    CreateTrackRequestFromJSON,
+    CreateTrackRequestToJSON,
+    FullTracksResponseFromJSON,
+    FullTracksResponseToJSON,
+    RecordTrackDownloadRequestFromJSON,
+    RecordTrackDownloadRequestToJSON,
+    RemixablesResponseFromJSON,
+    RemixablesResponseToJSON,
     RemixesResponseFromJSON,
     RemixesResponseToJSON,
     RemixingResponseFromJSON,
@@ -69,7 +88,17 @@ import {
     TracksResponseToJSON,
     TrendingIdsResponseFromJSON,
     TrendingIdsResponseToJSON,
+    UpdateTrackRequestFromJSON,
+    UpdateTrackRequestToJSON,
 } from '../models';
+
+export interface CreateTrackOperationRequest {
+    createTrackRequest: CreateTrackRequest;
+}
+
+export interface DeleteTrackRequest {
+    trackId: string;
+}
 
 export interface DownloadTrackRequest {
     trackId: string;
@@ -78,6 +107,17 @@ export interface DownloadTrackRequest {
     userData?: string;
     nftAccessSignature?: string;
     filename?: string;
+}
+
+export interface FavoriteTrackRequest {
+    trackId: string;
+}
+
+export interface GetBestNewReleasesRequest {
+    window: GetBestNewReleasesWindowEnum;
+    userId?: string;
+    limit?: number;
+    withUsers?: boolean;
 }
 
 export interface GetBulkTracksRequest {
@@ -92,6 +132,12 @@ export interface GetFeelingLuckyTracksRequest {
     limit?: number;
     withUsers?: boolean;
     minFollowers?: number;
+}
+
+export interface GetMostLovedTracksRequest {
+    userId?: string;
+    limit?: number;
+    withUsers?: boolean;
 }
 
 export interface GetMostSharedTracksRequest {
@@ -122,6 +168,12 @@ export interface GetRecommendedTracksWithVersionRequest {
     time?: GetRecommendedTracksWithVersionTimeEnum;
     exclusionList?: Array<number>;
     userId?: string;
+}
+
+export interface GetRemixableTracksRequest {
+    limit?: number;
+    userId?: string;
+    withUsers?: boolean;
 }
 
 export interface GetTrackRequest {
@@ -233,6 +285,15 @@ export interface GetTrendingUSDCPurchaseTracksWithVersionRequest {
     time?: GetTrendingUSDCPurchaseTracksWithVersionTimeEnum;
 }
 
+export interface GetUnderTheRadarTracksRequest {
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    filter?: GetUnderTheRadarTracksFilterEnum;
+    tracksOnly?: boolean;
+    withUsers?: boolean;
+}
+
 export interface GetUndergroundTrendingTracksRequest {
     offset?: number;
     limit?: number;
@@ -270,6 +331,15 @@ export interface InspectTracksRequest {
     original?: boolean;
 }
 
+export interface RecordTrackDownloadOperationRequest {
+    trackId: string;
+    recordTrackDownloadRequest?: RecordTrackDownloadRequest;
+}
+
+export interface RepostTrackRequest {
+    trackId: string;
+}
+
 export interface SearchTracksRequest {
     offset?: number;
     limit?: number;
@@ -286,6 +356,10 @@ export interface SearchTracksRequest {
     bpmMax?: string;
 }
 
+export interface ShareTrackRequest {
+    trackId: string;
+}
+
 export interface StreamTrackRequest {
     trackId: string;
     userId?: string;
@@ -299,10 +373,88 @@ export interface StreamTrackRequest {
     noRedirect?: boolean;
 }
 
+export interface UnfavoriteTrackRequest {
+    trackId: string;
+}
+
+export interface UnrepostTrackRequest {
+    trackId: string;
+}
+
+export interface UpdateTrackOperationRequest {
+    trackId: string;
+    updateTrackRequest: UpdateTrackRequest;
+}
+
 /**
  * 
  */
 export class TracksApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Creates a new track
+     */
+    async createTrackRaw(params: CreateTrackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateTrack201Response>> {
+        if (params.createTrackRequest === null || params.createTrackRequest === undefined) {
+            throw new runtime.RequiredError('createTrackRequest','Required parameter params.createTrackRequest was null or undefined when calling createTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/tracks`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateTrackRequestToJSON(params.createTrackRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateTrack201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new track
+     */
+    async createTrack(params: CreateTrackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateTrack201Response> {
+        const response = await this.createTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Deletes a track
+     */
+    async deleteTrackRaw(params: DeleteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling deleteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a track
+     */
+    async deleteTrack(params: DeleteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.deleteTrackRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -354,6 +506,84 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async downloadTrack(params: DownloadTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.downloadTrackRaw(params, initOverrides);
+    }
+
+    /**
+     * @hidden
+     * Favorite a track
+     */
+    async favoriteTrackRaw(params: FavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling favoriteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Favorite a track
+     */
+    async favoriteTrack(params: FavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.favoriteTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the tracks found on the \"Best New Releases\" smart playlist
+     */
+    async getBestNewReleasesRaw(params: GetBestNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullTracksResponse>> {
+        if (params.window === null || params.window === undefined) {
+            throw new runtime.RequiredError('window','Required parameter params.window was null or undefined when calling getBestNewReleases.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.window !== undefined) {
+            queryParameters['window'] = params.window;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/best_new_releases`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullTracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Best New Releases\" smart playlist
+     */
+    async getBestNewReleases(params: GetBestNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullTracksResponse> {
+        const response = await this.getBestNewReleasesRaw(params, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -439,6 +669,45 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getFeelingLuckyTracks(params: GetFeelingLuckyTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getFeelingLuckyTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the tracks found on the \"Most Loved\" smart playlist
+     */
+    async getMostLovedTracksRaw(params: GetMostLovedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullTracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/most_loved`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullTracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Most Loved\" smart playlist
+     */
+    async getMostLovedTracks(params: GetMostLovedTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullTracksResponse> {
+        const response = await this.getMostLovedTracksRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -619,6 +888,45 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getRecommendedTracksWithVersion(params: GetRecommendedTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getRecommendedTracksWithVersionRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a list of tracks that have stems available for remixing
+     */
+    async getRemixableTracksRaw(params: GetRemixableTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixablesResponse>> {
+        const queryParameters: any = {};
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/remixables`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RemixablesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a list of tracks that have stems available for remixing
+     */
+    async getRemixableTracks(params: GetRemixableTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixablesResponse> {
+        const response = await this.getRemixableTracksRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1300,6 +1608,57 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the tracks found on the \"Under the Radar\" smart playlist
+     */
+    async getUnderTheRadarTracksRaw(params: GetUnderTheRadarTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullTracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.filter !== undefined) {
+            queryParameters['filter'] = params.filter;
+        }
+
+        if (params.tracksOnly !== undefined) {
+            queryParameters['tracks_only'] = params.tracksOnly;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/under_the_radar`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullTracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Under the Radar\" smart playlist
+     */
+    async getUnderTheRadarTracks(params: GetUnderTheRadarTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullTracksResponse> {
+        const response = await this.getUnderTheRadarTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets the top 100 trending underground tracks on Audius
      */
     async getUndergroundTrendingTracksRaw(params: GetUndergroundTrendingTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
@@ -1546,6 +1905,71 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Record a track download event
+     */
+    async recordTrackDownloadRaw(params: RecordTrackDownloadOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling recordTrackDownload.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/downloads`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RecordTrackDownloadRequestToJSON(params.recordTrackDownloadRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a track download event
+     */
+    async recordTrackDownload(params: RecordTrackDownloadOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.recordTrackDownloadRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Repost a track
+     */
+    async repostTrackRaw(params: RepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling repostTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Repost a track
+     */
+    async repostTrack(params: RepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.repostTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Search for a track or tracks
      */
     async searchTracksRaw(params: SearchTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackSearch>> {
@@ -1625,6 +2049,37 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Record a track share event
+     */
+    async shareTrackRaw(params: ShareTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling shareTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/shares`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a track share event
+     */
+    async shareTrack(params: ShareTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.shareTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Stream an mp3 track This endpoint accepts the Range header for streaming. https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
      * Get the streamable MP3 file of a track
      */
@@ -1692,8 +2147,117 @@ export class TracksApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * @hidden
+     * Unfavorite a track
+     */
+    async unfavoriteTrackRaw(params: UnfavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling unfavoriteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfavorite a track
+     */
+    async unfavoriteTrack(params: UnfavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.unfavoriteTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unrepost a track
+     */
+    async unrepostTrackRaw(params: UnrepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling unrepostTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unrepost a track
+     */
+    async unrepostTrack(params: UnrepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.unrepostTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing track
+     */
+    async updateTrackRaw(params: UpdateTrackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling updateTrack.');
+        }
+
+        if (params.updateTrackRequest === null || params.updateTrackRequest === undefined) {
+            throw new runtime.RequiredError('updateTrackRequest','Required parameter params.updateTrackRequest was null or undefined when calling updateTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/tracks/{track_id}`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateTrackRequestToJSON(params.updateTrackRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing track
+     */
+    async updateTrack(params: UpdateTrackOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.updateTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
 }
 
+/**
+ * @export
+ */
+export const GetBestNewReleasesWindowEnum = {
+    Week: 'week',
+    Month: 'month',
+    Year: 'year'
+} as const;
+export type GetBestNewReleasesWindowEnum = typeof GetBestNewReleasesWindowEnum[keyof typeof GetBestNewReleasesWindowEnum];
 /**
  * @export
  */
@@ -1781,6 +2345,15 @@ export const GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = {
     AllTime: 'allTime'
 } as const;
 export type GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum[keyof typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum];
+/**
+ * @export
+ */
+export const GetUnderTheRadarTracksFilterEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Original: 'original'
+} as const;
+export type GetUnderTheRadarTracksFilterEnum = typeof GetUnderTheRadarTracksFilterEnum[keyof typeof GetUnderTheRadarTracksFilterEnum];
 /**
  * @export
  */

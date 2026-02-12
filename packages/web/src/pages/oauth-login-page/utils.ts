@@ -166,10 +166,13 @@ export const authWrite = async ({ userId, appApiKey }: CreateGrantRequest) => {
   })
 }
 
-export const getDeveloperApp = async (address: string) => {
+export const getDeveloperApp = async (
+  address: string
+): Promise<{ name?: string; imageUrl?: string }> => {
   const sdk = await audiusSdk()
-  const developerApp = await sdk.developerApps.getDeveloperApp({ address })
-  return developerApp.data
+  const result = await sdk.developerApps.getDeveloperApp({ address })
+  const app = result && 'data' in result ? result.data : result
+  return app as { name?: string; imageUrl?: string }
 }
 
 export const getIsAppAuthorized = async ({

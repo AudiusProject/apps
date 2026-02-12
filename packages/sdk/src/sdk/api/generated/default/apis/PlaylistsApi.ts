@@ -17,14 +17,27 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
+  CreateComment201Response,
+  CreatePlaylist201Response,
+  CreatePlaylistRequest,
+  FullTrendingPlaylistsResponse,
   PlaylistResponse,
   PlaylistSearchResult,
   PlaylistTracksResponse,
   TrendingPlaylistsResponse,
+  UpdatePlaylistRequest,
 } from '../models';
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
+    CreateComment201ResponseFromJSON,
+    CreateComment201ResponseToJSON,
+    CreatePlaylist201ResponseFromJSON,
+    CreatePlaylist201ResponseToJSON,
+    CreatePlaylistRequestFromJSON,
+    CreatePlaylistRequestToJSON,
+    FullTrendingPlaylistsResponseFromJSON,
+    FullTrendingPlaylistsResponseToJSON,
     PlaylistResponseFromJSON,
     PlaylistResponseToJSON,
     PlaylistSearchResultFromJSON,
@@ -33,7 +46,21 @@ import {
     PlaylistTracksResponseToJSON,
     TrendingPlaylistsResponseFromJSON,
     TrendingPlaylistsResponseToJSON,
+    UpdatePlaylistRequestFromJSON,
+    UpdatePlaylistRequestToJSON,
 } from '../models';
+
+export interface CreatePlaylistOperationRequest {
+    createPlaylistRequest: CreatePlaylistRequest;
+}
+
+export interface DeletePlaylistRequest {
+    playlistId: string;
+}
+
+export interface FavoritePlaylistRequest {
+    playlistId: string;
+}
 
 export interface GetBulkPlaylistsRequest {
     userId?: string;
@@ -70,6 +97,18 @@ export interface GetTrendingPlaylistsRequest {
     omitTracks?: boolean;
 }
 
+export interface GetTrendingPlaylistsWithVersionRequest {
+    version: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    time?: GetTrendingPlaylistsWithVersionTimeEnum;
+}
+
+export interface RepostPlaylistRequest {
+    playlistId: string;
+}
+
 export interface SearchPlaylistsRequest {
     offset?: number;
     limit?: number;
@@ -81,10 +120,123 @@ export interface SearchPlaylistsRequest {
     hasDownloads?: string;
 }
 
+export interface SharePlaylistRequest {
+    playlistId: string;
+}
+
+export interface UnfavoritePlaylistRequest {
+    playlistId: string;
+}
+
+export interface UnrepostPlaylistRequest {
+    playlistId: string;
+}
+
+export interface UpdatePlaylistOperationRequest {
+    playlistId: string;
+    updatePlaylistRequest: UpdatePlaylistRequest;
+}
+
 /**
  * 
  */
 export class PlaylistsApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Creates a new playlist or album
+     */
+    async createPlaylistRaw(params: CreatePlaylistOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreatePlaylist201Response>> {
+        if (params.createPlaylistRequest === null || params.createPlaylistRequest === undefined) {
+            throw new runtime.RequiredError('createPlaylistRequest','Required parameter params.createPlaylistRequest was null or undefined when calling createPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/playlists`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreatePlaylistRequestToJSON(params.createPlaylistRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreatePlaylist201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new playlist or album
+     */
+    async createPlaylist(params: CreatePlaylistOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreatePlaylist201Response> {
+        const response = await this.createPlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Deletes a playlist or album
+     */
+    async deletePlaylistRaw(params: DeletePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling deletePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a playlist or album
+     */
+    async deletePlaylist(params: DeletePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.deletePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Favorite a playlist
+     */
+    async favoritePlaylistRaw(params: FavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling favoritePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Favorite a playlist
+     */
+    async favoritePlaylist(params: FavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.favoritePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -318,6 +470,84 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersionRaw(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullTrendingPlaylistsResponse>> {
+        if (params.version === null || params.version === undefined) {
+            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingPlaylistsWithVersion.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.time !== undefined) {
+            queryParameters['time'] = params.time;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/trending/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullTrendingPlaylistsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersion(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullTrendingPlaylistsResponse> {
+        const response = await this.getTrendingPlaylistsWithVersionRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Repost a playlist
+     */
+    async repostPlaylistRaw(params: RepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling repostPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Repost a playlist
+     */
+    async repostPlaylist(params: RepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.repostPlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Search for a playlist
      */
     async searchPlaylistsRaw(params: SearchPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PlaylistSearchResult>> {
@@ -375,6 +605,137 @@ export class PlaylistsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * @hidden
+     * Record a playlist share event
+     */
+    async sharePlaylistRaw(params: SharePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling sharePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/shares`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a playlist share event
+     */
+    async sharePlaylist(params: SharePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.sharePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unfavorite a playlist
+     */
+    async unfavoritePlaylistRaw(params: UnfavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling unfavoritePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfavorite a playlist
+     */
+    async unfavoritePlaylist(params: UnfavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.unfavoritePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unrepost a playlist
+     */
+    async unrepostPlaylistRaw(params: UnrepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling unrepostPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unrepost a playlist
+     */
+    async unrepostPlaylist(params: UnrepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.unrepostPlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing playlist or album
+     */
+    async updatePlaylistRaw(params: UpdatePlaylistOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateComment201Response>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling updatePlaylist.');
+        }
+
+        if (params.updatePlaylistRequest === null || params.updatePlaylistRequest === undefined) {
+            throw new runtime.RequiredError('updatePlaylistRequest','Required parameter params.updatePlaylistRequest was null or undefined when calling updatePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdatePlaylistRequestToJSON(params.updatePlaylistRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateComment201ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing playlist or album
+     */
+    async updatePlaylist(params: UpdatePlaylistOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateComment201Response> {
+        const response = await this.updatePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -395,6 +756,16 @@ export const GetTrendingPlaylistsTypeEnum = {
     Album: 'album'
 } as const;
 export type GetTrendingPlaylistsTypeEnum = typeof GetTrendingPlaylistsTypeEnum[keyof typeof GetTrendingPlaylistsTypeEnum];
+/**
+ * @export
+ */
+export const GetTrendingPlaylistsWithVersionTimeEnum = {
+    Week: 'week',
+    Month: 'month',
+    Year: 'year',
+    AllTime: 'allTime'
+} as const;
+export type GetTrendingPlaylistsWithVersionTimeEnum = typeof GetTrendingPlaylistsWithVersionTimeEnum[keyof typeof GetTrendingPlaylistsWithVersionTimeEnum];
 /**
  * @export
  */

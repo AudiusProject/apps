@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { Id } from '@audius/sdk'
+import { full, Id } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -42,7 +42,7 @@ export const useCommentReplies = (
     },
     queryFn: async ({ pageParam }): Promise<ID[]> => {
       const sdk = await audiusSdk()
-      const response = await sdk.full.comments.getCommentReplies({
+      const response = await sdk.comments.getCommentReplies({
         commentId: Id.parse(commentId),
         userId: currentUserId?.toString(),
         limit: pageSize,
@@ -51,7 +51,10 @@ export const useCommentReplies = (
 
       const replies = transformAndCleanList(response.data, replyCommentFromSDK)
 
-      primeRelatedData({ related: response.related, queryClient })
+      primeRelatedData({
+        related: (response as { related?: full.Related }).related,
+        queryClient
+      })
 
       // Update the parent comment with the new replies and prime the reply data
       // Add the replies to our parent comment replies list

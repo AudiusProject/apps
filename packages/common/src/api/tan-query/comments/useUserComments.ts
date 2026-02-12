@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { Id, OptionalId } from '@audius/sdk'
+import { full, Id, OptionalId } from '@audius/sdk'
 import {
   useInfiniteQuery,
   useIsMutating,
@@ -46,7 +46,7 @@ export const useUserComments = (
     queryKey: ['userCommentList', userId, pageSize],
     queryFn: async ({ pageParam }): Promise<ID[]> => {
       const sdk = await audiusSdk()
-      const commentsRes = await sdk.full.users.getUserComments({
+      const commentsRes = await sdk.users.getUserComments({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         offset: pageParam,
@@ -58,7 +58,10 @@ export const useUserComments = (
         commentFromSDK
       )
 
-      primeRelatedData({ related: commentsRes.related, queryClient })
+      primeRelatedData({
+        related: (commentsRes as { related?: full.Related }).related,
+        queryClient
+      })
 
       // Prime comment data in the cache
       primeCommentData({ comments: commentList, queryClient })

@@ -56,7 +56,7 @@ function* sendLibraryRequest({
   const sdk = yield* call(audiusSdk)
 
   const libraryTracksResponse = yield* call(
-    [sdk.full.users, sdk.full.users.getUserLibraryTracks],
+    [sdk.users, sdk.users.getUserLibraryTracks],
     {
       id: Id.parse(userId),
       userId: Id.parse(userId),

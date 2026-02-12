@@ -37,7 +37,7 @@ export const usePurchasersCount = (
     queryFn: async () => {
       const sdk = await audiusSdk()
       if (!currentUserId) return 0
-      const { data = 0 } = await sdk.full.users.getPurchasersCount({
+      const { data = 0 } = await sdk.users.getPurchasersCount({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         contentId: OptionalId.parse(contentId),

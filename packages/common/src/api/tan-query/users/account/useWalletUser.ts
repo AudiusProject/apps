@@ -33,7 +33,7 @@ export const getWalletAccountQueryFn = async (
   sdk: AudiusSdk,
   queryClient: QueryClient
 ) => {
-  const { data } = await sdk.full.users.getUserAccount({
+  const { data } = await sdk.users.getUserAccount({
     wallet
   })
 

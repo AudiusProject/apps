@@ -66,7 +66,7 @@ function* handleFetchTrackCount() {
 
   try {
     const { data = [] } = yield* call(
-      [sdk.full.users, sdk.users.getTracksByUserHandle],
+      [sdk.users, sdk.users.getTracksByUserHandle],
       {
         handle,
         userId: Id.parse(currentUserId),

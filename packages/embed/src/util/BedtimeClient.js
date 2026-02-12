@@ -76,20 +76,20 @@ const getFormattedCollectionResponse = (collection) => {
 }
 
 export const getTrack = async (id) => {
-  const res = await audiusSdk.full.tracks.getTrack({
+  const res = await audiusSdk.tracks.getTrack({
     trackId: encodeHashId(id)
   })
   return res.data
 }
 
 export const getTrackWithHashId = async (hashId) => {
-  const res = await audiusSdk.full.tracks.getTrack({ trackId: hashId })
+  const res = await audiusSdk.tracks.getTrack({ trackId: hashId })
   return res.data
 }
 
 export const getTrackByPermalink = async (handle, slug) => {
   const permalink = `/${handle}/${slug}`
-  const res = await audiusSdk.full.tracks.getBulkTracks({
+  const res = await audiusSdk.tracks.getBulkTracks({
     permalink: [permalink]
   })
   return res.data?.[0] || null

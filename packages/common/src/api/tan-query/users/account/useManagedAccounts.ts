@@ -26,7 +26,7 @@ export const useManagedAccounts = <TResult = ManagedUserMetadata[] | undefined>(
     queryKey: getManagedAccountsQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const managedUsers = await sdk.full.users.getManagedUsers({
+      const managedUsers = await sdk.users.getManagedUsers({
         id: Id.parse(userId)
       })
       const { data = [] } = managedUsers

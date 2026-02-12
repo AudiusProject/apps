@@ -2,7 +2,7 @@
 export { sdk } from './sdk'
 export type { AudiusSdk } from './sdk'
 export * as full from './api/generated/full'
-export * from './api/generated/default'
+export * from './api/generated/default-reexport'
 export { TracksApi } from './api/tracks/TracksApi'
 export { PlaylistsApi } from './api/playlists/PlaylistsApi'
 export { AlbumsApi } from './api/albums/AlbumsApi'

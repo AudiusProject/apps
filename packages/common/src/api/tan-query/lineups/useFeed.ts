@@ -70,7 +70,7 @@ export const useFeed = (
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserFeed({
+      const { data = [] } = await sdk.users.getUserFeed({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         filter: filterMap[filter],

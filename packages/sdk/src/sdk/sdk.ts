@@ -18,6 +18,7 @@ import {
   TipsApi,
   WalletApi
 } from './api/generated/default'
+import type { UsersApi as GeneratedUsersApi } from './api/generated/default'
 import {
   TracksApi as TracksApiFull,
   Configuration as ConfigurationFull,
@@ -126,7 +127,7 @@ export const sdk = (config: SdkConfig) => {
       ? new OAuth({
           appName,
           apiKey,
-          usersApi: apis.users,
+          usersApi: apis.users as unknown as GeneratedUsersApi,
           logger: services.logger
         })
       : undefined
@@ -441,6 +442,23 @@ const initializeApis = ({
     basePath
   })
 
+  // Full API with default basePath for endpoints served at /v1 (no /full)
+  const apiClientConfigFullDefaultPath = new ConfigurationFull({
+    basePath,
+    fetchApi: fetch,
+    middleware
+  })
+  const search = new SearchApiFull(apiClientConfigFullDefaultPath)
+  const usersApiFullDefaultPath = new UsersApiFull(
+    apiClientConfigFullDefaultPath
+  )
+  const notificationsApiFullDefaultPath = new NotificationsApiFull(
+    apiClientConfigFullDefaultPath
+  )
+  const playlistsApiFullDefaultPath = new PlaylistsApiFull(
+    apiClientConfigFullDefaultPath
+  )
+
   const tracks = new TracksApi(
     apiClientConfig,
     services.storage,
@@ -458,7 +476,8 @@ const initializeApis = ({
     services.logger,
     services.claimableTokensClient,
     services.solanaClient,
-    services.emailEncryptionService
+    services.emailEncryptionService,
+    usersApiFullDefaultPath
   )
   const albums = new AlbumsApi(
     apiClientConfig,
@@ -474,7 +493,8 @@ const initializeApis = ({
     apiClientConfig,
     services.storage,
     services.entityManager,
-    services.logger
+    services.logger,
+    playlistsApiFullDefaultPath
   )
   const comments = new CommentsApi(
     apiClientConfig,
@@ -500,7 +520,11 @@ const initializeApis = ({
     services.logger
   )
 
-  const grants = new GrantsApi(apiClientConfig, services.entityManager, users)
+  const grants = new GrantsApi(
+    apiClientConfig,
+    services.entityManager,
+    users as unknown as GeneratedUsersApi
+  )
 
   const developerApps = new DeveloperAppsApi(
     apiClientConfig,
@@ -514,7 +538,8 @@ const initializeApis = ({
 
   const notifications = new NotificationsApi(
     apiClientConfig,
-    services.entityManager
+    services.entityManager,
+    notificationsApiFullDefaultPath
   )
 
   const generatedApiClientConfigFull = new ConfigurationFull({
@@ -551,6 +576,7 @@ const initializeApis = ({
     playlists,
     tips,
     resolve,
+    search,
     full,
     chats,
     grants,

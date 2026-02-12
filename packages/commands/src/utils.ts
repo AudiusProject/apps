@@ -207,7 +207,7 @@ export const getCurrentUserId = async () => {
     throw new Error('sdk not initialized')
   }
   const [address] = await audiusSdk.services.audiusWalletClient.getAddresses()
-  const { data } = await audiusSdk.full.users.getUserAccount({
+  const { data } = await audiusSdk.users.getUserAccount({
     wallet: address
   })
   if (!data?.user) {
@@ -224,7 +224,7 @@ export const getCurrentUserHandle = async () => {
     return currentHandle
   }
   const [address] = await audiusSdk.services.audiusWalletClient.getAddresses()
-  const { data } = await audiusSdk.full.users.getUserAccount({
+  const { data } = await audiusSdk.users.getUserAccount({
     wallet: address
   })
   if (!data?.user) {
