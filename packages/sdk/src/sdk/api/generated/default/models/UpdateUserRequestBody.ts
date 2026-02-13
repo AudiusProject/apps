@@ -14,6 +14,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CreateUserRequestBodyEvents } from './CreateUserRequestBodyEvents';
+import {
+    CreateUserRequestBodyEventsFromJSON,
+    CreateUserRequestBodyEventsFromJSONTyped,
+    CreateUserRequestBodyEventsToJSON,
+} from './CreateUserRequestBodyEvents';
+
 /**
  * Request body for updating user profile. All fields are optional.
  * @export
@@ -128,6 +135,12 @@ export interface UpdateUserRequestBody {
      * @memberof UpdateUserRequestBody
      */
     coinFlairMint?: string;
+    /**
+     * 
+     * @type {CreateUserRequestBodyEvents}
+     * @memberof UpdateUserRequestBody
+     */
+    events?: CreateUserRequestBodyEvents;
 }
 
 
@@ -177,6 +190,7 @@ export function UpdateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
         'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
+        'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
 
@@ -207,6 +221,7 @@ export function UpdateUserRequestBodyToJSON(value?: UpdateUserRequestBody | null
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
         'coin_flair_mint': value.coinFlairMint,
+        'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }
 

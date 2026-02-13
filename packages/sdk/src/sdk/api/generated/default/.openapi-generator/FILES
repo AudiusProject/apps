@@ -79,6 +79,7 @@ models/CreateTrackResponse.ts
 models/CreateUserDeveloperAppRequestBody.ts
 models/CreateUserDeveloperAppResponse.ts
 models/CreateUserRequestBody.ts
+models/CreateUserRequestBodyEvents.ts
 models/CreateUserResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts

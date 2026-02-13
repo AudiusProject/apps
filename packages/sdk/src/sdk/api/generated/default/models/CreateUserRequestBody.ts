@@ -14,6 +14,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CreateUserRequestBodyEvents } from './CreateUserRequestBodyEvents';
+import {
+    CreateUserRequestBodyEventsFromJSON,
+    CreateUserRequestBodyEventsFromJSONTyped,
+    CreateUserRequestBodyEventsToJSON,
+} from './CreateUserRequestBodyEvents';
+
 /**
  * 
  * @export
@@ -128,6 +135,12 @@ export interface CreateUserRequestBody {
      * @memberof CreateUserRequestBody
      */
     splUsdcPayoutWallet?: string;
+    /**
+     * 
+     * @type {CreateUserRequestBodyEvents}
+     * @memberof CreateUserRequestBody
+     */
+    events?: CreateUserRequestBodyEvents;
 }
 
 
@@ -179,6 +192,7 @@ export function CreateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'profileType': !exists(json, 'profile_type') ? undefined : json['profile_type'],
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
+        'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
 
@@ -209,6 +223,7 @@ export function CreateUserRequestBodyToJSON(value?: CreateUserRequestBody | null
         'profile_type': value.profileType,
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
+        'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }
 

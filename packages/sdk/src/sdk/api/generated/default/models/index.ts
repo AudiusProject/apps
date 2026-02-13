@@ -63,6 +63,7 @@ export * from './CreateTrackResponse';
 export * from './CreateUserDeveloperAppRequestBody';
 export * from './CreateUserDeveloperAppResponse';
 export * from './CreateUserRequestBody';
+export * from './CreateUserRequestBodyEvents';
 export * from './CreateUserResponse';
 export * from './DashboardWalletUser';
 export * from './DashboardWalletUsersResponse';

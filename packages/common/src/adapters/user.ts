@@ -235,7 +235,7 @@ export const userMetadataToSdk = (
   website: input.website ?? undefined,
   artistPickTrackId: OptionalId.parse(input.artist_pick_track_id ?? undefined),
   events: {
-    referrer: OptionalId.parse(input.events?.referrer ?? undefined),
+    referrer: input.events?.referrer ?? undefined,
     isMobileUser: input.events?.is_mobile_user ?? undefined
   },
   location: input.location ?? undefined,
