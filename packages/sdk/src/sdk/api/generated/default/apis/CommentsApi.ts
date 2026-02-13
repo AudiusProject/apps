@@ -20,6 +20,8 @@ import type {
   CommentResponse,
   CreateCommentRequestBody,
   CreateCommentResponse,
+  PinCommentRequestBody,
+  ReactCommentRequestBody,
   UnclaimedIdResponse,
   UpdateCommentRequestBody,
   WriteResponse,
@@ -33,6 +35,10 @@ import {
     CreateCommentRequestBodyToJSON,
     CreateCommentResponseFromJSON,
     CreateCommentResponseToJSON,
+    PinCommentRequestBodyFromJSON,
+    PinCommentRequestBodyToJSON,
+    ReactCommentRequestBodyFromJSON,
+    ReactCommentRequestBodyToJSON,
     UnclaimedIdResponseFromJSON,
     UnclaimedIdResponseToJSON,
     UpdateCommentRequestBodyFromJSON,
@@ -65,11 +71,13 @@ export interface GetCommentRepliesRequest {
 export interface PinCommentRequest {
     commentId: string;
     userId: string;
+    metadata: PinCommentRequestBody;
 }
 
 export interface ReactToCommentRequest {
     commentId: string;
     userId: string;
+    metadata: ReactCommentRequestBody;
 }
 
 export interface ReportCommentRequest {
@@ -80,11 +88,13 @@ export interface ReportCommentRequest {
 export interface UnpinCommentRequest {
     commentId: string;
     userId: string;
+    metadata: PinCommentRequestBody;
 }
 
 export interface UnreactToCommentRequest {
     commentId: string;
     userId: string;
+    metadata: ReactCommentRequestBody;
 }
 
 export interface UpdateCommentRequest {
@@ -315,6 +325,10 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling pinComment.');
         }
 
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling pinComment.');
+        }
+
         const queryParameters: any = {};
 
         if (params.userId !== undefined) {
@@ -322,6 +336,8 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -339,6 +355,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: PinCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
@@ -365,6 +382,10 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling reactToComment.');
         }
 
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling reactToComment.');
+        }
+
         const queryParameters: any = {};
 
         if (params.userId !== undefined) {
@@ -372,6 +393,8 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -389,6 +412,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: ReactCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
@@ -465,6 +489,10 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unpinComment.');
         }
 
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling unpinComment.');
+        }
+
         const queryParameters: any = {};
 
         if (params.userId !== undefined) {
@@ -472,6 +500,8 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -489,6 +519,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
+            body: PinCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
@@ -515,6 +546,10 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unreactToComment.');
         }
 
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling unreactToComment.');
+        }
+
         const queryParameters: any = {};
 
         if (params.userId !== undefined) {
@@ -522,6 +557,8 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -539,6 +576,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
+            body: ReactCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

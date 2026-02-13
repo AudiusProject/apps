@@ -85,16 +85,17 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const { createCommentRequestBody, userId } = params
-      const metadata: EntityManagerCreateCommentRequest = {
+      const { metadata, userId } = params
+      const commentId = await this.createCommentWithEntityManager({
         userId,
-        entityId: createCommentRequestBody.entityId,
-        entityType: createCommentRequestBody.entityType,
-        body: createCommentRequestBody.body,
-        commentId: createCommentRequestBody.commentId,
-        parentCommentId: createCommentRequestBody.parentId
-      }
-      const commentId = await this.createCommentWithEntityManager(metadata)
+        entityId: encodeHashId(metadata.entityId) ?? '',
+        entityType: metadata.entityType,
+        body: metadata.body,
+        commentId: metadata.commentId,
+        parentCommentId: metadata.parentId,
+        trackTimestampS: metadata.trackTimestampS,
+        mentions: metadata.mentions
+      })
       return {
         success: true,
         commentId: commentId ?? undefined
@@ -132,14 +133,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const { updateCommentRequestBody, userId, commentId } = params
-      const metadata: EntityManagerUpdateCommentRequest = {
+      const { metadata, userId, commentId } = params
+      await this.updateCommentWithEntityManager({
         userId,
         entityId: commentId,
-        trackId: commentId, // trackId is used for the entity being commented on
-        body: updateCommentRequestBody.body
-      }
-      await this.updateCommentWithEntityManager(metadata)
+        trackId: encodeHashId(metadata.entityId) ?? '',
+        body: metadata.body
+      })
       return {
         success: true
       }

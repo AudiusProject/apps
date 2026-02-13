@@ -24,52 +24,39 @@ import {
 /**
  * 
  * @export
- * @interface UpdateCommentRequestBody
+ * @interface ReactCommentRequestBody
  */
-export interface UpdateCommentRequestBody {
+export interface ReactCommentRequestBody {
     /**
      * 
      * @type {CommentEntityType}
-     * @memberof UpdateCommentRequestBody
+     * @memberof ReactCommentRequestBody
      */
     entityType: CommentEntityType;
     /**
-     * ID of the entity being commented on
+     * ID of the entity (track or playlist) being commented on
      * @type {number}
-     * @memberof UpdateCommentRequestBody
+     * @memberof ReactCommentRequestBody
      */
     entityId: number;
-    /**
-     * The updated comment text
-     * @type {string}
-     * @memberof UpdateCommentRequestBody
-     */
-    body: string;
-    /**
-     * Array of user IDs mentioned in the comment (max 10)
-     * @type {Array<number>}
-     * @memberof UpdateCommentRequestBody
-     */
-    mentions?: Array<number>;
 }
 
 /**
- * Check if a given object implements the UpdateCommentRequestBody interface.
+ * Check if a given object implements the ReactCommentRequestBody interface.
  */
-export function instanceOfUpdateCommentRequestBody(value: object): value is UpdateCommentRequestBody {
+export function instanceOfReactCommentRequestBody(value: object): value is ReactCommentRequestBody {
     let isInstance = true;
     isInstance = isInstance && "entityType" in value && value["entityType"] !== undefined;
     isInstance = isInstance && "entityId" in value && value["entityId"] !== undefined;
-    isInstance = isInstance && "body" in value && value["body"] !== undefined;
 
     return isInstance;
 }
 
-export function UpdateCommentRequestBodyFromJSON(json: any): UpdateCommentRequestBody {
-    return UpdateCommentRequestBodyFromJSONTyped(json, false);
+export function ReactCommentRequestBodyFromJSON(json: any): ReactCommentRequestBody {
+    return ReactCommentRequestBodyFromJSONTyped(json, false);
 }
 
-export function UpdateCommentRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateCommentRequestBody {
+export function ReactCommentRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): ReactCommentRequestBody {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -77,12 +64,10 @@ export function UpdateCommentRequestBodyFromJSONTyped(json: any, ignoreDiscrimin
         
         'entityType': CommentEntityTypeFromJSON(json['entityType']),
         'entityId': json['entityId'],
-        'body': json['body'],
-        'mentions': !exists(json, 'mentions') ? undefined : json['mentions'],
     };
 }
 
-export function UpdateCommentRequestBodyToJSON(value?: UpdateCommentRequestBody | null): any {
+export function ReactCommentRequestBodyToJSON(value?: ReactCommentRequestBody | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -93,8 +78,6 @@ export function UpdateCommentRequestBodyToJSON(value?: UpdateCommentRequestBody 
         
         'entityType': CommentEntityTypeToJSON(value.entityType),
         'entityId': value.entityId,
-        'body': value.body,
-        'mentions': value.mentions,
     };
 }
 

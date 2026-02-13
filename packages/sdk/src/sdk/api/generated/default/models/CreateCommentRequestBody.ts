@@ -35,10 +35,10 @@ export interface CreateCommentRequestBody {
     entityType: CommentEntityType;
     /**
      * ID of the entity being commented on
-     * @type {string}
+     * @type {number}
      * @memberof CreateCommentRequestBody
      */
-    entityId: string;
+    entityId: number;
     /**
      * Comment text
      * @type {string}
@@ -46,7 +46,7 @@ export interface CreateCommentRequestBody {
      */
     body: string;
     /**
-     * Optional comment ID
+     * Optional comment ID (will be generated if not provided)
      * @type {number}
      * @memberof CreateCommentRequestBody
      */
@@ -57,6 +57,18 @@ export interface CreateCommentRequestBody {
      * @memberof CreateCommentRequestBody
      */
     parentId?: number;
+    /**
+     * Timestamp in the track where the comment was made (in seconds)
+     * @type {number}
+     * @memberof CreateCommentRequestBody
+     */
+    trackTimestampS?: number;
+    /**
+     * Array of user IDs mentioned in the comment (max 10)
+     * @type {Array<number>}
+     * @memberof CreateCommentRequestBody
+     */
+    mentions?: Array<number>;
 }
 
 /**
@@ -86,6 +98,8 @@ export function CreateCommentRequestBodyFromJSONTyped(json: any, ignoreDiscrimin
         'body': json['body'],
         'commentId': !exists(json, 'commentId') ? undefined : json['commentId'],
         'parentId': !exists(json, 'parentId') ? undefined : json['parentId'],
+        'trackTimestampS': !exists(json, 'trackTimestampS') ? undefined : json['trackTimestampS'],
+        'mentions': !exists(json, 'mentions') ? undefined : json['mentions'],
     };
 }
 
@@ -103,6 +117,8 @@ export function CreateCommentRequestBodyToJSON(value?: CreateCommentRequestBody 
         'body': value.body,
         'commentId': value.commentId,
         'parentId': value.parentId,
+        'trackTimestampS': value.trackTimestampS,
+        'mentions': value.mentions,
     };
 }
 
