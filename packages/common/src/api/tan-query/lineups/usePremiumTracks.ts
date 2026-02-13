@@ -53,7 +53,7 @@ export const usePremiumTracks = (
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
       const { data: tracks = [] } =
-        await sdk.tracks.getTrendingUSDCPurchaseTracks({
+        await sdk.full.tracks.getTrendingUSDCPurchaseTracks({
           userId: OptionalId.parse(currentUserId),
           limit: pageSize,
           offset: pageParam

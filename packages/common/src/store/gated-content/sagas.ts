@@ -85,7 +85,7 @@ export function* pollGatedContent({
           return transformAndCleanList(data, userCollectionMetadataFromSDK)[0]
         })
       : yield* call(async () => {
-          const { data } = await sdk.tracks.getTrack({
+          const { data } = await sdk.full.tracks.getTrack({
             trackId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })

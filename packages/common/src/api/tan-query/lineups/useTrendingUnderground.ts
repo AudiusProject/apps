@@ -53,7 +53,7 @@ export const useTrendingUnderground = (
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
 
-      const { data = [] } = await sdk.tracks.getUndergroundTrendingTracks({
+      const { data = [] } = await sdk.full.tracks.getUndergroundTrendingTracks({
         offset: pageParam,
         limit: pageSize,
         userId: OptionalId.parse(currentUserId)
