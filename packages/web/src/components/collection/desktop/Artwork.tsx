@@ -19,7 +19,6 @@ const messages = {
 
 type ArtworkProps = {
   collectionId: number
-  callback: () => void
   isOwner: boolean
 }
 

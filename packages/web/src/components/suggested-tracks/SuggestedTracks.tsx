@@ -20,9 +20,9 @@ import { useToggle } from 'react-use'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link/UserLink'
-import { useMainContentRef } from 'pages/MainContentContext'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { useMainContentRef } from 'pages/MainContentContext'
 
 import styles from './SuggestedTracks.module.css'
 
@@ -107,8 +107,11 @@ type SuggestedTracksProps = {
 export const SuggestedTracks = (props: SuggestedTracksProps) => {
   const { collectionId } = props
   const mainContentRef = useMainContentRef()
-  const { suggestedTracks, onRefresh, onAddTrack: originalOnAddTrack } =
-    useSuggestedPlaylistTracks(collectionId)
+  const {
+    suggestedTracks,
+    onRefresh,
+    onAddTrack: originalOnAddTrack
+  } = useSuggestedPlaylistTracks(collectionId)
   const [isExpanded, toggleIsExpanded] = useToggle(false)
   const { motion } = useTheme()
 

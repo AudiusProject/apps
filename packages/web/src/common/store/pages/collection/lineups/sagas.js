@@ -15,8 +15,8 @@ import { dayjs, removeNullable, Uid } from '@audius/common/utils'
 import { keyBy } from 'lodash'
 import { select, call } from 'redux-saga/effects'
 
-import { LineupSagas } from 'common/store/lineup/sagas'
 import { hasPendingPlaylistUpdates } from 'common/store/cache/collections/utils/hasPendingPlaylistUpdates'
+import { LineupSagas } from 'common/store/lineup/sagas'
 
 const { getPositions } = queueSelectors
 const { getCollectionId, getCollectionTracksLineup, getCollectionPermalink } =

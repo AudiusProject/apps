@@ -1,13 +1,11 @@
 import { Kind } from '@audius/common/models'
+import type { Track, ID, UID } from '@audius/common/models'
 import {
   collectionPageLineupActions,
   collectionPageSelectors
 } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
 import { put, select } from 'typed-redux-saga'
-
-import type { Track } from '@audius/common/models'
-import type { ID, UID } from '@audius/common/models'
 
 /**
  * Updates the collection page lineup with minimal changes (add/remove/order)
@@ -26,12 +24,12 @@ export function* addTrackToCollectionLineupIfViewing(
 
   const entry = {
     ...track,
+    kind: Kind.TRACKS,
+    id: track.track_id,
     uid: trackUid,
     dateAdded: dayjs()
   }
-  yield* put(
-    collectionPageLineupActions.add(entry, track.track_id)
-  )
+  yield* put(collectionPageLineupActions.add(entry, track.track_id))
 }
 
 export function* removeTrackFromCollectionLineupIfViewing(
