@@ -88,9 +88,7 @@ function* watchRepairEmptyPlaylistLibrary() {
           type: 'playlist' as const
         }))
       ]
-      yield* put(
-        update({ playlistLibrary: { contents: newContents } })
-      )
+      yield* put(update({ playlistLibrary: { contents: newContents } }))
     }
   )
 }
