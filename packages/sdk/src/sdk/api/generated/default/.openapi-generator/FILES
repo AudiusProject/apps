@@ -114,6 +114,7 @@ models/MediaLink.ts
 models/MonthlyAggregatePlay.ts
 models/Mood.ts
 models/MutualFollowersResponse.ts
+models/PinCommentRequestBody.ts
 models/Playlist.ts
 models/PlaylistAddedTimestamp.ts
 models/PlaylistArtwork.ts
@@ -127,6 +128,7 @@ models/PrizePublic.ts
 models/PrizesResponse.ts
 models/ProfilePicture.ts
 models/PurchasersResponse.ts
+models/ReactCommentRequestBody.ts
 models/RedeemAmountResponse.ts
 models/RelatedArtistResponse.ts
 models/RemixParent.ts

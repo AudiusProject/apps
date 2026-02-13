@@ -14,12 +14,25 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CommentEntityType } from './CommentEntityType';
+import {
+    CommentEntityTypeFromJSON,
+    CommentEntityTypeFromJSONTyped,
+    CommentEntityTypeToJSON,
+} from './CommentEntityType';
+
 /**
  * 
  * @export
  * @interface PinCommentRequestBody
  */
 export interface PinCommentRequestBody {
+    /**
+     * 
+     * @type {CommentEntityType}
+     * @memberof PinCommentRequestBody
+     */
+    entityType: CommentEntityType;
     /**
      * ID of the entity (track or playlist) the comment is on
      * @type {number}
@@ -33,6 +46,7 @@ export interface PinCommentRequestBody {
  */
 export function instanceOfPinCommentRequestBody(value: object): value is PinCommentRequestBody {
     let isInstance = true;
+    isInstance = isInstance && "entityType" in value && value["entityType"] !== undefined;
     isInstance = isInstance && "entityId" in value && value["entityId"] !== undefined;
 
     return isInstance;
@@ -48,6 +62,7 @@ export function PinCommentRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
+        'entityType': CommentEntityTypeFromJSON(json['entityType']),
         'entityId': json['entityId'],
     };
 }
@@ -61,6 +76,7 @@ export function PinCommentRequestBodyToJSON(value?: PinCommentRequestBody | null
     }
     return {
         
+        'entityType': CommentEntityTypeToJSON(value.entityType),
         'entityId': value.entityId,
     };
 }
