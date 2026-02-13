@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 
+import type { Genre, Mood } from '@audius/sdk'
 import { fileToSdk } from '@audius/common/adapters'
 import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
@@ -110,7 +111,8 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
-    mood: track?.mood || null,
+    genre: (track?.genre as Genre) ?? '',
+    mood: (track?.mood as Mood) ?? null,
     artwork: {
       url: coverArtUrl || ''
     },

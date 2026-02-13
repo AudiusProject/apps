@@ -36,13 +36,13 @@ export type QuickSearchPreset = {
 
 export const QUICK_SEARCH_PRESETS: QuickSearchPreset[] = [
   { mood: Mood.Fiery, bpm: bpmDescriptions.UPBEAT },
-  { genre: Genre.ELECTRONIC, mood: Mood.Aggressive },
-  { genre: Genre.ALTERNATIVE, key: 'E Minor' },
-  { genre: Genre.HIP_HOP_RAP, bpm: bpmDescriptions.MEDIUM },
-  { genre: Genre.TECHNO, bpm: bpmDescriptions.UPBEAT },
-  { genre: Genre.LOFI, bpm: bpmDescriptions.SLOW },
-  { genre: Genre.DUBSTEP, bpm: bpmDescriptions._140 },
-  { genre: Genre.ROCK, isVerified: true },
-  { genre: Genre.ALTERNATIVE, mood: Mood.Romantic },
+  { genre: Genre.Electronic, mood: Mood.Aggressive },
+  { genre: Genre.Alternative, key: 'E Minor' },
+  { genre: Genre.HipHopRap, bpm: bpmDescriptions.MEDIUM },
+  { genre: Genre.Techno, bpm: bpmDescriptions.UPBEAT },
+  { genre: Genre.LoFi, bpm: bpmDescriptions.SLOW },
+  { genre: Genre.Dubstep, bpm: bpmDescriptions._140 },
+  { genre: Genre.Rock, isVerified: true },
+  { genre: Genre.Alternative, mood: Mood.Romantic },
   { key: 'A Minor', bpm: bpmDescriptions.SLOW }
 ]

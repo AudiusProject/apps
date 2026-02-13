@@ -17,7 +17,7 @@ import {
   TRENDING_MONTH_PREFIX,
   TRENDING_ALL_TIME_PREFIX
 } from '~/store/pages/trending/lineup/actions'
-import { GENRES, Genre } from '~/utils/genres'
+import { ALL_GENRES, GENRES, Genre } from '~/utils/genres'
 
 import { TimeRange, Track } from '../../../models'
 
@@ -103,7 +103,11 @@ const reducer =
               ? timeRange
               : TimeRange.WEEK,
           trendingGenre:
-            genre && Object.values(GENRES).includes(genre) ? genre : null
+            genre === ALL_GENRES
+              ? null
+              : genre && GENRES.includes(genre)
+                ? genre
+                : null
         }
       }
 
