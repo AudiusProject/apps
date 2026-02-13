@@ -156,7 +156,6 @@ import {
 } from '../models';
 
 export interface CreateUserRequest {
-    userId: string;
     metadata: CreateUserRequestBody;
 }
 
@@ -549,19 +548,11 @@ export class UsersApi extends runtime.BaseAPI {
      * Creates a new user
      */
     async createUserRaw(params: CreateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateUserResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createUser.');
-        }
-
         if (params.metadata === null || params.metadata === undefined) {
             throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createUser.');
         }
 
         const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
