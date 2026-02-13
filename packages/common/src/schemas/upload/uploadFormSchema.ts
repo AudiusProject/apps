@@ -64,8 +64,9 @@ const GenreSchema = z
 
 /** Same as SDK. */
 const MoodSchema = z
-  .optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]]))
+  .enum(Object.values(Mood) as [Mood, ...Mood[]])
   .nullable()
+  .optional()
 
 const DDEXResourceContributor = z
   .object({
