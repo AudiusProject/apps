@@ -39,6 +39,10 @@ import { ensureLoggedIn } from 'common/utils/ensureLoggedIn'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
+import {
+  acquirePlaylistUpdateLock,
+  hasPendingPlaylistUpdates
+} from './utils/playlistUpdateLock'
 
 const { setOptimisticChallengeCompleted } = audioRewardsPageActions
 
@@ -75,95 +79,104 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
   const isNative = yield* getContext('isNativeMobile')
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
-  const playlistTracks = yield* call(
-    queryTracks,
-    playlist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
-  )
-  const track = yield* queryTrack(trackId)
+  const release = yield* call(acquirePlaylistUpdateLock, playlistId)
+  try {
+    const pending = yield* hasPendingPlaylistUpdates(playlistId)
+    const queryOpts = pending ? {} : { staleTime: 0 }
+    const playlist = yield* queryCollection(playlistId, queryOpts)
+    const playlistTracks = yield* call(
+      queryTracks,
+      playlist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
+    )
+    const track = yield* queryTrack(trackId)
 
-  if (!playlist || !playlistTracks || !track) return
+    if (!playlist || !playlistTracks || !track) return
 
-  const trackUid = makeUid(
-    Kind.TRACKS,
-    action.trackId,
-    `collection:${action.playlistId}`
-  )
+    const trackUid = makeUid(
+      Kind.TRACKS,
+      action.trackId,
+      `collection:${action.playlistId}`
+    )
 
-  yield* put(
-    cacheActions.subscribe(Kind.TRACKS, [{ uid: trackUid, id: action.trackId }])
-  )
+    yield* put(
+      cacheActions.subscribe(Kind.TRACKS, [
+        { uid: trackUid, id: action.trackId }
+      ])
+    )
 
-  playlist.playlist_contents = {
-    track_ids: playlist.playlist_contents.track_ids.concat({
-      track: action.trackId,
-      // Replaced in indexing with block timestamp
-      // Represents the server time seen when track was added to playlist
-      time: 0,
-      // Represents user-facing timestamp when the user added the track to the playlist.
-      // This is needed to disambiguate between tracks added at the same time/potentiall in
-      // the same block.
-      metadata_time: getCurrentTimestamp(),
-      uid: trackUid
-    })
-  }
-
-  const count = playlist.track_count + 1
-  playlist.track_count = count
-
-  // Optimistic update #1 to show track in playlist quickly
-  if (isNative) {
-    yield* call(optimisticUpdateCollection, playlist)
-  }
-
-  const updatedPlaylist = yield* call(
-    updatePlaylistArtwork,
-    playlist,
-    playlistTracks,
-    { added: track },
-    {
-      generateImage: generatePlaylistArtwork
+    playlist.playlist_contents = {
+      track_ids: playlist.playlist_contents.track_ids.concat({
+        track: action.trackId,
+        // Replaced in indexing with block timestamp
+        // Represents the server time seen when track was added to playlist
+        time: 0,
+        // Represents user-facing timestamp when the user added the track to the playlist.
+        // This is needed to disambiguate between tracks added at the same time/potentiall in
+        // the same block.
+        metadata_time: getCurrentTimestamp(),
+        uid: trackUid
+      })
     }
-  )
 
-  // Optimistic update #2 to show updated artwork
-  yield* call(optimisticUpdateCollection, updatedPlaylist)
+    const count = playlist.track_count + 1
+    playlist.track_count = count
 
-  yield* call(
-    confirmAddTrackToPlaylist,
-    userId,
-    action.playlistId,
-    action.trackId,
-    count,
-    updatedPlaylist
-  )
+    // Optimistic update #1 to show track in playlist quickly
+    if (isNative) {
+      yield* call(optimisticUpdateCollection, playlist)
+    }
 
-  yield* put(
-    setOptimisticChallengeCompleted({
-      challengeId: 'first-playlist',
-      specifier: userId.toString()
+    const updatedPlaylist = yield* call(
+      updatePlaylistArtwork,
+      playlist,
+      playlistTracks,
+      { added: track },
+      {
+        generateImage: generatePlaylistArtwork
+      }
+    )
+
+    // Optimistic update #2 to show updated artwork
+    yield* call(optimisticUpdateCollection, updatedPlaylist)
+
+    yield* call(
+      confirmAddTrackToPlaylist,
+      userId,
+      action.playlistId,
+      action.trackId,
+      count,
+      updatedPlaylist
+    )
+
+    yield* put(
+      setOptimisticChallengeCompleted({
+        challengeId: 'first-playlist',
+        specifier: userId.toString()
+      })
+    )
+
+    yield* put(
+      setOptimisticChallengeCompleted({
+        challengeId: ChallengeName.FirstPlaylist,
+        specifier: Id.parse(userId)
+      })
+    )
+
+    const event = make(Name.PLAYLIST_ADD, {
+      trackId: action.trackId,
+      playlistId: action.playlistId
     })
-  )
 
-  yield* put(
-    setOptimisticChallengeCompleted({
-      challengeId: ChallengeName.FirstPlaylist,
-      specifier: Id.parse(userId)
-    })
-  )
+    yield* put(event)
 
-  const event = make(Name.PLAYLIST_ADD, {
-    trackId: action.trackId,
-    playlistId: action.playlistId
-  })
-
-  yield* put(event)
-
-  yield* put(
-    toast({
-      content: messages.addedTrack(playlist.is_album ? 'album' : 'playlist')
-    })
-  )
+    yield* put(
+      toast({
+        content: messages.addedTrack(playlist.is_album ? 'album' : 'playlist')
+      })
+    )
+  } finally {
+    release()
+  }
 }
 
 function* confirmAddTrackToPlaylist(

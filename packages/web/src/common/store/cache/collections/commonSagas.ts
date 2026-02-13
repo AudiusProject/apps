@@ -50,6 +50,10 @@ import { confirmOrderPlaylist } from './confirmOrderPlaylist'
 import { createAlbumSaga } from './createAlbumSaga'
 import { createPlaylistSaga } from './createPlaylistSaga'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
+import {
+  acquirePlaylistUpdateLock,
+  hasPendingPlaylistUpdates
+} from './utils/playlistUpdateLock'
 
 const { manualClearToast, toast } = toastActions
 
@@ -101,67 +105,77 @@ function* editPlaylistAsync(
     })
   )
 
-  let playlist: Collection = { ...formFields }
-  const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
-  })
-  const updatedTracks = (yield* all(
-    formFields.playlist_contents.track_ids.map(({ track }) =>
-      call(queryTrack, track)
-    )
-  )).filter(removeNullable)
+  const release = yield* call(acquirePlaylistUpdateLock, playlistId)
+  try {
+    const pending = yield* hasPendingPlaylistUpdates(playlistId)
+    const queryOpts = pending ? {} : { staleTime: 0 }
+    let playlist: Collection = { ...formFields }
+    const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
+      ...queryOpts
+    })
+    const updatedTracks = (yield* all(
+      formFields.playlist_contents.track_ids.map(({ track }) =>
+        call(queryTrack, track)
+      )
+    )).filter(removeNullable)
 
-  // If the collection is a newly premium album, this will populate the premium metadata (price/splits/etc)
-  if (
-    playlist.is_album &&
-    isContentUSDCPurchaseGated(playlist.stream_conditions)
-  ) {
-    playlist.stream_conditions = yield* call(
-      getUSDCMetadata,
-      playlist.stream_conditions
-    )
-  }
+    // If the collection is a newly premium album, this will populate the premium metadata (price/splits/etc)
+    if (
+      playlist.is_album &&
+      isContentUSDCPurchaseGated(playlist.stream_conditions)
+    ) {
+      playlist.stream_conditions = yield* call(
+        getUSDCMetadata,
+        playlist.stream_conditions
+      )
+    }
 
-  // Optimistic update #1 to quickly update metadata and track lineup
-  if (isNative) {
+    // Optimistic update #1 to quickly update metadata and track lineup
+    if (isNative) {
+      yield* call(optimisticUpdateCollection, playlist)
+    }
+
+    playlist = yield* call(
+      updatePlaylistArtwork,
+      playlist,
+      playlistTracks!,
+      { updated: updatedTracks },
+      { generateImage: generatePlaylistArtwork }
+    )
+
+    // Optimistic update #2 to update the artwork
+    const playlistBeforeEdit = yield* queryCollection(playlistId)
     yield* call(optimisticUpdateCollection, playlist)
-  }
 
-  playlist = yield* call(
-    updatePlaylistArtwork,
-    playlist,
-    playlistTracks!,
-    { updated: updatedTracks },
-    { generateImage: generatePlaylistArtwork }
-  )
+    yield* call(confirmEditPlaylist, playlistId, userId, playlist)
+    yield* put(collectionActions.editPlaylistSucceeded())
+    yield* put(toast({ content: messages.editToast }))
 
-  // Optimistic update #2 to update the artwork
-  const playlistBeforeEdit = yield* queryCollection(playlistId)
-  yield* call(optimisticUpdateCollection, playlist)
+    if (playlistBeforeEdit?.is_private && !playlist.is_private) {
+      const playlistTracksForPublish = yield* call(
+        queryCollectionTracks,
+        playlistId
+      )
 
-  yield* call(confirmEditPlaylist, playlistId, userId, playlist)
-  yield* put(collectionActions.editPlaylistSucceeded())
-  yield* put(toast({ content: messages.editToast }))
-
-  if (playlistBeforeEdit?.is_private && !playlist.is_private) {
-    const playlistTracks = yield* call(queryCollectionTracks, playlistId)
-
-    // Publish all hidden tracks
-    // If the playlist is a scheduled release
-    //    AND all tracks are scheduled releases, publish them all
-    const isEachTrackScheduled = playlistTracks?.every(
-      (track) => track.is_unlisted && track.is_scheduled_release
-    )
-    const isEarlyRelease =
-      playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
-    for (const track of playlistTracks ?? []) {
-      if (
-        track.is_unlisted &&
-        (!track.is_scheduled_release || isEarlyRelease)
-      ) {
-        yield* put(trackPageActions.makeTrackPublic(track.track_id))
+      // Publish all hidden tracks
+      // If the playlist is a scheduled release
+      //    AND all tracks are scheduled releases, publish them all
+      const isEachTrackScheduled = playlistTracksForPublish?.every(
+        (track) => track.is_unlisted && track.is_scheduled_release
+      )
+      const isEarlyRelease =
+        playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
+      for (const track of playlistTracksForPublish ?? []) {
+        if (
+          track.is_unlisted &&
+          (!track.is_scheduled_release || isEarlyRelease)
+        ) {
+          yield* put(trackPageActions.makeTrackPublic(track.track_id))
+        }
       }
     }
+  } finally {
+    release()
   }
 }
 
@@ -243,55 +257,62 @@ function* removeTrackFromPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
-  const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
-  })
-  const removedTrack = yield* queryTrack(trackId)
-
-  const updatedPlaylist = yield* call(
-    updatePlaylistArtwork,
-    playlist!,
-    playlistTracks!,
-    { removed: removedTrack! },
-    { generateImage: generatePlaylistArtwork }
-  )
-
-  // Find the index of the track based on the track's id and timestamp
-  const index = updatedPlaylist.playlist_contents.track_ids.findIndex((t) => {
-    if (t.track !== trackId) return false
-
-    return t.metadata_time === timestamp || t.time === timestamp
-  })
-  if (index === -1) {
-    console.error('Could not find the index of to-be-deleted track')
-    return
-  }
-
-  const track = updatedPlaylist.playlist_contents.track_ids[index]
-  updatedPlaylist.playlist_contents.track_ids.splice(index, 1)
-  const count = countTrackIds(updatedPlaylist.playlist_contents, trackId)
-
-  yield* put(
-    toast({
-      content: messages.removingTrack,
-      key: `remove-track-${trackId}`
+  const release = yield* call(acquirePlaylistUpdateLock, playlistId)
+  try {
+    const pending = yield* hasPendingPlaylistUpdates(playlistId)
+    const queryOpts = pending ? {} : { staleTime: 0 }
+    const playlist = yield* queryCollection(playlistId, queryOpts)
+    const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
+      ...queryOpts
     })
-  )
+    const removedTrack = yield* queryTrack(trackId)
 
-  yield* call(
-    confirmRemoveTrackFromPlaylist,
-    userId,
-    action.playlistId,
-    action.trackId,
-    track.time,
-    count,
-    updatedPlaylist
-  )
-  yield* call(optimisticUpdateCollection, {
-    ...updatedPlaylist,
-    track_count: count
-  })
+    const updatedPlaylist = yield* call(
+      updatePlaylistArtwork,
+      playlist!,
+      playlistTracks!,
+      { removed: removedTrack! },
+      { generateImage: generatePlaylistArtwork }
+    )
+
+    // Find the index of the track based on the track's id and timestamp
+    const index = updatedPlaylist.playlist_contents.track_ids.findIndex((t) => {
+      if (t.track !== trackId) return false
+
+      return t.metadata_time === timestamp || t.time === timestamp
+    })
+    if (index === -1) {
+      console.error('Could not find the index of to-be-deleted track')
+      return
+    }
+
+    const track = updatedPlaylist.playlist_contents.track_ids[index]
+    updatedPlaylist.playlist_contents.track_ids.splice(index, 1)
+    const count = countTrackIds(updatedPlaylist.playlist_contents, trackId)
+
+    yield* put(
+      toast({
+        content: messages.removingTrack,
+        key: `remove-track-${trackId}`
+      })
+    )
+
+    yield* call(
+      confirmRemoveTrackFromPlaylist,
+      userId,
+      action.playlistId,
+      action.trackId,
+      track.time,
+      count,
+      updatedPlaylist
+    )
+    yield* call(optimisticUpdateCollection, {
+      ...updatedPlaylist,
+      track_count: count
+    })
+  } finally {
+    release()
+  }
 }
 
 function* confirmRemoveTrackFromPlaylist(
@@ -372,70 +393,77 @@ function* orderPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const oldPlaylist = yield* queryCollection(playlistId)
-  const freshPlaylist = yield* queryCollection(playlistId, { staleTime: 0 })
-  const tracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
-  })
+  const release = yield* call(acquirePlaylistUpdateLock, playlistId)
+  try {
+    const pending = yield* hasPendingPlaylistUpdates(playlistId)
+    const queryOpts = pending ? {} : { staleTime: 0 }
+    const oldPlaylist = yield* queryCollection(playlistId)
+    const freshPlaylist = yield* queryCollection(playlistId, queryOpts)
+    const tracks = yield* call(queryCollectionTracks, playlistId, {
+      ...queryOpts
+    })
 
-  const oldTracks =
-    oldPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
-  const freshTracks =
-    freshPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
+    const oldTracks =
+      oldPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
+    const freshTracks =
+      freshPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
 
-  // If the lengths don't match or tracks are in a different order, the collection is stale
-  const isStale =
-    freshTracks.length !== oldTracks.length ||
-    !freshTracks.every((t, i) => t === oldTracks[i])
+    // If the lengths don't match or tracks are in a different order, the collection is stale
+    const isStale =
+      freshTracks.length !== oldTracks.length ||
+      !freshTracks.every((t, i) => t === oldTracks[i])
 
-  if (isStale) {
-    // Collection has been modified elsewhere - fail the operation
-    yield* put(
-      toast({
-        content: messages.reorderStale
-      })
-    )
-    return
-  }
-
-  if (!freshPlaylist || !tracks) {
-    yield* put(
-      collectionActions.orderPlaylistFailed(
-        new Error('Playlist or tracks not found'),
-        { userId, playlistId },
-        {}
+    if (isStale) {
+      // Collection has been modified elsewhere - fail the operation
+      yield* put(
+        toast({
+          content: messages.reorderStale
+        })
       )
+      return
+    }
+
+    if (!freshPlaylist || !tracks) {
+      yield* put(
+        collectionActions.orderPlaylistFailed(
+          new Error('Playlist or tracks not found'),
+          { userId, playlistId },
+          {}
+        )
+      )
+      return
+    }
+
+    const trackIds = trackIdsAndTimes.map(({ id }) => id)
+
+    const orderedTracks = trackIds.map(
+      (trackId) => tracks!.find((track) => track.track_id === trackId)!
     )
-    return
+
+    const updatedPlaylist = yield* call(
+      updatePlaylistArtwork,
+      freshPlaylist,
+      tracks,
+      { reordered: orderedTracks },
+      { generateImage: generatePlaylistArtwork }
+    )
+
+    updatedPlaylist.playlist_contents.track_ids = trackIdsAndTimes.map(
+      ({ id, time }) => ({ track: id, time })
+    )
+
+    yield* call(
+      confirmOrderPlaylist,
+      userId,
+      playlistId,
+      trackIds,
+      updatedPlaylist
+    )
+
+    yield* call(optimisticUpdateCollection, updatedPlaylist)
+  } finally {
+    release()
   }
-
-  const trackIds = trackIdsAndTimes.map(({ id }) => id)
-
-  const orderedTracks = trackIds.map(
-    (trackId) => tracks!.find((track) => track.track_id === trackId)!
-  )
-
-  const updatedPlaylist = yield* call(
-    updatePlaylistArtwork,
-    freshPlaylist,
-    tracks,
-    { reordered: orderedTracks },
-    { generateImage: generatePlaylistArtwork }
-  )
-
-  updatedPlaylist.playlist_contents.track_ids = trackIdsAndTimes.map(
-    ({ id, time }) => ({ track: id, time })
-  )
-
-  yield* call(
-    confirmOrderPlaylist,
-    userId,
-    playlistId,
-    trackIds,
-    updatedPlaylist
-  )
-
-  yield* call(optimisticUpdateCollection, updatedPlaylist)
 }
 
 /** PUBLISH PLAYLIST */
