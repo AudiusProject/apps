@@ -20,6 +20,7 @@ import { useToggle } from 'react-use'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link/UserLink'
+import { useMainContentRef } from 'pages/MainContentContext'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -76,6 +77,7 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
         variant='secondary'
         size='small'
         onClick={handleAddTrack}
+        onMouseDown={(e) => e.preventDefault()}
         disabled={trackIsInCollection}
       >
         {trackIsInCollection ? messages.added : messages.addTrack}
@@ -104,10 +106,29 @@ type SuggestedTracksProps = {
 
 export const SuggestedTracks = (props: SuggestedTracksProps) => {
   const { collectionId } = props
-  const { suggestedTracks, onRefresh, onAddTrack } =
+  const mainContentRef = useMainContentRef()
+  const { suggestedTracks, onRefresh, onAddTrack: originalOnAddTrack } =
     useSuggestedPlaylistTracks(collectionId)
   const [isExpanded, toggleIsExpanded] = useToggle(false)
   const { motion } = useTheme()
+
+  // Preserve scroll position when adding track - prevents scroll-to-top on
+  // optimistic update (e.g. from focus loss when Add button becomes disabled)
+  const onAddTrack = useCallback(
+    (trackId: ID) => {
+      const scrollTop = mainContentRef?.current?.scrollTop ?? 0
+      originalOnAddTrack(trackId)
+      // Restore scroll after React has committed the update
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (mainContentRef?.current != null) {
+            mainContentRef.current.scrollTop = scrollTop
+          }
+        })
+      })
+    },
+    [originalOnAddTrack, mainContentRef]
+  )
 
   const contentHeight = 66 + SUGGESTED_TRACK_COUNT * 74
   const contentStyles = useSpring({

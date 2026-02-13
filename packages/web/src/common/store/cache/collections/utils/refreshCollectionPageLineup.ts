@@ -17,7 +17,13 @@ export function* refreshCollectionPageLineupIfViewing(playlistId: ID) {
   )
   if (collectionId === playlistId) {
     yield* put(
-      collectionPageLineupActions.fetchLineupMetadatas(0, 200, false, undefined)
+      collectionPageLineupActions.fetchLineupMetadatas(
+        0,
+        200,
+        false,
+        undefined,
+        { skipLoadingState: true }
+      )
     )
   }
 }

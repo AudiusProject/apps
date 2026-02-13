@@ -54,7 +54,7 @@ import {
   isPlaylistConfirmerDone
 } from './utils/hasPendingPlaylistUpdates'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
-import { refreshCollectionPageLineupIfViewing } from './utils/refreshCollectionPageLineup'
+import { updateCollectionLineupOrderIfViewing } from './utils/updateCollectionPageLineup'
 
 const { manualClearToast, toast } = toastActions
 
@@ -297,7 +297,7 @@ function* removeTrackFromPlaylistAsync(
     ...updatedPlaylist,
     track_count: count
   })
-  yield* call(refreshCollectionPageLineupIfViewing, action.playlistId)
+  // UI already dispatches lineup remove - skip full refresh to preserve scroll
   yield* call(
     confirmRemoveTrackFromPlaylist,
     userId,
@@ -445,7 +445,7 @@ function* orderPlaylistAsync(
   )
 
   yield* call(optimisticUpdateCollection, updatedPlaylist)
-  yield* call(refreshCollectionPageLineupIfViewing, action.playlistId)
+  yield* call(updateCollectionLineupOrderIfViewing, action.playlistId, trackIds)
   yield* call(
     confirmOrderPlaylist,
     userId,

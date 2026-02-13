@@ -43,7 +43,7 @@ import {
   isPlaylistConfirmerDone
 } from './utils/hasPendingPlaylistUpdates'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
-import { refreshCollectionPageLineupIfViewing } from './utils/refreshCollectionPageLineup'
+import { addTrackToCollectionLineupIfViewing } from './utils/updateCollectionPageLineup'
 
 const { setOptimisticChallengeCompleted } = audioRewardsPageActions
 
@@ -135,7 +135,12 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
 
   // Optimistic update #2 to show updated artwork
   yield* call(optimisticUpdateCollection, updatedPlaylist)
-  yield* call(refreshCollectionPageLineupIfViewing, action.playlistId)
+  yield* call(
+    addTrackToCollectionLineupIfViewing,
+    action.playlistId,
+    track,
+    trackUid
+  )
 
   yield* call(
     confirmAddTrackToPlaylist,
