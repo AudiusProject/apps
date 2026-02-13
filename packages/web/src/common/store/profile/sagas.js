@@ -1,4 +1,4 @@
-import { userMetadataFromSDK } from '@audius/common/adapters'
+import { userMetadataListFromSDK } from '@audius/common/adapters'
 import {
   getUserQueryKey,
   queryCurrentUserId,
@@ -154,11 +154,14 @@ function* confirmUpdateProfile(userId, metadata) {
         }
         yield waitForAccount()
         const currentUserId = yield call(queryCurrentUserId)
-        const { data } = yield call([sdk.users, sdk.users.getUser], {
-          id: Id.parse(userId),
-          userId: Id.parse(currentUserId)
-        })
-        return userMetadataFromSDK(data)
+        const { data = [] } = yield call(
+          [sdk.full.users, sdk.full.users.getUser],
+          {
+            id: Id.parse(userId),
+            userId: Id.parse(currentUserId)
+          }
+        )
+        return userMetadataListFromSDK(data)[0]
       },
       function* (confirmedUser) {
         // Invalidate the user query to refetch fresh data from the server

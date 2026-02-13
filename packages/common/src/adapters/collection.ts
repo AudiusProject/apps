@@ -4,11 +4,11 @@ import {
   full,
   Id,
   OptionalHashId,
-  type Playlist,
   UpdateAlbumRequest,
   UpdatePlaylistRequest
 } from '@audius/sdk'
 import dayjs from 'dayjs'
+import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
 import {
@@ -46,140 +46,91 @@ const addedTimestampToPlaylistTrackId = ({
   return null
 }
 
-/** Playlist/album shape from default or full SDK (same runtime shape, shared camelCase fields). */
-type CollectionFromSDK =
-  | Playlist
-  | full.PlaylistFullWithoutTracks
-  | full.SearchPlaylistFull
-  | full.PlaylistFull
-
-function collectionArtworkFromSDK(
-  art: CollectionFromSDK['artwork']
-): UserCollectionMetadata['artwork'] {
-  if (!art) return {}
-  return {
-    '150x150': art._150x150,
-    '480x480': art._480x480,
-    '1000x1000': art._1000x1000,
-    ...('mirrors' in art && art.mirrors ? { mirrors: art.mirrors } : {})
-  }
-}
-
 export const userCollectionMetadataFromSDK = (
-  input: CollectionFromSDK
+  input:
+    | full.PlaylistFullWithoutTracks
+    | full.SearchPlaylistFull
+    | full.PlaylistFull
 ): UserCollectionMetadata | undefined => {
   try {
-    const userId =
-      'userId' in input && input.userId ? input.userId : input.user?.id
     const decodedPlaylistId = OptionalHashId.parse(input.id)
-    const decodedOwnerId = OptionalHashId.parse(userId)
+    const decodedOwnerId = OptionalHashId.parse(input.userId ?? input.user.id)
     const user = userMetadataFromSDK(input.user)
     if (!decodedPlaylistId || !decodedOwnerId || !user) {
       return undefined
     }
 
-    const access = input.access ?? { stream: true, download: true }
     const newCollection: UserCollectionMetadata = {
+      // Fields from API that are omitted in this model
+      ...omit(snakecaseKeys(input), [
+        'id',
+        'user_id',
+        'followee_favorites',
+        'favorite_count',
+        'added_timestamps'
+      ]),
+      artwork: input.artwork
+        ? {
+            '150x150': input.artwork._150x150,
+            '480x480': input.artwork._480x480,
+            '1000x1000': input.artwork._1000x1000,
+            mirrors: input.artwork.mirrors
+          }
+        : {},
       variant: Variant.USER_GENERATED,
-      is_album: input.isAlbum ?? false,
-      track_count: input.trackCount ?? 0,
-      repost_count: input.repostCount ?? 0,
-      permalink: input.permalink ?? '',
-      playlist_name: input.playlistName ?? '',
-      access: { stream: access.stream, download: access.download },
+
+      // Conversions
       playlist_id: decodedPlaylistId,
       playlist_owner_id: decodedOwnerId,
-      artwork: collectionArtworkFromSDK(input.artwork),
-      playlist_contents: {
-        track_ids: transformAndCleanList(
-          input.playlistContents ?? [],
-          addedTimestampToPlaylistTrackId
-        )
-      },
-      user,
-      save_count: input.favoriteCount ?? 0,
-      release_date:
-        'releaseDate' in input && input.releaseDate
-          ? dayjs.utc(input.releaseDate).local().toString()
-          : null,
-      artists:
-        'artists' in input && input.artists
-          ? transformAndCleanList(
-              input.artists as object[],
-              resourceContributorFromSDK
-            )
-          : null,
-      copyright_line:
-        'copyrightLine' in input && input.copyrightLine
-          ? (snakecaseKeys(
-              input.copyrightLine as Record<string, unknown>
-            ) as Copyright)
-          : null,
-      cover_art_cids:
-        'coverArtCids' in input && input.coverArtCids
-          ? coverArtSizesCIDsFromSDK(input.coverArtCids as full.CoverArt)
-          : null,
+      // TODO: Remove this when api is fixed to return UTC dates
+      release_date: input.releaseDate
+        ? dayjs.utc(input.releaseDate).local().toString()
+        : null,
+
+      // Nested Transformed Fields
+      artists: input.artists
+        ? transformAndCleanList(input.artists, resourceContributorFromSDK)
+        : null,
+      copyright_line: input.copyrightLine
+        ? (snakecaseKeys(input.copyrightLine) as Copyright)
+        : null,
+      cover_art_cids: input.coverArtCids
+        ? coverArtSizesCIDsFromSDK(input.coverArtCids)
+        : null,
       followee_reposts: transformAndCleanList(
-        'followeeReposts' in input ? (input.followeeReposts ?? []) : [],
+        input.followeeReposts,
         repostFromSDK
       ),
       followee_saves: transformAndCleanList(
-        'followeeFavorites' in input ? (input.followeeFavorites ?? []) : [],
+        input.followeeFavorites,
         favoriteFromSDK
       ),
-      producer_copyright_line:
-        'producerCopyrightLine' in input && input.producerCopyrightLine
-          ? (snakecaseKeys(
-              input.producerCopyrightLine as Record<string, unknown>
-            ) as Copyright)
-          : null,
-      stream_conditions:
-        'streamConditions' in input && input.streamConditions
-          ? accessConditionsFromSDK(input.streamConditions as full.AccessGate)
-          : null,
-      tracks: transformAndCleanList(
-        'tracks' in input ? (input.tracks ?? []) : [],
-        userTrackMetadataFromSDK
-      ),
-      cover_art: 'coverArt' in input ? (input.coverArt ?? null) : null,
-      cover_art_sizes:
-        'coverArtSizes' in input ? (input.coverArtSizes ?? null) : null,
-      description: input.description ?? null,
-      blocknumber: 'blocknumber' in input ? (input.blocknumber ?? 0) : 0,
-      has_current_user_reposted:
-        'hasCurrentUserReposted' in input
-          ? (input.hasCurrentUserReposted ?? false)
-          : false,
-      has_current_user_saved:
-        'hasCurrentUserSaved' in input
-          ? (input.hasCurrentUserSaved ?? false)
-          : false,
-      is_delete: 'isDelete' in input ? (input.isDelete ?? false) : false,
-      is_private: 'isPrivate' in input ? (input.isPrivate ?? false) : false,
-      created_at:
-        'createdAt' in input && input.createdAt
-          ? dayjs(input.createdAt).toISOString()
-          : '',
-      updated_at:
-        'updatedAt' in input && input.updatedAt
-          ? dayjs(input.updatedAt).toISOString()
-          : '',
-      is_scheduled_release:
-        'isScheduledRelease' in input
-          ? (input.isScheduledRelease ?? false)
-          : false,
-      is_stream_gated:
-        'isStreamGated' in input ? (input.isStreamGated ?? false) : false,
-      upc: input.upc ?? null,
-      ddex_app: input.ddexApp ?? null,
-      ddex_release_ids:
-        (input as { ddexReleaseIds?: unknown }).ddexReleaseIds ?? null,
-      parental_warning_type:
-        (input as { parentalWarningType?: string }).parentalWarningType ?? null
+      playlist_contents: {
+        track_ids: transformAndCleanList(
+          input.playlistContents,
+          addedTimestampToPlaylistTrackId
+        )
+      },
+      producer_copyright_line: input.producerCopyrightLine
+        ? (snakecaseKeys(input.producerCopyrightLine) as Copyright)
+        : null,
+      stream_conditions: input.streamConditions
+        ? accessConditionsFromSDK(input.streamConditions)
+        : null,
+      tracks: transformAndCleanList(input.tracks, userTrackMetadataFromSDK),
+      user,
+
+      // Retypes / Renames
+      save_count: input.favoriteCount,
+
+      // Nullable fields
+      cover_art: input.coverArt ?? null,
+      cover_art_sizes: input.coverArtSizes ?? null,
+      description: input.description ?? null
     }
 
     return newCollection
-  } catch {
+  } catch (e) {
     return undefined
   }
 }

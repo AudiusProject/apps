@@ -20,18 +20,6 @@ import {
     AccessFromJSONTyped,
     AccessToJSON,
 } from './Access';
-import type { AccessGate } from './AccessGate';
-import {
-    AccessGateFromJSON,
-    AccessGateFromJSONTyped,
-    AccessGateToJSON,
-} from './AccessGate';
-import type { Favorite } from './Favorite';
-import {
-    FavoriteFromJSON,
-    FavoriteFromJSONTyped,
-    FavoriteToJSON,
-} from './Favorite';
 import type { PlaylistAddedTimestamp } from './PlaylistAddedTimestamp';
 import {
     PlaylistAddedTimestampFromJSON,
@@ -44,18 +32,6 @@ import {
     PlaylistArtworkFromJSONTyped,
     PlaylistArtworkToJSON,
 } from './PlaylistArtwork';
-import type { Repost } from './Repost';
-import {
-    RepostFromJSON,
-    RepostFromJSONTyped,
-    RepostToJSON,
-} from './Repost';
-import type { Track } from './Track';
-import {
-    TrackFromJSON,
-    TrackFromJSONTyped,
-    TrackToJSON,
-} from './Track';
 import type { User } from './User';
 import {
     UserFromJSON,
@@ -165,150 +141,6 @@ export interface Playlist {
      * @memberof Playlist
      */
     trackCount: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Playlist
-     */
-    blocknumber: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    createdAt: string;
-    /**
-     * 
-     * @type {Array<Repost>}
-     * @memberof Playlist
-     */
-    followeeReposts: Array<Repost>;
-    /**
-     * 
-     * @type {Array<Favorite>}
-     * @memberof Playlist
-     */
-    followeeFavorites: Array<Favorite>;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    hasCurrentUserReposted: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    hasCurrentUserSaved: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    isDelete: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    isPrivate: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    updatedAt: string;
-    /**
-     * DEPRECATED. Use playlist_contents instead.
-     * @type {Array<PlaylistAddedTimestamp>}
-     * @memberof Playlist
-     */
-    addedTimestamps: Array<PlaylistAddedTimestamp>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    userId: string;
-    /**
-     * 
-     * @type {Array<Track>}
-     * @memberof Playlist
-     */
-    tracks?: Array<Track>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    coverArt?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    coverArtSizes?: string;
-    /**
-     * 
-     * @type {PlaylistArtwork}
-     * @memberof Playlist
-     */
-    coverArtCids?: PlaylistArtwork;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    isStreamGated: boolean;
-    /**
-     * How to unlock stream access to the track
-     * @type {AccessGate}
-     * @memberof Playlist
-     */
-    streamConditions?: AccessGate;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Playlist
-     */
-    isScheduledRelease: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    releaseDate?: string;
-    /**
-     * 
-     * @type {object}
-     * @memberof Playlist
-     */
-    ddexReleaseIds?: object;
-    /**
-     * 
-     * @type {Array<object>}
-     * @memberof Playlist
-     */
-    artists?: Array<object>;
-    /**
-     * 
-     * @type {object}
-     * @memberof Playlist
-     */
-    copyrightLine?: object;
-    /**
-     * 
-     * @type {object}
-     * @memberof Playlist
-     */
-    producerCopyrightLine?: object;
-    /**
-     * 
-     * @type {string}
-     * @memberof Playlist
-     */
-    parentalWarningType?: string;
 }
 
 /**
@@ -328,19 +160,6 @@ export function instanceOfPlaylist(value: object): value is Playlist {
     isInstance = isInstance && "user" in value && value["user"] !== undefined;
     isInstance = isInstance && "access" in value && value["access"] !== undefined;
     isInstance = isInstance && "trackCount" in value && value["trackCount"] !== undefined;
-    isInstance = isInstance && "blocknumber" in value && value["blocknumber"] !== undefined;
-    isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
-    isInstance = isInstance && "followeeReposts" in value && value["followeeReposts"] !== undefined;
-    isInstance = isInstance && "followeeFavorites" in value && value["followeeFavorites"] !== undefined;
-    isInstance = isInstance && "hasCurrentUserReposted" in value && value["hasCurrentUserReposted"] !== undefined;
-    isInstance = isInstance && "hasCurrentUserSaved" in value && value["hasCurrentUserSaved"] !== undefined;
-    isInstance = isInstance && "isDelete" in value && value["isDelete"] !== undefined;
-    isInstance = isInstance && "isPrivate" in value && value["isPrivate"] !== undefined;
-    isInstance = isInstance && "updatedAt" in value && value["updatedAt"] !== undefined;
-    isInstance = isInstance && "addedTimestamps" in value && value["addedTimestamps"] !== undefined;
-    isInstance = isInstance && "userId" in value && value["userId"] !== undefined;
-    isInstance = isInstance && "isStreamGated" in value && value["isStreamGated"] !== undefined;
-    isInstance = isInstance && "isScheduledRelease" in value && value["isScheduledRelease"] !== undefined;
 
     return isInstance;
 }
@@ -371,30 +190,6 @@ export function PlaylistFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'access': AccessFromJSON(json['access']),
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
         'trackCount': json['track_count'],
-        'blocknumber': json['blocknumber'],
-        'createdAt': json['created_at'],
-        'followeeReposts': ((json['followee_reposts'] as Array<any>).map(RepostFromJSON)),
-        'followeeFavorites': ((json['followee_favorites'] as Array<any>).map(FavoriteFromJSON)),
-        'hasCurrentUserReposted': json['has_current_user_reposted'],
-        'hasCurrentUserSaved': json['has_current_user_saved'],
-        'isDelete': json['is_delete'],
-        'isPrivate': json['is_private'],
-        'updatedAt': json['updated_at'],
-        'addedTimestamps': ((json['added_timestamps'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
-        'userId': json['user_id'],
-        'tracks': !exists(json, 'tracks') ? undefined : ((json['tracks'] as Array<any>).map(TrackFromJSON)),
-        'coverArt': !exists(json, 'cover_art') ? undefined : json['cover_art'],
-        'coverArtSizes': !exists(json, 'cover_art_sizes') ? undefined : json['cover_art_sizes'],
-        'coverArtCids': !exists(json, 'cover_art_cids') ? undefined : PlaylistArtworkFromJSON(json['cover_art_cids']),
-        'isStreamGated': json['is_stream_gated'],
-        'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
-        'isScheduledRelease': json['is_scheduled_release'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
-        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
-        'artists': !exists(json, 'artists') ? undefined : json['artists'],
-        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
-        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
-        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
     };
 }
 
@@ -423,30 +218,6 @@ export function PlaylistToJSON(value?: Playlist | null): any {
         'access': AccessToJSON(value.access),
         'upc': value.upc,
         'track_count': value.trackCount,
-        'blocknumber': value.blocknumber,
-        'created_at': value.createdAt,
-        'followee_reposts': ((value.followeeReposts as Array<any>).map(RepostToJSON)),
-        'followee_favorites': ((value.followeeFavorites as Array<any>).map(FavoriteToJSON)),
-        'has_current_user_reposted': value.hasCurrentUserReposted,
-        'has_current_user_saved': value.hasCurrentUserSaved,
-        'is_delete': value.isDelete,
-        'is_private': value.isPrivate,
-        'updated_at': value.updatedAt,
-        'added_timestamps': ((value.addedTimestamps as Array<any>).map(PlaylistAddedTimestampToJSON)),
-        'user_id': value.userId,
-        'tracks': value.tracks === undefined ? undefined : ((value.tracks as Array<any>).map(TrackToJSON)),
-        'cover_art': value.coverArt,
-        'cover_art_sizes': value.coverArtSizes,
-        'cover_art_cids': PlaylistArtworkToJSON(value.coverArtCids),
-        'is_stream_gated': value.isStreamGated,
-        'stream_conditions': AccessGateToJSON(value.streamConditions),
-        'is_scheduled_release': value.isScheduledRelease,
-        'release_date': value.releaseDate,
-        'ddex_release_ids': value.ddexReleaseIds,
-        'artists': value.artists,
-        'copyright_line': value.copyrightLine,
-        'producer_copyright_line': value.producerCopyrightLine,
-        'parental_warning_type': value.parentalWarningType,
     };
 }
 

@@ -40,7 +40,7 @@ export const useGetTrendingIds = (args?: GetTrendingIdsArgs) => {
     queryKey: getTrendingIdsQueryKey(args),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.tracks.getTrendingTrackIDs(args)
+      const { data } = await sdk.full.tracks.getTrendingTrackIDs(args)
       return data ? trendingIdsFromSDK(data) : null
     }
   })

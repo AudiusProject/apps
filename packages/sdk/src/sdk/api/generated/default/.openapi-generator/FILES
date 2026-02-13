@@ -17,7 +17,6 @@ apis/WalletApi.ts
 apis/index.ts
 index.ts
 models/Access.ts
-models/AccessGate.ts
 models/AccessInfoResponse.ts
 models/Activity.ts
 models/AlbumBacklink.ts
@@ -92,7 +91,6 @@ models/GetSupporters.ts
 models/GetTipsResponse.ts
 models/HistoryResponse.ts
 models/ListenCount.ts
-models/MediaLink.ts
 models/MonthlyAggregatePlay.ts
 models/MutualFollowersResponse.ts
 models/NftCollection.ts
@@ -115,10 +113,7 @@ models/RelatedArtistResponse.ts
 models/RemixParent.ts
 models/RemixedTrackAggregate.ts
 models/RemixersResponse.ts
-models/RemixesResponse.ts
-models/RemixingResponse.ts
 models/ReplyComment.ts
-models/Repost.ts
 models/Reposts.ts
 models/RewardCodeErrorResponse.ts
 models/RewardCodeResponse.ts
@@ -146,18 +141,12 @@ models/TrackCommentCountResponse.ts
 models/TrackCommentNotificationResponse.ts
 models/TrackCommentsResponse.ts
 models/TrackElement.ts
-models/TrackFavoritesResponse.ts
-models/TrackId.ts
 models/TrackInspect.ts
 models/TrackInspectList.ts
-models/TrackRepostsResponse.ts
 models/TrackResponse.ts
 models/TrackSearch.ts
-models/TracksCountResponse.ts
 models/TracksResponse.ts
-models/TrendingIdsResponse.ts
 models/TrendingPlaylistsResponse.ts
-models/TrendingTimesIds.ts
 models/UnclaimedIdResponse.ts
 models/UndisbursedChallenge.ts
 models/UndisbursedChallenges.ts

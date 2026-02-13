@@ -193,10 +193,11 @@ app.post('/attestation/:handle', async (c) => {
   const handle = c.req.param('handle').toLowerCase()
   const { challengeId, challengeSpecifier, amount } = await c.req.json()
 
-  const { data: user } = await sdk.users.getUserByHandle({ handle })
-  if (!user) {
+  const { data: users } = await sdk.full.users.getUserByHandle({ handle })
+  if (!users || !users[0]) {
     return c.json({ error: `handle not found: ${handle}` }, 404)
   }
+  const user = users[0]!
   if (verifiedRewards.includes(challengeId)) {
     if (!user.isVerified) {
       return c.json({ error: 'denied' }, 400)

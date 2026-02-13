@@ -72,7 +72,7 @@ export const useExclusiveTracks = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data: tracks = [] } = await sdk.users.getTracksByUser({
+      const { data: tracks = [] } = await sdk.full.users.getTracksByUser({
         id: OptionalId.parse(userId)!,
         userId: OptionalId.parse(currentUserId),
         gateCondition: gateConditions as any,
@@ -136,7 +136,7 @@ export const useExclusiveTracksCount = (args: {
     queryKey: [QUERY_KEYS.exclusiveTracksCount, userId, { gateConditions }],
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data: count } = await sdk.users.getTracksCountByUser({
+      const { data: count } = await sdk.full.users.getTracksCountByUser({
         id: OptionalId.parse(userId)!,
         userId: OptionalId.parse(currentUserId),
         gateCondition: gateConditions as any

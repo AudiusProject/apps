@@ -48,7 +48,6 @@ export const useUnfollowUser = () => {
       // Handle gated content
       dispatch(removeFolloweeId({ id: followeeUserId }))
 
-      // Track the unfollow
       if (source) {
         track(
           make({

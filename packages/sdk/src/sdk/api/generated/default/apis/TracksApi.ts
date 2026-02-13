@@ -17,30 +17,21 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
-  RemixesResponse,
-  RemixingResponse,
   StemsResponse,
   StreamUrlResponse,
   TopListener,
   TrackCommentCountResponse,
   TrackCommentNotificationResponse,
   TrackCommentsResponse,
-  TrackFavoritesResponse,
   TrackInspect,
   TrackInspectList,
-  TrackRepostsResponse,
   TrackResponse,
   TrackSearch,
   TracksResponse,
-  TrendingIdsResponse,
 } from '../models';
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
-    RemixesResponseFromJSON,
-    RemixesResponseToJSON,
-    RemixingResponseFromJSON,
-    RemixingResponseToJSON,
     StemsResponseFromJSON,
     StemsResponseToJSON,
     StreamUrlResponseFromJSON,
@@ -53,22 +44,16 @@ import {
     TrackCommentNotificationResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
-    TrackFavoritesResponseFromJSON,
-    TrackFavoritesResponseToJSON,
     TrackInspectFromJSON,
     TrackInspectToJSON,
     TrackInspectListFromJSON,
     TrackInspectListToJSON,
-    TrackRepostsResponseFromJSON,
-    TrackRepostsResponseToJSON,
     TrackResponseFromJSON,
     TrackResponseToJSON,
     TrackSearchFromJSON,
     TrackSearchToJSON,
     TracksResponseFromJSON,
     TracksResponseToJSON,
-    TrendingIdsResponseFromJSON,
-    TrendingIdsResponseToJSON,
 } from '../models';
 
 export interface DownloadTrackRequest {
@@ -84,13 +69,11 @@ export interface GetBulkTracksRequest {
     permalink?: Array<string>;
     id?: Array<string>;
     isrc?: Array<string>;
-    userId?: string;
 }
 
 export interface GetFeelingLuckyTracksRequest {
     userId?: string;
     limit?: number;
-    withUsers?: boolean;
     minFollowers?: number;
 }
 
@@ -107,26 +90,8 @@ export interface GetRecentPremiumTracksRequest {
     userId?: string;
 }
 
-export interface GetRecommendedTracksRequest {
-    limit?: number;
-    genre?: string;
-    time?: GetRecommendedTracksTimeEnum;
-    exclusionList?: Array<number>;
-    userId?: string;
-}
-
-export interface GetRecommendedTracksWithVersionRequest {
-    version: string;
-    limit?: number;
-    genre?: string;
-    time?: GetRecommendedTracksWithVersionTimeEnum;
-    exclusionList?: Array<number>;
-    userId?: string;
-}
-
 export interface GetTrackRequest {
     trackId: string;
-    userId?: string;
 }
 
 export interface GetTrackAccessInfoRequest {
@@ -152,23 +117,6 @@ export interface GetTrackCommentsRequest {
     sortMethod?: GetTrackCommentsSortMethodEnum;
 }
 
-export interface GetTrackRemixParentsRequest {
-    trackId: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-}
-
-export interface GetTrackRemixesRequest {
-    trackId: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-    sortMethod?: GetTrackRemixesSortMethodEnum;
-    onlyCosigns?: boolean;
-    onlyContestEntries?: boolean;
-}
-
 export interface GetTrackStemsRequest {
     trackId: string;
 }
@@ -186,78 +134,16 @@ export interface GetTracksWithRecentCommentsRequest {
     offset?: number;
 }
 
-export interface GetTrendingTrackIDsRequest {
-    offset?: number;
-    limit?: number;
-    genre?: string;
-}
-
 export interface GetTrendingTracksRequest {
     offset?: number;
     limit?: number;
     genre?: string;
     time?: GetTrendingTracksTimeEnum;
-    userId?: string;
-}
-
-export interface GetTrendingTracksIDsWithVersionRequest {
-    version: string;
-    offset?: number;
-    limit?: number;
-    genre?: string;
-}
-
-export interface GetTrendingTracksWithVersionRequest {
-    version: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-    genre?: string;
-    time?: GetTrendingTracksWithVersionTimeEnum;
-}
-
-export interface GetTrendingUSDCPurchaseTracksRequest {
-    offset?: number;
-    limit?: number;
-    userId?: string;
-    genre?: string;
-    time?: GetTrendingUSDCPurchaseTracksTimeEnum;
-}
-
-export interface GetTrendingUSDCPurchaseTracksWithVersionRequest {
-    version: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-    genre?: string;
-    time?: GetTrendingUSDCPurchaseTracksWithVersionTimeEnum;
 }
 
 export interface GetUndergroundTrendingTracksRequest {
     offset?: number;
     limit?: number;
-    userId?: string;
-}
-
-export interface GetUndergroundTrendingTracksWithVersionRequest {
-    version: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-}
-
-export interface GetUsersFromFavoritesRequest {
-    trackId: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-}
-
-export interface GetUsersFromRepostsRequest {
-    trackId: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
 }
 
 export interface InspectTrackRequest {
@@ -375,10 +261,6 @@ export class TracksApi extends runtime.BaseAPI {
             queryParameters['isrc'] = params.isrc;
         }
 
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -412,10 +294,6 @@ export class TracksApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
-        }
-
-        if (params.withUsers !== undefined) {
-            queryParameters['with_users'] = params.withUsers;
         }
 
         if (params.minFollowers !== undefined) {
@@ -526,104 +404,6 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Get recommended tracks
-     */
-    async getRecommendedTracksRaw(params: GetRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        const queryParameters: any = {};
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        if (params.time !== undefined) {
-            queryParameters['time'] = params.time;
-        }
-
-        if (params.exclusionList) {
-            queryParameters['exclusion_list'] = params.exclusionList;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/recommended`,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get recommended tracks
-     */
-    async getRecommendedTracks(params: GetRecommendedTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getRecommendedTracksRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Get recommended tracks using the given trending strategy version
-     */
-    async getRecommendedTracksWithVersionRaw(params: GetRecommendedTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        if (params.version === null || params.version === undefined) {
-            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getRecommendedTracksWithVersion.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        if (params.time !== undefined) {
-            queryParameters['time'] = params.time;
-        }
-
-        if (params.exclusionList) {
-            queryParameters['exclusion_list'] = params.exclusionList;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/recommended/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get recommended tracks using the given trending strategy version
-     */
-    async getRecommendedTracksWithVersion(params: GetRecommendedTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getRecommendedTracksWithVersionRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
      * Gets a track by ID
      */
     async getTrackRaw(params: GetTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackResponse>> {
@@ -632,10 +412,6 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -811,104 +587,6 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets all the tracks that the given track remixes
-     */
-    async getTrackRemixParentsRaw(params: GetTrackRemixParentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixingResponse>> {
-        if (params.trackId === null || params.trackId === undefined) {
-            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getTrackRemixParents.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/{track_id}/remixing`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => RemixingResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets all the tracks that the given track remixes
-     */
-    async getTrackRemixParents(params: GetTrackRemixParentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixingResponse> {
-        const response = await this.getTrackRemixParentsRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Get all tracks that remix the given track
-     */
-    async getTrackRemixesRaw(params: GetTrackRemixesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixesResponse>> {
-        if (params.trackId === null || params.trackId === undefined) {
-            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getTrackRemixes.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        if (params.sortMethod !== undefined) {
-            queryParameters['sort_method'] = params.sortMethod;
-        }
-
-        if (params.onlyCosigns !== undefined) {
-            queryParameters['only_cosigns'] = params.onlyCosigns;
-        }
-
-        if (params.onlyContestEntries !== undefined) {
-            queryParameters['only_contest_entries'] = params.onlyContestEntries;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/{track_id}/remixes`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => RemixesResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get all tracks that remix the given track
-     */
-    async getTrackRemixes(params: GetTrackRemixesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixesResponse> {
-        const response = await this.getTrackRemixesRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
      * Get the remixable stems of a track
      */
     async getTrackStemsRaw(params: GetTrackStemsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StemsResponse>> {
@@ -1022,45 +700,6 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets the track IDs of the top trending tracks on Audius
-     */
-    async getTrendingTrackIDsRaw(params: GetTrendingTrackIDsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingIdsResponse>> {
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/trending/ids`,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingIdsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the track IDs of the top trending tracks on Audius
-     */
-    async getTrendingTrackIDs(params: GetTrendingTrackIDsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingIdsResponse> {
-        const response = await this.getTrendingTrackIDsRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
      * Gets the top 100 trending (most popular) tracks on Audius
      */
     async getTrendingTracksRaw(params: GetTrendingTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
@@ -1080,10 +719,6 @@ export class TracksApi extends runtime.BaseAPI {
 
         if (params.time !== undefined) {
             queryParameters['time'] = params.time;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -1108,198 +743,6 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets the track IDs of the top trending tracks on Audius based on the given trending strategy version
-     */
-    async getTrendingTracksIDsWithVersionRaw(params: GetTrendingTracksIDsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingIdsResponse>> {
-        if (params.version === null || params.version === undefined) {
-            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingTracksIDsWithVersion.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/trending/ids/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingIdsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the track IDs of the top trending tracks on Audius based on the given trending strategy version
-     */
-    async getTrendingTracksIDsWithVersion(params: GetTrendingTracksIDsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingIdsResponse> {
-        const response = await this.getTrendingTracksIDsWithVersionRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets the top 100 trending (most popular) tracks on Audius using a given trending strategy version
-     */
-    async getTrendingTracksWithVersionRaw(params: GetTrendingTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        if (params.version === null || params.version === undefined) {
-            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingTracksWithVersion.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        if (params.time !== undefined) {
-            queryParameters['time'] = params.time;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/trending/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the top 100 trending (most popular) tracks on Audius using a given trending strategy version
-     */
-    async getTrendingTracksWithVersion(params: GetTrendingTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getTrendingTracksWithVersionRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets the top trending (most popular) USDC purchase tracks on Audius
-     */
-    async getTrendingUSDCPurchaseTracksRaw(params: GetTrendingUSDCPurchaseTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        if (params.time !== undefined) {
-            queryParameters['time'] = params.time;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/usdc-purchase`,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the top trending (most popular) USDC purchase tracks on Audius
-     */
-    async getTrendingUSDCPurchaseTracks(params: GetTrendingUSDCPurchaseTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getTrendingUSDCPurchaseTracksRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets the top trending (most popular) USDC purchase tracks on Audius using a given trending strategy version
-     */
-    async getTrendingUSDCPurchaseTracksWithVersionRaw(params: GetTrendingUSDCPurchaseTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        if (params.version === null || params.version === undefined) {
-            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingUSDCPurchaseTracksWithVersion.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        if (params.genre !== undefined) {
-            queryParameters['genre'] = params.genre;
-        }
-
-        if (params.time !== undefined) {
-            queryParameters['time'] = params.time;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/usdc-purchase/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the top trending (most popular) USDC purchase tracks on Audius using a given trending strategy version
-     */
-    async getTrendingUSDCPurchaseTracksWithVersion(params: GetTrendingUSDCPurchaseTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getTrendingUSDCPurchaseTracksWithVersionRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
      * Gets the top 100 trending underground tracks on Audius
      */
     async getUndergroundTrendingTracksRaw(params: GetUndergroundTrendingTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
@@ -1311,10 +754,6 @@ export class TracksApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -1334,135 +773,6 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getUndergroundTrendingTracks(params: GetUndergroundTrendingTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getUndergroundTrendingTracksRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets the top 100 trending underground tracks on Audius using a given trending strategy version
-     */
-    async getUndergroundTrendingTracksWithVersionRaw(params: GetUndergroundTrendingTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
-        if (params.version === null || params.version === undefined) {
-            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getUndergroundTrendingTracksWithVersion.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/trending/underground/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the top 100 trending underground tracks on Audius using a given trending strategy version
-     */
-    async getUndergroundTrendingTracksWithVersion(params: GetUndergroundTrendingTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
-        const response = await this.getUndergroundTrendingTracksWithVersionRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Get users that favorited a track
-     */
-    async getUsersFromFavoritesRaw(params: GetUsersFromFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackFavoritesResponse>> {
-        if (params.trackId === null || params.trackId === undefined) {
-            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getUsersFromFavorites.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TrackFavoritesResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get users that favorited a track
-     */
-    async getUsersFromFavorites(params: GetUsersFromFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackFavoritesResponse> {
-        const response = await this.getUsersFromFavoritesRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Get the users that reposted a track
-     */
-    async getUsersFromRepostsRaw(params: GetUsersFromRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackRepostsResponse>> {
-        if (params.trackId === null || params.trackId === undefined) {
-            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getUsersFromReposts.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TrackRepostsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get the users that reposted a track
-     */
-    async getUsersFromReposts(params: GetUsersFromRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackRepostsResponse> {
-        const response = await this.getUsersFromRepostsRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1706,41 +1016,12 @@ export type GetMostSharedTracksTimeRangeEnum = typeof GetMostSharedTracksTimeRan
 /**
  * @export
  */
-export const GetRecommendedTracksTimeEnum = {
-    Week: 'week',
-    Month: 'month',
-    Year: 'year',
-    AllTime: 'allTime'
-} as const;
-export type GetRecommendedTracksTimeEnum = typeof GetRecommendedTracksTimeEnum[keyof typeof GetRecommendedTracksTimeEnum];
-/**
- * @export
- */
-export const GetRecommendedTracksWithVersionTimeEnum = {
-    Week: 'week',
-    Month: 'month',
-    Year: 'year',
-    AllTime: 'allTime'
-} as const;
-export type GetRecommendedTracksWithVersionTimeEnum = typeof GetRecommendedTracksWithVersionTimeEnum[keyof typeof GetRecommendedTracksWithVersionTimeEnum];
-/**
- * @export
- */
 export const GetTrackCommentsSortMethodEnum = {
     Top: 'top',
     Newest: 'newest',
     Timestamp: 'timestamp'
 } as const;
 export type GetTrackCommentsSortMethodEnum = typeof GetTrackCommentsSortMethodEnum[keyof typeof GetTrackCommentsSortMethodEnum];
-/**
- * @export
- */
-export const GetTrackRemixesSortMethodEnum = {
-    Likes: 'likes',
-    Plays: 'plays',
-    Recent: 'recent'
-} as const;
-export type GetTrackRemixesSortMethodEnum = typeof GetTrackRemixesSortMethodEnum[keyof typeof GetTrackRemixesSortMethodEnum];
 /**
  * @export
  */
@@ -1751,36 +1032,6 @@ export const GetTrendingTracksTimeEnum = {
     AllTime: 'allTime'
 } as const;
 export type GetTrendingTracksTimeEnum = typeof GetTrendingTracksTimeEnum[keyof typeof GetTrendingTracksTimeEnum];
-/**
- * @export
- */
-export const GetTrendingTracksWithVersionTimeEnum = {
-    Week: 'week',
-    Month: 'month',
-    Year: 'year',
-    AllTime: 'allTime'
-} as const;
-export type GetTrendingTracksWithVersionTimeEnum = typeof GetTrendingTracksWithVersionTimeEnum[keyof typeof GetTrendingTracksWithVersionTimeEnum];
-/**
- * @export
- */
-export const GetTrendingUSDCPurchaseTracksTimeEnum = {
-    Week: 'week',
-    Month: 'month',
-    Year: 'year',
-    AllTime: 'allTime'
-} as const;
-export type GetTrendingUSDCPurchaseTracksTimeEnum = typeof GetTrendingUSDCPurchaseTracksTimeEnum[keyof typeof GetTrendingUSDCPurchaseTracksTimeEnum];
-/**
- * @export
- */
-export const GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = {
-    Week: 'week',
-    Month: 'month',
-    Year: 'year',
-    AllTime: 'allTime'
-} as const;
-export type GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum[keyof typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum];
 /**
  * @export
  */
