@@ -9,7 +9,6 @@ import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { UserMetadata } from '~/models/User'
 import { removeFolloweeId } from '~/store/gated-content/slice'
-import { revokeFollowGatedAccess } from '~/store/tipping/slice'
 
 import { primeUserData } from '../utils/primeUserData'
 
@@ -49,9 +48,6 @@ export const useUnfollowUser = () => {
       // Handle gated content
       dispatch(removeFolloweeId({ id: followeeUserId }))
 
-      dispatch(revokeFollowGatedAccess({ userId: followeeUserId }))
-
-      // Track the unfollow
       if (source) {
         track(
           make({
