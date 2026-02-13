@@ -75,7 +75,7 @@ export interface ClaimCoinRewardCodeRequest {
 
 export interface CreateCoinRequest {
     userId: string;
-    createCoinRequestBody: CreateCoinRequestBody;
+    metadata: CreateCoinRequestBody;
 }
 
 export interface GetCoinRequest {
@@ -131,7 +131,7 @@ export interface GetVolumeLeadersRequest {
 export interface UpdateCoinRequest {
     mint: string;
     userId: string;
-    updateCoinRequestBody: UpdateCoinRequestBody;
+    metadata: UpdateCoinRequestBody;
 }
 
 /**
@@ -230,8 +230,8 @@ export class CoinsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createCoin.');
         }
 
-        if (params.createCoinRequestBody === null || params.createCoinRequestBody === undefined) {
-            throw new runtime.RequiredError('createCoinRequestBody','Required parameter params.createCoinRequestBody was null or undefined when calling createCoin.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createCoin.');
         }
 
         const queryParameters: any = {};
@@ -249,7 +249,7 @@ export class CoinsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateCoinRequestBodyToJSON(params.createCoinRequestBody),
+            body: CreateCoinRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateCoinResponseFromJSON(jsonValue));
@@ -611,8 +611,8 @@ export class CoinsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateCoin.');
         }
 
-        if (params.updateCoinRequestBody === null || params.updateCoinRequestBody === undefined) {
-            throw new runtime.RequiredError('updateCoinRequestBody','Required parameter params.updateCoinRequestBody was null or undefined when calling updateCoin.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateCoin.');
         }
 
         const queryParameters: any = {};
@@ -630,7 +630,7 @@ export class CoinsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateCoinRequestBodyToJSON(params.updateCoinRequestBody),
+            body: UpdateCoinRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => UpdateCoinResponseFromJSON(jsonValue));

@@ -162,7 +162,7 @@ export interface CreateUserRequest {
 
 export interface CreateUserDeveloperAppRequest {
     id: string;
-    createUserDeveloperAppRequestBody: CreateUserDeveloperAppRequestBody;
+    metadata: CreateUserDeveloperAppRequestBody;
 }
 
 export interface CreateUserDeveloperAppAccessKeyRequest {
@@ -173,7 +173,7 @@ export interface CreateUserDeveloperAppAccessKeyRequest {
 export interface DeactivateUserDeveloperAppAccessKeyRequest {
     id: string;
     address: string;
-    deactivateAccessKeyRequestBody: DeactivateAccessKeyRequestBody;
+    metadata: DeactivateAccessKeyRequestBody;
 }
 
 export interface DeleteUserDeveloperAppRequest {
@@ -606,8 +606,8 @@ export class UsersApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling createUserDeveloperApp.');
         }
 
-        if (params.createUserDeveloperAppRequestBody === null || params.createUserDeveloperAppRequestBody === undefined) {
-            throw new runtime.RequiredError('createUserDeveloperAppRequestBody','Required parameter params.createUserDeveloperAppRequestBody was null or undefined when calling createUserDeveloperApp.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createUserDeveloperApp.');
         }
 
         const queryParameters: any = {};
@@ -632,7 +632,7 @@ export class UsersApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateUserDeveloperAppRequestBodyToJSON(params.createUserDeveloperAppRequestBody),
+            body: CreateUserDeveloperAppRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateUserDeveloperAppResponseFromJSON(jsonValue));
@@ -705,8 +705,8 @@ export class UsersApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling deactivateUserDeveloperAppAccessKey.');
         }
 
-        if (params.deactivateAccessKeyRequestBody === null || params.deactivateAccessKeyRequestBody === undefined) {
-            throw new runtime.RequiredError('deactivateAccessKeyRequestBody','Required parameter params.deactivateAccessKeyRequestBody was null or undefined when calling deactivateUserDeveloperAppAccessKey.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling deactivateUserDeveloperAppAccessKey.');
         }
 
         const queryParameters: any = {};
@@ -731,7 +731,7 @@ export class UsersApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: DeactivateAccessKeyRequestBodyToJSON(params.deactivateAccessKeyRequestBody),
+            body: DeactivateAccessKeyRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => DeactivateAccessKeyResponseFromJSON(jsonValue));

@@ -4,7 +4,7 @@ import {
   OptionalId,
   type full,
   type User,
-  type UpdateProfileRequest
+  type UpdateUserRequest
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
 import { omit, pick } from 'lodash'
@@ -220,7 +220,7 @@ export const accountFromSDK = (
 
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
-): UpdateProfileRequest['metadata'] => ({
+): UpdateUserRequest['metadata'] => ({
   ...camelcaseKeys(
     pick(input, [
       'name',

@@ -34,7 +34,7 @@ import {
 
 export interface CreateDeveloperAppRequest {
     userId: string;
-    createDeveloperAppRequestBody: CreateDeveloperAppRequestBody;
+    metadata: CreateDeveloperAppRequestBody;
 }
 
 export interface DeleteDeveloperAppRequest {
@@ -49,7 +49,7 @@ export interface GetDeveloperAppRequest {
 export interface UpdateDeveloperAppRequest {
     address: string;
     userId: string;
-    updateDeveloperAppRequestBody: UpdateDeveloperAppRequestBody;
+    metadata: UpdateDeveloperAppRequestBody;
 }
 
 /**
@@ -66,8 +66,8 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createDeveloperApp.');
         }
 
-        if (params.createDeveloperAppRequestBody === null || params.createDeveloperAppRequestBody === undefined) {
-            throw new runtime.RequiredError('createDeveloperAppRequestBody','Required parameter params.createDeveloperAppRequestBody was null or undefined when calling createDeveloperApp.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createDeveloperApp.');
         }
 
         const queryParameters: any = {};
@@ -96,7 +96,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateDeveloperAppRequestBodyToJSON(params.createDeveloperAppRequestBody),
+            body: CreateDeveloperAppRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
@@ -204,8 +204,8 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateDeveloperApp.');
         }
 
-        if (params.updateDeveloperAppRequestBody === null || params.updateDeveloperAppRequestBody === undefined) {
-            throw new runtime.RequiredError('updateDeveloperAppRequestBody','Required parameter params.updateDeveloperAppRequestBody was null or undefined when calling updateDeveloperApp.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateDeveloperApp.');
         }
 
         const queryParameters: any = {};
@@ -234,7 +234,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateDeveloperAppRequestBodyToJSON(params.updateDeveloperAppRequestBody),
+            body: UpdateDeveloperAppRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

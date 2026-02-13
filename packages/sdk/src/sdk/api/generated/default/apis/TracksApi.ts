@@ -302,7 +302,7 @@ export interface InspectTracksRequest {
 
 export interface RecordTrackDownloadRequest {
     trackId: string;
-    trackDownloadRequestBody?: TrackDownloadRequestBody;
+    location?: TrackDownloadRequestBody;
 }
 
 export interface RepostTrackRequest {
@@ -1789,7 +1789,7 @@ export class TracksApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: TrackDownloadRequestBodyToJSON(params.trackDownloadRequestBody),
+            body: TrackDownloadRequestBodyToJSON(params.location),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

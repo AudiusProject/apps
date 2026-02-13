@@ -33,11 +33,11 @@ import {
 } from '../models';
 
 export interface ClaimRewardsRequest {
-    claimRewardsRequestBody: ClaimRewardsRequestBody;
+    reward: ClaimRewardsRequestBody;
 }
 
 export interface CreateRewardCodeRequest {
-    createRewardCodeRequestBody: CreateRewardCodeRequestBody;
+    body?: CreateRewardCodeRequestBody;
 }
 
 /**
@@ -50,8 +50,8 @@ export class RewardsApi extends runtime.BaseAPI {
      * Claims all the filtered undisbursed rewards for a user
      */
     async claimRewardsRaw(params: ClaimRewardsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClaimRewardsResponse>> {
-        if (params.claimRewardsRequestBody === null || params.claimRewardsRequestBody === undefined) {
-            throw new runtime.RequiredError('claimRewardsRequestBody','Required parameter params.claimRewardsRequestBody was null or undefined when calling claimRewards.');
+        if (params.reward === null || params.reward === undefined) {
+            throw new runtime.RequiredError('reward','Required parameter params.reward was null or undefined when calling claimRewards.');
         }
 
         const queryParameters: any = {};
@@ -65,7 +65,7 @@ export class RewardsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: ClaimRewardsRequestBodyToJSON(params.claimRewardsRequestBody),
+            body: ClaimRewardsRequestBodyToJSON(params.reward),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ClaimRewardsResponseFromJSON(jsonValue));
@@ -84,10 +84,6 @@ export class RewardsApi extends runtime.BaseAPI {
      * Creates a new reward code with Solana signature verification
      */
     async createRewardCodeRaw(params: CreateRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateRewardCodeResponse>> {
-        if (params.createRewardCodeRequestBody === null || params.createRewardCodeRequestBody === undefined) {
-            throw new runtime.RequiredError('createRewardCodeRequestBody','Required parameter params.createRewardCodeRequestBody was null or undefined when calling createRewardCode.');
-        }
-
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -99,7 +95,7 @@ export class RewardsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateRewardCodeRequestBodyToJSON(params.createRewardCodeRequestBody),
+            body: CreateRewardCodeRequestBodyToJSON(params.body),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateRewardCodeResponseFromJSON(jsonValue));
@@ -108,7 +104,7 @@ export class RewardsApi extends runtime.BaseAPI {
     /**
      * Creates a new reward code with Solana signature verification
      */
-    async createRewardCode(params: CreateRewardCodeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateRewardCodeResponse> {
+    async createRewardCode(params: CreateRewardCodeRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateRewardCodeResponse> {
         const response = await this.createRewardCodeRaw(params, initOverrides);
         return await response.value();
     }

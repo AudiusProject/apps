@@ -71,7 +71,7 @@ export const useUpdateArtistCoin = () => {
       const response = await sdk.coins.updateCoin({
         mint,
         userId: Id.parse(currentUserId),
-        updateCoinRequest: {
+        metadata: {
           description: updateCoinRequest.description,
           link1: updateCoinRequest.links?.[0] ?? '',
           link2: updateCoinRequest.links?.[1] ?? '',

@@ -43,7 +43,7 @@ import {
 
 export interface CreateCommentRequest {
     userId: string;
-    createCommentRequestBody: CreateCommentRequestBody;
+    metadata: CreateCommentRequestBody;
 }
 
 export interface DeleteCommentRequest {
@@ -90,7 +90,7 @@ export interface UnreactToCommentRequest {
 export interface UpdateCommentRequest {
     commentId: string;
     userId: string;
-    updateCommentRequestBody: UpdateCommentRequestBody;
+    metadata: UpdateCommentRequestBody;
 }
 
 /**
@@ -107,8 +107,8 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createComment.');
         }
 
-        if (params.createCommentRequestBody === null || params.createCommentRequestBody === undefined) {
-            throw new runtime.RequiredError('createCommentRequestBody','Required parameter params.createCommentRequestBody was null or undefined when calling createComment.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createComment.');
         }
 
         const queryParameters: any = {};
@@ -137,7 +137,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateCommentRequestBodyToJSON(params.createCommentRequestBody),
+            body: CreateCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateCommentResponseFromJSON(jsonValue));
@@ -565,8 +565,8 @@ export class CommentsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateComment.');
         }
 
-        if (params.updateCommentRequestBody === null || params.updateCommentRequestBody === undefined) {
-            throw new runtime.RequiredError('updateCommentRequestBody','Required parameter params.updateCommentRequestBody was null or undefined when calling updateComment.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateComment.');
         }
 
         const queryParameters: any = {};
@@ -595,7 +595,7 @@ export class CommentsApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateCommentRequestBodyToJSON(params.updateCommentRequestBody),
+            body: UpdateCommentRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

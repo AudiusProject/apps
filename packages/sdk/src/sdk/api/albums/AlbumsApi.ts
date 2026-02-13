@@ -138,8 +138,8 @@ export class AlbumsApi {
   async updateAlbum(params: UpdateAlbumRequest, requestInit?: RequestInit) {
     await parseParams('updateAlbum', UpdateAlbumSchema)(params)
 
-    const { updateAlbumRequestBody, albumId, ...rest } = params
-    const { albumName, ...playlistMetadata } = updateAlbumRequestBody
+    const { metadata, albumId, ...rest } = params
+    const { albumName, ...playlistMetadata } = metadata
 
     // Transform album request to playlist request
     const playlistParams = {

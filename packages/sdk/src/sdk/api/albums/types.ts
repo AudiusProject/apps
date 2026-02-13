@@ -40,7 +40,7 @@ export type CreateAlbumRequest = {
 export type UpdateAlbumRequest = {
   userId: string
   albumId: string
-  updateAlbumRequestBody: UpdateAlbumRequestBody
+  metadata: UpdateAlbumRequestBody
   imageFile?: z.input<typeof ImageFile>
   onProgress?: UploadPlaylistProgressHandler
 }
