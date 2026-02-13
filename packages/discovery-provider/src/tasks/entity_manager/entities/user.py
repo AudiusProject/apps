@@ -197,6 +197,8 @@ def validate_user_name(name: Union[str, None]):
         return name
     if has_badwords(name):
         raise IndexingValidationError(f"Name {name} contains a bad word")
+    if len(name) > 32:
+        raise IndexingValidationError(f"Name {name} is too long")
     return name
 
 
