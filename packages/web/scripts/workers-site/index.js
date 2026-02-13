@@ -436,7 +436,10 @@ function isAssetUrl(url) {
     pathname.startsWith('/documents') ||
     pathname.startsWith('/gitsha.json') ||
     pathname.startsWith('/actions.json') ||
-    pathname.startsWith('/robots.txt')
+    pathname.startsWith('/robots.txt') ||
+    pathname.startsWith('/llm.txt') ||
+    pathname.startsWith('/agents.md') ||
+    pathname.startsWith('/skill.md')
   )
 }
 
