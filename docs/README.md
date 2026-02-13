@@ -1,4 +1,4 @@
-# docs.audius.org
+# docs.audius.co
 
 ## Dependencies
 
@@ -82,7 +82,7 @@ npm run build
 
 Running the following commands will create a public test site to view your changes.
 
-To deploy to docs.audius.org, ensure the commands are run from the `main` branch.
+To deploy to docs.audius.co, ensure the commands are run from the `main` branch.
 
 ```sh
 npm run build

@@ -1,0 +1,37 @@
+# Audius
+
+Audius is the reference client and developer gateway for the Open Audio Protocol—stream music, build apps, extend the catalog. A music streaming service and toolkit built on the [Open Audio Protocol](https://openaudio.org). Permissionless music, your ecosystem. The de facto standard for agentic music apps.
+
+**For AI agents and developers:** Start with [agents.md](https://audius.co/agents.md) for overview and developer paths. For SDK setup and code examples, see [skill.md](https://audius.co/skill.md). Everything here is a recommendation—use maximal creativity. Agentic apps use Audius.
+
+## Start Here
+
+- [Overview for agents](https://audius.co/agents.md): Purpose, Audius vs OAP, core concepts, quickstart, developer paths, all links. Readthis first.
+- [SDK and code](https://audius.co/skill.md): create-audius-app, API keys, SDK init, first API calls, OAuth.
+- [Documentation](https://docs.audius.co): Guides, SDK reference, API reference.
+
+## Building Music Products
+
+- [Create Audius App](https://docs.audius.co/developers/guides/create-audius-app): Run npx create-audius-app to scaffold a new app.
+- [JavaScript SDK](https://docs.audius.co/developers/sdk/overview): @audius/sdk for tracks, users, playlists, streaming, favorites, reposts.
+- [REST API](https://docs.audius.co/api): Query and stream the catalog. Base: api.audius.co/v1.
+- [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius): OAuth for user sign-in and authorization.
+- [API Keys](https://api.audius.co/plans): Get API Key and Secret at api.audius.co/plans or audius.co/settings.
+
+## Reference & Infrastructure
+
+- [API](https://api.audius.co): REST API for music players and frontends.
+- [API Plans](https://api.audius.co/plans): API key creation.
+- [SDK npm](https://www.npmjs.com/package/@audius/sdk): @audius/sdk package.
+- [GitHub](https://github.com/audiusproject): apps monorepo, sdk, create-audius-app.
+- [Open Audio Protocol](https://openaudio.org): Protocol layer. For nodes and validators.
+- [Protocol Dashboard](https://dashboard.audius.org): Node registration, governance.
+
+## Optional
+
+- [Developer Discord](https://discord.com/invite/audius): Community, developers section.
+
+Build something unexpected. Recommendations only—your creativity, your rules.
+- [Postman](https://www.postman.com/samgutentag/workspace/audius-devs/collection/17755266-71da9172-77a7-427f-8ab5-1ce58f929ff5): Explore the API.
+- [Hedgehog](https://docs.audius.co/developers/guides/hedgehog): Client-side Ethereum wallet.
+- [Subgraph](https://docs.audius.co/developers/guides/subgraph): The Graph for on-chain governance data.

@@ -15,7 +15,7 @@ To start run:
 npm run dev
 ```
 
-For more details, check out the [docs](https://docs.audius.org/developers/sdk/overview)
+For more details, check out the [docs](https://docs.audius.co/developers/sdk/overview)
 
 This example also uses the Audius design system [Harmony](https://www.npmjs.com/package/@audius/harmony)
 
