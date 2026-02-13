@@ -14,6 +14,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { AccessGate } from './AccessGate';
+import {
+    AccessGateFromJSON,
+    AccessGateFromJSONTyped,
+    AccessGateToJSON,
+} from './AccessGate';
+import type { FieldVisibility } from './FieldVisibility';
+import {
+    FieldVisibilityFromJSON,
+    FieldVisibilityFromJSONTyped,
+    FieldVisibilityToJSON,
+} from './FieldVisibility';
 import type { Genre } from './Genre';
 import {
     GenreFromJSON,
@@ -26,6 +38,18 @@ import {
     MoodFromJSONTyped,
     MoodToJSON,
 } from './Mood';
+import type { RemixParentWrite } from './RemixParentWrite';
+import {
+    RemixParentWriteFromJSON,
+    RemixParentWriteFromJSONTyped,
+    RemixParentWriteToJSON,
+} from './RemixParentWrite';
+import type { StemParent } from './StemParent';
+import {
+    StemParentFromJSON,
+    StemParentFromJSONTyped,
+    StemParentToJSON,
+} from './StemParent';
 
 /**
  * Request body for updating track information. All fields are optional.
@@ -40,59 +64,173 @@ export interface UpdateTrackRequestBody {
      */
     title?: string;
     /**
-     * Track description
-     * @type {string}
-     * @memberof UpdateTrackRequestBody
-     */
-    description?: string;
-    /**
      * 
      * @type {Genre}
      * @memberof UpdateTrackRequestBody
      */
     genre?: Genre;
     /**
+     * Track description
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    description?: string | null;
+    /**
      * 
      * @type {Mood}
      * @memberof UpdateTrackRequestBody
      */
-    mood?: Mood;
+    mood?: Mood | null;
+    /**
+     * Beats per minute (tempo)
+     * @type {number}
+     * @memberof UpdateTrackRequestBody
+     */
+    bpm?: number | null;
+    /**
+     * Musical key of the track
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    musicalKey?: string | null;
     /**
      * Comma-separated tags
      * @type {string}
      * @memberof UpdateTrackRequestBody
      */
-    tags?: string;
+    tags?: string | null;
     /**
-     * Track release date
-     * @type {Date}
+     * License type
+     * @type {string}
      * @memberof UpdateTrackRequestBody
      */
-    releaseDate?: Date;
+    license?: string | null;
     /**
      * International Standard Recording Code
      * @type {string}
      * @memberof UpdateTrackRequestBody
      */
-    isrc?: string;
+    isrc?: string | null;
+    /**
+     * International Standard Musical Work Code
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    iswc?: string | null;
+    /**
+     * Release date
+     * @type {Date}
+     * @memberof UpdateTrackRequestBody
+     */
+    releaseDate?: Date;
+    /**
+     * IPFS CID for the track audio file
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    trackCid?: string;
+    /**
+     * IPFS CID for the original track file
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    origFileCid?: string;
+    /**
+     * Original filename of the track
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    origFilename?: string;
+    /**
+     * IPFS CID for cover art
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    coverArtCid?: string;
+    /**
+     * Cover art sizes metadata
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    coverArtSizes?: string;
+    /**
+     * IPFS CID for the track preview
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    previewCid?: string;
+    /**
+     * Preview start time in seconds
+     * @type {number}
+     * @memberof UpdateTrackRequestBody
+     */
+    previewStartSeconds?: number;
+    /**
+     * Track duration in seconds
+     * @type {number}
+     * @memberof UpdateTrackRequestBody
+     */
+    duration?: number;
     /**
      * Whether the track is downloadable
      * @type {boolean}
      * @memberof UpdateTrackRequestBody
      */
-    isDownloadable?: boolean;
+    downloadable?: boolean;
     /**
-     * Whether the original file is available
+     * Whether the track is unlisted
      * @type {boolean}
      * @memberof UpdateTrackRequestBody
      */
-    isOriginalAvailable?: boolean;
+    isUnlisted?: boolean;
     /**
-     * URL for track artwork
+     * 
+     * @type {AccessGate}
+     * @memberof UpdateTrackRequestBody
+     */
+    streamConditions?: AccessGate | null;
+    /**
+     * 
+     * @type {AccessGate}
+     * @memberof UpdateTrackRequestBody
+     */
+    downloadConditions?: AccessGate | null;
+    /**
+     * 
+     * @type {FieldVisibility}
+     * @memberof UpdateTrackRequestBody
+     */
+    fieldVisibility?: FieldVisibility;
+    /**
+     * Placement hosts for the track
      * @type {string}
      * @memberof UpdateTrackRequestBody
      */
-    artworkUrl?: string;
+    placementHosts?: string;
+    /**
+     * 
+     * @type {StemParent}
+     * @memberof UpdateTrackRequestBody
+     */
+    stemOf?: StemParent;
+    /**
+     * 
+     * @type {RemixParentWrite}
+     * @memberof UpdateTrackRequestBody
+     */
+    remixOf?: RemixParentWrite;
+    /**
+     * DDEX application identifier
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    ddexApp?: string | null;
+    /**
+     * Parental warning type
+     * @type {string}
+     * @memberof UpdateTrackRequestBody
+     */
+    parentalWarningType?: string | null;
 }
 
 /**
@@ -115,15 +253,34 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'title': !exists(json, 'title') ? undefined : json['title'],
-        'description': !exists(json, 'description') ? undefined : json['description'],
         'genre': !exists(json, 'genre') ? undefined : GenreFromJSON(json['genre']),
+        'description': !exists(json, 'description') ? undefined : json['description'],
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
+        'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
+        'musicalKey': !exists(json, 'musical_key') ? undefined : json['musical_key'],
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
+        'license': !exists(json, 'license') ? undefined : json['license'],
         'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
-        'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
-        'isOriginalAvailable': !exists(json, 'is_original_available') ? undefined : json['is_original_available'],
-        'artworkUrl': !exists(json, 'artwork_url') ? undefined : json['artwork_url'],
+        'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
+        'trackCid': !exists(json, 'track_cid') ? undefined : json['track_cid'],
+        'origFileCid': !exists(json, 'orig_file_cid') ? undefined : json['orig_file_cid'],
+        'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
+        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
+        'coverArtSizes': !exists(json, 'cover_art_sizes') ? undefined : json['cover_art_sizes'],
+        'previewCid': !exists(json, 'preview_cid') ? undefined : json['preview_cid'],
+        'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
+        'duration': !exists(json, 'duration') ? undefined : json['duration'],
+        'downloadable': !exists(json, 'downloadable') ? undefined : json['downloadable'],
+        'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
+        'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
+        'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
+        'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
+        'placementHosts': !exists(json, 'placement_hosts') ? undefined : json['placement_hosts'],
+        'stemOf': !exists(json, 'stem_of') ? undefined : StemParentFromJSON(json['stem_of']),
+        'remixOf': !exists(json, 'remix_of') ? undefined : RemixParentWriteFromJSON(json['remix_of']),
+        'ddexApp': !exists(json, 'ddex_app') ? undefined : json['ddex_app'],
+        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
     };
 }
 
@@ -137,15 +294,34 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
     return {
         
         'title': value.title,
-        'description': value.description,
         'genre': GenreToJSON(value.genre),
+        'description': value.description,
         'mood': MoodToJSON(value.mood),
+        'bpm': value.bpm,
+        'musical_key': value.musicalKey,
         'tags': value.tags,
-        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString()),
+        'license': value.license,
         'isrc': value.isrc,
-        'is_downloadable': value.isDownloadable,
-        'is_original_available': value.isOriginalAvailable,
-        'artwork_url': value.artworkUrl,
+        'iswc': value.iswc,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
+        'track_cid': value.trackCid,
+        'orig_file_cid': value.origFileCid,
+        'orig_filename': value.origFilename,
+        'cover_art_cid': value.coverArtCid,
+        'cover_art_sizes': value.coverArtSizes,
+        'preview_cid': value.previewCid,
+        'preview_start_seconds': value.previewStartSeconds,
+        'duration': value.duration,
+        'downloadable': value.downloadable,
+        'is_unlisted': value.isUnlisted,
+        'stream_conditions': AccessGateToJSON(value.streamConditions),
+        'download_conditions': AccessGateToJSON(value.downloadConditions),
+        'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
+        'placement_hosts': value.placementHosts,
+        'stem_of': StemParentToJSON(value.stemOf),
+        'remix_of': RemixParentWriteToJSON(value.remixOf),
+        'ddex_app': value.ddexApp,
+        'parental_warning_type': value.parentalWarningType,
     };
 }
 

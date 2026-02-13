@@ -275,10 +275,10 @@ export interface Playlist {
     isScheduledRelease: boolean;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof Playlist
      */
-    releaseDate?: string;
+    releaseDate?: Date;
     /**
      * 
      * @type {object}
@@ -389,7 +389,7 @@ export function PlaylistFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'isStreamGated': json['is_stream_gated'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'isScheduledRelease': json['is_scheduled_release'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
         'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
         'artists': !exists(json, 'artists') ? undefined : json['artists'],
         'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
@@ -441,7 +441,7 @@ export function PlaylistToJSON(value?: Playlist | null): any {
         'is_stream_gated': value.isStreamGated,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'is_scheduled_release': value.isScheduledRelease,
-        'release_date': value.releaseDate,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
         'ddex_release_ids': value.ddexReleaseIds,
         'artists': value.artists,
         'copyright_line': value.copyrightLine,

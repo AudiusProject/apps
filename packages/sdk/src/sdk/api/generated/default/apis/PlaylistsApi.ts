@@ -49,7 +49,7 @@ import {
 
 export interface CreatePlaylistRequest {
     userId: string;
-    createPlaylistRequestBody: CreatePlaylistRequestBody;
+    metadata: CreatePlaylistRequestBody;
 }
 
 export interface DeletePlaylistRequest {
@@ -131,7 +131,7 @@ export interface UnrepostPlaylistRequest {
 export interface UpdatePlaylistRequest {
     playlistId: string;
     userId: string;
-    updatePlaylistRequestBody: UpdatePlaylistRequestBody;
+    metadata: UpdatePlaylistRequestBody;
 }
 
 /**
@@ -148,8 +148,8 @@ export class PlaylistsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createPlaylist.');
         }
 
-        if (params.createPlaylistRequestBody === null || params.createPlaylistRequestBody === undefined) {
-            throw new runtime.RequiredError('createPlaylistRequestBody','Required parameter params.createPlaylistRequestBody was null or undefined when calling createPlaylist.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createPlaylist.');
         }
 
         const queryParameters: any = {};
@@ -178,7 +178,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreatePlaylistRequestBodyToJSON(params.createPlaylistRequestBody),
+            body: CreatePlaylistRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreatePlaylistResponseFromJSON(jsonValue));
@@ -794,8 +794,8 @@ export class PlaylistsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updatePlaylist.');
         }
 
-        if (params.updatePlaylistRequestBody === null || params.updatePlaylistRequestBody === undefined) {
-            throw new runtime.RequiredError('updatePlaylistRequestBody','Required parameter params.updatePlaylistRequestBody was null or undefined when calling updatePlaylist.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updatePlaylist.');
         }
 
         const queryParameters: any = {};
@@ -824,7 +824,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdatePlaylistRequestBodyToJSON(params.updatePlaylistRequestBody),
+            body: UpdatePlaylistRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

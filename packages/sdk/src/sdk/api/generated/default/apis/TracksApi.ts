@@ -88,7 +88,7 @@ import {
 
 export interface CreateTrackRequest {
     userId: string;
-    createTrackRequestBody: CreateTrackRequestBody;
+    metadata: CreateTrackRequestBody;
 }
 
 export interface DeleteTrackRequest {
@@ -328,6 +328,7 @@ export interface SearchTracksRequest {
 
 export interface ShareTrackRequest {
     trackId: string;
+    userId: string;
 }
 
 export interface StreamTrackRequest {
@@ -356,7 +357,7 @@ export interface UnrepostTrackRequest {
 export interface UpdateTrackRequest {
     trackId: string;
     userId: string;
-    updateTrackRequestBody: UpdateTrackRequestBody;
+    metadata: UpdateTrackRequestBody;
 }
 
 /**
@@ -373,8 +374,8 @@ export class TracksApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createTrack.');
         }
 
-        if (params.createTrackRequestBody === null || params.createTrackRequestBody === undefined) {
-            throw new runtime.RequiredError('createTrackRequestBody','Required parameter params.createTrackRequestBody was null or undefined when calling createTrack.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createTrack.');
         }
 
         const queryParameters: any = {};
@@ -403,7 +404,7 @@ export class TracksApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateTrackRequestBodyToJSON(params.createTrackRequestBody),
+            body: CreateTrackRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateTrackResponseFromJSON(jsonValue));
@@ -1940,7 +1941,15 @@ export class TracksApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling shareTrack.');
         }
 
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling shareTrack.');
+        }
+
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -2155,8 +2164,8 @@ export class TracksApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateTrack.');
         }
 
-        if (params.updateTrackRequestBody === null || params.updateTrackRequestBody === undefined) {
-            throw new runtime.RequiredError('updateTrackRequestBody','Required parameter params.updateTrackRequestBody was null or undefined when calling updateTrack.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateTrack.');
         }
 
         const queryParameters: any = {};
@@ -2185,7 +2194,7 @@ export class TracksApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateTrackRequestBodyToJSON(params.updateTrackRequestBody),
+            body: UpdateTrackRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

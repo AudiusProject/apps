@@ -14,6 +14,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { AccessGate } from './AccessGate';
+import {
+    AccessGateFromJSON,
+    AccessGateFromJSONTyped,
+    AccessGateToJSON,
+} from './AccessGate';
+import type { FieldVisibility } from './FieldVisibility';
+import {
+    FieldVisibilityFromJSON,
+    FieldVisibilityFromJSONTyped,
+    FieldVisibilityToJSON,
+} from './FieldVisibility';
 import type { Genre } from './Genre';
 import {
     GenreFromJSON,
@@ -26,6 +38,18 @@ import {
     MoodFromJSONTyped,
     MoodToJSON,
 } from './Mood';
+import type { RemixParentWrite } from './RemixParentWrite';
+import {
+    RemixParentWriteFromJSON,
+    RemixParentWriteFromJSONTyped,
+    RemixParentWriteToJSON,
+} from './RemixParentWrite';
+import type { StemParent } from './StemParent';
+import {
+    StemParentFromJSON,
+    StemParentFromJSONTyped,
+    StemParentToJSON,
+} from './StemParent';
 
 /**
  * 
@@ -35,10 +59,10 @@ import {
 export interface CreateTrackRequestBody {
     /**
      * Optional track ID (will be generated if not provided)
-     * @type {string}
+     * @type {number}
      * @memberof CreateTrackRequestBody
      */
-    trackId?: string;
+    trackId?: number;
     /**
      * Track title
      * @type {string}
@@ -63,6 +87,18 @@ export interface CreateTrackRequestBody {
      * @memberof CreateTrackRequestBody
      */
     mood?: Mood;
+    /**
+     * Beats per minute (tempo)
+     * @type {number}
+     * @memberof CreateTrackRequestBody
+     */
+    bpm?: number;
+    /**
+     * Musical key of the track
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    musicalKey?: string;
     /**
      * Comma-separated tags
      * @type {string}
@@ -89,10 +125,10 @@ export interface CreateTrackRequestBody {
     iswc?: string;
     /**
      * Release date
-     * @type {string}
+     * @type {Date}
      * @memberof CreateTrackRequestBody
      */
-    releaseDate?: string;
+    releaseDate?: Date;
     /**
      * IPFS CID for the track audio file (required)
      * @type {string}
@@ -100,11 +136,29 @@ export interface CreateTrackRequestBody {
      */
     trackCid: string;
     /**
+     * IPFS CID for the original track file
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    origFileCid?: string;
+    /**
+     * Original filename of the track
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    origFilename?: string;
+    /**
      * IPFS CID for cover art
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
     coverArtCid?: string;
+    /**
+     * Cover art sizes metadata
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    coverArtSizes?: string;
     /**
      * IPFS CID for the track preview
      * @type {string}
@@ -135,6 +189,42 @@ export interface CreateTrackRequestBody {
      * @memberof CreateTrackRequestBody
      */
     isUnlisted?: boolean;
+    /**
+     * 
+     * @type {AccessGate}
+     * @memberof CreateTrackRequestBody
+     */
+    streamConditions?: AccessGate;
+    /**
+     * 
+     * @type {AccessGate}
+     * @memberof CreateTrackRequestBody
+     */
+    downloadConditions?: AccessGate;
+    /**
+     * 
+     * @type {FieldVisibility}
+     * @memberof CreateTrackRequestBody
+     */
+    fieldVisibility?: FieldVisibility;
+    /**
+     * Placement hosts for the track
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    placementHosts?: string;
+    /**
+     * 
+     * @type {StemParent}
+     * @memberof CreateTrackRequestBody
+     */
+    stemOf?: StemParent;
+    /**
+     * 
+     * @type {RemixParentWrite}
+     * @memberof CreateTrackRequestBody
+     */
+    remixOf?: RemixParentWrite;
     /**
      * DDEX application identifier
      * @type {string}
@@ -176,18 +266,29 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'genre': GenreFromJSON(json['genre']),
         'description': !exists(json, 'description') ? undefined : json['description'],
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
+        'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
+        'musicalKey': !exists(json, 'musical_key') ? undefined : json['musical_key'],
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
         'license': !exists(json, 'license') ? undefined : json['license'],
         'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
         'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
         'trackCid': json['track_cid'],
+        'origFileCid': !exists(json, 'orig_file_cid') ? undefined : json['orig_file_cid'],
+        'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
         'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
+        'coverArtSizes': !exists(json, 'cover_art_sizes') ? undefined : json['cover_art_sizes'],
         'previewCid': !exists(json, 'preview_cid') ? undefined : json['preview_cid'],
         'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
         'downloadable': !exists(json, 'downloadable') ? undefined : json['downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
+        'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
+        'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
+        'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
+        'placementHosts': !exists(json, 'placement_hosts') ? undefined : json['placement_hosts'],
+        'stemOf': !exists(json, 'stem_of') ? undefined : StemParentFromJSON(json['stem_of']),
+        'remixOf': !exists(json, 'remix_of') ? undefined : RemixParentWriteFromJSON(json['remix_of']),
         'ddexApp': !exists(json, 'ddex_app') ? undefined : json['ddex_app'],
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
     };
@@ -207,18 +308,29 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'genre': GenreToJSON(value.genre),
         'description': value.description,
         'mood': MoodToJSON(value.mood),
+        'bpm': value.bpm,
+        'musical_key': value.musicalKey,
         'tags': value.tags,
         'license': value.license,
         'isrc': value.isrc,
         'iswc': value.iswc,
-        'release_date': value.releaseDate,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
         'track_cid': value.trackCid,
+        'orig_file_cid': value.origFileCid,
+        'orig_filename': value.origFilename,
         'cover_art_cid': value.coverArtCid,
+        'cover_art_sizes': value.coverArtSizes,
         'preview_cid': value.previewCid,
         'preview_start_seconds': value.previewStartSeconds,
         'duration': value.duration,
         'downloadable': value.downloadable,
         'is_unlisted': value.isUnlisted,
+        'stream_conditions': AccessGateToJSON(value.streamConditions),
+        'download_conditions': AccessGateToJSON(value.downloadConditions),
+        'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
+        'placement_hosts': value.placementHosts,
+        'stem_of': StemParentToJSON(value.stemOf),
+        'remix_of': RemixParentWriteToJSON(value.remixOf),
         'ddex_app': value.ddexApp,
         'parental_warning_type': value.parentalWarningType,
     };

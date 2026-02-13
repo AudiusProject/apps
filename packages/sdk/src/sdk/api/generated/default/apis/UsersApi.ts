@@ -157,7 +157,7 @@ import {
 
 export interface CreateUserRequest {
     userId: string;
-    createUserRequestBody: CreateUserRequestBody;
+    metadata: CreateUserRequestBody;
 }
 
 export interface CreateUserDeveloperAppRequest {
@@ -532,7 +532,7 @@ export interface UnsubscribeFromUserRequest {
 export interface UpdateUserRequest {
     id: string;
     userId: string;
-    updateUserRequestBody: UpdateUserRequestBody;
+    metadata: UpdateUserRequestBody;
 }
 
 export interface VerifyIDTokenRequest {
@@ -553,8 +553,8 @@ export class UsersApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createUser.');
         }
 
-        if (params.createUserRequestBody === null || params.createUserRequestBody === undefined) {
-            throw new runtime.RequiredError('createUserRequestBody','Required parameter params.createUserRequestBody was null or undefined when calling createUser.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createUser.');
         }
 
         const queryParameters: any = {};
@@ -583,7 +583,7 @@ export class UsersApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateUserRequestBodyToJSON(params.createUserRequestBody),
+            body: CreateUserRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateUserResponseFromJSON(jsonValue));
@@ -3032,8 +3032,8 @@ export class UsersApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateUser.');
         }
 
-        if (params.updateUserRequestBody === null || params.updateUserRequestBody === undefined) {
-            throw new runtime.RequiredError('updateUserRequestBody','Required parameter params.updateUserRequestBody was null or undefined when calling updateUser.');
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateUser.');
         }
 
         const queryParameters: any = {};
@@ -3054,7 +3054,7 @@ export class UsersApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateUserRequestBodyToJSON(params.updateUserRequestBody),
+            body: UpdateUserRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

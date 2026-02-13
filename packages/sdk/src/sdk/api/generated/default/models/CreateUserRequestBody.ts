@@ -22,10 +22,10 @@ import { exists, mapValues } from '../runtime';
 export interface CreateUserRequestBody {
     /**
      * Optional user ID (will be generated if not provided)
-     * @type {string}
+     * @type {number}
      * @memberof CreateUserRequestBody
      */
-    userId?: string;
+    userId?: number;
     /**
      * User handle (unique username)
      * @type {string}

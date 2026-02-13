@@ -54,6 +54,7 @@ models/Collectibles.ts
 models/CollectiblesResponse.ts
 models/CollectionActivity.ts
 models/Comment.ts
+models/CommentEntityType.ts
 models/CommentMention.ts
 models/CommentNotificationSetting.ts
 models/CommentRepliesResponse.ts
@@ -98,6 +99,7 @@ models/ExtendedTokenGate.ts
 models/ExtendedUsdcGate.ts
 models/Favorite.ts
 models/FavoritesResponse.ts
+models/FieldVisibility.ts
 models/FollowGate.ts
 models/FollowersResponse.ts
 models/FollowingResponse.ts
@@ -112,8 +114,6 @@ models/MediaLink.ts
 models/MonthlyAggregatePlay.ts
 models/Mood.ts
 models/MutualFollowersResponse.ts
-models/NftCollection.ts
-models/NftGate.ts
 models/Playlist.ts
 models/PlaylistAddedTimestamp.ts
 models/PlaylistArtwork.ts
@@ -130,6 +130,7 @@ models/PurchasersResponse.ts
 models/RedeemAmountResponse.ts
 models/RelatedArtistResponse.ts
 models/RemixParent.ts
+models/RemixParentWrite.ts
 models/RemixedTrackAggregate.ts
 models/RemixersResponse.ts
 models/RemixesResponse.ts
@@ -145,6 +146,8 @@ models/SalesAggregateResponse.ts
 models/SalesJsonContent.ts
 models/SalesJsonResponse.ts
 models/Stem.ts
+models/StemCategory.ts
+models/StemParent.ts
 models/StemsResponse.ts
 models/StreamUrlResponse.ts
 models/SubscribersResponse.ts
@@ -164,6 +167,7 @@ models/TrackCommentNotificationResponse.ts
 models/TrackCommentsResponse.ts
 models/TrackDownloadRequestBody.ts
 models/TrackElement.ts
+models/TrackElementWrite.ts
 models/TrackFavoritesResponse.ts
 models/TrackId.ts
 models/TrackInspect.ts

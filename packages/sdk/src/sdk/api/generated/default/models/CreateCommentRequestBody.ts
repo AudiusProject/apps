@@ -14,6 +14,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CommentEntityType } from './CommentEntityType';
+import {
+    CommentEntityTypeFromJSON,
+    CommentEntityTypeFromJSONTyped,
+    CommentEntityTypeToJSON,
+} from './CommentEntityType';
+
 /**
  * 
  * @export
@@ -21,11 +28,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateCommentRequestBody {
     /**
-     * Type of entity being commented on
-     * @type {string}
+     * 
+     * @type {CommentEntityType}
      * @memberof CreateCommentRequestBody
      */
-    entityType: string;
+    entityType: CommentEntityType;
     /**
      * ID of the entity being commented on
      * @type {string}
@@ -74,7 +81,7 @@ export function CreateCommentRequestBodyFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'entityType': json['entityType'],
+        'entityType': CommentEntityTypeFromJSON(json['entityType']),
         'entityId': json['entityId'],
         'body': json['body'],
         'commentId': !exists(json, 'commentId') ? undefined : json['commentId'],
@@ -91,7 +98,7 @@ export function CreateCommentRequestBodyToJSON(value?: CreateCommentRequestBody 
     }
     return {
         
-        'entityType': value.entityType,
+        'entityType': CommentEntityTypeToJSON(value.entityType),
         'entityId': value.entityId,
         'body': value.body,
         'commentId': value.commentId,

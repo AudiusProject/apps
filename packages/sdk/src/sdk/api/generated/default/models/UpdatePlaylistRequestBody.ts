@@ -14,6 +14,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { Genre } from './Genre';
+import {
+    GenreFromJSON,
+    GenreFromJSONTyped,
+    GenreToJSON,
+} from './Genre';
+import type { Mood } from './Mood';
+import {
+    MoodFromJSON,
+    MoodFromJSONTyped,
+    MoodToJSON,
+} from './Mood';
 import type { PlaylistAddedTimestamp } from './PlaylistAddedTimestamp';
 import {
     PlaylistAddedTimestampFromJSON,
@@ -46,17 +58,47 @@ export interface UpdatePlaylistRequestBody {
      */
     isPrivate?: boolean;
     /**
+     * 
+     * @type {Genre}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    genre?: Genre;
+    /**
+     * 
+     * @type {Mood}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    mood?: Mood;
+    /**
+     * Comma-separated tags
+     * @type {string}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    tags?: string;
+    /**
+     * License type
+     * @type {string}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    license?: string;
+    /**
+     * Release date
+     * @type {Date}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    releaseDate?: Date;
+    /**
      * Array of track IDs to include in the playlist
      * @type {Array<PlaylistAddedTimestamp>}
      * @memberof UpdatePlaylistRequestBody
      */
     playlistContents?: Array<PlaylistAddedTimestamp>;
     /**
-     * URL for playlist artwork
+     * IPFS CID for cover art
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    artworkUrl?: string;
+    coverArtCid?: string;
     /**
      * Universal Product Code (for albums)
      * @type {string}
@@ -87,8 +129,13 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'playlistName': !exists(json, 'playlist_name') ? undefined : json['playlist_name'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'isPrivate': !exists(json, 'is_private') ? undefined : json['is_private'],
+        'genre': !exists(json, 'genre') ? undefined : GenreFromJSON(json['genre']),
+        'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
+        'tags': !exists(json, 'tags') ? undefined : json['tags'],
+        'license': !exists(json, 'license') ? undefined : json['license'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
         'playlistContents': !exists(json, 'playlist_contents') ? undefined : ((json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
-        'artworkUrl': !exists(json, 'artwork_url') ? undefined : json['artwork_url'],
+        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
     };
 }
@@ -105,8 +152,13 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'playlist_name': value.playlistName,
         'description': value.description,
         'is_private': value.isPrivate,
+        'genre': GenreToJSON(value.genre),
+        'mood': MoodToJSON(value.mood),
+        'tags': value.tags,
+        'license': value.license,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
         'playlist_contents': value.playlistContents === undefined ? undefined : ((value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
-        'artwork_url': value.artworkUrl,
+        'cover_art_cid': value.coverArtCid,
         'upc': value.upc,
     };
 }
