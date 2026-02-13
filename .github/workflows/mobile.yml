@@ -472,7 +472,7 @@ jobs:
     name: iOS Production Build & Upload
     runs-on: macos-15
     needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/mobile-app-fix') && github.event_name != 'pull_request'
     environment:
       name: mobile-production-ios
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -633,7 +633,7 @@ jobs:
     name: Android Production Build & Upload
     runs-on: ubuntu-latest
     needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/mobile-app-fix') && github.event_name != 'pull_request'
     environment:
       name: mobile-production-android
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
