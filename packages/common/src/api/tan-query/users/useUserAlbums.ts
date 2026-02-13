@@ -58,7 +58,7 @@ export const useUserAlbums = (
 
       const sdk = await audiusSdk()
 
-      const response = await sdk.users.getAlbumsByUser({
+      const { data } = await sdk.full.users.getAlbumsByUser({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
@@ -66,7 +66,6 @@ export const useUserAlbums = (
         sortMethod,
         query
       })
-      const data = response?.data ?? []
 
       const collections = transformAndCleanList(
         data,

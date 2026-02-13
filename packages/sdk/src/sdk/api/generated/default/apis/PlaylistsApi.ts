@@ -64,7 +64,6 @@ export interface GetPlaylistTracksRequest {
 export interface GetTrendingPlaylistsRequest {
     offset?: number;
     limit?: number;
-    userId?: string;
     time?: GetTrendingPlaylistsTimeEnum;
     type?: GetTrendingPlaylistsTypeEnum;
     omitTracks?: boolean;
@@ -278,10 +277,6 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
         }
 
         if (params.time !== undefined) {

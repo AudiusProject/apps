@@ -251,7 +251,8 @@ export class ResponseError extends Error {
 export class FetchError extends Error {
     override name: "FetchError" = "FetchError";
     constructor(cause: Error, msg?: string) {
-        super(msg, { cause });
+        super(msg ?? cause?.message);
+        (this as unknown as { cause?: Error }).cause = cause;
     }
 }
 
