@@ -17,27 +17,27 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface PrizeClaimRequest
+ * @interface PrizeClaimRequestBody
  */
-export interface PrizeClaimRequest {
+export interface PrizeClaimRequestBody {
     /**
      * The Solana transaction signature for the 2 YAK payment
      * @type {string}
-     * @memberof PrizeClaimRequest
+     * @memberof PrizeClaimRequestBody
      */
     signature: string;
     /**
      * The wallet address that sent the transaction
      * @type {string}
-     * @memberof PrizeClaimRequest
+     * @memberof PrizeClaimRequestBody
      */
     wallet: string;
 }
 
 /**
- * Check if a given object implements the PrizeClaimRequest interface.
+ * Check if a given object implements the PrizeClaimRequestBody interface.
  */
-export function instanceOfPrizeClaimRequest(value: object): value is PrizeClaimRequest {
+export function instanceOfPrizeClaimRequestBody(value: object): value is PrizeClaimRequestBody {
     let isInstance = true;
     isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
     isInstance = isInstance && "wallet" in value && value["wallet"] !== undefined;
@@ -45,11 +45,11 @@ export function instanceOfPrizeClaimRequest(value: object): value is PrizeClaimR
     return isInstance;
 }
 
-export function PrizeClaimRequestFromJSON(json: any): PrizeClaimRequest {
-    return PrizeClaimRequestFromJSONTyped(json, false);
+export function PrizeClaimRequestBodyFromJSON(json: any): PrizeClaimRequestBody {
+    return PrizeClaimRequestBodyFromJSONTyped(json, false);
 }
 
-export function PrizeClaimRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): PrizeClaimRequest {
+export function PrizeClaimRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): PrizeClaimRequestBody {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -60,7 +60,7 @@ export function PrizeClaimRequestFromJSONTyped(json: any, ignoreDiscriminator: b
     };
 }
 
-export function PrizeClaimRequestToJSON(value?: PrizeClaimRequest | null): any {
+export function PrizeClaimRequestBodyToJSON(value?: PrizeClaimRequestBody | null): any {
     if (value === undefined) {
         return undefined;
     }

@@ -17,15 +17,15 @@
 import * as runtime from '../runtime';
 import type {
   ClaimedPrizesResponse,
-  PrizeClaimRequest,
+  PrizeClaimRequestBody,
   PrizeClaimResponse,
   PrizesResponse,
 } from '../models';
 import {
     ClaimedPrizesResponseFromJSON,
     ClaimedPrizesResponseToJSON,
-    PrizeClaimRequestFromJSON,
-    PrizeClaimRequestToJSON,
+    PrizeClaimRequestBodyFromJSON,
+    PrizeClaimRequestBodyToJSON,
     PrizeClaimResponseFromJSON,
     PrizeClaimResponseToJSON,
     PrizesResponseFromJSON,
@@ -33,7 +33,7 @@ import {
 } from '../models';
 
 export interface ClaimPrizeRequest {
-    prizeClaimRequest: PrizeClaimRequest;
+    prizeClaimRequestBody: PrizeClaimRequestBody;
 }
 
 export interface GetWalletPrizesRequest {
@@ -50,8 +50,8 @@ export class PrizesApi extends runtime.BaseAPI {
      * Claims a prize by verifying a Solana transaction. User must send exactly 2 YAK to the prize receiver address. Returns the prize won and any redeem codes/URLs.
      */
     async claimPrizeRaw(params: ClaimPrizeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PrizeClaimResponse>> {
-        if (params.prizeClaimRequest === null || params.prizeClaimRequest === undefined) {
-            throw new runtime.RequiredError('prizeClaimRequest','Required parameter params.prizeClaimRequest was null or undefined when calling claimPrize.');
+        if (params.prizeClaimRequestBody === null || params.prizeClaimRequestBody === undefined) {
+            throw new runtime.RequiredError('prizeClaimRequestBody','Required parameter params.prizeClaimRequestBody was null or undefined when calling claimPrize.');
         }
 
         const queryParameters: any = {};
@@ -65,7 +65,7 @@ export class PrizesApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: PrizeClaimRequestToJSON(params.prizeClaimRequest),
+            body: PrizeClaimRequestBodyToJSON(params.prizeClaimRequestBody),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => PrizeClaimResponseFromJSON(jsonValue));

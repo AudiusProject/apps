@@ -17,6 +17,8 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
+  CreateTrackRequestBody,
+  CreateTrackResponse,
   RemixesResponse,
   RemixingResponse,
   StemsResponse,
@@ -25,6 +27,7 @@ import type {
   TrackCommentCountResponse,
   TrackCommentNotificationResponse,
   TrackCommentsResponse,
+  TrackDownloadRequestBody,
   TrackFavoritesResponse,
   TrackInspect,
   TrackInspectList,
@@ -33,10 +36,16 @@ import type {
   TrackSearch,
   TracksResponse,
   TrendingIdsResponse,
+  UpdateTrackRequestBody,
+  WriteResponse,
 } from '../models';
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
+    CreateTrackRequestBodyFromJSON,
+    CreateTrackRequestBodyToJSON,
+    CreateTrackResponseFromJSON,
+    CreateTrackResponseToJSON,
     RemixesResponseFromJSON,
     RemixesResponseToJSON,
     RemixingResponseFromJSON,
@@ -53,6 +62,8 @@ import {
     TrackCommentNotificationResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
+    TrackDownloadRequestBodyFromJSON,
+    TrackDownloadRequestBodyToJSON,
     TrackFavoritesResponseFromJSON,
     TrackFavoritesResponseToJSON,
     TrackInspectFromJSON,
@@ -69,7 +80,21 @@ import {
     TracksResponseToJSON,
     TrendingIdsResponseFromJSON,
     TrendingIdsResponseToJSON,
+    UpdateTrackRequestBodyFromJSON,
+    UpdateTrackRequestBodyToJSON,
+    WriteResponseFromJSON,
+    WriteResponseToJSON,
 } from '../models';
+
+export interface CreateTrackRequest {
+    userId: string;
+    createTrackRequestBody: CreateTrackRequestBody;
+}
+
+export interface DeleteTrackRequest {
+    trackId: string;
+    userId: string;
+}
 
 export interface DownloadTrackRequest {
     trackId: string;
@@ -78,6 +103,11 @@ export interface DownloadTrackRequest {
     userData?: string;
     nftAccessSignature?: string;
     filename?: string;
+}
+
+export interface FavoriteTrackRequest {
+    trackId: string;
+    userId: string;
 }
 
 export interface GetBulkTracksRequest {
@@ -270,6 +300,16 @@ export interface InspectTracksRequest {
     original?: boolean;
 }
 
+export interface RecordTrackDownloadRequest {
+    trackId: string;
+    trackDownloadRequestBody?: TrackDownloadRequestBody;
+}
+
+export interface RepostTrackRequest {
+    trackId: string;
+    userId: string;
+}
+
 export interface SearchTracksRequest {
     offset?: number;
     limit?: number;
@@ -286,6 +326,10 @@ export interface SearchTracksRequest {
     bpmMax?: string;
 }
 
+export interface ShareTrackRequest {
+    trackId: string;
+}
+
 export interface StreamTrackRequest {
     trackId: string;
     userId?: string;
@@ -299,10 +343,129 @@ export interface StreamTrackRequest {
     noRedirect?: boolean;
 }
 
+export interface UnfavoriteTrackRequest {
+    trackId: string;
+    userId: string;
+}
+
+export interface UnrepostTrackRequest {
+    trackId: string;
+    userId: string;
+}
+
+export interface UpdateTrackRequest {
+    trackId: string;
+    userId: string;
+    updateTrackRequestBody: UpdateTrackRequestBody;
+}
+
 /**
  * 
  */
 export class TracksApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Creates a new track
+     */
+    async createTrackRaw(params: CreateTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateTrackResponse>> {
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createTrack.');
+        }
+
+        if (params.createTrackRequestBody === null || params.createTrackRequestBody === undefined) {
+            throw new runtime.RequiredError('createTrackRequestBody','Required parameter params.createTrackRequestBody was null or undefined when calling createTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateTrackRequestBodyToJSON(params.createTrackRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateTrackResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new track
+     */
+    async createTrack(params: CreateTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateTrackResponse> {
+        const response = await this.createTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Deletes a track
+     */
+    async deleteTrackRaw(params: DeleteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling deleteTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling deleteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a track
+     */
+    async deleteTrack(params: DeleteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.deleteTrackRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -354,6 +517,56 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async downloadTrack(params: DownloadTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.downloadTrackRaw(params, initOverrides);
+    }
+
+    /**
+     * @hidden
+     * Favorite a track
+     */
+    async favoriteTrackRaw(params: FavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling favoriteTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling favoriteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Favorite a track
+     */
+    async favoriteTrack(params: FavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.favoriteTrackRaw(params, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -1546,6 +1759,101 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Record a track download event
+     */
+    async recordTrackDownloadRaw(params: RecordTrackDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling recordTrackDownload.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/downloads`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TrackDownloadRequestBodyToJSON(params.trackDownloadRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a track download event
+     */
+    async recordTrackDownload(params: RecordTrackDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.recordTrackDownloadRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Repost a track
+     */
+    async repostTrackRaw(params: RepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling repostTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling repostTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Repost a track
+     */
+    async repostTrack(params: RepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.repostTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Search for a track or tracks
      */
     async searchTracksRaw(params: SearchTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackSearch>> {
@@ -1625,6 +1933,48 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Record a track share event
+     */
+    async shareTrackRaw(params: ShareTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling shareTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/shares`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a track share event
+     */
+    async shareTrack(params: ShareTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.shareTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Stream an mp3 track This endpoint accepts the Range header for streaming. https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
      * Get the streamable MP3 file of a track
      */
@@ -1689,6 +2039,163 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async streamTrack(params: StreamTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StreamUrlResponse> {
         const response = await this.streamTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unfavorite a track
+     */
+    async unfavoriteTrackRaw(params: UnfavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling unfavoriteTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unfavoriteTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfavorite a track
+     */
+    async unfavoriteTrack(params: UnfavoriteTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unfavoriteTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unrepost a track
+     */
+    async unrepostTrackRaw(params: UnrepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling unrepostTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unrepostTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unrepost a track
+     */
+    async unrepostTrack(params: UnrepostTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unrepostTrackRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing track
+     */
+    async updateTrackRaw(params: UpdateTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling updateTrack.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateTrack.');
+        }
+
+        if (params.updateTrackRequestBody === null || params.updateTrackRequestBody === undefined) {
+            throw new runtime.RequiredError('updateTrackRequestBody','Required parameter params.updateTrackRequestBody was null or undefined when calling updateTrack.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/tracks/{track_id}`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateTrackRequestBodyToJSON(params.updateTrackRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing track
+     */
+    async updateTrack(params: UpdateTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.updateTrackRaw(params, initOverrides);
         return await response.value();
     }
 
