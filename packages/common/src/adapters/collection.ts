@@ -18,10 +18,11 @@ import {
   UserCollectionMetadata,
   Variant
 } from '~/models/Collection'
-import { Copyright } from '~/models/Track'
+import { Copyright, isContentUSDCPurchaseGated } from '~/models/Track'
 import type { AlbumValues, PlaylistValues } from '~/schemas'
 
 import { accessConditionsFromSDK } from './accessConditionsFromSDK'
+import { usdcPurchaseConditionsToSDK } from './accessConditionsToSDK'
 import { resourceContributorFromSDK } from './attribution'
 import { favoriteFromSDK } from './favorite'
 import { coverArtSizesCIDsFromSDK } from './imageSize'
@@ -135,7 +136,7 @@ export const userCollectionMetadataFromSDK = (
           : null,
       stream_conditions:
         'streamConditions' in input && input.streamConditions
-          ? accessConditionsFromSDK(input.streamConditions as full.AccessGate)
+          ? accessConditionsFromSDK(input.streamConditions)
           : null,
       tracks: transformAndCleanList(
         'tracks' in input ? (input.tracks ?? []) : [],
@@ -254,10 +255,9 @@ export const albumMetadataForCreateWithSDK = (
 ): CreateAlbumMetadata => {
   return {
     streamConditions:
-      input.stream_conditions && 'usdc_purchase' in input.stream_conditions
-        ? {
-            usdcPurchase: input.stream_conditions.usdc_purchase
-          }
+      input.stream_conditions != null &&
+      isContentUSDCPurchaseGated(input.stream_conditions)
+        ? usdcPurchaseConditionsToSDK(input.stream_conditions)
         : null,
     isStreamGated: input.is_stream_gated ?? false,
     isScheduledRelease: input.is_scheduled_release ?? false,

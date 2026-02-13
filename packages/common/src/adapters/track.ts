@@ -177,11 +177,11 @@ export const userTrackMetadataFromSDK = (
     permalink: input.permalink,
     is_stream_gated: input.isStreamGated ?? false,
     stream_conditions: input.streamConditions
-      ? accessConditionsFromSDK(input.streamConditions as full.AccessGate)
+      ? accessConditionsFromSDK(input.streamConditions)
       : null,
     is_download_gated: input.isDownloadGated ?? false,
     download_conditions: input.downloadConditions
-      ? accessConditionsFromSDK(input.downloadConditions as full.AccessGate)
+      ? accessConditionsFromSDK(input.downloadConditions)
       : null,
     access: { stream: access.stream, download: access.download },
     is_available: input.isAvailable ?? true,

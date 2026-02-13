@@ -230,25 +230,29 @@ export const usePublishTracks = (
 
 /*
  * Given a user's bank and USDC purchase conditions,
- * returns updated conditions with price in WEI and splits added.
- *
- * TODO: Update this to use the new user ID + percentages format.
+ * returns updated conditions with price in WEI and splits in the new array format.
  */
 export function getUSDCMetadata(
   userBank: string,
   stream_conditions: USDCPurchaseConditions
-) {
+): USDCPurchaseConditions {
   const priceCents = stream_conditions.usdc_purchase.price
   const priceWei = Number(USDC(priceCents / 100).value.toString())
-  const conditionsWithMetadata: USDCPurchaseConditions = {
+  return {
     usdc_purchase: {
       price: priceCents,
-      splits: {
-        [userBank?.toString() ?? '']: priceWei
-      }
+      ...(stream_conditions.usdc_purchase.albumTrackPrice != null && {
+        albumTrackPrice: stream_conditions.usdc_purchase.albumTrackPrice
+      }),
+      splits: [
+        {
+          payout_wallet: userBank?.toString() ?? '',
+          percentage: 100,
+          amount: priceWei
+        }
+      ]
     }
   }
-  return conditionsWithMetadata
 }
 
 /**

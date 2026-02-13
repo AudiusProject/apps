@@ -35,12 +35,21 @@ const TokenGatedConditionsSchema = z
   })
   .strict()
 
-/** Same as SDK but snake-cased */
+/** Same as API extended_payment_split (snake-cased) */
+const PaymentSplitSchema = z.object({
+  user_id: z.optional(z.number()),
+  percentage: z.number().min(0).max(100),
+  payout_wallet: z.string(),
+  amount: z.number().nonnegative(),
+  eth_wallet: z.optional(z.string())
+})
+
+/** Same as SDK but snake-cased for USDC purchase conditions */
 const USDCPurchaseConditionsSchema = z
   .object({
     usdc_purchase: z.object({
       price: z.number().positive(),
-      splits: z.any()
+      splits: z.array(PaymentSplitSchema).default([])
     })
   })
   .strict()

@@ -71,7 +71,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         // albumTrackPrice will be parsed out of the collection metadata, so we keep a copy here
         albumTrackPrice =
           params.collectionMetadata.stream_conditions?.usdc_purchase
-            .albumTrackPrice
+            .albumTrackPrice ?? undefined
         params.collectionMetadata.stream_conditions = getUSDCMetadata(
           userBank.toString(),
           params.collectionMetadata.stream_conditions
@@ -249,14 +249,14 @@ function combineMetadata(
     metadata.download_conditions = {
       usdc_purchase: {
         price: albumTrackPrice,
-        splits: { 0: 0 }
+        splits: []
       }
     }
     // Set up initial stream gating values
     metadata.is_stream_gated = true
     metadata.preview_start_seconds = 0
     metadata.stream_conditions = {
-      usdc_purchase: { price: albumTrackPrice, splits: { 0: 0 } }
+      usdc_purchase: { price: albumTrackPrice, splits: [] }
     }
     // Add splits to stream & download conditions
     addPremiumMetadata(userBank, metadata)
