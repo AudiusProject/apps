@@ -63,6 +63,7 @@ default_routes = [
     "messages",
     "dashboard",
     "explore/playlists",
+    "explore/underground",
     "explore/top-albums",
     "explore/remixables",
     "explore/feeling-lucky",

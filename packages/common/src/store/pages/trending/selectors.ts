@@ -31,8 +31,5 @@ export const getTrendingTimeRange = (state: CommonState) =>
 export const getTrendingGenre = (state: CommonState) =>
   state.pages.trending.trendingGenre
 
-export const getTrendingCategory = (state: CommonState) =>
-  state.pages.trending.trendingCategory
-
 export const getLastFetchedTrendingGenre = (state: CommonState) =>
   state.pages.trending.lastFetchedTrendingGenre

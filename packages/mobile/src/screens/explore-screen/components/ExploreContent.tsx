@@ -14,6 +14,7 @@ import { FeelingLucky } from './FeelingLucky'
 import { ForYouTracks } from './ForYouTracks'
 import { LabelSpotlight } from './LabelSpotlight'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
+import { UndergroundTrendingTracks } from './UndergroundTrendingTracks'
 
 export const ExploreContent = () => {
   const [category] = useSearchCategory()
@@ -34,6 +35,7 @@ export const ExploreContent = () => {
       )}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <FeaturedRemixContests />}
+      {showTrackContent && <UndergroundTrendingTracks />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
       {showTrackContent && showUserContextualContent && <FeelingLucky />}

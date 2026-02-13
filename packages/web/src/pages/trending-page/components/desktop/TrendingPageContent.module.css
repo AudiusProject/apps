@@ -4,6 +4,21 @@
   overflow: hidden;
 }
 
+.tabBody {
+  /* Should be 1080px, but account for extra room for hover to grow */
+  min-width: 400px;
+  width: calc(100% + 20px);
+
+  /* Compensate for padding of .lineupContainer */
+  left: -10px;
+  top: -10px;
+}
+
+.tabElement {
+  max-width: 1100px;
+  overflow: visible;
+}
+
 .bannerContainer {
   margin-bottom: 14px;
 }

@@ -4,11 +4,9 @@ import { LineupActions, asLineup } from '~/store/lineup/reducer'
 import {
   SET_TRENDING_GENRE,
   SET_TRENDING_TIME_RANGE,
-  SET_TRENDING_CATEGORY,
   SET_LAST_FETCHED_TRENDING_GENRE,
   SetTrendingGenreAction,
   SetTrendingTimeRangeAction,
-  SetTrendingCategoryAction,
   SetLastFetchedTrendingGenreAction,
   TrendingPageAction
 } from '~/store/pages/trending/actions'
@@ -37,15 +35,6 @@ const actionsMap = {
     return {
       ...state,
       trendingTimeRange: action.timeRange
-    }
-  },
-  [SET_TRENDING_CATEGORY](
-    state: TrendingPageState,
-    action: SetTrendingCategoryAction
-  ) {
-    return {
-      ...state,
-      trendingCategory: action.category
     }
   },
   [SET_TRENDING_GENRE](
@@ -88,8 +77,7 @@ const reducer =
         trendingMonth: makeInitialState(TRENDING_MONTH_PREFIX),
         trendingAllTime: makeInitialState(TRENDING_ALL_TIME_PREFIX),
         trendingGenre: null,
-        trendingTimeRange: TimeRange.WEEK,
-        trendingCategory: 'tracks'
+        trendingTimeRange: TimeRange.WEEK
       }
 
       if (history) {
@@ -141,11 +129,6 @@ const reducer =
         return actionsMap[SET_TRENDING_TIME_RANGE](
           state,
           action as SetTrendingTimeRangeAction
-        )
-      case SET_TRENDING_CATEGORY:
-        return actionsMap[SET_TRENDING_CATEGORY](
-          state,
-          action as SetTrendingCategoryAction
         )
       case SET_LAST_FETCHED_TRENDING_GENRE:
         return actionsMap[SET_LAST_FETCHED_TRENDING_GENRE](

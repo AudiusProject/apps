@@ -180,7 +180,7 @@ export const TrendingRewardsDrawer = (titleIcon) => {
         break
       }
       case 'underground': {
-        navigation.navigate('trending', { screen: 'Trending' })
+        navigation.navigate('explore', { screen: 'TrendingUnderground' })
         break
       }
     }
