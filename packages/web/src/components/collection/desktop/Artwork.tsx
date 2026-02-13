@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-
 import { useCollection } from '@audius/common/api'
 import { imageBlank } from '@audius/common/assets'
 import { SquareSizes } from '@audius/common/models'
@@ -26,7 +24,7 @@ type ArtworkProps = {
 }
 
 export const Artwork = (props: ArtworkProps) => {
-  const { collectionId, callback, isOwner } = props
+  const { collectionId, isOwner } = props
 
   const { data: partialCollection } = useCollection(collectionId, {
     select: (collection) =>
@@ -40,13 +38,6 @@ export const Artwork = (props: ArtworkProps) => {
   })
 
   const hasImage = image && image !== imageBlank
-
-  useEffect(() => {
-    // If there's a gradient, just immediately call back
-    if (image || image === '') {
-      callback()
-    }
-  }, [image, callback])
 
   return (
     <DynamicImage
