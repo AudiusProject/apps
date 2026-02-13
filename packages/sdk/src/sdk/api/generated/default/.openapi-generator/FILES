@@ -80,6 +80,8 @@ models/CreateUserDeveloperAppRequestBody.ts
 models/CreateUserDeveloperAppResponse.ts
 models/CreateUserRequestBody.ts
 models/CreateUserRequestBodyEvents.ts
+models/CreateUserRequestBodyPlaylistLibrary.ts
+models/CreateUserRequestBodyPlaylistLibraryContentsInner.ts
 models/CreateUserResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
@@ -119,6 +121,9 @@ models/PinCommentRequestBody.ts
 models/Playlist.ts
 models/PlaylistAddedTimestamp.ts
 models/PlaylistArtwork.ts
+models/PlaylistLibraryExplorePlaylistIdentifier.ts
+models/PlaylistLibraryFolder.ts
+models/PlaylistLibraryPlaylistIdentifier.ts
 models/PlaylistResponse.ts
 models/PlaylistSearchResult.ts
 models/PlaylistTracksResponse.ts

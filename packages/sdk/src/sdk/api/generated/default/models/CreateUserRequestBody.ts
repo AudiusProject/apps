@@ -20,6 +20,12 @@ import {
     CreateUserRequestBodyEventsFromJSONTyped,
     CreateUserRequestBodyEventsToJSON,
 } from './CreateUserRequestBodyEvents';
+import type { CreateUserRequestBodyPlaylistLibrary } from './CreateUserRequestBodyPlaylistLibrary';
+import {
+    CreateUserRequestBodyPlaylistLibraryFromJSON,
+    CreateUserRequestBodyPlaylistLibraryFromJSONTyped,
+    CreateUserRequestBodyPlaylistLibraryToJSON,
+} from './CreateUserRequestBodyPlaylistLibrary';
 
 /**
  * 
@@ -137,6 +143,12 @@ export interface CreateUserRequestBody {
     splUsdcPayoutWallet?: string;
     /**
      * 
+     * @type {CreateUserRequestBodyPlaylistLibrary}
+     * @memberof CreateUserRequestBody
+     */
+    playlistLibrary?: CreateUserRequestBodyPlaylistLibrary;
+    /**
+     * 
      * @type {CreateUserRequestBodyEvents}
      * @memberof CreateUserRequestBody
      */
@@ -192,6 +204,7 @@ export function CreateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'profileType': !exists(json, 'profile_type') ? undefined : json['profile_type'],
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
+        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : CreateUserRequestBodyPlaylistLibraryFromJSON(json['playlist_library']),
         'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
@@ -223,6 +236,7 @@ export function CreateUserRequestBodyToJSON(value?: CreateUserRequestBody | null
         'profile_type': value.profileType,
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
+        'playlist_library': CreateUserRequestBodyPlaylistLibraryToJSON(value.playlistLibrary),
         'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }
