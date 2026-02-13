@@ -171,6 +171,7 @@ function* fetchLineupMetadatasAsync<T extends Track | Collection>(
     | undefined,
   action: ReturnType<LineupBaseActions['fetchLineupMetadatas']> & {
     handle?: string
+    skipLoadingState?: boolean
   }
 ) {
   const initLineup = yield* select(lineupSelector)
@@ -182,15 +183,17 @@ function* fetchLineupMetadatasAsync<T extends Track | Collection>(
 
   function* fetchLineupMetadatasTask() {
     try {
-      yield* put(
-        lineupActions.fetchLineupMetadatasRequested(
-          action.offset,
-          action.limit,
-          action.overwrite,
-          action.payload,
-          action.handle?.toLowerCase()
+      if (!action.skipLoadingState) {
+        yield* put(
+          lineupActions.fetchLineupMetadatasRequested(
+            action.offset,
+            action.limit,
+            action.overwrite,
+            action.payload,
+            action.handle?.toLowerCase()
+          )
         )
-      )
+      }
 
       const lineupMetadatasResponse: LineupEntry<T>[] = yield* call(
         lineupMetadatasCall,

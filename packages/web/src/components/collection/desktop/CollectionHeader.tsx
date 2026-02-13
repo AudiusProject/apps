@@ -88,7 +88,6 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     permalink,
     is_private: isPrivate
   } = partialCollection ?? {}
-  const [artworkLoading, setIsArtworkLoading] = useState(true)
   const [filterText, setFilterText] = useState('')
 
   const hasStreamAccess = access?.stream
@@ -105,10 +104,6 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     [onFilterChange]
   )
 
-  const handleLoadArtwork = useCallback(() => {
-    setIsArtworkLoading(false)
-  }, [])
-
   const renderStatsRow = (isLoading: boolean) => {
     if (isLoading) return <Skeleton height='20px' width='120px' />
     return shouldShowStats ? (
@@ -121,18 +116,14 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     ) : null
   }
 
-  const isLoading = loading || artworkLoading
+  const isLoading = loading
 
   const isPremium =
     isStreamGated && isContentUSDCPurchaseGated(streamConditions)
 
   const topSection = (
     <Flex gap='xl' p='l' backgroundColor='white'>
-      <Artwork
-        collectionId={collectionId}
-        callback={handleLoadArtwork}
-        isOwner={isOwner}
-      />
+      <Artwork collectionId={collectionId} isOwner={isOwner} />
       <Flex
         direction='column'
         gap='xl'

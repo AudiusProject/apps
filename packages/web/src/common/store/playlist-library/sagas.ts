@@ -5,7 +5,7 @@ import {
   playlistLibraryActions,
   playlistLibraryHelpers
 } from '@audius/common/store'
-import { fork, put, takeEvery } from 'typed-redux-saga'
+import { fork, put, select, takeEvery } from 'typed-redux-saga'
 
 import { updateProfileAsync } from 'common/store/profile/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
@@ -14,8 +14,11 @@ import { watchAddToFolderSaga } from './watchAddToFolderSaga'
 import { watchReorderLibrarySaga } from './watchReorderLibrarySaga'
 
 const { update } = playlistLibraryActions
-const { removePlaylistLibraryDuplicates, removeFromPlaylistLibrary } =
-  playlistLibraryHelpers
+const {
+  getPlaylistsNotInLibrary,
+  removePlaylistLibraryDuplicates,
+  removeFromPlaylistLibrary
+} = playlistLibraryHelpers
 
 function* watchUpdatePlaylistLibrary() {
   yield* takeEvery(
@@ -47,9 +50,54 @@ export function* removePlaylistFromLibrary(id: PlaylistLibraryID) {
   yield* put(update({ playlistLibrary: updatedLibrary }))
 }
 
+function* watchAddAccountPlaylist() {
+  yield* takeEvery(
+    accountActions.addAccountPlaylist.type,
+    function* handleAddAccountPlaylist() {
+      yield* waitForWrite()
+      const account = yield* select((state) => state.account)
+      const playlistLibrary = account.playlistLibrary
+      if (!playlistLibrary) return
+      yield* put(update({ playlistLibrary }))
+    }
+  )
+}
+
+function* watchRepairEmptyPlaylistLibrary() {
+  yield* takeEvery(
+    accountActions.fetchAccountSucceeded.type,
+    function* handleRepairEmptyPlaylistLibrary() {
+      yield* waitForWrite()
+      const account = yield* select((state) => state.account)
+      const { collections, playlistLibrary } = account
+      const collectionCount = Object.keys(collections).length
+      if (collectionCount === 0) return
+
+      const missing = getPlaylistsNotInLibrary(
+        playlistLibrary ?? null,
+        collections
+      )
+      const missingCount = Object.keys(missing).length
+      if (missingCount === 0) return
+
+      const existingContents = playlistLibrary?.contents ?? []
+      const newContents = [
+        ...existingContents,
+        ...Object.values(missing).map((c) => ({
+          playlist_id: c.id,
+          type: 'playlist' as const
+        }))
+      ]
+      yield* put(update({ playlistLibrary: { contents: newContents } }))
+    }
+  )
+}
+
 export default function sagas() {
   const sagas = [
     watchUpdatePlaylistLibrary,
+    watchAddAccountPlaylist,
+    watchRepairEmptyPlaylistLibrary,
     watchReorderLibrarySaga,
     watchAddToFolderSaga
   ]

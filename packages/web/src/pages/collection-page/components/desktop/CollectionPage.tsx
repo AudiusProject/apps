@@ -26,6 +26,7 @@ import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
 import { TracksTable } from 'components/tracks-table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { useMainContentRef } from 'pages/MainContentContext'
 import { computeCollectionMetadataProps } from 'pages/collection-page/store/utils'
 import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
@@ -85,6 +86,7 @@ type CollectionPageProps = {
 }
 
 const CollectionPage = ({ type }: CollectionPageProps) => {
+  const mainContentRef = useMainContentRef()
   const {
     collection,
     user,
@@ -315,6 +317,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               columns={tracksTableColumns}
               wrapperClassName={styles.tracksTableWrapper}
               key={playlistName}
+              scrollRef={mainContentRef}
               loading={collectionLoading}
               userId={accountUserId}
               playing={playing}
@@ -346,10 +349,10 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
         )}
       </Paper>
 
-      {!collectionLoading && isOwner && !isAlbum ? (
+      {playlistId != null && isOwner && !isAlbum ? (
         <Flex column gap='2xl' pv='2xl' w='100%' css={{ minWidth: 774 }}>
           <Divider />
-          <SuggestedTracks collectionId={playlistId!} />
+          <SuggestedTracks collectionId={playlistId} />
         </Flex>
       ) : null}
     </Page>

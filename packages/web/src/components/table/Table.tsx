@@ -694,11 +694,12 @@ export const Table = ({
   ])
 
   // Force the window scroller to update its position
-  // after the DOM has laid out
+  // after the DOM has laid out. Also when row count changes (e.g. add/remove track)
+  // so scroll position is preserved.
   const wsRef = useRef<WindowScroller>(null)
   useLayoutEffect(() => {
     wsRef.current?.updatePosition()
-  }, [])
+  }, [rows.length])
 
   const renderVirtualizedContent = useCallback(() => {
     return (

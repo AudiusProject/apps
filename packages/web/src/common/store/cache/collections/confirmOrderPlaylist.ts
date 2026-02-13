@@ -1,5 +1,5 @@
 import { playlistMetadataForUpdateWithSDK } from '@audius/common/adapters'
-import { queryCollection, updateCollectionData } from '@audius/common/api'
+import { updateCollectionData } from '@audius/common/api'
 import { Kind, Collection, ID } from '@audius/common/models'
 import {
   cacheCollectionsActions as collectionActions,
@@ -10,6 +10,8 @@ import {
 import { makeKindId } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
 import { call, put } from 'typed-redux-saga'
+
+import { isPlaylistConfirmerDone } from './utils/hasPendingPlaylistUpdates'
 
 export function* confirmOrderPlaylist(
   userId: ID,
@@ -30,15 +32,12 @@ export function* confirmOrderPlaylist(
 
         return playlistId
       },
-      function* (confirmedPlaylistId: ID) {
-        const confirmedPlaylist = yield* call(
-          queryCollection,
-          confirmedPlaylistId
-        )
-
-        if (!confirmedPlaylist) return
-
-        yield* call(updateCollectionData, [confirmedPlaylist])
+      function* (_confirmedPlaylistId: ID) {
+        const done = yield* isPlaylistConfirmerDone(playlistId)
+        if (!done) return
+        // Don't refetch - the backend may not have propagated yet, and a refetch
+        // would overwrite our optimistic cache with stale data.
+        yield* call(updateCollectionData, [playlist])
       },
       function* ({ error, timeout }) {
         // Fail Call
