@@ -27,41 +27,49 @@ import {
   DownloadTrackRequest,
   TracksApi as GeneratedTracksApi,
   ExtendedPaymentSplit,
-  instanceOfExtendedPurchaseGate
+  instanceOfExtendedPurchaseGate,
+  type DeleteTrackRequest,
+  type FavoriteTrackRequest,
+  type UnfavoriteTrackRequest,
+  type ShareTrackRequest,
+  type RepostTrackRequest,
+  type UnrepostTrackRequest,
+  type RecordTrackDownloadRequest
 } from '../generated/default'
 import { RequiredError } from '../generated/default/runtime'
 
 import { TrackUploadHelper } from './TrackUploadHelper'
 import {
-  DeleteTrackRequest,
+  EntityManagerDeleteTrackRequest,
   DeleteTrackSchema,
-  RepostTrackRequest,
+  EntityManagerRepostTrackRequest,
   RepostTrackSchema,
-  FavoriteTrackRequest,
+  EntityManagerFavoriteTrackRequest,
   FavoriteTrackSchema,
-  UnrepostTrackRequest,
+  EntityManagerUnrepostTrackRequest,
   UnrepostTrackSchema,
-  UnfavoriteTrackRequest,
+  EntityManagerUnfavoriteTrackRequest,
   UnfavoriteTrackSchema,
-  UpdateTrackRequest,
+  EntityManagerUpdateTrackRequest,
   UploadTrackRequest,
   PurchaseTrackRequest,
   PurchaseTrackSchema,
   GetPurchaseTrackInstructionsRequest,
   GetPurchaseTrackInstructionsSchema,
-  RecordTrackDownloadRequest,
+  EntityManagerRecordTrackDownloadRequest,
   RecordTrackDownloadSchema,
   UploadTrackFilesRequest,
   UploadTrackSchema,
   UpdateTrackSchema,
   UploadTrackFilesSchema,
   ShareTrackSchema,
-  ShareTrackRequest,
+  EntityManagerShareTrackRequest,
   type PublishTrackRequest,
   PublishTrackSchema,
   type PublishStemRequest,
   PublishStemSchema,
-  type UploadTrackFilesTask
+  type UploadTrackFilesTask,
+  type UpdateTrackRequestWithFiles
 } from './types'
 
 // Extend that new class
@@ -108,8 +116,6 @@ export class TracksApi extends GeneratedTracksApi {
     if (params.apiKey) queryParams.append('api_key', params.apiKey)
     if (params.skipCheck !== undefined)
       queryParams.append('skip_check', String(params.skipCheck))
-    if (params.noRedirect !== undefined)
-      queryParams.append('no_redirect', String(params.noRedirect))
 
     const path = `/tracks/{track_id}/stream`.replace(
       `{${'track_id'}}`,
@@ -241,11 +247,7 @@ export class TracksApi extends GeneratedTracksApi {
         imageUploadResponse
       )
 
-    return this.writeTrackToChain(
-      params.userId,
-      populatedMetadata,
-      advancedOptions
-    )
+    return this.writeTrackToChain(userId, populatedMetadata, advancedOptions)
   }
 
   /** @hidden
@@ -267,6 +269,7 @@ export class TracksApi extends GeneratedTracksApi {
       streamConditions: undefined,
       isUnlisted: false,
       fieldVisibility: {
+        remixes: false,
         genre: false,
         mood: false,
         tags: false,
@@ -288,18 +291,14 @@ export class TracksApi extends GeneratedTracksApi {
         audioUploadResponse
       )
 
-    return this.writeTrackToChain(
-      params.userId,
-      populatedMetadata,
-      advancedOptions
-    )
+    return this.writeTrackToChain(userId, populatedMetadata, advancedOptions)
   }
 
   /** @hidden
    * Write track upload to chain
    */
   async writeTrackToChain(
-    userId: string,
+    userId: number,
     metadata: ReturnType<
       typeof this.trackUploadHelper.populateTrackMetadataWithUploadResponse
     >,
@@ -309,16 +308,12 @@ export class TracksApi extends GeneratedTracksApi {
     this.logger.info('Writing metadata to chain')
 
     const entityId =
-      metadata.trackId || (await this.trackUploadHelper.generateId('track'))
-
-    const decodedUserId = decodeHashId(userId) ?? undefined
-
-    if (!decodedUserId) {
-      throw new Error('writeTrackToChain: userId could not be decoded')
-    }
+      'trackId' in metadata && metadata.trackId
+        ? metadata.trackId
+        : await this.trackUploadHelper.generateId('track')
 
     const response = await this.entityManager.manageEntity({
-      userId: decodedUserId,
+      userId,
       entityType: EntityType.TRACK,
       entityId,
       action: Action.CREATE,
@@ -326,7 +321,7 @@ export class TracksApi extends GeneratedTracksApi {
         cid: '',
         data: {
           ...snakecaseKeys(metadata),
-          owner_id: decodedUserId,
+          owner_id: userId,
           download_conditions:
             metadata.downloadConditions &&
             snakecaseKeys(metadata.downloadConditions),
@@ -385,10 +380,10 @@ export class TracksApi extends GeneratedTracksApi {
   }
 
   /** @hidden
-   * Update a track
+   * Update a track with entity manager
    */
-  async updateTrack(
-    params: UpdateTrackRequest,
+  async updateTrackWithEntityManager(
+    params: EntityManagerUpdateTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -433,9 +428,6 @@ export class TracksApi extends GeneratedTracksApi {
       if (updatedMetadata.previewStartSeconds === undefined) {
         throw new Error('No track preview start time specified')
       }
-      if (!updatedMetadata.audioUploadId) {
-        throw new Error('Missing required audio_upload_id')
-      }
 
       const previewCid = await retry3(
         async () =>
@@ -475,11 +467,62 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async updateTrack(
+    params: UpdateTrackRequestWithFiles,
+    requestInit?: RequestInit
+  ) {
+    // Upload files
+    let metadata = params.metadata
+    if (params.audioFile || params.imageFile) {
+      const { audioUploadResponse, imageUploadResponse } =
+        await this.uploadTrackFiles({
+          audioFile: params.audioFile,
+          imageFile: params.imageFile,
+          fileMetadata: {
+            placementHosts: metadata.placementHosts,
+            previewStartSeconds: metadata.previewStartSeconds
+          },
+          onProgress: params.onProgress
+        }).start()
+
+      metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+        metadata,
+        decodeHashId(params.userId)!
+      )
+
+      metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse,
+        imageUploadResponse
+      )
+    }
+
+    if (this.entityManager) {
+      const res = await this.updateTrackWithEntityManager({
+        trackId: params.trackId,
+        userId: params.userId,
+        metadata
+      })
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.updateTrack(
+      {
+        trackId: params.trackId,
+        userId: params.userId,
+        metadata
+      },
+      requestInit
+    )
+  }
+
   /** @hidden
    * Delete a track
    */
-  async deleteTrack(
-    params: DeleteTrackRequest,
+  async deleteTrackWithEntityManager(
+    params: EntityManagerDeleteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -497,11 +540,25 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async deleteTrack(
+    params: DeleteTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.deleteTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.deleteTrack(params, requestInit)
+  }
+
   /** @hidden
    * Favorite a track
    */
-  async favoriteTrack(
-    params: FavoriteTrackRequest,
+  async favoriteTrackWithEntityManager(
+    params: EntityManagerFavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -520,11 +577,25 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async favoriteTrack(
+    params: FavoriteTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.favoriteTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.favoriteTrack(params, requestInit)
+  }
+
   /** @hidden
    * Unfavorite a track
    */
-  async unfavoriteTrack(
-    params: UnfavoriteTrackRequest,
+  async unfavoriteTrackWithEntityManager(
+    params: EntityManagerUnfavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -542,11 +613,25 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async unfavoriteTrack(
+    params: UnfavoriteTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.unfavoriteTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unfavoriteTrack(params, requestInit)
+  }
+
   /** @hidden
    * Share a track
    */
-  async shareTrack(
-    params: ShareTrackRequest,
+  async shareTrackWithEntityManager(
+    params: EntityManagerShareTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -564,11 +649,25 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async shareTrack(
+    params: ShareTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.shareTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.shareTrack(params, requestInit)
+  }
+
   /** @hidden
    * Repost a track
    */
-  async repostTrack(
-    params: RepostTrackRequest,
+  async repostTrackWithEntityManager(
+    params: EntityManagerRepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -587,11 +686,25 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async repostTrack(
+    params: RepostTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.repostTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.repostTrack(params, requestInit)
+  }
+
   /** @hidden
    * Unrepost a track
    */
-  async unrepostTrack(
-    params: UnrepostTrackRequest,
+  async unrepostTrackWithEntityManager(
+    params: EntityManagerUnrepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -609,13 +722,27 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async unrepostTrack(
+    params: UnrepostTrackRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.unrepostTrackWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unrepostTrack(params, requestInit)
+  }
+
   /**
    * @hidden
    *
    * Records that a track was downloaded.
    */
-  public async recordTrackDownload(
-    params: RecordTrackDownloadRequest,
+  public async recordTrackDownloadWithEntityManager(
+    params: EntityManagerRecordTrackDownloadRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, trackId } = await parseParams(
@@ -642,6 +769,20 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
+  override async recordTrackDownload(
+    params: RecordTrackDownloadRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const res = await this.recordTrackDownloadWithEntityManager(params)
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.recordTrackDownload(params, requestInit)
+  }
+
   /**
    * Gets the Solana instructions that purchase the track
    *
@@ -666,8 +807,8 @@ export class TracksApi extends GeneratedTracksApi {
     // Fetch track
     this.logger.debug('Fetching track purchase info...', { trackId })
     const { data: track } = await this.getTrackAccessInfo({
-      trackId: params.trackId, // use hashed trackId
-      userId: params.userId // use hashed userId
+      trackId: encodeHashId(trackId)!, // use hashed trackId
+      userId: encodeHashId(userId)! // use hashed userId
     })
 
     // Validate purchase attempt

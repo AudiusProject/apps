@@ -34,7 +34,7 @@ export const CreateUserSchema = z.object({
     .strict()
 })
 
-export type CreateUserRequest = Omit<
+export type EntityManagerCreateUserRequest = Omit<
   z.input<typeof CreateUserSchema>,
   'onProgress'
 > & {
@@ -132,7 +132,7 @@ export const UpdateProfileSchema = z
   })
   .strict()
 
-export type UpdateProfileRequest = Omit<
+export type EntityManagerUpdateProfileRequest = Omit<
   z.input<typeof UpdateProfileSchema>,
   'onProgress'
 > & {
@@ -148,7 +148,7 @@ export const FollowUserSchema = z
   })
   .strict()
 
-export type FollowUserRequest = z.input<typeof FollowUserSchema>
+export type EntityManagerFollowUserRequest = z.input<typeof FollowUserSchema>
 
 export const UnfollowUserSchema = z
   .object({
@@ -157,7 +157,9 @@ export const UnfollowUserSchema = z
   })
   .strict()
 
-export type UnfollowUserRequest = z.input<typeof UnfollowUserSchema>
+export type EntityManagerUnfollowUserRequest = z.input<
+  typeof UnfollowUserSchema
+>
 
 export const SubscribeToUserSchema = z
   .object({
@@ -166,7 +168,9 @@ export const SubscribeToUserSchema = z
   })
   .strict()
 
-export type SubscribeToUserRequest = z.input<typeof SubscribeToUserSchema>
+export type EntityManagerSubscribeToUserRequest = z.input<
+  typeof SubscribeToUserSchema
+>
 
 export const UnsubscribeFromUserSchema = z
   .object({
@@ -175,7 +179,7 @@ export const UnsubscribeFromUserSchema = z
   })
   .strict()
 
-export type UnsubscribeFromUserRequest = z.input<
+export type EntityManagerUnsubscribeFromUserRequest = z.input<
   typeof UnsubscribeFromUserSchema
 >
 

@@ -22,18 +22,18 @@ import {
   DownloadPurchasesAsCSVRequest,
   DownloadSalesAsCSVRequest,
   DownloadUSDCWithdrawalsAsCSVRequest,
-  UsersApi as GeneratedUsersApi
+  UsersApi as GeneratedUsersApi,
+  type CreateUserRequest
 } from '../generated/default'
 import * as runtime from '../generated/default/runtime'
 
 import {
   AddAssociatedWalletRequest,
   AddAssociatedWalletSchema,
-  CreateUserRequest,
   CreateUserSchema,
   EmailRequest,
   EmailSchema,
-  FollowUserRequest,
+  EntityManagerFollowUserRequest,
   FollowUserSchema,
   RemoveAssociatedWalletRequest,
   RemoveAssociatedWalletSchema,
@@ -41,16 +41,17 @@ import {
   SendTipReactionRequestSchema,
   SendTipRequest,
   SendTipSchema,
-  SubscribeToUserRequest,
+  EntityManagerSubscribeToUserRequest,
   SubscribeToUserSchema,
-  UnfollowUserRequest,
+  EntityManagerUnfollowUserRequest,
   UnfollowUserSchema,
-  UnsubscribeFromUserRequest,
+  EntityManagerUnsubscribeFromUserRequest,
   UnsubscribeFromUserSchema,
   UpdateCollectiblesRequest,
   UpdateCollectiblesSchema,
-  UpdateProfileRequest,
-  UpdateProfileSchema
+  UpdateProfileSchema,
+  type EntityManagerCreateUserRequest,
+  type EntityManagerUpdateProfileRequest
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
@@ -87,8 +88,8 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Create a user
    */
-  async createUser(
-    params: CreateUserRequest,
+  async createUserWithEntityManager(
+    params: EntityManagerCreateUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { onProgress, profilePictureFile, coverArtFile, metadata } =
@@ -172,6 +173,23 @@ export class UsersApi extends GeneratedUsersApi {
     return { blockHash, blockNumber, metadata: updatedMetadata }
   }
 
+  override async createUser(
+    params: CreateUserRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      const { metadata } = params
+      const res = await this.createUserWithEntityManager({
+        metadata
+      })
+      return {
+        success: true,
+        transactionHash: res.blockHash
+      }
+    }
+    return super.createUser(params, requestInit)
+  }
+
   /** @hidden
    * Creates a guest for guest checkout
    */
@@ -206,7 +224,7 @@ export class UsersApi extends GeneratedUsersApi {
    * Update a user profile
    */
   async updateProfile(
-    params: UpdateProfileRequest,
+    params: EntityManagerUpdateProfileRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -283,8 +301,8 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Follow a user
    */
-  async followUser(
-    params: FollowUserRequest,
+  async followUserWithEntityManager(
+    params: EntityManagerFollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -302,11 +320,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async followUser(
+    params: EntityManagerFollowUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.followUserWithEntityManager(
+        params as EntityManagerFollowUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.followUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Unfollow a user
    */
-  async unfollowUser(
-    params: UnfollowUserRequest,
+  async unfollowUserWithEntityManager(
+    params: EntityManagerUnfollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -324,11 +358,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async unfollowUser(
+    params: EntityManagerUnfollowUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.unfollowUserWithEntityManager(
+        params as EntityManagerUnfollowUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unfollowUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Subscribe to a user
    */
-  async subscribeToUser(
-    params: SubscribeToUserRequest,
+  async subscribeToUserWithEntityManager(
+    params: EntityManagerSubscribeToUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -346,11 +396,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async subscribeToUser(
+    params: EntityManagerSubscribeToUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.subscribeToUserWithEntityManager(
+        params as EntityManagerSubscribeToUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.subscribeToUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Unsubscribe from a user
    */
-  async unsubscribeFromUser(
-    params: UnsubscribeFromUserRequest,
+  async unsubscribeFromUserWithEntityManager(
+    params: EntityManagerUnsubscribeFromUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -366,6 +432,22 @@ export class UsersApi extends GeneratedUsersApi {
       action: Action.UNSUBSCRIBE,
       ...advancedOptions
     })
+  }
+
+  override async unsubscribeFromUser(
+    params: EntityManagerUnsubscribeFromUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.unsubscribeFromUserWithEntityManager(
+        params as EntityManagerUnsubscribeFromUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unsubscribeFromUser(params as any, requestInit)
   }
 
   /**

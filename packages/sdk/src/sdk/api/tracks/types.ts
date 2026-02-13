@@ -9,10 +9,13 @@ import {
   DDEXRightsController
 } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
-import { Genre } from '../../types/Genre'
 import { HashId } from '../../types/HashId'
-import { Mood } from '../../types/Mood'
-import { StemCategory } from '../../types/StemCategory'
+import {
+  Mood,
+  Genre,
+  StemCategory,
+  type UpdateTrackRequest
+} from '../generated/default'
 
 import { MAX_DESCRIPTION_LENGTH } from './constants'
 
@@ -78,7 +81,14 @@ export const USDCPurchaseConditions = z
   .object({
     usdcPurchase: z.object({
       price: z.number().positive(),
-      splits: z.any()
+      splits: z.array(
+        z.object({
+          userId: z.number().optional(),
+          percentage: z.number().min(0).max(100),
+          payoutWallet: z.string(),
+          amount: z.number().positive()
+        })
+      )
     })
   })
   .strict()
@@ -86,14 +96,14 @@ export const USDCPurchaseConditions = z
 export const UploadStemMetadataSchema = z.object({
   category: z
     .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
-    .default(StemCategory.OTHER),
-  parentTrackId: HashId
+    .default(StemCategory.Other),
+  parentTrackId: HashId.or(z.number())
 })
 
 export const UploadTrackMetadataSchema = z.object({
   trackId: z.optional(HashId),
   aiAttributionUserId: z.optional(HashId),
-  description: z.optional(z.string().max(MAX_DESCRIPTION_LENGTH)),
+  description: z.optional(z.string().max(MAX_DESCRIPTION_LENGTH).nullable()),
   fieldVisibility: z.optional(
     z.object({
       mood: z.optional(z.boolean()),
@@ -104,25 +114,16 @@ export const UploadTrackMetadataSchema = z.object({
       remixes: z.optional(z.boolean())
     })
   ),
-  genre: z
-    .enum(Object.values(Genre) as [Genre, ...Genre[]])
-    .nullable()
-    .refine((val) => val !== null, {
-      message: messages.genreRequiredError
-    })
-    .refine((val) => val !== Genre.ALL, {
-      message: messages.genreAllError
-    }),
+  genre: z.enum(Object.values(Genre) as [Genre, ...Genre[]]),
   isrc: z.optional(z.string().nullable()),
   isUnlisted: z.optional(z.boolean()),
   iswc: z.optional(z.string().nullable()),
   license: z.optional(z.string().nullable()),
-  mood: z.optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]])).nullable(),
+  mood: z.optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]]).nullable()),
   isStreamGated: z.optional(z.boolean()),
   streamConditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditions,
         TipGatedConditions,
         USDCPurchaseConditions,
@@ -134,7 +135,6 @@ export const UploadTrackMetadataSchema = z.object({
   downloadConditions: z
     .optional(
       z.union([
-        CollectibleGatedConditions,
         FollowGatedConditions,
         TipGatedConditions,
         USDCPurchaseConditions,
@@ -149,7 +149,7 @@ export const UploadTrackMetadataSchema = z.object({
         tracks: z
           .array(
             z.object({
-              parentTrackId: HashId
+              parentTrackId: HashId.or(z.number())
             })
           )
           .min(1)
@@ -157,7 +157,7 @@ export const UploadTrackMetadataSchema = z.object({
       .strict()
   ),
   stemOf: z.optional(UploadStemMetadataSchema.strict()),
-  tags: z.optional(z.string()),
+  tags: z.optional(z.string()).nullable(),
   title: z.string({
     required_error: messages.titleRequiredError
   }),
@@ -172,7 +172,7 @@ export const UploadTrackMetadataSchema = z.object({
   isDownloadable: z.optional(z.boolean()),
   isOriginalAvailable: z.optional(z.boolean()),
   ddexReleaseIds: z.optional(z.record(z.string()).nullable()),
-  ddexApp: z.optional(z.string()),
+  ddexApp: z.optional(z.string()).nullable(),
   artists: z.optional(z.array(DDEXResourceContributor)).nullable(),
   resourceContributors: z.optional(z.array(DDEXResourceContributor).nullable()),
   indirectResourceContributors: z.optional(
@@ -277,7 +277,7 @@ export const UpdateTrackSchema = z
   })
   .strict()
 
-export type UpdateTrackRequest = Omit<
+export type EntityManagerUpdateTrackRequest = Omit<
   z.input<typeof UpdateTrackSchema>,
   'onProgress'
 > & {
@@ -291,7 +291,7 @@ export const DeleteTrackSchema = z
   })
   .strict()
 
-export type DeleteTrackRequest = z.input<typeof DeleteTrackSchema>
+export type EntityManagerDeleteTrackRequest = z.input<typeof DeleteTrackSchema>
 
 export const FavoriteTrackSchema = z
   .object({
@@ -311,7 +311,9 @@ export const FavoriteTrackSchema = z
   })
   .strict()
 
-export type FavoriteTrackRequest = z.input<typeof FavoriteTrackSchema>
+export type EntityManagerFavoriteTrackRequest = z.input<
+  typeof FavoriteTrackSchema
+>
 
 export const UnfavoriteTrackSchema = z
   .object({
@@ -320,7 +322,9 @@ export const UnfavoriteTrackSchema = z
   })
   .strict()
 
-export type UnfavoriteTrackRequest = z.input<typeof UnfavoriteTrackSchema>
+export type EntityManagerUnfavoriteTrackRequest = z.input<
+  typeof UnfavoriteTrackSchema
+>
 
 export const RepostTrackSchema = z
   .object({
@@ -340,7 +344,7 @@ export const RepostTrackSchema = z
   })
   .strict()
 
-export type RepostTrackRequest = z.input<typeof RepostTrackSchema>
+export type EntityManagerRepostTrackRequest = z.input<typeof RepostTrackSchema>
 
 export const UnrepostTrackSchema = z
   .object({
@@ -349,7 +353,9 @@ export const UnrepostTrackSchema = z
   })
   .strict()
 
-export type UnrepostTrackRequest = z.input<typeof UnrepostTrackSchema>
+export type EntityManagerUnrepostTrackRequest = z.input<
+  typeof UnrepostTrackSchema
+>
 
 export const RecordTrackDownloadSchema = z
   .object({
@@ -365,9 +371,9 @@ export const ShareTrackSchema = z
   })
   .strict()
 
-export type ShareTrackRequest = z.input<typeof ShareTrackSchema>
+export type EntityManagerShareTrackRequest = z.input<typeof ShareTrackSchema>
 
-export type RecordTrackDownloadRequest = z.input<
+export type EntityManagerRecordTrackDownloadRequest = z.input<
   typeof RecordTrackDownloadSchema
 >
 
@@ -474,4 +480,10 @@ export type UploadTrackFilesTask = {
     imageUploadResponse?: UploadResponse
   }>
   abort: () => void
+}
+
+export type UpdateTrackRequestWithFiles = UpdateTrackRequest & {
+  audioFile?: z.input<typeof AudioFile>
+  imageFile?: z.input<typeof ImageFile>
+  onProgress?: UploadTrackFilesProgressHandler
 }

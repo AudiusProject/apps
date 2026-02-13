@@ -1,14 +1,15 @@
 import { z } from 'zod'
 
-import {
-  ProgressEventHandlerSchema,
-  ProgressEventSchema
-} from '../../services/Storage/types'
+import { ProgressEventSchema } from '../../services/Storage/types'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
-import { Genre } from '../../types/Genre'
 import { HashId } from '../../types/HashId'
-import { Mood } from '../../types/Mood'
+import {
+  Genre,
+  Mood,
+  type CreatePlaylistRequest,
+  type UpdatePlaylistRequest
+} from '../generated/default'
 import { UploadTrackMetadataSchema } from '../tracks/types'
 
 const CreatePlaylistMetadataSchema = z
@@ -16,6 +17,7 @@ const CreatePlaylistMetadataSchema = z
     description: z.optional(z.string().max(1000)),
     playlistName: z.string(),
     isPrivate: z.optional(z.boolean()),
+    isAlbum: z.optional(z.boolean()),
     coverArtCid: z.optional(z.string()),
     license: z.optional(z.string()),
     mood: z.optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]])),
@@ -47,7 +49,9 @@ export const CreatePlaylistSchema = z
   })
   .strict()
 
-export type CreatePlaylistRequest = z.input<typeof CreatePlaylistSchema>
+export type EntityManagerCreatePlaylistRequest = z.input<
+  typeof CreatePlaylistSchema
+>
 
 export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
   {
@@ -68,35 +72,6 @@ const PlaylistTrackMetadataSchema = UploadTrackMetadataSchema.partial({
  * `genre`, `mood`, and `tags` are optional
  */
 export type PlaylistTrackMetadata = z.infer<typeof PlaylistTrackMetadataSchema>
-
-export const UpdatePlaylistMetadataSchema =
-  UploadPlaylistMetadataSchema.partial()
-    .merge(
-      z.object({
-        isPrivate: z.optional(z.boolean()),
-        playlistContents: z.optional(
-          z.array(
-            z.object({
-              timestamp: z.number(),
-              metadataTimestamp: z.optional(z.number()),
-              trackId: HashId
-            })
-          )
-        ),
-        coverArtCid: z.optional(z.string())
-      })
-    )
-    .strict()
-
-export const UpdatePlaylistSchema = z
-  .object({
-    userId: HashId,
-    playlistId: HashId,
-    imageFile: z.optional(ImageFile),
-    metadata: UpdatePlaylistMetadataSchema,
-    onProgress: ProgressEventHandlerSchema.optional()
-  })
-  .strict()
 
 export const UploadPlaylistProgressEventSchema = ProgressEventSchema.extend({
   /**
@@ -142,14 +117,62 @@ export const UploadPlaylistSchema = z
   })
   .strict()
 
-export type UpdatePlaylistRequest = z.input<typeof UpdatePlaylistSchema>
-
 export type UploadPlaylistRequest = Omit<
   z.input<typeof UploadPlaylistSchema>,
   'onProgress'
 > & {
   onProgress?: UploadPlaylistProgressHandler
 }
+
+export const UpdatePlaylistMetadataSchema =
+  UploadPlaylistMetadataSchema.partial()
+    .merge(
+      z.object({
+        isPrivate: z.optional(z.boolean()),
+        playlistContents: z.optional(
+          z.array(
+            z.object({
+              timestamp: z.number(),
+              metadataTimestamp: z.optional(z.number()),
+              trackId: HashId
+            })
+          )
+        ),
+        coverArtCid: z.optional(z.string())
+      })
+    )
+    .strict()
+
+export const UpdatePlaylistSchema = z
+  .object({
+    userId: HashId,
+    playlistId: HashId,
+    imageFile: z.optional(ImageFile),
+    metadata: UpdatePlaylistMetadataSchema,
+    onProgress: UploadPlaylistProgressHandlerSchema.optional()
+  })
+  .strict()
+
+export type EntityManagerUpdatePlaylistRequest = z.input<
+  typeof UpdatePlaylistSchema
+>
+
+export type PlaylistImageParameters = {
+  imageFile?: z.input<typeof ImageFile>
+  onProgress?: UploadPlaylistProgressHandler
+}
+
+export type PlaylistAudioParameters = {
+  audioFiles?: z.input<typeof AudioFile>[]
+  trackMetadatas?: z.input<typeof PlaylistTrackMetadataSchema>[]
+  onProgress?: UploadPlaylistProgressHandler
+}
+
+export type CreatePlaylistRequestWithFiles = CreatePlaylistRequest &
+  PlaylistImageParameters
+
+export type UpdatePlaylistRequestWithImage = UpdatePlaylistRequest &
+  PlaylistImageParameters
 
 export const PublishPlaylistSchema = z
   .object({
@@ -189,7 +212,9 @@ export const DeletePlaylistSchema = z
   })
   .strict()
 
-export type DeletePlaylistRequest = z.input<typeof DeletePlaylistSchema>
+export type EntityManagerDeletePlaylistRequest = z.input<
+  typeof DeletePlaylistSchema
+>
 
 export const FavoritePlaylistSchema = z
   .object({
@@ -209,7 +234,9 @@ export const FavoritePlaylistSchema = z
   })
   .strict()
 
-export type FavoritePlaylistRequest = z.input<typeof FavoritePlaylistSchema>
+export type EntityManagerFavoritePlaylistRequest = z.input<
+  typeof FavoritePlaylistSchema
+>
 
 export const UnfavoritePlaylistSchema = z
   .object({
@@ -218,7 +245,9 @@ export const UnfavoritePlaylistSchema = z
   })
   .strict()
 
-export type UnfavoritePlaylistRequest = z.input<typeof UnfavoritePlaylistSchema>
+export type EntityManagerUnfavoritePlaylistRequest = z.input<
+  typeof UnfavoritePlaylistSchema
+>
 
 export const RepostPlaylistSchema = z
   .object({
@@ -238,7 +267,9 @@ export const RepostPlaylistSchema = z
   })
   .strict()
 
-export type RepostPlaylistRequest = z.input<typeof RepostPlaylistSchema>
+export type EntityManagerRepostPlaylistRequest = z.input<
+  typeof RepostPlaylistSchema
+>
 
 export const UnrepostPlaylistSchema = z
   .object({
@@ -247,7 +278,9 @@ export const UnrepostPlaylistSchema = z
   })
   .strict()
 
-export type UnrepostPlaylistRequest = z.input<typeof UnrepostPlaylistSchema>
+export type EntityManagerUnrepostPlaylistRequest = z.input<
+  typeof UnrepostPlaylistSchema
+>
 
 export const SharePlaylistSchema = z
   .object({
@@ -256,4 +289,6 @@ export const SharePlaylistSchema = z
   })
   .strict()
 
-export type SharePlaylistRequest = z.input<typeof SharePlaylistSchema>
+export type EntityManagerSharePlaylistRequest = z.input<
+  typeof SharePlaylistSchema
+>

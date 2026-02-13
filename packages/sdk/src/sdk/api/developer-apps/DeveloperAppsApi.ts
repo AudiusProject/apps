@@ -12,15 +12,18 @@ import {
 import { parseParams } from '../../utils/parseParams'
 import {
   Configuration,
-  DeveloperAppsApi as GeneratedDeveloperAppsApi
+  DeveloperAppsApi as GeneratedDeveloperAppsApi,
+  type CreateDeveloperAppRequest,
+  type DeleteDeveloperAppRequest,
+  type UpdateDeveloperAppRequest
 } from '../generated/default'
 
 import {
-  CreateDeveloperAppRequest,
+  EntityManagerCreateDeveloperAppRequest,
   CreateDeveloperAppSchema,
-  UpdateDeveloperAppRequest,
+  EntityManagerUpdateDeveloperAppRequest,
   UpdateDeveloperAppSchema,
-  DeleteDeveloperAppRequest,
+  EntityManagerDeleteDeveloperAppRequest,
   DeleteDeveloperAppSchema
 } from './types'
 
@@ -35,8 +38,8 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
   /**
    * Create a developer app
    */
-  async createDeveloperApp(
-    params: CreateDeveloperAppRequest,
+  async createDeveloperAppWithEntityManager(
+    params: EntityManagerCreateDeveloperAppRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { name, userId, description, imageUrl } = await parseParams(
@@ -81,11 +84,25 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     }
   }
 
+  override async createDeveloperApp(
+    params: CreateDeveloperAppRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      return await this.createDeveloperAppWithEntityManager({
+        ...params.createDeveloperAppRequestBody,
+        userId: params.userId
+      })
+    } else {
+      return await super.createDeveloperApp(params, requestInit)
+    }
+  }
+
   /**
    * Update a developer app
    */
-  async updateDeveloperApp(
-    params: UpdateDeveloperAppRequest,
+  async updateDeveloperAppWithEntityManager(
+    params: EntityManagerUpdateDeveloperAppRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { appApiKey, name, userId, description, imageUrl } =
@@ -110,10 +127,27 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     }
   }
 
+  override async updateDeveloperApp(
+    params: UpdateDeveloperAppRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      return await this.updateDeveloperAppWithEntityManager({
+        ...params.updateDeveloperAppRequestBody,
+        userId: params.userId,
+        appApiKey: params.address
+      })
+    } else {
+      return await super.updateDeveloperApp(params, requestInit)
+    }
+  }
+
   /**
    * Delete a developer app
    */
-  async deleteDeveloperApp(params: DeleteDeveloperAppRequest) {
+  async deleteDeveloperAppWithEntityManager(
+    params: EntityManagerDeleteDeveloperAppRequest
+  ) {
     const { userId, appApiKey } = await parseParams(
       'deleteDeveloperApp',
       DeleteDeveloperAppSchema
@@ -128,5 +162,19 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
         address: `0x${appApiKey}`
       })
     })
+  }
+
+  override async deleteDeveloperApp(
+    params: DeleteDeveloperAppRequest,
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager) {
+      return await this.deleteDeveloperAppWithEntityManager({
+        userId: params.userId,
+        appApiKey: params.address
+      })
+    } else {
+      return await super.deleteDeveloperApp(params, requestInit)
+    }
   }
 }

@@ -1,6 +1,10 @@
 import type { UploadResponse } from '../../services/Storage/types'
 import { decodeHashId } from '../../utils/hashId'
-import { BaseAPI } from '../generated/default'
+import {
+  BaseAPI,
+  type CreateTrackRequestBody,
+  type UpdateTrackRequestBody
+} from '../generated/default'
 import type { PlaylistTrackMetadata } from '../playlists/types'
 
 export class TrackUploadHelper extends BaseAPI {
@@ -20,21 +24,16 @@ export class TrackUploadHelper extends BaseAPI {
     return id
   }
 
-  public transformTrackUploadMetadata<
-    // TrackMetadata is a less strict type
-    // only requiring the fields used in this function.
-    // This supports both track/playlist uploads and edits
-    TrackMetadata extends Pick<
-      PlaylistTrackMetadata,
-      'isStreamGated' | 'streamConditions' | 'isUnlisted' | 'fieldVisibility'
-    >
-  >(inputMetadata: TrackMetadata, userId: number) {
+  public transformTrackUploadMetadata(
+    inputMetadata: CreateTrackRequestBody | UpdateTrackRequestBody,
+    userId: number
+  ) {
     const metadata = {
       ...inputMetadata,
       ownerId: userId
     }
 
-    const isStreamGated = metadata.isStreamGated
+    const isStreamGated = metadata.streamConditions !== undefined
     const isUsdcGated = 'usdc_purchase' in (metadata.streamConditions ?? {})
     const isUnlisted = metadata.isUnlisted
 
@@ -46,6 +45,7 @@ export class TrackUploadHelper extends BaseAPI {
     // If track is public, set required visibility fields to true
     if (!isUnlisted) {
       metadata.fieldVisibility = {
+        remixes: true, // default, but overwritten
         ...metadata.fieldVisibility,
         genre: true,
         mood: true,
@@ -58,11 +58,11 @@ export class TrackUploadHelper extends BaseAPI {
   }
 
   public populateTrackMetadataWithUploadResponse(
-    trackMetadata: Partial<PlaylistTrackMetadata>,
+    trackMetadata: CreateTrackRequestBody | UpdateTrackRequestBody,
     audioResponse?: UploadResponse,
     coverArtResponse?: UploadResponse
   ) {
-    let updated: Partial<PlaylistTrackMetadata> & { coverArtSizes?: string } = {
+    let updated = {
       ...trackMetadata
     }
     if (audioResponse) {
@@ -75,18 +75,16 @@ export class TrackUploadHelper extends BaseAPI {
             ? audioResponse.results[
                 `320_preview|${trackMetadata.previewStartSeconds}`
               ]
-            : trackMetadata.previewCid,
+            : trackMetadata.previewCid!,
         origFileCid: audioResponse.orig_file_cid,
         origFilename: audioResponse.orig_filename || trackMetadata.origFilename,
-        audioUploadId: audioResponse.id,
         duration: parseInt(audioResponse?.probe?.format?.duration ?? '0', 10),
         bpm: audioResponse.audio_analysis_results?.bpm
           ? audioResponse.audio_analysis_results.bpm
           : trackMetadata.bpm,
         musicalKey: audioResponse.audio_analysis_results?.key
           ? audioResponse.audio_analysis_results.key
-          : trackMetadata.musicalKey,
-        audioAnalysisErrorCount: audioResponse.audio_analysis_error_count || 0
+          : trackMetadata.musicalKey
       }
     }
     if (coverArtResponse) {
