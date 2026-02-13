@@ -12,7 +12,7 @@ import {
 import type { LoggerService } from '../../services/Logger'
 import type { ClaimableTokensClient } from '../../services/Solana/programs/ClaimableTokensClient/ClaimableTokensClient'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
-import { HashId } from '../../types/HashId'
+import { HashId, Id } from '../../types/HashId'
 import { generateMetadataCidV1 } from '../../utils/cid'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
@@ -180,7 +180,13 @@ export class UsersApi extends GeneratedUsersApi {
     if (this.entityManager) {
       const { metadata } = params
       const res = await this.createUserWithEntityManager({
-        metadata
+        metadata: {
+          ...metadata,
+          events: {
+            ...metadata.events,
+            referrer: Id.parse(metadata.events?.referrer)!
+          }
+        }
       })
       return {
         success: true,

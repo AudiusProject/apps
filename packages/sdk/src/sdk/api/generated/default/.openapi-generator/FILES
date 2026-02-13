@@ -79,6 +79,9 @@ models/CreateTrackResponse.ts
 models/CreateUserDeveloperAppRequestBody.ts
 models/CreateUserDeveloperAppResponse.ts
 models/CreateUserRequestBody.ts
+models/CreateUserRequestBodyEvents.ts
+models/CreateUserRequestBodyPlaylistLibrary.ts
+models/CreateUserRequestBodyPlaylistLibraryContentsInner.ts
 models/CreateUserResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
@@ -114,9 +117,13 @@ models/MediaLink.ts
 models/MonthlyAggregatePlay.ts
 models/Mood.ts
 models/MutualFollowersResponse.ts
+models/PinCommentRequestBody.ts
 models/Playlist.ts
 models/PlaylistAddedTimestamp.ts
 models/PlaylistArtwork.ts
+models/PlaylistLibraryExplorePlaylistIdentifier.ts
+models/PlaylistLibraryFolder.ts
+models/PlaylistLibraryPlaylistIdentifier.ts
 models/PlaylistResponse.ts
 models/PlaylistSearchResult.ts
 models/PlaylistTracksResponse.ts
@@ -127,6 +134,7 @@ models/PrizePublic.ts
 models/PrizesResponse.ts
 models/ProfilePicture.ts
 models/PurchasersResponse.ts
+models/ReactCommentRequestBody.ts
 models/RedeemAmountResponse.ts
 models/RelatedArtistResponse.ts
 models/RemixParent.ts
@@ -190,6 +198,7 @@ models/UpdateDeveloperAppRequestBody.ts
 models/UpdatePlaylistRequestBody.ts
 models/UpdateTrackRequestBody.ts
 models/UpdateUserRequestBody.ts
+models/UpdateUserRequestBodyPlaylistLibrary.ts
 models/User.ts
 models/UserCoin.ts
 models/UserCoinAccount.ts

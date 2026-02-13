@@ -14,6 +14,19 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CreateUserRequestBodyEvents } from './CreateUserRequestBodyEvents';
+import {
+    CreateUserRequestBodyEventsFromJSON,
+    CreateUserRequestBodyEventsFromJSONTyped,
+    CreateUserRequestBodyEventsToJSON,
+} from './CreateUserRequestBodyEvents';
+import type { UpdateUserRequestBodyPlaylistLibrary } from './UpdateUserRequestBodyPlaylistLibrary';
+import {
+    UpdateUserRequestBodyPlaylistLibraryFromJSON,
+    UpdateUserRequestBodyPlaylistLibraryFromJSONTyped,
+    UpdateUserRequestBodyPlaylistLibraryToJSON,
+} from './UpdateUserRequestBodyPlaylistLibrary';
+
 /**
  * Request body for updating user profile. All fields are optional.
  * @export
@@ -106,10 +119,10 @@ export interface UpdateUserRequestBody {
     isDeactivated?: boolean;
     /**
      * Track ID to feature as artist pick
-     * @type {string}
+     * @type {number}
      * @memberof UpdateUserRequestBody
      */
-    artistPickTrackId?: string;
+    artistPickTrackId?: number;
     /**
      * Whether to allow AI attribution
      * @type {boolean}
@@ -128,6 +141,18 @@ export interface UpdateUserRequestBody {
      * @memberof UpdateUserRequestBody
      */
     coinFlairMint?: string;
+    /**
+     * 
+     * @type {UpdateUserRequestBodyPlaylistLibrary}
+     * @memberof UpdateUserRequestBody
+     */
+    playlistLibrary?: UpdateUserRequestBodyPlaylistLibrary;
+    /**
+     * 
+     * @type {CreateUserRequestBodyEvents}
+     * @memberof UpdateUserRequestBody
+     */
+    events?: CreateUserRequestBodyEvents;
 }
 
 
@@ -177,6 +202,8 @@ export function UpdateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
         'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
+        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : UpdateUserRequestBodyPlaylistLibraryFromJSON(json['playlist_library']),
+        'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
 
@@ -207,6 +234,8 @@ export function UpdateUserRequestBodyToJSON(value?: UpdateUserRequestBody | null
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
         'coin_flair_mint': value.coinFlairMint,
+        'playlist_library': UpdateUserRequestBodyPlaylistLibraryToJSON(value.playlistLibrary),
+        'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }
 

@@ -35,7 +35,8 @@ export const usePinComment = () => {
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
           metadata: {
-            entityId: trackId
+            entityId: trackId,
+            entityType: 'Track'
           }
         })
       } else {
@@ -43,7 +44,8 @@ export const usePinComment = () => {
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
           metadata: {
-            entityId: trackId
+            entityId: trackId,
+            entityType: 'Track'
           }
         })
       }
