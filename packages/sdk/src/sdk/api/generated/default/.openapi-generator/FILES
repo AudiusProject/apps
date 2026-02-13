@@ -198,6 +198,7 @@ models/UpdateDeveloperAppRequestBody.ts
 models/UpdatePlaylistRequestBody.ts
 models/UpdateTrackRequestBody.ts
 models/UpdateUserRequestBody.ts
+models/UpdateUserRequestBodyPlaylistLibrary.ts
 models/User.ts
 models/UserCoin.ts
 models/UserCoinAccount.ts

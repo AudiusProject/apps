@@ -182,6 +182,7 @@ export * from './UpdateDeveloperAppRequestBody';
 export * from './UpdatePlaylistRequestBody';
 export * from './UpdateTrackRequestBody';
 export * from './UpdateUserRequestBody';
+export * from './UpdateUserRequestBodyPlaylistLibrary';
 export * from './User';
 export * from './UserCoin';
 export * from './UserCoinAccount';

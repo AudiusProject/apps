@@ -1,7 +1,6 @@
 import {
   HashId,
   OptionalHashId,
-  OptionalId,
   type full,
   type User,
   type UpdateUserRequest
@@ -233,7 +232,7 @@ export const userMetadataToSdk = (
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,
-  artistPickTrackId: OptionalId.parse(input.artist_pick_track_id ?? undefined),
+  artistPickTrackId: input.artist_pick_track_id ?? undefined,
   events: {
     referrer: input.events?.referrer ?? undefined,
     isMobileUser: input.events?.is_mobile_user ?? undefined

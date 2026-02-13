@@ -20,12 +20,12 @@ import {
     CreateUserRequestBodyEventsFromJSONTyped,
     CreateUserRequestBodyEventsToJSON,
 } from './CreateUserRequestBodyEvents';
-import type { CreateUserRequestBodyPlaylistLibrary } from './CreateUserRequestBodyPlaylistLibrary';
+import type { UpdateUserRequestBodyPlaylistLibrary } from './UpdateUserRequestBodyPlaylistLibrary';
 import {
-    CreateUserRequestBodyPlaylistLibraryFromJSON,
-    CreateUserRequestBodyPlaylistLibraryFromJSONTyped,
-    CreateUserRequestBodyPlaylistLibraryToJSON,
-} from './CreateUserRequestBodyPlaylistLibrary';
+    UpdateUserRequestBodyPlaylistLibraryFromJSON,
+    UpdateUserRequestBodyPlaylistLibraryFromJSONTyped,
+    UpdateUserRequestBodyPlaylistLibraryToJSON,
+} from './UpdateUserRequestBodyPlaylistLibrary';
 
 /**
  * Request body for updating user profile. All fields are optional.
@@ -143,10 +143,10 @@ export interface UpdateUserRequestBody {
     coinFlairMint?: string;
     /**
      * 
-     * @type {CreateUserRequestBodyPlaylistLibrary}
+     * @type {UpdateUserRequestBodyPlaylistLibrary}
      * @memberof UpdateUserRequestBody
      */
-    playlistLibrary?: CreateUserRequestBodyPlaylistLibrary;
+    playlistLibrary?: UpdateUserRequestBodyPlaylistLibrary;
     /**
      * 
      * @type {CreateUserRequestBodyEvents}
@@ -202,7 +202,7 @@ export function UpdateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
         'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
-        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : CreateUserRequestBodyPlaylistLibraryFromJSON(json['playlist_library']),
+        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : UpdateUserRequestBodyPlaylistLibraryFromJSON(json['playlist_library']),
         'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
@@ -234,7 +234,7 @@ export function UpdateUserRequestBodyToJSON(value?: UpdateUserRequestBody | null
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
         'coin_flair_mint': value.coinFlairMint,
-        'playlist_library': CreateUserRequestBodyPlaylistLibraryToJSON(value.playlistLibrary),
+        'playlist_library': UpdateUserRequestBodyPlaylistLibraryToJSON(value.playlistLibrary),
         'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }

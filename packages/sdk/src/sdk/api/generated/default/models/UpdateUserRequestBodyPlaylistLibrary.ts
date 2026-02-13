@@ -24,42 +24,41 @@ import {
 /**
  * User's playlist library with support for folders and playlists
  * @export
- * @interface CreateUserRequestBodyPlaylistLibrary
+ * @interface UpdateUserRequestBodyPlaylistLibrary
  */
-export interface CreateUserRequestBodyPlaylistLibrary {
+export interface UpdateUserRequestBodyPlaylistLibrary {
     /**
      * Array of folders and playlist identifiers
      * @type {Array<CreateUserRequestBodyPlaylistLibraryContentsInner>}
-     * @memberof CreateUserRequestBodyPlaylistLibrary
+     * @memberof UpdateUserRequestBodyPlaylistLibrary
      */
-    contents: Array<CreateUserRequestBodyPlaylistLibraryContentsInner>;
+    contents?: Array<CreateUserRequestBodyPlaylistLibraryContentsInner>;
 }
 
 /**
- * Check if a given object implements the CreateUserRequestBodyPlaylistLibrary interface.
+ * Check if a given object implements the UpdateUserRequestBodyPlaylistLibrary interface.
  */
-export function instanceOfCreateUserRequestBodyPlaylistLibrary(value: object): value is CreateUserRequestBodyPlaylistLibrary {
+export function instanceOfUpdateUserRequestBodyPlaylistLibrary(value: object): value is UpdateUserRequestBodyPlaylistLibrary {
     let isInstance = true;
-    isInstance = isInstance && "contents" in value && value["contents"] !== undefined;
 
     return isInstance;
 }
 
-export function CreateUserRequestBodyPlaylistLibraryFromJSON(json: any): CreateUserRequestBodyPlaylistLibrary {
-    return CreateUserRequestBodyPlaylistLibraryFromJSONTyped(json, false);
+export function UpdateUserRequestBodyPlaylistLibraryFromJSON(json: any): UpdateUserRequestBodyPlaylistLibrary {
+    return UpdateUserRequestBodyPlaylistLibraryFromJSONTyped(json, false);
 }
 
-export function CreateUserRequestBodyPlaylistLibraryFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateUserRequestBodyPlaylistLibrary {
+export function UpdateUserRequestBodyPlaylistLibraryFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateUserRequestBodyPlaylistLibrary {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'contents': ((json['contents'] as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSON)),
+        'contents': !exists(json, 'contents') ? undefined : ((json['contents'] as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSON)),
     };
 }
 
-export function CreateUserRequestBodyPlaylistLibraryToJSON(value?: CreateUserRequestBodyPlaylistLibrary | null): any {
+export function UpdateUserRequestBodyPlaylistLibraryToJSON(value?: UpdateUserRequestBodyPlaylistLibrary | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -68,7 +67,7 @@ export function CreateUserRequestBodyPlaylistLibraryToJSON(value?: CreateUserReq
     }
     return {
         
-        'contents': ((value.contents as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerToJSON)),
+        'contents': value.contents === undefined ? undefined : ((value.contents as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerToJSON)),
     };
 }
 
