@@ -90,7 +90,7 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
   ) {
     if (this.entityManager) {
       return await this.createDeveloperAppWithEntityManager({
-        ...params.createDeveloperAppRequestBody,
+        ...params.metadata,
         userId: params.userId
       })
     } else {
