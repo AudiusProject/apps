@@ -20,8 +20,10 @@ models/Access.ts
 models/AccessGate.ts
 models/AccessInfoResponse.ts
 models/Activity.ts
+models/AddManagerRequestBody.ts
 models/AlbumBacklink.ts
 models/AlbumsResponse.ts
+models/ApproveGrantRequestBody.ts
 models/AuthorizedApp.ts
 models/AuthorizedApps.ts
 models/BalanceHistoryDataPoint.ts
@@ -69,7 +71,8 @@ models/CreateCoinResponseData.ts
 models/CreateCommentRequestBody.ts
 models/CreateCommentResponse.ts
 models/CreateDeveloperAppRequestBody.ts
-models/CreateDeveloperAppRequestBodyAppSignature.ts
+models/CreateDeveloperAppResponse.ts
+models/CreateGrantRequestBody.ts
 models/CreatePlaylistRequestBody.ts
 models/CreatePlaylistResponse.ts
 models/CreateRewardCodeRequestBody.ts

@@ -31,13 +31,13 @@ export interface UpdateDeveloperAppRequestBody {
      * @type {string}
      * @memberof UpdateDeveloperAppRequestBody
      */
-    description: string;
+    description?: string;
     /**
      * App logo/image URL (camelCase)
      * @type {string}
      * @memberof UpdateDeveloperAppRequestBody
      */
-    imageUrl: string;
+    imageUrl?: string;
 }
 
 /**
@@ -46,8 +46,6 @@ export interface UpdateDeveloperAppRequestBody {
 export function instanceOfUpdateDeveloperAppRequestBody(value: object): value is UpdateDeveloperAppRequestBody {
     let isInstance = true;
     isInstance = isInstance && "name" in value && value["name"] !== undefined;
-    isInstance = isInstance && "description" in value && value["description"] !== undefined;
-    isInstance = isInstance && "imageUrl" in value && value["imageUrl"] !== undefined;
 
     return isInstance;
 }
@@ -63,8 +61,8 @@ export function UpdateDeveloperAppRequestBodyFromJSONTyped(json: any, ignoreDisc
     return {
         
         'name': json['name'],
-        'description': json['description'],
-        'imageUrl': json['imageUrl'],
+        'description': !exists(json, 'description') ? undefined : json['description'],
+        'imageUrl': !exists(json, 'imageUrl') ? undefined : json['imageUrl'],
     };
 }
 

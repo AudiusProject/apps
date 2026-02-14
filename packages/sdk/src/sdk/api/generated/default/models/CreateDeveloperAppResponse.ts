@@ -17,49 +17,49 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface CreateUserDeveloperAppResponse
+ * @interface CreateDeveloperAppResponse
  */
-export interface CreateUserDeveloperAppResponse {
+export interface CreateDeveloperAppResponse {
     /**
      * The API key (address) for the developer app
      * @type {string}
-     * @memberof CreateUserDeveloperAppResponse
+     * @memberof CreateDeveloperAppResponse
      */
     apiKey?: string;
     /**
      * The private key for the developer app (for signing)
      * @type {string}
-     * @memberof CreateUserDeveloperAppResponse
+     * @memberof CreateDeveloperAppResponse
      */
     apiSecret?: string;
     /**
      * The bearer token for API authentication (use in Authorization header)
      * @type {string}
-     * @memberof CreateUserDeveloperAppResponse
+     * @memberof CreateDeveloperAppResponse
      */
     bearerToken?: string;
     /**
      * Transaction hash of the creation
      * @type {string}
-     * @memberof CreateUserDeveloperAppResponse
+     * @memberof CreateDeveloperAppResponse
      */
     transactionHash?: string;
 }
 
 /**
- * Check if a given object implements the CreateUserDeveloperAppResponse interface.
+ * Check if a given object implements the CreateDeveloperAppResponse interface.
  */
-export function instanceOfCreateUserDeveloperAppResponse(value: object): value is CreateUserDeveloperAppResponse {
+export function instanceOfCreateDeveloperAppResponse(value: object): value is CreateDeveloperAppResponse {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function CreateUserDeveloperAppResponseFromJSON(json: any): CreateUserDeveloperAppResponse {
-    return CreateUserDeveloperAppResponseFromJSONTyped(json, false);
+export function CreateDeveloperAppResponseFromJSON(json: any): CreateDeveloperAppResponse {
+    return CreateDeveloperAppResponseFromJSONTyped(json, false);
 }
 
-export function CreateUserDeveloperAppResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateUserDeveloperAppResponse {
+export function CreateDeveloperAppResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateDeveloperAppResponse {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -72,7 +72,7 @@ export function CreateUserDeveloperAppResponseFromJSONTyped(json: any, ignoreDis
     };
 }
 
-export function CreateUserDeveloperAppResponseToJSON(value?: CreateUserDeveloperAppResponse | null): any {
+export function CreateDeveloperAppResponseToJSON(value?: CreateDeveloperAppResponse | null): any {
     if (value === undefined) {
         return undefined;
     }

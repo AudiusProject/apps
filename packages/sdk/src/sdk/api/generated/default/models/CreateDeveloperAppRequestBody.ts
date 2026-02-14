@@ -14,13 +14,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CreateDeveloperAppRequestBodyAppSignature } from './CreateDeveloperAppRequestBodyAppSignature';
-import {
-    CreateDeveloperAppRequestBodyAppSignatureFromJSON,
-    CreateDeveloperAppRequestBodyAppSignatureFromJSONTyped,
-    CreateDeveloperAppRequestBodyAppSignatureToJSON,
-} from './CreateDeveloperAppRequestBodyAppSignature';
-
 /**
  * 
  * @export
@@ -38,19 +31,13 @@ export interface CreateDeveloperAppRequestBody {
      * @type {string}
      * @memberof CreateDeveloperAppRequestBody
      */
-    description: string;
+    description?: string;
     /**
-     * App logo/image URL (camelCase)
+     * App logo/image URL
      * @type {string}
      * @memberof CreateDeveloperAppRequestBody
      */
-    imageUrl: string;
-    /**
-     * 
-     * @type {CreateDeveloperAppRequestBodyAppSignature}
-     * @memberof CreateDeveloperAppRequestBody
-     */
-    appSignature: CreateDeveloperAppRequestBodyAppSignature;
+    imageUrl?: string;
 }
 
 /**
@@ -59,9 +46,6 @@ export interface CreateDeveloperAppRequestBody {
 export function instanceOfCreateDeveloperAppRequestBody(value: object): value is CreateDeveloperAppRequestBody {
     let isInstance = true;
     isInstance = isInstance && "name" in value && value["name"] !== undefined;
-    isInstance = isInstance && "description" in value && value["description"] !== undefined;
-    isInstance = isInstance && "imageUrl" in value && value["imageUrl"] !== undefined;
-    isInstance = isInstance && "appSignature" in value && value["appSignature"] !== undefined;
 
     return isInstance;
 }
@@ -77,9 +61,8 @@ export function CreateDeveloperAppRequestBodyFromJSONTyped(json: any, ignoreDisc
     return {
         
         'name': json['name'],
-        'description': json['description'],
-        'imageUrl': json['imageUrl'],
-        'appSignature': CreateDeveloperAppRequestBodyAppSignatureFromJSON(json['appSignature']),
+        'description': !exists(json, 'description') ? undefined : json['description'],
+        'imageUrl': !exists(json, 'imageUrl') ? undefined : json['imageUrl'],
     };
 }
 
@@ -95,7 +78,6 @@ export function CreateDeveloperAppRequestBodyToJSON(value?: CreateDeveloperAppRe
         'name': value.name,
         'description': value.description,
         'imageUrl': value.imageUrl,
-        'appSignature': CreateDeveloperAppRequestBodyAppSignatureToJSON(value.appSignature),
     };
 }
 
