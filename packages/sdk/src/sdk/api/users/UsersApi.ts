@@ -205,13 +205,16 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Update a user profile
    */
-  async updateProfile(
+  async updateProfileWithEntityManager(
     params: UpdateProfileRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
     const { onProgress, profilePictureFile, coverArtFile, userId, metadata } =
-      await parseParams('updateProfile', UpdateProfileSchema)(params)
+      await parseParams(
+        'updateProfileWithEntityManager',
+        UpdateProfileSchema
+      )(params)
 
     const [profilePictureResp, coverArtResp] = await Promise.all([
       profilePictureFile &&

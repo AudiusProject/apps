@@ -44,12 +44,13 @@ export const useUpdateProfile = () => {
         }
       }
 
-      const { blockHash, blockNumber } = await sdk.users.updateProfile({
-        userId: Id.parse(currentUserId),
-        profilePictureFile: metadata.updatedProfilePicture?.file,
-        coverArtFile: metadata.updatedCoverPhoto?.file,
-        metadata: userMetadataToSdk(metadata)
-      })
+      const { blockHash, blockNumber } =
+        await sdk.users.updateProfileWithEntityManager({
+          userId: Id.parse(currentUserId),
+          profilePictureFile: metadata.updatedProfilePicture?.file,
+          coverArtFile: metadata.updatedCoverPhoto?.file,
+          metadata: userMetadataToSdk(metadata)
+        })
 
       // Wait for transaction confirmation
       const confirmed = await sdk.services.entityManager.confirmWrite({

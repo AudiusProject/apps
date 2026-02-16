@@ -502,7 +502,7 @@ function* signUp() {
               }
 
               const { blockHash, blockNumber } = yield* call(
-                [sdk.users, sdk.users.updateProfile],
+                [sdk.users, sdk.users.updateProfileWithEntityManager],
                 completeProfileMetadataRequest
               )
 

@@ -195,12 +195,13 @@ export const audiusBackend = ({
     try {
       newMetadata = schemas.newUserMetadata(newMetadata, true)
       const userId = newMetadata.user_id
-      const { blockHash, blockNumber } = await sdk.users.updateProfile({
-        userId: Id.parse(userId),
-        profilePictureFile: metadata.updatedProfilePicture?.file,
-        coverArtFile: metadata.updatedCoverPhoto?.file,
-        metadata: userMetadataToSdk(newMetadata)
-      })
+      const { blockHash, blockNumber } =
+        await sdk.users.updateProfileWithEntityManager({
+          userId: Id.parse(userId),
+          profilePictureFile: metadata.updatedProfilePicture?.file,
+          coverArtFile: metadata.updatedCoverPhoto?.file,
+          metadata: userMetadataToSdk(newMetadata)
+        })
       return { blockHash, blockNumber, userId }
     } catch (err) {
       console.error(getErrorMessage(err))

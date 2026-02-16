@@ -95,7 +95,7 @@ export async function updateUser(
 
   const sdkMetadata = userMetadataToSdk(metadata as UserMetadata)
 
-  const response = await sdk.users.updateProfile({
+  const response = await sdk.users.updateProfileWithEntityManager({
     coverArtFile,
     profilePictureFile,
     userId: encodedUserId,
