@@ -37,8 +37,8 @@ export class ExploreApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Get best selling tracks and playlists
-     * Get best selling tracks and/or albums
+     * Get best selling tracks and/or albums with related entities
+     * Get best selling tracks and playlists with related entities
      */
     async getBestSellingRaw(params: GetBestSellingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BestSellingResponse>> {
         const queryParameters: any = {};
@@ -72,8 +72,8 @@ export class ExploreApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get best selling tracks and playlists
-     * Get best selling tracks and/or albums
+     * Get best selling tracks and/or albums with related entities
+     * Get best selling tracks and playlists with related entities
      */
     async getBestSelling(params: GetBestSellingRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BestSellingResponse> {
         const response = await this.getBestSellingRaw(params, initOverrides);

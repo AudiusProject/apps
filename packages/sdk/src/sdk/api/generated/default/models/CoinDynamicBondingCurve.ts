@@ -15,7 +15,7 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * Information about the dynamic bonding curve if one exists for the Coin
+ * Information about the dynamic bonding curve if one exists
  * @export
  * @interface CoinDynamicBondingCurve
  */
@@ -25,25 +25,25 @@ export interface CoinDynamicBondingCurve {
      * @type {string}
      * @memberof CoinDynamicBondingCurve
      */
-    address: string;
+    address?: string;
     /**
-     * Current price in the pool's quote token (e.g., AUDIO)
+     * Current price in the pool's quote token
      * @type {number}
      * @memberof CoinDynamicBondingCurve
      */
-    price: number;
+    price?: number;
     /**
      * Current price in USD
      * @type {number}
      * @memberof CoinDynamicBondingCurve
      */
-    priceUSD: number;
+    priceUSD?: number;
     /**
      * Progress along the bonding curve (0.0 - 1.0)
      * @type {number}
      * @memberof CoinDynamicBondingCurve
      */
-    curveProgress: number;
+    curveProgress?: number;
     /**
      * Whether the bonding curve has been migrated
      * @type {boolean}
@@ -55,19 +55,19 @@ export interface CoinDynamicBondingCurve {
      * @type {number}
      * @memberof CoinDynamicBondingCurve
      */
-    creatorQuoteFee: number;
+    creatorQuoteFee?: number;
     /**
      * Total trading quote fee accumulated
      * @type {number}
      * @memberof CoinDynamicBondingCurve
      */
-    totalTradingQuoteFee: number;
+    totalTradingQuoteFee?: number;
     /**
      * Address of the pool creator's wallet
      * @type {string}
      * @memberof CoinDynamicBondingCurve
      */
-    creatorWalletAddress: string;
+    creatorWalletAddress?: string;
 }
 
 /**
@@ -75,13 +75,6 @@ export interface CoinDynamicBondingCurve {
  */
 export function instanceOfCoinDynamicBondingCurve(value: object): value is CoinDynamicBondingCurve {
     let isInstance = true;
-    isInstance = isInstance && "address" in value && value["address"] !== undefined;
-    isInstance = isInstance && "price" in value && value["price"] !== undefined;
-    isInstance = isInstance && "priceUSD" in value && value["priceUSD"] !== undefined;
-    isInstance = isInstance && "curveProgress" in value && value["curveProgress"] !== undefined;
-    isInstance = isInstance && "creatorQuoteFee" in value && value["creatorQuoteFee"] !== undefined;
-    isInstance = isInstance && "totalTradingQuoteFee" in value && value["totalTradingQuoteFee"] !== undefined;
-    isInstance = isInstance && "creatorWalletAddress" in value && value["creatorWalletAddress"] !== undefined;
 
     return isInstance;
 }
@@ -96,14 +89,14 @@ export function CoinDynamicBondingCurveFromJSONTyped(json: any, ignoreDiscrimina
     }
     return {
         
-        'address': json['address'],
-        'price': json['price'],
-        'priceUSD': json['priceUSD'],
-        'curveProgress': json['curveProgress'],
+        'address': !exists(json, 'address') ? undefined : json['address'],
+        'price': !exists(json, 'price') ? undefined : json['price'],
+        'priceUSD': !exists(json, 'priceUSD') ? undefined : json['priceUSD'],
+        'curveProgress': !exists(json, 'curveProgress') ? undefined : json['curveProgress'],
         'isMigrated': !exists(json, 'isMigrated') ? undefined : json['isMigrated'],
-        'creatorQuoteFee': json['creatorQuoteFee'],
-        'totalTradingQuoteFee': json['totalTradingQuoteFee'],
-        'creatorWalletAddress': json['creatorWalletAddress'],
+        'creatorQuoteFee': !exists(json, 'creatorQuoteFee') ? undefined : json['creatorQuoteFee'],
+        'totalTradingQuoteFee': !exists(json, 'totalTradingQuoteFee') ? undefined : json['totalTradingQuoteFee'],
+        'creatorWalletAddress': !exists(json, 'creatorWalletAddress') ? undefined : json['creatorWalletAddress'],
     };
 }
 

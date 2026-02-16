@@ -77,11 +77,11 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
       label: messages.marketCap
     }),
     createMetric({
-      value: `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      value: `$${formatCount(coin.totalVolumeUSD ?? 0, 2)}`,
       label: messages.totalVolume
     }),
     createMetric({
-      value: formatCount(coin.holder),
+      value: formatCount(coin.holder ?? 0),
       label: messages.uniqueHolders
     }),
     createMetric({

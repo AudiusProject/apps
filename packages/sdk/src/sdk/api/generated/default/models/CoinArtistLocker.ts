@@ -15,31 +15,31 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * Information about the artist locker associated with the coin.
+ * Artist locker vesting information
  * @export
  * @interface CoinArtistLocker
  */
 export interface CoinArtistLocker {
     /**
-     * The address of the artist locker.
+     * 
      * @type {string}
      * @memberof CoinArtistLocker
      */
     address?: string;
     /**
-     * The amount currently locked in the artist locker.
+     * 
      * @type {number}
      * @memberof CoinArtistLocker
      */
     locked?: number;
     /**
-     * The amount currently unlocked in the artist locker.
+     * 
      * @type {number}
      * @memberof CoinArtistLocker
      */
     unlocked?: number;
     /**
-     * The amount claimable from the artist locker. Eg. the amount unlocked that hasn't already been claimed.
+     * 
      * @type {number}
      * @memberof CoinArtistLocker
      */

@@ -17,6 +17,7 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
+  FollowingResponse,
   PlaylistResponse,
   PlaylistSearchResult,
   PlaylistTracksResponse,
@@ -25,6 +26,8 @@ import type {
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
+    FollowingResponseFromJSON,
+    FollowingResponseToJSON,
     PlaylistResponseFromJSON,
     PlaylistResponseToJSON,
     PlaylistSearchResultFromJSON,
@@ -68,6 +71,28 @@ export interface GetTrendingPlaylistsRequest {
     time?: GetTrendingPlaylistsTimeEnum;
     type?: GetTrendingPlaylistsTypeEnum;
     omitTracks?: boolean;
+}
+
+export interface GetTrendingPlaylistsWithVersionRequest {
+    version: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    time?: GetTrendingPlaylistsWithVersionTimeEnum;
+}
+
+export interface GetUsersFromPlaylistFavoritesRequest {
+    playlistId: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+}
+
+export interface GetUsersFromPlaylistRepostsRequest {
+    playlistId: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
 }
 
 export interface SearchPlaylistsRequest {
@@ -267,7 +292,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets trending playlists for a time period
+     * Returns trending playlists for a time period
      */
     async getTrendingPlaylistsRaw(params: GetTrendingPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
         const queryParameters: any = {};
@@ -309,10 +334,143 @@ export class PlaylistsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets trending playlists for a time period
+     * Returns trending playlists for a time period
      */
     async getTrendingPlaylists(params: GetTrendingPlaylistsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
         const response = await this.getTrendingPlaylistsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersionRaw(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
+        if (params.version === null || params.version === undefined) {
+            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingPlaylistsWithVersion.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.time !== undefined) {
+            queryParameters['time'] = params.time;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/trending/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingPlaylistsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersion(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
+        const response = await this.getTrendingPlaylistsWithVersionRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get users that favorited a playlist
+     */
+    async getUsersFromPlaylistFavoritesRaw(params: GetUsersFromPlaylistFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowingResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling getUsersFromPlaylistFavorites.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowingResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get users that favorited a playlist
+     */
+    async getUsersFromPlaylistFavorites(params: GetUsersFromPlaylistFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowingResponse> {
+        const response = await this.getUsersFromPlaylistFavoritesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get users that reposted a playlist
+     */
+    async getUsersFromPlaylistRepostsRaw(params: GetUsersFromPlaylistRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowingResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling getUsersFromPlaylistReposts.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowingResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get users that reposted a playlist
+     */
+    async getUsersFromPlaylistReposts(params: GetUsersFromPlaylistRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowingResponse> {
+        const response = await this.getUsersFromPlaylistRepostsRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -395,6 +553,16 @@ export const GetTrendingPlaylistsTypeEnum = {
     Album: 'album'
 } as const;
 export type GetTrendingPlaylistsTypeEnum = typeof GetTrendingPlaylistsTypeEnum[keyof typeof GetTrendingPlaylistsTypeEnum];
+/**
+ * @export
+ */
+export const GetTrendingPlaylistsWithVersionTimeEnum = {
+    Week: 'week',
+    Month: 'month',
+    Year: 'year',
+    AllTime: 'allTime'
+} as const;
+export type GetTrendingPlaylistsWithVersionTimeEnum = typeof GetTrendingPlaylistsWithVersionTimeEnum[keyof typeof GetTrendingPlaylistsWithVersionTimeEnum];
 /**
  * @export
  */

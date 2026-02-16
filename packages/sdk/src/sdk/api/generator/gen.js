@@ -45,7 +45,14 @@ const clearOutput = ({ apiFlavor }) => {
   fs.mkdirSync(path.join(process.env.PWD, OUT_DIR))
 }
 
-const downloadSpec = async ({ env, apiVersion, apiFlavor }) => {
+const downloadSpec = async ({ env, apiVersion, apiFlavor, local }) => {
+  if (local) {
+    const srcPath = path.resolve(process.env.PWD, local)
+    const spec = fs.readFileSync(srcPath, 'utf8')
+    fs.writeFileSync(path.join(process.env.PWD, SWAGGER_SPEC_PATH), spec)
+    console.info(`Using local spec: ${srcPath}`)
+    return
+  }
   // Setup args
   let baseURL = ''
   if (env === 'dev') {
@@ -83,6 +90,10 @@ program
   .option('--env <env>', 'The environment of the DN to gen from', 'prod')
   .option('--api-version <apiVersion>', 'The API version', 'v1')
   .option('--api-flavor <apiFlavor>', 'The API flavor', '')
+  .option(
+    '--local <path>',
+    'Use local swagger file instead of fetching (e.g. ../../../../api/api/swagger/swagger-v1.yaml)'
+  )
   .option('--generator <generator>', 'The generator to use', 'typescript-fetch')
   .action(async (options) => {
     clearOutput(options)

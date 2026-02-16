@@ -16,7 +16,10 @@
 import { exists, mapValues } from '../runtime';
 import {
      CollectionActivityFromJSONTyped,
-     TrackActivityFromJSONTyped
+     CollectionActivityFullWithoutTracksFromJSONTyped,
+     CollectionActivityWithoutTracksFromJSONTyped,
+     TrackActivityFromJSONTyped,
+     TrackActivityFullFromJSONTyped
 } from './';
 
 /**
@@ -87,8 +90,17 @@ export function ActivityFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         if (json['_class'] === 'collection_activity') {
             return CollectionActivityFromJSONTyped(json, true);
         }
+        if (json['_class'] === 'collection_activity_full_without_tracks') {
+            return CollectionActivityFullWithoutTracksFromJSONTyped(json, true);
+        }
+        if (json['_class'] === 'collection_activity_without_tracks') {
+            return CollectionActivityWithoutTracksFromJSONTyped(json, true);
+        }
         if (json['_class'] === 'track_activity') {
             return TrackActivityFromJSONTyped(json, true);
+        }
+        if (json['_class'] === 'track_activity_full') {
+            return TrackActivityFullFromJSONTyped(json, true);
         }
     }
     return {

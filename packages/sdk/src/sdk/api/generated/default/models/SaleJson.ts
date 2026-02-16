@@ -27,7 +27,7 @@ export interface SaleJson {
      */
     title?: string;
     /**
-     * Full URL link to the content
+     * URL link to the content
      * @type {string}
      * @memberof SaleJson
      */

@@ -416,8 +416,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   )
   const pricePerBaseToken = useMemo(() => {
     return outputCoin?.price
-      ? outputCoin?.price
-      : (outputCoin?.dynamicBondingCurve.priceUSD ?? 0)
+      ? outputCoin.price
+      : (outputCoin?.dynamicBondingCurve?.priceUSD ?? 0)
   }, [outputCoin])
 
   const isTransactionInvalid = !transactionData?.isValid

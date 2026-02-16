@@ -15,19 +15,19 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * Information about the fees earned by the artist on the coin's trading.
+ * Artist fee information
  * @export
  * @interface CoinArtistFees
  */
 export interface CoinArtistFees {
     /**
-     * Total unclaimed fees from all sources, in $AUDIO.
+     * 
      * @type {number}
      * @memberof CoinArtistFees
      */
     unclaimedFees?: number;
     /**
-     * Total fees earned from all sources, in $AUDIO.
+     * 
      * @type {number}
      * @memberof CoinArtistFees
      */

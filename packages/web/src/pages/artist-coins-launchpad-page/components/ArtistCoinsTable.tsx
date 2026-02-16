@@ -134,7 +134,9 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
 const renderPriceCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   const price =
-    coin.price === 0 ? coin.dynamicBondingCurve.priceUSD : coin.price
+    coin.price === 0
+      ? (coin.dynamicBondingCurve?.priceUSD ?? 0)
+      : (coin.price ?? 0)
   return (
     <Text variant='body' size='m'>
       {formatCurrencyWithSubscript(price)}
@@ -147,7 +149,7 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   return (
     <Text variant='body' size='m'>
       {walletMessages.dollarSign}
-      {formatCount(Math.round(coin.marketCap))}
+      {formatCount(Math.round(coin.marketCap ?? 0))}
     </Text>
   )
 }
@@ -157,7 +159,7 @@ const renderTotalVolumeUSDCell = (cellInfo: CoinCell) => {
   return (
     <Text variant='body' size='m'>
       {walletMessages.dollarSign}
-      {formatCount(coin.totalVolumeUSD, 2)}
+      {formatCount(coin.totalVolumeUSD ?? 0, 2)}
     </Text>
   )
 }
@@ -166,7 +168,7 @@ const renderHoldersCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
     <Text variant='body' size='m'>
-      {formatCount(coin.holder)}
+      {formatCount(coin.holder ?? 0)}
     </Text>
   )
 }

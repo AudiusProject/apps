@@ -20,6 +20,12 @@ import {
     TrackActivityFromJSONTyped,
     TrackActivityToJSON,
 } from './TrackActivity';
+import type { VersionMetadata } from './VersionMetadata';
+import {
+    VersionMetadataFromJSON,
+    VersionMetadataFromJSONTyped,
+    VersionMetadataToJSON,
+} from './VersionMetadata';
 
 /**
  * 
@@ -27,6 +33,48 @@ import {
  * @interface HistoryResponse
  */
 export interface HistoryResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof HistoryResponse
+     */
+    latestChainBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof HistoryResponse
+     */
+    latestIndexedBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof HistoryResponse
+     */
+    latestChainSlotPlays: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof HistoryResponse
+     */
+    latestIndexedSlotPlays: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof HistoryResponse
+     */
+    signature: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HistoryResponse
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {VersionMetadata}
+     * @memberof HistoryResponse
+     */
+    version: VersionMetadata;
     /**
      * 
      * @type {Array<TrackActivity>}
@@ -40,6 +88,13 @@ export interface HistoryResponse {
  */
 export function instanceOfHistoryResponse(value: object): value is HistoryResponse {
     let isInstance = true;
+    isInstance = isInstance && "latestChainBlock" in value && value["latestChainBlock"] !== undefined;
+    isInstance = isInstance && "latestIndexedBlock" in value && value["latestIndexedBlock"] !== undefined;
+    isInstance = isInstance && "latestChainSlotPlays" in value && value["latestChainSlotPlays"] !== undefined;
+    isInstance = isInstance && "latestIndexedSlotPlays" in value && value["latestIndexedSlotPlays"] !== undefined;
+    isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
+    isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "version" in value && value["version"] !== undefined;
 
     return isInstance;
 }
@@ -54,6 +109,13 @@ export function HistoryResponseFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
+        'latestChainBlock': json['latest_chain_block'],
+        'latestIndexedBlock': json['latest_indexed_block'],
+        'latestChainSlotPlays': json['latest_chain_slot_plays'],
+        'latestIndexedSlotPlays': json['latest_indexed_slot_plays'],
+        'signature': json['signature'],
+        'timestamp': json['timestamp'],
+        'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : ((json['data'] as Array<any>).map(TrackActivityFromJSON)),
     };
 }
@@ -67,6 +129,13 @@ export function HistoryResponseToJSON(value?: HistoryResponse | null): any {
     }
     return {
         
+        'latest_chain_block': value.latestChainBlock,
+        'latest_indexed_block': value.latestIndexedBlock,
+        'latest_chain_slot_plays': value.latestChainSlotPlays,
+        'latest_indexed_slot_plays': value.latestIndexedSlotPlays,
+        'signature': value.signature,
+        'timestamp': value.timestamp,
+        'version': VersionMetadataToJSON(value.version),
         'data': value.data === undefined ? undefined : ((value.data as Array<any>).map(TrackActivityToJSON)),
     };
 }

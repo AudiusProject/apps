@@ -13,66 +13,48 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
-import type { ExtendedPurchaseGate } from './ExtendedPurchaseGate';
 import {
-    ExtendedPurchaseGateFromJSON,
-    ExtendedPurchaseGateFromJSONTyped,
-    ExtendedPurchaseGateToJSON,
-} from './ExtendedPurchaseGate';
-import type { ExtendedTokenGate } from './ExtendedTokenGate';
+    FollowGate,
+    instanceOfFollowGate,
+    FollowGateFromJSON,
+    FollowGateFromJSONTyped,
+    FollowGateToJSON,
+} from './FollowGate';
 import {
-    ExtendedTokenGateFromJSON,
-    ExtendedTokenGateFromJSONTyped,
-    ExtendedTokenGateToJSON,
-} from './ExtendedTokenGate';
+    NftGate,
+    instanceOfNftGate,
+    NftGateFromJSON,
+    NftGateFromJSONTyped,
+    NftGateToJSON,
+} from './NftGate';
+import {
+    PurchaseGate,
+    instanceOfPurchaseGate,
+    PurchaseGateFromJSON,
+    PurchaseGateFromJSONTyped,
+    PurchaseGateToJSON,
+} from './PurchaseGate';
+import {
+    TipGate,
+    instanceOfTipGate,
+    TipGateFromJSON,
+    TipGateFromJSONTyped,
+    TipGateToJSON,
+} from './TipGate';
+import {
+    TokenGate,
+    instanceOfTokenGate,
+    TokenGateFromJSON,
+    TokenGateFromJSONTyped,
+    TokenGateToJSON,
+} from './TokenGate';
 
 /**
+ * @type AccessGate
  * 
  * @export
- * @interface AccessGate
  */
-export interface AccessGate {
-    /**
-     * 
-     * @type {ExtendedPurchaseGate}
-     * @memberof AccessGate
-     */
-    usdcPurchase?: ExtendedPurchaseGate;
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessGate
-     */
-    followUserId?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessGate
-     */
-    tipUserId?: number;
-    /**
-     * 
-     * @type {object}
-     * @memberof AccessGate
-     */
-    nftCollection?: object;
-    /**
-     * 
-     * @type {ExtendedTokenGate}
-     * @memberof AccessGate
-     */
-    tokenGate?: ExtendedTokenGate;
-}
-
-/**
- * Check if a given object implements the AccessGate interface.
- */
-export function instanceOfAccessGate(value: object): value is AccessGate {
-    let isInstance = true;
-
-    return isInstance;
-}
+export type AccessGate = FollowGate | NftGate | PurchaseGate | TipGate | TokenGate;
 
 export function AccessGateFromJSON(json: any): AccessGate {
     return AccessGateFromJSONTyped(json, false);
@@ -82,14 +64,7 @@ export function AccessGateFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return {
-        
-        'usdcPurchase': !exists(json, 'usdc_purchase') ? undefined : ExtendedPurchaseGateFromJSON(json['usdc_purchase']),
-        'followUserId': !exists(json, 'follow_user_id') ? undefined : json['follow_user_id'],
-        'tipUserId': !exists(json, 'tip_user_id') ? undefined : json['tip_user_id'],
-        'nftCollection': !exists(json, 'nft_collection') ? undefined : json['nft_collection'],
-        'tokenGate': !exists(json, 'token_gate') ? undefined : ExtendedTokenGateFromJSON(json['token_gate']),
-    };
+    return { ...FollowGateFromJSONTyped(json, true), ...NftGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
 }
 
 export function AccessGateToJSON(value?: AccessGate | null): any {
@@ -99,13 +74,23 @@ export function AccessGateToJSON(value?: AccessGate | null): any {
     if (value === null) {
         return null;
     }
-    return {
-        
-        'usdc_purchase': ExtendedPurchaseGateToJSON(value.usdcPurchase),
-        'follow_user_id': value.followUserId,
-        'tip_user_id': value.tipUserId,
-        'nft_collection': value.nftCollection,
-        'token_gate': ExtendedTokenGateToJSON(value.tokenGate),
-    };
+
+    if (instanceOfFollowGate(value)) {
+        return FollowGateToJSON(value as FollowGate);
+    }
+    if (instanceOfNftGate(value)) {
+        return NftGateToJSON(value as NftGate);
+    }
+    if (instanceOfPurchaseGate(value)) {
+        return PurchaseGateToJSON(value as PurchaseGate);
+    }
+    if (instanceOfTipGate(value)) {
+        return TipGateToJSON(value as TipGate);
+    }
+    if (instanceOfTokenGate(value)) {
+        return TokenGateToJSON(value as TokenGate);
+    }
+
+    return {};
 }
 

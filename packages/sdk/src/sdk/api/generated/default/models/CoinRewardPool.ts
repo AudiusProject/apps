@@ -15,19 +15,19 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * Information about the reward pool associated with the coin.
+ * Reward pool information
  * @export
  * @interface CoinRewardPool
  */
 export interface CoinRewardPool {
     /**
-     * The address of the reward pool.
+     * 
      * @type {string}
      * @memberof CoinRewardPool
      */
     address?: string;
     /**
-     * The current balance of the reward pool.
+     * 
      * @type {number}
      * @memberof CoinRewardPool
      */

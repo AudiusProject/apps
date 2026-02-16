@@ -83,6 +83,13 @@ vitest
   .spyOn(GeneratedPlaylistsApi.prototype, 'getPlaylist')
   .mockImplementation(async () => {
     return {
+      latestChainBlock: 1,
+      latestIndexedBlock: 1,
+      latestChainSlotPlays: 1,
+      latestIndexedSlotPlays: 1,
+      signature: '',
+      timestamp: '',
+      version: { service: 'test', version: '1' },
       data: [
         {
           playlistName: 'test',

@@ -99,11 +99,14 @@ const Link = ({
             params: { id: HashId.parse(res.data[0].id) }
           })
         } else if (instanceOfUserResponse(res)) {
-          setUnfurledContent(formatUserName({ user: res.data }))
-          setTo({
-            screen: 'Profile',
-            params: { id: HashId.parse(res.data.id) }
-          })
+          const user = Array.isArray(res.data) ? res.data[0] : res.data
+          if (user) {
+            setUnfurledContent(formatUserName({ user }))
+            setTo({
+              screen: 'Profile',
+              params: { id: HashId.parse(user.id) }
+            })
+          }
         }
       }
     }

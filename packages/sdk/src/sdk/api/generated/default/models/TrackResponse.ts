@@ -20,6 +20,12 @@ import {
     TrackFromJSONTyped,
     TrackToJSON,
 } from './Track';
+import type { VersionMetadata } from './VersionMetadata';
+import {
+    VersionMetadataFromJSON,
+    VersionMetadataFromJSONTyped,
+    VersionMetadataToJSON,
+} from './VersionMetadata';
 
 /**
  * 
@@ -27,6 +33,48 @@ import {
  * @interface TrackResponse
  */
 export interface TrackResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof TrackResponse
+     */
+    latestChainBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrackResponse
+     */
+    latestIndexedBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrackResponse
+     */
+    latestChainSlotPlays: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrackResponse
+     */
+    latestIndexedSlotPlays: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrackResponse
+     */
+    signature: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrackResponse
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {VersionMetadata}
+     * @memberof TrackResponse
+     */
+    version: VersionMetadata;
     /**
      * 
      * @type {Track}
@@ -40,6 +88,13 @@ export interface TrackResponse {
  */
 export function instanceOfTrackResponse(value: object): value is TrackResponse {
     let isInstance = true;
+    isInstance = isInstance && "latestChainBlock" in value && value["latestChainBlock"] !== undefined;
+    isInstance = isInstance && "latestIndexedBlock" in value && value["latestIndexedBlock"] !== undefined;
+    isInstance = isInstance && "latestChainSlotPlays" in value && value["latestChainSlotPlays"] !== undefined;
+    isInstance = isInstance && "latestIndexedSlotPlays" in value && value["latestIndexedSlotPlays"] !== undefined;
+    isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
+    isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "version" in value && value["version"] !== undefined;
 
     return isInstance;
 }
@@ -54,6 +109,13 @@ export function TrackResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
+        'latestChainBlock': json['latest_chain_block'],
+        'latestIndexedBlock': json['latest_indexed_block'],
+        'latestChainSlotPlays': json['latest_chain_slot_plays'],
+        'latestIndexedSlotPlays': json['latest_indexed_slot_plays'],
+        'signature': json['signature'],
+        'timestamp': json['timestamp'],
+        'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : TrackFromJSON(json['data']),
     };
 }
@@ -67,6 +129,13 @@ export function TrackResponseToJSON(value?: TrackResponse | null): any {
     }
     return {
         
+        'latest_chain_block': value.latestChainBlock,
+        'latest_indexed_block': value.latestIndexedBlock,
+        'latest_chain_slot_plays': value.latestChainSlotPlays,
+        'latest_indexed_slot_plays': value.latestIndexedSlotPlays,
+        'signature': value.signature,
+        'timestamp': value.timestamp,
+        'version': VersionMetadataToJSON(value.version),
         'data': TrackToJSON(value.data),
     };
 }

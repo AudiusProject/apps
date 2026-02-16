@@ -106,12 +106,12 @@ export interface GetCoinRedeemAmountRequest {
 }
 
 export interface GetCoinsRequest {
+    ticker?: Array<string>;
     mint?: Array<string>;
     ownerId?: Array<string>;
-    ticker?: Array<string>;
-    query?: string;
-    offset?: number;
     limit?: number;
+    offset?: number;
+    query?: string;
     sortMethod?: GetCoinsSortMethodEnum;
     sortDirection?: GetCoinsSortDirectionEnum;
 }
@@ -463,10 +463,14 @@ export class CoinsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets information about coins
+     * Gets a list of coins with optional filtering
      */
     async getCoinsRaw(params: GetCoinsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CoinsResponse>> {
         const queryParameters: any = {};
+
+        if (params.ticker) {
+            queryParameters['ticker'] = params.ticker;
+        }
 
         if (params.mint) {
             queryParameters['mint'] = params.mint;
@@ -476,20 +480,16 @@ export class CoinsApi extends runtime.BaseAPI {
             queryParameters['owner_id'] = params.ownerId;
         }
 
-        if (params.ticker) {
-            queryParameters['ticker'] = params.ticker;
-        }
-
-        if (params.query !== undefined) {
-            queryParameters['query'] = params.query;
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
         }
 
         if (params.offset !== undefined) {
             queryParameters['offset'] = params.offset;
         }
 
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
         }
 
         if (params.sortMethod !== undefined) {
@@ -513,7 +513,7 @@ export class CoinsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets information about coins
+     * Gets a list of coins with optional filtering
      */
     async getCoins(params: GetCoinsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CoinsResponse> {
         const response = await this.getCoinsRaw(params, initOverrides);
@@ -659,8 +659,8 @@ export type GetCoinMembersSortDirectionEnum = typeof GetCoinMembersSortDirection
  */
 export const GetCoinsSortMethodEnum = {
     MarketCap: 'market_cap',
-    Volume: 'volume',
     Price: 'price',
+    Volume: 'volume',
     CreatedAt: 'created_at',
     Holder: 'holder'
 } as const;
