@@ -576,7 +576,7 @@ function* signUp() {
               }
 
               const { metadata } = yield* call(
-                [sdk.users, sdk.users.createUser],
+                [sdk.users, sdk.users.createUserWithEntityManager],
                 createUserMetadata
               )
               userId = metadata.userId

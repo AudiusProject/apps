@@ -87,12 +87,12 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Create a user
    */
-  async createUser(
+  async createUserWithEntityManager(
     params: CreateUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { onProgress, profilePictureFile, coverArtFile, metadata } =
-      await parseParams('createUser', CreateUserSchema)(params)
+      await parseParams('createUserWithEntityManager', CreateUserSchema)(params)
 
     const { data } = await this.generateUserId()
     if (!data) {
