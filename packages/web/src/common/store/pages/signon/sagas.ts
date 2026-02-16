@@ -395,7 +395,7 @@ function* createGuestAccount(
         }
         const { blockHash, blockNumber, metadata } = yield* call([
           sdk.users,
-          sdk.users.createGuestAccount
+          sdk.users.createGuestAccountWithEntityManager
         ])
         yield* call(confirmTransaction, blockHash, blockNumber)
         yield* call(fetchAccountAsync, { shouldMarkAccountAsLoading: true })

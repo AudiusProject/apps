@@ -175,7 +175,7 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Creates a guest for guest checkout
    */
-  async createGuestAccount(advancedOptions?: AdvancedOptions) {
+  async createGuestAccountWithEntityManager(advancedOptions?: AdvancedOptions) {
     const { data } = await this.generateUserId()
     if (!data) {
       throw new Error('Failed to generate userId')
