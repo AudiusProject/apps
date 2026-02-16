@@ -405,11 +405,23 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UpdatePlaylistMetadataSchema.shape
     )
 
+    const picked = pick(playlist, supportedUpdateFields) as Record<
+      string,
+      unknown
+    >
+    // API returns releaseDate as string; updateMetadata expects Date
+    const normalizedMetadata = {
+      ...picked,
+      ...(picked.releaseDate != null && typeof picked.releaseDate === 'string'
+        ? { releaseDate: new Date(picked.releaseDate) }
+        : {})
+    } as UpdatePlaylistRequest['metadata']
+
     return await this.updatePlaylist(
       {
         userId,
         playlistId,
-        metadata: updateMetadata(pick(playlist, supportedUpdateFields))
+        metadata: updateMetadata(normalizedMetadata)
       },
       advancedOptions
     )
