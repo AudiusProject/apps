@@ -14,12 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CreateUserRequestBodyPlaylistLibraryContentsInner } from './CreateUserRequestBodyPlaylistLibraryContentsInner';
+import type { UserPlaylistLibraryContentsInner } from './UserPlaylistLibraryContentsInner';
 import {
-    CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSON,
-    CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSONTyped,
-    CreateUserRequestBodyPlaylistLibraryContentsInnerToJSON,
-} from './CreateUserRequestBodyPlaylistLibraryContentsInner';
+    UserPlaylistLibraryContentsInnerFromJSON,
+    UserPlaylistLibraryContentsInnerFromJSONTyped,
+    UserPlaylistLibraryContentsInnerToJSON,
+} from './UserPlaylistLibraryContentsInner';
 
 /**
  * Folder containing nested playlists and folders
@@ -47,10 +47,10 @@ export interface PlaylistLibraryFolder {
     name: string;
     /**
      * Nested folders and playlist identifiers
-     * @type {Array<CreateUserRequestBodyPlaylistLibraryContentsInner>}
+     * @type {Array<UserPlaylistLibraryContentsInner>}
      * @memberof PlaylistLibraryFolder
      */
-    contents: Array<CreateUserRequestBodyPlaylistLibraryContentsInner>;
+    contents: Array<UserPlaylistLibraryContentsInner>;
 }
 
 
@@ -89,7 +89,7 @@ export function PlaylistLibraryFolderFromJSONTyped(json: any, ignoreDiscriminato
         'id': json['id'],
         'type': json['type'],
         'name': json['name'],
-        'contents': ((json['contents'] as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSON)),
+        'contents': ((json['contents'] as Array<any>).map(UserPlaylistLibraryContentsInnerFromJSON)),
     };
 }
 
@@ -105,7 +105,7 @@ export function PlaylistLibraryFolderToJSON(value?: PlaylistLibraryFolder | null
         'id': value.id,
         'type': value.type,
         'name': value.name,
-        'contents': ((value.contents as Array<any>).map(CreateUserRequestBodyPlaylistLibraryContentsInnerToJSON)),
+        'contents': ((value.contents as Array<any>).map(UserPlaylistLibraryContentsInnerToJSON)),
     };
 }
 

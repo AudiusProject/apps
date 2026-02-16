@@ -10,7 +10,7 @@ import {
   AdvancedOptions
 } from '../../services/EntityManager/types'
 import type { LoggerService } from '../../services/Logger'
-import { encodeHashId } from '../../utils/hashId'
+import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
 import { retry3 } from '../../utils/retry'
 import {
@@ -22,9 +22,12 @@ import {
   type FavoritePlaylistRequest,
   type UnfavoritePlaylistRequest,
   type SharePlaylistRequest,
-  type UpdateTrackRequestBody
+  TracksApi,
+  type CreateTrackRequestBody,
+  type CreatePlaylistRequestBody
 } from '../generated/default'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
+import { UploadTrackSchema } from '../tracks/types'
 
 import {
   AddTrackToPlaylistRequest,
@@ -65,6 +68,7 @@ const getCurrentTimestamp = () => {
 
 export class PlaylistsApi extends GeneratedPlaylistsApi {
   private readonly trackUploadHelper: TrackUploadHelper
+  private readonly tracksApi: TracksApi
 
   constructor(
     configuration: Configuration,
@@ -73,6 +77,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     private readonly logger: LoggerService
   ) {
     super(configuration)
+    this.tracksApi = new TracksApi(configuration)
     this.trackUploadHelper = new TrackUploadHelper(configuration)
     this.logger = logger.createPrefixedLogger('[playlists-api]')
   }
@@ -85,19 +90,64 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
-    const parsedParameters = await parseParams(
-      'createPlaylist',
-      CreatePlaylistSchema
-    )(params)
+    const {
+      userId,
+      playlistId: providedPlaylistId,
+      metadata,
+      trackIds
+    } = await parseParams('createPlaylist', CreatePlaylistSchema)(params)
 
-    // Call createPlaylistInternal with parsed inputs
-    return await this.createPlaylistInternal(parsedParameters, advancedOptions)
+    const playlistId = providedPlaylistId || (await this.generatePlaylistId())
+    const timestamp = getCurrentTimestamp()
+
+    // Update metadata to include track ids
+    const updatedMetadata = {
+      ...metadata,
+      playlistContents: (trackIds ?? []).map((trackId) => ({
+        trackId,
+        timestamp
+      }))
+    }
+
+    // Write playlist metadata to chain
+    const response = await this.entityManager.manageEntity({
+      userId,
+      entityType: EntityType.PLAYLIST,
+      entityId: playlistId,
+      action: Action.CREATE,
+      metadata: JSON.stringify({
+        cid: '',
+        data: snakecaseKeys(updatedMetadata)
+      }),
+      ...advancedOptions
+    })
+
+    return {
+      ...response,
+      playlistId: encodeHashId(playlistId)
+    }
   }
 
   override async createPlaylist(
     params: CreatePlaylistRequestWithFiles,
     requestInit?: RequestInit
   ) {
+    if (params.imageFile) {
+      const imageUploadResponse = await this.storage
+        .uploadFile({
+          file: params.imageFile,
+          onProgress: (event) =>
+            params.onProgress?.(event.loaded / event.total, {
+              ...event,
+              key: 'image'
+            }),
+          metadata: {
+            template: 'img_square'
+          }
+        })
+        .start()
+      params.metadata.coverArtCid = imageUploadResponse.orig_file_cid
+    }
     if (this.entityManager) {
       const { metadata } = params
       const res = await this.createPlaylistWithEntityManager({
@@ -120,14 +170,149 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: UploadPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
-    const parsedParameters = await parseParams(
+    const { userId, onProgress, audioFiles, imageFile } = await parseParams(
       'uploadPlaylist',
       UploadPlaylistSchema
     )(params)
 
-    // Call uploadPlaylistInternal with parsed inputs
-    return await this.uploadPlaylistInternal(parsedParameters, advancedOptions)
+    const trackMetadatas = params.trackMetadatas
+    const playlistMetadata = params.metadata
+
+    const progresses = audioFiles.map(() => 0)
+    const [imageUploadResponse, ...audioUploadResponses] = await Promise.all([
+      params.imageFile &&
+        this.storage
+          .uploadFile({
+            file: imageFile,
+            onProgress: (event) =>
+              onProgress?.(event.loaded / event.total, {
+                ...event,
+                key: 'image'
+              }),
+            metadata: {
+              template: 'img_square'
+            }
+          })
+          .start(),
+      ...audioFiles.map((trackFile, idx) =>
+        this.storage
+          .uploadFile({
+            file: trackFile,
+            onProgress: (progress) => {
+              progresses[idx] =
+                (progress.loaded / progress.total) * 0.5 +
+                progress.transcode * 0.5
+              const overallProgress =
+                progresses.reduce((a, b) => a + b, 0) / audioFiles.length
+              onProgress?.(overallProgress, {
+                ...progress,
+                key: idx
+              })
+            },
+            metadata: {
+              template: 'audio',
+              placementHosts: trackMetadatas[idx]?.placementHosts,
+              previewStartSeconds: trackMetadatas[idx]?.previewStartSeconds
+            }
+          })
+          .start()
+      )
+    ])
+
+    // Write tracks to chain
+    const trackIds = await Promise.all(
+      trackMetadatas.map(async (t, i) => {
+        // Transform track metadata
+        const trackMetadata = this.combineMetadata(
+          this.trackUploadHelper.transformTrackUploadMetadata(t, userId),
+          playlistMetadata
+        )
+
+        const audioResponse = audioUploadResponses[i]
+
+        if (!audioResponse) {
+          throw new Error(`Failed to upload track: ${t.title}`)
+        }
+
+        // Update metadata to include uploaded CIDs
+        const updatedMetadata =
+          this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+            trackMetadata,
+            audioResponse,
+            imageUploadResponse
+          )
+
+        if (this.entityManager) {
+          const { metadata } = UploadTrackSchema.parse(updatedMetadata)
+          const trackId = await this.trackUploadHelper.generateId('track')
+          await this.entityManager.manageEntity({
+            userId,
+            entityType: EntityType.TRACK,
+            entityId: trackId,
+            action: Action.CREATE,
+            metadata: JSON.stringify({
+              cid: '',
+              data: snakecaseKeys(metadata)
+            }),
+            ...advancedOptions
+          })
+
+          return trackId
+        }
+
+        const res = await this.tracksApi.createTrack({
+          userId: encodeHashId(userId)!,
+          metadata: updatedMetadata
+        })
+        return decodeHashId(res.trackId!)!
+      })
+    )
+
+    const timestamp = getCurrentTimestamp()
+
+    if (this.entityManager) {
+      // Update metadata to include track ids
+      const updatedMetadata = {
+        ...params.metadata,
+        playlistContents: (trackIds ?? []).map((trackId) => ({
+          trackId,
+          timestamp
+        })),
+        playlistImageSizesMultihash: imageUploadResponse?.orig_file_cid
+      }
+      const playlistId = await this.generatePlaylistId()
+      // Write playlist metadata to chain
+      const response = await this.entityManager.manageEntity({
+        userId,
+        entityType: EntityType.PLAYLIST,
+        entityId: playlistId,
+        action: Action.CREATE,
+        metadata: JSON.stringify({
+          cid: '',
+          data: snakecaseKeys(updatedMetadata)
+        }),
+        ...advancedOptions
+      })
+
+      return {
+        ...response,
+        playlistId: encodeHashId(playlistId)
+      }
+    }
+
+    // Update metadata to include track ids
+    const updatedMetadata = {
+      ...params.metadata,
+      playlistContents: (trackIds ?? []).map((trackId) => ({
+        trackId: encodeHashId(trackId)!,
+        timestamp
+      })),
+      playlistImageSizesMultihash: imageUploadResponse?.orig_file_cid
+    }
+    return super.createPlaylist({
+      userId: encodeHashId(userId)!,
+      metadata: updatedMetadata
+    })
   }
 
   /** @hidden
@@ -506,8 +691,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
    * taking the metadata from the playlist when the track is missing it.
    */
   private combineMetadata(
-    trackMetadata: UpdateTrackRequestBody,
-    playlistMetadata: PlaylistMetadata
+    trackMetadata: CreateTrackRequestBody,
+    playlistMetadata: CreatePlaylistRequestBody
   ) {
     const metadata = trackMetadata
 
@@ -586,153 +771,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       },
       advancedOptions
     )
-  }
-
-  /** @internal
-   * Method to upload a playlist with already parsed inputs
-   * This is used for both playlists and albums
-   */
-  public async uploadPlaylistInternal<Metadata extends PlaylistMetadata>(
-    {
-      userId,
-      imageFile,
-      audioFiles,
-      onProgress,
-      metadata,
-      trackMetadatas
-    }: z.infer<typeof UploadPlaylistSchema> & {
-      metadata: Metadata
-    },
-    advancedOptions?: AdvancedOptions
-  ) {
-    const progresses = audioFiles.map(() => 0)
-    // Upload track audio and cover art to storage node
-    const [coverArtResponse, ...audioResponses] = await Promise.all([
-      retry3(
-        async () =>
-          await this.storage
-            .uploadFile({
-              file: imageFile,
-              onProgress: (progress) =>
-                onProgress?.(
-                  progresses.reduce((a, b) => a + b, 0) / audioFiles.length,
-                  { ...progress, key: 'image' }
-                ),
-              metadata: {
-                template: 'img_square'
-              }
-            })
-            .start(),
-        (e) => {
-          this.logger.info('Retrying uploadPlaylistCoverArt', e)
-        }
-      ),
-      ...audioFiles.map(
-        async (trackFile, idx) =>
-          await retry3(
-            async () =>
-              await this.storage
-                .uploadFile({
-                  file: trackFile,
-                  onProgress: (progress) => {
-                    progresses[idx] =
-                      (progress.loaded / progress.total) * 0.5 +
-                      progress.transcode * 0.5
-                    const overallProgress =
-                      progresses.reduce((a, b) => a + b, 0) / audioFiles.length
-                    onProgress?.(overallProgress, {
-                      ...progress,
-                      key: idx
-                    })
-                  },
-                  metadata: {
-                    template: 'audio',
-                    ...this.trackUploadHelper.extractMediorumUploadOptions(
-                      trackMetadatas[idx]!
-                    )
-                  }
-                })
-                .start(),
-            (e) => {
-              this.logger.info('Retrying uploadTrackAudio', e)
-            }
-          )
-      )
-    ])
-
-    // Write tracks to chain
-    const trackIds = await Promise.all(
-      trackMetadatas.map(async (parsedTrackMetadata, i) => {
-        // Transform track metadata
-        const trackMetadata = this.combineMetadata(
-          this.trackUploadHelper.transformTrackUploadMetadata(
-            parsedTrackMetadata,
-            userId
-          ),
-          metadata
-        )
-
-        const audioResponse = audioResponses[i]
-
-        if (!audioResponse) {
-          throw new Error(`Failed to upload track: ${trackMetadata.title}`)
-        }
-
-        // Update metadata to include uploaded CIDs
-        const updatedMetadata =
-          this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
-            trackMetadata,
-            audioResponse,
-            coverArtResponse
-          )
-
-        const trackId = await this.trackUploadHelper.generateId('track')
-        await this.entityManager.manageEntity({
-          userId,
-          entityType: EntityType.TRACK,
-          entityId: trackId,
-          action: Action.CREATE,
-          metadata: JSON.stringify({
-            cid: '',
-            data: snakecaseKeys(updatedMetadata)
-          }),
-          ...advancedOptions
-        })
-
-        return trackId
-      })
-    )
-
-    const playlistId = await this.trackUploadHelper.generateId('playlist')
-    const timestamp = getCurrentTimestamp()
-
-    // Update metadata to include track ids and cover art cid
-    const updatedMetadata = {
-      ...metadata,
-      isPrivate: false,
-      playlistContents: trackIds.map((trackId) => ({
-        trackId,
-        timestamp
-      })),
-      playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
-    }
-
-    // Write playlist metadata to chain
-    const response = await this.entityManager.manageEntity({
-      userId,
-      entityType: EntityType.PLAYLIST,
-      entityId: playlistId,
-      action: Action.CREATE,
-      metadata: JSON.stringify({
-        cid: '',
-        data: snakecaseKeys(updatedMetadata)
-      }),
-      ...advancedOptions
-    })
-    return {
-      ...response,
-      playlistId: encodeHashId(playlistId)
-    }
   }
 
   /** @internal

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import type { CreateUserRequest, UpdateUserRequest } from '../..'
 import { ProgressHandler } from '../../services/Storage/types'
 import { EthAddressSchema } from '../../types/EthAddress'
 import { ImageFile } from '../../types/File'
@@ -99,6 +100,10 @@ const PlaylistLibrarySchema = z.object({
     z.union([PlaylistLibraryFolderSchema, PlaylistLibraryIdentifierSchema])
   )
 })
+
+export type EntityManagerPlaylistLibraryContents = z.input<
+  typeof PlaylistLibrarySchema
+>['contents']
 
 export const UpdateProfileSchema = z
   .object({
@@ -283,3 +288,15 @@ export const UpdateCollectiblesSchema = z.object({
 })
 
 export type UpdateCollectiblesRequest = z.input<typeof UpdateCollectiblesSchema>
+
+export type UserFileUploadParams = {
+  profilePictureFile?: z.input<typeof ImageFile>
+  coverArtFile?: z.input<typeof ImageFile>
+  onProgress?: ProgressHandler
+}
+
+export type CreateUserRequestWithFiles = CreateUserRequest &
+  UserFileUploadParams
+
+export type UpdateUserRequestWithFiles = UpdateUserRequest &
+  UserFileUploadParams

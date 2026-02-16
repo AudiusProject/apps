@@ -36,24 +36,24 @@ import {
 } from './PlaylistLibraryPlaylistIdentifier';
 
 /**
- * @type CreateUserRequestBodyPlaylistLibraryContentsInner
+ * @type UserPlaylistLibraryContentsInner
  * 
  * @export
  */
-export type CreateUserRequestBodyPlaylistLibraryContentsInner = PlaylistLibraryExplorePlaylistIdentifier | PlaylistLibraryFolder | PlaylistLibraryPlaylistIdentifier;
+export type UserPlaylistLibraryContentsInner = PlaylistLibraryExplorePlaylistIdentifier | PlaylistLibraryFolder | PlaylistLibraryPlaylistIdentifier;
 
-export function CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSON(json: any): CreateUserRequestBodyPlaylistLibraryContentsInner {
-    return CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSONTyped(json, false);
+export function UserPlaylistLibraryContentsInnerFromJSON(json: any): UserPlaylistLibraryContentsInner {
+    return UserPlaylistLibraryContentsInnerFromJSONTyped(json, false);
 }
 
-export function CreateUserRequestBodyPlaylistLibraryContentsInnerFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateUserRequestBodyPlaylistLibraryContentsInner {
+export function UserPlaylistLibraryContentsInnerFromJSONTyped(json: any, ignoreDiscriminator: boolean): UserPlaylistLibraryContentsInner {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return { ...PlaylistLibraryExplorePlaylistIdentifierFromJSONTyped(json, true), ...PlaylistLibraryFolderFromJSONTyped(json, true), ...PlaylistLibraryPlaylistIdentifierFromJSONTyped(json, true) };
 }
 
-export function CreateUserRequestBodyPlaylistLibraryContentsInnerToJSON(value?: CreateUserRequestBodyPlaylistLibraryContentsInner | null): any {
+export function UserPlaylistLibraryContentsInnerToJSON(value?: UserPlaylistLibraryContentsInner | null): any {
     if (value === undefined) {
         return undefined;
     }

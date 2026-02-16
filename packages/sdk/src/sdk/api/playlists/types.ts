@@ -8,9 +8,10 @@ import {
   Genre,
   Mood,
   type CreatePlaylistRequest,
+  type CreatePlaylistRequestBody,
+  type CreateTrackRequestBody,
   type UpdatePlaylistRequest
 } from '../generated/default'
-import { UploadTrackMetadataSchema } from '../tracks/types'
 
 const CreatePlaylistMetadataSchema = z
   .object({
@@ -61,18 +62,6 @@ export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
 
 export type PlaylistMetadata = z.input<typeof CreatePlaylistMetadataSchema>
 
-const PlaylistTrackMetadataSchema = UploadTrackMetadataSchema.partial({
-  genre: true,
-  mood: true,
-  tags: true
-})
-
-/**
- * PlaylistTrackMetadata is less strict than TrackMetadata because
- * `genre`, `mood`, and `tags` are optional
- */
-export type PlaylistTrackMetadata = z.infer<typeof PlaylistTrackMetadataSchema>
-
 export const UploadPlaylistProgressEventSchema = ProgressEventSchema.extend({
   /**
    * Index of the track being uploaded in the playlist tracks array, or 'image' if for the image
@@ -103,25 +92,20 @@ export type UploadPlaylistProgressHandler = (
   event: UploadPlaylistProgressEvent
 ) => void
 
-export const UploadPlaylistSchema = z
-  .object({
-    userId: HashId,
-    imageFile: ImageFile,
-    metadata: UploadPlaylistMetadataSchema,
-    onProgress: z.optional(UploadPlaylistProgressHandlerSchema),
-    /**
-     * Track metadata is populated from the playlist if fields are missing
-     */
-    trackMetadatas: z.array(PlaylistTrackMetadataSchema),
-    audioFiles: z.array(AudioFile)
-  })
-  .strict()
+export const UploadPlaylistSchema = z.object({
+  userId: HashId,
+  imageFile: ImageFile,
+  onProgress: z.optional(UploadPlaylistProgressHandlerSchema),
+  audioFiles: z.array(AudioFile)
+})
 
 export type UploadPlaylistRequest = Omit<
   z.input<typeof UploadPlaylistSchema>,
   'onProgress'
 > & {
   onProgress?: UploadPlaylistProgressHandler
+  metadata: CreatePlaylistRequestBody
+  trackMetadatas: CreateTrackRequestBody[]
 }
 
 export const UpdatePlaylistMetadataSchema =
@@ -159,12 +143,6 @@ export type EntityManagerUpdatePlaylistRequest = z.input<
 
 export type PlaylistImageParameters = {
   imageFile?: z.input<typeof ImageFile>
-  onProgress?: UploadPlaylistProgressHandler
-}
-
-export type PlaylistAudioParameters = {
-  audioFiles?: z.input<typeof AudioFile>[]
-  trackMetadatas?: z.input<typeof PlaylistTrackMetadataSchema>[]
   onProgress?: UploadPlaylistProgressHandler
 }
 

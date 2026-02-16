@@ -176,7 +176,7 @@ export interface UpdateTrackRequestBody {
      * @type {boolean}
      * @memberof UpdateTrackRequestBody
      */
-    downloadable?: boolean;
+    isDownloadable?: boolean;
     /**
      * Whether the track is unlisted
      * @type {boolean}
@@ -271,7 +271,7 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'previewCid': !exists(json, 'preview_cid') ? undefined : json['preview_cid'],
         'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
-        'downloadable': !exists(json, 'downloadable') ? undefined : json['downloadable'],
+        'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
@@ -312,7 +312,7 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
         'preview_cid': value.previewCid,
         'preview_start_seconds': value.previewStartSeconds,
         'duration': value.duration,
-        'downloadable': value.downloadable,
+        'is_downloadable': value.isDownloadable,
         'is_unlisted': value.isUnlisted,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),

@@ -22,10 +22,10 @@ import { exists, mapValues } from '../runtime';
 export interface TrackElementWrite {
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof TrackElementWrite
      */
-    parentTrackId: number;
+    parentTrackId: string;
 }
 
 /**

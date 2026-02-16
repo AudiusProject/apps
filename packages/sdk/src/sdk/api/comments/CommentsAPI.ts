@@ -1,13 +1,15 @@
 import snakecaseKeys from 'snakecase-keys'
+import { OverrideProperties } from 'type-fest'
 
 import { LoggerService } from '../../services'
 import {
   Action,
   EntityManagerService,
-  EntityType
+  EntityType,
+  type ManageEntityOptions
 } from '../../services/EntityManager/types'
+import { HashId } from '../../types/HashId'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
-import { parseParams } from '../../utils/parseParams'
 import {
   Configuration,
   CommentsApi as GeneratedCommentsApi,
@@ -21,21 +23,30 @@ import {
   type ReportCommentRequest
 } from '../generated/default'
 
-import {
-  CreateCommentSchema,
-  UpdateCommentSchema,
-  DeleteCommentSchema,
-  PinCommentSchema,
-  ReactCommentSchema,
-  ReportCommentSchema,
-  EntityManagerCreateCommentRequest,
-  EntityManagerUpdateCommentRequest,
-  EntityManagerDeleteCommentRequest,
-  EntityManagerPinCommentRequest,
-  EntityManagerReactCommentRequest,
-  EntityManagerReportCommentRequest
-} from './types'
+import type { CommentMetadata } from './types'
 
+type EditCommentMetadata = CommentMetadata & {
+  trackId: number
+}
+
+type PinCommentMetadata = {
+  userId: number
+  entityId: number
+  trackId: number
+  isPin: boolean
+}
+
+type ReactCommentMetadata = {
+  userId: number
+  commentId: number
+  isLiked: boolean
+  trackId: number
+}
+
+type CommentNotificationOptions = OverrideProperties<
+  Omit<ManageEntityOptions, 'metadata' | 'auth'>,
+  { action: Action.MUTE | Action.UNMUTE }
+>
 export class CommentsApi extends GeneratedCommentsApi {
   constructor(
     configuration: Configuration,
@@ -57,13 +68,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Create a comment using entity manager
    */
-  async createCommentWithEntityManager(
-    params: EntityManagerCreateCommentRequest
-  ) {
-    const metadata = await parseParams(
-      'createComment',
-      CreateCommentSchema
-    )(params)
+  async createCommentWithEntityManager(metadata: CommentMetadata) {
     const { userId, entityType = EntityType.TRACK, commentId } = metadata
     const newCommentId = commentId ?? (await this.generateCommentId())
     await this.entityManager.manageEntity({
@@ -87,8 +92,8 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (this.entityManager) {
       const { metadata, userId } = params
       const commentId = await this.createCommentWithEntityManager({
-        userId,
-        entityId: encodeHashId(metadata.entityId) ?? '',
+        userId: HashId.parse(userId),
+        entityId: metadata.entityId,
         entityType: metadata.entityType,
         body: metadata.body,
         commentId: metadata.commentId,
@@ -107,14 +112,8 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Update a comment using entity manager
    */
-  async updateCommentWithEntityManager(
-    params: EntityManagerUpdateCommentRequest
-  ) {
-    const metadata = await parseParams(
-      'updateComment',
-      UpdateCommentSchema
-    )(params)
-    const { userId, entityId, trackId, body } = metadata
+  async updateCommentWithEntityManager(metadata: EditCommentMetadata) {
+    const { userId, entityId, trackId } = metadata
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -122,7 +121,7 @@ export class CommentsApi extends GeneratedCommentsApi {
       action: Action.UPDATE,
       metadata: JSON.stringify({
         cid: '',
-        data: snakecaseKeys({ body, entityId: trackId })
+        data: snakecaseKeys({ ...metadata, entityId: trackId })
       })
     })
     return response
@@ -134,15 +133,12 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId, commentId } = params
-      await this.updateCommentWithEntityManager({
-        userId,
-        entityId: commentId,
-        trackId: encodeHashId(metadata.entityId) ?? '',
+      return await this.updateCommentWithEntityManager({
+        userId: HashId.parse(userId),
+        entityId: HashId.parse(commentId),
+        trackId: HashId.parse(commentId),
         body: metadata.body
       })
-      return {
-        success: true
-      }
     }
     return super.updateComment(params, requestInit)
   }
@@ -150,13 +146,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Delete a comment using entity manager
    */
-  async deleteCommentWithEntityManager(
-    params: EntityManagerDeleteCommentRequest
-  ) {
-    const metadata = await parseParams(
-      'deleteComment',
-      DeleteCommentSchema
-    )(params)
+  async deleteCommentWithEntityManager(metadata: CommentMetadata) {
     const { userId, entityId } = metadata
     const response = await this.entityManager.manageEntity({
       userId,
@@ -173,14 +163,10 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerDeleteCommentRequest = {
-        userId: params.userId,
-        entityId: params.commentId
-      }
-      await this.deleteCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.deleteCommentWithEntityManager({
+        userId: HashId.parse(params.userId),
+        entityId: HashId.parse(params.commentId)
+      })
     }
     return super.deleteComment(params, requestInit)
   }
@@ -188,13 +174,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * React to a comment using entity manager
    */
-  async reactToCommentWithEntityManager(
-    params: EntityManagerReactCommentRequest
-  ) {
-    const metadata = await parseParams(
-      'reactComment',
-      ReactCommentSchema
-    )(params)
+  async reactToCommentWithEntityManager(metadata: ReactCommentMetadata) {
     const { userId, commentId, isLiked, trackId } = metadata
     const response = await this.entityManager.manageEntity({
       userId,
@@ -214,16 +194,12 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerReactCommentRequest = {
-        userId: params.userId,
-        commentId: params.commentId,
+      return await this.reactToCommentWithEntityManager({
+        userId: HashId.parse(params.userId),
+        commentId: HashId.parse(params.commentId),
         isLiked: true,
-        trackId: params.commentId // trackId represents the entity being commented on
-      }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+        trackId: HashId.parse(params.commentId)
+      })
     }
     return super.reactToComment(params, requestInit)
   }
@@ -233,16 +209,12 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerReactCommentRequest = {
-        userId: params.userId,
-        commentId: params.commentId,
-        isLiked: false,
-        trackId: params.commentId
-      }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reactToCommentWithEntityManager({
+        userId: HashId.parse(params.userId),
+        commentId: HashId.parse(params.commentId),
+        isLiked: true,
+        trackId: HashId.parse(params.commentId)
+      })
     }
     return super.unreactToComment(params, requestInit)
   }
@@ -250,8 +222,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Pin a comment using entity manager
    */
-  async pinCommentWithEntityManager(params: EntityManagerPinCommentRequest) {
-    const metadata = await parseParams('pinComment', PinCommentSchema)(params)
+  async pinCommentWithEntityManager(metadata: PinCommentMetadata) {
     const { userId, entityId, trackId, isPin } = metadata
     const response = await this.entityManager.manageEntity({
       userId,
@@ -271,16 +242,12 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerPinCommentRequest = {
-        userId: params.userId,
-        entityId: params.commentId,
-        trackId: params.commentId, // trackId represents the entity being commented on
+      return await this.pinCommentWithEntityManager({
+        userId: HashId.parse(params.userId),
+        entityId: HashId.parse(params.commentId),
+        trackId: HashId.parse(params.commentId),
         isPin: true
-      }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      })
     }
     return super.pinComment(params, requestInit)
   }
@@ -290,16 +257,12 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerPinCommentRequest = {
-        userId: params.userId,
-        entityId: params.commentId,
-        trackId: params.commentId,
+      return await this.pinCommentWithEntityManager({
+        userId: HashId.parse(params.userId),
+        entityId: HashId.parse(params.commentId),
+        trackId: HashId.parse(params.commentId),
         isPin: false
-      }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      })
     }
     return super.unpinComment(params, requestInit)
   }
@@ -307,14 +270,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Report a comment using entity manager
    */
-  async reportCommentWithEntityManager(
-    params: EntityManagerReportCommentRequest
-  ) {
-    const metadata = await parseParams(
-      'reportComment',
-      ReportCommentSchema
-    )(params)
-    const { userId, entityId } = metadata
+  async reportCommentWithEntityManager(userId: number, entityId: number) {
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -330,14 +286,10 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const metadata: EntityManagerReportCommentRequest = {
-        userId: params.userId,
-        entityId: params.commentId
-      }
-      await this.reportCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reportCommentWithEntityManager(
+        HashId.parse(params.userId),
+        HashId.parse(params.commentId)
+      )
     }
     return super.reportComment(params, requestInit)
   }
@@ -359,12 +311,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   /** @hidden
    * Update comment notification settings (entity manager only)
    */
-  async updateCommentNotificationSetting(config: {
-    userId: number
-    entityType: EntityType
-    entityId: number
-    action: Action.MUTE | Action.UNMUTE
-  }) {
+  async updateCommentNotificationSetting(config: CommentNotificationOptions) {
     const response = await this.entityManager.manageEntity({
       ...config,
       metadata: ''

@@ -5,7 +5,6 @@ import {
   type CreateTrackRequestBody,
   type UpdateTrackRequestBody
 } from '../generated/default'
-import type { PlaylistTrackMetadata } from '../playlists/types'
 
 export class TrackUploadHelper extends BaseAPI {
   public async generateId(type: 'track' | 'playlist') {
@@ -24,11 +23,10 @@ export class TrackUploadHelper extends BaseAPI {
     return id
   }
 
-  public transformTrackUploadMetadata(
-    inputMetadata: CreateTrackRequestBody | UpdateTrackRequestBody,
-    userId: number
-  ) {
-    const metadata = {
+  public transformTrackUploadMetadata<
+    T extends CreateTrackRequestBody | UpdateTrackRequestBody
+  >(inputMetadata: T, userId: number) {
+    const metadata: T = {
       ...inputMetadata,
       ownerId: userId
     }
@@ -57,8 +55,10 @@ export class TrackUploadHelper extends BaseAPI {
     return metadata
   }
 
-  public populateTrackMetadataWithUploadResponse(
-    trackMetadata: CreateTrackRequestBody | UpdateTrackRequestBody,
+  public populateTrackMetadataWithUploadResponse<
+    T extends CreateTrackRequestBody | UpdateTrackRequestBody
+  >(
+    trackMetadata: T,
     audioResponse?: UploadResponse,
     coverArtResponse?: UploadResponse
   ) {
@@ -94,20 +94,5 @@ export class TrackUploadHelper extends BaseAPI {
       }
     }
     return updated
-  }
-
-  public extractMediorumUploadOptions(metadata: PlaylistTrackMetadata) {
-    const uploadOptions: { [key: string]: string } = {}
-    if (
-      metadata.previewStartSeconds !== undefined &&
-      metadata.previewStartSeconds !== null
-    ) {
-      uploadOptions.previewStartSeconds =
-        metadata.previewStartSeconds.toString()
-    }
-    if (metadata.placementHosts) {
-      uploadOptions.placement_hosts = metadata.placementHosts
-    }
-    return uploadOptions
   }
 }

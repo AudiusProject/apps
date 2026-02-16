@@ -20,12 +20,12 @@ import {
     CreateUserRequestBodyEventsFromJSONTyped,
     CreateUserRequestBodyEventsToJSON,
 } from './CreateUserRequestBodyEvents';
-import type { CreateUserRequestBodyPlaylistLibrary } from './CreateUserRequestBodyPlaylistLibrary';
+import type { UserPlaylistLibrary } from './UserPlaylistLibrary';
 import {
-    CreateUserRequestBodyPlaylistLibraryFromJSON,
-    CreateUserRequestBodyPlaylistLibraryFromJSONTyped,
-    CreateUserRequestBodyPlaylistLibraryToJSON,
-} from './CreateUserRequestBodyPlaylistLibrary';
+    UserPlaylistLibraryFromJSON,
+    UserPlaylistLibraryFromJSONTyped,
+    UserPlaylistLibraryToJSON,
+} from './UserPlaylistLibrary';
 
 /**
  * 
@@ -34,11 +34,11 @@ import {
  */
 export interface CreateUserRequestBody {
     /**
-     * Optional user ID (will be generated if not provided)
-     * @type {number}
+     * Optional user hash ID (will be generated if not provided)
+     * @type {string}
      * @memberof CreateUserRequestBody
      */
-    userId?: number;
+    userId?: string;
     /**
      * User handle (unique username)
      * @type {string}
@@ -143,10 +143,10 @@ export interface CreateUserRequestBody {
     splUsdcPayoutWallet?: string;
     /**
      * 
-     * @type {CreateUserRequestBodyPlaylistLibrary}
+     * @type {UserPlaylistLibrary}
      * @memberof CreateUserRequestBody
      */
-    playlistLibrary?: CreateUserRequestBodyPlaylistLibrary;
+    playlistLibrary?: UserPlaylistLibrary;
     /**
      * 
      * @type {CreateUserRequestBodyEvents}
@@ -204,7 +204,7 @@ export function CreateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'profileType': !exists(json, 'profile_type') ? undefined : json['profile_type'],
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
-        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : CreateUserRequestBodyPlaylistLibraryFromJSON(json['playlist_library']),
+        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : UserPlaylistLibraryFromJSON(json['playlist_library']),
         'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
@@ -236,7 +236,7 @@ export function CreateUserRequestBodyToJSON(value?: CreateUserRequestBody | null
         'profile_type': value.profileType,
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
-        'playlist_library': CreateUserRequestBodyPlaylistLibraryToJSON(value.playlistLibrary),
+        'playlist_library': UserPlaylistLibraryToJSON(value.playlistLibrary),
         'events': CreateUserRequestBodyEventsToJSON(value.events),
     };
 }

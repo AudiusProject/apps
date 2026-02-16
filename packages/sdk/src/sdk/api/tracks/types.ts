@@ -14,7 +14,8 @@ import {
   Mood,
   Genre,
   StemCategory,
-  type UpdateTrackRequest
+  type UpdateTrackRequest,
+  type CreateTrackRequest
 } from '../generated/default'
 
 import { MAX_DESCRIPTION_LENGTH } from './constants'
@@ -97,7 +98,7 @@ export const UploadStemMetadataSchema = z.object({
   category: z
     .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
     .default(StemCategory.Other),
-  parentTrackId: HashId.or(z.number())
+  parentTrackId: HashId
 })
 
 export const UploadTrackMetadataSchema = z.object({
@@ -149,7 +150,7 @@ export const UploadTrackMetadataSchema = z.object({
         tracks: z
           .array(
             z.object({
-              parentTrackId: HashId.or(z.number())
+              parentTrackId: HashId
             })
           )
           .min(1)
@@ -453,16 +454,16 @@ const UploadResponseSchema = z.object({
 
 export type UploadResponse = z.input<typeof UploadResponseSchema>
 
-export const PublishTrackSchema = z
-  .object({
-    userId: HashId,
-    metadata: UploadTrackMetadataSchema.strict(),
-    audioUploadResponse: UploadResponseSchema,
-    imageUploadResponse: UploadResponseSchema
-  })
-  .strict()
+export const PublishTrackSchema = z.object({
+  userId: HashId,
+  audioUploadResponse: UploadResponseSchema,
+  imageUploadResponse: UploadResponseSchema
+})
 
-export type PublishTrackRequest = z.input<typeof PublishTrackSchema>
+export type PublishTrackRequest = CreateTrackRequest & {
+  audioUploadResponse: UploadResponse
+  imageUploadResponse: UploadResponse
+}
 
 export const PublishStemSchema = z
   .object({
@@ -482,8 +483,14 @@ export type UploadTrackFilesTask = {
   abort: () => void
 }
 
-export type UpdateTrackRequestWithFiles = UpdateTrackRequest & {
+export type TrackFileUploadParams = {
   audioFile?: z.input<typeof AudioFile>
   imageFile?: z.input<typeof ImageFile>
   onProgress?: UploadTrackFilesProgressHandler
 }
+
+export type CreateTrackRequestWithFiles = CreateTrackRequest &
+  TrackFileUploadParams
+
+export type UpdateTrackRequestWithFiles = UpdateTrackRequest &
+  TrackFileUploadParams

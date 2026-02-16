@@ -8,13 +8,11 @@ import { HashId } from '../../types/HashId'
 import { Mood, Genre } from '../generated/default'
 import type {
   CreatePlaylistRequestBody,
+  CreateTrackRequestBody,
   UpdatePlaylistRequestBody
 } from '../generated/default'
 import type { UploadPlaylistProgressHandler } from '../playlists/types'
-import {
-  UploadTrackMetadataSchema,
-  USDCPurchaseConditions
-} from '../tracks/types'
+import { USDCPurchaseConditions } from '../tracks/types'
 
 // Album request body types that wrap playlist types but use album field names
 export type CreateAlbumRequestBody = Omit<
@@ -135,16 +133,6 @@ export const UploadAlbumMetadataSchema = CreateAlbumMetadataSchema.extend({
 
 export type AlbumMetadata = z.input<typeof UploadAlbumMetadataSchema>
 
-const AlbumTrackMetadataSchema = UploadTrackMetadataSchema.partial({
-  genre: true,
-  mood: true,
-  tags: true,
-  isStreamGated: true,
-  streamConditions: true,
-  isDownloadable: true,
-  downloadConditions: true
-})
-
 export const UpdateAlbumMetadataSchema = UploadAlbumMetadataSchema.partial()
   .merge(
     z.object({
@@ -161,21 +149,17 @@ export const UpdateAlbumMetadataSchema = UploadAlbumMetadataSchema.partial()
   )
   .strict()
 
-export const UploadAlbumSchema = z
-  .object({
-    userId: HashId,
-    imageFile: ImageFile,
-    metadata: UploadAlbumMetadataSchema,
-    onProgress: z.optional(z.function()),
-    /**
-     * Track metadata is populated from the album if fields are missing
-     */
-    trackMetadatas: z.array(AlbumTrackMetadataSchema),
-    audioFiles: z.array(AudioFile)
-  })
-  .strict()
+export const UploadAlbumSchema = z.object({
+  userId: HashId,
+  imageFile: ImageFile,
+  onProgress: z.optional(z.function()),
+  audioFiles: z.array(AudioFile)
+})
 
-export type UploadAlbumRequest = z.input<typeof UploadAlbumSchema>
+export type UploadAlbumRequest = z.input<typeof UploadAlbumSchema> & {
+  metadata: CreateAlbumRequestBody
+  trackMetadatas: CreateTrackRequestBody[]
+}
 
 export const UpdateAlbumSchema = z
   .object({

@@ -41,10 +41,10 @@ import {
 export interface CreatePlaylistRequestBody {
     /**
      * Optional playlist ID (will be generated if not provided)
-     * @type {number}
+     * @type {string}
      * @memberof CreatePlaylistRequestBody
      */
-    playlistId?: number;
+    playlistId?: string;
     /**
      * Playlist or album name
      * @type {string}

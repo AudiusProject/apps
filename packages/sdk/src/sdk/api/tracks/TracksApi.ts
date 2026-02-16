@@ -34,7 +34,8 @@ import {
   type ShareTrackRequest,
   type RepostTrackRequest,
   type UnrepostTrackRequest,
-  type RecordTrackDownloadRequest
+  type RecordTrackDownloadRequest,
+  type CreateTrackRequest
 } from '../generated/default'
 import { RequiredError } from '../generated/default/runtime'
 
@@ -51,7 +52,6 @@ import {
   EntityManagerUnfavoriteTrackRequest,
   UnfavoriteTrackSchema,
   EntityManagerUpdateTrackRequest,
-  UploadTrackRequest,
   PurchaseTrackRequest,
   PurchaseTrackSchema,
   GetPurchaseTrackInstructionsRequest,
@@ -69,7 +69,8 @@ import {
   type PublishStemRequest,
   PublishStemSchema,
   type UploadTrackFilesTask,
-  type UpdateTrackRequestWithFiles
+  type UpdateTrackRequestWithFiles,
+  type CreateTrackRequestWithFiles
 } from './types'
 
 // Extend that new class
@@ -224,30 +225,28 @@ export class TracksApi extends GeneratedTracksApi {
   /** @hidden
    * Publishes a track that was uploaded using storage node uploadFileV2 uploads.
    */
-  async publishTrack(
-    params: PublishTrackRequest,
-    advancedOptions?: AdvancedOptions
-  ) {
-    const {
-      userId,
-      metadata: parsedMetadata,
-      audioUploadResponse,
-      imageUploadResponse
-    } = await parseParams('publishTrack', PublishTrackSchema)(params)
+  async publishTrack(params: PublishTrackRequest, requestInit?: RequestInit) {
+    const { userId, audioUploadResponse, imageUploadResponse } =
+      await parseParams('publishTrack', PublishTrackSchema)(params)
+    const metadata = params.metadata
 
-    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
-      parsedMetadata,
-      userId
-    )
+    const transformedMetadata =
+      this.trackUploadHelper.transformTrackUploadMetadata(metadata, userId)
 
     const populatedMetadata =
       this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
-        metadata,
+        transformedMetadata,
         audioUploadResponse,
         imageUploadResponse
       )
 
-    return this.writeTrackToChain(userId, populatedMetadata, advancedOptions)
+    if (this.entityManager) {
+      return this.writeTrackToChain(userId, populatedMetadata)
+    }
+    return super.createTrack(
+      { userId: params.userId, metadata: populatedMetadata },
+      requestInit
+    )
   }
 
   /** @hidden
@@ -263,9 +262,8 @@ export class TracksApi extends GeneratedTracksApi {
       audioUploadResponse
     } = await parseParams('publishStem', PublishStemSchema)(params)
 
-    const trackMetadata = {
+    const trackMetadata: Partial<CreateTrackRequest['metadata']> = {
       title: audioUploadResponse.orig_filename || 'Untitled Stem',
-      isStreamGated: false,
       streamConditions: undefined,
       isUnlisted: false,
       fieldVisibility: {
@@ -277,7 +275,10 @@ export class TracksApi extends GeneratedTracksApi {
         playCount: false
       },
       isDownloadable: true,
-      stemOf: parsedMetadata
+      stemOf: {
+        parentTrackId: params.metadata.parentTrackId,
+        category: parsedMetadata.category
+      }
     }
 
     const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
@@ -299,17 +300,14 @@ export class TracksApi extends GeneratedTracksApi {
    */
   async writeTrackToChain(
     userId: number,
-    metadata: ReturnType<
-      typeof this.trackUploadHelper.populateTrackMetadataWithUploadResponse
-    >,
+    metadata: Partial<CreateTrackRequest['metadata']>,
     advancedOptions?: AdvancedOptions
   ) {
-    // Write metadata to chain
-    this.logger.info('Writing metadata to chain')
+    const { metadata: parsedMetadata } = UploadTrackSchema.parse(metadata)
 
     const entityId =
-      'trackId' in metadata && metadata.trackId
-        ? metadata.trackId
+      'trackId' in parsedMetadata && parsedMetadata.trackId
+        ? parsedMetadata.trackId
         : await this.trackUploadHelper.generateId('track')
 
     const response = await this.entityManager.manageEntity({
@@ -320,38 +318,32 @@ export class TracksApi extends GeneratedTracksApi {
       metadata: JSON.stringify({
         cid: '',
         data: {
-          ...snakecaseKeys(metadata),
+          ...snakecaseKeys(parsedMetadata),
           owner_id: userId,
           download_conditions:
-            metadata.downloadConditions &&
-            snakecaseKeys(metadata.downloadConditions),
+            parsedMetadata.downloadConditions &&
+            snakecaseKeys(parsedMetadata.downloadConditions),
           stream_conditions:
-            metadata.streamConditions &&
-            snakecaseKeys(metadata.streamConditions),
-          stem_of: metadata.stemOf && snakecaseKeys(metadata.stemOf)
+            parsedMetadata.streamConditions &&
+            snakecaseKeys(parsedMetadata.streamConditions),
+          stem_of: parsedMetadata.stemOf && snakecaseKeys(parsedMetadata.stemOf)
         }
       }),
       ...advancedOptions
     })
 
-    this.logger.info('Successfully uploaded track')
     return {
       ...response,
       trackId: encodeHashId(entityId)!
     }
   }
 
-  /**
-   * Upload a track
-   */
-  async uploadTrack(
-    params: UploadTrackRequest,
-    advancedOptions?: AdvancedOptions
+  override async createTrack(
+    params: CreateTrackRequestWithFiles,
+    requestInit?: RequestInit
   ) {
-    // Validate inputs
-    await parseParams('uploadTrack', UploadTrackSchema)(params)
-
-    // Upload track files
+    // Upload files
+    let metadata = params.metadata
     const { audioUploadResponse, imageUploadResponse } =
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
@@ -363,19 +355,26 @@ export class TracksApi extends GeneratedTracksApi {
         onProgress: params.onProgress
       }).start()
 
-    if (!audioUploadResponse || !imageUploadResponse) {
-      throw new Error('uploadTrack: Missing upload responses')
-    }
+    metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      metadata,
+      decodeHashId(params.userId)!
+    )
 
-    // Write track metadata to chain
-    return this.publishTrack(
+    metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+      metadata,
+      audioUploadResponse,
+      imageUploadResponse
+    )
+
+    if (this.entityManager) {
+      return this.writeTrackToChain(decodeHashId(params.userId)!, metadata)
+    }
+    return super.createTrack(
       {
         userId: params.userId,
-        metadata: params.metadata,
-        audioUploadResponse,
-        imageUploadResponse
+        metadata
       },
-      advancedOptions
+      requestInit
     )
   }
 
@@ -387,62 +386,10 @@ export class TracksApi extends GeneratedTracksApi {
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
-    const {
-      userId,
-      trackId,
-      audioFile,
-      imageFile,
-      metadata: parsedMetadata,
-      onProgress,
-      generatePreview
-    } = await parseParams('updateTrack', UpdateTrackSchema)(params)
-
-    // Transform metadata
-    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
-      parsedMetadata,
-      userId
-    )
-
-    const { audioUploadResponse, imageUploadResponse } =
-      await this.uploadTrackFiles({
-        audioFile,
-        imageFile,
-        fileMetadata: {
-          placementHosts: parsedMetadata.placementHosts,
-          previewStartSeconds: parsedMetadata.previewStartSeconds
-        },
-        onProgress
-      }).start()
-
-    // Update metadata to include uploaded CIDs
-    const updatedMetadata =
-      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
-        metadata,
-        audioUploadResponse,
-        imageUploadResponse
-      )
-
-    // Generate preview if requested and no audio file was uploaded
-    // (as that would handle the preview generation already)
-    if (generatePreview && !audioFile) {
-      if (updatedMetadata.previewStartSeconds === undefined) {
-        throw new Error('No track preview start time specified')
-      }
-
-      const previewCid = await retry3(
-        async () =>
-          await this.storage.generatePreview({
-            cid: updatedMetadata.trackCid!,
-            secondOffset: updatedMetadata.previewStartSeconds!
-          }),
-        (e) => {
-          this.logger.info('Retrying generatePreview', e)
-        }
-      )
-
-      // Update metadata to include updated preview CID
-      updatedMetadata.previewCid = previewCid
-    }
+    const { userId, trackId, metadata } = await parseParams(
+      'updateTrack',
+      UpdateTrackSchema
+    )(params)
 
     // Write metadata to chain
     return await this.entityManager.manageEntity({
@@ -453,13 +400,13 @@ export class TracksApi extends GeneratedTracksApi {
       metadata: JSON.stringify({
         cid: '',
         data: {
-          ...snakecaseKeys(updatedMetadata),
+          ...snakecaseKeys(metadata),
           download_conditions:
-            updatedMetadata.downloadConditions &&
-            snakecaseKeys(updatedMetadata.downloadConditions),
+            metadata.downloadConditions &&
+            snakecaseKeys(metadata.downloadConditions),
           stream_conditions:
-            updatedMetadata.streamConditions &&
-            snakecaseKeys(updatedMetadata.streamConditions),
+            metadata.streamConditions &&
+            snakecaseKeys(metadata.streamConditions),
           stem_of: metadata.stemOf && snakecaseKeys(metadata.stemOf)
         }
       }),
@@ -473,28 +420,44 @@ export class TracksApi extends GeneratedTracksApi {
   ) {
     // Upload files
     let metadata = params.metadata
-    if (params.audioFile || params.imageFile) {
-      const { audioUploadResponse, imageUploadResponse } =
-        await this.uploadTrackFiles({
-          audioFile: params.audioFile,
-          imageFile: params.imageFile,
-          fileMetadata: {
-            placementHosts: metadata.placementHosts,
-            previewStartSeconds: metadata.previewStartSeconds
-          },
-          onProgress: params.onProgress
-        }).start()
+    const { audioUploadResponse, imageUploadResponse } =
+      await this.uploadTrackFiles({
+        audioFile: params.audioFile,
+        imageFile: params.imageFile,
+        fileMetadata: {
+          placementHosts: params.metadata.placementHosts,
+          previewStartSeconds: params.metadata.previewStartSeconds
+        },
+        onProgress: params.onProgress
+      }).start()
 
-      metadata = this.trackUploadHelper.transformTrackUploadMetadata(
-        metadata,
-        decodeHashId(params.userId)!
+    metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      metadata,
+      decodeHashId(params.userId)!
+    )
+
+    metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+      metadata,
+      audioUploadResponse,
+      imageUploadResponse
+    )
+
+    // Generate preview if requested and no audio file was uploaded
+    // (as that would handle the preview generation already)
+    if (metadata.previewStartSeconds !== undefined && !params.audioFile) {
+      const previewCid = await retry3(
+        async () =>
+          await this.storage.generatePreview({
+            cid: metadata.trackCid!,
+            secondOffset: metadata.previewStartSeconds!
+          }),
+        (e) => {
+          this.logger.info('Retrying generatePreview', e)
+        }
       )
 
-      metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
-        metadata,
-        audioUploadResponse,
-        imageUploadResponse
-      )
+      // Update metadata to include updated preview CID
+      metadata.previewCid = previewCid
     }
 
     if (this.entityManager) {
@@ -512,7 +475,7 @@ export class TracksApi extends GeneratedTracksApi {
       {
         trackId: params.trackId,
         userId: params.userId,
-        metadata
+        metadata: params.metadata
       },
       requestInit
     )

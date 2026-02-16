@@ -46,7 +46,7 @@ export interface CreateCommentRequestBody {
      */
     body: string;
     /**
-     * Optional comment ID (will be generated if not provided)
+     * Optional ID for the comment (will be generated if not provided)
      * @type {number}
      * @memberof CreateCommentRequestBody
      */

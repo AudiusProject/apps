@@ -44,8 +44,9 @@ export const useUpdateProfile = () => {
         }
       }
 
-      const { blockHash, blockNumber } = await sdk.users.updateProfile({
+      const { blockHash, blockNumber } = await sdk.users.updateUser({
         userId: Id.parse(currentUserId),
+        id: Id.parse(currentUserId),
         profilePictureFile: metadata.updatedProfilePicture?.file,
         coverArtFile: metadata.updatedCoverPhoto?.file,
         metadata: userMetadataToSdk(metadata)
