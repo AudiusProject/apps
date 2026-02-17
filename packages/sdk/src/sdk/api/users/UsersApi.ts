@@ -9,7 +9,6 @@ import {
   EntityManagerService,
   EntityType
 } from '../../services/EntityManager/types'
-import type { LoggerService } from '../../services/Logger'
 import type { ClaimableTokensClient } from '../../services/Solana/programs/ClaimableTokensClient/ClaimableTokensClient'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { HashId, Id } from '../../types/HashId'
