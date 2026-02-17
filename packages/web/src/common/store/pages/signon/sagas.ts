@@ -51,9 +51,10 @@ import {
 } from '@audius/common/utils'
 import {
   OptionalId,
-  CreateUserRequest,
+  CreateUserRequestWithFiles,
   Id,
-  UpdateProfileRequest
+  UpdateUserRequest,
+  decodeHashId
 } from '@audius/sdk'
 import { isEmpty } from 'lodash'
 import {
@@ -491,7 +492,7 @@ function* signUp() {
                 throw new Error('Account user ID does not exist')
               }
               userId = account.user.user_id
-              const completeProfileMetadataRequest: UpdateProfileRequest = {
+              const completeProfileMetadataRequest: UpdateUserRequest = {
                 userId: Id.parse(userId),
                 profilePictureFile: signOn.profileImage?.file as File,
                 metadata: {
@@ -500,9 +501,8 @@ function* signUp() {
                   handle
                 }
               }
-
-              const { blockHash, blockNumber } = yield* call(
-                [sdk.users, sdk.users.updateProfile],
+              yield* call(
+                [sdk.users, sdk.users.updateUser],
                 completeProfileMetadataRequest
               )
 
@@ -516,7 +516,6 @@ function* signUp() {
 
               yield* fork(sendPostSignInRecoveryEmail, { handle, email })
 
-              yield* call(confirmTransaction, blockHash, blockNumber)
               yield* put(
                 make(Name.CREATE_ACCOUNT_COMPLETE_GUEST_PROFILE, {
                   handle,
@@ -555,7 +554,8 @@ function* signUp() {
                 sdk.services.audiusWalletClient.getAddresses
               ])
 
-              const events: CreateUserRequest['metadata']['events'] = {}
+              const events: CreateUserRequestWithFiles['metadata']['events'] =
+                {}
               if (referrer) {
                 events.referrer = OptionalId.parse(referrer)
               }
@@ -563,7 +563,7 @@ function* signUp() {
                 events.isMobileUser = true
               }
 
-              const createUserMetadata: CreateUserRequest = {
+              const createUserMetadata: CreateUserRequestWithFiles = {
                 profilePictureFile: signOn.profileImage?.file as File,
                 coverArtFile: signOn.coverPhoto?.file as File,
                 metadata: {
@@ -575,11 +575,14 @@ function* signUp() {
                 }
               }
 
-              const { metadata } = yield* call(
+              const { userId: returnedUserId } = yield* call(
                 [sdk.users, sdk.users.createUser],
                 createUserMetadata
               )
-              userId = metadata.userId
+              if (!returnedUserId) {
+                throw new Error('User ID not returned from createUser')
+              }
+              userId = decodeHashId(returnedUserId)!
             }
 
             yield* put(
