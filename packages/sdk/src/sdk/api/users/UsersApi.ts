@@ -142,6 +142,7 @@ export class UsersApi extends GeneratedUsersApi {
     }
     return super.createUser(
       {
+        userId: params.userId,
         metadata
       },
       requestInit
