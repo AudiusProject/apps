@@ -67,7 +67,6 @@ export class UsersApi extends GeneratedUsersApi {
     private readonly emailEncryption: EmailEncryptionService
   ) {
     super(configuration)
-    this.logger = logger.createPrefixedLogger('[users-api]')
   }
 
   /** @hidden
