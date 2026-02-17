@@ -14,7 +14,8 @@ import {
   Mood,
   Genre,
   StemCategory,
-  type UpdateTrackRequest
+  type UpdateTrackRequest,
+  type CreateTrackRequest
 } from '../generated/default'
 
 import { MAX_DESCRIPTION_LENGTH } from './constants'
@@ -482,8 +483,16 @@ export type UploadTrackFilesTask = {
   abort: () => void
 }
 
-export type UpdateTrackRequestWithFiles = UpdateTrackRequest & {
+export type TrackFileUploadParams = {
   audioFile?: z.input<typeof AudioFile>
   imageFile?: z.input<typeof ImageFile>
   onProgress?: UploadTrackFilesProgressHandler
 }
+
+export type CreateTrackRequestWithFiles = CreateTrackRequest &
+  TrackFileUploadParams
+
+export type UpdateTrackRequestWithFiles = UpdateTrackRequest &
+  TrackFileUploadParams & {
+    generatePreview?: boolean
+  }
