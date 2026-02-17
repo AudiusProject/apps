@@ -23,6 +23,7 @@ If you want to create apps that stream music from the catalog, extend the listen
 | --------------------- | ----------------------------------------- |
 | Docs                  | https://docs.audius.co                    |
 | API                   | https://api.audius.co                     |
+| API Swagger (OpenAPI) | https://api.audius.co/v1/swagger.yaml     |
 | API Plans (keys)      | https://api.audius.co/plans               |
 | SDK (npm)             | https://www.npmjs.com/package/@audius/sdk |
 | GitHub Org            | https://github.com/audiusproject          |
@@ -46,7 +47,7 @@ When building a music player, app, or frontend, use the Audius API and SDK at [a
 
 HTTP API for querying and streaming the catalog. Base URL: `https://api.audius.co/v1`. Key domains: users, tracks, playlists, comments, tips, challenges, resolve (canonical URL lookup), explore, events, rewards. Read-only by default; writes require API credentials.
 
-[Full API Reference](https://docs.audius.co/api)
+[Full API Reference](https://docs.audius.co/api) · [OpenAPI/Swagger spec](https://api.audius.co/v1/swagger.yaml)
 
 ### JavaScript SDK
 
@@ -121,6 +122,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 | Audius (app)        | https://audius.co                                           |
 | Docs                | https://docs.audius.co                                      |
 | API                 | https://api.audius.co                                       |
+| API Swagger (OpenAPI) | https://api.audius.co/v1/swagger.yaml                     |
 | API Plans           | https://api.audius.co/plans                                 |
 | API Reference       | https://docs.audius.co/api                                  |
 | SDK npm             | https://www.npmjs.com/package/@audius/sdk                   |
