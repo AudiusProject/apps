@@ -62,7 +62,6 @@ export class UsersApi extends GeneratedUsersApi {
     configuration: Configuration,
     private readonly storage: StorageService,
     private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService,
     private readonly claimableTokens: ClaimableTokensClient,
     private readonly solanaClient: SolanaClient,
     private readonly emailEncryption: EmailEncryptionService
