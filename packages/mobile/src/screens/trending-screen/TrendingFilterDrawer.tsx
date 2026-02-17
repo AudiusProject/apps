@@ -9,7 +9,8 @@ import {
   Genre,
   ELECTRONIC_PREFIX,
   ELECTRONIC_SUBGENRES,
-  GENRES
+  GENRES,
+  ALL_GENRES
 } from '@audius/common/utils'
 import { FlatList, Keyboard, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,7 +32,7 @@ const messages = {
   searchPlaceholder: 'Search Genres'
 }
 
-const trendingGenres = [Genre.ALL, ...GENRES]
+const trendingGenres = [ALL_GENRES, ...GENRES]
 
 const useStyles = makeStyles(({ spacing }) => ({
   root: {
@@ -63,7 +64,7 @@ export const TrendingFilterDrawer = () => {
   const handleSelect = useCallback(
     (genre: string) => {
       const trimmedGenre =
-        genre === Genre.ALL
+        genre === ALL_GENRES
           ? null
           : (genre.replace(ELECTRONIC_PREFIX, '') as Genre)
 
