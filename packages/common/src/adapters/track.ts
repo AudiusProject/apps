@@ -1,7 +1,7 @@
 import {
   type full,
   type CrossPlatformFile,
-  type Genre,
+  Genre,
   type NativeFile,
   type Track,
   HashId,
@@ -34,6 +34,17 @@ import { remixFromSDK } from './remix'
 import { repostFromSDK } from './repost'
 import { userMetadataFromSDK } from './user'
 import { transformAndCleanList } from './utils'
+
+const VALID_GENRES = new Set<string>(Object.values(Genre))
+
+function toSdkGenre(
+  value: string | undefined | ''
+): (typeof Genre)[keyof typeof Genre] | undefined {
+  if (value === undefined || value === '') return undefined
+  return VALID_GENRES.has(value)
+    ? (value as (typeof Genre)[keyof typeof Genre])
+    : undefined
+}
 
 export const trackSegmentFromSDK = ({
   duration,
@@ -353,94 +364,95 @@ export const stemTrackMetadataFromSDK = (
   }
 }
 
-export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => ({
-  ...camelcaseKeys(
-    pick(input, [
-      'license',
-      'isrc',
-      'iswc',
-      'is_unlisted',
-      'is_premium',
-      'premium_conditions',
-      'is_stream_gated',
-      'stream_conditions',
-      'is_download_gated',
-      'is_downloadable',
-      'is_original_available',
-      'is_scheduled_release',
-      'bpm',
-      'is_custom_bpm',
-      'is_custom_musical_key',
-      'comments_disabled',
-      'ddex_release_ids',
-      'parental_warning_type'
-    ])
-  ),
-  trackId: OptionalId.parse(input.track_id),
-  title: input.title,
-  description: squashNewLines(input.description) ?? undefined,
-  mood: input.mood,
-  tags: input.tags ?? undefined,
-  ...(input.genre !== undefined && input.genre !== ''
-    ? { genre: input.genre as Genre }
-    : {}),
-  releaseDate: input.release_date ? new Date(input.release_date) : undefined,
-  previewStartSeconds: input.preview_start_seconds ?? undefined,
-  previewCid: input.preview_cid ?? '',
-  ddexApp: input.ddex_app ?? '',
-  audioUploadId: input.audio_upload_id ?? undefined,
-  duration: input.duration ?? undefined,
-  musicalKey: input.musical_key
-    ? formatMusicalKey(input.musical_key)
-    : undefined,
-  trackCid: input.track_cid ?? '',
-  origFileCid: input.orig_file_cid ?? '',
-  origFilename: input.orig_filename ?? undefined,
-  fieldVisibility: input.field_visibility
-    ? mapValues(
-        camelcaseKeys(input.field_visibility),
-        (value: Maybe<boolean>) => (value === null ? undefined : value)
-      )
-    : undefined,
-  downloadConditions: input.download_conditions
-    ? accessConditionsToSDK(input.download_conditions)
-    : null,
-  streamConditions: input.stream_conditions
-    ? accessConditionsToSDK(input.stream_conditions)
-    : null,
-  remixOf: input.remix_of
-    ? {
-        tracks: input.remix_of.tracks.map((track) => ({
-          parentTrackId: Id.parse(track.parent_track_id)
-        }))
-      }
-    : undefined,
-  stemOf: input.stem_of
-    ? {
-        category: input.stem_of.category,
-        parentTrackId: Id.parse(input.stem_of.parent_track_id)
-      }
-    : undefined,
-  copyrightLine: input.copyright_line
-    ? camelcaseKeys(input.copyright_line)
-    : undefined,
-  producerCopyrightLine: input.producer_copyright_line
-    ? camelcaseKeys(input.producer_copyright_line)
-    : undefined,
-  rightsController: input.rights_controller
-    ? camelcaseKeys(input.rights_controller)
-    : undefined,
-  resourceContributors: input.resource_contributors
-    ? input.resource_contributors.map((contributor) =>
-        camelcaseKeys(contributor)
-      )
-    : undefined,
-  indirectResourceContributors: input.indirect_resource_contributors
-    ? input.indirect_resource_contributors.map((contributor) =>
-        camelcaseKeys(contributor)
-      )
-    : undefined
-})
+export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => {
+  const sdkGenre = toSdkGenre(input.genre)
+  return {
+    ...camelcaseKeys(
+      pick(input, [
+        'license',
+        'isrc',
+        'iswc',
+        'is_unlisted',
+        'is_premium',
+        'premium_conditions',
+        'is_stream_gated',
+        'stream_conditions',
+        'is_download_gated',
+        'is_downloadable',
+        'is_original_available',
+        'is_scheduled_release',
+        'bpm',
+        'is_custom_bpm',
+        'is_custom_musical_key',
+        'comments_disabled',
+        'ddex_release_ids',
+        'parental_warning_type'
+      ])
+    ),
+    trackId: OptionalId.parse(input.track_id),
+    title: input.title,
+    description: squashNewLines(input.description) ?? undefined,
+    mood: input.mood,
+    tags: input.tags ?? undefined,
+    ...(sdkGenre !== undefined ? { genre: sdkGenre } : {}),
+    releaseDate: input.release_date ? new Date(input.release_date) : undefined,
+    previewStartSeconds: input.preview_start_seconds ?? undefined,
+    previewCid: input.preview_cid ?? '',
+    ddexApp: input.ddex_app ?? '',
+    audioUploadId: input.audio_upload_id ?? undefined,
+    duration: input.duration ?? undefined,
+    musicalKey: input.musical_key
+      ? formatMusicalKey(input.musical_key)
+      : undefined,
+    trackCid: input.track_cid ?? '',
+    origFileCid: input.orig_file_cid ?? '',
+    origFilename: input.orig_filename ?? undefined,
+    fieldVisibility: input.field_visibility
+      ? mapValues(
+          camelcaseKeys(input.field_visibility),
+          (value: Maybe<boolean>) => (value === null ? undefined : value)
+        )
+      : undefined,
+    downloadConditions: input.download_conditions
+      ? accessConditionsToSDK(input.download_conditions)
+      : null,
+    streamConditions: input.stream_conditions
+      ? accessConditionsToSDK(input.stream_conditions)
+      : null,
+    remixOf: input.remix_of
+      ? {
+          tracks: input.remix_of.tracks.map((track) => ({
+            parentTrackId: Id.parse(track.parent_track_id)
+          }))
+        }
+      : undefined,
+    stemOf: input.stem_of
+      ? {
+          category: input.stem_of.category,
+          parentTrackId: Id.parse(input.stem_of.parent_track_id)
+        }
+      : undefined,
+    copyrightLine: input.copyright_line
+      ? camelcaseKeys(input.copyright_line)
+      : undefined,
+    producerCopyrightLine: input.producer_copyright_line
+      ? camelcaseKeys(input.producer_copyright_line)
+      : undefined,
+    rightsController: input.rights_controller
+      ? camelcaseKeys(input.rights_controller)
+      : undefined,
+    resourceContributors: input.resource_contributors
+      ? input.resource_contributors.map((contributor) =>
+          camelcaseKeys(contributor)
+        )
+      : undefined,
+    indirectResourceContributors: input.indirect_resource_contributors
+      ? input.indirect_resource_contributors.map((contributor) =>
+          camelcaseKeys(contributor)
+        )
+      : undefined
+  }
+}
 
 export const fileToSdk = (
   file: Blob | File | NativeFile,
