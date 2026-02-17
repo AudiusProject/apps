@@ -1,5 +1,5 @@
 import { USDC } from '@audius/fixed-decimal'
-import { HashId, Id, type UploadResponse } from '@audius/sdk'
+import { type Genre, HashId, Id, type UploadResponse } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { trackMetadataForUploadToSdk } from '~/adapters'
@@ -79,9 +79,14 @@ export const publishTracks = async (
 
       const publishParentTrack = async () => {
         try {
+          // Publish requires genre; form validation ensures it's set at runtime
+          const metadata = {
+            ...camelMetadata,
+            ...(param.metadata.genre ? { genre: param.metadata.genre } : {})
+          } as typeof camelMetadata & { genre: Genre }
           const res = await sdk.tracks.publishTrack({
             userId: Id.parse(userId),
-            metadata: camelMetadata,
+            metadata,
             audioUploadResponse: param.audioUploadResponse,
             imageUploadResponse: param.imageUploadResponse
           })

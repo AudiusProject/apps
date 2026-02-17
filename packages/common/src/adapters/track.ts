@@ -1,6 +1,7 @@
 import {
   type full,
   type CrossPlatformFile,
+  type Genre,
   type NativeFile,
   type Track,
   HashId,
@@ -380,7 +381,9 @@ export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => ({
   description: squashNewLines(input.description) ?? undefined,
   mood: input.mood,
   tags: input.tags ?? undefined,
-  genre: input.genre || undefined,
+  ...(input.genre !== undefined && input.genre !== ''
+    ? { genre: input.genre as Genre }
+    : {}),
   releaseDate: input.release_date ? new Date(input.release_date) : undefined,
   previewStartSeconds: input.preview_start_seconds ?? undefined,
   previewCid: input.preview_cid ?? '',

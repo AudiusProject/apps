@@ -22,7 +22,7 @@ export const getTrackWithFallback = (track: Track | null | undefined) => {
       followee_saves: [],
       duration: 0,
       save_count: 0,
-      genre: Genre.ALL,
+      genre: '',
       field_visibility: defaultFieldVisibility,
       has_current_user_reposted: false,
       has_current_user_saved: false,

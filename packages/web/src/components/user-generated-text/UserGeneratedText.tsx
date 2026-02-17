@@ -69,7 +69,8 @@ const RenderLink = ({ attributes, content }: IntermediateRepresentation) => {
         } else if (instanceOfPlaylistResponse(res)) {
           setUnfurledContent(formatCollectionName({ collection: res.data[0] }))
         } else if (instanceOfUserResponse(res)) {
-          setUnfurledContent(formatUserName({ user: res.data }))
+          const user = Array.isArray(res.data) ? res.data[0] : res.data
+          if (user) setUnfurledContent(formatUserName({ user }))
         }
       }
     }

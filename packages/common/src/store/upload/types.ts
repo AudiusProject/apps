@@ -43,7 +43,8 @@ export const isTrackForUpload = (
  */
 export interface TrackMetadataForUpload
   extends Omit<TrackMetadata, 'artwork' | 'track_id' | 'genre' | 'mood'> {
-  genre?: Genre | ''
+  /** API tracks use genre: string; form empty state is ''. */
+  genre?: Genre | '' | string
   mood?: Mood | null
   artwork?:
     | Nullable<{

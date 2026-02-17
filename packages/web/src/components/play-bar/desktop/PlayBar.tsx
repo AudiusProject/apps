@@ -95,8 +95,8 @@ const PlayBar = () => {
   const isStreamGated = currentTrack?.is_stream_gated || false
   const trackPermalink = currentTrack?.permalink || ''
   const isLongFormContent =
-    currentTrack?.genre === Genre.PODCASTS ||
-    currentTrack?.genre === Genre.AUDIOBOOKS
+    currentTrack?.genre === Genre.Podcasts ||
+    currentTrack?.genre === Genre.Audiobooks
 
   const playable = !!uid
 

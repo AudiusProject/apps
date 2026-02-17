@@ -441,7 +441,9 @@ export const searchPage = (searchOptions: SearchOptions) => {
   const { category, ...searchParams } = searchOptions
 
   if (searchParams.genre) {
-    searchParams.genre = convertGenreLabelToValue(searchParams.genre) as Genre
+    searchParams.genre = convertGenreLabelToValue(
+      searchParams.genre as Parameters<typeof convertGenreLabelToValue>[0]
+    ) as Genre
   }
 
   // Build the search path - category is optional
