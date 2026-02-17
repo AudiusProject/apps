@@ -28,7 +28,7 @@ If you want to create apps that stream music from the catalog, extend the listen
 | GitHub Org            | https://github.com/audiusproject          |
 | Open Audio Protocol   | https://openaudio.org                     |
 | skill.md (SDK/code)   | https://audius.co/skill.md                |
-| llm.txt (AI overview) | https://audius.co/llm.txt                 |
+| llms.txt (AI overview) | https://audius.co/llms.txt                 |
 | Protocol Dashboard    | https://dashboard.audius.org              |
 
 ## Audius vs Open Audio Protocol
@@ -133,7 +133,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 | OAP llms.txt        | https://openaudio.org/llms.txt                              |
 | Protocol Dashboard  | https://dashboard.audius.org                                |
 | skill.md            | https://audius.co/skill.md                                  |
-| llm.txt             | https://audius.co/llm.txt                                   |
+| llms.txt             | https://audius.co/llms.txt                                   |
 
 ## Skill File
 
