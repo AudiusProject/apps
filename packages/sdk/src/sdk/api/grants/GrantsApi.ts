@@ -1,4 +1,13 @@
-import type { Configuration, User, UsersApi } from '../../api/generated/default'
+import type {
+  AddManagerRequest as GeneratedAddManagerRequest,
+  ApproveGrantRequest as GeneratedApproveGrantRequest,
+  Configuration,
+  CreateGrantRequest as GeneratedCreateGrantRequest,
+  RemoveManagerRequest as GeneratedRemoveManagerRequest,
+  RevokeGrantRequest as GeneratedRevokeGrantRequest,
+  User,
+  UsersApi
+} from '../../api/generated/default'
 import type { EntityManagerService } from '../../services'
 import {
   Action,
@@ -9,16 +18,16 @@ import { encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
 
 import {
-  ApproveGrantSchema,
-  type ApproveGrantRequest,
   AddManagerSchema,
-  type AddManagerRequest,
-  type CreateGrantRequest,
+  ApproveGrantSchema,
   CreateGrantSchema,
-  type RemoveManagerRequest,
   RemoveManagerSchema,
-  type RevokeGrantRequest,
-  RevokeGrantSchema
+  RevokeGrantSchema,
+  type EntityManagerAddManagerRequest,
+  type EntityManagerApproveGrantRequest,
+  type EntityManagerCreateGrantRequest,
+  type EntityManagerRemoveManagerRequest,
+  type EntityManagerRevokeGrantRequest
 } from './types'
 
 export class GrantsApi {
@@ -30,7 +39,7 @@ export class GrantsApi {
   ) {}
 
   async createGrantWithEntityManager(
-    params: CreateGrantRequest,
+    params: EntityManagerCreateGrantRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, appApiKey } = await parseParams(
@@ -50,7 +59,10 @@ export class GrantsApi {
     })
   }
 
-  async createGrant(params: CreateGrantRequest, requestInit?: RequestInit) {
+  async createGrant(
+    params: EntityManagerCreateGrantRequest,
+    requestInit?: RequestInit
+  ) {
     if (this.entityManager) {
       return await this.createGrantWithEntityManager(params)
     }
@@ -58,17 +70,15 @@ export class GrantsApi {
       'createGrant',
       CreateGrantSchema
     )(params)
-    return await this.usersApi.createGrant(
-      {
-        id: encodeHashId(userId)!,
-        createGrantRequestBody: { appApiKey }
-      },
-      requestInit
-    )
+    const request: GeneratedCreateGrantRequest = {
+      id: encodeHashId(userId)!,
+      createGrantRequestBody: { appApiKey }
+    }
+    return await this.usersApi.createGrant(request, requestInit)
   }
 
   async addManagerWithEntityManager(
-    params: AddManagerRequest,
+    params: EntityManagerAddManagerRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, managerUserId } = await parseParams(
@@ -89,7 +99,10 @@ export class GrantsApi {
     })
   }
 
-  async addManager(params: AddManagerRequest, requestInit?: RequestInit) {
+  async addManager(
+    params: EntityManagerAddManagerRequest,
+    requestInit?: RequestInit
+  ) {
     if (this.entityManager) {
       return await this.addManagerWithEntityManager(params)
     }
@@ -97,19 +110,17 @@ export class GrantsApi {
       'addManager',
       AddManagerSchema
     )(params)
-    return await this.usersApi.addManager(
-      {
-        id: encodeHashId(userId)!,
-        addManagerRequestBody: {
-          managerUserId: encodeHashId(managerUserId)!
-        }
-      },
-      requestInit
-    )
+    const request: GeneratedAddManagerRequest = {
+      id: encodeHashId(userId)!,
+      addManagerRequestBody: {
+        managerUserId: encodeHashId(managerUserId)!
+      }
+    }
+    return await this.usersApi.addManager(request, requestInit)
   }
 
   async removeManagerWithEntityManager(
-    params: RemoveManagerRequest,
+    params: EntityManagerRemoveManagerRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, managerUserId } = await parseParams(
@@ -133,7 +144,10 @@ export class GrantsApi {
     })
   }
 
-  async removeManager(params: RemoveManagerRequest, requestInit?: RequestInit) {
+  async removeManager(
+    params: EntityManagerRemoveManagerRequest,
+    requestInit?: RequestInit
+  ) {
     if (this.entityManager) {
       return await this.removeManagerWithEntityManager(params)
     }
@@ -141,17 +155,15 @@ export class GrantsApi {
       'removeManager',
       RemoveManagerSchema
     )(params)
-    return await this.usersApi.removeManager(
-      {
-        id: encodeHashId(userId)!,
-        managerUserId: encodeHashId(managerUserId)!
-      },
-      requestInit
-    )
+    const request: GeneratedRemoveManagerRequest = {
+      id: encodeHashId(userId)!,
+      managerUserId: encodeHashId(managerUserId)!
+    }
+    return await this.usersApi.removeManager(request, requestInit)
   }
 
   async revokeGrantWithEntityManager(
-    params: RevokeGrantRequest,
+    params: EntityManagerRevokeGrantRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, appApiKey } = await parseParams(
@@ -171,7 +183,10 @@ export class GrantsApi {
     })
   }
 
-  async revokeGrant(params: RevokeGrantRequest, requestInit?: RequestInit) {
+  async revokeGrant(
+    params: EntityManagerRevokeGrantRequest,
+    requestInit?: RequestInit
+  ) {
     if (this.entityManager) {
       return await this.revokeGrantWithEntityManager(params)
     }
@@ -179,17 +194,15 @@ export class GrantsApi {
       'revokeGrant',
       RevokeGrantSchema
     )(params)
-    return await this.usersApi.revokeGrant(
-      {
-        id: encodeHashId(userId)!,
-        address: appApiKey
-      },
-      requestInit
-    )
+    const request: GeneratedRevokeGrantRequest = {
+      id: encodeHashId(userId)!,
+      address: appApiKey
+    }
+    return await this.usersApi.revokeGrant(request, requestInit)
   }
 
   async approveGrantWithEntityManager(
-    params: ApproveGrantRequest,
+    params: EntityManagerApproveGrantRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, grantorUserId } = await parseParams(
@@ -209,7 +222,10 @@ export class GrantsApi {
     })
   }
 
-  async approveGrant(params: ApproveGrantRequest, requestInit?: RequestInit) {
+  async approveGrant(
+    params: EntityManagerApproveGrantRequest,
+    requestInit?: RequestInit
+  ) {
     if (this.entityManager) {
       return await this.approveGrantWithEntityManager(params)
     }
@@ -217,15 +233,13 @@ export class GrantsApi {
       'approveGrant',
       ApproveGrantSchema
     )(params)
-    return await this.usersApi.approveGrant(
-      {
-        id: encodeHashId(userId)!,
-        approveGrantRequestBody: {
-          grantorUserId: encodeHashId(grantorUserId)!
-        }
-      },
-      requestInit
-    )
+    const request: GeneratedApproveGrantRequest = {
+      id: encodeHashId(userId)!,
+      approveGrantRequestBody: {
+        grantorUserId: encodeHashId(grantorUserId)!
+      }
+    }
+    return await this.usersApi.approveGrant(request, requestInit)
   }
 
   private async getManagerUser(

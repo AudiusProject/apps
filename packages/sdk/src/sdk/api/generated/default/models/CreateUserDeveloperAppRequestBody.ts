@@ -21,7 +21,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateUserDeveloperAppRequestBody {
     /**
-     * Developer app name (Plans API create)
+     * Developer app name
      * @type {string}
      * @memberof CreateUserDeveloperAppRequestBody
      */

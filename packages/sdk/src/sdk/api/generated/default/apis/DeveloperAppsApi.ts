@@ -23,6 +23,7 @@ import type {
   DeactivateAccessKeyResponse,
   DeveloperAppResponse,
   DeveloperAppsResponse,
+  UpdateDeveloperAppRequestBody,
   WriteResponse,
 } from '../models';
 import {
@@ -40,6 +41,8 @@ import {
     DeveloperAppResponseToJSON,
     DeveloperAppsResponseFromJSON,
     DeveloperAppsResponseToJSON,
+    UpdateDeveloperAppRequestBodyFromJSON,
+    UpdateDeveloperAppRequestBodyToJSON,
     WriteResponseFromJSON,
     WriteResponseToJSON,
 } from '../models';
@@ -74,6 +77,12 @@ export interface GetDeveloperAppsRequest {
     include?: GetDeveloperAppsIncludeEnum;
 }
 
+export interface UpdateDeveloperAppRequest {
+    userId: string;
+    address: string;
+    metadata: UpdateDeveloperAppRequestBody;
+}
+
 /**
  * 
  */
@@ -81,7 +90,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Create a new developer app (Plans API). Indexer validates grants.
+     * Create a new developer app. Indexer validates grants.
      */
     async createDeveloperAppRaw(params: CreateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateDeveloperAppResponse>> {
         if (params.userId === null || params.userId === undefined) {
@@ -114,7 +123,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create a new developer app (Plans API). Indexer validates grants.
+     * Create a new developer app. Indexer validates grants.
      */
     async createDeveloperApp(params: CreateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateDeveloperAppResponse> {
         const response = await this.createDeveloperAppRaw(params, initOverrides);
@@ -123,7 +132,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Create a new bearer token (API access key) for a developer app (Plans API). Indexer validates grants.
+     * Create a new bearer token (API access key) for a developer app. Indexer validates grants.
      */
     async createDeveloperAppAccessKeyRaw(params: CreateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateAccessKeyResponse>> {
         if (params.userId === null || params.userId === undefined) {
@@ -153,7 +162,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create a new bearer token (API access key) for a developer app (Plans API). Indexer validates grants.
+     * Create a new bearer token (API access key) for a developer app. Indexer validates grants.
      */
     async createDeveloperAppAccessKey(params: CreateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateAccessKeyResponse> {
         const response = await this.createDeveloperAppAccessKeyRaw(params, initOverrides);
@@ -162,7 +171,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Deactivate a bearer token (API access key) for a developer app (Plans API). Indexer validates grants.
+     * Deactivate a bearer token (API access key) for a developer app. Indexer validates grants.
      */
     async deactivateDeveloperAppAccessKeyRaw(params: DeactivateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeactivateAccessKeyResponse>> {
         if (params.userId === null || params.userId === undefined) {
@@ -199,7 +208,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deactivate a bearer token (API access key) for a developer app (Plans API). Indexer validates grants.
+     * Deactivate a bearer token (API access key) for a developer app. Indexer validates grants.
      */
     async deactivateDeveloperAppAccessKey(params: DeactivateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeactivateAccessKeyResponse> {
         const response = await this.deactivateDeveloperAppAccessKeyRaw(params, initOverrides);
@@ -208,7 +217,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Deletes a developer app (Plans API). Indexer validates grants.
+     * Deletes a developer app. Indexer validates grants.
      */
     async deleteDeveloperAppRaw(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
         if (params.userId === null || params.userId === undefined) {
@@ -238,7 +247,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a developer app (Plans API). Indexer validates grants.
+     * Deletes a developer app. Indexer validates grants.
      */
     async deleteDeveloperApp(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
         const response = await this.deleteDeveloperAppRaw(params, initOverrides);
@@ -308,6 +317,52 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
      */
     async getDeveloperApps(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperAppsResponse> {
         const response = await this.getDeveloperAppsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates a developer app. Indexer validates grants.
+     */
+    async updateDeveloperAppRaw(params: UpdateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateDeveloperApp.');
+        }
+
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling updateDeveloperApp.');
+        }
+
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateDeveloperApp.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateDeveloperAppRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates a developer app. Indexer validates grants.
+     */
+    async updateDeveloperApp(params: UpdateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.updateDeveloperAppRaw(params, initOverrides);
         return await response.value();
     }
 
