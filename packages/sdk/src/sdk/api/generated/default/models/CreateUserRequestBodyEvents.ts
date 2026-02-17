@@ -21,11 +21,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateUserRequestBodyEvents {
     /**
-     * User ID of the referrer
-     * @type {number}
+     * Hash ID of the user who referred this user
+     * @type {string}
      * @memberof CreateUserRequestBodyEvents
      */
-    referrer?: number;
+    referrer?: string;
     /**
      * Whether the user is on mobile
      * @type {boolean}

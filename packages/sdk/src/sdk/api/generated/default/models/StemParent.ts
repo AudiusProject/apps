@@ -35,10 +35,10 @@ export interface StemParent {
     category: StemCategory;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof StemParent
      */
-    parentTrackId: number;
+    parentTrackId: string;
 }
 
 /**

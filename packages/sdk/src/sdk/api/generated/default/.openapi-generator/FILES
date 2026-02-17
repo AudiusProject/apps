@@ -83,8 +83,6 @@ models/CreateUserDeveloperAppRequestBody.ts
 models/CreateUserDeveloperAppResponse.ts
 models/CreateUserRequestBody.ts
 models/CreateUserRequestBodyEvents.ts
-models/CreateUserRequestBodyPlaylistLibrary.ts
-models/CreateUserRequestBodyPlaylistLibraryContentsInner.ts
 models/CreateUserResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
@@ -201,7 +199,6 @@ models/UpdateDeveloperAppRequestBody.ts
 models/UpdatePlaylistRequestBody.ts
 models/UpdateTrackRequestBody.ts
 models/UpdateUserRequestBody.ts
-models/UpdateUserRequestBodyPlaylistLibrary.ts
 models/User.ts
 models/UserCoin.ts
 models/UserCoinAccount.ts
@@ -211,6 +208,8 @@ models/UserCoinsResponse.ts
 models/UserCommentsResponse.ts
 models/UserIdAddress.ts
 models/UserIdsAddressesResponse.ts
+models/UserPlaylistLibrary.ts
+models/UserPlaylistLibraryContentsInner.ts
 models/UserResponse.ts
 models/UserSearch.ts
 models/UserTrackListenCountsResponse.ts

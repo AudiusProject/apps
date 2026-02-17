@@ -34,7 +34,7 @@ export interface ReactCommentRequestBody {
      */
     entityType: CommentEntityType;
     /**
-     * ID of the entity (track or playlist) being commented on
+     * ID of the entity (track) being commented on
      * @type {number}
      * @memberof ReactCommentRequestBody
      */

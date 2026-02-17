@@ -34,7 +34,7 @@ export interface PinCommentRequestBody {
      */
     entityType: CommentEntityType;
     /**
-     * ID of the entity (track or playlist) the comment is on
+     * ID of the entity (track) the comment is on
      * @type {number}
      * @memberof PinCommentRequestBody
      */

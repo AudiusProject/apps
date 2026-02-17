@@ -239,10 +239,10 @@ export interface Track {
     access?: TrackAccessInfo;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof Track
      */
-    aiAttributionUserId?: number;
+    aiAttributionUserId?: string;
     /**
      * 
      * @type {Array<string>}
