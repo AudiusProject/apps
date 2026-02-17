@@ -31,12 +31,18 @@ import {
   playbackRateValueMap,
   gatedContentSelectors,
   OverflowActionCallbacks,
-  PurchaseableContentType
+  PurchaseableContentType,
+  playbackActions,
+  getCurrentTrackId,
+  getLineupId,
+  getIsPlaying as getNewIsPlaying,
+  getIsBuffering as getNewIsBuffering,
+  getPlaybackRate as getNewPlaybackRate
 } from '@audius/common/store'
 import { Genre, route } from '@audius/common/utils'
 import { IconCaretRight as IconCaret, Scrubber } from '@audius/harmony'
 import { Location } from 'history'
-import { connect, useSelector } from 'react-redux'
+import { connect, useSelector, useDispatch } from 'react-redux'
 import { Dispatch } from 'redux'
 
 import { useHistoryContext } from 'app/HistoryProvider'
@@ -134,10 +140,30 @@ const NowPlaying = g(
     clickOverflow,
     goToRoute
   }) => {
+    const dispatch = useDispatch()
     const { uid, track, user } = currentQueueItem
     const { history } = useHistoryContext()
 
     const { data: currentUserId } = useCurrentUserId()
+
+    // Check if new playback system is active
+    const newCurrentTrackId = useSelector(getCurrentTrackId)
+    const newLineupId = useSelector(getLineupId)
+    const useNewPlayback =
+      !!newCurrentTrackId &&
+      !!newLineupId &&
+      newCurrentTrackId === track?.track_id
+
+    // Use new playback selectors if active, otherwise use old ones
+    const isPlayingState = useNewPlayback
+      ? useSelector(getNewIsPlaying)
+      : isPlaying
+    const isBufferingState = useNewPlayback
+      ? useSelector(getNewIsBuffering)
+      : isBuffering
+    const playbackRateState = useNewPlayback
+      ? useSelector(getNewPlaybackRate)
+      : useSelector(getPlaybackRate)
 
     const albumInfo = track?.album_backlink
 
@@ -161,7 +187,6 @@ const NowPlaying = g(
     const seekInterval = useRef<number | undefined>(undefined)
     const [prevPlayCounter, setPrevPlayCounter] = useState<number | null>(null)
 
-    const playbackRate = useSelector(getPlaybackRate)
     const isLongFormContent =
       track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
 
@@ -217,32 +242,41 @@ const NowPlaying = g(
     })
 
     let playButtonStatus
-    if (isBuffering) {
+    if (isBufferingState) {
       playButtonStatus = PlayButtonStatus.LOAD
-    } else if (isPlaying) {
+    } else if (isPlayingState) {
       playButtonStatus = PlayButtonStatus.PAUSE
     } else {
       playButtonStatus = PlayButtonStatus.PLAY
     }
 
     const togglePlay = () => {
-      if (isPlaying) {
-        pause()
-        record(
-          make(Name.PLAYBACK_PAUSE, {
-            id: `${track_id}`,
-            source: PlaybackSource.NOW_PLAYING
-          })
-        )
+      if (useNewPlayback) {
+        // Use new playback actions
+        if (isPlayingState) {
+          dispatch(playbackActions.pause({}))
+        } else if (newCurrentTrackId && newLineupId) {
+          dispatch(
+            playbackActions.play({
+              lineupId: newLineupId,
+              trackId: newCurrentTrackId
+            })
+          )
+        }
       } else {
-        play()
-        record(
-          make(Name.PLAYBACK_PLAY, {
-            id: `${track_id}`,
-            source: PlaybackSource.NOW_PLAYING
-          })
-        )
+        // Use old playback actions
+        if (isPlaying) {
+          pause()
+        } else {
+          play()
+        }
       }
+      record(
+        make(isPlayingState ? Name.PLAYBACK_PAUSE : Name.PLAYBACK_PLAY, {
+          id: `${track_id}`,
+          source: PlaybackSource.NOW_PLAYING
+        })
+      )
     }
 
     const toggleSaveTrack = useToggleFavoriteTrack({
@@ -317,16 +351,36 @@ const NowPlaying = g(
       if (isLongFormContent) {
         const position = timing.position
         const newPosition = position - SKIP_DURATION_SEC
-        seek(Math.max(0, newPosition))
+        if (useNewPlayback) {
+          dispatch(playbackActions.seek({ seconds: Math.max(0, newPosition) }))
+        } else {
+          seek(Math.max(0, newPosition))
+        }
         // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })
         setMediaKey((mediaKey) => mediaKey + 1)
       } else {
         const shouldGoToPrevious = timing.position < RESTART_THRESHOLD_SEC
         if (shouldGoToPrevious) {
-          previous()
+          if (useNewPlayback) {
+            dispatch(playbackActions.previous({}))
+          } else {
+            previous()
+          }
         } else {
-          reset(true /* shouldAutoplay */)
+          if (useNewPlayback) {
+            dispatch(playbackActions.seek({ seconds: 0 }))
+            if (isPlayingState && newCurrentTrackId && newLineupId) {
+              dispatch(
+                playbackActions.play({
+                  lineupId: newLineupId,
+                  trackId: newCurrentTrackId
+                })
+              )
+            }
+          } else {
+            reset(true /* shouldAutoplay */)
+          }
         }
       }
     }
@@ -336,12 +390,24 @@ const NowPlaying = g(
         track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
       if (isLongFormContent) {
         const newPosition = timing.position + SKIP_DURATION_SEC
-        seek(Math.min(newPosition, timing.duration))
+        if (useNewPlayback) {
+          dispatch(
+            playbackActions.seek({
+              seconds: Math.min(newPosition, timing.duration)
+            })
+          )
+        } else {
+          seek(Math.min(newPosition, timing.duration))
+        }
         // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })
         setMediaKey((mediaKey) => mediaKey + 1)
       } else {
-        next()
+        if (useNewPlayback) {
+          dispatch(playbackActions.next({}))
+        } else {
+          next()
+        }
       }
     }
 
@@ -448,7 +514,7 @@ const NowPlaying = g(
             // Include the duration in the media key because the play counter can
             // potentially update before the duration coming from the native layer if present
             mediaKey={`${uid}${mediaKey}${timing.duration}`}
-            isPlaying={isPlaying && !isBuffering}
+            isPlaying={isPlayingState && !isBufferingState}
             isDisabled={!uid}
             isMobile
             getAudioPosition={
@@ -460,9 +526,15 @@ const NowPlaying = g(
             elapsedSeconds={timing.position}
             totalSeconds={timing.duration}
             includeTimestamps
-            onScrubRelease={seek}
+            onScrubRelease={(position: number) => {
+              if (useNewPlayback) {
+                dispatch(playbackActions.seek({ seconds: position }))
+              } else {
+                seek(position)
+              }
+            }}
             playbackRate={
-              isLongFormContent ? playbackRateValueMap[playbackRate] : 1
+              isLongFormContent ? playbackRateValueMap[playbackRateState] : 1
             }
             style={{
               railListenedColor: 'var(--track-slider-rail)',
@@ -473,9 +545,29 @@ const NowPlaying = g(
         <div className={styles.controls}>
           <div className={styles.repeatButton}>
             <RepeatButtonProvider
-              onRepeatOff={() => repeat(RepeatMode.OFF)}
-              onRepeatAll={() => repeat(RepeatMode.ALL)}
-              onRepeatSingle={() => repeat(RepeatMode.SINGLE)}
+              onRepeatOff={() => {
+                if (useNewPlayback) {
+                  dispatch(playbackActions.setRepeat({ mode: RepeatMode.OFF }))
+                } else {
+                  repeat(RepeatMode.OFF)
+                }
+              }}
+              onRepeatAll={() => {
+                if (useNewPlayback) {
+                  dispatch(playbackActions.setRepeat({ mode: RepeatMode.ALL }))
+                } else {
+                  repeat(RepeatMode.ALL)
+                }
+              }}
+              onRepeatSingle={() => {
+                if (useNewPlayback) {
+                  dispatch(
+                    playbackActions.setRepeat({ mode: RepeatMode.SINGLE })
+                  )
+                } else {
+                  repeat(RepeatMode.SINGLE)
+                }
+              }}
             />
           </div>
           <div className={styles.previousButton}>
@@ -493,8 +585,20 @@ const NowPlaying = g(
           </div>
           <div className={styles.shuffleButton}>
             <ShuffleButtonProvider
-              onShuffleOn={() => shuffle(true)}
-              onShuffleOff={() => shuffle(false)}
+              onShuffleOn={() => {
+                if (useNewPlayback) {
+                  dispatch(playbackActions.setShuffle({ enabled: true }))
+                } else {
+                  shuffle(true)
+                }
+              }}
+              onShuffleOff={() => {
+                if (useNewPlayback) {
+                  dispatch(playbackActions.setShuffle({ enabled: false }))
+                } else {
+                  shuffle(false)
+                }
+              }}
             />
           </div>
         </div>
@@ -530,7 +634,23 @@ function makeMapStateToProps() {
   const getCurrentQueueItem = makeGetCurrent()
 
   const mapStateToProps = (state: AppState) => {
-    const currentQueueItem = getCurrentQueueItem(state)
+    // Check if new playback system is active
+    const newCurrentTrackId = getCurrentTrackId(state)
+    const newLineupId = getLineupId(state)
+    const useNewPlayback = !!newCurrentTrackId && !!newLineupId
+
+    let currentQueueItem
+    if (useNewPlayback) {
+      // Create a compatible structure for new playback
+      currentQueueItem = {
+        uid: `tracks:${newCurrentTrackId}:${newLineupId}` as any,
+        source: null as any
+      }
+    } else {
+      // Use old playback system
+      currentQueueItem = getCurrentQueueItem(state)
+    }
+
     return {
       currentQueueItem,
       seek: getSeek(state),

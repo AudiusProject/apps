@@ -2,7 +2,7 @@ import { MouseEvent, useCallback } from 'react'
 
 import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playerSelectors, getCurrentTrackId } from '@audius/common/store'
 import {
   IconWaveForm as IconVisualizer,
   IconButton,
@@ -41,7 +41,10 @@ export const NowPlayingArtworkTile = () => {
   const { color, spacing, motion } = useTheme()
 
   const { data: currentUserId } = useCurrentUserId()
-  const trackId = useSelector(getTrackId)
+  // Check both old and new playback systems
+  const oldTrackId = useSelector(getTrackId)
+  const newTrackId = useSelector(getCurrentTrackId)
+  const trackId = newTrackId ?? oldTrackId
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) => {
       return {
