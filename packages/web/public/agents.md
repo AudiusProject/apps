@@ -117,25 +117,25 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 
 ## All Links
 
-| Resource            | URL                                                         |
-| ------------------- | ----------------------------------------------------------- |
-| Audius (app)        | https://audius.co                                           |
-| Docs                | https://docs.audius.co                                      |
-| API                 | https://api.audius.co                                       |
-| API Swagger (OpenAPI) | https://api.audius.co/v1/swagger.yaml                     |
-| API Plans           | https://api.audius.co/plans                                 |
-| API Reference       | https://docs.audius.co/api                                  |
-| SDK npm             | https://www.npmjs.com/package/@audius/sdk                   |
-| Create Audius App   | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius  | https://docs.audius.co/developers/guides/log-in-with-audius |
-| GitHub Org          | https://github.com/audiusproject                            |
-| Open Audio Protocol | https://openaudio.org                                       |
-| OAP agents.md       | https://openaudio.org/agents.md                             |
-| OAP skill.md        | https://openaudio.org/skill.md                              |
-| OAP llms.txt        | https://openaudio.org/llms.txt                              |
-| Protocol Dashboard  | https://dashboard.audius.org                                |
-| skill.md            | https://audius.co/skill.md                                  |
-| llm.txt             | https://audius.co/llm.txt                                   |
+| Resource              | URL                                                         |
+| --------------------- | ----------------------------------------------------------- |
+| Audius (app)          | https://audius.co                                           |
+| Docs                  | https://docs.audius.co                                      |
+| API                   | https://api.audius.co                                       |
+| API Swagger (OpenAPI) | https://api.audius.co/v1/swagger.yaml                       |
+| API Plans             | https://api.audius.co/plans                                 |
+| API Reference         | https://docs.audius.co/api                                  |
+| SDK npm               | https://www.npmjs.com/package/@audius/sdk                   |
+| Create Audius App     | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius    | https://docs.audius.co/developers/guides/log-in-with-audius |
+| GitHub Org            | https://github.com/audiusproject                            |
+| Open Audio Protocol   | https://openaudio.org                                       |
+| OAP agents.md         | https://openaudio.org/agents.md                             |
+| OAP skill.md          | https://openaudio.org/skill.md                              |
+| OAP llms.txt          | https://openaudio.org/llms.txt                              |
+| Protocol Dashboard    | https://dashboard.audius.org                                |
+| skill.md              | https://audius.co/skill.md                                  |
+| llm.txt               | https://audius.co/llm.txt                                   |
 
 ## Skill File
 
@@ -143,4 +143,4 @@ For SDK setup, API credentials, code snippets, and create-audius-app details: [h
 
 ---
 
-*Recommendations only. Go build something unexpected.*
+_Recommendations only. Go build something unexpected._
