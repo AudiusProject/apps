@@ -86,7 +86,7 @@ export const useTrending = (
 
       const { data: sdkResponse = [] } = await sdk.tracks.getTrendingTracks({
         time: timeRange,
-        genre: (genre as string) || undefined,
+        genre: genre ?? undefined,
         userId: OptionalId.parse(currentUserId),
         limit: currentPageSize,
         offset: pageParam

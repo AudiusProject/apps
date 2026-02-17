@@ -261,7 +261,7 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
     currentUserId && contextPlaylist?.playlist_owner_id === currentUserId
 
   const isLongFormContent =
-    track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+    track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
   const playbackPositionInfo = useSelector((state) =>
     getTrackPosition(state, { trackId: track_id, userId: currentUserId })
   )

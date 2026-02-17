@@ -79,10 +79,35 @@ export const GENRES = [
   ...Object.values(ELECTRONIC_SUBGENRES)
 ] as const
 
-export const convertGenreLabelToValue = (
-  genreLabel: (typeof GENRES)[number]
-) => {
-  return genreLabel.replace(ELECTRONIC_PREFIX, '')
+export type GenreLabel = (typeof GENRES)[number]
+
+export const convertGenreLabelToValue = (genreLabel: GenreLabel): SDKGenre => {
+  return genreLabel.replace(ELECTRONIC_PREFIX, '') as SDKGenre
+}
+
+/**
+ * Converts a string from the trending genre UI (e.g. from URL or genre list)
+ * into Genre | null for Redux state. Returns null for null, empty, or ALL_GENRES.
+ */
+export const parseTrendingGenreFromUrl = (param: string | null): SDKGenre | null => {
+  if (param === null || param === '' || param === ALL_GENRES) return null
+  const genresList = GENRES as readonly string[]
+  if (!genresList.includes(param)) return null
+  const trimmed = param.startsWith(ELECTRONIC_PREFIX)
+    ? param.slice(ELECTRONIC_PREFIX.length)
+    : param
+  return trimmed as SDKGenre
+}
+
+/**
+ * Converts a genre string from UI (e.g. from GenreSelectionList) to Genre | null
+ * for setTrendingGenre. Use when the value is known to come from GENRES.
+ */
+export const toTrendingGenre = (value: string | null): SDKGenre | null => {
+  if (value === null || value === '' || value === ALL_GENRES) return null
+  const genresList = GENRES as readonly string[]
+  if (!genresList.includes(value)) return null
+  return convertGenreLabelToValue(value as GenreLabel)
 }
 
 const NEWLY_ADDED_GENRES: string[] = []

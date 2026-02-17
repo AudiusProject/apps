@@ -7,8 +7,8 @@ import {
   trendingUndergroundPageLineupSelectors
 } from '@audius/common/store'
 import {
-  ELECTRONIC_PREFIX,
   getCanonicalName,
+  toTrendingGenre,
   TRENDING_GENRES
 } from '@audius/common/utils'
 import {
@@ -188,9 +188,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const setGenreAndRefresh = useCallback(
     (genre: string | null) => {
-      const trimmedGenre =
-        genre !== null ? genre.replace(ELECTRONIC_PREFIX, '') : genre
-      setTrendingGenre(trimmedGenre)
+      setTrendingGenre(toTrendingGenre(genre))
 
       // Call reset to change everything everything to skeleton tiles
       makeResetTrending(TimeRange.WEEK)()
