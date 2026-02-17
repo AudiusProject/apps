@@ -81,23 +81,23 @@ function* fetchDashboardAsync(
         limit,
         getUnlisted: true
       }),
-      call([sdk.full.users, sdk.full.users.getPlaylistsByUser], {
+      call([sdk.users, sdk.users.getPlaylistsByUser], {
         id: Id.parse(accountUserId),
         userId: OptionalId.parse(accountUserId)
       }),
-      call([sdk.full.users, sdk.full.users.getAlbumsByUser], {
+      call([sdk.users, sdk.users.getAlbumsByUser], {
         id: Id.parse(accountUserId),
         userId: OptionalId.parse(accountUserId)
       })
     ])
     const tracks = data[0] as Track[]
     const playlists = transformAndCleanList(
-      (data[1] as Awaited<ReturnType<typeof sdk.full.users.getPlaylistsByUser>>)
+      (data[1] as Awaited<ReturnType<typeof sdk.users.getPlaylistsByUser>>)
         .data,
       userCollectionMetadataFromSDK
     )
     const albums = transformAndCleanList(
-      (data[2] as Awaited<ReturnType<typeof sdk.full.users.getPlaylistsByUser>>)
+      (data[2] as Awaited<ReturnType<typeof sdk.users.getPlaylistsByUser>>)
         .data,
       userCollectionMetadataFromSDK
     )

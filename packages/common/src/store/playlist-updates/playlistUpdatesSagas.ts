@@ -26,7 +26,7 @@ function* fetchPlaylistUpdatesWorker() {
   const existingUpdatesTotal = yield* select(selectPlaylistUpdatesTotal)
 
   const { data } = yield* call(
-    [sdk.full.notifications, sdk.full.notifications.getPlaylistUpdates],
+    [sdk.notifications, sdk.notifications.getPlaylistUpdates],
     { userId: Id.parse(currentUserId) }
   )
 

@@ -209,14 +209,15 @@ function* confirmEditPlaylist(
             playlistId: Id.parse(playlistId)
           })
         }
-        const { data: playlist } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+        const playlistRes = yield* call(
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)
           }
         )
-        return playlist?.[0] ? userCollectionMetadataFromSDK(playlist[0]) : null
+        const playlistData = playlistRes?.data?.[0]
+        return playlistData ? userCollectionMetadataFromSDK(playlistData) : null
       },
       function* (confirmedPlaylist: Collection) {
         const done = yield* isPlaylistConfirmerDone(playlistId)
@@ -513,14 +514,15 @@ function* confirmPublishPlaylist(
           playlistId: Id.parse(playlistId)
         })
 
-        const { data } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+        const playlistRes = yield* call(
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)
           }
         )
-        return data?.[0] ? userCollectionMetadataFromSDK(data[0]) : null
+        const playlistData = playlistRes?.data?.[0]
+        return playlistData ? userCollectionMetadataFromSDK(playlistData) : null
       },
       function* (confirmedPlaylist: Collection) {
         const done = yield* isPlaylistConfirmerDone(playlistId)

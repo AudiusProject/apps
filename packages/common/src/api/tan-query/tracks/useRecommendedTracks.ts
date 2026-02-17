@@ -53,7 +53,7 @@ export const useRecommendedTracks = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserRecommendedTracks({
+      const { data = [] } = await sdk.users.getUserRecommendedTracks({
         ...args,
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),

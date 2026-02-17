@@ -153,13 +153,11 @@ function* syncCollection(collectionId: ID) {
 
   const sdk = yield* getSDK()
 
-  const { data = [] } = yield* call(
-    [sdk.playlists, sdk.playlists.getPlaylist],
-    {
-      playlistId: Id.parse(collectionId),
-      userId: OptionalId.parse(currentUserId)
-    }
-  )
+  const playlistRes = yield* call([sdk.playlists, sdk.playlists.getPlaylist], {
+    playlistId: Id.parse(collectionId),
+    userId: OptionalId.parse(currentUserId)
+  })
+  const data = playlistRes?.data ?? []
   const [latestCollection] = transformAndCleanList(
     data,
     userCollectionMetadataFromSDK

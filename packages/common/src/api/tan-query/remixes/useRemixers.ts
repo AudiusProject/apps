@@ -48,7 +48,7 @@ export const useRemixers = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getRemixers({
+      const { data = [] } = await sdk.users.getRemixers({
         id: Id.parse(userId),
         limit: pageSize,
         offset: pageParam,

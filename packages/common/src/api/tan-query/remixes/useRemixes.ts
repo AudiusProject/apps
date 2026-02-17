@@ -1,4 +1,5 @@
-import { Id, OptionalId, EntityType, full } from '@audius/sdk'
+import { Id, OptionalId, EntityType } from '@audius/sdk'
+import type { GetTrackRemixesSortMethodEnum } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -25,7 +26,7 @@ export type UseRemixesArgs = {
   includeOriginal?: boolean
   includeWinners?: boolean
   pageSize?: number
-  sortMethod?: full.GetTrackRemixesSortMethodEnum
+  sortMethod?: GetTrackRemixesSortMethodEnum
   isCosign?: boolean
   isContestEntry?: boolean
 }
@@ -100,16 +101,19 @@ export const useRemixes = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = { count: 0, tracks: [] } } =
-        await sdk.full.tracks.getTrackRemixes({
-          trackId: Id.parse(trackId),
-          userId: OptionalId.parse(currentUserId),
-          limit: pageSize,
-          offset: pageParam,
-          sortMethod,
-          onlyCosigns: isCosign,
-          onlyContestEntries: isContestEntry
-        })
+      const remixesRes = await sdk.tracks.getTrackRemixes({
+        trackId: Id.parse(trackId),
+        userId: OptionalId.parse(currentUserId),
+        limit: pageSize,
+        offset: pageParam,
+        sortMethod,
+        onlyCosigns: isCosign,
+        onlyContestEntries: isContestEntry
+      })
+      const data = {
+        count: remixesRes.count ?? 0,
+        tracks: remixesRes.tracks ?? []
+      }
       let processedTracks = transformAndCleanList(
         data.tracks,
         userTrackMetadataFromSDK

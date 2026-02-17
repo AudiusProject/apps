@@ -43,13 +43,13 @@ export const getCollectionByPermalinkQueryFn = async (
   sdk: any
 ) => {
   const { handle, slug } = playlistPermalinkToHandleAndSlug(permalink)
-  const { data = [] } = await sdk.full.playlists.getPlaylistByHandleAndSlug({
+  const playlistRes = await sdk.playlists.getPlaylistByHandleAndSlug({
     handle,
     slug,
     userId: OptionalId.parse(currentUserId)
   })
-
-  const collection = userCollectionMetadataFromSDK(data[0])
+  const playlist = playlistRes?.data?.[0]
+  const collection = playlist ? userCollectionMetadataFromSDK(playlist) : null
 
   if (collection) {
     // Prime related entities

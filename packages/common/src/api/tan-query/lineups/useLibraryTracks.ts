@@ -86,7 +86,7 @@ export const useLibraryTracks = (
     queryFn: async ({ pageParam = 0 }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserLibraryTracks({
+      const { data = [] } = await sdk.users.getUserLibraryTracks({
         id: Id.parse(currentUserId),
         offset: pageParam,
         limit: pageSize,

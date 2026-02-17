@@ -2,7 +2,7 @@ import { AudiusSdk, OptionalId } from '@audius/sdk'
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
 import { omit } from 'lodash'
 
-import { userMetadataListFromSDK } from '~/adapters/user'
+import { userMetadataFromSDK } from '~/adapters/user'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models/Identifiers'
 import { User } from '~/models/User'
@@ -29,12 +29,12 @@ export const getUserByHandleQueryFn = async (
   currentUserId?: ID | null
 ) => {
   if (!handle) return undefined
-  const { data } = await sdk.full.users.getUserByHandle({
+  const { data } = await sdk.users.getUserByHandle({
     handle: handle.toLowerCase(),
     userId: OptionalId.parse(currentUserId)
   })
-  const user = userMetadataListFromSDK(data)[0]
-
+  const user = data ? userMetadataFromSDK(data) : null
+  if (!user) return undefined
   primeUserData({ users: [user], queryClient })
   return user.user_id
 }

@@ -51,7 +51,7 @@ export const useUserTracksByHandle = (
     queryKey: getUserTracksByHandleQueryKey(args),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getTracksByUserHandle({
+      const { data = [] } = await sdk.users.getTracksByUserHandle({
         handle: handle!,
         userId: OptionalId.parse(currentUserId),
         filterTracks,

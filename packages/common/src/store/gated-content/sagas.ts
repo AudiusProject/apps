@@ -2,7 +2,6 @@ import { Id, OptionalId } from '@audius/sdk'
 import { takeEvery, call, put, delay, all } from 'typed-redux-saga'
 
 import {
-  transformAndCleanList,
   userCollectionMetadataFromSDK,
   userTrackMetadataFromSDK
 } from '~/adapters'
@@ -78,14 +77,15 @@ export function* pollGatedContent({
   while (true) {
     const apiEntity = isAlbum
       ? yield* call(async () => {
-          const { data = [] } = await sdk.full.playlists.getPlaylist({
+          const playlistRes = await sdk.playlists.getPlaylist({
             playlistId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })
-          return transformAndCleanList(data, userCollectionMetadataFromSDK)[0]
+          const playlist = playlistRes?.data?.[0]
+          return playlist ? userCollectionMetadataFromSDK(playlist) : null
         })
       : yield* call(async () => {
-          const { data } = await sdk.full.tracks.getTrack({
+          const { data } = await sdk.tracks.getTrack({
             trackId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })

@@ -57,21 +57,24 @@ describe('getUsersBatcher', () => {
     blocknumber: 0,
     isStorageV2: false,
     doesCurrentUserSubscribe: false,
-    allowAiAttribution: false
+    allowAiAttribution: false,
+    artistCoinBadge: {},
+    splUsdcWallet: '',
+    supporterCount: 0,
+    supportingCount: 0,
+    hasCollectibles: false
   })
 
   const mockSdk = {
-    full: {
-      users: {
-        getBulkUsers: vi
-          .fn()
-          .mockImplementation((params: GetBulkUsersRequest) => {
-            const users = params.id?.map((userId) =>
-              createMockSdkUser(HashId.parse(userId))
-            )
-            return Promise.resolve({ data: users })
-          })
-      }
+    users: {
+      getBulkUsers: vi
+        .fn()
+        .mockImplementation((params: GetBulkUsersRequest) => {
+          const users = params.id?.map((userId) =>
+            createMockSdkUser(HashId.parse(userId))
+          )
+          return Promise.resolve({ data: users })
+        })
     }
   } as unknown as BatchContext['sdk']
 
@@ -91,7 +94,7 @@ describe('getUsersBatcher', () => {
     const id = 1
     const result = await batcher.fetch(id)
 
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: [Id.parse(id)],
       userId: OptionalId.parse(null)
     })
@@ -108,8 +111,8 @@ describe('getUsersBatcher', () => {
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
     // Verify single bulk request was made
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(1)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -141,12 +144,12 @@ describe('getUsersBatcher', () => {
     )
 
     // Verify two separate bulk requests were made
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(2)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenNthCalledWith(1, {
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(2)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenNthCalledWith(2, {
+    expect(mockSdk.users.getBulkUsers).toHaveBeenNthCalledWith(2, {
       id: secondBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -171,8 +174,7 @@ describe('getUsersBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkUsers = mockSdk.full.users
-      .getBulkUsers as unknown as MockInstance<
+    const mockBulkUsers = mockSdk.users.getBulkUsers as unknown as MockInstance<
       [GetBulkUsersRequest],
       Promise<{ data: full.UserFull[] }>
     >
@@ -199,8 +201,8 @@ describe('getUsersBatcher', () => {
     expect(missingResult).toBeNull()
 
     // Verify single batch request was made with both IDs
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.users.getBulkUsers).toHaveBeenCalledWith({
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledTimes(1)
+    expect(mockSdk.users.getBulkUsers).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })

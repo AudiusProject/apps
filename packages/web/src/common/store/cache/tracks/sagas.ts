@@ -228,11 +228,12 @@ function* confirmEditTrack(
           generatePreview
         })
 
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          { trackId: Id.parse(trackId), userId: OptionalId.parse(userId) }
-        )
-        return data ? userTrackMetadataFromSDK(data) : null
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId),
+          userId: OptionalId.parse(userId)
+        })
+        const trackData = data
+        return trackData ? userTrackMetadataFromSDK(trackData) : null
       },
       function* (confirmedTrack: TrackMetadataForUpload & Track) {
         if (wasUnlisted && isNowListed) {
@@ -313,11 +314,12 @@ function* confirmDeleteTrack(track: Track) {
         const track = yield* queryTrack(trackId)
 
         if (!track) return
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          { trackId: Id.parse(trackId), userId: OptionalId.parse(userId) }
-        )
-        return data ? userTrackMetadataFromSDK(data) : null
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId),
+          userId: OptionalId.parse(userId)
+        })
+        const trackData = data
+        return trackData ? userTrackMetadataFromSDK(trackData) : null
       },
       function* (deletedTrack: Track) {
         // NOTE: we do not delete from the cache as the track may be playing

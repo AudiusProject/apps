@@ -120,7 +120,7 @@ function* downloadTrackAsync(
   if (!currentUserId) return OfflineDownloadStatus.ERROR
   const sdk = yield* getSDK()
 
-  const { data } = yield* call([sdk.full.tracks, sdk.full.tracks.getTrack], {
+  const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
     trackId: Id.parse(trackId),
     userId: OptionalId.parse(currentUserId)
   })

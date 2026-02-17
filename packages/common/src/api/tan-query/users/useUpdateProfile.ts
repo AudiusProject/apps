@@ -1,7 +1,7 @@
 import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { userMetadataToSdk } from '~/adapters/user'
+import { userMetadataFromSDK, userMetadataToSdk } from '~/adapters/user'
 import { primeUserData, useQueryContext } from '~/api/tan-query/utils'
 import { Feature } from '~/models/ErrorReporting'
 import { UserMetadata, WriteableUserMetadata } from '~/models/User'
@@ -64,12 +64,19 @@ export const useUpdateProfile = () => {
       }
 
       // Fetch updated user data
-      const { data: userData = [] } = await sdk.full.users.getUser({
+      const { data } = await sdk.users.getUser({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId)
       })
-
-      return userData[0]
+      const user = data ? userMetadataFromSDK(data) : undefined
+      if (user) {
+        primeUserData({
+          queryClient,
+          users: [user],
+          forceReplace: true
+        })
+      }
+      return user
     },
     onMutate: async (metadata): Promise<MutationContext> => {
       // Cancel any outgoing refetches

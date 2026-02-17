@@ -67,7 +67,7 @@ export const useTrackHistory = (
 
       const id = Id.parse(currentUserId)
 
-      const { data: activityData } = await sdk.full.users.getUsersTrackHistory({
+      const { data: activityData } = await sdk.users.getUsersTrackHistory({
         id,
         userId: id,
         limit: pageSize,

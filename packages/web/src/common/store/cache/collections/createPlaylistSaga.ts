@@ -200,16 +200,16 @@ function* createAndConfirmPlaylist(
 
     // Merge the confirmed playlist with the optimistic playlist, preferring
     // optimistic data in case other unconfirmed edits have been made.
-    const { data: playlist } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+    const playlistRes = yield* call(
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(playlistId)
       }
     )
 
-    const confirmedPlaylist = playlist?.[0]
-      ? userCollectionMetadataFromSDK(playlist[0])
+    const confirmedPlaylist = playlistRes?.data?.[0]
+      ? userCollectionMetadataFromSDK(playlistRes.data[0])
       : null
     if (!confirmedPlaylist) {
       throw new Error(

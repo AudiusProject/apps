@@ -1,7 +1,4 @@
-import {
-  transformAndCleanList,
-  userCollectionMetadataFromSDK
-} from '@audius/common/adapters'
+import { userCollectionMetadataFromSDK } from '@audius/common/adapters'
 import { queryCurrentUserId } from '@audius/common/api'
 import type {
   CollectionMetadata,
@@ -123,17 +120,12 @@ function* downloadCollectionAsync(
   if (!currentUserId) return OfflineDownloadStatus.ERROR
 
   const sdk = yield* getSDK()
-  const { data = [] } = yield* call(
-    [sdk.full.playlists, sdk.full.playlists.getPlaylist],
-    {
-      playlistId: Id.parse(collectionId),
-      userId: OptionalId.parse(currentUserId)
-    }
-  )
-  const [collection] = transformAndCleanList(
-    data,
-    userCollectionMetadataFromSDK
-  )
+  const playlistRes = yield* call([sdk.playlists, sdk.playlists.getPlaylist], {
+    playlistId: Id.parse(collectionId),
+    userId: OptionalId.parse(currentUserId)
+  })
+  const playlist = playlistRes?.data?.[0]
+  const collection = playlist ? userCollectionMetadataFromSDK(playlist) : null
 
   if (!collection) return OfflineDownloadStatus.ERROR
 

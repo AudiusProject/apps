@@ -1,4 +1,7 @@
-import type { Configuration } from '../../api/generated/default'
+import type {
+  Configuration,
+  NotificationsApi as NotificationsApiGenerated
+} from '../../api/generated/default'
 import type { EntityManagerService } from '../../services'
 import { Action, EntityType } from '../../services/EntityManager/types'
 import { parseParams } from '../../utils/parseParams'
@@ -14,8 +17,25 @@ export class NotificationsApi {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     _config: Configuration,
-    private readonly entityManager: EntityManagerService
+    private readonly entityManager: EntityManagerService,
+    private readonly generated: NotificationsApiGenerated
   ) {}
+
+  /**
+   * Get notifications for user ID
+   */
+  async getNotifications(
+    params: Parameters<NotificationsApiGenerated['getNotifications']>[0]
+  ) {
+    return this.generated.getNotifications(params)
+  }
+
+  /**
+   * Get playlists the user has saved that have been updated
+   */
+  async getPlaylistUpdates(params: { userId: string }) {
+    return this.generated.getPlaylistUpdates(params)
+  }
 
   /**
    * When a user views all of their notifications

@@ -61,7 +61,7 @@ export const usePurchases = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getPurchases({
+      const { data = [] } = await sdk.users.getPurchases({
         id: Id.parse(userId),
         userId: Id.parse(userId),
         limit: pageSize,

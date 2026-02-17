@@ -36,7 +36,7 @@ export const useMutedUsers = <TResult = UserMetadata[]>(
     queryFn: async () => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getMutedUsers({
+      const { data } = await sdk.users.getMutedUsers({
         id: Id.parse(currentUserId)
       })
       const users = userMetadataListFromSDK(data)

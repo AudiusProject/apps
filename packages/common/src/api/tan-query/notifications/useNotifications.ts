@@ -202,7 +202,7 @@ export const useNotifications = (options?: QueryOptions) => {
     initialPageParam: null as PageParam,
     queryFn: async ({ pageParam = null }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.notifications.getNotifications({
+      const { data } = await sdk.notifications.getNotifications({
         userId: Id.parse(currentUserId),
         limit: DEFAULT_LIMIT,
         timestamp: pageParam?.timestamp,

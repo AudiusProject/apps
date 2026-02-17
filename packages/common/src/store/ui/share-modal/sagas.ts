@@ -1,11 +1,7 @@
 import { Id } from '@audius/sdk'
 import { takeEvery, put, call } from 'typed-redux-saga'
 
-import {
-  userCollectionMetadataFromSDK,
-  userMetadataFromSDK,
-  transformAndCleanList
-} from '~/adapters'
+import { userCollectionMetadataFromSDK, userMetadataFromSDK } from '~/adapters'
 import { queryCollection, queryTrack, queryUser } from '~/api'
 import { TQCollection } from '~/api/tan-query/models'
 import { getSDK } from '~/store/sdkUtils'
@@ -39,16 +35,15 @@ function* handleRequestOpen(action: ShareModalRequestOpenAction) {
 
       let collection = yield* queryCollection(collectionId)
       if (!collection) {
-        const { data = [] } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+        const playlistRes = yield* call(
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             playlistId: Id.parse(collectionId)
           }
         )
-        const [transformedCollection] = transformAndCleanList(
-          data,
-          userCollectionMetadataFromSDK
-        )
+        const transformedCollection = playlistRes?.data?.[0]
+          ? userCollectionMetadataFromSDK(playlistRes.data[0])
+          : null
         if (transformedCollection) {
           collection = transformedCollection as unknown as TQCollection
         }
@@ -57,13 +52,12 @@ function* handleRequestOpen(action: ShareModalRequestOpenAction) {
 
       let owner = yield* queryUser(collection.playlist_owner_id)
       if (!owner) {
-        const { data } = yield* call([sdk.full.users, sdk.full.users.getUser], {
+        const userRes = yield* call([sdk.users, sdk.users.getUser], {
           id: Id.parse(collection.playlist_owner_id)
         })
-        const [transformedUser] = transformAndCleanList(
-          data ?? [],
-          userMetadataFromSDK
-        )
+        const transformedUser = userRes?.data
+          ? userMetadataFromSDK(userRes.data)
+          : null
         if (transformedUser) {
           owner = transformedUser
         }

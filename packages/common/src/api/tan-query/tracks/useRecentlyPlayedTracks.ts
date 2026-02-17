@@ -53,7 +53,7 @@ export const useRecentlyPlayedTracks = (
       if (!currentUserId) return []
       const sdk = await audiusSdk()
       const id = Id.parse(currentUserId)
-      const { data = [] } = await sdk.full.users.getUsersTrackHistory({
+      const { data = [] } = await sdk.users.getUsersTrackHistory({
         ...args,
         id,
         userId: id,

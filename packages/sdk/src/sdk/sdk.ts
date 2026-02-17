@@ -13,8 +13,10 @@ import {
   CoinsApi,
   Configuration,
   ExploreApi,
+  NotificationsApi as NotificationsApiGenerated,
   PrizesApi,
   RewardsApi,
+  SearchApi,
   TipsApi,
   WalletApi
 } from './api/generated/default'
@@ -500,6 +502,8 @@ const initializeApis = ({
     services.logger
   )
 
+  const search = new SearchApi(apiClientConfig)
+
   const grants = new GrantsApi(apiClientConfig, services.entityManager, users)
 
   const developerApps = new DeveloperAppsApi(
@@ -514,7 +518,8 @@ const initializeApis = ({
 
   const notifications = new NotificationsApi(
     apiClientConfig,
-    services.entityManager
+    services.entityManager,
+    new NotificationsApiGenerated(apiClientConfig)
   )
 
   const generatedApiClientConfigFull = new ConfigurationFull({
@@ -549,6 +554,7 @@ const initializeApis = ({
     users,
     albums,
     playlists,
+    search,
     tips,
     resolve,
     full,

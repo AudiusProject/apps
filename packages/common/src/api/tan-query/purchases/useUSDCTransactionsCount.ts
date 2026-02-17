@@ -37,7 +37,7 @@ export const useUSDCTransactionsCount = (
     queryFn: async () => {
       if (!currentUserId) return 0
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getUSDCTransactionCount({
+      const { data } = await sdk.users.getUSDCTransactionCount({
         id: Id.parse(currentUserId),
         type: args?.type,
         method: args?.method

@@ -32,7 +32,7 @@ export const useNotificationUnreadCount = () => {
     queryKey: getNotificationUnreadCountQueryKey(currentUserId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.notifications.getNotifications({
+      const { data } = await sdk.notifications.getNotifications({
         userId: Id.parse(currentUserId),
         limit: 0
       })

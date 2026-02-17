@@ -4,6 +4,7 @@ import {
   full,
   Id,
   OptionalHashId,
+  type Playlist as PlaylistV1,
   UpdateAlbumRequest,
   UpdatePlaylistRequest
 } from '@audius/sdk'
@@ -51,6 +52,7 @@ export const userCollectionMetadataFromSDK = (
     | full.PlaylistFullWithoutTracks
     | full.SearchPlaylistFull
     | full.PlaylistFull
+    | PlaylistV1
 ): UserCollectionMetadata | undefined => {
   try {
     const decodedPlaylistId = OptionalHashId.parse(input.id)
@@ -74,7 +76,10 @@ export const userCollectionMetadataFromSDK = (
             '150x150': input.artwork._150x150,
             '480x480': input.artwork._480x480,
             '1000x1000': input.artwork._1000x1000,
-            mirrors: input.artwork.mirrors
+            mirrors:
+              'mirrors' in input.artwork
+                ? (input.artwork as { mirrors?: string[] }).mirrors
+                : undefined
           }
         : {},
       variant: Variant.USER_GENERATED,

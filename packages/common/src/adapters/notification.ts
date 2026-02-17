@@ -641,5 +641,7 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    default:
+      return undefined
   }
 }

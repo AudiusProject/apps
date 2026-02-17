@@ -175,16 +175,13 @@ function* createAndConfirmAlbum(
       metadata: albumMetadataForCreateWithSDK(formFields)
     })
 
-    const { data: album } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
-      {
-        userId: OptionalId.parse(userId),
-        playlistId: Id.parse(albumId)
-      }
-    )
+    const albumRes = yield* call([sdk.playlists, sdk.playlists.getPlaylist], {
+      userId: OptionalId.parse(userId),
+      playlistId: Id.parse(albumId)
+    })
 
-    const confirmedAlbum = album?.[0]
-      ? userCollectionMetadataFromSDK(album[0])
+    const confirmedAlbum = albumRes?.data?.[0]
+      ? userCollectionMetadataFromSDK(albumRes.data[0])
       : null
     if (!confirmedAlbum) {
       throw new Error(
