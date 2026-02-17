@@ -1,12 +1,14 @@
 import {
-  CreateAlbumMetadata,
-  CreatePlaylistMetadata,
+  type CreateAlbumRequestBody,
+  type CreatePlaylistRequestBody,
   full,
   Id,
   OptionalHashId,
   type Playlist,
+  type PlaylistAddedTimestamp,
   UpdateAlbumRequest,
-  UpdatePlaylistRequest
+  type UpdateAlbumRequestBody,
+  type UpdatePlaylistRequestBody
 } from '@audius/sdk'
 import dayjs from 'dayjs'
 import snakecaseKeys from 'snakecase-keys'
@@ -35,7 +37,7 @@ const addedTimestampToPlaylistTrackId = ({
   timestamp,
   trackId,
   metadataTimestamp
-}: full.PlaylistAddedTimestamp): PlaylistTrackId | null => {
+}: PlaylistAddedTimestamp): PlaylistTrackId | null => {
   const decoded = OptionalHashId.parse(trackId)
   if (decoded) {
     return {
@@ -209,7 +211,7 @@ export const accountCollectionFromSDK = (
 
 export const playlistMetadataForCreateWithSDK = (
   input: Collection | PlaylistValues
-): CreatePlaylistMetadata => {
+): CreatePlaylistRequestBody => {
   return {
     playlistName: input.playlist_name ?? '',
     description: input.description ?? '',
@@ -233,7 +235,7 @@ export const playlistMetadataForCreateWithSDK = (
 
 export const playlistMetadataForUpdateWithSDK = (
   input: Collection
-): UpdatePlaylistRequest['metadata'] => {
+): UpdatePlaylistRequestBody => {
   return {
     ...playlistMetadataForCreateWithSDK(input),
     playlistContents: input.playlist_contents
@@ -252,7 +254,7 @@ export const playlistMetadataForUpdateWithSDK = (
 
 export const albumMetadataForCreateWithSDK = (
   input: Collection | AlbumValues
-): CreateAlbumMetadata => {
+): CreateAlbumRequestBody => {
   return {
     streamConditions:
       input.stream_conditions != null &&
@@ -278,7 +280,7 @@ export const albumMetadataForCreateWithSDK = (
 
 export const albumMetadataForUpdateWithSDK = (
   input: Collection
-): UpdateAlbumRequest['metadata'] => {
+): UpdateAlbumRequestBody => {
   return {
     ...albumMetadataForCreateWithSDK(input),
     playlistContents: input.playlist_contents
