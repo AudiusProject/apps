@@ -98,7 +98,7 @@ export const UploadStemMetadataSchema = z.object({
   category: z
     .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
     .default(StemCategory.Other),
-  parentTrackId: HashId.or(z.number())
+  parentTrackId: HashId
 })
 
 export const UploadTrackMetadataSchema = z.object({
@@ -150,7 +150,7 @@ export const UploadTrackMetadataSchema = z.object({
         tracks: z
           .array(
             z.object({
-              parentTrackId: HashId.or(z.number())
+              parentTrackId: HashId
             })
           )
           .min(1)
@@ -493,6 +493,4 @@ export type CreateTrackRequestWithFiles = CreateTrackRequest &
   TrackFileUploadParams
 
 export type UpdateTrackRequestWithFiles = UpdateTrackRequest &
-  TrackFileUploadParams & {
-    generatePreview?: boolean
-  }
+  TrackFileUploadParams
