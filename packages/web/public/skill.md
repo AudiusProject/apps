@@ -192,7 +192,7 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 | Resource           | URL                                                         |
 | ------------------ | ----------------------------------------------------------- |
 | agents.md          | https://audius.co/agents.md                                 |
-| llm.txt            | https://audius.co/llm.txt                                   |
+| llms.txt            | https://audius.co/llms.txt                                   |
 | Docs               | https://docs.audius.co                                      |
 | API                | https://api.audius.co                                       |
 | API Reference      | https://docs.audius.co/api                                  |
