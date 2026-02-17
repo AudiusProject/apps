@@ -3,7 +3,7 @@ import qs from 'query-string'
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
 import { encodeUrlName, formatTickerForUrl } from './formatUtil'
-import { convertGenreLabelToValue, Genre } from './genres'
+import { convertGenreLabelToValue, type GenreLabel, Genre } from './genres'
 
 // External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
@@ -442,7 +442,7 @@ export const searchPage = (searchOptions: SearchOptions) => {
 
   if (searchParams.genre) {
     searchParams.genre = convertGenreLabelToValue(
-      searchParams.genre as Parameters<typeof convertGenreLabelToValue>[0]
+      searchParams.genre as GenreLabel
     ) as Genre
   }
 

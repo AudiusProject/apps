@@ -79,9 +79,9 @@ export const GENRES = [
   ...Object.values(ELECTRONIC_SUBGENRES)
 ] as const
 
-export const convertGenreLabelToValue = (
-  genreLabel: (typeof GENRES)[number]
-): SDKGenre => {
+export type GenreLabel = (typeof GENRES)[number]
+
+export const convertGenreLabelToValue = (genreLabel: GenreLabel): SDKGenre => {
   return genreLabel.replace(ELECTRONIC_PREFIX, '') as SDKGenre
 }
 
@@ -107,7 +107,7 @@ export const toTrendingGenre = (value: string | null): SDKGenre | null => {
   if (value === null || value === '' || value === ALL_GENRES) return null
   const genresList = GENRES as readonly string[]
   if (!genresList.includes(value)) return null
-  return convertGenreLabelToValue(value as (typeof GENRES)[number])
+  return convertGenreLabelToValue(value as GenreLabel)
 }
 
 const NEWLY_ADDED_GENRES: string[] = []

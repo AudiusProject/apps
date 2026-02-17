@@ -5,7 +5,7 @@ import { useSuggestedArtists, useTopArtistsInGenre } from '@audius/common/api'
 import { selectArtistsPageMessages } from '@audius/common/messages'
 import { UserMetadata } from '@audius/common/models'
 import { selectArtistsSchema } from '@audius/common/schemas'
-import { GENRES, convertGenreLabelToValue, route } from '@audius/common/utils'
+import { type GenreLabel, convertGenreLabelToValue, route } from '@audius/common/utils'
 import { Flex, Paper, SelectablePill, Text, useTheme } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { Form, Formik, useFormikContext } from 'formik'
@@ -210,7 +210,7 @@ export const SelectArtistsPage = () => {
                   disableScroll={!isMobile}
                 >
                   {artistGenres.map((genre) => {
-                    const genreValue = convertGenreLabelToValue(genre as (typeof GENRES)[number])
+                    const genreValue = convertGenreLabelToValue(genre as GenreLabel)
                     return (
                       // TODO: max of 6, kebab overflow
                       <SelectablePill
