@@ -102,6 +102,7 @@ models/ExtendedPurchaseGate.ts
 models/ExtendedTokenGate.ts
 models/ExtendedUsdcGate.ts
 models/Favorite.ts
+models/FavoriteRequestBody.ts
 models/FavoritesResponse.ts
 models/FieldVisibility.ts
 models/FollowGate.ts

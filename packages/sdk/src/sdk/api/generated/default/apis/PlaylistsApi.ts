@@ -19,6 +19,7 @@ import type {
   AccessInfoResponse,
   CreatePlaylistRequestBody,
   CreatePlaylistResponse,
+  FavoriteRequestBody,
   PlaylistResponse,
   PlaylistSearchResult,
   PlaylistTracksResponse,
@@ -33,6 +34,8 @@ import {
     CreatePlaylistRequestBodyToJSON,
     CreatePlaylistResponseFromJSON,
     CreatePlaylistResponseToJSON,
+    FavoriteRequestBodyFromJSON,
+    FavoriteRequestBodyToJSON,
     PlaylistResponseFromJSON,
     PlaylistResponseToJSON,
     PlaylistSearchResultFromJSON,
@@ -60,6 +63,7 @@ export interface DeletePlaylistRequest {
 export interface FavoritePlaylistRequest {
     playlistId: string;
     userId: string;
+    metadata?: FavoriteRequestBody;
 }
 
 export interface GetBulkPlaylistsRequest {
@@ -263,6 +267,8 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -279,6 +285,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: FavoriteRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

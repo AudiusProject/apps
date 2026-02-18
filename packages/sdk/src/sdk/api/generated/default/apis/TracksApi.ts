@@ -19,6 +19,7 @@ import type {
   AccessInfoResponse,
   CreateTrackRequestBody,
   CreateTrackResponse,
+  FavoriteRequestBody,
   RemixesResponse,
   RemixingResponse,
   StemsResponse,
@@ -46,6 +47,8 @@ import {
     CreateTrackRequestBodyToJSON,
     CreateTrackResponseFromJSON,
     CreateTrackResponseToJSON,
+    FavoriteRequestBodyFromJSON,
+    FavoriteRequestBodyToJSON,
     RemixesResponseFromJSON,
     RemixesResponseToJSON,
     RemixingResponseFromJSON,
@@ -108,6 +111,7 @@ export interface DownloadTrackRequest {
 export interface FavoriteTrackRequest {
     trackId: string;
     userId: string;
+    metadata?: FavoriteRequestBody;
 }
 
 export interface GetBulkTracksRequest {
@@ -541,6 +545,8 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -557,6 +563,7 @@ export class TracksApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: FavoriteRequestBodyToJSON(params.metadata),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
