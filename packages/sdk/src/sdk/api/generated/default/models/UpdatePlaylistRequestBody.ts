@@ -105,6 +105,12 @@ export interface UpdatePlaylistRequestBody {
      * @memberof UpdatePlaylistRequestBody
      */
     upc?: string;
+    /**
+     * Parental warning type
+     * @type {string}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    parentalWarningType?: string | null;
 }
 
 /**
@@ -137,6 +143,7 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'playlistContents': !exists(json, 'playlist_contents') ? undefined : ((json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
         'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
+        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
     };
 }
 
@@ -160,6 +167,7 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'playlist_contents': value.playlistContents === undefined ? undefined : ((value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
         'cover_art_cid': value.coverArtCid,
         'upc': value.upc,
+        'parental_warning_type': value.parentalWarningType,
     };
 }
 
