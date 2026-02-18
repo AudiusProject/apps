@@ -188,7 +188,7 @@ export interface UpdateTrackRequestBody {
      * @type {boolean}
      * @memberof UpdateTrackRequestBody
      */
-    isStreamGated?: boolean | null;
+    isStreamGated?: boolean;
     /**
      * 
      * @type {AccessGate}

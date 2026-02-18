@@ -162,12 +162,6 @@ export type PlaylistImageParameters = {
   onProgress?: UploadPlaylistProgressHandler
 }
 
-export type PlaylistAudioParameters = {
-  audioFiles?: z.input<typeof AudioFile>[]
-  trackMetadatas?: z.input<typeof PlaylistTrackMetadataSchema>[]
-  onProgress?: UploadPlaylistProgressHandler
-}
-
 export type CreatePlaylistRequestWithFiles = CreatePlaylistRequest &
   PlaylistImageParameters
 

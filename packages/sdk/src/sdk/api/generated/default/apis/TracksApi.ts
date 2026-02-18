@@ -270,6 +270,16 @@ export interface GetTrendingUSDCPurchaseTracksWithVersionRequest {
     time?: GetTrendingUSDCPurchaseTracksWithVersionTimeEnum;
 }
 
+export interface GetTrendingUndergroundWinnersRequest {
+    week?: Date;
+    userId?: string;
+}
+
+export interface GetTrendingWinnersRequest {
+    week?: Date;
+    userId?: string;
+}
+
 export interface GetUndergroundTrendingTracksRequest {
     offset?: number;
     limit?: number;
@@ -1521,6 +1531,76 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getTrendingUSDCPurchaseTracksWithVersion(params: GetTrendingUSDCPurchaseTracksWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getTrendingUSDCPurchaseTracksWithVersionRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets weekly trending underground winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     */
+    async getTrendingUndergroundWinnersRaw(params: GetTrendingUndergroundWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.week !== undefined) {
+            queryParameters['week'] = (params.week as any).toISOString().substr(0,10);
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/trending/underground/winners`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets weekly trending underground winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     */
+    async getTrendingUndergroundWinners(params: GetTrendingUndergroundWinnersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getTrendingUndergroundWinnersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets weekly trending winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     */
+    async getTrendingWinnersRaw(params: GetTrendingWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.week !== undefined) {
+            queryParameters['week'] = (params.week as any).toISOString().substr(0,10);
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/trending/winners`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets weekly trending winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     */
+    async getTrendingWinners(params: GetTrendingWinnersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getTrendingWinnersRaw(params, initOverrides);
         return await response.value();
     }
 

@@ -7,10 +7,7 @@ import type {
   SolanaRelayService,
   StorageService
 } from '../../services'
-import type {
-  EntityManagerService,
-  AdvancedOptions
-} from '../../services/EntityManager/types'
+import type { EntityManagerService } from '../../services/EntityManager/types'
 import type { LoggerService } from '../../services/Logger'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { parseParams } from '../../utils/parseParams'
@@ -112,10 +109,7 @@ export class AlbumsApi {
    * Upload an album
    * Uploads the specified tracks and combines them into an album
    */
-  async uploadAlbum(
-    params: UploadAlbumRequest,
-    advancedOptions?: AdvancedOptions
-  ) {
+  async uploadAlbum(params: UploadAlbumRequest) {
     await parseParams('uploadAlbum', UploadAlbumSchema)(params)
 
     const { albumName, ...playlistMetadata } = params.metadata
@@ -129,10 +123,7 @@ export class AlbumsApi {
       }
     }
 
-    return await this.playlistsApi.uploadPlaylist(
-      playlistParams,
-      advancedOptions
-    )
+    return await this.playlistsApi.uploadPlaylist(playlistParams)
   }
 
   /** @hidden
