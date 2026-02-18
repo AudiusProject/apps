@@ -131,6 +131,7 @@ export * from './RemixesResponse';
 export * from './RemixingResponse';
 export * from './ReplyComment';
 export * from './Repost';
+export * from './RepostRequestBody';
 export * from './Reposts';
 export * from './RewardCodeErrorResponse';
 export * from './RewardCodeResponse';

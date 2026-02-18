@@ -147,6 +147,7 @@ models/RemixesResponse.ts
 models/RemixingResponse.ts
 models/ReplyComment.ts
 models/Repost.ts
+models/RepostRequestBody.ts
 models/Reposts.ts
 models/RewardCodeErrorResponse.ts
 models/RewardCodeResponse.ts

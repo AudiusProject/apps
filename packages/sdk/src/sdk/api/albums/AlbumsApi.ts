@@ -202,7 +202,8 @@ export class AlbumsApi {
   async repostAlbum(params: RepostAlbumRequest, requestInit?: RequestInit) {
     const playlistParams = {
       userId: params.userId,
-      playlistId: params.albumId
+      playlistId: params.albumId,
+      repostRequestBody: params.metadata
     }
     return await this.playlistsApi.repostPlaylist(playlistParams, requestInit)
   }

@@ -336,9 +336,9 @@ export const RepostTrackSchema = z
         .object({
           /**
            * Is this a repost of a repost? Used to dispatch notifications
-           * when a user favorites another user's repost
+           * when a user reposts content that someone they follow has already reposted
            */
-          isRepostOfRepost: z.boolean()
+          isRepostOfRepost: z.optional(z.boolean())
         })
         .strict()
     )

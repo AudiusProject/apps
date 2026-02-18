@@ -22,6 +22,7 @@ import type {
   FavoriteRequestBody,
   RemixesResponse,
   RemixingResponse,
+  RepostRequestBody,
   StemsResponse,
   StreamUrlResponse,
   TopListener,
@@ -53,6 +54,8 @@ import {
     RemixesResponseToJSON,
     RemixingResponseFromJSON,
     RemixingResponseToJSON,
+    RepostRequestBodyFromJSON,
+    RepostRequestBodyToJSON,
     StemsResponseFromJSON,
     StemsResponseToJSON,
     StreamUrlResponseFromJSON,
@@ -312,6 +315,7 @@ export interface RecordTrackDownloadRequest {
 export interface RepostTrackRequest {
     trackId: string;
     userId: string;
+    repostRequestBody?: RepostRequestBody;
 }
 
 export interface SearchTracksRequest {
@@ -1831,6 +1835,8 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -1847,6 +1853,7 @@ export class TracksApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: RepostRequestBodyToJSON(params.repostRequestBody),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

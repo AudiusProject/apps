@@ -23,6 +23,7 @@ import type {
   PlaylistResponse,
   PlaylistSearchResult,
   PlaylistTracksResponse,
+  RepostRequestBody,
   TrendingPlaylistsResponse,
   UpdatePlaylistRequestBody,
   WriteResponse,
@@ -42,6 +43,8 @@ import {
     PlaylistSearchResultToJSON,
     PlaylistTracksResponseFromJSON,
     PlaylistTracksResponseToJSON,
+    RepostRequestBodyFromJSON,
+    RepostRequestBodyToJSON,
     TrendingPlaylistsResponseFromJSON,
     TrendingPlaylistsResponseToJSON,
     UpdatePlaylistRequestBodyFromJSON,
@@ -104,6 +107,7 @@ export interface GetTrendingPlaylistsRequest {
 export interface RepostPlaylistRequest {
     playlistId: string;
     userId: string;
+    repostRequestBody?: RepostRequestBody;
 }
 
 export interface SearchPlaylistsRequest {
@@ -550,6 +554,8 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        headerParameters['Content-Type'] = 'application/json';
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -566,6 +572,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: RepostRequestBodyToJSON(params.repostRequestBody),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));

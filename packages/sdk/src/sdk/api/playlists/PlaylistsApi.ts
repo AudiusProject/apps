@@ -420,7 +420,13 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.repostPlaylistWithEntityManager(params)
+      // Map repostRequestBody (generated API) to metadata (entity manager schema)
+      const entityManagerParams = {
+        playlistId: params.playlistId,
+        userId: params.userId,
+        metadata: params.repostRequestBody
+      }
+      const res = await this.repostPlaylistWithEntityManager(entityManagerParams)
       return {
         success: true,
         transactionHash: res.transactionHash

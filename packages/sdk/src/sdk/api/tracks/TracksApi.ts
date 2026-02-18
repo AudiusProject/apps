@@ -672,7 +672,12 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.repostTrackWithEntityManager(params)
+      const entityManagerParams = {
+        trackId: params.trackId,
+        userId: params.userId,
+        metadata: params.repostRequestBody
+      }
+      const res = await this.repostTrackWithEntityManager(entityManagerParams)
       return {
         success: true,
         transactionHash: res.transactionHash
