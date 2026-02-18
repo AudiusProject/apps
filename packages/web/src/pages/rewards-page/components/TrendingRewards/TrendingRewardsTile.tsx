@@ -48,6 +48,7 @@ export const TrendingRewardsTile = ({
   }
 
   const rewardIds = useRewardIds()
+  const wm = useWithMobileStyle(styles.mobile)
 
   if (rewardIds.length === 0) {
     return null
@@ -62,8 +63,6 @@ export const TrendingRewardsTile = ({
         key={props.id}
       />
     ))
-
-  const wm = useWithMobileStyle(styles.mobile)
 
   return (
     <Tile className={wm(styles.rewardsTile, className)}>

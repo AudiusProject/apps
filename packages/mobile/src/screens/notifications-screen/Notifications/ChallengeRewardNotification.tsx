@@ -52,10 +52,6 @@ export const ChallengeRewardNotification = (
 ) => {
   const { notification } = props
   const { challengeId, listenStreak } = notification
-  // Skip deprecated trending-playlist (tp) notifications
-  if (challengeId === 'tp' || challengeId === 'trending-playlist') {
-    return null
-  }
 
   const mappedChallengeRewardsConfigKey =
     challengeId in trendingChallengeIdMapping
@@ -91,6 +87,12 @@ export const ChallengeRewardNotification = (
         return `${messages.amountEarned(amount)} ${messages.challengeCompleteText}`
     }
   }, [challengeId, amount, listenStreak])
+
+  // Skip deprecated trending-playlist (tp) notifications (legacy API may still send)
+  const id = String(challengeId)
+  if (id === 'tp' || id === 'trending-playlist') {
+    return null
+  }
 
   if (!info) return null
 

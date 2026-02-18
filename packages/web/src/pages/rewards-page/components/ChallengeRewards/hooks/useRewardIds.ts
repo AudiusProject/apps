@@ -30,7 +30,6 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   ChallengeName.Cosign,
   ChallengeName.RemixContestWinner,
   ChallengeName.TrendingTrack,
-  ChallengeName.TrendingPlaylist,
   ChallengeName.TrendingUndergroundTrack
 ])
 
