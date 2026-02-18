@@ -11,7 +11,7 @@ import camelcaseKeys from 'camelcase-keys'
 import { omit, pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
-import type { PlaylistLibrary, PlaylistLibraryItem } from '~/models'
+import type { PlaylistLibraryItem } from '~/models'
 import {
   AccountUserMetadata,
   ManagedUserMetadata,
