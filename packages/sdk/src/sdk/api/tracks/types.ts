@@ -95,9 +95,9 @@ export const USDCPurchaseConditions = z
   .strict()
 
 export const UploadStemMetadataSchema = z.object({
-  category: z
-    .enum(Object.values(StemCategory) as [StemCategory, ...StemCategory[]])
-    .default(StemCategory.Other),
+  category: z.enum(
+    Object.values(StemCategory) as [StemCategory, ...StemCategory[]]
+  ),
   parentTrackId: HashId
 })
 
