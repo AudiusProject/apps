@@ -56,7 +56,7 @@ import {
   EntityManagerUpdatePlaylistRequest,
   type UpdatePlaylistRequestWithImage,
   type CreatePlaylistRequestWithFiles,
-  type UploadPlaylistRequestWithFiles
+  type UploadPlaylistRequest
 } from './types'
 
 // Returns current timestamp in seconds, which is the expected
@@ -117,7 +117,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
    * Uploads the specified tracks and combines them into a playlist
    */
   async uploadPlaylist(
-    params: UploadPlaylistRequestWithFiles,
+    params: UploadPlaylistRequest,
     requestInit?: RequestInit
   ) {
     const { metadata: playlistMetadata, trackMetadatas } = params

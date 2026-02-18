@@ -8,7 +8,6 @@ import {
   Genre,
   Mood,
   type CreatePlaylistRequest,
-  type CreateTrackRequestBody,
   type UpdatePlaylistRequest
 } from '../generated/default'
 import { UploadTrackMetadataSchema } from '../tracks/types'
@@ -63,7 +62,6 @@ export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
 export type PlaylistMetadata = z.input<typeof CreatePlaylistMetadataSchema>
 
 const PlaylistTrackMetadataSchema = UploadTrackMetadataSchema.partial({
-  genre: true,
   mood: true,
   tags: true
 })
@@ -104,6 +102,27 @@ export type UploadPlaylistProgressHandler = (
   event: UploadPlaylistProgressEvent
 ) => void
 
+export const UploadPlaylistSchema = z
+  .object({
+    userId: HashId,
+    imageFile: ImageFile,
+    metadata: UploadPlaylistMetadataSchema,
+    onProgress: z.optional(UploadPlaylistProgressHandlerSchema),
+    /**
+     * Track metadata is populated from the playlist if fields are missing
+     */
+    trackMetadatas: z.array(PlaylistTrackMetadataSchema),
+    audioFiles: z.array(AudioFile)
+  })
+  .strict()
+
+export type UploadPlaylistRequest = Omit<
+  z.input<typeof UploadPlaylistSchema>,
+  'onProgress'
+> & {
+  onProgress?: UploadPlaylistProgressHandler
+}
+
 export const UpdatePlaylistMetadataSchema =
   UploadPlaylistMetadataSchema.partial()
     .merge(
@@ -142,20 +161,11 @@ export type PlaylistImageParameters = {
   onProgress?: UploadPlaylistProgressHandler
 }
 
-export type PlaylistAudioParameters = {
-  audioFiles: z.input<typeof AudioFile>[]
-  trackMetadatas: CreateTrackRequestBody[]
-  onProgress: UploadPlaylistProgressHandler
-}
-
 export type CreatePlaylistRequestWithFiles = CreatePlaylistRequest &
   PlaylistImageParameters
 
 export type UpdatePlaylistRequestWithImage = UpdatePlaylistRequest &
   PlaylistImageParameters
-
-export type UploadPlaylistRequestWithFiles = CreatePlaylistRequestWithFiles &
-  PlaylistAudioParameters
 
 export const PublishPlaylistSchema = z
   .object({
