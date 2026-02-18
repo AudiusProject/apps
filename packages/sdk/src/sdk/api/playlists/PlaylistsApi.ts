@@ -104,14 +104,10 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     if (this.entityManager) {
       const { metadata } = params
-      const res = await this.createPlaylistWithEntityManager({
+      return await this.createPlaylistWithEntityManager({
         userId: params.userId,
         metadata
       })
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.createPlaylist(params, requestInit)
   }
@@ -410,15 +406,11 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     }
 
     if (this.entityManager) {
-      const res = await this.updatePlaylistWithEntityManager({
+      return await this.updatePlaylistWithEntityManager({
         userId: params.userId,
         playlistId: params.playlistId,
         metadata
       })
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.updatePlaylist(params, requestInit)
   }
@@ -450,11 +442,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.deletePlaylistWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.deletePlaylistWithEntityManager(params)
     }
     return super.deletePlaylist(params, requestInit)
   }
@@ -487,11 +475,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.favoritePlaylistWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.favoritePlaylistWithEntityManager(params)
     }
     return super.favoritePlaylist(params, requestInit)
   }
@@ -523,11 +507,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.unfavoritePlaylistWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.unfavoritePlaylistWithEntityManager(params)
     }
     return super.unfavoritePlaylist(params, requestInit)
   }
@@ -541,7 +521,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   ) {
     // Parse inputs
     const { userId, playlistId, metadata } = await parseParams(
-      'respostPlaylist',
+      'repostPlaylist',
       RepostPlaylistSchema
     )(params)
 
@@ -566,12 +546,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         userId: params.userId,
         metadata: params.repostRequestBody
       }
-      const res =
-        await this.repostPlaylistWithEntityManager(entityManagerParams)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.repostPlaylistWithEntityManager(entityManagerParams)
     }
     return super.repostPlaylist(params, requestInit)
   }
@@ -603,11 +578,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.unrepostPlaylistWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.unrepostPlaylistWithEntityManager(params)
     }
     return super.unrepostPlaylist(params, requestInit)
   }
@@ -639,11 +610,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.sharePlaylistWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.sharePlaylistWithEntityManager(params)
     }
     return super.sharePlaylist(params, requestInit)
   }
@@ -796,7 +763,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
 
     return {
       ...response,
-      playlistId: encodeHashId(playlistId)
+      playlistId: encodeHashId(playlistId) ?? undefined
     }
   }
 
