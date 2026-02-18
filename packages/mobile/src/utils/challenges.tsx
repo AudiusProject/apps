@@ -140,18 +140,6 @@ const mobileChallengeConfig: Partial<
       }
     }
   },
-  'trending-playlist': {
-    icon: ArrowUp,
-    buttonInfo: {
-      iconRight: IconCheck
-    }
-  },
-  tp: {
-    icon: ArrowUp,
-    buttonInfo: {
-      iconRight: IconCheck
-    }
-  },
   'trending-track': {
     icon: ChartIncreasing,
     buttonInfo: {

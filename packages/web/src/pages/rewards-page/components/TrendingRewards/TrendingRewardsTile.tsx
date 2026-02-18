@@ -49,6 +49,10 @@ export const TrendingRewardsTile = ({
 
   const rewardIds = useRewardIds()
 
+  if (rewardIds.length === 0) {
+    return null
+  }
+
   const rewardsTiles = rewardIds
     .map((id) => getChallengeConfig(id))
     .map((props) => (

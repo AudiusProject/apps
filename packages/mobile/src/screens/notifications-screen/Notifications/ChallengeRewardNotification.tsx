@@ -44,7 +44,6 @@ type ChallengeRewardNotificationProps = {
 
 const trendingChallengeIdMapping = {
   tt: 'trending-track',
-  tp: 'trending-playlist',
   tut: 'trending-underground-track'
 }
 
@@ -53,6 +52,11 @@ export const ChallengeRewardNotification = (
 ) => {
   const { notification } = props
   const { challengeId, listenStreak } = notification
+  // Skip deprecated trending-playlist (tp) notifications
+  if (challengeId === 'tp' || challengeId === 'trending-playlist') {
+    return null
+  }
+
   const mappedChallengeRewardsConfigKey =
     challengeId in trendingChallengeIdMapping
       ? trendingChallengeIdMapping[challengeId]

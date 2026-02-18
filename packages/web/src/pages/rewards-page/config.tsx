@@ -175,12 +175,6 @@ const webChallengesConfig: Partial<
       complete: linkButtonMap[ChallengeName.AudioMatchingBuy]
     }
   },
-  'trending-playlist': {
-    icon: <i className='emoji large arrow-curve-up' />
-  },
-  tp: {
-    icon: <i className='emoji large arrow-curve-up' />
-  },
   'trending-track': {
     icon: <i className='emoji large chart-increasing' />
   },
