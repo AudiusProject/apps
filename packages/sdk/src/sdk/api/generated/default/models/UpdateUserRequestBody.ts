@@ -34,6 +34,12 @@ import {
  */
 export interface UpdateUserRequestBody {
     /**
+     * User handle. Can only be set if the user does not already have a handle.
+     * @type {string}
+     * @memberof UpdateUserRequestBody
+     */
+    handle?: string;
+    /**
      * Display name
      * @type {string}
      * @memberof UpdateUserRequestBody
@@ -184,6 +190,7 @@ export function UpdateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
+        'handle': !exists(json, 'handle') ? undefined : json['handle'],
         'name': !exists(json, 'name') ? undefined : json['name'],
         'bio': !exists(json, 'bio') ? undefined : json['bio'],
         'location': !exists(json, 'location') ? undefined : json['location'],
@@ -216,6 +223,7 @@ export function UpdateUserRequestBodyToJSON(value?: UpdateUserRequestBody | null
     }
     return {
         
+        'handle': value.handle,
         'name': value.name,
         'bio': value.bio,
         'location': value.location,
