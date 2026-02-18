@@ -4,13 +4,83 @@ import { z } from 'zod'
 import { PublicKeySchema } from '../../services/Solana'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
-import { Genre } from '../../types/Genre'
 import { HashId } from '../../types/HashId'
-import { Mood } from '../../types/Mood'
+import { Mood, Genre } from '../generated/default'
+import type {
+  CreatePlaylistRequestBody,
+  UpdatePlaylistRequestBody
+} from '../generated/default'
+import type { UploadPlaylistProgressHandler } from '../playlists/types'
 import {
   UploadTrackMetadataSchema,
   USDCPurchaseConditions
 } from '../tracks/types'
+
+// Album request body types that wrap playlist types but use album field names
+export type CreateAlbumRequestBody = Omit<
+  CreatePlaylistRequestBody,
+  'playlistName'
+> & {
+  albumName: string
+}
+
+export type UpdateAlbumRequestBody = Omit<
+  UpdatePlaylistRequestBody,
+  'playlistName'
+> & {
+  albumName?: string
+}
+
+// Album request types that wrap playlist request types
+export type CreateAlbumRequest = {
+  userId: string
+  albumId?: string
+  metadata: CreateAlbumRequestBody
+}
+
+export type CreateAlbumRequestWithFiles = CreateAlbumRequest & {
+  imageFile?: z.input<typeof ImageFile>
+  onProgress?: UploadPlaylistProgressHandler
+}
+
+export type UpdateAlbumRequest = {
+  userId: string
+  albumId: string
+  metadata: UpdateAlbumRequestBody
+  imageFile?: z.input<typeof ImageFile>
+  onProgress?: UploadPlaylistProgressHandler
+}
+
+export type DeleteAlbumRequest = {
+  userId: string
+  albumId: string
+}
+
+export type FavoriteAlbumRequest = {
+  userId: string
+  albumId: string
+  metadata?: {
+    isSaveOfRepost?: boolean
+  }
+}
+
+export type UnfavoriteAlbumRequest = {
+  userId: string
+  albumId: string
+}
+
+export type RepostAlbumRequest = {
+  userId: string
+  albumId: string
+  metadata?: {
+    isRepostOfRepost?: boolean
+  }
+}
+
+export type UnrepostAlbumRequest = {
+  userId: string
+  albumId: string
+}
 
 export const getAlbumSchema = z.object({
   userId: HashId.optional(),
@@ -67,7 +137,7 @@ export const CreateAlbumSchema = z
   })
   .strict()
 
-export type CreateAlbumRequest = z.input<typeof CreateAlbumSchema>
+export type EntityManagerCreateAlbumRequest = z.input<typeof CreateAlbumSchema>
 
 export const UploadAlbumMetadataSchema = CreateAlbumMetadataSchema.extend({
   genre: z.enum(Object.values(Genre) as [Genre, ...Genre[]]),
@@ -129,7 +199,7 @@ export const UpdateAlbumSchema = z
   })
   .strict()
 
-export type UpdateAlbumRequest = z.input<typeof UpdateAlbumSchema>
+export type EntityManagerUpdateAlbumRequest = z.input<typeof UpdateAlbumSchema>
 
 export const DeleteAlbumSchema = z
   .object({
@@ -138,7 +208,7 @@ export const DeleteAlbumSchema = z
   })
   .strict()
 
-export type DeleteAlbumRequest = z.input<typeof DeleteAlbumSchema>
+export type EntityManagerDeleteAlbumRequest = z.input<typeof DeleteAlbumSchema>
 
 export const FavoriteAlbumSchema = z
   .object({
@@ -150,13 +220,15 @@ export const FavoriteAlbumSchema = z
          * Is this a save of a repost? Used to dispatch notifications
          * when a user favorites another user's repost
          */
-        isSaveOfRepost: z.boolean()
+        isSaveOfRepost: z.optional(z.boolean())
       })
     )
   })
   .strict()
 
-export type FavoriteAlbumRequest = z.input<typeof FavoriteAlbumSchema>
+export type EntityManagerFavoriteAlbumRequest = z.input<
+  typeof FavoriteAlbumSchema
+>
 
 export const UnfavoriteAlbumSchema = z
   .object({
@@ -165,7 +237,9 @@ export const UnfavoriteAlbumSchema = z
   })
   .strict()
 
-export type UnfavoriteAlbumRequest = z.input<typeof UnfavoriteAlbumSchema>
+export type EntityManagerUnfavoriteAlbumRequest = z.input<
+  typeof UnfavoriteAlbumSchema
+>
 
 export const RepostAlbumSchema = z
   .object({
@@ -175,15 +249,15 @@ export const RepostAlbumSchema = z
       z.object({
         /**
          * Is this a repost of a repost? Used to dispatch notifications
-         * when a user favorites another user's repost
+         * when a user reposts content that someone they follow has already reposted
          */
-        isRepostOfRepost: z.boolean()
+        isRepostOfRepost: z.optional(z.boolean())
       })
     )
   })
   .strict()
 
-export type RepostAlbumRequest = z.input<typeof RepostAlbumSchema>
+export type EntityManagerRepostAlbumRequest = z.input<typeof RepostAlbumSchema>
 
 export const UnrepostAlbumSchema = z
   .object({
@@ -192,7 +266,9 @@ export const UnrepostAlbumSchema = z
   })
   .strict()
 
-export type UnrepostAlbumRequest = z.input<typeof UnrepostAlbumSchema>
+export type EntityManagerUnrepostAlbumRequest = z.input<
+  typeof UnrepostAlbumSchema
+>
 
 const PurchaseAlbumSchemaBase = z.object({
   /** The ID of the user purchasing the album. */

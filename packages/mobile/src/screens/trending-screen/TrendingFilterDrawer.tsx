@@ -6,10 +6,11 @@ import {
   trendingPageSelectors
 } from '@audius/common/store'
 import {
-  Genre,
+  type Genre,
   ELECTRONIC_PREFIX,
   ELECTRONIC_SUBGENRES,
-  GENRES
+  GENRES,
+  ALL_GENRES
 } from '@audius/common/utils'
 import { FlatList, Keyboard, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,7 +32,7 @@ const messages = {
   searchPlaceholder: 'Search Genres'
 }
 
-const trendingGenres = [Genre.ALL, ...GENRES]
+const trendingGenres = [ALL_GENRES, ...GENRES]
 
 const useStyles = makeStyles(({ spacing }) => ({
   root: {
@@ -49,7 +50,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 export const TrendingFilterDrawer = () => {
   const styles = useStyles()
   const [searchValue, setSearchValue] = useState('')
-  const trendingGenre = useSelector(getTrendingGenre) ?? Genre.ALL
+  const trendingGenre = useSelector(getTrendingGenre) ?? ALL_GENRES
   const { onClose } = useDrawerState(MODAL_NAME)
   const dispatch = useDispatch()
 
@@ -63,7 +64,7 @@ export const TrendingFilterDrawer = () => {
   const handleSelect = useCallback(
     (genre: string) => {
       const trimmedGenre =
-        genre === Genre.ALL
+        genre === ALL_GENRES
           ? null
           : (genre.replace(ELECTRONIC_PREFIX, '') as Genre)
 

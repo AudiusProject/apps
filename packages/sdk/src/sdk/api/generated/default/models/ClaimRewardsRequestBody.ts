@@ -17,44 +17,44 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ClaimRewardsRequest
+ * @interface ClaimRewardsRequestBody
  */
-export interface ClaimRewardsRequest {
+export interface ClaimRewardsRequestBody {
     /**
      * The challenge ID to filter rewards (optional)
      * @type {string}
-     * @memberof ClaimRewardsRequest
+     * @memberof ClaimRewardsRequestBody
      */
     challengeId?: string;
     /**
      * The specifier to filter rewards (optional)
      * @type {string}
-     * @memberof ClaimRewardsRequest
+     * @memberof ClaimRewardsRequestBody
      */
     specifier?: string;
     /**
      * The user ID to claim rewards for
      * @type {string}
-     * @memberof ClaimRewardsRequest
+     * @memberof ClaimRewardsRequestBody
      */
     userId: string;
 }
 
 /**
- * Check if a given object implements the ClaimRewardsRequest interface.
+ * Check if a given object implements the ClaimRewardsRequestBody interface.
  */
-export function instanceOfClaimRewardsRequest(value: object): value is ClaimRewardsRequest {
+export function instanceOfClaimRewardsRequestBody(value: object): value is ClaimRewardsRequestBody {
     let isInstance = true;
     isInstance = isInstance && "userId" in value && value["userId"] !== undefined;
 
     return isInstance;
 }
 
-export function ClaimRewardsRequestFromJSON(json: any): ClaimRewardsRequest {
-    return ClaimRewardsRequestFromJSONTyped(json, false);
+export function ClaimRewardsRequestBodyFromJSON(json: any): ClaimRewardsRequestBody {
+    return ClaimRewardsRequestBodyFromJSONTyped(json, false);
 }
 
-export function ClaimRewardsRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ClaimRewardsRequest {
+export function ClaimRewardsRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): ClaimRewardsRequestBody {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -66,7 +66,7 @@ export function ClaimRewardsRequestFromJSONTyped(json: any, ignoreDiscriminator:
     };
 }
 
-export function ClaimRewardsRequestToJSON(value?: ClaimRewardsRequest | null): any {
+export function ClaimRewardsRequestBodyToJSON(value?: ClaimRewardsRequestBody | null): any {
     if (value === undefined) {
         return undefined;
     }

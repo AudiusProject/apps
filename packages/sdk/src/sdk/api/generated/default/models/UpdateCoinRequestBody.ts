@@ -17,61 +17,61 @@ import { exists, mapValues } from '../runtime';
 /**
  * Request body for updating coin information
  * @export
- * @interface UpdateCoinRequest
+ * @interface UpdateCoinRequestBody
  */
-export interface UpdateCoinRequest {
+export interface UpdateCoinRequestBody {
     /**
      * The description of the coin (max 2500 characters)
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     description?: string;
     /**
      * URL for the coin's banner image
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     bannerImageUrl?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     link1?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     link2?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     link3?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof UpdateCoinRequest
+     * @memberof UpdateCoinRequestBody
      */
     link4?: string;
 }
 
 /**
- * Check if a given object implements the UpdateCoinRequest interface.
+ * Check if a given object implements the UpdateCoinRequestBody interface.
  */
-export function instanceOfUpdateCoinRequest(value: object): value is UpdateCoinRequest {
+export function instanceOfUpdateCoinRequestBody(value: object): value is UpdateCoinRequestBody {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function UpdateCoinRequestFromJSON(json: any): UpdateCoinRequest {
-    return UpdateCoinRequestFromJSONTyped(json, false);
+export function UpdateCoinRequestBodyFromJSON(json: any): UpdateCoinRequestBody {
+    return UpdateCoinRequestBodyFromJSONTyped(json, false);
 }
 
-export function UpdateCoinRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateCoinRequest {
+export function UpdateCoinRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateCoinRequestBody {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -86,7 +86,7 @@ export function UpdateCoinRequestFromJSONTyped(json: any, ignoreDiscriminator: b
     };
 }
 
-export function UpdateCoinRequestToJSON(value?: UpdateCoinRequest | null): any {
+export function UpdateCoinRequestBodyToJSON(value?: UpdateCoinRequestBody | null): any {
     if (value === undefined) {
         return undefined;
     }

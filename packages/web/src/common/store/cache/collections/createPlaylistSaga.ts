@@ -191,11 +191,20 @@ function* createAndConfirmPlaylist(
       throw new Error('No userId set, cannot repost collection')
     }
 
+    const metadata = playlistMetadataForCreateWithSDK(formFields)
+    metadata.playlistId = Id.parse(playlistId)
+    metadata.playlistContents = initTrack
+      ? [
+          {
+            timestamp: Math.round(Date.now() / 1000), // must use seconds
+            trackId: Id.parse(initTrack.track_id)
+          }
+        ]
+      : []
+
     yield* call([sdk.playlists, sdk.playlists.createPlaylist], {
       userId: Id.parse(userId),
-      playlistId: Id.parse(playlistId),
-      trackIds: initTrack ? [Id.parse(initTrack.track_id)] : undefined,
-      metadata: playlistMetadataForCreateWithSDK(formFields)
+      metadata
     })
 
     // Merge the confirmed playlist with the optimistic playlist, preferring

@@ -200,7 +200,7 @@ export const useUpload = (
                 ? (t.metadata.artwork.source as 'unsplash' | 'original')
                 : 'original',
             trackId: t.metadata.track_id!,
-            genre: t.metadata.genre,
+            genre: t.metadata.genre ?? '',
             mood: t.metadata.mood ?? undefined,
             size: t.file.size ?? -1,
             fileType: t.file.type ?? '',

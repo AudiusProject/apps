@@ -17,7 +17,7 @@ import {
   TRENDING_MONTH_PREFIX,
   TRENDING_ALL_TIME_PREFIX
 } from '~/store/pages/trending/lineup/actions'
-import { GENRES, Genre } from '~/utils/genres'
+import { parseTrendingGenreFromUrl } from '~/utils/genres'
 
 import { TimeRange, Track } from '../../../models'
 
@@ -94,7 +94,7 @@ const reducer =
 
       if (history) {
         const urlParams = new URLSearchParams(history.location.search)
-        const genre = urlParams.get('genre') as Genre | null
+        const genreParam = urlParams.get('genre')
         const timeRange = urlParams.get('timeRange') as TimeRange | null
         return {
           ...initialState,
@@ -102,8 +102,7 @@ const reducer =
             timeRange && Object.values(TimeRange).includes(timeRange)
               ? timeRange
               : TimeRange.WEEK,
-          trendingGenre:
-            genre && Object.values(GENRES).includes(genre) ? genre : null
+          trendingGenre: parseTrendingGenreFromUrl(genreParam)
         }
       }
 

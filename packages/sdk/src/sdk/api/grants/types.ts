@@ -10,21 +10,23 @@ export const CreateGrantSchema = z.object({
   })
 })
 
-export type CreateGrantRequest = z.input<typeof CreateGrantSchema>
+export type EntityManagerCreateGrantRequest = z.input<typeof CreateGrantSchema>
 
 export const AddManagerSchema = z.object({
   userId: HashId,
   managerUserId: HashId
 })
 
-export type AddManagerRequest = z.input<typeof AddManagerSchema>
+export type EntityManagerAddManagerRequest = z.input<typeof AddManagerSchema>
 
 export const RemoveManagerSchema = z.object({
   userId: HashId,
   managerUserId: HashId
 })
 
-export type RemoveManagerRequest = z.input<typeof RemoveManagerSchema>
+export type EntityManagerRemoveManagerRequest = z.input<
+  typeof RemoveManagerSchema
+>
 
 export const RevokeGrantSchema = z.object({
   userId: HashId,
@@ -33,11 +35,19 @@ export const RevokeGrantSchema = z.object({
   })
 })
 
-export type RevokeGrantRequest = z.input<typeof RevokeGrantSchema>
+export type EntityManagerRevokeGrantRequest = z.input<typeof RevokeGrantSchema>
 
 export const ApproveGrantSchema = z.object({
   userId: HashId,
   grantorUserId: HashId
 })
 
-export type ApproveGrantRequest = z.input<typeof ApproveGrantSchema>
+export type EntityManagerApproveGrantRequest = z.input<
+  typeof ApproveGrantSchema
+>
+
+export type CreateGrantRequest = EntityManagerCreateGrantRequest
+export type AddManagerRequest = EntityManagerAddManagerRequest
+export type RemoveManagerRequest = EntityManagerRemoveManagerRequest
+export type RevokeGrantRequest = EntityManagerRevokeGrantRequest
+export type ApproveGrantRequest = EntityManagerApproveGrantRequest

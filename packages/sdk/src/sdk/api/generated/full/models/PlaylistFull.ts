@@ -314,7 +314,7 @@ export interface PlaylistFull {
      * @type {string}
      * @memberof PlaylistFull
      */
-    parentalWarningType?: string;
+    parentalWarningType?: string | null;
 }
 
 /**

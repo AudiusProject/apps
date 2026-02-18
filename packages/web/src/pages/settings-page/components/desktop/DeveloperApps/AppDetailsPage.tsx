@@ -22,12 +22,14 @@ const AUDIUS_SDK_LINK = 'https://docs.audius.co/developers'
 
 const messages = {
   secretReminder:
-    "Remember to save your API Secret. You won't be able to view it again.",
+    "Remember to save your API Secret and Bearer Token. You won't be able to view them again.",
   description: 'Description',
   apiKey: 'api key',
   copyApiKeyLabel: 'copy api key',
   apiSecret: 'api secret',
   copyApiSecretLabel: 'copy api secret',
+  bearerToken: 'bearer token',
+  copyBearerTokenLabel: 'copy bearer token',
   copied: 'Copied!',
   readTheDocs: 'Read the Developer Docs',
   goBack: 'Back to Your Apps'
@@ -40,7 +42,7 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
     setPage(CreateAppsPages.YOUR_APPS)
   }, [setPage])
 
-  const { name, description, apiKey, apiSecret } = params || {}
+  const { name, description, apiKey, apiSecret, bearerToken } = params ?? {}
   const copyApiKey = useCallback(() => {
     if (!apiKey) return
     copyToClipboard(apiKey)
@@ -51,11 +53,16 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
     copyToClipboard(apiSecret)
   }, [apiSecret])
 
+  const copyBearerToken = useCallback(() => {
+    if (!bearerToken) return
+    copyToClipboard(bearerToken)
+  }, [bearerToken])
+
   if (!params) return null
 
   return (
     <div className={styles.root}>
-      {!apiSecret ? null : (
+      {!apiSecret && !bearerToken ? null : (
         <Hint
           icon={IconError}
           actions={
@@ -118,7 +125,32 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
             >
               <IconButton
                 onClick={copySecret}
-                aria-label={messages.copyApiKeyLabel}
+                aria-label={messages.copyApiSecretLabel}
+                color='subdued'
+                icon={IconCopy}
+              />
+            </Toast>
+          </span>
+        </div>
+      )}
+      {!bearerToken ? null : (
+        <div className={styles.keyRoot}>
+          <span className={styles.keyLabel}>{messages.bearerToken}</span>
+          <Divider orientation='vertical' className={styles.keyDivider} />
+          <span className={styles.keyText}>{bearerToken}</span>
+          <Divider orientation='vertical' className={styles.keyDivider} />
+          <span>
+            <Toast
+              text={messages.copied}
+              portalLocation={
+                typeof document !== 'undefined'
+                  ? document.getElementById('page') || document.body
+                  : undefined
+              }
+            >
+              <IconButton
+                onClick={copyBearerToken}
+                aria-label={messages.copyBearerTokenLabel}
                 color='subdued'
                 icon={IconCopy}
               />

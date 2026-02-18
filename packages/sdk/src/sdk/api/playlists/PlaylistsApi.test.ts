@@ -8,9 +8,7 @@ import { EntityManagerClient } from '../../services/EntityManager'
 import { Logger } from '../../services/Logger'
 import { Storage } from '../../services/Storage'
 import { StorageNodeSelector } from '../../services/StorageNodeSelector'
-import { Genre } from '../../types/Genre'
-import { Mood } from '../../types/Mood'
-import { Configuration } from '../generated/default'
+import { Configuration, Mood, Genre } from '../generated/default'
 import { PlaylistsApi as GeneratedPlaylistsApi } from '../generated/default/apis/PlaylistsApi'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
 
@@ -135,9 +133,14 @@ describe('PlaylistsApi', () => {
           name: 'coverArt'
         },
         metadata: {
-          playlistName: 'My Playlist'
-        },
-        trackIds: ['yyNwXq7']
+          playlistName: 'My Playlist',
+          playlistContents: [
+            {
+              trackId: 'yyNwXq7',
+              timestamp: 1
+            }
+          ]
+        }
       })
 
       expect(result).toStrictEqual({
@@ -155,8 +158,14 @@ describe('PlaylistsApi', () => {
             buffer: pngFile,
             name: 'coverArt'
           },
-          metadata: {} as any,
-          trackIds: ['yyNwXq7']
+          metadata: {
+            playlistContents: [
+              {
+                trackId: 'yyNwXq7',
+                timestamp: 1
+              }
+            ]
+          } as any
         })
       }).rejects.toThrow()
     })
@@ -172,8 +181,8 @@ describe('PlaylistsApi', () => {
         },
         metadata: {
           playlistName: 'My Playlist',
-          genre: Genre.ACOUSTIC,
-          mood: Mood.TENDER
+          genre: Genre.Acoustic,
+          mood: Mood.Tender
         },
         trackMetadatas: [
           {
@@ -300,7 +309,7 @@ describe('PlaylistsApi', () => {
         },
         metadata: {
           playlistName: 'My Playlist edited',
-          mood: Mood.TENDER,
+          mood: Mood.Tender,
           playlistContents: []
         }
       })
@@ -322,8 +331,8 @@ describe('PlaylistsApi', () => {
           },
           metadata: {
             playlistName: 'My Playlist edited',
-            playlistMood: Mood.TENDER,
-            mod: Mood.TENDER
+            playlistMood: Mood.Tender,
+            mod: Mood.Tender
           } as any
         })
       }).rejects.toThrow()

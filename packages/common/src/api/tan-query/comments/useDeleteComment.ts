@@ -1,3 +1,4 @@
+import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
@@ -27,7 +28,10 @@ export const useDeleteComment = () => {
   const dispatch = useDispatch()
   return useMutation({
     mutationFn: async ({ commentId, userId }: DeleteCommentArgs) => {
-      const commentData = { userId, entityId: commentId }
+      const commentData = {
+        userId: Id.parse(userId),
+        commentId: Id.parse(commentId)
+      }
       const sdk = await audiusSdk()
       return await sdk.comments.deleteComment(commentData)
     },

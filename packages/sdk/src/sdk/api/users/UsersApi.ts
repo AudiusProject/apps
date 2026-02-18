@@ -9,31 +9,29 @@ import {
   EntityManagerService,
   EntityType
 } from '../../services/EntityManager/types'
-import type { LoggerService } from '../../services/Logger'
 import type { ClaimableTokensClient } from '../../services/Solana/programs/ClaimableTokensClient/ClaimableTokensClient'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
-import { HashId } from '../../types/HashId'
+import { HashId, Id } from '../../types/HashId'
 import { generateMetadataCidV1 } from '../../utils/cid'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
-import { retry3 } from '../../utils/retry'
 import {
   Configuration,
   DownloadPurchasesAsCSVRequest,
   DownloadSalesAsCSVRequest,
   DownloadUSDCWithdrawalsAsCSVRequest,
-  UsersApi as GeneratedUsersApi
+  UsersApi as GeneratedUsersApi,
+  type UserPlaylistLibrary
 } from '../generated/default'
 import * as runtime from '../generated/default/runtime'
 
 import {
   AddAssociatedWalletRequest,
   AddAssociatedWalletSchema,
-  CreateUserRequest,
   CreateUserSchema,
   EmailRequest,
   EmailSchema,
-  FollowUserRequest,
+  EntityManagerFollowUserRequest,
   FollowUserSchema,
   RemoveAssociatedWalletRequest,
   RemoveAssociatedWalletSchema,
@@ -41,16 +39,21 @@ import {
   SendTipReactionRequestSchema,
   SendTipRequest,
   SendTipSchema,
-  SubscribeToUserRequest,
+  EntityManagerSubscribeToUserRequest,
   SubscribeToUserSchema,
-  UnfollowUserRequest,
+  EntityManagerUnfollowUserRequest,
   UnfollowUserSchema,
-  UnsubscribeFromUserRequest,
+  EntityManagerUnsubscribeFromUserRequest,
   UnsubscribeFromUserSchema,
   UpdateCollectiblesRequest,
   UpdateCollectiblesSchema,
-  UpdateProfileRequest,
-  UpdateProfileSchema
+  UpdateProfileSchema,
+  type EntityManagerCreateUserRequest,
+  type EntityManagerUpdateProfileRequest,
+  type UpdateUserRequestWithFiles,
+  type CreateUserRequestWithFiles,
+  type UserFileUploadParams,
+  type EntityManagerPlaylistLibraryContents
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
@@ -58,13 +61,11 @@ export class UsersApi extends GeneratedUsersApi {
     configuration: Configuration,
     private readonly storage: StorageService,
     private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService,
     private readonly claimableTokens: ClaimableTokensClient,
     private readonly solanaClient: SolanaClient,
     private readonly emailEncryption: EmailEncryptionService
   ) {
     super(configuration)
-    this.logger = logger.createPrefixedLogger('[users-api]')
   }
 
   /** @hidden
@@ -87,12 +88,14 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Create a user
    */
-  async createUser(
-    params: CreateUserRequest,
+  async createUserWithEntityManager(
+    params: EntityManagerCreateUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    const { onProgress, profilePictureFile, coverArtFile, metadata } =
-      await parseParams('createUser', CreateUserSchema)(params)
+    const { metadata } = await parseParams(
+      'createUser',
+      CreateUserSchema
+    )(params)
 
     const { data } = await this.generateUserId()
     if (!data) {
@@ -100,59 +103,7 @@ export class UsersApi extends GeneratedUsersApi {
     }
     const userId = HashId.parse(data)
 
-    const [profilePictureResp, coverArtResp] = await Promise.all([
-      profilePictureFile &&
-        retry3(
-          async () =>
-            await this.storage
-              .uploadFile({
-                file: profilePictureFile,
-                onProgress,
-                metadata: {
-                  template: 'img_square'
-                }
-              })
-              .start(),
-          (e) => {
-            this.logger.info('Retrying uploadProfilePicture', e)
-          }
-        ),
-      coverArtFile &&
-        retry3(
-          async () =>
-            await this.storage
-              .uploadFile({
-                file: coverArtFile,
-                onProgress,
-                metadata: {
-                  template: 'img_backdrop'
-                }
-              })
-              .start(),
-          (e) => {
-            this.logger.info('Retrying uploadProfileCoverArt', e)
-          }
-        )
-    ])
-
-    const updatedMetadata = {
-      ...metadata,
-      userId,
-      ...(profilePictureResp
-        ? {
-            profilePicture: profilePictureResp?.orig_file_cid,
-            profilePictureSizes: profilePictureResp?.orig_file_cid
-          }
-        : {}),
-      ...(coverArtResp
-        ? {
-            coverPhoto: coverArtResp?.orig_file_cid,
-            coverPhotoSizes: coverArtResp?.orig_file_cid
-          }
-        : {})
-    }
-
-    const entityMetadata = snakecaseKeys(updatedMetadata)
+    const entityMetadata = snakecaseKeys(metadata)
 
     const cid = (await generateMetadataCidV1(entityMetadata)).toString()
 
@@ -169,7 +120,29 @@ export class UsersApi extends GeneratedUsersApi {
       ...advancedOptions
     })
 
-    return { blockHash, blockNumber, metadata: updatedMetadata }
+    return { blockHash, blockNumber, metadata }
+  }
+
+  override async createUser(
+    params: CreateUserRequestWithFiles,
+    requestInit?: RequestInit
+  ) {
+    const metadata = await this.updateMetadataWithFiles(params.metadata, params)
+    if (this.entityManager) {
+      const res = await this.createUserWithEntityManager({
+        metadata
+      })
+      return {
+        success: true,
+        transactionHash: res.blockHash
+      }
+    }
+    return super.createUser(
+      {
+        metadata
+      },
+      requestInit
+    )
   }
 
   /** @hidden
@@ -205,66 +178,15 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Update a user profile
    */
-  async updateProfile(
-    params: UpdateProfileRequest,
+  async updateUserWithEntityManager(
+    params: EntityManagerUpdateProfileRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
-    const { onProgress, profilePictureFile, coverArtFile, userId, metadata } =
-      await parseParams('updateProfile', UpdateProfileSchema)(params)
-
-    const [profilePictureResp, coverArtResp] = await Promise.all([
-      profilePictureFile &&
-        retry3(
-          async () =>
-            await this.storage
-              .uploadFile({
-                file: profilePictureFile,
-                onProgress,
-                metadata: {
-                  template: 'img_square'
-                }
-              })
-              .start(),
-          (e) => {
-            this.logger.info('Retrying uploadProfilePicture', e)
-          }
-        ),
-      coverArtFile &&
-        retry3(
-          async () =>
-            await this.storage
-              .uploadFile({
-                file: coverArtFile,
-                onProgress,
-                metadata: {
-                  template: 'img_backdrop'
-                }
-              })
-              .start(),
-          (e) => {
-            this.logger.info('Retrying uploadProfileCoverArt', e)
-          }
-        )
-    ])
-
-    const updatedMetadata = snakecaseKeys({
-      ...metadata,
-      ...(profilePictureResp
-        ? {
-            profilePicture: profilePictureResp?.orig_file_cid,
-            profilePictureSizes: profilePictureResp?.orig_file_cid
-          }
-        : {}),
-      ...(coverArtResp
-        ? {
-            coverPhoto: coverArtResp?.orig_file_cid,
-            coverPhotoSizes: coverArtResp?.orig_file_cid
-          }
-        : {})
-    })
-
-    const cid = (await generateMetadataCidV1(updatedMetadata)).toString()
+    const { userId, metadata } = await parseParams(
+      'updateUser',
+      UpdateProfileSchema
+    )(params)
+    const cid = (await generateMetadataCidV1(metadata)).toString()
 
     // Write metadata to chain
     return await this.entityManager.manageEntity({
@@ -274,17 +196,118 @@ export class UsersApi extends GeneratedUsersApi {
       action: Action.UPDATE,
       metadata: JSON.stringify({
         cid,
-        data: updatedMetadata
+        data: snakecaseKeys(metadata)
       }),
       ...advancedOptions
     })
   }
 
+  private async updateMetadataWithFiles<
+    T extends
+      | CreateUserRequestWithFiles['metadata']
+      | UpdateUserRequestWithFiles['metadata']
+  >(metadata: T, fileUploadParams: UserFileUploadParams) {
+    const { onProgress, profilePictureFile, coverArtFile } = fileUploadParams
+    const [profilePictureResp, coverArtResp] = await Promise.all([
+      profilePictureFile
+        ? await this.storage
+            .uploadFile({
+              file: profilePictureFile,
+              onProgress,
+              metadata: {
+                template: 'img_square'
+              }
+            })
+            .start()
+        : null,
+      coverArtFile
+        ? await this.storage
+            .uploadFile({
+              file: coverArtFile,
+              onProgress,
+              metadata: {
+                template: 'img_backdrop'
+              }
+            })
+            .start()
+        : null
+    ])
+    if (profilePictureResp) {
+      metadata.profilePicture = profilePictureResp.orig_file_cid
+      metadata.profilePictureSizes = profilePictureResp.orig_file_cid
+    }
+    if (coverArtResp) {
+      metadata.coverPhoto = coverArtResp.orig_file_cid
+      metadata.coverPhotoSizes = coverArtResp.orig_file_cid
+    }
+    return metadata
+  }
+
+  private mapLibraryContentsToEntityManagerFormat(
+    libraryItems: UserPlaylistLibrary['contents']
+  ): EntityManagerPlaylistLibraryContents {
+    const items: EntityManagerPlaylistLibraryContents = []
+    for (const item of libraryItems) {
+      if (item.type === 'folder') {
+        const folder = {
+          id: item.id,
+          type: 'folder' as const,
+          name: item.name,
+          contents: this.mapLibraryContentsToEntityManagerFormat(item.contents)
+        }
+        items.push(folder)
+      }
+      if (item.type === 'playlist') {
+        items.push({
+          playlist_id: item.playlistId,
+          type: 'playlist' as const
+        })
+      }
+      if (item.type === 'explore_playlist') {
+        items.push({
+          playlist_id: item.playlistId,
+          type: 'explore_playlist' as const
+        })
+      }
+    }
+    return items
+  }
+
+  override async updateUser(
+    params: UpdateUserRequestWithFiles,
+    requestInit?: RequestInit
+  ) {
+    const metadata = await this.updateMetadataWithFiles(params.metadata, params)
+    if (this.entityManager) {
+      return await this.updateUserWithEntityManager({
+        userId: Id.parse(params.id)!,
+        metadata: {
+          ...metadata,
+          playlistLibrary: metadata.playlistLibrary?.contents
+            ? {
+                contents: this.mapLibraryContentsToEntityManagerFormat(
+                  metadata.playlistLibrary?.contents || []
+                )
+              }
+            : undefined
+        }
+      })
+    }
+    return super.updateUser(
+      {
+        id: params.id,
+        userId: params.userId,
+        metadata
+      },
+      requestInit
+    )
+  }
+
   /** @hidden
    * Follow a user
    */
-  async followUser(
-    params: FollowUserRequest,
+  async followUserWithEntityManager(
+    params: EntityManagerFollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -302,11 +325,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async followUser(
+    params: EntityManagerFollowUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.followUserWithEntityManager(
+        params as EntityManagerFollowUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.followUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Unfollow a user
    */
-  async unfollowUser(
-    params: UnfollowUserRequest,
+  async unfollowUserWithEntityManager(
+    params: EntityManagerUnfollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -324,11 +363,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async unfollowUser(
+    params: EntityManagerUnfollowUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.unfollowUserWithEntityManager(
+        params as EntityManagerUnfollowUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unfollowUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Subscribe to a user
    */
-  async subscribeToUser(
-    params: SubscribeToUserRequest,
+  async subscribeToUserWithEntityManager(
+    params: EntityManagerSubscribeToUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -346,11 +401,27 @@ export class UsersApi extends GeneratedUsersApi {
     })
   }
 
+  override async subscribeToUser(
+    params: EntityManagerSubscribeToUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.subscribeToUserWithEntityManager(
+        params as EntityManagerSubscribeToUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.subscribeToUser(params as any, requestInit)
+  }
+
   /** @hidden
    * Unsubscribe from a user
    */
-  async unsubscribeFromUser(
-    params: UnsubscribeFromUserRequest,
+  async unsubscribeFromUserWithEntityManager(
+    params: EntityManagerUnsubscribeFromUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -366,6 +437,22 @@ export class UsersApi extends GeneratedUsersApi {
       action: Action.UNSUBSCRIBE,
       ...advancedOptions
     })
+  }
+
+  override async unsubscribeFromUser(
+    params: EntityManagerUnsubscribeFromUserRequest | { id: string },
+    requestInit?: RequestInit
+  ) {
+    if (this.entityManager && 'userId' in params) {
+      const res = await this.unsubscribeFromUserWithEntityManager(
+        params as EntityManagerUnsubscribeFromUserRequest
+      )
+      return {
+        success: true,
+        transactionHash: res.transactionHash
+      }
+    }
+    return super.unsubscribeFromUser(params as any, requestInit)
   }
 
   /**
