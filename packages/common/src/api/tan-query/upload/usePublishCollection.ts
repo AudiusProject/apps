@@ -105,22 +105,30 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         ? fileToSdk(artworkBlob, 'cover_art')
         : undefined
       if (params.collectionMetadata.is_album) {
+        const metadata = albumMetadataForCreateWithSDK(
+          params.collectionMetadata
+        )
+        metadata.playlistContents = publishedTracks.map((t) => ({
+          timestamp: Date.now() / 1000,
+          trackId: Id.parse(t.trackId)
+        }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata: albumMetadataForCreateWithSDK(params.collectionMetadata),
-          trackIds: publishedTracks
-            .filter((t) => t.trackId && !t.error)
-            .map((t) => t.trackId!)
+          metadata
         })
       } else {
+        const metadata = playlistMetadataForCreateWithSDK(
+          params.collectionMetadata
+        )
+        metadata.playlistContents = publishedTracks.map((t) => ({
+          timestamp: Date.now() / 1000,
+          trackId: Id.parse(t.trackId)
+        }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata: playlistMetadataForCreateWithSDK(params.collectionMetadata),
-          trackIds: publishedTracks
-            .filter((t) => t.trackId && !t.error)
-            .map((t) => t.trackId!)
+          metadata
         })
       }
     }

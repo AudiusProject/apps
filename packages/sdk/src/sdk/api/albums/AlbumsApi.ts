@@ -1,7 +1,6 @@
 import { USDC } from '@audius/fixed-decimal'
 import { TransactionInstruction } from '@solana/web3.js'
 
-import type { UploadPlaylistRequest } from '../..'
 import type {
   ClaimableTokensClient,
   PaymentRouterClient,
@@ -22,6 +21,7 @@ import {
   type Configuration
 } from '../generated/default'
 import { PlaylistsApi } from '../playlists/PlaylistsApi'
+import type { UploadPlaylistRequest } from '../playlists/types'
 
 import {
   getAlbumRequest,
@@ -33,7 +33,7 @@ import {
   PurchaseAlbumSchema,
   UploadAlbumRequest,
   UploadAlbumSchema,
-  CreateAlbumRequest,
+  CreateAlbumRequestWithFiles,
   UpdateAlbumRequest,
   DeleteAlbumRequest,
   FavoriteAlbumRequest,
@@ -84,7 +84,10 @@ export class AlbumsApi {
   /** @hidden
    * Create an album from existing tracks
    */
-  async createAlbum(params: CreateAlbumRequest, requestInit?: RequestInit) {
+  async createAlbum(
+    params: CreateAlbumRequestWithFiles,
+    requestInit?: RequestInit
+  ) {
     const { metadata, ...rest } = params
     const { albumName, ...playlistMetadata } = metadata
 

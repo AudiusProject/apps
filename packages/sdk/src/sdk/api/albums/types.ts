@@ -34,7 +34,13 @@ export type UpdateAlbumRequestBody = Omit<
 // Album request types that wrap playlist request types
 export type CreateAlbumRequest = {
   userId: string
+  albumId?: string
   metadata: CreateAlbumRequestBody
+}
+
+export type CreateAlbumRequestWithFiles = CreateAlbumRequest & {
+  imageFile?: z.input<typeof ImageFile>
+  onProgress?: UploadPlaylistProgressHandler
 }
 
 export type UpdateAlbumRequest = {
