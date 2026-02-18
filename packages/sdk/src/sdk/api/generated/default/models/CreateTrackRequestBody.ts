@@ -80,49 +80,49 @@ export interface CreateTrackRequestBody {
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    description?: string;
+    description?: string | null;
     /**
      * 
      * @type {Mood}
      * @memberof CreateTrackRequestBody
      */
-    mood?: Mood;
+    mood?: Mood | null;
     /**
      * Beats per minute (tempo)
      * @type {number}
      * @memberof CreateTrackRequestBody
      */
-    bpm?: number;
+    bpm?: number | null;
     /**
      * Musical key of the track
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    musicalKey?: string;
+    musicalKey?: string | null;
     /**
      * Comma-separated tags
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    tags?: string;
+    tags?: string | null;
     /**
      * License type
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    license?: string;
+    license?: string | null;
     /**
      * International Standard Recording Code
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    isrc?: string;
+    isrc?: string | null;
     /**
      * International Standard Musical Work Code
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    iswc?: string;
+    iswc?: string | null;
     /**
      * Release date
      * @type {Date}
@@ -190,17 +190,23 @@ export interface CreateTrackRequestBody {
      */
     isUnlisted?: boolean;
     /**
-     * 
-     * @type {AccessGate}
+     * Whether streaming is restricted behind an access gate
+     * @type {boolean}
      * @memberof CreateTrackRequestBody
      */
-    streamConditions?: AccessGate;
+    isStreamGated?: boolean | null;
     /**
      * 
      * @type {AccessGate}
      * @memberof CreateTrackRequestBody
      */
-    downloadConditions?: AccessGate;
+    streamConditions?: AccessGate | null;
+    /**
+     * 
+     * @type {AccessGate}
+     * @memberof CreateTrackRequestBody
+     */
+    downloadConditions?: AccessGate | null;
     /**
      * 
      * @type {FieldVisibility}
@@ -355,6 +361,7 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
         'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
+        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
         'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
@@ -409,6 +416,7 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'duration': value.duration,
         'is_downloadable': value.isDownloadable,
         'is_unlisted': value.isUnlisted,
+        'is_stream_gated': value.isStreamGated,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),
         'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
