@@ -44,67 +44,73 @@ export interface UpdatePlaylistRequestBody {
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    playlistName?: string;
+    playlistName?: string | null;
     /**
      * Playlist description
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    description?: string;
+    description?: string | null;
     /**
      * Whether the playlist is private
      * @type {boolean}
      * @memberof UpdatePlaylistRequestBody
      */
-    isPrivate?: boolean;
+    isPrivate?: boolean | null;
     /**
      * 
      * @type {Genre}
      * @memberof UpdatePlaylistRequestBody
      */
-    genre?: Genre;
+    genre?: Genre | null;
     /**
      * 
      * @type {Mood}
      * @memberof UpdatePlaylistRequestBody
      */
-    mood?: Mood;
+    mood?: Mood | null;
     /**
      * Comma-separated tags
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    tags?: string;
+    tags?: string | null;
     /**
      * License type
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    license?: string;
+    license?: string | null;
     /**
      * Release date
      * @type {Date}
      * @memberof UpdatePlaylistRequestBody
      */
-    releaseDate?: Date;
+    releaseDate?: Date | null;
     /**
      * Array of track IDs to include in the playlist
      * @type {Array<PlaylistAddedTimestamp>}
      * @memberof UpdatePlaylistRequestBody
      */
-    playlistContents?: Array<PlaylistAddedTimestamp>;
+    playlistContents?: Array<PlaylistAddedTimestamp> | null;
+    /**
+     * Whether streaming is restricted behind an access gate
+     * @type {boolean}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    isStreamGated?: boolean | null;
     /**
      * IPFS CID for cover art
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    coverArtCid?: string;
+    coverArtCid?: string | null;
     /**
      * Universal Product Code (for albums)
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    upc?: string;
+    upc?: string | null;
     /**
      * Parental warning type
      * @type {string}
@@ -139,8 +145,9 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
         'license': !exists(json, 'license') ? undefined : json['license'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
-        'playlistContents': !exists(json, 'playlist_contents') ? undefined : ((json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
+        'releaseDate': !exists(json, 'release_date') ? undefined : (json['release_date'] === null ? null : new Date(json['release_date'])),
+        'playlistContents': !exists(json, 'playlist_contents') ? undefined : (json['playlist_contents'] === null ? null : (json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
+        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
@@ -163,8 +170,9 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'mood': MoodToJSON(value.mood),
         'tags': value.tags,
         'license': value.license,
-        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
-        'playlist_contents': value.playlistContents === undefined ? undefined : ((value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate === null ? null : value.releaseDate.toISOString().substr(0,10)),
+        'playlist_contents': value.playlistContents === undefined ? undefined : (value.playlistContents === null ? null : (value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
+        'is_stream_gated': value.isStreamGated,
         'cover_art_cid': value.coverArtCid,
         'upc': value.upc,
         'parental_warning_type': value.parentalWarningType,

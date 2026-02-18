@@ -309,6 +309,7 @@ export interface InspectTracksRequest {
 
 export interface RecordTrackDownloadRequest {
     trackId: string;
+    userId?: string;
     location?: TrackDownloadRequestBody;
 }
 
@@ -1779,6 +1780,10 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 

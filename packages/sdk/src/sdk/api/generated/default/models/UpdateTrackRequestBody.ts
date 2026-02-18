@@ -184,6 +184,12 @@ export interface UpdateTrackRequestBody {
      */
     isUnlisted?: boolean;
     /**
+     * Whether streaming is restricted behind an access gate
+     * @type {boolean}
+     * @memberof UpdateTrackRequestBody
+     */
+    isStreamGated?: boolean | null;
+    /**
      * 
      * @type {AccessGate}
      * @memberof UpdateTrackRequestBody
@@ -273,6 +279,7 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
         'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
+        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
         'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
@@ -314,6 +321,7 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
         'duration': value.duration,
         'is_downloadable': value.isDownloadable,
         'is_unlisted': value.isUnlisted,
+        'is_stream_gated': value.isStreamGated,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),
         'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
