@@ -63,7 +63,7 @@ export class TrackUploadHelper extends BaseAPI {
 
   public transformTrackUploadMetadataV2<
     T extends CreateTrackRequestBody | UpdateTrackRequestBody
-  >(inputMetadata: T, userId: number) {
+  >(inputMetadata: T, userId: number): T {
     const metadata: T = {
       ...inputMetadata,
       ownerId: userId
@@ -99,7 +99,7 @@ export class TrackUploadHelper extends BaseAPI {
     trackMetadata: T,
     audioResponse?: UploadResponse,
     coverArtResponse?: UploadResponse
-  ) {
+  ): T {
     let updated = {
       ...trackMetadata
     }
@@ -113,7 +113,7 @@ export class TrackUploadHelper extends BaseAPI {
             ? audioResponse.results[
                 `320_preview|${trackMetadata.previewStartSeconds}`
               ]
-            : trackMetadata.previewCid!,
+            : trackMetadata.previewCid,
         origFileCid: audioResponse.orig_file_cid,
         origFilename: audioResponse.orig_filename || trackMetadata.origFilename,
         duration: parseInt(audioResponse?.probe?.format?.duration ?? '0', 10),

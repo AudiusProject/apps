@@ -369,7 +369,7 @@ export class TracksApi extends GeneratedTracksApi {
         onProgress: params.onProgress
       }).start()
 
-    metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+    metadata = this.trackUploadHelper.transformTrackUploadMetadataV2(
       metadata,
       decodeHashId(params.userId)!
     )
