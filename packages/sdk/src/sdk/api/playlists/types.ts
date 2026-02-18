@@ -62,6 +62,7 @@ export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
 export type PlaylistMetadata = z.input<typeof CreatePlaylistMetadataSchema>
 
 const PlaylistTrackMetadataSchema = UploadTrackMetadataSchema.partial({
+  genre: true,
   mood: true,
   tags: true
 })
