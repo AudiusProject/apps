@@ -7,7 +7,7 @@ The Audius JavaScript (TypeScript) SDK allows you to easily interact with the Au
 - 🔍 Search and display users, tracks, and playlists
 - 🎵 Stream and upload tracks
 - ❤️ Favorite, repost, and curate playlists
-- ✍️ Allow your users to [log in with their Audius account](https://docs.audius.org/developers/log-in-with-audius) and act on their behalf
+- ✍️ Allow your users to [log in with their Audius account](https://docs.audius.co/developers/log-in-with-audius) and act on their behalf
 
 ...and much more!
 
@@ -162,6 +162,6 @@ Writing data (such as uploading or favoriting a track) is only possible if you p
 
 ## What's next?
 
-- [Get authorization](https://docs.audius.org/developers/guides/log-in-with-audius) to access your app's users' Audius accounts
+- [Get authorization](https://docs.audius.co/developers/guides/log-in-with-audius) to access your app's users' Audius accounts
 
-- [Explore the API docs](https://docs.audius.org/developers/sdk/tracks) to see what else you can do with the Audius SDK
+- [Explore the API docs](https://docs.audius.co/developers/sdk/tracks) to see what else you can do with the Audius SDK

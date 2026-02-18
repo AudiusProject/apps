@@ -96,19 +96,19 @@ export const getTrackByPermalink = async (handle, slug) => {
 }
 
 export const getCollection = async (id) => {
-  const res = await audiusSdk.playlists.getPlaylist({
+  const res = await audiusSdk.full.playlists.getPlaylist({
     playlistId: encodeHashId(id)
   })
   return getFormattedCollectionResponse(res.data)
 }
 
 export const getCollectionWithHashId = async (hashId) => {
-  const res = await audiusSdk.playlists.getPlaylist({ playlistId: hashId })
+  const res = await audiusSdk.full.playlists.getPlaylist({ playlistId: hashId })
   return getFormattedCollectionResponse(res.data)
 }
 
 export const getCollectionByPermalink = async (handle, slug) => {
-  const res = await audiusSdk.playlists.getPlaylistByHandleAndSlug({
+  const res = await audiusSdk.full.playlists.getPlaylistByHandleAndSlug({
     handle,
     slug
   })

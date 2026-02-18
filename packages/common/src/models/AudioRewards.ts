@@ -41,7 +41,6 @@ export enum ChallengeName {
   AudioMatchingBuy = 'b',
   AudioMatchingSell = 's',
   TrendingTrack = 'tt',
-  TrendingPlaylist = 'tp',
   TrendingUndergroundTrack = 'tut',
   TrackUpload = 'u',
   Referrals = 'r',
@@ -74,12 +73,10 @@ export type ChallengeRewardID =
   | ChallengeName.AudioMatchingSell // $AUDIO matching seller
   | ChallengeName.AudioMatchingBuy // $AUDIO matching buyer
   | 'trending-track'
-  | 'trending-playlist'
   | 'top-api'
   | 'verified-upload'
   | 'trending-underground'
   | ChallengeName.TrendingTrack
-  | ChallengeName.TrendingPlaylist
   | ChallengeName.TrendingUndergroundTrack
   | ChallengeName.TrackUpload
   | ChallengeName.Referrals

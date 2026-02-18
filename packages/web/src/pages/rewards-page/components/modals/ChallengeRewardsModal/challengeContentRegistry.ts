@@ -48,8 +48,6 @@ export const challengeContentRegistry: ChallengeContentMap = {
     RemixContestWinnerChallengeModalContent as ChallengeContentComponent,
   [ChallengeName.TrendingTrack]:
     TrendingRewardsModalContent as ChallengeContentComponent,
-  [ChallengeName.TrendingPlaylist]:
-    TrendingRewardsModalContent as ChallengeContentComponent,
   [ChallengeName.TrendingUndergroundTrack]:
     TrendingRewardsModalContent as ChallengeContentComponent,
   default: DefaultChallengeContent as ChallengeContentComponent

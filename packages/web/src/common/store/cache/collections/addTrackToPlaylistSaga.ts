@@ -38,7 +38,12 @@ import { make } from 'common/store/analytics/actions'
 import { ensureLoggedIn } from 'common/utils/ensureLoggedIn'
 import { waitForWrite } from 'utils/sagaHelpers'
 
+import {
+  hasPendingPlaylistUpdates,
+  isPlaylistConfirmerDone
+} from './utils/hasPendingPlaylistUpdates'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
+import { addTrackToCollectionLineupIfViewing } from './utils/updateCollectionPageLineup'
 
 const { setOptimisticChallengeCompleted } = audioRewardsPageActions
 
@@ -75,7 +80,9 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
   const isNative = yield* getContext('isNativeMobile')
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
+  const pending = yield* hasPendingPlaylistUpdates(playlistId)
+  const queryOpts = pending ? {} : { staleTime: 0 }
+  const playlist = yield* queryCollection(playlistId, queryOpts)
   const playlistTracks = yield* call(
     queryTracks,
     playlist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
@@ -128,6 +135,12 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
 
   // Optimistic update #2 to show updated artwork
   yield* call(optimisticUpdateCollection, updatedPlaylist)
+  yield* call(
+    addTrackToCollectionLineupIfViewing,
+    action.playlistId,
+    track,
+    trackUid
+  )
 
   yield* call(
     confirmAddTrackToPlaylist,
@@ -194,15 +207,12 @@ function* confirmAddTrackToPlaylist(
 
         return playlistId
       },
-      function* (confirmedPlaylistId: ID) {
-        const confirmedPlaylist = yield* call(
-          queryCollection,
-          confirmedPlaylistId
-        )
-
-        if (!confirmedPlaylist) return
-
-        yield* call(updateCollectionData, [confirmedPlaylist])
+      function* (_confirmedPlaylistId: ID) {
+        const done = yield* isPlaylistConfirmerDone(playlistId)
+        if (!done) return
+        // Don't refetch - the backend may not have propagated yet, and a refetch
+        // would overwrite our optimistic cache with stale data.
+        yield* call(updateCollectionData, [playlist])
       },
       function* ({ error, timeout, message }) {
         // Fail Call

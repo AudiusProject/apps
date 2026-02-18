@@ -14,10 +14,10 @@ export const fetchHandleInUse = async (
   if (!handle) return false
   const sdk = await audiusSdk()
   try {
-    const { data: user } = await sdk.users.getUserByHandle({
+    const { data: users = [] } = await sdk.full.users.getUserByHandle({
       handle
     })
-    return !isEmpty(user)
+    return !isEmpty(users[0])
   } catch (e: any) {
     if ('response' in e && e.response.status === 404) {
       // Expect not found when handle is available

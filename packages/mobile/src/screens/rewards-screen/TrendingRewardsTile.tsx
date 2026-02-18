@@ -84,6 +84,12 @@ export const TrendingRewards = () => {
 
 export const TrendingRewardsTile = () => {
   const styles = useStyles()
+  const rewardIds = useRewardIds()
+
+  if (rewardIds.length === 0) {
+    return null
+  }
+
   return (
     <Paper
       shadow='near'

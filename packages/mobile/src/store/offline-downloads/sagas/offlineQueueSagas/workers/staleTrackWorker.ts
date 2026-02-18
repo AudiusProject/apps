@@ -55,7 +55,7 @@ export function* handleStaleTrack(trackId: ID) {
 
   if (!currentTrack || !currentUserId) return OfflineDownloadStatus.ERROR
 
-  const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+  const { data } = yield* call([sdk.full.tracks, sdk.full.tracks.getTrack], {
     trackId: Id.parse(trackId),
     userId: OptionalId.parse(currentUserId)
   })

@@ -74,19 +74,19 @@ async function getMetadata(pathname, apiEndpoint) {
     case 'track': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      apiRequestPath = `v1/tracks?permalink=${encodeURIComponent(handle + '/' + title)}`
+      apiRequestPath = `v1/tracks?permalink=${handle + '/' + title}`
       break
     }
     case 'playlist': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      apiRequestPath = `v1/playlists/by_permalink/${encodeURIComponent(handle)}/${encodeURIComponent(title)}`
+      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
       break
     }
     case 'album': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      apiRequestPath = `v1/playlists/by_permalink/${encodeURIComponent(handle)}/${encodeURIComponent(title)}`
+      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
       break
     }
     default:
@@ -436,7 +436,10 @@ function isAssetUrl(url) {
     pathname.startsWith('/documents') ||
     pathname.startsWith('/gitsha.json') ||
     pathname.startsWith('/actions.json') ||
-    pathname.startsWith('/robots.txt')
+    pathname.startsWith('/robots.txt') ||
+    pathname.startsWith('/llms.txt') ||
+    pathname.startsWith('/agents.md') ||
+    pathname.startsWith('/skill.md')
   )
 }
 

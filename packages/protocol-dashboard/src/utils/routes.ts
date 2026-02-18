@@ -86,11 +86,11 @@ export const OAF_URL = 'https://audius.org'
 export const WHITEPAPER_URL = 'https://whitepaper.audius.co'
 export const AUDIUS_DAPP_URL =
   import.meta.env.VITE_AUDIUS_URL || 'https://audius.co'
-export const DOCS_URL = 'https://docs.audius.org/'
+export const DOCS_URL = 'https://docs.audius.co/'
 export const REGISTER_NODE_DOCS_URL =
   'https://docs.openaudio.org/tutorials/running-a-node'
 export const COOLDOWN_PERIOD_DOCS_URL =
-  'https://docs.audius.org/node-operator/staking/delegate#cooldown-period'
+  'https://docs.audius.co/node-operator/staking/delegate#cooldown-period'
 
 // Get Routes
 export const accountPage = (address: string) => {

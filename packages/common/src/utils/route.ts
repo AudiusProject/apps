@@ -196,7 +196,7 @@ export const externalInternalLinks = [
 
 // Org Links
 export const AUDIUS_ORG = 'https://audius.org'
-export const AUDIUS_DOCS_LINK = 'https://docs.audius.org'
+export const AUDIUS_DOCS_LINK = 'https://docs.audius.co'
 export const AUDIUS_TEAM_LINK = 'https://www.tikilabs.com/team'
 export const AUDIUS_DEV_STAKER_LINK = 'https://audius.org/protocol'
 

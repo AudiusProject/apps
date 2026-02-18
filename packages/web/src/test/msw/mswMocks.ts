@@ -27,16 +27,12 @@ const { apiEndpoint } = developmentConfig.network
 type TestUser = typeof artistUser | typeof nonArtistUser
 
 /**
- *  User mocks (v1/full for legacy; v1 for default API used by useUserByHandle)
+ *  User mocks
  */
-export const mockUserByHandle = (user: typeof artistUser) => [
+export const mockUserByHandle = (user: typeof artistUser) =>
   http.get(`${apiEndpoint}/v1/full/users/handle/${user.handle}`, () =>
     HttpResponse.json({ data: [user] })
-  ),
-  http.get(`${apiEndpoint}/v1/users/handle/${user.handle}`, () =>
-    HttpResponse.json({ data: user })
   )
-]
 
 export const mockRelatedUsers = (
   user: typeof artistUser,
@@ -162,7 +158,7 @@ export const mockUserCreatedCoin = (
  * Collections
  */
 export const mockCollectionById = (collection: typeof testCollection & any) =>
-  http.get(`${apiEndpoint}/v1/playlists`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/full/playlists`, ({ request }) => {
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
 
@@ -173,20 +169,25 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
     return HttpResponse.json({ data: [] })
   })
 
-const tracksByIdHandler =
-  (track: typeof testTrack & any) =>
-  ({ request }: { request: Request }) => {
+/**
+ * Tracks
+ */
+export const mockTrackById = (track: typeof testTrack & any) =>
+  http.get(`${apiEndpoint}/v1/full/tracks`, ({ request }) => {
     const url = new URL(request.url)
+    // Handle both single ID param and array params (id[]=1&id[]=2)
     const idParam = url.searchParams.get('id')
     const idArrayParams = url.searchParams.getAll('id[]')
     const ids =
       idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
 
+    // Get track IDs in various formats for comparison
     const trackIdStr = track.id?.toString()
     const trackTrackIdStr = track.track_id?.toString()
     const trackIdNum = track.id
     const trackTrackIdNum = track.track_id
 
+    // Check if any requested ID matches the track
     const matches = ids.some((id) => {
       const idNum = Number(id)
       return (
@@ -197,19 +198,13 @@ const tracksByIdHandler =
       )
     })
 
+    // If no IDs specified or we have a match, return the track
     if (ids.length === 0 || matches) {
       return HttpResponse.json({ data: [track] })
     }
-    return HttpResponse.json({ data: [] })
-  }
 
-/**
- * Tracks (matches both v1/full/tracks and v1/tracks for migration)
- */
-export const mockTrackById = (track: typeof testTrack & any) => [
-  http.get(`${apiEndpoint}/v1/full/tracks`, tracksByIdHandler(track)),
-  http.get(`${apiEndpoint}/v1/tracks`, tracksByIdHandler(track))
-]
+    return HttpResponse.json({ data: [] })
+  })
 
 /**
  * Notifications
@@ -218,75 +213,6 @@ export const mockUsers = (users: (typeof artistUser)[]) =>
   http.get(`${apiEndpoint}/v1/full/users`, () =>
     HttpResponse.json({ data: users })
   )
-
-/**
- * v1/users (default API) - bulk get users by id, used by getUsersBatcher
- */
-export const mockUsersById = (users: (typeof artistUser)[]) =>
-  http.get(`${apiEndpoint}/v1/users`, ({ request }) => {
-    const url = new URL(request.url)
-    const idParam = url.searchParams.get('id')
-    const idArrayParams = url.searchParams.getAll('id[]')
-    const ids =
-      idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
-
-    if (ids.length === 0) {
-      return HttpResponse.json({ data: users })
-    }
-    const filtered = users.filter((u) => ids.includes(u.id?.toString()))
-    return HttpResponse.json({ data: filtered })
-  })
-
-const escapedApi = apiEndpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-// Match path with optional query string (?...)
-const v1UserTracksPath = new RegExp(
-  `^${escapedApi}/v1/users/[^/]+/tracks(\\?|$)`
-)
-const v1UserTracksCountPath = new RegExp(
-  `^${escapedApi}/v1/users/[^/]+/tracks/count(\\?|$)`
-)
-
-/**
- * v1/users/:id/tracks (default API) - user's tracks, used by getTracksByUser.
- * Call with no args to match any user and return [].
- */
-export const mockUserTracks = (
-  userIdOrTracks?: string | (typeof testTrack)[],
-  tracks?: (typeof testTrack)[]
-): ReturnType<typeof http.get> => {
-  if (userIdOrTracks === undefined) {
-    return http.get(v1UserTracksPath, () => HttpResponse.json({ data: [] }))
-  }
-  if (Array.isArray(userIdOrTracks)) {
-    return http.get(v1UserTracksPath, () =>
-      HttpResponse.json({ data: userIdOrTracks })
-    )
-  }
-  return http.get(`${apiEndpoint}/v1/users/${userIdOrTracks}/tracks`, () =>
-    HttpResponse.json({ data: tracks ?? [] })
-  )
-}
-
-/**
- * v1/users/:id/tracks/count (default API) - user's track count, used by getTracksCountByUser.
- * Call with no args to match any user and return 0.
- */
-export const mockUserTracksCount = (
-  userIdOrCount?: string | number,
-  count?: number
-): ReturnType<typeof http.get> => {
-  if (userIdOrCount === undefined) {
-    return http.get(v1UserTracksCountPath, () => HttpResponse.json({ data: 0 }))
-  }
-  if (typeof userIdOrCount === 'number') {
-    return http.get(v1UserTracksCountPath, () =>
-      HttpResponse.json({ data: userIdOrCount })
-    )
-  }
-  return http.get(`${apiEndpoint}/v1/users/${userIdOrCount}/tracks/count`, () =>
-    HttpResponse.json({ data: count ?? 0 })
-  )
-}
 
 export const mockTracks = (tracks: (typeof testTrack)[]) =>
   http.get(`${apiEndpoint}/v1/full/tracks`, () =>

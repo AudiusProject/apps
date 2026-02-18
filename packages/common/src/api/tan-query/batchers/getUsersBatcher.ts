@@ -17,7 +17,7 @@ export const getUsersBatcher = memoize(
       fetcher: async (ids: ID[]): Promise<UserMetadata[]> => {
         const { sdk, currentUserId } = context
         if (!ids.length) return []
-        const { data } = await sdk.users.getBulkUsers({
+        const { data } = await sdk.full.users.getBulkUsers({
           id: ids.map((id) => Id.parse(id)),
           userId: OptionalId.parse(currentUserId)
         })

@@ -49,7 +49,12 @@ import { watchAddTrackToPlaylist } from './addTrackToPlaylistSaga'
 import { confirmOrderPlaylist } from './confirmOrderPlaylist'
 import { createAlbumSaga } from './createAlbumSaga'
 import { createPlaylistSaga } from './createPlaylistSaga'
+import {
+  hasPendingPlaylistUpdates,
+  isPlaylistConfirmerDone
+} from './utils/hasPendingPlaylistUpdates'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
+import { updateCollectionLineupOrderIfViewing } from './utils/updateCollectionPageLineup'
 
 const { manualClearToast, toast } = toastActions
 
@@ -101,9 +106,11 @@ function* editPlaylistAsync(
     })
   )
 
+  const pending = yield* hasPendingPlaylistUpdates(playlistId)
+  const queryOpts = pending ? {} : { staleTime: 0 }
   let playlist: Collection = { ...formFields }
   const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
+    ...queryOpts
   })
   const updatedTracks = (yield* all(
     formFields.playlist_contents.track_ids.map(({ track }) =>
@@ -144,17 +151,20 @@ function* editPlaylistAsync(
   yield* put(toast({ content: messages.editToast }))
 
   if (playlistBeforeEdit?.is_private && !playlist.is_private) {
-    const playlistTracks = yield* call(queryCollectionTracks, playlistId)
+    const playlistTracksForPublish = yield* call(
+      queryCollectionTracks,
+      playlistId
+    )
 
     // Publish all hidden tracks
     // If the playlist is a scheduled release
     //    AND all tracks are scheduled releases, publish them all
-    const isEachTrackScheduled = playlistTracks?.every(
+    const isEachTrackScheduled = playlistTracksForPublish?.every(
       (track) => track.is_unlisted && track.is_scheduled_release
     )
     const isEarlyRelease =
       playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
-    for (const track of playlistTracks ?? []) {
+    for (const track of playlistTracksForPublish ?? []) {
       if (
         track.is_unlisted &&
         (!track.is_scheduled_release || isEarlyRelease)
@@ -199,17 +209,18 @@ function* confirmEditPlaylist(
             playlistId: Id.parse(playlistId)
           })
         }
-        const response = yield* call(
-          [sdk.playlists, sdk.playlists.getPlaylist],
+        const { data: playlist } = yield* call(
+          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)
           }
         )
-        const playlist = response?.data ?? []
-        return playlist[0] ? userCollectionMetadataFromSDK(playlist[0]) : null
+        return playlist?.[0] ? userCollectionMetadataFromSDK(playlist[0]) : null
       },
       function* (confirmedPlaylist: Collection) {
+        const done = yield* isPlaylistConfirmerDone(playlistId)
+        if (!done) return
         yield* call(updateCollectionData, [confirmedPlaylist])
       },
       function* ({ error, timeout, message }) {
@@ -244,9 +255,11 @@ function* removeTrackFromPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  const playlist = yield* queryCollection(playlistId, { staleTime: 0 })
+  const pending = yield* hasPendingPlaylistUpdates(playlistId)
+  const queryOpts = pending ? {} : { staleTime: 0 }
+  const playlist = yield* queryCollection(playlistId, queryOpts)
   const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
+    ...queryOpts
   })
   const removedTrack = yield* queryTrack(trackId)
 
@@ -280,6 +293,11 @@ function* removeTrackFromPlaylistAsync(
     })
   )
 
+  yield* call(optimisticUpdateCollection, {
+    ...updatedPlaylist,
+    track_count: count
+  })
+  // UI already dispatches lineup remove - skip full refresh to preserve scroll
   yield* call(
     confirmRemoveTrackFromPlaylist,
     userId,
@@ -289,10 +307,6 @@ function* removeTrackFromPlaylistAsync(
     count,
     updatedPlaylist
   )
-  yield* call(optimisticUpdateCollection, {
-    ...updatedPlaylist,
-    track_count: count
-  })
 }
 
 function* confirmRemoveTrackFromPlaylist(
@@ -322,13 +336,13 @@ function* confirmRemoveTrackFromPlaylist(
         })
         return confirmedPlaylistId
       },
-      function* (confirmedPlaylistId: ID) {
-        const confirmedPlaylist = yield* call(
-          queryCollection,
-          confirmedPlaylistId
-        )
-        if (!confirmedPlaylist) return
-        yield* call(updateCollectionData, [confirmedPlaylist])
+      function* (_confirmedPlaylistId: ID) {
+        const done = yield* isPlaylistConfirmerDone(playlistId)
+        if (!done) return
+        // Don't refetch - the backend may not have propagated yet, and a refetch
+        // would overwrite our optimistic cache with stale data (tracks reappearing).
+        // Our playlist state is correct since we just sent it to the API.
+        yield* call(updateCollectionData, [playlist])
         yield* put(manualClearToast({ key: `remove-track-${trackId}` }))
         yield* put(
           toast({
@@ -373,10 +387,12 @@ function* orderPlaylistAsync(
   const userId = yield* call(ensureLoggedIn)
   const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
+  const pending = yield* hasPendingPlaylistUpdates(playlistId)
+  const queryOpts = pending ? {} : { staleTime: 0 }
   const oldPlaylist = yield* queryCollection(playlistId)
-  const freshPlaylist = yield* queryCollection(playlistId, { staleTime: 0 })
+  const freshPlaylist = yield* queryCollection(playlistId, queryOpts)
   const tracks = yield* call(queryCollectionTracks, playlistId, {
-    staleTime: 0
+    ...queryOpts
   })
 
   const oldTracks =
@@ -428,6 +444,8 @@ function* orderPlaylistAsync(
     ({ id, time }) => ({ track: id, time })
   )
 
+  yield* call(optimisticUpdateCollection, updatedPlaylist)
+  yield* call(updateCollectionLineupOrderIfViewing, action.playlistId, trackIds)
   yield* call(
     confirmOrderPlaylist,
     userId,
@@ -435,8 +453,6 @@ function* orderPlaylistAsync(
     trackIds,
     updatedPlaylist
   )
-
-  yield* call(optimisticUpdateCollection, updatedPlaylist)
 }
 
 /** PUBLISH PLAYLIST */
@@ -497,17 +513,18 @@ function* confirmPublishPlaylist(
           playlistId: Id.parse(playlistId)
         })
 
-        const response = yield* call(
-          [sdk.playlists, sdk.playlists.getPlaylist],
+        const { data } = yield* call(
+          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)
           }
         )
-        const data = response?.data ?? []
-        return data[0] ? userCollectionMetadataFromSDK(data[0]) : null
+        return data?.[0] ? userCollectionMetadataFromSDK(data[0]) : null
       },
       function* (confirmedPlaylist: Collection) {
+        const done = yield* isPlaylistConfirmerDone(playlistId)
+        if (!done) return
         confirmedPlaylist.is_private = false
         confirmedPlaylist._is_publishing = false
         yield* call(updateCollectionData, [confirmedPlaylist])

@@ -1,4 +1,5 @@
 import {
+  getCollectionQueryKey,
   queryCollection,
   queryCollectionByPermalink,
   queryTracks
@@ -7,13 +8,16 @@ import { Kind } from '@audius/common/models'
 import {
   collectionPageLineupActions as tracksActions,
   collectionPageSelectors,
+  getContext,
   queueSelectors
 } from '@audius/common/store'
 import { dayjs, removeNullable, Uid } from '@audius/common/utils'
 import { keyBy } from 'lodash'
 import { select, call } from 'redux-saga/effects'
 
+import { hasPendingPlaylistUpdates } from 'common/store/cache/collections/utils/hasPendingPlaylistUpdates'
 import { LineupSagas } from 'common/store/lineup/sagas'
+
 const { getPositions } = queueSelectors
 const { getCollectionId, getCollectionTracksLineup, getCollectionPermalink } =
   collectionPageSelectors
@@ -23,10 +27,20 @@ function* getCollectionTracks() {
   const collectionId = yield select(getCollectionId)
   let collection
 
-  if (permalink) {
-    collection = yield call(queryCollectionByPermalink, permalink)
-  } else if (collectionId) {
-    collection = yield call(queryCollection, collectionId)
+  const pending = collectionId
+    ? yield* hasPendingPlaylistUpdates(collectionId)
+    : false
+
+  if (pending && collectionId) {
+    const queryClient = yield getContext('queryClient')
+    collection = queryClient.getQueryData(getCollectionQueryKey(collectionId))
+  }
+  if (!collection) {
+    if (permalink) {
+      collection = yield call(queryCollectionByPermalink, permalink)
+    } else if (collectionId) {
+      collection = yield call(queryCollection, collectionId)
+    }
   }
 
   if (!collection) return []

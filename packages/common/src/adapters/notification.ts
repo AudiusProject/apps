@@ -642,5 +642,4 @@ export const notificationFromSDK = (
       }
     }
   }
-  return undefined
 }

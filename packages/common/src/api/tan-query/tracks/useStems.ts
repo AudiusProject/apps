@@ -31,7 +31,7 @@ export const useStems = (
     queryKey: getStemsQueryKey(trackId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.tracks.getTrackStems({
+      const { data = [] } = await sdk.full.tracks.getTrackStems({
         trackId: Id.parse(trackId!)
       })
 
