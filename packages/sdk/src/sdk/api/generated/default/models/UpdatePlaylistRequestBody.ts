@@ -14,6 +14,30 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { AccessGate } from './AccessGate';
+import {
+    AccessGateFromJSON,
+    AccessGateFromJSONTyped,
+    AccessGateToJSON,
+} from './AccessGate';
+import type { CreatePlaylistRequestBodyCopyrightLine } from './CreatePlaylistRequestBodyCopyrightLine';
+import {
+    CreatePlaylistRequestBodyCopyrightLineFromJSON,
+    CreatePlaylistRequestBodyCopyrightLineFromJSONTyped,
+    CreatePlaylistRequestBodyCopyrightLineToJSON,
+} from './CreatePlaylistRequestBodyCopyrightLine';
+import type { CreatePlaylistRequestBodyProducerCopyrightLine } from './CreatePlaylistRequestBodyProducerCopyrightLine';
+import {
+    CreatePlaylistRequestBodyProducerCopyrightLineFromJSON,
+    CreatePlaylistRequestBodyProducerCopyrightLineFromJSONTyped,
+    CreatePlaylistRequestBodyProducerCopyrightLineToJSON,
+} from './CreatePlaylistRequestBodyProducerCopyrightLine';
+import type { DdexResourceContributor } from './DdexResourceContributor';
+import {
+    DdexResourceContributorFromJSON,
+    DdexResourceContributorFromJSONTyped,
+    DdexResourceContributorToJSON,
+} from './DdexResourceContributor';
 import type { Genre } from './Genre';
 import {
     GenreFromJSON,
@@ -44,55 +68,73 @@ export interface UpdatePlaylistRequestBody {
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    playlistName?: string | null;
+    playlistName?: string;
     /**
      * Playlist description
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    description?: string | null;
+    description?: string;
     /**
      * Whether the playlist is private
      * @type {boolean}
      * @memberof UpdatePlaylistRequestBody
      */
-    isPrivate?: boolean | null;
+    isPrivate?: boolean;
+    /**
+     * Whether this is an album
+     * @type {boolean}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    isAlbum?: boolean;
     /**
      * 
      * @type {Genre}
      * @memberof UpdatePlaylistRequestBody
      */
-    genre?: Genre | null;
+    genre?: Genre;
     /**
      * 
      * @type {Mood}
      * @memberof UpdatePlaylistRequestBody
      */
-    mood?: Mood | null;
+    mood?: Mood;
     /**
      * Comma-separated tags
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    tags?: string | null;
+    tags?: string;
     /**
      * License type
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    license?: string | null;
+    license?: string;
+    /**
+     * Universal Product Code (for albums)
+     * @type {string}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    upc?: string;
     /**
      * Release date
      * @type {Date}
      * @memberof UpdatePlaylistRequestBody
      */
-    releaseDate?: Date | null;
+    releaseDate?: Date;
+    /**
+     * IPFS CID for cover art
+     * @type {string}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    coverArtCid?: string;
     /**
      * Array of track IDs to include in the playlist
      * @type {Array<PlaylistAddedTimestamp>}
      * @memberof UpdatePlaylistRequestBody
      */
-    playlistContents?: Array<PlaylistAddedTimestamp> | null;
+    playlistContents?: Array<PlaylistAddedTimestamp>;
     /**
      * Whether streaming is restricted behind an access gate
      * @type {boolean}
@@ -100,23 +142,59 @@ export interface UpdatePlaylistRequestBody {
      */
     isStreamGated?: boolean | null;
     /**
-     * IPFS CID for cover art
-     * @type {string}
+     * Whether the playlist/album is a scheduled release
+     * @type {boolean}
      * @memberof UpdatePlaylistRequestBody
      */
-    coverArtCid?: string | null;
+    isScheduledRelease?: boolean | null;
     /**
-     * Universal Product Code (for albums)
+     * 
+     * @type {AccessGate}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    streamConditions?: AccessGate | null;
+    /**
+     * DDEX application identifier
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    upc?: string | null;
+    ddexApp?: string;
+    /**
+     * DDEX release identifiers
+     * @type {{ [key: string]: string; }}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    ddexReleaseIds?: { [key: string]: string; } | null;
+    /**
+     * DDEX resource contributors / artists
+     * @type {Array<DdexResourceContributor>}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    artists?: Array<DdexResourceContributor> | null;
+    /**
+     * 
+     * @type {CreatePlaylistRequestBodyCopyrightLine}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    copyrightLine?: CreatePlaylistRequestBodyCopyrightLine | null;
+    /**
+     * 
+     * @type {CreatePlaylistRequestBodyProducerCopyrightLine}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    producerCopyrightLine?: CreatePlaylistRequestBodyProducerCopyrightLine | null;
     /**
      * Parental warning type
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
     parentalWarningType?: string | null;
+    /**
+     * Whether the image is autogenerated
+     * @type {boolean}
+     * @memberof UpdatePlaylistRequestBody
+     */
+    isImageAutogenerated?: boolean | null;
 }
 
 /**
@@ -141,16 +219,25 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'playlistName': !exists(json, 'playlist_name') ? undefined : json['playlist_name'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'isPrivate': !exists(json, 'is_private') ? undefined : json['is_private'],
+        'isAlbum': !exists(json, 'is_album') ? undefined : json['is_album'],
         'genre': !exists(json, 'genre') ? undefined : GenreFromJSON(json['genre']),
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
         'license': !exists(json, 'license') ? undefined : json['license'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : (json['release_date'] === null ? null : new Date(json['release_date'])),
-        'playlistContents': !exists(json, 'playlist_contents') ? undefined : (json['playlist_contents'] === null ? null : (json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
-        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
-        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
+        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
+        'playlistContents': !exists(json, 'playlist_contents') ? undefined : ((json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
+        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
+        'isScheduledRelease': !exists(json, 'is_scheduled_release') ? undefined : json['is_scheduled_release'],
+        'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
+        'ddexApp': !exists(json, 'ddex_app') ? undefined : json['ddex_app'],
+        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
+        'artists': !exists(json, 'artists') ? undefined : (json['artists'] === null ? null : (json['artists'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : CreatePlaylistRequestBodyCopyrightLineFromJSON(json['copyright_line']),
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : CreatePlaylistRequestBodyProducerCopyrightLineFromJSON(json['producer_copyright_line']),
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
+        'isImageAutogenerated': !exists(json, 'is_image_autogenerated') ? undefined : json['is_image_autogenerated'],
     };
 }
 
@@ -166,16 +253,25 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'playlist_name': value.playlistName,
         'description': value.description,
         'is_private': value.isPrivate,
+        'is_album': value.isAlbum,
         'genre': GenreToJSON(value.genre),
         'mood': MoodToJSON(value.mood),
         'tags': value.tags,
         'license': value.license,
-        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate === null ? null : value.releaseDate.toISOString().substr(0,10)),
-        'playlist_contents': value.playlistContents === undefined ? undefined : (value.playlistContents === null ? null : (value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
-        'is_stream_gated': value.isStreamGated,
-        'cover_art_cid': value.coverArtCid,
         'upc': value.upc,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
+        'cover_art_cid': value.coverArtCid,
+        'playlist_contents': value.playlistContents === undefined ? undefined : ((value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
+        'is_stream_gated': value.isStreamGated,
+        'is_scheduled_release': value.isScheduledRelease,
+        'stream_conditions': AccessGateToJSON(value.streamConditions),
+        'ddex_app': value.ddexApp,
+        'ddex_release_ids': value.ddexReleaseIds,
+        'artists': value.artists === undefined ? undefined : (value.artists === null ? null : (value.artists as Array<any>).map(DdexResourceContributorToJSON)),
+        'copyright_line': CreatePlaylistRequestBodyCopyrightLineToJSON(value.copyrightLine),
+        'producer_copyright_line': CreatePlaylistRequestBodyProducerCopyrightLineToJSON(value.producerCopyrightLine),
         'parental_warning_type': value.parentalWarningType,
+        'is_image_autogenerated': value.isImageAutogenerated,
     };
 }
 

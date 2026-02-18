@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 apis/ChallengesApi.ts
 apis/CoinsApi.ts
 apis/CommentsApi.ts
@@ -73,6 +74,8 @@ models/CreateDeveloperAppRequestBody.ts
 models/CreateDeveloperAppResponse.ts
 models/CreateGrantRequestBody.ts
 models/CreatePlaylistRequestBody.ts
+models/CreatePlaylistRequestBodyCopyrightLine.ts
+models/CreatePlaylistRequestBodyProducerCopyrightLine.ts
 models/CreatePlaylistResponse.ts
 models/CreateRewardCodeRequestBody.ts
 models/CreateRewardCodeResponse.ts
@@ -85,6 +88,8 @@ models/CreateUserRequestBodyEvents.ts
 models/CreateUserResponse.ts
 models/DashboardWalletUser.ts
 models/DashboardWalletUsersResponse.ts
+models/DdexCopyright.ts
+models/DdexResourceContributor.ts
 models/DeactivateAccessKeyRequestBody.ts
 models/DeactivateAccessKeyResponse.ts
 models/DecodedUserToken.ts
