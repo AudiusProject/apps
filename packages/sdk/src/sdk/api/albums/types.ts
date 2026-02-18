@@ -53,6 +53,9 @@ export type DeleteAlbumRequest = {
 export type FavoriteAlbumRequest = {
   userId: string
   albumId: string
+  metadata?: {
+    isSaveOfRepost?: boolean
+  }
 }
 
 export type UnfavoriteAlbumRequest = {

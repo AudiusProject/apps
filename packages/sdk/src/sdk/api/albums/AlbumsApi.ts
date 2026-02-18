@@ -170,7 +170,8 @@ export class AlbumsApi {
   async favoriteAlbum(params: FavoriteAlbumRequest, requestInit?: RequestInit) {
     const playlistParams = {
       userId: params.userId,
-      playlistId: params.albumId
+      playlistId: params.albumId,
+      metadata: params.metadata
     }
     return await this.playlistsApi.favoritePlaylist(playlistParams, requestInit)
   }
