@@ -109,7 +109,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
           params.collectionMetadata
         )
         metadata.playlistContents = publishedTracks.map((t) => ({
-          metadataTimestamp: Date.now() / 1000,
           timestamp: Date.now() / 1000,
           trackId: Id.parse(t.trackId)
         }))
@@ -123,7 +122,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
           params.collectionMetadata
         )
         metadata.playlistContents = publishedTracks.map((t) => ({
-          metadataTimestamp: Date.now() / 1000,
           timestamp: Date.now() / 1000,
           trackId: Id.parse(t.trackId)
         }))
