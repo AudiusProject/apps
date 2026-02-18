@@ -188,7 +188,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
             trackMetadata,
             audioResponse,
             imageUploadResponse
-          )
+          ) as CreateTrackRequestBody
 
         if (this.entityManager) {
           const trackId = await this.trackUploadHelper.generateId('track')
