@@ -387,20 +387,27 @@ def update_user_events(
                 and user_events.referrer is None
                 and user_record.user_id != value
             ):
-                user_events.referrer = value
-                bus.dispatch(
-                    ChallengeEvent.referral_signup,
-                    user_record.blocknumber,
-                    params.block_datetime,
-                    value,
-                    {"referred_user_id": user_record.user_id},
+                referrer_is_verified = (
+                    params.session.query(User.is_verified)
+                    .filter(User.user_id == value, User.is_current == True)
+                    .scalar()
+                    or False
                 )
-                bus.dispatch(
-                    ChallengeEvent.referred_signup,
-                    user_record.blocknumber,
-                    params.block_datetime,
-                    user_record.user_id,
-                )
+                if referrer_is_verified:
+                    user_events.referrer = value
+                    bus.dispatch(
+                        ChallengeEvent.referral_signup,
+                        user_record.blocknumber,
+                        params.block_datetime,
+                        value,
+                        {"referred_user_id": user_record.user_id},
+                    )
+                    bus.dispatch(
+                        ChallengeEvent.referred_signup,
+                        user_record.blocknumber,
+                        params.block_datetime,
+                        user_record.user_id,
+                    )
             elif (
                 event == "is_mobile_user"
                 and isinstance(value, bool)
