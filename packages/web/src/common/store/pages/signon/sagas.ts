@@ -53,8 +53,8 @@ import {
   OptionalId,
   CreateUserRequestWithFiles,
   Id,
-  UpdateUserRequest,
-  decodeHashId
+  decodeHashId,
+  type UpdateUserRequestWithFiles
 } from '@audius/sdk'
 import { isEmpty } from 'lodash'
 import {
@@ -492,15 +492,17 @@ function* signUp() {
                 throw new Error('Account user ID does not exist')
               }
               userId = account.user.user_id
-              const completeProfileMetadataRequest: UpdateUserRequest = {
-                userId: Id.parse(userId),
-                profilePictureFile: signOn.profileImage?.file as File,
-                metadata: {
-                  location: location ?? undefined,
-                  name,
-                  handle
+              const completeProfileMetadataRequest: UpdateUserRequestWithFiles =
+                {
+                  id: Id.parse(userId),
+                  userId: Id.parse(userId),
+                  profilePictureFile: signOn.profileImage?.file as File,
+                  metadata: {
+                    location: location ?? undefined,
+                    name,
+                    handle
+                  }
                 }
-              }
               yield* call(
                 [sdk.users, sdk.users.updateUser],
                 completeProfileMetadataRequest
