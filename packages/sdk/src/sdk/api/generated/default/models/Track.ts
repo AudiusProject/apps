@@ -464,7 +464,7 @@ export interface Track {
      * @type {string}
      * @memberof Track
      */
-    parentalWarningType?: string;
+    parentalWarningType?: string | null;
     /**
      * 
      * @type {object}

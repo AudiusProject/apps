@@ -230,13 +230,85 @@ export interface CreateTrackRequestBody {
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    ddexApp?: string;
+    ddexApp?: string | null;
+    /**
+     * DDEX release identifiers
+     * @type {object}
+     * @memberof CreateTrackRequestBody
+     */
+    ddexReleaseIds?: object | null;
+    /**
+     * DDEX resource contributors / artists
+     * @type {Array<object>}
+     * @memberof CreateTrackRequestBody
+     */
+    artists?: Array<object> | null;
+    /**
+     * DDEX resource contributors
+     * @type {Array<object>}
+     * @memberof CreateTrackRequestBody
+     */
+    resourceContributors?: Array<object> | null;
+    /**
+     * DDEX indirect resource contributors
+     * @type {Array<object>}
+     * @memberof CreateTrackRequestBody
+     */
+    indirectResourceContributors?: Array<object> | null;
+    /**
+     * DDEX rights controller
+     * @type {object}
+     * @memberof CreateTrackRequestBody
+     */
+    rightsController?: object | null;
+    /**
+     * DDEX copyright line
+     * @type {object}
+     * @memberof CreateTrackRequestBody
+     */
+    copyrightLine?: object | null;
+    /**
+     * DDEX producer copyright line
+     * @type {object}
+     * @memberof CreateTrackRequestBody
+     */
+    producerCopyrightLine?: object | null;
     /**
      * Parental warning type
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
-    parentalWarningType?: string;
+    parentalWarningType?: string | null;
+    /**
+     * Original song title for cover tracks
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    coverOriginalSongTitle?: string | null;
+    /**
+     * Original artist for cover tracks
+     * @type {string}
+     * @memberof CreateTrackRequestBody
+     */
+    coverOriginalArtist?: string | null;
+    /**
+     * Whether the track is owned by the user
+     * @type {boolean}
+     * @memberof CreateTrackRequestBody
+     */
+    isOwnedByUser?: boolean;
+    /**
+     * Territory codes for distribution
+     * @type {Array<string>}
+     * @memberof CreateTrackRequestBody
+     */
+    territoryCodes?: Array<string> | null;
+    /**
+     * Whether AI use is prohibited
+     * @type {boolean}
+     * @memberof CreateTrackRequestBody
+     */
+    noAiUse?: boolean;
 }
 
 /**
@@ -290,7 +362,19 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'stemOf': !exists(json, 'stem_of') ? undefined : StemParentFromJSON(json['stem_of']),
         'remixOf': !exists(json, 'remix_of') ? undefined : RemixParentWriteFromJSON(json['remix_of']),
         'ddexApp': !exists(json, 'ddex_app') ? undefined : json['ddex_app'],
+        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
+        'artists': !exists(json, 'artists') ? undefined : json['artists'],
+        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : json['resource_contributors'],
+        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : json['indirect_resource_contributors'],
+        'rightsController': !exists(json, 'rights_controller') ? undefined : json['rights_controller'],
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
+        'coverOriginalSongTitle': !exists(json, 'cover_original_song_title') ? undefined : json['cover_original_song_title'],
+        'coverOriginalArtist': !exists(json, 'cover_original_artist') ? undefined : json['cover_original_artist'],
+        'isOwnedByUser': !exists(json, 'is_owned_by_user') ? undefined : json['is_owned_by_user'],
+        'territoryCodes': !exists(json, 'territory_codes') ? undefined : json['territory_codes'],
+        'noAiUse': !exists(json, 'no_ai_use') ? undefined : json['no_ai_use'],
     };
 }
 
@@ -332,7 +416,19 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'stem_of': StemParentToJSON(value.stemOf),
         'remix_of': RemixParentWriteToJSON(value.remixOf),
         'ddex_app': value.ddexApp,
+        'ddex_release_ids': value.ddexReleaseIds,
+        'artists': value.artists,
+        'resource_contributors': value.resourceContributors,
+        'indirect_resource_contributors': value.indirectResourceContributors,
+        'rights_controller': value.rightsController,
+        'copyright_line': value.copyrightLine,
+        'producer_copyright_line': value.producerCopyrightLine,
         'parental_warning_type': value.parentalWarningType,
+        'cover_original_song_title': value.coverOriginalSongTitle,
+        'cover_original_artist': value.coverOriginalArtist,
+        'is_owned_by_user': value.isOwnedByUser,
+        'territory_codes': value.territoryCodes,
+        'no_ai_use': value.noAiUse,
     };
 }
 

@@ -308,7 +308,7 @@ export interface Playlist {
      * @type {string}
      * @memberof Playlist
      */
-    parentalWarningType?: string;
+    parentalWarningType?: string | null;
 }
 
 /**

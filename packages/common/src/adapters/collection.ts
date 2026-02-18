@@ -223,7 +223,7 @@ export const playlistMetadataForCreateWithSDK = (
     artists: input.artists ?? null,
     copyrightLine: input.copyright_line ?? null,
     producerCopyrightLine: input.producer_copyright_line ?? null,
-    parentalWarningType: input.parental_warning_type ?? null,
+    parentalWarningType: input.parental_warning_type ?? undefined,
     ...('cover_art_sizes' in input
       ? {
           coverArtCid: input.cover_art_sizes ?? '',
