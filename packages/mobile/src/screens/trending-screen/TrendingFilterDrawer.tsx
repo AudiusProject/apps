@@ -6,7 +6,7 @@ import {
   trendingPageSelectors
 } from '@audius/common/store'
 import {
-  Genre,
+  type Genre,
   ELECTRONIC_PREFIX,
   ELECTRONIC_SUBGENRES,
   GENRES,
@@ -50,7 +50,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 export const TrendingFilterDrawer = () => {
   const styles = useStyles()
   const [searchValue, setSearchValue] = useState('')
-  const trendingGenre = useSelector(getTrendingGenre) ?? Genre.ALL
+  const trendingGenre = useSelector(getTrendingGenre) ?? ALL_GENRES
   const { onClose } = useDrawerState(MODAL_NAME)
   const dispatch = useDispatch()
 

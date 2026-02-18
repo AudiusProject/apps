@@ -2,8 +2,10 @@ import {
   type full,
   type CrossPlatformFile,
   Genre,
+  Mood,
   type NativeFile,
   type Track,
+  type TrackMetadata,
   HashId,
   Id,
   OptionalHashId,
@@ -36,6 +38,7 @@ import { userMetadataFromSDK } from './user'
 import { transformAndCleanList } from './utils'
 
 const VALID_GENRES = new Set<string>(Object.values(Genre))
+const VALID_MOODS = new Set<string>(Object.values(Mood))
 
 function toSdkGenre(
   value: string | undefined | ''
@@ -43,6 +46,15 @@ function toSdkGenre(
   if (value === undefined || value === '') return undefined
   return VALID_GENRES.has(value)
     ? (value as (typeof Genre)[keyof typeof Genre])
+    : undefined
+}
+
+function toSdkMood(
+  value: string | null | undefined
+): (typeof Mood)[keyof typeof Mood] | null | undefined {
+  if (value === undefined || value === null || value === '') return undefined
+  return VALID_MOODS.has(value)
+    ? (value as (typeof Mood)[keyof typeof Mood])
     : undefined
 }
 
@@ -364,8 +376,13 @@ export const stemTrackMetadataFromSDK = (
   }
 }
 
-export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => {
+const DEFAULT_GENRE = Genre.Electronic
+
+export const trackMetadataForUploadToSdk = (
+  input: TrackMetadataForUpload
+): TrackMetadata => {
   const sdkGenre = toSdkGenre(input.genre)
+  const genre = sdkGenre ?? DEFAULT_GENRE
   return {
     ...camelcaseKeys(
       pick(input, [
@@ -392,9 +409,9 @@ export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => {
     trackId: OptionalId.parse(input.track_id),
     title: input.title,
     description: squashNewLines(input.description) ?? undefined,
-    mood: input.mood,
+    mood: toSdkMood(input.mood),
     tags: input.tags ?? undefined,
-    ...(sdkGenre !== undefined ? { genre: sdkGenre } : {}),
+    genre,
     releaseDate: input.release_date ? new Date(input.release_date) : undefined,
     previewStartSeconds: input.preview_start_seconds ?? undefined,
     previewCid: input.preview_cid ?? '',
@@ -451,7 +468,7 @@ export const trackMetadataForUploadToSdk = (input: TrackMetadataForUpload) => {
           camelcaseKeys(contributor)
         )
       : undefined
-  }
+  } as TrackMetadata
 }
 
 export const fileToSdk = (

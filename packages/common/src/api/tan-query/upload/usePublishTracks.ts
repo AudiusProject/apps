@@ -81,7 +81,9 @@ export const publishTracks = async (
         try {
           const res = await sdk.tracks.publishTrack({
             userId: Id.parse(userId),
-            metadata: camelMetadata,
+            metadata: camelMetadata as Parameters<
+              typeof sdk.tracks.publishTrack
+            >[0]['metadata'],
             audioUploadResponse: param.audioUploadResponse,
             imageUploadResponse: param.imageUploadResponse
           })

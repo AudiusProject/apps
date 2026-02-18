@@ -487,6 +487,8 @@ export type TrackFileUploadParams = {
   audioFile?: z.input<typeof AudioFile>
   imageFile?: z.input<typeof ImageFile>
   onProgress?: UploadTrackFilesProgressHandler
+  /** When true, regenerate the track preview (e.g. when preview start or track CID changed). Used for update. */
+  generatePreview?: boolean
 }
 
 export type CreateTrackRequestWithFiles = CreateTrackRequest &

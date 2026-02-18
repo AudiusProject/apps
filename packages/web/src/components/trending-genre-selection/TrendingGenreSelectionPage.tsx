@@ -4,7 +4,12 @@ import {
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import { Genre, TRENDING_GENRES, toTrendingGenre, route } from '@audius/common/utils'
+import {
+  Genre,
+  TRENDING_GENRES,
+  toTrendingGenre,
+  route
+} from '@audius/common/utils'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 

@@ -223,7 +223,7 @@ export const accountFromSDK = (
 function mapLibraryContentsToSdkFormat(
   libraryItems: PlaylistLibraryItem[]
 ): UserPlaylistLibrary['contents'] {
-  const items = []
+  const items: UserPlaylistLibrary['contents'] = []
   for (const item of libraryItems) {
     if (item.type === 'folder') {
       const folder = {

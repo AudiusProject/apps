@@ -1,4 +1,8 @@
-import { type UpdateTrackRequestBody, Id, type CrossPlatformFile } from '@audius/sdk'
+import {
+  type UpdateTrackRequestBody,
+  Id,
+  type CrossPlatformFile
+} from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 

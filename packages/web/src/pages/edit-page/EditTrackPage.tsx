@@ -1,6 +1,5 @@
 import { createContext } from 'react'
 
-import type { Genre, Mood } from '@audius/sdk'
 import { fileToSdk } from '@audius/common/adapters'
 import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
@@ -10,6 +9,7 @@ import {
   useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
+import type { Genre, Mood } from '@audius/sdk'
 import { useNavigate, useParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'

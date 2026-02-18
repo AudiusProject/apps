@@ -246,7 +246,7 @@ export class UsersApi extends GeneratedUsersApi {
   private mapLibraryContentsToEntityManagerFormat(
     libraryItems: UserPlaylistLibrary['contents']
   ): EntityManagerPlaylistLibraryContents {
-    const items = []
+    const items: EntityManagerPlaylistLibraryContents = []
     for (const item of libraryItems) {
       if (item.type === 'folder') {
         const folder = {

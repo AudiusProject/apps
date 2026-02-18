@@ -1,6 +1,5 @@
 import { Collection, FieldVisibility, Track, User } from '@audius/common/models'
 import { TQCollection } from '@audius/common/src/api/tan-query/models'
-import { Genre } from '@audius/common/utils'
 
 const defaultFieldVisibility: FieldVisibility = {
   genre: true,

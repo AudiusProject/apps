@@ -27,7 +27,8 @@ export const main = async () => {
     handle: 'totallynotalec'
   })
   const userId = data?.id!
-  const res = await audiusSdk.users.updateProfile({
+  const res = await audiusSdk.users.updateUser({
+    id: userId,
     userId,
     metadata: {
       bio: `identity has no reigns on me ${new Date().getTime()}`

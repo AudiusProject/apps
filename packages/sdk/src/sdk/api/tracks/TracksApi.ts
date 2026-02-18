@@ -462,7 +462,11 @@ export class TracksApi extends GeneratedTracksApi {
 
     // Generate preview if requested and no audio file was uploaded
     // (as that would handle the preview generation already)
-    if (metadata.previewStartSeconds !== undefined && !params.audioFile) {
+    if (
+      params.generatePreview &&
+      metadata.previewStartSeconds !== undefined &&
+      !params.audioFile
+    ) {
       const previewCid = await retry3(
         async () =>
           await this.storage.generatePreview({

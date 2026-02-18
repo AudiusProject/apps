@@ -6,7 +6,6 @@ import {
   getContext,
   confirmerActions,
   confirmerSelectors,
-  confirmTransaction,
   getSDK
 } from '@audius/common/store'
 import { waitForValue } from '@audius/common/utils'

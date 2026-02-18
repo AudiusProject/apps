@@ -89,7 +89,9 @@ export const convertGenreLabelToValue = (genreLabel: GenreLabel): SDKGenre => {
  * Converts a string from the trending genre UI (e.g. from URL or genre list)
  * into Genre | null for Redux state. Returns null for null, empty, or ALL_GENRES.
  */
-export const parseTrendingGenreFromUrl = (param: string | null): SDKGenre | null => {
+export const parseTrendingGenreFromUrl = (
+  param: string | null
+): SDKGenre | null => {
   if (param === null || param === '' || param === ALL_GENRES) return null
   const genresList = GENRES as readonly string[]
   if (!genresList.includes(param)) return null

@@ -6,7 +6,7 @@ import {
   trendingPageLineupActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import { ALL_GENRES, Genre } from '@audius/common/utils'
+import { ALL_GENRES } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { IconCloseAlt, SelectablePill } from '@audius/harmony-native'
