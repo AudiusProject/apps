@@ -86,6 +86,7 @@ export * from './ExtendedPurchaseGate';
 export * from './ExtendedTokenGate';
 export * from './ExtendedUsdcGate';
 export * from './Favorite';
+export * from './FavoriteRequestBody';
 export * from './FavoritesResponse';
 export * from './FieldVisibility';
 export * from './FollowGate';

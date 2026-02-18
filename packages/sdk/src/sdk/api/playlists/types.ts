@@ -227,7 +227,7 @@ export const FavoritePlaylistSchema = z
            * Is this a save of a repost? Used to dispatch notifications
            * when a user favorites another user's repost
            */
-          isSaveOfRepost: z.boolean()
+          isSaveOfRepost: z.optional(z.boolean())
         })
         .strict()
     )
