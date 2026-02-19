@@ -17,81 +17,81 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface CreateCoinRequestBody
+ * @interface CreateCoinRequest
  */
-export interface CreateCoinRequestBody {
+export interface CreateCoinRequest {
     /**
      * The mint address of the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     mint: string;
     /**
      * The coin symbol/ticker
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     ticker: string;
     /**
      * The number of decimals for the coin (0-18)
      * @type {number}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     decimals: number;
     /**
      * The coin name
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     name: string;
     /**
      * The URI for the coin's logo image
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     logoUri?: string;
     /**
      * The URI for the coin's banner image
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     bannerImageUrl?: string;
     /**
      * The description of the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     description?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     link1?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     link2?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     link3?: string;
     /**
      * Generic link URL for the coin
      * @type {string}
-     * @memberof CreateCoinRequestBody
+     * @memberof CreateCoinRequest
      */
     link4?: string;
 }
 
 /**
- * Check if a given object implements the CreateCoinRequestBody interface.
+ * Check if a given object implements the CreateCoinRequest interface.
  */
-export function instanceOfCreateCoinRequestBody(value: object): value is CreateCoinRequestBody {
+export function instanceOfCreateCoinRequest(value: object): value is CreateCoinRequest {
     let isInstance = true;
     isInstance = isInstance && "mint" in value && value["mint"] !== undefined;
     isInstance = isInstance && "ticker" in value && value["ticker"] !== undefined;
@@ -101,11 +101,11 @@ export function instanceOfCreateCoinRequestBody(value: object): value is CreateC
     return isInstance;
 }
 
-export function CreateCoinRequestBodyFromJSON(json: any): CreateCoinRequestBody {
-    return CreateCoinRequestBodyFromJSONTyped(json, false);
+export function CreateCoinRequestFromJSON(json: any): CreateCoinRequest {
+    return CreateCoinRequestFromJSONTyped(json, false);
 }
 
-export function CreateCoinRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateCoinRequestBody {
+export function CreateCoinRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateCoinRequest {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -125,7 +125,7 @@ export function CreateCoinRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
     };
 }
 
-export function CreateCoinRequestBodyToJSON(value?: CreateCoinRequestBody | null): any {
+export function CreateCoinRequestToJSON(value?: CreateCoinRequest | null): any {
     if (value === undefined) {
         return undefined;
     }

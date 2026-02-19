@@ -1,115 +1,132 @@
-import { Genre as SDKGenre } from '@audius/sdk'
+export enum Genre {
+  ALL = 'All Genres',
+  ELECTRONIC = 'Electronic',
+  ROCK = 'Rock',
+  METAL = 'Metal',
+  ALTERNATIVE = 'Alternative',
+  HIP_HOP_RAP = 'Hip-Hop/Rap',
+  EXPERIMENTAL = 'Experimental',
+  PUNK = 'Punk',
+  FOLK = 'Folk',
+  POP = 'Pop',
+  AMBIENT = 'Ambient',
+  SOUNDTRACK = 'Soundtrack',
+  WORLD = 'World',
+  JAZZ = 'Jazz',
+  ACOUSTIC = 'Acoustic',
+  FUNK = 'Funk',
+  R_AND_B_SOUL = 'R&B/Soul',
+  DEVOTIONAL = 'Devotional',
+  CLASSICAL = 'Classical',
+  REGGAE = 'Reggae',
+  PODCASTS = 'Podcasts',
+  COUNTRY = 'Country',
+  SPOKEN_WORK = 'Spoken Word',
+  COMEDY = 'Comedy',
+  BLUES = 'Blues',
+  KIDS = 'Kids',
+  AUDIOBOOKS = 'Audiobooks',
+  LATIN = 'Latin',
+  LOFI = 'Lo-Fi',
+  HYPERPOP = 'Hyperpop',
+  DANCEHALL = 'Dancehall',
 
-/** Re-export SDK Genre as the canonical source for track metadata. */
-export { Genre } from '@audius/sdk'
-
-/**
- * UI-only value for "all genres" filter (e.g. trending page).
- * Not part of SDK Genre - use for filter state only.
- */
-export const ALL_GENRES = 'All Genres' as const
-export type AllGenres = typeof ALL_GENRES
+  // Electronic Subgenres
+  TECHNO = 'Techno',
+  TRAP = 'Trap',
+  HOUSE = 'House',
+  TECH_HOUSE = 'Tech House',
+  DEEP_HOUSE = 'Deep House',
+  DISCO = 'Disco',
+  ELECTRO = 'Electro',
+  JUNGLE = 'Jungle',
+  PROGRESSIVE_HOUSE = 'Progressive House',
+  HARDSTYLE = 'Hardstyle',
+  GLITCH_HOP = 'Glitch Hop',
+  TRANCE = 'Trance',
+  FUTURE_BASS = 'Future Bass',
+  FUTURE_HOUSE = 'Future House',
+  TROPICAL_HOUSE = 'Tropical House',
+  DOWNTEMPO = 'Downtempo',
+  DRUM_AND_BASS = 'Drum & Bass',
+  DUBSTEP = 'Dubstep',
+  JERSEY_CLUB = 'Jersey Club',
+  VAPORWAVE = 'Vaporwave',
+  MOOMBAHTON = 'Moombahton'
+}
 
 export const ELECTRONIC_PREFIX = 'Electronic - '
 
 export const ELECTRONIC_SUBGENRES: Partial<
-  Record<SDKGenre, `${typeof ELECTRONIC_PREFIX}${SDKGenre}`>
+  Record<Genre, `${typeof ELECTRONIC_PREFIX}${Genre}`>
 > = {
-  [SDKGenre.Techno]: `${ELECTRONIC_PREFIX}${SDKGenre.Techno}`,
-  [SDKGenre.Trap]: `${ELECTRONIC_PREFIX}${SDKGenre.Trap}`,
-  [SDKGenre.House]: `${ELECTRONIC_PREFIX}${SDKGenre.House}`,
-  [SDKGenre.TechHouse]: `${ELECTRONIC_PREFIX}${SDKGenre.TechHouse}`,
-  [SDKGenre.DeepHouse]: `${ELECTRONIC_PREFIX}${SDKGenre.DeepHouse}`,
-  [SDKGenre.Disco]: `${ELECTRONIC_PREFIX}${SDKGenre.Disco}`,
-  [SDKGenre.Electro]: `${ELECTRONIC_PREFIX}${SDKGenre.Electro}`,
-  [SDKGenre.Jungle]: `${ELECTRONIC_PREFIX}${SDKGenre.Jungle}`,
-  [SDKGenre.ProgressiveHouse]: `${ELECTRONIC_PREFIX}${SDKGenre.ProgressiveHouse}`,
-  [SDKGenre.Hardstyle]: `${ELECTRONIC_PREFIX}${SDKGenre.Hardstyle}`,
-  [SDKGenre.GlitchHop]: `${ELECTRONIC_PREFIX}${SDKGenre.GlitchHop}`,
-  [SDKGenre.Trance]: `${ELECTRONIC_PREFIX}${SDKGenre.Trance}`,
-  [SDKGenre.FutureBass]: `${ELECTRONIC_PREFIX}${SDKGenre.FutureBass}`,
-  [SDKGenre.FutureHouse]: `${ELECTRONIC_PREFIX}${SDKGenre.FutureHouse}`,
-  [SDKGenre.TropicalHouse]: `${ELECTRONIC_PREFIX}${SDKGenre.TropicalHouse}`,
-  [SDKGenre.Downtempo]: `${ELECTRONIC_PREFIX}${SDKGenre.Downtempo}`,
-  [SDKGenre.DrumBass]: `${ELECTRONIC_PREFIX}${SDKGenre.DrumBass}`,
-  [SDKGenre.Dubstep]: `${ELECTRONIC_PREFIX}${SDKGenre.Dubstep}`,
-  [SDKGenre.JerseyClub]: `${ELECTRONIC_PREFIX}${SDKGenre.JerseyClub}`,
-  [SDKGenre.Vaporwave]: `${ELECTRONIC_PREFIX}${SDKGenre.Vaporwave}`,
-  [SDKGenre.Moombahton]: `${ELECTRONIC_PREFIX}${SDKGenre.Moombahton}`
+  [Genre.TECHNO]: `${ELECTRONIC_PREFIX}${Genre.TECHNO}`,
+  [Genre.TRAP]: `${ELECTRONIC_PREFIX}${Genre.TRAP}`,
+  [Genre.HOUSE]: `${ELECTRONIC_PREFIX}${Genre.HOUSE}`,
+  [Genre.TECH_HOUSE]: `${ELECTRONIC_PREFIX}${Genre.TECH_HOUSE}`,
+  [Genre.DEEP_HOUSE]: `${ELECTRONIC_PREFIX}${Genre.DEEP_HOUSE}`,
+  [Genre.DISCO]: `${ELECTRONIC_PREFIX}${Genre.DISCO}`,
+  [Genre.ELECTRO]: `${ELECTRONIC_PREFIX}${Genre.ELECTRO}`,
+  [Genre.JUNGLE]: `${ELECTRONIC_PREFIX}${Genre.JUNGLE}`,
+  [Genre.PROGRESSIVE_HOUSE]: `${ELECTRONIC_PREFIX}${Genre.PROGRESSIVE_HOUSE}`,
+  [Genre.HARDSTYLE]: `${ELECTRONIC_PREFIX}${Genre.HARDSTYLE}`,
+  [Genre.GLITCH_HOP]: `${ELECTRONIC_PREFIX}${Genre.GLITCH_HOP}`,
+  [Genre.TRANCE]: `${ELECTRONIC_PREFIX}${Genre.TRANCE}`,
+  [Genre.FUTURE_BASS]: `${ELECTRONIC_PREFIX}${Genre.FUTURE_BASS}`,
+  [Genre.FUTURE_HOUSE]: `${ELECTRONIC_PREFIX}${Genre.FUTURE_HOUSE}`,
+  [Genre.TROPICAL_HOUSE]: `${ELECTRONIC_PREFIX}${Genre.TROPICAL_HOUSE}`,
+  [Genre.DOWNTEMPO]: `${ELECTRONIC_PREFIX}${Genre.DOWNTEMPO}`,
+  [Genre.DRUM_AND_BASS]: `${ELECTRONIC_PREFIX}${Genre.DRUM_AND_BASS}`,
+  [Genre.DUBSTEP]: `${ELECTRONIC_PREFIX}${Genre.DUBSTEP}`,
+  [Genre.JERSEY_CLUB]: `${ELECTRONIC_PREFIX}${Genre.JERSEY_CLUB}`,
+  [Genre.VAPORWAVE]: `${ELECTRONIC_PREFIX}${Genre.VAPORWAVE}`,
+  [Genre.MOOMBAHTON]: `${ELECTRONIC_PREFIX}${Genre.MOOMBAHTON}`
 }
 
-export const getCanonicalName = (genre: SDKGenre | string) => {
-  if (genre in ELECTRONIC_SUBGENRES)
-    return ELECTRONIC_SUBGENRES[genre as SDKGenre]
+export const getCanonicalName = (genre: Genre | any) => {
+  if (genre in ELECTRONIC_SUBGENRES) return ELECTRONIC_SUBGENRES[genre as Genre]
   return genre
 }
 
 /** User-facing genre labels. Use `convertGenreLabelToValue` to get the correct genre value (to set as the genre in track metadata). */
 export const GENRES = [
-  SDKGenre.Electronic,
-  SDKGenre.Rock,
-  SDKGenre.Metal,
-  SDKGenre.Alternative,
-  SDKGenre.HipHopRap,
-  SDKGenre.Experimental,
-  SDKGenre.Punk,
-  SDKGenre.Folk,
-  SDKGenre.Pop,
-  SDKGenre.Ambient,
-  SDKGenre.Soundtrack,
-  SDKGenre.World,
-  SDKGenre.Jazz,
-  SDKGenre.Acoustic,
-  SDKGenre.Funk,
-  SDKGenre.RbSoul,
-  SDKGenre.Devotional,
-  SDKGenre.Classical,
-  SDKGenre.Reggae,
-  SDKGenre.Podcasts,
-  SDKGenre.Country,
-  SDKGenre.SpokenWord,
-  SDKGenre.Comedy,
-  SDKGenre.Blues,
-  SDKGenre.Kids,
-  SDKGenre.Audiobooks,
-  SDKGenre.Latin,
-  SDKGenre.LoFi,
-  SDKGenre.Hyperpop,
-  SDKGenre.Dancehall,
+  Genre.ELECTRONIC,
+  Genre.ROCK,
+  Genre.METAL,
+  Genre.ALTERNATIVE,
+  Genre.HIP_HOP_RAP,
+  Genre.EXPERIMENTAL,
+  Genre.PUNK,
+  Genre.FOLK,
+  Genre.POP,
+  Genre.AMBIENT,
+  Genre.SOUNDTRACK,
+  Genre.WORLD,
+  Genre.JAZZ,
+  Genre.ACOUSTIC,
+  Genre.FUNK,
+  Genre.R_AND_B_SOUL,
+  Genre.DEVOTIONAL,
+  Genre.CLASSICAL,
+  Genre.REGGAE,
+  Genre.PODCASTS,
+  Genre.COUNTRY,
+  Genre.SPOKEN_WORK,
+  Genre.COMEDY,
+  Genre.BLUES,
+  Genre.KIDS,
+  Genre.AUDIOBOOKS,
+  Genre.LATIN,
+  Genre.LOFI,
+  Genre.HYPERPOP,
+  Genre.DANCEHALL,
   ...Object.values(ELECTRONIC_SUBGENRES)
-] as const
+]
 
-export type GenreLabel = (typeof GENRES)[number]
-
-export const convertGenreLabelToValue = (genreLabel: GenreLabel): SDKGenre => {
-  return genreLabel.replace(ELECTRONIC_PREFIX, '') as SDKGenre
-}
-
-/**
- * Converts a string from the trending genre UI (e.g. from URL or genre list)
- * into Genre | null for Redux state. Returns null for null, empty, or ALL_GENRES.
- */
-export const parseTrendingGenreFromUrl = (
-  param: string | null
-): SDKGenre | null => {
-  if (param === null || param === '' || param === ALL_GENRES) return null
-  const genresList = GENRES as readonly string[]
-  if (!genresList.includes(param)) return null
-  const trimmed = param.startsWith(ELECTRONIC_PREFIX)
-    ? param.slice(ELECTRONIC_PREFIX.length)
-    : param
-  return trimmed as SDKGenre
-}
-
-/**
- * Converts a genre string from UI (e.g. from GenreSelectionList) to Genre | null
- * for setTrendingGenre. Use when the value is known to come from GENRES.
- */
-export const toTrendingGenre = (value: string | null): SDKGenre | null => {
-  if (value === null || value === '' || value === ALL_GENRES) return null
-  const genresList = GENRES as readonly string[]
-  if (!genresList.includes(value)) return null
-  return convertGenreLabelToValue(value as GenreLabel)
+export const convertGenreLabelToValue = (
+  genreLabel: (typeof GENRES)[number]
+) => {
+  return genreLabel.replace(ELECTRONIC_PREFIX, '')
 }
 
 const NEWLY_ADDED_GENRES: string[] = []

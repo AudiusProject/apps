@@ -127,8 +127,7 @@ export class EntityManagerClient implements EntityManagerService {
 
       return {
         blockHash: jsonResponse.receipt.blockHash,
-        blockNumber: jsonResponse.receipt.blockNumber,
-        transactionHash: jsonResponse.receipt.transactionHash
+        blockNumber: jsonResponse.receipt.blockNumber
       }
     } else {
       if (response.status === 429) {

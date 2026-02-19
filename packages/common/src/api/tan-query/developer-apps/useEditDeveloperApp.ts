@@ -22,12 +22,10 @@ export const useEditDeveloperApp = () => {
       const sdk = await audiusSdk()
 
       await sdk.developerApps.updateDeveloperApp({
-        address: apiKey,
-        metadata: {
-          name,
-          description,
-          imageUrl
-        },
+        appApiKey: apiKey,
+        name,
+        description,
+        imageUrl,
         userId: Id.parse(currentUserId)
       })
 

@@ -71,7 +71,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         // albumTrackPrice will be parsed out of the collection metadata, so we keep a copy here
         albumTrackPrice =
           params.collectionMetadata.stream_conditions?.usdc_purchase
-            .albumTrackPrice ?? undefined
+            .albumTrackPrice
         params.collectionMetadata.stream_conditions = getUSDCMetadata(
           userBank.toString(),
           params.collectionMetadata.stream_conditions
@@ -105,30 +105,22 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         ? fileToSdk(artworkBlob, 'cover_art')
         : undefined
       if (params.collectionMetadata.is_album) {
-        const metadata = albumMetadataForCreateWithSDK(
-          params.collectionMetadata
-        )
-        metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Date.now() / 1000,
-          trackId: Id.parse(t.trackId)
-        }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata
+          metadata: albumMetadataForCreateWithSDK(params.collectionMetadata),
+          trackIds: publishedTracks
+            .filter((t) => t.trackId && !t.error)
+            .map((t) => t.trackId!)
         })
       } else {
-        const metadata = playlistMetadataForCreateWithSDK(
-          params.collectionMetadata
-        )
-        metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Date.now() / 1000,
-          trackId: Id.parse(t.trackId)
-        }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata
+          metadata: playlistMetadataForCreateWithSDK(params.collectionMetadata),
+          trackIds: publishedTracks
+            .filter((t) => t.trackId && !t.error)
+            .map((t) => t.trackId!)
         })
       }
     }
@@ -257,14 +249,14 @@ function combineMetadata(
     metadata.download_conditions = {
       usdc_purchase: {
         price: albumTrackPrice,
-        splits: []
+        splits: { 0: 0 }
       }
     }
     // Set up initial stream gating values
     metadata.is_stream_gated = true
     metadata.preview_start_seconds = 0
     metadata.stream_conditions = {
-      usdc_purchase: { price: albumTrackPrice, splits: [] }
+      usdc_purchase: { price: albumTrackPrice, splits: { 0: 0 } }
     }
     // Add splits to stream & download conditions
     addPremiumMetadata(userBank, metadata)

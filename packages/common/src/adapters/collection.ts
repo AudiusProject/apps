@@ -1,14 +1,11 @@
 import {
-  type CreateAlbumRequestBody,
-  type CreatePlaylistRequestBody,
+  CreateAlbumMetadata,
+  CreatePlaylistMetadata,
   full,
   Id,
   OptionalHashId,
-  type Playlist,
-  type PlaylistAddedTimestamp,
   UpdateAlbumRequest,
-  type UpdateAlbumRequestBody,
-  type UpdatePlaylistRequestBody
+  UpdatePlaylistRequest
 } from '@audius/sdk'
 import dayjs from 'dayjs'
 import { omit } from 'lodash'
@@ -21,11 +18,10 @@ import {
   UserCollectionMetadata,
   Variant
 } from '~/models/Collection'
-import { Copyright, isContentUSDCPurchaseGated } from '~/models/Track'
+import { Copyright } from '~/models/Track'
 import type { AlbumValues, PlaylistValues } from '~/schemas'
 
 import { accessConditionsFromSDK } from './accessConditionsFromSDK'
-import { usdcPurchaseConditionsToSDK } from './accessConditionsToSDK'
 import { resourceContributorFromSDK } from './attribution'
 import { favoriteFromSDK } from './favorite'
 import { coverArtSizesCIDsFromSDK } from './imageSize'
@@ -38,13 +34,13 @@ const addedTimestampToPlaylistTrackId = ({
   timestamp,
   trackId,
   metadataTimestamp
-}: PlaylistAddedTimestamp): PlaylistTrackId | null => {
+}: full.PlaylistAddedTimestamp): PlaylistTrackId | null => {
   const decoded = OptionalHashId.parse(trackId)
   if (decoded) {
     return {
       track: decoded,
       time: timestamp,
-      metadata_time: metadataTimestamp ?? 0
+      metadata_time: metadataTimestamp
     }
   }
   return null
@@ -55,14 +51,11 @@ export const userCollectionMetadataFromSDK = (
     | full.PlaylistFullWithoutTracks
     | full.SearchPlaylistFull
     | full.PlaylistFull
-    | Playlist
 ): UserCollectionMetadata | undefined => {
   try {
     const decodedPlaylistId = OptionalHashId.parse(input.id)
-    const decodedOwnerId = OptionalHashId.parse(
-      'userId' in input && input.userId != null ? input.userId : input.user.id
-    )
-    const user = userMetadataFromSDK(input.user as unknown as full.UserFull)
+    const decodedOwnerId = OptionalHashId.parse(input.userId ?? input.user.id)
+    const user = userMetadataFromSDK(input.user)
     if (!decodedPlaylistId || !decodedOwnerId || !user) {
       return undefined
     }
@@ -81,7 +74,7 @@ export const userCollectionMetadataFromSDK = (
             '150x150': input.artwork._150x150,
             '480x480': input.artwork._480x480,
             '1000x1000': input.artwork._1000x1000,
-            mirrors: (input.artwork as { mirrors?: string[] }).mirrors ?? []
+            mirrors: input.artwork.mirrors
           }
         : {},
       variant: Variant.USER_GENERATED,
@@ -105,11 +98,11 @@ export const userCollectionMetadataFromSDK = (
         ? coverArtSizesCIDsFromSDK(input.coverArtCids)
         : null,
       followee_reposts: transformAndCleanList(
-        'followeeReposts' in input ? (input.followeeReposts ?? []) : [],
+        input.followeeReposts,
         repostFromSDK
       ),
       followee_saves: transformAndCleanList(
-        'followeeFavorites' in input ? (input.followeeFavorites ?? []) : [],
+        input.followeeFavorites,
         favoriteFromSDK
       ),
       playlist_contents: {
@@ -118,30 +111,21 @@ export const userCollectionMetadataFromSDK = (
           addedTimestampToPlaylistTrackId
         )
       },
-      producer_copyright_line:
-        'producerCopyrightLine' in input && input.producerCopyrightLine
-          ? (snakecaseKeys(input.producerCopyrightLine) as Copyright)
-          : null,
-      stream_conditions:
-        'streamConditions' in input && input.streamConditions
-          ? accessConditionsFromSDK(input.streamConditions)
-          : null,
-      tracks: transformAndCleanList(
-        ('tracks' in input ? (input.tracks ?? []) : []) as unknown as (
-          | full.TrackFull
-          | full.SearchTrackFull
-        )[],
-        userTrackMetadataFromSDK
-      ),
+      producer_copyright_line: input.producerCopyrightLine
+        ? (snakecaseKeys(input.producerCopyrightLine) as Copyright)
+        : null,
+      stream_conditions: input.streamConditions
+        ? accessConditionsFromSDK(input.streamConditions)
+        : null,
+      tracks: transformAndCleanList(input.tracks, userTrackMetadataFromSDK),
       user,
 
       // Retypes / Renames
       save_count: input.favoriteCount,
 
       // Nullable fields
-      cover_art: 'coverArt' in input ? (input.coverArt ?? null) : null,
-      cover_art_sizes:
-        'coverArtSizes' in input ? (input.coverArtSizes ?? null) : null,
+      cover_art: input.coverArt ?? null,
+      cover_art_sizes: input.coverArtSizes ?? null,
       description: input.description ?? null
     }
 
@@ -175,7 +159,7 @@ export const accountCollectionFromSDK = (
 
 export const playlistMetadataForCreateWithSDK = (
   input: Collection | PlaylistValues
-): CreatePlaylistRequestBody => {
+): CreatePlaylistMetadata => {
   return {
     playlistName: input.playlist_name ?? '',
     description: input.description ?? '',
@@ -187,7 +171,7 @@ export const playlistMetadataForCreateWithSDK = (
     artists: input.artists ?? null,
     copyrightLine: input.copyright_line ?? null,
     producerCopyrightLine: input.producer_copyright_line ?? null,
-    parentalWarningType: input.parental_warning_type ?? undefined,
+    parentalWarningType: input.parental_warning_type ?? null,
     ...('cover_art_sizes' in input
       ? {
           coverArtCid: input.cover_art_sizes ?? '',
@@ -199,7 +183,7 @@ export const playlistMetadataForCreateWithSDK = (
 
 export const playlistMetadataForUpdateWithSDK = (
   input: Collection
-): UpdatePlaylistRequestBody => {
+): UpdatePlaylistRequest['metadata'] => {
   return {
     ...playlistMetadataForCreateWithSDK(input),
     playlistContents: input.playlist_contents
@@ -218,12 +202,13 @@ export const playlistMetadataForUpdateWithSDK = (
 
 export const albumMetadataForCreateWithSDK = (
   input: Collection | AlbumValues
-): CreateAlbumRequestBody => {
+): CreateAlbumMetadata => {
   return {
     streamConditions:
-      input.stream_conditions != null &&
-      isContentUSDCPurchaseGated(input.stream_conditions)
-        ? usdcPurchaseConditionsToSDK(input.stream_conditions)
+      input.stream_conditions && 'usdc_purchase' in input.stream_conditions
+        ? {
+            usdcPurchase: input.stream_conditions.usdc_purchase
+          }
         : null,
     isStreamGated: input.is_stream_gated ?? false,
     isScheduledRelease: input.is_scheduled_release ?? false,
@@ -244,7 +229,7 @@ export const albumMetadataForCreateWithSDK = (
 
 export const albumMetadataForUpdateWithSDK = (
   input: Collection
-): UpdateAlbumRequestBody => {
+): UpdateAlbumRequest['metadata'] => {
   return {
     ...albumMetadataForCreateWithSDK(input),
     playlistContents: input.playlist_contents

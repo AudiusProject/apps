@@ -9,7 +9,6 @@ import {
   useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
-import type { Genre, Mood } from '@audius/sdk'
 import { useNavigate, useParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'
@@ -111,8 +110,7 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
-    genre: (track?.genre as Genre) ?? '',
-    mood: (track?.mood as Mood) ?? null,
+    mood: track?.mood || null,
     artwork: {
       url: coverArtUrl || ''
     },

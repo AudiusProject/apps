@@ -236,7 +236,7 @@ export const TrackTile = ({
   const onClickOverflow = useCallback(
     (trackId: ID) => {
       const isLongFormContent =
-        genre === Genre.Podcasts || genre === Genre.Audiobooks
+        genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
 
       const repostAction =
         !isOwner && hasStreamAccess
@@ -395,7 +395,7 @@ export const TrackTile = ({
               {duration
                 ? formatLineupTileDuration(
                     duration,
-                    genre === Genre.Podcasts || genre === Genre.Audiobooks
+                    genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
                   )
                 : null}
             </Text>

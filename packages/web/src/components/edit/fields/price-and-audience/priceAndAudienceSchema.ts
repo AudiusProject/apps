@@ -48,7 +48,7 @@ const refineMinPrice =
       isContentUSDCPurchaseGated(streamConditions)
     ) {
       const price = streamConditions.usdc_purchase[key]
-      return price != null && price > 0 && price >= minContentPriceCents
+      return price !== undefined && price > 0 && price >= minContentPriceCents
     }
     return true
   }
@@ -62,7 +62,7 @@ const refineMaxPrice =
       isContentUSDCPurchaseGated(streamConditions)
     ) {
       const price = streamConditions.usdc_purchase[key]
-      return price != null && price <= maxContentPriceCents
+      return price !== undefined && price <= maxContentPriceCents
     }
     return true
   }

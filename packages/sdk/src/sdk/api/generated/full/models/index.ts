@@ -47,7 +47,6 @@ export * from './CollectionActivityFull';
 export * from './CollectionActivityFullWithoutTracks';
 export * from './CollectionLibraryResponseFull';
 export * from './Comment';
-export * from './CommentEntityType';
 export * from './CommentMention';
 export * from './CommentMentionNotification';
 export * from './CommentMentionNotificationAction';

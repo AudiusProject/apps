@@ -236,7 +236,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const onNext = useCallback(async () => {
     const isLongFormContent =
-      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
     if (isLongFormContent) {
       const { position: currentPosition } = await TrackPlayer.getProgress()
       const newPosition = currentPosition + SKIP_DURATION_SEC
@@ -250,7 +250,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const onPrevious = useCallback(async () => {
     const { position: currentPosition } = await TrackPlayer.getProgress()
     const isLongFormContent =
-      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
     if (isLongFormContent) {
       const newPosition = currentPosition - SKIP_DURATION_SEC
       dispatch(seek({ seconds: Math.max(0, newPosition) }))
@@ -347,8 +347,8 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             onNext={onNext}
             onPrevious={onPrevious}
             isLongFormContent={
-              track?.genre === Genre.Podcasts ||
-              track?.genre === Genre.Audiobooks
+              track?.genre === Genre.PODCASTS ||
+              track?.genre === Genre.AUDIOBOOKS
             }
           />
           <ActionsBar track={track} />

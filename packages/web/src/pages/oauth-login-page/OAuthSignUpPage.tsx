@@ -120,13 +120,20 @@ export const OAuthSignUpPage = () => {
       const sdk = await audiusSdk()
       const [wallet] = await sdk.services.audiusWalletClient.getAddresses()
 
-      await sdk.users.createUser({
+      const { blockHash, blockNumber } = await sdk.users.createUser({
         metadata: {
           handle: data.handle,
           name: data.displayName.trim(),
           wallet
         }
       })
+
+      if (blockHash && blockNumber) {
+        await sdk.services.entityManager.confirmWrite({
+          blockHash,
+          blockNumber
+        })
+      }
 
       let accountData
       let retries = 0

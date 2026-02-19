@@ -101,20 +101,12 @@ export function* getUSDCMetadata(stream_conditions: USDCPurchaseConditions) {
   const ownerUserbank = yield* call(getOrCreateUSDCUserBank, wallet)
   const priceCents = stream_conditions.usdc_purchase.price
   const priceWei = Number(USDC(priceCents / 100).value.toString())
-  const payoutWallet = ownerUserbank?.toString() ?? ''
   const conditionsWithMetadata: USDCPurchaseConditions = {
     usdc_purchase: {
       price: priceCents,
-      ...(stream_conditions.usdc_purchase.albumTrackPrice != null && {
-        albumTrackPrice: stream_conditions.usdc_purchase.albumTrackPrice
-      }),
-      splits: [
-        {
-          payout_wallet: payoutWallet,
-          percentage: 100,
-          amount: priceWei
-        }
-      ]
+      splits: {
+        [ownerUserbank?.toString() ?? '']: priceWei
+      }
     }
   }
   return conditionsWithMetadata

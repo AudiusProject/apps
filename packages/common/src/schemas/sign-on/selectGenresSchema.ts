@@ -3,12 +3,12 @@ import { z } from 'zod'
 import { GENRES, Genre, convertGenreLabelToValue } from '~/utils/genres'
 
 const excludedGenres = new Set<string>([
-  Genre.Comedy,
-  Genre.Kids,
-  Genre.Soundtrack,
-  Genre.Devotional,
-  Genre.Audiobooks,
-  Genre.SpokenWord
+  Genre.COMEDY,
+  Genre.KIDS,
+  Genre.SOUNDTRACK,
+  Genre.DEVOTIONAL,
+  Genre.AUDIOBOOKS,
+  Genre.SPOKEN_WORK
 ])
 
 export const selectableGenres = GENRES.filter(

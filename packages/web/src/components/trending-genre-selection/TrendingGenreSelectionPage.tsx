@@ -6,8 +6,8 @@ import {
 } from '@audius/common/store'
 import {
   Genre,
+  ELECTRONIC_PREFIX,
   TRENDING_GENRES,
-  toTrendingGenre,
   route
 } from '@audius/common/utils'
 import { connect } from 'react-redux'
@@ -37,7 +37,9 @@ const ConnectedTrendingGenreSelectionPage = ({
   resetAllTrending
 }: ConnectedTrendingGenreSelectionPageProps) => {
   const setTrimmedGenre = (genre: string | null) => {
-    setTrendingGenre(toTrendingGenre(genre))
+    const trimmedGenre =
+      genre !== null ? genre.replace(ELECTRONIC_PREFIX, '') : genre
+    setTrendingGenre(trimmedGenre as Genre | null)
     resetAllTrending()
     setTrendingTimeRange(timeRange)
     goToTrending()

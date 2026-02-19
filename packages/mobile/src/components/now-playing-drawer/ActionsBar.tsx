@@ -183,7 +183,7 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   const onPressOverflow = useCallback(() => {
     if (track) {
       const isLongFormContent =
-        track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
+        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
       const overflowActions = [
         OverflowAction.VIEW_COMMENTS,
         OverflowAction.SHARE,

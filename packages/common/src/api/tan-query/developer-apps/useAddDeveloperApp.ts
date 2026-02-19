@@ -22,40 +22,25 @@ export const useAddDeveloperApp = () => {
       const encodedUserId = Id.parse(currentUserId)
       const sdk = await audiusSdk()
 
-      const result = await sdk.developerApps.createDeveloperApp({
-        metadata: {
-          name,
-          description,
-          imageUrl
-        },
+      const { apiKey, apiSecret } = await sdk.developerApps.createDeveloperApp({
+        name,
+        description,
+        imageUrl,
         userId: encodedUserId
       })
-      const { apiKey, apiSecret } = result
-      const bearerToken =
-        'bearerToken' in result && typeof result.bearerToken === 'string'
-          ? result.bearerToken
-          : undefined
-
-      if (!apiKey || !apiSecret) {
-        throw new Error('Failed to create developer app')
-      }
 
       await sdk.grants.createGrant({
         userId: encodedUserId,
         appApiKey: apiKey
       })
 
-      return { name, description, imageUrl, apiKey, apiSecret, bearerToken }
+      return { name, description, imageUrl, apiKey, apiSecret }
     },
     onSuccess: (newApp: DeveloperApp) => {
       if (!currentUserId) {
         throw new Error('No current user ID')
       }
-      const {
-        apiSecret: apiSecretIgnored,
-        bearerToken: bearerTokenIgnored,
-        ...restNewApp
-      } = newApp
+      const { apiSecret: apiSecretIgnored, ...restNewApp } = newApp
 
       queryClient.setQueryData(
         getDeveloperAppsQueryKey(currentUserId),

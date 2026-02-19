@@ -20,7 +20,9 @@ import {
 import { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { Storage } from '../../services/Storage'
 import { StorageNodeSelector } from '../../services/StorageNodeSelector'
-import { Configuration, Genre, Mood } from '../generated/default'
+import { Genre } from '../../types/Genre'
+import { Mood } from '../../types/Mood'
+import { Configuration } from '../generated/default'
 import { PlaylistsApi as GeneratedPlaylistsApi } from '../generated/default/apis/PlaylistsApi'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
 
@@ -169,9 +171,9 @@ describe('AlbumsApi', () => {
           name: 'coverArt'
         },
         metadata: {
-          genre: Genre.Acoustic,
+          genre: Genre.ACOUSTIC,
           albumName: 'My Album',
-          mood: Mood.Tender
+          mood: Mood.TENDER
         },
         trackMetadatas: [
           {
@@ -228,9 +230,9 @@ describe('AlbumsApi', () => {
           name: 'coverArt'
         },
         metadata: {
-          genre: Genre.Acoustic,
+          genre: Genre.ACOUSTIC,
           albumName: 'My Album edited',
-          mood: Mood.Tender
+          mood: Mood.TENDER
         }
       })
 
@@ -250,7 +252,7 @@ describe('AlbumsApi', () => {
             name: 'coverArt'
           },
           metadata: {
-            mod: Mood.Tender
+            mod: Mood.TENDER
           } as any
         })
       }).rejects.toThrow()

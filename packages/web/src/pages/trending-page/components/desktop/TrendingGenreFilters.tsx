@@ -83,7 +83,7 @@ export const TrendingGenreFilters = (props: TrendingGenreFiltersProps) => {
           key={genre}
           name='trending-genre-filter'
           type='radio'
-          label={getCanonicalName(genre) ?? ''}
+          label={getCanonicalName(genre)}
           value={genre}
           size='large'
           isSelected={genre === currentGenre}

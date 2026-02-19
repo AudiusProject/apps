@@ -81,9 +81,7 @@ export const publishTracks = async (
         try {
           const res = await sdk.tracks.publishTrack({
             userId: Id.parse(userId),
-            metadata: camelMetadata as Parameters<
-              typeof sdk.tracks.publishTrack
-            >[0]['metadata'],
+            metadata: camelMetadata,
             audioUploadResponse: param.audioUploadResponse,
             imageUploadResponse: param.imageUploadResponse
           })
@@ -232,29 +230,25 @@ export const usePublishTracks = (
 
 /*
  * Given a user's bank and USDC purchase conditions,
- * returns updated conditions with price in WEI and splits in the new array format.
+ * returns updated conditions with price in WEI and splits added.
+ *
+ * TODO: Update this to use the new user ID + percentages format.
  */
 export function getUSDCMetadata(
   userBank: string,
   stream_conditions: USDCPurchaseConditions
-): USDCPurchaseConditions {
+) {
   const priceCents = stream_conditions.usdc_purchase.price
   const priceWei = Number(USDC(priceCents / 100).value.toString())
-  return {
+  const conditionsWithMetadata: USDCPurchaseConditions = {
     usdc_purchase: {
       price: priceCents,
-      ...(stream_conditions.usdc_purchase.albumTrackPrice != null && {
-        albumTrackPrice: stream_conditions.usdc_purchase.albumTrackPrice
-      }),
-      splits: [
-        {
-          payout_wallet: userBank?.toString() ?? '',
-          percentage: 100,
-          amount: priceWei
-        }
-      ]
+      splits: {
+        [userBank?.toString() ?? '']: priceWei
+      }
     }
   }
+  return conditionsWithMetadata
 }
 
 /**

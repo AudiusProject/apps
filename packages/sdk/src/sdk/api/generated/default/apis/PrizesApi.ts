@@ -17,15 +17,15 @@
 import * as runtime from '../runtime';
 import type {
   ClaimedPrizesResponse,
-  PrizeClaimRequestBody,
+  PrizeClaimRequest,
   PrizeClaimResponse,
   PrizesResponse,
 } from '../models';
 import {
     ClaimedPrizesResponseFromJSON,
     ClaimedPrizesResponseToJSON,
-    PrizeClaimRequestBodyFromJSON,
-    PrizeClaimRequestBodyToJSON,
+    PrizeClaimRequestFromJSON,
+    PrizeClaimRequestToJSON,
     PrizeClaimResponseFromJSON,
     PrizeClaimResponseToJSON,
     PrizesResponseFromJSON,
@@ -33,7 +33,7 @@ import {
 } from '../models';
 
 export interface ClaimPrizeRequest {
-    claim: PrizeClaimRequestBody;
+    prizeClaimRequest: PrizeClaimRequest;
 }
 
 export interface GetWalletPrizesRequest {
@@ -50,8 +50,8 @@ export class PrizesApi extends runtime.BaseAPI {
      * Claims a prize by verifying a Solana transaction. User must send exactly 2 YAK to the prize receiver address. Returns the prize won and any redeem codes/URLs.
      */
     async claimPrizeRaw(params: ClaimPrizeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PrizeClaimResponse>> {
-        if (params.claim === null || params.claim === undefined) {
-            throw new runtime.RequiredError('claim','Required parameter params.claim was null or undefined when calling claimPrize.');
+        if (params.prizeClaimRequest === null || params.prizeClaimRequest === undefined) {
+            throw new runtime.RequiredError('prizeClaimRequest','Required parameter params.prizeClaimRequest was null or undefined when calling claimPrize.');
         }
 
         const queryParameters: any = {};
@@ -65,7 +65,7 @@ export class PrizesApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: PrizeClaimRequestBodyToJSON(params.claim),
+            body: PrizeClaimRequestToJSON(params.prizeClaimRequest),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => PrizeClaimResponseFromJSON(jsonValue));

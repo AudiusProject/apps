@@ -51,10 +51,9 @@ import {
 } from '@audius/common/utils'
 import {
   OptionalId,
-  CreateUserRequestWithFiles,
+  CreateUserRequest,
   Id,
-  decodeHashId,
-  type UpdateUserRequestWithFiles
+  UpdateProfileRequest
 } from '@audius/sdk'
 import { isEmpty } from 'lodash'
 import {
@@ -492,19 +491,18 @@ function* signUp() {
                 throw new Error('Account user ID does not exist')
               }
               userId = account.user.user_id
-              const completeProfileMetadataRequest: UpdateUserRequestWithFiles =
-                {
-                  id: Id.parse(userId),
-                  userId: Id.parse(userId),
-                  profilePictureFile: signOn.profileImage?.file as File,
-                  metadata: {
-                    location: location ?? undefined,
-                    name,
-                    handle
-                  }
+              const completeProfileMetadataRequest: UpdateProfileRequest = {
+                userId: Id.parse(userId),
+                profilePictureFile: signOn.profileImage?.file as File,
+                metadata: {
+                  location: location ?? undefined,
+                  name,
+                  handle
                 }
-              yield* call(
-                [sdk.users, sdk.users.updateUser],
+              }
+
+              const { blockHash, blockNumber } = yield* call(
+                [sdk.users, sdk.users.updateProfile],
                 completeProfileMetadataRequest
               )
 
@@ -518,6 +516,7 @@ function* signUp() {
 
               yield* fork(sendPostSignInRecoveryEmail, { handle, email })
 
+              yield* call(confirmTransaction, blockHash, blockNumber)
               yield* put(
                 make(Name.CREATE_ACCOUNT_COMPLETE_GUEST_PROFILE, {
                   handle,
@@ -556,8 +555,7 @@ function* signUp() {
                 sdk.services.audiusWalletClient.getAddresses
               ])
 
-              const events: CreateUserRequestWithFiles['metadata']['events'] =
-                {}
+              const events: CreateUserRequest['metadata']['events'] = {}
               if (referrer) {
                 events.referrer = OptionalId.parse(referrer)
               }
@@ -565,7 +563,7 @@ function* signUp() {
                 events.isMobileUser = true
               }
 
-              const createUserMetadata: CreateUserRequestWithFiles = {
+              const createUserMetadata: CreateUserRequest = {
                 profilePictureFile: signOn.profileImage?.file as File,
                 coverArtFile: signOn.coverPhoto?.file as File,
                 metadata: {
@@ -577,14 +575,11 @@ function* signUp() {
                 }
               }
 
-              const { userId: returnedUserId } = yield* call(
+              const { metadata } = yield* call(
                 [sdk.users, sdk.users.createUser],
                 createUserMetadata
               )
-              if (!returnedUserId) {
-                throw new Error('User ID not returned from createUser')
-              }
-              userId = decodeHashId(returnedUserId)!
+              userId = metadata.userId
             }
 
             yield* put(

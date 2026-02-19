@@ -23,12 +23,12 @@ import type {
   CoinResponse,
   CoinsResponse,
   CoinsVolumeLeadersResponse,
-  CreateCoinRequestBody,
+  CreateCoinRequest,
   CreateCoinResponse,
   RedeemAmountResponse,
   RewardCodeErrorResponse,
   RewardCodeResponse,
-  UpdateCoinRequestBody,
+  UpdateCoinRequest,
   UpdateCoinResponse,
 } from '../models';
 import {
@@ -46,8 +46,8 @@ import {
     CoinsResponseToJSON,
     CoinsVolumeLeadersResponseFromJSON,
     CoinsVolumeLeadersResponseToJSON,
-    CreateCoinRequestBodyFromJSON,
-    CreateCoinRequestBodyToJSON,
+    CreateCoinRequestFromJSON,
+    CreateCoinRequestToJSON,
     CreateCoinResponseFromJSON,
     CreateCoinResponseToJSON,
     RedeemAmountResponseFromJSON,
@@ -56,8 +56,8 @@ import {
     RewardCodeErrorResponseToJSON,
     RewardCodeResponseFromJSON,
     RewardCodeResponseToJSON,
-    UpdateCoinRequestBodyFromJSON,
-    UpdateCoinRequestBodyToJSON,
+    UpdateCoinRequestFromJSON,
+    UpdateCoinRequestToJSON,
     UpdateCoinResponseFromJSON,
     UpdateCoinResponseToJSON,
 } from '../models';
@@ -73,9 +73,9 @@ export interface ClaimCoinRewardCodeRequest {
     userId: string;
 }
 
-export interface CreateCoinRequest {
+export interface CreateCoinOperationRequest {
     userId: string;
-    metadata: CreateCoinRequestBody;
+    createCoinRequest: CreateCoinRequest;
 }
 
 export interface GetCoinRequest {
@@ -128,10 +128,10 @@ export interface GetVolumeLeadersRequest {
     limit?: number;
 }
 
-export interface UpdateCoinRequest {
+export interface UpdateCoinOperationRequest {
     mint: string;
     userId: string;
-    metadata: UpdateCoinRequestBody;
+    updateCoinRequest: UpdateCoinRequest;
 }
 
 /**
@@ -225,13 +225,13 @@ export class CoinsApi extends runtime.BaseAPI {
      * @hidden
      * Creates a new artist coin
      */
-    async createCoinRaw(params: CreateCoinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateCoinResponse>> {
+    async createCoinRaw(params: CreateCoinOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateCoinResponse>> {
         if (params.userId === null || params.userId === undefined) {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createCoin.');
         }
 
-        if (params.metadata === null || params.metadata === undefined) {
-            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createCoin.');
+        if (params.createCoinRequest === null || params.createCoinRequest === undefined) {
+            throw new runtime.RequiredError('createCoinRequest','Required parameter params.createCoinRequest was null or undefined when calling createCoin.');
         }
 
         const queryParameters: any = {};
@@ -249,7 +249,7 @@ export class CoinsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CreateCoinRequestBodyToJSON(params.metadata),
+            body: CreateCoinRequestToJSON(params.createCoinRequest),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateCoinResponseFromJSON(jsonValue));
@@ -258,7 +258,7 @@ export class CoinsApi extends runtime.BaseAPI {
     /**
      * Creates a new artist coin
      */
-    async createCoin(params: CreateCoinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateCoinResponse> {
+    async createCoin(params: CreateCoinOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateCoinResponse> {
         const response = await this.createCoinRaw(params, initOverrides);
         return await response.value();
     }
@@ -602,7 +602,7 @@ export class CoinsApi extends runtime.BaseAPI {
      * @hidden
      * Updates information about a specific coin by its mint address
      */
-    async updateCoinRaw(params: UpdateCoinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateCoinResponse>> {
+    async updateCoinRaw(params: UpdateCoinOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UpdateCoinResponse>> {
         if (params.mint === null || params.mint === undefined) {
             throw new runtime.RequiredError('mint','Required parameter params.mint was null or undefined when calling updateCoin.');
         }
@@ -611,8 +611,8 @@ export class CoinsApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateCoin.');
         }
 
-        if (params.metadata === null || params.metadata === undefined) {
-            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateCoin.');
+        if (params.updateCoinRequest === null || params.updateCoinRequest === undefined) {
+            throw new runtime.RequiredError('updateCoinRequest','Required parameter params.updateCoinRequest was null or undefined when calling updateCoin.');
         }
 
         const queryParameters: any = {};
@@ -630,7 +630,7 @@ export class CoinsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: UpdateCoinRequestBodyToJSON(params.metadata),
+            body: UpdateCoinRequestToJSON(params.updateCoinRequest),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => UpdateCoinResponseFromJSON(jsonValue));
@@ -639,7 +639,7 @@ export class CoinsApi extends runtime.BaseAPI {
     /**
      * Updates information about a specific coin by its mint address
      */
-    async updateCoin(params: UpdateCoinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateCoinResponse> {
+    async updateCoin(params: UpdateCoinOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UpdateCoinResponse> {
         const response = await this.updateCoinRaw(params, initOverrides);
         return await response.value();
     }

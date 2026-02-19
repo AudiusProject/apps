@@ -21,9 +21,7 @@ export const CreateDeveloperAppSchema = z.object({
   userId: HashId
 })
 
-export type EntityManagerCreateDeveloperAppRequest = z.input<
-  typeof CreateDeveloperAppSchema
->
+export type CreateDeveloperAppRequest = z.input<typeof CreateDeveloperAppSchema>
 
 export const UpdateDeveloperAppSchema = z.object({
   appApiKey: z.custom<string>((data: unknown) => {
@@ -42,9 +40,7 @@ export const UpdateDeveloperAppSchema = z.object({
   userId: HashId
 })
 
-export type EntityManagerUpdateDeveloperAppRequest = z.input<
-  typeof UpdateDeveloperAppSchema
->
+export type UpdateDeveloperAppRequest = z.input<typeof UpdateDeveloperAppSchema>
 
 export const DeleteDeveloperAppSchema = z.object({
   userId: HashId,
@@ -53,6 +49,4 @@ export const DeleteDeveloperAppSchema = z.object({
   })
 })
 
-export type EntityManagerDeleteDeveloperAppRequest = z.input<
-  typeof DeleteDeveloperAppSchema
->
+export type DeleteDeveloperAppRequest = z.input<typeof DeleteDeveloperAppSchema>

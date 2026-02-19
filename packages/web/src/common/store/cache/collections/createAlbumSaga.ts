@@ -168,20 +168,11 @@ function* createAndConfirmAlbum(
       throw new Error('No userId set, cannot create album')
     }
 
-    const metadata = albumMetadataForCreateWithSDK(formFields)
-    metadata.playlistContents = initTrack
-      ? [
-          {
-            trackId: Id.parse(initTrack.track_id),
-            timestamp: Date.now() / 1000
-          }
-        ]
-      : undefined
-
     yield* call([sdk.albums, sdk.albums.createAlbum], {
       userId: Id.parse(userId),
       albumId: Id.parse(albumId),
-      metadata
+      trackIds: initTrack ? [Id.parse(initTrack.track_id)] : undefined,
+      metadata: albumMetadataForCreateWithSDK(formFields)
     })
 
     const { data: album } = yield* call(

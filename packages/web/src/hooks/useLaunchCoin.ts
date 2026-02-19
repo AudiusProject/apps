@@ -217,7 +217,7 @@ export const useLaunchCoin = () => {
           // Create coin in Audius database
           await sdk.coins.createCoin({
             userId: Id.parse(userId),
-            metadata: {
+            createCoinRequest: {
               mint: mintPublicKey,
               ticker: `${symbolUpper}`,
               decimals: LAUNCHPAD_COIN_DECIMALS,

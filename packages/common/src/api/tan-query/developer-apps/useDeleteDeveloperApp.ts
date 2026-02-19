@@ -22,7 +22,7 @@ export const useDeleteDeveloperApp = () => {
 
       await sdk.developerApps.deleteDeveloperApp({
         userId: Id.parse(currentUserId),
-        address: apiKey
+        appApiKey: apiKey
       })
       return {}
     },

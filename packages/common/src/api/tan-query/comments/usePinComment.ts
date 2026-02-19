@@ -1,4 +1,3 @@
-import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
@@ -30,25 +29,12 @@ export const usePinComment = () => {
     mutationFn: async (args: PinCommentArgs) => {
       const { userId, commentId, isPinned, trackId } = args
       const sdk = await audiusSdk()
-      if (isPinned) {
-        return await sdk.comments.pinComment({
-          userId: Id.parse(userId)!,
-          commentId: Id.parse(commentId)!,
-          metadata: {
-            entityId: trackId,
-            entityType: 'Track'
-          }
-        })
-      } else {
-        return await sdk.comments.unpinComment({
-          userId: Id.parse(userId)!,
-          commentId: Id.parse(commentId)!,
-          metadata: {
-            entityId: trackId,
-            entityType: 'Track'
-          }
-        })
-      }
+      return await sdk.comments.pinComment({
+        userId,
+        entityId: commentId,
+        trackId,
+        isPin: isPinned
+      })
     },
     onMutate: ({ commentId, isPinned, trackId, currentSort }) => {
       if (isPinned) {

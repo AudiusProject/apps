@@ -518,7 +518,7 @@ export interface SearchTrackFull {
      * @type {string}
      * @memberof SearchTrackFull
      */
-    parentalWarningType?: string | null;
+    parentalWarningType?: string;
     /**
      * Whether or not the owner has restricted streaming behind an access gate
      * @type {boolean}

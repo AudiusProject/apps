@@ -1,5 +1,6 @@
 import { Collection, FieldVisibility, Track, User } from '@audius/common/models'
 import { TQCollection } from '@audius/common/src/api/tan-query/models'
+import { Genre } from '@audius/common/utils'
 
 const defaultFieldVisibility: FieldVisibility = {
   genre: true,
@@ -21,7 +22,7 @@ export const getTrackWithFallback = (track: Track | null | undefined) => {
       followee_saves: [],
       duration: 0,
       save_count: 0,
-      genre: '',
+      genre: Genre.ALL,
       field_visibility: defaultFieldVisibility,
       has_current_user_reposted: false,
       has_current_user_saved: false,

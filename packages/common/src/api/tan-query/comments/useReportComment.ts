@@ -1,4 +1,3 @@
-import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
@@ -29,10 +28,7 @@ export const useReportComment = () => {
   return useMutation({
     mutationFn: async ({ userId, commentId }: ReportCommentArgs) => {
       const sdk = await audiusSdk()
-      await sdk.comments.reportComment({
-        userId: Id.parse(userId)!,
-        commentId: Id.parse(commentId)!
-      })
+      await sdk.comments.reportComment(userId, commentId)
     },
     onMutate: ({ trackId, commentId, currentSort, parentCommentId }) => {
       // Optimistic update - filter out the comment from either the top list or the parent comment's replies

@@ -68,7 +68,7 @@ export const TrackingBar = (props: TrackingBarProps) => {
 
   // Calculate the actual playback rate based on track type
   const isLongFormContent =
-    trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
+    trackGenre === Genre.PODCASTS || trackGenre === Genre.AUDIOBOOKS
   const actualPlaybackRate = isLongFormContent
     ? playbackRateValueMap[playbackRate]
     : 1.0

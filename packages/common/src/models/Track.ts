@@ -64,20 +64,11 @@ export type NftGatedConditions = {
   }
 }
 
-/** Single split in USDC purchase conditions (matches API extended_payment_split). */
-export type PaymentSplit = {
-  user_id?: number
-  percentage: number
-  payout_wallet: string
-  amount: number
-  eth_wallet?: string
-}
-
 export type USDCPurchaseConditions = {
   usdc_purchase: {
     price: number
-    albumTrackPrice?: number | null
-    splits?: PaymentSplit[]
+    albumTrackPrice?: number
+    splits: Record<ID, number>
   }
 }
 
