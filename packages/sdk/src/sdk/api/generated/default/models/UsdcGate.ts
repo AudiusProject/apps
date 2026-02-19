@@ -14,6 +14,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { PaymentSplit } from './PaymentSplit';
+import {
+    PaymentSplitFromJSON,
+    PaymentSplitFromJSONTyped,
+    PaymentSplitToJSON,
+} from './PaymentSplit';
+
 /**
  * 
  * @export
@@ -21,17 +28,17 @@ import { exists, mapValues } from '../runtime';
  */
 export interface UsdcGate {
     /**
-     * 
-     * @type {{ [key: string]: number; }}
-     * @memberof UsdcGate
-     */
-    splits: { [key: string]: number; };
-    /**
-     * 
+     * The price in USDC needed to unlock
      * @type {number}
      * @memberof UsdcGate
      */
     price: number;
+    /**
+     * 
+     * @type {Array<PaymentSplit>}
+     * @memberof UsdcGate
+     */
+    splits: Array<PaymentSplit>;
 }
 
 /**
@@ -39,8 +46,8 @@ export interface UsdcGate {
  */
 export function instanceOfUsdcGate(value: object): value is UsdcGate {
     let isInstance = true;
-    isInstance = isInstance && "splits" in value && value["splits"] !== undefined;
     isInstance = isInstance && "price" in value && value["price"] !== undefined;
+    isInstance = isInstance && "splits" in value && value["splits"] !== undefined;
 
     return isInstance;
 }
@@ -55,8 +62,8 @@ export function UsdcGateFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     }
     return {
         
-        'splits': json['splits'],
         'price': json['price'],
+        'splits': ((json['splits'] as Array<any>).map(PaymentSplitFromJSON)),
     };
 }
 
@@ -69,8 +76,8 @@ export function UsdcGateToJSON(value?: UsdcGate | null): any {
     }
     return {
         
-        'splits': value.splits,
         'price': value.price,
+        'splits': ((value.splits as Array<any>).map(PaymentSplitToJSON)),
     };
 }
 

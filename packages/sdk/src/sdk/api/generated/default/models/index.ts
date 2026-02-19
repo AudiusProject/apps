@@ -188,6 +188,7 @@ export * from './NftGate';
 export * from './Notification';
 export * from './Notifications';
 export * from './NotificationsResponse';
+export * from './PaymentSplit';
 export * from './PinCommentRequestBody';
 export * from './Playlist';
 export * from './PlaylistAddedTimestamp';

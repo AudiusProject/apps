@@ -209,6 +209,7 @@ models/NftGate.ts
 models/Notification.ts
 models/Notifications.ts
 models/NotificationsResponse.ts
+models/PaymentSplit.ts
 models/PinCommentRequestBody.ts
 models/Playlist.ts
 models/PlaylistAddedTimestamp.ts

@@ -84,10 +84,8 @@ export const USDCPurchaseConditions = z
       price: z.number().positive(),
       splits: z.array(
         z.object({
-          userId: z.number().optional(),
-          percentage: z.number().min(0).max(100),
-          payoutWallet: z.string(),
-          amount: z.number().positive()
+          userId: z.number(),
+          percentage: z.number().min(0).max(100)
         })
       )
     })
@@ -103,6 +101,7 @@ export const UploadStemMetadataSchema = z.object({
 
 export const UploadTrackMetadataSchema = z.object({
   trackId: z.optional(HashId),
+  ownerId: z.optional(z.number()),
   aiAttributionUserId: z.optional(HashId),
   description: z.optional(z.string().max(MAX_DESCRIPTION_LENGTH).nullable()),
   fieldVisibility: z.optional(

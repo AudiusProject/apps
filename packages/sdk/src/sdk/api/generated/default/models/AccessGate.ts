@@ -21,13 +21,6 @@ import {
     FollowGateToJSON,
 } from './FollowGate';
 import {
-    NftGate,
-    instanceOfNftGate,
-    NftGateFromJSON,
-    NftGateFromJSONTyped,
-    NftGateToJSON,
-} from './NftGate';
-import {
     PurchaseGate,
     instanceOfPurchaseGate,
     PurchaseGateFromJSON,
@@ -54,7 +47,7 @@ import {
  * 
  * @export
  */
-export type AccessGate = FollowGate | NftGate | PurchaseGate | TipGate | TokenGate;
+export type AccessGate = FollowGate | PurchaseGate | TipGate | TokenGate;
 
 export function AccessGateFromJSON(json: any): AccessGate {
     return AccessGateFromJSONTyped(json, false);
@@ -64,7 +57,7 @@ export function AccessGateFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return { ...FollowGateFromJSONTyped(json, true), ...NftGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
+    return { ...FollowGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
 }
 
 export function AccessGateToJSON(value?: AccessGate | null): any {
@@ -77,9 +70,6 @@ export function AccessGateToJSON(value?: AccessGate | null): any {
 
     if (instanceOfFollowGate(value)) {
         return FollowGateToJSON(value as FollowGate);
-    }
-    if (instanceOfNftGate(value)) {
-        return NftGateToJSON(value as NftGate);
     }
     if (instanceOfPurchaseGate(value)) {
         return PurchaseGateToJSON(value as PurchaseGate);
