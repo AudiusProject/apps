@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { useTrendingWinners } from '@audius/common/api'
 import {
@@ -22,6 +22,10 @@ import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
 import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
+import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
+import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
+import { TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
 
 const { getLineup } = trendingWinnersPageLineupSelectors
 
@@ -95,6 +99,8 @@ export const WinnersView = ({
   const lineupProps = useTrendingWinnersLineup(
     containerRef?.current ?? undefined
   )
+  const isMobile = useIsMobile()
+  const TrackTileComponent = isMobile ? MobileTrackTile : DesktopTrackTile
 
   useEffect(() => {
     if (tracks && tracks.length > 0) {
@@ -191,10 +197,38 @@ export const WinnersView = ({
       </Paper>
 
       {isPending ? (
-        <Flex column gap='m'>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Flex key={i} h={128} alignItems='center' gap='l' p='s' />
-          ))}
+        <Flex
+          column
+          gap='m'
+          as='ul'
+          css={{ listStyle: 'none', margin: 0, padding: 0 }}
+        >
+          {Array(5)
+            .fill(null)
+            .map((_, i) => (
+              <Flex
+                key={i}
+                as='li'
+                w='100%'
+                css={{ '& > *': { width: '100%', minWidth: 0 } }}
+              >
+                <TrackTileComponent
+                  uid={`skeleton-winners-${i}`}
+                  id={-1}
+                  index={i}
+                  size={TrackTileSize.LARGE}
+                  statSize='large'
+                  ordered
+                  togglePlay={() => {}}
+                  isLoading
+                  hasLoaded={() => {}}
+                  isTrending
+                  isFeed={false}
+                  isActive={false}
+                  noShimmer
+                />
+              </Flex>
+            ))}
         </Flex>
       ) : (
         <div>
