@@ -173,7 +173,8 @@ function* createAndConfirmAlbum(
       ? [
           {
             trackId: Id.parse(initTrack.track_id),
-            timestamp: Date.now() / 1000
+            timestamp: Math.round(Date.now() / 1000),
+            metadataTimestamp: Math.round(Date.now() / 1000)
           }
         ]
       : undefined
@@ -185,7 +186,7 @@ function* createAndConfirmAlbum(
     })
 
     const { data: album } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(albumId)

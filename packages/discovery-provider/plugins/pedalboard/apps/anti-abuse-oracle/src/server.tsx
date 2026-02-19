@@ -193,7 +193,7 @@ app.post('/attestation/:handle', async (c) => {
   const handle = c.req.param('handle').toLowerCase()
   const { challengeId, challengeSpecifier, amount } = await c.req.json()
 
-  const { data: users } = await sdk.full.users.getUserByHandle({ handle })
+  const { data: users } = await sdk.users.getUserByHandle({ handle })
   if (!users || !users[0]) {
     return c.json({ error: `handle not found: ${handle}` }, 404)
   }

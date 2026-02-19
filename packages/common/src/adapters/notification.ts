@@ -1,4 +1,15 @@
-import { full, HashId, OptionalHashId } from '@audius/sdk'
+import {
+  HashId,
+  OptionalHashId,
+  type Notification as SdkNotification,
+  RepostNotificationActionDataTypeEnum,
+  RepostOfRepostNotificationActionDataTypeEnum,
+  SaveNotificationActionDataTypeEnum,
+  SaveOfRepostNotificationActionDataTypeEnum,
+  instanceOfCreatePlaylistNotificationActionData,
+  instanceOfPlaylistMilestoneNotificationActionData,
+  instanceOfTrackMilestoneNotificationActionData
+} from '@audius/sdk'
 import dayjs from 'dayjs'
 
 import { BadgeTier, type ID } from '~/models'
@@ -26,7 +37,7 @@ const getTimeAgo = (date: number) => {
   return 'A few moments ago'
 }
 
-function formatBaseNotification(notification: full.Notification) {
+function formatBaseNotification(notification: SdkNotification) {
   const timestamp = notification.actions[0].timestamp
   return {
     groupId: notification.groupId,
@@ -39,11 +50,10 @@ function formatBaseNotification(notification: full.Notification) {
 
 const toEntityType = (
   type:
-    | full.SaveOfRepostNotificationActionDataTypeEnum
-    | full.SaveNotificationActionDataTypeEnum
-    | full.RepostNotificationActionDataTypeEnum
-    | full.RepostOfRepostNotificationActionDataTypeEnum
-    | full.SaveOfRepostNotificationActionDataTypeEnum
+    | SaveOfRepostNotificationActionDataTypeEnum
+    | SaveNotificationActionDataTypeEnum
+    | RepostNotificationActionDataTypeEnum
+    | RepostOfRepostNotificationActionDataTypeEnum
 ) => {
   if (type === 'track') {
     return Entity.Track
@@ -60,7 +70,7 @@ const toEntityType = (
  * and other nuanced things on a per notification basis.
  */
 export const notificationFromSDK = (
-  notification: full.Notification
+  notification: SdkNotification
 ): Notification | undefined => {
   switch (notification.type) {
     case 'follow': {
@@ -200,7 +210,7 @@ export const notificationFromSDK = (
       const entityIds = notification.actions
         .map((action) => {
           const data = action.data
-          if (full.instanceOfCreatePlaylistNotificationActionData(data)) {
+          if (instanceOfCreatePlaylistNotificationActionData(data)) {
             entityType = data.isAlbum ? Entity.Album : Entity.Playlist
             // Future proofing for when playlistId is fixed to be a string
             return HashId.parse(
@@ -295,7 +305,7 @@ export const notificationFromSDK = (
     }
     case 'milestone': {
       const data = notification.actions[0].data
-      if (full.instanceOfTrackMilestoneNotificationActionData(data)) {
+      if (instanceOfTrackMilestoneNotificationActionData(data)) {
         let achievement: Achievement
         if (data.type === 'track_repost_count') {
           achievement = Achievement.Reposts
@@ -312,7 +322,7 @@ export const notificationFromSDK = (
           achievement,
           ...formatBaseNotification(notification)
         }
-      } else if (full.instanceOfPlaylistMilestoneNotificationActionData(data)) {
+      } else if (instanceOfPlaylistMilestoneNotificationActionData(data)) {
         let achievement: Achievement
         if (data.type === 'playlist_repost_count') {
           achievement = Achievement.Reposts
@@ -641,5 +651,7 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    default:
+      return undefined
   }
 }

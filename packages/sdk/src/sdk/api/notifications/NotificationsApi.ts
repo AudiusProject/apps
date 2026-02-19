@@ -1,4 +1,7 @@
-import type { Configuration } from '../../api/generated/default'
+import {
+  NotificationsApi as GeneratedNotificationsApi,
+  type Configuration
+} from '../../api/generated/default'
 import type { EntityManagerService } from '../../services'
 import { Action, EntityType } from '../../services/EntityManager/types'
 import { parseParams } from '../../utils/parseParams'
@@ -10,12 +13,13 @@ import {
   UpdatePlaylistLastViewedAtSchema
 } from './types'
 
-export class NotificationsApi {
-  // eslint-disable-next-line no-useless-constructor
+export class NotificationsApi extends GeneratedNotificationsApi {
   constructor(
-    _config: Configuration,
+    config: Configuration,
     private readonly entityManager: EntityManagerService
-  ) {}
+  ) {
+    super(config)
+  }
 
   /**
    * When a user views all of their notifications

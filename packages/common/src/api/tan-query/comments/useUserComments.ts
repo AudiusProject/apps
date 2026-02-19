@@ -46,7 +46,7 @@ export const useUserComments = (
     queryKey: ['userCommentList', userId, pageSize],
     queryFn: async ({ pageParam }): Promise<ID[]> => {
       const sdk = await audiusSdk()
-      const commentsRes = await sdk.full.users.getUserComments({
+      const commentsRes = await sdk.users.getUserComments({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         offset: pageParam,

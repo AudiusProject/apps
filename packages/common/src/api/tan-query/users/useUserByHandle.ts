@@ -29,14 +29,18 @@ export const getUserByHandleQueryFn = async (
   currentUserId?: ID | null
 ) => {
   if (!handle) return undefined
-  const { data } = await sdk.full.users.getUserByHandle({
+  const response = await sdk.users.getUserByHandle({
     handle: handle.toLowerCase(),
     userId: OptionalId.parse(currentUserId)
   })
-  const user = userMetadataListFromSDK(data)[0]
-
-  primeUserData({ users: [user], queryClient })
-  return user.user_id
+  const user = response.data
+    ? userMetadataListFromSDK([response.data])[0]
+    : undefined
+  if (user) {
+    primeUserData({ users: [user], queryClient })
+    return user.user_id
+  }
+  return undefined
 }
 
 export const useUserByHandle = <TResult = User>(

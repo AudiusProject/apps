@@ -1,11 +1,15 @@
 import {
+  type AccessGate,
+  type AccountCollection as SdkAccountCollection,
   type CreateAlbumRequestBody,
   type CreatePlaylistRequestBody,
-  full,
   Id,
   OptionalHashId,
   type Playlist,
   type PlaylistAddedTimestamp,
+  type SearchPlaylist,
+  type Track,
+  type SearchTrack,
   UpdateAlbumRequest,
   type UpdateAlbumRequestBody,
   type UpdatePlaylistRequestBody
@@ -51,18 +55,14 @@ const addedTimestampToPlaylistTrackId = ({
 }
 
 export const userCollectionMetadataFromSDK = (
-  input:
-    | full.PlaylistFullWithoutTracks
-    | full.SearchPlaylistFull
-    | full.PlaylistFull
-    | Playlist
+  input: Playlist | SearchPlaylist
 ): UserCollectionMetadata | undefined => {
   try {
     const decodedPlaylistId = OptionalHashId.parse(input.id)
     const decodedOwnerId = OptionalHashId.parse(
       'userId' in input && input.userId != null ? input.userId : input.user.id
     )
-    const user = userMetadataFromSDK(input.user as unknown as full.UserFull)
+    const user = userMetadataFromSDK(input.user)
     if (!decodedPlaylistId || !decodedOwnerId || !user) {
       return undefined
     }
@@ -127,9 +127,9 @@ export const userCollectionMetadataFromSDK = (
           ? accessConditionsFromSDK(input.streamConditions)
           : null,
       tracks: transformAndCleanList(
-        ('tracks' in input ? (input.tracks ?? []) : []) as unknown as (
-          | full.TrackFull
-          | full.SearchTrackFull
+        ('tracks' in input ? (input.tracks ?? []) : []) as (
+          | Track
+          | SearchTrack
         )[],
         userTrackMetadataFromSDK
       ),
@@ -152,7 +152,7 @@ export const userCollectionMetadataFromSDK = (
 }
 
 export const accountCollectionFromSDK = (
-  input: full.AccountCollection
+  input: SdkAccountCollection
 ): AccountCollection | undefined => {
   const playlistId = OptionalHashId.parse(input.id)
   const userId = OptionalHashId.parse(input.user.id)
@@ -206,7 +206,7 @@ export const playlistMetadataForUpdateWithSDK = (
       ? input.playlist_contents.track_ids.map((t) => ({
           timestamp: t.time,
           trackId: Id.parse(t.track),
-          metadataTimestamp: t.metadata_time
+          metadataTimestamp: t.metadata_time ?? 0
         }))
       : undefined,
     playlistName: input.playlist_name ?? '',
@@ -223,7 +223,9 @@ export const albumMetadataForCreateWithSDK = (
     streamConditions:
       input.stream_conditions != null &&
       isContentUSDCPurchaseGated(input.stream_conditions)
-        ? usdcPurchaseConditionsToSDK(input.stream_conditions)
+        ? (usdcPurchaseConditionsToSDK(
+            input.stream_conditions
+          ) as unknown as AccessGate)
         : null,
     isStreamGated: input.is_stream_gated ?? false,
     isScheduledRelease: input.is_scheduled_release ?? false,

@@ -38,8 +38,9 @@ const HeaderContainer = (props: HeaderContainerProps) => {
 }
 
 type PageProps = {
-  variant?: 'insert' | 'flush'
+  variant?: 'inset' | 'flush'
   size?: 'medium' | 'large'
+  headerPadding?: number
   containerRef?: MutableRefObject<any>
   className?: string
   contentClassName?: string
@@ -82,7 +83,8 @@ export const Page = (props: PageProps) => {
     size = 'medium',
     structuredData,
     title,
-    variant = 'inset'
+    variant = 'inset',
+    headerPadding = HEADER_MARGIN_PX
   } = props
 
   const metaTagsProps = {
@@ -124,7 +126,7 @@ export const Page = (props: PageProps) => {
             [containerClassName ?? '']: !!containerClassName
           })}
           style={
-            variant === 'inset' ? { paddingTop: HEADER_MARGIN_PX } : undefined
+            variant === 'inset' ? { paddingTop: headerPadding } : undefined
           }
         >
           {/* Set an id so that nested components can mount in relation to page if needed, e.g. fixed menu popups. */}

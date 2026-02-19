@@ -62,7 +62,7 @@ export function fetchTopPlaylists(): ThunkAction<
   return async (dispatch) => {
     try {
       const limit = 5
-      const { data } = await audiusSdk.full.playlists.getTrendingPlaylists({
+      const { data } = await audiusSdk.playlists.getTrendingPlaylists({
         limit,
         omitTracks: true
       })
@@ -89,7 +89,7 @@ export function fetchTopAlbums(): ThunkAction<
 > {
   return async (dispatch) => {
     try {
-      const { data } = await audiusSdk.full.playlists.getTrendingPlaylists({
+      const { data } = await audiusSdk.playlists.getTrendingPlaylists({
         type: 'album',
         omitTracks: true,
         limit: 5

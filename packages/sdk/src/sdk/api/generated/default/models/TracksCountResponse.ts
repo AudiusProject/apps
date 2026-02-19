@@ -21,11 +21,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface TracksCountResponse {
     /**
-     * 
+     * The total number of tracks matching the filter criteria
      * @type {number}
      * @memberof TracksCountResponse
      */
-    data?: number;
+    data: number;
 }
 
 /**
@@ -33,6 +33,7 @@ export interface TracksCountResponse {
  */
 export function instanceOfTracksCountResponse(value: object): value is TracksCountResponse {
     let isInstance = true;
+    isInstance = isInstance && "data" in value && value["data"] !== undefined;
 
     return isInstance;
 }
@@ -47,7 +48,7 @@ export function TracksCountResponseFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'data': !exists(json, 'data') ? undefined : json['data'],
+        'data': json['data'],
     };
 }
 

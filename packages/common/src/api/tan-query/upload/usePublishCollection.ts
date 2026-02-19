@@ -104,8 +104,9 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
           params.collectionMetadata
         )
         metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Date.now() / 1000,
-          trackId: Id.parse(t.trackId)
+          timestamp: Math.round(Date.now() / 1000),
+          trackId: Id.parse(t.trackId),
+          metadataTimestamp: Math.round(Date.now() / 1000)
         }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
@@ -117,8 +118,9 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
           params.collectionMetadata
         )
         metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Date.now() / 1000,
-          trackId: Id.parse(t.trackId)
+          timestamp: Math.round(Date.now() / 1000),
+          trackId: Id.parse(t.trackId),
+          metadataTimestamp: Math.round(Date.now() / 1000)
         }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),

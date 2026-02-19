@@ -1,4 +1,4 @@
-import type { full } from '@audius/sdk'
+import type { CoverArt, CoverPhoto, ProfilePicture } from '@audius/sdk'
 
 import {
   CoverArtSizesCids,
@@ -9,7 +9,7 @@ import {
 } from '~/models/ImageSizes'
 
 export const coverPhotoSizesCIDsFromSDK = (
-  input: full.CoverPhoto
+  input: CoverPhoto
 ): CoverPhotoSizesCids => {
   return [WidthSizes.SIZE_640, WidthSizes.SIZE_2000].reduce((out, size) => {
     out[size] = input[size] ?? null
@@ -18,7 +18,7 @@ export const coverPhotoSizesCIDsFromSDK = (
 }
 
 export const coverArtSizesCIDsFromSDK = (
-  input: full.CoverArt
+  input: CoverArt
 ): CoverArtSizesCids => {
   return [
     SquareSizes.SIZE_1000_BY_1000,
@@ -31,7 +31,7 @@ export const coverArtSizesCIDsFromSDK = (
 }
 
 export const profilePictureSizesCIDsFromSDK = (
-  input: full.ProfilePicture
+  input: ProfilePicture
 ): ProfilePictureSizesCids => {
   return [
     SquareSizes.SIZE_1000_BY_1000,

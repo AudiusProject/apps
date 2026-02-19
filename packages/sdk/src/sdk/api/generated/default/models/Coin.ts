@@ -14,61 +14,49 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CoinArtistFees } from './CoinArtistFees';
+import type { ArtistCoinFees } from './ArtistCoinFees';
 import {
-    CoinArtistFeesFromJSON,
-    CoinArtistFeesFromJSONTyped,
-    CoinArtistFeesToJSON,
-} from './CoinArtistFees';
-import type { CoinArtistLocker } from './CoinArtistLocker';
+    ArtistCoinFeesFromJSON,
+    ArtistCoinFeesFromJSONTyped,
+    ArtistCoinFeesToJSON,
+} from './ArtistCoinFees';
+import type { ArtistLocker } from './ArtistLocker';
 import {
-    CoinArtistLockerFromJSON,
-    CoinArtistLockerFromJSONTyped,
-    CoinArtistLockerToJSON,
-} from './CoinArtistLocker';
-import type { CoinDynamicBondingCurve } from './CoinDynamicBondingCurve';
+    ArtistLockerFromJSON,
+    ArtistLockerFromJSONTyped,
+    ArtistLockerToJSON,
+} from './ArtistLocker';
+import type { DynamicBondingCurveInsights } from './DynamicBondingCurveInsights';
 import {
-    CoinDynamicBondingCurveFromJSON,
-    CoinDynamicBondingCurveFromJSONTyped,
-    CoinDynamicBondingCurveToJSON,
-} from './CoinDynamicBondingCurve';
-import type { CoinExtensions } from './CoinExtensions';
+    DynamicBondingCurveInsightsFromJSON,
+    DynamicBondingCurveInsightsFromJSONTyped,
+    DynamicBondingCurveInsightsToJSON,
+} from './DynamicBondingCurveInsights';
+import type { RewardPool } from './RewardPool';
 import {
-    CoinExtensionsFromJSON,
-    CoinExtensionsFromJSONTyped,
-    CoinExtensionsToJSON,
-} from './CoinExtensions';
-import type { CoinRewardPool } from './CoinRewardPool';
-import {
-    CoinRewardPoolFromJSON,
-    CoinRewardPoolFromJSONTyped,
-    CoinRewardPoolToJSON,
-} from './CoinRewardPool';
+    RewardPoolFromJSON,
+    RewardPoolFromJSONTyped,
+    RewardPoolToJSON,
+} from './RewardPool';
 
 /**
- * 
+ * A coin object
  * @export
  * @interface Coin
  */
 export interface Coin {
     /**
-     * The coin name
-     * @type {string}
-     * @memberof Coin
-     */
-    name: string;
-    /**
-     * The coin symbol
-     * @type {string}
-     * @memberof Coin
-     */
-    ticker?: string;
-    /**
-     * The coin mint address
+     * The mint address of the coin
      * @type {string}
      * @memberof Coin
      */
     mint: string;
+    /**
+     * The coin symbol/ticker
+     * @type {string}
+     * @memberof Coin
+     */
+    ticker: string;
     /**
      * The number of decimals for the coin
      * @type {number}
@@ -76,37 +64,49 @@ export interface Coin {
      */
     decimals: number;
     /**
-     * The ID of the user associated with the coin
+     * The coin name
      * @type {string}
      * @memberof Coin
      */
-    ownerId: string;
+    name: string;
     /**
-     * The escrow recipient address for custom-created coins without DBCs
-     * @type {string}
-     * @memberof Coin
-     */
-    escrowRecipient?: string;
-    /**
-     * URL to the coin's logo image
+     * The URI for the coin's logo image
      * @type {string}
      * @memberof Coin
      */
     logoUri?: string;
     /**
-     * URL to the coin's banner image
+     * The URI for the coin's banner image
      * @type {string}
      * @memberof Coin
      */
     bannerImageUrl?: string;
     /**
-     * A longform description about the coin
+     * The description of the coin
      * @type {string}
      * @memberof Coin
      */
     description?: string;
     /**
-     * The official website for the coin
+     * X (Twitter) handle for the coin
+     * @type {string}
+     * @memberof Coin
+     */
+    xHandle?: string;
+    /**
+     * Instagram handle for the coin
+     * @type {string}
+     * @memberof Coin
+     */
+    instagramHandle?: string;
+    /**
+     * TikTok handle for the coin
+     * @type {string}
+     * @memberof Coin
+     */
+    tiktokHandle?: string;
+    /**
+     * Website URL for the coin
      * @type {string}
      * @memberof Coin
      */
@@ -140,343 +140,115 @@ export interface Coin {
      * @type {boolean}
      * @memberof Coin
      */
-    hasDiscord: boolean;
+    hasDiscord?: boolean;
     /**
-     * The date and time when the coin was added to Audius.
+     * The date and time when the coin was created
+     * @type {Date}
+     * @memberof Coin
+     */
+    createdAt: Date;
+    /**
+     * The date and time when the coin was last updated
+     * @type {Date}
+     * @memberof Coin
+     */
+    updatedAt?: Date;
+    /**
+     * The user ID of the coin owner
      * @type {string}
      * @memberof Coin
      */
-    createdAt: string;
+    ownerId?: string;
     /**
-     * The SPL token mint address
+     * The escrow recipient address for custom-created coins without DBCs
      * @type {string}
      * @memberof Coin
      */
-    address?: string;
-    /**
-     * The token symbol
-     * @type {string}
-     * @memberof Coin
-     */
-    symbol?: string;
-    /**
-     * Market capitalization in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    marketCap: number;
-    /**
-     * Fully diluted valuation in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    fdv: number;
+    escrowRecipient?: string;
     /**
      * 
-     * @type {CoinExtensions}
+     * @type {DynamicBondingCurveInsights}
      * @memberof Coin
      */
-    extensions?: CoinExtensions;
+    dynamicBondingCurve?: DynamicBondingCurveInsights;
     /**
-     * Current liquidity in USD
-     * @type {number}
+     * 
+     * @type {ArtistLocker}
      * @memberof Coin
      */
-    liquidity: number;
+    artistLocker?: ArtistLocker;
     /**
-     * Unix timestamp of the last trade
-     * @type {number}
+     * 
+     * @type {ArtistCoinFees}
      * @memberof Coin
      */
-    lastTradeUnixTime: number;
+    artistFees?: ArtistCoinFees;
     /**
-     * ISO8601 time of the last trade
-     * @type {string}
+     * 
+     * @type {RewardPool}
      * @memberof Coin
      */
-    lastTradeHumanTime: string;
+    rewardPool?: RewardPool;
     /**
      * Current price in USD
      * @type {number}
      * @memberof Coin
      */
-    price: number;
+    price?: number;
     /**
-     * Price 24 hours ago in USD
+     * Market capitalization in USD
      * @type {number}
      * @memberof Coin
      */
-    history24hPrice: number;
+    marketCap?: number;
     /**
-     * 24h price change in percent
+     * Total volume traded in USD (all time)
      * @type {number}
      * @memberof Coin
      */
-    priceChange24hPercent: number;
-    /**
-     * Unique wallets traded in last 24h
-     * @type {number}
-     * @memberof Coin
-     */
-    uniqueWallet24h: number;
-    /**
-     * Unique wallets traded in previous 24h
-     * @type {number}
-     * @memberof Coin
-     */
-    uniqueWalletHistory24h: number;
-    /**
-     * 24h change in unique wallets (percent)
-     * @type {number}
-     * @memberof Coin
-     */
-    uniqueWallet24hChangePercent: number;
-    /**
-     * Total supply of the token
-     * @type {number}
-     * @memberof Coin
-     */
-    totalSupply: number;
-    /**
-     * Circulating supply of the token
-     * @type {number}
-     * @memberof Coin
-     */
-    circulatingSupply: number;
+    totalVolumeUSD?: number;
     /**
      * Number of holders
      * @type {number}
      * @memberof Coin
      */
-    holder: number;
+    holder?: number;
     /**
-     * Number of trades in last 24h
+     * Total supply of the token
      * @type {number}
      * @memberof Coin
      */
-    trade24h: number;
+    totalSupply?: number;
     /**
-     * Number of trades in previous 24h
+     * Current liquidity in USD
      * @type {number}
      * @memberof Coin
      */
-    tradeHistory24h: number;
+    liquidity?: number;
     /**
-     * 24h change in trade count (percent)
+     * Circulating supply of the token
      * @type {number}
      * @memberof Coin
      */
-    trade24hChangePercent: number;
+    circulatingSupply?: number;
     /**
-     * Number of sell trades in last 24h
+     * 24h price change in percent
      * @type {number}
      * @memberof Coin
      */
-    sell24h: number;
+    priceChange24hPercent?: number;
     /**
-     * Number of sell trades in previous 24h
+     * Display price (client-computed, e.g. for display formatting)
      * @type {number}
      * @memberof Coin
      */
-    sellHistory24h: number;
+    displayPrice?: number;
     /**
-     * 24h change in sell trades (percent)
+     * Display market cap (client-computed)
      * @type {number}
      * @memberof Coin
      */
-    sell24hChangePercent: number;
-    /**
-     * Number of buy trades in last 24h
-     * @type {number}
-     * @memberof Coin
-     */
-    buy24h: number;
-    /**
-     * Number of buy trades in previous 24h
-     * @type {number}
-     * @memberof Coin
-     */
-    buyHistory24h: number;
-    /**
-     * 24h change in buy trades (percent)
-     * @type {number}
-     * @memberof Coin
-     */
-    buy24hChangePercent: number;
-    /**
-     * 24h trading volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    v24h: number;
-    /**
-     * 24h trading volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    v24hUSD: number;
-    /**
-     * Previous 24h trading volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    vHistory24h: number;
-    /**
-     * Previous 24h trading volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    vHistory24hUSD?: number;
-    /**
-     * 24h change in volume (percent)
-     * @type {number}
-     * @memberof Coin
-     */
-    v24hChangePercent?: number;
-    /**
-     * 24h buy volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    vBuy24h?: number;
-    /**
-     * 24h buy volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    vBuy24hUSD?: number;
-    /**
-     * Previous 24h buy volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    vBuyHistory24h?: number;
-    /**
-     * Previous 24h buy volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    vBuyHistory24hUSD?: number;
-    /**
-     * 24h change in buy volume (percent)
-     * @type {number}
-     * @memberof Coin
-     */
-    vBuy24hChangePercent?: number;
-    /**
-     * 24h sell volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    vSell24h?: number;
-    /**
-     * 24h sell volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    vSell24hUSD?: number;
-    /**
-     * Previous 24h sell volume (token units)
-     * @type {number}
-     * @memberof Coin
-     */
-    vSellHistory24h?: number;
-    /**
-     * Previous 24h sell volume in USD
-     * @type {number}
-     * @memberof Coin
-     */
-    vSellHistory24hUSD?: number;
-    /**
-     * 24h change in sell volume (percent)
-     * @type {number}
-     * @memberof Coin
-     */
-    vSell24hChangePercent?: number;
-    /**
-     * Number of markets the token is traded on
-     * @type {number}
-     * @memberof Coin
-     */
-    numberMarkets?: number;
-    /**
-     * Total volume of coin traded (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    totalVolume: number;
-    /**
-     * Total volume of coin traded in USD (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    totalVolumeUSD: number;
-    /**
-     * Total volume bought (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    volumeBuy: number;
-    /**
-     * Total volume bought in USD (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    volumeBuyUSD: number;
-    /**
-     * Total volume sold (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    volumeSell: number;
-    /**
-     * Total volume sold in USD (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    volumeSellUSD: number;
-    /**
-     * Total number of trades (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    totalTrade: number;
-    /**
-     * Total number of buys (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    buy: number;
-    /**
-     * Total number of sells (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    sell: number;
-    /**
-     * 
-     * @type {CoinDynamicBondingCurve}
-     * @memberof Coin
-     */
-    dynamicBondingCurve: CoinDynamicBondingCurve;
-    /**
-     * 
-     * @type {CoinArtistFees}
-     * @memberof Coin
-     */
-    artistFees?: CoinArtistFees;
-    /**
-     * 
-     * @type {CoinArtistLocker}
-     * @memberof Coin
-     */
-    artistLocker?: CoinArtistLocker;
-    /**
-     * 
-     * @type {CoinRewardPool}
-     * @memberof Coin
-     */
-    rewardPool?: CoinRewardPool;
+    displayMarketCap?: number;
 }
 
 /**
@@ -484,48 +256,11 @@ export interface Coin {
  */
 export function instanceOfCoin(value: object): value is Coin {
     let isInstance = true;
-    isInstance = isInstance && "name" in value && value["name"] !== undefined;
     isInstance = isInstance && "mint" in value && value["mint"] !== undefined;
+    isInstance = isInstance && "ticker" in value && value["ticker"] !== undefined;
     isInstance = isInstance && "decimals" in value && value["decimals"] !== undefined;
-    isInstance = isInstance && "ownerId" in value && value["ownerId"] !== undefined;
-    isInstance = isInstance && "hasDiscord" in value && value["hasDiscord"] !== undefined;
+    isInstance = isInstance && "name" in value && value["name"] !== undefined;
     isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
-    isInstance = isInstance && "marketCap" in value && value["marketCap"] !== undefined;
-    isInstance = isInstance && "fdv" in value && value["fdv"] !== undefined;
-    isInstance = isInstance && "liquidity" in value && value["liquidity"] !== undefined;
-    isInstance = isInstance && "lastTradeUnixTime" in value && value["lastTradeUnixTime"] !== undefined;
-    isInstance = isInstance && "lastTradeHumanTime" in value && value["lastTradeHumanTime"] !== undefined;
-    isInstance = isInstance && "price" in value && value["price"] !== undefined;
-    isInstance = isInstance && "history24hPrice" in value && value["history24hPrice"] !== undefined;
-    isInstance = isInstance && "priceChange24hPercent" in value && value["priceChange24hPercent"] !== undefined;
-    isInstance = isInstance && "uniqueWallet24h" in value && value["uniqueWallet24h"] !== undefined;
-    isInstance = isInstance && "uniqueWalletHistory24h" in value && value["uniqueWalletHistory24h"] !== undefined;
-    isInstance = isInstance && "uniqueWallet24hChangePercent" in value && value["uniqueWallet24hChangePercent"] !== undefined;
-    isInstance = isInstance && "totalSupply" in value && value["totalSupply"] !== undefined;
-    isInstance = isInstance && "circulatingSupply" in value && value["circulatingSupply"] !== undefined;
-    isInstance = isInstance && "holder" in value && value["holder"] !== undefined;
-    isInstance = isInstance && "trade24h" in value && value["trade24h"] !== undefined;
-    isInstance = isInstance && "tradeHistory24h" in value && value["tradeHistory24h"] !== undefined;
-    isInstance = isInstance && "trade24hChangePercent" in value && value["trade24hChangePercent"] !== undefined;
-    isInstance = isInstance && "sell24h" in value && value["sell24h"] !== undefined;
-    isInstance = isInstance && "sellHistory24h" in value && value["sellHistory24h"] !== undefined;
-    isInstance = isInstance && "sell24hChangePercent" in value && value["sell24hChangePercent"] !== undefined;
-    isInstance = isInstance && "buy24h" in value && value["buy24h"] !== undefined;
-    isInstance = isInstance && "buyHistory24h" in value && value["buyHistory24h"] !== undefined;
-    isInstance = isInstance && "buy24hChangePercent" in value && value["buy24hChangePercent"] !== undefined;
-    isInstance = isInstance && "v24h" in value && value["v24h"] !== undefined;
-    isInstance = isInstance && "v24hUSD" in value && value["v24hUSD"] !== undefined;
-    isInstance = isInstance && "vHistory24h" in value && value["vHistory24h"] !== undefined;
-    isInstance = isInstance && "totalVolume" in value && value["totalVolume"] !== undefined;
-    isInstance = isInstance && "totalVolumeUSD" in value && value["totalVolumeUSD"] !== undefined;
-    isInstance = isInstance && "volumeBuy" in value && value["volumeBuy"] !== undefined;
-    isInstance = isInstance && "volumeBuyUSD" in value && value["volumeBuyUSD"] !== undefined;
-    isInstance = isInstance && "volumeSell" in value && value["volumeSell"] !== undefined;
-    isInstance = isInstance && "volumeSellUSD" in value && value["volumeSellUSD"] !== undefined;
-    isInstance = isInstance && "totalTrade" in value && value["totalTrade"] !== undefined;
-    isInstance = isInstance && "buy" in value && value["buy"] !== undefined;
-    isInstance = isInstance && "sell" in value && value["sell"] !== undefined;
-    isInstance = isInstance && "dynamicBondingCurve" in value && value["dynamicBondingCurve"] !== undefined;
 
     return isInstance;
 }
@@ -540,77 +275,40 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
     }
     return {
         
-        'name': json['name'],
-        'ticker': !exists(json, 'ticker') ? undefined : json['ticker'],
         'mint': json['mint'],
+        'ticker': json['ticker'],
         'decimals': json['decimals'],
-        'ownerId': json['owner_id'],
-        'escrowRecipient': !exists(json, 'escrow_recipient') ? undefined : json['escrow_recipient'],
+        'name': json['name'],
         'logoUri': !exists(json, 'logo_uri') ? undefined : json['logo_uri'],
         'bannerImageUrl': !exists(json, 'banner_image_url') ? undefined : json['banner_image_url'],
         'description': !exists(json, 'description') ? undefined : json['description'],
+        'xHandle': !exists(json, 'x_handle') ? undefined : json['x_handle'],
+        'instagramHandle': !exists(json, 'instagram_handle') ? undefined : json['instagram_handle'],
+        'tiktokHandle': !exists(json, 'tiktok_handle') ? undefined : json['tiktok_handle'],
         'website': !exists(json, 'website') ? undefined : json['website'],
         'link1': !exists(json, 'link_1') ? undefined : json['link_1'],
         'link2': !exists(json, 'link_2') ? undefined : json['link_2'],
         'link3': !exists(json, 'link_3') ? undefined : json['link_3'],
         'link4': !exists(json, 'link_4') ? undefined : json['link_4'],
-        'hasDiscord': json['has_discord'],
-        'createdAt': json['created_at'],
-        'address': !exists(json, 'address') ? undefined : json['address'],
-        'symbol': !exists(json, 'symbol') ? undefined : json['symbol'],
-        'marketCap': json['marketCap'],
-        'fdv': json['fdv'],
-        'extensions': !exists(json, 'extensions') ? undefined : CoinExtensionsFromJSON(json['extensions']),
-        'liquidity': json['liquidity'],
-        'lastTradeUnixTime': json['lastTradeUnixTime'],
-        'lastTradeHumanTime': json['lastTradeHumanTime'],
-        'price': json['price'],
-        'history24hPrice': json['history24hPrice'],
-        'priceChange24hPercent': json['priceChange24hPercent'],
-        'uniqueWallet24h': json['uniqueWallet24h'],
-        'uniqueWalletHistory24h': json['uniqueWalletHistory24h'],
-        'uniqueWallet24hChangePercent': json['uniqueWallet24hChangePercent'],
-        'totalSupply': json['totalSupply'],
-        'circulatingSupply': json['circulatingSupply'],
-        'holder': json['holder'],
-        'trade24h': json['trade24h'],
-        'tradeHistory24h': json['tradeHistory24h'],
-        'trade24hChangePercent': json['trade24hChangePercent'],
-        'sell24h': json['sell24h'],
-        'sellHistory24h': json['sellHistory24h'],
-        'sell24hChangePercent': json['sell24hChangePercent'],
-        'buy24h': json['buy24h'],
-        'buyHistory24h': json['buyHistory24h'],
-        'buy24hChangePercent': json['buy24hChangePercent'],
-        'v24h': json['v24h'],
-        'v24hUSD': json['v24hUSD'],
-        'vHistory24h': json['vHistory24h'],
-        'vHistory24hUSD': !exists(json, 'vHistory24hUSD') ? undefined : json['vHistory24hUSD'],
-        'v24hChangePercent': !exists(json, 'v24hChangePercent') ? undefined : json['v24hChangePercent'],
-        'vBuy24h': !exists(json, 'vBuy24h') ? undefined : json['vBuy24h'],
-        'vBuy24hUSD': !exists(json, 'vBuy24hUSD') ? undefined : json['vBuy24hUSD'],
-        'vBuyHistory24h': !exists(json, 'vBuyHistory24h') ? undefined : json['vBuyHistory24h'],
-        'vBuyHistory24hUSD': !exists(json, 'vBuyHistory24hUSD') ? undefined : json['vBuyHistory24hUSD'],
-        'vBuy24hChangePercent': !exists(json, 'vBuy24hChangePercent') ? undefined : json['vBuy24hChangePercent'],
-        'vSell24h': !exists(json, 'vSell24h') ? undefined : json['vSell24h'],
-        'vSell24hUSD': !exists(json, 'vSell24hUSD') ? undefined : json['vSell24hUSD'],
-        'vSellHistory24h': !exists(json, 'vSellHistory24h') ? undefined : json['vSellHistory24h'],
-        'vSellHistory24hUSD': !exists(json, 'vSellHistory24hUSD') ? undefined : json['vSellHistory24hUSD'],
-        'vSell24hChangePercent': !exists(json, 'vSell24hChangePercent') ? undefined : json['vSell24hChangePercent'],
-        'numberMarkets': !exists(json, 'numberMarkets') ? undefined : json['numberMarkets'],
-        'totalVolume': json['totalVolume'],
-        'totalVolumeUSD': json['totalVolumeUSD'],
-        'volumeBuy': json['volumeBuy'],
-        'volumeBuyUSD': json['volumeBuyUSD'],
-        'volumeSell': json['volumeSell'],
-        'volumeSellUSD': json['volumeSellUSD'],
-        'totalTrade': json['totalTrade'],
-        'buy': json['buy'],
-        'sell': json['sell'],
-        'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
-        'artistFees': !exists(json, 'artist_fees') ? undefined : CoinArtistFeesFromJSON(json['artist_fees']),
-        'artistLocker': !exists(json, 'artist_locker') ? undefined : CoinArtistLockerFromJSON(json['artist_locker']),
-        'rewardPool': !exists(json, 'reward_pool') ? undefined : CoinRewardPoolFromJSON(json['reward_pool']),
+        'hasDiscord': !exists(json, 'has_discord') ? undefined : json['has_discord'],
+        'createdAt': (new Date(json['created_at'])),
+        'updatedAt': !exists(json, 'updated_at') ? undefined : (new Date(json['updated_at'])),
+        'ownerId': !exists(json, 'owner_id') ? undefined : json['owner_id'],
+        'escrowRecipient': !exists(json, 'escrow_recipient') ? undefined : json['escrow_recipient'],
+        'dynamicBondingCurve': !exists(json, 'dynamicBondingCurve') ? undefined : DynamicBondingCurveInsightsFromJSON(json['dynamicBondingCurve']),
+        'artistLocker': !exists(json, 'artist_locker') ? undefined : ArtistLockerFromJSON(json['artist_locker']),
+        'artistFees': !exists(json, 'artist_fees') ? undefined : ArtistCoinFeesFromJSON(json['artist_fees']),
+        'rewardPool': !exists(json, 'reward_pool') ? undefined : RewardPoolFromJSON(json['reward_pool']),
+        'price': !exists(json, 'price') ? undefined : json['price'],
+        'marketCap': !exists(json, 'marketCap') ? undefined : json['marketCap'],
+        'totalVolumeUSD': !exists(json, 'totalVolumeUSD') ? undefined : json['totalVolumeUSD'],
+        'holder': !exists(json, 'holder') ? undefined : json['holder'],
+        'totalSupply': !exists(json, 'totalSupply') ? undefined : json['totalSupply'],
+        'liquidity': !exists(json, 'liquidity') ? undefined : json['liquidity'],
+        'circulatingSupply': !exists(json, 'circulatingSupply') ? undefined : json['circulatingSupply'],
+        'priceChange24hPercent': !exists(json, 'priceChange24hPercent') ? undefined : json['priceChange24hPercent'],
+        'displayPrice': !exists(json, 'displayPrice') ? undefined : json['displayPrice'],
+        'displayMarketCap': !exists(json, 'displayMarketCap') ? undefined : json['displayMarketCap'],
     };
 }
 
@@ -623,77 +321,40 @@ export function CoinToJSON(value?: Coin | null): any {
     }
     return {
         
-        'name': value.name,
-        'ticker': value.ticker,
         'mint': value.mint,
+        'ticker': value.ticker,
         'decimals': value.decimals,
-        'owner_id': value.ownerId,
-        'escrow_recipient': value.escrowRecipient,
+        'name': value.name,
         'logo_uri': value.logoUri,
         'banner_image_url': value.bannerImageUrl,
         'description': value.description,
+        'x_handle': value.xHandle,
+        'instagram_handle': value.instagramHandle,
+        'tiktok_handle': value.tiktokHandle,
         'website': value.website,
         'link_1': value.link1,
         'link_2': value.link2,
         'link_3': value.link3,
         'link_4': value.link4,
         'has_discord': value.hasDiscord,
-        'created_at': value.createdAt,
-        'address': value.address,
-        'symbol': value.symbol,
-        'marketCap': value.marketCap,
-        'fdv': value.fdv,
-        'extensions': CoinExtensionsToJSON(value.extensions),
-        'liquidity': value.liquidity,
-        'lastTradeUnixTime': value.lastTradeUnixTime,
-        'lastTradeHumanTime': value.lastTradeHumanTime,
+        'created_at': (value.createdAt.toISOString()),
+        'updated_at': value.updatedAt === undefined ? undefined : (value.updatedAt.toISOString()),
+        'owner_id': value.ownerId,
+        'escrow_recipient': value.escrowRecipient,
+        'dynamicBondingCurve': DynamicBondingCurveInsightsToJSON(value.dynamicBondingCurve),
+        'artist_locker': ArtistLockerToJSON(value.artistLocker),
+        'artist_fees': ArtistCoinFeesToJSON(value.artistFees),
+        'reward_pool': RewardPoolToJSON(value.rewardPool),
         'price': value.price,
-        'history24hPrice': value.history24hPrice,
-        'priceChange24hPercent': value.priceChange24hPercent,
-        'uniqueWallet24h': value.uniqueWallet24h,
-        'uniqueWalletHistory24h': value.uniqueWalletHistory24h,
-        'uniqueWallet24hChangePercent': value.uniqueWallet24hChangePercent,
-        'totalSupply': value.totalSupply,
-        'circulatingSupply': value.circulatingSupply,
-        'holder': value.holder,
-        'trade24h': value.trade24h,
-        'tradeHistory24h': value.tradeHistory24h,
-        'trade24hChangePercent': value.trade24hChangePercent,
-        'sell24h': value.sell24h,
-        'sellHistory24h': value.sellHistory24h,
-        'sell24hChangePercent': value.sell24hChangePercent,
-        'buy24h': value.buy24h,
-        'buyHistory24h': value.buyHistory24h,
-        'buy24hChangePercent': value.buy24hChangePercent,
-        'v24h': value.v24h,
-        'v24hUSD': value.v24hUSD,
-        'vHistory24h': value.vHistory24h,
-        'vHistory24hUSD': value.vHistory24hUSD,
-        'v24hChangePercent': value.v24hChangePercent,
-        'vBuy24h': value.vBuy24h,
-        'vBuy24hUSD': value.vBuy24hUSD,
-        'vBuyHistory24h': value.vBuyHistory24h,
-        'vBuyHistory24hUSD': value.vBuyHistory24hUSD,
-        'vBuy24hChangePercent': value.vBuy24hChangePercent,
-        'vSell24h': value.vSell24h,
-        'vSell24hUSD': value.vSell24hUSD,
-        'vSellHistory24h': value.vSellHistory24h,
-        'vSellHistory24hUSD': value.vSellHistory24hUSD,
-        'vSell24hChangePercent': value.vSell24hChangePercent,
-        'numberMarkets': value.numberMarkets,
-        'totalVolume': value.totalVolume,
+        'marketCap': value.marketCap,
         'totalVolumeUSD': value.totalVolumeUSD,
-        'volumeBuy': value.volumeBuy,
-        'volumeBuyUSD': value.volumeBuyUSD,
-        'volumeSell': value.volumeSell,
-        'volumeSellUSD': value.volumeSellUSD,
-        'totalTrade': value.totalTrade,
-        'buy': value.buy,
-        'sell': value.sell,
-        'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
-        'artist_fees': CoinArtistFeesToJSON(value.artistFees),
-        'artist_locker': CoinArtistLockerToJSON(value.artistLocker),
-        'reward_pool': CoinRewardPoolToJSON(value.rewardPool),
+        'holder': value.holder,
+        'totalSupply': value.totalSupply,
+        'liquidity': value.liquidity,
+        'circulatingSupply': value.circulatingSupply,
+        'priceChange24hPercent': value.priceChange24hPercent,
+        'displayPrice': value.displayPrice,
+        'displayMarketCap': value.displayMarketCap,
     };
 }
 

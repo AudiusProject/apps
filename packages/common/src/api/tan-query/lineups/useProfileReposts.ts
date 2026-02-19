@@ -60,7 +60,7 @@ export const useProfileReposts = (
 
       // If the @ is still at the beginning of the handle, trim it off
       const handleNoAt = handle.startsWith('@') ? handle.substring(1) : handle
-      const { data: repostsSDKData } = await sdk.full.users.getRepostsByHandle({
+      const { data: repostsSDKData } = await sdk.users.getRepostsByHandle({
         handle: handleNoAt,
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,

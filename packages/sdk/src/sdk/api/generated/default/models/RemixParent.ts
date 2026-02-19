@@ -14,12 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TrackElement } from './TrackElement';
+import type { Remix } from './Remix';
 import {
-    TrackElementFromJSON,
-    TrackElementFromJSONTyped,
-    TrackElementToJSON,
-} from './TrackElement';
+    RemixFromJSON,
+    RemixFromJSONTyped,
+    RemixToJSON,
+} from './Remix';
 
 /**
  * 
@@ -29,10 +29,10 @@ import {
 export interface RemixParent {
     /**
      * 
-     * @type {Array<TrackElement>}
+     * @type {Array<Remix>}
      * @memberof RemixParent
      */
-    tracks?: Array<TrackElement>;
+    tracks?: Array<Remix>;
 }
 
 /**
@@ -54,7 +54,7 @@ export function RemixParentFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'tracks': !exists(json, 'tracks') ? undefined : ((json['tracks'] as Array<any>).map(TrackElementFromJSON)),
+        'tracks': !exists(json, 'tracks') ? undefined : ((json['tracks'] as Array<any>).map(RemixFromJSON)),
     };
 }
 
@@ -67,7 +67,7 @@ export function RemixParentToJSON(value?: RemixParent | null): any {
     }
     return {
         
-        'tracks': value.tracks === undefined ? undefined : ((value.tracks as Array<any>).map(TrackElementToJSON)),
+        'tracks': value.tracks === undefined ? undefined : ((value.tracks as Array<any>).map(RemixToJSON)),
     };
 }
 

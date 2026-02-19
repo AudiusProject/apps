@@ -1,7 +1,10 @@
 import {
   HashId,
   OptionalHashId,
-  type full,
+  type User,
+  type UserManager,
+  type ManagedUser,
+  type Account,
   type UserPlaylistLibrary,
   Id,
   type UpdateUserRequestBody
@@ -30,10 +33,8 @@ import {
 import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
-/** Converts a SDK `full.UserFull` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
-export const userMetadataFromSDK = (
-  input: full.UserFull
-): UserMetadata | undefined => {
+/** Converts a SDK User response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
+export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
     return undefined
@@ -76,12 +77,19 @@ export const userMetadataFromSDK = (
         }
       : {},
     profile_picture: input.profilePicture
-      ? {
-          '150x150': input.profilePicture._150x150,
-          '480x480': input.profilePicture._480x480,
-          '1000x1000': input.profilePicture._1000x1000,
-          mirrors: input.profilePicture.mirrors
-        }
+      ? (() => {
+          const pic = input.profilePicture!
+          const mirrors =
+            'mirrors' in pic && Array.isArray(pic.mirrors)
+              ? pic.mirrors
+              : undefined
+          return {
+            '150x150': pic._150x150,
+            '480x480': pic._480x480,
+            '1000x1000': pic._1000x1000,
+            ...(mirrors != null && { mirrors })
+          }
+        })()
       : {},
     // Required Nullable fields
     bio: input.bio ?? null,
@@ -108,11 +116,11 @@ export const userMetadataFromSDK = (
   return newUser
 }
 
-export const userMetadataListFromSDK = (input?: full.UserFull[]) =>
+export const userMetadataListFromSDK = (input?: User[]) =>
   input ? input.map((d) => userMetadataFromSDK(d)).filter(removeNullable) : []
 
 export const managedUserFromSDK = (
-  input: full.ManagedUser
+  input: ManagedUser
 ): ManagedUserMetadata | undefined => {
   const user = userMetadataFromSDK(input.user)
   if (!user) {
@@ -124,11 +132,11 @@ export const managedUserFromSDK = (
   }
 }
 
-export const managedUserListFromSDK = (input?: full.ManagedUser[]) =>
+export const managedUserListFromSDK = (input?: ManagedUser[]) =>
   input ? input.map((d) => managedUserFromSDK(d)).filter(removeNullable) : []
 
 export const userManagerFromSDK = (
-  input: full.UserManager
+  input: UserManager
 ): UserManagerMetadata | undefined => {
   const manager = userMetadataFromSDK(input.manager)
   if (!manager) {
@@ -140,11 +148,11 @@ export const userManagerFromSDK = (
   }
 }
 
-export const userManagerListFromSDK = (input?: full.UserManager[]) =>
+export const userManagerListFromSDK = (input?: UserManager[]) =>
   input ? input.map((d) => userManagerFromSDK(d)).filter(removeNullable) : []
 
 export const accountFromSDK = (
-  input: full.AccountFull
+  input: Account
 ): AccountUserMetadata | undefined => {
   const user = userMetadataFromSDK(input.user)
   if (!user) {

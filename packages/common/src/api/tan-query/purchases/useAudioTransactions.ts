@@ -1,4 +1,8 @@
-import { full, Id } from '@audius/sdk'
+import {
+  GetAudioTransactionsSortMethodEnum,
+  GetAudioTransactionsSortDirectionEnum,
+  Id
+} from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
 
 import { audioTransactionFromSdk } from '~/adapters/audioTransactions'
@@ -14,8 +18,8 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 type GetAudioTransactionsArgs = {
   page?: number
   pageSize?: number
-  sortMethod?: full.GetAudioTransactionsSortMethodEnum
-  sortDirection?: full.GetAudioTransactionsSortDirectionEnum
+  sortMethod?: GetAudioTransactionsSortMethodEnum
+  sortDirection?: GetAudioTransactionsSortDirectionEnum
 }
 
 export const DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE = 50
@@ -63,7 +67,7 @@ export const useAudioTransactions = (
       if (!userId) return []
 
       const sdk = await audiusSdk()
-      const response = await sdk.full.users.getAudioTransactions({
+      const response = await sdk.users.getAudioTransactions({
         id: Id.parse(userId),
         offset: page * pageSize,
         limit: pageSize,

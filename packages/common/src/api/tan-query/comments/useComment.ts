@@ -21,7 +21,7 @@ export const useComment = (commentId: ID | null | undefined) => {
     enabled: !!commentId,
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data: commentRes } = await sdk.full.comments.getComment({
+      const { data: commentRes } = await sdk.comments.getComment({
         commentId: Id.parse(commentId)
       })
 

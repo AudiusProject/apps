@@ -1,10 +1,13 @@
 import {
-  type full,
   type CrossPlatformFile,
   Genre,
   Mood,
   type NativeFile,
-  type TrackMetadata,
+  type Track,
+  type TrackSegment as SdkTrackSegment,
+  type SearchTrack,
+  type Stem,
+  type UpdateTrackRequestBody,
   HashId,
   Id,
   OptionalHashId,
@@ -59,14 +62,14 @@ function toSdkMood(
 export const trackSegmentFromSDK = ({
   duration,
   multihash
-}: full.TrackSegment): TrackSegment => ({
+}: SdkTrackSegment): TrackSegment => ({
   // Client code expects duration as a string
   duration: `${duration}`,
   multihash
 })
 
 export const userTrackMetadataFromSDK = (
-  input: full.TrackFull | full.SearchTrackFull
+  input: Track | SearchTrack
 ): UserTrackMetadata | undefined => {
   const decodedTrackId = OptionalHashId.parse(input.id)
   const decodedOwnerId = OptionalHashId.parse(input.userId)
@@ -193,7 +196,7 @@ export const userTrackMetadataFromSDK = (
 }
 
 export const stemTrackMetadataFromSDK = (
-  input: full.StemFull
+  input: Stem
 ): StemTrackMetadata | undefined => {
   const [id, parentId, ownerId] = [input.id, input.parentId, input.userId].map(
     (id) => HashId.parse(id)
@@ -260,7 +263,7 @@ const DEFAULT_GENRE = Genre.Electronic
 
 export const trackMetadataForUploadToSdk = (
   input: TrackMetadataForUpload
-): TrackMetadata => {
+): UpdateTrackRequestBody => {
   const sdkGenre = toSdkGenre(input.genre)
   const genre = sdkGenre ?? DEFAULT_GENRE
   return {
@@ -348,7 +351,7 @@ export const trackMetadataForUploadToSdk = (
           camelcaseKeys(contributor)
         )
       : undefined
-  } as TrackMetadata
+  } as UpdateTrackRequestBody
 }
 
 export const fileToSdk = (

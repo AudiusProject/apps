@@ -108,7 +108,7 @@ const CoverPhoto = ({
         isUrl={false}
         wrapperClassName={styles.photo}
         imageStyle={imageSettings.backgroundStyle}
-        useBlur={shouldBlur}
+        useBlur={!updatedCoverPhoto && shouldBlur}
         usePlaceholder={false}
         immediate={imageSettings.immediate}
       >

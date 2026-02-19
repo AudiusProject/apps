@@ -89,7 +89,7 @@ export const useTrending = (
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
 
       const { data: sdkResponse = [] } = version
-        ? await sdk.full.tracks.getTrendingTracksWithVersion({
+        ? await sdk.tracks.getTrendingTracksWithVersion({
             time: timeRange,
             genre: (genre as string) || undefined,
             userId: OptionalId.parse(currentUserId),
@@ -97,7 +97,7 @@ export const useTrending = (
             offset: pageParam,
             version
           })
-        : await sdk.full.tracks.getTrendingTracks({
+        : await sdk.tracks.getTrendingTracks({
             time: timeRange,
             genre: (genre as string) || undefined,
             userId: OptionalId.parse(currentUserId),

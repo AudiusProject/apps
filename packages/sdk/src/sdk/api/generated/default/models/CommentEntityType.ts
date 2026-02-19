@@ -15,7 +15,7 @@
 
 
 /**
- * 
+ * Type of entity that can be commented on
  * @export
  */
 export const CommentEntityType = {

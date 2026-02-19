@@ -24,7 +24,7 @@ export const useFavoritedTracks = (
     queryKey: getFavoritedTracksQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.users.getFavorites({
+      const { data } = await sdk.users.getUserFavorites({
         id: Id.parse(userId)
       })
 

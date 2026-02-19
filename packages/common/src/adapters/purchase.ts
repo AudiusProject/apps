@@ -1,4 +1,4 @@
-import { full, HashId } from '@audius/sdk'
+import { HashId, type Purchase } from '@audius/sdk'
 
 import { PurchaseAccess } from '~/models/PurchaseContent'
 import {
@@ -7,7 +7,7 @@ import {
 } from '~/models/USDCTransactions'
 import { StringUSDC } from '~/models/Wallet'
 
-export const purchaseFromSDK = (input: full.Purchase): USDCPurchaseDetails => {
+export const purchaseFromSDK = (input: Purchase): USDCPurchaseDetails => {
   const {
     contentId,
     contentType,

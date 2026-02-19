@@ -28,7 +28,7 @@ function* getPremiumTracks({
   const sdk = yield* getSDK()
   const currentUserId = yield* call(queryCurrentUserId)
   const { data = [] } = yield* call(
-    [sdk.full.tracks, sdk.full.tracks.getTrendingUSDCPurchaseTracks],
+    [sdk.tracks, sdk.tracks.getTrendingUSDCPurchaseTracks],
     { limit, offset, userId: OptionalId.parse(currentUserId) }
   )
   const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)

@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from 'react'
 
-import { full, Id } from '@audius/sdk'
+import {
+  Id,
+  type GetPurchasesSortDirectionEnum,
+  type GetPurchasesSortMethodEnum
+} from '@audius/sdk'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { purchaseFromSDK } from '~/adapters/purchase'
@@ -22,8 +26,8 @@ const PAGE_SIZE = 10
 
 export type GetSalesListArgs = {
   userId: ID | null | undefined
-  sortMethod?: full.GetPurchasesSortMethodEnum
-  sortDirection?: full.GetPurchasesSortDirectionEnum
+  sortMethod?: GetPurchasesSortMethodEnum
+  sortDirection?: GetPurchasesSortDirectionEnum
   pageSize?: number
 }
 
@@ -56,7 +60,7 @@ export const useSales = (args: GetSalesListArgs, options?: QueryOptions) => {
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getSales({
+      const { data = [] } = await sdk.users.getSales({
         id: Id.parse(userId!),
         userId: Id.parse(userId!),
         limit: pageSize,

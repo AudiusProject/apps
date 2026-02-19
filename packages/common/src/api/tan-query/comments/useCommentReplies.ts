@@ -42,7 +42,7 @@ export const useCommentReplies = (
     },
     queryFn: async ({ pageParam }): Promise<ID[]> => {
       const sdk = await audiusSdk()
-      const response = await sdk.full.comments.getCommentReplies({
+      const response = await sdk.comments.getCommentReplies({
         commentId: Id.parse(commentId),
         userId: currentUserId?.toString(),
         limit: pageSize,

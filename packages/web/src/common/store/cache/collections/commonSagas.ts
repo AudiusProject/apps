@@ -210,7 +210,7 @@ function* confirmEditPlaylist(
           })
         }
         const { data: playlist } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)
@@ -514,7 +514,7 @@ function* confirmPublishPlaylist(
         })
 
         const { data } = yield* call(
-          [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+          [sdk.playlists, sdk.playlists.getPlaylist],
           {
             userId: OptionalId.parse(userId),
             playlistId: Id.parse(playlistId)

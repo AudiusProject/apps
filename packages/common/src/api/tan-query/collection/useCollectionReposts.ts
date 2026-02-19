@@ -46,7 +46,7 @@ export const useCollectionReposts = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.playlists.getUsersFromPlaylistReposts({
+      const { data } = await sdk.playlists.getUsersFromPlaylistReposts({
         playlistId: Id.parse(collectionId),
         limit: pageSize,
         offset: pageParam,

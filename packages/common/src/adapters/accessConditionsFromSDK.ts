@@ -1,4 +1,4 @@
-import type { AccessGate, full } from '@audius/sdk'
+import type { AccessGate } from '@audius/sdk'
 import {
   instanceOfFollowGate,
   instanceOfPurchaseGate,
@@ -7,9 +7,9 @@ import {
 
 import { AccessConditions } from '~/models'
 
-/** Accepts default API AccessGate or full API AccessGate (e.g. from playlists). */
+/** Accepts default API AccessGate (e.g. from playlists). */
 export const accessConditionsFromSDK = (
-  input: AccessGate | full.AccessGate
+  input: AccessGate
 ): AccessConditions | null => {
   if (instanceOfFollowGate(input)) {
     return { follow_user_id: input.followUserId }

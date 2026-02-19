@@ -20,6 +20,30 @@ import {
     AccessGateFromJSONTyped,
     AccessGateToJSON,
 } from './AccessGate';
+import type { CreatePlaylistRequestBodyCopyrightLine } from './CreatePlaylistRequestBodyCopyrightLine';
+import {
+    CreatePlaylistRequestBodyCopyrightLineFromJSON,
+    CreatePlaylistRequestBodyCopyrightLineFromJSONTyped,
+    CreatePlaylistRequestBodyCopyrightLineToJSON,
+} from './CreatePlaylistRequestBodyCopyrightLine';
+import type { CreatePlaylistRequestBodyProducerCopyrightLine } from './CreatePlaylistRequestBodyProducerCopyrightLine';
+import {
+    CreatePlaylistRequestBodyProducerCopyrightLineFromJSON,
+    CreatePlaylistRequestBodyProducerCopyrightLineFromJSONTyped,
+    CreatePlaylistRequestBodyProducerCopyrightLineToJSON,
+} from './CreatePlaylistRequestBodyProducerCopyrightLine';
+import type { DdexResourceContributor } from './DdexResourceContributor';
+import {
+    DdexResourceContributorFromJSON,
+    DdexResourceContributorFromJSONTyped,
+    DdexResourceContributorToJSON,
+} from './DdexResourceContributor';
+import type { DdexRightsController } from './DdexRightsController';
+import {
+    DdexRightsControllerFromJSON,
+    DdexRightsControllerFromJSONTyped,
+    DdexRightsControllerToJSON,
+} from './DdexRightsController';
 import type { FieldVisibility } from './FieldVisibility';
 import {
     FieldVisibilityFromJSON,
@@ -251,34 +275,34 @@ export interface CreateTrackRequestBody {
     artists?: Array<object> | null;
     /**
      * DDEX resource contributors
-     * @type {Array<object>}
+     * @type {Array<DdexResourceContributor>}
      * @memberof CreateTrackRequestBody
      */
-    resourceContributors?: Array<object> | null;
+    resourceContributors?: Array<DdexResourceContributor> | null;
     /**
      * DDEX indirect resource contributors
-     * @type {Array<object>}
+     * @type {Array<DdexResourceContributor>}
      * @memberof CreateTrackRequestBody
      */
-    indirectResourceContributors?: Array<object> | null;
+    indirectResourceContributors?: Array<DdexResourceContributor> | null;
     /**
-     * DDEX rights controller
-     * @type {object}
+     * 
+     * @type {DdexRightsController}
      * @memberof CreateTrackRequestBody
      */
-    rightsController?: object | null;
+    rightsController?: DdexRightsController;
     /**
-     * DDEX copyright line
-     * @type {object}
+     * 
+     * @type {CreatePlaylistRequestBodyCopyrightLine}
      * @memberof CreateTrackRequestBody
      */
-    copyrightLine?: object | null;
+    copyrightLine?: CreatePlaylistRequestBodyCopyrightLine | null;
     /**
-     * DDEX producer copyright line
-     * @type {object}
+     * 
+     * @type {CreatePlaylistRequestBodyProducerCopyrightLine}
      * @memberof CreateTrackRequestBody
      */
-    producerCopyrightLine?: object | null;
+    producerCopyrightLine?: CreatePlaylistRequestBodyProducerCopyrightLine | null;
     /**
      * Parental warning type
      * @type {string}
@@ -371,11 +395,11 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'ddexApp': !exists(json, 'ddex_app') ? undefined : json['ddex_app'],
         'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
         'artists': !exists(json, 'artists') ? undefined : json['artists'],
-        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : json['resource_contributors'],
-        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : json['indirect_resource_contributors'],
-        'rightsController': !exists(json, 'rights_controller') ? undefined : json['rights_controller'],
-        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
-        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
+        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : (json['resource_contributors'] === null ? null : (json['resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : (json['indirect_resource_contributors'] === null ? null : (json['indirect_resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'rightsController': !exists(json, 'rights_controller') ? undefined : DdexRightsControllerFromJSON(json['rights_controller']),
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : CreatePlaylistRequestBodyCopyrightLineFromJSON(json['copyright_line']),
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : CreatePlaylistRequestBodyProducerCopyrightLineFromJSON(json['producer_copyright_line']),
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
         'coverOriginalSongTitle': !exists(json, 'cover_original_song_title') ? undefined : json['cover_original_song_title'],
         'coverOriginalArtist': !exists(json, 'cover_original_artist') ? undefined : json['cover_original_artist'],
@@ -426,11 +450,11 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'ddex_app': value.ddexApp,
         'ddex_release_ids': value.ddexReleaseIds,
         'artists': value.artists,
-        'resource_contributors': value.resourceContributors,
-        'indirect_resource_contributors': value.indirectResourceContributors,
-        'rights_controller': value.rightsController,
-        'copyright_line': value.copyrightLine,
-        'producer_copyright_line': value.producerCopyrightLine,
+        'resource_contributors': value.resourceContributors === undefined ? undefined : (value.resourceContributors === null ? null : (value.resourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'indirect_resource_contributors': value.indirectResourceContributors === undefined ? undefined : (value.indirectResourceContributors === null ? null : (value.indirectResourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'rights_controller': DdexRightsControllerToJSON(value.rightsController),
+        'copyright_line': CreatePlaylistRequestBodyCopyrightLineToJSON(value.copyrightLine),
+        'producer_copyright_line': CreatePlaylistRequestBodyProducerCopyrightLineToJSON(value.producerCopyrightLine),
         'parental_warning_type': value.parentalWarningType,
         'cover_original_song_title': value.coverOriginalSongTitle,
         'cover_original_artist': value.coverOriginalArtist,

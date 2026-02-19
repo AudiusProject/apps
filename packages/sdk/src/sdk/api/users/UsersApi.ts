@@ -11,7 +11,7 @@ import {
 } from '../../services/EntityManager/types'
 import type { ClaimableTokensClient } from '../../services/Solana/programs/ClaimableTokensClient/ClaimableTokensClient'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
-import { HashId, Id } from '../../types/HashId'
+import { HashId } from '../../types/HashId'
 import { generateMetadataCidV1 } from '../../utils/cid'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
@@ -120,7 +120,7 @@ export class UsersApi extends GeneratedUsersApi {
       ...advancedOptions
     })
 
-    return { blockHash, blockNumber, metadata }
+    return { blockHash, blockNumber, metadata, userId: data }
   }
 
   override async createUser(
@@ -134,7 +134,8 @@ export class UsersApi extends GeneratedUsersApi {
       })
       return {
         success: true,
-        transactionHash: res.blockHash
+        transactionHash: res.blockHash,
+        userId: res.userId
       }
     }
     return super.createUser(
@@ -280,7 +281,7 @@ export class UsersApi extends GeneratedUsersApi {
     const metadata = await this.updateMetadataWithFiles(params.metadata, params)
     if (this.entityManager) {
       return await this.updateUserWithEntityManager({
-        userId: Id.parse(params.id)!,
+        userId: params.id,
         metadata: {
           ...metadata,
           playlistLibrary: metadata.playlistLibrary?.contents

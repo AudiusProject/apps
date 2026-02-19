@@ -197,7 +197,8 @@ function* createAndConfirmPlaylist(
       ? [
           {
             timestamp: Math.round(Date.now() / 1000), // must use seconds
-            trackId: Id.parse(initTrack.track_id)
+            trackId: Id.parse(initTrack.track_id),
+            metadataTimestamp: Math.round(Date.now() / 1000)
           }
         ]
       : []
@@ -210,7 +211,7 @@ function* createAndConfirmPlaylist(
     // Merge the confirmed playlist with the optimistic playlist, preferring
     // optimistic data in case other unconfirmed edits have been made.
     const { data: playlist } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(playlistId)

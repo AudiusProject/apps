@@ -14,7 +14,13 @@ import {
   withdrawUSDCSelectors
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
-import { Id, full } from '@audius/sdk'
+import {
+  Id,
+  GetUSDCTransactionsSortDirectionEnum,
+  GetUSDCTransactionsSortMethodEnum,
+  GetUSDCTransactionsTypeEnum,
+  GetUSDCTransactionsMethodEnum
+} from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 import { ThunkDispatch } from 'redux-thunk'
 
@@ -50,20 +56,20 @@ const messages = {
 const TRANSACTIONS_BATCH_SIZE = 50
 
 const sortMethods: {
-  [k in WithdrawalsTableSortMethod]: full.GetUSDCTransactionsSortMethodEnum
+  [k in WithdrawalsTableSortMethod]: GetUSDCTransactionsSortMethodEnum
 } = {
-  date: full.GetUSDCTransactionsSortMethodEnum.Date
+  date: GetUSDCTransactionsSortMethodEnum.Date
 }
 
 const sortDirections: {
-  [k in WithdrawalsTableSortDirection]: full.GetUSDCTransactionsSortDirectionEnum
+  [k in WithdrawalsTableSortDirection]: GetUSDCTransactionsSortDirectionEnum
 } = {
-  asc: full.GetUSDCTransactionsSortDirectionEnum.Asc,
-  desc: full.GetUSDCTransactionsSortDirectionEnum.Desc
+  asc: GetUSDCTransactionsSortDirectionEnum.Asc,
+  desc: GetUSDCTransactionsSortDirectionEnum.Desc
 }
 
-const DEFAULT_SORT_METHOD = full.GetUSDCTransactionsSortMethodEnum.Date
-const DEFAULT_SORT_DIRECTION = full.GetUSDCTransactionsSortDirectionEnum.Desc
+const DEFAULT_SORT_METHOD = GetUSDCTransactionsSortMethodEnum.Date
+const DEFAULT_SORT_DIRECTION = GetUSDCTransactionsSortDirectionEnum.Desc
 
 const NoWithdrawals = () => {
   const { onOpen: openWithdrawUSDCModal } = useWithdrawUSDCModal()
@@ -99,8 +105,8 @@ const NoWithdrawals = () => {
 const useWithdrawalTransactionPoller = (
   userId: ID | null | undefined,
   lastCompletedTransaction: string | undefined,
-  sortMethod: full.GetUSDCTransactionsSortMethodEnum,
-  sortDirection: full.GetUSDCTransactionsSortDirectionEnum
+  sortMethod: GetUSDCTransactionsSortMethodEnum,
+  sortDirection: GetUSDCTransactionsSortDirectionEnum
 ) => {
   const [isPolling, setIsPolling] = useState(false)
 
@@ -116,10 +122,10 @@ const useWithdrawalTransactionPoller = (
     sortMethod,
     sortDirection,
     type: [
-      full.GetUSDCTransactionsTypeEnum.Withdrawal,
-      full.GetUSDCTransactionsTypeEnum.Transfer
+      GetUSDCTransactionsTypeEnum.Withdrawal,
+      GetUSDCTransactionsTypeEnum.Transfer
     ],
-    method: full.GetUSDCTransactionsMethodEnum.Send
+    method: GetUSDCTransactionsMethodEnum.Send
   })
 
   useEffect(() => {
@@ -182,9 +188,9 @@ export const useWithdrawals = () => {
   )
   // Defaults: sort method = date, sort direction = desc
   const [sortMethod, setSortMethod] =
-    useState<full.GetUSDCTransactionsSortMethodEnum>(DEFAULT_SORT_METHOD)
+    useState<GetUSDCTransactionsSortMethodEnum>(DEFAULT_SORT_METHOD)
   const [sortDirection, setSortDirection] =
-    useState<full.GetUSDCTransactionsSortDirectionEnum>(DEFAULT_SORT_DIRECTION)
+    useState<GetUSDCTransactionsSortDirectionEnum>(DEFAULT_SORT_DIRECTION)
 
   const {
     transactions,
@@ -205,7 +211,7 @@ export const useWithdrawals = () => {
     data: transactionsCount,
     isPending: transactionsCountIsPending
   } = useUSDCTransactionsCount({
-    method: full.GetUSDCTransactionsMethodEnum.Send
+    method: GetUSDCTransactionsMethodEnum.Send
   })
 
   // Error handling

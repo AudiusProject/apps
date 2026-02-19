@@ -20,6 +20,7 @@ import type {
   CreateTrackRequestBody,
   CreateTrackResponse,
   FavoriteRequestBody,
+  RemixablesResponse,
   RemixesResponse,
   RemixingResponse,
   RepostRequestBody,
@@ -50,6 +51,8 @@ import {
     CreateTrackResponseToJSON,
     FavoriteRequestBodyFromJSON,
     FavoriteRequestBodyToJSON,
+    RemixablesResponseFromJSON,
+    RemixablesResponseToJSON,
     RemixesResponseFromJSON,
     RemixesResponseToJSON,
     RemixingResponseFromJSON,
@@ -117,11 +120,18 @@ export interface FavoriteTrackRequest {
     metadata?: FavoriteRequestBody;
 }
 
+export interface GetBestNewReleasesRequest {
+    window: GetBestNewReleasesWindowEnum;
+    userId?: string;
+    limit?: number;
+    withUsers?: boolean;
+}
+
 export interface GetBulkTracksRequest {
+    userId?: string;
     permalink?: Array<string>;
     id?: Array<string>;
     isrc?: Array<string>;
-    userId?: string;
 }
 
 export interface GetFeelingLuckyTracksRequest {
@@ -129,6 +139,12 @@ export interface GetFeelingLuckyTracksRequest {
     limit?: number;
     withUsers?: boolean;
     minFollowers?: number;
+}
+
+export interface GetMostLovedTracksRequest {
+    userId?: string;
+    limit?: number;
+    withUsers?: boolean;
 }
 
 export interface GetMostSharedTracksRequest {
@@ -159,6 +175,12 @@ export interface GetRecommendedTracksWithVersionRequest {
     time?: GetRecommendedTracksWithVersionTimeEnum;
     exclusionList?: Array<number>;
     userId?: string;
+}
+
+export interface GetRemixableTracksRequest {
+    limit?: number;
+    userId?: string;
+    withUsers?: boolean;
 }
 
 export interface GetTrackRequest {
@@ -232,9 +254,9 @@ export interface GetTrendingTrackIDsRequest {
 export interface GetTrendingTracksRequest {
     offset?: number;
     limit?: number;
+    userId?: string;
     genre?: string;
     time?: GetTrendingTracksTimeEnum;
-    userId?: string;
 }
 
 export interface GetTrendingTracksIDsWithVersionRequest {
@@ -278,6 +300,15 @@ export interface GetTrendingUndergroundWinnersRequest {
 export interface GetTrendingWinnersRequest {
     week?: Date;
     userId?: string;
+}
+
+export interface GetUnderTheRadarTracksRequest {
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    filter?: GetUnderTheRadarTracksFilterEnum;
+    tracksOnly?: boolean;
+    withUsers?: boolean;
 }
 
 export interface GetUndergroundTrendingTracksRequest {
@@ -594,10 +625,61 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the tracks found on the \"Best New Releases\" smart playlist
+     */
+    async getBestNewReleasesRaw(params: GetBestNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        if (params.window === null || params.window === undefined) {
+            throw new runtime.RequiredError('window','Required parameter params.window was null or undefined when calling getBestNewReleases.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.window !== undefined) {
+            queryParameters['window'] = params.window;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/best_new_releases`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Best New Releases\" smart playlist
+     */
+    async getBestNewReleases(params: GetBestNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getBestNewReleasesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets a list of tracks using their IDs or permalinks
      */
     async getBulkTracksRaw(params: GetBulkTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         if (params.permalink) {
             queryParameters['permalink'] = params.permalink;
@@ -609,10 +691,6 @@ export class TracksApi extends runtime.BaseAPI {
 
         if (params.isrc) {
             queryParameters['isrc'] = params.isrc;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -675,6 +753,45 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getFeelingLuckyTracks(params: GetFeelingLuckyTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getFeelingLuckyTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the tracks found on the \"Most Loved\" smart playlist
+     */
+    async getMostLovedTracksRaw(params: GetMostLovedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/most_loved`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Most Loved\" smart playlist
+     */
+    async getMostLovedTracks(params: GetMostLovedTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getMostLovedTracksRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -860,7 +977,46 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets a track by ID
+     * Gets a list of tracks that have stems available for remixing
+     */
+    async getRemixableTracksRaw(params: GetRemixableTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixablesResponse>> {
+        const queryParameters: any = {};
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/remixables`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RemixablesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a list of tracks that have stems available for remixing
+     */
+    async getRemixableTracks(params: GetRemixableTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixablesResponse> {
+        const response = await this.getRemixableTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a track by ID.
      */
     async getTrackRaw(params: GetTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackResponse>> {
         if (params.trackId === null || params.trackId === undefined) {
@@ -886,7 +1042,7 @@ export class TracksApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets a track by ID
+     * Gets a track by ID.
      */
     async getTrack(params: GetTrackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackResponse> {
         const response = await this.getTrackRaw(params, initOverrides);
@@ -1310,16 +1466,16 @@ export class TracksApi extends runtime.BaseAPI {
             queryParameters['limit'] = params.limit;
         }
 
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
         if (params.genre !== undefined) {
             queryParameters['genre'] = params.genre;
         }
 
         if (params.time !== undefined) {
             queryParameters['time'] = params.time;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -1536,7 +1692,7 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets weekly trending underground winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     * Gets weekly trending underground winners from the trending_results table. Returns track objects for the specified week. Defaults to the most recent week with data when no week is provided.
      */
     async getTrendingUndergroundWinnersRaw(params: GetTrendingUndergroundWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
         const queryParameters: any = {};
@@ -1562,7 +1718,7 @@ export class TracksApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets weekly trending underground winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     * Gets weekly trending underground winners from the trending_results table. Returns track objects for the specified week. Defaults to the most recent week with data when no week is provided.
      */
     async getTrendingUndergroundWinners(params: GetTrendingUndergroundWinnersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getTrendingUndergroundWinnersRaw(params, initOverrides);
@@ -1571,7 +1727,7 @@ export class TracksApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets weekly trending winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     * Gets weekly trending winners from the trending_results table. Returns track objects for the specified week. Defaults to the most recent week with data when no week is provided.
      */
     async getTrendingWinnersRaw(params: GetTrendingWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
         const queryParameters: any = {};
@@ -1597,10 +1753,61 @@ export class TracksApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets weekly trending winners from the trending_results table. Returns full track objects for the specified week. Defaults to the most recent week with data when no week is provided.
+     * Gets weekly trending winners from the trending_results table. Returns track objects for the specified week. Defaults to the most recent week with data when no week is provided.
      */
     async getTrendingWinners(params: GetTrendingWinnersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getTrendingWinnersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the tracks found on the \"Under the Radar\" smart playlist
+     */
+    async getUnderTheRadarTracksRaw(params: GetUnderTheRadarTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.filter !== undefined) {
+            queryParameters['filter'] = params.filter;
+        }
+
+        if (params.tracksOnly !== undefined) {
+            queryParameters['tracks_only'] = params.tracksOnly;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/tracks/under_the_radar`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks found on the \"Under the Radar\" smart playlist
+     */
+    async getUnderTheRadarTracks(params: GetUnderTheRadarTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getUnderTheRadarTracksRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -2312,6 +2519,15 @@ export class TracksApi extends runtime.BaseAPI {
 /**
  * @export
  */
+export const GetBestNewReleasesWindowEnum = {
+    Week: 'week',
+    Month: 'month',
+    Year: 'year'
+} as const;
+export type GetBestNewReleasesWindowEnum = typeof GetBestNewReleasesWindowEnum[keyof typeof GetBestNewReleasesWindowEnum];
+/**
+ * @export
+ */
 export const GetMostSharedTracksTimeRangeEnum = {
     Week: 'week',
     Month: 'month',
@@ -2396,6 +2612,15 @@ export const GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = {
     AllTime: 'allTime'
 } as const;
 export type GetTrendingUSDCPurchaseTracksWithVersionTimeEnum = typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum[keyof typeof GetTrendingUSDCPurchaseTracksWithVersionTimeEnum];
+/**
+ * @export
+ */
+export const GetUnderTheRadarTracksFilterEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Original: 'original'
+} as const;
+export type GetUnderTheRadarTracksFilterEnum = typeof GetUnderTheRadarTracksFilterEnum[keyof typeof GetUnderTheRadarTracksFilterEnum];
 /**
  * @export
  */

@@ -12,7 +12,13 @@ import {
   LibraryCategoryType
 } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { full, HashId, Id } from '@audius/sdk'
+import {
+  HashId,
+  Id,
+  type Activity,
+  GetUserLibraryTracksSortMethodEnum,
+  GetUserLibraryTracksSortDirectionEnum
+} from '@audius/sdk'
 import { call, fork, put, select, takeLatest } from 'typed-redux-saga'
 
 import { waitForRead } from 'utils/sagaHelpers'
@@ -56,16 +62,15 @@ function* sendLibraryRequest({
   const sdk = yield* call(audiusSdk)
 
   const libraryTracksResponse = yield* call(
-    [sdk.full.users, sdk.full.users.getUserLibraryTracks],
+    [sdk.users, sdk.users.getUserLibraryTracks],
     {
       id: Id.parse(userId),
       userId: Id.parse(userId),
       offset,
       limit,
       query,
-      sortMethod: sortMethod as full.GetUserLibraryTracksSortMethodEnum,
-      sortDirection:
-        sortDirection as full.GetUserLibraryTracksSortDirectionEnum,
+      sortMethod: sortMethod as GetUserLibraryTracksSortMethodEnum,
+      sortDirection: sortDirection as GetUserLibraryTracksSortDirectionEnum,
       type: category
     }
   )
@@ -73,7 +78,7 @@ function* sendLibraryRequest({
   const libraryTracksResponseData = libraryTracksResponse.data ?? []
   const tracks = transformAndCleanList(
     libraryTracksResponse.data,
-    (activity: full.ActivityFull) => trackActivityFromSDK(activity)?.item
+    (activity: Activity) => trackActivityFromSDK(activity)?.item
   )
 
   if (!tracks) {

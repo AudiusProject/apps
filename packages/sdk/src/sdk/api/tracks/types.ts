@@ -10,10 +10,10 @@ import {
 } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
 import { HashId } from '../../types/HashId'
+import { StemCategory } from '../../types/StemCategory'
 import {
   Mood,
   Genre,
-  StemCategory,
   type UpdateTrackRequest,
   type CreateTrackRequest
 } from '../generated/default'

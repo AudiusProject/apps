@@ -85,9 +85,9 @@ function* syncFavoritesCollection() {
   const sdk = yield* getSDK()
   const offlineTrackMetadata = yield* select(getOfflineTrackMetadata)
 
-  const { data } = yield* call([sdk.users, sdk.users.getFavorites], {
+  const { data } = (yield* call([sdk.users, sdk.users.getUserFavorites], {
     id: Id.parse(currentUserId)
-  })
+  })) as import('@audius/sdk').FavoritesResponse
 
   const latestFavoritedTracks = transformAndCleanList(data, favoriteFromSDK)
 

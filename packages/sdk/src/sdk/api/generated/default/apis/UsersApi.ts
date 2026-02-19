@@ -21,7 +21,9 @@ import type {
   ApproveGrantRequestBody,
   AuthorizedApps,
   BalanceHistoryResponse,
+  BulkSubscribersResponse,
   CollectiblesResponse,
+  CollectionLibraryResponse,
   ConnectedWalletsResponse,
   CreateGrantRequestBody,
   CreateUserRequestBody,
@@ -32,30 +34,45 @@ import type {
   FollowingResponse,
   GetChallenges,
   GetSupportedUsers,
+  GetSupporter,
   GetSupporters,
+  GetSupporting,
   HistoryResponse,
+  ManagedUsersResponse,
+  ManagersResponse,
   MutualFollowersResponse,
   PlaylistsResponse,
+  PurchasersCountResponse,
   PurchasersResponse,
+  PurchasesCountResponse,
+  PurchasesResponse,
   RelatedArtistResponse,
+  RemixersCountResponse,
   RemixersResponse,
   Reposts,
   SalesAggregateResponse,
   SalesJsonResponse,
   SubscribersResponse,
   TagsResponse,
+  TopGenreUsersResponse,
+  TopUsersResponse,
+  TrackLibraryResponse,
+  Tracks,
   TracksCountResponse,
-  TracksResponse,
+  TransactionHistoryCountResponse,
+  TransactionHistoryResponse,
   UpdateUserRequestBody,
+  UserAccountResponse,
   UserCoinResponse,
   UserCoinsResponse,
   UserCommentsResponse,
+  UserFeedResponse,
   UserIdsAddressesResponse,
   UserResponse,
+  UserResponseSingle,
   UserSearch,
   UserTrackListenCountsResponse,
   UserTracksRemixedResponse,
-  UsersResponse,
   VerifyToken,
   WriteResponse,
 } from '../models';
@@ -70,8 +87,12 @@ import {
     AuthorizedAppsToJSON,
     BalanceHistoryResponseFromJSON,
     BalanceHistoryResponseToJSON,
+    BulkSubscribersResponseFromJSON,
+    BulkSubscribersResponseToJSON,
     CollectiblesResponseFromJSON,
     CollectiblesResponseToJSON,
+    CollectionLibraryResponseFromJSON,
+    CollectionLibraryResponseToJSON,
     ConnectedWalletsResponseFromJSON,
     ConnectedWalletsResponseToJSON,
     CreateGrantRequestBodyFromJSON,
@@ -92,18 +113,34 @@ import {
     GetChallengesToJSON,
     GetSupportedUsersFromJSON,
     GetSupportedUsersToJSON,
+    GetSupporterFromJSON,
+    GetSupporterToJSON,
     GetSupportersFromJSON,
     GetSupportersToJSON,
+    GetSupportingFromJSON,
+    GetSupportingToJSON,
     HistoryResponseFromJSON,
     HistoryResponseToJSON,
+    ManagedUsersResponseFromJSON,
+    ManagedUsersResponseToJSON,
+    ManagersResponseFromJSON,
+    ManagersResponseToJSON,
     MutualFollowersResponseFromJSON,
     MutualFollowersResponseToJSON,
     PlaylistsResponseFromJSON,
     PlaylistsResponseToJSON,
+    PurchasersCountResponseFromJSON,
+    PurchasersCountResponseToJSON,
     PurchasersResponseFromJSON,
     PurchasersResponseToJSON,
+    PurchasesCountResponseFromJSON,
+    PurchasesCountResponseToJSON,
+    PurchasesResponseFromJSON,
+    PurchasesResponseToJSON,
     RelatedArtistResponseFromJSON,
     RelatedArtistResponseToJSON,
+    RemixersCountResponseFromJSON,
+    RemixersCountResponseToJSON,
     RemixersResponseFromJSON,
     RemixersResponseToJSON,
     RepostsFromJSON,
@@ -116,30 +153,44 @@ import {
     SubscribersResponseToJSON,
     TagsResponseFromJSON,
     TagsResponseToJSON,
+    TopGenreUsersResponseFromJSON,
+    TopGenreUsersResponseToJSON,
+    TopUsersResponseFromJSON,
+    TopUsersResponseToJSON,
+    TrackLibraryResponseFromJSON,
+    TrackLibraryResponseToJSON,
+    TracksFromJSON,
+    TracksToJSON,
     TracksCountResponseFromJSON,
     TracksCountResponseToJSON,
-    TracksResponseFromJSON,
-    TracksResponseToJSON,
+    TransactionHistoryCountResponseFromJSON,
+    TransactionHistoryCountResponseToJSON,
+    TransactionHistoryResponseFromJSON,
+    TransactionHistoryResponseToJSON,
     UpdateUserRequestBodyFromJSON,
     UpdateUserRequestBodyToJSON,
+    UserAccountResponseFromJSON,
+    UserAccountResponseToJSON,
     UserCoinResponseFromJSON,
     UserCoinResponseToJSON,
     UserCoinsResponseFromJSON,
     UserCoinsResponseToJSON,
     UserCommentsResponseFromJSON,
     UserCommentsResponseToJSON,
+    UserFeedResponseFromJSON,
+    UserFeedResponseToJSON,
     UserIdsAddressesResponseFromJSON,
     UserIdsAddressesResponseToJSON,
     UserResponseFromJSON,
     UserResponseToJSON,
+    UserResponseSingleFromJSON,
+    UserResponseSingleToJSON,
     UserSearchFromJSON,
     UserSearchToJSON,
     UserTrackListenCountsResponseFromJSON,
     UserTrackListenCountsResponseToJSON,
     UserTracksRemixedResponseFromJSON,
     UserTracksRemixedResponseToJSON,
-    UsersResponseFromJSON,
-    UsersResponseToJSON,
     VerifyTokenFromJSON,
     VerifyTokenToJSON,
     WriteResponseFromJSON,
@@ -154,6 +205,14 @@ export interface AddManagerRequest {
 export interface ApproveGrantRequest {
     id: string;
     approveGrantRequestBody: ApproveGrantRequestBody;
+}
+
+export interface BulkGetSubscribersRequest {
+    ids: Array<string>;
+}
+
+export interface BulkGetSubscribersViaJSONRequestRequest {
+    ids: Array<string>;
 }
 
 export interface CreateGrantRequest {
@@ -224,6 +283,22 @@ export interface GetAlbumsByUserRequest {
     encodedDataSignature?: string;
 }
 
+export interface GetAudioTransactionCountRequest {
+    id: string;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetAudioTransactionsRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    sortMethod?: GetAudioTransactionsSortMethodEnum;
+    sortDirection?: GetAudioTransactionsSortDirectionEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
 export interface GetAuthorizedAppsRequest {
     id: string;
 }
@@ -234,10 +309,6 @@ export interface GetBulkUsersRequest {
 }
 
 export interface GetConnectedWalletsRequest {
-    id: string;
-}
-
-export interface GetFavoritesRequest {
     id: string;
 }
 
@@ -253,6 +324,22 @@ export interface GetFollowingRequest {
     offset?: number;
     limit?: number;
     userId?: string;
+}
+
+export interface GetManagedUsersRequest {
+    id: string;
+    isApproved?: boolean;
+    isRevoked?: boolean;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetManagersRequest {
+    id: string;
+    isApproved?: boolean;
+    isRevoked?: boolean;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
 }
 
 export interface GetMutedUsersRequest {
@@ -288,6 +375,35 @@ export interface GetPurchasersRequest {
     contentId?: string;
 }
 
+export interface GetPurchasersCountRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    contentType?: string;
+    contentId?: string;
+}
+
+export interface GetPurchasesRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    sortMethod?: GetPurchasesSortMethodEnum;
+    sortDirection?: GetPurchasesSortDirectionEnum;
+    contentIds?: Array<string>;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetPurchasesCountRequest {
+    id: string;
+    userId?: string;
+    contentIds?: Array<string>;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
 export interface GetRelatedUsersRequest {
     id: string;
     offset?: number;
@@ -304,6 +420,12 @@ export interface GetRemixersRequest {
     trackId?: string;
 }
 
+export interface GetRemixersCountRequest {
+    id: string;
+    userId?: string;
+    trackId?: string;
+}
+
 export interface GetRepostsRequest {
     id: string;
     offset?: number;
@@ -311,11 +433,38 @@ export interface GetRepostsRequest {
     userId?: string;
 }
 
+export interface GetRepostsByHandleRequest {
+    handle: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+}
+
+export interface GetSalesRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    sortMethod?: GetSalesSortMethodEnum;
+    sortDirection?: GetSalesSortDirectionEnum;
+    contentIds?: Array<string>;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
 export interface GetSalesAggregateRequest {
     id: string;
     offset?: number;
     limit?: number;
     userId?: string;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetSalesCountRequest {
+    id: string;
+    userId?: string;
+    contentIds?: Array<string>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
 }
@@ -334,6 +483,12 @@ export interface GetSupportedUsersRequest {
     userId?: string;
 }
 
+export interface GetSupporterRequest {
+    id: string;
+    supporterUserId: string;
+    userId?: string;
+}
+
 export interface GetSupportersRequest {
     id: string;
     offset?: number;
@@ -341,10 +496,28 @@ export interface GetSupportersRequest {
     userId?: string;
 }
 
+export interface GetSupportingRequest {
+    id: string;
+    supportedUserId: string;
+    userId?: string;
+}
+
 export interface GetTopTrackTagsRequest {
     id: string;
     limit?: number;
     userId?: string;
+}
+
+export interface GetTopUsersRequest {
+    offset?: number;
+    limit?: number;
+    userId?: string;
+}
+
+export interface GetTopUsersInGenreRequest {
+    offset?: number;
+    limit?: number;
+    genre?: Array<string>;
 }
 
 export interface GetTracksByUserRequest {
@@ -385,9 +558,37 @@ export interface GetTracksCountByUserRequest {
     encodedDataSignature?: string;
 }
 
+export interface GetUSDCTransactionCountRequest {
+    id: string;
+    type?: Array<GetUSDCTransactionCountTypeEnum>;
+    includeSystemTransactions?: boolean;
+    method?: GetUSDCTransactionCountMethodEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetUSDCTransactionsRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    sortMethod?: GetUSDCTransactionsSortMethodEnum;
+    sortDirection?: GetUSDCTransactionsSortDirectionEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+    type?: Array<GetUSDCTransactionsTypeEnum>;
+    includeSystemTransactions?: boolean;
+    method?: GetUSDCTransactionsMethodEnum;
+}
+
 export interface GetUserRequest {
     id: string;
     userId?: string;
+}
+
+export interface GetUserAccountRequest {
+    wallet: string;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
 }
 
 export interface GetUserBalanceHistoryRequest {
@@ -437,8 +638,74 @@ export interface GetUserEmailKeyRequest {
     grantorUserId: string;
 }
 
+export interface GetUserFavoriteTracksRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    query?: string;
+    sortMethod?: GetUserFavoriteTracksSortMethodEnum;
+    sortDirection?: GetUserFavoriteTracksSortDirectionEnum;
+}
+
+export interface GetUserFavoritesRequest {
+    id: string;
+}
+
+export interface GetUserFeedRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    filter?: GetUserFeedFilterEnum;
+    tracksOnly?: boolean;
+    withUsers?: boolean;
+    followeeUserId?: Array<number>;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
 export interface GetUserIDsByAddressesRequest {
     address: Array<string>;
+}
+
+export interface GetUserLibraryAlbumsRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    query?: string;
+    sortDirection?: GetUserLibraryAlbumsSortDirectionEnum;
+    type?: GetUserLibraryAlbumsTypeEnum;
+    sortMethod?: GetUserLibraryAlbumsSortMethodEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetUserLibraryPlaylistsRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    query?: string;
+    sortDirection?: GetUserLibraryPlaylistsSortDirectionEnum;
+    type?: GetUserLibraryPlaylistsTypeEnum;
+    sortMethod?: GetUserLibraryPlaylistsSortMethodEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetUserLibraryTracksRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    query?: string;
+    sortMethod?: GetUserLibraryTracksSortMethodEnum;
+    sortDirection?: GetUserLibraryTracksSortDirectionEnum;
+    type?: GetUserLibraryTracksTypeEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
 }
 
 export interface GetUserMonthlyTrackListensRequest {
@@ -628,6 +895,76 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async approveGrant(params: ApproveGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
         const response = await this.approveGrantRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * All users that subscribe to the provided users
+     */
+    async bulkGetSubscribersRaw(params: BulkGetSubscribersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BulkSubscribersResponse>> {
+        if (params.ids === null || params.ids === undefined) {
+            throw new runtime.RequiredError('ids','Required parameter params.ids was null or undefined when calling bulkGetSubscribers.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.ids) {
+            queryParameters['ids'] = params.ids.join(runtime.COLLECTION_FORMATS["csv"]);
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/subscribers`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => BulkSubscribersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * All users that subscribe to the provided users
+     */
+    async bulkGetSubscribers(params: BulkGetSubscribersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BulkSubscribersResponse> {
+        const response = await this.bulkGetSubscribersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get all users that subscribe to the users listed in the JSON request
+     */
+    async bulkGetSubscribersViaJSONRequestRaw(params: BulkGetSubscribersViaJSONRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BulkSubscribersResponse>> {
+        if (params.ids === null || params.ids === undefined) {
+            throw new runtime.RequiredError('ids','Required parameter params.ids was null or undefined when calling bulkGetSubscribersViaJSONRequest.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.ids) {
+            queryParameters['ids'] = params.ids.join(runtime.COLLECTION_FORMATS["csv"]);
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/subscribers`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => BulkSubscribersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get all users that subscribe to the users listed in the JSON request
+     */
+    async bulkGetSubscribersViaJSONRequest(params: BulkGetSubscribersViaJSONRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BulkSubscribersResponse> {
+        const response = await this.bulkGetSubscribersViaJSONRequestRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -952,7 +1289,7 @@ export class UsersApi extends runtime.BaseAPI {
      * @hidden
      * Gets the AI generated tracks attributed to a user using the user\'s handle
      */
-    async getAIAttributedTracksByUserHandleRaw(params: GetAIAttributedTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+    async getAIAttributedTracksByUserHandleRaw(params: GetAIAttributedTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
         if (params.handle === null || params.handle === undefined) {
             throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getAIAttributedTracksByUserHandle.');
         }
@@ -1008,13 +1345,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
     }
 
     /**
      * Gets the AI generated tracks attributed to a user using the user\'s handle
      */
-    async getAIAttributedTracksByUserHandle(params: GetAIAttributedTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+    async getAIAttributedTracksByUserHandle(params: GetAIAttributedTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
         const response = await this.getAIAttributedTracksByUserHandleRaw(params, initOverrides);
         return await response.value();
     }
@@ -1080,6 +1417,100 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the count of the user\'s $AUDIO transaction history within the App
+     */
+    async getAudioTransactionCountRaw(params: GetAudioTransactionCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionHistoryCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getAudioTransactionCount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/transactions/audio/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionHistoryCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of the user\'s $AUDIO transaction history within the App
+     */
+    async getAudioTransactionCount(params: GetAudioTransactionCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionHistoryCountResponse> {
+        const response = await this.getAudioTransactionCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the user\'s $AUDIO transaction history within the App
+     */
+    async getAudioTransactionsRaw(params: GetAudioTransactionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionHistoryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getAudioTransactions.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/transactions/audio`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionHistoryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the user\'s $AUDIO transaction history within the App
+     */
+    async getAudioTransactions(params: GetAudioTransactionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionHistoryResponse> {
+        const response = await this.getAudioTransactionsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Get the apps that user has authorized to write to their account
      */
     async getAuthorizedAppsRaw(params: GetAuthorizedAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthorizedApps>> {
@@ -1113,7 +1544,7 @@ export class UsersApi extends runtime.BaseAPI {
      * @hidden
      * Gets a list of users by ID
      */
-    async getBulkUsersRaw(params: GetBulkUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UsersResponse>> {
+    async getBulkUsersRaw(params: GetBulkUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {
         const queryParameters: any = {};
 
         if (params.userId !== undefined) {
@@ -1133,13 +1564,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UsersResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseFromJSON(jsonValue));
     }
 
     /**
      * Gets a list of users by ID
      */
-    async getBulkUsers(params: GetBulkUsersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UsersResponse> {
+    async getBulkUsers(params: GetBulkUsersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponse> {
         const response = await this.getBulkUsersRaw(params, initOverrides);
         return await response.value();
     }
@@ -1172,37 +1603,6 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getConnectedWallets(params: GetConnectedWalletsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ConnectedWalletsResponse> {
         const response = await this.getConnectedWalletsRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets a user\'s favorite tracks
-     */
-    async getFavoritesRaw(params: GetFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FavoritesResponse>> {
-        if (params.id === null || params.id === undefined) {
-            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getFavorites.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/users/{id}/favorites`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => FavoritesResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets a user\'s favorite tracks
-     */
-    async getFavorites(params: GetFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FavoritesResponse> {
-        const response = await this.getFavoritesRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1294,9 +1694,103 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets a list of users managed by the given user
+     */
+    async getManagedUsersRaw(params: GetManagedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ManagedUsersResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getManagedUsers.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.isApproved !== undefined) {
+            queryParameters['is_approved'] = params.isApproved;
+        }
+
+        if (params.isRevoked !== undefined) {
+            queryParameters['is_revoked'] = params.isRevoked;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/managed_users`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ManagedUsersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a list of users managed by the given user
+     */
+    async getManagedUsers(params: GetManagedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ManagedUsersResponse> {
+        const response = await this.getManagedUsersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a list of users managing the given user
+     */
+    async getManagersRaw(params: GetManagersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ManagersResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getManagers.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.isApproved !== undefined) {
+            queryParameters['is_approved'] = params.isApproved;
+        }
+
+        if (params.isRevoked !== undefined) {
+            queryParameters['is_revoked'] = params.isRevoked;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/managers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ManagersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a list of users managing the given user
+     */
+    async getManagers(params: GetManagersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ManagersResponse> {
+        const response = await this.getManagersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets users muted by the given user
      */
-    async getMutedUsersRaw(params: GetMutedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UsersResponse>> {
+    async getMutedUsersRaw(params: GetMutedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {
         if (params.id === null || params.id === undefined) {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getMutedUsers.');
         }
@@ -1320,13 +1814,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UsersResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseFromJSON(jsonValue));
     }
 
     /**
      * Gets users muted by the given user
      */
-    async getMutedUsers(params: GetMutedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UsersResponse> {
+    async getMutedUsers(params: GetMutedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponse> {
         const response = await this.getMutedUsersRaw(params, initOverrides);
         return await response.value();
     }
@@ -1486,6 +1980,167 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the list of users who have purchased content by the given user
+     */
+    async getPurchasersCountRaw(params: GetPurchasersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchasersCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getPurchasersCount.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.contentType !== undefined) {
+            queryParameters['content_type'] = params.contentType;
+        }
+
+        if (params.contentId !== undefined) {
+            queryParameters['content_id'] = params.contentId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/purchasers/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchasersCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the list of users who have purchased content by the given user
+     */
+    async getPurchasersCount(params: GetPurchasersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchasersCountResponse> {
+        const response = await this.getPurchasersCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the purchases the user has made
+     */
+    async getPurchasesRaw(params: GetPurchasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchasesResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getPurchases.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.contentIds) {
+            queryParameters['content_ids'] = params.contentIds;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/purchases`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchasesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the purchases the user has made
+     */
+    async getPurchases(params: GetPurchasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchasesResponse> {
+        const response = await this.getPurchasesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the count of purchases the user has made
+     */
+    async getPurchasesCountRaw(params: GetPurchasesCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchasesCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getPurchasesCount.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.contentIds) {
+            queryParameters['content_ids'] = params.contentIds;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/purchases/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchasesCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of purchases the user has made
+     */
+    async getPurchasesCount(params: GetPurchasesCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchasesCountResponse> {
+        const response = await this.getPurchasesCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets a list of users that might be of interest to followers of this user.
      */
     async getRelatedUsersRaw(params: GetRelatedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RelatedArtistResponse>> {
@@ -1580,6 +2235,45 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the count of unique users who have remixed tracks by the given user, or a specific track by that user if provided
+     */
+    async getRemixersCountRaw(params: GetRemixersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixersCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getRemixersCount.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.trackId !== undefined) {
+            queryParameters['track_id'] = params.trackId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/remixers/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RemixersCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of unique users who have remixed tracks by the given user, or a specific track by that user if provided
+     */
+    async getRemixersCount(params: GetRemixersCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixersCountResponse> {
+        const response = await this.getRemixersCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets the given user\'s reposts
      */
     async getRepostsRaw(params: GetRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Reposts>> {
@@ -1618,6 +2312,112 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getReposts(params: GetRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Reposts> {
         const response = await this.getRepostsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the user\'s reposts by the user handle
+     */
+    async getRepostsByHandleRaw(params: GetRepostsByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Reposts>> {
+        if (params.handle === null || params.handle === undefined) {
+            throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getRepostsByHandle.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/handle/{handle}/reposts`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RepostsFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the user\'s reposts by the user handle
+     */
+    async getRepostsByHandle(params: GetRepostsByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Reposts> {
+        const response = await this.getRepostsByHandleRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the sales the user has made
+     */
+    async getSalesRaw(params: GetSalesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchasesResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getSales.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.contentIds) {
+            queryParameters['content_ids'] = params.contentIds;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/sales`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchasesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the sales the user has made
+     */
+    async getSales(params: GetSalesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchasesResponse> {
+        const response = await this.getSalesRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1669,6 +2469,53 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getSalesAggregate(params: GetSalesAggregateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SalesAggregateResponse> {
         const response = await this.getSalesAggregateRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the count of sales the user has made
+     */
+    async getSalesCountRaw(params: GetSalesCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PurchasesCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getSalesCount.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.contentIds) {
+            queryParameters['content_ids'] = params.contentIds;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/sales/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PurchasesCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of sales the user has made
+     */
+    async getSalesCount(params: GetSalesCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PurchasesCountResponse> {
+        const response = await this.getSalesCountRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1760,6 +2607,45 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the specified supporter of the given user
+     */
+    async getSupporterRaw(params: GetSupporterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetSupporter>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getSupporter.');
+        }
+
+        if (params.supporterUserId === null || params.supporterUserId === undefined) {
+            throw new runtime.RequiredError('supporterUserId','Required parameter params.supporterUserId was null or undefined when calling getSupporter.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/supporters/{supporter_user_id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"supporter_user_id"}}`, encodeURIComponent(String(params.supporterUserId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GetSupporterFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the specified supporter of the given user
+     */
+    async getSupporter(params: GetSupporterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetSupporter> {
+        const response = await this.getSupporterRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets the supporters of the given user
      */
     async getSupportersRaw(params: GetSupportersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetSupporters>> {
@@ -1798,6 +2684,45 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getSupporters(params: GetSupportersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetSupporters> {
         const response = await this.getSupportersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the support from the given user to the supported user
+     */
+    async getSupportingRaw(params: GetSupportingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetSupporting>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getSupporting.');
+        }
+
+        if (params.supportedUserId === null || params.supportedUserId === undefined) {
+            throw new runtime.RequiredError('supportedUserId','Required parameter params.supportedUserId was null or undefined when calling getSupporting.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/supporting/{supported_user_id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"supported_user_id"}}`, encodeURIComponent(String(params.supportedUserId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GetSupportingFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the support from the given user to the supported user
+     */
+    async getSupporting(params: GetSupportingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetSupporting> {
+        const response = await this.getSupportingRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1844,9 +2769,87 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Get the Top Users having at least one track by follower count
+     */
+    async getTopUsersRaw(params: GetTopUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TopUsersResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/top`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TopUsersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the Top Users having at least one track by follower count
+     */
+    async getTopUsers(params: GetTopUsersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TopUsersResponse> {
+        const response = await this.getTopUsersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get the Top Users for a Given Genre
+     */
+    async getTopUsersInGenreRaw(params: GetTopUsersInGenreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TopGenreUsersResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.genre) {
+            queryParameters['genre'] = params.genre;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/genre/top`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TopGenreUsersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the Top Users for a Given Genre
+     */
+    async getTopUsersInGenre(params: GetTopUsersInGenreRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TopGenreUsersResponse> {
+        const response = await this.getTopUsersInGenreRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets the tracks created by a user using their user ID
      */
-    async getTracksByUserRaw(params: GetTracksByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+    async getTracksByUserRaw(params: GetTracksByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
         if (params.id === null || params.id === undefined) {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getTracksByUser.');
         }
@@ -1906,13 +2909,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
     }
 
     /**
      * Gets the tracks created by a user using their user ID
      */
-    async getTracksByUser(params: GetTracksByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+    async getTracksByUser(params: GetTracksByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
         const response = await this.getTracksByUserRaw(params, initOverrides);
         return await response.value();
     }
@@ -1921,7 +2924,7 @@ export class UsersApi extends runtime.BaseAPI {
      * @hidden
      * Gets the tracks created by a user using the user\'s handle
      */
-    async getTracksByUserHandleRaw(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+    async getTracksByUserHandleRaw(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
         if (params.handle === null || params.handle === undefined) {
             throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getTracksByUserHandle.');
         }
@@ -1977,13 +2980,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
     }
 
     /**
      * Gets the tracks created by a user using the user\'s handle
      */
-    async getTracksByUserHandle(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+    async getTracksByUserHandle(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
         const response = await this.getTracksByUserHandleRaw(params, initOverrides);
         return await response.value();
     }
@@ -2041,9 +3044,127 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the count of the user\'s $USDC transaction history within the App
+     */
+    async getUSDCTransactionCountRaw(params: GetUSDCTransactionCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionHistoryCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUSDCTransactionCount.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.type) {
+            queryParameters['type'] = params.type;
+        }
+
+        if (params.includeSystemTransactions !== undefined) {
+            queryParameters['include_system_transactions'] = params.includeSystemTransactions;
+        }
+
+        if (params.method !== undefined) {
+            queryParameters['method'] = params.method;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/transactions/usdc/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionHistoryCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of the user\'s $USDC transaction history within the App
+     */
+    async getUSDCTransactionCount(params: GetUSDCTransactionCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionHistoryCountResponse> {
+        const response = await this.getUSDCTransactionCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the user\'s $USDC transaction history within the App
+     */
+    async getUSDCTransactionsRaw(params: GetUSDCTransactionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionHistoryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUSDCTransactions.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.type) {
+            queryParameters['type'] = params.type;
+        }
+
+        if (params.includeSystemTransactions !== undefined) {
+            queryParameters['include_system_transactions'] = params.includeSystemTransactions;
+        }
+
+        if (params.method !== undefined) {
+            queryParameters['method'] = params.method;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/transactions/usdc`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionHistoryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the user\'s $USDC transaction history within the App
+     */
+    async getUSDCTransactions(params: GetUSDCTransactionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionHistoryResponse> {
+        const response = await this.getUSDCTransactionsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets a single user by their user ID
      */
-    async getUserRaw(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {
+    async getUserRaw(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponseSingle>> {
         if (params.id === null || params.id === undefined) {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUser.');
         }
@@ -2063,14 +3184,53 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseSingleFromJSON(jsonValue));
     }
 
     /**
      * Gets a single user by their user ID
      */
-    async getUser(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponse> {
+    async getUser(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponseSingle> {
         const response = await this.getUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the account for a given user
+     */
+    async getUserAccountRaw(params: GetUserAccountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserAccountResponse>> {
+        if (params.wallet === null || params.wallet === undefined) {
+            throw new runtime.RequiredError('wallet','Required parameter params.wallet was null or undefined when calling getUserAccount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/account/{wallet}`.replace(`{${"wallet"}}`, encodeURIComponent(String(params.wallet))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserAccountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the account for a given user
+     */
+    async getUserAccount(params: GetUserAccountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserAccountResponse> {
+        const response = await this.getUserAccountRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -2133,7 +3293,7 @@ export class UsersApi extends runtime.BaseAPI {
      * @hidden
      * Gets a single user by their handle
      */
-    async getUserByHandleRaw(params: GetUserByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {
+    async getUserByHandleRaw(params: GetUserByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponseSingle>> {
         if (params.handle === null || params.handle === undefined) {
             throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getUserByHandle.');
         }
@@ -2153,13 +3313,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseSingleFromJSON(jsonValue));
     }
 
     /**
      * Gets a single user by their handle
      */
-    async getUserByHandle(params: GetUserByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponse> {
+    async getUserByHandle(params: GetUserByHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponseSingle> {
         const response = await this.getUserByHandleRaw(params, initOverrides);
         return await response.value();
     }
@@ -2384,6 +3544,159 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets a user\'s favorite tracks
+     */
+    async getUserFavoriteTracksRaw(params: GetUserFavoriteTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackLibraryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserFavoriteTracks.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/favorites/tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackLibraryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a user\'s favorite tracks
+     */
+    async getUserFavoriteTracks(params: GetUserFavoriteTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackLibraryResponse> {
+        const response = await this.getUserFavoriteTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a user\'s favorite tracks
+     */
+    async getUserFavoritesRaw(params: GetUserFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FavoritesResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserFavorites.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/users/{id}/favorites`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FavoritesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a user\'s favorite tracks
+     */
+    async getUserFavorites(params: GetUserFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FavoritesResponse> {
+        const response = await this.getUserFavoritesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the feed for the user
+     */
+    async getUserFeedRaw(params: GetUserFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserFeedResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserFeed.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.filter !== undefined) {
+            queryParameters['filter'] = params.filter;
+        }
+
+        if (params.tracksOnly !== undefined) {
+            queryParameters['tracks_only'] = params.tracksOnly;
+        }
+
+        if (params.withUsers !== undefined) {
+            queryParameters['with_users'] = params.withUsers;
+        }
+
+        if (params.followeeUserId) {
+            queryParameters['followee_user_id'] = params.followeeUserId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/feed`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserFeedResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the feed for the user
+     */
+    async getUserFeed(params: GetUserFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserFeedResponse> {
+        const response = await this.getUserFeedRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets User IDs from any Ethereum wallet address or Solana account address associated with their Audius account.
      */
     async getUserIDsByAddressesRaw(params: GetUserIDsByAddressesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserIdsAddressesResponse>> {
@@ -2414,6 +3727,213 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getUserIDsByAddresses(params: GetUserIDsByAddressesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserIdsAddressesResponse> {
         const response = await this.getUserIDsByAddressesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a user\'s saved/reposted/purchased/all albums
+     * Fetch a user\'s full library playlists
+     */
+    async getUserLibraryAlbumsRaw(params: GetUserLibraryAlbumsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CollectionLibraryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserLibraryAlbums.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.type !== undefined) {
+            queryParameters['type'] = params.type;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/library/albums`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CollectionLibraryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a user\'s saved/reposted/purchased/all albums
+     * Fetch a user\'s full library playlists
+     */
+    async getUserLibraryAlbums(params: GetUserLibraryAlbumsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CollectionLibraryResponse> {
+        const response = await this.getUserLibraryAlbumsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a user\'s saved/reposted/purchased/all playlists
+     * Fetch a user\'s full library playlists
+     */
+    async getUserLibraryPlaylistsRaw(params: GetUserLibraryPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CollectionLibraryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserLibraryPlaylists.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.type !== undefined) {
+            queryParameters['type'] = params.type;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/library/playlists`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CollectionLibraryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a user\'s saved/reposted/purchased/all playlists
+     * Fetch a user\'s full library playlists
+     */
+    async getUserLibraryPlaylists(params: GetUserLibraryPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CollectionLibraryResponse> {
+        const response = await this.getUserLibraryPlaylistsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a user\'s saved/reposted/purchased/all tracks
+     * Fetch a user\'s full library tracks
+     */
+    async getUserLibraryTracksRaw(params: GetUserLibraryTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackLibraryResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserLibraryTracks.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.type !== undefined) {
+            queryParameters['type'] = params.type;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/library/tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackLibraryResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets a user\'s saved/reposted/purchased/all tracks
+     * Fetch a user\'s full library tracks
+     */
+    async getUserLibraryTracks(params: GetUserLibraryTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackLibraryResponse> {
+        const response = await this.getUserLibraryTracksRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -2468,7 +3988,7 @@ export class UsersApi extends runtime.BaseAPI {
      * @hidden
      * Gets the recommended tracks for the user
      */
-    async getUserRecommendedTracksRaw(params: GetUserRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+    async getUserRecommendedTracksRaw(params: GetUserRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
         if (params.id === null || params.id === undefined) {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserRecommendedTracks.');
         }
@@ -2500,13 +4020,13 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
     }
 
     /**
      * Gets the recommended tracks for the user
      */
-    async getUserRecommendedTracks(params: GetUserRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+    async getUserRecommendedTracks(params: GetUserRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
         const response = await this.getUserRecommendedTracksRaw(params, initOverrides);
         return await response.value();
     }
@@ -3146,11 +4666,63 @@ export type GetAlbumsByUserSortMethodEnum = typeof GetAlbumsByUserSortMethodEnum
 /**
  * @export
  */
+export const GetAudioTransactionsSortMethodEnum = {
+    Date: 'date',
+    TransactionType: 'transaction_type'
+} as const;
+export type GetAudioTransactionsSortMethodEnum = typeof GetAudioTransactionsSortMethodEnum[keyof typeof GetAudioTransactionsSortMethodEnum];
+/**
+ * @export
+ */
+export const GetAudioTransactionsSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetAudioTransactionsSortDirectionEnum = typeof GetAudioTransactionsSortDirectionEnum[keyof typeof GetAudioTransactionsSortDirectionEnum];
+/**
+ * @export
+ */
 export const GetPlaylistsByUserSortMethodEnum = {
     Recent: 'recent',
     Popular: 'popular'
 } as const;
 export type GetPlaylistsByUserSortMethodEnum = typeof GetPlaylistsByUserSortMethodEnum[keyof typeof GetPlaylistsByUserSortMethodEnum];
+/**
+ * @export
+ */
+export const GetPurchasesSortMethodEnum = {
+    ContentTitle: 'content_title',
+    ArtistName: 'artist_name',
+    BuyerName: 'buyer_name',
+    Date: 'date'
+} as const;
+export type GetPurchasesSortMethodEnum = typeof GetPurchasesSortMethodEnum[keyof typeof GetPurchasesSortMethodEnum];
+/**
+ * @export
+ */
+export const GetPurchasesSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetPurchasesSortDirectionEnum = typeof GetPurchasesSortDirectionEnum[keyof typeof GetPurchasesSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetSalesSortMethodEnum = {
+    ContentTitle: 'content_title',
+    ArtistName: 'artist_name',
+    BuyerName: 'buyer_name',
+    Date: 'date'
+} as const;
+export type GetSalesSortMethodEnum = typeof GetSalesSortMethodEnum[keyof typeof GetSalesSortMethodEnum];
+/**
+ * @export
+ */
+export const GetSalesSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetSalesSortDirectionEnum = typeof GetSalesSortDirectionEnum[keyof typeof GetSalesSortDirectionEnum];
 /**
  * @export
  */
@@ -3264,11 +4836,188 @@ export type GetTracksCountByUserGateConditionEnum = typeof GetTracksCountByUserG
 /**
  * @export
  */
+export const GetUSDCTransactionCountTypeEnum = {
+    PurchaseContent: 'purchase_content',
+    Transfer: 'transfer',
+    InternalTransfer: 'internal_transfer',
+    PrepareWithdrawal: 'prepare_withdrawal',
+    RecoverWithdrawal: 'recover_withdrawal',
+    Withdrawal: 'withdrawal',
+    PurchaseStripe: 'purchase_stripe'
+} as const;
+export type GetUSDCTransactionCountTypeEnum = typeof GetUSDCTransactionCountTypeEnum[keyof typeof GetUSDCTransactionCountTypeEnum];
+/**
+ * @export
+ */
+export const GetUSDCTransactionCountMethodEnum = {
+    Send: 'send',
+    Receive: 'receive'
+} as const;
+export type GetUSDCTransactionCountMethodEnum = typeof GetUSDCTransactionCountMethodEnum[keyof typeof GetUSDCTransactionCountMethodEnum];
+/**
+ * @export
+ */
+export const GetUSDCTransactionsSortMethodEnum = {
+    Date: 'date',
+    TransactionType: 'transaction_type'
+} as const;
+export type GetUSDCTransactionsSortMethodEnum = typeof GetUSDCTransactionsSortMethodEnum[keyof typeof GetUSDCTransactionsSortMethodEnum];
+/**
+ * @export
+ */
+export const GetUSDCTransactionsSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetUSDCTransactionsSortDirectionEnum = typeof GetUSDCTransactionsSortDirectionEnum[keyof typeof GetUSDCTransactionsSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetUSDCTransactionsTypeEnum = {
+    PurchaseContent: 'purchase_content',
+    Transfer: 'transfer',
+    InternalTransfer: 'internal_transfer',
+    PrepareWithdrawal: 'prepare_withdrawal',
+    RecoverWithdrawal: 'recover_withdrawal',
+    Withdrawal: 'withdrawal',
+    PurchaseStripe: 'purchase_stripe'
+} as const;
+export type GetUSDCTransactionsTypeEnum = typeof GetUSDCTransactionsTypeEnum[keyof typeof GetUSDCTransactionsTypeEnum];
+/**
+ * @export
+ */
+export const GetUSDCTransactionsMethodEnum = {
+    Send: 'send',
+    Receive: 'receive'
+} as const;
+export type GetUSDCTransactionsMethodEnum = typeof GetUSDCTransactionsMethodEnum[keyof typeof GetUSDCTransactionsMethodEnum];
+/**
+ * @export
+ */
 export const GetUserBalanceHistoryGranularityEnum = {
     Hourly: 'hourly',
     Daily: 'daily'
 } as const;
 export type GetUserBalanceHistoryGranularityEnum = typeof GetUserBalanceHistoryGranularityEnum[keyof typeof GetUserBalanceHistoryGranularityEnum];
+/**
+ * @export
+ */
+export const GetUserFavoriteTracksSortMethodEnum = {
+    Title: 'title',
+    ArtistName: 'artist_name',
+    ReleaseDate: 'release_date',
+    LastListenDate: 'last_listen_date',
+    AddedDate: 'added_date',
+    Plays: 'plays',
+    Reposts: 'reposts',
+    Saves: 'saves',
+    MostListensByUser: 'most_listens_by_user'
+} as const;
+export type GetUserFavoriteTracksSortMethodEnum = typeof GetUserFavoriteTracksSortMethodEnum[keyof typeof GetUserFavoriteTracksSortMethodEnum];
+/**
+ * @export
+ */
+export const GetUserFavoriteTracksSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetUserFavoriteTracksSortDirectionEnum = typeof GetUserFavoriteTracksSortDirectionEnum[keyof typeof GetUserFavoriteTracksSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetUserFeedFilterEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Original: 'original'
+} as const;
+export type GetUserFeedFilterEnum = typeof GetUserFeedFilterEnum[keyof typeof GetUserFeedFilterEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryAlbumsSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetUserLibraryAlbumsSortDirectionEnum = typeof GetUserLibraryAlbumsSortDirectionEnum[keyof typeof GetUserLibraryAlbumsSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryAlbumsTypeEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Favorite: 'favorite',
+    Purchase: 'purchase'
+} as const;
+export type GetUserLibraryAlbumsTypeEnum = typeof GetUserLibraryAlbumsTypeEnum[keyof typeof GetUserLibraryAlbumsTypeEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryAlbumsSortMethodEnum = {
+    AddedDate: 'added_date',
+    Reposts: 'reposts',
+    Saves: 'saves'
+} as const;
+export type GetUserLibraryAlbumsSortMethodEnum = typeof GetUserLibraryAlbumsSortMethodEnum[keyof typeof GetUserLibraryAlbumsSortMethodEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryPlaylistsSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetUserLibraryPlaylistsSortDirectionEnum = typeof GetUserLibraryPlaylistsSortDirectionEnum[keyof typeof GetUserLibraryPlaylistsSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryPlaylistsTypeEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Favorite: 'favorite',
+    Purchase: 'purchase'
+} as const;
+export type GetUserLibraryPlaylistsTypeEnum = typeof GetUserLibraryPlaylistsTypeEnum[keyof typeof GetUserLibraryPlaylistsTypeEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryPlaylistsSortMethodEnum = {
+    AddedDate: 'added_date',
+    Reposts: 'reposts',
+    Saves: 'saves'
+} as const;
+export type GetUserLibraryPlaylistsSortMethodEnum = typeof GetUserLibraryPlaylistsSortMethodEnum[keyof typeof GetUserLibraryPlaylistsSortMethodEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryTracksSortMethodEnum = {
+    Title: 'title',
+    ArtistName: 'artist_name',
+    ReleaseDate: 'release_date',
+    LastListenDate: 'last_listen_date',
+    AddedDate: 'added_date',
+    Plays: 'plays',
+    Reposts: 'reposts',
+    Saves: 'saves',
+    MostListensByUser: 'most_listens_by_user'
+} as const;
+export type GetUserLibraryTracksSortMethodEnum = typeof GetUserLibraryTracksSortMethodEnum[keyof typeof GetUserLibraryTracksSortMethodEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryTracksSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetUserLibraryTracksSortDirectionEnum = typeof GetUserLibraryTracksSortDirectionEnum[keyof typeof GetUserLibraryTracksSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetUserLibraryTracksTypeEnum = {
+    All: 'all',
+    Repost: 'repost',
+    Favorite: 'favorite',
+    Purchase: 'purchase'
+} as const;
+export type GetUserLibraryTracksTypeEnum = typeof GetUserLibraryTracksTypeEnum[keyof typeof GetUserLibraryTracksTypeEnum];
 /**
  * @export
  */

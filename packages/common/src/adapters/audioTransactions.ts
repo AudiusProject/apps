@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import type { TransactionDetails as SdkTransactionDetails } from '@audius/sdk'
 
 import {
   TransactionDetails,
@@ -7,7 +7,7 @@ import {
 } from '~/store/ui/transaction-details/types'
 
 export const audioTransactionFromSdk = (
-  tx: full.TransactionDetails
+  tx: SdkTransactionDetails
 ): TransactionDetails => {
   const transactionTypeMap: Record<string, TransactionType> = {
     purchase_stripe: TransactionType.PURCHASE,

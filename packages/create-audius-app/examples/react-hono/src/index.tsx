@@ -63,7 +63,7 @@ app.get(
   async (c) => {
     const audiusSdk = await getAudiusSdk()
     const { id, userId } = c.req.valid('query')
-    const { data } = await audiusSdk.full.users.getTracksByUser({
+    const { data } = await audiusSdk.users.getTracksByUser({
       id,
       userId
     })

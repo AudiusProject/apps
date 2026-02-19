@@ -1,4 +1,4 @@
-import { Id, OptionalId, full } from '@audius/sdk'
+import { GetPlaylistsByUserSortMethodEnum, Id, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -21,7 +21,7 @@ import { useCurrentUserId } from './account/useCurrentUserId'
 type GetPlaylistsOptions = {
   userId: number | null | undefined
   pageSize?: number
-  sortMethod?: full.GetPlaylistsByUserSortMethodEnum
+  sortMethod?: GetPlaylistsByUserSortMethodEnum
   query?: string
 }
 
@@ -58,7 +58,7 @@ export const useUserPlaylists = (
 
       const sdk = await audiusSdk()
 
-      const { data } = await sdk.full.users.getPlaylistsByUser({
+      const { data } = await sdk.users.getPlaylistsByUser({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,

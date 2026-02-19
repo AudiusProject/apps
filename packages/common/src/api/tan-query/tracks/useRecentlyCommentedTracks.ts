@@ -1,4 +1,4 @@
-import { full, OptionalId } from '@audius/sdk'
+import { GetTracksWithRecentCommentsRequest, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -18,7 +18,7 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 const DEFAULT_PAGE_SIZE = 10
 
 export type UseRecentlyCommentedTracksArgs =
-  SDKInfiniteQueryArgs<full.GetTracksWithRecentCommentsRequest>
+  SDKInfiniteQueryArgs<GetTracksWithRecentCommentsRequest>
 
 export const getRecentlyCommentedTracksQueryKey = (
   userId: ID | null | undefined,
@@ -55,7 +55,7 @@ export const useRecentlyCommentedTracks = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.tracks.getTracksWithRecentComments({
+      const { data = [] } = await sdk.tracks.getTracksWithRecentComments({
         ...args,
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
