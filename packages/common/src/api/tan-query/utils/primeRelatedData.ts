@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import type { Related } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 
 import {
@@ -20,7 +20,7 @@ export const primeRelatedData = ({
   forceReplace = false,
   skipQueryData = false
 }: {
-  related: full.Related | undefined
+  related: Related | undefined
   queryClient: QueryClient
   forceReplace?: boolean
   skipQueryData?: boolean

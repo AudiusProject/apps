@@ -15,23 +15,10 @@ import {
   ExploreApi,
   PrizesApi,
   RewardsApi,
+  SearchApi,
   TipsApi,
   WalletApi
 } from './api/generated/default'
-import {
-  TracksApi as TracksApiFull,
-  Configuration as ConfigurationFull,
-  PlaylistsApi as PlaylistsApiFull,
-  ReactionsApi as ReactionsApiFull,
-  SearchApi as SearchApiFull,
-  UsersApi as UsersApiFull,
-  TipsApi as TipsApiFull,
-  TransactionsApi as TransactionsApiFull,
-  NotificationsApi as NotificationsApiFull,
-  CidDataApi as CidDataApiFull,
-  CommentsApi as CommentsApiFull,
-  ExploreApi as ExploreApiFull
-} from './api/generated/full'
 import { GrantsApi } from './api/grants/GrantsApi'
 import { NotificationsApi } from './api/notifications/NotificationsApi'
 import { PlaylistsApi } from './api/playlists/PlaylistsApi'
@@ -516,32 +503,13 @@ const initializeApis = ({
     services.entityManager
   )
 
-  const generatedApiClientConfigFull = new ConfigurationFull({
-    basePath: `${basePath}/full`,
-    fetchApi: fetch,
-    middleware
-  })
-
   const events = new EventsApi(
     apiClientConfig,
     services.entityManager,
     services.logger
   )
   const explore = new ExploreApi(apiClientConfig)
-
-  const full = {
-    tracks: new TracksApiFull(generatedApiClientConfigFull),
-    users: new UsersApiFull(generatedApiClientConfigFull),
-    search: new SearchApiFull(generatedApiClientConfigFull),
-    playlists: new PlaylistsApiFull(generatedApiClientConfigFull),
-    reactions: new ReactionsApiFull(generatedApiClientConfigFull),
-    tips: new TipsApiFull(generatedApiClientConfigFull),
-    transactions: new TransactionsApiFull(generatedApiClientConfigFull),
-    notifications: new NotificationsApiFull(generatedApiClientConfigFull),
-    cidData: new CidDataApiFull(generatedApiClientConfigFull),
-    comments: new CommentsApiFull(generatedApiClientConfigFull),
-    explore: new ExploreApiFull(generatedApiClientConfigFull)
-  }
+  const search = new SearchApi(apiClientConfig)
 
   return {
     tracks,
@@ -550,7 +518,6 @@ const initializeApis = ({
     playlists,
     tips,
     resolve,
-    full,
     chats,
     grants,
     developerApps,
@@ -561,6 +528,7 @@ const initializeApis = ({
     notifications,
     events,
     explore,
+    search,
     coins,
     wallets,
     challenges,

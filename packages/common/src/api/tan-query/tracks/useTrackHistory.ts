@@ -1,4 +1,10 @@
-import { Id, full, EntityType } from '@audius/sdk'
+import {
+  Id,
+  EntityType,
+  GetUsersTrackHistorySortMethodEnum,
+  GetUsersTrackHistorySortDirectionEnum,
+  type TrackActivity
+} from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -22,8 +28,8 @@ const DEFAULT_PAGE_SIZE = 30
 type UseTrackHistoryArgs = {
   pageSize?: number
   query?: string
-  sortMethod?: full.GetUsersTrackHistorySortMethodEnum
-  sortDirection?: full.GetUsersTrackHistorySortDirectionEnum
+  sortMethod?: GetUsersTrackHistorySortMethodEnum
+  sortDirection?: GetUsersTrackHistorySortDirectionEnum
 }
 
 export const getTrackHistoryQueryKey = (
@@ -67,7 +73,7 @@ export const useTrackHistory = (
 
       const id = Id.parse(currentUserId)
 
-      const { data: activityData } = await sdk.full.users.getUsersTrackHistory({
+      const { data: activityData } = await sdk.users.getUsersTrackHistory({
         id,
         userId: id,
         limit: pageSize,
@@ -81,7 +87,7 @@ export const useTrackHistory = (
 
       const tracks = transformAndCleanList(
         activityData,
-        (activity: full.ActivityFull) => {
+        (activity: TrackActivity) => {
           const track = trackActivityFromSDK(activity)?.item
           if (track) {
             return {

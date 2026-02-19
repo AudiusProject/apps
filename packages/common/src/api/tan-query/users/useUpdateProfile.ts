@@ -53,12 +53,12 @@ export const useUpdateProfile = () => {
       })
 
       // Fetch updated user data
-      const { data: userData = [] } = await sdk.full.users.getUser({
+      const response = await sdk.users.getUser({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId)
       })
 
-      return userData[0]
+      return response.data
     },
     onMutate: async (metadata): Promise<MutationContext> => {
       // Cancel any outgoing refetches

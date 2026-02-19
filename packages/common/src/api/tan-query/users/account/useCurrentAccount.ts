@@ -70,7 +70,7 @@ export const getCurrentAccountQueryFn = async (
     return null
   }
 
-  const { data } = await sdk.full.users.getUserAccount({
+  const { data } = await sdk.users.getUserAccount({
     wallet: currentUserWallet!
   })
 

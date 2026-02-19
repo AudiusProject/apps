@@ -55,7 +55,7 @@ export default function App() {
       handle: handleInputRef.current?.value ?? ''
     })
 
-    const { data: tracks } = await sdk.full.users.getTracksByUser({
+    const { data: tracks } = await sdk.users.getTracksByUser({
       id: selectedUser?.id ?? ''
     })
 

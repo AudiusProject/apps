@@ -2,7 +2,7 @@ import { Id, EntityType } from '@audius/sdk'
 import {
   GetUserLibraryTracksSortMethodEnum,
   GetUserLibraryTracksSortDirectionEnum
-} from '@audius/sdk/src/sdk/api/generated/full/apis/UsersApi'
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -86,7 +86,7 @@ export const useLibraryTracks = (
     queryFn: async ({ pageParam = 0 }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserLibraryTracks({
+      const response = await sdk.users.getUserLibraryTracks({
         id: Id.parse(currentUserId),
         offset: pageParam,
         limit: pageSize,
@@ -96,6 +96,7 @@ export const useLibraryTracks = (
         query
       })
 
+      const data = response.data ?? []
       const tracks = data
         .map((activity) => userTrackMetadataFromSDK(activity.item))
         .filter(removeNullable)

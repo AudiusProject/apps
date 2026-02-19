@@ -30,7 +30,7 @@ type TestUser = typeof artistUser | typeof nonArtistUser
  *  User mocks
  */
 export const mockUserByHandle = (user: typeof artistUser) =>
-  http.get(`${apiEndpoint}/v1/full/users/handle/${user.handle}`, () =>
+  http.get(`${apiEndpoint}/v1/users/handle/${user.handle}`, () =>
     HttpResponse.json({ data: [user] })
   )
 
@@ -38,7 +38,7 @@ export const mockRelatedUsers = (
   user: typeof artistUser,
   relatedUsers?: TestUser[]
 ) =>
-  http.get(`${apiEndpoint}/v1/full/users/${user.id}/related`, () =>
+  http.get(`${apiEndpoint}/v1/users/${user.id}/related`, () =>
     HttpResponse.json({ data: relatedUsers ?? [] })
   )
 
@@ -81,7 +81,7 @@ export const mockCurrentAccount = (
     userMetadataFromSDK(user)
   )
   // Set current account data
-  return http.get(`${apiEndpoint}/v1/full/users/account/${user.wallet}`, () =>
+  return http.get(`${apiEndpoint}/v1/users/account/${user.wallet}`, () =>
     HttpResponse.json({ data: account })
   )
 }
@@ -158,7 +158,7 @@ export const mockUserCreatedCoin = (
  * Collections
  */
 export const mockCollectionById = (collection: typeof testCollection & any) =>
-  http.get(`${apiEndpoint}/v1/full/playlists`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/playlists`, ({ request }) => {
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
 
@@ -173,7 +173,7 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
  * Tracks
  */
 export const mockTrackById = (track: typeof testTrack & any) =>
-  http.get(`${apiEndpoint}/v1/full/tracks`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/tracks`, ({ request }) => {
     const url = new URL(request.url)
     // Handle both single ID param and array params (id[]=1&id[]=2)
     const idParam = url.searchParams.get('id')
@@ -210,11 +210,9 @@ export const mockTrackById = (track: typeof testTrack & any) =>
  * Notifications
  */
 export const mockUsers = (users: (typeof artistUser)[]) =>
-  http.get(`${apiEndpoint}/v1/full/users`, () =>
-    HttpResponse.json({ data: users })
-  )
+  http.get(`${apiEndpoint}/v1/users`, () => HttpResponse.json({ data: users }))
 
 export const mockTracks = (tracks: (typeof testTrack)[]) =>
-  http.get(`${apiEndpoint}/v1/full/tracks`, () =>
+  http.get(`${apiEndpoint}/v1/tracks`, () =>
     HttpResponse.json({ data: tracks })
   )

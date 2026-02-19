@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id, type PlaylistUpdatesResponse } from '@audius/sdk'
 import { call, takeEvery, select, put } from 'typed-redux-saga'
 
 import { playlistUpdateFromSDK, transformAndCleanList } from '~/adapters'
@@ -25,13 +25,16 @@ function* fetchPlaylistUpdatesWorker() {
   const sdk = yield* getSDK()
   const existingUpdatesTotal = yield* select(selectPlaylistUpdatesTotal)
 
-  const { data } = yield* call(
-    [sdk.full.notifications, sdk.full.notifications.getPlaylistUpdates],
+  const response = (yield* call(
+    [
+      sdk.notifications,
+      (sdk.notifications as { getPlaylistUpdates: (params: { userId: string }) => Promise<PlaylistUpdatesResponse> }).getPlaylistUpdates
+    ],
     { userId: Id.parse(currentUserId) }
-  )
+  )) as PlaylistUpdatesResponse | undefined
 
   const playlistUpdates = transformAndCleanList(
-    data?.playlistUpdates ?? [],
+    response?.data?.playlistUpdates ?? [],
     playlistUpdateFromSDK
   )
 

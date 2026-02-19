@@ -18,7 +18,7 @@ export async function onBeforeRender(pageContext: PageContextServer) {
   const { handle, slug } = pageContext.routeParams
 
   try {
-    const requestPath = `v1/full/tracks?permalink=${handle}/${slug}`
+    const requestPath = `v1/tracks?permalink=${handle}/${slug}`
     const requestUrl = `${getApiUrl()}/${requestPath}`
 
     const res = await fetch(requestUrl)

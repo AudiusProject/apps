@@ -10,7 +10,10 @@ import {
   TransactionDetails
 } from '@audius/common/store'
 import { Flex, IconCaretRight, Paper, PlainButton, Text } from '@audius/harmony'
-import { full } from '@audius/sdk'
+import {
+  GetAudioTransactionsSortMethodEnum,
+  GetAudioTransactionsSortDirectionEnum
+} from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { useSetVisibility } from 'common/hooks/useModalState'
@@ -60,12 +63,12 @@ const Disclaimer = () => {
 export const AudioWalletTransactions = () => {
   const [page, setPage] = useState(0)
   const [sortMethod, setSortMethod] =
-    useState<full.GetAudioTransactionsSortMethodEnum>(
-      full.GetAudioTransactionsSortMethodEnum.Date
+    useState<GetAudioTransactionsSortMethodEnum>(
+      GetAudioTransactionsSortMethodEnum.Date
     )
   const [sortDirection, setSortDirection] =
-    useState<full.GetAudioTransactionsSortDirectionEnum>(
-      full.GetAudioTransactionsSortDirectionEnum.Desc
+    useState<GetAudioTransactionsSortDirectionEnum>(
+      GetAudioTransactionsSortDirectionEnum.Desc
     )
   const mainContentRef = useMainContentRef()
   const dispatch = useDispatch()
@@ -89,13 +92,13 @@ export const AudioWalletTransactions = () => {
     (sortMethodInner: string, sortDirectionInner: string) => {
       const sortMethodRes =
         sortMethodInner === 'type'
-          ? full.GetAudioTransactionsSortMethodEnum.TransactionType
-          : full.GetAudioTransactionsSortMethodEnum.Date
+          ? GetAudioTransactionsSortMethodEnum.TransactionType
+          : GetAudioTransactionsSortMethodEnum.Date
       setSortMethod(sortMethodRes)
       const sortDirectionRes =
         sortDirectionInner === 'asc'
-          ? full.GetAudioTransactionsSortDirectionEnum.Asc
-          : full.GetAudioTransactionsSortDirectionEnum.Desc
+          ? GetAudioTransactionsSortDirectionEnum.Asc
+          : GetAudioTransactionsSortDirectionEnum.Desc
       setSortDirection(sortDirectionRes)
       // Reset page when sorting changes
       setPage(0)

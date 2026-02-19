@@ -1,4 +1,3 @@
-import type { full, Track } from '@audius/sdk'
 import { OptionalId } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -27,25 +26,6 @@ export const getTrendingWinnersQueryKey = ({
   type
 ]
 
-/**
- * Maps default API Track (from sdk.tracks) to full.TrackFull-like structure
- * for userTrackMetadataFromSDK. The default Track has user but not userId.
- * TODO: Remove when full is gone.
- */
-const toTrackFullLike = (t: Track): full.TrackFull | null => {
-  // @ts-expect-error - TODO: Remove when full is gone.
-  const user = t.user as full.UserFull | undefined
-  if (!user?.id) return null
-  const trackWithUserId = {
-    ...t,
-    userId: user.id,
-    coverArtCids:
-      (t as { coverArtCids?: unknown }).coverArtCids ?? t.coverArtSizes,
-    trackSegments: Array.isArray(t.trackSegments) ? t.trackSegments : []
-  }
-  return trackWithUserId as unknown as full.TrackFull
-}
-
 export const useTrendingWinners = (
   { week, type }: UseTrendingWinnersArgs,
   options?: QueryOptions
@@ -71,12 +51,8 @@ export const useTrendingWinners = (
 
       const sdkResponse = response?.data ?? []
 
-      const trackFullLike = sdkResponse
-        .map(toTrackFullLike)
-        .filter((t): t is full.TrackFull => t !== null)
-
       const tracks = transformAndCleanList(
-        trackFullLike,
+        sdkResponse,
         userTrackMetadataFromSDK
       )
 

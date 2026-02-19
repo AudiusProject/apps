@@ -34,7 +34,7 @@ export const getWalletAccountQueryFn = async (
   queryClient: QueryClient
 ) => {
   try {
-    const { data } = await sdk.full.users.getUserAccount({ wallet })
+    const { data } = await sdk.users.getUserAccount({ wallet })
 
     if (!data) {
       console.warn('Missing user from account response')

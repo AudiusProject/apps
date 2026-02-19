@@ -1,4 +1,9 @@
-import { full, Id } from '@audius/sdk'
+import {
+  Id,
+  type GetUserLibraryAlbumsSortDirectionEnum,
+  type GetUserLibraryAlbumsSortMethodEnum,
+  type GetUserLibraryAlbumsTypeEnum
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -20,10 +25,10 @@ const PAGE_SIZE = 20
 
 type UseLibraryCollectionsArgs = {
   collectionType: CollectionType
-  category?: full.GetUserLibraryAlbumsTypeEnum
+  category?: GetUserLibraryAlbumsTypeEnum
   query?: string
-  sortMethod?: full.GetUserLibraryAlbumsSortMethodEnum
-  sortDirection?: full.GetUserLibraryAlbumsSortDirectionEnum
+  sortMethod?: GetUserLibraryAlbumsSortMethodEnum
+  sortDirection?: GetUserLibraryAlbumsSortDirectionEnum
   pageSize?: number
 }
 
@@ -94,8 +99,8 @@ export const useLibraryCollections = (
 
       const { data: activities = [] } =
         collectionType === 'albums'
-          ? await sdk.full.users.getUserLibraryAlbums(requestParams)
-          : await sdk.full.users.getUserLibraryPlaylists(requestParams)
+          ? await sdk.users.getUserLibraryAlbums(requestParams)
+          : await sdk.users.getUserLibraryPlaylists(requestParams)
 
       const collections = transformAndCleanList(activities, ({ item }) =>
         userCollectionMetadataFromSDK(item)

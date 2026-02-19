@@ -11,7 +11,7 @@ import {
 } from '../../services/EntityManager/types'
 import type { ClaimableTokensClient } from '../../services/Solana/programs/ClaimableTokensClient/ClaimableTokensClient'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
-import { HashId, Id } from '../../types/HashId'
+import { HashId } from '../../types/HashId'
 import { generateMetadataCidV1 } from '../../utils/cid'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'

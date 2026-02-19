@@ -14,7 +14,7 @@ export const fetchHandleInUse = async (
   if (!handle) return false
   const sdk = await audiusSdk()
   try {
-    const { data: users = [] } = await sdk.full.users.getUserByHandle({
+    const { data: users = [] } = await sdk.users.getUserByHandle({
       handle
     })
     return !isEmpty(users[0])

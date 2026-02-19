@@ -80,13 +80,13 @@ async function getMetadata(pathname, apiEndpoint) {
     case 'playlist': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
+      apiRequestPath = `v1/playlists/by_permalink/${handle}/${title}`
       break
     }
     case 'album': {
       const { handle, title } = route.params
       if (!handle || !title) return { metadata: null, name: null }
-      apiRequestPath = `v1/full/playlists/by_permalink/${handle}/${title}`
+      apiRequestPath = `v1/playlists/by_permalink/${handle}/${title}`
       break
     }
     default:

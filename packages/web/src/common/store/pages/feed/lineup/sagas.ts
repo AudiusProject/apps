@@ -22,7 +22,7 @@ import {
   CommonState,
   getSDK
 } from '@audius/common/store'
-import { Id, full } from '@audius/sdk'
+import { Id, type GetUserFeedFilterEnum } from '@audius/sdk'
 import { all, call, select } from 'typed-redux-saga'
 
 import { LineupSagas } from 'common/store/lineup/sagas'
@@ -33,7 +33,7 @@ const { getFeedFilter } = feedPageSelectors
 
 type FeedItem = LineupTrack | Collection
 
-const filterMap: { [k in FeedFilter]: full.GetUserFeedFilterEnum } = {
+const filterMap: { [k in FeedFilter]: GetUserFeedFilterEnum } = {
   [FeedFilter.ALL]: 'all',
   [FeedFilter.ORIGINAL]: 'original',
   [FeedFilter.REPOST]: 'repost'
@@ -59,18 +59,15 @@ function* getTracks({
   const followeeUserIds = yield* select(getFollowIds)
 
   const userId = Id.parse(currentUserId)
-  const { data = [] } = yield* call(
-    [sdk.full.users, sdk.full.users.getUserFeed],
-    {
-      id: userId,
-      userId,
-      filter,
-      limit,
-      offset,
-      followeeUserId: followeeUserIds.length ? followeeUserIds : undefined,
-      withUsers: true
-    }
-  )
+  const { data = [] } = yield* call([sdk.users, sdk.users.getUserFeed], {
+    id: userId,
+    userId,
+    filter,
+    limit,
+    offset,
+    followeeUserId: followeeUserIds.length ? followeeUserIds : undefined,
+    withUsers: true
+  })
   const feed = transformAndCleanList(data, userFeedItemFromSDK).map(
     ({ item }) => item
   )

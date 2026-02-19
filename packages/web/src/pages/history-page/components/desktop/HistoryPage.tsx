@@ -9,7 +9,10 @@ import {
   IconPlay,
   useTheme
 } from '@audius/harmony'
-import { full } from '@audius/sdk'
+import {
+  GetUsersTrackHistorySortMethodEnum,
+  GetUsersTrackHistorySortDirectionEnum
+} from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
 
@@ -51,9 +54,9 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
   }, [])
 
   const [sortMethod, setSortMethod] =
-    useState<full.GetUsersTrackHistorySortMethodEnum>()
+    useState<GetUsersTrackHistorySortMethodEnum>()
   const [sortDirection, setSortDirection] =
-    useState<full.GetUsersTrackHistorySortDirectionEnum>()
+    useState<GetUsersTrackHistorySortDirectionEnum>()
 
   const handleSort = useCallback(({ column, order }: any) => {
     setSortMethod(column?.accessor)

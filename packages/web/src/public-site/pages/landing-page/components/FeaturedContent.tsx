@@ -112,7 +112,7 @@ const FeaturedContent = (props: FeaturedContentProps) => {
       .slice(0, 4)
       .map((id: string) => Id.parse(parseInt(id)))
     const sdk = await audiusSdk()
-    const { data } = await sdk.full.playlists.getBulkPlaylists({
+    const { data } = await sdk.playlists.getBulkPlaylists({
       id: featuredPlaylistIds
     })
     return transformAndCleanList(data, userCollectionMetadataFromSDK)

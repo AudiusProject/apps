@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 
-import { Id } from '@audius/sdk'
+import { Id, type NotificationsResponse } from '@audius/sdk'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 import { usePrevious } from 'react-use'
 
@@ -202,15 +202,23 @@ export const useNotifications = (options?: QueryOptions) => {
     initialPageParam: null as PageParam,
     queryFn: async ({ pageParam = null }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.notifications.getNotifications({
+      const response = await (sdk.notifications as {
+        getNotifications: (params: {
+          userId: string
+          limit?: number
+          timestamp?: number
+          groupId?: string
+        }) => Promise<NotificationsResponse>
+      }).getNotifications({
         userId: Id.parse(currentUserId),
         limit: DEFAULT_LIMIT,
         timestamp: pageParam?.timestamp,
         groupId: pageParam?.groupId
       })
+      const data = response
 
       const notifications = transformAndCleanList(
-        data?.notifications,
+        data?.data?.notifications,
         notificationFromSDK
       ) as Notification[]
 

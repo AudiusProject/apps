@@ -254,7 +254,7 @@ export const getFullPlaylist = (
   encodedUserId: string
 ) => {
   return {
-    endpoint: 'v1/full/playlists',
+    endpoint: 'v1/playlists',
     urlParams: '/' + encodedPlaylistId,
     queryParams: {
       user_id: encodedUserId
@@ -532,7 +532,7 @@ export const getTopFullPlaylists = ({
   withUsers = false
 }: GetTopFullPlaylistsParams) => {
   return {
-    endpoint: `/v1/full/playlists/top`,
+    endpoint: `/v1/playlists/top`,
     queryParams: {
       type,
       limit,
@@ -569,7 +569,7 @@ export const getBestNewReleases = (
   withUsers = false
 ) => {
   return {
-    endpoint: `/v1/full/tracks/best_new_releases`,
+    endpoint: `/v1/tracks/best_new_releases`,
     queryParams: {
       window,
       limit,
@@ -585,7 +585,7 @@ export const getMostLovedTracks = (
   withUsers = false
 ) => {
   return {
-    endpoint: `/v1/full/tracks/most_loved`,
+    endpoint: `/v1/tracks/most_loved`,
     queryParams: {
       limit,
       user_id: encodedUserId,
@@ -600,7 +600,7 @@ export const getFeelingLuckyTracks = (
   withUsers = false
 ) => {
   return {
-    endpoint: `/v1/full/tracks/feeling_lucky`,
+    endpoint: `/v1/tracks/feeling_lucky`,
     queryParams: {
       limit,
       user_id: encodedUserId,
@@ -682,7 +682,7 @@ export const getUserNotifications = ({
   validTypes
 }: GetUserNotificationsParams) => {
   return {
-    endpoint: `v1/full/notifications/${encodedUserId}`,
+    endpoint: `v1/notifications/${encodedUserId}`,
     queryParams: {
       timestamp,
       group_id: groupId,
@@ -694,7 +694,7 @@ export const getUserNotifications = ({
 
 export const getUserSubscribers = (encodedUserId: string, timeout: number) => {
   return {
-    endpoint: `v1/full/users/${encodedUserId}/subscribers`,
+    endpoint: `v1/users/${encodedUserId}/subscribers`,
     method: 'get',
     timeout
   }
@@ -705,7 +705,7 @@ export const bulkGetUserSubscribers = (
   timeout: number
 ) => {
   return {
-    endpoint: 'v1/full/users/subscribers',
+    endpoint: 'v1/users/subscribers',
     method: 'post',
     headers: {
       'Content-Type': 'application/json'
@@ -723,7 +723,7 @@ export const getCIDData = (
   timeout: number
 ) => {
   return {
-    endpoint: `v1/full/cid_data/${cid}`,
+    endpoint: `v1/cid_data/${cid}`,
     method: 'get',
     responseType,
     timeout
@@ -803,7 +803,7 @@ export const verifyToken = (token: string) => {
 
 export const getUserReplicaSet = (encodedUserId: string) => {
   return {
-    endpoint: `/v1/full/users/${encodedUserId}/replica_set`,
+    endpoint: `/v1/users/${encodedUserId}/replica_set`,
     timeout: 5000
   }
 }

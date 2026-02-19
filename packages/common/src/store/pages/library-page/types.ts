@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import { GetUserLibraryTracksTypeEnum } from '@audius/sdk'
 
 import type { Dayjs } from '~/utils/dayjs'
 import { ValueOf } from '~/utils/typeUtils'
@@ -12,7 +12,7 @@ import {
   LineupTrack
 } from '../../../models'
 
-export const LibraryCategory = full.GetUserLibraryTracksTypeEnum
+export const LibraryCategory = GetUserLibraryTracksTypeEnum
 export type LibraryCategoryType = ValueOf<typeof LibraryCategory>
 
 export function isLibraryCategory(value: string): value is LibraryCategoryType {

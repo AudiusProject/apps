@@ -154,13 +154,10 @@ function* confirmUpdateProfile(userId, metadata) {
         }
         yield waitForAccount()
         const currentUserId = yield call(queryCurrentUserId)
-        const { data = [] } = yield call(
-          [sdk.full.users, sdk.full.users.getUser],
-          {
-            id: Id.parse(userId),
-            userId: Id.parse(currentUserId)
-          }
-        )
+        const { data = [] } = yield call([sdk.users, sdk.users.getUser], {
+          id: Id.parse(userId),
+          userId: Id.parse(currentUserId)
+        })
         return userMetadataListFromSDK(data)[0]
       },
       function* (confirmedUser) {

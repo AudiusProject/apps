@@ -21,7 +21,7 @@ type TrackPageContextServer = PageContextServer & {
 // Fetch comment data if commentId is provided
 async function fetchCommentData(commentId: string) {
   try {
-    const url = `${getApiUrl()}/v1/full/comments/${commentId}`
+    const url = `${getApiUrl()}/v1/comments/${commentId}`
     const res = await fetch(url)
     if (res.status !== 200) {
       return null
@@ -49,7 +49,7 @@ export async function onBeforeRender(pageContext: TrackPageContextServer) {
   const { commentId } = pageContext.urlParsed.search ?? {}
 
   try {
-    const requestPath = `v1/full/tracks?permalink=${handle}/${slug}`
+    const requestPath = `v1/tracks?permalink=${handle}/${slug}`
     const requestUrl = `${getApiUrl()}/${requestPath}`
 
     const res = await fetch(requestUrl)

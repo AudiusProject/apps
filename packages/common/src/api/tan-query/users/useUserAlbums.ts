@@ -1,4 +1,8 @@
-import { full, Id, OptionalId } from '@audius/sdk'
+import {
+  GetAlbumsByUserSortMethodEnum,
+  Id,
+  OptionalId
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -21,7 +25,7 @@ import { useCurrentUserId } from './account/useCurrentUserId'
 type GetAlbumsOptions = {
   userId: number | null | undefined
   pageSize?: number
-  sortMethod?: full.GetAlbumsByUserSortMethodEnum
+  sortMethod?: GetAlbumsByUserSortMethodEnum
   query?: string
 }
 
@@ -58,7 +62,7 @@ export const useUserAlbums = (
 
       const sdk = await audiusSdk()
 
-      const { data } = await sdk.full.users.getAlbumsByUser({
+      const { data } = await sdk.users.getAlbumsByUser({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
