@@ -101,6 +101,7 @@ export const UploadStemMetadataSchema = z.object({
 
 export const UploadTrackMetadataSchema = z.object({
   trackId: z.optional(HashId),
+  ownerId: z.optional(z.number()),
   aiAttributionUserId: z.optional(HashId),
   description: z.optional(z.string().max(MAX_DESCRIPTION_LENGTH).nullable()),
   fieldVisibility: z.optional(
