@@ -133,7 +133,11 @@ export const UpdateProfileSchema = z
         instagramHandle: z.optional(z.string()),
         tiktokHandle: z.optional(z.string()),
         splUsdcPayoutWallet: z.optional(SolanaAddressSchema).nullable(),
-        coinFlairMint: z.optional(z.string().nullable())
+        coinFlairMint: z.optional(z.string().nullable()),
+        coverPhoto: z.optional(z.string()),
+        coverPhotoSizes: z.optional(z.string()),
+        profilePicture: z.optional(z.string()),
+        profilePictureSizes: z.optional(z.string())
       })
       .strict()
   })
