@@ -84,10 +84,8 @@ export const USDCPurchaseConditions = z
       price: z.number().positive(),
       splits: z.array(
         z.object({
-          userId: z.number().optional(),
-          percentage: z.number().min(0).max(100),
-          payoutWallet: z.string(),
-          amount: z.number().positive()
+          userId: z.number(),
+          percentage: z.number().min(0).max(100)
         })
       )
     })

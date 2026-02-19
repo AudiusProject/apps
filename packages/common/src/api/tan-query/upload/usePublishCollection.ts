@@ -36,7 +36,6 @@ type PublishCollectionContext = Pick<
   'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
 > & {
   userId: number
-  wallet: string
 }
 
 type PublishCollectionParams = {
@@ -52,15 +51,11 @@ type PublishCollectionParams = {
 const getPublishCollectionOptions = (context: PublishCollectionContext) =>
   mutationOptions({
     mutationFn: async (params: PublishCollectionParams) => {
-      const { audiusSdk, userId, wallet } = context
+      const { audiusSdk, userId } = context
       const sdk = await audiusSdk()
-      if (!userId || !wallet) {
+      if (!userId) {
         throw new Error('User ID and wallet are required to publish collection')
       }
-      const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
-        ethWallet: wallet,
-        mint: 'USDC'
-      })
 
       // If the collection is a premium album, this will populate the premium metadata (price/splits/etc)
       let albumTrackPrice: number | undefined
@@ -73,7 +68,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
           params.collectionMetadata.stream_conditions?.usdc_purchase
             .albumTrackPrice ?? undefined
         params.collectionMetadata.stream_conditions = getUSDCMetadata(
-          userBank.toString(),
+          userId,
           params.collectionMetadata.stream_conditions
         )
       }
@@ -81,7 +76,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       // Combine collection metadata into each track's metadata
       for (const track of params.tracks) {
         track.metadata = combineMetadata(
-          userBank.toString(),
+          userId,
           track.metadata,
           params.collectionMetadata,
           albumTrackPrice
@@ -143,14 +138,12 @@ export const usePublishCollection = (
   const { data: account = null } = useCurrentAccount()
   const { data: accountUser } = useCurrentAccountUser()
   const userId = account?.userId ?? undefined
-  const wallet = account?.walletAddresses.currentUser ?? undefined
 
   return useMutation({
     ...options,
     ...getPublishCollectionOptions({
       audiusSdk,
       userId: userId!,
-      wallet: wallet!,
       dispatch,
       analytics,
       reportToSentry
@@ -212,7 +205,7 @@ export const usePublishCollection = (
  * taking the metadata from the playlist when the track is missing it.
  */
 function combineMetadata(
-  userBank: string,
+  userId: number,
   trackMetadata: TrackMetadataForUpload,
   collectionMetadata: CollectionValues,
   albumTrackPrice?: number
@@ -267,7 +260,7 @@ function combineMetadata(
       usdc_purchase: { price: albumTrackPrice, splits: [] }
     }
     // Add splits to stream & download conditions
-    addPremiumMetadata(userBank, metadata)
+    addPremiumMetadata(userId, metadata)
   }
   return metadata
 }

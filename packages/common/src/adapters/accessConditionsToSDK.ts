@@ -28,7 +28,7 @@ export const usdcPurchaseConditionsToSDK = (
             ethWallet?: string
           }
         ) => ({
-          userId: s.user_id ?? s.userId,
+          userId: s.user_id,
           percentage: s.percentage,
           payoutWallet: s.payout_wallet ?? s.payoutWallet ?? '',
           amount: s.amount,

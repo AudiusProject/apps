@@ -1,4 +1,3 @@
-import { USDC } from '@audius/fixed-decimal'
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -29,7 +28,6 @@ type PublishTracksContext = Pick<
   'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
 > & {
   userId: number
-  wallet: string
   kind?: 'tracks' | 'album' | 'playlist'
 }
 
@@ -47,7 +45,6 @@ export const publishTracks = async (
 ) => {
   const {
     userId,
-    wallet,
     kind,
     audiusSdk,
     dispatch,
@@ -55,21 +52,15 @@ export const publishTracks = async (
     analytics: { make, track }
   } = context
 
-  if (!context.userId || !context.wallet) {
+  if (!context.userId) {
     throw new Error('User ID and wallet are required to publish tracks')
   }
 
   const sdk = await audiusSdk()
-  const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
-    ethWallet: wallet,
-    mint: 'USDC'
-  })
+
   return await Promise.all(
     params.map(async (param) => {
-      const snakeMetadata = addPremiumMetadata(
-        userBank.toString(),
-        param.metadata
-      )
+      const snakeMetadata = addPremiumMetadata(userId, param.metadata)
 
       const trackId = await sdk.tracks.generateTrackId()
       const camelMetadata = trackMetadataForUploadToSdk({
@@ -191,7 +182,6 @@ export const usePublishTracks = (
   const { data: account } = useCurrentAccount()
   const { data: accountUser } = useCurrentAccountUser()
   const userId = account?.userId ?? undefined
-  const wallet = account?.walletAddresses.currentUser ?? undefined
   const kind = options?.kind ?? 'tracks'
 
   return useMutation({
@@ -199,7 +189,6 @@ export const usePublishTracks = (
     ...getPublishTracksOptions({
       ...queryContext,
       userId: userId!,
-      wallet: wallet!,
       kind
     }),
     onSuccess: async (data) => {
@@ -235,11 +224,10 @@ export const usePublishTracks = (
  * returns updated conditions with price in WEI and splits in the new array format.
  */
 export function getUSDCMetadata(
-  userBank: string,
+  userId: number,
   stream_conditions: USDCPurchaseConditions
 ): USDCPurchaseConditions {
   const priceCents = stream_conditions.usdc_purchase.price
-  const priceWei = Number(USDC(priceCents / 100).value.toString())
   return {
     usdc_purchase: {
       price: priceCents,
@@ -248,9 +236,8 @@ export function getUSDCMetadata(
       }),
       splits: [
         {
-          payout_wallet: userBank?.toString() ?? '',
-          percentage: 100,
-          amount: priceWei
+          user_id: userId,
+          percentage: 100
         }
       ]
     }
@@ -262,24 +249,21 @@ export function getUSDCMetadata(
  * Converts prices to WEI and adds splits for USDC purchasable content.
  */
 export function addPremiumMetadata<T extends TrackMetadataForUpload>(
-  userBank: string,
+  userId: number,
   track: T
 ) {
   // download_conditions could be set separately from stream_conditions, so we check for them first
   if (isContentUSDCPurchaseGated(track.download_conditions)) {
     track.download_conditions = getUSDCMetadata(
-      userBank,
+      userId,
       track.download_conditions
     )
   }
 
   if (isContentUSDCPurchaseGated(track.stream_conditions)) {
-    track.stream_conditions = getUSDCMetadata(userBank, track.stream_conditions)
+    track.stream_conditions = getUSDCMetadata(userId, track.stream_conditions)
     // If stream_conditions are set, download_conditions should always match
-    track.download_conditions = getUSDCMetadata(
-      userBank,
-      track.stream_conditions
-    )
+    track.download_conditions = getUSDCMetadata(userId, track.stream_conditions)
   }
 
   return track

@@ -14,19 +14,19 @@
  */
 
 import {
-    ExtendedPurchaseGate,
-    instanceOfExtendedPurchaseGate,
-    ExtendedPurchaseGateFromJSON,
-    ExtendedPurchaseGateFromJSONTyped,
-    ExtendedPurchaseGateToJSON,
-} from './ExtendedPurchaseGate';
-import {
     FollowGate,
     instanceOfFollowGate,
     FollowGateFromJSON,
     FollowGateFromJSONTyped,
     FollowGateToJSON,
 } from './FollowGate';
+import {
+    PurchaseGate,
+    instanceOfPurchaseGate,
+    PurchaseGateFromJSON,
+    PurchaseGateFromJSONTyped,
+    PurchaseGateToJSON,
+} from './PurchaseGate';
 import {
     TipGate,
     instanceOfTipGate,
@@ -47,7 +47,7 @@ import {
  * 
  * @export
  */
-export type AccessGate = ExtendedPurchaseGate | FollowGate | TipGate | TokenGate;
+export type AccessGate = FollowGate | PurchaseGate | TipGate | TokenGate;
 
 export function AccessGateFromJSON(json: any): AccessGate {
     return AccessGateFromJSONTyped(json, false);
@@ -57,7 +57,7 @@ export function AccessGateFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return { ...ExtendedPurchaseGateFromJSONTyped(json, true), ...FollowGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
+    return { ...FollowGateFromJSONTyped(json, true), ...PurchaseGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
 }
 
 export function AccessGateToJSON(value?: AccessGate | null): any {
@@ -68,11 +68,11 @@ export function AccessGateToJSON(value?: AccessGate | null): any {
         return null;
     }
 
-    if (instanceOfExtendedPurchaseGate(value)) {
-        return ExtendedPurchaseGateToJSON(value as ExtendedPurchaseGate);
-    }
     if (instanceOfFollowGate(value)) {
         return FollowGateToJSON(value as FollowGate);
+    }
+    if (instanceOfPurchaseGate(value)) {
+        return PurchaseGateToJSON(value as PurchaseGate);
     }
     if (instanceOfTipGate(value)) {
         return TipGateToJSON(value as TipGate);

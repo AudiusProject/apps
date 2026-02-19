@@ -1,7 +1,7 @@
 import type { AccessGate, full } from '@audius/sdk'
 import {
-  instanceOfExtendedPurchaseGate,
   instanceOfFollowGate,
+  instanceOfPurchaseGate,
   instanceOfTokenGate
 } from '@audius/sdk'
 
@@ -13,26 +13,6 @@ export const accessConditionsFromSDK = (
 ): AccessConditions | null => {
   if (instanceOfFollowGate(input)) {
     return { follow_user_id: input.followUserId }
-  } else if (instanceOfExtendedPurchaseGate(input)) {
-    const purchase = input.usdcPurchase
-    const splits = Array.isArray(purchase.splits)
-      ? purchase.splits.map((s) => ({
-          user_id: s.userId,
-          percentage: s.percentage,
-          payout_wallet: s.payoutWallet,
-          amount: s.amount,
-          ...(s.ethWallet != null && { eth_wallet: s.ethWallet })
-        }))
-      : []
-    const albumTrackPrice = (purchase as { albumTrackPrice?: number })
-      .albumTrackPrice
-    return {
-      usdc_purchase: {
-        price: purchase.price,
-        ...(albumTrackPrice != null && { albumTrackPrice }),
-        splits
-      }
-    }
   } else if (instanceOfTokenGate(input)) {
     return {
       token_gate: {
@@ -40,8 +20,16 @@ export const accessConditionsFromSDK = (
         token_amount: input.tokenGate.tokenAmount
       }
     }
-  } else if ('nftCollection' in input && input.nftCollection != null) {
-    return null
+  } else if (instanceOfPurchaseGate(input)) {
+    return {
+      usdc_purchase: {
+        price: input.usdcPurchase.price,
+        splits: input.usdcPurchase.splits.map((s) => ({
+          user_id: s.userId,
+          percentage: s.percentage
+        }))
+      }
+    }
   } else {
     throw new Error(`Unsupported access gate type: ${JSON.stringify(input)}`)
   }
