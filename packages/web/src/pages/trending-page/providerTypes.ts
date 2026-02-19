@@ -45,6 +45,7 @@ export interface TrendingPageDispatchProps {
 export interface TrendingUrlParams {
   genre: string | null
   timeRange: TimeRange | null
+  week: string | null
 }
 
 // Hook return types

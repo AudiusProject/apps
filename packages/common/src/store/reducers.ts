@@ -44,6 +44,7 @@ import { TrackPageState } from './pages/track/types'
 import trending from './pages/trending/reducer'
 import { TrendingPageState } from './pages/trending/types'
 import trendingUnderground from './pages/trending-underground/slice'
+import trendingWinners from './pages/trending-winners/slice'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
 import player, { PlayerState } from './player/slice'
@@ -185,6 +186,7 @@ export const reducers = (storage: Storage, history?: History) => ({
     track,
     trending: trending(history),
     trendingUnderground,
+    trendingWinners,
     settings,
     remixes,
     exclusiveTracks,
@@ -286,6 +288,7 @@ export type CommonState = {
     settings: SettingsPageState
     trending: TrendingPageState
     trendingUnderground: ReturnType<typeof trendingUnderground>
+    trendingWinners: ReturnType<typeof trendingWinners>
     remixes: ReturnType<typeof remixes>
     exclusiveTracks: ReturnType<typeof exclusiveTracks>
     premiumTracks: ReturnType<typeof premiumTracks>

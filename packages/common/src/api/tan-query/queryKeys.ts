@@ -80,6 +80,7 @@ export const QUERY_KEYS = {
   profileTracks: 'profileTracks',
   trendingIds: 'trendingIds',
   trendingUnderground: 'trendingUnderground',
+  trendingWinners: 'trendingWinners',
   trackPageLineup: 'trackPageLineup',
   connectedWallets: 'connectedWallets',
   audioBalance: 'audioBalance',
