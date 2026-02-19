@@ -798,6 +798,13 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
     // Login succeeded but we found no account for the user (incomplete signup)
     if (!account) {
       yield* put(
+        signOnActions.signInFailed(
+          messages.incompleteAccount,
+          'FETCH_ACCOUNT',
+          false
+        )
+      )
+      yield* put(
         signOnActions.openSignOn(false, Pages.PROFILE, {
           accountAlreadyExisted: true
         })
@@ -833,6 +840,13 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
     // due to incomplete signup
 
     if (!user.name) {
+      yield* put(
+        signOnActions.signInFailed(
+          messages.incompleteAccount,
+          'FETCH_ACCOUNT',
+          false
+        )
+      )
       if (isGuest) {
         yield* put(
           signOnActions.openSignOn(false, Pages.PASSWORD, {

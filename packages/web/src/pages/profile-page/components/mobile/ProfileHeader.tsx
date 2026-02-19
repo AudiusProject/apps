@@ -288,7 +288,9 @@ const ProfileHeader = ({
           [styles.isEditing]: isEditing
         })}
         useBlur={Boolean(
-          !profile?.cover_photo_sizes && profile?.profile_picture_sizes
+          !profile?.cover_photo_sizes &&
+            !updatedCoverPhoto &&
+            profile?.profile_picture_sizes
         )}
       >
         {isArtist && !isEditing && !isDeactivated ? (

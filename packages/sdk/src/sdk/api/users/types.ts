@@ -21,12 +21,14 @@ export const CreateUserSchema = z.object({
     .object({
       allowAiAttribution: z.optional(z.boolean()),
       bio: z.optional(z.string()),
+      coverPhoto: z.optional(z.string()),
       coverPhotoSizes: z.optional(z.string()),
       donation: z.optional(z.string()),
       handle: z.optional(z.string()),
       events: z.optional(UserEventsSchema),
       location: z.optional(z.string()),
       name: z.optional(z.string()),
+      profilePicture: z.optional(z.string()),
       profilePictureSizes: z.optional(z.string()),
       splUsdcPayoutWallet: z.optional(z.string()),
       wallet: z.string(),
@@ -131,7 +133,11 @@ export const UpdateProfileSchema = z
         instagramHandle: z.optional(z.string()),
         tiktokHandle: z.optional(z.string()),
         splUsdcPayoutWallet: z.optional(SolanaAddressSchema).nullable(),
-        coinFlairMint: z.optional(z.string().nullable())
+        coinFlairMint: z.optional(z.string().nullable()),
+        coverPhoto: z.optional(z.string()),
+        coverPhotoSizes: z.optional(z.string()),
+        profilePicture: z.optional(z.string()),
+        profilePictureSizes: z.optional(z.string())
       })
       .strict()
   })
