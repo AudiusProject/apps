@@ -281,7 +281,7 @@ export class UsersApi extends GeneratedUsersApi {
     const metadata = await this.updateMetadataWithFiles(params.metadata, params)
     if (this.entityManager) {
       return await this.updateUserWithEntityManager({
-        userId: Id.parse(params.id)!,
+        userId: params.id,
         metadata: {
           ...metadata,
           playlistLibrary: metadata.playlistLibrary?.contents
