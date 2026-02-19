@@ -161,7 +161,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
   // Calculate the actual playback rate based on track type
   const isLongFormContent =
-    trackGenre === Genre.PODCASTS || trackGenre === Genre.AUDIOBOOKS
+    trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
   const actualPlaybackRate = isLongFormContent
     ? playbackRateValueMap[playbackRate]
     : 1.0

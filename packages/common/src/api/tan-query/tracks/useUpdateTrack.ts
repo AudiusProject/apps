@@ -1,4 +1,8 @@
-import { Id, type CrossPlatformFile } from '@audius/sdk'
+import {
+  type UpdateTrackRequestBody,
+  Id,
+  type CrossPlatformFile
+} from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 
@@ -63,7 +67,7 @@ export const useUpdateTrack = () => {
         imageFile,
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
-        metadata: sdkMetadata,
+        metadata: sdkMetadata as UpdateTrackRequestBody,
         onProgress: (_, progress) => {
           if (progress.key === 'audio') {
             dispatch(

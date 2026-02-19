@@ -1,4 +1,4 @@
-import { NativeFile } from '@audius/sdk'
+import { type Genre, type Mood, NativeFile } from '@audius/sdk'
 
 import { CollectionValues } from '~/schemas'
 
@@ -39,9 +39,14 @@ export const isTrackForUpload = (
  * Unlike normal Track metadata, TrackMetadataForUpload includes additional
  * files: artwork and a stems field with StemsForUpload.
  * This type is used for both Upload and Edit flows.
+ * Uses SDK Genre/Mood for type safety when passing to SDK.
+ * mood accepts string so that Track/TQTrack metadata (Nullable<string>) is assignable.
  */
 export interface TrackMetadataForUpload
-  extends Omit<TrackMetadata, 'artwork' | 'track_id'> {
+  extends Omit<TrackMetadata, 'artwork' | 'track_id' | 'genre' | 'mood'> {
+  /** API tracks use genre: string; form empty state is ''. */
+  genre?: Genre | '' | string
+  mood?: Mood | string | null
   artwork?:
     | Nullable<{
         file?: Blob | NativeFile

@@ -138,7 +138,7 @@ export function* confirmRepostCollection(
         yield* call([sdk.playlists, sdk.playlists.repostPlaylist], {
           userId: Id.parse(userId),
           playlistId: Id.parse(collectionId),
-          metadata: {
+          repostRequestBody: {
             isRepostOfRepost: metadata?.is_repost_of_repost ?? false
           }
         })

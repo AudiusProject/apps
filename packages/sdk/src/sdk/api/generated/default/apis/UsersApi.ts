@@ -16,12 +16,16 @@
 
 import * as runtime from '../runtime';
 import type {
+  AddManagerRequestBody,
   AlbumsResponse,
+  ApproveGrantRequestBody,
   AuthorizedApps,
   BalanceHistoryResponse,
   CollectiblesResponse,
   ConnectedWalletsResponse,
-  DeveloperApps,
+  CreateGrantRequestBody,
+  CreateUserRequestBody,
+  CreateUserResponse,
   EmailAccessResponse,
   FavoritesResponse,
   FollowersResponse,
@@ -40,7 +44,9 @@ import type {
   SalesJsonResponse,
   SubscribersResponse,
   TagsResponse,
+  TracksCountResponse,
   TracksResponse,
+  UpdateUserRequestBody,
   UserCoinResponse,
   UserCoinsResponse,
   UserCommentsResponse,
@@ -51,10 +57,15 @@ import type {
   UserTracksRemixedResponse,
   UsersResponse,
   VerifyToken,
+  WriteResponse,
 } from '../models';
 import {
+    AddManagerRequestBodyFromJSON,
+    AddManagerRequestBodyToJSON,
     AlbumsResponseFromJSON,
     AlbumsResponseToJSON,
+    ApproveGrantRequestBodyFromJSON,
+    ApproveGrantRequestBodyToJSON,
     AuthorizedAppsFromJSON,
     AuthorizedAppsToJSON,
     BalanceHistoryResponseFromJSON,
@@ -63,8 +74,12 @@ import {
     CollectiblesResponseToJSON,
     ConnectedWalletsResponseFromJSON,
     ConnectedWalletsResponseToJSON,
-    DeveloperAppsFromJSON,
-    DeveloperAppsToJSON,
+    CreateGrantRequestBodyFromJSON,
+    CreateGrantRequestBodyToJSON,
+    CreateUserRequestBodyFromJSON,
+    CreateUserRequestBodyToJSON,
+    CreateUserResponseFromJSON,
+    CreateUserResponseToJSON,
     EmailAccessResponseFromJSON,
     EmailAccessResponseToJSON,
     FavoritesResponseFromJSON,
@@ -101,8 +116,12 @@ import {
     SubscribersResponseToJSON,
     TagsResponseFromJSON,
     TagsResponseToJSON,
+    TracksCountResponseFromJSON,
+    TracksCountResponseToJSON,
     TracksResponseFromJSON,
     TracksResponseToJSON,
+    UpdateUserRequestBodyFromJSON,
+    UpdateUserRequestBodyToJSON,
     UserCoinResponseFromJSON,
     UserCoinResponseToJSON,
     UserCoinsResponseFromJSON,
@@ -123,7 +142,28 @@ import {
     UsersResponseToJSON,
     VerifyTokenFromJSON,
     VerifyTokenToJSON,
+    WriteResponseFromJSON,
+    WriteResponseToJSON,
 } from '../models';
+
+export interface AddManagerRequest {
+    id: string;
+    addManagerRequestBody: AddManagerRequestBody;
+}
+
+export interface ApproveGrantRequest {
+    id: string;
+    approveGrantRequestBody: ApproveGrantRequestBody;
+}
+
+export interface CreateGrantRequest {
+    id: string;
+    createGrantRequestBody: CreateGrantRequestBody;
+}
+
+export interface CreateUserRequest {
+    metadata: CreateUserRequestBody;
+}
 
 export interface DownloadPurchasesAsCSVRequest {
     id: string;
@@ -152,6 +192,11 @@ export interface DownloadUSDCWithdrawalsAsCSVRequest {
     userId?: string;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
+}
+
+export interface FollowUserRequest {
+    id: string;
+    userId: string;
 }
 
 export interface GetAIAttributedTracksByUserHandleRequest {
@@ -189,10 +234,6 @@ export interface GetBulkUsersRequest {
 }
 
 export interface GetConnectedWalletsRequest {
-    id: string;
-}
-
-export interface GetDeveloperAppsRequest {
     id: string;
 }
 
@@ -290,12 +331,14 @@ export interface GetSupportedUsersRequest {
     id: string;
     offset?: number;
     limit?: number;
+    userId?: string;
 }
 
 export interface GetSupportersRequest {
     id: string;
     offset?: number;
     limit?: number;
+    userId?: string;
 }
 
 export interface GetTopTrackTagsRequest {
@@ -319,8 +362,32 @@ export interface GetTracksByUserRequest {
     encodedDataSignature?: string;
 }
 
+export interface GetTracksByUserHandleRequest {
+    handle: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    sort?: GetTracksByUserHandleSortEnum;
+    query?: string;
+    sortMethod?: GetTracksByUserHandleSortMethodEnum;
+    sortDirection?: GetTracksByUserHandleSortDirectionEnum;
+    filterTracks?: GetTracksByUserHandleFilterTracksEnum;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
+export interface GetTracksCountByUserRequest {
+    id: string;
+    userId?: string;
+    filterTracks?: GetTracksCountByUserFilterTracksEnum;
+    gateCondition?: Array<GetTracksCountByUserGateConditionEnum>;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
+}
+
 export interface GetUserRequest {
     id: string;
+    userId?: string;
 }
 
 export interface GetUserBalanceHistoryRequest {
@@ -407,6 +474,21 @@ export interface GetUsersTrackHistoryRequest {
     encodedDataSignature?: string;
 }
 
+export interface MuteUserRequest {
+    id: string;
+    userId: string;
+}
+
+export interface RemoveManagerRequest {
+    id: string;
+    managerUserId: string;
+}
+
+export interface RevokeGrantRequest {
+    id: string;
+    address: string;
+}
+
 export interface SearchUsersRequest {
     offset?: number;
     limit?: number;
@@ -414,6 +496,32 @@ export interface SearchUsersRequest {
     genre?: Array<string>;
     sortMethod?: SearchUsersSortMethodEnum;
     isVerified?: string;
+}
+
+export interface SubscribeToUserRequest {
+    id: string;
+    userId: string;
+}
+
+export interface UnfollowUserRequest {
+    id: string;
+    userId: string;
+}
+
+export interface UnmuteUserRequest {
+    id: string;
+    userId: string;
+}
+
+export interface UnsubscribeFromUserRequest {
+    id: string;
+    userId: string;
+}
+
+export interface UpdateUserRequest {
+    id: string;
+    userId: string;
+    metadata: UpdateUserRequestBody;
 }
 
 export interface VerifyIDTokenRequest {
@@ -424,6 +532,198 @@ export interface VerifyIDTokenRequest {
  * 
  */
 export class UsersApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Add a manager (authorize another user to act on your behalf)
+     */
+    async addManagerRaw(params: AddManagerRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling addManager.');
+        }
+
+        if (params.addManagerRequestBody === null || params.addManagerRequestBody === undefined) {
+            throw new runtime.RequiredError('addManagerRequestBody','Required parameter params.addManagerRequestBody was null or undefined when calling addManager.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/managers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AddManagerRequestBodyToJSON(params.addManagerRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Add a manager (authorize another user to act on your behalf)
+     */
+    async addManager(params: AddManagerRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.addManagerRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Approve a manager request (manager approves being added by the child user)
+     */
+    async approveGrantRaw(params: ApproveGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling approveGrant.');
+        }
+
+        if (params.approveGrantRequestBody === null || params.approveGrantRequestBody === undefined) {
+            throw new runtime.RequiredError('approveGrantRequestBody','Required parameter params.approveGrantRequestBody was null or undefined when calling approveGrant.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/grants/approve`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ApproveGrantRequestBodyToJSON(params.approveGrantRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Approve a manager request (manager approves being added by the child user)
+     */
+    async approveGrant(params: ApproveGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.approveGrantRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Create a grant (authorize an app to act on the user\'s behalf)
+     */
+    async createGrantRaw(params: CreateGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling createGrant.');
+        }
+
+        if (params.createGrantRequestBody === null || params.createGrantRequestBody === undefined) {
+            throw new runtime.RequiredError('createGrantRequestBody','Required parameter params.createGrantRequestBody was null or undefined when calling createGrant.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/grants`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateGrantRequestBodyToJSON(params.createGrantRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Create a grant (authorize an app to act on the user\'s behalf)
+     */
+    async createGrant(params: CreateGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.createGrantRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Creates a new user
+     */
+    async createUserRaw(params: CreateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateUserResponse>> {
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createUser.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateUserRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreateUserResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new user
+     */
+    async createUser(params: CreateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateUserResponse> {
+        const response = await this.createUserRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -596,6 +896,56 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async downloadUSDCWithdrawalsAsCSV(params: DownloadUSDCWithdrawalsAsCSVRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.downloadUSDCWithdrawalsAsCSVRaw(params, initOverrides);
+    }
+
+    /**
+     * @hidden
+     * Follow a user
+     */
+    async followUserRaw(params: FollowUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling followUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling followUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/follow`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Follow a user
+     */
+    async followUser(params: FollowUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.followUserRaw(params, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -822,37 +1172,6 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getConnectedWallets(params: GetConnectedWalletsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ConnectedWalletsResponse> {
         const response = await this.getConnectedWalletsRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Gets the developer apps that the user owns
-     */
-    async getDeveloperAppsRaw(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeveloperApps>> {
-        if (params.id === null || params.id === undefined) {
-            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getDeveloperApps.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/users/{id}/developer_apps`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeveloperAppsFromJSON(jsonValue));
-    }
-
-    /**
-     * Gets the developer apps that the user owns
-     */
-    async getDeveloperApps(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperApps> {
-        const response = await this.getDeveloperAppsRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1415,6 +1734,10 @@ export class UsersApi extends runtime.BaseAPI {
             queryParameters['limit'] = params.limit;
         }
 
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -1452,6 +1775,10 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -1592,6 +1919,128 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Gets the tracks created by a user using the user\'s handle
+     */
+    async getTracksByUserHandleRaw(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        if (params.handle === null || params.handle === undefined) {
+            throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getTracksByUserHandle.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.sort !== undefined) {
+            queryParameters['sort'] = params.sort;
+        }
+
+        if (params.query !== undefined) {
+            queryParameters['query'] = params.query;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.sortDirection !== undefined) {
+            queryParameters['sort_direction'] = params.sortDirection;
+        }
+
+        if (params.filterTracks !== undefined) {
+            queryParameters['filter_tracks'] = params.filterTracks;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/handle/{handle}/tracks`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the tracks created by a user using the user\'s handle
+     */
+    async getTracksByUserHandle(params: GetTracksByUserHandleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getTracksByUserHandleRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the count of tracks created by a user
+     */
+    async getTracksCountByUserRaw(params: GetTracksCountByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getTracksCountByUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.filterTracks !== undefined) {
+            queryParameters['filter_tracks'] = params.filterTracks;
+        }
+
+        if (params.gateCondition) {
+            queryParameters['gate_condition'] = params.gateCondition;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/tracks/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the count of tracks created by a user
+     */
+    async getTracksCountByUser(params: GetTracksCountByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksCountResponse> {
+        const response = await this.getTracksCountByUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets a single user by their user ID
      */
     async getUserRaw(params: GetUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {
@@ -1600,6 +2049,10 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -2166,6 +2619,148 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Mute a user
+     */
+    async muteUserRaw(params: MuteUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling muteUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling muteUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/muted`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Mute a user
+     */
+    async muteUser(params: MuteUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.muteUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Remove a manager (revoke user-to-user grant). Can be called by the child user or the manager.
+     */
+    async removeManagerRaw(params: RemoveManagerRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling removeManager.');
+        }
+
+        if (params.managerUserId === null || params.managerUserId === undefined) {
+            throw new runtime.RequiredError('managerUserId','Required parameter params.managerUserId was null or undefined when calling removeManager.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/managers/{managerUserId}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"managerUserId"}}`, encodeURIComponent(String(params.managerUserId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Remove a manager (revoke user-to-user grant). Can be called by the child user or the manager.
+     */
+    async removeManager(params: RemoveManagerRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.removeManagerRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Revoke a grant (remove app authorization)
+     */
+    async revokeGrantRaw(params: RevokeGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling revokeGrant.');
+        }
+
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling revokeGrant.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/grants/{address}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Revoke a grant (remove app authorization)
+     */
+    async revokeGrant(params: RevokeGrantRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.revokeGrantRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Search for users that match the given query
      */
     async searchUsersRaw(params: SearchUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserSearch>> {
@@ -2212,6 +2807,255 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async searchUsers(params: SearchUsersRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserSearch> {
         const response = await this.searchUsersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Subscribe to a user
+     */
+    async subscribeToUserRaw(params: SubscribeToUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling subscribeToUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling subscribeToUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/subscribers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Subscribe to a user
+     */
+    async subscribeToUser(params: SubscribeToUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.subscribeToUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unfollow a user
+     */
+    async unfollowUserRaw(params: UnfollowUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling unfollowUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unfollowUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/follow`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfollow a user
+     */
+    async unfollowUser(params: UnfollowUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unfollowUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unmute a user
+     */
+    async unmuteUserRaw(params: UnmuteUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling unmuteUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unmuteUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/muted`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unmute a user
+     */
+    async unmuteUser(params: UnmuteUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unmuteUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unsubscribe from a user
+     */
+    async unsubscribeFromUserRaw(params: UnsubscribeFromUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling unsubscribeFromUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unsubscribeFromUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}/subscribers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unsubscribe from a user
+     */
+    async unsubscribeFromUser(params: UnsubscribeFromUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unsubscribeFromUserRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing user profile
+     */
+    async updateUserRaw(params: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling updateUser.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateUser.');
+        }
+
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/users/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateUserRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing user profile
+     */
+    async updateUser(params: UpdateUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.updateUserRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -2358,6 +3202,65 @@ export const GetTracksByUserGateConditionEnum = {
     Token: 'token'
 } as const;
 export type GetTracksByUserGateConditionEnum = typeof GetTracksByUserGateConditionEnum[keyof typeof GetTracksByUserGateConditionEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserHandleSortEnum = {
+    Date: 'date',
+    Plays: 'plays'
+} as const;
+export type GetTracksByUserHandleSortEnum = typeof GetTracksByUserHandleSortEnum[keyof typeof GetTracksByUserHandleSortEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserHandleSortMethodEnum = {
+    Title: 'title',
+    ArtistName: 'artist_name',
+    ReleaseDate: 'release_date',
+    LastListenDate: 'last_listen_date',
+    AddedDate: 'added_date',
+    Plays: 'plays',
+    Reposts: 'reposts',
+    Saves: 'saves',
+    MostListensByUser: 'most_listens_by_user'
+} as const;
+export type GetTracksByUserHandleSortMethodEnum = typeof GetTracksByUserHandleSortMethodEnum[keyof typeof GetTracksByUserHandleSortMethodEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserHandleSortDirectionEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+export type GetTracksByUserHandleSortDirectionEnum = typeof GetTracksByUserHandleSortDirectionEnum[keyof typeof GetTracksByUserHandleSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetTracksByUserHandleFilterTracksEnum = {
+    All: 'all',
+    Public: 'public'
+} as const;
+export type GetTracksByUserHandleFilterTracksEnum = typeof GetTracksByUserHandleFilterTracksEnum[keyof typeof GetTracksByUserHandleFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksCountByUserFilterTracksEnum = {
+    All: 'all',
+    Public: 'public'
+} as const;
+export type GetTracksCountByUserFilterTracksEnum = typeof GetTracksCountByUserFilterTracksEnum[keyof typeof GetTracksCountByUserFilterTracksEnum];
+/**
+ * @export
+ */
+export const GetTracksCountByUserGateConditionEnum = {
+    Ungated: 'ungated',
+    UsdcPurchase: 'usdc_purchase',
+    Follow: 'follow',
+    Tip: 'tip',
+    Nft: 'nft',
+    Token: 'token'
+} as const;
+export type GetTracksCountByUserGateConditionEnum = typeof GetTracksCountByUserGateConditionEnum[keyof typeof GetTracksCountByUserGateConditionEnum];
 /**
  * @export
  */
