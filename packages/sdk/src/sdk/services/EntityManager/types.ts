@@ -6,7 +6,6 @@ import type { LoggerService } from '../Logger'
 export type EntityManagerTransactionReceipt = {
   blockHash: string
   blockNumber: number
-  transactionHash: string
 }
 
 export type EntityManagerConfigInternal = {

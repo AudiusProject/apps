@@ -27,49 +27,41 @@ import {
   DownloadTrackRequest,
   TracksApi as GeneratedTracksApi,
   ExtendedPaymentSplit,
-  instanceOfExtendedPurchaseGate,
-  type DeleteTrackRequest,
-  type FavoriteTrackRequest,
-  type UnfavoriteTrackRequest,
-  type ShareTrackRequest,
-  type RepostTrackRequest,
-  type UnrepostTrackRequest,
-  type RecordTrackDownloadRequest
+  instanceOfExtendedPurchaseGate
 } from '../generated/default'
 import { RequiredError } from '../generated/default/runtime'
 
 import { TrackUploadHelper } from './TrackUploadHelper'
 import {
-  EntityManagerDeleteTrackRequest,
+  DeleteTrackRequest,
   DeleteTrackSchema,
-  EntityManagerRepostTrackRequest,
+  RepostTrackRequest,
   RepostTrackSchema,
-  EntityManagerFavoriteTrackRequest,
+  FavoriteTrackRequest,
   FavoriteTrackSchema,
-  EntityManagerUnrepostTrackRequest,
+  UnrepostTrackRequest,
   UnrepostTrackSchema,
-  EntityManagerUnfavoriteTrackRequest,
+  UnfavoriteTrackRequest,
   UnfavoriteTrackSchema,
-  EntityManagerUpdateTrackRequest,
+  UpdateTrackRequest,
+  UploadTrackRequest,
   PurchaseTrackRequest,
   PurchaseTrackSchema,
   GetPurchaseTrackInstructionsRequest,
   GetPurchaseTrackInstructionsSchema,
-  EntityManagerRecordTrackDownloadRequest,
+  RecordTrackDownloadRequest,
   RecordTrackDownloadSchema,
   UploadTrackFilesRequest,
+  UploadTrackSchema,
   UpdateTrackSchema,
   UploadTrackFilesSchema,
   ShareTrackSchema,
-  EntityManagerShareTrackRequest,
+  ShareTrackRequest,
   type PublishTrackRequest,
   PublishTrackSchema,
   type PublishStemRequest,
-  type UploadTrackFilesTask,
-  type UpdateTrackRequestWithFiles,
-  type CreateTrackRequestWithFiles,
   PublishStemSchema,
-  UploadTrackSchema
+  type UploadTrackFilesTask
 } from './types'
 
 // Extend that new class
@@ -116,6 +108,8 @@ export class TracksApi extends GeneratedTracksApi {
     if (params.apiKey) queryParams.append('api_key', params.apiKey)
     if (params.skipCheck !== undefined)
       queryParams.append('skip_check', String(params.skipCheck))
+    if (params.noRedirect !== undefined)
+      queryParams.append('no_redirect', String(params.noRedirect))
 
     const path = `/tracks/{track_id}/stream`.replace(
       `{${'track_id'}}`,
@@ -352,12 +346,17 @@ export class TracksApi extends GeneratedTracksApi {
     }
   }
 
-  override async createTrack(
-    params: CreateTrackRequestWithFiles,
-    requestInit?: RequestInit
+  /**
+   * Upload a track
+   */
+  async uploadTrack(
+    params: UploadTrackRequest,
+    advancedOptions?: AdvancedOptions
   ) {
-    // Upload files
-    let metadata = params.metadata
+    // Validate inputs
+    await parseParams('uploadTrack', UploadTrackSchema)(params)
+
+    // Upload track files
     const { audioUploadResponse, imageUploadResponse } =
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
@@ -369,45 +368,89 @@ export class TracksApi extends GeneratedTracksApi {
         onProgress: params.onProgress
       }).start()
 
-    metadata = this.trackUploadHelper.transformTrackUploadMetadataV2(
-      metadata,
-      decodeHashId(params.userId)!
-    )
-
-    metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponseV2(
-      metadata,
-      audioUploadResponse,
-      imageUploadResponse
-    )
-
-    if (this.entityManager) {
-      const { metadata } = await parseParams(
-        'createTrack',
-        UploadTrackSchema
-      )(params)
-      return this.writeTrackToChain(params.userId, metadata)
+    if (!audioUploadResponse || !imageUploadResponse) {
+      throw new Error('uploadTrack: Missing upload responses')
     }
-    return super.createTrack(
+
+    // Write track metadata to chain
+    return this.publishTrack(
       {
         userId: params.userId,
-        metadata
+        metadata: params.metadata,
+        audioUploadResponse,
+        imageUploadResponse
       },
-      requestInit
+      advancedOptions
     )
   }
 
   /** @hidden
-   * Update a track with entity manager
+   * Update a track
    */
-  async updateTrackWithEntityManager(
-    params: EntityManagerUpdateTrackRequest,
+  async updateTrack(
+    params: UpdateTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
-    const { userId, trackId, metadata } = await parseParams(
-      'updateTrack',
-      UpdateTrackSchema
-    )(params)
+    const {
+      userId,
+      trackId,
+      audioFile,
+      imageFile,
+      metadata: parsedMetadata,
+      onProgress,
+      generatePreview
+    } = await parseParams('updateTrack', UpdateTrackSchema)(params)
+
+    // Transform metadata
+    const metadata = this.trackUploadHelper.transformTrackUploadMetadata(
+      parsedMetadata,
+      userId
+    )
+
+    const { audioUploadResponse, imageUploadResponse } =
+      await this.uploadTrackFiles({
+        audioFile,
+        imageFile,
+        fileMetadata: {
+          placementHosts: parsedMetadata.placementHosts,
+          previewStartSeconds: parsedMetadata.previewStartSeconds
+        },
+        onProgress
+      }).start()
+
+    // Update metadata to include uploaded CIDs
+    const updatedMetadata =
+      this.trackUploadHelper.populateTrackMetadataWithUploadResponse(
+        metadata,
+        audioUploadResponse,
+        imageUploadResponse
+      )
+
+    // Generate preview if requested and no audio file was uploaded
+    // (as that would handle the preview generation already)
+    if (generatePreview && !audioFile) {
+      if (updatedMetadata.previewStartSeconds === undefined) {
+        throw new Error('No track preview start time specified')
+      }
+      if (!updatedMetadata.audioUploadId) {
+        throw new Error('Missing required audio_upload_id')
+      }
+
+      const previewCid = await retry3(
+        async () =>
+          await this.storage.generatePreview({
+            cid: updatedMetadata.trackCid!,
+            secondOffset: updatedMetadata.previewStartSeconds!
+          }),
+        (e) => {
+          this.logger.info('Retrying generatePreview', e)
+        }
+      )
+
+      // Update metadata to include updated preview CID
+      updatedMetadata.previewCid = previewCid
+    }
 
     // Write metadata to chain
     return await this.entityManager.manageEntity({
@@ -418,13 +461,13 @@ export class TracksApi extends GeneratedTracksApi {
       metadata: JSON.stringify({
         cid: '',
         data: {
-          ...snakecaseKeys(metadata),
+          ...snakecaseKeys(updatedMetadata),
           download_conditions:
-            metadata.downloadConditions &&
-            snakecaseKeys(metadata.downloadConditions),
+            updatedMetadata.downloadConditions &&
+            snakecaseKeys(updatedMetadata.downloadConditions),
           stream_conditions:
-            metadata.streamConditions &&
-            snakecaseKeys(metadata.streamConditions),
+            updatedMetadata.streamConditions &&
+            snakecaseKeys(updatedMetadata.streamConditions),
           stem_of: metadata.stemOf && snakecaseKeys(metadata.stemOf)
         }
       }),
@@ -432,82 +475,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async updateTrack(
-    params: UpdateTrackRequestWithFiles,
-    requestInit?: RequestInit
-  ) {
-    // Upload files
-    let metadata = params.metadata
-    const { audioUploadResponse, imageUploadResponse } =
-      await this.uploadTrackFiles({
-        audioFile: params.audioFile,
-        imageFile: params.imageFile,
-        fileMetadata: {
-          placementHosts: params.metadata.placementHosts,
-          previewStartSeconds: params.metadata.previewStartSeconds
-        },
-        onProgress: params.onProgress
-      }).start()
-
-    metadata = this.trackUploadHelper.transformTrackUploadMetadataV2(
-      metadata,
-      decodeHashId(params.userId)!
-    )
-
-    metadata = this.trackUploadHelper.populateTrackMetadataWithUploadResponseV2(
-      metadata,
-      audioUploadResponse,
-      imageUploadResponse
-    )
-
-    // Generate preview if requested and no audio file was uploaded
-    // (as that would handle the preview generation already)
-    if (
-      params.generatePreview &&
-      metadata.previewStartSeconds !== undefined &&
-      !params.audioFile
-    ) {
-      const previewCid = await retry3(
-        async () =>
-          await this.storage.generatePreview({
-            cid: metadata.trackCid!,
-            secondOffset: metadata.previewStartSeconds!
-          }),
-        (e) => {
-          this.logger.info('Retrying generatePreview', e)
-        }
-      )
-
-      // Update metadata to include updated preview CID
-      metadata.previewCid = previewCid
-    }
-
-    if (this.entityManager) {
-      const res = await this.updateTrackWithEntityManager({
-        trackId: params.trackId,
-        userId: params.userId,
-        metadata
-      })
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.updateTrack(
-      {
-        trackId: params.trackId,
-        userId: params.userId,
-        metadata: params.metadata
-      },
-      requestInit
-    )
-  }
-
   /** @hidden
    * Delete a track
    */
-  async deleteTrackWithEntityManager(
-    params: EntityManagerDeleteTrackRequest,
+  async deleteTrack(
+    params: DeleteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -525,25 +497,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async deleteTrack(
-    params: DeleteTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.deleteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.deleteTrack(params, requestInit)
-  }
-
   /** @hidden
    * Favorite a track
    */
-  async favoriteTrackWithEntityManager(
-    params: EntityManagerFavoriteTrackRequest,
+  async favoriteTrack(
+    params: FavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -562,25 +520,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async favoriteTrack(
-    params: FavoriteTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.favoriteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.favoriteTrack(params, requestInit)
-  }
-
   /** @hidden
    * Unfavorite a track
    */
-  async unfavoriteTrackWithEntityManager(
-    params: EntityManagerUnfavoriteTrackRequest,
+  async unfavoriteTrack(
+    params: UnfavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -598,25 +542,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async unfavoriteTrack(
-    params: UnfavoriteTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.unfavoriteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.unfavoriteTrack(params, requestInit)
-  }
-
   /** @hidden
    * Share a track
    */
-  async shareTrackWithEntityManager(
-    params: EntityManagerShareTrackRequest,
+  async shareTrack(
+    params: ShareTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -634,25 +564,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async shareTrack(
-    params: ShareTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.shareTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.shareTrack(params, requestInit)
-  }
-
   /** @hidden
    * Repost a track
    */
-  async repostTrackWithEntityManager(
-    params: EntityManagerRepostTrackRequest,
+  async repostTrack(
+    params: RepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -671,30 +587,11 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async repostTrack(
-    params: RepostTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const entityManagerParams = {
-        trackId: params.trackId,
-        userId: params.userId,
-        metadata: params.repostRequestBody
-      }
-      const res = await this.repostTrackWithEntityManager(entityManagerParams)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.repostTrack(params, requestInit)
-  }
-
   /** @hidden
    * Unrepost a track
    */
-  async unrepostTrackWithEntityManager(
-    params: EntityManagerUnrepostTrackRequest,
+  async unrepostTrack(
+    params: UnrepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
     // Parse inputs
@@ -712,27 +609,13 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async unrepostTrack(
-    params: UnrepostTrackRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.unrepostTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.unrepostTrack(params, requestInit)
-  }
-
   /**
    * @hidden
    *
    * Records that a track was downloaded.
    */
-  public async recordTrackDownloadWithEntityManager(
-    params: EntityManagerRecordTrackDownloadRequest,
+  public async recordTrackDownload(
+    params: RecordTrackDownloadRequest,
     advancedOptions?: AdvancedOptions
   ) {
     const { userId, trackId } = await parseParams(
@@ -759,20 +642,6 @@ export class TracksApi extends GeneratedTracksApi {
     })
   }
 
-  override async recordTrackDownload(
-    params: RecordTrackDownloadRequest,
-    requestInit?: RequestInit
-  ) {
-    if (this.entityManager) {
-      const res = await this.recordTrackDownloadWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
-    }
-    return super.recordTrackDownload(params, requestInit)
-  }
-
   /**
    * Gets the Solana instructions that purchase the track
    *
@@ -797,8 +666,8 @@ export class TracksApi extends GeneratedTracksApi {
     // Fetch track
     this.logger.debug('Fetching track purchase info...', { trackId })
     const { data: track } = await this.getTrackAccessInfo({
-      trackId: encodeHashId(trackId)!, // use hashed trackId
-      userId: encodeHashId(userId)! // use hashed userId
+      trackId: params.trackId, // use hashed trackId
+      userId: params.userId // use hashed userId
     })
 
     // Validate purchase attempt

@@ -105,13 +105,9 @@ export const useUpdateCollection = () => {
         collectionUpdate.stream_conditions = {
           usdc_purchase: {
             price: priceCents,
-            splits: [
-              {
-                payout_wallet: userBankStr,
-                percentage: 100,
-                amount: priceWei
-              }
-            ]
+            splits: {
+              [userBankStr]: priceWei
+            }
           }
         }
       }

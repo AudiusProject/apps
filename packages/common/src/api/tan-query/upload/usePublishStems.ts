@@ -1,9 +1,13 @@
 import { HashId, Id, type UploadResponse } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { StemCategory, Name, type StemUpload } from '~/models'
+import {
+  StemCategory,
+  Name,
+  type StemUpload,
+  type TrackMetadata
+} from '~/models'
 import { ProgressStatus, uploadActions } from '~/store'
-import type { TrackMetadataForUpload } from '~/store/upload/types'
 
 import { getStemsQueryKey } from '../tracks/useStems'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
@@ -23,7 +27,7 @@ type PublishStemsContext = Pick<
 type PublishStemsParams = {
   clientId: string
   parentTrackId: number
-  parentMetadata: TrackMetadataForUpload
+  parentMetadata: Omit<TrackMetadata, 'artwork' | 'track_id'>
   stems: {
     metadata: StemUpload
     audioUploadResponse: UploadResponse

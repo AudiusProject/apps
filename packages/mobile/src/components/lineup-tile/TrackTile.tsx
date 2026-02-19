@@ -194,7 +194,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const handlePressOverflow = useCallback(() => {
     if (!track) return
     const isLongFormContent =
-      track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
+      track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
     const isOwner = currentUserId === track.owner_id
     const isArtistPick =
       isOwner && user?.artist_pick_track_id === track.track_id
@@ -303,7 +303,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
         trackId={track.track_id}
         duration={track.duration}
         isLongFormContent={
-          track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
+          track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
         }
         isArtistPick={showArtistPick && isArtistPick}
       />

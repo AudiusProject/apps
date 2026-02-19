@@ -14,12 +14,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CommentEntityType } from './CommentEntityType';
-import {
-    CommentEntityTypeFromJSON,
-    CommentEntityTypeFromJSONTyped,
-    CommentEntityTypeToJSON,
-} from './CommentEntityType';
 import type { CommentMention } from './CommentMention';
 import {
     CommentMentionFromJSON,
@@ -53,10 +47,10 @@ export interface Comment {
     entityId: string;
     /**
      * 
-     * @type {CommentEntityType}
+     * @type {string}
      * @memberof Comment
      */
-    entityType: CommentEntityType;
+    entityType: string;
     /**
      * 
      * @type {string}
@@ -178,7 +172,7 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         
         'id': json['id'],
         'entityId': json['entity_id'],
-        'entityType': CommentEntityTypeFromJSON(json['entity_type']),
+        'entityType': json['entity_type'],
         'userId': !exists(json, 'user_id') ? undefined : json['user_id'],
         'message': json['message'],
         'mentions': !exists(json, 'mentions') ? undefined : ((json['mentions'] as Array<any>).map(CommentMentionFromJSON)),
@@ -208,7 +202,7 @@ export function CommentToJSON(value?: Comment | null): any {
         
         'id': value.id,
         'entity_id': value.entityId,
-        'entity_type': CommentEntityTypeToJSON(value.entityType),
+        'entity_type': value.entityType,
         'user_id': value.userId,
         'message': value.message,
         'mentions': value.mentions === undefined ? undefined : ((value.mentions as Array<any>).map(CommentMentionToJSON)),

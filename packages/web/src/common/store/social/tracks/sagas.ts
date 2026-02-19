@@ -176,10 +176,7 @@ export function* confirmRepostTrack(
       function* () {
         yield* call([sdk.tracks, sdk.tracks.repostTrack], {
           trackId: Id.parse(trackId),
-          userId: Id.parse(user.user_id),
-          repostRequestBody: metadata
-            ? { isRepostOfRepost: metadata.is_repost_of_repost }
-            : undefined
+          userId: Id.parse(user.user_id)
         })
 
         return trackId

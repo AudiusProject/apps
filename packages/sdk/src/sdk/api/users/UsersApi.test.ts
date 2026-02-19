@@ -104,6 +104,7 @@ describe('UsersApi', () => {
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
       }),
+      new Logger(),
       claimableTokens,
       solanaClient,
       emailEncryption
@@ -116,8 +117,7 @@ describe('UsersApi', () => {
 
   describe('updateProfile', () => {
     it('updates the user profile if valid metadata is provided', async () => {
-      const result = await users.updateUser({
-        id: '7eP5n',
+      const result = await users.updateProfile({
         userId: '7eP5n',
         profilePictureFile: {
           buffer: pngFile,
@@ -143,8 +143,7 @@ describe('UsersApi', () => {
     })
 
     it('updates the user profile if partial valid metadata is provided', async () => {
-      const result = await users.updateUser({
-        id: '7eP5n',
+      const result = await users.updateProfile({
         userId: '7eP5n',
         metadata: {
           bio: 'The bio has been updated'
@@ -159,8 +158,7 @@ describe('UsersApi', () => {
 
     it('throws an error if invalid metadata is provided', async () => {
       await expect(async () => {
-        await users.updateUser({
-          id: '7eP5n',
+        await users.updateProfile({
           userId: '7eP5n',
           metadata: {
             asdf: '123'
@@ -171,8 +169,7 @@ describe('UsersApi', () => {
 
     it('throws an error if invalid request is sent', async () => {
       await expect(async () => {
-        await users.updateUser({
-          id: '7eP5n',
+        await users.updateProfile({
           metadata: { bio: 'New bio' }
         } as any)
       }).rejects.toThrow()

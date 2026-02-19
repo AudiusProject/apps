@@ -44,13 +44,24 @@ export const useUpdateProfile = () => {
         }
       }
 
-      await sdk.users.updateUser({
-        id: Id.parse(currentUserId),
+      const { blockHash, blockNumber } = await sdk.users.updateProfile({
         userId: Id.parse(currentUserId),
         profilePictureFile: metadata.updatedProfilePicture?.file,
         coverArtFile: metadata.updatedCoverPhoto?.file,
         metadata: userMetadataToSdk(metadata)
       })
+
+      // Wait for transaction confirmation
+      const confirmed = await sdk.services.entityManager.confirmWrite({
+        blockHash,
+        blockNumber
+      })
+
+      if (!confirmed) {
+        throw new Error(
+          `Could not confirm update profile for user id ${currentUserId}`
+        )
+      }
 
       // Fetch updated user data
       const { data: userData = [] } = await sdk.full.users.getUser({

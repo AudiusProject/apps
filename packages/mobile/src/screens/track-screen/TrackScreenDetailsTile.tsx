@@ -227,7 +227,7 @@ export const TrackScreenDetailsTile = ({
   const { open: openCommentDrawer } = useCommentDrawer()
 
   const isLongFormContent =
-    track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+    track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: remixContest } = useRemixContest(trackId)
   const isRemixContest = !!remixContest
@@ -433,7 +433,7 @@ export const TrackScreenDetailsTile = ({
 
   const handlePressOverflow = () => {
     const isLongFormContent =
-      genre === Genre.Podcasts || genre === Genre.Audiobooks
+      genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
     const addToAlbumAction =
       isOwner && !ddexApp ? OverflowAction.ADD_TO_ALBUM : null
     const overflowActions = [

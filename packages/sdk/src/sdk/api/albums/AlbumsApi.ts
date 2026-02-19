@@ -7,7 +7,10 @@ import type {
   SolanaRelayService,
   StorageService
 } from '../../services'
-import type { EntityManagerService } from '../../services/EntityManager/types'
+import type {
+  EntityManagerService,
+  AdvancedOptions
+} from '../../services/EntityManager/types'
 import type { LoggerService } from '../../services/Logger'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { parseParams } from '../../utils/parseParams'
@@ -18,9 +21,13 @@ import {
   type Configuration
 } from '../generated/default'
 import { PlaylistsApi } from '../playlists/PlaylistsApi'
-import type { UploadPlaylistRequest } from '../playlists/types'
+import { PlaylistMetadata } from '../playlists/types'
 
 import {
+  DeleteAlbumRequest,
+  DeleteAlbumSchema,
+  FavoriteAlbumRequest,
+  FavoriteAlbumSchema,
   getAlbumRequest,
   getAlbumsRequest,
   getAlbumTracksRequest,
@@ -28,16 +35,18 @@ import {
   GetPurchaseAlbumInstructionsSchema,
   PurchaseAlbumRequest,
   PurchaseAlbumSchema,
+  RepostAlbumRequest,
+  RepostAlbumSchema,
+  UnfavoriteAlbumRequest,
+  UnfavoriteAlbumSchema,
+  UnrepostAlbumRequest,
+  UnrepostAlbumSchema,
+  UpdateAlbumRequest,
+  UpdateAlbumSchema,
   UploadAlbumRequest,
   UploadAlbumSchema,
-  CreateAlbumRequestWithFiles,
-  UpdateAlbumRequest,
-  DeleteAlbumRequest,
-  FavoriteAlbumRequest,
-  UnfavoriteAlbumRequest,
-  RepostAlbumRequest,
-  UnrepostAlbumRequest,
-  UpdateAlbumSchema
+  CreateAlbumRequest,
+  CreateAlbumSchema
 } from './types'
 
 export class AlbumsApi {
@@ -82,92 +91,139 @@ export class AlbumsApi {
    * Create an album from existing tracks
    */
   async createAlbum(
-    params: CreateAlbumRequestWithFiles,
-    requestInit?: RequestInit
+    params: CreateAlbumRequest,
+    advancedOptions?: AdvancedOptions
   ) {
-    const { metadata, ...rest } = params
+    // Parse inputs
+    const { metadata, ...parsedParameters } = await parseParams(
+      'createAlbum',
+      CreateAlbumSchema
+    )(params)
+
     const { albumName, ...playlistMetadata } = metadata
 
-    // Transform album request to playlist request
-    const playlistParams = {
-      ...rest,
-      metadata: {
-        ...playlistMetadata,
-        playlistName: albumName,
-        isAlbum: true
-      }
-    }
-    const response = await this.playlistsApi.createPlaylist(
-      playlistParams,
-      requestInit
+    // Call createPlaylistInternal with parsed inputs
+    const response = await this.playlistsApi.createPlaylistInternal<
+      PlaylistMetadata & { isAlbum: boolean }
+    >(
+      {
+        ...parsedParameters,
+        playlistId: parsedParameters.albumId,
+        metadata: {
+          ...playlistMetadata,
+          playlistName: albumName,
+          isAlbum: true
+        }
+      },
+      advancedOptions
     )
 
-    return response
+    return {
+      ...response,
+      albumId: response.playlistId
+    }
   }
 
   /** @hidden
    * Upload an album
    * Uploads the specified tracks and combines them into an album
    */
-  async uploadAlbum(params: UploadAlbumRequest) {
-    await parseParams('uploadAlbum', UploadAlbumSchema)(params)
+  async uploadAlbum(
+    params: UploadAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { metadata, ...parsedParameters } = await parseParams(
+      'uploadAlbum',
+      UploadAlbumSchema
+    )(params)
 
-    const { albumName, ...playlistMetadata } = params.metadata
+    const { albumName, ...playlistMetadata } = metadata
 
-    const playlistParams: UploadPlaylistRequest = {
-      ...params,
-      metadata: {
-        ...playlistMetadata,
-        playlistName: albumName,
-        isAlbum: true
-      }
+    // Call uploadPlaylistInternal with parsed inputs
+    const response = await this.playlistsApi.uploadPlaylistInternal(
+      {
+        ...parsedParameters,
+        metadata: {
+          ...playlistMetadata,
+          playlistName: albumName,
+          isAlbum: true
+        }
+      },
+      advancedOptions
+    )
+
+    return {
+      blockHash: response.blockHash,
+      blockNumber: response.blockNumber,
+      albumId: response.playlistId
     }
-
-    return await this.playlistsApi.uploadPlaylist(playlistParams)
   }
 
   /** @hidden
    * Update an album
    */
-  async updateAlbum(params: UpdateAlbumRequest, requestInit?: RequestInit) {
-    await parseParams('updateAlbum', UpdateAlbumSchema)(params)
+  async updateAlbum(
+    params: UpdateAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { albumId, metadata, ...parsedParameters } = await parseParams(
+      'updateAlbum',
+      UpdateAlbumSchema
+    )(params)
 
-    const { metadata, albumId, ...rest } = params
     const { albumName, ...playlistMetadata } = metadata
 
-    // Transform album request to playlist request
-    const playlistParams = {
-      ...rest,
-      playlistId: albumId,
-      metadata: {
-        ...playlistMetadata,
-        ...(albumName && { playlistName: albumName })
-      }
-    }
-    return await this.playlistsApi.updatePlaylist(playlistParams, requestInit)
+    // Call updatePlaylistInternal with parsed inputs
+    return await this.playlistsApi.updatePlaylistInternal(
+      {
+        ...parsedParameters,
+        playlistId: albumId,
+        metadata: {
+          ...playlistMetadata,
+          playlistName: albumName
+        }
+      },
+      advancedOptions
+    )
   }
 
   /** @hidden
    * Delete an album
    */
-  async deleteAlbum(params: DeleteAlbumRequest, requestInit?: RequestInit) {
-    const playlistParams = {
-      userId: params.userId,
-      playlistId: params.albumId
-    }
-    return await this.playlistsApi.deletePlaylist(playlistParams, requestInit)
+  async deleteAlbum(
+    params: DeleteAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    await parseParams('deleteAlbum', DeleteAlbumSchema)(params)
+
+    return await this.playlistsApi.deletePlaylist(
+      {
+        userId: params.userId,
+        playlistId: params.albumId
+      },
+      advancedOptions
+    )
   }
 
   /** @hidden
    * Favorite an album
    */
-  async favoriteAlbum(params: FavoriteAlbumRequest, requestInit?: RequestInit) {
-    const playlistParams = {
-      userId: params.userId,
-      playlistId: params.albumId,
-      metadata: params.metadata
-    }
-    return await this.playlistsApi.favoritePlaylist(playlistParams, requestInit)
+  async favoriteAlbum(
+    params: FavoriteAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { metadata } = await parseParams(
+      'favoriteAlbum',
+      FavoriteAlbumSchema
+    )(params)
+    return await this.playlistsApi.favoritePlaylist(
+      {
+        userId: params.userId,
+        playlistId: params.albumId,
+        metadata
+      },
+      advancedOptions
+    )
   }
 
   /** @hidden
@@ -175,39 +231,55 @@ export class AlbumsApi {
    */
   async unfavoriteAlbum(
     params: UnfavoriteAlbumRequest,
-    requestInit?: RequestInit
+    advancedOptions?: AdvancedOptions
   ) {
-    const playlistParams = {
-      userId: params.userId,
-      playlistId: params.albumId
-    }
+    await parseParams('unfavoriteAlbum', UnfavoriteAlbumSchema)(params)
     return await this.playlistsApi.unfavoritePlaylist(
-      playlistParams,
-      requestInit
+      {
+        userId: params.userId,
+        playlistId: params.albumId
+      },
+      advancedOptions
     )
   }
 
   /** @hidden
    * Repost an album
    */
-  async repostAlbum(params: RepostAlbumRequest, requestInit?: RequestInit) {
-    const playlistParams = {
-      userId: params.userId,
-      playlistId: params.albumId,
-      repostRequestBody: params.metadata
-    }
-    return await this.playlistsApi.repostPlaylist(playlistParams, requestInit)
+  async repostAlbum(
+    params: RepostAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { metadata } = await parseParams(
+      'repostAlbum',
+      RepostAlbumSchema
+    )(params)
+
+    return await this.playlistsApi.repostPlaylist(
+      {
+        userId: params.userId,
+        playlistId: params.albumId,
+        metadata
+      },
+      advancedOptions
+    )
   }
 
   /** @hidden
    * Unrepost an album
    */
-  async unrepostAlbum(params: UnrepostAlbumRequest, requestInit?: RequestInit) {
-    const playlistParams = {
-      userId: params.userId,
-      playlistId: params.albumId
-    }
-    return await this.playlistsApi.unrepostPlaylist(playlistParams, requestInit)
+  async unrepostAlbum(
+    params: UnrepostAlbumRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    await parseParams('unrepostAlbum', UnrepostAlbumSchema)(params)
+    return await this.playlistsApi.unrepostPlaylist(
+      {
+        userId: params.userId,
+        playlistId: params.albumId
+      },
+      advancedOptions
+    )
   }
 
   /**

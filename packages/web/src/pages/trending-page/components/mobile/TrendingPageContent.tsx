@@ -312,7 +312,7 @@ const TrendingPageMobileContent = ({
           <SelectablePill
             type='button'
             size='large'
-            label={genreLabel ?? ''}
+            label={genreLabel}
             isSelected={isGenreSelected}
             icon={isGenreSelected ? IconCloseAlt : undefined}
             onClick={handleGenrePillClick}

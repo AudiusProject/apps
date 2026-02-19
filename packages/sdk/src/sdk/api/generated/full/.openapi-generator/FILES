@@ -62,7 +62,6 @@ models/CollectionActivityFull.ts
 models/CollectionActivityFullWithoutTracks.ts
 models/CollectionLibraryResponseFull.ts
 models/Comment.ts
-models/CommentEntityType.ts
 models/CommentMention.ts
 models/CommentMentionNotification.ts
 models/CommentMentionNotificationAction.ts

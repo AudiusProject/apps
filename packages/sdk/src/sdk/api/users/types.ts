@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-import type { CreateUserRequest, UpdateUserRequest } from '../..'
 import { ProgressHandler } from '../../services/Storage/types'
 import { EthAddressSchema } from '../../types/EthAddress'
 import { ImageFile } from '../../types/File'
@@ -35,7 +34,7 @@ export const CreateUserSchema = z.object({
     .strict()
 })
 
-export type EntityManagerCreateUserRequest = Omit<
+export type CreateUserRequest = Omit<
   z.input<typeof CreateUserSchema>,
   'onProgress'
 > & {
@@ -101,10 +100,6 @@ const PlaylistLibrarySchema = z.object({
   )
 })
 
-export type EntityManagerPlaylistLibraryContents = z.input<
-  typeof PlaylistLibrarySchema
->['contents']
-
 export const UpdateProfileSchema = z
   .object({
     userId: HashId,
@@ -137,7 +132,7 @@ export const UpdateProfileSchema = z
   })
   .strict()
 
-export type EntityManagerUpdateProfileRequest = Omit<
+export type UpdateProfileRequest = Omit<
   z.input<typeof UpdateProfileSchema>,
   'onProgress'
 > & {
@@ -153,7 +148,7 @@ export const FollowUserSchema = z
   })
   .strict()
 
-export type EntityManagerFollowUserRequest = z.input<typeof FollowUserSchema>
+export type FollowUserRequest = z.input<typeof FollowUserSchema>
 
 export const UnfollowUserSchema = z
   .object({
@@ -162,9 +157,7 @@ export const UnfollowUserSchema = z
   })
   .strict()
 
-export type EntityManagerUnfollowUserRequest = z.input<
-  typeof UnfollowUserSchema
->
+export type UnfollowUserRequest = z.input<typeof UnfollowUserSchema>
 
 export const SubscribeToUserSchema = z
   .object({
@@ -173,9 +166,7 @@ export const SubscribeToUserSchema = z
   })
   .strict()
 
-export type EntityManagerSubscribeToUserRequest = z.input<
-  typeof SubscribeToUserSchema
->
+export type SubscribeToUserRequest = z.input<typeof SubscribeToUserSchema>
 
 export const UnsubscribeFromUserSchema = z
   .object({
@@ -184,7 +175,7 @@ export const UnsubscribeFromUserSchema = z
   })
   .strict()
 
-export type EntityManagerUnsubscribeFromUserRequest = z.input<
+export type UnsubscribeFromUserRequest = z.input<
   typeof UnsubscribeFromUserSchema
 >
 
@@ -288,15 +279,3 @@ export const UpdateCollectiblesSchema = z.object({
 })
 
 export type UpdateCollectiblesRequest = z.input<typeof UpdateCollectiblesSchema>
-
-export type UserFileUploadParams = {
-  profilePictureFile?: z.input<typeof ImageFile>
-  coverArtFile?: z.input<typeof ImageFile>
-  onProgress?: ProgressHandler
-}
-
-export type CreateUserRequestWithFiles = CreateUserRequest &
-  UserFileUploadParams
-
-export type UpdateUserRequestWithFiles = UpdateUserRequest &
-  UserFileUploadParams

@@ -163,7 +163,7 @@ const NowPlaying = g(
 
     const playbackRate = useSelector(getPlaybackRate)
     const isLongFormContent =
-      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
 
     const startSeeking = useCallback(() => {
       clearInterval(seekInterval.current)
@@ -313,7 +313,7 @@ const NowPlaying = g(
 
     const onPrevious = () => {
       const isLongFormContent =
-        track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+        track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
       if (isLongFormContent) {
         const position = timing.position
         const newPosition = position - SKIP_DURATION_SEC
@@ -333,7 +333,7 @@ const NowPlaying = g(
 
     const onNext = () => {
       const isLongFormContent =
-        track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+        track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
       if (isLongFormContent) {
         const newPosition = timing.position + SKIP_DURATION_SEC
         seek(Math.min(newPosition, timing.duration))

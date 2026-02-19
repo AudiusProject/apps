@@ -214,7 +214,7 @@ export const GiantTrackTile = ({
   const isRemixContest = !!remixContest
 
   const isLongFormContent =
-    genre === Genre.Podcasts || genre === Genre.Audiobooks
+    genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: track } = useTrack(trackId, {
     select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
@@ -272,7 +272,7 @@ export const GiantTrackTile = ({
         isScheduledRelease={isScheduledRelease}
         isRemix={isRemix}
         isStreamGated={isStreamGated}
-        isPodcast={genre === Genre.Podcasts}
+        isPodcast={genre === Genre.PODCASTS}
         streamConditions={streamConditions}
         isRemixContest={!!isRemixContest}
       />

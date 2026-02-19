@@ -95,11 +95,10 @@ export async function updateUser(
 
   const sdkMetadata = userMetadataToSdk(metadata as UserMetadata)
 
-  const response = await sdk.users.updateUser({
+  const response = await sdk.users.updateProfile({
     coverArtFile,
     profilePictureFile,
     userId: encodedUserId,
-    id: encodedUserId,
     metadata: sdkMetadata
   })
 

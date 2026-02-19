@@ -16,243 +16,21 @@
 
 import * as runtime from '../runtime';
 import type {
-  CreateAccessKeyResponse,
-  CreateDeveloperAppRequestBody,
-  CreateDeveloperAppResponse,
-  DeactivateAccessKeyRequestBody,
-  DeactivateAccessKeyResponse,
   DeveloperAppResponse,
-  DeveloperAppsResponse,
-  UpdateDeveloperAppRequestBody,
-  WriteResponse,
 } from '../models';
 import {
-    CreateAccessKeyResponseFromJSON,
-    CreateAccessKeyResponseToJSON,
-    CreateDeveloperAppRequestBodyFromJSON,
-    CreateDeveloperAppRequestBodyToJSON,
-    CreateDeveloperAppResponseFromJSON,
-    CreateDeveloperAppResponseToJSON,
-    DeactivateAccessKeyRequestBodyFromJSON,
-    DeactivateAccessKeyRequestBodyToJSON,
-    DeactivateAccessKeyResponseFromJSON,
-    DeactivateAccessKeyResponseToJSON,
     DeveloperAppResponseFromJSON,
     DeveloperAppResponseToJSON,
-    DeveloperAppsResponseFromJSON,
-    DeveloperAppsResponseToJSON,
-    UpdateDeveloperAppRequestBodyFromJSON,
-    UpdateDeveloperAppRequestBodyToJSON,
-    WriteResponseFromJSON,
-    WriteResponseToJSON,
 } from '../models';
-
-export interface CreateDeveloperAppRequest {
-    userId: string;
-    metadata: CreateDeveloperAppRequestBody;
-}
-
-export interface CreateDeveloperAppAccessKeyRequest {
-    userId: string;
-    address: string;
-}
-
-export interface DeactivateDeveloperAppAccessKeyRequest {
-    userId: string;
-    address: string;
-    metadata: DeactivateAccessKeyRequestBody;
-}
-
-export interface DeleteDeveloperAppRequest {
-    userId: string;
-    address: string;
-}
 
 export interface GetDeveloperAppRequest {
     address: string;
-}
-
-export interface GetDeveloperAppsRequest {
-    id: string;
-    include?: GetDeveloperAppsIncludeEnum;
-}
-
-export interface UpdateDeveloperAppRequest {
-    userId: string;
-    address: string;
-    metadata: UpdateDeveloperAppRequestBody;
 }
 
 /**
  * 
  */
 export class DeveloperAppsApi extends runtime.BaseAPI {
-
-    /**
-     * @hidden
-     * Create a new developer app. Indexer validates grants.
-     */
-    async createDeveloperAppRaw(params: CreateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateDeveloperAppResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createDeveloperApp.');
-        }
-
-        if (params.metadata === null || params.metadata === undefined) {
-            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createDeveloperApp.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/developer-apps`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: CreateDeveloperAppRequestBodyToJSON(params.metadata),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => CreateDeveloperAppResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Create a new developer app. Indexer validates grants.
-     */
-    async createDeveloperApp(params: CreateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateDeveloperAppResponse> {
-        const response = await this.createDeveloperAppRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Create a new bearer token (API access key) for a developer app. Indexer validates grants.
-     */
-    async createDeveloperAppAccessKeyRaw(params: CreateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateAccessKeyResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createDeveloperAppAccessKey.');
-        }
-
-        if (params.address === null || params.address === undefined) {
-            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling createDeveloperAppAccessKey.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/developer-apps/{address}/access-keys`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => CreateAccessKeyResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Create a new bearer token (API access key) for a developer app. Indexer validates grants.
-     */
-    async createDeveloperAppAccessKey(params: CreateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateAccessKeyResponse> {
-        const response = await this.createDeveloperAppAccessKeyRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Deactivate a bearer token (API access key) for a developer app. Indexer validates grants.
-     */
-    async deactivateDeveloperAppAccessKeyRaw(params: DeactivateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeactivateAccessKeyResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling deactivateDeveloperAppAccessKey.');
-        }
-
-        if (params.address === null || params.address === undefined) {
-            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling deactivateDeveloperAppAccessKey.');
-        }
-
-        if (params.metadata === null || params.metadata === undefined) {
-            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling deactivateDeveloperAppAccessKey.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/developer-apps/{address}/access-keys/deactivate`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: DeactivateAccessKeyRequestBodyToJSON(params.metadata),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeactivateAccessKeyResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Deactivate a bearer token (API access key) for a developer app. Indexer validates grants.
-     */
-    async deactivateDeveloperAppAccessKey(params: DeactivateDeveloperAppAccessKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeactivateAccessKeyResponse> {
-        const response = await this.deactivateDeveloperAppAccessKeyRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Deletes a developer app. Indexer validates grants.
-     */
-    async deleteDeveloperAppRaw(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling deleteDeveloperApp.');
-        }
-
-        if (params.address === null || params.address === undefined) {
-            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling deleteDeveloperApp.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
-            method: 'DELETE',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Deletes a developer app. Indexer validates grants.
-     */
-    async deleteDeveloperApp(params: DeleteDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
-        const response = await this.deleteDeveloperAppRaw(params, initOverrides);
-        return await response.value();
-    }
 
     /**
      * @hidden
@@ -268,7 +46,7 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            path: `/developer_apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -285,93 +63,4 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
-    /**
-     * @hidden
-     * Get developer apps for the user.
-     */
-    async getDeveloperAppsRaw(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeveloperAppsResponse>> {
-        if (params.id === null || params.id === undefined) {
-            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getDeveloperApps.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.include !== undefined) {
-            queryParameters['include'] = params.include;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/users/{id}/developer-apps`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeveloperAppsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get developer apps for the user.
-     */
-    async getDeveloperApps(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperAppsResponse> {
-        const response = await this.getDeveloperAppsRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Updates a developer app. Indexer validates grants.
-     */
-    async updateDeveloperAppRaw(params: UpdateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updateDeveloperApp.');
-        }
-
-        if (params.address === null || params.address === undefined) {
-            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling updateDeveloperApp.');
-        }
-
-        if (params.metadata === null || params.metadata === undefined) {
-            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updateDeveloperApp.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/developer-apps/{address}`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
-            method: 'PUT',
-            headers: headerParameters,
-            query: queryParameters,
-            body: UpdateDeveloperAppRequestBodyToJSON(params.metadata),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Updates a developer app. Indexer validates grants.
-     */
-    async updateDeveloperApp(params: UpdateDeveloperAppRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
-        const response = await this.updateDeveloperAppRaw(params, initOverrides);
-        return await response.value();
-    }
-
 }
-
-/**
- * @export
- */
-export const GetDeveloperAppsIncludeEnum = {
-    Metrics: 'metrics'
-} as const;
-export type GetDeveloperAppsIncludeEnum = typeof GetDeveloperAppsIncludeEnum[keyof typeof GetDeveloperAppsIncludeEnum];

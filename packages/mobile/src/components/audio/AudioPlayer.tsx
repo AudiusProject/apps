@@ -489,8 +489,8 @@ export const AudioPlayer = () => {
             })
 
             const isLongFormContent =
-              track?.genre === Genre.Podcasts ||
-              track?.genre === Genre.Audiobooks
+              track?.genre === Genre.PODCASTS ||
+              track?.genre === Genre.AUDIOBOOKS
             const trackPosition = trackPositions?.[track.track_id]
             if (trackPosition?.status === 'IN_PROGRESS') {
               dispatch(
@@ -513,8 +513,8 @@ export const AudioPlayer = () => {
       }
 
       const isLongFormContent =
-        queueTracks[playerIndex]?.track?.genre === Genre.Podcasts ||
-        queueTracks[playerIndex]?.track?.genre === Genre.Audiobooks
+        queueTracks[playerIndex]?.track?.genre === Genre.PODCASTS ||
+        queueTracks[playerIndex]?.track?.genre === Genre.AUDIOBOOKS
 
       // Always set the correct playback rate when the active track changes
       const newRate = isLongFormContent
@@ -532,7 +532,7 @@ export const AudioPlayer = () => {
       if (event?.lastPosition !== undefined && event?.index !== undefined) {
         const { track } = queueTracks[event.index] ?? {}
         const isLongFormContent =
-          track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+          track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
         const isAtEndOfTrack =
           track?.duration &&
           event.lastPosition >= track.duration - TRACK_END_BUFFER

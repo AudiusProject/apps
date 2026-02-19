@@ -35,21 +35,12 @@ const TokenGatedConditionsSchema = z
   })
   .strict()
 
-/** Same as API extended_payment_split (snake-cased) */
-const PaymentSplitSchema = z.object({
-  user_id: z.optional(z.number()),
-  percentage: z.number().min(0).max(100),
-  payout_wallet: z.string(),
-  amount: z.number().nonnegative(),
-  eth_wallet: z.optional(z.string())
-})
-
-/** Same as SDK but snake-cased for USDC purchase conditions */
+/** Same as SDK but snake-cased */
 const USDCPurchaseConditionsSchema = z
   .object({
     usdc_purchase: z.object({
       price: z.number().positive(),
-      splits: z.array(PaymentSplitSchema).default([])
+      splits: z.any()
     })
   })
   .strict()
@@ -64,9 +55,8 @@ const GenreSchema = z
 
 /** Same as SDK. */
 const MoodSchema = z
-  .enum(Object.values(Mood) as [Mood, ...Mood[]])
+  .optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]]))
   .nullable()
-  .optional()
 
 const DDEXResourceContributor = z
   .object({

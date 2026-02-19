@@ -28,6 +28,13 @@ import {
     FollowGateToJSON,
 } from './FollowGate';
 import {
+    NftGate,
+    instanceOfNftGate,
+    NftGateFromJSON,
+    NftGateFromJSONTyped,
+    NftGateToJSON,
+} from './NftGate';
+import {
     TipGate,
     instanceOfTipGate,
     TipGateFromJSON,
@@ -47,7 +54,7 @@ import {
  * 
  * @export
  */
-export type ExtendedAccessGate = ExtendedPurchaseGate | FollowGate | TipGate | TokenGate;
+export type ExtendedAccessGate = ExtendedPurchaseGate | FollowGate | NftGate | TipGate | TokenGate;
 
 export function ExtendedAccessGateFromJSON(json: any): ExtendedAccessGate {
     return ExtendedAccessGateFromJSONTyped(json, false);
@@ -57,7 +64,7 @@ export function ExtendedAccessGateFromJSONTyped(json: any, ignoreDiscriminator: 
     if ((json === undefined) || (json === null)) {
         return json;
     }
-    return { ...ExtendedPurchaseGateFromJSONTyped(json, true), ...FollowGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
+    return { ...ExtendedPurchaseGateFromJSONTyped(json, true), ...FollowGateFromJSONTyped(json, true), ...NftGateFromJSONTyped(json, true), ...TipGateFromJSONTyped(json, true), ...TokenGateFromJSONTyped(json, true) };
 }
 
 export function ExtendedAccessGateToJSON(value?: ExtendedAccessGate | null): any {
@@ -73,6 +80,9 @@ export function ExtendedAccessGateToJSON(value?: ExtendedAccessGate | null): any
     }
     if (instanceOfFollowGate(value)) {
         return FollowGateToJSON(value as FollowGate);
+    }
+    if (instanceOfNftGate(value)) {
+        return NftGateToJSON(value as NftGate);
     }
     if (instanceOfTipGate(value)) {
         return TipGateToJSON(value as TipGate);

@@ -314,7 +314,7 @@ export interface PlaylistFullWithoutTracks {
      * @type {string}
      * @memberof PlaylistFullWithoutTracks
      */
-    parentalWarningType?: string | null;
+    parentalWarningType?: string;
 }
 
 /**

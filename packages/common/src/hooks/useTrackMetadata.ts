@@ -81,13 +81,13 @@ export const useTrackMetadata = ({
     {
       id: TrackMetadataType.GENRE,
       label: 'Genre',
-      value: genre ? getCanonicalName(genre) : '',
+      value: getCanonicalName(genre),
       url: searchPage({ category: 'tracks', genre: genre as Genre })
     },
     {
       id: TrackMetadataType.MOOD,
       label: 'Mood',
-      value: mood ?? '',
+      value: mood,
       url: searchPage({ category: 'tracks', mood: mood as Mood })
     },
     {
@@ -111,9 +111,9 @@ export const useTrackMetadata = ({
     {
       id: TrackMetadataType.DURATION,
       label: 'Duration',
-      value: formatSecondsAsText(duration ?? 0)
+      value: formatSecondsAsText(duration)
     }
   ].filter(({ isHidden, value }) => !isHidden && !!value)
 
-  return labels as TrackMetadataInfo[]
+  return labels
 }

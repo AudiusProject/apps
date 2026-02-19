@@ -186,7 +186,7 @@ const TrackMenu = ({
 
     const albumInfo = partialTrack?.album_backlink
     const isLongFormContent =
-      genre === Genre.Podcasts || genre === Genre.Audiobooks
+      genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
 
     const shareMenuItem = {
       text: messages.share,

@@ -9,7 +9,7 @@ type NextButtonProviderProps = NextButtonProps | ForwardSkipButtonProps
 const NextButtonProvider = (props: NextButtonProviderProps) => {
   const track = useCurrentTrack()
   const isLongFormContent =
-    track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+    track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
   return isLongFormContent ? (
     <ForwardSkipButton {...props} />
   ) : (

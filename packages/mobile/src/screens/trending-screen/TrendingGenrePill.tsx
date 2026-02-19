@@ -6,7 +6,7 @@ import {
   trendingPageLineupActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import { ALL_GENRES } from '@audius/common/utils'
+import { Genre } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { IconCloseAlt, SelectablePill } from '@audius/harmony-native'
@@ -21,12 +21,12 @@ const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
 
 export const TrendingGenrePill = () => {
   const dispatch = useDispatch()
-  const genre = useSelector(getTrendingGenre) ?? ALL_GENRES
+  const genre = useSelector(getTrendingGenre) ?? Genre.ALL
 
-  const isSelected = genre !== ALL_GENRES
+  const isSelected = genre !== Genre.ALL
 
   const handlePress = useCallback(() => {
-    if (genre === ALL_GENRES) {
+    if (genre === Genre.ALL) {
       dispatch(setVisibility({ modal: MODAL_NAME, visible: true }))
     }
   }, [dispatch, genre])

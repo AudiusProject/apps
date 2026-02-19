@@ -23,11 +23,9 @@ import type { SignOnScreenParamList } from '../types'
 import { useTrackScreen } from '../utils/useTrackScreen'
 
 type Genre = (typeof GENRES)[number]
-type SelectGenresValue = { genres: Genre[] }
+type SelectGenresValue = { genres: typeof GENRES }
 
-const initialValues: SelectGenresValue = {
-  genres: [] as Genre[]
-}
+const initialValues: SelectGenresValue = { genres: [] }
 
 /* Memoized SelectablePill to fix a performance issue.
  * The code below is arranged so that the pills don't need to re-render,
