@@ -1,4 +1,10 @@
-import { full, GetBulkTracksRequest, HashId, Id, OptionalId } from '@audius/sdk'
+import {
+  type Track,
+  GetBulkTracksRequest,
+  HashId,
+  Id,
+  OptionalId
+} from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { omit } from 'lodash'
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest'
@@ -9,7 +15,7 @@ import { getTracksBatcher } from '../getTracksBatcher'
 import type { BatchContext } from '../types'
 
 describe('getTracksBatcher', () => {
-  const createMockSdkTrack = (id: number): full.TrackFull => ({
+  const createMockSdkTrack = (id: number): Track => ({
     id: Id.parse(id),
     title: `Test Track ${id}`,
     userId: Id.parse(1),
@@ -21,10 +27,9 @@ describe('getTracksBatcher', () => {
     artwork: {
       _150x150: '',
       _480x480: '',
-      _1000x1000: '',
-      mirrors: []
+      _1000x1000: ''
     },
-    releaseDate: '',
+    releaseDate: new Date(),
     isrc: undefined,
     iswc: undefined,
     license: '',
@@ -88,8 +93,7 @@ describe('getTracksBatcher', () => {
       bio: '',
       coverPhoto: {
         _640x: '',
-        _2000x: '',
-        mirrors: []
+        _2000x: ''
       },
       followeeCount: 0,
       followerCount: 0,
@@ -109,8 +113,7 @@ describe('getTracksBatcher', () => {
       profilePicture: {
         _150x150: '',
         _480x480: '',
-        _1000x1000: '',
-        mirrors: []
+        _1000x1000: ''
       },
       repostCount: 0,
       trackCount: 0,
@@ -141,7 +144,12 @@ describe('getTracksBatcher', () => {
       profilePictureCids: undefined,
       profilePictureLegacy: undefined,
       playlistLibrary: undefined,
-      allowAiAttribution: false
+      allowAiAttribution: false,
+      artistCoinBadge: {},
+      splUsdcWallet: '',
+      supporterCount: 0,
+      supportingCount: 0,
+      hasCollectibles: false
     },
     origFileCid: undefined,
     origFilename: undefined,
@@ -157,17 +165,15 @@ describe('getTracksBatcher', () => {
   })
 
   const mockSdk = {
-    full: {
-      tracks: {
-        getBulkTracks: vi
-          .fn()
-          .mockImplementation((params: GetBulkTracksRequest) => {
-            const tracks = params.id?.map((trackId) =>
-              createMockSdkTrack(HashId.parse(trackId))
-            )
-            return Promise.resolve({ data: tracks })
-          })
-      }
+    tracks: {
+      getBulkTracks: vi
+        .fn()
+        .mockImplementation((params: GetBulkTracksRequest) => {
+          const tracks = params.id?.map((trackId) =>
+            createMockSdkTrack(HashId.parse(trackId))
+          )
+          return Promise.resolve({ data: tracks })
+        })
     }
   } as unknown as BatchContext['sdk']
 
@@ -187,7 +193,7 @@ describe('getTracksBatcher', () => {
     const id = 1
     const result = await batcher.fetch(id)
 
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: [Id.parse(id)],
       userId: OptionalId.parse(null)
     })
@@ -204,8 +210,8 @@ describe('getTracksBatcher', () => {
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
     // Verify single bulk request was made
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -237,12 +243,12 @@ describe('getTracksBatcher', () => {
     )
 
     // Verify two separate bulk requests were made
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(2)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenNthCalledWith(1, {
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(2)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenNthCalledWith(2, {
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenNthCalledWith(2, {
       id: secondBatchIds.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
@@ -273,10 +279,10 @@ describe('getTracksBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkTracks = mockSdk.full.tracks
+    const mockBulkTracks = mockSdk.tracks
       .getBulkTracks as unknown as MockInstance<
       [GetBulkTracksRequest],
-      Promise<{ data: full.TrackFull[] }>
+      Promise<{ data: Track[] }>
     >
     mockBulkTracks.mockImplementationOnce((params: GetBulkTracksRequest) => {
       const tracks =
@@ -301,8 +307,8 @@ describe('getTracksBatcher', () => {
     expect(missingResult).toBeNull()
 
     // Verify single batch request was made with both IDs
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
-    expect(mockSdk.full.tracks.getBulkTracks).toHaveBeenCalledWith({
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
+    expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })

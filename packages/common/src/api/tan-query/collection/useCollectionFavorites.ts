@@ -46,7 +46,7 @@ export const useCollectionFavorites = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.playlists.getUsersFromPlaylistFavorites({
+      const { data } = await sdk.playlists.getUsersFromPlaylistFavorites({
         playlistId: Id.parse(collectionId),
         limit: pageSize,
         offset: pageParam,

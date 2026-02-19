@@ -78,14 +78,14 @@ export function* pollGatedContent({
   while (true) {
     const apiEntity = isAlbum
       ? yield* call(async () => {
-          const { data = [] } = await sdk.full.playlists.getPlaylist({
+          const { data = [] } = await sdk.playlists.getPlaylist({
             playlistId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })
           return transformAndCleanList(data, userCollectionMetadataFromSDK)[0]
         })
       : yield* call(async () => {
-          const { data } = await sdk.full.tracks.getTrack({
+          const { data } = await sdk.tracks.getTrack({
             trackId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })

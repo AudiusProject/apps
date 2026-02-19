@@ -73,8 +73,8 @@ export function* retrieveTrending({
   }
 
   const { data = [] } = version
-    ? yield sdk.full.tracks.getTrendingTracksWithVersion({ ...args, version })
-    : yield sdk.full.tracks.getTrendingTracks(args)
+    ? yield sdk.tracks.getTrendingTracksWithVersion({ ...args, version })
+    : yield sdk.tracks.getTrendingTracks(args)
   let apiTracks = transformAndCleanList(data, userTrackMetadataFromSDK)
 
   // DN may return hidden tracks in trending because of its cache

@@ -47,7 +47,7 @@ export const useMutualFollowers = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getMutualFollowers({
+      const { data = [] } = await sdk.users.getMutualFollowers({
         userId: OptionalId.parse(currentUserId),
         id: Id.parse(userId),
         limit: pageSize,

@@ -10,7 +10,7 @@ import {
   UserCollectionMetadata
 } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
-import { OptionalId, full } from '@audius/sdk'
+import { OptionalId, type Activity } from '@audius/sdk'
 import { all } from 'redux-saga/effects'
 
 import { waitForRead } from 'utils/sagaHelpers'
@@ -48,7 +48,7 @@ export function* retrieveUserReposts({
   yield* waitForRead()
   const sdk = yield* getSDK()
 
-  const { data: repostsSDKData } = yield sdk.full.users.getRepostsByHandle({
+  const { data: repostsSDKData } = yield sdk.users.getRepostsByHandle({
     handle,
     userId: OptionalId.parse(currentUserId),
     limit,
@@ -57,7 +57,7 @@ export function* retrieveUserReposts({
   const reposts = transformAndCleanList(
     repostsSDKData,
     // `getTracksAndCollections` below expects a list of just the items
-    (activity: full.ActivityFull) => repostActivityFromSDK(activity)?.item
+    (activity: Activity) => repostActivityFromSDK(activity)?.item
   )
 
   const [tracks, collections] = getTracksAndCollections(reposts)

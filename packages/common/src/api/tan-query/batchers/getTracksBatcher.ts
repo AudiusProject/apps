@@ -19,7 +19,7 @@ export const getTracksBatcher = memoize(
         const { sdk, currentUserId, queryClient } = context
         if (!ids.length) return []
 
-        const { data } = await sdk.full.tracks.getBulkTracks({
+        const { data } = await sdk.tracks.getBulkTracks({
           id: ids.map((id) => Id.parse(id)),
           userId: OptionalId.parse(currentUserId)
         })

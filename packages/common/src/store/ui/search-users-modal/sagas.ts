@@ -18,7 +18,7 @@ function* doSearchUsers(action: ReturnType<typeof searchUsers>) {
   const userList = yield* select(getUserList)
   try {
     const currentUserId = yield* call(queryCurrentUserId)
-    const { data } = yield* call([sdk.full.search, sdk.full.search.search], {
+    const { data } = yield* call([sdk.search, sdk.search.search], {
       query,
       limit,
       kind: SearchKind.USERS,

@@ -293,7 +293,7 @@ function* pollForPurchaseConfirmation({
       const sdk = yield* getSDK()
       for (const trackId of metadata.playlist_contents.track_ids) {
         const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
+          [sdk.tracks, sdk.tracks.getTrack],
           {
             trackId: Id.parse(trackId.track),
             userId: OptionalId.parse(currentUserId)
@@ -602,7 +602,7 @@ function* collectEmailAfterPurchase({
     }
 
     const { data: managers } = yield* call(
-      [sdk.full.users, sdk.full.users.getManagers],
+      [sdk.users, sdk.users.getManagers],
       {
         id: Id.parse(sellerId),
         isApproved: true

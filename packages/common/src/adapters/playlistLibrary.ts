@@ -1,4 +1,8 @@
-import { OptionalHashId, type full } from '@audius/sdk'
+import {
+  OptionalHashId,
+  type PlaylistLibrary as SdkPlaylistLibrary,
+  type PlaylistUpdate as SdkPlaylistUpdate
+} from '@audius/sdk'
 
 import {
   PlaylistLibrary,
@@ -40,7 +44,7 @@ const playlistItemFromSDK = (input: any): PlaylistLibraryItem | null => {
 }
 
 export const playlistLibraryFromSDK = (
-  input?: full.PlaylistLibrary
+  input?: SdkPlaylistLibrary
 ): PlaylistLibrary | undefined => {
   if (!input) return undefined
   return {
@@ -49,7 +53,7 @@ export const playlistLibraryFromSDK = (
 }
 
 export const playlistUpdateFromSDK = (
-  input: full.PlaylistUpdate
+  input: SdkPlaylistUpdate
 ): PlaylistUpdate | undefined => {
   const playlist_id = OptionalHashId.parse(input.playlistId)
   return playlist_id

@@ -44,16 +44,14 @@ function* getTrendingUnderground({
 
   const { data = [] } = version
     ? yield* call(
-        [
-          sdk.full.tracks,
-          sdk.full.tracks.getUndergroundTrendingTracksWithVersion
-        ],
+        [sdk.tracks, sdk.tracks.getUndergroundTrendingTracksWithVersion],
         { version, offset, limit, userId: OptionalId.parse(currentUserId) }
       )
-    : yield* call(
-        [sdk.full.tracks, sdk.full.tracks.getUndergroundTrendingTracks],
-        { offset, limit, userId: OptionalId.parse(currentUserId) }
-      )
+    : yield* call([sdk.tracks, sdk.tracks.getUndergroundTrendingTracks], {
+        offset,
+        limit,
+        userId: OptionalId.parse(currentUserId)
+      })
 
   let tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
 

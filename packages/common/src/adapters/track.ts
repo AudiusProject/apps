@@ -1,9 +1,12 @@
 import {
-  type full,
   type CrossPlatformFile,
   Genre,
   Mood,
   type NativeFile,
+  type Track,
+  type TrackSegment as SdkTrackSegment,
+  type SearchTrack,
+  type Stem,
   type UpdateTrackRequestBody,
   HashId,
   Id,
@@ -59,14 +62,14 @@ function toSdkMood(
 export const trackSegmentFromSDK = ({
   duration,
   multihash
-}: full.TrackSegment): TrackSegment => ({
+}: SdkTrackSegment): TrackSegment => ({
   // Client code expects duration as a string
   duration: `${duration}`,
   multihash
 })
 
 export const userTrackMetadataFromSDK = (
-  input: full.TrackFull | full.SearchTrackFull
+  input: Track | SearchTrack
 ): UserTrackMetadata | undefined => {
   const decodedTrackId = OptionalHashId.parse(input.id)
   const decodedOwnerId = OptionalHashId.parse(input.userId)
@@ -193,7 +196,7 @@ export const userTrackMetadataFromSDK = (
 }
 
 export const stemTrackMetadataFromSDK = (
-  input: full.StemFull
+  input: Stem
 ): StemTrackMetadata | undefined => {
   const [id, parentId, ownerId] = [input.id, input.parentId, input.userId].map(
     (id) => HashId.parse(id)

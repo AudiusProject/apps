@@ -44,7 +44,7 @@ export const useSearchAutocomplete = (
     queryKey: getSearchAutocompleteQueryKey(currentUserId, { query, limit }),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.search.searchAutocomplete({
+      const { data } = await sdk.search.searchAutocomplete({
         userId: OptionalId.parse(currentUserId),
         query,
         limit,

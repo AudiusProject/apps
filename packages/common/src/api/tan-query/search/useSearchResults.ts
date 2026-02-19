@@ -209,8 +209,8 @@ const useSearchQueryProps = <T>(
       }
 
       const { data } = isTagsSearch
-        ? await sdk.full.search.searchTags(searchParams)
-        : await sdk.full.search.search(searchParams)
+        ? await sdk.search.searchTags(searchParams)
+        : await sdk.search.search(searchParams)
 
       const { tracks, playlists, albums, users } = searchResultsFromSDK(
         data,

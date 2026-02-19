@@ -31,7 +31,7 @@ import {
   useLineupTable
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { full } from '@audius/sdk'
+import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -52,17 +52,15 @@ const messages = {
   description: "View tracks that you've favorited"
 }
 
-const { GetFavoritesSortMethodEnum } = full
-
 const sortMethodMap: Record<string, string> = {
-  title: GetFavoritesSortMethodEnum.Title,
-  artist: GetFavoritesSortMethodEnum.ArtistName,
-  created_at: GetFavoritesSortMethodEnum.ReleaseDate,
-  dateListened: GetFavoritesSortMethodEnum.LastListenDate,
-  dateSaved: GetFavoritesSortMethodEnum.AddedDate,
-  dateAdded: GetFavoritesSortMethodEnum.AddedDate,
-  plays: GetFavoritesSortMethodEnum.Plays,
-  repost_count: GetFavoritesSortMethodEnum.Reposts
+  title: GetUserLibraryTracksSortMethodEnum.Title,
+  artist: GetUserLibraryTracksSortMethodEnum.ArtistName,
+  created_at: GetUserLibraryTracksSortMethodEnum.ReleaseDate,
+  dateListened: GetUserLibraryTracksSortMethodEnum.LastListenDate,
+  dateSaved: GetUserLibraryTracksSortMethodEnum.AddedDate,
+  dateAdded: GetUserLibraryTracksSortMethodEnum.AddedDate,
+  plays: GetUserLibraryTracksSortMethodEnum.Plays,
+  repost_count: GetUserLibraryTracksSortMethodEnum.Reposts
 }
 
 type LibraryPageState = {

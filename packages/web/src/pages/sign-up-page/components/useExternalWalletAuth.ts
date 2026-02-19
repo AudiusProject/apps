@@ -14,7 +14,7 @@ import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
  */
 export const doesUserExist = async (sdk: AudiusSdk, wallet: string) => {
   try {
-    const { data } = await sdk.full.users.getUserAccount({
+    const { data } = await sdk.users.getUserAccount({
       wallet
     })
     if (data?.user) {

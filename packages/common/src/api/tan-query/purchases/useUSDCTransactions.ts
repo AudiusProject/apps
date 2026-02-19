@@ -1,6 +1,13 @@
 import { useCallback } from 'react'
 
-import { full, Id } from '@audius/sdk'
+import {
+  Id,
+  GetUSDCTransactionsSortDirectionEnum,
+  GetUSDCTransactionsSortMethodEnum,
+  type GetUSDCTransactionsMethodEnum,
+  type GetUSDCTransactionsTypeEnum,
+  type TransactionDetails
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -20,10 +27,10 @@ const DEFAULT_PAGE_SIZE = 50
 
 type UseUSDCTransactionsArgs = {
   pageSize?: number
-  sortMethod?: full.GetUSDCTransactionsSortMethodEnum
-  sortDirection?: full.GetUSDCTransactionsSortDirectionEnum
-  type?: full.GetUSDCTransactionsTypeEnum[]
-  method?: full.GetUSDCTransactionsMethodEnum
+  sortMethod?: GetUSDCTransactionsSortMethodEnum
+  sortDirection?: GetUSDCTransactionsSortDirectionEnum
+  type?: GetUSDCTransactionsTypeEnum[]
+  method?: GetUSDCTransactionsMethodEnum
 }
 
 export const getUSDCTransactionsQueryKey = (
@@ -32,8 +39,8 @@ export const getUSDCTransactionsQueryKey = (
 ) => {
   const {
     pageSize = DEFAULT_PAGE_SIZE,
-    sortMethod = full.GetUSDCTransactionsSortMethodEnum.Date,
-    sortDirection = full.GetUSDCTransactionsSortDirectionEnum.Desc,
+    sortMethod = GetUSDCTransactionsSortMethodEnum.Date,
+    sortDirection = GetUSDCTransactionsSortDirectionEnum.Desc,
     type,
     method
   } = args
@@ -56,7 +63,7 @@ export const getUSDCTransactionsQueryKey = (
 const parseTransaction = ({
   transaction
 }: {
-  transaction: full.TransactionDetails
+  transaction: TransactionDetails
 }): USDCTransactionDetails => {
   const { change, balance, transactionType, method, ...rest } = transaction
   return {
@@ -71,8 +78,8 @@ const parseTransaction = ({
 export const useUSDCTransactions = (
   {
     pageSize = DEFAULT_PAGE_SIZE,
-    sortMethod = full.GetUSDCTransactionsSortMethodEnum.Date,
-    sortDirection = full.GetUSDCTransactionsSortDirectionEnum.Desc,
+    sortMethod = GetUSDCTransactionsSortMethodEnum.Date,
+    sortDirection = GetUSDCTransactionsSortDirectionEnum.Desc,
     type,
     method
   }: UseUSDCTransactionsArgs = {},
@@ -99,7 +106,7 @@ export const useUSDCTransactions = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUSDCTransactions({
+      const { data = [] } = await sdk.users.getUSDCTransactions({
         id: Id.parse(currentUserId),
         limit: pageSize,
         offset: pageParam,

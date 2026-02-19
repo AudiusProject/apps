@@ -1,8 +1,8 @@
-import { full, HashId } from '@audius/sdk'
+import { HashId, type Grant as SdkGrant } from '@audius/sdk'
 
 import { Grant } from '~/models/Grant'
 
-export const grantFromSDK = (input: full.Grant): Grant => {
+export const grantFromSDK = (input: SdkGrant): Grant => {
   return {
     grantee_address: input.granteeAddress,
     user_id: HashId.parse(input.userId) ?? null,

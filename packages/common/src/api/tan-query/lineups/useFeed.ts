@@ -1,4 +1,4 @@
-import { EntityType, Id, full } from '@audius/sdk'
+import { EntityType, Id, type GetUserFeedFilterEnum } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -22,7 +22,7 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 import { useLineupQuery } from './useLineupQuery'
 
-const filterMap: { [k in FeedFilter]: full.GetUserFeedFilterEnum } = {
+const filterMap: { [k in FeedFilter]: GetUserFeedFilterEnum } = {
   [FeedFilter.ALL]: 'all',
   [FeedFilter.ORIGINAL]: 'original',
   [FeedFilter.REPOST]: 'repost'
@@ -70,7 +70,7 @@ export const useFeed = (
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserFeed({
+      const { data = [] } = await sdk.users.getUserFeed({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         filter: filterMap[filter],

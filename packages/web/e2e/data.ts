@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 
-import type { full } from '@audius/sdk'
+import type { Track, Playlist } from '@audius/sdk'
 
 const runAgainstLocalStack = process.env.RUN_AGAINST_STAGE !== 'true'
 
@@ -38,7 +38,7 @@ export const getUser = () => {
 
 export const getTrack = () => {
   if (runAgainstLocalStack) {
-    return track() as Pick<full.TrackFull, 'permalink' | 'title'>
+    return track() as Pick<Track, 'permalink' | 'title'>
   }
 
   return {
@@ -96,7 +96,7 @@ export const getRemixes = () => {
 
 export const getAlbum = () => {
   if (runAgainstLocalStack) {
-    return album() as Pick<full.PlaylistFull, 'playlistName' | 'permalink'>
+    return album() as Pick<Playlist, 'playlistName' | 'permalink'>
   }
 
   return {
@@ -107,7 +107,7 @@ export const getAlbum = () => {
 
 export const getEditableAlbum = () => {
   if (runAgainstLocalStack) {
-    return album2() as Pick<full.PlaylistFull, 'playlistName' | 'permalink'>
+    return album2() as Pick<Playlist, 'playlistName' | 'permalink'>
   }
 
   // TODO: Find one for stage or eliminate stage testing

@@ -1,7 +1,6 @@
 /* eslint-disable import/export */
 export { sdk } from './sdk'
 export type { AudiusSdk } from './sdk'
-export * as full from './api/generated/full'
 export * from './api/generated/default'
 export { TracksApi } from './api/tracks/TracksApi'
 export { PlaylistsApi } from './api/playlists/PlaylistsApi'
@@ -17,7 +16,7 @@ export {
   GetAudioTransactionHistorySortMethodEnum,
   GetAudioTransactionHistorySortDirectionEnum,
   GetNotificationsTypesEnum
-} from './api/generated/full'
+} from './api/generated/default'
 export { ChallengeId } from './api/challenges/types'
 export * from './api/chats/clientTypes'
 export * from './api/chats/serverTypes'

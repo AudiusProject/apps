@@ -30,7 +30,7 @@ export const useAudioTransactionsCount = <TResult = number>(
       if (!userId) return 0
 
       const sdk = await audiusSdk()
-      const response = await sdk.full.users.getAudioTransactionCount({
+      const response = await sdk.users.getAudioTransactionCount({
         id: Id.parse(userId)
       })
 

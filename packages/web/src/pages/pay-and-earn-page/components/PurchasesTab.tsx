@@ -8,7 +8,11 @@ import {
 import { USDCPurchaseDetails } from '@audius/common/models'
 import { useUSDCPurchaseDetailsModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { Id, full } from '@audius/sdk'
+import {
+  Id,
+  GetPurchasesSortMethodEnum,
+  GetPurchasesSortDirectionEnum
+} from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -43,22 +47,22 @@ const messages = {
 const TRANSACTIONS_BATCH_SIZE = 50
 
 const sortMethods: {
-  [k in PurchasesTableSortMethod]: full.GetPurchasesSortMethodEnum
+  [k in PurchasesTableSortMethod]: GetPurchasesSortMethodEnum
 } = {
-  contentId: full.GetPurchasesSortMethodEnum.ContentTitle,
-  createdAt: full.GetPurchasesSortMethodEnum.Date,
-  sellerUserId: full.GetPurchasesSortMethodEnum.ArtistName
+  contentId: GetPurchasesSortMethodEnum.ContentTitle,
+  createdAt: GetPurchasesSortMethodEnum.Date,
+  sellerUserId: GetPurchasesSortMethodEnum.ArtistName
 }
 
 const sortDirections: {
-  [k in PurchasesTableSortDirection]: full.GetPurchasesSortDirectionEnum
+  [k in PurchasesTableSortDirection]: GetPurchasesSortDirectionEnum
 } = {
-  asc: full.GetPurchasesSortDirectionEnum.Asc,
-  desc: full.GetPurchasesSortDirectionEnum.Desc
+  asc: GetPurchasesSortDirectionEnum.Asc,
+  desc: GetPurchasesSortDirectionEnum.Desc
 }
 
-const DEFAULT_SORT_METHOD = full.GetPurchasesSortMethodEnum.Date
-const DEFAULT_SORT_DIRECTION = full.GetPurchasesSortDirectionEnum.Desc
+const DEFAULT_SORT_METHOD = GetPurchasesSortMethodEnum.Date
+const DEFAULT_SORT_DIRECTION = GetPurchasesSortDirectionEnum.Desc
 
 const NoPurchases = () => {
   const dispatch = useDispatch()
@@ -81,9 +85,9 @@ export const usePurchases = () => {
   const dispatch = useDispatch()
   // Defaults: sort method = date, sort direction = desc
   const [sortMethod, setSortMethod] =
-    useState<full.GetPurchasesSortMethodEnum>(DEFAULT_SORT_METHOD)
+    useState<GetPurchasesSortMethodEnum>(DEFAULT_SORT_METHOD)
   const [sortDirection, setSortDirection] =
-    useState<full.GetPurchasesSortDirectionEnum>(DEFAULT_SORT_DIRECTION)
+    useState<GetPurchasesSortDirectionEnum>(DEFAULT_SORT_DIRECTION)
 
   const { onOpen: openDetailsModal } = useUSDCPurchaseDetailsModal()
 
