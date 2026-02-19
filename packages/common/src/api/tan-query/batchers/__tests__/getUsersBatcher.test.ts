@@ -74,13 +74,13 @@ describe('getUsersBatcher', () => {
   const mockSdk = {
     users: {
       getBulkUsers: vi
-          .fn()
-          .mockImplementation((params: GetBulkUsersRequest) => {
-            const users = params.id?.map((userId) =>
-              createMockSdkUser(HashId.parse(userId))
-            )
-            return Promise.resolve({ data: users })
-          })
+        .fn()
+        .mockImplementation((params: GetBulkUsersRequest) => {
+          const users = params.id?.map((userId) =>
+            createMockSdkUser(HashId.parse(userId))
+          )
+          return Promise.resolve({ data: users })
+        })
     }
   } as unknown as BatchContext['sdk']
 
@@ -180,8 +180,7 @@ describe('getUsersBatcher', () => {
     const missingId = 999
 
     // Mock API to only return data for existingId
-    const mockBulkUsers = mockSdk.users
-      .getBulkUsers as unknown as MockInstance<
+    const mockBulkUsers = mockSdk.users.getBulkUsers as unknown as MockInstance<
       [GetBulkUsersRequest],
       Promise<{ data: User[] }>
     >

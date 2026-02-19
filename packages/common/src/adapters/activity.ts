@@ -1,8 +1,4 @@
-import type {
-  Activity,
-  Playlist,
-  Track
-} from '@audius/sdk'
+import type { Activity, Playlist, Track } from '@audius/sdk'
 import { ActivityItemTypeEnum } from '@audius/sdk'
 
 import { userCollectionMetadataFromSDK } from './collection'

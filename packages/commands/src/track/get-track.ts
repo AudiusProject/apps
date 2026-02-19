@@ -8,7 +8,7 @@ export const getTrackCommand = new Command('get')
   .action(async (trackId, { from }) => {
     const audiusSdk = await initializeAudiusSdk({ handle: from })
     const userId = await getCurrentUserId()
-    const { data: track } = await audiusSdk.full.tracks.getTrack({
+    const { data: track } = await audiusSdk.tracks.getTrack({
       userId,
       trackId
     })

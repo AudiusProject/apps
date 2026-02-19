@@ -116,12 +116,12 @@ describe('getCollectionsBatcher', () => {
     playlists: {
       getBulkPlaylists: vi
         .fn()
-          .mockImplementation((params: GetBulkPlaylistsRequest) => {
-            const collections = params.id?.map((collectionId) =>
-              createMockSdkCollection(HashId.parse(collectionId))
-            )
-            return Promise.resolve({ data: collections })
-          })
+        .mockImplementation((params: GetBulkPlaylistsRequest) => {
+          const collections = params.id?.map((collectionId) =>
+            createMockSdkCollection(HashId.parse(collectionId))
+          )
+          return Promise.resolve({ data: collections })
+        })
     }
   } as unknown as BatchContext['sdk']
 

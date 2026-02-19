@@ -28,7 +28,13 @@ function* fetchPlaylistUpdatesWorker() {
   const response = (yield* call(
     [
       sdk.notifications,
-      (sdk.notifications as { getPlaylistUpdates: (params: { userId: string }) => Promise<PlaylistUpdatesResponse> }).getPlaylistUpdates
+      (
+        sdk.notifications as {
+          getPlaylistUpdates: (params: {
+            userId: string
+          }) => Promise<PlaylistUpdatesResponse>
+        }
+      ).getPlaylistUpdates
     ],
     { userId: Id.parse(currentUserId) }
   )) as PlaylistUpdatesResponse | undefined
