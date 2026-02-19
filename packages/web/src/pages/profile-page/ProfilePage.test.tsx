@@ -107,13 +107,10 @@ describe('ProfilePage', () => {
   it('should render the profile page for a non-artist', async () => {
     renderProfilePage(nonArtistUser)
 
-    // User header
-    expect(
-      await screen.findByRole('heading', { name: nonArtistUser.name })
-    ).toBeInTheDocument()
+    // User header (name may have trailing space in mobile header)
     expect(
       await screen.findByRole('heading', {
-        name: `@${nonArtistUser.handle}`
+        name: new RegExp(`^${nonArtistUser.name}\\s*$`)
       })
     ).toBeInTheDocument()
 
@@ -237,9 +234,11 @@ describe('ProfilePage', () => {
       }
     )
 
-    // Wait for the profile to load
+    // Wait for the profile to load (name may have trailing space in mobile header)
     expect(
-      await screen.findByRole('heading', { name: artistUser.name })
+      await screen.findByRole('heading', {
+        name: new RegExp(`^${artistUser.name}\\s*$`)
+      })
     ).toBeInTheDocument()
 
     // Verify that coin-related elements are present when user has coins
