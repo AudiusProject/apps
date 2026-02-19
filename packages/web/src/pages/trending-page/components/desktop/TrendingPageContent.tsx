@@ -26,12 +26,18 @@ import Lineup from 'components/lineup/Lineup'
 import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
+import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
 import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
 import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
 import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
 import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
 import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
 import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
+import {
+  updateWinnersWeekParam,
+  isValidWinnersWeek,
+  parseUrlParams
+} from 'pages/trending-page/utils'
 
 import styles from './TrendingPageContent.module.css'
 const { trendingAllTimeActions, trendingMonthActions, trendingWeekActions } =
@@ -41,6 +47,7 @@ const { getLineup } = trendingUndergroundPageLineupSelectors
 const messages = {
   tracks: 'Tracks',
   underground: 'Underground',
+  winners: 'Winners',
   thisWeek: 'This Week',
   thisMonth: 'This Month',
   allTime: 'All Time',
@@ -50,7 +57,7 @@ const messages = {
   disabledTabTooltip: 'Nothing available'
 }
 
-type TrendingCategory = 'tracks' | 'underground'
+type TrendingCategory = 'tracks' | 'underground' | 'winners'
 
 type TrendingPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
@@ -92,7 +99,17 @@ const useTrendingUndergroundLineup = (
 
 const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const dispatch = useDispatch()
-  const [category, setCategory] = useState<TrendingCategory>('tracks')
+  const [category, setCategory] = useState<TrendingCategory>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? 'winners' : 'tracks'
+  })
+  const [winnersWeek, setWinnersWeek] = useState<string | null>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? week : null
+  })
+  const [winnersSubFilter, setWinnersSubFilter] = useState<
+    'tracks' | 'underground'
+  >('tracks')
   const trendingPageState = useTrendingPageState()
   const actions = useTrendingActions()
   const lineups = useTrendingLineups({
@@ -111,6 +128,15 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   })
 
   useTrendingPageCleanup({ trendingPageState, actions })
+
+  useEffect(() => {
+    if (category === 'winners') {
+      const { week } = parseUrlParams()
+      if (isValidWinnersWeek(week)) {
+        setWinnersWeek(week)
+      }
+    }
+  }, [category])
 
   useEffect(() => {
     return () => {
@@ -328,6 +354,13 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
           isSelected={category === 'underground'}
           onClick={() => setCategory('underground')}
         />
+        <SelectablePill
+          type='button'
+          label={messages.winners}
+          size='large'
+          isSelected={category === 'winners'}
+          onClick={() => setCategory('winners')}
+        />
       </Flex>
       {category === 'tracks' ? (
         <Flex gap='s' alignItems='center'>
@@ -348,6 +381,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
             menuProps={{ maxHeight: 320, width: 240 }}
           />
         </Flex>
+      ) : category === 'winners' ? (
+        <Flex gap='2xs' alignItems='center' />
       ) : null}
     </Flex>
   )
@@ -429,6 +464,17 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const pageContent =
     category === 'tracks' ? (
       getTracksLineupForRange(trendingTimeRange)
+    ) : category === 'winners' ? (
+      <WinnersView
+        week={winnersWeek}
+        subFilter={winnersSubFilter}
+        onWeekChange={(week) => {
+          setWinnersWeek(week)
+          updateWinnersWeekParam(week, actions.replaceRoute)
+        }}
+        onSubFilterChange={setWinnersSubFilter}
+        containerRef={containerRef}
+      />
     ) : (
       <div className={styles.lineupContainer}>
         <Lineup
@@ -448,6 +494,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         title={pageTitle}
         description={trendingDescription}
         size='large'
+        variant='inset'
+        headerPadding={6}
         header={header}
       >
         {pageContent}

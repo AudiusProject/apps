@@ -35,6 +35,12 @@ import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups
 import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
 import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
 import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
+import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
+import {
+  updateWinnersWeekParam,
+  isValidWinnersWeek,
+  parseUrlParams
+} from 'pages/trending-page/utils'
 import { BASE_URL } from 'utils/route'
 import { scrollWindowToTop } from 'utils/scroll'
 
@@ -47,6 +53,7 @@ const { getLineup } = trendingUndergroundPageLineupSelectors
 const messages = {
   trending: 'Trending',
   underground: 'Underground',
+  winners: 'Winners',
   tracks: 'Tracks',
   thisWeek: 'This Week',
   thisMonth: 'This Month',
@@ -56,7 +63,7 @@ const messages = {
   endOfLineupDescription: "Looks like you've reached the end of this list..."
 }
 
-type TrendingCategory = 'tracks' | 'underground'
+type TrendingCategory = 'tracks' | 'underground' | 'winners'
 
 type TrendingPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
@@ -79,7 +86,17 @@ const TrendingPageMobileContent = ({
   containerRef
 }: TrendingPageMobileContentProps) => {
   const dispatch = useDispatch()
-  const [category, setCategory] = useState<TrendingCategory>('tracks')
+  const [category, setCategory] = useState<TrendingCategory>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? 'winners' : 'tracks'
+  })
+  const [winnersWeek, setWinnersWeek] = useState<string | null>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? week : null
+  })
+  const [winnersSubFilter, setWinnersSubFilter] = useState<
+    'tracks' | 'underground'
+  >('tracks')
 
   const trendingPageState = useTrendingPageState()
   const actions = useTrendingActions()
@@ -99,6 +116,15 @@ const TrendingPageMobileContent = ({
   })
 
   useTrendingPageCleanup({ trendingPageState, actions })
+
+  useEffect(() => {
+    if (category === 'winners') {
+      const { week } = parseUrlParams()
+      if (isValidWinnersWeek(week)) {
+        setWinnersWeek(week)
+      }
+    }
+  }, [category])
 
   useEffect(() => {
     return () => {
@@ -237,7 +263,8 @@ const TrendingPageMobileContent = ({
   const categoryOptions = useMemo(
     () => [
       { value: 'tracks' as const, label: messages.tracks },
-      { value: 'underground' as const, label: messages.underground }
+      { value: 'underground' as const, label: messages.underground },
+      { value: 'winners' as const, label: messages.winners }
     ],
     []
   )
@@ -284,6 +311,17 @@ const TrendingPageMobileContent = ({
       <div className={cn(styles.lineupContainer)}>
         {getTracksLineupForRange(trendingTimeRange)}
       </div>
+    ) : category === 'winners' ? (
+      <WinnersView
+        week={winnersWeek}
+        subFilter={winnersSubFilter}
+        onWeekChange={(week) => {
+          setWinnersWeek(week)
+          updateWinnersWeekParam(week, actions.replaceRoute)
+        }}
+        onSubFilterChange={setWinnersSubFilter}
+        containerRef={containerRef}
+      />
     ) : (
       <div className={cn(styles.lineupContainer)}>
         <Lineup

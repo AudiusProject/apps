@@ -14,7 +14,8 @@ export const TRENDING_MESSAGES = {
 // URL parameter keys for trending page
 export const URL_PARAM_KEYS = {
   GENRE: 'genre',
-  TIME_RANGE: 'timeRange'
+  TIME_RANGE: 'timeRange',
+  WINNERS_WEEK: 'week'
 } as const
 
 // Time range to lineup actions mapping

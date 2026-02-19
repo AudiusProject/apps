@@ -7,6 +7,8 @@ import { GENRES, Genre } from '@audius/common/utils'
 import { TIME_RANGE_ACTION_MAP, URL_PARAM_KEYS } from './constants'
 import { TrendingUrlParams } from './providerTypes'
 
+const WEEK_YYYY_MM_DD_REGEX = /^\d{4}-\d{2}-\d{2}$/
+
 // ========== Lineup Utils ==========
 
 /**
@@ -94,11 +96,20 @@ export const parseUrlParams = (): TrendingUrlParams => {
   const genre = urlParams.get(URL_PARAM_KEYS.GENRE)
   const timeRange = urlParams.get(URL_PARAM_KEYS.TIME_RANGE) as TimeRange | null
 
+  const week = urlParams.get(URL_PARAM_KEYS.WINNERS_WEEK)
+
   return {
     genre,
-    timeRange
+    timeRange,
+    week: isValidWinnersWeek(week) ? week : null
   }
 }
+
+/**
+ * Validate YYYY-MM-DD format for winners week param
+ */
+export const isValidWinnersWeek = (week: string | null): boolean =>
+  week !== null && WEEK_YYYY_MM_DD_REGEX.test(week)
 
 /**
  * Validate if a genre string is a valid genre
@@ -154,4 +165,14 @@ export const updateTimeRangeUrlParam = (
   replaceRoute: (route: { search: string }) => void
 ) => {
   updateUrlParam(URL_PARAM_KEYS.TIME_RANGE, timeRange, replaceRoute)
+}
+
+/**
+ * Update winners week URL parameter
+ */
+export const updateWinnersWeekParam = (
+  week: string | null,
+  replaceRoute: (route: { search: string }) => void
+) => {
+  updateUrlParam(URL_PARAM_KEYS.WINNERS_WEEK, week, replaceRoute)
 }
