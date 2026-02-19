@@ -20,6 +20,12 @@ import {
     UserFromJSONTyped,
     UserToJSON,
 } from './User';
+import type { VersionMetadata } from './VersionMetadata';
+import {
+    VersionMetadataFromJSON,
+    VersionMetadataFromJSONTyped,
+    VersionMetadataToJSON,
+} from './VersionMetadata';
 
 /**
  * 
@@ -27,6 +33,48 @@ import {
  * @interface PurchasersResponse
  */
 export interface PurchasersResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchasersResponse
+     */
+    latestChainBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchasersResponse
+     */
+    latestIndexedBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchasersResponse
+     */
+    latestChainSlotPlays: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchasersResponse
+     */
+    latestIndexedSlotPlays: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchasersResponse
+     */
+    signature: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchasersResponse
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {VersionMetadata}
+     * @memberof PurchasersResponse
+     */
+    version: VersionMetadata;
     /**
      * 
      * @type {Array<User>}
@@ -40,6 +88,13 @@ export interface PurchasersResponse {
  */
 export function instanceOfPurchasersResponse(value: object): value is PurchasersResponse {
     let isInstance = true;
+    isInstance = isInstance && "latestChainBlock" in value && value["latestChainBlock"] !== undefined;
+    isInstance = isInstance && "latestIndexedBlock" in value && value["latestIndexedBlock"] !== undefined;
+    isInstance = isInstance && "latestChainSlotPlays" in value && value["latestChainSlotPlays"] !== undefined;
+    isInstance = isInstance && "latestIndexedSlotPlays" in value && value["latestIndexedSlotPlays"] !== undefined;
+    isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
+    isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "version" in value && value["version"] !== undefined;
 
     return isInstance;
 }
@@ -54,6 +109,13 @@ export function PurchasersResponseFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
+        'latestChainBlock': json['latest_chain_block'],
+        'latestIndexedBlock': json['latest_indexed_block'],
+        'latestChainSlotPlays': json['latest_chain_slot_plays'],
+        'latestIndexedSlotPlays': json['latest_indexed_slot_plays'],
+        'signature': json['signature'],
+        'timestamp': json['timestamp'],
+        'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : ((json['data'] as Array<any>).map(UserFromJSON)),
     };
 }
@@ -67,6 +129,13 @@ export function PurchasersResponseToJSON(value?: PurchasersResponse | null): any
     }
     return {
         
+        'latest_chain_block': value.latestChainBlock,
+        'latest_indexed_block': value.latestIndexedBlock,
+        'latest_chain_slot_plays': value.latestChainSlotPlays,
+        'latest_indexed_slot_plays': value.latestIndexedSlotPlays,
+        'signature': value.signature,
+        'timestamp': value.timestamp,
+        'version': VersionMetadataToJSON(value.version),
         'data': value.data === undefined ? undefined : ((value.data as Array<any>).map(UserToJSON)),
     };
 }

@@ -14,12 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CreateUserRequestBodyEvents } from './CreateUserRequestBodyEvents';
+import type { UpdateUserRequestBodyEvents } from './UpdateUserRequestBodyEvents';
 import {
-    CreateUserRequestBodyEventsFromJSON,
-    CreateUserRequestBodyEventsFromJSONTyped,
-    CreateUserRequestBodyEventsToJSON,
-} from './CreateUserRequestBodyEvents';
+    UpdateUserRequestBodyEventsFromJSON,
+    UpdateUserRequestBodyEventsFromJSONTyped,
+    UpdateUserRequestBodyEventsToJSON,
+} from './UpdateUserRequestBodyEvents';
 import type { UserPlaylistLibrary } from './UserPlaylistLibrary';
 import {
     UserPlaylistLibraryFromJSON,
@@ -149,10 +149,10 @@ export interface CreateUserRequestBody {
     playlistLibrary?: UserPlaylistLibrary;
     /**
      * 
-     * @type {CreateUserRequestBodyEvents}
+     * @type {UpdateUserRequestBodyEvents}
      * @memberof CreateUserRequestBody
      */
-    events?: CreateUserRequestBodyEvents;
+    events?: UpdateUserRequestBodyEvents;
 }
 
 
@@ -205,7 +205,7 @@ export function CreateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'allowAiAttribution': !exists(json, 'allow_ai_attribution') ? undefined : json['allow_ai_attribution'],
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
         'playlistLibrary': !exists(json, 'playlist_library') ? undefined : UserPlaylistLibraryFromJSON(json['playlist_library']),
-        'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
+        'events': !exists(json, 'events') ? undefined : UpdateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
 
@@ -237,7 +237,7 @@ export function CreateUserRequestBodyToJSON(value?: CreateUserRequestBody | null
         'allow_ai_attribution': value.allowAiAttribution,
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
         'playlist_library': UserPlaylistLibraryToJSON(value.playlistLibrary),
-        'events': CreateUserRequestBodyEventsToJSON(value.events),
+        'events': UpdateUserRequestBodyEventsToJSON(value.events),
     };
 }
 

@@ -20,6 +20,18 @@ import {
     CommentFromJSONTyped,
     CommentToJSON,
 } from './Comment';
+import type { Related } from './Related';
+import {
+    RelatedFromJSON,
+    RelatedFromJSONTyped,
+    RelatedToJSON,
+} from './Related';
+import type { VersionMetadata } from './VersionMetadata';
+import {
+    VersionMetadataFromJSON,
+    VersionMetadataFromJSONTyped,
+    VersionMetadataToJSON,
+} from './VersionMetadata';
 
 /**
  * 
@@ -29,10 +41,58 @@ import {
 export interface UserCommentsResponse {
     /**
      * 
+     * @type {number}
+     * @memberof UserCommentsResponse
+     */
+    latestChainBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserCommentsResponse
+     */
+    latestIndexedBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserCommentsResponse
+     */
+    latestChainSlotPlays: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserCommentsResponse
+     */
+    latestIndexedSlotPlays: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserCommentsResponse
+     */
+    signature: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserCommentsResponse
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {VersionMetadata}
+     * @memberof UserCommentsResponse
+     */
+    version: VersionMetadata;
+    /**
+     * 
      * @type {Array<Comment>}
      * @memberof UserCommentsResponse
      */
     data?: Array<Comment>;
+    /**
+     * 
+     * @type {Related}
+     * @memberof UserCommentsResponse
+     */
+    related?: Related;
 }
 
 /**
@@ -40,6 +100,13 @@ export interface UserCommentsResponse {
  */
 export function instanceOfUserCommentsResponse(value: object): value is UserCommentsResponse {
     let isInstance = true;
+    isInstance = isInstance && "latestChainBlock" in value && value["latestChainBlock"] !== undefined;
+    isInstance = isInstance && "latestIndexedBlock" in value && value["latestIndexedBlock"] !== undefined;
+    isInstance = isInstance && "latestChainSlotPlays" in value && value["latestChainSlotPlays"] !== undefined;
+    isInstance = isInstance && "latestIndexedSlotPlays" in value && value["latestIndexedSlotPlays"] !== undefined;
+    isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
+    isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "version" in value && value["version"] !== undefined;
 
     return isInstance;
 }
@@ -54,7 +121,15 @@ export function UserCommentsResponseFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
+        'latestChainBlock': json['latest_chain_block'],
+        'latestIndexedBlock': json['latest_indexed_block'],
+        'latestChainSlotPlays': json['latest_chain_slot_plays'],
+        'latestIndexedSlotPlays': json['latest_indexed_slot_plays'],
+        'signature': json['signature'],
+        'timestamp': json['timestamp'],
+        'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : ((json['data'] as Array<any>).map(CommentFromJSON)),
+        'related': !exists(json, 'related') ? undefined : RelatedFromJSON(json['related']),
     };
 }
 
@@ -67,7 +142,15 @@ export function UserCommentsResponseToJSON(value?: UserCommentsResponse | null):
     }
     return {
         
+        'latest_chain_block': value.latestChainBlock,
+        'latest_indexed_block': value.latestIndexedBlock,
+        'latest_chain_slot_plays': value.latestChainSlotPlays,
+        'latest_indexed_slot_plays': value.latestIndexedSlotPlays,
+        'signature': value.signature,
+        'timestamp': value.timestamp,
+        'version': VersionMetadataToJSON(value.version),
         'data': value.data === undefined ? undefined : ((value.data as Array<any>).map(CommentToJSON)),
+        'related': RelatedToJSON(value.related),
     };
 }
 

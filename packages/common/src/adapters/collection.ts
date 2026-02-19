@@ -206,7 +206,7 @@ export const playlistMetadataForUpdateWithSDK = (
       ? input.playlist_contents.track_ids.map((t) => ({
           timestamp: t.time,
           trackId: Id.parse(t.track),
-          metadataTimestamp: t.metadata_time
+          metadataTimestamp: t.metadata_time ?? 0
         }))
       : undefined,
     playlistName: input.playlist_name ?? '',

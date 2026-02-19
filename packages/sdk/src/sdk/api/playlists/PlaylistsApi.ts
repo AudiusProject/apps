@@ -170,9 +170,12 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     // Write tracks to chain
     const trackIds = await Promise.all(
       trackMetadatas.map(async (t, i) => {
-        // Transform track metadata
+        // Transform track metadata (cast: SDK upload schema and API body types align at runtime)
         const trackMetadata = this.combineMetadata(
-          this.trackUploadHelper.transformTrackUploadMetadataV2(t, userId),
+          this.trackUploadHelper.transformTrackUploadMetadataV2(
+            t as unknown as CreateTrackRequestBody,
+            userId
+          ) as CreateTrackRequestBody,
           playlistMetadata
         )
 
@@ -253,7 +256,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       ...params.metadata,
       playlistContents: (trackIds ?? []).map((trackId) => ({
         trackId: encodeHashId(trackId)!,
-        timestamp
+        timestamp,
+        metadataTimestamp: timestamp
       })),
       playlistImageSizesMultihash: imageUploadResponse?.orig_file_cid
     }

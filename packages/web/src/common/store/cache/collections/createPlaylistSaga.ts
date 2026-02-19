@@ -197,7 +197,8 @@ function* createAndConfirmPlaylist(
       ? [
           {
             timestamp: Math.round(Date.now() / 1000), // must use seconds
-            trackId: Id.parse(initTrack.track_id)
+            trackId: Id.parse(initTrack.track_id),
+            metadataTimestamp: Math.round(Date.now() / 1000)
           }
         ]
       : []

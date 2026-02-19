@@ -14,18 +14,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CoinDynamicBondingCurve } from './CoinDynamicBondingCurve';
+import type { CoinInsightsDynamicBondingCurve } from './CoinInsightsDynamicBondingCurve';
 import {
-    CoinDynamicBondingCurveFromJSON,
-    CoinDynamicBondingCurveFromJSONTyped,
-    CoinDynamicBondingCurveToJSON,
-} from './CoinDynamicBondingCurve';
-import type { CoinExtensions } from './CoinExtensions';
+    CoinInsightsDynamicBondingCurveFromJSON,
+    CoinInsightsDynamicBondingCurveFromJSONTyped,
+    CoinInsightsDynamicBondingCurveToJSON,
+} from './CoinInsightsDynamicBondingCurve';
+import type { CoinInsightsExtensions } from './CoinInsightsExtensions';
 import {
-    CoinExtensionsFromJSON,
-    CoinExtensionsFromJSONTyped,
-    CoinExtensionsToJSON,
-} from './CoinExtensions';
+    CoinInsightsExtensionsFromJSON,
+    CoinInsightsExtensionsFromJSONTyped,
+    CoinInsightsExtensionsToJSON,
+} from './CoinInsightsExtensions';
 
 /**
  * Additional token information from Birdeye's defi token overview API.
@@ -73,10 +73,10 @@ export interface CoinInsights {
     fdv: number;
     /**
      * 
-     * @type {CoinExtensions}
+     * @type {CoinInsightsExtensions}
      * @memberof CoinInsights
      */
-    extensions?: CoinExtensions;
+    extensions?: CoinInsightsExtensions;
     /**
      * Current liquidity in USD
      * @type {number}
@@ -355,10 +355,10 @@ export interface CoinInsights {
     sell: number;
     /**
      * 
-     * @type {CoinDynamicBondingCurve}
+     * @type {CoinInsightsDynamicBondingCurve}
      * @memberof CoinInsights
      */
-    dynamicBondingCurve: CoinDynamicBondingCurve;
+    dynamicBondingCurve: CoinInsightsDynamicBondingCurve;
 }
 
 /**
@@ -422,7 +422,7 @@ export function CoinInsightsFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'name': !exists(json, 'name') ? undefined : json['name'],
         'marketCap': json['marketCap'],
         'fdv': json['fdv'],
-        'extensions': !exists(json, 'extensions') ? undefined : CoinExtensionsFromJSON(json['extensions']),
+        'extensions': !exists(json, 'extensions') ? undefined : CoinInsightsExtensionsFromJSON(json['extensions']),
         'liquidity': json['liquidity'],
         'lastTradeUnixTime': json['lastTradeUnixTime'],
         'lastTradeHumanTime': json['lastTradeHumanTime'],
@@ -469,7 +469,7 @@ export function CoinInsightsFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'totalTrade': json['totalTrade'],
         'buy': json['buy'],
         'sell': json['sell'],
-        'dynamicBondingCurve': CoinDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
+        'dynamicBondingCurve': CoinInsightsDynamicBondingCurveFromJSON(json['dynamicBondingCurve']),
     };
 }
 
@@ -488,7 +488,7 @@ export function CoinInsightsToJSON(value?: CoinInsights | null): any {
         'name': value.name,
         'marketCap': value.marketCap,
         'fdv': value.fdv,
-        'extensions': CoinExtensionsToJSON(value.extensions),
+        'extensions': CoinInsightsExtensionsToJSON(value.extensions),
         'liquidity': value.liquidity,
         'lastTradeUnixTime': value.lastTradeUnixTime,
         'lastTradeHumanTime': value.lastTradeHumanTime,
@@ -535,7 +535,7 @@ export function CoinInsightsToJSON(value?: CoinInsights | null): any {
         'totalTrade': value.totalTrade,
         'buy': value.buy,
         'sell': value.sell,
-        'dynamicBondingCurve': CoinDynamicBondingCurveToJSON(value.dynamicBondingCurve),
+        'dynamicBondingCurve': CoinInsightsDynamicBondingCurveToJSON(value.dynamicBondingCurve),
     };
 }
 

@@ -14,12 +14,24 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { Related } from './Related';
+import {
+    RelatedFromJSON,
+    RelatedFromJSONTyped,
+    RelatedToJSON,
+} from './Related';
 import type { ReplyComment } from './ReplyComment';
 import {
     ReplyCommentFromJSON,
     ReplyCommentFromJSONTyped,
     ReplyCommentToJSON,
 } from './ReplyComment';
+import type { VersionMetadata } from './VersionMetadata';
+import {
+    VersionMetadataFromJSON,
+    VersionMetadataFromJSONTyped,
+    VersionMetadataToJSON,
+} from './VersionMetadata';
 
 /**
  * 
@@ -29,10 +41,58 @@ import {
 export interface CommentRepliesResponse {
     /**
      * 
+     * @type {number}
+     * @memberof CommentRepliesResponse
+     */
+    latestChainBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CommentRepliesResponse
+     */
+    latestIndexedBlock: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CommentRepliesResponse
+     */
+    latestChainSlotPlays: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CommentRepliesResponse
+     */
+    latestIndexedSlotPlays: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CommentRepliesResponse
+     */
+    signature: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CommentRepliesResponse
+     */
+    timestamp: string;
+    /**
+     * 
+     * @type {VersionMetadata}
+     * @memberof CommentRepliesResponse
+     */
+    version: VersionMetadata;
+    /**
+     * 
      * @type {Array<ReplyComment>}
      * @memberof CommentRepliesResponse
      */
     data?: Array<ReplyComment>;
+    /**
+     * 
+     * @type {Related}
+     * @memberof CommentRepliesResponse
+     */
+    related?: Related;
 }
 
 /**
@@ -40,6 +100,13 @@ export interface CommentRepliesResponse {
  */
 export function instanceOfCommentRepliesResponse(value: object): value is CommentRepliesResponse {
     let isInstance = true;
+    isInstance = isInstance && "latestChainBlock" in value && value["latestChainBlock"] !== undefined;
+    isInstance = isInstance && "latestIndexedBlock" in value && value["latestIndexedBlock"] !== undefined;
+    isInstance = isInstance && "latestChainSlotPlays" in value && value["latestChainSlotPlays"] !== undefined;
+    isInstance = isInstance && "latestIndexedSlotPlays" in value && value["latestIndexedSlotPlays"] !== undefined;
+    isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
+    isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "version" in value && value["version"] !== undefined;
 
     return isInstance;
 }
@@ -54,7 +121,15 @@ export function CommentRepliesResponseFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
+        'latestChainBlock': json['latest_chain_block'],
+        'latestIndexedBlock': json['latest_indexed_block'],
+        'latestChainSlotPlays': json['latest_chain_slot_plays'],
+        'latestIndexedSlotPlays': json['latest_indexed_slot_plays'],
+        'signature': json['signature'],
+        'timestamp': json['timestamp'],
+        'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : ((json['data'] as Array<any>).map(ReplyCommentFromJSON)),
+        'related': !exists(json, 'related') ? undefined : RelatedFromJSON(json['related']),
     };
 }
 
@@ -67,7 +142,15 @@ export function CommentRepliesResponseToJSON(value?: CommentRepliesResponse | nu
     }
     return {
         
+        'latest_chain_block': value.latestChainBlock,
+        'latest_indexed_block': value.latestIndexedBlock,
+        'latest_chain_slot_plays': value.latestChainSlotPlays,
+        'latest_indexed_slot_plays': value.latestIndexedSlotPlays,
+        'signature': value.signature,
+        'timestamp': value.timestamp,
+        'version': VersionMetadataToJSON(value.version),
         'data': value.data === undefined ? undefined : ((value.data as Array<any>).map(ReplyCommentToJSON)),
+        'related': RelatedToJSON(value.related),
     };
 }
 

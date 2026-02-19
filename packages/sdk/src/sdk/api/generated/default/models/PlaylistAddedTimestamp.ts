@@ -21,23 +21,23 @@ import { exists, mapValues } from '../runtime';
  */
 export interface PlaylistAddedTimestamp {
     /**
-     * Track ID
-     * @type {string}
+     * Optional. Metadata timestamp for when the track was added to the playlist.
+     * @type {number}
      * @memberof PlaylistAddedTimestamp
      */
-    trackId: string;
+    metadataTimestamp?: number;
     /**
-     * Unix timestamp when track was added
+     * 
      * @type {number}
      * @memberof PlaylistAddedTimestamp
      */
     timestamp: number;
     /**
-     * Metadata timestamp
-     * @type {number}
+     * 
+     * @type {string}
      * @memberof PlaylistAddedTimestamp
      */
-    metadataTimestamp?: number;
+    trackId: string;
 }
 
 /**
@@ -45,8 +45,8 @@ export interface PlaylistAddedTimestamp {
  */
 export function instanceOfPlaylistAddedTimestamp(value: object): value is PlaylistAddedTimestamp {
     let isInstance = true;
-    isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
     isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
+    isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
 
     return isInstance;
 }
@@ -61,9 +61,9 @@ export function PlaylistAddedTimestampFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'trackId': json['track_id'],
-        'timestamp': json['timestamp'],
         'metadataTimestamp': !exists(json, 'metadata_timestamp') ? undefined : json['metadata_timestamp'],
+        'timestamp': json['timestamp'],
+        'trackId': json['track_id'],
     };
 }
 
@@ -76,9 +76,9 @@ export function PlaylistAddedTimestampToJSON(value?: PlaylistAddedTimestamp | nu
     }
     return {
         
-        'track_id': value.trackId,
-        'timestamp': value.timestamp,
         'metadata_timestamp': value.metadataTimestamp,
+        'timestamp': value.timestamp,
+        'track_id': value.trackId,
     };
 }
 

@@ -32,6 +32,12 @@ export interface CoverPhoto {
      * @memberof CoverPhoto
      */
     _2000x?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CoverPhoto
+     */
+    mirrors?: Array<string>;
 }
 
 /**
@@ -55,6 +61,7 @@ export function CoverPhotoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         
         '_640x': !exists(json, '640x') ? undefined : json['640x'],
         '_2000x': !exists(json, '2000x') ? undefined : json['2000x'],
+        'mirrors': !exists(json, 'mirrors') ? undefined : json['mirrors'],
     };
 }
 
@@ -69,6 +76,7 @@ export function CoverPhotoToJSON(value?: CoverPhoto | null): any {
         
         '640x': value._640x,
         '2000x': value._2000x,
+        'mirrors': value.mirrors,
     };
 }
 
