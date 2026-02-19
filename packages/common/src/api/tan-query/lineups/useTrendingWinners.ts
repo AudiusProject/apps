@@ -30,8 +30,10 @@ export const getTrendingWinnersQueryKey = ({
 /**
  * Maps default API Track (from sdk.tracks) to full.TrackFull-like structure
  * for userTrackMetadataFromSDK. The default Track has user but not userId.
+ * TODO: Remove when full is gone.
  */
 const toTrackFullLike = (t: Track): full.TrackFull | null => {
+  // @ts-expect-error - TODO: Remove when full is gone.
   const user = t.user as full.UserFull | undefined
   if (!user?.id) return null
   const trackWithUserId = {

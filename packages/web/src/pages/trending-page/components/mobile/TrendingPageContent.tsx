@@ -29,13 +29,13 @@ import NavContext, {
   LeftPreset,
   RightPreset
 } from 'components/nav/mobile/NavContext'
+import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
 import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
 import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
 import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
 import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
 import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
 import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
-import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
 import {
   updateWinnersWeekParam,
   isValidWinnersWeek,
