@@ -31,7 +31,7 @@ type TestUser = typeof artistUser | typeof nonArtistUser
  */
 export const mockUserByHandle = (user: typeof artistUser) =>
   http.get(`${apiEndpoint}/v1/users/handle/${user.handle}`, () =>
-    HttpResponse.json({ data: [user] })
+    HttpResponse.json({ data: user })
   )
 
 export const mockRelatedUsers = (
