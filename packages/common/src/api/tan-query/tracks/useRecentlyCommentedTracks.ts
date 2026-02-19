@@ -1,7 +1,4 @@
-import {
-  GetTracksWithRecentCommentsRequest,
-  OptionalId
-} from '@audius/sdk'
+import { GetTracksWithRecentCommentsRequest, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,

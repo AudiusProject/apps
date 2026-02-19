@@ -34,9 +34,7 @@ import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
 /** Converts a SDK User response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
-export const userMetadataFromSDK = (
-  input: User
-): UserMetadata | undefined => {
+export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
     return undefined
@@ -82,7 +80,9 @@ export const userMetadataFromSDK = (
       ? (() => {
           const pic = input.profilePicture!
           const mirrors =
-            'mirrors' in pic && Array.isArray(pic.mirrors) ? pic.mirrors : undefined
+            'mirrors' in pic && Array.isArray(pic.mirrors)
+              ? pic.mirrors
+              : undefined
           return {
             '150x150': pic._150x150,
             '480x480': pic._480x480,

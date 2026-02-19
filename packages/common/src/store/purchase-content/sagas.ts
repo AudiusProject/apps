@@ -292,13 +292,10 @@ function* pollForPurchaseConfirmation({
     ) {
       const sdk = yield* getSDK()
       for (const trackId of metadata.playlist_contents.track_ids) {
-        const { data } = yield* call(
-          [sdk.tracks, sdk.tracks.getTrack],
-          {
-            trackId: Id.parse(trackId.track),
-            userId: OptionalId.parse(currentUserId)
-          }
-        )
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId.track),
+          userId: OptionalId.parse(currentUserId)
+        })
         const track = data ? userTrackMetadataFromSDK(data) : null
 
         if (track) {
@@ -601,13 +598,10 @@ function* collectEmailAfterPurchase({
       return
     }
 
-    const { data: managers } = yield* call(
-      [sdk.users, sdk.users.getManagers],
-      {
-        id: Id.parse(sellerId),
-        isApproved: true
-      }
-    )
+    const { data: managers } = yield* call([sdk.users, sdk.users.getManagers], {
+      id: Id.parse(sellerId),
+      isApproved: true
+    })
 
     const grantees = managers?.map((m) => m.manager.id)
 

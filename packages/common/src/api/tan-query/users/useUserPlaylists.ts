@@ -1,8 +1,4 @@
-import {
-  GetPlaylistsByUserSortMethodEnum,
-  Id,
-  OptionalId
-} from '@audius/sdk'
+import { GetPlaylistsByUserSortMethodEnum, Id, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,

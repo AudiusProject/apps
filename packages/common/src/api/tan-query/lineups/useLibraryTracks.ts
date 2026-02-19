@@ -1,5 +1,6 @@
-import { Id, EntityType } from '@audius/sdk'
 import {
+  Id,
+  EntityType,
   GetUserLibraryTracksSortMethodEnum,
   GetUserLibraryTracksSortDirectionEnum
 } from '@audius/sdk'

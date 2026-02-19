@@ -86,23 +86,25 @@ const generate = async ({ apiFlavor, generator }) => {
 
 program
   .command('generate', { isDefault: true })
-  .description('Generates the client')
+  .description('Generates the v1 default API client (v1/full has been removed)')
   .option('--env <env>', 'The environment of the DN to gen from', 'prod')
   .option('--api-version <apiVersion>', 'The API version', 'v1')
-  .option('--api-flavor <apiFlavor>', 'The API flavor', '')
   .option(
     '--spec <path>',
     'Use a local swagger YAML file instead of fetching (path relative to cwd or absolute)'
   )
   .option('--generator <generator>', 'The generator to use', 'typescript-fetch')
   .action(async (options) => {
-    clearOutput(options)
+    // Only generate default (v1) client; v1/full is no longer used
+    const apiFlavor = ''
+    const opts = { ...options, apiFlavor }
+    clearOutput(opts)
     if (options.spec) {
       copySpecFromLocal(options.spec)
     } else {
-      await downloadSpec(options)
+      await downloadSpec(opts)
     }
-    await generate(options)
+    await generate(opts)
   })
 
 program

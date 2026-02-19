@@ -127,7 +127,10 @@ export const userCollectionMetadataFromSDK = (
           ? accessConditionsFromSDK(input.streamConditions)
           : null,
       tracks: transformAndCleanList(
-        ('tracks' in input ? (input.tracks ?? []) : []) as (Track | SearchTrack)[],
+        ('tracks' in input ? (input.tracks ?? []) : []) as (
+          | Track
+          | SearchTrack
+        )[],
         userTrackMetadataFromSDK
       ),
       user,

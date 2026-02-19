@@ -106,14 +106,14 @@ export const useRemixes = (
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
       const remixesResponse = await sdk.tracks.getTrackRemixes({
-          trackId: Id.parse(trackId),
-          userId: OptionalId.parse(currentUserId),
-          limit: pageSize,
-          offset: pageParam,
-          sortMethod,
-          onlyCosigns: isCosign,
-          onlyContestEntries: isContestEntry
-        })
+        trackId: Id.parse(trackId),
+        userId: OptionalId.parse(currentUserId),
+        limit: pageSize,
+        offset: pageParam,
+        sortMethod,
+        onlyCosigns: isCosign,
+        onlyContestEntries: isContestEntry
+      })
       const data = remixesResponse ?? { count: 0, tracks: [] }
       let processedTracks = transformAndCleanList(
         data.tracks ?? [],
