@@ -21,11 +21,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface PlaylistAddedTimestamp {
     /**
-     * 
+     * Optional. Metadata timestamp for when the track was added to the playlist.
      * @type {number}
      * @memberof PlaylistAddedTimestamp
      */
-    metadataTimestamp: number;
+    metadataTimestamp?: number;
     /**
      * 
      * @type {number}
@@ -45,7 +45,6 @@ export interface PlaylistAddedTimestamp {
  */
 export function instanceOfPlaylistAddedTimestamp(value: object): value is PlaylistAddedTimestamp {
     let isInstance = true;
-    isInstance = isInstance && "metadataTimestamp" in value && value["metadataTimestamp"] !== undefined;
     isInstance = isInstance && "timestamp" in value && value["timestamp"] !== undefined;
     isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
 
@@ -62,7 +61,7 @@ export function PlaylistAddedTimestampFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'metadataTimestamp': json['metadata_timestamp'],
+        'metadataTimestamp': !exists(json, 'metadata_timestamp') ? undefined : json['metadata_timestamp'],
         'timestamp': json['timestamp'],
         'trackId': json['track_id'],
     };

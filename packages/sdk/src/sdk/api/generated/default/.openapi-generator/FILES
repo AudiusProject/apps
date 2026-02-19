@@ -143,6 +143,7 @@ models/DashboardWalletUsersResponse.ts
 models/DataAndType.ts
 models/DdexCopyright.ts
 models/DdexResourceContributor.ts
+models/DdexRightsController.ts
 models/DeactivateAccessKeyRequestBody.ts
 models/DeactivateAccessKeyResponse.ts
 models/DecodedUserToken.ts

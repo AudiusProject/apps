@@ -122,6 +122,7 @@ export * from './DashboardWalletUsersResponse';
 export * from './DataAndType';
 export * from './DdexCopyright';
 export * from './DdexResourceContributor';
+export * from './DdexRightsController';
 export * from './DeactivateAccessKeyRequestBody';
 export * from './DeactivateAccessKeyResponse';
 export * from './DecodedUserToken';

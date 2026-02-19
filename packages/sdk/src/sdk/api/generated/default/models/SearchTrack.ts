@@ -38,6 +38,24 @@ import {
     CoverArtFromJSONTyped,
     CoverArtToJSON,
 } from './CoverArt';
+import type { DdexCopyright } from './DdexCopyright';
+import {
+    DdexCopyrightFromJSON,
+    DdexCopyrightFromJSONTyped,
+    DdexCopyrightToJSON,
+} from './DdexCopyright';
+import type { DdexResourceContributor } from './DdexResourceContributor';
+import {
+    DdexResourceContributorFromJSON,
+    DdexResourceContributorFromJSONTyped,
+    DdexResourceContributorToJSON,
+} from './DdexResourceContributor';
+import type { DdexRightsController } from './DdexRightsController';
+import {
+    DdexRightsControllerFromJSON,
+    DdexRightsControllerFromJSONTyped,
+    DdexRightsControllerToJSON,
+} from './DdexRightsController';
 import type { Favorite } from './Favorite';
 import {
     FavoriteFromJSON,
@@ -161,10 +179,10 @@ export interface SearchTrack {
     mood?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof SearchTrack
      */
-    releaseDate?: string;
+    releaseDate?: Date;
     /**
      * 
      * @type {RemixParent}
@@ -485,34 +503,34 @@ export interface SearchTrack {
     artists?: Array<object>;
     /**
      * 
-     * @type {Array<object>}
+     * @type {Array<DdexResourceContributor>}
      * @memberof SearchTrack
      */
-    resourceContributors?: Array<object>;
+    resourceContributors?: Array<DdexResourceContributor> | null;
     /**
      * 
-     * @type {Array<object>}
+     * @type {Array<DdexResourceContributor>}
      * @memberof SearchTrack
      */
-    indirectResourceContributors?: Array<object>;
+    indirectResourceContributors?: Array<DdexResourceContributor> | null;
     /**
      * 
-     * @type {object}
+     * @type {DdexRightsController}
      * @memberof SearchTrack
      */
-    rightsController?: object;
+    rightsController?: DdexRightsController;
     /**
      * 
-     * @type {object}
+     * @type {DdexCopyright}
      * @memberof SearchTrack
      */
-    copyrightLine?: object;
+    copyrightLine?: DdexCopyright | null;
     /**
      * 
-     * @type {object}
+     * @type {DdexCopyright}
      * @memberof SearchTrack
      */
-    producerCopyrightLine?: object;
+    producerCopyrightLine?: DdexCopyright | null;
     /**
      * 
      * @type {string}
@@ -645,7 +663,7 @@ export function SearchTrackFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
         'isOriginalAvailable': json['is_original_available'],
         'mood': !exists(json, 'mood') ? undefined : json['mood'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
         'remixOf': RemixParentFromJSON(json['remix_of']),
         'repostCount': json['repost_count'],
         'favoriteCount': json['favorite_count'],
@@ -699,11 +717,11 @@ export function SearchTrackFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'commentsDisabled': !exists(json, 'comments_disabled') ? undefined : json['comments_disabled'],
         'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
         'artists': !exists(json, 'artists') ? undefined : json['artists'],
-        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : json['resource_contributors'],
-        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : json['indirect_resource_contributors'],
-        'rightsController': !exists(json, 'rights_controller') ? undefined : json['rights_controller'],
-        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
-        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
+        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : (json['resource_contributors'] === null ? null : (json['resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : (json['indirect_resource_contributors'] === null ? null : (json['indirect_resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'rightsController': !exists(json, 'rights_controller') ? undefined : DdexRightsControllerFromJSON(json['rights_controller']),
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : DdexCopyrightFromJSON(json['copyright_line']),
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : DdexCopyrightFromJSON(json['producer_copyright_line']),
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
         'isStreamGated': json['is_stream_gated'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
@@ -737,7 +755,7 @@ export function SearchTrackToJSON(value?: SearchTrack | null): any {
         'orig_filename': value.origFilename,
         'is_original_available': value.isOriginalAvailable,
         'mood': value.mood,
-        'release_date': value.releaseDate,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
         'remix_of': RemixParentToJSON(value.remixOf),
         'repost_count': value.repostCount,
         'favorite_count': value.favoriteCount,
@@ -791,11 +809,11 @@ export function SearchTrackToJSON(value?: SearchTrack | null): any {
         'comments_disabled': value.commentsDisabled,
         'ddex_release_ids': value.ddexReleaseIds,
         'artists': value.artists,
-        'resource_contributors': value.resourceContributors,
-        'indirect_resource_contributors': value.indirectResourceContributors,
-        'rights_controller': value.rightsController,
-        'copyright_line': value.copyrightLine,
-        'producer_copyright_line': value.producerCopyrightLine,
+        'resource_contributors': value.resourceContributors === undefined ? undefined : (value.resourceContributors === null ? null : (value.resourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'indirect_resource_contributors': value.indirectResourceContributors === undefined ? undefined : (value.indirectResourceContributors === null ? null : (value.indirectResourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'rights_controller': DdexRightsControllerToJSON(value.rightsController),
+        'copyright_line': DdexCopyrightToJSON(value.copyrightLine),
+        'producer_copyright_line': DdexCopyrightToJSON(value.producerCopyrightLine),
         'parental_warning_type': value.parentalWarningType,
         'is_stream_gated': value.isStreamGated,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
