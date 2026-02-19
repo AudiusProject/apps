@@ -223,9 +223,7 @@ export const albumMetadataForCreateWithSDK = (
     streamConditions:
       input.stream_conditions != null &&
       isContentUSDCPurchaseGated(input.stream_conditions)
-        ? (usdcPurchaseConditionsToSDK(
-            input.stream_conditions
-          ) as unknown as CreateAlbumRequestBody['streamConditions'])
+        ? usdcPurchaseConditionsToSDK(input.stream_conditions)
         : null,
     isStreamGated: input.is_stream_gated ?? false,
     isScheduledRelease: input.is_scheduled_release ?? false,
