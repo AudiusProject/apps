@@ -140,12 +140,15 @@ export const useAudiusLinkResolver = ({
                 data: res.data[0]
               }
             } else if (instanceOfUserResponse(res)) {
-              const human = formatUserName({ user: res.data })
-              linkToHuman[match] = human
-              humanToData[human] = {
-                link: match,
-                type: 'user',
-                data: res.data
+              const user = Array.isArray(res.data) ? res.data[0] : res.data
+              if (user) {
+                const human = formatUserName({ user })
+                linkToHuman[match] = human
+                humanToData[human] = {
+                  link: match,
+                  type: 'user',
+                  data: user
+                }
               }
             }
           }

@@ -36,6 +36,7 @@ import {
   type UnrepostTrackRequest,
   type RecordTrackDownloadRequest
 } from '../generated/default'
+import type { UpdateTrackRequest as GeneratedUpdateTrackRequest } from '../generated/default/apis/TracksApi'
 import { RequiredError } from '../generated/default/runtime'
 
 import { TrackUploadHelper } from './TrackUploadHelper'
@@ -486,21 +487,20 @@ export class TracksApi extends GeneratedTracksApi {
       const res = await this.updateTrackWithEntityManager({
         trackId: params.trackId,
         userId: params.userId,
-        metadata
+        metadata: metadata as EntityManagerUpdateTrackRequest['metadata']
       })
       return {
         success: true,
         transactionHash: res.transactionHash
       }
     }
-    return super.updateTrack(
-      {
-        trackId: params.trackId,
-        userId: params.userId,
-        metadata: params.metadata
-      },
-      requestInit
-    )
+    const updateRequest: GeneratedUpdateTrackRequest = {
+      trackId: params.trackId,
+      userId: params.userId,
+      metadata:
+        params.metadata as unknown as GeneratedUpdateTrackRequest['metadata']
+    }
+    return super.updateTrack(updateRequest, requestInit)
   }
 
   /** @hidden

@@ -4,7 +4,7 @@ import {
   Genre,
   Mood,
   type NativeFile,
-  type TrackMetadata,
+  type UpdateTrackRequestBody,
   HashId,
   Id,
   OptionalHashId,
@@ -260,7 +260,7 @@ const DEFAULT_GENRE = Genre.Electronic
 
 export const trackMetadataForUploadToSdk = (
   input: TrackMetadataForUpload
-): TrackMetadata => {
+): UpdateTrackRequestBody => {
   const sdkGenre = toSdkGenre(input.genre)
   const genre = sdkGenre ?? DEFAULT_GENRE
   return {
@@ -348,7 +348,7 @@ export const trackMetadataForUploadToSdk = (
           camelcaseKeys(contributor)
         )
       : undefined
-  } as TrackMetadata
+  } as UpdateTrackRequestBody
 }
 
 export const fileToSdk = (

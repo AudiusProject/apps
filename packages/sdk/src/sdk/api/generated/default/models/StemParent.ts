@@ -14,13 +14,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { StemCategory } from './StemCategory';
-import {
-    StemCategoryFromJSON,
-    StemCategoryFromJSONTyped,
-    StemCategoryToJSON,
-} from './StemCategory';
-
 /**
  * 
  * @export
@@ -29,16 +22,16 @@ import {
 export interface StemParent {
     /**
      * 
-     * @type {StemCategory}
-     * @memberof StemParent
-     */
-    category: StemCategory;
-    /**
-     * 
      * @type {string}
      * @memberof StemParent
      */
-    parentTrackId: string;
+    category: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof StemParent
+     */
+    parentTrackId: number;
 }
 
 /**
@@ -62,7 +55,7 @@ export function StemParentFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     }
     return {
         
-        'category': StemCategoryFromJSON(json['category']),
+        'category': json['category'],
         'parentTrackId': json['parent_track_id'],
     };
 }
@@ -76,7 +69,7 @@ export function StemParentToJSON(value?: StemParent | null): any {
     }
     return {
         
-        'category': StemCategoryToJSON(value.category),
+        'category': value.category,
         'parent_track_id': value.parentTrackId,
     };
 }

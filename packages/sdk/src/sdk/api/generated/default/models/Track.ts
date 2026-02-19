@@ -14,6 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { Access } from './Access';
+import {
+    AccessFromJSON,
+    AccessFromJSONTyped,
+    AccessToJSON,
+} from './Access';
 import type { AccessGate } from './AccessGate';
 import {
     AccessGateFromJSON,
@@ -26,30 +32,60 @@ import {
     AlbumBacklinkFromJSONTyped,
     AlbumBacklinkToJSON,
 } from './AlbumBacklink';
-import type { MediaLink } from './MediaLink';
+import type { CoverArt } from './CoverArt';
 import {
-    MediaLinkFromJSON,
-    MediaLinkFromJSONTyped,
-    MediaLinkToJSON,
-} from './MediaLink';
+    CoverArtFromJSON,
+    CoverArtFromJSONTyped,
+    CoverArtToJSON,
+} from './CoverArt';
+import type { Favorite } from './Favorite';
+import {
+    FavoriteFromJSON,
+    FavoriteFromJSONTyped,
+    FavoriteToJSON,
+} from './Favorite';
+import type { FieldVisibility } from './FieldVisibility';
+import {
+    FieldVisibilityFromJSON,
+    FieldVisibilityFromJSONTyped,
+    FieldVisibilityToJSON,
+} from './FieldVisibility';
 import type { RemixParent } from './RemixParent';
 import {
     RemixParentFromJSON,
     RemixParentFromJSONTyped,
     RemixParentToJSON,
 } from './RemixParent';
-import type { TrackAccessInfo } from './TrackAccessInfo';
+import type { Repost } from './Repost';
 import {
-    TrackAccessInfoFromJSON,
-    TrackAccessInfoFromJSONTyped,
-    TrackAccessInfoToJSON,
-} from './TrackAccessInfo';
+    RepostFromJSON,
+    RepostFromJSONTyped,
+    RepostToJSON,
+} from './Repost';
+import type { StemParent } from './StemParent';
+import {
+    StemParentFromJSON,
+    StemParentFromJSONTyped,
+    StemParentToJSON,
+} from './StemParent';
 import type { TrackArtwork } from './TrackArtwork';
 import {
     TrackArtworkFromJSON,
     TrackArtworkFromJSONTyped,
     TrackArtworkToJSON,
 } from './TrackArtwork';
+import type { TrackSegment } from './TrackSegment';
+import {
+    TrackSegmentFromJSON,
+    TrackSegmentFromJSONTyped,
+    TrackSegmentToJSON,
+} from './TrackSegment';
+import type { UrlWithMirrors } from './UrlWithMirrors';
+import {
+    UrlWithMirrorsFromJSON,
+    UrlWithMirrorsFromJSONTyped,
+    UrlWithMirrorsToJSON,
+} from './UrlWithMirrors';
 import type { User } from './User';
 import {
     UserFromJSON,
@@ -125,22 +161,16 @@ export interface Track {
     mood?: string;
     /**
      * 
-     * @type {Date}
-     * @memberof Track
-     */
-    releaseDate?: Date;
-    /**
-     * 
      * @type {string}
      * @memberof Track
      */
-    isrc?: string;
+    releaseDate?: string;
     /**
      * 
      * @type {RemixParent}
      * @memberof Track
      */
-    remixOf?: RemixParent;
+    remixOf: RemixParent;
     /**
      * 
      * @type {number}
@@ -232,89 +262,17 @@ export interface Track {
      */
     albumBacklink?: AlbumBacklink;
     /**
-     * 
-     * @type {TrackAccessInfo}
+     * Describes what access the given user has
+     * @type {Access}
      * @memberof Track
      */
-    access?: TrackAccessInfo;
+    access: Access;
     /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    aiAttributionUserId?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Track
-     */
-    allowedApiKeys?: Array<string>;
-    /**
-     * 
-     * @type {object}
-     * @memberof Track
-     */
-    artists?: object;
-    /**
-     * 
+     * The blocknumber this track was last updated
      * @type {number}
      * @memberof Track
      */
-    audioAnalysisErrorCount?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    audioUploadId?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Track
-     */
-    blocknumber?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Track
-     */
-    bpm?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    commentsDisabled?: boolean;
-    /**
-     * 
-     * @type {object}
-     * @memberof Track
-     */
-    copyrightLine?: object;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    coverArt?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    coverArtSizes?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    coverOriginalArtist?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    coverOriginalSongTitle?: string;
+    blocknumber: number;
     /**
      * 
      * @type {string}
@@ -323,10 +281,22 @@ export interface Track {
     createDate?: string;
     /**
      * 
-     * @type {Date}
+     * @type {string}
      * @memberof Track
      */
-    createdAt?: Date;
+    coverArtSizes: string;
+    /**
+     * 
+     * @type {CoverArt}
+     * @memberof Track
+     */
+    coverArtCids?: CoverArt;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    createdAt: string;
     /**
      * 
      * @type {string}
@@ -335,118 +305,10 @@ export interface Track {
     creditsSplits?: string;
     /**
      * 
-     * @type {object}
-     * @memberof Track
-     */
-    ddexReleaseIds?: object;
-    /**
-     * 
-     * @type {MediaLink}
-     * @memberof Track
-     */
-    download?: MediaLink;
-    /**
-     * 
-     * @type {AccessGate}
-     * @memberof Track
-     */
-    downloadConditions?: AccessGate;
-    /**
-     * 
-     * @type {object}
-     * @memberof Track
-     */
-    fieldVisibility?: object;
-    /**
-     * 
-     * @type {Array<object>}
-     * @memberof Track
-     */
-    followeeFavorites?: Array<object>;
-    /**
-     * 
-     * @type {Array<object>}
-     * @memberof Track
-     */
-    followeeReposts?: Array<object>;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    hasCurrentUserReposted?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    hasCurrentUserSaved?: boolean;
-    /**
-     * 
-     * @type {object}
-     * @memberof Track
-     */
-    indirectResourceContributors?: object;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isAvailable?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isCustomBpm?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isCustomMusicalKey?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isDelete?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isDownloadGated?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isOwnedByUser?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isScheduledRelease?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isStreamGated?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Track
-     */
-    isUnlisted?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof Track
      */
-    iswc?: string;
+    isrc?: string;
     /**
      * 
      * @type {string}
@@ -458,25 +320,115 @@ export interface Track {
      * @type {string}
      * @memberof Track
      */
-    musicalKey?: string;
+    iswc?: string;
+    /**
+     * 
+     * @type {FieldVisibility}
+     * @memberof Track
+     */
+    fieldVisibility: FieldVisibility;
+    /**
+     * 
+     * @type {Array<Repost>}
+     * @memberof Track
+     */
+    followeeReposts: Array<Repost>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    hasCurrentUserReposted: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isScheduledRelease: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isUnlisted: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    hasCurrentUserSaved: boolean;
+    /**
+     * 
+     * @type {Array<Favorite>}
+     * @memberof Track
+     */
+    followeeFavorites: Array<Favorite>;
     /**
      * 
      * @type {string}
      * @memberof Track
      */
-    parentalWarningType?: string | null;
+    routeId: string;
     /**
      * 
-     * @type {object}
+     * @type {StemParent}
      * @memberof Track
      */
-    playlistsPreviouslyContainingTrack?: object;
+    stemOf?: StemParent;
     /**
      * 
-     * @type {MediaLink}
+     * @type {Array<TrackSegment>}
      * @memberof Track
      */
-    preview?: MediaLink;
+    trackSegments: Array<TrackSegment>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    updatedAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    userId: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isDelete: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverArt?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isAvailable: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    aiAttributionUserId?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Track
+     */
+    allowedApiKeys?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    audioUploadId?: string;
     /**
      * 
      * @type {number}
@@ -485,16 +437,64 @@ export interface Track {
     previewStartSeconds?: number;
     /**
      * 
-     * @type {object}
+     * @type {number}
      * @memberof Track
      */
-    producerCopyrightLine?: object;
+    bpm?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isCustomBpm?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    musicalKey?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isCustomMusicalKey?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    audioAnalysisErrorCount?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    commentsDisabled?: boolean;
     /**
      * 
      * @type {object}
      * @memberof Track
      */
-    resourceContributors?: object;
+    ddexReleaseIds?: object;
+    /**
+     * 
+     * @type {Array<object>}
+     * @memberof Track
+     */
+    artists?: Array<object>;
+    /**
+     * 
+     * @type {Array<object>}
+     * @memberof Track
+     */
+    resourceContributors?: Array<object>;
+    /**
+     * 
+     * @type {Array<object>}
+     * @memberof Track
+     */
+    indirectResourceContributors?: Array<object>;
     /**
      * 
      * @type {object}
@@ -503,46 +503,82 @@ export interface Track {
     rightsController?: object;
     /**
      * 
-     * @type {string}
+     * @type {object}
      * @memberof Track
      */
-    slug?: string;
-    /**
-     * 
-     * @type {Array<object>}
-     * @memberof Track
-     */
-    stemOf?: Array<object>;
-    /**
-     * 
-     * @type {MediaLink}
-     * @memberof Track
-     */
-    stream?: MediaLink;
-    /**
-     * 
-     * @type {AccessGate}
-     * @memberof Track
-     */
-    streamConditions?: AccessGate;
-    /**
-     * 
-     * @type {number}
-     * @memberof Track
-     */
-    trackId?: number;
+    copyrightLine?: object;
     /**
      * 
      * @type {object}
      * @memberof Track
      */
-    trackSegments?: object;
+    producerCopyrightLine?: object;
     /**
      * 
-     * @type {Date}
+     * @type {string}
      * @memberof Track
      */
-    updatedAt?: Date;
+    parentalWarningType?: string | null;
+    /**
+     * Whether or not the owner has restricted streaming behind an access gate
+     * @type {boolean}
+     * @memberof Track
+     */
+    isStreamGated: boolean;
+    /**
+     * How to unlock stream access to the track
+     * @type {AccessGate}
+     * @memberof Track
+     */
+    streamConditions?: AccessGate;
+    /**
+     * Whether or not the owner has restricted downloading behind an access gate
+     * @type {boolean}
+     * @memberof Track
+     */
+    isDownloadGated: boolean;
+    /**
+     * How to unlock the track download
+     * @type {AccessGate}
+     * @memberof Track
+     */
+    downloadConditions?: AccessGate;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverOriginalSongTitle?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverOriginalArtist?: string;
+    /**
+     * Indicates whether the track is owned by the user for MRI sake
+     * @type {boolean}
+     * @memberof Track
+     */
+    isOwnedByUser: boolean;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    stream: UrlWithMirrors;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    download: UrlWithMirrors;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    preview: UrlWithMirrors;
 }
 
 /**
@@ -554,6 +590,7 @@ export function instanceOfTrack(value: object): value is Track {
     isInstance = isInstance && "genre" in value && value["genre"] !== undefined;
     isInstance = isInstance && "id" in value && value["id"] !== undefined;
     isInstance = isInstance && "isOriginalAvailable" in value && value["isOriginalAvailable"] !== undefined;
+    isInstance = isInstance && "remixOf" in value && value["remixOf"] !== undefined;
     isInstance = isInstance && "repostCount" in value && value["repostCount"] !== undefined;
     isInstance = isInstance && "favoriteCount" in value && value["favoriteCount"] !== undefined;
     isInstance = isInstance && "commentCount" in value && value["commentCount"] !== undefined;
@@ -563,6 +600,29 @@ export function instanceOfTrack(value: object): value is Track {
     isInstance = isInstance && "isDownloadable" in value && value["isDownloadable"] !== undefined;
     isInstance = isInstance && "playCount" in value && value["playCount"] !== undefined;
     isInstance = isInstance && "permalink" in value && value["permalink"] !== undefined;
+    isInstance = isInstance && "access" in value && value["access"] !== undefined;
+    isInstance = isInstance && "blocknumber" in value && value["blocknumber"] !== undefined;
+    isInstance = isInstance && "coverArtSizes" in value && value["coverArtSizes"] !== undefined;
+    isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
+    isInstance = isInstance && "fieldVisibility" in value && value["fieldVisibility"] !== undefined;
+    isInstance = isInstance && "followeeReposts" in value && value["followeeReposts"] !== undefined;
+    isInstance = isInstance && "hasCurrentUserReposted" in value && value["hasCurrentUserReposted"] !== undefined;
+    isInstance = isInstance && "isScheduledRelease" in value && value["isScheduledRelease"] !== undefined;
+    isInstance = isInstance && "isUnlisted" in value && value["isUnlisted"] !== undefined;
+    isInstance = isInstance && "hasCurrentUserSaved" in value && value["hasCurrentUserSaved"] !== undefined;
+    isInstance = isInstance && "followeeFavorites" in value && value["followeeFavorites"] !== undefined;
+    isInstance = isInstance && "routeId" in value && value["routeId"] !== undefined;
+    isInstance = isInstance && "trackSegments" in value && value["trackSegments"] !== undefined;
+    isInstance = isInstance && "updatedAt" in value && value["updatedAt"] !== undefined;
+    isInstance = isInstance && "userId" in value && value["userId"] !== undefined;
+    isInstance = isInstance && "isDelete" in value && value["isDelete"] !== undefined;
+    isInstance = isInstance && "isAvailable" in value && value["isAvailable"] !== undefined;
+    isInstance = isInstance && "isStreamGated" in value && value["isStreamGated"] !== undefined;
+    isInstance = isInstance && "isDownloadGated" in value && value["isDownloadGated"] !== undefined;
+    isInstance = isInstance && "isOwnedByUser" in value && value["isOwnedByUser"] !== undefined;
+    isInstance = isInstance && "stream" in value && value["stream"] !== undefined;
+    isInstance = isInstance && "download" in value && value["download"] !== undefined;
+    isInstance = isInstance && "preview" in value && value["preview"] !== undefined;
 
     return isInstance;
 }
@@ -587,9 +647,8 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
         'isOriginalAvailable': json['is_original_available'],
         'mood': !exists(json, 'mood') ? undefined : json['mood'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
-        'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
-        'remixOf': !exists(json, 'remix_of') ? undefined : RemixParentFromJSON(json['remix_of']),
+        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
+        'remixOf': RemixParentFromJSON(json['remix_of']),
         'repostCount': json['repost_count'],
         'favoriteCount': json['favorite_count'],
         'commentCount': json['comment_count'],
@@ -605,58 +664,59 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'playlistsContainingTrack': !exists(json, 'playlists_containing_track') ? undefined : json['playlists_containing_track'],
         'pinnedCommentId': !exists(json, 'pinned_comment_id') ? undefined : json['pinned_comment_id'],
         'albumBacklink': !exists(json, 'album_backlink') ? undefined : AlbumBacklinkFromJSON(json['album_backlink']),
-        'access': !exists(json, 'access') ? undefined : TrackAccessInfoFromJSON(json['access']),
+        'access': AccessFromJSON(json['access']),
+        'blocknumber': json['blocknumber'],
+        'createDate': !exists(json, 'create_date') ? undefined : json['create_date'],
+        'coverArtSizes': json['cover_art_sizes'],
+        'coverArtCids': !exists(json, 'cover_art_cids') ? undefined : CoverArtFromJSON(json['cover_art_cids']),
+        'createdAt': json['created_at'],
+        'creditsSplits': !exists(json, 'credits_splits') ? undefined : json['credits_splits'],
+        'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
+        'license': !exists(json, 'license') ? undefined : json['license'],
+        'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
+        'fieldVisibility': FieldVisibilityFromJSON(json['field_visibility']),
+        'followeeReposts': ((json['followee_reposts'] as Array<any>).map(RepostFromJSON)),
+        'hasCurrentUserReposted': json['has_current_user_reposted'],
+        'isScheduledRelease': json['is_scheduled_release'],
+        'isUnlisted': json['is_unlisted'],
+        'hasCurrentUserSaved': json['has_current_user_saved'],
+        'followeeFavorites': ((json['followee_favorites'] as Array<any>).map(FavoriteFromJSON)),
+        'routeId': json['route_id'],
+        'stemOf': !exists(json, 'stem_of') ? undefined : StemParentFromJSON(json['stem_of']),
+        'trackSegments': ((json['track_segments'] as Array<any>).map(TrackSegmentFromJSON)),
+        'updatedAt': json['updated_at'],
+        'userId': json['user_id'],
+        'isDelete': json['is_delete'],
+        'coverArt': !exists(json, 'cover_art') ? undefined : json['cover_art'],
+        'isAvailable': json['is_available'],
         'aiAttributionUserId': !exists(json, 'ai_attribution_user_id') ? undefined : json['ai_attribution_user_id'],
         'allowedApiKeys': !exists(json, 'allowed_api_keys') ? undefined : json['allowed_api_keys'],
-        'artists': !exists(json, 'artists') ? undefined : json['artists'],
-        'audioAnalysisErrorCount': !exists(json, 'audio_analysis_error_count') ? undefined : json['audio_analysis_error_count'],
         'audioUploadId': !exists(json, 'audio_upload_id') ? undefined : json['audio_upload_id'],
-        'blocknumber': !exists(json, 'blocknumber') ? undefined : json['blocknumber'],
-        'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
-        'commentsDisabled': !exists(json, 'comments_disabled') ? undefined : json['comments_disabled'],
-        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
-        'coverArt': !exists(json, 'cover_art') ? undefined : json['cover_art'],
-        'coverArtSizes': !exists(json, 'cover_art_sizes') ? undefined : json['cover_art_sizes'],
-        'coverOriginalArtist': !exists(json, 'cover_original_artist') ? undefined : json['cover_original_artist'],
-        'coverOriginalSongTitle': !exists(json, 'cover_original_song_title') ? undefined : json['cover_original_song_title'],
-        'createDate': !exists(json, 'create_date') ? undefined : json['create_date'],
-        'createdAt': !exists(json, 'created_at') ? undefined : (new Date(json['created_at'])),
-        'creditsSplits': !exists(json, 'credits_splits') ? undefined : json['credits_splits'],
-        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
-        'download': !exists(json, 'download') ? undefined : MediaLinkFromJSON(json['download']),
-        'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
-        'fieldVisibility': !exists(json, 'field_visibility') ? undefined : json['field_visibility'],
-        'followeeFavorites': !exists(json, 'followee_favorites') ? undefined : json['followee_favorites'],
-        'followeeReposts': !exists(json, 'followee_reposts') ? undefined : json['followee_reposts'],
-        'hasCurrentUserReposted': !exists(json, 'has_current_user_reposted') ? undefined : json['has_current_user_reposted'],
-        'hasCurrentUserSaved': !exists(json, 'has_current_user_saved') ? undefined : json['has_current_user_saved'],
-        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : json['indirect_resource_contributors'],
-        'isAvailable': !exists(json, 'is_available') ? undefined : json['is_available'],
-        'isCustomBpm': !exists(json, 'is_custom_bpm') ? undefined : json['is_custom_bpm'],
-        'isCustomMusicalKey': !exists(json, 'is_custom_musical_key') ? undefined : json['is_custom_musical_key'],
-        'isDelete': !exists(json, 'is_delete') ? undefined : json['is_delete'],
-        'isDownloadGated': !exists(json, 'is_download_gated') ? undefined : json['is_download_gated'],
-        'isOwnedByUser': !exists(json, 'is_owned_by_user') ? undefined : json['is_owned_by_user'],
-        'isScheduledRelease': !exists(json, 'is_scheduled_release') ? undefined : json['is_scheduled_release'],
-        'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
-        'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
-        'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
-        'license': !exists(json, 'license') ? undefined : json['license'],
-        'musicalKey': !exists(json, 'musical_key') ? undefined : json['musical_key'],
-        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
-        'playlistsPreviouslyContainingTrack': !exists(json, 'playlists_previously_containing_track') ? undefined : json['playlists_previously_containing_track'],
-        'preview': !exists(json, 'preview') ? undefined : MediaLinkFromJSON(json['preview']),
         'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
-        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
+        'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
+        'isCustomBpm': !exists(json, 'is_custom_bpm') ? undefined : json['is_custom_bpm'],
+        'musicalKey': !exists(json, 'musical_key') ? undefined : json['musical_key'],
+        'isCustomMusicalKey': !exists(json, 'is_custom_musical_key') ? undefined : json['is_custom_musical_key'],
+        'audioAnalysisErrorCount': !exists(json, 'audio_analysis_error_count') ? undefined : json['audio_analysis_error_count'],
+        'commentsDisabled': !exists(json, 'comments_disabled') ? undefined : json['comments_disabled'],
+        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
+        'artists': !exists(json, 'artists') ? undefined : json['artists'],
         'resourceContributors': !exists(json, 'resource_contributors') ? undefined : json['resource_contributors'],
+        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : json['indirect_resource_contributors'],
         'rightsController': !exists(json, 'rights_controller') ? undefined : json['rights_controller'],
-        'slug': !exists(json, 'slug') ? undefined : json['slug'],
-        'stemOf': !exists(json, 'stem_of') ? undefined : json['stem_of'],
-        'stream': !exists(json, 'stream') ? undefined : MediaLinkFromJSON(json['stream']),
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : json['copyright_line'],
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : json['producer_copyright_line'],
+        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
+        'isStreamGated': json['is_stream_gated'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
-        'trackId': !exists(json, 'track_id') ? undefined : json['track_id'],
-        'trackSegments': !exists(json, 'track_segments') ? undefined : json['track_segments'],
-        'updatedAt': !exists(json, 'updated_at') ? undefined : (new Date(json['updated_at'])),
+        'isDownloadGated': json['is_download_gated'],
+        'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
+        'coverOriginalSongTitle': !exists(json, 'cover_original_song_title') ? undefined : json['cover_original_song_title'],
+        'coverOriginalArtist': !exists(json, 'cover_original_artist') ? undefined : json['cover_original_artist'],
+        'isOwnedByUser': json['is_owned_by_user'],
+        'stream': UrlWithMirrorsFromJSON(json['stream']),
+        'download': UrlWithMirrorsFromJSON(json['download']),
+        'preview': UrlWithMirrorsFromJSON(json['preview']),
     };
 }
 
@@ -679,8 +739,7 @@ export function TrackToJSON(value?: Track | null): any {
         'orig_filename': value.origFilename,
         'is_original_available': value.isOriginalAvailable,
         'mood': value.mood,
-        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
-        'isrc': value.isrc,
+        'release_date': value.releaseDate,
         'remix_of': RemixParentToJSON(value.remixOf),
         'repost_count': value.repostCount,
         'favorite_count': value.favoriteCount,
@@ -697,58 +756,59 @@ export function TrackToJSON(value?: Track | null): any {
         'playlists_containing_track': value.playlistsContainingTrack,
         'pinned_comment_id': value.pinnedCommentId,
         'album_backlink': AlbumBacklinkToJSON(value.albumBacklink),
-        'access': TrackAccessInfoToJSON(value.access),
+        'access': AccessToJSON(value.access),
+        'blocknumber': value.blocknumber,
+        'create_date': value.createDate,
+        'cover_art_sizes': value.coverArtSizes,
+        'cover_art_cids': CoverArtToJSON(value.coverArtCids),
+        'created_at': value.createdAt,
+        'credits_splits': value.creditsSplits,
+        'isrc': value.isrc,
+        'license': value.license,
+        'iswc': value.iswc,
+        'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
+        'followee_reposts': ((value.followeeReposts as Array<any>).map(RepostToJSON)),
+        'has_current_user_reposted': value.hasCurrentUserReposted,
+        'is_scheduled_release': value.isScheduledRelease,
+        'is_unlisted': value.isUnlisted,
+        'has_current_user_saved': value.hasCurrentUserSaved,
+        'followee_favorites': ((value.followeeFavorites as Array<any>).map(FavoriteToJSON)),
+        'route_id': value.routeId,
+        'stem_of': StemParentToJSON(value.stemOf),
+        'track_segments': ((value.trackSegments as Array<any>).map(TrackSegmentToJSON)),
+        'updated_at': value.updatedAt,
+        'user_id': value.userId,
+        'is_delete': value.isDelete,
+        'cover_art': value.coverArt,
+        'is_available': value.isAvailable,
         'ai_attribution_user_id': value.aiAttributionUserId,
         'allowed_api_keys': value.allowedApiKeys,
-        'artists': value.artists,
-        'audio_analysis_error_count': value.audioAnalysisErrorCount,
         'audio_upload_id': value.audioUploadId,
-        'blocknumber': value.blocknumber,
-        'bpm': value.bpm,
-        'comments_disabled': value.commentsDisabled,
-        'copyright_line': value.copyrightLine,
-        'cover_art': value.coverArt,
-        'cover_art_sizes': value.coverArtSizes,
-        'cover_original_artist': value.coverOriginalArtist,
-        'cover_original_song_title': value.coverOriginalSongTitle,
-        'create_date': value.createDate,
-        'created_at': value.createdAt === undefined ? undefined : (value.createdAt.toISOString()),
-        'credits_splits': value.creditsSplits,
-        'ddex_release_ids': value.ddexReleaseIds,
-        'download': MediaLinkToJSON(value.download),
-        'download_conditions': AccessGateToJSON(value.downloadConditions),
-        'field_visibility': value.fieldVisibility,
-        'followee_favorites': value.followeeFavorites,
-        'followee_reposts': value.followeeReposts,
-        'has_current_user_reposted': value.hasCurrentUserReposted,
-        'has_current_user_saved': value.hasCurrentUserSaved,
-        'indirect_resource_contributors': value.indirectResourceContributors,
-        'is_available': value.isAvailable,
-        'is_custom_bpm': value.isCustomBpm,
-        'is_custom_musical_key': value.isCustomMusicalKey,
-        'is_delete': value.isDelete,
-        'is_download_gated': value.isDownloadGated,
-        'is_owned_by_user': value.isOwnedByUser,
-        'is_scheduled_release': value.isScheduledRelease,
-        'is_stream_gated': value.isStreamGated,
-        'is_unlisted': value.isUnlisted,
-        'iswc': value.iswc,
-        'license': value.license,
-        'musical_key': value.musicalKey,
-        'parental_warning_type': value.parentalWarningType,
-        'playlists_previously_containing_track': value.playlistsPreviouslyContainingTrack,
-        'preview': MediaLinkToJSON(value.preview),
         'preview_start_seconds': value.previewStartSeconds,
-        'producer_copyright_line': value.producerCopyrightLine,
+        'bpm': value.bpm,
+        'is_custom_bpm': value.isCustomBpm,
+        'musical_key': value.musicalKey,
+        'is_custom_musical_key': value.isCustomMusicalKey,
+        'audio_analysis_error_count': value.audioAnalysisErrorCount,
+        'comments_disabled': value.commentsDisabled,
+        'ddex_release_ids': value.ddexReleaseIds,
+        'artists': value.artists,
         'resource_contributors': value.resourceContributors,
+        'indirect_resource_contributors': value.indirectResourceContributors,
         'rights_controller': value.rightsController,
-        'slug': value.slug,
-        'stem_of': value.stemOf,
-        'stream': MediaLinkToJSON(value.stream),
+        'copyright_line': value.copyrightLine,
+        'producer_copyright_line': value.producerCopyrightLine,
+        'parental_warning_type': value.parentalWarningType,
+        'is_stream_gated': value.isStreamGated,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
-        'track_id': value.trackId,
-        'track_segments': value.trackSegments,
-        'updated_at': value.updatedAt === undefined ? undefined : (value.updatedAt.toISOString()),
+        'is_download_gated': value.isDownloadGated,
+        'download_conditions': AccessGateToJSON(value.downloadConditions),
+        'cover_original_song_title': value.coverOriginalSongTitle,
+        'cover_original_artist': value.coverOriginalArtist,
+        'is_owned_by_user': value.isOwnedByUser,
+        'stream': UrlWithMirrorsToJSON(value.stream),
+        'download': UrlWithMirrorsToJSON(value.download),
+        'preview': UrlWithMirrorsToJSON(value.preview),
     };
 }
 

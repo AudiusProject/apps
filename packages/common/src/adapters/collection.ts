@@ -206,7 +206,7 @@ export const playlistMetadataForUpdateWithSDK = (
       ? input.playlist_contents.track_ids.map((t) => ({
           timestamp: t.time,
           trackId: Id.parse(t.track),
-          metadataTimestamp: t.metadata_time
+          metadataTimestamp: t.metadata_time ?? 0
         }))
       : undefined,
     playlistName: input.playlist_name ?? '',
@@ -223,7 +223,9 @@ export const albumMetadataForCreateWithSDK = (
     streamConditions:
       input.stream_conditions != null &&
       isContentUSDCPurchaseGated(input.stream_conditions)
-        ? usdcPurchaseConditionsToSDK(input.stream_conditions)
+        ? (usdcPurchaseConditionsToSDK(
+            input.stream_conditions
+          ) as unknown as CreateAlbumRequestBody['streamConditions'])
         : null,
     isStreamGated: input.is_stream_gated ?? false,
     isScheduledRelease: input.is_scheduled_release ?? false,

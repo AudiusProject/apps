@@ -173,7 +173,8 @@ function* createAndConfirmAlbum(
       ? [
           {
             trackId: Id.parse(initTrack.track_id),
-            timestamp: Date.now() / 1000
+            timestamp: Math.round(Date.now() / 1000),
+            metadataTimestamp: Math.round(Date.now() / 1000)
           }
         ]
       : undefined

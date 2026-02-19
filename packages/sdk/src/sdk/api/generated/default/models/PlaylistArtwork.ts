@@ -38,6 +38,12 @@ export interface PlaylistArtwork {
      * @memberof PlaylistArtwork
      */
     _1000x1000?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PlaylistArtwork
+     */
+    mirrors?: Array<string>;
 }
 
 /**
@@ -62,6 +68,7 @@ export function PlaylistArtworkFromJSONTyped(json: any, ignoreDiscriminator: boo
         '_150x150': !exists(json, '150x150') ? undefined : json['150x150'],
         '_480x480': !exists(json, '480x480') ? undefined : json['480x480'],
         '_1000x1000': !exists(json, '1000x1000') ? undefined : json['1000x1000'],
+        'mirrors': !exists(json, 'mirrors') ? undefined : json['mirrors'],
     };
 }
 
@@ -77,6 +84,7 @@ export function PlaylistArtworkToJSON(value?: PlaylistArtwork | null): any {
         '150x150': value._150x150,
         '480x480': value._480x480,
         '1000x1000': value._1000x1000,
+        'mirrors': value.mirrors,
     };
 }
 

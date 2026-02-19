@@ -60,6 +60,13 @@ const downloadSpec = async ({ env, apiVersion, apiFlavor }) => {
   fs.writeFileSync(path.join(process.env.PWD, SWAGGER_SPEC_PATH), spec)
 }
 
+const copySpecFromLocal = (specPath) => {
+  const absolutePath = path.isAbsolute(specPath)
+    ? specPath
+    : path.join(process.env.PWD, specPath)
+  fs.copyFileSync(absolutePath, path.join(process.env.PWD, SWAGGER_SPEC_PATH))
+}
+
 const generate = async ({ apiFlavor, generator }) => {
   const outputFolderName = apiFlavor === '' ? 'default' : apiFlavor
   const openApiGeneratorArgs = [
@@ -83,10 +90,18 @@ program
   .option('--env <env>', 'The environment of the DN to gen from', 'prod')
   .option('--api-version <apiVersion>', 'The API version', 'v1')
   .option('--api-flavor <apiFlavor>', 'The API flavor', '')
+  .option(
+    '--spec <path>',
+    'Use a local swagger YAML file instead of fetching (path relative to cwd or absolute)'
+  )
   .option('--generator <generator>', 'The generator to use', 'typescript-fetch')
   .action(async (options) => {
     clearOutput(options)
-    await downloadSpec(options)
+    if (options.spec) {
+      copySpecFromLocal(options.spec)
+    } else {
+      await downloadSpec(options)
+    }
     await generate(options)
   })
 

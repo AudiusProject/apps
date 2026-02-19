@@ -14,12 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { CreateUserRequestBodyEvents } from './CreateUserRequestBodyEvents';
+import type { UpdateUserRequestBodyEvents } from './UpdateUserRequestBodyEvents';
 import {
-    CreateUserRequestBodyEventsFromJSON,
-    CreateUserRequestBodyEventsFromJSONTyped,
-    CreateUserRequestBodyEventsToJSON,
-} from './CreateUserRequestBodyEvents';
+    UpdateUserRequestBodyEventsFromJSON,
+    UpdateUserRequestBodyEventsFromJSONTyped,
+    UpdateUserRequestBodyEventsToJSON,
+} from './UpdateUserRequestBodyEvents';
 import type { UserPlaylistLibrary } from './UserPlaylistLibrary';
 import {
     UserPlaylistLibraryFromJSON,
@@ -155,10 +155,10 @@ export interface UpdateUserRequestBody {
     playlistLibrary?: UserPlaylistLibrary;
     /**
      * 
-     * @type {CreateUserRequestBodyEvents}
+     * @type {UpdateUserRequestBodyEvents}
      * @memberof UpdateUserRequestBody
      */
-    events?: CreateUserRequestBodyEvents;
+    events?: UpdateUserRequestBodyEvents;
 }
 
 
@@ -210,7 +210,7 @@ export function UpdateUserRequestBodyFromJSONTyped(json: any, ignoreDiscriminato
         'splUsdcPayoutWallet': !exists(json, 'spl_usdc_payout_wallet') ? undefined : json['spl_usdc_payout_wallet'],
         'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
         'playlistLibrary': !exists(json, 'playlist_library') ? undefined : UserPlaylistLibraryFromJSON(json['playlist_library']),
-        'events': !exists(json, 'events') ? undefined : CreateUserRequestBodyEventsFromJSON(json['events']),
+        'events': !exists(json, 'events') ? undefined : UpdateUserRequestBodyEventsFromJSON(json['events']),
     };
 }
 
@@ -243,7 +243,7 @@ export function UpdateUserRequestBodyToJSON(value?: UpdateUserRequestBody | null
         'spl_usdc_payout_wallet': value.splUsdcPayoutWallet,
         'coin_flair_mint': value.coinFlairMint,
         'playlist_library': UserPlaylistLibraryToJSON(value.playlistLibrary),
-        'events': CreateUserRequestBodyEventsToJSON(value.events),
+        'events': UpdateUserRequestBodyEventsToJSON(value.events),
     };
 }
 

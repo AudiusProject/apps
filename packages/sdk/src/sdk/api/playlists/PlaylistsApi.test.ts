@@ -10,6 +10,7 @@ import { Storage } from '../../services/Storage'
 import { StorageNodeSelector } from '../../services/StorageNodeSelector'
 import { Configuration, Mood, Genre } from '../generated/default'
 import { PlaylistsApi as GeneratedPlaylistsApi } from '../generated/default/apis/PlaylistsApi'
+import type { PlaylistResponse } from '../generated/default/models/PlaylistResponse'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
 
 import { PlaylistsApi } from './PlaylistsApi'
@@ -77,21 +78,20 @@ vitest
     } as any
   })
 
+const mockPlaylistResponse: PlaylistResponse = {
+  latestChainBlock: 0,
+  latestIndexedBlock: 0,
+  latestChainSlotPlays: 0,
+  latestIndexedSlotPlays: 0,
+  signature: '',
+  timestamp: '',
+  version: { service: 'api', version: '1.0' },
+  data: []
+}
+
 vitest
   .spyOn(GeneratedPlaylistsApi.prototype, 'getPlaylist')
-  .mockImplementation(async () => {
-    return {
-      data: [
-        {
-          playlistName: 'test',
-          playlistContents: [
-            { trackId: 'yyNwXq7', timestamp: 1 },
-            { trackId: 'yyNwXq7', timestamp: 1 }
-          ]
-        } as any
-      ]
-    }
-  })
+  .mockImplementation(async () => mockPlaylistResponse)
 
 describe('PlaylistsApi', () => {
   // TODO: Move this setup out of describe
@@ -137,7 +137,8 @@ describe('PlaylistsApi', () => {
           playlistContents: [
             {
               trackId: 'yyNwXq7',
-              timestamp: 1
+              timestamp: 1,
+              metadataTimestamp: 1
             }
           ]
         }

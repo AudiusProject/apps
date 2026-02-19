@@ -25,37 +25,37 @@ export interface FieldVisibility {
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    mood?: boolean;
+    mood: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    tags?: boolean;
+    tags: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    genre?: boolean;
+    genre: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    share?: boolean;
+    share: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    playCount?: boolean;
+    playCount: boolean;
     /**
      * 
      * @type {boolean}
      * @memberof FieldVisibility
      */
-    remixes?: boolean;
+    remixes: boolean;
 }
 
 /**
@@ -63,6 +63,12 @@ export interface FieldVisibility {
  */
 export function instanceOfFieldVisibility(value: object): value is FieldVisibility {
     let isInstance = true;
+    isInstance = isInstance && "mood" in value && value["mood"] !== undefined;
+    isInstance = isInstance && "tags" in value && value["tags"] !== undefined;
+    isInstance = isInstance && "genre" in value && value["genre"] !== undefined;
+    isInstance = isInstance && "share" in value && value["share"] !== undefined;
+    isInstance = isInstance && "playCount" in value && value["playCount"] !== undefined;
+    isInstance = isInstance && "remixes" in value && value["remixes"] !== undefined;
 
     return isInstance;
 }
@@ -77,12 +83,12 @@ export function FieldVisibilityFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
-        'mood': !exists(json, 'mood') ? undefined : json['mood'],
-        'tags': !exists(json, 'tags') ? undefined : json['tags'],
-        'genre': !exists(json, 'genre') ? undefined : json['genre'],
-        'share': !exists(json, 'share') ? undefined : json['share'],
-        'playCount': !exists(json, 'play_count') ? undefined : json['play_count'],
-        'remixes': !exists(json, 'remixes') ? undefined : json['remixes'],
+        'mood': json['mood'],
+        'tags': json['tags'],
+        'genre': json['genre'],
+        'share': json['share'],
+        'playCount': json['play_count'],
+        'remixes': json['remixes'],
     };
 }
 
