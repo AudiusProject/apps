@@ -6,7 +6,6 @@ import {
   getContext,
   confirmerActions,
   confirmerSelectors,
-  confirmTransaction,
   getSDK
 } from '@audius/common/store'
 import { waitForValue } from '@audius/common/utils'
@@ -37,22 +36,10 @@ function* handleDeactivateAccount() {
         DEACTIVATE_CONFIRMATION_UID,
         function* () {
           yield* put(make(Name.DEACTIVATE_ACCOUNT_REQUEST, {}))
-          const result = yield* call(audiusBackendInstance.updateCreator, {
+          yield* call(audiusBackendInstance.updateCreator, {
             metadata: { ...userMetadata, is_deactivated: true },
             sdk
           })
-          if (!result) return
-          const { blockHash, blockNumber } = result
-          const confirmed = yield* call(
-            confirmTransaction,
-            blockHash,
-            blockNumber
-          )
-          if (!confirmed) {
-            throw new Error(
-              `Could not confirm account deactivation for user ${accountUserId}`
-            )
-          }
         },
         // @ts-ignore: confirmer is untyped
         function* () {

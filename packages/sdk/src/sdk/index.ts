@@ -29,14 +29,29 @@ export * from './api/tracks/types'
 export * from './api/users/types'
 export * from './middleware'
 export * from './types/File'
-export * from './types/Genre'
-export * from './types/StemCategory'
 export * from './types/HashId'
-export * from './types/Mood'
 export * from './types/Timeout'
 export * from './api/developer-apps/types'
 export * from './api/dashboard-wallet-users/types'
-export * from './api/grants/types'
+export type {
+  AddManagerRequest,
+  ApproveGrantRequest,
+  CreateGrantRequest,
+  EntityManagerAddManagerRequest,
+  EntityManagerApproveGrantRequest,
+  EntityManagerCreateGrantRequest,
+  EntityManagerRemoveManagerRequest,
+  EntityManagerRevokeGrantRequest,
+  RemoveManagerRequest,
+  RevokeGrantRequest
+} from './api/grants/types'
+export {
+  AddManagerSchema,
+  ApproveGrantSchema,
+  CreateGrantSchema,
+  RemoveManagerSchema,
+  RevokeGrantSchema
+} from './api/grants/types'
 export * from './services'
 export { productionConfig } from './config/production'
 export { developmentConfig } from './config/development'

@@ -3,7 +3,7 @@ import qs from 'query-string'
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
 import { encodeUrlName, formatTickerForUrl } from './formatUtil'
-import { convertGenreLabelToValue, Genre } from './genres'
+import { convertGenreLabelToValue, type GenreLabel } from './genres'
 
 // External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
@@ -441,7 +441,9 @@ export const searchPage = (searchOptions: SearchOptions) => {
   const { category, ...searchParams } = searchOptions
 
   if (searchParams.genre) {
-    searchParams.genre = convertGenreLabelToValue(searchParams.genre) as Genre
+    searchParams.genre = convertGenreLabelToValue(
+      searchParams.genre as GenreLabel
+    )
   }
 
   // Build the search path - category is optional

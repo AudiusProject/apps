@@ -144,7 +144,7 @@ export function* watchPlay() {
       )
 
       const isLongFormContent =
-        track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
+        track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
 
       const createEndChannel = async (url: string) => {
         const endChannel = eventChannel((emitter) => {
@@ -325,7 +325,7 @@ export function* watchSeek() {
       const track = yield* queryTrack(trackId)
       const currentUserId = yield* call(queryCurrentUserId)
       const isLongFormContent =
-        track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+        track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
 
       if (isLongFormContent) {
         yield* put(

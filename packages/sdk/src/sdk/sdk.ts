@@ -455,7 +455,6 @@ const initializeApis = ({
     apiClientConfig,
     services.storage,
     services.entityManager,
-    services.logger,
     services.claimableTokensClient,
     services.solanaClient,
     services.emailEncryptionService

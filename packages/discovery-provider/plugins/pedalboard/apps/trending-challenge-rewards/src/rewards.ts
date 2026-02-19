@@ -113,7 +113,7 @@ export const onDisburse = async (
               challenge.amount
             )
             res = await sdk.rewards.claimRewards({
-              claimRewardsRequest: {
+              reward: {
                 challengeId,
                 userId: challenge.user_id,
                 specifier: challenge.specifier

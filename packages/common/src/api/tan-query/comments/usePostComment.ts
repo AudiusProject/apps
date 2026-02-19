@@ -1,4 +1,4 @@
-import { CommentMention, EntityType } from '@audius/sdk'
+import { CommentMention, EntityType, Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 
@@ -32,11 +32,17 @@ export const usePostComment = () => {
   return useMutation({
     mutationFn: async (args: PostCommentArgs) => {
       const sdk = await audiusSdk()
-      return await sdk.comments.postComment({
-        ...args,
-        mentions: args.mentions?.map((mention) => mention.userId) ?? [],
-        entityId: args.trackId,
-        commentId: args.newId
+      return await sdk.comments.createComment({
+        userId: Id.parse(args.userId)!,
+        metadata: {
+          commentId: args.newId,
+          entityId: args.trackId,
+          entityType: 'Track',
+          body: args.body,
+          trackTimestampS: args.trackTimestampS,
+          mentions: args.mentions?.map((mention) => mention.userId) ?? [],
+          parentId: args.parentCommentId
+        }
       })
     },
     onMutate: async (args: PostCommentArgs) => {

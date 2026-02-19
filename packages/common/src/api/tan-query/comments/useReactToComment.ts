@@ -1,3 +1,4 @@
+import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -29,7 +30,19 @@ export const useReactToComment = () => {
       trackId
     }: ReactToCommentArgs) => {
       const sdk = await audiusSdk()
-      await sdk.comments.reactComment({ userId, commentId, isLiked, trackId })
+      if (isLiked) {
+        await sdk.comments.reactToComment({
+          userId: Id.parse(userId)!,
+          commentId: Id.parse(commentId)!,
+          metadata: { entityId: trackId, entityType: 'Track' }
+        })
+      } else {
+        await sdk.comments.unreactToComment({
+          userId: Id.parse(userId)!,
+          commentId: Id.parse(commentId)!,
+          metadata: { entityId: trackId, entityType: 'Track' }
+        })
+      }
     },
     mutationKey: ['reactToComment'],
     onMutate: async ({

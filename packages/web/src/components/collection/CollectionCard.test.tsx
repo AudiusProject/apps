@@ -109,7 +109,7 @@ describe('CollectionCard', () => {
       ...testCollection,
       access: { stream: false },
       stream_conditions: {
-        usdc_purchase: { price: 10, albumTrackPrice: 1, splits: {} }
+        usdc_purchase: { price: 10, albumTrackPrice: 1, splits: [] }
       }
     })
 
@@ -125,7 +125,7 @@ describe('CollectionCard', () => {
       ...testCollection,
       access: { stream: true, download: true },
       stream_conditions: {
-        usdc_purchase: { price: 10, albumTrackPrice: 1, splits: {} }
+        usdc_purchase: { price: 10, albumTrackPrice: 1, splits: [] }
       }
     })
 

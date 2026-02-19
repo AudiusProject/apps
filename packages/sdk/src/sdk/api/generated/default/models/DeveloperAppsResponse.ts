@@ -24,31 +24,31 @@ import {
 /**
  * 
  * @export
- * @interface DeveloperApps
+ * @interface DeveloperAppsResponse
  */
-export interface DeveloperApps {
+export interface DeveloperAppsResponse {
     /**
      * 
      * @type {Array<DeveloperApp>}
-     * @memberof DeveloperApps
+     * @memberof DeveloperAppsResponse
      */
     data?: Array<DeveloperApp>;
 }
 
 /**
- * Check if a given object implements the DeveloperApps interface.
+ * Check if a given object implements the DeveloperAppsResponse interface.
  */
-export function instanceOfDeveloperApps(value: object): value is DeveloperApps {
+export function instanceOfDeveloperAppsResponse(value: object): value is DeveloperAppsResponse {
     let isInstance = true;
 
     return isInstance;
 }
 
-export function DeveloperAppsFromJSON(json: any): DeveloperApps {
-    return DeveloperAppsFromJSONTyped(json, false);
+export function DeveloperAppsResponseFromJSON(json: any): DeveloperAppsResponse {
+    return DeveloperAppsResponseFromJSONTyped(json, false);
 }
 
-export function DeveloperAppsFromJSONTyped(json: any, ignoreDiscriminator: boolean): DeveloperApps {
+export function DeveloperAppsResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): DeveloperAppsResponse {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -58,7 +58,7 @@ export function DeveloperAppsFromJSONTyped(json: any, ignoreDiscriminator: boole
     };
 }
 
-export function DeveloperAppsToJSON(value?: DeveloperApps | null): any {
+export function DeveloperAppsResponseToJSON(value?: DeveloperAppsResponse | null): any {
     if (value === undefined) {
         return undefined;
     }

@@ -15,6 +15,7 @@ export type DeveloperApp = {
   imageUrl?: string
   apiKey: string
   apiSecret?: string
+  bearerToken?: string
 }
 
 export const developerAppSchema = z.object({

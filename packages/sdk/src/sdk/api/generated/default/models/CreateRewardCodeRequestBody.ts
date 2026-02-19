@@ -17,33 +17,33 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface CreateRewardCodeRequest
+ * @interface CreateRewardCodeRequestBody
  */
-export interface CreateRewardCodeRequest {
+export interface CreateRewardCodeRequestBody {
     /**
      * Base64-encoded Solana Ed25519 signature of the string "code"
      * @type {string}
-     * @memberof CreateRewardCodeRequest
+     * @memberof CreateRewardCodeRequestBody
      */
     signature: string;
     /**
      * The coin mint address
      * @type {string}
-     * @memberof CreateRewardCodeRequest
+     * @memberof CreateRewardCodeRequestBody
      */
     mint: string;
     /**
      * The reward amount (must be greater than 0)
      * @type {number}
-     * @memberof CreateRewardCodeRequest
+     * @memberof CreateRewardCodeRequestBody
      */
     amount: number;
 }
 
 /**
- * Check if a given object implements the CreateRewardCodeRequest interface.
+ * Check if a given object implements the CreateRewardCodeRequestBody interface.
  */
-export function instanceOfCreateRewardCodeRequest(value: object): value is CreateRewardCodeRequest {
+export function instanceOfCreateRewardCodeRequestBody(value: object): value is CreateRewardCodeRequestBody {
     let isInstance = true;
     isInstance = isInstance && "signature" in value && value["signature"] !== undefined;
     isInstance = isInstance && "mint" in value && value["mint"] !== undefined;
@@ -52,11 +52,11 @@ export function instanceOfCreateRewardCodeRequest(value: object): value is Creat
     return isInstance;
 }
 
-export function CreateRewardCodeRequestFromJSON(json: any): CreateRewardCodeRequest {
-    return CreateRewardCodeRequestFromJSONTyped(json, false);
+export function CreateRewardCodeRequestBodyFromJSON(json: any): CreateRewardCodeRequestBody {
+    return CreateRewardCodeRequestBodyFromJSONTyped(json, false);
 }
 
-export function CreateRewardCodeRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateRewardCodeRequest {
+export function CreateRewardCodeRequestBodyFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateRewardCodeRequestBody {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -68,7 +68,7 @@ export function CreateRewardCodeRequestFromJSONTyped(json: any, ignoreDiscrimina
     };
 }
 
-export function CreateRewardCodeRequestToJSON(value?: CreateRewardCodeRequest | null): any {
+export function CreateRewardCodeRequestBodyToJSON(value?: CreateRewardCodeRequestBody | null): any {
     if (value === undefined) {
         return undefined;
     }

@@ -1,14 +1,16 @@
 import {
   HashId,
   OptionalHashId,
-  OptionalId,
   type full,
-  type UpdateProfileRequest
+  type UserPlaylistLibrary,
+  Id,
+  type UpdateUserRequestBody
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
 import { omit, pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
+import type { PlaylistLibraryItem } from '~/models'
 import {
   AccountUserMetadata,
   ManagedUserMetadata,
@@ -164,9 +166,33 @@ export const accountFromSDK = (
   }
 }
 
+function mapLibraryContentsToSdkFormat(
+  libraryItems: PlaylistLibraryItem[]
+): UserPlaylistLibrary['contents'] {
+  const items: UserPlaylistLibrary['contents'] = []
+  for (const item of libraryItems) {
+    if (item.type === 'folder') {
+      const folder = {
+        id: item.id,
+        type: 'folder' as const,
+        name: item.name,
+        contents: mapLibraryContentsToSdkFormat(item.contents)
+      }
+      items.push(folder)
+    }
+    if (item.type === 'playlist') {
+      items.push({
+        playlistId: item.playlist_id,
+        type: 'playlist' as const
+      })
+    }
+  }
+  return items
+}
+
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
-): UpdateProfileRequest['metadata'] => ({
+): UpdateUserRequestBody => ({
   ...camelcaseKeys(
     pick(input, [
       'name',
@@ -179,14 +205,22 @@ export const userMetadataToSdk = (
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,
-  artistPickTrackId: OptionalId.parse(input.artist_pick_track_id ?? undefined),
+  artistPickTrackId: input.artist_pick_track_id
+    ? Id.parse(input.artist_pick_track_id)
+    : undefined,
   events: {
-    referrer: OptionalId.parse(input.events?.referrer ?? undefined),
+    referrer: input.events?.referrer
+      ? Id.parse(input.events.referrer)
+      : undefined,
     isMobileUser: input.events?.is_mobile_user ?? undefined
   },
   location: input.location ?? undefined,
   twitterHandle: input.twitter_handle ?? undefined,
   instagramHandle: input.instagram_handle ?? undefined,
-  playlistLibrary: input.playlist_library ?? undefined,
+  playlistLibrary: input.playlist_library
+    ? {
+        contents: mapLibraryContentsToSdkFormat(input.playlist_library.contents)
+      }
+    : undefined,
   tiktokHandle: input.tiktok_handle ?? undefined
 })

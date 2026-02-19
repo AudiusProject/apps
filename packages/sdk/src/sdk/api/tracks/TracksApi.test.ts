@@ -146,13 +146,15 @@ describe('TracksApi', () => {
 
   describe('uploadTrack', () => {
     it('uploads a track if valid metadata is provided', async () => {
-      const result = await tracks.uploadTrack({
+      const result = await tracks.createTrack({
         userId: '7eP5n',
         imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
         metadata: {
+          trackCid:
+            'bafkreihzvsc5jqhxzdygntlqqd7kqtx3lul77d22v54a47m26n5q426z7i',
           title: 'BachGavotte',
           genre: Genre.ELECTRONIC,
           mood: Mood.TENDER
@@ -172,13 +174,14 @@ describe('TracksApi', () => {
 
     it('throws an error if invalid metadata is provided', async () => {
       await expect(async () => {
-        await tracks.uploadTrack({
+        await tracks.createTrack({
           userId: '7eP5n',
           imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
           metadata: {
+            // intentionally missing trackCid, genre
             title: 'BachGavotte'
           } as any,
           audioFile: {
