@@ -7,7 +7,7 @@ import type { SdkServicesConfig } from './types'
 export const productionConfig: SdkServicesConfig = {
   network: {
     minVersion: '0.7.0',
-    apiEndpoint: 'http://localhost:1323',
+    apiEndpoint: 'https://api.audius.co',
     storageNodes: [
       {
         endpoint: 'https://creatornode3.audius.co',
