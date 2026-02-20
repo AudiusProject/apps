@@ -50,7 +50,7 @@ export const TrendingScreen = () => {
             </ScreenSecondaryContent>
           ) : category === 'underground' ? (
             <ScreenSecondaryContent>
-              <TrendingUndergroundLineup header={<TrendingFilterChips />} />
+              <TrendingUndergroundLineup />
             </ScreenSecondaryContent>
           ) : (
             <ScreenSecondaryContent>

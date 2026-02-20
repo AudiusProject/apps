@@ -115,7 +115,7 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
             {title}
           </GradientText>
         </View>
-        {category !== 'winners' ? (
+        {category === 'tracks' ? (
           <IconButton
             icon={IconLeading}
             size='s'

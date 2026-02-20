@@ -11,7 +11,7 @@ import { ALL_GENRES } from '@audius/common/utils'
 import { Pressable, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Button, Flex, IconCaretRight, Text } from '@audius/harmony-native'
+import { Flex, IconCaretRight, Text } from '@audius/harmony-native'
 import {
   RadioButton,
   SelectedValue,
@@ -40,12 +40,21 @@ const messages = {
   title: 'Trending',
   timeRangeSection: 'Time Range',
   filterByGenre: 'Filter by genre',
-  selected: 'Selected',
-  done: 'Done',
-  clear: 'Clear'
+  selected: 'Selected'
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
+  grabBar: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: palette.neutralLight6
+  },
+  grabBarContainer: {
+    paddingTop: spacing(2),
+    paddingBottom: spacing(1),
+    alignItems: 'center'
+  },
   content: {
     paddingHorizontal: spacing(4),
     paddingTop: spacing(4),
@@ -127,31 +136,26 @@ export const TrendingCombinedFilterDrawer = () => {
     )
   }, [dispatch])
 
-  const handleDone = useCallback(() => {
-    dispatch(
-      modalsActions.setVisibility({
-        modal: TRENDING_FILTER_MODAL,
-        visible: false
-      })
-    )
-  }, [dispatch])
-
-  const handleClear = useCallback(() => {
-    dispatch(trendingPageActions.setTrendingTimeRange(TimeRange.WEEK))
-    dispatch(trendingPageActions.setTrendingGenre(null))
-    resetLineups()
-    dispatch(
-      modalsActions.setVisibility({
-        modal: TRENDING_FILTER_MODAL,
-        visible: false
-      })
-    )
-  }, [dispatch, resetLineups])
+  const drawerHeader = useCallback(
+    (_props: { onClose: () => void }) => (
+      <Flex>
+        <View style={[styles.grabBarContainer]}>
+          <View style={[styles.grabBar]} />
+        </View>
+        <Flex ph='l' pb='l' pt='xs' justifyContent='center' alignItems='center'>
+          <Text variant='title' size='l' textAlign='center'>
+            {messages.title}
+          </Text>
+        </Flex>
+      </Flex>
+    ),
+    [styles]
+  )
 
   return (
     <AppDrawer
       modalName={TRENDING_FILTER_MODAL}
-      title={messages.title}
+      drawerHeader={drawerHeader}
       isGestureSupported
     >
       <View style={styles.content}>
@@ -199,15 +203,6 @@ export const TrendingCombinedFilterDrawer = () => {
             </SelectedValue>
           </View>
         </Pressable>
-
-        <Flex direction='row' gap='m' mt='2xl'>
-          <Button variant='primary' fullWidth onPress={handleDone}>
-            {messages.done}
-          </Button>
-          <Button variant='secondary' fullWidth onPress={handleClear}>
-            {messages.clear}
-          </Button>
-        </Flex>
       </View>
     </AppDrawer>
   )
