@@ -1,0 +1,167 @@
+.section {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.headline {
+  font-family: 'Dust Bucer', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 140px;
+  line-height: 0.72;
+  color: #fff;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.subline {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.5;
+  color: #ebebeb;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1 0 0;
+  min-width: 196px;
+  max-width: 400px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bwOverlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  mix-blend-mode: hue;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.card:hover .bwOverlay,
+.card:focus-visible .bwOverlay {
+  opacity: 0;
+}
+
+.name {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ebebeb;
+}
+
+/* Skeleton styles */
+.cardSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 0 0;
+  min-width: 196px;
+  max-width: 400px;
+}
+
+.cardSkeleton .imageWrap {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nameSkeleton {
+  height: 24px;
+  width: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+@media (max-width: 800px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .headline {
+    font-size: 96px;
+  }
+
+  .subline {
+    font-size: 18px;
+  }
+
+  .gridContainer {
+    padding: 0 16px;
+  }
+
+  .grid {
+    gap: 16px;
+  }
+
+  .card {
+    min-width: 140px;
+    max-width: none;
+  }
+
+  .cardSkeleton {
+    min-width: 140px;
+    max-width: none;
+  }
+}

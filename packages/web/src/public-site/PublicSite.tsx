@@ -10,7 +10,8 @@ import { env } from 'services/env'
 
 import { AppContextProvider } from '../app/AppContextProvider'
 
-import LandingPage from './pages/landing-page/LandingPage'
+import { LandingPage2026 } from './pages/landing-2026/LandingPage2026'
+import { PublicSiteProviders } from './PublicSiteProviders'
 
 const {
   TRENDING_PAGE,
@@ -111,9 +112,10 @@ export const PublicSite = (props: PublicSiteProps) => {
       </div>
 
       <Suspense fallback={<div style={{ width: '100vw', height: '100vh' }} />}>
-        <ThemeProvider theme='day'>
-          <AppContextProvider>
-            {(() => {
+        <PublicSiteProviders>
+          <ThemeProvider theme='day'>
+            <AppContextProvider>
+              {(() => {
               const RouterComponent = env.USE_HASH_ROUTING
                 ? HashRouter
                 : BrowserRouter
@@ -195,7 +197,7 @@ export const PublicSite = (props: PublicSiteProps) => {
                     <Route
                       path='/'
                       element={
-                        <LandingPage
+                        <LandingPage2026
                           isMobile={isMobileOrNarrow}
                           openNavScreen={openNavScreen}
                           setRenderPublicSite={setRenderPublicSite}
@@ -209,9 +211,10 @@ export const PublicSite = (props: PublicSiteProps) => {
                   </Routes>
                 </RouterComponent>
               )
-            })()}
-          </AppContextProvider>
-        </ThemeProvider>
+              })()}
+            </AppContextProvider>
+          </ThemeProvider>
+        </PublicSiteProviders>
       </Suspense>
     </>
   )

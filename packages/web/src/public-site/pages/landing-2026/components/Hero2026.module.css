@@ -1,0 +1,102 @@
+.section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  max-height: 1024px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 var(--gutters, 48px);
+  box-sizing: border-box;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 104px;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.headline {
+  font-family: 'Dust Bucer', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 208px;
+  line-height: 0.72;
+  color: #fff;
+  margin: 0;
+  width: 100%;
+  font-feature-settings: 'salt' 1;
+}
+
+.ctaButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  width: 145px;
+  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: box-shadow 0.25s ease;
+  box-sizing: border-box;
+}
+
+.ctaButton:hover {
+  box-shadow:
+    inset 0px 4px 4px 0px rgba(175, 72, 255, 0.25),
+    inset 0px -4px 4px 0px rgba(175, 72, 255, 0.25),
+    inset 4px 0px 4px 0px rgba(175, 72, 255, 0.25),
+    inset -4px 0px 4px 0px rgba(175, 72, 255, 0.25);
+}
+
+.ctaLabel {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  color: #fff;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .section {
+    height: 790px;
+    min-height: 790px;
+    max-height: none;
+    padding: 0 24px;
+  }
+
+  .headline {
+    font-size: 120px;
+  }
+
+  .content {
+    gap: 104px;
+  }
+
+  .ctaButton {
+    width: 100%;
+  }
+}
