@@ -97,7 +97,12 @@ export const TrendingCombinedFilterDrawer = () => {
     dispatch(trendingWeekActions.reset())
     dispatch(trendingMonthActions.reset())
     dispatch(trendingAllTimeActions.reset())
-  }, [dispatch])
+  }, [
+    dispatch,
+    trendingWeekActions,
+    trendingMonthActions,
+    trendingAllTimeActions
+  ])
 
   const handleSelectTimeRange = useCallback(
     (range: TimeRange) => {
