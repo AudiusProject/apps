@@ -38,7 +38,11 @@ export const Hero2026 = (props: Hero2026Props) => {
           <br />
           {messages.line2}
         </h1>
-        <button type='button' className={styles.ctaButton} onClick={onGetStarted}>
+        <button
+          type='button'
+          className={styles.ctaButton}
+          onClick={onGetStarted}
+        >
           <span className={styles.ctaLabel}>{messages.getStarted}</span>
         </button>
       </div>

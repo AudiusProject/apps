@@ -1,19 +1,16 @@
 import { MouseEvent, useState, useRef, useEffect } from 'react'
 
+import { route } from '@audius/common/utils'
 import {
   IconAudiusLogoHorizontal,
-  IconBlog,
   IconCaretDown,
   IconClose,
-  IconCloudDownload,
   IconDiscord,
-  IconHeadphones,
   IconInstagram,
   IconKebabHorizontal,
   IconTikTok,
   IconX
 } from '@audius/harmony'
-import { route } from '@audius/common/utils'
 import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
@@ -27,34 +24,50 @@ const messages = {
   resources: 'Resources'
 }
 
-const MENU_ITEMS = [
+const MENU_ITEMS: {
+  title: string
+  description: string
+  href: string
+  iconSrc: string
+}[] = [
   {
     title: 'Download App',
-    description:
-      'Download the apps for desktop and mobile devices.',
+    description: 'Download the apps for desktop and mobile devices.',
     href: DOWNLOAD_LINK,
-    Icon: IconCloudDownload
+    iconSrc: '/landing-2026/icon-download-app.svg'
   },
   {
     title: 'Help & Support',
     description:
       'Answers and Resources to help you make the most of Audius Music.',
     href: 'https://help.audius.co/',
-    Icon: IconHeadphones
+    iconSrc: '/landing-2026/icon-help-support.svg'
   },
   {
     title: 'Blog',
     description: 'Check out the latest updates to the Audius Blog.',
     href: 'https://blog.audius.co/',
-    Icon: IconBlog
+    iconSrc: '/landing-2026/icon-blog.svg'
   }
 ]
 
 const SOCIAL_LINKS = [
-  { label: 'Instagram', href: 'https://instagram.com/audiusmusic', Icon: IconInstagram },
-  { label: 'Discord', href: 'https://discord.com/invite/audius', Icon: IconDiscord },
+  {
+    label: 'Instagram',
+    href: 'https://instagram.com/audiusmusic',
+    Icon: IconInstagram
+  },
+  {
+    label: 'Discord',
+    href: 'https://discord.com/invite/audius',
+    Icon: IconDiscord
+  },
   { label: 'TikTok', href: 'https://tiktok.com/@audius', Icon: IconTikTok },
-  { label: 'X (Twitter)', href: 'https://twitter.com/audiusproject', Icon: IconX }
+  {
+    label: 'X (Twitter)',
+    href: 'https://twitter.com/audiusproject',
+    Icon: IconX
+  }
 ]
 
 type Nav2026Props = {
@@ -109,7 +122,12 @@ export const Nav2026 = (props: Nav2026Props) => {
     <>
       <nav className={styles.nav}>
         <div className={styles.inner}>
-          <a href='/' onClick={onLogoClick} aria-label='Audius home' className={styles.logoLink}>
+          <a
+            href='/'
+            onClick={onLogoClick}
+            aria-label='Audius home'
+            className={styles.logoLink}
+          >
             <IconAudiusLogoHorizontal
               height={32}
               width='auto'
@@ -197,7 +215,12 @@ function MobileNavOverlay({
   return (
     <div className={styles.overlay}>
       <div className={styles.overlayNav}>
-        <a href='/' onClick={onLogoClick} aria-label='Audius home' className={styles.logoLink}>
+        <a
+          href='/'
+          onClick={onLogoClick}
+          aria-label='Audius home'
+          className={styles.logoLink}
+        >
           <IconAudiusLogoHorizontal
             height={32}
             width='auto'
@@ -216,22 +239,19 @@ function MobileNavOverlay({
       </div>
       <div className={styles.overlayBody}>
         <div className={styles.overlayLinks}>
-          {MENU_ITEMS.map((item) => {
-            const Icon = item.Icon
-            return (
-              <button
-                key={item.title}
-                type='button'
-                className={styles.overlayMenuItem}
-                onClick={handleItemClick(item.href)}
-              >
-                <span className={styles.overlayMenuIcon}>
-                  <Icon size='s' color='default' />
-                </span>
-                <span className={styles.overlayMenuTitle}>{item.title}</span>
-              </button>
-            )
-          })}
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.title}
+              type='button'
+              className={styles.overlayMenuItem}
+              onClick={handleItemClick(item.href)}
+            >
+              <span className={styles.overlayMenuIcon}>
+                <img src={item.iconSrc} alt='' />
+              </span>
+              <span className={styles.overlayMenuTitle}>{item.title}</span>
+            </button>
+          ))}
         </div>
         <div className={styles.overlayBottom}>
           <div className={styles.overlaySocials}>
@@ -285,28 +305,23 @@ function ResourcesDropdown({
 
   return (
     <div className={styles.dropdown} role='menu'>
-      {RESOURCES_ITEMS.map((item) => {
-        const Icon = item.Icon
-        return (
-          <button
-            key={item.title}
-            type='button'
-            className={styles.dropdownItem}
-            onClick={handleItemClick(item.href)}
-            role='menuitem'
-          >
-            <span className={styles.dropdownItemIcon} aria-hidden>
-              <Icon size='s' color='default' />
-            </span>
-            <div className={styles.dropdownItemContent}>
-              <p className={styles.dropdownItemTitle}>{item.title}</p>
-              <p className={styles.dropdownItemDescription}>
-                {item.description}
-              </p>
-            </div>
-          </button>
-        )
-      })}
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.title}
+          type='button'
+          className={styles.dropdownItem}
+          onClick={handleItemClick(item.href)}
+          role='menuitem'
+        >
+          <span className={styles.dropdownItemIcon} aria-hidden>
+            <img src={item.iconSrc} alt='' />
+          </span>
+          <div className={styles.dropdownItemContent}>
+            <p className={styles.dropdownItemTitle}>{item.title}</p>
+            <p className={styles.dropdownItemDescription}>{item.description}</p>
+          </div>
+        </button>
+      ))}
       <hr className={styles.dropdownDivider} />
       <div className={styles.dropdownSocials}>
         {SOCIAL_LINKS.map((social) => {

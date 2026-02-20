@@ -11,7 +11,7 @@ const { SIGN_UP_PAGE } = route
 
 const messages = {
   headline: 'Create the future of music, together.',
-  getStarted: 'Get Started'
+  signUp: 'Sign up'
 }
 
 type CreateFutureCTAProps = {
@@ -22,7 +22,7 @@ type CreateFutureCTAProps = {
 export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
   const navigate = useNavigate()
 
-  const onGetStarted = (e: MouseEvent) => {
+  const onSignUp = (e: MouseEvent) => {
     handleClickRoute(SIGN_UP_PAGE, props.setRenderPublicSite, navigate)(e)
   }
 
@@ -38,12 +38,8 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
           <h2 id='cta-heading' className={styles.headline}>
             {messages.headline}
           </h2>
-          <button
-            type='button'
-            className={styles.ctaButton}
-            onClick={onGetStarted}
-          >
-            <span className={styles.ctaLabel}>{messages.getStarted}</span>
+          <button type='button' className={styles.ctaButton} onClick={onSignUp}>
+            <span className={styles.ctaLabel}>{messages.signUp}</span>
           </button>
         </div>
       </div>

@@ -152,16 +152,20 @@
   }
 
   .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 
   .card {
-    min-width: 140px;
+    min-width: 0;
     max-width: none;
+    flex: none;
   }
 
   .cardSkeleton {
-    min-width: 140px;
+    min-width: 0;
     max-width: none;
+    flex: none;
   }
 }

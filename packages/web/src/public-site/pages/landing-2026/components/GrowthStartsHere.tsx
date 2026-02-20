@@ -26,10 +26,7 @@ type GrowthStartsHereProps = {
 
 export const GrowthStartsHere = (_props: GrowthStartsHereProps) => {
   return (
-    <section
-      className={styles.section}
-      aria-labelledby='growth-heading'
-    >
+    <section className={styles.section} aria-labelledby='growth-heading'>
       <div className={styles.bg}>
         <img src='/landing-2026/features-bg.svg' alt='' />
       </div>

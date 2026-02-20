@@ -56,12 +56,7 @@ function ArtistCard({
       aria-label={`View ${name} on Audius`}
     >
       <div className={styles.imageWrap}>
-        <img
-          src={imageUrl}
-          alt=''
-          className={styles.image}
-          loading='lazy'
-        />
+        <img src={imageUrl} alt='' className={styles.image} loading='lazy' />
         <div className={styles.bwOverlay} aria-hidden='true' />
       </div>
       <span className={styles.name}>{name}</span>
@@ -77,6 +72,9 @@ export const WhoUsesAudius2026 = (props: WhoUsesAudius2026Props) => {
 
   const row1 = users?.slice(0, ROW_SIZE) ?? []
   const row2 = users?.slice(ROW_SIZE, FEATURED_LIMIT) ?? []
+  const allUsers = users?.slice(0, FEATURED_LIMIT) ?? []
+
+  const skeletonCount = props.isMobile ? FEATURED_LIMIT : ROW_SIZE
 
   return (
     <section className={styles.section} aria-labelledby='who-uses-heading'>
@@ -86,17 +84,17 @@ export const WhoUsesAudius2026 = (props: WhoUsesAudius2026Props) => {
         </h2>
         <p className={styles.subline}>{messages.subline}</p>
       </div>
-      {[row1, row2].map((row, rowIdx) => (
-        <div key={rowIdx} className={styles.gridContainer}>
+      {props.isMobile ? (
+        <div className={styles.gridContainer}>
           <div className={styles.grid}>
             {isPending
-              ? Array.from({ length: ROW_SIZE }).map((_, i) => (
+              ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <div key={i} className={styles.cardSkeleton}>
                     <div className={styles.imageWrap} />
                     <div className={styles.nameSkeleton} />
                   </div>
                 ))
-              : row.map((user) => (
+              : allUsers.map((user) => (
                   <ArtistCard
                     key={user.user_id}
                     userId={user.user_id}
@@ -108,7 +106,31 @@ export const WhoUsesAudius2026 = (props: WhoUsesAudius2026Props) => {
                 ))}
           </div>
         </div>
-      ))}
+      ) : (
+        [row1, row2].map((row, rowIdx) => (
+          <div key={rowIdx} className={styles.gridContainer}>
+            <div className={styles.grid}>
+              {isPending
+                ? Array.from({ length: ROW_SIZE }).map((_, i) => (
+                    <div key={i} className={styles.cardSkeleton}>
+                      <div className={styles.imageWrap} />
+                      <div className={styles.nameSkeleton} />
+                    </div>
+                  ))
+                : row.map((user) => (
+                    <ArtistCard
+                      key={user.user_id}
+                      userId={user.user_id}
+                      name={user.name}
+                      handle={user.handle}
+                      setRenderPublicSite={props.setRenderPublicSite}
+                      navigate={navigate}
+                    />
+                  ))}
+            </div>
+          </div>
+        ))
+      )}
     </section>
   )
 }

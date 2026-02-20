@@ -57,7 +57,7 @@
   font-weight: 400;
   font-size: 28px;
   line-height: 1.5;
-  color: #ebebeb;
+  color: #fff;
   margin: 0;
   width: 100%;
 }
@@ -90,7 +90,7 @@
   gap: 36px;
   flex: 1 0 0;
   padding: 32px 0;
-  color: #eee;
+  color: #fff;
 }
 
 .feature {
@@ -104,6 +104,7 @@
   font-weight: 700;
   font-size: 24px;
   line-height: 24px;
+  color: #fff;
   margin: 0;
 }
 
@@ -112,6 +113,7 @@
   font-weight: 500;
   font-size: 18px;
   line-height: 32px;
+  color: #fff;
   margin: 0;
 }
 

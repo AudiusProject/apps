@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@audius/harmony'
 
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
+import { dismissCookieBanner as dismissCookieBannerAction } from 'store/application/ui/cookieBanner/actions'
 import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
 
+import styles from './LandingPage2026.module.css'
 import { CreateFutureCTA } from './components/CreateFutureCTA'
 import { FAQ2026 } from './components/FAQ2026'
 import { FeaturedContests2026 } from './components/FeaturedContests2026'
@@ -15,8 +17,6 @@ import { MadeForUs } from './components/MadeForUs'
 import { Nav2026 } from './components/Nav2026'
 import { Partners2026 } from './components/Partners2026'
 import { WhoUsesAudius2026 } from './components/WhoUsesAudius2026'
-
-import styles from './LandingPage2026.module.css'
 
 const MOBILE_MAX_WIDTH = 800
 const MOBILE_MEDIA_QUERY =
@@ -60,6 +60,7 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
   const onDismissCookie = () => {
     dismissCookieBanner()
     setShowCookieBanner(false)
+    return dismissCookieBannerAction()
   }
 
   return (

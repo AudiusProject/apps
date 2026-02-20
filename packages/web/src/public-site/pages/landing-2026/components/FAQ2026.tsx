@@ -7,8 +7,7 @@ import styles from './FAQ2026.module.css'
 const faqItems = [
   {
     question: 'Who is Audius made for?',
-    answer:
-      'Audius is made for us, the people pushing music scenes forward.'
+    answer: 'Audius is made for us, the people pushing music scenes forward.'
   },
   {
     question: "I'm an artist. What can I do on Audius?",
@@ -21,7 +20,7 @@ const faqItems = [
       "Record labels on Audius actively showcase their roster's music, discover artists, and create a community around their brand. They host remix contests, stay connected to emerging scenes, and build the momentum needed to support their releases everywhere else. Like artists, successful labels consistently engage, activate, and connect with their audience."
   },
   {
-    question: "I just love music. What can I do on Audius?",
+    question: 'I just love music. What can I do on Audius?',
     answer:
       "Music lovers on Audius keep the culture alive. They play a vital role in directly engaging, amplifying, and creating opportunities for artists to grow in their scene. While some just love the music, many professionally run collectives, promote events, and use the platform to expand what they're already building."
   }

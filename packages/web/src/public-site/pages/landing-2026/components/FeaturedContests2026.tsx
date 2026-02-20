@@ -36,9 +36,9 @@ function ContestCard({
   const permalink = track?.permalink ?? ''
   const handleNavigate = useLinkClickHandler(permalink)
 
-  const onClick = (e: MouseEvent) => {
+  const onClick = (e: MouseEvent<Element>) => {
     setRenderPublicSite(false)
-    handleNavigate(e)
+    handleNavigate(e as MouseEvent<HTMLAnchorElement>)
   }
 
   if (isPending) {
@@ -108,13 +108,15 @@ export const FeaturedContests2026 = (props: FeaturedContests2026Props) => {
                     <div className={styles.titleSkeleton} />
                   </div>
                 ))
-              : contestIds.slice(0, 4).map((id) => (
-                  <ContestCard
-                    key={id}
-                    id={id}
-                    setRenderPublicSite={props.setRenderPublicSite}
-                  />
-                ))}
+              : contestIds
+                  .slice(0, 4)
+                  .map((id) => (
+                    <ContestCard
+                      key={id}
+                      id={id}
+                      setRenderPublicSite={props.setRenderPublicSite}
+                    />
+                  ))}
           </div>
         </div>
       </div>

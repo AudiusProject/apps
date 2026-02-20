@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createStore } from 'redux'
 import { Provider as ReduxProvider } from 'react-redux'
+import { createStore } from 'redux'
 
 import { AudiusQueryProvider } from 'app/AudiusQueryProvider'
 import { queryClient } from 'services/query-client'

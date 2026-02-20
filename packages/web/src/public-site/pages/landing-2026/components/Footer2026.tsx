@@ -1,5 +1,6 @@
 import { MouseEvent } from 'react'
 
+import { route } from '@audius/common/utils'
 import {
   IconAudiusLogoHorizontal,
   IconDiscord,
@@ -8,7 +9,6 @@ import {
   IconX
 } from '@audius/harmony'
 import type { IconComponent } from '@audius/harmony'
-import { route } from '@audius/common/utils'
 import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
@@ -55,14 +55,9 @@ const socialLinks: { label: string; href: string; Icon: IconComponent }[] = [
 export const Footer2026 = (props: Footer2026Props) => {
   const navigate = useNavigate()
 
-  const onLegalClick =
-    (legalRoute: string) => (e: MouseEvent) => {
-      handleClickRoute(
-        legalRoute,
-        props.setRenderPublicSite,
-        navigate
-      )(e)
-    }
+  const onLegalClick = (legalRoute: string) => (e: MouseEvent) => {
+    handleClickRoute(legalRoute, props.setRenderPublicSite, navigate)(e)
+  }
 
   return (
     <footer className={styles.footer}>
@@ -88,9 +83,7 @@ export const Footer2026 = (props: Footer2026Props) => {
                     target='_blank'
                     rel='noopener noreferrer'
                   >
-                    <span className={styles.footerLinkText}>
-                      {link.label}
-                    </span>
+                    <span className={styles.footerLinkText}>{link.label}</span>
                   </a>
                 ))}
               </div>

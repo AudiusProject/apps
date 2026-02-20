@@ -67,7 +67,9 @@
   line-height: 1.5;
   color: #fff;
   margin: 0;
-  transition: color 0.2s ease, text-shadow 0.2s ease;
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
 }
 
 .faqItem[aria-expanded='true'] .faqQuestion,
