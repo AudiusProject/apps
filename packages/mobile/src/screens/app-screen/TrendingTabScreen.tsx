@@ -9,5 +9,9 @@ export type TrendingTabScreenParamList = AppTabScreenParamList & {
 
 export const TrendingTabScreen =
   createAppTabScreenStack<TrendingTabScreenParamList>((Stack) => (
-    <Stack.Screen name='Trending' component={TrendingScreen} />
+    <Stack.Screen
+      name='Trending'
+      component={TrendingScreen}
+      options={{ contentStyle: { paddingTop: 0 } }}
+    />
   ))

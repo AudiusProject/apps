@@ -15,6 +15,7 @@ export type IconComponent = FunctionComponent<IconProps>
 
 export { default as IconAlbum } from '@audius/harmony/src/assets/icons/Album.svg'
 export { default as IconFilter } from '@audius/harmony/src/assets/icons/Filter.svg'
+export { default as IconLeading } from '@audius/harmony/src/assets/icons/Leading.svg'
 export { default as IconSearch } from '@audius/harmony/src/assets/icons/Search.svg'
 export { default as IconAllTime } from '@audius/harmony/src/assets/icons/AllTime.svg'
 export { default as IconFolder } from '@audius/harmony/src/assets/icons/Folder.svg'

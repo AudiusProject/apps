@@ -61,6 +61,7 @@ export type Modals =
   | 'TrendingGenreSelection'
   | 'TrendingCategory'
   | 'TrendingTimeRange'
+  | 'TrendingFilter'
   | 'TrendingRewardsExplainer'
   | 'SocialProof'
   | 'EditFolder'

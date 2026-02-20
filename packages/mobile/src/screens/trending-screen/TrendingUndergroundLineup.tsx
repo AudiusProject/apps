@@ -8,13 +8,20 @@ import {
 import { useDispatch } from 'react-redux'
 
 import { Lineup } from 'app/components/lineup'
+import type { LineupProps } from 'app/components/lineup/types'
 
 const { getLineup } = trendingUndergroundPageLineupSelectors
 const { makeGetLineupMetadatas } = lineupSelectors
 
 const getTrendingUndergroundLineup = makeGetLineupMetadatas(getLineup)
 
-export const TrendingUndergroundLineup = () => {
+type TrendingUndergroundLineupProps = {
+  header?: LineupProps['header']
+}
+
+export const TrendingUndergroundLineup = ({
+  header
+}: TrendingUndergroundLineupProps) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -42,9 +49,11 @@ export const TrendingUndergroundLineup = () => {
       selfLoad
       pullToRefresh
       rankIconCount={5}
+      header={header}
       lineupSelector={getTrendingUndergroundLineup}
       actions={trendingUndergroundPageLineupActions}
       loadMore={handleLoadMore}
+      itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
     />
   )
 }

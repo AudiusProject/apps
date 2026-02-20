@@ -26,6 +26,7 @@ export const initialState: BasicModalsState = {
   TrendingGenreSelection: { isOpen: false },
   TrendingCategory: { isOpen: false },
   TrendingTimeRange: { isOpen: false },
+  TrendingFilter: { isOpen: false },
   TrendingRewardsExplainer: { isOpen: false },
   SocialProof: { isOpen: false },
   EditFolder: { isOpen: false },

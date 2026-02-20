@@ -55,9 +55,8 @@ import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
-  TrendingCategoryDrawer,
-  TrendingFilterDrawer,
-  TrendingTimeRangeDrawer
+  TrendingCombinedFilterDrawer,
+  TrendingFilterDrawer
 } from 'app/screens/trending-screen'
 import { WalletRowOverflowMenu } from 'app/screens/wallet-screen/components/LinkedWallets'
 
@@ -117,8 +116,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
-  TrendingCategory: TrendingCategoryDrawer,
-  TrendingTimeRange: TrendingTimeRangeDrawer,
+  TrendingFilter: TrendingCombinedFilterDrawer,
   Overflow: OverflowMenuDrawer,
   SignOutConfirmation: SignOutConfirmationDrawer,
   AddToCollection: AddToCollectionDrawer,
