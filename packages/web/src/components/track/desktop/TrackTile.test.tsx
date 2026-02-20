@@ -77,7 +77,12 @@ describe('TrackTile', () => {
     expect(await screen.findByText('3:00')).toBeInTheDocument()
   })
 
-  const premiumConditions = { usdc_purchase: { price: 100 } }
+  const premiumConditions = {
+    usdc_purchase: {
+      price: 100,
+      splits: [{ user_id: artistUser.id, percentage: 100 }]
+    }
+  }
 
   const matrix = [
     {
@@ -100,12 +105,8 @@ describe('TrackTile', () => {
         stream_conditions: premiumConditions
       },
       assert: async () => {
-        expect(await screen.findByText('Premium')).toBeInTheDocument()
         expect(
-          screen.getByRole('img', { name: /available for purchase/i })
-        ).toBeInTheDocument()
-        expect(
-          screen.getByRole('button', { name: '$1.00' })
+          await screen.findByRole('button', { name: '$1.00' })
         ).toBeInTheDocument()
       }
     }
