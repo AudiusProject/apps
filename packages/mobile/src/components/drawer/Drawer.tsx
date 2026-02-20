@@ -208,6 +208,10 @@ export type DrawerProps = {
    * Optional replacement component for the drawer header
    */
   drawerHeader?: ComponentType<{ onClose: () => void }>
+  /**
+   * Show back arrow instead of close X in the header. For nested drawers.
+   */
+  showBackButton?: boolean
 
   translationAnim?: Animated.Value
 }
@@ -278,6 +282,7 @@ export const Drawer: DrawerComponent = ({
   shouldHaveRoundedBordersAtInitialOffset = false,
   zIndex = 5,
   drawerHeader: CustomDrawerHeader,
+  showBackButton = false,
   drawerStyle,
   shouldShowShadow = true,
   shouldAnimateShadow,
@@ -705,6 +710,7 @@ export const Drawer: DrawerComponent = ({
             titleImage={titleImage}
             isFullscreen={isFullscreen}
             blockClose={blockClose}
+            showBackButton={showBackButton}
           />
         )}
         {children}

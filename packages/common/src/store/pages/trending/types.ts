@@ -2,7 +2,7 @@ import { Genre } from '~/utils'
 
 import { LineupState, TimeRange, Track } from '../../../models'
 
-export type TrendingCategory = 'tracks' | 'underground'
+export type TrendingCategory = 'tracks' | 'underground' | 'winners'
 
 export type TrendingPageState = {
   trendingWeek: LineupState<Track>

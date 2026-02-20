@@ -82,6 +82,7 @@ export const TrendingLineup = (props: TrendingLineupProps) => {
       lineupSelector={selectorsMap[timeRange]}
       actions={trendingActions}
       loadMore={handleLoadMore}
+      itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
       {...other}
     />
   )

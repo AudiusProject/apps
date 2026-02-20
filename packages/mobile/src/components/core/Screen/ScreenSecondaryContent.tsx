@@ -26,7 +26,7 @@ export const ScreenSecondaryContent = (props: ScreenSecondaryContentProps) => {
   return isPrimaryContentReady ? (
     <Animated.View
       entering={Platform.OS === 'ios' ? FadeIn : undefined}
-      style={{ flex: 1 }}
+      style={{ flex: 1, minHeight: 0 }}
     >
       {children}
     </Animated.View>

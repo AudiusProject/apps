@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useCallback, useEffect } from 'react'
 
 import {
@@ -14,7 +15,13 @@ const { makeGetLineupMetadatas } = lineupSelectors
 
 const getTrendingUndergroundLineup = makeGetLineupMetadatas(getLineup)
 
-export const TrendingUndergroundLineup = () => {
+type TrendingUndergroundLineupProps = {
+  header?: ReactNode
+}
+
+export const TrendingUndergroundLineup = ({
+  header
+}: TrendingUndergroundLineupProps) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -42,9 +49,11 @@ export const TrendingUndergroundLineup = () => {
       selfLoad
       pullToRefresh
       rankIconCount={5}
+      header={header}
       lineupSelector={getTrendingUndergroundLineup}
       actions={trendingUndergroundPageLineupActions}
       loadMore={handleLoadMore}
+      itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
     />
   )
 }
