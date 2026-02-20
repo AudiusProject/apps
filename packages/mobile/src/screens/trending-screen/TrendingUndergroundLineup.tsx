@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useCallback, useEffect } from 'react'
 
 import {
@@ -9,6 +8,7 @@ import {
 import { useDispatch } from 'react-redux'
 
 import { Lineup } from 'app/components/lineup'
+import type { LineupProps } from 'app/components/lineup/types'
 
 const { getLineup } = trendingUndergroundPageLineupSelectors
 const { makeGetLineupMetadatas } = lineupSelectors
@@ -16,7 +16,7 @@ const { makeGetLineupMetadatas } = lineupSelectors
 const getTrendingUndergroundLineup = makeGetLineupMetadatas(getLineup)
 
 type TrendingUndergroundLineupProps = {
-  header?: ReactNode
+  header?: LineupProps['header']
 }
 
 export const TrendingUndergroundLineup = ({

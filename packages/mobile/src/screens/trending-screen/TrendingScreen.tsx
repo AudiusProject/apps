@@ -46,19 +46,11 @@ export const TrendingScreen = () => {
         <ScreenContent>
           {category === 'tracks' ? (
             <ScreenSecondaryContent>
-              <TrendingTracksLineup
-                header={
-                  category !== 'winners' ? <TrendingFilterChips /> : undefined
-                }
-              />
+              <TrendingTracksLineup header={<TrendingFilterChips />} />
             </ScreenSecondaryContent>
           ) : category === 'underground' ? (
             <ScreenSecondaryContent>
-              <TrendingUndergroundLineup
-                header={
-                  category !== 'winners' ? <TrendingFilterChips /> : undefined
-                }
-              />
+              <TrendingUndergroundLineup header={<TrendingFilterChips />} />
             </ScreenSecondaryContent>
           ) : (
             <ScreenSecondaryContent>
