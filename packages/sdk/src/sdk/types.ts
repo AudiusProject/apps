@@ -199,7 +199,7 @@ const DevAppSchema = z
      */
     apiSecret: z.optional(z.string().min(1)),
     /**
-     * Bearer token for API auth. When set, uses minimal SDK (no entityManager).
+     * Bearer token auth is recommended.
      */
     bearerToken: z.optional(z.string().min(1)),
     /**
@@ -231,7 +231,7 @@ const CustomAppSchema = z
      */
     apiSecret: z.optional(z.string().min(1)),
     /**
-     * Bearer token for API auth. When set, uses minimal SDK (no entityManager).
+     * Bearer token auth is recommended.
      */
     bearerToken: z.optional(z.string().min(1)),
     /**

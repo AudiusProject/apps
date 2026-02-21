@@ -62,13 +62,12 @@ Otherwise, include the SDK script tag in your web page. The Audius SDK will then
 
 ## Initialize the SDK
 
-Initialize the SDK with a bearer token for a minimal setup, or with API key and secret for the full
-SDK.
+Initialize the SDK with a bearer token (recommended) or with API key and secret.
 
 ### Option 1: API Key + Bearer Token (Recommended)
 
 When you have a bearer token from a developer app access key, you can initialize with `bearerToken`
-and `apiKey`. This uses a minimal configuration (no entity manager) and works for reads plus write
+and `apiKey`. Works for reads plus write
 operations that accept Bearer auth (e.g. favorites, reposts). OAuth is supported—pass `apiKey` (your
 developer app address) and/or `appName` for Log in with Audius.
 
@@ -93,9 +92,8 @@ await audiusSdk.tracks.favoriteTrack({ trackId: 'D7KyD', userId })
 
 :::note
 
-Bearer-token mode excludes: entity manager (on-chain writes), track/playlist upload flows, chats,
-grants, and albums. Use the SDK with `apiKey` and `apiSecret` (Option 2) when you need those
-features.
+Bearer token auth excludes: entity manager (on-chain writes), track/playlist upload flows, chats,
+grants, and albums. Use the SDK with `apiKey` and `apiSecret` (Option 2) when you need those features.
 
 :::
 

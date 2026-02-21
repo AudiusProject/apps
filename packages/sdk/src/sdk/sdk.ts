@@ -98,8 +98,7 @@ import { SdkConfig, SdkConfigSchema, ServicesContainer } from './types'
 import fetch from './utils/fetch'
 
 /**
- * The Audius SDK. When bearerToken is set, returns minimal SDK (no entityManager).
- * Otherwise returns full SDK.
+ * The Audius SDK. Bearer token auth is recommended.
  */
 export const sdk = (config: SdkConfig) => {
   SdkConfigSchema.parse(config)
