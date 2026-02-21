@@ -38,6 +38,8 @@ const messages = {
   imageUrlLabel: 'App Icon URL',
   apiKey: 'api key',
   copyApiKeyLabel: 'copy api key',
+  bearerToken: 'bearer token',
+  copyBearerTokenLabel: 'copy bearer token',
   copied: 'Copied!',
   goBack: 'Back to Your Apps',
   back: 'Back',
@@ -63,9 +65,24 @@ const ImageField = ({ name }: { name: string }) => {
   )
 }
 
+/** Active bearer tokens: from params.bearerToken (post-creation) or params.api_access_keys */
+const getBearerTokens = (params: EditAppPageProps['params']) => {
+  if (!params) return []
+  const { bearerToken, api_access_keys } = params
+  const fromAccessKeys =
+    api_access_keys
+      ?.filter((a) => a.is_active !== false)
+      ?.map((a) => a.api_access_key) ?? []
+  if (bearerToken != null && !fromAccessKeys.includes(bearerToken)) {
+    return [bearerToken, ...fromAccessKeys]
+  }
+  return fromAccessKeys
+}
+
 export const EditAppPage = (props: EditAppPageProps) => {
   const { params, setPage } = props
-  const { name, description, apiKey, imageUrl } = params || {}
+  const { name, description, apiKey, bearerToken, imageUrl } = params ?? {}
+  const bearerTokens = getBearerTokens(params)
 
   const record = useRecord()
 
@@ -120,6 +137,11 @@ export const EditAppPage = (props: EditAppPageProps) => {
     if (!apiKey) return
     copyToClipboard(apiKey)
   }, [apiKey])
+
+  const copyBearerToken = useCallback(
+    (token: string) => () => copyToClipboard(token),
+    []
+  )
 
   if (!params) return null
 
@@ -189,6 +211,31 @@ export const EditAppPage = (props: EditAppPageProps) => {
               </Toast>
             </span>
           </div>
+          {bearerTokens.map((token) => (
+            <div key={token} className={styles.keyRoot}>
+              <span className={styles.keyLabel}>{messages.bearerToken}</span>
+              <Divider orientation='vertical' className={styles.keyDivider} />
+              <span className={styles.keyText}>{token}</span>
+              <Divider orientation='vertical' className={styles.keyDivider} />
+              <span>
+                <Toast
+                  text={messages.copied}
+                  portalLocation={
+                    typeof document !== 'undefined'
+                      ? document.getElementById('page') || document.body
+                      : undefined
+                  }
+                >
+                  <IconButton
+                    onClick={copyBearerToken(token)}
+                    aria-label={messages.copyBearerTokenLabel}
+                    color='subdued'
+                    icon={IconCopy}
+                  />
+                </Toast>
+              </span>
+            </div>
+          ))}
           <div className={styles.actionsContainer}>
             <Button
               variant='secondary'

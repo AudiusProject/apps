@@ -25,16 +25,24 @@ export const useDeveloperApps = <TResult = DeveloperApp[]>(
     queryKey: getDeveloperAppsQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.developerApps.getDeveloperApps({
-        id: Id.parse(userId)
-      })
+      const { data = [] } =
+        await sdk.developerApps.getDeveloperAppsWithMetrics({
+          id: Id.parse(userId)
+        })
 
       return data.map(
-        ({ address, name, description, imageUrl }): DeveloperApp => ({
+        ({
+          address,
           name,
           description,
-          imageUrl,
-          apiKey: address.slice(2)
+          image_url,
+          api_access_keys
+        }): DeveloperApp => ({
+          name,
+          description: description ?? undefined,
+          imageUrl: image_url ?? undefined,
+          apiKey: address.slice(2),
+          api_access_keys
         })
       )
     },

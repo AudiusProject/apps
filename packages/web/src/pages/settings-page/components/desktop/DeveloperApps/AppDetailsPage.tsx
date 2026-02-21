@@ -22,13 +22,17 @@ const AUDIUS_SDK_LINK = 'https://docs.audius.co/developers'
 
 const messages = {
   secretReminder:
-    "Remember to save your API Secret and Bearer Token. You won't be able to view them again.",
+    'Use your API Key, Secret, and a Bearer Token to authenticate requests to the Audius API or SDK.',
   description: 'Description',
   apiKey: 'api key',
+  apiKeyDescription: "Your app's public identifier",
   copyApiKeyLabel: 'copy api key',
   apiSecret: 'api secret',
+  apiSecretDescription: "Your app's password. Shown once, save it!",
   copyApiSecretLabel: 'copy api secret',
   bearerToken: 'bearer token',
+  bearerTokenDescription:
+    'Used to sign requests. Regenerate a new one anytime.',
   copyBearerTokenLabel: 'copy bearer token',
   copied: 'Copied!',
   readTheDocs: 'Read the Developer Docs',
@@ -85,34 +89,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
           <p className={styles.description}>{description}</p>
         </span>
       )}
-      <div className={styles.keyRoot}>
-        <span className={styles.keyLabel}>{messages.apiKey}</span>
-        <Divider orientation='vertical' className={styles.keyDivider} />
-        <span className={styles.keyText}>{apiKey}</span>
-        <Divider orientation='vertical' className={styles.keyDivider} />
-        <span>
-          <Toast
-            text={messages.copied}
-            portalLocation={
-              typeof document !== 'undefined'
-                ? document.getElementById('page') || document.body
-                : undefined
-            }
-          >
-            <IconButton
-              onClick={copyApiKey}
-              aria-label={messages.copyApiKeyLabel}
-              color='subdued'
-              icon={IconCopy}
-            />
-          </Toast>
+      <div className={styles.keyBlock}>
+        <span className={styles.keyDescription}>
+          {messages.apiKeyDescription}
         </span>
-      </div>
-      {!apiSecret ? null : (
         <div className={styles.keyRoot}>
-          <span className={styles.keyLabel}>{messages.apiSecret}</span>
+          <span className={styles.keyLabel}>{messages.apiKey}</span>
           <Divider orientation='vertical' className={styles.keyDivider} />
-          <span className={styles.keyText}>{apiSecret}</span>
+          <span className={styles.keyText}>{apiKey}</span>
           <Divider orientation='vertical' className={styles.keyDivider} />
           <span>
             <Toast
@@ -124,38 +108,73 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
               }
             >
               <IconButton
-                onClick={copySecret}
-                aria-label={messages.copyApiSecretLabel}
+                onClick={copyApiKey}
+                aria-label={messages.copyApiKeyLabel}
                 color='subdued'
                 icon={IconCopy}
               />
             </Toast>
           </span>
         </div>
+      </div>
+      {!apiSecret ? null : (
+        <div className={styles.keyBlock}>
+          <span className={styles.keyDescription}>
+            {messages.apiSecretDescription}
+          </span>
+          <div className={styles.keyRoot}>
+            <span className={styles.keyLabel}>{messages.apiSecret}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <span className={styles.keyText}>{apiSecret}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <span>
+              <Toast
+                text={messages.copied}
+                portalLocation={
+                  typeof document !== 'undefined'
+                    ? document.getElementById('page') || document.body
+                    : undefined
+                }
+              >
+                <IconButton
+                  onClick={copySecret}
+                  aria-label={messages.copyApiSecretLabel}
+                  color='subdued'
+                  icon={IconCopy}
+                />
+              </Toast>
+            </span>
+          </div>
+        </div>
       )}
       {!bearerToken ? null : (
-        <div className={styles.keyRoot}>
-          <span className={styles.keyLabel}>{messages.bearerToken}</span>
-          <Divider orientation='vertical' className={styles.keyDivider} />
-          <span className={styles.keyText}>{bearerToken}</span>
-          <Divider orientation='vertical' className={styles.keyDivider} />
-          <span>
-            <Toast
-              text={messages.copied}
-              portalLocation={
-                typeof document !== 'undefined'
-                  ? document.getElementById('page') || document.body
-                  : undefined
-              }
-            >
-              <IconButton
-                onClick={copyBearerToken}
-                aria-label={messages.copyBearerTokenLabel}
-                color='subdued'
-                icon={IconCopy}
-              />
-            </Toast>
+        <div className={styles.keyBlock}>
+          <span className={styles.keyDescription}>
+            {messages.bearerTokenDescription}
           </span>
+          <div className={styles.keyRoot}>
+            <span className={styles.keyLabel}>{messages.bearerToken}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <span className={styles.keyText}>{bearerToken}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <span>
+              <Toast
+                text={messages.copied}
+                portalLocation={
+                  typeof document !== 'undefined'
+                    ? document.getElementById('page') || document.body
+                    : undefined
+                }
+              >
+                <IconButton
+                  onClick={copyBearerToken}
+                  aria-label={messages.copyBearerTokenLabel}
+                  color='subdued'
+                  icon={IconCopy}
+                />
+              </Toast>
+            </span>
+          </div>
         </div>
       )}
       <Button variant='secondary' onClick={handleGoBack}>
