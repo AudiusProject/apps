@@ -1,6 +1,7 @@
 import { program } from 'commander'
+import { privateKeyToAccount } from 'viem/accounts'
 
-import { sdk as audiusSdk } from '../sdk'
+import { sdk as audiusSdk, type AudiusSdkWithSecret } from '../sdk'
 import { EntityManagerAction, EntityType } from '../services'
 import { HashId } from '../types/HashId'
 
@@ -37,11 +38,15 @@ program
       process.exit(1)
     }
 
+    const account = privateKeyToAccount(
+      `0x${args.privateKey.replace(/^0x/, '')}` as `0x${string}`
+    )
     const sdk = audiusSdk({
       appName: 'verify-user',
+      apiKey: account.address,
       apiSecret: args.privateKey,
       environment: args.environment
-    })
+    }) as AudiusSdkWithSecret
 
     try {
       const user = await sdk.users.getUserByHandle({ handle: args.handle })

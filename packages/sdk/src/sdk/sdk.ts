@@ -11,12 +11,20 @@ import { EventsApi } from './api/events/EventsApi'
 import {
   ChallengesApi,
   CoinsApi,
+  CommentsApi as GeneratedCommentsApi,
   Configuration,
+  DashboardWalletUsersApi as GeneratedDashboardWalletUsersApi,
+  DeveloperAppsApi as GeneratedDeveloperAppsApi,
+  EventsApi as GeneratedEventsApi,
   ExploreApi,
+  NotificationsApi as GeneratedNotificationsApi,
+  PlaylistsApi as GeneratedPlaylistsApi,
   PrizesApi,
   RewardsApi,
   SearchApi,
   TipsApi,
+  TracksApi as GeneratedTracksApi,
+  UsersApi as GeneratedUsersApi,
   WalletApi
 } from './api/generated/default'
 import { GrantsApi } from './api/grants/GrantsApi'
@@ -90,10 +98,94 @@ import { SdkConfig, SdkConfigSchema, ServicesContainer } from './types'
 import fetch from './utils/fetch'
 
 /**
- * The Audius SDK
+ * The Audius SDK. When bearerToken is set, returns minimal SDK (no entityManager).
+ * Otherwise returns full SDK.
  */
 export const sdk = (config: SdkConfig) => {
   SdkConfigSchema.parse(config)
+
+  const hasBearerToken =
+    typeof config.bearerToken === 'string' && config.bearerToken.length > 0
+
+  if (hasBearerToken) {
+    return initializeSdkWithBearerToken(config)
+  }
+  return initializeSdkFull(config)
+}
+
+const initializeSdkWithBearerToken = (config: SdkConfig) => {
+  const apiEndpoint =
+    config.environment === 'development'
+      ? developmentConfig.network.apiEndpoint
+      : productionConfig.network.apiEndpoint
+  const basePath = `${apiEndpoint}/v1`
+
+  const defaultLogger = new Logger({
+    logLevel: config.environment !== 'production' ? 'debug' : undefined
+  })
+  const logger = config.services?.logger ?? defaultLogger
+
+  const apiClientConfig = new Configuration({
+    fetchApi: fetch,
+    accessToken: config.bearerToken,
+    basePath
+  })
+
+  const tracks = new GeneratedTracksApi(apiClientConfig)
+  const users = new GeneratedUsersApi(apiClientConfig)
+  const playlists = new GeneratedPlaylistsApi(apiClientConfig)
+  const comments = new GeneratedCommentsApi(apiClientConfig)
+  const tips = new TipsApi(apiClientConfig)
+  const developerApps = new GeneratedDeveloperAppsApi(apiClientConfig)
+  const dashboardWalletUsers = new GeneratedDashboardWalletUsersApi(
+    apiClientConfig
+  )
+  const rewards = new RewardsApi(apiClientConfig)
+  const notifications = new GeneratedNotificationsApi(apiClientConfig)
+  const events = new GeneratedEventsApi(apiClientConfig)
+  const explore = new ExploreApi(apiClientConfig)
+  const search = new SearchApi(apiClientConfig)
+  const coins = new CoinsApi(apiClientConfig)
+  const wallets = new WalletApi(apiClientConfig)
+  const challenges = new ChallengesApi(apiClientConfig)
+  const prizes = new PrizesApi(apiClientConfig)
+
+  const resolveApi = new ResolveApi(apiClientConfig)
+  const resolve = resolveApi.resolve.bind(resolveApi)
+
+  const oauth =
+    typeof window !== 'undefined'
+      ? new OAuth({
+          appName: config.appName,
+          apiKey: config.apiKey,
+          usersApi: users,
+          logger
+        })
+      : undefined
+
+  return {
+    oauth,
+    tracks,
+    users,
+    playlists,
+    tips,
+    resolve,
+    developerApps,
+    dashboardWalletUsers,
+    rewards,
+    comments,
+    notifications,
+    events,
+    explore,
+    search,
+    coins,
+    wallets,
+    challenges,
+    prizes
+  }
+}
+
+const initializeSdkFull = (config: SdkConfig) => {
   const { appName, apiKey } = config
 
   // Initialize services
@@ -537,3 +629,4 @@ const initializeApis = ({
 }
 
 export type AudiusSdk = ReturnType<typeof sdk>
+export type AudiusSdkWithSecret = ReturnType<typeof initializeSdkFull>

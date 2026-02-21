@@ -168,56 +168,81 @@ export type ServicesContainer = {
   archiverService?: ArchiverService
 }
 
-/**
- * SDK configuration schema that requires API keypairs
- */
-const DevAppSchema = z.object({
-  /**
-   * Your app name
-   */
-  appName: z.optional(z.string()),
-  /**
-   * Services injection
-   */
-  services: z.optional(z.custom<Partial<ServicesContainer>>()),
-  /**
-   * API key, required for writes
-   */
-  apiKey: z.string().min(1),
-  /**
-   * API secret, required for writes
-   */
-  apiSecret: z.optional(z.string().min(1)),
-  /**
-   * Target environment
-   * @internal
-   */
-  environment: z.enum(['development', 'production']).optional()
-})
+const credentialRefine = (data: {
+  apiKey?: string
+  apiSecret?: string
+  bearerToken?: string
+}) =>
+  (data.bearerToken?.length ?? 0) > 0 ||
+  (data.apiKey?.length ?? 0) > 0 ||
+  (data.apiSecret?.length ?? 0) > 0
 
-const CustomAppSchema = z.object({
-  /**
-   * Your app name
-   */
-  appName: z.string().min(1),
-  /**
-   * Services injection
-   */
-  services: z.optional(z.custom<Partial<ServicesContainer>>()),
-  /**
-   * API key, required for writes
-   */
-  apiKey: z.optional(z.string().min(1)),
-  /**
-   * API secret, required for writes
-   */
-  apiSecret: z.optional(z.string().min(1)),
-  /**
-   * Target environment
-   * @internal
-   */
-  environment: z.enum(['development', 'production']).optional()
-})
+/**
+ * SDK configuration schema. Either apiKey or bearerToken must be provided.
+ */
+const DevAppSchema = z
+  .object({
+    /**
+     * Your app name
+     */
+    appName: z.optional(z.string()),
+    /**
+     * Services injection
+     */
+    services: z.optional(z.custom<Partial<ServicesContainer>>()),
+    /**
+     * API key, required when bearerToken is not set
+     */
+    apiKey: z.string().min(1).optional(),
+    /**
+     * API secret, required for writes (full SDK only)
+     */
+    apiSecret: z.optional(z.string().min(1)),
+    /**
+     * Bearer token for API auth. When set, uses minimal SDK (no entityManager).
+     */
+    bearerToken: z.optional(z.string().min(1)),
+    /**
+     * Target environment
+     * @internal
+     */
+    environment: z.enum(['development', 'production']).optional()
+  })
+  .refine(credentialRefine, {
+    message: 'Either apiKey, apiSecret, or bearerToken must be provided'
+  })
+
+const CustomAppSchema = z
+  .object({
+    /**
+     * Your app name
+     */
+    appName: z.string().min(1),
+    /**
+     * Services injection
+     */
+    services: z.optional(z.custom<Partial<ServicesContainer>>()),
+    /**
+     * API key, required when bearerToken is not set
+     */
+    apiKey: z.optional(z.string().min(1)),
+    /**
+     * API secret, required for writes (full SDK only)
+     */
+    apiSecret: z.optional(z.string().min(1)),
+    /**
+     * Bearer token for API auth. When set, uses minimal SDK (no entityManager).
+     */
+    bearerToken: z.optional(z.string().min(1)),
+    /**
+     * Target environment
+     * @internal
+     */
+    environment: z.enum(['development', 'production']).optional()
+  })
+  .refine(credentialRefine, {
+    message: 'Either apiKey, apiSecret, or bearerToken must be provided'
+  })
 
 export const SdkConfigSchema = z.union([DevAppSchema, CustomAppSchema])
 

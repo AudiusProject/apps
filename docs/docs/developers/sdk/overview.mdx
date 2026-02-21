@@ -62,12 +62,47 @@ Otherwise, include the SDK script tag in your web page. The Audius SDK will then
 
 ## Initialize the SDK
 
-Initialize the SDK with your API key.
+Initialize the SDK with a bearer token for a minimal setup, or with API key and secret for the full
+SDK.
 
-If you plan to write data to Audius (e.g. upload a track, favorite a playlist, etc.), then pass in
-your API secret as well.
+### Option 1: API Key + Bearer Token (Recommended)
 
-### Node.js example
+When you have a bearer token from a developer app access key, you can initialize with `bearerToken`
+and `apiKey`. This uses a minimal configuration (no entity manager) and works for reads plus write
+operations that accept Bearer auth (e.g. favorites, reposts). OAuth is supported—pass `apiKey` (your
+developer app address) and/or `appName` for Log in with Audius.
+
+Obtain a bearer token via [audius.co/settings](https://audius.co/settings),
+[api.audius.co/plans](https://api.audius.co/plans), or
+[POST /developer-apps/{address}/access-keys](https://docs.audius.co/api/create-developer-app-access-key.api)
+after creating a developer app. See the
+[Create Developer App Access Key](/developers/api/create-developer-app-access-key.api) API for
+details.
+
+```js
+import { sdk } from '@audius/sdk'
+
+const audiusSdk = sdk({
+  apiKey: 'your-api-key',
+  bearerToken: 'your-bearer-token',
+})
+
+const track = await audiusSdk.tracks.getTrack({ trackId: 'D7KyD' })
+await audiusSdk.tracks.favoriteTrack({ trackId: 'D7KyD', userId })
+```
+
+:::note
+
+Bearer-token mode excludes: entity manager (on-chain writes), track/playlist upload flows, chats,
+grants, and albums. Use the SDK with `apiKey` and `apiSecret` (Option 2) when you need those
+features.
+
+:::
+
+### Option 2: API Key + Secret
+
+If you plan to write data to Audius (e.g. upload a track, favorite a playlist, etc.), use your API
+key and API secret.
 
 ```js title="In Node.js environment"
 import { sdk } from '@audius/sdk'

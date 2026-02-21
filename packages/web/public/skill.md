@@ -93,16 +93,16 @@ SDK is assigned to `window.audiusSdk` when using the CDN.
 ## Initialize SDK
 
 ```js
-import { sdk } from '@audius/sdk'
-
 const audiusSdk = sdk({
-  apiKey: 'Your API Key goes here',
-  apiSecret: 'Your API Secret goes here' // Required for writes; omit for frontend
+  apiKey: 'your-api-key',
+  bearerToken: 'your-bearer-token',
+  environment: 'production'
 })
 ```
 
+- **Bearer tokens**: From `POST /developer-apps/{address}/access-keys`. Supports reads + Bearer-authenticated writes (favorites, reposts, etc.). OAuth supported (pass apiKey/appName). Excludes entity manager, uploads.
 - **Read-only**: Use `apiKey` only. Safe for frontend.
-- **Writes** (upload, favorite, repost): Add `apiSecret`. Use only on the server—never in browser.
+- **Writes** (upload, favorite, repost): Add `bearerToken` (recommended), or use `apiSecret` for access-key auth.
 
 ## First API Calls
 

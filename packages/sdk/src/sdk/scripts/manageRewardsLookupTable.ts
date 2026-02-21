@@ -20,7 +20,7 @@ import untildify from 'untildify'
 import { developmentConfig } from '../config/development'
 import { productionConfig } from '../config/production'
 import type { SdkServicesConfig } from '../config/types'
-import { sdk as audiusSdk } from '../sdk'
+import { sdk as audiusSdk, type AudiusSdkWithSecret } from '../sdk'
 import { Logger } from '../services'
 import type { SdkConfig } from '../types'
 
@@ -162,11 +162,12 @@ const createLookupTable = async ({
   )
   const sdk = audiusSdk({
     appName: 'generate-rewards-lookup-table',
+    apiKey: '0x0000000000000000000000000000000000000000',
     environment,
     services: {
       logger: new Logger()
     }
-  })
+  }) as AudiusSdkWithSecret
   const config = getConfig(environment)
   const connection = sdk.services.solanaClient.connection
 
@@ -280,11 +281,12 @@ const updateLookupTable = async ({
   )
   const sdk = audiusSdk({
     appName: 'generate-rewards-lookup-table',
+    apiKey: '0x0000000000000000000000000000000000000000',
     environment,
     services: {
       logger: new Logger()
     }
-  })
+  }) as AudiusSdkWithSecret
   const config = getConfig(environment)
   const connection = sdk.services.solanaClient.connection
 
