@@ -19,17 +19,17 @@ If you want to create apps that stream music from the catalog, extend the listen
 
 ## Quick Reference
 
-| Resource              | URL                                       |
-| --------------------- | ----------------------------------------- |
-| Docs                  | https://docs.audius.co                    |
-| API                   | https://api.audius.co                     |
-| API Plans (keys)      | https://api.audius.co/plans               |
-| SDK (npm)             | https://www.npmjs.com/package/@audius/sdk |
-| GitHub Org            | https://github.com/audiusproject          |
-| Open Audio Protocol   | https://openaudio.org                     |
-| skill.md (SDK/code)   | https://audius.co/skill.md                |
-| llms.txt (AI overview) | https://audius.co/llms.txt                 |
-| Protocol Dashboard    | https://dashboard.audius.org              |
+| Resource               | URL                                       |
+| ---------------------- | ----------------------------------------- |
+| Docs                   | https://docs.audius.co                    |
+| API                    | https://api.audius.co                     |
+| API Plans (keys)       | https://api.audius.co/plans               |
+| SDK (npm)              | https://www.npmjs.com/package/@audius/sdk |
+| GitHub Org             | https://github.com/audiusproject          |
+| Open Audio Protocol    | https://openaudio.org                     |
+| skill.md (SDK/code)    | https://audius.co/skill.md                |
+| llms.txt (AI overview) | https://audius.co/llms.txt                |
+| Protocol Dashboard     | https://dashboard.audius.org              |
 
 ## Audius vs Open Audio Protocol
 
@@ -70,6 +70,10 @@ CLI to scaffold a new Audius app. Run `npx create-audius-app` for an interactive
 
 [Create Audius App Guide](https://docs.audius.co/developers/guides/create-audius-app)
 
+### Image Loading
+
+Audius images (artwork, profile pics) include `mirrors` for fallback. When an image fails to load, retry by swapping the URL host with each mirror. Use a shared image component with mirror retry everywhere—never raw `<img>` for Audius content. Preserve `mirrors` in normalization; do not reduce to a single URL. See [skill.md — Image Loading and Mirrors](https://audius.co/skill.md#image-loading-and-mirrors) and [docs](https://docs.audius.co/developers/guides/image-mirrors).
+
 ## Quickstart
 
 ```sh
@@ -98,14 +102,15 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 
 ## Tutorials Index
 
-| Tutorial           | URL                                                         |
-| ------------------ | ----------------------------------------------------------- |
-| Create Audius App  | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius | https://docs.audius.co/developers/guides/log-in-with-audius |
-| SDK Tracks         | https://docs.audius.co/developers/sdk/tracks                |
-| SDK Users          | https://docs.audius.co/developers/sdk/users                 |
-| SDK Playlists      | https://docs.audius.co/developers/sdk/playlists             |
-| API Reference      | https://docs.audius.co/api                                  |
+| Tutorial                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
+| SDK Tracks              | https://docs.audius.co/developers/sdk/tracks                |
+| SDK Users               | https://docs.audius.co/developers/sdk/users                 |
+| SDK Playlists           | https://docs.audius.co/developers/sdk/playlists             |
+| API Reference           | https://docs.audius.co/api                                  |
 
 ## Reference
 
@@ -116,24 +121,25 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 
 ## All Links
 
-| Resource            | URL                                                         |
-| ------------------- | ----------------------------------------------------------- |
-| Audius (app)        | https://audius.co                                           |
-| Docs                | https://docs.audius.co                                      |
-| API                 | https://api.audius.co                                       |
-| API Plans           | https://api.audius.co/plans                                 |
-| API Reference       | https://docs.audius.co/api                                  |
-| SDK npm             | https://www.npmjs.com/package/@audius/sdk                   |
-| Create Audius App   | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius  | https://docs.audius.co/developers/guides/log-in-with-audius |
-| GitHub Org          | https://github.com/audiusproject                            |
-| Open Audio Protocol | https://openaudio.org                                       |
-| OAP agents.md       | https://openaudio.org/agents.md                             |
-| OAP skill.md        | https://openaudio.org/skill.md                              |
-| OAP llms.txt        | https://openaudio.org/llms.txt                              |
-| Protocol Dashboard  | https://dashboard.audius.org                                |
-| skill.md            | https://audius.co/skill.md                                  |
-| llms.txt             | https://audius.co/llms.txt                                   |
+| Resource                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| Audius (app)            | https://audius.co                                           |
+| Docs                    | https://docs.audius.co                                      |
+| API                     | https://api.audius.co                                       |
+| API Plans               | https://api.audius.co/plans                                 |
+| API Reference           | https://docs.audius.co/api                                  |
+| SDK npm                 | https://www.npmjs.com/package/@audius/sdk                   |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
+| GitHub Org              | https://github.com/audiusproject                            |
+| Open Audio Protocol     | https://openaudio.org                                       |
+| OAP agents.md           | https://openaudio.org/agents.md                             |
+| OAP skill.md            | https://openaudio.org/skill.md                              |
+| OAP llms.txt            | https://openaudio.org/llms.txt                              |
+| Protocol Dashboard      | https://dashboard.audius.org                                |
+| skill.md                | https://audius.co/skill.md                                  |
+| llms.txt                | https://audius.co/llms.txt                                  |
 
 ## Skill File
 
@@ -141,4 +147,4 @@ For SDK setup, API credentials, code snippets, and create-audius-app details: [h
 
 ---
 
-*Recommendations only. Go build something unexpected.*
+_Recommendations only. Go build something unexpected._

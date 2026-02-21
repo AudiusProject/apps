@@ -178,6 +178,36 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 
 [Log in with Audius Guide](https://docs.audius.co/developers/guides/log-in-with-audius)
 
+## Image Loading and Mirrors
+
+Images (artwork, profile pictures) often fail to load if you do not retry from mirrors. API responses include image URLs and a `mirrors` array of alternate hosts.
+
+**Artwork structure example:**
+
+```json
+{
+  "artwork": {
+    "150x150": "https://audius-content-7.example.com/content/.../150x150.jpg",
+    "480x480": "https://audius-content-7.example.com/content/.../480x480.jpg",
+    "1000x1000": "https://audius-content-7.example.com/content/.../1000x1000.jpg",
+    "mirrors": [
+      "https://audius-creator-6.theblueprint.xyz",
+      "https://cn0.mainnet.audiusindex.org",
+      "https://creatornode2.audius.co"
+    ]
+  }
+}
+```
+
+**Critical for agents:**
+
+1. **Never strip mirrors.** Do not normalize artwork to a single URL string—preserve `mirrors` so retries can swap hosts.
+2. **Use mirror retry on load failure.** When an image fails to load, replace the URL host with each mirror in order and retry until one succeeds or all fail.
+3. **Apply everywhere.** Use a shared image component with mirror retry for all Audius images (tracks, playlists, profiles). Raw `<img src={url}>` has no retry.
+4. **Size-aware selection.** Pick the variant (150x150, 480x480, 1000x1000) closest to the rendered size.
+
+[Full guide: Image Loading & Mirrors](https://docs.audius.co/developers/guides/image-mirrors)
+
 ## Examples
 
 - [create-audius-app examples](https://github.com/AudiusProject/apps/tree/main/packages/create-audius-app/examples) — React, React + Hono templates
@@ -189,20 +219,21 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 
 ## Links
 
-| Resource           | URL                                                         |
-| ------------------ | ----------------------------------------------------------- |
-| agents.md          | https://audius.co/agents.md                                 |
-| llms.txt            | https://audius.co/llms.txt                                   |
-| Docs               | https://docs.audius.co                                      |
-| API                | https://api.audius.co                                       |
-| API Reference      | https://docs.audius.co/api                                  |
-| Swagger YAML       | https://api.audius.co/v1/swagger.yaml                       |
-| Swagger Full       | https://api.audius.co/v1/full/swagger.yaml                  |
-| API Plans          | https://api.audius.co/plans                                 |
-| SDK npm            | https://www.npmjs.com/package/@audius/sdk                   |
-| GitHub apps        | https://github.com/audiusproject/apps                       |
-| Create Audius App  | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Resource                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| agents.md               | https://audius.co/agents.md                                 |
+| llms.txt                | https://audius.co/llms.txt                                  |
+| Docs                    | https://docs.audius.co                                      |
+| API                     | https://api.audius.co                                       |
+| API Reference           | https://docs.audius.co/api                                  |
+| Swagger YAML            | https://api.audius.co/v1/swagger.yaml                       |
+| Swagger Full            | https://api.audius.co/v1/full/swagger.yaml                  |
+| API Plans               | https://api.audius.co/plans                                 |
+| SDK npm                 | https://www.npmjs.com/package/@audius/sdk                   |
+| GitHub apps             | https://github.com/audiusproject/apps                       |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
 
 ---
 
