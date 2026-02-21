@@ -1,0 +1,326 @@
+---
+id: get-remixers-count
+title: "Get remixers count"
+description: "Gets the count of unique users who have remixed tracks by the given user, or a specific track by that user if provided"
+sidebar_label: "Get remixers count"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFVttu2zgQ/ZUBn5JAtZM27YOwWCBB0jbF9oKt02w3DlyaHFuMJVIlKV/W0L8vhpIsOXaTFvuwT7bIGc6ZM8PDWTPPp47Ft6xwaB27i5hEJ6zKvTKaxewNegc+QRCm0B7MBAqtvhcIwR4WiYGEzxEsZmqJErzlYuZgvApOUzVHHUwjMBY4uByFmihR2VVm3AcLUBPIrZkriZJFzORoOYG4khWMOoR1FRQWsZxbnqEn3PHtmmmeIYuZIm9F2HPuE/YwoTO4pmBXFyxiFr8XyqJksbcFRsyJBDPO4jXzq5zOct4qPWVlGW2OJ6ijNsb3Au1qJ8ggqQiCqwuizDefGZ8pPQ3fFBsdpfEzUQNdT4Z9rVJiAybGtmztlmhTmKoIgYofg7gjnlxutENH+8+Pj+lnO/LnQgh0jkVMGO1RezLheZ4qEYrYv3dkt+7Eacm/ZSn36PxIJFzp0Tg1Ysai7UWXGj/KU75y7Y7SEpcoHzo0y1suTk0194VFFjGvMnSeZzmL2BytoxTuoiZxM75HEdrLUg96VaW9B2JLltIep2hZ+QNsj1nu5Pczxz5l3qa7W9EuAft2G0oe1MihnSuBv8JZ4/JElJ22Z175lJZqo1GGnkvuOTmG3z1Jd9ya3h8FpRg17cvKkqxO9zXwOZedK9k2MTm83NvxaOdoAa019oFHGbEMfWJIuKZYKZVPWMz6QTT7ayXLfoOx36iZCwdWUlbYlMUs8T53cb/Pc9XjhVSF6wnTn58wupMORWGVX32mC1XRfc6dEmcFhdrQQ2c015u+x2SzIxxvB4NPENyB/FH7+t7CQvkELn2CFosMcqvm3CPMcBVEZmGVR9hItesN9VAfHW2fcXREq9cO4ZEwFCAoU86dWxgrYaIwlUC8cqUdrExh9wKJh/rbt29DTScaq/4JB8Z1mN/G3OGr0wMinqQ0rh1nuDr8vXYc6kauyQIE1zBG4HoFc54W2INBF1ZWOE/7P8QDSkOCS+In4x4OAoPElfKJKTwcLyG3OFHLw8DW5ZJneYqPZiH/+pCK7GUyvrl+9f7tdPn+/v3xh8HXFx8vZouvN+/u/37zJftDnRabhI6O3poFKA8LY2cupgqcVHmcfboCicJIrJ71thogLEoqCU/dUD/vweWS3of6+d+qvDXZnloN9YseXKBV8/rsDTtcSovOdRzb04b6tEdPMrko15rSuNDlAkSCYubaBtvsVP1FyckQXMKCpyn6zVlNyVARoHionwUqaqvu+zxGep658CihyI2GA6ksCg9modG6ROWH5H3W+Ibacg08p8kFZQTa6GcW52aGEqaWax8y2QQ4yLjmU5oEjMTDoSZBO0du0T51b4MRi+o/r0NzsZi9uxnsnT6ozpUpeDNDTR34MZT53c2gXuoi6xGWkqaLiQkwaik9+3S1O0IFLYIvJ1DtbqScnfSOKaPcOJ/xoO31/LJ3fts6dd1K6P83dNbke1z6fp5yFeoTxHhda3gzKEcsDtNYk1R4Aiitu4glxnmyXK9Jfa5tWpa0XM1sJO9SOT5O6Vmd8NThI0z80iC5F/0MV1tTa9A0FjNG0+XPA/kPo+UjsDpjbYvrjj6sImC/yNbBn/W8cgjdMX8vgHqR61U3eANMSVbelRFLkEu0AUa1cSYE5r7jsjPkEv7N8//mcsDK8l86VLPJ
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get remixers count"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/remixers/count"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets the count of unique users who have remixed tracks by the given user, or a specific track by that user if provided
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"track_id","in":"query","description":"Filters for remixers who have remixed the given track ID","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"signature"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"timestamp"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                version
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"service"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"version"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={false}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"latest_chain_block\": 0,\n  \"latest_indexed_block\": 0,\n  \"latest_chain_slot_plays\": 0,\n  \"latest_indexed_slot_plays\": 0,\n  \"signature\": \"string\",\n  \"timestamp\": \"string\",\n  \"version\": {\n    \"service\": \"string\",\n    \"version\": \"string\"\n  },\n  \"data\": 0\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

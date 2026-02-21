@@ -7,13 +7,19 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "users",
+      label: "Users",
       items: [
         {
           type: "doc",
           id: "developers/api/get-bulk-users",
           label: "Get Bulk Users",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/create-user",
+          label: "Create User",
+          className: "api-method post",
         },
         {
           type: "doc",
@@ -25,6 +31,12 @@ const sidebar = {
           type: "doc",
           id: "developers/api/get-user-by-handle",
           label: "Get User by Handle",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-tracks-by-user-handle",
+          label: "Get Tracks by User Handle",
           className: "api-method get",
         },
         {
@@ -50,6 +62,12 @@ const sidebar = {
           id: "developers/api/get-user",
           label: "Get User",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/update-user",
+          label: "Update User",
+          className: "api-method put",
         },
         {
           type: "doc",
@@ -107,14 +125,8 @@ const sidebar = {
         },
         {
           type: "doc",
-          id: "developers/api/get-developer-apps",
-          label: "Get Developer Apps",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "developers/api/get-favorites",
-          label: "Get Favorites",
+          id: "developers/api/get-user-favorites",
+          label: "Get User Favorites",
           className: "api-method get",
         },
         {
@@ -122,6 +134,54 @@ const sidebar = {
           id: "developers/api/get-followers",
           label: "Get Followers",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/follow-user",
+          label: "Follow User",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unfollow-user",
+          label: "Unfollow User",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/create-grant",
+          label: "Create Grant",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/revoke-grant",
+          label: "Revoke Grant",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/approve-grant",
+          label: "Approve Grant",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/add-manager",
+          label: "Add Manager",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-managers",
+          label: "Get Managers",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/remove-manager",
+          label: "Remove Manager",
+          className: "api-method delete",
         },
         {
           type: "doc",
@@ -146,6 +206,18 @@ const sidebar = {
           id: "developers/api/get-muted-users",
           label: "Get Muted Users",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/mute-user",
+          label: "Mute User",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unmute-user",
+          label: "Unmute User",
+          className: "api-method delete",
         },
         {
           type: "doc",
@@ -221,6 +293,18 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/subscribe-to-user",
+          label: "Subscribe to User",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unsubscribe-from-user",
+          label: "Unsubscribe from User",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
           id: "developers/api/get-supporters",
           label: "Get Supporters",
           className: "api-method get",
@@ -245,6 +329,12 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/get-tracks-count-by-user",
+          label: "Get Tracks Count by User",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "developers/api/get-user-tracks-remixed",
           label: "Get User Tracks Remixed",
           className: "api-method get",
@@ -261,17 +351,167 @@ const sidebar = {
           label: "Get User Email Key",
           className: "api-method get",
         },
+        {
+          type: "doc",
+          id: "developers/api/get-user-account",
+          label: "Get User Account",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-top-users-in-genre",
+          label: "Get Top Users In Genre",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-reposts-by-handle",
+          label: "Get Reposts by Handle",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/bulk-get-subscribers",
+          label: "Bulk Get Subscribers",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/bulk-get-subscribers-via-json-request",
+          label: "Bulk Get Subscribers via JSON request",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-top-users",
+          label: "Get Top Users",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-user-favorite-tracks",
+          label: "Get User Favorite Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-user-feed",
+          label: "Get User Feed",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-user-library-albums",
+          label: "Fetch a user's full library playlists",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-user-library-playlists",
+          label: "Fetch a user's full library playlists",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-user-library-tracks",
+          label: "Fetch a user's full library tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-managed-users",
+          label: "Get Managed Users",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-purchasers-count",
+          label: "Get purchasers count",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-purchases",
+          label: "Get Purchases",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-purchases-count",
+          label: "Get Purchases Count",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-remixers-count",
+          label: "Get remixers count",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-sales",
+          label: "Get Sales",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-sales-count",
+          label: "Get Sales Count",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-supporter",
+          label: "Get Supporter",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-supporting",
+          label: "Get Supporting",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-audio-transactions",
+          label: "Get Audio Transactions",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-audio-transaction-count",
+          label: "Get Audio Transaction Count",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-usdc-transactions",
+          label: "Get USDC Transactions",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-usdc-transaction-count",
+          label: "Get USDC Transaction Count",
+          className: "api-method get",
+        },
       ],
     },
     {
       type: "category",
-      label: "playlists",
+      label: "Playlists",
       items: [
         {
           type: "doc",
           id: "developers/api/get-bulk-playlists",
           label: "Get Bulk Playlists",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/create-playlist",
+          label: "Create Playlist",
+          className: "api-method post",
         },
         {
           type: "doc",
@@ -299,6 +539,18 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/update-playlist",
+          label: "Update Playlist",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "developers/api/delete-playlist",
+          label: "Delete Playlist",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
           id: "developers/api/get-playlist-access-info",
           label: "Get Playlist Access Info",
           className: "api-method get",
@@ -309,17 +561,71 @@ const sidebar = {
           label: "Get Playlist Tracks",
           className: "api-method get",
         },
+        {
+          type: "doc",
+          id: "developers/api/favorite-playlist",
+          label: "Favorite Playlist",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unfavorite-playlist",
+          label: "Unfavorite Playlist",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-users-from-playlist-favorites",
+          label: "Get Users From Playlist Favorites",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/repost-playlist",
+          label: "Repost Playlist",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unrepost-playlist",
+          label: "Unrepost Playlist",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-users-from-playlist-reposts",
+          label: "Get Users From Playlist Reposts",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/share-playlist",
+          label: "Share Playlist",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-playlists-with-version",
+          label: "Get Trending Playlists With Version",
+          className: "api-method get",
+        },
       ],
     },
     {
       type: "category",
-      label: "tracks",
+      label: "Tracks",
       items: [
         {
           type: "doc",
           id: "developers/api/get-bulk-tracks",
           label: "Get Bulk Tracks",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/create-track",
+          label: "Create Track",
+          className: "api-method post",
         },
         {
           type: "doc",
@@ -331,6 +637,18 @@ const sidebar = {
           type: "doc",
           id: "developers/api/get-recent-premium-tracks",
           label: "Get Recent Premium Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-recommended-tracks",
+          label: "Get Recommended Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-recommended-tracks-with-version",
+          label: "Get Recommended Tracks With Version",
           className: "api-method get",
         },
         {
@@ -353,6 +671,18 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/get-trending-usdc-purchase-tracks",
+          label: "Get Trending USDC Purchase Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-usdc-purchase-tracks-with-version",
+          label: "Get Trending USDC Purchase Tracks With Version",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "developers/api/search-tracks",
           label: "Search Tracks",
           className: "api-method get",
@@ -365,8 +695,44 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/get-trending-winners",
+          label: "Get Trending Winners",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-tracks-with-version",
+          label: "Get Trending Tracks With Version",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-track-i-ds",
+          label: "Get Trending Track IDs",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-tracks-i-ds-with-version",
+          label: "Get Trending Tracks IDs With Version",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "developers/api/get-underground-trending-tracks",
           label: "Get Underground Trending Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-trending-underground-winners",
+          label: "Get Trending Underground Winners",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-underground-trending-tracks-with-version",
+          label: "Get Underground Trending Tracks With Version",
           className: "api-method get",
         },
         {
@@ -374,6 +740,18 @@ const sidebar = {
           id: "developers/api/get-track",
           label: "Get Track",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/update-track",
+          label: "Update Track",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "developers/api/delete-track",
+          label: "Delete Track",
+          className: "api-method delete",
         },
         {
           type: "doc",
@@ -401,6 +779,54 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/get-users-from-favorites",
+          label: "Get Users From Favorites",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/favorite-track",
+          label: "Favorite Track",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unfavorite-track",
+          label: "Unfavorite Track",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-track-remixes",
+          label: "Get Track Remixes",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-track-remix-parents",
+          label: "Get Track Remix Parents",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-users-from-reposts",
+          label: "Get Users From Reposts",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/repost-track",
+          label: "Repost Track",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unrepost-track",
+          label: "Unrepost Track",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
           id: "developers/api/download-track",
           label: "Download the original or MP3 file of a track",
           className: "api-method get",
@@ -419,6 +845,18 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/share-track",
+          label: "Share Track",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/record-track-download",
+          label: "Record Track Download",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
           id: "developers/api/stream-track",
           label: "Get the streamable MP3 file of a track",
           className: "api-method get",
@@ -429,11 +867,35 @@ const sidebar = {
           label: "Get Track Top Listeners",
           className: "api-method get",
         },
+        {
+          type: "doc",
+          id: "developers/api/get-best-new-releases",
+          label: "Get Best New Releases",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-most-loved-tracks",
+          label: "Get Most Loved Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-remixable-tracks",
+          label: "Get Remixable Tracks",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-under-the-radar-tracks",
+          label: "Get Under the Radar Tracks",
+          className: "api-method get",
+        },
       ],
     },
     {
       type: "category",
-      label: "challenges",
+      label: "Challenges",
       items: [
         {
           type: "doc",
@@ -447,11 +909,17 @@ const sidebar = {
           label: "Get Undisbursed Challenges For User",
           className: "api-method get",
         },
+        {
+          type: "doc",
+          id: "developers/api/get-challenge-attestation",
+          label: "Get Challenge Attestation",
+          className: "api-method get",
+        },
       ],
     },
     {
       type: "category",
-      label: "tips",
+      label: "Tips",
       items: [
         {
           type: "doc",
@@ -463,19 +931,55 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "developer_apps",
+      label: "Developer Apps",
       items: [
+        {
+          type: "doc",
+          id: "developers/api/create-developer-app",
+          label: "Create Developer App",
+          className: "api-method post",
+        },
         {
           type: "doc",
           id: "developers/api/get-developer-app",
           label: "Get Developer App",
           className: "api-method get",
         },
+        {
+          type: "doc",
+          id: "developers/api/delete-developer-app",
+          label: "Delete Developer App",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/update-developer-app",
+          label: "Update Developer App",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "developers/api/deactivate-developer-app-access-key",
+          label: "Deactivate Developer App Access Key",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/create-developer-app-access-key",
+          label: "Create Developer App Access Key",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-developer-apps",
+          label: "Get Developer Apps",
+          className: "api-method get",
+        },
       ],
     },
     {
       type: "category",
-      label: "dashboard_wallet_users",
+      label: "Dashboard Wallet Users",
       items: [
         {
           type: "doc",
@@ -487,7 +991,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "resolve",
+      label: "Resolve",
       items: [
         {
           type: "doc",
@@ -499,7 +1003,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "comments",
+      label: "Comments",
       items: [
         {
           type: "doc",
@@ -509,9 +1013,57 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/create-comment",
+          label: "Create Comment",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
           id: "developers/api/get-comment",
           label: "Get Comment",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/update-comment",
+          label: "Update Comment",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "developers/api/delete-comment",
+          label: "Delete Comment",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/react-to-comment",
+          label: "React to Comment",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unreact-to-comment",
+          label: "Unreact to Comment",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/pin-comment",
+          label: "Pin Comment",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/unpin-comment",
+          label: "Unpin Comment",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "developers/api/report-comment",
+          label: "Report Comment",
+          className: "api-method post",
         },
         {
           type: "doc",
@@ -523,7 +1075,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "events",
+      label: "Events",
       items: [
         {
           type: "doc",
@@ -553,19 +1105,19 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "explore",
+      label: "Explore",
       items: [
         {
           type: "doc",
           id: "developers/api/get-best-selling",
-          label: "Get best selling tracks and/or albums",
+          label: "Get best selling tracks and playlists with related entities",
           className: "api-method get",
         },
       ],
     },
     {
       type: "category",
-      label: "rewards",
+      label: "Rewards",
       items: [
         {
           type: "doc",
@@ -583,7 +1135,31 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "wallet",
+      label: "Prizes",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/get-prizes",
+          label: "Get Prizes",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/claim-prize",
+          label: "Claim Prize",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-wallet-prizes",
+          label: "Get Wallet Prizes",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Wallet",
       items: [
         {
           type: "doc",
@@ -595,7 +1171,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "coins",
+      label: "Coins",
       items: [
         {
           type: "doc",
@@ -674,6 +1250,90 @@ const sidebar = {
           id: "developers/api/claim-coin-reward-code",
           label: "Claim Coin Reward Code",
           className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Cid Data",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/get-metadata",
+          label: "Get Metadata",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Notifications",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/get-notifications",
+          label: "Get Notifications",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-playlist-updates",
+          label: "Get Playlist Updates",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Reactions",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/bulk-get-reactions",
+          label: "Bulk get Reactions",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Search",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/search-autocomplete",
+          label: "Get Users/Tracks/Playlists/Albums that best match the search query",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/search",
+          label: "Search",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/search-tags",
+          label: "SearchTags",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Transactions",
+      items: [
+        {
+          type: "doc",
+          id: "developers/api/get-audio-transaction-history",
+          label: "Gets the user's $AUDIO transaction history within the App",
+          className: "menu__list-item--deprecated api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/api/get-audio-transaction-history-count",
+          label: "Gets the count of the user's $AUDIO transaction history within the App",
+          className: "menu__list-item--deprecated api-method get",
         },
       ],
     },
