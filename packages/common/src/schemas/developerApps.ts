@@ -9,6 +9,11 @@ const messages = {
   invalidUrl: 'Invalid URL'
 }
 
+export type ApiAccessKey = {
+  api_access_key: string
+  is_active: boolean
+}
+
 export type DeveloperApp = {
   name: string
   description?: string
@@ -16,6 +21,8 @@ export type DeveloperApp = {
   apiKey: string
   apiSecret?: string
   bearerToken?: string
+  /** Bearer tokens from API when fetched with include=metrics */
+  api_access_keys?: ApiAccessKey[]
 }
 
 export const developerAppSchema = z.object({
