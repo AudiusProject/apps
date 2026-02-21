@@ -5,11 +5,14 @@ import {
   DEVELOPER_APP_IMAGE_URL_MAX_LENGTH,
   DEVELOPER_APP_NAME_MAX_LENGTH,
   developerAppEditSchema,
-  useEditDeveloperApp
+  useEditDeveloperApp,
+  useDeactivateDeveloperAppAccessKey,
+  useCreateDeveloperAppAccessKey
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
 import {
   IconCopy,
+  IconTrash,
   IconButton,
   Button,
   Flex,
@@ -27,6 +30,7 @@ import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './EditAppPage.module.css'
+import { MaskedSecretDisplay } from './MaskedSecretDisplay'
 import { CreateAppPageProps, CreateAppsPages } from './types'
 
 type EditAppPageProps = CreateAppPageProps
@@ -40,6 +44,10 @@ const messages = {
   copyApiKeyLabel: 'copy api key',
   bearerToken: 'bearer token',
   copyBearerTokenLabel: 'copy bearer token',
+  revealTokenLabel: 'reveal bearer token',
+  hideTokenLabel: 'hide bearer token',
+  deleteAccessKeyLabel: 'delete bearer token',
+  createNewToken: 'Create New Bearer Token',
   copied: 'Copied!',
   goBack: 'Back to Your Apps',
   back: 'Back',
@@ -81,13 +89,22 @@ const getBearerTokens = (params: EditAppPageProps['params']) => {
 
 export const EditAppPage = (props: EditAppPageProps) => {
   const { params, setPage } = props
-  const { name, description, apiKey, bearerToken, imageUrl } = params ?? {}
-  const bearerTokens = getBearerTokens(params)
+  const { name, description, apiKey, imageUrl } = params ?? {}
+  const initialBearerTokens = getBearerTokens(params)
+  const [bearerTokens, setBearerTokens] =
+    useState<string[]>(initialBearerTokens)
 
   const record = useRecord()
 
   const { isSuccess, isError, error, mutate, isPending } = useEditDeveloperApp()
+  const deactivateAccessKey = useDeactivateDeveloperAppAccessKey()
+  const createAccessKey = useCreateDeveloperAppAccessKey()
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  // Sync bearer tokens when params change (e.g. navigating to different app)
+  useEffect(() => {
+    setBearerTokens(getBearerTokens(params))
+  }, [params])
 
   useEffect(() => {
     if (isSuccess) {
@@ -138,10 +155,31 @@ export const EditAppPage = (props: EditAppPageProps) => {
     copyToClipboard(apiKey)
   }, [apiKey])
 
-  const copyBearerToken = useCallback(
-    (token: string) => () => copyToClipboard(token),
-    []
+  const handleDeactivateToken = useCallback(
+    (token: string) => {
+      if (!apiKey) return
+      deactivateAccessKey.mutate(
+        { apiKey, apiAccessKey: token },
+        {
+          onSuccess: () => {
+            setBearerTokens((prev) => prev.filter((t) => t !== token))
+          }
+        }
+      )
+    },
+    [apiKey, deactivateAccessKey]
   )
+
+  const handleCreateToken = useCallback(() => {
+    if (!apiKey) return
+    createAccessKey.mutate(apiKey, {
+      onSuccess: (data) => {
+        if (data.api_access_key) {
+          setBearerTokens((prev) => [data.api_access_key, ...prev])
+        }
+      }
+    })
+  }, [apiKey, createAccessKey])
 
   if (!params) return null
 
@@ -215,27 +253,34 @@ export const EditAppPage = (props: EditAppPageProps) => {
             <div key={token} className={styles.keyRoot}>
               <span className={styles.keyLabel}>{messages.bearerToken}</span>
               <Divider orientation='vertical' className={styles.keyDivider} />
-              <span className={styles.keyText}>{token}</span>
-              <Divider orientation='vertical' className={styles.keyDivider} />
-              <span>
-                <Toast
-                  text={messages.copied}
-                  portalLocation={
-                    typeof document !== 'undefined'
-                      ? document.getElementById('page') || document.body
-                      : undefined
-                  }
-                >
+              <MaskedSecretDisplay
+                value={token}
+                copiedMessage={messages.copied}
+                copyLabel={messages.copyBearerTokenLabel}
+                revealLabel={messages.revealTokenLabel}
+                hideLabel={messages.hideTokenLabel}
+                dividerClassName={styles.keyDivider}
+                extraActions={
                   <IconButton
-                    onClick={copyBearerToken(token)}
-                    aria-label={messages.copyBearerTokenLabel}
+                    onClick={() => handleDeactivateToken(token)}
+                    aria-label={messages.deleteAccessKeyLabel}
                     color='subdued'
-                    icon={IconCopy}
+                    icon={IconTrash}
+                    disabled={deactivateAccessKey.isPending}
                   />
-                </Toast>
-              </span>
+                }
+              />
             </div>
           ))}
+          <Button
+            variant='secondary'
+            type='button'
+            onClick={handleCreateToken}
+            disabled={createAccessKey.isPending}
+            isLoading={createAccessKey.isPending}
+          >
+            {messages.createNewToken}
+          </Button>
           <div className={styles.actionsContainer}>
             <Button
               variant='secondary'

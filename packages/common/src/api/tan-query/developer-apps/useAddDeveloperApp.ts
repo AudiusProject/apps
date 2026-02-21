@@ -56,17 +56,12 @@ export const useAddDeveloperApp = () => {
       if (!currentUserId) {
         throw new Error('No current user ID')
       }
-      const {
-        apiSecret: apiSecretIgnored,
-        bearerToken,
-        ...restNewApp
-      } = newApp
+      const { apiSecret: apiSecretIgnored, bearerToken, ...restNewApp } = newApp
 
       // Normalize apiKey to match list format (no 0x prefix, like API returns for address.slice(2))
-      const apiKeyNormalized =
-        restNewApp.apiKey.startsWith('0x')
-          ? restNewApp.apiKey.slice(2).toLowerCase()
-          : restNewApp.apiKey.toLowerCase()
+      const apiKeyNormalized = restNewApp.apiKey.startsWith('0x')
+        ? restNewApp.apiKey.slice(2).toLowerCase()
+        : restNewApp.apiKey.toLowerCase()
       const appForList: DeveloperApp = {
         ...restNewApp,
         apiKey: apiKeyNormalized,

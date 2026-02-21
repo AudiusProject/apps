@@ -87,15 +87,14 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     const apiKey = address.startsWith('0x')
       ? address.slice(2).toLowerCase()
       : address.toLowerCase()
-    const apiSecret =
-      (privateKey as string).startsWith('0x')
-        ? (privateKey as string).slice(2).toLowerCase()
-        : (privateKey as string).toLowerCase()
+    const apiSecret = (privateKey as string).startsWith('0x')
+      ? (privateKey as string).slice(2).toLowerCase()
+      : (privateKey as string).toLowerCase()
 
     // Create api_access_key for the relay-created app (user from auth headers; indexer may lag, so retry)
     const bearerToken = await this.createAccessKeyWithRetry({
-      address: address,
-      userId: typeof userId === 'bigint' ? String(userId) : userId
+      address,
+      userId: userId.toString()
     })
 
     return {
@@ -137,7 +136,7 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
             ? (e as { response?: { status?: number } }).response?.status
             : undefined
         if (status === 404 && attempt < maxAttempts) {
-          await new Promise((r) => setTimeout(r, delayMs))
+          await new Promise((resolve) => setTimeout(resolve, delayMs))
           continue
         }
         throw e

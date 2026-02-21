@@ -25,10 +25,11 @@ export const useDeveloperApps = <TResult = DeveloperApp[]>(
     queryKey: getDeveloperAppsQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } =
-        await sdk.developerApps.getDeveloperAppsWithMetrics({
+      const { data = [] } = await sdk.developerApps.getDeveloperAppsWithMetrics(
+        {
           id: Id.parse(userId)
-        })
+        }
+      )
 
       return data.map(
         ({

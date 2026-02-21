@@ -14,6 +14,7 @@ import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './AppDetailsPage.module.css'
+import { MaskedSecretDisplay } from './MaskedSecretDisplay'
 import { CreateAppPageProps, CreateAppsPages } from './types'
 
 type AppDetailsPageProps = CreateAppPageProps
@@ -25,15 +26,19 @@ const messages = {
     'Use your API Key, Secret, and a Bearer Token to authenticate requests to the Audius API or SDK.',
   description: 'Description',
   apiKey: 'api key',
-  apiKeyDescription: "Your app's public identifier",
+  apiKeyDescription: "Your app's public identifier.",
   copyApiKeyLabel: 'copy api key',
   apiSecret: 'api secret',
   apiSecretDescription: "Your app's password. Shown once, save it!",
   copyApiSecretLabel: 'copy api secret',
+  revealSecretLabel: 'reveal api secret',
+  hideSecretLabel: 'hide api secret',
   bearerToken: 'bearer token',
   bearerTokenDescription:
     'Used to sign requests. Regenerate a new one anytime.',
   copyBearerTokenLabel: 'copy bearer token',
+  revealTokenLabel: 'reveal bearer token',
+  hideTokenLabel: 'hide bearer token',
   copied: 'Copied!',
   readTheDocs: 'Read the Developer Docs',
   goBack: 'Back to Your Apps'
@@ -51,16 +56,6 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
     if (!apiKey) return
     copyToClipboard(apiKey)
   }, [apiKey])
-
-  const copySecret = useCallback(() => {
-    if (!apiSecret) return
-    copyToClipboard(apiSecret)
-  }, [apiSecret])
-
-  const copyBearerToken = useCallback(() => {
-    if (!bearerToken) return
-    copyToClipboard(bearerToken)
-  }, [bearerToken])
 
   if (!params) return null
 
@@ -125,25 +120,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
           <div className={styles.keyRoot}>
             <span className={styles.keyLabel}>{messages.apiSecret}</span>
             <Divider orientation='vertical' className={styles.keyDivider} />
-            <span className={styles.keyText}>{apiSecret}</span>
-            <Divider orientation='vertical' className={styles.keyDivider} />
-            <span>
-              <Toast
-                text={messages.copied}
-                portalLocation={
-                  typeof document !== 'undefined'
-                    ? document.getElementById('page') || document.body
-                    : undefined
-                }
-              >
-                <IconButton
-                  onClick={copySecret}
-                  aria-label={messages.copyApiSecretLabel}
-                  color='subdued'
-                  icon={IconCopy}
-                />
-              </Toast>
-            </span>
+            <MaskedSecretDisplay
+              value={apiSecret}
+              copiedMessage={messages.copied}
+              copyLabel={messages.copyApiSecretLabel}
+              revealLabel={messages.revealSecretLabel}
+              hideLabel={messages.hideSecretLabel}
+              dividerClassName={styles.keyDivider}
+            />
           </div>
         </div>
       )}
@@ -155,25 +139,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
           <div className={styles.keyRoot}>
             <span className={styles.keyLabel}>{messages.bearerToken}</span>
             <Divider orientation='vertical' className={styles.keyDivider} />
-            <span className={styles.keyText}>{bearerToken}</span>
-            <Divider orientation='vertical' className={styles.keyDivider} />
-            <span>
-              <Toast
-                text={messages.copied}
-                portalLocation={
-                  typeof document !== 'undefined'
-                    ? document.getElementById('page') || document.body
-                    : undefined
-                }
-              >
-                <IconButton
-                  onClick={copyBearerToken}
-                  aria-label={messages.copyBearerTokenLabel}
-                  color='subdued'
-                  icon={IconCopy}
-                />
-              </Toast>
-            </span>
+            <MaskedSecretDisplay
+              value={bearerToken}
+              copiedMessage={messages.copied}
+              copyLabel={messages.copyBearerTokenLabel}
+              revealLabel={messages.revealTokenLabel}
+              hideLabel={messages.hideTokenLabel}
+              dividerClassName={styles.keyDivider}
+            />
           </div>
         </div>
       )}
