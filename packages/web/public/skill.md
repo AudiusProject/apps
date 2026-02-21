@@ -180,7 +180,7 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 
 ## Image Loading and Mirrors
 
-Images (artwork, profile pictures) often fail to load if you do not retry from mirrors. API responses include image URLs and a `mirrors` array of alternate content-node hosts.
+Images (artwork, profile pictures) often fail to load if you do not retry from mirrors. API responses include image URLs and a `mirrors` array of alternate hosts.
 
 **Artwork structure example:**
 
@@ -219,21 +219,21 @@ Images (artwork, profile pictures) often fail to load if you do not retry from m
 
 ## Links
 
-| Resource           | URL                                                         |
-| ------------------ | ----------------------------------------------------------- |
-| agents.md          | https://audius.co/agents.md                                 |
-| llms.txt            | https://audius.co/llms.txt                                   |
-| Docs               | https://docs.audius.co                                      |
-| API                | https://api.audius.co                                       |
-| API Reference      | https://docs.audius.co/api                                  |
-| Swagger YAML       | https://api.audius.co/v1/swagger.yaml                       |
-| Swagger Full       | https://api.audius.co/v1/full/swagger.yaml                  |
-| API Plans          | https://api.audius.co/plans                                 |
-| SDK npm            | https://www.npmjs.com/package/@audius/sdk                   |
-| GitHub apps        | https://github.com/audiusproject/apps                       |
-| Create Audius App   | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius  | https://docs.audius.co/developers/guides/log-in-with-audius |
-| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors  |
+| Resource                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| agents.md               | https://audius.co/agents.md                                 |
+| llms.txt                | https://audius.co/llms.txt                                  |
+| Docs                    | https://docs.audius.co                                      |
+| API                     | https://api.audius.co                                       |
+| API Reference           | https://docs.audius.co/api                                  |
+| Swagger YAML            | https://api.audius.co/v1/swagger.yaml                       |
+| Swagger Full            | https://api.audius.co/v1/full/swagger.yaml                  |
+| API Plans               | https://api.audius.co/plans                                 |
+| SDK npm                 | https://www.npmjs.com/package/@audius/sdk                   |
+| GitHub apps             | https://github.com/audiusproject/apps                       |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
 
 ---
 

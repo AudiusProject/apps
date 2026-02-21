@@ -3,7 +3,7 @@ id: image-mirrors
 title: Image Loading & Mirrors
 pagination_label: Image Loading & Mirrors
 sidebar_label: Image Loading & Mirrors
-description: Reliable image loading with content-node mirror fallback
+description: Reliable image loading with validator mirror fallback
 toc_min_heading_level: 2
 ---
 
@@ -32,7 +32,7 @@ Artwork and profile image objects in API responses include size variants **and**
 
 - **Size variants** (`150x150`, `480x480`, `1000x1000`): Use the variant closest to the displayed
   size for performance.
-- **mirrors**: Alternate content-node host roots. Mirror order is arbitrary; try each until one
+- **mirrors**: Alternate validator node host roots. Mirror order is arbitrary; try each until one
   succeeds.
 
 Profile objects use the same pattern for `profile_picture` and `cover_photo` (with `_150x150`,
