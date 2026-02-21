@@ -1,0 +1,293 @@
+---
+id: claim-prize
+title: "Claim Prize"
+description: "Claims a prize by verifying a Solana transaction. User must send exactly 2 YAK to the prize receiver address. Returns the prize won and any redeem codes/URLs."
+sidebar_label: "Claim Prize"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Claim Prize"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/prizes/claim"}
+>
+  
+</MethodEndpoint>
+
+
+
+Claims a prize by verifying a Solana transaction. User must send exactly 2 YAK to the prize receiver address. Returns the prize won and any redeem codes/URLs.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<MimeTabs
+  className={"openapi-tabs__mime"}
+>
+  <TabItem
+    label={"application/json"}
+    value={"application/json-schema"}
+  >
+    <details
+      style={{}}
+      className={"openapi-markdown__details mime"}
+      data-collapsed={false}
+      open={true}
+    >
+      <summary
+        style={{}}
+        className={"openapi-markdown__details-summary-mime"}
+      >
+        <h3
+          className={"openapi-markdown__details-summary-header-body"}
+        >
+          Body
+        </h3><strong
+          className={"openapi-schema__required"}
+        >
+          required
+        </strong>
+      </summary><div
+        style={{"textAlign":"left","marginLeft":"1rem"}}
+      >
+        
+      </div><ul
+        style={{"marginLeft":"1rem"}}
+      >
+        <SchemaItem
+          collapsible={false}
+          name={"signature"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The Solana transaction signature for the 2 YAK payment","example":"5j7s1QjmRKFuDbCWMRVRNibSV2VAAEcNKP6HWU7GwPdXkBZvhz8n4vQl7bBq8tN4Rz9x1Kj3mP5wQ8rT2Y6zA"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"wallet"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"The wallet address that sent the transaction","example":"HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC"}}
+        >
+          
+        </SchemaItem>
+      </ul>
+    </details>
+  </TabItem>
+</MimeTabs><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success - Prize claimed
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"prize_id"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The unique identifier of the prize won","example":"prize_1_yak_airdrop"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"prize_name"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The name of the prize won","example":"1 YAK Airdrop"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"wallet"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The wallet address that claimed the prize","example":"HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"prize_type"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The type of prize (e.g., \"coin_airdrop\", \"download\")","example":"coin_airdrop"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                action_data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <div
+                              style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                            >
+                              
+                              
+                              Prize-specific action data (e.g., redeem code/URL for coin airdrops, download URL for downloads)
+                              
+                              
+                            </div><SchemaItem
+                              name={"property name*"}
+                              required={false}
+                              schemaName={"any"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"object","description":"Prize-specific action data (e.g., redeem code/URL for coin airdrops, download URL for downloads)","additionalProperties":true,"example":{"code":"aB3d5F","url":"/coins/YAK/redeem/aB3d5F"}}}
+                              collapsible={false}
+                              discriminator={false}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"prize_id\": \"prize_1_yak_airdrop\",\n  \"prize_name\": \"1 YAK Airdrop\",\n  \"wallet\": \"HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC\",\n  \"prize_type\": \"coin_airdrop\",\n  \"action_data\": {\n    \"code\": \"aB3d5F\",\n    \"url\": \"/coins/YAK/redeem/aB3d5F\"\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request - Transaction not found, invalid, or signature already used
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

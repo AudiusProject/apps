@@ -16,7 +16,7 @@
     "pages:dev": "wrangler pages dev --compatibility-date=2024-02-23 --proxy 3000 -- npm run start",
     "pages:deploy": "npm run build && wrangler pages deploy ./build",
     "sync:api-spec": "node scripts/sync-openapi.cjs",
-    "gen:api-docs": "npm run sync:api-spec && npm run docusaurus -- gen-api-docs api && node scripts/patch-api-sidebar.cjs"
+    "gen:api-docs": "npm run sync:api-spec && rm -f docs/developers/api/sidebar.ts && npm run docusaurus -- gen-api-docs api && node scripts/patch-api-sidebar.cjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.5.2",
@@ -37,16 +37,8 @@
     "wrangler": "3.30.1"
   },
   "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 3 chrome version",
-      "last 3 firefox version",
-      "last 5 safari version"
-    ]
+    "production": [">0.5%", "not dead", "not op_mini all"],
+    "development": ["last 3 chrome version", "last 3 firefox version", "last 5 safari version"]
   },
   "engines": {
     "node": ">=18.0"

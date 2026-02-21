@@ -1,0 +1,227 @@
+---
+id: remove-manager
+title: "Remove Manager"
+description: "Remove a manager (revoke user-to-user grant). Can be called by the child user or the manager."
+sidebar_label: "Remove Manager"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1Vm1v2zYQ/iuH+2QHip20WT8IRQF3SdcUTRu0drMuNlpavESMJVIlKb/M0H8fjpLfajfbOuyTBPJennvueHdL9OLeYXyLpSPrcBShJJdYVXhlNMb4gXIzJRCQCy3uyULL0tRMCFj+2Jtj/sK9Fdq3O/Cr0DAmSESWkYTxAnxKkKQqk0EejA0nja0ORmgKsoJ9XcqNt6v6HiN0lJRW+QXGt0t8KZxKeqVPMb4dVdESX5KwZNcnowgLYUVOnkNhDS1ywhiVxAgVh1MIn+L3MfbTOhy4PIfWFtpZatwaLCgHY1L6HmwAKdsYoaVvpbIkMfa2pAhdklIuMF6iXxTs2Xmr9D1WjLYB09gbOLKX/xyXudtmDrxpYPwrECMWdoXRjhzfPzk54c+u14b8VZjgyiQh5+7KLFtghInRnrRnPVEUmUpC9roPjpWX+87N+IESjxEWlnPtVe26sbolODYmI6H3WLhJyadUF866WmAm3BYyrCL0VmgnEr79kgqX7hNwiN9xZpJJkgqlYcsABAMVW1U+YxMzqzx9WbGHVcWXZ4f4eykkcErI+R26aoXTfYWBFqVPjVV/kjyg8XRf45WxYyUl6T3xXw4h+kh2ShbIWmO/06gizMmnhh+fpIw8F1Qoxhi7oSV0l0pW3abuXHe5U75VeKJsvX5vpc0wxtT7wsXdrihUR5RSla6TmO70FLkAVy/6IxdKXQtb73qdMraBTS2H6mCZvQy+7vevIagD65P2TT3CTPkULrhwqMyhsGoqPMGEFnBnLIRsbqrJdYZ6qI+Odm0cHfHpwBE84oYdhNIshHMzYyXcKcokMMlCaQcLU9qDQOKh/vr161D3muQHg3Hj5vlYOHp21uIUcN+IG8UJLdovGsWhXjUIloCk7r1CL2AqspI60N+GlZfO8/0P8YDSkNKc+cmFh1ZgkLlSPjWlh5M5FJbu1Lwd2LqYi7zI6NEo5O/vsiT/JR3fDJ5dvb6fXz1cnbzrf376/nwy+3zz5uGP3z7lb9VZuQ7o6Oi1mYHyMDN24mLOwGkdR+/6EiQlRpILdG+yAYklySkRmRvqJx24mHsrEl/L7WTemvxArob6aQfOyappY3vNjpDSknNbihtrQ33WgYELKsptRI0Fsc0FJCklE7cpsPVNXV8cnAzOJcx4bvq1rVXKSDGgeKiPAxWNVDMRwoCoB5NIPEkoC6OhJZWlxIOZabIuVUWbtXsr3ZBboUEUheUmH4E2+rie7LKe5iGStYPWavDkRlJ7qLnhbk/fH7/bIIRR8/MqFBfG+Oamf7Afc55rUfBmQpor8H1I85ubfnO0jazDWCqeoncmwGj6de/6cs9+L/Qi+HQK9S23rfrmtHPCERXG+VyEOdYM672FZMfictNL//dFqeHX09x3i0yokILQb5dNw17tcBHGYeFZ9Ww+2F06RhGmxnlWWS650wxsVlV8/K0ky8vWKMKpsEqMmczbJUrl+F9ifCcyR4/w0PrQrCNt+Pm96mCwzaHQvIaEFocxYoQTWtQ7Hi9Z/xnoI4vWT6Da5b0aVRGmJCTZwGot00sSKvyW9t5exXNzPabPL95e9C8wQrH78lYTsv6y+YPQnm91zkEzO16s8a6mSeDyb/Wvmz660V91Vg61qv4Ci+dMpA==
+sidebar_class_name: "delete api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Remove Manager"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/users/{id}/managers/{managerUserId}"}
+>
+  
+</MethodEndpoint>
+
+
+
+Remove a manager (revoke user-to-user grant). Can be called by the child user or the manager.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"The user ID (child user whose manager is being removed)","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"managerUserId","in":"path","description":"The user ID of the manager to remove","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Manager removed successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"success"}
+                        required={false}
+                        schemaName={"boolean"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"boolean","description":"Whether the operation was successful"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"transaction_hash"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The blockchain transaction hash"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"success\": true,\n  \"transaction_hash\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"403"}
+        value={"403"}
+      >
+        <div>
+          
+          
+          Forbidden
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

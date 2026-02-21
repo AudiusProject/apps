@@ -1,0 +1,224 @@
+---
+id: create-developer-app-access-key
+title: "Create Developer App Access Key"
+description: "Create a new bearer token (API access key) for a developer app. Indexer validates grants."
+sidebar_label: "Create Developer App Access Key"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1Vm1v2zYQ/isHfooNxXbatB+EYYC7ZEvapQkWp1kXBwktniPGEsmSlF9m6L8PR8myXXsJVmCfEov38tw9x+e4ZJ4/ORbfMYFTzLRB+8CNcew+YgJdYqXxUisWs18sco/AQeEMRsgtWvB6ggoO+lfnwJMEnYMJLlow1hY4NAGBG9OBcyVwjhamPJOCe3TwZLnyrsMiRlac8pyLdaaTxr9vDPSr+J9wwSJmuOU5erSEfMkUz5HFrHBoH6RgEZME+FuBloy3yxikCGQI5yegx+BXP2epBj1TLnzZgs4iZvFbIS0KFntbYMRckmLOWbxkfmEotfNWqidWllGDhgth0bkVGsN9ugPmZDMP1B5VPz/hovWfMt+TsTNaOXR0/qbXoz/bCfsNS5CELgtwRfg2LrKMupVo5VF5cuXGZDIJvHSfHfkvd/Pr0TMmfgvpHeNGPlQD8TDBBc2SsVSmlxW27853qtlHmsJZtkb94gASD8xLn1HIymMj3cOqTawsyfC4d7TbqBvFC59qK/9GsdWVyuN412ObS6U9jHWhdp3f7ePlGu0ULaC12n7nUUYsR59quhlGOx/G36csZt1mTA/pynaX9QCV3arYwwkuaP5cCF5dlcJmLGap98bF3S43ssMLIQvXSXR3esRoihwmhZV+cU1UV3x94E4m/YKyNlRRDFYPJP0ekc0Oc2eDwRUEdyB/VL6eKJhJn8KpT9FikYOxckqXniaT5GNmpUdodMF1hmqo2u3tGO02fb1xCC+koQThUhvu3ExbAWOJmQDqMZfKwUIXdi+QeKgeHx+Hql9PQggY12l+GnGH748PSDzoxse1I83fz7XjUK3Uhiwg4QpGCFwtSAQL7MBgE1ZeOE/n/4oHpIIU59SfnHs4CB2kXkmf6sJDbw7G4ljOW6Fbp3OemwxfrEL8+TlL8nfp6Pbm/cXZ0/zi+aL3efD17eXJZPb19uPzX799yX+Xx0VTULt9pmcgPcy0nbiYGDiq6qA7KDDRAisNXbNBl1YQJTxzQ/WmA6dzb3niK7st5q3O93A1VG87cIJWTuvYTXdWkrl2XEcbquMO3LjgIt3alJbTZi8gSTGZuPWANSfVfA3CQqDkAmY8y9A3sVaUoSRA8VAdhlbUVpvrZYRSPQFPSLsKoxUcCGkx8bRz0LpUmhZ591e+gVuuSEusnqKIQGl1aHGqJyiqzRkqaRIc5FzxJ7SQa4GtoWJlxD4EkXzt3gYjFtX//BqGi8Xs4+1grw4Tz1vqqy1cBpo/3g7qT5vIOoSlpC041gFGrcv9q/Od+P2gRfDlCKpTkq3q5KjTo4pIAHMeNlG9Zl9/LGylWK619X990dTN9jj3XZNxGfgI4rus5XvjxRXkm0UsXr8ZNhX8PmIpCX98x5ZLkp0bm5Ulfa6eOKTrQjo+ymj7jnnm8IWqD/6oF3ULfugttLeysMU3HmBB31jMwkKZcisJ3I8Dff2dtBdV/ZGrxSakFdpVs8v7MmIpcoE2IKxOaYSM3/DbeQ1Rac1mvrq8HrCy/Ae2D/NY
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create Developer App Access Key"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/developer-apps/{address}/access-keys"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create a new bearer token (API access key) for a developer app. Indexer validates grants.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"address","in":"path","description":"Developer app address (API Key)","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user who owns the developer app","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Access key created successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"api_access_key"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The newly created bearer token (API access key)"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"api_access_key\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"404"}
+        value={"404"}
+      >
+        <div>
+          
+          
+          Developer app not found
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

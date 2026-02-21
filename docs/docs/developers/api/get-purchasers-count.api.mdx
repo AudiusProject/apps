@@ -1,0 +1,341 @@
+---
+id: get-purchasers-count
+title: "Get purchasers count"
+description: "Gets the list of users who have purchased content by the given user"
+sidebar_label: "Get purchasers count"
+hide_title: true
+hide_table_of_contents: true
+api: eJytV9tu2zgQ/ZUBn5JAtZM27YOwWCBF0zbFtg22TrPdOnBpaWwxlkiVHPmyhv99MZRk2bHipJcnW+Rczlw4PFwKkmMnwq+icGiduAlEjC6yKidltAjFGyQHlCCkyhGYEXg5mCUGEjlFyAsbJdJhDJHRhJpguPDyYzVF7aVFIEyOVrLFi7i0udazDiJTaBKByKWVGRLDCL8uhZYZilCoWARCMZRcUiLu4juDK4cWLl6JQFj8XiiLsQjJFhgIFyWYSREuBS1ytuXIKj0Wq1WwNm9GI4dUu/heoF3s+OglCLrIhmg5AYowc0AG3ETlHXY/KlIYGQu5HCvtw4SDXI7XSkeQqkzRoWiBpDThGO0WJi/9U5BGSFHyWDdcm0GT3vsdFWWG2RPVn5mcKD3235x2dNTmtiXhVZsMvMR+14sc2WfdWByfSgktt9gBWRlNwFiQ6bDIWnO7x/tDYb/2jpwv670d37T5NpiyG++Hc8Ot6nKjHTref3p8zD/bCD4VUYTOiaDGzCIyz1MV+Rbr3jqWW274afr/q0gloaNBlEilB8PURBMRbC+61NAgT+XCNTtKxzjH+K5Cvbyl4tRYSyosV5FUho5klotATNE6DuEmqAM3w1uM/Am3PAhIlWG3QGxp2Huw7ZPcie8xZh8Sb8LdrehmAtp265TcqZFDO1UR/kjOapUHvOwcAEGKUl6qhAYZkowlSVb0v62zYq3WjOuBH9eDuoHFasVyp20t/FLGG8OhaWNWeN7a82inaAGtNfaOxioQGVJi+P4YY3ldUCJC0fXHs7tU8arboOzWl4rzJssbpbCpCEVClLuw25W56sgiVoXrRKY7PRF8Lh1GhVW0+MSHqkz5S+lUdFaws3WK2EZ9xPl7yDI7Q+Rtr3cJXh1YHzVVZxdmihI4pwQtFhnkVk0lIUxw4QfOzCpCWN+ZrtPXfX10tG3j6IhXrxzCHjfswI+pXDo3MzaGkcK0vKul0g4WprCtQMK+/vbtW1+zRWPVf95gWLn5Yygdvjg94NTzYA0rxQkuDv+sFPu6vjpYAiKpYYgg9QKmMi2wA71NWFnhiPfvxQNKQ4Jzzk8mCQ58BjlXihJTEBzPIbc4UvNDn63zuczyFPdGEf/zIY2y58nw+urF+7fj+fvb98cfel+efXw1mX25fnf775vP2V/qtFgHdHT01sxAEcyMnbiQK3BSxnF2eQExRibGkiw11YDIYswlkanr66cdOJ/zZVGRqq3KW5O11Kqvn3XgFVo1rWyvsyPj2KJzG4qNtb4+9dSEVZRrRPmK2swFRAlGE9c02Hqn7C8OLvbOY5jJNEVa26pLhooBhX39xKeiktrkCkNkqiAjwhiKnNlRrCxGBGam0bpE5YesfVbr+tpKDTLPrZliHIA2+onFqZlgDGMrNflI1g4OMqnlmFmJifGwr3movURp0T50br2QCKo/r31ziVC8u+61MiGucykKZCaouQM/+jK/u+5VS5vIOoxlxUxjZDyMapyeXV7sMlk/i+DzCZS763EuTjrHHFFuHGXSz/eKzdxDpLfsLpsx+pvIfJVLwjl181Qqn24/W5fVUK5fE4EIPdFqMPqpzihvApEYRyy7XPI4ubLpasXLJSHjeR0rJ4cp35UjmTrcE9hvZOit0U1wsflW8BNMhEIws/xllDVp3+O5fhH8guNHk/g9MJoXw88C+UFKvwfLnXfETwL6DTz/ERjvpOyGP6xiiD/Y5wd/V/TxEDYfvq0QqkWpF5vOa2gqFqubVSASlDFaD6PcOIsizDd7befNwfjXXOzNeU+sVv8D2b6v9w==
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get purchasers count"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/purchasers/count"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets the list of users who have purchased content by the given user
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"content_type","in":"query","description":"Type of content to filter by (track or album)","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"content_id","in":"query","description":"Filters for users who have purchased the given track or album ID","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"signature"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"timestamp"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                version
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"service"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"version"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={false}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"latest_chain_block\": 0,\n  \"latest_indexed_block\": 0,\n  \"latest_chain_slot_plays\": 0,\n  \"latest_indexed_slot_plays\": 0,\n  \"signature\": \"string\",\n  \"timestamp\": \"string\",\n  \"version\": {\n    \"service\": \"string\",\n    \"version\": \"string\"\n  },\n  \"data\": 0\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

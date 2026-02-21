@@ -1,0 +1,233 @@
+---
+id: share-playlist
+title: "Share Playlist"
+description: "Record a playlist share event"
+sidebar_label: "Share Playlist"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVttu2zgQ/ZUBn5JAtZM27YNQFHCR7jbBpjEap9luHLRjahwxlkiVpHxZQ/++GEq25dhNd/dJNjmXwznDw1kKjw9OxHeiyHCRKeeduI9EQk5aVXhltIjFZ5LGJoCwsgGXoiWgKWkvImEKssi254mIxXXY6zemIhKOZGmVX4j4bineo1OyV/pUxHf3VbQU7wkt2fXKfSQKtJiTJ+uCh8acRLzG900lIhKKcRXoU/EUbG+dGs7PRCQs/SiVpUTE3pYUCSdTylHES+EXBQd23ir9ICoG0+QqHdlWnh8l2cVOokFKwIZwfgZmDH71N8eJ0g/hP+emUIN/j+KejV1htCPH+y+Pj/mznbu/TYQNBFECrpSSnBuXWcaApdGeKYqXAosiUzKw1H10HGS5C8KMHkky3MIyp17VEJqoLcORMRmh3qnJbUo+JRsOv+4KmKFrIRNVJLxF7VDy7rcUXbpbiH3VHmVGTmSKSkMrAIQAFUdVPuMQM6s8fVtVUVQVb54en+zW8UZj6VNj1d+UbNWr9jh9pvLaeBibUu/6vd7H2DXZKVkga4194lFFIiefGr48hQntEjo7Ft31pewuW/1fdQPtLtwtDltflNJmIhap94WLu10sVAfLRJWuI013eiK4s1ZX8ZqZr8ltXcg1BxxDNE0a6GabHUo+DgZ9CO7A/qR902AwUz6FD9wJVOZQWDVFTzChBYyNhUDPpj1cZ6iH+uhoO8bREa/eOIJn0nCC0GsFOjdjjRoryhLg6qLSDhamtHuBxEP9/fv3oe419IeAcZPm7QgdvTk94OvMihA3jhNaHL5rHId6df/ZAiRqGBGgXsAUs5I6MGjDykvnef+neEBpSGnO9cnRw0GoINdK+dSUHo7nUFgaq/lhqNaHOeZFRs+eIvnzUybz1+no9ubN5ceH+eXj5fGnwddXV2eT2dfbi8e/fv+S/6FOy/WBjo4+mhkoDzNjJy5mBk7qc/T655CQNAm5UO4NGyAtJUwJZm6oX3bgw9xblL6222LemnwPV0P9qgNnZNW0ib2uDiaJJedajptoQ33agRsXXJTbmBoL2K4FyJTkxG0abL1T9xcfLgnJE5hhlpFfx1pRRooBxUP9IpSisWoL/ohY71F6SqAsjIaDRFmSHsxMk3WpKg7Zu7fyDdyiBiwKa6aURKCNfmFpaiaUwINF7cNJ1gkOctT4wE+LSehwqFlB28/mz+9tMBJR8+O30FwiFhe3g70CyzzXpuDNhDR34FWg+eJ20Cy1kXUYS8Wv5NgEGI0A9/rnu+9y0CL4cgL1LstWvXPSOeYTsfTlGB6m5hnemSS2Ii43IvrLCaWpj6e5Z01VoYRBL5eN1rYHoEjE29NGI7f3kUhZn+M7sVyyRtzYrKp4uZ4QWIQT5XCU8UM/xszRM5gPPjczwSH8p1Fi71kmtNiaW4IIiVgE1Z+iVQzq/wN8OlTtxdAsol60AaywtSta3VeRSAkTsgFTbdGTkgrf8t2ZWfgw66eyf3XNXYzbV2D1VNVfDr4X1tuWhN00Iv5OtOsYepBnwl/69xtB2/ivJI4PWlX/AP+n+1w=
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Share Playlist"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/playlists/{playlist_id}/shares"}
+>
+  
+</MethodEndpoint>
+
+
+
+Record a playlist share event
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"playlist_id","in":"path","description":"A Playlist ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Playlist share recorded successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"success"}
+                        required={false}
+                        schemaName={"boolean"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"boolean","description":"Whether the operation was successful"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"transaction_hash"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The blockchain transaction hash"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"success\": true,\n  \"transaction_hash\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"404"}
+        value={"404"}
+      >
+        <div>
+          
+          
+          Playlist not found
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

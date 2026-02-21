@@ -1,0 +1,233 @@
+---
+id: unfavorite-playlist
+title: "Unfavorite Playlist"
+description: "Unfavorite a playlist"
+sidebar_label: "Unfavorite Playlist"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVttu2zgQ/ZUBn5JAtZM27YNQFHCR7CZBL0FrN9uNjWQsjSPGEqmSlC9r6N8XQ8myHDvZy5MTcS5nzgwPZyUcPlgR3oo8xWUqrbNiFIiYbGRk7qRWIhQDNcGZNtIRIKztRCB0TgbZ5jLetrre2FiKCiPdUoS3K/ERrYx6hUtEeDsqg5X4SGjINF9GgcjRYEaOjPUeCjMSYQPuTsYiEJJB5egS8RRpr0kNl2ciEIZ+FdJQLEJnCgqEjRLKUIQr4ZY5B7bOSPUgSgZT5yosmVaeXwWZ5U6ifkLAhnB5BnoCbv1vhlOpHvz/nJs8B/8exYiNba6VJcvnr4+P+Wc7d1Ni0TAegy2iiKydFGnKaCOtHCnHzpjnqYx8n7qPliOsdhHo8SNFjDU33FUnq/x11JbhWOuUUO0QcpOQS8j4ypu5gDnaFjJRBsIZVBYjPr1L0Ca7LOyjepzqaBolKBW0AoAPUHJU6VIOMWcy7tYUirLkw9Pjk10SBwoLl2gj/6J4i6/K4/QF2pV2MNGF2vV7u69d38nMyAAZo80TjzIQGblE8/WJKSVH3AEe7FB0mwvZXbXGv+yue2797eLY1VUpTCpCkTiX27DbxVx2sIhlYTuR7s5OBM/W+jJ+5/ZXHW5dyaYRHEPUY+p7zjY7fbno96/BuwP7k3L1lMFcugTOeRyoyCA3coaOYEpLmGgDvkebGbGdoRqqo6PtGEdH/HVgCV5Iwwn8wOVo7VybGCaS0hiYYpTKwlIXZi+QcKju7++HqlfPgA8Y1mnej9HSu9MDvtCsCWHtOKXl4YfacajWCsAWEKGCMQGqJcwwLagD/TasrLCOz5/FA1JBQgvmJ0MHB55B5kq6RBcOjheQG5rIxaFn63yBWZ7Si1XEf3xJo+xtMr4ZvPt88bD4/Pj5+Ev/55uvZ9P5z5urxz9//5F9kqdFU9DR0YWeg3Qw12ZqQ+7ASVVH7/oSYop0TNbTvekGRIZibgmmdqhed+B84QxGrrLb6rzR2Z5eDdWbDpyRkbM6dsMOxrEha1uOm2hDddqBgfUu0m5MtQFscwFRQtHUbgasOanmi4uLffIY5pim5JpY65aRZEDhUL3yVNRWbckfEys+RqzCRa4VHMTSUORAzxUZm8j8kL17a1/fW1SAeW70jOIAlFavDM30lGJ4MKicr6RJcJChwgd+XHRMh0PFMtp+OJ+/t95IBPUfv/nhEqG4uunvVVnuc2UKTk9J8QR+9W2+uunXn9rIOoyl5Hdyoj2MWoV715e7L7PXIvhxAtUpy1Z1ctI55opybV2G/nWqH+L9C8VW2NVGTp/dUmpyHC0ca6r0/HmxXNVa215+AhFuLxsbuR0FItHWsf1qxRoxMGlZ8udqR2ARjqXFccpP/QRTSy/APfhWbwWH8J+Wib3lTGm5tbl4ERKh8Ko/QyMZ1P8H+HSt2ouh/ohq2QawxtYmtRyVgUgIYzIeU2XRiyLKXct3Z3HhYpr38uz803n/XAQCty/B+rGqfjn8XmDvWyI2qGX8g2gz6aeQ98J/9L+uJW3jvxY5LrUs/wbcaf06
+sidebar_class_name: "delete api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Unfavorite Playlist"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/playlists/{playlist_id}/favorites"}
+>
+  
+</MethodEndpoint>
+
+
+
+Unfavorite a playlist
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"playlist_id","in":"path","description":"A Playlist ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Playlist unfavorited successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"success"}
+                        required={false}
+                        schemaName={"boolean"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"boolean","description":"Whether the operation was successful"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"transaction_hash"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The blockchain transaction hash"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"success\": true,\n  \"transaction_hash\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"404"}
+        value={"404"}
+      >
+        <div>
+          
+          
+          Playlist not found
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      
