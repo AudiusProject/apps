@@ -1,0 +1,143 @@
+.section {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 92px;
+  flex: 1 0 0;
+  padding: 0 96px;
+}
+
+.headline {
+  font-family: 'Dust Bucer', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 140px;
+  line-height: 0.72;
+  color: #fff;
+  margin: 0;
+  width: 100%;
+  font-feature-settings: 'salt' 1;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.faqItem {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0 24px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.faqHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 90px;
+  padding: 24px 0;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.faqQuestion {
+  flex: 1 0 0;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.5;
+  color: #fff;
+  margin: 0;
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
+}
+
+.faqItem[aria-expanded='true'] .faqQuestion,
+.faqItem:hover .faqQuestion {
+  color: #e7c7ff;
+  text-shadow:
+    -4px 0px 4px rgba(175, 72, 255, 0.25),
+    4px 0px 4px rgba(175, 72, 255, 0.25),
+    0px -4px 4px rgba(175, 72, 255, 0.25),
+    0px 4px 4px rgba(175, 72, 255, 0.25);
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.chevron svg,
+.chevron svg path {
+  fill: #fff !important;
+}
+
+.faqItem[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.faqContent {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 16px 0;
+  overflow: hidden;
+}
+
+.faqAnswer {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.5;
+  color: #fff;
+  margin: 0;
+  text-align: left;
+}
+
+@media (max-width: 800px) {
+  .container {
+    padding: 0 16px;
+    gap: 48px;
+  }
+
+  .headline {
+    font-size: 96px;
+  }
+
+  .faqItem {
+    padding: 0;
+  }
+
+  .faqHeader {
+    height: auto;
+    padding: 16px 0;
+  }
+
+  .faqQuestion {
+    font-size: 18px;
+  }
+
+  .faqAnswer {
+    font-size: 16px;
+  }
+}

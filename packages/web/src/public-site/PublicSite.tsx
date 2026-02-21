@@ -10,7 +10,8 @@ import { env } from 'services/env'
 
 import { AppContextProvider } from '../app/AppContextProvider'
 
-import LandingPage from './pages/landing-page/LandingPage'
+import { PublicSiteProviders } from './PublicSiteProviders'
+import { LandingPage2026 } from './pages/landing-2026/LandingPage2026'
 
 const {
   TRENDING_PAGE,
@@ -111,107 +112,109 @@ export const PublicSite = (props: PublicSiteProps) => {
       </div>
 
       <Suspense fallback={<div style={{ width: '100vw', height: '100vh' }} />}>
-        <ThemeProvider theme='day'>
-          <AppContextProvider>
-            {(() => {
-              const RouterComponent = env.USE_HASH_ROUTING
-                ? HashRouter
-                : BrowserRouter
-              const basename = env.BASENAME || undefined
-              // In React Router v7, future flags are enabled by default for declarative routers
-              // The future prop is only available for data routers (createBrowserRouter)
-              return (
-                <RouterComponent basename={basename}>
-                  <NavScreen
-                    closeNavScreen={closeNavScreen}
-                    isOpen={isNavScreenOpen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                  <Routes>
-                    <Route
-                      path='/legal/terms-of-use'
-                      element={
-                        <TermsOfUsePage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
+        <PublicSiteProviders>
+          <ThemeProvider theme='day'>
+            <AppContextProvider>
+              {(() => {
+                const RouterComponent = env.USE_HASH_ROUTING
+                  ? HashRouter
+                  : BrowserRouter
+                const basename = env.BASENAME || undefined
+                // In React Router v7, future flags are enabled by default for declarative routers
+                // The future prop is only available for data routers (createBrowserRouter)
+                return (
+                  <RouterComponent basename={basename}>
+                    <NavScreen
+                      closeNavScreen={closeNavScreen}
+                      isOpen={isNavScreenOpen}
+                      setRenderPublicSite={setRenderPublicSite}
                     />
-                    <Route
-                      path='/legal/privacy-policy'
-                      element={
-                        <PrivacyPolicyPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/artist-coin-terms'
-                      element={
-                        <ArtistCoinTermsPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/artist-coin-acceptable-use'
-                      element={
-                        <ArtistCoinAcceptableUsePage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/api-terms'
-                      element={
-                        <ApiTermsPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/press'
-                      element={<ExternalRedirect to={AUDIUS_PRESS_LINK} />}
-                    />
-                    <Route
-                      path='/download'
-                      element={
-                        <DownloadPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/'
-                      element={
-                        <LandingPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/auth-redirect'
-                      element={<LoadingSpinnerFullPage />}
-                    />
-                  </Routes>
-                </RouterComponent>
-              )
-            })()}
-          </AppContextProvider>
-        </ThemeProvider>
+                    <Routes>
+                      <Route
+                        path='/legal/terms-of-use'
+                        element={
+                          <TermsOfUsePage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/privacy-policy'
+                        element={
+                          <PrivacyPolicyPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/artist-coin-terms'
+                        element={
+                          <ArtistCoinTermsPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/artist-coin-acceptable-use'
+                        element={
+                          <ArtistCoinAcceptableUsePage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/api-terms'
+                        element={
+                          <ApiTermsPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/press'
+                        element={<ExternalRedirect to={AUDIUS_PRESS_LINK} />}
+                      />
+                      <Route
+                        path='/download'
+                        element={
+                          <DownloadPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/'
+                        element={
+                          <LandingPage2026
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/auth-redirect'
+                        element={<LoadingSpinnerFullPage />}
+                      />
+                    </Routes>
+                  </RouterComponent>
+                )
+              })()}
+            </AppContextProvider>
+          </ThemeProvider>
+        </PublicSiteProviders>
       </Suspense>
     </>
   )

@@ -1,0 +1,34 @@
+.page {
+  min-height: 100vh;
+  background: #111;
+  color: #fff;
+  font-family: 'Urbanist', sans-serif;
+  overflow-x: hidden;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.spacer {
+  width: 100%;
+  height: 320px;
+}
+
+.spacerSmall {
+  width: 100%;
+  height: 160px;
+}
+
+@media (max-width: 800px) {
+  .spacer {
+    height: 240px;
+  }
+
+  .spacerSmall {
+    height: 120px;
+  }
+}
