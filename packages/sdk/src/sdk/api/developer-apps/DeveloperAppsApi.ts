@@ -1,5 +1,6 @@
 import { generatePrivateKey, privateKeyToAddress } from 'viem/accounts'
 
+import { UninitializedEntityManagerError } from '../../errors'
 import {
   createAppWalletClient,
   type EntityManagerService
@@ -24,7 +25,8 @@ import {
   EntityManagerUpdateDeveloperAppRequest,
   UpdateDeveloperAppSchema,
   EntityManagerDeleteDeveloperAppRequest,
-  DeleteDeveloperAppSchema
+  DeleteDeveloperAppSchema,
+  type DeveloperAppsApiServicesConfig
 } from './types'
 
 /** Extended params to allow bypassing entity manager for bearer token response */
@@ -34,11 +36,10 @@ type CreateDeveloperAppParams = CreateDeveloperAppRequest & {
 }
 
 export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
-  constructor(
-    config: Configuration,
-    private readonly entityManager: EntityManagerService
-  ) {
+  private readonly entityManager?: EntityManagerService
+  constructor(config: Configuration, services: DeveloperAppsApiServicesConfig) {
     super(config)
+    this.entityManager = services.entityManager
   }
 
   /**
@@ -66,6 +67,10 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     const message = `Creating Audius developer app at ${unixTs}`
 
     const signature = await wallet.signMessage({ message })
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.DEVELOPER_APP,
@@ -195,6 +200,9 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     const { appApiKey, name, userId, description, imageUrl } =
       await parseParams('updateDeveloperApp', UpdateDeveloperAppSchema)(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.DEVELOPER_APP,
@@ -240,6 +248,9 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
       DeleteDeveloperAppSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.DEVELOPER_APP,

@@ -434,45 +434,11 @@ const initializeApis = ({
     basePath
   })
 
-  const tracks = new TracksApi(
-    apiClientConfig,
-    services.storage,
-    services.entityManager,
-    services.logger,
-    services.claimableTokensClient,
-    services.paymentRouterClient,
-    services.solanaRelay,
-    services.solanaClient
-  )
-  const users = new UsersApi(
-    apiClientConfig,
-    services.storage,
-    services.entityManager,
-    services.claimableTokensClient,
-    services.solanaClient,
-    services.emailEncryptionService
-  )
-  const albums = new AlbumsApi(
-    apiClientConfig,
-    services.storage,
-    services.entityManager,
-    services.logger,
-    services.claimableTokensClient,
-    services.paymentRouterClient,
-    services.solanaRelay,
-    services.solanaClient
-  )
-  const playlists = new PlaylistsApi(
-    apiClientConfig,
-    services.storage,
-    services.entityManager,
-    services.logger
-  )
-  const comments = new CommentsApi(
-    apiClientConfig,
-    services.entityManager,
-    services.logger
-  )
+  const tracks = new TracksApi(apiClientConfig, services)
+  const users = new UsersApi(apiClientConfig, services)
+  const albums = new AlbumsApi(apiClientConfig, services)
+  const playlists = new PlaylistsApi(apiClientConfig, services)
+  const comments = new CommentsApi(apiClientConfig, services)
   const challenges = new ChallengesApi(apiClientConfig)
   const coins = new CoinsApi(apiClientConfig)
   const wallets = new WalletApi(apiClientConfig)
@@ -492,28 +458,18 @@ const initializeApis = ({
     services.logger
   )
 
-  const grants = new GrantsApi(apiClientConfig, services.entityManager, users)
+  const grants = new GrantsApi(apiClientConfig, services)
 
-  const developerApps = new DeveloperAppsApi(
-    apiClientConfig,
-    services.entityManager
-  )
+  const developerApps = new DeveloperAppsApi(apiClientConfig, services)
 
   const dashboardWalletUsers = new DashboardWalletUsersApi(
     apiClientConfig,
-    services.entityManager
+    services
   )
 
-  const notifications = new NotificationsApi(
-    apiClientConfig,
-    services.entityManager
-  )
+  const notifications = new NotificationsApi(apiClientConfig, services)
 
-  const events = new EventsApi(
-    apiClientConfig,
-    services.entityManager,
-    services.logger
-  )
+  const events = new EventsApi(apiClientConfig, services)
   const explore = new ExploreApi(apiClientConfig)
   const search = new SearchApi(apiClientConfig)
 

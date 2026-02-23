@@ -4,11 +4,9 @@ import { TransactionInstruction } from '@solana/web3.js'
 import type {
   ClaimableTokensClient,
   PaymentRouterClient,
-  SolanaRelayService,
-  StorageService
+  SolanaRelayService
 } from '../../services'
-import type { EntityManagerService } from '../../services/EntityManager/types'
-import type { LoggerService } from '../../services/Logger'
+import { Logger, type LoggerService } from '../../services/Logger'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { parseParams } from '../../utils/parseParams'
 import { prepareSplits } from '../../utils/preparePaymentSplits'
@@ -37,27 +35,30 @@ import {
   UnfavoriteAlbumRequest,
   RepostAlbumRequest,
   UnrepostAlbumRequest,
-  UpdateAlbumSchema
+  UpdateAlbumSchema,
+  type AlbumsApiServicesConfig
 } from './types'
 
 export class AlbumsApi {
   private readonly playlistsApi: PlaylistsApi
+  private logger: LoggerService
+  private claimableTokensClient: ClaimableTokensClient
+  private paymentRouterClient: PaymentRouterClient
+  private solanaRelay: SolanaRelayService
+  private solanaClient: SolanaClient
+
   constructor(
     configuration: Configuration,
-    storage: StorageService,
-    entityManager: EntityManagerService,
-    private logger: LoggerService,
-    private claimableTokensClient: ClaimableTokensClient,
-    private paymentRouterClient: PaymentRouterClient,
-    private solanaRelay: SolanaRelayService,
-    private solanaClient: SolanaClient
+    servicesConfig: AlbumsApiServicesConfig
   ) {
-    this.playlistsApi = new PlaylistsApi(
-      configuration,
-      storage,
-      entityManager,
-      logger
+    this.playlistsApi = new PlaylistsApi(configuration, servicesConfig)
+    this.logger = (servicesConfig.logger ?? new Logger()).createPrefixedLogger(
+      '[albums-api]'
     )
+    this.claimableTokensClient = servicesConfig.claimableTokensClient
+    this.paymentRouterClient = servicesConfig.paymentRouterClient
+    this.solanaRelay = servicesConfig.solanaRelay
+    this.solanaClient = servicesConfig.solanaClient
   }
 
   // READS

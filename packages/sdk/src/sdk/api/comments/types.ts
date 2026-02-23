@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { HashId } from '../../types/HashId'
 import type { CommentEntityType } from '../generated/default'
+
+export type CommentsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export type CommentMetadata = {
   body?: string

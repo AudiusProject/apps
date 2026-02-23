@@ -1,6 +1,15 @@
 import { WalletAdapter } from '@solana/wallet-adapter-base'
 import { z } from 'zod'
 
+import type {
+  ClaimableTokensClient,
+  EntityManagerService,
+  LoggerService,
+  PaymentRouterClient,
+  SolanaClient,
+  SolanaRelayService,
+  StorageService
+} from '../../services'
 import { PublicKeySchema } from '../../services/Solana'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
@@ -15,6 +24,16 @@ import {
   UploadTrackMetadataSchema,
   USDCPurchaseConditions
 } from '../tracks/types'
+
+export type AlbumsApiServicesConfig = {
+  storage: StorageService
+  entityManager?: EntityManagerService
+  solanaRelay: SolanaRelayService
+  solanaClient: SolanaClient
+  claimableTokensClient: ClaimableTokensClient
+  paymentRouterClient: PaymentRouterClient
+  logger?: LoggerService
+}
 
 // Album request body types that wrap playlist types but use album field names
 export type CreateAlbumRequestBody = Omit<

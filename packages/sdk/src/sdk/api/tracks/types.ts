@@ -1,8 +1,19 @@
 import type { WalletAdapter } from '@solana/wallet-adapter-base'
 import { z } from 'zod'
 
+import type {
+  ClaimableTokensClient,
+  EntityManagerService,
+  LoggerService,
+  PaymentRouterClient,
+  SolanaClient,
+  SolanaRelayService
+} from '../../services'
 import { PublicKeySchema } from '../../services/Solana'
-import { ProgressEventSchema } from '../../services/Storage/types'
+import {
+  ProgressEventSchema,
+  type StorageService
+} from '../../services/Storage/types'
 import {
   DDEXResourceContributor,
   DDEXCopyright,
@@ -25,6 +36,16 @@ const messages = {
   artworkRequiredError: 'Artwork is required',
   genreRequiredError: 'Genre is required',
   genreAllError: 'Genre cannot be set to "All Genres"'
+}
+
+export type TracksApiServicesConfig = {
+  storage: StorageService
+  entityManager?: EntityManagerService
+  logger?: LoggerService
+  claimableTokensClient: ClaimableTokensClient
+  paymentRouterClient: PaymentRouterClient
+  solanaRelay: SolanaRelayService
+  solanaClient: SolanaClient
 }
 
 export const EthCollectibleGatedConditions = z

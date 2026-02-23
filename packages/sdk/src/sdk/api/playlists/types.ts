@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import type { EntityManagerService, StorageService } from '../../services'
 import { ProgressEventSchema } from '../../services/Storage/types'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
@@ -11,6 +12,11 @@ import {
   type UpdatePlaylistRequest
 } from '../generated/default'
 import { UploadTrackMetadataSchema } from '../tracks/types'
+
+export type PlaylistsApiServicesConfig = {
+  entityManager?: EntityManagerService
+  storage: StorageService
+}
 
 const CreatePlaylistMetadataSchema = z
   .object({
