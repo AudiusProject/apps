@@ -97,6 +97,7 @@ jobs:
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          export SKIP_POD_INSTALL=true SKIP_ANDROID_INSTALL=true
           mkdir -p /tmp/android-sdk-dummy
           # Clear npm cache to avoid EEXIST conflicts
           npm cache clean --force || true
