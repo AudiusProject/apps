@@ -10,7 +10,22 @@ if (!fs.existsSync(inputPath)) {
   process.exit(1);
 }
 
+function toCapitalCase(str) {
+  return str
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
 let src = fs.readFileSync(inputPath, 'utf8');
+// Capitalize sidebar category labels (e.g. "users" -> "Users", "developer_apps" -> "Developer Apps")
+// Only transform tag-style labels (lowercase + underscores), not doc titles like "Get Bulk Users"
+src = src.replace(/label:\s*"([^"]+)"/g, (_, label) => {
+  if (/^[a-z0-9_]+$/.test(label)) {
+    return `label: "${toCapitalCase(label)}"`;
+  }
+  return `label: "${label}"`;
+});
 // Remove TypeScript import lines
 src = src.replace(/import[^\n]*\n/g, '');
 src = src.replace(/const\s+sidebar\s*:\s*SidebarsConfig\s*=/, 'const sidebar =');

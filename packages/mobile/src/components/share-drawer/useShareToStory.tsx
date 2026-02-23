@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import EventEmitter from 'events'
 import path from 'path'
@@ -137,10 +137,18 @@ export const useShareToStory = ({
     size: SquareSizes.SIZE_480_BY_480
   })
   const isStickerImageLoadedRef = useRef(false)
-  const handleShareToStoryStickerLoad = () => {
+  const handleShareToStoryStickerLoad = useCallback(() => {
     isStickerImageLoadedRef.current = true
     stickerLoadedEventEmitter.emit(STICKER_LOADED_EVENT)
-  }
+  }, [])
+
+  const trackId = content?.type === 'track' ? content.track.track_id : null
+  // Reset when share content (track) changes so we wait for the new sticker to load
+  useEffect(() => {
+    if (trackId) {
+      isStickerImageLoadedRef.current = false
+    }
+  }, [trackId])
   const trackImageUri =
     content?.type === 'track' &&
     trackImage &&
@@ -151,25 +159,23 @@ export const useShareToStory = ({
 
   const captureStickerImage = useCallback(async () => {
     if (!isStickerImageLoadedRef.current) {
-      // Wait for the sticker component and image inside it to load. If this hasn't happened in 5 seconds, assume that it failed.
       await Promise.race([
         new Promise((resolve) =>
           stickerLoadedEventEmitter.once(STICKER_LOADED_EVENT, resolve)
         ),
-        new Promise((resolve) => {
-          setTimeout(resolve, 5000)
-        })
+        new Promise((resolve) => setTimeout(resolve, 5000))
       ])
-
       if (!isStickerImageLoadedRef.current) {
-        // Loading the sticker failed; return undefined
-        throw new Error('The sticker component did not load successfully.')
+        // onLoad may not fire on iOS (e.g. cached image, opacity:0); try capture anyway
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
-
     let res: string | undefined
-    if (viewShotRef && viewShotRef.current && viewShotRef.current.capture) {
+    if (viewShotRef?.current?.capture) {
       res = await viewShotRef.current.capture()
+    }
+    if (!res) {
+      throw new Error('The sticker component did not load successfully.')
     }
     return res
   }, [viewShotRef])

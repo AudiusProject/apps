@@ -1,0 +1,233 @@
+---
+id: delete-comment
+title: "Delete Comment"
+description: "Deletes a comment"
+sidebar_label: "Delete Comment"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVttu2zgQ/ZUBn5JAtZM27YNQFHA32W2KXoKt02y3DpIxNY4YS6RKUr6soX9fDCXZcu1k0X1yIs7lzDnDGa6Ex3sn4u9Cmjwn7Z24iURCTlpVeGW0iMUZZeTJAUJjIyJhCrLI5xfJ2gJ+Wx87kqVVfini7yvxFp2Sg9KnIv5+U0Ur8ZbQkl1/uYlEgRZz8mRd8NCYk4hbSLcqEZFQDKVAn4qf8Q3axHBxJiJh6UepLCUi9rakSDiZUo4iXgm/LDis81bpe1ExlCZT6ch20vwoyS538gxTAjaEizMwE/DtvzlOlb4P/3Nucv6XUNywsSuMduT4/PnxMf9s524rTALTCbhSSnJuUmYZA5VGe2Y+XgksikzJoE3/wbHzaje5GT+QZJiFZSW9qlM3UTuGY2MyQr3DxXVKPiUbil73AszRdZCJKhLeonYo+fQ2RZfuErCP5XFm5FSmqDR0AkAIUHFU5TMOMbfK023LnqgqPjw9Ptnl70pj6VNj1T+UbPFVe5w+zrg2Hiam1LtuL/cJ9YXsjCyQtcb+5FFFIiefGr4xtY4sAHd0LPrt9euvNl1fhZvE8eprUdpMxCL1vnBxv4+F6mGZqNL1pOnPTgR3UnvxvrDitaid67fmnmOIpimDzGyzI8W74fASgjuwP2nfNBbMlU/hnDuAyhwKq2boCaa0hImxEGTZtIXrjfRIHx1txzg64q9XjuCJNJwg9FiBzs2NTWCiKEuAaUWlHSxNafcCiUf67u5upAeN7CFg3KR5PUZHr04P+PryBIgbxyktD980jiPd3ne2AIkaxgSolzDDrKQeDLuw8tJ5Pn8UDygNKS2Ynxw9HAQGmSvlU1N6OF5AYWmiFoeBrfMF5kVGT1aR/PUpk/nLdHx99erju/vFx4ePx5+G3158PpvOv12/f/j7j6/5B3Vargs6Onpn5qA8zI2dupgVOKnrGFxeQELSJOQC3Rs1QFpKWBLM3Eg/78H5wluUvrbbUt6afI9WI/2iB2dk1ayJvWYHk8SScx3HTbSRPu3BlQsuym1MjQXscgEyJTl1mwZbn9T9xcUlIXkCc8wy8utYrWSkGFA80s8CFY1Vd8CPiec7Sh68ZWE0HCTKkvRg5pqsS1VxyN6D1jdoixqwKKyZURKBNvqZpZmZUgL3FrUPlawTHOSo8Z5XiUnocKR5cnaX5OP3NhiJqPnj99BcIhbvr4d7ByvrXJuCN1PS3IGfg8zvr4fNpy6yHmOpeCtOTIDRDN7B5cXuGg6zCL6eQH3KY6s+Oekdc0WFcT7HsJCatbvzbtiKuNpMz71vkIYTTwvfLzJUgbYwI1fNWO28aiIRd54TN5FIjfNssVrxMLiyWVXx53r187RNlMNxxht8gpmjJ8Ad/Nks+0P4pTfC3gKmtNx6kIRpI2IRxvsMrWJQ/x/gT4+lvRCaj6iX3fwttA6N1U0ViZQwIRsQ1QYDKanwHdedJwmXsl6FZ+cfzofnIhK43evtTqp/OfxeXK87s+qqmdZvRJfH0Gz82PtP/8tmcm3821nGpVbVv3Zv5Vo=
+sidebar_class_name: "delete api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Delete Comment"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/comments/{comment_id}"}
+>
+  
+</MethodEndpoint>
+
+
+
+Deletes a comment
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"comment_id","in":"path","description":"A Comment ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Comment deleted successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"success"}
+                        required={false}
+                        schemaName={"boolean"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"boolean","description":"Whether the operation was successful"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"transaction_hash"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The blockchain transaction hash"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"success\": true,\n  \"transaction_hash\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"404"}
+        value={"404"}
+      >
+        <div>
+          
+          
+          Comment not found
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

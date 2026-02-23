@@ -24,6 +24,8 @@ export * from './tan-query/developer-apps/useDeveloperApps'
 export * from './tan-query/developer-apps/useAddDeveloperApp'
 export * from './tan-query/developer-apps/useEditDeveloperApp'
 export * from './tan-query/developer-apps/useDeleteDeveloperApp'
+export * from './tan-query/developer-apps/useDeactivateDeveloperAppAccessKey'
+export * from './tan-query/developer-apps/useCreateDeveloperAppAccessKey'
 
 // Events
 export * from './tan-query/events'

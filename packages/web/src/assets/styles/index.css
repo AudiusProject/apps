@@ -4,9 +4,10 @@
 @import './ant-overrides.css';
 @import './shadows.css';
 
-#root *,
-body * {
-  font-family: var(--harmony-font-family) !important;
+/* Exclude landing page 2026 so Dust Bucer / Urbanist can apply */
+#root *:not(#landing-page-2026 *),
+body *:not(#landing-page-2026 *) {
+  font-family: var(--harmony-font-family);
 }
 
 body,

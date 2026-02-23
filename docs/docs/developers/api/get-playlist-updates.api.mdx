@@ -1,0 +1,361 @@
+---
+id: get-playlist-updates
+title: "Get Playlist Updates"
+description: "Get playlists the user has saved that have been updated for user ID"
+sidebar_label: "Get Playlist Updates"
+hide_title: true
+hide_table_of_contents: true
+api: eJytVttuGzcQ/ZUBn2xjK9lJmodFUcBB3MRBkxiNHDe1DGW0HGlp7ZIbclaXCvr3YqjV3ZcW6JNW5Jy5nCEPZ64Yh0Glt8o6NgOTIRtng7pLlKaQeVPJf5Wqd8RQFTgrTOAAnBPUgTzkGCDgmDRwjgw5jgn6RBbqSiOThoHzS8vLtypRriIfI1zqxudV4xOuIyCoRFXosSQmL3nNlcWSVKrESc9olSgj+VTIudpP8hyu16E8/aiNJ61S9jUlKmQ5lajSueJZJQ4De2OHarG4E+NQORsoyP6L01P52XX9pc4yCpJe5iyTZTHBqioaytr3QezmW3E2GdyqQmrjXpajsb1+4bKRSnYXQ+G4JwyHzY6xmqak9wGr5R1IMEOLXHtSiWJTUmAsK5WoMfkgJdwlq8Jd/54yFqK99IPNsuwHUtyQZSzTkLxaPJLbU5YH9f0bt8+Zb8o97Og2AQ/trijZ61EgPzYZ/RfOVpBnouyfOEmQC1lqjHolMWpkFGD83aAeCb26jL26uTgbBHqPM7koTGXYr3KNi3epuaY95OeL3UY+VPCWr0c6HLgXiOwjFlu07BWnFk9shqeQobe62uJDDEvi3In6DCmWKDqSqvaO/LXnjdos2gfBktj0lTjVvlCpypmrkLbbWJkW1trUoZW59vhMibYEympvePZFhGHJ5BsMJjuvJfKaBvGhGpmS/32xOVC4953OFUQ4CJ4sNznDxHAOF5yTp7qEypsxMsGIZlGCJ94wwVp+Q6tru/bkZNfHyYmsXgeCJ8JIgKj/FYYwcV7DwFChQWQRjQ0wc7V/MJG0a79//9614tF583d0mDZhfuljoNevjoR4Ufy0AY5odvxrA+zaTvPuiAVkaKFPgHYGYyxqakFnO62yDiz7j+YDxkJOU+GnRIajyKBwZTh3NcPpFCpPAzM9jmxdTLGsCnqyCv3npyIrf877N9evP74fTj/efzz91Pn28vPb0eTbzYf7v959LX83r+p1QScn790EDMPE+VFIpQNnyzrOry5BU+Y0LZ/bTTcg86SlJViErn3Rgospe8yaZ3mn896VD/Sqa1+24C15M258r9lBrT2FsAXceOvaVy15XwViwsbUecBtLiDLKRuFzQFb7yzPlxSnY3ANEywK4rWvVcvISEJp1/4UqWis3GAzd/TJ2CFgJiNGXTkLR9p4yhjcxJIPuamOBX2+wsbeogWsKu/GpBOwzv7kaexGpGHo0XKsZB3gqESLQ/JQOk3HXSsC9obQk3/u3kYjlTQfv8XDpVL14aZzcJtXfV6aArsRWTmBn2ObP9x0mqXtzFqSy0KmoIGLaTTCd351eTgPRS2Cr2ew3F0/SeqsdSoVVS5wifGNasasR2ayHb/zzQz0P82FDZdMUxbFNZHuqK3zRqH3B9REpZuJ8ECk7xKVu8ACm89FWa59sVjI8o+a/Eylt3eJGqM32BfybudKmyDfWqUDLAI9UfHRH81regzb8+aDJaweZCvPcRQplSqVqBHNtkbaxd0iUTmhJh9zWe6eZxlVvIU7mDbldVk/Z+8uOmqx+AcYiS41
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Playlist Updates"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/notifications/{user_id}/playlist_updates"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get playlists the user has saved that have been updated for user ID
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"signature"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"timestamp"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                version
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"service"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"version"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={true}
+                              className={"schemaItem"}
+                            >
+                              <details
+                                style={{}}
+                                className={"openapi-markdown__details"}
+                              >
+                                <summary
+                                  style={{}}
+                                >
+                                  <span
+                                    className={"openapi-schema__container"}
+                                  >
+                                    <strong
+                                      className={"openapi-schema__property"}
+                                    >
+                                      playlist_updates
+                                    </strong><span
+                                      className={"openapi-schema__name"}
+                                    >
+                                       object[]
+                                    </span>
+                                  </span>
+                                </summary><div
+                                  style={{"marginLeft":"1rem"}}
+                                >
+                                  <li>
+                                    <div
+                                      style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                                    >
+                                      Array [
+                                    </div>
+                                  </li><SchemaItem
+                                    collapsible={false}
+                                    name={"playlist_id"}
+                                    required={true}
+                                    schemaName={"string"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"string"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"updated_at"}
+                                    required={true}
+                                    schemaName={"integer"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"integer"}}
+                                  >
+                                    
+                                  </SchemaItem><SchemaItem
+                                    collapsible={false}
+                                    name={"last_seen_at"}
+                                    required={false}
+                                    schemaName={"integer"}
+                                    qualifierMessage={undefined}
+                                    schema={{"type":"integer"}}
+                                  >
+                                    
+                                  </SchemaItem><li>
+                                    <div
+                                      style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                                    >
+                                      ]
+                                    </div>
+                                  </li>
+                                </div>
+                              </details>
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"latest_chain_block\": 0,\n  \"latest_indexed_block\": 0,\n  \"latest_chain_slot_plays\": 0,\n  \"latest_indexed_slot_plays\": 0,\n  \"signature\": \"string\",\n  \"timestamp\": \"string\",\n  \"version\": {\n    \"service\": \"string\",\n    \"version\": \"string\"\n  },\n  \"data\": {\n    \"playlist_updates\": [\n      {\n        \"playlist_id\": \"string\",\n        \"updated_at\": 0,\n        \"last_seen_at\": 0\n      }\n    ]\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

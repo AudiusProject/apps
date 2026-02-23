@@ -1,0 +1,260 @@
+---
+id: get-challenge-attestation
+title: "Get Challenge Attestation"
+description: "Produces an attestation that a given user has completed a challenge, or errors."
+sidebar_label: "Get Challenge Attestation"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9V21v2zYQ/isHflkSqHbSpv0gDAPcNWtTrG3QOs26Omhp8WwxlkiVPPllhv/7cJQs2YnjAum6T0nIe3nuntPDy1KQHHsRfxZJKrMMzRi9uI6EQp84XZC2RsTiwllVJuhBGpBE6EnyDVAqCSSM9RQNlB4dpNJDYvMiQ0IFEpqoEVgH6Jx1viMiYQt0Ica5ErF4iQS/ry2h12YQkSikkzkSOka5FEbmKOIW7RetRCQ0oywkpeI29H6KLQg4fwF2BJRihba9cPit1E6bcbiUWwiqO1QiJldiJHySYi5FvBS0KBiMJ/YUq1XU4LNOJhmukX0r0S12QpNKOfSeUUmYykyrCByOtSd0qKBnSD/qDUuP8G4d8SFwfIGJHml030fUmP5PneLwGyTeDyzg+MkEXrOxL6zx6Pn+8fEx/9gG86FMEvReRCKxhtAQm8iiyHQSMnZvPNst7+axwxtMiIfa8QdAusqiJAWrFudnsV2BnRl0X2ZcLPHnuT/elvXdKqOt4LvIEaQp46NNw3vOvzgM/RKrFVuc7upYf5uSQBZ6gpn0oE0YezjAcQcanpVW5hdqpKRSmpbtBdLhVv859dOdZKGbYq08tzxWkciRUssKNMbQRlaQWHRbLewuN5Vm1a2qEJHwIW6lSaXLRCxSosLH3a4sdEeWSpe+k9ju9ETwVHlMSqdp8YFHomLpufQ66ZWcsaGAY4h6QPnvIdvc+Rpe9fsXENyB/dFQPXkw05TCGaXosMyhcHoqCWGCCxhZBzOnCaGRXt8ZmIE5OtqOcXTEp5ceYU8aThA+tEJ6P7NOwUhjpoDbK7XxsLCl2wkkHpivX78ODEe0Tv8TAsZ1ml+H0uOz0wMeAZaHuHac4OLwt9pxYNZDwhaQSANDBGkWLJ8lVjPUwMpLT3x/Lx7QBlKcc39ySXAQOsi90pTakuB4DoXDkZ4fhm6dzSVP5N4q1F9vsyR/mg6vLp+9eTWev7l5c/y2/+nJuxeT2aer1zd/v/yY/6lPy6ago6NXdgaaYGbdxMfMwElVR+/iHBQmVqEP7W7ZgMShYkpk5gfmcQfO5uRkQpXdFvPO5ju4GpgnHXiBTk/r2E131m9S69hGG5jTDlz64KJ9a2odyM1eQJJiMvHtgDU31XxxcSokV1AJVRNrTRlqBhQPzKPQitpqU/2HyHovE141ysIaOFDaYUIQBNCnujhk797aN3DLK0xRODtFFYGx5pHDqZ2ggrGThkIlTYKDXBo5Rge5VXg4MKydz1E6dN/7boORiOpf/gjDJWLx+qq/821jnitTIDtBwxP4LtD8+qpfH20i6wwqPdZmZAOMWpd7F+d34veCFsHHE6huWbaqm5POMVdUWE+5DC9B/Sbv28e2gi9bQf0JS2LdXMI5dYtM6tD/ILbLWqq31tZIxLfWwlqtryORWk9svlyyxFy6bLXi42rbYA1X2sthxm/vSGYe99R58L5+pg/hgRvczromuNjcG4OYiVgIXpUeDO5Hlrk9KDfXyf8G6MOXuz0w29WyBXnNfzjNKH+M9x/8p2In7PpQmsUm5nU5W8O9ul5FIkWp0IU6KpNekmBBG8531lJuQLP1vDzri9XqX8/z7LA=
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Challenge Attestation"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/challenges/{challenge_id}/attest"}
+>
+  
+</MethodEndpoint>
+
+
+
+Produces an attestation that a given user has completed a challenge, or errors.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"challenge_id","in":"path","description":"The challenge ID of the user challenge requiring the attestation","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"oracle","in":"query","description":"The address of a valid, registered Anti-Abuse Oracle","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"specifier","in":"query","description":"The specifier of the user challenge requiring the attestation","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user challenge requiring the attestation","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"owner_wallet"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"attestation"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": {\n    \"owner_wallet\": \"string\",\n    \"attestation\": \"string\"\n  }\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          The attestation request was invalid (eg. The user didn't complete that challenge yet)
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

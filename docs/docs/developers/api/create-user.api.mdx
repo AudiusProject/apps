@@ -1,0 +1,743 @@
+---
+id: create-user
+title: "Create User"
+description: "Creates a new user"
+sidebar_label: "Create User"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create User"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/users"}
+>
+  
+</MethodEndpoint>
+
+
+
+Creates a new user
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<MimeTabs
+  className={"openapi-tabs__mime"}
+>
+  <TabItem
+    label={"application/json"}
+    value={"application/json-schema"}
+  >
+    <details
+      style={{}}
+      className={"openapi-markdown__details mime"}
+      data-collapsed={false}
+      open={true}
+    >
+      <summary
+        style={{}}
+        className={"openapi-markdown__details-summary-mime"}
+      >
+        <h3
+          className={"openapi-markdown__details-summary-header-body"}
+        >
+          Body
+        </h3><strong
+          className={"openapi-schema__required"}
+        >
+          required
+        </strong>
+      </summary><div
+        style={{"textAlign":"left","marginLeft":"1rem"}}
+      >
+        
+      </div><ul
+        style={{"marginLeft":"1rem"}}
+      >
+        <SchemaItem
+          collapsible={false}
+          name={"user_id"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Optional user hash ID (will be generated if not provided)","example":"p9Km2Lx"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"handle"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"User handle (unique username)","example":"newartist"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"wallet"}
+          required={true}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Wallet address (required)","example":"0x1234..."}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"name"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Display name","example":"New Artist"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"bio"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={"**Possible values:** `<= 256 characters`"}
+          schema={{"type":"string","description":"User bio","maxLength":256}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"location"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"User location"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"website"}
+          required={false}
+          schemaName={"uri"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Website URL","format":"uri"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"donation"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Donation link"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"twitter_handle"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Twitter handle (without @)"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"instagram_handle"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Instagram handle (without @)"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"tiktok_handle"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"TikTok handle (without @)"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"profile_picture"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Profile picture CID or URL"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"profile_picture_sizes"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Profile picture sizes metadata"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"cover_photo"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Cover photo CID or URL"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"cover_photo_sizes"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Cover photo sizes metadata"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"profile_type"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={"**Possible values:** [`label`]"}
+          schema={{"type":"string","nullable":true,"enum":["label"],"description":"Type of profile (e.g., 'label' for record labels)"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"allow_ai_attribution"}
+          required={false}
+          schemaName={"boolean"}
+          qualifierMessage={undefined}
+          schema={{"type":"boolean","description":"Whether to allow AI attribution"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={false}
+          name={"spl_usdc_payout_wallet"}
+          required={false}
+          schemaName={"string"}
+          qualifierMessage={undefined}
+          schema={{"type":"string","description":"Solana USDC payout wallet address"}}
+        >
+          
+        </SchemaItem><SchemaItem
+          collapsible={true}
+          className={"schemaItem"}
+        >
+          <details
+            style={{}}
+            className={"openapi-markdown__details"}
+          >
+            <summary
+              style={{}}
+            >
+              <span
+                className={"openapi-schema__container"}
+              >
+                <strong
+                  className={"openapi-schema__property"}
+                >
+                  playlist_library
+                </strong><span
+                  className={"openapi-schema__name"}
+                >
+                   object
+                </span>
+              </span>
+            </summary><div
+              style={{"marginLeft":"1rem"}}
+            >
+              <div
+                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+              >
+                
+                
+                User's playlist library with support for folders and playlists
+                
+                
+              </div><SchemaItem
+                collapsible={true}
+                className={"schemaItem"}
+              >
+                <details
+                  style={{}}
+                  className={"openapi-markdown__details"}
+                >
+                  <summary
+                    style={{}}
+                  >
+                    <span
+                      className={"openapi-schema__container"}
+                    >
+                      <strong
+                        className={"openapi-schema__property"}
+                      >
+                        contents
+                      </strong><span
+                        className={"openapi-schema__name"}
+                      >
+                         object[]
+                      </span><span
+                        className={"openapi-schema__divider"}
+                      >
+                        
+                      </span><span
+                        className={"openapi-schema__required"}
+                      >
+                        required
+                      </span>
+                    </span>
+                  </summary><div
+                    style={{"marginLeft":"1rem"}}
+                  >
+                    <div
+                      style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                    >
+                      
+                      
+                      Array of folders and playlist identifiers
+                      
+                      
+                    </div><li>
+                      <div
+                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                      >
+                        Array [
+                      </div>
+                    </li><div>
+                      <span
+                        className={"badge badge--info"}
+                      >
+                        oneOf
+                      </span><SchemaTabs>
+                        <TabItem
+                          label={"playlist_library_folder"}
+                          value={"0-item-properties"}
+                        >
+                          <SchemaItem
+                            collapsible={false}
+                            name={"id"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={undefined}
+                            schema={{"type":"string","description":"Unique folder identifier"}}
+                          >
+                            
+                          </SchemaItem><SchemaItem
+                            collapsible={false}
+                            name={"type"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={"**Possible values:** [`folder`]"}
+                            schema={{"type":"string","enum":["folder"]}}
+                          >
+                            
+                          </SchemaItem><SchemaItem
+                            collapsible={false}
+                            name={"name"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={undefined}
+                            schema={{"type":"string","description":"Folder name"}}
+                          >
+                            
+                          </SchemaItem><SchemaItem
+                            collapsible={true}
+                            className={"schemaItem"}
+                          >
+                            <details
+                              style={{}}
+                              className={"openapi-markdown__details"}
+                            >
+                              <summary
+                                style={{}}
+                              >
+                                <span
+                                  className={"openapi-schema__container"}
+                                >
+                                  <strong
+                                    className={"openapi-schema__property"}
+                                  >
+                                    contents
+                                  </strong><span
+                                    className={"openapi-schema__name"}
+                                  >
+                                     object[]
+                                  </span><span
+                                    className={"openapi-schema__divider"}
+                                  >
+                                    
+                                  </span><span
+                                    className={"openapi-schema__required"}
+                                  >
+                                    required
+                                  </span>
+                                </span>
+                              </summary><div
+                                style={{"marginLeft":"1rem"}}
+                              >
+                                <div
+                                  style={{"marginTop":".5rem","marginBottom":".5rem"}}
+                                >
+                                  
+                                  
+                                  Nested folders and playlist identifiers
+                                  
+                                  
+                                </div><li>
+                                  <div
+                                    style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                                  >
+                                    Array [
+                                  </div>
+                                </li><div>
+                                  <span
+                                    className={"badge badge--info"}
+                                  >
+                                    oneOf
+                                  </span><SchemaTabs>
+                                    <TabItem
+                                      label={"playlist_library_playlist_identifier"}
+                                      value={"1-item-properties"}
+                                    >
+                                      <SchemaItem
+                                        collapsible={false}
+                                        name={"type"}
+                                        required={true}
+                                        schemaName={"string"}
+                                        qualifierMessage={"**Possible values:** [`playlist`]"}
+                                        schema={{"type":"string","enum":["playlist"]}}
+                                      >
+                                        
+                                      </SchemaItem><SchemaItem
+                                        collapsible={false}
+                                        name={"playlist_id"}
+                                        required={true}
+                                        schemaName={"integer"}
+                                        qualifierMessage={undefined}
+                                        schema={{"type":"integer","description":"Playlist ID","example":1234}}
+                                      >
+                                        
+                                      </SchemaItem>
+                                    </TabItem><TabItem
+                                      label={"playlist_library_explore_playlist_identifier"}
+                                      value={"2-item-properties"}
+                                    >
+                                      <SchemaItem
+                                        collapsible={false}
+                                        name={"type"}
+                                        required={true}
+                                        schemaName={"string"}
+                                        qualifierMessage={"**Possible values:** [`explore_playlist`]"}
+                                        schema={{"type":"string","enum":["explore_playlist"]}}
+                                      >
+                                        
+                                      </SchemaItem><SchemaItem
+                                        collapsible={false}
+                                        name={"playlist_id"}
+                                        required={true}
+                                        schemaName={"string"}
+                                        qualifierMessage={undefined}
+                                        schema={{"type":"string","description":"Explore playlist identifier"}}
+                                      >
+                                        
+                                      </SchemaItem>
+                                    </TabItem>
+                                  </SchemaTabs>
+                                </div><li>
+                                  <div
+                                    style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                                  >
+                                    ]
+                                  </div>
+                                </li>
+                              </div>
+                            </details>
+                          </SchemaItem>
+                        </TabItem><TabItem
+                          label={"playlist_library_playlist_identifier"}
+                          value={"1-item-properties"}
+                        >
+                          <SchemaItem
+                            collapsible={false}
+                            name={"type"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={"**Possible values:** [`playlist`]"}
+                            schema={{"type":"string","enum":["playlist"]}}
+                          >
+                            
+                          </SchemaItem><SchemaItem
+                            collapsible={false}
+                            name={"playlist_id"}
+                            required={true}
+                            schemaName={"integer"}
+                            qualifierMessage={undefined}
+                            schema={{"type":"integer","description":"Playlist ID","example":1234}}
+                          >
+                            
+                          </SchemaItem>
+                        </TabItem><TabItem
+                          label={"playlist_library_explore_playlist_identifier"}
+                          value={"2-item-properties"}
+                        >
+                          <SchemaItem
+                            collapsible={false}
+                            name={"type"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={"**Possible values:** [`explore_playlist`]"}
+                            schema={{"type":"string","enum":["explore_playlist"]}}
+                          >
+                            
+                          </SchemaItem><SchemaItem
+                            collapsible={false}
+                            name={"playlist_id"}
+                            required={true}
+                            schemaName={"string"}
+                            qualifierMessage={undefined}
+                            schema={{"type":"string","description":"Explore playlist identifier"}}
+                          >
+                            
+                          </SchemaItem>
+                        </TabItem>
+                      </SchemaTabs>
+                    </div><li>
+                      <div
+                        style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                      >
+                        ]
+                      </div>
+                    </li>
+                  </div>
+                </details>
+              </SchemaItem>
+            </div>
+          </details>
+        </SchemaItem><SchemaItem
+          collapsible={true}
+          className={"schemaItem"}
+        >
+          <details
+            style={{}}
+            className={"openapi-markdown__details"}
+          >
+            <summary
+              style={{}}
+            >
+              <span
+                className={"openapi-schema__container"}
+              >
+                <strong
+                  className={"openapi-schema__property"}
+                >
+                  events
+                </strong><span
+                  className={"openapi-schema__name"}
+                >
+                   object
+                </span>
+              </span>
+            </summary><div
+              style={{"marginLeft":"1rem"}}
+            >
+              <div
+                style={{"marginTop":".5rem","marginBottom":".5rem"}}
+              >
+                
+                
+                User events for tracking referrals and mobile users
+                
+                
+              </div><SchemaItem
+                collapsible={false}
+                name={"referrer"}
+                required={false}
+                schemaName={"string"}
+                qualifierMessage={undefined}
+                schema={{"type":"string","description":"Hash ID of the user who referred this user","example":"k9Xm5Pz"}}
+              >
+                
+              </SchemaItem><SchemaItem
+                collapsible={false}
+                name={"is_mobile_user"}
+                required={false}
+                schemaName={"boolean"}
+                qualifierMessage={undefined}
+                schema={{"type":"boolean","description":"Whether the user is on mobile"}}
+              >
+                
+              </SchemaItem>
+            </div>
+          </details>
+        </SchemaItem>
+      </ul>
+    </details>
+  </TabItem>
+</MimeTabs><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"201"}
+        value={"201"}
+      >
+        <div>
+          
+          
+          User created successfully
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"success"}
+                        required={false}
+                        schemaName={"boolean"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"boolean","description":"Whether the user was created successfully"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"transaction_hash"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The blockchain transaction hash"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"user_id"}
+                        required={false}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string","description":"The ID of the created user"}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"success\": true,\n  \"transaction_hash\": \"string\",\n  \"user_id\": \"string\"\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"401"}
+        value={"401"}
+      >
+        <div>
+          
+          
+          Unauthorized
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

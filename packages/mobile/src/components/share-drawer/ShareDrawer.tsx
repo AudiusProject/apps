@@ -62,8 +62,13 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   viewShot: {
     position: 'absolute',
-    // Position the container off-screen (264px is the width of the whole thing)
-    right: -264 - 5
+    left: 0,
+    top: 0,
+    opacity: 0,
+    zIndex: -1,
+    pointerEvents: 'none'
+    // Keep in viewport so iOS loads the image (off-screen views may not load).
+    // Invisible so the user doesn't see it; we only use it for capture.
   }
 }))
 

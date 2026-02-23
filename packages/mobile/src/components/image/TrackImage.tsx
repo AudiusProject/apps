@@ -97,6 +97,7 @@ export const TrackImage = (props: TrackImageProps) => {
     size,
     style,
     borderRadius = 's' as const,
+    onLoad,
     onError,
     children
   } = props
@@ -128,6 +129,7 @@ export const TrackImage = (props: TrackImageProps) => {
   return (
     <Artwork
       source={source}
+      onLoad={onLoad}
       onError={handleError}
       borderRadius={borderRadius}
       style={style}

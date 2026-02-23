@@ -1,0 +1,380 @@
+---
+id: get-user-library-playlists
+title: "Fetch a user's full library playlists"
+description: "Gets a user's saved/reposted/purchased/all playlists"
+sidebar_label: "Fetch a user's full library playlists"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Fetch a user's full library playlists"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/users/{id}/library/playlists"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets a user's saved/reposted/purchased/all playlists
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Path Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"id","in":"path","description":"A user ID","required":true,"schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"query","in":"query","description":"The filter query","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"sort_direction","in":"query","description":"The sort direction","schema":{"type":"string","enum":["asc","desc"]}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"type","in":"query","description":"The type of entity to return: favorited, reposted, purchased, or all. Defaults to favorite","schema":{"type":"string","default":"favorite","enum":["all","repost","favorite","purchase"]}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"sort_method","in":"query","description":"The sort method","schema":{"type":"string","enum":["added_date","reposts","saves"]}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Header Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Message","in":"header","description":"The data that was signed by the user for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"Encoded-Data-Signature","in":"header","description":"The signature of data, used for signature recovery","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_block"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_chain_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"latest_indexed_slot_plays"}
+                        required={true}
+                        schemaName={"integer"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"integer"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"signature"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"timestamp"}
+                        required={true}
+                        schemaName={"string"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"string"}}
+                      >
+                        
+                      </SchemaItem><SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                version
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object
+                              </span><span
+                                className={"openapi-schema__divider"}
+                              >
+                                
+                              </span><span
+                                className={"openapi-schema__required"}
+                              >
+                                required
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <SchemaItem
+                              collapsible={false}
+                              name={"service"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"version"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem>
+                          </div>
+                        </details>
+                      </SchemaItem><SchemaItem
+                        collapsible={false}
+                        name={"data"}
+                        required={false}
+                        schemaName={"object[]"}
+                        qualifierMessage={undefined}
+                        schema={{"type":"array","items":{"allOf":[{"required":["class","item","item_type","timestamp"],"type":"object","properties":{"timestamp":{"type":"string"},"item_type":{"type":"string","example":"track","enum":["track","playlist"]},"item":{"type":"object","properties":{}},"class":{"type":"string"}},"discriminator":{"propertyName":"class"},"title":"activity"},{"required":["item","item_type"],"type":"object","properties":{"item_type":{"type":"string","example":"playlist","enum":["playlist"]},"item":{"required":["access","added_timestamps","blocknumber","created_at","favorite_count","followee_favorites","followee_reposts","has_current_user_reposted","has_current_user_saved","id","is_album","is_delete","is_image_autogenerated","is_private","is_scheduled_release","is_stream_gated","permalink","playlist_contents","playlist_name","repost_count","total_play_count","track_count","updated_at","user","user_id"],"type":"object","properties":{"artwork":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"playlist_artwork"},"description":{"type":"string"},"permalink":{"type":"string"},"id":{"type":"string"},"is_album":{"type":"boolean"},"is_image_autogenerated":{"type":"boolean"},"playlist_name":{"type":"string"},"playlist_contents":{"type":"array","items":{"required":["timestamp","track_id"],"type":"object","properties":{"metadata_timestamp":{"type":"integer","description":"Optional. Metadata timestamp for when the track was added to the playlist."},"timestamp":{"type":"integer"},"track_id":{"type":"string"}},"title":"playlist_added_timestamp"}},"repost_count":{"type":"integer"},"favorite_count":{"type":"integer"},"total_play_count":{"type":"integer"},"user":{"required":["album_count","allow_ai_attribution","artist_coin_badge","associated_sol_wallets_balance","associated_wallets_balance","balance","blocknumber","created_at","current_user_followee_follow_count","does_current_user_follow","does_current_user_subscribe","does_follow_current_user","erc_wallet","followee_count","follower_count","handle","handle_lc","has_collectibles","id","is_available","is_deactivated","is_storage_v2","is_verified","name","playlist_count","repost_count","spl_wallet","spl_usdc_wallet","supporter_count","supporting_count","total_audio_balance","total_balance","track_count","updated_at","verified_with_instagram","verified_with_tiktok","verified_with_twitter","wallet","waudio_balance"],"type":"object","properties":{"album_count":{"type":"integer"},"artist_pick_track_id":{"type":"string"},"artist_coin_badge":{"type":"object","properties":{"mint":{"type":"string"},"logo_uri":{"type":"string"},"banner_image_url":{"type":"string"},"ticker":{"type":"string","description":"The coin symbol/ticker"}}},"coin_flair_mint":{"type":"string"},"bio":{"type":"string"},"cover_photo":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"followee_count":{"type":"integer"},"follower_count":{"type":"integer"},"handle":{"type":"string"},"id":{"type":"string"},"is_verified":{"type":"boolean"},"twitter_handle":{"type":"string"},"instagram_handle":{"type":"string"},"tiktok_handle":{"type":"string"},"verified_with_twitter":{"type":"boolean"},"verified_with_instagram":{"type":"boolean"},"verified_with_tiktok":{"type":"boolean"},"website":{"type":"string"},"donation":{"type":"string"},"location":{"type":"string"},"name":{"type":"string"},"playlist_count":{"type":"integer"},"profile_picture":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"repost_count":{"type":"integer"},"track_count":{"type":"integer"},"is_deactivated":{"type":"boolean"},"is_available":{"type":"boolean"},"erc_wallet":{"type":"string"},"spl_wallet":{"type":"string"},"spl_usdc_wallet":{"type":"string"},"spl_usdc_payout_wallet":{"type":"string"},"supporter_count":{"type":"integer"},"supporting_count":{"type":"integer"},"total_audio_balance":{"type":"integer"},"wallet":{"type":"string","description":"The user's Ethereum wallet address for their account"},"balance":{"type":"string"},"associated_wallets_balance":{"type":"string"},"total_balance":{"type":"string"},"waudio_balance":{"type":"string"},"associated_sol_wallets_balance":{"type":"string"},"blocknumber":{"type":"integer"},"created_at":{"type":"string"},"is_storage_v2":{"type":"boolean"},"creator_node_endpoint":{"type":"string"},"current_user_followee_follow_count":{"type":"integer"},"does_current_user_follow":{"type":"boolean"},"does_current_user_subscribe":{"type":"boolean"},"does_follow_current_user":{"type":"boolean"},"handle_lc":{"type":"string"},"updated_at":{"type":"string"},"cover_photo_sizes":{"type":"string"},"cover_photo_cids":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"cover_photo_legacy":{"type":"string"},"profile_picture_sizes":{"type":"string"},"profile_picture_cids":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"profile_picture_legacy":{"type":"string"},"has_collectibles":{"type":"boolean"},"playlist_library":{"type":"object","properties":{"contents":{"type":"array","items":{"type":"object","properties":{}}}},"title":"playlist_library"},"allow_ai_attribution":{"type":"boolean"},"profile_type":{"type":"string"}},"title":"user"},"ddex_app":{"type":"string"},"access":{"required":["download","stream"],"type":"object","properties":{"stream":{"type":"boolean"},"download":{"type":"boolean"}},"title":"access"},"upc":{"type":"string"},"track_count":{"type":"integer"},"blocknumber":{"type":"integer"},"created_at":{"type":"string"},"followee_reposts":{"type":"array","items":{"required":["repost_item_id","repost_type","user_id"],"type":"object","properties":{"repost_item_id":{"type":"string"},"repost_type":{"type":"string"},"user_id":{"type":"string"}},"title":"repost"}},"followee_favorites":{"type":"array","items":{"required":["created_at","favorite_item_id","favorite_type","user_id"],"type":"object","properties":{"favorite_item_id":{"type":"string"},"favorite_type":{"type":"string"},"user_id":{"type":"string"},"created_at":{"type":"string"}},"title":"favorite"}},"has_current_user_reposted":{"type":"boolean"},"has_current_user_saved":{"type":"boolean"},"is_delete":{"type":"boolean"},"is_private":{"type":"boolean"},"updated_at":{"type":"string"},"added_timestamps":{"type":"array","description":"DEPRECATED. Use playlist_contents instead.","items":{"required":["timestamp","track_id"],"type":"object","properties":{"metadata_timestamp":{"type":"integer","description":"Optional. Metadata timestamp for when the track was added to the playlist."},"timestamp":{"type":"integer"},"track_id":{"type":"string"}},"title":"playlist_added_timestamp"}},"user_id":{"type":"string"},"tracks":{"type":"array","items":{"required":["access","artwork","blocknumber","comment_count","cover_art_sizes","created_at","download","duration","favorite_count","field_visibility","followee_favorites","followee_reposts","genre","has_current_user_reposted","has_current_user_saved","id","is_available","is_delete","is_download_gated","is_downloadable","is_original_available","is_owned_by_user","is_scheduled_release","is_stream_gated","is_unlisted","permalink","play_count","preview","remix_of","repost_count","route_id","stream","title","track_segments","updated_at","user","user_id"],"type":"object","properties":{"artwork":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"track_artwork"},"description":{"type":"string"},"genre":{"type":"string"},"id":{"type":"string"},"track_cid":{"type":"string"},"preview_cid":{"type":"string"},"orig_file_cid":{"type":"string"},"orig_filename":{"type":"string"},"is_original_available":{"type":"boolean"},"mood":{"type":"string"},"release_date":{"type":"string","format":"date"},"remix_of":{"type":"object","properties":{"tracks":{"type":"array","items":{"required":["has_remix_author_reposted","has_remix_author_saved","parent_track_id","user"],"type":"object","properties":{"parent_track_id":{"type":"string"},"user":{"required":["album_count","allow_ai_attribution","artist_coin_badge","associated_sol_wallets_balance","associated_wallets_balance","balance","blocknumber","created_at","current_user_followee_follow_count","does_current_user_follow","does_current_user_subscribe","does_follow_current_user","erc_wallet","followee_count","follower_count","handle","handle_lc","has_collectibles","id","is_available","is_deactivated","is_storage_v2","is_verified","name","playlist_count","repost_count","spl_wallet","spl_usdc_wallet","supporter_count","supporting_count","total_audio_balance","total_balance","track_count","updated_at","verified_with_instagram","verified_with_tiktok","verified_with_twitter","wallet","waudio_balance"],"type":"object","properties":{"album_count":{"type":"integer"},"artist_pick_track_id":{"type":"string"},"artist_coin_badge":{"type":"object","properties":{"mint":{"type":"string"},"logo_uri":{"type":"string"},"banner_image_url":{"type":"string"},"ticker":{"type":"string","description":"The coin symbol/ticker"}}},"coin_flair_mint":{"type":"string"},"bio":{"type":"string"},"cover_photo":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"followee_count":{"type":"integer"},"follower_count":{"type":"integer"},"handle":{"type":"string"},"id":{"type":"string"},"is_verified":{"type":"boolean"},"twitter_handle":{"type":"string"},"instagram_handle":{"type":"string"},"tiktok_handle":{"type":"string"},"verified_with_twitter":{"type":"boolean"},"verified_with_instagram":{"type":"boolean"},"verified_with_tiktok":{"type":"boolean"},"website":{"type":"string"},"donation":{"type":"string"},"location":{"type":"string"},"name":{"type":"string"},"playlist_count":{"type":"integer"},"profile_picture":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"repost_count":{"type":"integer"},"track_count":{"type":"integer"},"is_deactivated":{"type":"boolean"},"is_available":{"type":"boolean"},"erc_wallet":{"type":"string"},"spl_wallet":{"type":"string"},"spl_usdc_wallet":{"type":"string"},"spl_usdc_payout_wallet":{"type":"string"},"supporter_count":{"type":"integer"},"supporting_count":{"type":"integer"},"total_audio_balance":{"type":"integer"},"wallet":{"type":"string","description":"The user's Ethereum wallet address for their account"},"balance":{"type":"string"},"associated_wallets_balance":{"type":"string"},"total_balance":{"type":"string"},"waudio_balance":{"type":"string"},"associated_sol_wallets_balance":{"type":"string"},"blocknumber":{"type":"integer"},"created_at":{"type":"string"},"is_storage_v2":{"type":"boolean"},"creator_node_endpoint":{"type":"string"},"current_user_followee_follow_count":{"type":"integer"},"does_current_user_follow":{"type":"boolean"},"does_current_user_subscribe":{"type":"boolean"},"does_follow_current_user":{"type":"boolean"},"handle_lc":{"type":"string"},"updated_at":{"type":"string"},"cover_photo_sizes":{"type":"string"},"cover_photo_cids":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"cover_photo_legacy":{"type":"string"},"profile_picture_sizes":{"type":"string"},"profile_picture_cids":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"profile_picture_legacy":{"type":"string"},"has_collectibles":{"type":"boolean"},"playlist_library":{"type":"object","properties":{"contents":{"type":"array","items":{"type":"object","properties":{}}}},"title":"playlist_library"},"allow_ai_attribution":{"type":"boolean"},"profile_type":{"type":"string"}},"title":"user"},"has_remix_author_reposted":{"type":"boolean"},"has_remix_author_saved":{"type":"boolean"}},"title":"remix"}}},"title":"remix_parent"},"repost_count":{"type":"integer"},"favorite_count":{"type":"integer"},"comment_count":{"type":"integer"},"tags":{"type":"string"},"title":{"type":"string"},"user":{"required":["album_count","allow_ai_attribution","artist_coin_badge","associated_sol_wallets_balance","associated_wallets_balance","balance","blocknumber","created_at","current_user_followee_follow_count","does_current_user_follow","does_current_user_subscribe","does_follow_current_user","erc_wallet","followee_count","follower_count","handle","handle_lc","has_collectibles","id","is_available","is_deactivated","is_storage_v2","is_verified","name","playlist_count","repost_count","spl_wallet","spl_usdc_wallet","supporter_count","supporting_count","total_audio_balance","total_balance","track_count","updated_at","verified_with_instagram","verified_with_tiktok","verified_with_twitter","wallet","waudio_balance"],"type":"object","properties":{"album_count":{"type":"integer"},"artist_pick_track_id":{"type":"string"},"artist_coin_badge":{"type":"object","properties":{"mint":{"type":"string"},"logo_uri":{"type":"string"},"banner_image_url":{"type":"string"},"ticker":{"type":"string","description":"The coin symbol/ticker"}}},"coin_flair_mint":{"type":"string"},"bio":{"type":"string"},"cover_photo":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"followee_count":{"type":"integer"},"follower_count":{"type":"integer"},"handle":{"type":"string"},"id":{"type":"string"},"is_verified":{"type":"boolean"},"twitter_handle":{"type":"string"},"instagram_handle":{"type":"string"},"tiktok_handle":{"type":"string"},"verified_with_twitter":{"type":"boolean"},"verified_with_instagram":{"type":"boolean"},"verified_with_tiktok":{"type":"boolean"},"website":{"type":"string"},"donation":{"type":"string"},"location":{"type":"string"},"name":{"type":"string"},"playlist_count":{"type":"integer"},"profile_picture":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"repost_count":{"type":"integer"},"track_count":{"type":"integer"},"is_deactivated":{"type":"boolean"},"is_available":{"type":"boolean"},"erc_wallet":{"type":"string"},"spl_wallet":{"type":"string"},"spl_usdc_wallet":{"type":"string"},"spl_usdc_payout_wallet":{"type":"string"},"supporter_count":{"type":"integer"},"supporting_count":{"type":"integer"},"total_audio_balance":{"type":"integer"},"wallet":{"type":"string","description":"The user's Ethereum wallet address for their account"},"balance":{"type":"string"},"associated_wallets_balance":{"type":"string"},"total_balance":{"type":"string"},"waudio_balance":{"type":"string"},"associated_sol_wallets_balance":{"type":"string"},"blocknumber":{"type":"integer"},"created_at":{"type":"string"},"is_storage_v2":{"type":"boolean"},"creator_node_endpoint":{"type":"string"},"current_user_followee_follow_count":{"type":"integer"},"does_current_user_follow":{"type":"boolean"},"does_current_user_subscribe":{"type":"boolean"},"does_follow_current_user":{"type":"boolean"},"handle_lc":{"type":"string"},"updated_at":{"type":"string"},"cover_photo_sizes":{"type":"string"},"cover_photo_cids":{"type":"object","properties":{"640x":{"type":"string"},"2000x":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"cover_photo"},"cover_photo_legacy":{"type":"string"},"profile_picture_sizes":{"type":"string"},"profile_picture_cids":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"profile_picture"},"profile_picture_legacy":{"type":"string"},"has_collectibles":{"type":"boolean"},"playlist_library":{"type":"object","properties":{"contents":{"type":"array","items":{"type":"object","properties":{}}}},"title":"playlist_library"},"allow_ai_attribution":{"type":"boolean"},"profile_type":{"type":"string"}},"title":"user"},"duration":{"type":"integer"},"is_downloadable":{"type":"boolean"},"play_count":{"type":"integer"},"permalink":{"type":"string"},"is_streamable":{"type":"boolean"},"ddex_app":{"type":"string"},"playlists_containing_track":{"type":"array","items":{"type":"integer"}},"pinned_comment_id":{"type":"integer"},"album_backlink":{"required":["permalink","playlist_id","playlist_name"],"type":"object","properties":{"playlist_id":{"type":"integer"},"playlist_name":{"type":"string"},"permalink":{"type":"string"}},"title":"album_backlink"},"access":{"type":"object","description":"Describes what access the given user has","allOf":[{"required":["download","stream"],"type":"object","properties":{"stream":{"type":"boolean"},"download":{"type":"boolean"}},"title":"access"}]},"blocknumber":{"type":"integer","description":"The blocknumber this track was last updated"},"create_date":{"type":"string"},"cover_art_sizes":{"type":"string"},"cover_art_cids":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"}},"title":"cover_art"},"created_at":{"type":"string"},"credits_splits":{"type":"string"},"isrc":{"type":"string"},"license":{"type":"string"},"iswc":{"type":"string"},"field_visibility":{"required":["genre","mood","play_count","remixes","share","tags"],"type":"object","properties":{"mood":{"type":"boolean"},"tags":{"type":"boolean"},"genre":{"type":"boolean"},"share":{"type":"boolean"},"play_count":{"type":"boolean"},"remixes":{"type":"boolean"}},"title":"field_visibility"},"followee_reposts":{"type":"array","items":{"required":["repost_item_id","repost_type","user_id"],"type":"object","properties":{"repost_item_id":{"type":"string"},"repost_type":{"type":"string"},"user_id":{"type":"string"}},"title":"repost"}},"has_current_user_reposted":{"type":"boolean"},"is_scheduled_release":{"type":"boolean"},"is_unlisted":{"type":"boolean"},"has_current_user_saved":{"type":"boolean"},"followee_favorites":{"type":"array","items":{"required":["created_at","favorite_item_id","favorite_type","user_id"],"type":"object","properties":{"favorite_item_id":{"type":"string"},"favorite_type":{"type":"string"},"user_id":{"type":"string"},"created_at":{"type":"string"}},"title":"favorite"}},"route_id":{"type":"string"},"stem_of":{"required":["category","parent_track_id"],"type":"object","properties":{"category":{"type":"string"},"parent_track_id":{"type":"integer"}},"title":"stem_parent"},"track_segments":{"type":"array","items":{"required":["duration","multihash"],"type":"object","properties":{"duration":{"type":"number"},"multihash":{"type":"string"}},"title":"track_segment"}},"updated_at":{"type":"string"},"user_id":{"type":"string"},"is_delete":{"type":"boolean"},"cover_art":{"type":"string"},"is_available":{"type":"boolean"},"ai_attribution_user_id":{"type":"integer"},"allowed_api_keys":{"type":"array","items":{"type":"string"}},"audio_upload_id":{"type":"string"},"preview_start_seconds":{"type":"number"},"bpm":{"type":"number"},"is_custom_bpm":{"type":"boolean"},"musical_key":{"type":"string"},"is_custom_musical_key":{"type":"boolean"},"audio_analysis_error_count":{"type":"integer"},"comments_disabled":{"type":"boolean"},"ddex_release_ids":{"type":"object","properties":{}},"artists":{"type":"array","items":{"type":"object","properties":{}}},"resource_contributors":{"type":"array","nullable":true,"items":{"type":"object","required":["name","roles"],"properties":{"name":{"type":"string","minLength":1,"description":"Contributor name"},"roles":{"type":"array","minItems":1,"items":{"type":"string","minLength":1},"description":"Contributor roles"},"sequence_number":{"type":"integer","minimum":0,"description":"Sequence number for ordering"}},"title":"ddex_resource_contributor"}},"indirect_resource_contributors":{"type":"array","nullable":true,"items":{"type":"object","required":["name","roles"],"properties":{"name":{"type":"string","minLength":1,"description":"Contributor name"},"roles":{"type":"array","minItems":1,"items":{"type":"string","minLength":1},"description":"Contributor roles"},"sequence_number":{"type":"integer","minimum":0,"description":"Sequence number for ordering"}},"title":"ddex_resource_contributor"}},"rights_controller":{"nullable":true,"type":"object","description":"DDEX rights controller","required":["name","roles"],"properties":{"name":{"type":"string","minLength":1},"roles":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"rights_share_unknown":{"type":"string","description":"Optional"}},"title":"ddex_rights_controller"},"copyright_line":{"nullable":true,"allOf":[{"type":"object","required":["year","text"],"properties":{"year":{"type":"string","minLength":4,"maxLength":4,"description":"Copyright year (4 characters)"},"text":{"type":"string","minLength":1,"description":"Copyright text"}},"title":"ddex_copyright"}]},"producer_copyright_line":{"nullable":true,"allOf":[{"type":"object","required":["year","text"],"properties":{"year":{"type":"string","minLength":4,"maxLength":4,"description":"Copyright year (4 characters)"},"text":{"type":"string","minLength":1,"description":"Copyright text"}},"title":"ddex_copyright"}]},"parental_warning_type":{"type":"string","nullable":true},"is_stream_gated":{"type":"boolean","description":"Whether or not the owner has restricted streaming behind an access gate"},"stream_conditions":{"type":"object","description":"How to unlock stream access to the track","allOf":[{"oneOf":[{"required":["tip_user_id"],"type":"object","properties":{"tip_user_id":{"type":"integer","description":"Must tip the given user ID to unlock"}},"title":"tip_gate"},{"required":["follow_user_id"],"type":"object","properties":{"follow_user_id":{"type":"integer","description":"Must follow the given user ID to unlock"}},"title":"follow_gate"},{"required":["usdc_purchase"],"type":"object","properties":{"usdc_purchase":{"type":"object","description":"Must pay the total price and split to the given addresses to unlock","allOf":[{"required":["price","splits"],"type":"object","properties":{"price":{"type":"integer","description":"The price in USDC needed to unlock"},"splits":{"type":"array","items":{"required":["user_id","percentage"],"type":"object","properties":{"user_id":{"type":"integer","example":1234},"percentage":{"type":"number"}},"title":"payment_split"}}},"title":"usdc_gate"}]}},"title":"purchase_gate"},{"required":["token_gate"],"type":"object","properties":{"token_gate":{"type":"object","description":"Must hold an NFT of the given collection to unlock","allOf":[{"required":["token_mint","token_amount"],"type":"object","properties":{"token_mint":{"type":"string","description":"The mint of the token needed to unlock"},"token_amount":{"type":"integer","description":"The amount of the token needed to unlock"}},"title":"extended_token_gate"}]}},"title":"token_gate"}],"title":"access_gate"}]},"is_download_gated":{"type":"boolean","description":"Whether or not the owner has restricted downloading behind an access gate"},"download_conditions":{"type":"object","description":"How to unlock the track download","allOf":[{"oneOf":[{"required":["tip_user_id"],"type":"object","properties":{"tip_user_id":{"type":"integer","description":"Must tip the given user ID to unlock"}},"title":"tip_gate"},{"required":["follow_user_id"],"type":"object","properties":{"follow_user_id":{"type":"integer","description":"Must follow the given user ID to unlock"}},"title":"follow_gate"},{"required":["usdc_purchase"],"type":"object","properties":{"usdc_purchase":{"type":"object","description":"Must pay the total price and split to the given addresses to unlock","allOf":[{"required":["price","splits"],"type":"object","properties":{"price":{"type":"integer","description":"The price in USDC needed to unlock"},"splits":{"type":"array","items":{"required":["user_id","percentage"],"type":"object","properties":{"user_id":{"type":"integer","example":1234},"percentage":{"type":"number"}},"title":"payment_split"}}},"title":"usdc_gate"}]}},"title":"purchase_gate"},{"required":["token_gate"],"type":"object","properties":{"token_gate":{"type":"object","description":"Must hold an NFT of the given collection to unlock","allOf":[{"required":["token_mint","token_amount"],"type":"object","properties":{"token_mint":{"type":"string","description":"The mint of the token needed to unlock"},"token_amount":{"type":"integer","description":"The amount of the token needed to unlock"}},"title":"extended_token_gate"}]}},"title":"token_gate"}],"title":"access_gate"}]},"cover_original_song_title":{"type":"string"},"cover_original_artist":{"type":"string"},"is_owned_by_user":{"type":"boolean","description":"Indicates whether the track is owned by the user for MRI sake"},"stream":{"required":["mirrors"],"type":"object","properties":{"url":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"url_with_mirrors"},"download":{"required":["mirrors"],"type":"object","properties":{"url":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"url_with_mirrors"},"preview":{"required":["mirrors"],"type":"object","properties":{"url":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"url_with_mirrors"}},"title":"track"}},"cover_art":{"type":"string"},"cover_art_sizes":{"type":"string"},"cover_art_cids":{"type":"object","properties":{"150x150":{"type":"string"},"480x480":{"type":"string"},"1000x1000":{"type":"string"},"mirrors":{"type":"array","items":{"type":"string"}}},"title":"playlist_artwork"},"is_stream_gated":{"type":"boolean"},"stream_conditions":{"type":"object","description":"How to unlock stream access to the track","allOf":[{"oneOf":[{"required":["tip_user_id"],"type":"object","properties":{"tip_user_id":{"type":"integer","description":"Must tip the given user ID to unlock"}},"title":"tip_gate"},{"required":["follow_user_id"],"type":"object","properties":{"follow_user_id":{"type":"integer","description":"Must follow the given user ID to unlock"}},"title":"follow_gate"},{"required":["usdc_purchase"],"type":"object","properties":{"usdc_purchase":{"type":"object","description":"Must pay the total price and split to the given addresses to unlock","allOf":[{"required":["price","splits"],"type":"object","properties":{"price":{"type":"integer","description":"The price in USDC needed to unlock"},"splits":{"type":"array","items":{"required":["user_id","percentage"],"type":"object","properties":{"user_id":{"type":"integer","example":1234},"percentage":{"type":"number"}},"title":"payment_split"}}},"title":"usdc_gate"}]}},"title":"purchase_gate"},{"required":["token_gate"],"type":"object","properties":{"token_gate":{"type":"object","description":"Must hold an NFT of the given collection to unlock","allOf":[{"required":["token_mint","token_amount"],"type":"object","properties":{"token_mint":{"type":"string","description":"The mint of the token needed to unlock"},"token_amount":{"type":"integer","description":"The amount of the token needed to unlock"}},"title":"extended_token_gate"}]}},"title":"token_gate"}],"title":"access_gate"}]},"is_scheduled_release":{"type":"boolean"},"release_date":{"type":"string"},"ddex_release_ids":{"type":"object","properties":{}},"artists":{"type":"array","items":{"type":"object","properties":{}}},"copyright_line":{"type":"object","properties":{}},"producer_copyright_line":{"type":"object","properties":{}},"parental_warning_type":{"type":"string","nullable":true}},"title":"playlist_without_tracks"}}}],"title":"collection_activity_without_tracks"}}}
+                      >
+                        
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"latest_chain_block\": 0,\n  \"latest_indexed_block\": 0,\n  \"latest_chain_slot_plays\": 0,\n  \"latest_indexed_slot_plays\": 0,\n  \"signature\": \"string\",\n  \"timestamp\": \"string\",\n  \"version\": {\n    \"service\": \"string\",\n    \"version\": \"string\"\n  },\n  \"data\": [\n    {\n      \"timestamp\": \"string\",\n      \"item_type\": true,\n      \"item\": {\n        \"artwork\": {\n          \"150x150\": \"string\",\n          \"480x480\": \"string\",\n          \"1000x1000\": \"string\",\n          \"mirrors\": [\n            \"string\"\n          ]\n        },\n        \"description\": \"string\",\n        \"permalink\": \"string\",\n        \"id\": \"string\",\n        \"is_album\": true,\n        \"is_image_autogenerated\": true,\n        \"playlist_name\": \"string\",\n        \"playlist_contents\": [\n          {\n            \"metadata_timestamp\": 0,\n            \"timestamp\": 0,\n            \"track_id\": \"string\"\n          }\n        ],\n        \"repost_count\": 0,\n        \"favorite_count\": 0,\n        \"total_play_count\": 0,\n        \"user\": {\n          \"album_count\": 0,\n          \"artist_pick_track_id\": \"string\",\n          \"artist_coin_badge\": {\n            \"mint\": \"string\",\n            \"logo_uri\": \"string\",\n            \"banner_image_url\": \"string\",\n            \"ticker\": \"string\"\n          },\n          \"coin_flair_mint\": \"string\",\n          \"bio\": \"string\",\n          \"cover_photo\": {\n            \"640x\": \"string\",\n            \"2000x\": \"string\",\n            \"mirrors\": [\n              \"string\"\n            ]\n          },\n          \"followee_count\": 0,\n          \"follower_count\": 0,\n          \"handle\": \"string\",\n          \"id\": \"string\",\n          \"is_verified\": true,\n          \"twitter_handle\": \"string\",\n          \"instagram_handle\": \"string\",\n          \"tiktok_handle\": \"string\",\n          \"verified_with_twitter\": true,\n          \"verified_with_instagram\": true,\n          \"verified_with_tiktok\": true,\n          \"website\": \"string\",\n          \"donation\": \"string\",\n          \"location\": \"string\",\n          \"name\": \"string\",\n          \"playlist_count\": 0,\n          \"profile_picture\": {\n            \"150x150\": \"string\",\n            \"480x480\": \"string\",\n            \"1000x1000\": \"string\",\n            \"mirrors\": [\n              \"string\"\n            ]\n          },\n          \"repost_count\": 0,\n          \"track_count\": 0,\n          \"is_deactivated\": true,\n          \"is_available\": true,\n          \"erc_wallet\": \"string\",\n          \"spl_wallet\": \"string\",\n          \"spl_usdc_wallet\": \"string\",\n          \"spl_usdc_payout_wallet\": \"string\",\n          \"supporter_count\": 0,\n          \"supporting_count\": 0,\n          \"total_audio_balance\": 0,\n          \"wallet\": \"string\",\n          \"balance\": \"string\",\n          \"associated_wallets_balance\": \"string\",\n          \"total_balance\": \"string\",\n          \"waudio_balance\": \"string\",\n          \"associated_sol_wallets_balance\": \"string\",\n          \"blocknumber\": 0,\n          \"created_at\": \"string\",\n          \"is_storage_v2\": true,\n          \"creator_node_endpoint\": \"string\",\n          \"current_user_followee_follow_count\": 0,\n          \"does_current_user_follow\": true,\n          \"does_current_user_subscribe\": true,\n          \"does_follow_current_user\": true,\n          \"handle_lc\": \"string\",\n          \"updated_at\": \"string\",\n          \"cover_photo_sizes\": \"string\",\n          \"cover_photo_cids\": {\n            \"640x\": \"string\",\n            \"2000x\": \"string\",\n            \"mirrors\": [\n              \"string\"\n            ]\n          },\n          \"cover_photo_legacy\": \"string\",\n          \"profile_picture_sizes\": \"string\",\n          \"profile_picture_cids\": {\n            \"150x150\": \"string\",\n            \"480x480\": \"string\",\n            \"1000x1000\": \"string\",\n            \"mirrors\": [\n              \"string\"\n            ]\n          },\n          \"profile_picture_legacy\": \"string\",\n          \"has_collectibles\": true,\n          \"playlist_library\": {\n            \"contents\": [\n              {}\n            ]\n          },\n          \"allow_ai_attribution\": true,\n          \"profile_type\": \"string\"\n        },\n        \"ddex_app\": \"string\",\n        \"access\": {\n          \"stream\": true,\n          \"download\": true\n        },\n        \"upc\": \"string\",\n        \"track_count\": 0,\n        \"blocknumber\": 0,\n        \"created_at\": \"string\",\n        \"followee_reposts\": [\n          {\n            \"repost_item_id\": \"string\",\n            \"repost_type\": \"string\",\n            \"user_id\": \"string\"\n          }\n        ],\n        \"followee_favorites\": [\n          {\n            \"favorite_item_id\": \"string\",\n            \"favorite_type\": \"string\",\n            \"user_id\": \"string\",\n            \"created_at\": \"string\"\n          }\n        ],\n        \"has_current_user_reposted\": true,\n        \"has_current_user_saved\": true,\n        \"is_delete\": true,\n        \"is_private\": true,\n        \"updated_at\": \"string\",\n        \"added_timestamps\": [\n          {\n            \"metadata_timestamp\": 0,\n            \"timestamp\": 0,\n            \"track_id\": \"string\"\n          }\n        ],\n        \"user_id\": \"string\",\n        \"tracks\": [\n          {\n            \"artwork\": {\n              \"150x150\": \"string\",\n              \"480x480\": \"string\",\n              \"1000x1000\": \"string\",\n              \"mirrors\": [\n                \"string\"\n              ]\n            },\n            \"description\": \"string\",\n            \"genre\": \"string\",\n            \"id\": \"string\",\n            \"track_cid\": \"string\",\n            \"preview_cid\": \"string\",\n            \"orig_file_cid\": \"string\",\n            \"orig_filename\": \"string\",\n            \"is_original_available\": true,\n            \"mood\": \"string\",\n            \"release_date\": \"2026-02-21\",\n            \"remix_of\": {\n              \"tracks\": [\n                {\n                  \"parent_track_id\": \"string\",\n                  \"user\": {\n                    \"album_count\": 0,\n                    \"artist_pick_track_id\": \"string\",\n                    \"artist_coin_badge\": {\n                      \"mint\": \"string\",\n                      \"logo_uri\": \"string\",\n                      \"banner_image_url\": \"string\",\n                      \"ticker\": \"string\"\n                    },\n                    \"coin_flair_mint\": \"string\",\n                    \"bio\": \"string\",\n                    \"cover_photo\": {\n                      \"640x\": \"string\",\n                      \"2000x\": \"string\",\n                      \"mirrors\": [\n                        \"string\"\n                      ]\n                    },\n                    \"followee_count\": 0,\n                    \"follower_count\": 0,\n                    \"handle\": \"string\",\n                    \"id\": \"string\",\n                    \"is_verified\": true,\n                    \"twitter_handle\": \"string\",\n                    \"instagram_handle\": \"string\",\n                    \"tiktok_handle\": \"string\",\n                    \"verified_with_twitter\": true,\n                    \"verified_with_instagram\": true,\n                    \"verified_with_tiktok\": true,\n                    \"website\": \"string\",\n                    \"donation\": \"string\",\n                    \"location\": \"string\",\n                    \"name\": \"string\",\n                    \"playlist_count\": 0,\n                    \"profile_picture\": {\n                      \"150x150\": \"string\",\n                      \"480x480\": \"string\",\n                      \"1000x1000\": \"string\",\n                      \"mirrors\": [\n                        \"string\"\n                      ]\n                    },\n                    \"repost_count\": 0,\n                    \"track_count\": 0,\n                    \"is_deactivated\": true,\n                    \"is_available\": true,\n                    \"erc_wallet\": \"string\",\n                    \"spl_wallet\": \"string\",\n                    \"spl_usdc_wallet\": \"string\",\n                    \"spl_usdc_payout_wallet\": \"string\",\n                    \"supporter_count\": 0,\n                    \"supporting_count\": 0,\n                    \"total_audio_balance\": 0,\n                    \"wallet\": \"string\",\n                    \"balance\": \"string\",\n                    \"associated_wallets_balance\": \"string\",\n                    \"total_balance\": \"string\",\n                    \"waudio_balance\": \"string\",\n                    \"associated_sol_wallets_balance\": \"string\",\n                    \"blocknumber\": 0,\n                    \"created_at\": \"string\",\n                    \"is_storage_v2\": true,\n                    \"creator_node_endpoint\": \"string\",\n                    \"current_user_followee_follow_count\": 0,\n                    \"does_current_user_follow\": true,\n                    \"does_current_user_subscribe\": true,\n                    \"does_follow_current_user\": true,\n                    \"handle_lc\": \"string\",\n                    \"updated_at\": \"string\",\n                    \"cover_photo_sizes\": \"string\",\n                    \"cover_photo_cids\": {\n                      \"640x\": \"string\",\n                      \"2000x\": \"string\",\n                      \"mirrors\": [\n                        \"string\"\n                      ]\n                    },\n                    \"cover_photo_legacy\": \"string\",\n                    \"profile_picture_sizes\": \"string\",\n                    \"profile_picture_cids\": {\n                      \"150x150\": \"string\",\n                      \"480x480\": \"string\",\n                      \"1000x1000\": \"string\",\n                      \"mirrors\": [\n                        \"string\"\n                      ]\n                    },\n                    \"profile_picture_legacy\": \"string\",\n                    \"has_collectibles\": true,\n                    \"playlist_library\": {\n                      \"contents\": [\n                        {}\n                      ]\n                    },\n                    \"allow_ai_attribution\": true,\n                    \"profile_type\": \"string\"\n                  },\n                  \"has_remix_author_reposted\": true,\n                  \"has_remix_author_saved\": true\n                }\n              ]\n            },\n            \"repost_count\": 0,\n            \"favorite_count\": 0,\n            \"comment_count\": 0,\n            \"tags\": \"string\",\n            \"title\": \"string\",\n            \"user\": {\n              \"album_count\": 0,\n              \"artist_pick_track_id\": \"string\",\n              \"artist_coin_badge\": {\n                \"mint\": \"string\",\n                \"logo_uri\": \"string\",\n                \"banner_image_url\": \"string\",\n                \"ticker\": \"string\"\n              },\n              \"coin_flair_mint\": \"string\",\n              \"bio\": \"string\",\n              \"cover_photo\": {\n                \"640x\": \"string\",\n                \"2000x\": \"string\",\n                \"mirrors\": [\n                  \"string\"\n                ]\n              },\n              \"followee_count\": 0,\n              \"follower_count\": 0,\n              \"handle\": \"string\",\n              \"id\": \"string\",\n              \"is_verified\": true,\n              \"twitter_handle\": \"string\",\n              \"instagram_handle\": \"string\",\n              \"tiktok_handle\": \"string\",\n              \"verified_with_twitter\": true,\n              \"verified_with_instagram\": true,\n              \"verified_with_tiktok\": true,\n              \"website\": \"string\",\n              \"donation\": \"string\",\n              \"location\": \"string\",\n              \"name\": \"string\",\n              \"playlist_count\": 0,\n              \"profile_picture\": {\n                \"150x150\": \"string\",\n                \"480x480\": \"string\",\n                \"1000x1000\": \"string\",\n                \"mirrors\": [\n                  \"string\"\n                ]\n              },\n              \"repost_count\": 0,\n              \"track_count\": 0,\n              \"is_deactivated\": true,\n              \"is_available\": true,\n              \"erc_wallet\": \"string\",\n              \"spl_wallet\": \"string\",\n              \"spl_usdc_wallet\": \"string\",\n              \"spl_usdc_payout_wallet\": \"string\",\n              \"supporter_count\": 0,\n              \"supporting_count\": 0,\n              \"total_audio_balance\": 0,\n              \"wallet\": \"string\",\n              \"balance\": \"string\",\n              \"associated_wallets_balance\": \"string\",\n              \"total_balance\": \"string\",\n              \"waudio_balance\": \"string\",\n              \"associated_sol_wallets_balance\": \"string\",\n              \"blocknumber\": 0,\n              \"created_at\": \"string\",\n              \"is_storage_v2\": true,\n              \"creator_node_endpoint\": \"string\",\n              \"current_user_followee_follow_count\": 0,\n              \"does_current_user_follow\": true,\n              \"does_current_user_subscribe\": true,\n              \"does_follow_current_user\": true,\n              \"handle_lc\": \"string\",\n              \"updated_at\": \"string\",\n              \"cover_photo_sizes\": \"string\",\n              \"cover_photo_cids\": {\n                \"640x\": \"string\",\n                \"2000x\": \"string\",\n                \"mirrors\": [\n                  \"string\"\n                ]\n              },\n              \"cover_photo_legacy\": \"string\",\n              \"profile_picture_sizes\": \"string\",\n              \"profile_picture_cids\": {\n                \"150x150\": \"string\",\n                \"480x480\": \"string\",\n                \"1000x1000\": \"string\",\n                \"mirrors\": [\n                  \"string\"\n                ]\n              },\n              \"profile_picture_legacy\": \"string\",\n              \"has_collectibles\": true,\n              \"playlist_library\": {\n                \"contents\": [\n                  {}\n                ]\n              },\n              \"allow_ai_attribution\": true,\n              \"profile_type\": \"string\"\n            },\n            \"duration\": 0,\n            \"is_downloadable\": true,\n            \"play_count\": 0,\n            \"permalink\": \"string\",\n            \"is_streamable\": true,\n            \"ddex_app\": \"string\",\n            \"playlists_containing_track\": [\n              0\n            ],\n            \"pinned_comment_id\": 0,\n            \"album_backlink\": {\n              \"playlist_id\": 0,\n              \"playlist_name\": \"string\",\n              \"permalink\": \"string\"\n            },\n            \"access\": {\n              \"stream\": true,\n              \"download\": true\n            },\n            \"blocknumber\": 0,\n            \"create_date\": \"string\",\n            \"cover_art_sizes\": \"string\",\n            \"cover_art_cids\": {\n              \"150x150\": \"string\",\n              \"480x480\": \"string\",\n              \"1000x1000\": \"string\"\n            },\n            \"created_at\": \"string\",\n            \"credits_splits\": \"string\",\n            \"isrc\": \"string\",\n            \"license\": \"string\",\n            \"iswc\": \"string\",\n            \"field_visibility\": {\n              \"mood\": true,\n              \"tags\": true,\n              \"genre\": true,\n              \"share\": true,\n              \"play_count\": true,\n              \"remixes\": true\n            },\n            \"followee_reposts\": [\n              {\n                \"repost_item_id\": \"string\",\n                \"repost_type\": \"string\",\n                \"user_id\": \"string\"\n              }\n            ],\n            \"has_current_user_reposted\": true,\n            \"is_scheduled_release\": true,\n            \"is_unlisted\": true,\n            \"has_current_user_saved\": true,\n            \"followee_favorites\": [\n              {\n                \"favorite_item_id\": \"string\",\n                \"favorite_type\": \"string\",\n                \"user_id\": \"string\",\n                \"created_at\": \"string\"\n              }\n            ],\n            \"route_id\": \"string\",\n            \"stem_of\": {\n              \"category\": \"string\",\n              \"parent_track_id\": 0\n            },\n            \"track_segments\": [\n              {\n                \"duration\": 0,\n                \"multihash\": \"string\"\n              }\n            ],\n            \"updated_at\": \"string\",\n            \"user_id\": \"string\",\n            \"is_delete\": true,\n            \"cover_art\": \"string\",\n            \"is_available\": true,\n            \"ai_attribution_user_id\": 0,\n            \"allowed_api_keys\": [\n              \"string\"\n            ],\n            \"audio_upload_id\": \"string\",\n            \"preview_start_seconds\": 0,\n            \"bpm\": 0,\n            \"is_custom_bpm\": true,\n            \"musical_key\": \"string\",\n            \"is_custom_musical_key\": true,\n            \"audio_analysis_error_count\": 0,\n            \"comments_disabled\": true,\n            \"ddex_release_ids\": {},\n            \"artists\": [\n              {}\n            ],\n            \"resource_contributors\": [\n              {\n                \"name\": \"string\",\n                \"roles\": [\n                  \"string\"\n                ],\n                \"sequence_number\": 0\n              }\n            ],\n            \"indirect_resource_contributors\": [\n              {\n                \"name\": \"string\",\n                \"roles\": [\n                  \"string\"\n                ],\n                \"sequence_number\": 0\n              }\n            ],\n            \"rights_controller\": {\n              \"name\": \"string\",\n              \"roles\": [\n                \"string\"\n              ],\n              \"rights_share_unknown\": \"string\"\n            },\n            \"copyright_line\": {\n              \"year\": \"string\",\n              \"text\": \"string\"\n            },\n            \"producer_copyright_line\": {\n              \"year\": \"string\",\n              \"text\": \"string\"\n            },\n            \"parental_warning_type\": \"string\",\n            \"is_stream_gated\": true,\n            \"stream_conditions\": {\n              \"tip_user_id\": 0\n            },\n            \"is_download_gated\": true,\n            \"download_conditions\": {\n              \"tip_user_id\": 0\n            },\n            \"cover_original_song_title\": \"string\",\n            \"cover_original_artist\": \"string\",\n            \"is_owned_by_user\": true,\n            \"stream\": {\n              \"url\": \"string\",\n              \"mirrors\": [\n                \"string\"\n              ]\n            },\n            \"download\": {\n              \"url\": \"string\",\n              \"mirrors\": [\n                \"string\"\n              ]\n            },\n            \"preview\": {\n              \"url\": \"string\",\n              \"mirrors\": [\n                \"string\"\n              ]\n            }\n          }\n        ],\n        \"cover_art\": \"string\",\n        \"cover_art_sizes\": \"string\",\n        \"cover_art_cids\": {\n          \"150x150\": \"string\",\n          \"480x480\": \"string\",\n          \"1000x1000\": \"string\",\n          \"mirrors\": [\n            \"string\"\n          ]\n        },\n        \"is_stream_gated\": true,\n        \"stream_conditions\": {\n          \"tip_user_id\": 0\n        },\n        \"is_scheduled_release\": true,\n        \"release_date\": \"string\",\n        \"ddex_release_ids\": {},\n        \"artists\": [\n          {}\n        ],\n        \"copyright_line\": {},\n        \"producer_copyright_line\": {},\n        \"parental_warning_type\": \"string\"\n      },\n      \"class\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      

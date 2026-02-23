@@ -1,0 +1,21 @@
+/* Dust Bucer – display font for 2026 landing large text */
+@font-face {
+  font-family: 'Dust Bucer';
+  src: url('/fonts/DustBucer.otf') format('opentype'),
+    url('/fonts/DustBucer.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dust Bucer Swash';
+  src: url('/fonts/DustBucer%20Swash.otf') format('opentype'),
+    url('/fonts/DustBucer%20Swash.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Urbanist – body font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap');

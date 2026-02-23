@@ -1,0 +1,274 @@
+---
+id: bulk-get-reactions
+title: "Bulk get Reactions"
+description: "Gets reactions by reacted_to_id and type"
+sidebar_label: "Bulk get Reactions"
+hide_title: true
+hide_table_of_contents: true
+api: eJytVttu2zgQ/ZUBn2LDtZM27YOwWMBBs7lg0wat02w3DhJaHFuMJVIdUr6s4X9fDKXI16RbYJ8kknM5c2Y4nIXwcuREdCcIZey1NU7ct4RCF5POeS0icYbeQX0Og3m5QPXg7YNWII0CP89RtITNkSSLXSgRiZMiHcMIPXypjbdELklm6JHY7UIYmaGIRKWv2d+PAmkutlH0EgxewA7XwAwtwTTRcQLeQlBsi5ZwcYKZFNGitBsJ50mbkVguW7XHjRjcz30/rhQewZM0rsQAWh24BqPyCa4h04bxOF4wJMIfhSZUIvJUYEs4P08ZxtBSJloCZ3lqFYpoKFOHeyKQRJKBaY+Z2xfZ8p6duNwah0Hg7eEhfzYj+VrEMToON7bGo/EsIvM81XHIW+fJsdxiF4AdPGHsOYHEWfa69KKkfxXmKu67NcoDISVTD1Xq6/VEpgVvODQK6aFwSA9acVm+jmTLwC5F2z73SWw5fdFIGcW+AhNe+7QuMGZ9uW/X8fayJY73ZelEKmDi0PmNTJUKx7sKnyy4Ik7q8tvRer+3GJAmSIBElrY0li2RoU8sX+MRBrKlT0QkOrR2l10wUF7kglIRicT73EWdjsx1WxZKF64d287kSHB5OowL0n7+lWurTNqJdDruFmy65pJtPF9iXg9YZudOnvd61xDUgfXR+KqEYap9Aqc+QcIig5z0RHqEMc7LbkHaI9SNyrX7pm+azU0bzSbv3jiEV9ywg3Dpc+nc1JKCocZUAfMotXEwtwXtBRL1zePjY9+wRUv6n2Awqtz8NpAOPxwfcA1yr4oqxTHOG79Xin3DLelZAmJpYIAgzRxC8behtw4rK5zn8xfxcLNKcMb8ZNLDQWCQudI+sYWHwxnkhEM9awS2Tmcyy1N8NQr116c0zt4ng9ubD1fno9nV09Xhp973d58/jqffby+f/j77lv2pj4s6oGbz3E5Be5haGruIM3BUxtG9vgCFsVXoAt2rbEBMqDglMnV987YNpzNPMval3EbmyWZ7ctU379rwEUlPKts1O1IpQufWFFfW+ua4DTcuqGi3ErUEcp0LiBOMx25VYPVJWV8cnArOFUxlmqKvbT2nDDUDivrmTaCikqoeG84/DFCbEYSWBEVuDRwoTRh7sFOD5BKdN1i7+6wbcisNyDwnO0HVAmPNG8KJHaOCEUnjQyS1g4NMGjlCgswqbPQN98ATlIT0s3sbhESr+vkjFJeIxOVtb+8Ly3kuRcHbMRquwM8hzZe3vWprHVmbsSz54R6Wrbhqsd3rix373dCL4NsRlKfctsqTo/YhR5Rb5zMZnr5qQNg7vWxYXaxa5q8MSRVdHme+k6dSB0ZD+1xUXXZrHEus87y5WHBruKF0ueTtclbh3qu0k4OUH9lqfHgR5q9MUXtxjnG+Gteql1YInqv+O4iDL9VQ0ID/YbJ6BebOjLcCfM8L0oxYRHf3y5ZIUCqkwGep3Y1jzP2a1s6cxFbqZ/LstCeWy38Be3/3fA==
+sidebar_class_name: "get api-method"
+info_path: developers/api/api
+custom_edit_url: null
+---
+
+import ApiTabs from "@theme/ApiTabs";
+import DiscriminatorTabs from "@theme/DiscriminatorTabs";
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
+import MimeTabs from "@theme/MimeTabs";
+import ParamsItem from "@theme/ParamsItem";
+import ResponseSamples from "@theme/ResponseSamples";
+import SchemaItem from "@theme/SchemaItem";
+import SchemaTabs from "@theme/SchemaTabs";
+import Markdown from "@theme/Markdown";
+import Heading from "@theme/Heading";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Bulk get Reactions"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/reactions"}
+>
+  
+</MethodEndpoint>
+
+
+
+Gets reactions by reacted_to_id and type
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<details
+  style={{"marginBottom":"1rem"}}
+  className={"openapi-markdown__details"}
+  data-collapsed={false}
+  open={true}
+>
+  <summary
+    style={{}}
+  >
+    <h3
+      className={"openapi-markdown__details-summary-header-params"}
+    >
+      Query Parameters
+    </h3>
+  </summary><div>
+    <ul>
+      <ParamsItem
+        className={"paramsItem"}
+        param={{"name":"type","in":"query","description":"The type of reactions for which to query.","schema":{"type":"string"}}}
+      >
+        
+      </ParamsItem><ParamsItem
+        className={"paramsItem"}
+        param={{"name":"reacted_to_ids","in":"query","description":"The `reacted_to` transaction id(s) of the reactions in question.","required":true,"style":"form","explode":false,"schema":{"type":"array","items":{"type":"string"}}}}
+      >
+        
+      </ParamsItem>
+    </ul>
+  </div>
+</details><div>
+  <div>
+    <ApiTabs
+      label={undefined}
+      id={undefined}
+    >
+      <TabItem
+        label={"200"}
+        value={"200"}
+      >
+        <div>
+          
+          
+          Success
+          
+          
+        </div><div>
+          <MimeTabs
+            className={"openapi-tabs__mime"}
+            schemaType={"response"}
+          >
+            <TabItem
+              label={"application/json"}
+              value={"application/json"}
+            >
+              <SchemaTabs
+                className={"openapi-tabs__schema"}
+              >
+                <TabItem
+                  label={"Schema"}
+                  value={"Schema"}
+                >
+                  <details
+                    style={{}}
+                    className={"openapi-markdown__details response"}
+                    data-collapsed={false}
+                    open={true}
+                  >
+                    <summary
+                      style={{}}
+                      className={"openapi-markdown__details-summary-response"}
+                    >
+                      <strong>
+                        Schema
+                      </strong>
+                    </summary><div
+                      style={{"textAlign":"left","marginLeft":"1rem"}}
+                    >
+                      
+                    </div><ul
+                      style={{"marginLeft":"1rem"}}
+                    >
+                      <SchemaItem
+                        collapsible={true}
+                        className={"schemaItem"}
+                      >
+                        <details
+                          style={{}}
+                          className={"openapi-markdown__details"}
+                        >
+                          <summary
+                            style={{}}
+                          >
+                            <span
+                              className={"openapi-schema__container"}
+                            >
+                              <strong
+                                className={"openapi-schema__property"}
+                              >
+                                data
+                              </strong><span
+                                className={"openapi-schema__name"}
+                              >
+                                 object[]
+                              </span>
+                            </span>
+                          </summary><div
+                            style={{"marginLeft":"1rem"}}
+                          >
+                            <li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
+                              >
+                                Array [
+                              </div>
+                            </li><SchemaItem
+                              collapsible={false}
+                              name={"reaction_value"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"reaction_type"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"sender_user_id"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><SchemaItem
+                              collapsible={false}
+                              name={"reacted_to"}
+                              required={true}
+                              schemaName={"string"}
+                              qualifierMessage={undefined}
+                              schema={{"type":"string"}}
+                            >
+                              
+                            </SchemaItem><li>
+                              <div
+                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
+                              >
+                                ]
+                              </div>
+                            </li>
+                          </div>
+                        </details>
+                      </SchemaItem>
+                    </ul>
+                  </details>
+                </TabItem><TabItem
+                  label={"Example (from schema)"}
+                  value={"Example (from schema)"}
+                >
+                  <ResponseSamples
+                    responseExample={"{\n  \"data\": [\n    {\n      \"reaction_value\": \"string\",\n      \"reaction_type\": \"string\",\n      \"sender_user_id\": \"string\",\n      \"reacted_to\": \"string\"\n    }\n  ]\n}"}
+                    language={"json"}
+                  >
+                    
+                  </ResponseSamples>
+                </TabItem>
+              </SchemaTabs>
+            </TabItem>
+          </MimeTabs>
+        </div>
+      </TabItem><TabItem
+        label={"400"}
+        value={"400"}
+      >
+        <div>
+          
+          
+          Bad request
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"404"}
+        value={"404"}
+      >
+        <div>
+          
+          
+          No such reaction
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem><TabItem
+        label={"500"}
+        value={"500"}
+      >
+        <div>
+          
+          
+          Server error
+          
+          
+        </div><div>
+          
+        </div>
+      </TabItem>
+    </ApiTabs>
+  </div>
+</div>
+      
