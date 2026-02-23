@@ -32,7 +32,7 @@ export const TrackInfo = (props: TrackInfoProps) => {
         mr='xs'
         css={{ minHeight: 24, minWidth: 24 }}
       />
-      <Text variant='body' strength='strong'>
+      <Text variant='body' color='default'>
         {track.title} <Text color='subdued'>{messages.by}</Text>{' '}
         <Box css={{ display: 'inline-flex' }}>
           <UserLink userId={track.owner_id} />

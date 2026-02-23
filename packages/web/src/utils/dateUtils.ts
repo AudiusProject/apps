@@ -11,34 +11,37 @@ export const formatToday = () => {
 
 const formatReleaseMessage = (
   releaseDate: string,
-  base: string,
-  prefixMessage: string
+  dayLabel: string,
+  includeTimeAndTz: boolean
 ) => {
-  const isFutureRelease = dayjs(releaseDate ?? undefined).isAfter(dayjs())
-  let message = isFutureRelease ? '[' + prefixMessage + '] ' : ''
-  message += base
-  message += isFutureRelease ? ' @ LT' : ''
-  return message
+  if (!includeTimeAndTz) return dayLabel
+  const parsed = dayjs(releaseDate ?? undefined)
+  const timePart = parsed.format('hA')
+  const tzPart = getLocalTimezone()
+  return `${dayLabel} @ ${timePart} ${tzPart}`
 }
 
 export const formatCalendarTime = (
   time: Nullable<string>,
-  prefixMessage = ''
+  _prefixMessage?: string
 ) => {
   if (!time) {
     return 'Today'
   }
 
-  return (
-    dayjs(time).calendar(undefined, {
-      sameDay: formatReleaseMessage(time, '[Today]', prefixMessage),
-      nextDay: formatReleaseMessage(time, '[Tomorrow]', prefixMessage),
-      nextWeek: formatReleaseMessage(time, 'dddd', prefixMessage),
-      lastDay: '[Yesterday]',
-      lastWeek: '[Last] dddd',
-      sameElse: formatReleaseMessage(time, 'M/D/YYYY', prefixMessage)
-    }) + (dayjs(time).isAfter(dayjs()) ? ' ' + getLocalTimezone() : '')
-  )
+  const parsed = dayjs(time)
+  const isFuture = parsed.isAfter(dayjs())
+
+  const dayLabel = parsed.calendar(undefined, {
+    sameDay: '[Today]',
+    nextDay: '[Tomorrow]',
+    nextWeek: 'dddd',
+    lastDay: '[Yesterday]',
+    lastWeek: '[Last] dddd',
+    sameElse: 'M/D/YYYY'
+  })
+
+  return formatReleaseMessage(time, dayLabel, isFuture)
 }
 
 // DayJs Utils
