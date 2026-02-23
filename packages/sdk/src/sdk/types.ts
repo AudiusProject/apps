@@ -41,7 +41,7 @@ export type ServicesContainer = {
   /**
    * Service used to write and update entities on chain
    */
-  entityManager: EntityManagerService
+  entityManager?: EntityManagerService
 
   /**
    * Service used to store and retrieve content e.g. tracks and images
@@ -167,11 +167,10 @@ export type ServicesContainer = {
    */
   archiverService?: ArchiverService
 }
-
 /**
- * SDK configuration schema that requires API keypairs
+ * SDK configuration schema that requires api key only (for read-only access with higher rate limits)
  */
-const DevAppSchema = z.object({
+export const DevAppSchemaWithApiKeyOnly = z.object({
   /**
    * Your app name
    */
@@ -185,9 +184,32 @@ const DevAppSchema = z.object({
    */
   apiKey: z.string().min(1),
   /**
-   * API secret, required for writes
+   * Target environment
+   * @internal
    */
-  apiSecret: z.optional(z.string().min(1)),
+  environment: z.enum(['development', 'production']).optional()
+})
+
+/**
+ * SDK configuration schema that requires API secret (read, write using Entity Manager)
+ */
+export const DevAppSchemaWithApiSecret = z.object({
+  /**
+   * Your app name
+   */
+  appName: z.optional(z.string()),
+  /**
+   * Services injection
+   */
+  services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * API key
+   */
+  apiKey: z.string().min(1).optional(),
+  /**
+   * API secret, required for writes that use Entity Manager
+   */
+  apiSecret: z.string().min(1),
   /**
    * Target environment
    * @internal
@@ -195,7 +217,37 @@ const DevAppSchema = z.object({
   environment: z.enum(['development', 'production']).optional()
 })
 
-const CustomAppSchema = z.object({
+/**
+ * SDK configuration schema that requires bearer token (read, write using API)
+ */
+export const DevAppSchemaWithBearerToken = z.object({
+  /**
+   * Your app name
+   */
+  appName: z.optional(z.string()),
+  /**
+   * Services injection
+   */
+  services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * API key
+   */
+  apiKey: z.string().min(1),
+  /**
+   * API bearer token, required for writes that use the API
+   */
+  bearerToken: z.string().min(1),
+  /**
+   * Target environment
+   * @internal
+   */
+  environment: z.enum(['development', 'production']).optional()
+})
+
+/**
+ * SDK configuration schema that requires app name only (for read-only access)
+ */
+export const DevAppSchemaWithAppNameOnly = z.object({
   /**
    * Your app name
    */
@@ -205,20 +257,26 @@ const CustomAppSchema = z.object({
    */
   services: z.optional(z.custom<Partial<ServicesContainer>>()),
   /**
-   * API key, required for writes
-   */
-  apiKey: z.optional(z.string().min(1)),
-  /**
-   * API secret, required for writes
-   */
-  apiSecret: z.optional(z.string().min(1)),
-  /**
    * Target environment
    * @internal
    */
   environment: z.enum(['development', 'production']).optional()
 })
 
-export const SdkConfigSchema = z.union([DevAppSchema, CustomAppSchema])
+export const SdkConfigSchema = z.union([
+  DevAppSchemaWithAppNameOnly,
+  DevAppSchemaWithApiKeyOnly,
+  DevAppSchemaWithApiSecret,
+  DevAppSchemaWithBearerToken
+])
+
+export type SdkWithBearerTokenConfig = z.input<
+  typeof DevAppSchemaWithBearerToken
+>
+export type SdkWithApiSecretConfig = z.input<typeof DevAppSchemaWithApiSecret>
+export type SdkWithApiKeyOnlyConfig = z.input<typeof DevAppSchemaWithApiKeyOnly>
+export type SdkWithAppNameOnlyConfig = z.input<
+  typeof DevAppSchemaWithAppNameOnly
+>
 
 export type SdkConfig = z.infer<typeof SdkConfigSchema>

@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { HashId } from '../../types/HashId'
 import { isApiKeyValid } from '../../utils/apiKey'
+
+export type GrantsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export const CreateGrantSchema = z.object({
   userId: HashId,

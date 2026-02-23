@@ -2,6 +2,7 @@ import {
   NotificationsApi as GeneratedNotificationsApi,
   type Configuration
 } from '../../api/generated/default'
+import { UninitializedEntityManagerError } from '../../errors'
 import type { EntityManagerService } from '../../services'
 import { Action, EntityType } from '../../services/EntityManager/types'
 import { parseParams } from '../../utils/parseParams'
@@ -10,15 +11,15 @@ import {
   MarkAllNotificationsAsViewedRequest,
   UpdatePlaylistLastViewedAtRequest,
   MarkAllNotificationsAsViewedSchema,
-  UpdatePlaylistLastViewedAtSchema
+  UpdatePlaylistLastViewedAtSchema,
+  type NotificationsApiServicesConfig
 } from './types'
 
 export class NotificationsApi extends GeneratedNotificationsApi {
-  constructor(
-    config: Configuration,
-    private readonly entityManager: EntityManagerService
-  ) {
+  private readonly entityManager?: EntityManagerService
+  constructor(config: Configuration, services: NotificationsApiServicesConfig) {
     super(config)
+    this.entityManager = services.entityManager
   }
 
   /**
@@ -31,6 +32,9 @@ export class NotificationsApi extends GeneratedNotificationsApi {
       'markAllNotificationsAsViewed',
       MarkAllNotificationsAsViewedSchema
     )(params)
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.NOTIFICATION,
@@ -49,6 +53,9 @@ export class NotificationsApi extends GeneratedNotificationsApi {
       'updatePlaylistLastViewedAt',
       UpdatePlaylistLastViewedAtSchema
     )(params)
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.NOTIFICATION,

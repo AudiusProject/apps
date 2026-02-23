@@ -1,6 +1,11 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { EventEventTypeEnum, EventEntityTypeEnum } from '../generated/default'
+
+export type EventsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 // Base schema for event metadata
 export const EventMetadataSchema = z.object({

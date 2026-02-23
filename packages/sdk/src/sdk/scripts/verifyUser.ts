@@ -67,7 +67,7 @@ program
       console.info('With config', config)
       console.info('Sending tx...')
       const { blockHash, blockNumber } =
-        await sdk.services.entityManager.manageEntity({
+        await sdk.services.entityManager!.manageEntity({
           userId,
           entityType: EntityType.USER,
           entityId: userId,

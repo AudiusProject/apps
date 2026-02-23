@@ -27,7 +27,7 @@ export const addRequestSignatureMiddleware = ({
   apiKey,
   apiSecret
 }: {
-  services: Pick<ServicesContainer, 'audiusWalletClient' | 'logger'>
+  services: Partial<Pick<ServicesContainer, 'audiusWalletClient' | 'logger'>>
   apiKey?: string
   apiSecret?: string
 }): Middleware => {
@@ -53,7 +53,7 @@ export const addRequestSignatureMiddleware = ({
         }
 
         const signingClient = audiusWalletClient ?? appWalletClient
-        const [currentAddress] = await signingClient.getAddresses()
+        const [currentAddress] = (await signingClient?.getAddresses()) ?? []
         const currentTimestamp = new Date().getTime()
         const isExpired =
           !timestamp || timestamp + SIGNATURE_EXPIRY_MS < currentTimestamp
@@ -72,9 +72,10 @@ export const addRequestSignatureMiddleware = ({
 
           const m = `signature:${currentTimestamp}`
 
-          signature = await signingClient.signMessage({
-            message: m
-          })
+          signature =
+            (await signingClient?.signMessage({
+              message: m
+            })) ?? null
 
           // Cache the new signature and message
           message = m
@@ -83,7 +84,7 @@ export const addRequestSignatureMiddleware = ({
       } catch (e) {
         // Don't log a warning for HedgehogWalletNotFoundError as it's expected when user is logged out
         if (!(e instanceof HedgehogWalletNotFoundError)) {
-          logger.warn(`Unable to add request signature: ${e}`)
+          logger?.warn(`Unable to add request signature: ${e}`)
         }
       }
       return { message, signature }

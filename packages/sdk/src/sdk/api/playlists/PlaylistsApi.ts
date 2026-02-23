@@ -2,6 +2,7 @@ import { pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 import type { z } from 'zod'
 
+import { UninitializedEntityManagerError } from '../../errors'
 import type { StorageService } from '../../services'
 import {
   Action,
@@ -9,10 +10,8 @@ import {
   EntityType,
   AdvancedOptions
 } from '../../services/EntityManager/types'
-import type { LoggerService } from '../../services/Logger'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
 import { parseParams } from '../../utils/parseParams'
-import { retry3 } from '../../utils/retry'
 import {
   Configuration,
   PlaylistsApi as GeneratedPlaylistsApi,
@@ -56,7 +55,8 @@ import {
   EntityManagerUpdatePlaylistRequest,
   type UpdatePlaylistRequestWithImage,
   type CreatePlaylistRequestWithFiles,
-  type UploadPlaylistRequest
+  type UploadPlaylistRequest,
+  type PlaylistsApiServicesConfig
 } from './types'
 
 // Returns current timestamp in seconds, which is the expected
@@ -66,19 +66,21 @@ const getCurrentTimestamp = () => {
 }
 
 export class PlaylistsApi extends GeneratedPlaylistsApi {
-  private readonly trackUploadHelper: TrackUploadHelper
+  private readonly storage: StorageService
+  private readonly entityManager?: EntityManagerService
 
+  private readonly trackUploadHelper: TrackUploadHelper
   private readonly tracksApi: TracksApi
+
   constructor(
     configuration: Configuration,
-    private readonly storage: StorageService,
-    private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService
+    services: PlaylistsApiServicesConfig
   ) {
     super(configuration)
+    this.storage = services.storage
+    this.entityManager = services.entityManager
     this.tracksApi = new TracksApi(configuration)
     this.trackUploadHelper = new TrackUploadHelper(configuration)
-    this.logger = logger.createPrefixedLogger('[playlists-api]')
   }
 
   /** @hidden
@@ -373,6 +375,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UpdatePlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId: parsedParameters.userId,
       entityType: EntityType.PLAYLIST,
@@ -432,6 +437,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       DeletePlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -464,6 +472,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       FavoritePlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -497,6 +508,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UnfavoritePlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -529,6 +543,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       RepostPlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -568,6 +585,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UnrepostPlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -600,6 +620,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       SharePlaylistSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,
@@ -723,21 +746,15 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     // Upload cover art to storage node
     const coverArtResponse =
       imageFile &&
-      (await retry3(
-        async () =>
-          await this.storage
-            .uploadFile({
-              file: imageFile,
-              onProgress,
-              metadata: {
-                template: 'img_square'
-              }
-            })
-            .start(),
-        (e) => {
-          this.logger.info('Retrying uploadPlaylistCoverArt', e)
-        }
-      ))
+      (await this.storage
+        .uploadFile({
+          file: imageFile,
+          onProgress,
+          metadata: {
+            template: 'img_square'
+          }
+        })
+        .start())
 
     const playlistId = providedPlaylistId || (await this.generatePlaylistId())
     const timestamp = getCurrentTimestamp()
@@ -752,6 +769,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     // Write playlist metadata to chain
     const response = await this.entityManager.manageEntity({
       userId,

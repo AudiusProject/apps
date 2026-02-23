@@ -1,4 +1,3 @@
-import { USDC } from '@audius/fixed-decimal'
 import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isEqual } from 'lodash'
@@ -9,7 +8,6 @@ import { fileToSdk } from '~/adapters/track'
 import {
   getCollectionQueryKey,
   getTrackQueryKey,
-  useCurrentAccountUser,
   useCurrentUserId
 } from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils'
@@ -40,13 +38,6 @@ export const useUpdateCollection = () => {
     imageUtils: { generatePlaylistArtwork }
   } = useQueryContext()
   const queryClient = useQueryClient()
-  const { data: account } = useCurrentAccountUser({
-    select: (user) => ({
-      erc_wallet: user?.erc_wallet,
-      wallet: user?.wallet
-    })
-  })
-  const { erc_wallet, wallet } = account ?? {}
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
 
@@ -86,20 +77,6 @@ export const useUpdateCollection = () => {
         const priceCents = Number(
           collectionUpdate.stream_conditions.usdc_purchase.price
         )
-        const priceWei = Number(USDC(priceCents / 100).value.toString())
-
-        const walletToUse = erc_wallet ?? wallet
-        if (!walletToUse) {
-          throw new Error('No wallet found for user')
-        }
-
-        // Get the user's USDC bank address from the wallet
-        const { userBank } =
-          await sdk.services.claimableTokensClient.getOrCreateUserBank({
-            ethWallet: walletToUse,
-            mint: 'USDC'
-          })
-        const userBankStr = userBank.toString()
 
         // Update the stream conditions with the price and splits
         collectionUpdate.stream_conditions = {
@@ -107,9 +84,8 @@ export const useUpdateCollection = () => {
             price: priceCents,
             splits: [
               {
-                payout_wallet: userBankStr,
-                percentage: 100,
-                amount: priceWei
+                user_id: currentUserId,
+                percentage: 100
               }
             ]
           }

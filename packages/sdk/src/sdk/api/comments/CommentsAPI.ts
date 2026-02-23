@@ -1,6 +1,6 @@
 import snakecaseKeys from 'snakecase-keys'
 
-import { LoggerService } from '../../services'
+import { UninitializedEntityManagerError } from '../../errors'
 import {
   Action,
   EntityManagerService,
@@ -33,16 +33,18 @@ import {
   EntityManagerDeleteCommentRequest,
   EntityManagerPinCommentRequest,
   EntityManagerReactCommentRequest,
-  EntityManagerReportCommentRequest
+  EntityManagerReportCommentRequest,
+  type CommentsApiServicesConfig
 } from './types'
 
 export class CommentsApi extends GeneratedCommentsApi {
+  private readonly entityManager?: EntityManagerService
   constructor(
     configuration: Configuration,
-    private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService
+    services: CommentsApiServicesConfig
   ) {
     super(configuration)
+    this.entityManager = services.entityManager
   }
 
   async generateCommentId() {
@@ -66,6 +68,10 @@ export class CommentsApi extends GeneratedCommentsApi {
     )(params)
     const { userId, entityType = EntityType.TRACK, commentId } = metadata
     const newCommentId = commentId ?? (await this.generateCommentId())
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -76,7 +82,6 @@ export class CommentsApi extends GeneratedCommentsApi {
         data: snakecaseKeys({ entityType, ...metadata })
       })
     })
-    this.logger.info('Successfully posted a comment')
     return encodeHashId(newCommentId)
   }
 
@@ -115,6 +120,9 @@ export class CommentsApi extends GeneratedCommentsApi {
       UpdateCommentSchema
     )(params)
     const { userId, entityId, trackId, body } = metadata
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -158,6 +166,9 @@ export class CommentsApi extends GeneratedCommentsApi {
       DeleteCommentSchema
     )(params)
     const { userId, entityId } = metadata
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -196,6 +207,9 @@ export class CommentsApi extends GeneratedCommentsApi {
       ReactCommentSchema
     )(params)
     const { userId, commentId, isLiked, trackId } = metadata
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -253,6 +267,9 @@ export class CommentsApi extends GeneratedCommentsApi {
   async pinCommentWithEntityManager(params: EntityManagerPinCommentRequest) {
     const metadata = await parseParams('pinComment', PinCommentSchema)(params)
     const { userId, entityId, trackId, isPin } = metadata
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -315,6 +332,9 @@ export class CommentsApi extends GeneratedCommentsApi {
       ReportCommentSchema
     )(params)
     const { userId, entityId } = metadata
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
@@ -346,6 +366,9 @@ export class CommentsApi extends GeneratedCommentsApi {
    * Mute/unmute a user (entity manager only)
    */
   async muteUser(userId: number, mutedUserId: number, isMuted: boolean) {
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -365,6 +388,9 @@ export class CommentsApi extends GeneratedCommentsApi {
     entityId: number
     action: Action.MUTE | Action.UNMUTE
   }) {
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       ...config,
       metadata: ''

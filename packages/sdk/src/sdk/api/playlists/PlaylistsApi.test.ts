@@ -106,18 +106,16 @@ describe('PlaylistsApi', () => {
   })
 
   beforeAll(() => {
-    playlists = new PlaylistsApi(
-      new Configuration(),
-      new Storage({
+    playlists = new PlaylistsApi(new Configuration(), {
+      storage: new Storage({
         storageNodeSelector,
         logger: new Logger()
       }),
-      new EntityManagerClient({
+      entityManager: new EntityManagerClient({
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
-      }),
-      new Logger()
-    )
+      })
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})
