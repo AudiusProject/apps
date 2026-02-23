@@ -5,7 +5,8 @@ import {
   SdkConfigSchema,
   type SdkWithApiKeyOnlyConfig,
   type SdkWithApiSecretConfig,
-  type SdkWithBearerTokenConfig
+  type SdkWithBearerTokenConfig,
+  type SdkWithAppNameOnlyConfig
 } from './types'
 
 /**
@@ -15,7 +16,10 @@ export function sdk(
   config: SdkWithBearerTokenConfig
 ): ReturnType<typeof createSdkWithBearerToken>
 export function sdk(
-  config: SdkWithApiSecretConfig | SdkWithApiKeyOnlyConfig
+  config:
+    | SdkWithApiSecretConfig
+    | SdkWithApiKeyOnlyConfig
+    | SdkWithAppNameOnlyConfig
 ): ReturnType<typeof createSdkWithApiSecret>
 export function sdk(config: SdkConfig) {
   SdkConfigSchema.parse(config)
