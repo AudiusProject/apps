@@ -38,8 +38,7 @@ import {
   getSDK,
   fetchAccountAsync,
   getOrCreateUSDCUserBank,
-  changePasswordActions,
-  confirmTransaction
+  changePasswordActions
 } from '@audius/common/store'
 import {
   parseHandleReservedStatusFromSocial,
@@ -394,11 +393,10 @@ function* createGuestAccount(
         if (!guestEmail) {
           throw new Error('No email set for guest account')
         }
-        const { blockHash, blockNumber, metadata } = yield* call([
+        const { metadata } = yield* call([
           sdk.users,
           sdk.users.createGuestAccount
         ])
-        yield* call(confirmTransaction, blockHash, blockNumber)
         yield* call(fetchAccountAsync, { shouldMarkAccountAsLoading: true })
 
         const userBank = yield* call(getOrCreateUSDCUserBank)

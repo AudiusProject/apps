@@ -11,7 +11,6 @@ import {
   chatActions,
   reachabilitySelectors,
   confirmerActions,
-  confirmTransaction,
   getSDK
 } from '@audius/common/store'
 import {
@@ -140,18 +139,10 @@ function* confirmUpdateProfile(userId, metadata) {
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const response = yield call(audiusBackendInstance.updateCreator, {
+        yield call(audiusBackendInstance.updateCreator, {
           metadata,
           sdk
         })
-        const { blockHash, blockNumber } = response
-
-        const confirmed = yield call(confirmTransaction, blockHash, blockNumber)
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm update profile for user id ${userId}`
-          )
-        }
         yield waitForAccount()
         const currentUserId = yield call(queryCurrentUserId)
         const { data = [] } = yield call([sdk.users, sdk.users.getUser], {

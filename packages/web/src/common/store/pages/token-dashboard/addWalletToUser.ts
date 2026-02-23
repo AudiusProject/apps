@@ -3,7 +3,6 @@ import { Chain } from '@audius/common/models'
 import {
   tokenDashboardPageActions,
   confirmerActions,
-  confirmTransaction,
   getSDK
 } from '@audius/common/store'
 import { Id } from '@audius/sdk'
@@ -34,16 +33,6 @@ export function* addWalletToUser(
     })
 
     if (!result) {
-      throw new Error(
-        `Could not confirm connect wallet for account user id ${accountUserId}`
-      )
-    }
-
-    const { blockHash, blockNumber } = result
-
-    const confirmed = yield* call(confirmTransaction, blockHash, blockNumber)
-
-    if (!confirmed) {
       throw new Error(
         `Could not confirm connect wallet for account user id ${accountUserId}`
       )
