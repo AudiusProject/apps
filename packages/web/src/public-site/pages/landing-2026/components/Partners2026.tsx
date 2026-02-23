@@ -1,5 +1,3 @@
-import styles from './Partners2026.module.css'
-
 import logoDdex from '../assets/logos/ddex.png'
 import logoDistrokid from '../assets/logos/distrokid.png'
 import logoDowntown from '../assets/logos/downtown.png'
@@ -9,6 +7,8 @@ import logoKobalt from '../assets/logos/kobalt.png'
 import logoLabelworx from '../assets/logos/labelworx.png'
 import logoNettwerk from '../assets/logos/nettwerk.png'
 import logoWarner from '../assets/logos/warner.png'
+
+import styles from './Partners2026.module.css'
 
 const partners = [
   { name: 'Warner', src: logoWarner },

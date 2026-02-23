@@ -5,8 +5,8 @@ import { imageProfilePicEmpty } from '@audius/common/assets'
 import { useImageSize } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useNavigate } from 'react-router'
 import { pick } from 'lodash'
+import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 import { preload } from 'utils/image'
@@ -21,8 +21,15 @@ const DEFAULT_IMAGE_MIRRORS = [
 ]
 
 function artworkWithDefaultMirrors(
-  profilePicture: { '150x150'?: string; '480x480'?: string; '1000x1000'?: string; mirrors?: string[] } | undefined
-): typeof profilePicture & { mirrors: string[] } | undefined {
+  profilePicture:
+    | {
+        '150x150'?: string
+        '480x480'?: string
+        '1000x1000'?: string
+        mirrors?: string[]
+      }
+    | undefined
+): (typeof profilePicture & { mirrors: string[] }) | undefined {
   if (!profilePicture || !profilePicture['480x480']) return undefined
   const mirrors =
     profilePicture.mirrors && profilePicture.mirrors.length > 0

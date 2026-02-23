@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import promoBg from '../assets/promo-bg.jpg'
+
 import styles from './CreateFutureCTA.module.css'
 
 const { SIGN_UP_PAGE } = route

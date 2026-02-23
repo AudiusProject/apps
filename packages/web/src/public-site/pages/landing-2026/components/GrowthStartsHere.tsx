@@ -1,7 +1,7 @@
-import styles from './GrowthStartsHere.module.css'
-
 import featuresBg from '../assets/features-bg.svg?url'
 import featuresVisual from '../assets/features-visual.jpg'
+
+import styles from './GrowthStartsHere.module.css'
 
 const messages = {
   headline: 'Growth starts here.',

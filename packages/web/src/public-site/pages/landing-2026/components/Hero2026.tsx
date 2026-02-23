@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router'
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import landingImg from '../assets/landing.png'
+
 import styles from './Hero2026.module.css'
 
 const { SIGN_UP_PAGE } = route

@@ -10,6 +10,7 @@ import { ID } from '@audius/common/models'
 import { useLinkClickHandler } from 'react-router'
 
 import featuredLines from '../assets/featured-lines.svg?url'
+
 import styles from './FeaturedContests2026.module.css'
 
 const messages = {
