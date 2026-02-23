@@ -2,6 +2,7 @@ import { USDC } from '@audius/fixed-decimal'
 import { TransactionInstruction } from '@solana/web3.js'
 import snakecaseKeys from 'snakecase-keys'
 
+import { UninitializedEntityManagerError } from '../../errors'
 import type {
   EntityManagerService,
   ClaimableTokensClient,
@@ -13,7 +14,7 @@ import {
   EntityType,
   AdvancedOptions
 } from '../../services/EntityManager/types'
-import type { LoggerService } from '../../services/Logger'
+import { Logger, type LoggerService } from '../../services/Logger'
 import type { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import type { StorageService, UploadHandle } from '../../services/Storage'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
@@ -70,26 +71,34 @@ import {
   type UpdateTrackRequestWithFiles,
   type CreateTrackRequestWithFiles,
   PublishStemSchema,
-  UploadTrackSchema
+  UploadTrackSchema,
+  type TracksApiServicesConfig
 } from './types'
 
 // Extend that new class
 export class TracksApi extends GeneratedTracksApi {
   private readonly trackUploadHelper: TrackUploadHelper
 
-  constructor(
-    configuration: Configuration,
-    private readonly storage: StorageService,
-    private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService,
-    private readonly claimableTokensClient: ClaimableTokensClient,
-    private readonly paymentRouterClient: PaymentRouterClient,
-    private readonly solanaRelay: SolanaRelayService,
-    private readonly solanaClient: SolanaClient
-  ) {
+  private readonly storage: StorageService
+  private readonly entityManager?: EntityManagerService
+  private readonly logger: LoggerService
+  private readonly claimableTokensClient: ClaimableTokensClient
+  private readonly paymentRouterClient: PaymentRouterClient
+  private readonly solanaRelay: SolanaRelayService
+  private readonly solanaClient: SolanaClient
+
+  constructor(configuration: Configuration, services: TracksApiServicesConfig) {
     super(configuration)
     this.trackUploadHelper = new TrackUploadHelper(configuration)
-    this.logger = logger.createPrefixedLogger('[tracks-api]')
+    this.logger = (services.logger ?? new Logger()).createPrefixedLogger(
+      '[tracks-api]'
+    )
+    this.storage = services.storage
+    this.entityManager = services.entityManager
+    this.claimableTokensClient = services.claimableTokensClient
+    this.paymentRouterClient = services.paymentRouterClient
+    this.solanaRelay = services.solanaRelay
+    this.solanaClient = services.solanaClient
   }
 
   /**
@@ -324,6 +333,9 @@ export class TracksApi extends GeneratedTracksApi {
       throw new Error('writeTrackToChain: userId could not be decoded')
     }
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId: decodedUserId,
       entityType: EntityType.TRACK,
@@ -410,6 +422,9 @@ export class TracksApi extends GeneratedTracksApi {
       UpdateTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     // Write metadata to chain
     return await this.entityManager.manageEntity({
       userId,
@@ -516,6 +531,9 @@ export class TracksApi extends GeneratedTracksApi {
       DeleteTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -552,6 +570,9 @@ export class TracksApi extends GeneratedTracksApi {
       FavoriteTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -589,6 +610,9 @@ export class TracksApi extends GeneratedTracksApi {
       UnfavoriteTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -625,6 +649,9 @@ export class TracksApi extends GeneratedTracksApi {
       ShareTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -661,6 +688,9 @@ export class TracksApi extends GeneratedTracksApi {
       RepostTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -703,6 +733,9 @@ export class TracksApi extends GeneratedTracksApi {
       UnrepostTrackSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -740,6 +773,10 @@ export class TracksApi extends GeneratedTracksApi {
       RecordTrackDownloadSchema
     )(params)
     const location = await getLocation({ logger: this.logger })
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,

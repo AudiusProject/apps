@@ -1,6 +1,7 @@
 import { wAUDIO } from '@audius/fixed-decimal'
 import snakecaseKeys from 'snakecase-keys'
 
+import { UninitializedEntityManagerError } from '../../errors'
 import type { StorageService } from '../../services'
 import { EmailEncryptionService } from '../../services/Encryption'
 import {
@@ -53,19 +54,24 @@ import {
   type UpdateUserRequestWithFiles,
   type CreateUserRequestWithFiles,
   type UserFileUploadParams,
-  type EntityManagerPlaylistLibraryContents
+  type EntityManagerPlaylistLibraryContents,
+  type UsersApiServicesConfig
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
-  constructor(
-    configuration: Configuration,
-    private readonly storage: StorageService,
-    private readonly entityManager: EntityManagerService,
-    private readonly claimableTokens: ClaimableTokensClient,
-    private readonly solanaClient: SolanaClient,
-    private readonly emailEncryption: EmailEncryptionService
-  ) {
+  private readonly storage: StorageService
+  private readonly entityManager?: EntityManagerService
+  private readonly claimableTokens: ClaimableTokensClient
+  private readonly solanaClient: SolanaClient
+  private readonly emailEncryption: EmailEncryptionService
+
+  constructor(configuration: Configuration, services: UsersApiServicesConfig) {
     super(configuration)
+    this.storage = services.storage
+    this.entityManager = services.entityManager
+    this.claimableTokens = services.claimableTokensClient
+    this.solanaClient = services.solanaClient
+    this.emailEncryption = services.emailEncryptionService
   }
 
   /** @hidden
@@ -107,6 +113,9 @@ export class UsersApi extends GeneratedUsersApi {
 
     const cid = (await generateMetadataCidV1(entityMetadata)).toString()
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     // Write metadata to chain
     const { blockHash, blockNumber } = await this.entityManager.manageEntity({
       userId,
@@ -159,6 +168,9 @@ export class UsersApi extends GeneratedUsersApi {
       userId
     }
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     // Write metadata to chain
     const { blockHash, blockNumber } = await this.entityManager.manageEntity({
       userId,
@@ -189,6 +201,9 @@ export class UsersApi extends GeneratedUsersApi {
     )(params)
     const cid = (await generateMetadataCidV1(metadata)).toString()
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     // Write metadata to chain
     return await this.entityManager.manageEntity({
       userId,
@@ -317,6 +332,9 @@ export class UsersApi extends GeneratedUsersApi {
       FollowUserSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -355,6 +373,9 @@ export class UsersApi extends GeneratedUsersApi {
       UnfollowUserSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -393,6 +414,9 @@ export class UsersApi extends GeneratedUsersApi {
       SubscribeToUserSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -431,6 +455,9 @@ export class UsersApi extends GeneratedUsersApi {
       UnsubscribeFromUserSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -613,6 +640,9 @@ export class UsersApi extends GeneratedUsersApi {
       SendTipReactionRequestSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TIP,
@@ -746,6 +776,9 @@ export class UsersApi extends GeneratedUsersApi {
       access_grants: accessGrants
     }
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId: emailOwnerUserId,
       entityType,
@@ -775,6 +808,9 @@ export class UsersApi extends GeneratedUsersApi {
       AddAssociatedWalletSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.ASSOCIATED_WALLET,
@@ -804,6 +840,9 @@ export class UsersApi extends GeneratedUsersApi {
       RemoveAssociatedWalletSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.ASSOCIATED_WALLET,
@@ -828,6 +867,9 @@ export class UsersApi extends GeneratedUsersApi {
       UpdateCollectiblesSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COLLECTIBLES,

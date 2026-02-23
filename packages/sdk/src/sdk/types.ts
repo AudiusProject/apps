@@ -41,7 +41,7 @@ export type ServicesContainer = {
   /**
    * Service used to write and update entities on chain
    */
-  entityManager: EntityManagerService
+  entityManager?: EntityManagerService
 
   /**
    * Service used to store and retrieve content e.g. tracks and images

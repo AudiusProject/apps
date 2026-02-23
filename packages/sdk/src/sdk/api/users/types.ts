@@ -1,12 +1,27 @@
 import { z } from 'zod'
 
-import type { CreateUserRequest, UpdateUserRequest } from '../..'
+import type {
+  ClaimableTokensClient,
+  EmailEncryptionService,
+  EntityManagerService,
+  SolanaClient,
+  StorageService
+} from '../../services'
 import { ProgressHandler } from '../../services/Storage/types'
 import { EthAddressSchema } from '../../types/EthAddress'
 import { ImageFile } from '../../types/File'
 import { HashId } from '../../types/HashId'
 import { SolanaAddressSchema } from '../../types/SolanaAddress'
 import { getReaction, reactionsMap } from '../../utils/reactionsMap'
+import type { CreateUserRequest, UpdateUserRequest } from '../generated/default'
+
+export type UsersApiServicesConfig = {
+  storage: StorageService
+  entityManager?: EntityManagerService
+  claimableTokensClient: ClaimableTokensClient
+  solanaClient: SolanaClient
+  emailEncryptionService: EmailEncryptionService
+}
 
 export const UserEventsSchema = z.object({
   referrer: z.optional(HashId),

@@ -1,11 +1,16 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { HashId } from '../../types/HashId'
 import { isApiKeyValid } from '../../utils/apiKey'
 
 const DEVELOPER_APP_MAX_DESCRIPTION_LENGTH = 128
 const DEVELOPER_APP_MAX_IMAGE_URL_LENGTH = 2000
 const DEVELOPER_APP_IMAGE_URL_REGEX = /^(https?):\/\//i
+
+export type DeveloperAppsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export const CreateDeveloperAppSchema = z.object({
   name: z.string(),

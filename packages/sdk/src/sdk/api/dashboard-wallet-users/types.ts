@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { EthAddressSchema } from '../../types/EthAddress'
 import { HashId } from '../../types/HashId'
+
+export type DashboardWalletUsersApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export const CreateDashboardWalletUser = z
   .object({

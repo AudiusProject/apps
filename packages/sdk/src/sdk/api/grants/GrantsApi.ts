@@ -1,4 +1,4 @@
-import type {
+import {
   AddManagerRequest as GeneratedAddManagerRequest,
   ApproveGrantRequest as GeneratedApproveGrantRequest,
   Configuration,
@@ -8,6 +8,7 @@ import type {
   User,
   UsersApi
 } from '../../api/generated/default'
+import { UninitializedEntityManagerError } from '../../errors'
 import type { EntityManagerService } from '../../services'
 import {
   Action,
@@ -27,16 +28,17 @@ import {
   type EntityManagerApproveGrantRequest,
   type EntityManagerCreateGrantRequest,
   type EntityManagerRemoveManagerRequest,
-  type EntityManagerRevokeGrantRequest
+  type EntityManagerRevokeGrantRequest,
+  type GrantsApiServicesConfig
 } from './types'
 
 export class GrantsApi {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(
-    _config: Configuration,
-    private readonly entityManager: EntityManagerService,
-    private readonly usersApi: UsersApi
-  ) {}
+  private readonly entityManager?: EntityManagerService
+  private readonly usersApi: UsersApi
+  constructor(config: Configuration, services: GrantsApiServicesConfig) {
+    this.entityManager = services.entityManager
+    this.usersApi = new UsersApi(config)
+  }
 
   async createGrantWithEntityManager(
     params: EntityManagerCreateGrantRequest,
@@ -47,6 +49,9 @@ export class GrantsApi {
       CreateGrantSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.GRANT,
@@ -87,6 +92,9 @@ export class GrantsApi {
     )(params)
     const managerUser = await this.getManagerUser(managerUserId, 'addManager')
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.GRANT,
@@ -132,6 +140,9 @@ export class GrantsApi {
       'removeManager'
     )
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.GRANT,
@@ -171,6 +182,9 @@ export class GrantsApi {
       RevokeGrantSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.GRANT,
@@ -210,6 +224,9 @@ export class GrantsApi {
       ApproveGrantSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.GRANT,

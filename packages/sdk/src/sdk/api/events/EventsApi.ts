@@ -1,6 +1,6 @@
 import snakecaseKeys from 'snakecase-keys'
 
-import { LoggerService } from '../../services'
+import { UninitializedEntityManagerError } from '../../errors'
 import {
   EntityManagerService,
   EntityType,
@@ -19,17 +19,16 @@ import {
   UpdateEventRequest,
   UpdateEventSchema,
   DeleteEventRequest,
-  DeleteEventSchema
+  DeleteEventSchema,
+  type EventsApiServicesConfig
 } from './types'
 
 export class EventsApi extends GeneratedEventsApi {
-  constructor(
-    configuration: Configuration,
-    private readonly entityManager: EntityManagerService,
-    private readonly logger: LoggerService
-  ) {
+  private readonly entityManager?: EntityManagerService
+
+  constructor(configuration: Configuration, services: EventsApiServicesConfig) {
     super(configuration)
-    this.logger = logger.createPrefixedLogger('[events-api]')
+    this.entityManager = services.entityManager
   }
 
   async generateEventId() {
@@ -62,6 +61,9 @@ export class EventsApi extends GeneratedEventsApi {
     } = parsedParameters
     const entityId = eventId ?? (await this.generateEventId())
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       entityId,
       userId,
@@ -78,7 +80,6 @@ export class EventsApi extends GeneratedEventsApi {
         })
       })
     })
-    this.logger.info('Successfully created a event')
     return response
   }
 
@@ -93,6 +94,9 @@ export class EventsApi extends GeneratedEventsApi {
     )(params)
 
     const { userId, eventId, endDate, eventData } = parsedParameters
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       entityId: eventId,
       userId,
@@ -103,7 +107,6 @@ export class EventsApi extends GeneratedEventsApi {
         data: snakecaseKeys({ endDate, eventData })
       })
     })
-    this.logger.info('Successfully updated the event')
     return response
   }
 
@@ -119,6 +122,9 @@ export class EventsApi extends GeneratedEventsApi {
 
     const { userId, eventId } = parsedParameters
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       entityId: eventId,
       userId,
@@ -126,7 +132,6 @@ export class EventsApi extends GeneratedEventsApi {
       action: Action.DELETE,
       metadata: ''
     })
-    this.logger.info('Successfully deleted the event')
     return response
   }
 }
