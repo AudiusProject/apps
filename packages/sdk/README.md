@@ -11,26 +11,16 @@ The Audius JavaScript (TypeScript) SDK allows you to easily interact with the Au
 
 ...and much more!
 
-## API Plans
-
-Audius offers two API plans:
-
-| Plan          | Rate Limit         | Monthly Requests       |
-| ------------- | ------------------ | ---------------------- |
-| **Free**      | 10 requests/second | 500,000 requests/month |
-| **Unlimited** | Unlimited          | Unlimited              |
-
-The Free plan is always free with no restrictions. For higher limits and support, contact [api@audius.co](mailto:api@audius.co) about the Unlimited plan.
-
 ## Get Your API Key and Bearer Token
 
 1. Visit the [Audius API Plans page](https://api.audius.co/plans) and click "Create API Key" to generate your credentials.
 
-2. You will receive an **API Key** and a **Bearer Token**. Save both securely — treat them like passwords.
+2. You will receive an **API Key** and a **Bearer Token**.
 
 :::tip
 
-The bearer token is the recommended way to authenticate with the Audius API.
+Treat your bearer token like a password. Store it somewhere safe and don't expose it publicly. Never
+share it with anyone.
 
 :::
 

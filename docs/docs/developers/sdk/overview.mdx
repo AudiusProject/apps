@@ -22,26 +22,17 @@ the SDK to:
 
 ...and much more!
 
-## API Plans
-
-Audius offers two API plans:
-
-| Plan          | Rate Limit         | Monthly Requests       |
-| ------------- | ------------------ | ---------------------- |
-| **Free**      | 10 requests/second | 500,000 requests/month |
-| **Unlimited** | Unlimited          | Unlimited              |
-
-The Free plan is always free with no restrictions. For higher limits and support, contact [api@audius.co](mailto:api@audius.co) about the Unlimited plan.
-
 ## Get Your API Key and Bearer Token
 
-1. Visit the [Audius API Plans page](https://api.audius.co/plans) and click "Create API Key" to generate your credentials.
+1. Visit the [Audius API Plans page](https://api.audius.co/plans) and click "Create API Key" to
+   generate your credentials.
 
-2. You will receive an **API Key** and a **Bearer Token**. Save both securely — treat them like passwords.
+2. You will receive an **API Key** and a **Bearer Token**.
 
 :::tip
 
-The bearer token is the recommended way to authenticate with the Audius API.
+Treat your bearer token like a password. Store it somewhere safe and don't expose it publicly. Never
+share it with anyone.
 
 :::
 
@@ -96,7 +87,8 @@ const audiusSdk = window.audiusSdk({
 
 DO NOT include the bearer token if you are running the SDK in the browser or anywhere on the client.
 The bearer token is what allows your app to write on behalf of the users that have authorized it to
-do so. Keep your bearer token secure and never expose it in client-side code that could be inspected.
+do so. Keep your bearer token secure and never expose it in client-side code that could be
+inspected.
 
 :::
 
@@ -197,4 +189,5 @@ grpcurl -H "authorization: Bearer <YOUR-API-BEARER-TOKEN>" \
   grpc.audius.co:443 list
 ```
 
-For more details, visit the [API documentation](https://docs.audius.co/api) or the [Swagger definition](https://api.audius.co/v1).
+For more details, visit the [API documentation](https://docs.audius.co/api) or the
+[Swagger definition](https://api.audius.co/v1).
