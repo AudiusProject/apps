@@ -1,15 +1,25 @@
+import logoDdex from '../assets/logos/ddex.png'
+import logoDistrokid from '../assets/logos/distrokid.png'
+import logoDowntown from '../assets/logos/downtown.png'
+import logoEmpire from '../assets/logos/empire.png'
+import logoFuga from '../assets/logos/fuga.png'
+import logoKobalt from '../assets/logos/kobalt.png'
+import logoLabelworx from '../assets/logos/labelworx.png'
+import logoNettwerk from '../assets/logos/nettwerk.png'
+import logoWarner from '../assets/logos/warner.png'
+
 import styles from './Partners2026.module.css'
 
 const partners = [
-  { name: 'Warner', src: '/landing-2026/logos/warner.png' },
-  { name: 'Kobalt', src: '/landing-2026/logos/kobalt.png' },
-  { name: 'DistroKid', src: '/landing-2026/logos/distrokid.png', small: true },
-  { name: 'Downtown', src: '/landing-2026/logos/downtown.png' },
-  { name: 'Empire', src: '/landing-2026/logos/empire.png' },
-  { name: 'Fuga', src: '/landing-2026/logos/fuga.png' },
-  { name: 'Nettwerk', src: '/landing-2026/logos/nettwerk.png' },
-  { name: 'LabelWorx', src: '/landing-2026/logos/labelworx.png' },
-  { name: 'DDEX', src: '/landing-2026/logos/ddex.png' }
+  { name: 'Warner', src: logoWarner },
+  { name: 'Kobalt', src: logoKobalt },
+  { name: 'DistroKid', src: logoDistrokid, small: true },
+  { name: 'Downtown', src: logoDowntown },
+  { name: 'Empire', src: logoEmpire },
+  { name: 'Fuga', src: logoFuga },
+  { name: 'Nettwerk', src: logoNettwerk },
+  { name: 'LabelWorx', src: logoLabelworx },
+  { name: 'DDEX', src: logoDdex }
 ]
 
 type Partners2026Props = {

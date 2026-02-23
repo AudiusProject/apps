@@ -73,7 +73,9 @@
 }
 
 .faqItem[aria-expanded='true'] .faqQuestion,
-.faqItem:hover .faqQuestion {
+.faqItem:hover .faqQuestion,
+.faqItem:active .faqQuestion,
+.faqItem:focus-visible .faqQuestion {
   color: #e7c7ff;
   text-shadow:
     -4px 0px 4px rgba(175, 72, 255, 0.25),
@@ -92,6 +94,18 @@
 .chevron svg,
 .chevron svg path {
   fill: #fff !important;
+  transition: fill 0.2s ease;
+}
+
+.faqItem[aria-expanded='true'] .chevron svg,
+.faqItem[aria-expanded='true'] .chevron svg path,
+.faqItem:hover .chevron svg,
+.faqItem:hover .chevron svg path,
+.faqItem:active .chevron svg,
+.faqItem:active .chevron svg path,
+.faqItem:focus-visible .chevron svg,
+.faqItem:focus-visible .chevron svg path {
+  fill: #e7c7ff !important;
 }
 
 .faqItem[aria-expanded='true'] .chevron {

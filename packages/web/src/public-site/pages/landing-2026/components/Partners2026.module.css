@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 1440px;
   background: #111;
-  padding: 0 72px;
+  padding: 0 48px;
   box-sizing: border-box;
 }
 
@@ -11,8 +11,9 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
-  max-width: 1296px;
-  padding: 96px 48px;
+  width: 100%;
+  max-width: none;
+  padding: 96px 0;
   box-sizing: border-box;
 }
 
@@ -20,7 +21,10 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 12px 0;
+  /* Vertical padding for tap area; horizontal padding so carousel doesn’t hit edges */
+  padding: 12px 24px;
+  container-type: inline-size;
+  container-name: carousel;
 }
 
 .track {
@@ -40,6 +44,7 @@
   }
 }
 
+/* Size by height; width follows logo aspect ratio */
 .logo {
   height: 34px;
   width: auto;
@@ -81,6 +86,10 @@
 
   .container {
     padding: 48px 0;
+  }
+
+  .trackWrap {
+    padding: 12px 16px;
   }
 
   .logo {

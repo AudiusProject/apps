@@ -1,3 +1,6 @@
+import featuresBg from '../assets/features-bg.svg?url'
+import featuresVisual from '../assets/features-visual.jpg'
+
 import styles from './GrowthStartsHere.module.css'
 
 const messages = {
@@ -28,7 +31,7 @@ export const GrowthStartsHere = (_props: GrowthStartsHereProps) => {
   return (
     <section className={styles.section} aria-labelledby='growth-heading'>
       <div className={styles.bg}>
-        <img src='/landing-2026/features-bg.svg' alt='' />
+        <img src={featuresBg} alt='' />
       </div>
       <div className={styles.container}>
         <div className={styles.header}>
@@ -40,7 +43,7 @@ export const GrowthStartsHere = (_props: GrowthStartsHereProps) => {
         <div className={styles.contentRow}>
           <div className={styles.visualWrap}>
             <img
-              src='/landing-2026/features-visual.jpg'
+              src={featuresVisual}
               alt='Audius app interface'
               loading='lazy'
             />

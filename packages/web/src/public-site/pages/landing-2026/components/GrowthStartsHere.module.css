@@ -12,12 +12,14 @@
   position: absolute;
   inset: -118px 0 -141px 0;
   pointer-events: none;
+  width: 100%;
 }
 
 .bg img {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
 }
 
 .container {
@@ -28,6 +30,9 @@
   justify-content: center;
   gap: 48px;
   width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .header {

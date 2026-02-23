@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
+import promoBg from '../assets/promo-bg.jpg'
+
 import styles from './CreateFutureCTA.module.css'
 
 const { SIGN_UP_PAGE } = route
@@ -29,7 +31,7 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
   return (
     <section className={styles.section} aria-labelledby='cta-heading'>
       <div className={styles.bg} aria-hidden='true'>
-        <img src='/landing-2026/promo-bg.jpg' alt='' />
+        <img src={promoBg} alt='' />
         <div className={styles.bgOverlayDarken} />
         <div className={styles.bgOverlayBW} />
       </div>

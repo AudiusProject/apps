@@ -1,9 +1,42 @@
 .page {
+  position: relative;
   min-height: 100vh;
+  width: 100%;
+  min-width: 100%;
   background: #111;
   color: #fff;
   font-family: 'Urbanist', sans-serif;
+  font-feature-settings: 'liga' 0, 'clig' 0;
   overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Full-viewport dark background so wide screens don’t show body background */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #111;
+  z-index: -1;
+}
+
+/* Fade in text/content when fonts are ready (avoids FOUT, no FOIT) */
+.page .main,
+.page > nav,
+.page > footer {
+  transition: opacity 0.35s ease-out;
+}
+
+.page:not([data-fonts-ready]) .main,
+.page:not([data-fonts-ready]) .page > nav,
+.page:not([data-fonts-ready]) .page > footer {
+  opacity: 0;
+}
+
+.page[data-fonts-ready] .main,
+.page[data-fonts-ready] .page > nav,
+.page[data-fonts-ready] .page > footer {
+  opacity: 1;
 }
 
 .main {

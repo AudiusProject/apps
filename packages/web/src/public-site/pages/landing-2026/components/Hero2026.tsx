@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
+import landingImg from '../assets/landing.png'
+
 import styles from './Hero2026.module.css'
 
 const { SIGN_UP_PAGE } = route
@@ -30,21 +32,23 @@ export const Hero2026 = (props: Hero2026Props) => {
   return (
     <section className={styles.section}>
       <div className={styles.bg}>
-        <img src='/landing-2026/landing.png' alt='' />
+        <img src={landingImg} alt='' />
       </div>
-      <div className={styles.content}>
-        <h1 className={styles.headline}>
-          {messages.line1}
-          <br />
-          {messages.line2}
-        </h1>
-        <button
-          type='button'
-          className={styles.ctaButton}
-          onClick={onGetStarted}
-        >
-          <span className={styles.ctaLabel}>{messages.getStarted}</span>
-        </button>
+      <div className={styles.contentWrap}>
+        <div className={styles.content}>
+          <h1 className={styles.headline}>
+            {messages.line1}
+            <br />
+            {messages.line2}
+          </h1>
+          <button
+            type='button'
+            className={styles.ctaButton}
+            onClick={onGetStarted}
+          >
+            <span className={styles.ctaLabel}>{messages.getStarted}</span>
+          </button>
+        </div>
       </div>
     </section>
   )
