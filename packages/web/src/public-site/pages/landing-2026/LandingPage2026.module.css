@@ -6,7 +6,9 @@
   background: #111;
   color: #fff;
   font-family: 'Urbanist', sans-serif;
-  font-feature-settings: 'liga' 0, 'clig' 0;
+  font-feature-settings:
+    'liga' 0,
+    'clig' 0;
   overflow-x: hidden;
   box-sizing: border-box;
 }
