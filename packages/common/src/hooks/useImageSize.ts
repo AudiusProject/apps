@@ -118,8 +118,6 @@ export const useImageSize = <
         setImageUrl(mirrorUrl)
         return
       }
-      setImageUrl(defaultImage)
-      return
     }
 
     if (IMAGE_CACHE.has(targetUrl)) {
@@ -166,7 +164,6 @@ export const useImageSize = <
       setImageUrl(finalUrl)
     } catch (e) {
       console.error(`Unable to load image ${targetUrl} after retries: ${e}`)
-      setImageUrl(defaultImage)
     }
   }, [
     artwork,
