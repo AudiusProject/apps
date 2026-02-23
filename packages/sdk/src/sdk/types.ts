@@ -168,10 +168,7 @@ export type ServicesContainer = {
   archiverService?: ArchiverService
 }
 
-/**
- * SDK configuration schema that requires API keypairs
- */
-const DevAppSchema = z.object({
+export const DevAppSchemaWithApiKeyOnly = z.object({
   /**
    * Your app name
    */
@@ -185,33 +182,32 @@ const DevAppSchema = z.object({
    */
   apiKey: z.string().min(1),
   /**
-   * API secret, required for writes
-   */
-  apiSecret: z.optional(z.string().min(1)),
-  /**
    * Target environment
    * @internal
    */
   environment: z.enum(['development', 'production']).optional()
 })
 
-const CustomAppSchema = z.object({
+/**
+ * SDK configuration schema that requires API keypairs
+ */
+export const DevAppSchemaWithApiSecret = z.object({
   /**
    * Your app name
    */
-  appName: z.string().min(1),
+  appName: z.optional(z.string()),
   /**
    * Services injection
    */
   services: z.optional(z.custom<Partial<ServicesContainer>>()),
   /**
-   * API key, required for writes
+   * API key
    */
-  apiKey: z.optional(z.string().min(1)),
+  apiKey: z.string().min(1),
   /**
-   * API secret, required for writes
+   * API secret, required for writes that use Entity Manager
    */
-  apiSecret: z.optional(z.string().min(1)),
+  apiSecret: z.string().min(1),
   /**
    * Target environment
    * @internal
@@ -219,6 +215,43 @@ const CustomAppSchema = z.object({
   environment: z.enum(['development', 'production']).optional()
 })
 
-export const SdkConfigSchema = z.union([DevAppSchema, CustomAppSchema])
+/**
+ * SDK configuration schema that requires bearer token
+ */
+export const DevAppSchemaWithBearerToken = z.object({
+  /**
+   * Your app name
+   */
+  appName: z.optional(z.string()),
+  /**
+   * Services injection
+   */
+  services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * API key
+   */
+  apiKey: z.string().min(1),
+  /**
+   * API bearer token, required for writes that use the API
+   */
+  bearerToken: z.string().min(1),
+  /**
+   * Target environment
+   * @internal
+   */
+  environment: z.enum(['development', 'production']).optional()
+})
+
+export const SdkConfigSchema = z.union([
+  DevAppSchemaWithApiKeyOnly,
+  DevAppSchemaWithApiSecret,
+  DevAppSchemaWithBearerToken
+])
+
+export type SdkWithBearerTokenConfig = z.input<
+  typeof DevAppSchemaWithBearerToken
+>
+export type SdkWithApiSecretConfig = z.input<typeof DevAppSchemaWithApiSecret>
+export type SdkWithApiKeyOnlyConfig = z.input<typeof DevAppSchemaWithApiKeyOnly>
 
 export type SdkConfig = z.infer<typeof SdkConfigSchema>

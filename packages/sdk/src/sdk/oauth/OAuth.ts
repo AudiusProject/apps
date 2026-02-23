@@ -1,5 +1,5 @@
 import type { DecodedUserToken, UsersApi } from '../api/generated/default'
-import type { LoggerService } from '../services/Logger'
+import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
 import { parseParams } from '../utils/parseParams'
 
@@ -119,7 +119,7 @@ type OAuthConfig = {
   appName?: string
   apiKey?: string
   usersApi: UsersApi
-  logger: LoggerService
+  logger?: LoggerService
 }
 
 export class OAuth {
@@ -142,7 +142,9 @@ export class OAuth {
     this.loginSuccessCallback = null
     this.loginErrorCallback = null
     this.popupCheckInterval = null
-    this.logger = config.logger.createPrefixedLogger('[oauth]')
+    this.logger = (config.logger ?? new Logger()).createPrefixedLogger(
+      '[oauth]'
+    )
   }
 
   init({
