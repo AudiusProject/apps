@@ -1,4 +1,5 @@
-import { createPublicClient, createWalletClient, http } from 'viem'
+import { createPublicClient, createWalletClient, http, type Hex } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
 
 import { ResolveApi } from './api/ResolveApi'
@@ -30,6 +31,7 @@ import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware
 } from './middleware'
+import { addBearerTokenMiddleware } from './middleware/addBearerTokenMiddleware'
 import { OAuth } from './oauth'
 import {
   PaymentRouterClient,
@@ -86,47 +88,70 @@ import {
   StorageNodeSelector,
   getDefaultStorageNodeSelectorConfig
 } from './services/StorageNodeSelector'
-import {
-  DevAppSchemaWithApiSecret,
-  SdkConfig,
-  ServicesContainer,
-  type SdkWithApiSecretConfig,
-  type SdkWithApiKeyOnlyConfig,
-  type SdkWithAppNameOnlyConfig
-} from './types'
+import { SdkConfig, ServicesContainer } from './types'
 import fetch from './utils/fetch'
 
-export const createSdkWithApiSecret = (
-  config:
-    | SdkWithApiKeyOnlyConfig
-    | SdkWithApiSecretConfig
-    | SdkWithAppNameOnlyConfig
-) => {
-  DevAppSchemaWithApiSecret.parse(config)
-  const apiKey = 'apiKey' in config ? config.apiKey : undefined
+const ensureHex = (str: string): Hex =>
+  str.startsWith('0x') ? (str as Hex) : `0x${str}`
+
+export const createSdkWithServices = (config: SdkConfig) => {
+  const isBrowser: boolean =
+    typeof window !== 'undefined' && typeof window.document !== 'undefined'
+
+  let apiKey = 'apiKey' in config ? config.apiKey : undefined
   const appName = 'appName' in config ? config.appName : undefined
+  const apiSecret = 'apiSecret' in config ? config.apiSecret : undefined
+
+  // Default apiKey to derived key from apiSecret if not provided
+  if (apiSecret && !apiKey) {
+    apiKey = privateKeyToAccount(ensureHex(apiSecret)).address
+  }
 
   // Initialize services
-  const services = initializeServices(config)
+  const services = initializeServices({ config, apiKey, apiSecret })
+
+  // Warn if using private key in the browser
+  if (apiSecret && isBrowser) {
+    services.logger.warn(
+      "apiSecret should only be provided server side so that it isn't exposed"
+    )
+  }
+
+  // Warn if provided apiKey doesn't match apiSecret if both are provided
+  if (apiSecret && apiKey) {
+    const derivedKey = privateKeyToAccount(ensureHex(apiSecret)).address
+    if (derivedKey.toLowerCase() !== ensureHex(apiKey.toLowerCase())) {
+      services.logger.warn(
+        `The provided apiKey ${apiKey} does not match the associated apiKey for the provided apiSecret ${derivedKey}`
+      )
+    }
+  }
+
+  // Warn if only appName is provided
+  if (!apiKey) {
+    services.logger.warn(
+      'No apiKey provided, some endpoints may have lower rate limits or require additional authentication'
+    )
+  }
 
   // Initialize APIs
   const apis = initializeApis({
     config,
     apiKey,
     appName,
+    apiSecret,
     services
   })
 
   // Initialize OAuth
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          appName,
-          apiKey,
-          usersApi: apis.users,
-          logger: services.logger
-        })
-      : undefined
+  const oauth = isBrowser
+    ? new OAuth({
+        appName,
+        apiKey,
+        usersApi: apis.users,
+        logger: services.logger
+      })
+    : undefined
 
   return {
     oauth,
@@ -134,12 +159,15 @@ export const createSdkWithApiSecret = (
   }
 }
 
-const initializeServices = (
-  config:
-    | SdkWithApiKeyOnlyConfig
-    | SdkWithApiSecretConfig
-    | SdkWithAppNameOnlyConfig
-) => {
+const initializeServices = ({
+  config,
+  apiKey,
+  apiSecret
+}: {
+  config: SdkConfig
+  apiKey?: string
+  apiSecret?: string
+}) => {
   const servicesConfig =
     config.environment === 'development' ? developmentConfig : productionConfig
 
@@ -147,17 +175,6 @@ const initializeServices = (
     logLevel: config.environment !== 'production' ? 'debug' : undefined
   })
   const logger = config.services?.logger ?? defaultLogger
-
-  const isBrowser: boolean =
-    typeof window !== 'undefined' && typeof window.document !== 'undefined'
-  const apiSecret = 'apiSecret' in config ? config.apiSecret : undefined
-  if (apiSecret && isBrowser) {
-    logger.warn(
-      "apiSecret should only be provided server side so that it isn't exposed"
-    )
-  }
-
-  const apiKey = 'apiKey' in config ? config.apiKey : undefined
 
   const audiusWalletClient =
     config.services?.audiusWalletClient ??
@@ -415,11 +432,13 @@ const initializeApis = ({
   config,
   apiKey,
   appName,
+  apiSecret,
   services
 }: {
   config: SdkConfig
   apiKey?: string
   appName?: string
+  apiSecret?: string
   services: ServicesContainer
 }) => {
   const apiEndpoint =
@@ -438,9 +457,19 @@ const initializeApis = ({
     addRequestSignatureMiddleware({
       services,
       apiKey,
-      apiSecret: 'apiSecret' in config ? config.apiSecret : undefined
+      apiSecret
     })
   ]
+
+  if ('bearerToken' in config) {
+    middleware.push(
+      addBearerTokenMiddleware({
+        bearerToken: config.bearerToken,
+        logger: services.logger
+      })
+    )
+  }
+
   const apiClientConfig = new Configuration({
     fetchApi: fetch,
     middleware,

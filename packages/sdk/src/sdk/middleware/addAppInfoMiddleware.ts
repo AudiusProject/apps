@@ -25,7 +25,9 @@ export const addAppInfoMiddleware = ({
 }: {
   apiKey?: string
   appName?: string
-  services: ServicesContainer
+  services: Partial<
+    Pick<ServicesContainer, 'audiusWalletClient' | 'entityManager'>
+  >
   basePath: string
 }): Middleware => {
   apiKey = providedApiKey
@@ -38,14 +40,11 @@ export const addAppInfoMiddleware = ({
           fetchApi: fetch,
           basePath
         })
-        const developerApps = new DeveloperAppsApi(
-          apiClientConfig,
-          services.entityManager
-        )
+        const developerApps = new DeveloperAppsApi(apiClientConfig, services)
 
         apiKey =
           providedApiKey ??
-          (await services.audiusWalletClient.getAddresses())[0]
+          (await services.audiusWalletClient?.getAddresses())?.[0]
         if (apiKey) {
           appName = (
             await developerApps.getDeveloperApp({

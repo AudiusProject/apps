@@ -127,33 +127,32 @@ describe('AlbumsApi', () => {
     const solanaClient = new SolanaClient({
       solanaWalletAdapter
     })
-    albums = new AlbumsApi(
-      new Configuration(),
-      new Storage({
+    albums = new AlbumsApi(new Configuration(), {
+      storage: new Storage({
         storageNodeSelector,
         logger: new Logger()
       }),
-      new EntityManagerClient({
+      entityManager: new EntityManagerClient({
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
       }),
       logger,
-      new ClaimableTokensClient({
+      claimableTokensClient: new ClaimableTokensClient({
         ...getDefaultClaimableTokensConfig(developmentConfig),
         audiusWalletClient,
         solanaClient
       }),
-      new PaymentRouterClient({
+      paymentRouterClient: new PaymentRouterClient({
         ...getDefaultPaymentRouterClientConfig(developmentConfig),
         solanaClient
       }),
-      new SolanaRelay(
+      solanaRelay: new SolanaRelay(
         new Configuration({
           middleware: []
         })
       ),
       solanaClient
-    )
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})

@@ -24,13 +24,12 @@ describe('NotificationsApi', () => {
   let notifications: NotificationsApi
 
   beforeAll(() => {
-    notifications = new NotificationsApi(
-      new Configuration(),
-      new EntityManagerClient({
+    notifications = new NotificationsApi(new Configuration(), {
+      entityManager: new EntityManagerClient({
         audiusWalletClient: createAppWalletClient({ apiKey: '' }),
         endpoint: 'https://discoveryprovider.audius.co'
       })
-    )
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})

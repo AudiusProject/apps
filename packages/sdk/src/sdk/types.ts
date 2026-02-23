@@ -167,7 +167,9 @@ export type ServicesContainer = {
    */
   archiverService?: ArchiverService
 }
-
+/**
+ * SDK configuration schema that requires api key only (for read-only access with higher rate limits)
+ */
 export const DevAppSchemaWithApiKeyOnly = z.object({
   /**
    * Your app name
@@ -189,7 +191,7 @@ export const DevAppSchemaWithApiKeyOnly = z.object({
 })
 
 /**
- * SDK configuration schema that requires API keypairs
+ * SDK configuration schema that requires API secret (read, write using Entity Manager)
  */
 export const DevAppSchemaWithApiSecret = z.object({
   /**
@@ -203,7 +205,7 @@ export const DevAppSchemaWithApiSecret = z.object({
   /**
    * API key
    */
-  apiKey: z.string().min(1),
+  apiKey: z.string().min(1).optional(),
   /**
    * API secret, required for writes that use Entity Manager
    */
@@ -216,7 +218,7 @@ export const DevAppSchemaWithApiSecret = z.object({
 })
 
 /**
- * SDK configuration schema that requires bearer token
+ * SDK configuration schema that requires bearer token (read, write using API)
  */
 export const DevAppSchemaWithBearerToken = z.object({
   /**
@@ -242,6 +244,9 @@ export const DevAppSchemaWithBearerToken = z.object({
   environment: z.enum(['development', 'production']).optional()
 })
 
+/**
+ * SDK configuration schema that requires app name only (for read-only access)
+ */
 export const DevAppSchemaWithAppNameOnly = z.object({
   /**
    * Your app name

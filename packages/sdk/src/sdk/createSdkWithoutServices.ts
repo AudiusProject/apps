@@ -18,37 +18,76 @@ import {
   TipsApi,
   TracksApi,
   UsersApi,
-  WalletApi
+  WalletApi,
+  type Middleware
 } from './api/generated/default'
 import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
+import {
+  addAppInfoMiddleware,
+  addRequestSignatureMiddleware
+} from './middleware'
 import { addBearerTokenMiddleware } from './middleware/addBearerTokenMiddleware'
 import { OAuth } from './oauth'
 import { Logger } from './services'
-import { DevAppSchemaWithBearerToken, type SdkConfig } from './types'
+import { type SdkConfig } from './types'
 
-export const createSdkWithBearerToken = (config: SdkConfig) => {
-  const parsedConfig = DevAppSchemaWithBearerToken.parse(config)
+export const createSdkWithoutServices = (config: SdkConfig) => {
+  const { services, environment } = config
 
-  const { apiKey, services, bearerToken, environment } = parsedConfig
+  const appName = 'appName' in config ? config.appName : undefined
+  const bearerToken = 'bearerToken' in config ? config.bearerToken : undefined
+  const apiKey = 'apiKey' in config ? config.apiKey : undefined
+  const apiSecret = 'apiSecret' in config ? config.apiSecret : undefined
 
-  const defaultLogger = new Logger({
-    logLevel: environment !== 'production' ? 'debug' : undefined
-  })
-  const logger = services?.logger ?? defaultLogger
+  const logger =
+    services?.logger ??
+    new Logger({
+      logLevel: environment !== 'production' ? 'debug' : undefined
+    })
 
-  logger.debug('Initializing SDK with bearer token config', {
-    apiKey,
-    environment
-  })
+  const basePath =
+    config.environment === 'development'
+      ? developmentConfig.network.apiEndpoint
+      : productionConfig.network.apiEndpoint
+
+  const middleware: Middleware[] = []
+
+  if (bearerToken) {
+    middleware.push(addBearerTokenMiddleware({ bearerToken, logger }))
+  }
+
+  if (apiSecret || services?.audiusWalletClient) {
+    middleware.push(
+      addRequestSignatureMiddleware({
+        services: {
+          audiusWalletClient: services?.audiusWalletClient,
+          logger
+        },
+        apiKey,
+        apiSecret
+      })
+    )
+  }
+
+  if (appName || apiKey || services?.audiusWalletClient) {
+    middleware.push(
+      addAppInfoMiddleware({
+        appName,
+        apiKey,
+        basePath,
+        services: {
+          audiusWalletClient: services?.audiusWalletClient,
+          entityManager: services?.entityManager
+        }
+      })
+    )
+  }
 
   const apiConfig = new Configuration({
     fetchApi: fetch,
-    middleware: [addBearerTokenMiddleware({ bearerToken, logger })],
-    basePath:
-      config.environment === 'development'
-        ? developmentConfig.network.apiEndpoint
-        : productionConfig.network.apiEndpoint
+    middleware,
+    basePath
   })
 
   // Initialize OAuth
