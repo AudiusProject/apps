@@ -91,15 +91,20 @@ import {
   SdkConfig,
   ServicesContainer,
   type SdkWithApiSecretConfig,
-  type SdkWithApiKeyOnlyConfig
+  type SdkWithApiKeyOnlyConfig,
+  type SdkWithAppNameOnlyConfig
 } from './types'
 import fetch from './utils/fetch'
 
 export const createSdkWithApiSecret = (
-  config: SdkWithApiKeyOnlyConfig | SdkWithApiSecretConfig
+  config:
+    | SdkWithApiKeyOnlyConfig
+    | SdkWithApiSecretConfig
+    | SdkWithAppNameOnlyConfig
 ) => {
   DevAppSchemaWithApiSecret.parse(config)
-  const { appName, apiKey } = config
+  const apiKey = 'apiKey' in config ? config.apiKey : undefined
+  const appName = 'appName' in config ? config.appName : undefined
 
   // Initialize services
   const services = initializeServices(config)
@@ -129,7 +134,12 @@ export const createSdkWithApiSecret = (
   }
 }
 
-const initializeServices = (config: SdkConfig) => {
+const initializeServices = (
+  config:
+    | SdkWithApiKeyOnlyConfig
+    | SdkWithApiSecretConfig
+    | SdkWithAppNameOnlyConfig
+) => {
   const servicesConfig =
     config.environment === 'development' ? developmentConfig : productionConfig
 
@@ -146,11 +156,14 @@ const initializeServices = (config: SdkConfig) => {
       "apiSecret should only be provided server side so that it isn't exposed"
     )
   }
+
+  const apiKey = 'apiKey' in config ? config.apiKey : undefined
+
   const audiusWalletClient =
     config.services?.audiusWalletClient ??
     createAppWalletClient({
       // Allow undefined apiKey for now, use dummy wallet
-      apiKey: config.apiKey ?? '0x0000000000000000000000000000000000000000',
+      apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
       apiSecret
     })
 
@@ -207,7 +220,7 @@ const initializeServices = (config: SdkConfig) => {
   const middleware = [
     addRequestSignatureMiddleware({
       services: { audiusWalletClient, logger },
-      apiKey: config.apiKey,
+      apiKey,
       apiSecret
     })
   ]
@@ -217,7 +230,7 @@ const initializeServices = (config: SdkConfig) => {
     ? config.services.solanaRelay.withMiddleware(
         addRequestSignatureMiddleware({
           services: { audiusWalletClient, logger },
-          apiKey: config.apiKey,
+          apiKey,
           apiSecret
         })
       )
@@ -231,7 +244,7 @@ const initializeServices = (config: SdkConfig) => {
     ? config.services.archiverService.withMiddleware(
         addRequestSignatureMiddleware({
           services: { audiusWalletClient, logger },
-          apiKey: config.apiKey,
+          apiKey,
           apiSecret
         })
       )

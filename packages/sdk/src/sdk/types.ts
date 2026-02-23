@@ -242,7 +242,24 @@ export const DevAppSchemaWithBearerToken = z.object({
   environment: z.enum(['development', 'production']).optional()
 })
 
+export const DevAppSchemaWithAppNameOnly = z.object({
+  /**
+   * Your app name
+   */
+  appName: z.string().min(1),
+  /**
+   * Services injection
+   */
+  services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * Target environment
+   * @internal
+   */
+  environment: z.enum(['development', 'production']).optional()
+})
+
 export const SdkConfigSchema = z.union([
+  DevAppSchemaWithAppNameOnly,
   DevAppSchemaWithApiKeyOnly,
   DevAppSchemaWithApiSecret,
   DevAppSchemaWithBearerToken
@@ -253,5 +270,8 @@ export type SdkWithBearerTokenConfig = z.input<
 >
 export type SdkWithApiSecretConfig = z.input<typeof DevAppSchemaWithApiSecret>
 export type SdkWithApiKeyOnlyConfig = z.input<typeof DevAppSchemaWithApiKeyOnly>
+export type SdkWithAppNameOnlyConfig = z.input<
+  typeof DevAppSchemaWithAppNameOnly
+>
 
 export type SdkConfig = z.infer<typeof SdkConfigSchema>

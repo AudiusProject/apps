@@ -1,5 +1,5 @@
 ---
-"@audius/sdk": major
+'@audius/sdk': minor
 ---
 
-Support bearer token initialization and require ApiKey in sdk config
+Support bearer token initialization
