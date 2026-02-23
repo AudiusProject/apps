@@ -9,6 +9,7 @@ import {
 import { ID } from '@audius/common/models'
 import { useLinkClickHandler } from 'react-router'
 
+import featuredLines from '../assets/featured-lines.svg?url'
 import styles from './FeaturedContests2026.module.css'
 
 const messages = {
@@ -90,7 +91,7 @@ export const FeaturedContests2026 = (props: FeaturedContests2026Props) => {
   return (
     <section className={styles.section} aria-labelledby='contests-heading'>
       <div className={styles.lines} aria-hidden='true'>
-        <img src='/landing-2026/featured-lines.svg' alt='' />
+        <img src={featuredLines} alt='' />
       </div>
       <div className={styles.contentWrap}>
         <div className={styles.header}>
@@ -102,14 +103,14 @@ export const FeaturedContests2026 = (props: FeaturedContests2026Props) => {
         <div className={styles.gridContainer}>
           <div className={styles.grid}>
             {isPending
-              ? Array.from({ length: 4 }).map((_, i) => (
+              ? Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className={styles.card}>
                     <div className={styles.artworkSkeleton} />
                     <div className={styles.titleSkeleton} />
                   </div>
                 ))
               : contestIds
-                  .slice(0, 4)
+                  .slice(0, 5)
                   .map((id) => (
                     <ContestCard
                       key={id}

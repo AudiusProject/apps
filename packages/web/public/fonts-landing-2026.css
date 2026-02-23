@@ -17,5 +17,4 @@
   font-display: swap;
 }
 
-/* Urbanist – body font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap');
+/* Urbanist is loaded via a separate <link> in LandingPage2026 for reliable loading */

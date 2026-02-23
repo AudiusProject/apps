@@ -30,10 +30,8 @@ type FAQ2026Props = {
   isMobile: boolean
 }
 
-const ALL_OPEN = new Set(faqItems.map((_, i) => i))
-
 export const FAQ2026 = (_props: FAQ2026Props) => {
-  const [openSet, setOpenSet] = useState<Set<number>>(() => new Set(ALL_OPEN))
+  const [openSet, setOpenSet] = useState<Set<number>>(() => new Set())
 
   const toggle = (index: number) => {
     setOpenSet((prev) => {

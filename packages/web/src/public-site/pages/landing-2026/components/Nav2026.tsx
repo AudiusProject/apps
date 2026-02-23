@@ -1,4 +1,10 @@
-import { MouseEvent, useState, useRef, useEffect } from 'react'
+import {
+  type ComponentType,
+  MouseEvent,
+  useState,
+  useRef,
+  useEffect
+} from 'react'
 
 import { route } from '@audius/common/utils'
 import {
@@ -15,6 +21,10 @@ import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
+import IconBlog from '../assets/icon-blog.svg'
+import IconDownloadApp from '../assets/icon-download-app.svg'
+import IconHelpSupport from '../assets/icon-help-support.svg'
+
 import styles from './Nav2026.module.css'
 
 const { SIGN_UP_PAGE, DOWNLOAD_LINK } = route
@@ -28,26 +38,26 @@ const MENU_ITEMS: {
   title: string
   description: string
   href: string
-  iconSrc: string
+  Icon: ComponentType<{ className?: string }>
 }[] = [
   {
     title: 'Download App',
     description: 'Download the apps for desktop and mobile devices.',
     href: DOWNLOAD_LINK,
-    iconSrc: '/landing-2026/icon-download-app.svg'
+    Icon: IconDownloadApp
   },
   {
     title: 'Help & Support',
     description:
       'Answers and Resources to help you make the most of Audius Music.',
     href: 'https://help.audius.co/',
-    iconSrc: '/landing-2026/icon-help-support.svg'
+    Icon: IconHelpSupport
   },
   {
     title: 'Blog',
     description: 'Check out the latest updates to the Audius Blog.',
     href: 'https://blog.audius.co/',
-    iconSrc: '/landing-2026/icon-blog.svg'
+    Icon: IconBlog
   }
 ]
 
@@ -247,7 +257,7 @@ function MobileNavOverlay({
               onClick={handleItemClick(item.href)}
             >
               <span className={styles.overlayMenuIcon}>
-                <img src={item.iconSrc} alt='' />
+                <item.Icon />
               </span>
               <span className={styles.overlayMenuTitle}>{item.title}</span>
             </button>
@@ -314,7 +324,7 @@ function ResourcesDropdown({
           role='menuitem'
         >
           <span className={styles.dropdownItemIcon} aria-hidden>
-            <img src={item.iconSrc} alt='' />
+            <item.Icon />
           </span>
           <div className={styles.dropdownItemContent}>
             <p className={styles.dropdownItemTitle}>{item.title}</p>

@@ -9,10 +9,11 @@
   overflow: hidden;
 }
 
-/* Decorative diagonal lines – SVG from Figma (75-9505) */
+/* Full-width decorative diagonal lines – SVG from Figma (75-9505) */
 .lines {
   position: absolute;
   inset: 0;
+  width: 100%;
   pointer-events: none;
   overflow: hidden;
 }
@@ -32,6 +33,9 @@
   justify-content: center;
   gap: 37px;
   width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .header {
@@ -75,13 +79,12 @@
   justify-content: center;
   padding: 0 96px;
   width: 100%;
-  max-width: 1440px;
   box-sizing: border-box;
 }
 
 .grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 24px;
   align-items: center;
   width: 100%;
@@ -93,8 +96,7 @@
   gap: 8px;
   align-items: flex-start;
   justify-content: center;
-  flex: 1 0 0;
-  min-width: 196px;
+  min-width: 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -181,10 +183,11 @@
   }
 
   .grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
 
   .card {
-    min-width: 140px;
+    min-width: 0;
   }
 }

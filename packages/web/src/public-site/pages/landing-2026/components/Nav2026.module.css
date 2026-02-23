@@ -103,14 +103,17 @@
   max-width: 380px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 200;
+  overflow: hidden;
 }
 
 .dropdownItem {
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  width: 100%;
-  padding: 16px 0;
+  width: calc(100% + 48px);
+  margin-left: -24px;
+  margin-right: -24px;
+  padding: 16px 24px;
   background: none;
   border: none;
   cursor: pointer;
@@ -118,12 +121,14 @@
   text-decoration: none;
   color: inherit;
   font: inherit;
-  border-radius: 8px;
+  border-radius: 0;
   transition: background 0.15s ease;
+  box-sizing: border-box;
 }
 
 .dropdownItem:first-child {
-  padding-top: 0;
+  margin-top: -24px;
+  padding-top: 24px;
 }
 
 .dropdownItem:hover {
@@ -167,34 +172,36 @@
 
 .dropdownItemDescription {
   font-family: 'Urbanist', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.38;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
 
 .dropdownDivider {
+  display: block;
   height: 1px;
-  background: rgba(255, 255, 255, 0.12);
-  margin: 8px 0 16px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 0 20px;
+  padding: 0;
   border: none;
 }
 
 .dropdownSocials {
   display: flex;
-  gap: 16px;
+  gap: 32px;
   align-items: center;
   justify-content: center;
-  padding-top: 8px;
+  padding-top: 0;
 }
 
 .dropdownSocialLink {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 8px;
   color: #fff;
   transition:
@@ -213,8 +220,8 @@
 }
 
 .dropdownSocialIcon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
