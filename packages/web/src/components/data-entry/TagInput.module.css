@@ -81,6 +81,7 @@
   box-shadow: none;
   outline: none;
   width: 0;
+  color: var(--harmony-neutral);
 }
 
 .activeInput {
