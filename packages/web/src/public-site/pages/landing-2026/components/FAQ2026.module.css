@@ -105,26 +105,23 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: transform 0.3s ease, color 0.2s ease;
 }
 
-/* Caret same color as text; highlight when whole section hovered/pressed */
-.chevron svg,
-.chevron svg path {
-  fill: #fff !important;
-  transition: fill 0.2s ease;
+.chevron svg {
+  width: 100%;
+  height: 100%;
 }
 
-.faqItem:hover .chevron svg,
-.faqItem:hover .chevron svg path,
-.faqItem:focus-visible .chevron svg,
-.faqItem:focus-visible .chevron svg path {
-  fill: #e7c7ff !important;
-}
-
-.faqItem:active .chevron svg,
-.faqItem:active .chevron svg path {
-  fill: #e7c7ff !important;
+/* Purple when whole row hover/focus/active, same as question */
+.faqItem:hover .chevron,
+.faqItem:focus-visible .chevron,
+.faqItem:active .chevron {
+  color: #e7c7ff;
 }
 
 .faqItem[aria-expanded='true'] .chevron {

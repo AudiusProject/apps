@@ -113,9 +113,16 @@ export const Nav2026 = (props: Nav2026Props) => {
         startCloseDropdown()
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [isDropdownOpen])
+
+  /* When dropdown unmounts while "closing", ensure we reset so it can re-open (e.g. if animationend never fired) */
+  useEffect(() => {
+    if (!isDropdownClosing) return
+    const id = window.setTimeout(finishCloseDropdown, 300)
+    return () => window.clearTimeout(id)
+  }, [isDropdownClosing])
 
   useEffect(() => {
     if (isMobileOverlayOpen) {

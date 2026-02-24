@@ -121,6 +121,7 @@
 
 .dropdownClosing {
   animation: dropdownFadeOut 0.2s ease-out forwards;
+  pointer-events: none;
 }
 
 @keyframes dropdownFadeOut {
