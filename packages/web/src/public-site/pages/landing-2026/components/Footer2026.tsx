@@ -110,7 +110,7 @@ export const Footer2026 = (props: Footer2026Props) => {
           <hr className={styles.divider} />
           <div className={styles.bottomRow}>
             <p className={styles.copyright}>
-              &copy; 2025 Audius Music. All rights reserved.
+              © 2026 Audius. All rights reserved.
             </p>
             <div className={styles.legalLinks}>
               <a

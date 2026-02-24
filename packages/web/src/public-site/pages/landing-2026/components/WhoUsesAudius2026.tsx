@@ -15,23 +15,24 @@ import styles from './WhoUsesAudius2026.module.css'
 
 const { profilePage } = route
 
-/** Same artists as OG landing page (WhoUsesAudius.tsx) – name and handle only; images from API. */
+/** Artists and labels from Figma 2026 rebrand – name and handle; images from API. */
 const ARTISTS: { name: string; handle: string }[] = [
-  { name: 'deadmau5', handle: 'deadmau5' },
-  { name: 'Skrillex', handle: 'skrillex' },
-  { name: 'Zedd', handle: 'zedd' },
-  { name: 'Kenny Beats', handle: 'kennybeats' },
-  { name: 'Matt OX', handle: 'mattox' },
-  { name: 'Aluna', handle: 'alunaaa' },
-  { name: 'Diplo', handle: 'diplo' },
-  { name: 'Lolo Zouai', handle: 'lolozouai' },
-  { name: 'Rezz', handle: 'officialrezz' }
+  { name: 'Disclosure', handle: 'disclosure' },
+  { name: 'Ookay', handle: 'ookay' },
+  { name: 'Eli & Fur', handle: 'eliandfur' },
+  { name: 'Laxcity', handle: 'laxcitymusic' },
+  { name: 'Kato On The Track', handle: 'katoproducer' },
+  { name: 'bitbird', handle: 'bitbird' },
+  { name: 'Dim Mak', handle: 'dimmak' },
+  { name: 'Anjunadeep', handle: 'anjunadeep' },
+  { name: 'Run The Trap', handle: 'runthetrap' },
+  { name: 'NCS', handle: 'ncs' }
 ]
 
 const messages = {
   headline: 'Who uses Audius?',
   subline:
-    'Thousands of artists, labels, collectives, and music lovers, here for the culture just like you.'
+    'Thousands of artists, labels, collectives, and music lovers, here for the culture, just like you.'
 }
 
 type WhoUsesAudius2026Props = {
