@@ -5,9 +5,8 @@
 
 import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
 
-// Image URLs
-export const DEFAULT_IMAGE_URL =
-  'https://download.audius.co/static-resources/preview-image.jpg'
+// Image URLs - default OG uses the Audius logo on black from og.audius.co
+export const DEFAULT_IMAGE_URL = 'https://og.audius.co/default'
 export const AUDIO_REWARDS_IMAGE_URL =
   'https://download.audius.co/static-resources/audio-rewards.png'
 export const SIGNUP_REF_IMAGE_URL =
