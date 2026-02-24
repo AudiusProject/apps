@@ -8,8 +8,7 @@ import {
 } from '@audius/common/api'
 import { imageBlank } from '@audius/common/assets'
 import { useImageSize } from '@audius/common/hooks'
-import { ID } from '@audius/common/models'
-import { SquareSizes } from '@audius/common/models'
+import { ID, SquareSizes } from '@audius/common/models'
 import { useLinkClickHandler } from 'react-router'
 
 import { preload } from 'utils/image'
@@ -57,8 +56,7 @@ function ContestCard({
     handleNavigate(e as MouseEvent<HTMLAnchorElement>)
   }
 
-  const showImage =
-    imageUrl != null && imageUrl !== (imageBlank as string)
+  const showImage = imageUrl != null && imageUrl !== (imageBlank as string)
 
   if (isPending) {
     return (

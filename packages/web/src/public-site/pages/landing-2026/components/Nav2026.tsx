@@ -3,7 +3,8 @@ import React, {
   MouseEvent,
   useState,
   useRef,
-  useEffect
+  useEffect,
+  useCallback
 } from 'react'
 
 import { route } from '@audius/common/utils'
@@ -94,10 +95,10 @@ export const Nav2026 = (props: Nav2026Props) => {
   const [isMobileOverlayOpen, setIsMobileOverlayOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const startCloseDropdown = () => {
+  const startCloseDropdown = useCallback(() => {
     if (!isDropdownOpen) return
     setIsDropdownClosing(true)
-  }
+  }, [isDropdownOpen])
 
   const finishCloseDropdown = () => {
     setIsDropdownOpen(false)
@@ -115,7 +116,7 @@ export const Nav2026 = (props: Nav2026Props) => {
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [isDropdownOpen])
+  }, [isDropdownOpen, startCloseDropdown])
 
   /* When dropdown unmounts while "closing", ensure we reset so it can re-open (e.g. if animationend never fired) */
   useEffect(() => {
