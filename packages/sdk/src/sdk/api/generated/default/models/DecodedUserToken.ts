@@ -116,7 +116,7 @@ export function DecodedUserTokenFromJSONTyped(json: any, ignoreDiscriminator: bo
         'name': json['name'],
         'handle': json['handle'],
         'verified': json['verified'],
-        'profilePicture': !exists(json, 'profilePicture') ? undefined : ProfilePictureFromJSON(json['profilePicture']),
+        'profilePicture': !exists(json, 'profile_picture') ? undefined : ProfilePictureFromJSON(json['profile_picture']),
         'sub': json['sub'],
         'iat': json['iat'],
     };
@@ -137,7 +137,7 @@ export function DecodedUserTokenToJSON(value?: DecodedUserToken | null): any {
         'name': value.name,
         'handle': value.handle,
         'verified': value.verified,
-        'profilePicture': ProfilePictureToJSON(value.profilePicture),
+        'profile_picture': ProfilePictureToJSON(value.profilePicture),
         'sub': value.sub,
         'iat': value.iat,
     };

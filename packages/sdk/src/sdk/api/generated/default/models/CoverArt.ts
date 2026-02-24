@@ -38,6 +38,12 @@ export interface CoverArt {
      * @memberof CoverArt
      */
     _1000x1000?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof CoverArt
+     */
+    mirrors?: Array<string>;
 }
 
 /**
@@ -62,6 +68,7 @@ export function CoverArtFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         '_150x150': !exists(json, '150x150') ? undefined : json['150x150'],
         '_480x480': !exists(json, '480x480') ? undefined : json['480x480'],
         '_1000x1000': !exists(json, '1000x1000') ? undefined : json['1000x1000'],
+        'mirrors': !exists(json, 'mirrors') ? undefined : json['mirrors'],
     };
 }
 
@@ -77,6 +84,7 @@ export function CoverArtToJSON(value?: CoverArt | null): any {
         '150x150': value._150x150,
         '480x480': value._480x480,
         '1000x1000': value._1000x1000,
+        'mirrors': value.mirrors,
     };
 }
 
