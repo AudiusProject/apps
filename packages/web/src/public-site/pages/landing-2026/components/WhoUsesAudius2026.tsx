@@ -26,7 +26,7 @@ const ARTISTS: { name: string; handle: string }[] = [
   { name: 'Dim Mak', handle: 'dimmak' },
   { name: 'Anjunadeep', handle: 'anjunadeep' },
   { name: 'Run The Trap', handle: 'runthetrap' },
-  { name: 'NCS', handle: 'ncs' }
+  { name: 'NCS', handle: 'ncsounds' }
 ]
 
 const messages = {
