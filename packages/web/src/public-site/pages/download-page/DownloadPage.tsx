@@ -7,8 +7,8 @@ import queryString from 'query-string'
 import { useLocation } from 'react-router'
 
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
-import { Nav2026 } from 'public-site/pages/landing-2026/components/Nav2026'
 import { Footer2026 } from 'public-site/pages/landing-2026/components/Footer2026'
+import { Nav2026 } from 'public-site/pages/landing-2026/components/Nav2026'
 import { Partners2026 } from 'public-site/pages/landing-2026/components/Partners2026'
 import DownloadApp from 'services/download-app/DownloadApp'
 import { getIOSAppLink } from 'utils/appLinks'
@@ -48,13 +48,7 @@ type DownloadPageProps = {
 const os = getOS()
 const iOSDownloadLink = getIOSAppLink()
 
-const DesktopDownloadButton = ({
-  os,
-  label
-}: {
-  os: OS
-  label: string
-}) => {
+const DesktopDownloadButton = ({ os, label }: { os: OS; label: string }) => {
   return (
     <button
       onClick={() => DownloadApp.start(os)}
@@ -66,13 +60,7 @@ const DesktopDownloadButton = ({
   )
 }
 
-const MobileDownloadLink = ({
-  os,
-  label
-}: {
-  os: MobileOS
-  label: string
-}) => {
+const MobileDownloadLink = ({ os, label }: { os: MobileOS; label: string }) => {
   const downloadLink =
     os === MobileOS.IOS ? iOSDownloadLink : ANDROID_PLAY_STORE_LINK
 
