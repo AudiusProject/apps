@@ -1,4 +1,4 @@
-import {
+import React, {
   type ComponentType,
   MouseEvent,
   useState,
@@ -64,7 +64,7 @@ const MENU_ITEMS: {
 const SOCIAL_LINKS = [
   {
     label: 'Instagram',
-    href: 'https://instagram.com/audiusmusic',
+    href: 'https://instagram.com/audius',
     Icon: IconInstagram
   },
   {
@@ -75,7 +75,7 @@ const SOCIAL_LINKS = [
   { label: 'TikTok', href: 'https://tiktok.com/@audius', Icon: IconTikTok },
   {
     label: 'X (Twitter)',
-    href: 'https://twitter.com/audiusproject',
+    href: 'https://twitter.com/audius',
     Icon: IconX
   }
 ]
@@ -90,8 +90,19 @@ export const Nav2026 = (props: Nav2026Props) => {
   const { isMobile, setRenderPublicSite } = props
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isDropdownClosing, setIsDropdownClosing] = useState(false)
   const [isMobileOverlayOpen, setIsMobileOverlayOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const startCloseDropdown = () => {
+    if (!isDropdownOpen) return
+    setIsDropdownClosing(true)
+  }
+
+  const finishCloseDropdown = () => {
+    setIsDropdownOpen(false)
+    setIsDropdownClosing(false)
+  }
 
   useEffect(() => {
     const handleClickOutside = (e: globalThis.MouseEvent) => {
@@ -99,12 +110,12 @@ export const Nav2026 = (props: Nav2026Props) => {
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node)
       ) {
-        setIsDropdownOpen(false)
+        startCloseDropdown()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [isDropdownOpen])
 
   useEffect(() => {
     if (isMobileOverlayOpen) {
@@ -165,8 +176,14 @@ export const Nav2026 = (props: Nav2026Props) => {
                   <button
                     type='button'
                     className={styles.resourcesButton}
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    aria-expanded={isDropdownOpen}
+                    onClick={() => {
+                      if (isDropdownOpen) startCloseDropdown()
+                      else {
+                        setIsDropdownClosing(false)
+                        setIsDropdownOpen(true)
+                      }
+                    }}
+                    aria-expanded={isDropdownOpen && !isDropdownClosing}
                     aria-haspopup='true'
                     aria-label='Resources menu'
                   >
@@ -174,14 +191,16 @@ export const Nav2026 = (props: Nav2026Props) => {
                     <IconCaretDown
                       size='s'
                       color='default'
-                      className={`${styles.chevronIcon} ${isDropdownOpen ? styles.chevronIconOpen : ''}`}
+                      className={`${styles.chevronIcon} ${isDropdownOpen && !isDropdownClosing ? styles.chevronIconOpen : ''}`}
                     />
                   </button>
-                  {isDropdownOpen ? (
+                  {isDropdownOpen || isDropdownClosing ? (
                     <ResourcesDropdown
                       setRenderPublicSite={setRenderPublicSite}
                       navigate={navigate}
-                      onClose={() => setIsDropdownOpen(false)}
+                      onClose={startCloseDropdown}
+                      onClosingComplete={finishCloseDropdown}
+                      isClosing={isDropdownClosing}
                     />
                   ) : null}
                 </div>
@@ -297,11 +316,15 @@ function MobileNavOverlay({
 function ResourcesDropdown({
   setRenderPublicSite,
   navigate,
-  onClose
+  onClose,
+  onClosingComplete,
+  isClosing
 }: {
   setRenderPublicSite: (v: boolean) => void
   navigate: ReturnType<typeof useNavigate>
   onClose: () => void
+  onClosingComplete: () => void
+  isClosing: boolean
 }) {
   const handleItemClick = (href: string) => (e: MouseEvent) => {
     onClose()
@@ -313,8 +336,18 @@ function ResourcesDropdown({
     }
   }
 
+  const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+    if (e.animationName === 'dropdownFadeOut' && isClosing) {
+      onClosingComplete()
+    }
+  }
+
   return (
-    <div className={styles.dropdown} role='menu'>
+    <div
+      className={`${styles.dropdown} ${isClosing ? styles.dropdownClosing : ''}`}
+      role='menu'
+      onAnimationEnd={handleAnimationEnd}
+    >
       {MENU_ITEMS.map((item) => (
         <button
           key={item.title}

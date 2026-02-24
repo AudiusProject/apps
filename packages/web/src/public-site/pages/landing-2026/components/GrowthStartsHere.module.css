@@ -77,9 +77,12 @@
 }
 
 .visualWrap {
-  width: 612px;
-  flex-shrink: 0;
+  max-width: 612px;
+  width: 100%;
+  flex: 0 1 612px;
+  min-width: 0;
   align-self: stretch;
+  max-height: min(480px, 55vh);
   overflow: hidden;
 }
 

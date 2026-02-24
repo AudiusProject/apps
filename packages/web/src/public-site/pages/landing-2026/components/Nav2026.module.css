@@ -19,7 +19,9 @@
   justify-content: space-between;
   max-width: 1200px;
   width: 100%;
-  padding: 24px 0;
+  height: 88px;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .logoLink {
@@ -56,15 +58,16 @@
 .resourcesButton {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
   font-family: 'Urbanist', sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 20px;
   color: #fff;
   text-transform: capitalize;
 }
@@ -104,6 +107,29 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 200;
   overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dropdownClosing {
+  animation: dropdownFadeOut 0.2s ease-out forwards;
+}
+
+@keyframes dropdownFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .dropdownItem {
@@ -200,8 +226,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   color: #fff;
   transition:
@@ -220,8 +246,8 @@
 }
 
 .dropdownSocialIcon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -240,13 +266,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  padding: 12px 24px;
+  height: 40px;
+  padding: 10px 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .ctaButton:hover {
@@ -257,14 +283,26 @@
     inset -4px 0px 4px 0px rgba(175, 72, 255, 0.25);
 }
 
+/* Figma 2738-4495: press state – dark purple bg, light purple text, vibrant purple border */
+.ctaButton:active {
+  background: rgba(53, 20, 75, 0.85);
+  border-color: rgba(175, 72, 255, 0.9);
+  box-shadow: none;
+}
+
+.ctaButton:active .ctaLabel {
+  color: #e7c7ff;
+}
+
 .ctaLabel {
   font-family: 'Urbanist', sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1;
   color: #fff;
   text-transform: capitalize;
   white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
 .mobileMenuButton {
@@ -399,14 +437,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
+  height: 40px;
   width: 100%;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease;
   box-sizing: border-box;
 }
 
@@ -418,13 +456,25 @@
     inset -4px 0px 4px 0px rgba(175, 72, 255, 0.25);
 }
 
+/* Figma 2738-4495: press state */
+.overlayCtaButton:active {
+  background: rgba(53, 20, 75, 0.85);
+  border-color: rgba(175, 72, 255, 0.9);
+  box-shadow: none;
+}
+
+.overlayCtaButton:active .ctaLabel {
+  color: #e7c7ff;
+}
+
 @media (max-width: 800px) {
   .nav {
     padding: 0 24px;
   }
 
   .inner {
-    padding: 16px 0;
+    height: 72px;
+    padding: 0;
   }
 
   .resourcesButton {

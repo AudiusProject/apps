@@ -72,10 +72,27 @@
     text-shadow 0.2s ease;
 }
 
-.faqItem[aria-expanded='true'] .faqQuestion,
-.faqItem:hover .faqQuestion,
-.faqItem:active .faqQuestion,
+/* Purple hover when whole FAQ row is hovered; carets match text color */
+.faqItem:hover .faqQuestion {
+  color: #e7c7ff;
+  text-shadow:
+    -4px 0px 4px rgba(175, 72, 255, 0.25),
+    4px 0px 4px rgba(175, 72, 255, 0.25),
+    0px -4px 4px rgba(175, 72, 255, 0.25),
+    0px 4px 4px rgba(175, 72, 255, 0.25);
+}
+
 .faqItem:focus-visible .faqQuestion {
+  color: #e7c7ff;
+  text-shadow:
+    -4px 0px 4px rgba(175, 72, 255, 0.25),
+    4px 0px 4px rgba(175, 72, 255, 0.25),
+    0px -4px 4px rgba(175, 72, 255, 0.25),
+    0px 4px 4px rgba(175, 72, 255, 0.25);
+}
+
+/* Press state: same purple as hover (Figma 2777-2986) */
+.faqItem:active .faqQuestion {
   color: #e7c7ff;
   text-shadow:
     -4px 0px 4px rgba(175, 72, 255, 0.25),
@@ -91,20 +108,22 @@
   transition: transform 0.3s ease;
 }
 
+/* Caret same color as text; highlight when whole section hovered/pressed */
 .chevron svg,
 .chevron svg path {
   fill: #fff !important;
   transition: fill 0.2s ease;
 }
 
-.faqItem[aria-expanded='true'] .chevron svg,
-.faqItem[aria-expanded='true'] .chevron svg path,
 .faqItem:hover .chevron svg,
 .faqItem:hover .chevron svg path,
-.faqItem:active .chevron svg,
-.faqItem:active .chevron svg path,
 .faqItem:focus-visible .chevron svg,
 .faqItem:focus-visible .chevron svg path {
+  fill: #e7c7ff !important;
+}
+
+.faqItem:active .chevron svg,
+.faqItem:active .chevron svg path {
   fill: #e7c7ff !important;
 }
 

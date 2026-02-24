@@ -1,5 +1,3 @@
-import { MouseEvent } from 'react'
-
 import { route } from '@audius/common/utils'
 import {
   IconAudiusLogoHorizontal,
@@ -9,13 +7,17 @@ import {
   IconX
 } from '@audius/harmony'
 import type { IconComponent } from '@audius/harmony'
-import { useNavigate } from 'react-router'
-
-import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
 import styles from './Footer2026.module.css'
 
 const { PRIVACY_POLICY, TERMS_OF_SERVICE } = route
+
+const getLegalUrl = (path: string) => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return `${window.location.origin}${path}`
+  }
+  return `https://audius.co${path}`
+}
 
 type Footer2026Props = {
   isMobile: boolean
@@ -32,7 +34,7 @@ const siteLinks = [
 const socialLinks: { label: string; href: string; Icon: IconComponent }[] = [
   {
     label: 'Instagram',
-    href: 'https://instagram.com/audiusmusic',
+    href: 'https://instagram.com/audius',
     Icon: IconInstagram
   },
   {
@@ -47,18 +49,12 @@ const socialLinks: { label: string; href: string; Icon: IconComponent }[] = [
   },
   {
     label: 'X (Twitter)',
-    href: 'https://twitter.com/audiusproject',
+    href: 'https://twitter.com/audius',
     Icon: IconX
   }
 ]
 
 export const Footer2026 = (props: Footer2026Props) => {
-  const navigate = useNavigate()
-
-  const onLegalClick = (legalRoute: string) => (e: MouseEvent) => {
-    handleClickRoute(legalRoute, props.setRenderPublicSite, navigate)(e)
-  }
-
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
@@ -117,20 +113,22 @@ export const Footer2026 = (props: Footer2026Props) => {
               &copy; 2025 Audius Music. All rights reserved.
             </p>
             <div className={styles.legalLinks}>
-              <button
-                type='button'
+              <a
+                href={getLegalUrl(TERMS_OF_SERVICE)}
                 className={styles.legalLink}
-                onClick={onLegalClick(TERMS_OF_SERVICE)}
+                target='_blank'
+                rel='noopener noreferrer'
               >
                 Terms of Service
-              </button>
-              <button
-                type='button'
+              </a>
+              <a
+                href={getLegalUrl(PRIVACY_POLICY)}
                 className={styles.legalLink}
-                onClick={onLegalClick(PRIVACY_POLICY)}
+                target='_blank'
+                rel='noopener noreferrer'
               >
                 Privacy Policy
-              </button>
+              </a>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { MouseEvent } from 'react'
+import { MouseEvent, useState } from 'react'
 
 import {
   useExploreContent,
@@ -6,8 +6,13 @@ import {
   useTrack,
   useUser
 } from '@audius/common/api'
+import { imageBlank } from '@audius/common/assets'
+import { useImageSize } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import { useLinkClickHandler } from 'react-router'
+
+import { preload } from 'utils/image'
 
 import featuredLines from '../assets/featured-lines.svg?url'
 
@@ -30,9 +35,18 @@ function ContestCard({
   id: ID
   setRenderPublicSite: (v: boolean) => void
 }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
   const { data: contest, isPending: contestPending } = useRemixContest(id)
   const { data: track, isPending: trackPending } = useTrack(contest?.entityId)
   const { data: user, isPending: userPending } = useUser(track?.owner_id)
+
+  const artwork = track?.artwork
+  const { imageUrl, onError } = useImageSize({
+    artwork,
+    targetSize: SquareSizes.SIZE_480_BY_480,
+    defaultImage: imageBlank as string,
+    preloadImageFn: preload
+  })
 
   const isPending = contestPending || trackPending || userPending || !track
   const permalink = track?.permalink ?? ''
@@ -43,6 +57,9 @@ function ContestCard({
     handleNavigate(e as MouseEvent<HTMLAnchorElement>)
   }
 
+  const showImage =
+    imageUrl != null && imageUrl !== (imageBlank as string)
+
   if (isPending) {
     return (
       <div className={styles.card}>
@@ -52,10 +69,6 @@ function ContestCard({
     )
   }
 
-  const artworkUrl =
-    (track?.artwork && (track.artwork as Record<string, string>)['480x480']) ??
-    null
-
   return (
     <button
       type='button'
@@ -63,17 +76,20 @@ function ContestCard({
       onClick={onClick}
       aria-label={`Contest: ${track?.title} by ${user?.name}`}
     >
-      <div className={styles.artworkWrap}>
-        {artworkUrl ? (
+      <div
+        className={`${styles.artworkWrap} ${imageLoaded ? styles.artworkWrapLoaded : ''}`}
+      >
+        <div className={styles.artworkSkeletonInner} aria-hidden='true' />
+        {showImage ? (
           <img
-            src={artworkUrl}
+            src={imageUrl}
             alt=''
             className={styles.artwork}
             loading='lazy'
+            onLoad={() => setImageLoaded(true)}
+            onError={() => onError(imageUrl!)}
           />
-        ) : (
-          <div className={styles.artworkPlaceholder} />
-        )}
+        ) : null}
         <div className={styles.bwOverlay} aria-hidden='true' />
       </div>
       <span className={styles.title}>{track?.title}</span>
