@@ -78,7 +78,7 @@ user as described below.
 
 ### getBulkUsers
 
-#### getBulkUser(`params`)
+#### getBulkUsers(`params`)
 
 Gets a list of users.
 
@@ -844,9 +844,9 @@ The return type is the same as [`getFollowers`](#getfollowers)
 
 ---
 
-### updateProfile
+### updateUser
 
-#### updateProfile(`params`, `advancedOptions?`)
+#### updateUser(`params`, `advancedOptions?`)
 
 Update a user profile.
 
@@ -858,7 +858,8 @@ import fs from 'fs'
 
 const profilePicBuffer = fs.readFileSync('path/to/profile-pic.png')
 
-await audiusSdk.users.updateProfile({
+await audiusSdk.users.updateUser({
+  id: '7eP5n',
   userId: '7eP5n',
   profilePictureFile: {
     buffer: Buffer.from(profilePicBuffer),
@@ -880,13 +881,14 @@ example above.
 
 | Name                 | Type                                                                              | Description                                                                   | Required?    |
 | :------------------- | :-------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `id`                 | `string`                                                                          | The ID of the user                                                            | **Required** |
+| `userId`             | `string`                                                                          | The ID of the user (same as id)                                               | **Required** |
 | `profilePictureFile` | `File`                                                                            | A file to be used as the profile picture                                      | _Optional_   |
 | `coverArtFile`       | `File`                                                                            | A file to be used as the cover art. This is the header on a profile page      | _Optional_   |
 | `metadata`           | _see code block below_                                                            | An object with details about the user                                         | **Required** |
 | `onProgress`         | `(progress: { loaded: number, total: number, transcode: number }) => void` | A function that will be called with progress events as the image files upload | _Optional_   |
-| `userId`             | `string`                                                                          | The ID of the user                                                            | **Required** |
 
-```json title="updateProfile metadata payload"
+```json title="updateUser metadata payload"
 {
   name?: string;
   handle?: string;
