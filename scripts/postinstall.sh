@@ -32,6 +32,12 @@ if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   fi
 fi
 
+# When skipping iOS (no Xcode or SKIP_POD_INSTALL), skip Android too so we don't run
+# React Native CLI / Gradle in environments without full mobile tooling (e.g. publish-packages CI).
+if [[ -n "${SKIP_POD_INSTALL}" ]]; then
+  export SKIP_ANDROID_INSTALL=true
+fi
+
 if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   printf "${GREEN}Installing cocoapods...\n${NC}"
   {
