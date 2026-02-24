@@ -1,8 +1,29 @@
 import { useState } from 'react'
 
-import { IconCaretDown } from '@audius/harmony'
-
 import styles from './FAQ2026.module.css'
+
+/** Inline chevron so we control color (white default, purple on hover) without Harmony theme override */
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <span className={className} aria-hidden>
+      <svg
+        width='16'
+        height='16'
+        viewBox='0 0 16 16'
+        fill='none'
+        xmlns='http://www.w3.org/2000/svg'
+      >
+        <path
+          d='M4 6L8 10L12 6'
+          stroke='currentColor'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+        />
+      </svg>
+    </span>
+  )
+}
 
 const faqItems = [
   {
@@ -62,11 +83,7 @@ export const FAQ2026 = (_props: FAQ2026Props) => {
               >
                 <div className={styles.faqHeader}>
                   <p className={styles.faqQuestion}>{item.question}</p>
-                  <IconCaretDown
-                    size='s'
-                    color='default'
-                    className={styles.chevron}
-                  />
+                  <ChevronDown className={styles.chevron} />
                 </div>
                 {isOpen ? (
                   <div className={styles.faqContent}>

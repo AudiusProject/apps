@@ -72,10 +72,27 @@
     text-shadow 0.2s ease;
 }
 
-.faqItem[aria-expanded='true'] .faqQuestion,
-.faqItem:hover .faqQuestion,
-.faqItem:active .faqQuestion,
+/* Purple hover when whole FAQ row is hovered; carets match text color */
+.faqItem:hover .faqQuestion {
+  color: #e7c7ff;
+  text-shadow:
+    -4px 0px 4px rgba(175, 72, 255, 0.25),
+    4px 0px 4px rgba(175, 72, 255, 0.25),
+    0px -4px 4px rgba(175, 72, 255, 0.25),
+    0px 4px 4px rgba(175, 72, 255, 0.25);
+}
+
 .faqItem:focus-visible .faqQuestion {
+  color: #e7c7ff;
+  text-shadow:
+    -4px 0px 4px rgba(175, 72, 255, 0.25),
+    4px 0px 4px rgba(175, 72, 255, 0.25),
+    0px -4px 4px rgba(175, 72, 255, 0.25),
+    0px 4px 4px rgba(175, 72, 255, 0.25);
+}
+
+/* Press state: same purple as hover (Figma 2777-2986) */
+.faqItem:active .faqQuestion {
   color: #e7c7ff;
   text-shadow:
     -4px 0px 4px rgba(175, 72, 255, 0.25),
@@ -88,24 +105,25 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition:
+    transform 0.3s ease,
+    color 0.2s ease;
 }
 
-.chevron svg,
-.chevron svg path {
-  fill: #fff !important;
-  transition: fill 0.2s ease;
+.chevron svg {
+  width: 100%;
+  height: 100%;
 }
 
-.faqItem[aria-expanded='true'] .chevron svg,
-.faqItem[aria-expanded='true'] .chevron svg path,
-.faqItem:hover .chevron svg,
-.faqItem:hover .chevron svg path,
-.faqItem:active .chevron svg,
-.faqItem:active .chevron svg path,
-.faqItem:focus-visible .chevron svg,
-.faqItem:focus-visible .chevron svg path {
-  fill: #e7c7ff !important;
+/* Purple when whole row hover/focus/active, same as question */
+.faqItem:hover .chevron,
+.faqItem:focus-visible .chevron,
+.faqItem:active .chevron {
+  color: #e7c7ff;
 }
 
 .faqItem[aria-expanded='true'] .chevron {
