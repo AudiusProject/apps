@@ -577,11 +577,11 @@ Returns a `Promise` containing a `string` url which can be used to stream the tr
 
 ---
 
-## uploadTrack
+## createTrack
 
-> #### uploadTrack(`params`, `advancedOptions?`)
+> #### createTrack(`params`, `advancedOptions?`)
 
-Upload a track.
+Create and upload a track.
 
 <Tabs
   block={true}
@@ -620,7 +620,7 @@ import fs from 'fs'
 const coverArtBuffer = fs.readFileSync('path/to/cover-art.png')
 const trackBuffer = fs.readFileSync('path/to/track.mp3')
 
-const { trackId } = await audiusSdk.tracks.uploadTrack({
+const { trackId } = await audiusSdk.tracks.createTrack({
   userId: '7eP5n',
   imageFile: {
     buffer: Buffer.from(coverArtBuffer),
