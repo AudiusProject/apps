@@ -499,15 +499,11 @@ export class TracksApi extends GeneratedTracksApi {
     }
 
     if (this.entityManager) {
-      const res = await this.updateTrackWithEntityManager({
+      return await this.updateTrackWithEntityManager({
         trackId: params.trackId,
         userId: params.userId,
         metadata: metadata as EntityManagerUpdateTrackRequest['metadata']
       })
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     const updateRequest: GeneratedUpdateTrackRequest = {
       trackId: params.trackId,
@@ -548,11 +544,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.deleteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.deleteTrackWithEntityManager(params)
     }
     return super.deleteTrack(params, requestInit)
   }
@@ -588,11 +580,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.favoriteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.favoriteTrackWithEntityManager(params)
     }
     return super.favoriteTrack(params, requestInit)
   }
@@ -627,11 +615,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.unfavoriteTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.unfavoriteTrackWithEntityManager(params)
     }
     return super.unfavoriteTrack(params, requestInit)
   }
@@ -666,11 +650,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.shareTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.shareTrackWithEntityManager(params)
     }
     return super.shareTrack(params, requestInit)
   }
@@ -711,11 +691,7 @@ export class TracksApi extends GeneratedTracksApi {
         userId: params.userId,
         metadata: params.repostRequestBody
       }
-      const res = await this.repostTrackWithEntityManager(entityManagerParams)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.repostTrackWithEntityManager(entityManagerParams)
     }
     return super.repostTrack(params, requestInit)
   }
@@ -750,11 +726,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.unrepostTrackWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.unrepostTrackWithEntityManager(params)
     }
     return super.unrepostTrack(params, requestInit)
   }
@@ -801,11 +773,7 @@ export class TracksApi extends GeneratedTracksApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const res = await this.recordTrackDownloadWithEntityManager(params)
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
+      return await this.recordTrackDownloadWithEntityManager(params)
     }
     return super.recordTrackDownload(params, requestInit)
   }

@@ -142,8 +142,7 @@ export class UsersApi extends GeneratedUsersApi {
         metadata
       })
       return {
-        success: true,
-        transactionHash: res.blockHash,
+        ...res,
         userId: res.userId
       }
     }
@@ -349,13 +348,9 @@ export class UsersApi extends GeneratedUsersApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager && 'userId' in params) {
-      const res = await this.followUserWithEntityManager(
+      return await this.followUserWithEntityManager(
         params as EntityManagerFollowUserRequest
       )
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.followUser(params as any, requestInit)
   }
@@ -390,13 +385,9 @@ export class UsersApi extends GeneratedUsersApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager && 'userId' in params) {
-      const res = await this.unfollowUserWithEntityManager(
+      return await this.unfollowUserWithEntityManager(
         params as EntityManagerUnfollowUserRequest
       )
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.unfollowUser(params as any, requestInit)
   }
@@ -431,13 +422,9 @@ export class UsersApi extends GeneratedUsersApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager && 'userId' in params) {
-      const res = await this.subscribeToUserWithEntityManager(
+      return await this.subscribeToUserWithEntityManager(
         params as EntityManagerSubscribeToUserRequest
       )
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.subscribeToUser(params as any, requestInit)
   }
@@ -472,13 +459,9 @@ export class UsersApi extends GeneratedUsersApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager && 'userId' in params) {
-      const res = await this.unsubscribeFromUserWithEntityManager(
+      return await this.unsubscribeFromUserWithEntityManager(
         params as EntityManagerUnsubscribeFromUserRequest
       )
-      return {
-        success: true,
-        transactionHash: res.transactionHash
-      }
     }
     return super.unsubscribeFromUser(params as any, requestInit)
   }
