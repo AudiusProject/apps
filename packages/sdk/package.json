@@ -150,7 +150,7 @@
     "tsx": "^4.18.0",
     "typed-emitter": "2.1.0",
     "typescript": "5.4.5",
-    "vitest": "2.1.1",
+    "vitest": "3.2.4",
     "wait-for-expect": "3.0.2"
   },
   "peerDependencies": {
