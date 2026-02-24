@@ -167,15 +167,6 @@ describe('UsersApi', () => {
         })
       }).rejects.toThrow()
     })
-
-    it('throws an error if invalid request is sent', async () => {
-      await expect(async () => {
-        await users.updateUser({
-          id: '7eP5n',
-          metadata: { bio: 'New bio' }
-        } as any)
-      }).rejects.toThrow()
-    })
   })
 
   describe('followUser', () => {

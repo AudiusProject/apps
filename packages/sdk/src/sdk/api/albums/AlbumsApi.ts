@@ -124,7 +124,12 @@ export class AlbumsApi {
       }
     }
 
-    return await this.playlistsApi.uploadPlaylist(playlistParams)
+    const res = await this.playlistsApi.uploadPlaylist(playlistParams)
+    return {
+      blockHash: 'blockHash' in res ? res.blockHash : undefined,
+      blockNumber: 'blockNumber' in res ? res.blockNumber : undefined,
+      albumId: res.playlistId
+    }
   }
 
   /** @hidden

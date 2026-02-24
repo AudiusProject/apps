@@ -190,6 +190,7 @@ export const UploadTrackMetadataSchema = z.object({
   previewCid: z.optional(z.string()),
   origFileCid: z.optional(z.string()),
   origFilename: z.optional(z.string()),
+  coverArtSizes: z.optional(z.string()),
   isDownloadable: z.optional(z.boolean()),
   isOriginalAvailable: z.optional(z.boolean()),
   ddexReleaseIds: z.optional(z.record(z.string()).nullable()),
