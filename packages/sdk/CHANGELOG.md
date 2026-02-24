@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 13.0.1
+
+### Patch Changes
+
+- 7265a2e: Fix tests, fix return types of entity manager variation of APIs
+
 ## 13.0.0
 
 ### Major Changes
