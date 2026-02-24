@@ -13,7 +13,7 @@ const { SIGN_UP_PAGE } = route
 
 const messages = {
   headline: 'Create the future of music, together.',
-  signUp: 'Sign up'
+  getStarted: 'Get Started'
 }
 
 type CreateFutureCTAProps = {
@@ -41,7 +41,7 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
             {messages.headline}
           </h2>
           <button type='button' className={styles.ctaButton} onClick={onSignUp}>
-            <span className={styles.ctaLabel}>{messages.signUp}</span>
+            <span className={styles.ctaLabel}>{messages.getStarted}</span>
           </button>
         </div>
       </div>

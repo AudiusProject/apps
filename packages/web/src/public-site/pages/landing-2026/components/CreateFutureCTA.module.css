@@ -66,6 +66,7 @@
   color: #fff;
   margin: 0;
   width: 100%;
+  white-space: nowrap;
 }
 
 .ctaButton {
@@ -129,5 +130,6 @@
 
   .headline {
     font-size: 96px;
+    white-space: normal;
   }
 }

@@ -31,7 +31,7 @@ import styles from './Nav2026.module.css'
 const { SIGN_UP_PAGE, DOWNLOAD_LINK } = route
 
 const messages = {
-  signUp: 'Sign Up',
+  getStarted: 'Get Started',
   resources: 'Resources'
 }
 
@@ -42,12 +42,6 @@ const MENU_ITEMS: {
   Icon: ComponentType<{ className?: string }>
 }[] = [
   {
-    title: 'Download App',
-    description: 'Download the apps for desktop and mobile devices.',
-    href: DOWNLOAD_LINK,
-    Icon: IconDownloadApp
-  },
-  {
     title: 'Help & Support',
     description:
       'Answers and Resources to help you make the most of Audius Music.',
@@ -55,10 +49,16 @@ const MENU_ITEMS: {
     Icon: IconHelpSupport
   },
   {
-    title: 'Blog',
+    title: 'The Blog',
     description: 'Check out the latest updates to the Audius Blog.',
     href: 'https://blog.audius.co/',
     Icon: IconBlog
+  },
+  {
+    title: 'Download App',
+    description: 'Download the apps for desktop and mobile devices.',
+    href: DOWNLOAD_LINK,
+    Icon: IconDownloadApp
   }
 ]
 
@@ -217,7 +217,7 @@ export const Nav2026 = (props: Nav2026Props) => {
                   className={styles.ctaButton}
                   onClick={onSignUp}
                 >
-                  <span className={styles.ctaLabel}>{messages.signUp}</span>
+                  <span className={styles.ctaLabel}>{messages.getStarted}</span>
                 </button>
               </>
             )}
@@ -313,7 +313,7 @@ function MobileNavOverlay({
             className={styles.overlayCtaButton}
             onClick={onSignUp}
           >
-            <span className={styles.ctaLabel}>{messages.signUp}</span>
+            <span className={styles.ctaLabel}>{messages.getStarted}</span>
           </button>
         </div>
       </div>

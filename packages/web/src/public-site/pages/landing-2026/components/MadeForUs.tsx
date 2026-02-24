@@ -2,7 +2,7 @@ import styles from './MadeForUs.module.css'
 
 const messages = {
   headline: 'Audius is made for us.',
-  body: 'Audius is for people pushing music scenes forward. It\u2019s a platform built on community, connection, and culture-led artist growth. Audius is made for us.'
+  body: "Audius is for people pushing music scenes forward. It's a community-run platform built on connection, collaboration, and culture-led artist growth."
 }
 
 type MadeForUsProps = {
