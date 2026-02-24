@@ -10,7 +10,7 @@ const messages = {
   features: [
     {
       title: 'Free and Unlimited',
-      body: "We're free to use, no upload limits, and Ad-free. Everyone gets access to high quality 360kbps audio, the option to sell music direct, and lossless downloads."
+      body: "We're free to use, no upload limits, and Ad-free. Everyone gets access to high quality 320kbps audio, the option to sell music direct, and lossless downloads."
     },
     {
       title: 'Grow Your Scene',
