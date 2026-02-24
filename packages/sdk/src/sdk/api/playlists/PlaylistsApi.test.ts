@@ -25,8 +25,6 @@ const pngFile = fs.readFileSync(
 vitest.mock('../../services/EntityManager')
 vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
-vitest.mock('../tracks/TrackUploadHelper')
-vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../generated/default/apis/PlaylistsApi')
 
 vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
@@ -53,21 +51,10 @@ vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
 }))
 
 vitest
-  .spyOn(TrackUploadHelper.prototype, 'generateId' as any)
+  .spyOn(TrackUploadHelper.prototype, 'generateId')
   .mockImplementation(async () => {
     return 1
   })
-
-vitest
-  .spyOn(
-    TrackUploadHelper.prototype,
-    'populateTrackMetadataWithUploadResponse' as any
-  )
-  .mockImplementation(async () => ({}))
-
-vitest
-  .spyOn(TrackUploadHelper.prototype, 'transformTrackUploadMetadata' as any)
-  .mockImplementation(async () => ({}))
 
 vitest
   .spyOn(EntityManagerClient.prototype, 'manageEntity')
