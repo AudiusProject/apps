@@ -1,11 +1,17 @@
-import { Theme } from '@audius/common/models'
+import {
+  Theme,
+  ThemeMode,
+  ThemePalette,
+  SystemAppearance
+} from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import { themeSelectors } from '@audius/common/store'
-import type { HarmonyTheme } from '@audius/harmony/src/foundations/theme/theme'
-import { themes } from '@audius/harmony/src/foundations/theme/theme'
 import { useSelector } from 'react-redux'
 
-const { getTheme, getSystemAppearance } = themeSelectors
+import { theme as harmonyNativeTheme } from '@audius/harmony-native'
+
+const { getTheme, getThemePalette, getThemeMode, getSystemAppearance } =
+  themeSelectors
 
 export { Theme } from '@audius/common/models'
 
@@ -75,10 +81,10 @@ export type ThemeColors = {
   focus: string
 }
 
-const createMobileThemeFromHarmony = (
-  harmonyTheme: HarmonyTheme
-): ThemeColors => {
-  const { color } = harmonyTheme
+const createMobileThemeFromHarmony = (theme: {
+  color: Record<string, any>
+}): ThemeColors => {
+  const { color } = theme
 
   return {
     background: color.special.background,
@@ -146,11 +152,44 @@ const createMobileThemeFromHarmony = (
   }
 }
 
-export const defaultTheme = createMobileThemeFromHarmony(themes.day)
-export const darkTheme = createMobileThemeFromHarmony(themes.dark)
-export const matrixTheme = createMobileThemeFromHarmony(themes.matrix)
+export const defaultLightThemeColors = createMobileThemeFromHarmony(
+  harmonyNativeTheme['default-light']
+)
+export const defaultDarkThemeColors = createMobileThemeFromHarmony(
+  harmonyNativeTheme['default-dark']
+)
+export const defaultTheme = createMobileThemeFromHarmony(
+  harmonyNativeTheme['classic-light']
+)
+export const darkTheme = createMobileThemeFromHarmony(
+  harmonyNativeTheme['classic-dark']
+)
+export const matrixTheme = createMobileThemeFromHarmony(
+  harmonyNativeTheme.matrix
+)
 
-export const themeColorsByThemeVariant = {
+export type ResolvedThemeName =
+  | 'default-light'
+  | 'default-dark'
+  | 'classic-light'
+  | 'classic-dark'
+  | 'matrix'
+
+/** True when theme has dark backgrounds (status/nav bar should use light content) */
+export const isDarkTheme = (theme: ResolvedThemeName): boolean =>
+  theme === 'default-dark' || theme === 'classic-dark' || theme === 'matrix'
+
+export const themeColorsByThemeVariant: Record<ResolvedThemeName, ThemeColors> =
+  {
+    'default-light': defaultLightThemeColors,
+    'default-dark': defaultDarkThemeColors,
+    'classic-light': defaultTheme,
+    'classic-dark': darkTheme,
+    matrix: matrixTheme
+  }
+
+/** @deprecated Use useResolvedThemeName + themeColorsByThemeVariant */
+export const legacyThemeColorsByThemeVariant = {
   [Theme.LIGHT]: defaultTheme,
   [Theme.DARK]: darkTheme,
   [Theme.MATRIX]: matrixTheme
@@ -159,14 +198,60 @@ export const themeColorsByThemeVariant = {
 export const selectSystemTheme = (state: CommonState) => {
   const systemAppearance = getSystemAppearance(state)
   const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.LIGHT
-  return themeColorsByThemeVariant[systemTheme]
+  return legacyThemeColorsByThemeVariant[systemTheme]
 }
 
-export const useThemeVariant = (): keyof typeof themeColorsByThemeVariant => {
+/** Resolve palette + mode + system preference to theme name */
+const resolveThemeName = (
+  themePalette: ThemePalette | null,
+  themeMode: ThemeMode | null,
+  theme: Theme | null,
+  systemAppearance: SystemAppearance | null
+): ResolvedThemeName => {
+  if (themePalette != null) {
+    if (themePalette === ThemePalette.MATRIX) return 'matrix'
+    const mode =
+      themeMode ??
+      (theme === Theme.LIGHT
+        ? ThemeMode.LIGHT
+        : theme === Theme.DARK
+          ? ThemeMode.DARK
+          : ThemeMode.AUTO)
+    const sysAppearance =
+      systemAppearance ??
+      (theme === Theme.DARK ? SystemAppearance.DARK : SystemAppearance.LIGHT)
+    const resolvedMode =
+      mode === ThemeMode.AUTO
+        ? sysAppearance === SystemAppearance.DARK
+          ? 'dark'
+          : 'light'
+        : mode === ThemeMode.LIGHT
+          ? 'light'
+          : 'dark'
+    if (themePalette === ThemePalette.DEFAULT) {
+      return resolvedMode === 'light' ? 'default-light' : 'default-dark'
+    }
+    return resolvedMode === 'light' ? 'classic-light' : 'classic-dark'
+  }
+  if (theme === Theme.MATRIX) return 'matrix'
+  if (theme === Theme.LIGHT) return 'classic-light'
+  if (theme === Theme.DARK) return 'classic-dark'
+  const sysAppearance = systemAppearance ?? SystemAppearance.LIGHT
+  return sysAppearance === SystemAppearance.DARK
+    ? 'classic-dark'
+    : 'classic-light'
+}
+
+export const useResolvedThemeName = (): ResolvedThemeName => {
   const theme = useSelector(getTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
   const systemAppearance = useSelector(getSystemAppearance)
-  const systemTheme = systemAppearance === 'dark' ? Theme.DARK : Theme.LIGHT
-  return theme === Theme.AUTO ? systemTheme : (theme ?? systemTheme)
+  return resolveThemeName(themePalette, themeMode, theme, systemAppearance)
+}
+
+export const useThemeVariant = (): ResolvedThemeName => {
+  return useResolvedThemeName()
 }
 
 export const useThemeColors = () => {
@@ -186,9 +271,9 @@ export const useColor = (color: string): string => {
 
 // Uses normalColor when in light/dark mode, but "special color" when in other mode
 export const useSpecialColor = (normalColor: string, specialColor: string) => {
-  const theme = useSelector(getTheme)
+  const resolvedTheme = useResolvedThemeName()
   const themeVariant = useThemeColors()
-  if (theme === Theme.MATRIX) {
+  if (resolvedTheme === 'matrix') {
     return (themeVariant as any)[specialColor]
   }
   return (themeVariant as any)[normalColor]

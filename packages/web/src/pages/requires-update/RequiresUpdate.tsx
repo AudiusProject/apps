@@ -1,4 +1,4 @@
-import { Box, Button, useTheme } from '@audius/harmony'
+import { Box, Button, isLightTheme, useTheme } from '@audius/harmony'
 
 import tileBackground from 'assets/img/notFoundTiledBackround.png'
 
@@ -25,7 +25,7 @@ export const RequiresUpdate = (props: RequiresUpdateProps) => {
         className={styles.content}
         css={{
           backgroundImage: `url(${tileBackground})`,
-          backgroundBlendMode: theme.type === 'day' ? 'none' : 'color-burn'
+          backgroundBlendMode: isLightTheme(theme.type) ? 'none' : 'color-burn'
         }}
       >
         <div className={styles.title}>{messages.title}</div>

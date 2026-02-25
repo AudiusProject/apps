@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
-import { useIsManagedAccount } from '@audius/common/hooks'
+import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
-import { Name, Theme } from '@audius/common/models'
+import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -22,6 +23,7 @@ import {
   Button,
   Flex,
   IconAppearance,
+  Select,
   IconEmailAddress,
   IconError,
   IconKey,
@@ -66,7 +68,7 @@ import {
 import { isElectron } from 'utils/clientUtil'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
-import { THEME_KEY } from 'utils/theme/theme'
+import { THEME_KEY, THEME_MODE_KEY, THEME_PALETTE_KEY } from 'utils/theme/theme'
 
 import packageInfo from '../../../../../package.json'
 
@@ -84,8 +86,8 @@ import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard
 
 const { show } = musicConfettiActions
 const { signOut: signOutAction } = signOutActions
-const { setTheme } = themeActions
-const { getTheme } = themeSelectors
+const { setTheme, setThemePalette, setThemeMode } = themeActions
+const { getTheme, getThemePalette, getThemeMode } = themeSelectors
 const { getBrowserNotificationSettings, getEmailFrequency } =
   settingsPageSelectors
 const {
@@ -138,6 +140,8 @@ export const SettingsPage = () => {
   })
   const { handle, userId, isVerified } = accountData ?? {}
   const theme = useSelector(getTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
   const { tier } = useTierAndVerifiedForUser(userId)
@@ -145,6 +149,9 @@ export const SettingsPage = () => {
     tier === 'gold' ||
     tier === 'platinum' ||
     process.env.NODE_ENV === 'development'
+  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
+    FeatureFlags.NEW_THEME_MODEL
+  )
 
   const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false)
   const [
@@ -336,41 +343,109 @@ export const SettingsPage = () => {
     [dispatch, notificationSettings.permission]
   )
 
-  const toggleTheme = (option: Theme) => {
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
-      })
-    )
-    dispatch(setTheme({ theme: option }))
-    if (option === Theme.MATRIX) {
+  const effectivePalette =
+    themePalette ??
+    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.CLASSIC)
+  const effectiveMode =
+    themeMode ??
+    (theme === Theme.LIGHT
+      ? ThemeMode.LIGHT
+      : theme === Theme.DARK
+        ? ThemeMode.DARK
+        : ThemeMode.AUTO)
+
+  const onPaletteChange = (value: ThemePalette) => {
+    dispatch(setThemePalette({ themePalette: value }))
+    if (value === ThemePalette.MATRIX) {
+      dispatch(setTheme({ theme: Theme.MATRIX }))
       dispatch(show())
     }
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(THEME_KEY, option)
+      window.localStorage.setItem(THEME_PALETTE_KEY, value)
+      if (value === ThemePalette.MATRIX) {
+        window.localStorage.setItem(THEME_KEY, Theme.MATRIX)
+      }
     }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, {
+        mode: 'palette',
+        palette: value
+      })
+    )
   }
 
-  const appearanceOptions = useMemo(() => {
+  const onModeChange = (option: ThemeMode) => {
+    dispatch(setThemeMode({ themeMode: option }))
+    const theme =
+      option === ThemeMode.LIGHT
+        ? Theme.LIGHT
+        : option === ThemeMode.DARK
+          ? Theme.DARK
+          : Theme.AUTO
+    dispatch(setTheme({ theme }))
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_MODE_KEY, option)
+      window.localStorage.setItem(THEME_KEY, theme)
+    }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, {
+        mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
+      })
+    )
+  }
+
+  const paletteOptions = useMemo(() => {
+    const options: { value: ThemePalette; label: string }[] = [
+      { value: ThemePalette.DEFAULT, label: settingsMessages.defaultPalette },
+      { value: ThemePalette.CLASSIC, label: settingsMessages.classicPalette }
+    ]
+    if (showMatrix) {
+      options.push({
+        value: ThemePalette.MATRIX,
+        label: settingsMessages.matrixMode
+      })
+    }
+    return options
+  }, [showMatrix])
+
+  const modeOptions = useMemo(
+    () => [
+      { key: ThemeMode.AUTO, text: settingsMessages.autoMode },
+      { key: ThemeMode.LIGHT, text: settingsMessages.lightMode },
+      { key: ThemeMode.DARK, text: settingsMessages.darkMode }
+    ],
+    []
+  )
+
+  const legacyThemeOptions = useMemo(() => {
     const options = [
-      {
-        key: Theme.AUTO,
-        text: settingsMessages.autoMode
-      },
-      {
-        key: Theme.LIGHT,
-        text: settingsMessages.lightMode
-      },
-      {
-        key: Theme.DARK,
-        text: settingsMessages.darkMode
-      }
+      { key: Theme.AUTO, text: settingsMessages.autoMode },
+      { key: Theme.DARK, text: settingsMessages.darkMode },
+      { key: Theme.LIGHT, text: settingsMessages.lightMode }
     ]
     if (showMatrix) {
       options.push({ key: Theme.MATRIX, text: settingsMessages.matrixMode })
     }
     return options
   }, [showMatrix])
+
+  const toggleLegacyTheme = useCallback(
+    (option: Theme) => {
+      dispatch(
+        make(Name.SETTINGS_CHANGE_THEME, {
+          mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
+        })
+      )
+      dispatch(setTheme({ theme: option }))
+      if (option === Theme.MATRIX) {
+        dispatch(show())
+      }
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(THEME_KEY, option)
+      }
+    },
+    [dispatch]
+  )
 
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
@@ -392,14 +467,35 @@ export const SettingsPage = () => {
             description={settingsMessages.appearanceDescription}
             isFull={true}
           >
-            <SegmentedControl
-              fullWidth
-              label={settingsMessages.appearanceTitle}
-              options={appearanceOptions}
-              selected={theme ?? Theme.AUTO}
-              onSelectOption={(option) => toggleTheme(option)}
-              key={`tab-slider-${appearanceOptions.length}`}
-            />
+            {isNewThemeModelEnabled ? (
+              <Flex direction='column' gap='l'>
+                <Select<ThemePalette>
+                  value={effectivePalette}
+                  options={paletteOptions}
+                  onChange={(value) => onPaletteChange(value)}
+                  label={settingsMessages.appearanceTitle}
+                  optionsLabel='Theme'
+                />
+                {effectivePalette !== ThemePalette.MATRIX ? (
+                  <SegmentedControl
+                    fullWidth
+                    label='Color mode'
+                    options={modeOptions}
+                    selected={effectiveMode}
+                    onSelectOption={(option) => onModeChange(option)}
+                    key={`tab-slider-${effectivePalette}`}
+                  />
+                ) : null}
+              </Flex>
+            ) : (
+              <SegmentedControl
+                fullWidth
+                options={legacyThemeOptions}
+                selected={theme ?? Theme.AUTO}
+                onSelectOption={(option) => toggleLegacyTheme(option)}
+                key={`tab-slider-legacy-${legacyThemeOptions.length}`}
+              />
+            )}
           </SettingsCard>
         ) : null}
         {!isManagedAccount ? (

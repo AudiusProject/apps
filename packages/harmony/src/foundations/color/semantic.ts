@@ -78,9 +78,15 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
 })
 
 export const semanticTheme = {
+  defaultLight: createSemanticTheme(primitiveTheme.defaultLight),
+  defaultDark: createSemanticTheme(primitiveTheme.defaultDark),
+  classicLight: createSemanticTheme(primitiveTheme.classicLight),
+  classicDark: createSemanticTheme(primitiveTheme.classicDark),
+  matrix: createSemanticTheme(primitiveTheme.matrix),
+  /** @deprecated Use classicLight */
   day: createSemanticTheme(primitiveTheme.day),
-  dark: createSemanticTheme(primitiveTheme.dark),
-  matrix: createSemanticTheme(primitiveTheme.matrix)
+  /** @deprecated Use classicDark */
+  dark: createSemanticTheme(primitiveTheme.dark)
 }
 
 export type SemanticColors = typeof semanticTheme.day

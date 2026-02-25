@@ -40,6 +40,8 @@
   margin-left: var(--nav-width);
   margin-bottom: 88px;
   width: 100%;
+  /* Use theme background - ensures classic-dark/default-dark etc. apply correctly */
+  background-color: var(--harmony-background);
   /* Show scrollbar always so the page doesn't jump around. */
   overflow-y: scroll;
   overflow-x: hidden;

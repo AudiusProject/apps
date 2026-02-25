@@ -1,8 +1,17 @@
 import { ReactNode, useEffect } from 'react'
 
-import { Theme, SystemAppearance } from '@audius/common/models'
+import {
+  SystemAppearance,
+  Theme as LegacyTheme,
+  ThemeMode,
+  ThemePalette
+} from '@audius/common/models'
 import { themeActions, themeSelectors } from '@audius/common/store'
-import { ThemeProvider as HarmonyThemeProvider } from '@audius/harmony'
+import {
+  resolveTheme,
+  ThemeProvider as HarmonyThemeProvider
+} from '@audius/harmony'
+import type { Theme } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { AppState } from 'store/types'
@@ -11,28 +20,44 @@ import { PREFERS_DARK_MEDIA_QUERY } from 'utils/theme/theme'
 
 const { setSystemAppearance } = themeActions
 
-const { getTheme, getSystemAppearance } = themeSelectors
+const { getTheme, getThemePalette, getThemeMode, getSystemAppearance } =
+  themeSelectors
 
-const selectHarmonyTheme = (state: AppState) => {
-  const theme = getTheme(state)
+const selectHarmonyTheme = (state: AppState): Theme => {
+  const themePalette = getThemePalette(state)
+  const themeMode = getThemeMode(state)
+  const legacyTheme = getTheme(state)
   const systemAppearance = getSystemAppearance(state)
 
-  switch (theme) {
-    case Theme.LIGHT:
-      return 'day'
-    case Theme.DARK:
-      return 'dark'
-    case Theme.MATRIX:
+  const sysAppearance: 'light' | 'dark' =
+    systemAppearance === SystemAppearance.DARK ? 'dark' : 'light'
+  const mode: 'auto' | 'light' | 'dark' =
+    themeMode === ThemeMode.AUTO
+      ? 'auto'
+      : themeMode === ThemeMode.DARK
+        ? 'dark'
+        : 'light'
+
+  if (themePalette != null) {
+    const palette: 'default' | 'classic' | 'matrix' =
+      themePalette === ThemePalette.DEFAULT
+        ? 'default'
+        : themePalette === ThemePalette.MATRIX
+          ? 'matrix'
+          : 'classic'
+    return resolveTheme(palette, mode, sysAppearance)
+  }
+
+  switch (legacyTheme) {
+    case LegacyTheme.LIGHT:
+      return 'classic-light'
+    case LegacyTheme.DARK:
+      return 'classic-dark'
+    case LegacyTheme.MATRIX:
       return 'matrix'
-    case Theme.AUTO:
+    case LegacyTheme.AUTO:
     default:
-      switch (systemAppearance) {
-        case SystemAppearance.DARK:
-          return 'dark'
-        case SystemAppearance.LIGHT:
-        default:
-          return 'day'
-      }
+      return sysAppearance === 'dark' ? 'classic-dark' : 'classic-light'
   }
 }
 

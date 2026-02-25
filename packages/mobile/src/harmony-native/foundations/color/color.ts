@@ -9,6 +9,44 @@ const baseLinearGradient = {
 }
 
 const primitiveOverrides = {
+  defaultLight: {
+    special: {
+      gradient: {
+        ...baseLinearGradient,
+        colors: [
+          harmonyPrimitiveTheme.defaultLight.special.gradientStop1,
+          harmonyPrimitiveTheme.defaultLight.special.gradientStop2
+        ]
+      },
+      coinGradient: {
+        ...baseLinearGradient,
+        colors: [
+          harmonyPrimitiveTheme.defaultLight.special.coinGradientColor1,
+          harmonyPrimitiveTheme.defaultLight.special.coinGradientColor2,
+          harmonyPrimitiveTheme.defaultLight.special.coinGradientColor3
+        ]
+      }
+    }
+  },
+  defaultDark: {
+    special: {
+      gradient: {
+        ...baseLinearGradient,
+        colors: [
+          harmonyPrimitiveTheme.defaultDark.special.gradientStop1,
+          harmonyPrimitiveTheme.defaultDark.special.gradientStop2
+        ]
+      },
+      coinGradient: {
+        ...baseLinearGradient,
+        colors: [
+          harmonyPrimitiveTheme.defaultDark.special.coinGradientColor1,
+          harmonyPrimitiveTheme.defaultDark.special.coinGradientColor2,
+          harmonyPrimitiveTheme.defaultDark.special.coinGradientColor3
+        ]
+      }
+    }
+  },
   day: {
     special: {
       gradient: {
@@ -69,6 +107,26 @@ const primitiveOverrides = {
 }
 
 const semanticOverrides = {
+  defaultLight: {
+    text: {
+      heading: primitiveOverrides.defaultLight.special.gradient,
+      artistCoin: primitiveOverrides.defaultLight.special.coinGradient
+    },
+    icon: {
+      heading: primitiveOverrides.defaultLight.special.gradient,
+      artistCoin: primitiveOverrides.defaultLight.special.coinGradient
+    }
+  },
+  defaultDark: {
+    text: {
+      heading: primitiveOverrides.defaultDark.special.gradient,
+      artistCoin: primitiveOverrides.defaultDark.special.coinGradient
+    },
+    icon: {
+      heading: primitiveOverrides.defaultDark.special.gradient,
+      artistCoin: primitiveOverrides.defaultDark.special.coinGradient
+    }
+  },
   day: {
     text: {
       heading: primitiveOverrides.day.special.gradient,
@@ -102,6 +160,36 @@ const semanticOverrides = {
 }
 
 export const colorTheme = {
+  defaultLight: {
+    ...harmonyTheme['default-light'].color,
+    special: {
+      ...harmonyTheme['default-light'].color.special,
+      ...primitiveOverrides.defaultLight.special
+    },
+    text: {
+      ...harmonyTheme['default-light'].color.text,
+      ...semanticOverrides.defaultLight.text
+    },
+    icon: {
+      ...harmonyTheme['default-light'].color.icon,
+      ...semanticOverrides.defaultLight.icon
+    }
+  },
+  defaultDark: {
+    ...harmonyTheme['default-dark'].color,
+    special: {
+      ...harmonyTheme['default-dark'].color.special,
+      ...primitiveOverrides.defaultDark.special
+    },
+    text: {
+      ...harmonyTheme['default-dark'].color.text,
+      ...semanticOverrides.defaultDark.text
+    },
+    icon: {
+      ...harmonyTheme['default-dark'].color.icon,
+      ...semanticOverrides.defaultDark.icon
+    }
+  },
   day: {
     ...harmonyTheme.day.color,
     special: {
