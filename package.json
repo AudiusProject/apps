@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "1.5.164",
+  "version": "1.5.165",
   "workspaces": [
     "packages/*",
     "packages/discovery-provider/plugins/pedalboard/apps/*",
@@ -48,6 +48,8 @@
     "mobile:clean": "npm run clean:auto -w @audius/mobile && npm run clean:modules",
     "mobile:clear-cache": "watchman watch-del-all && npm run start -w @audius/mobile -- --reset-cache",
     "mobile:example:trending": "cd packages/mobile/examples/trending && npx expo start",
+    "mobile:example:auth-sign-in": "cd packages/mobile/examples/auth-sign-in && npx expo start",
+    "mobile:example:authenticated-writes": "cd packages/mobile/examples/authenticated-writes && npx expo start",
     "EMBED======================================": "",
     "embed:prod": "npm run start:prod -w embed",
     "embed:stage": "npm run start:stage -w embed",

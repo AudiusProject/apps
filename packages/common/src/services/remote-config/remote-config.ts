@@ -16,7 +16,9 @@ import {
 import {
   environmentFlagDefaults,
   FeatureFlags,
-  flagDefaults
+  featureFlagMinVersions,
+  flagDefaults,
+  isVersionAtLeast
 } from './feature-flags'
 import {
   IntKeys,
@@ -224,11 +226,18 @@ export const remoteConfig = <
 
   /**
    * Gets whether a given feature flag is enabled.
-   * Accepts a fallback flag which will be checked if the primary flag is disabled
+   * Accepts a fallback flag which will be checked if the primary flag is disabled.
+   * Flags with a minVersion in featureFlagMinVersions are only enabled when appVersion >= minVersion.
    */
   function getFeatureEnabled(flag: FeatureFlags, fallbackFlag?: FeatureFlags) {
     const defaultVal =
       environmentFlagDefaults[environment][flag] ?? flagDefaults[flag]
+
+    // Version gate: if flag has minVersion, require appVersion >= minVersion
+    const minVersion = featureFlagMinVersions[flag]
+    if (minVersion && !isVersionAtLeast(appVersion, minVersion)) {
+      return false
+    }
 
     // If the client is not ready yet, return early with `null`
     if (!client || !state.id) return defaultVal
