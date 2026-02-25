@@ -1,11 +1,15 @@
 import {
   SystemAppearance,
   Theme,
+  ThemeMode,
+  ThemePalette,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
 import { useSelector } from 'react-redux'
 
 export const THEME_KEY = 'theme'
+export const THEME_PALETTE_KEY = 'themePalette'
+export const THEME_MODE_KEY = 'themeMode'
 export const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)'
 
 const doesPreferDarkMode = () => {
@@ -38,6 +42,31 @@ export const getTheme = (): Theme | null => {
   }
 
   return Theme.AUTO
+}
+
+/** Derive themePalette from stored theme (for migration from legacy) */
+export const getThemePaletteFromStorage = (): ThemePalette | null => {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem(THEME_PALETTE_KEY)
+  if (stored && Object.values(ThemePalette).includes(stored as ThemePalette)) {
+    return stored as ThemePalette
+  }
+  const theme = getTheme()
+  if (theme === Theme.MATRIX) return ThemePalette.MATRIX
+  return null
+}
+
+/** Derive themeMode from stored theme (for migration from legacy) */
+export const getThemeModeFromStorage = (): ThemeMode | null => {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem(THEME_MODE_KEY)
+  if (stored && Object.values(ThemeMode).includes(stored as ThemeMode)) {
+    return stored as ThemeMode
+  }
+  const theme = getTheme()
+  if (theme === Theme.LIGHT) return ThemeMode.LIGHT
+  if (theme === Theme.DARK) return ThemeMode.DARK
+  return ThemeMode.AUTO
 }
 
 export const getSystemAppearance = () =>

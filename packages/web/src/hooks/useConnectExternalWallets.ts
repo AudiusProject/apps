@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
 import { Name, Chain, Feature } from '@audius/common/models'
+import { isLightTheme } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
 import type { NamespaceTypeMap } from '@reown/appkit'
 import { mainnet } from '@reown/appkit/networks'
@@ -88,13 +89,13 @@ export const useConnectExternalWallets = (
         await disconnect()
       }
       appkitModal.updateFeatures({ socials: false, email: false })
-      appkitModal.setThemeMode(theme.type === 'day' ? 'light' : 'dark')
+      appkitModal.setThemeMode(isLightTheme(theme.type) ? 'light' : 'dark')
       // If the user is signed in using an external wallet, they'll be connected
       // to the audiusChain network. Reset that to mainnet to connect properly.
       await appkitModal.switchNetwork(mainnet)
       await openAppKitModal({ view: 'Connect', namespace })
     },
-    [disconnect, isConnected, openAppKitModal, record, theme.type]
+    [disconnect, isConnected, openAppKitModal, record, theme]
   )
 
   /**

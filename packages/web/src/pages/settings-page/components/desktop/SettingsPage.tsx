@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
-import { Name, Theme } from '@audius/common/models'
+import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -22,6 +22,7 @@ import {
   Button,
   Flex,
   IconAppearance,
+  Select,
   IconEmailAddress,
   IconError,
   IconKey,
@@ -66,7 +67,7 @@ import {
 import { isElectron } from 'utils/clientUtil'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
-import { THEME_KEY } from 'utils/theme/theme'
+import { THEME_KEY, THEME_MODE_KEY, THEME_PALETTE_KEY } from 'utils/theme/theme'
 
 import packageInfo from '../../../../../package.json'
 
@@ -84,8 +85,8 @@ import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard
 
 const { show } = musicConfettiActions
 const { signOut: signOutAction } = signOutActions
-const { setTheme } = themeActions
-const { getTheme } = themeSelectors
+const { setTheme, setThemePalette, setThemeMode } = themeActions
+const { getTheme, getThemePalette, getThemeMode } = themeSelectors
 const { getBrowserNotificationSettings, getEmailFrequency } =
   settingsPageSelectors
 const {
@@ -138,6 +139,8 @@ export const SettingsPage = () => {
   })
   const { handle, userId, isVerified } = accountData ?? {}
   const theme = useSelector(getTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
   const { tier } = useTierAndVerifiedForUser(userId)
@@ -336,41 +339,79 @@ export const SettingsPage = () => {
     [dispatch, notificationSettings.permission]
   )
 
-  const toggleTheme = (option: Theme) => {
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
-      })
-    )
-    dispatch(setTheme({ theme: option }))
-    if (option === Theme.MATRIX) {
+  const effectivePalette =
+    themePalette ??
+    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.CLASSIC)
+  const effectiveMode =
+    themeMode ??
+    (theme === Theme.LIGHT
+      ? ThemeMode.LIGHT
+      : theme === Theme.DARK
+        ? ThemeMode.DARK
+        : ThemeMode.AUTO)
+
+  const onPaletteChange = (value: ThemePalette) => {
+    dispatch(setThemePalette({ themePalette: value }))
+    if (value === ThemePalette.MATRIX) {
+      dispatch(setTheme({ theme: Theme.MATRIX }))
       dispatch(show())
     }
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(THEME_KEY, option)
+      window.localStorage.setItem(THEME_PALETTE_KEY, value)
+      if (value === ThemePalette.MATRIX) {
+        window.localStorage.setItem(THEME_KEY, Theme.MATRIX)
+      }
     }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, {
+        mode: 'palette',
+        palette: value
+      })
+    )
   }
 
-  const appearanceOptions = useMemo(() => {
-    const options = [
-      {
-        key: Theme.AUTO,
-        text: settingsMessages.autoMode
-      },
-      {
-        key: Theme.LIGHT,
-        text: settingsMessages.lightMode
-      },
-      {
-        key: Theme.DARK,
-        text: settingsMessages.darkMode
-      }
+  const onModeChange = (option: ThemeMode) => {
+    dispatch(setThemeMode({ themeMode: option }))
+    const theme =
+      option === ThemeMode.LIGHT
+        ? Theme.LIGHT
+        : option === ThemeMode.DARK
+          ? Theme.DARK
+          : Theme.AUTO
+    dispatch(setTheme({ theme }))
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_MODE_KEY, option)
+      window.localStorage.setItem(THEME_KEY, theme)
+    }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, {
+        mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
+      })
+    )
+  }
+
+  const paletteOptions = useMemo(() => {
+    const options: { value: ThemePalette; label: string }[] = [
+      { value: ThemePalette.DEFAULT, label: settingsMessages.defaultPalette },
+      { value: ThemePalette.CLASSIC, label: settingsMessages.classicPalette }
     ]
     if (showMatrix) {
-      options.push({ key: Theme.MATRIX, text: settingsMessages.matrixMode })
+      options.push({
+        value: ThemePalette.MATRIX,
+        label: settingsMessages.matrixMode
+      })
     }
     return options
   }, [showMatrix])
+
+  const modeOptions = useMemo(
+    () => [
+      { key: ThemeMode.AUTO, text: settingsMessages.autoMode },
+      { key: ThemeMode.LIGHT, text: settingsMessages.lightMode },
+      { key: ThemeMode.DARK, text: settingsMessages.darkMode }
+    ],
+    []
+  )
 
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
@@ -392,14 +433,24 @@ export const SettingsPage = () => {
             description={settingsMessages.appearanceDescription}
             isFull={true}
           >
-            <SegmentedControl
-              fullWidth
-              label={settingsMessages.appearanceTitle}
-              options={appearanceOptions}
-              selected={theme ?? Theme.AUTO}
-              onSelectOption={(option) => toggleTheme(option)}
-              key={`tab-slider-${appearanceOptions.length}`}
-            />
+            <Flex direction='column' gap='l'>
+              <Select<ThemePalette>
+                value={effectivePalette}
+                options={paletteOptions}
+                onChange={(value) => onPaletteChange(value)}
+                label={settingsMessages.appearanceTitle}
+                optionsLabel='Theme'
+              />
+              <SegmentedControl
+                fullWidth
+                label='Color mode'
+                options={modeOptions}
+                selected={effectiveMode}
+                onSelectOption={(option) => onModeChange(option)}
+                disabled={effectivePalette === ThemePalette.MATRIX}
+                key={`tab-slider-${effectivePalette}`}
+              />
+            </Flex>
           </SettingsCard>
         ) : null}
         {!isManagedAccount ? (
