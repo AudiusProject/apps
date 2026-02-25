@@ -47,6 +47,7 @@
     "mobile": "npm run start -w @audius/mobile",
     "mobile:clean": "npm run clean:auto -w @audius/mobile && npm run clean:modules",
     "mobile:clear-cache": "watchman watch-del-all && npm run start -w @audius/mobile -- --reset-cache",
+    "mobile:example:trending": "cd packages/mobile/examples/trending && npx expo start",
     "EMBED======================================": "",
     "embed:prod": "npm run start:prod -w embed",
     "embed:stage": "npm run start:stage -w embed",

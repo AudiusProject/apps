@@ -98,6 +98,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Music player, app, frontend | Use [Audius API](https://api.audius.co) and [SDK](https://www.npmjs.com/package/@audius/sdk). Start with [create-audius-app](https://docs.audius.co/developers/guides/create-audius-app). |
 | User auth, OAuth            | [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius)                                                                                                         |
+| Mobile examples (OAuth, auth, writes) | `packages/mobile/examples` in monorepo — runnable auth-sign-in, authenticated-writes, trending; see README for run instructions. |
 | Run a node, protocol dev    | Use [Open Audio Protocol](https://openaudio.org). Read [openaudio.org/agents.md](https://openaudio.org/agents.md) and [skill.md](https://openaudio.org/skill.md).                         |
 
 ## Tutorials Index
@@ -117,6 +118,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 - **API base**: https://api.audius.co/v1
 - **SDK**: [@audius/sdk on npm](https://www.npmjs.com/package/@audius/sdk)
 - **GitHub**: [github.com/audiusproject](https://github.com/audiusproject) (apps, sdk in monorepo)
+- **Mobile examples**: `packages/mobile/examples` — auth-sign-in, authenticated-writes, trending; see README for run instructions
 - **create-audius-app**: `npx create-audius-app`
 
 ## All Links

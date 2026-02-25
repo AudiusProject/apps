@@ -49,5 +49,5 @@
     // Issue is due to absolute paths into @audius/web
     "strict": false
   },
-  "exclude": ["node_modules", "harmony"]
+  "exclude": ["node_modules", "harmony", "examples"]
 }
