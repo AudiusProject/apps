@@ -2,11 +2,13 @@ import { Theme } from '@audius/common/models'
 import type { ImageStyle, TextStyle, ViewStyle } from 'react-native'
 import { StyleSheet } from 'react-native'
 
-import type { ThemeColors } from 'app/utils/theme'
+import type { ResolvedThemeName, ThemeColors } from 'app/utils/theme'
 import {
   matrixTheme,
   defaultTheme,
   darkTheme,
+  defaultLightThemeColors,
+  defaultDarkThemeColors,
   useThemeVariant
 } from 'app/utils/theme'
 
@@ -31,7 +33,23 @@ export const makeStyles = <T extends Record<string, StyleTypes>>(
 ): (() => T) => {
   const baseOptions = { spacing, typography }
 
-  const lightStylesheet = StyleSheet.create(
+  const defaultLightStylesheet = StyleSheet.create(
+    styles({
+      type: Theme.LIGHT,
+      palette: defaultLightThemeColors,
+      ...baseOptions
+    })
+  )
+
+  const defaultDarkStylesheet = StyleSheet.create(
+    styles({
+      type: Theme.DARK,
+      palette: defaultDarkThemeColors,
+      ...baseOptions
+    })
+  )
+
+  const classicLightStylesheet = StyleSheet.create(
     styles({
       type: Theme.LIGHT,
       palette: defaultTheme,
@@ -39,7 +57,7 @@ export const makeStyles = <T extends Record<string, StyleTypes>>(
     })
   )
 
-  const darkStylesheet = StyleSheet.create(
+  const classicDarkStylesheet = StyleSheet.create(
     styles({
       type: Theme.DARK,
       palette: darkTheme,
@@ -55,10 +73,12 @@ export const makeStyles = <T extends Record<string, StyleTypes>>(
     })
   )
 
-  const themedStylesheets = {
-    [Theme.LIGHT]: lightStylesheet,
-    [Theme.DARK]: darkStylesheet,
-    [Theme.MATRIX]: matrixStylesheet
+  const themedStylesheets: Record<ResolvedThemeName, T> = {
+    'default-light': defaultLightStylesheet,
+    'default-dark': defaultDarkStylesheet,
+    'classic-light': classicLightStylesheet,
+    'classic-dark': classicDarkStylesheet,
+    matrix: matrixStylesheet
   }
 
   return function useStyles() {
