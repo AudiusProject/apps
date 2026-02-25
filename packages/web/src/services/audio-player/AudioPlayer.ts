@@ -1,5 +1,8 @@
 import { playbackRateValueMap, PlaybackRate } from '@audius/common/store'
-import { AUDIO_LOAD_TIMEOUT_MS, MIN_BUFFERING_DELAY_MS } from '@audius/common/utils'
+import {
+  AUDIO_LOAD_TIMEOUT_MS,
+  MIN_BUFFERING_DELAY_MS
+} from '@audius/common/utils'
 
 declare global {
   interface Window {
