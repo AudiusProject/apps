@@ -441,15 +441,16 @@ export const SettingsPage = () => {
                 label={settingsMessages.appearanceTitle}
                 optionsLabel='Theme'
               />
-              <SegmentedControl
-                fullWidth
-                label='Color mode'
-                options={modeOptions}
-                selected={effectiveMode}
-                onSelectOption={(option) => onModeChange(option)}
-                disabled={effectivePalette === ThemePalette.MATRIX}
-                key={`tab-slider-${effectivePalette}`}
-              />
+              {effectivePalette !== ThemePalette.MATRIX ? (
+                <SegmentedControl
+                  fullWidth
+                  label='Color mode'
+                  options={modeOptions}
+                  selected={effectiveMode}
+                  onSelectOption={(option) => onModeChange(option)}
+                  key={`tab-slider-${effectivePalette}`}
+                />
+              ) : null}
             </Flex>
           </SettingsCard>
         ) : null}
