@@ -15,11 +15,11 @@ import {
   queueSelectors
 } from '@audius/common/store'
 import {
+  CASCADING_TIMEOUTS_MS,
   Genre,
   actionChannelDispatcher,
   getTrackPreviewDuration,
-  Nullable,
-  resolveStreamUrl
+  Nullable
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { EventChannel, eventChannel } from 'redux-saga'
@@ -89,6 +89,56 @@ export const getMirrorStreamUrl = (
   return streamObj?.url ?? null
 }
 
+/**
+ * Returns the stream URL and load timeout for the given retry index.
+ * Uses the cascading pattern: primary (2s) → mirrors (2s) → mirrors (5s) → mirrors (30s).
+ * No HEAD fetch - the audio element does the actual request.
+ */
+const getStreamUrlAndTimeout = (
+  streamObj: { url?: string; mirrors?: string[] } | null | undefined,
+  retries: number
+): { url: string | null; timeoutMs: number } => {
+  const defaultTimeout = CASCADING_TIMEOUTS_MS[2]
+  if (!streamObj?.url) {
+    return { url: null, timeoutMs: defaultTimeout }
+  }
+
+  const urls: string[] = [streamObj.url]
+  const mirrors = streamObj.mirrors ?? []
+  for (const mirror of mirrors) {
+    try {
+      const mirrorUrl = new URL(streamObj.url)
+      mirrorUrl.hostname = new URL(mirror).hostname
+      urls.push(mirrorUrl.toString())
+    } catch {
+      // no-op
+    }
+  }
+
+  const numMirrors = urls.length - 1
+  const maxRetries = 1 + numMirrors * 3
+
+  if (numMirrors === 0) {
+    return { url: urls[0], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
+  }
+  if (retries >= maxRetries) {
+    return { url: urls[0], timeoutMs: defaultTimeout }
+  }
+
+  if (retries === 0) {
+    return { url: urls[0], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
+  }
+  if (retries <= numMirrors) {
+    return { url: urls[retries], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
+  }
+  if (retries <= numMirrors * 2) {
+    const mirrorIndex = 1 + (retries - numMirrors - 1)
+    return { url: urls[mirrorIndex], timeoutMs: CASCADING_TIMEOUTS_MS[1] }
+  }
+  const mirrorIndex = 1 + ((retries - numMirrors * 2 - 1) % numMirrors)
+  return { url: urls[mirrorIndex], timeoutMs: CASCADING_TIMEOUTS_MS[2] }
+}
+
 export function* watchPlay() {
   yield* takeLatest(play.type, function* (action: ReturnType<typeof play>) {
     const { uid, trackId, playerBehavior, startTime, onEnd, retries } =
@@ -139,14 +189,15 @@ export function* watchPlay() {
       }
 
       const streamObj = shouldPreview ? track.preview : track.stream
-      const contentNodeStreamUrl = streamObj?.url
-        ? yield* call(resolveStreamUrl, streamObj, retries ?? 0)
-        : null
+      const { url: contentNodeStreamUrl, timeoutMs: loadTimeoutMs } =
+        streamObj?.url
+          ? getStreamUrlAndTimeout(streamObj, retries ?? 0)
+          : { url: null as string | null, timeoutMs: 30000 }
 
       const isLongFormContent =
         track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
 
-      const createEndChannel = async (url: string) => {
+      const createEndChannel = async (url: string, timeoutMs?: number) => {
         const endChannel = eventChannel((emitter) => {
           audioPlayer.load(
             trackDuration ||
@@ -174,7 +225,8 @@ export function* watchPlay() {
                 )
               }
             },
-            url
+            url,
+            timeoutMs
           )
           return () => {}
         })
@@ -185,7 +237,11 @@ export function* watchPlay() {
       // If we have a stream URL from API already for content node, use that.
       // If not, we might need the NFT gated signature, so fallback to the API stream endpoint.
       if (contentNodeStreamUrl) {
-        endChannel = yield* call(createEndChannel, contentNodeStreamUrl)
+        endChannel = yield* call(
+          createEndChannel,
+          contentNodeStreamUrl,
+          loadTimeoutMs
+        )
       } else {
         const { data, signature } = yield* call(
           audiusBackendInstance.signGatedContentRequest,
@@ -204,7 +260,7 @@ export function* watchPlay() {
             preview: shouldPreview ? true : undefined
           }
         )
-        endChannel = yield* call(createEndChannel, streamUrl)
+        endChannel = yield* call(createEndChannel, streamUrl, undefined)
       }
 
       yield* spawn(actionChannelDispatcher, endChannel)
@@ -408,7 +464,9 @@ export function* handleAudioErrors() {
       const retries = yield* select(getPlaybackRetryCount)
       const { shouldPreview } = calculatePlayerBehavior(track, playerBehavior)
       const streamObj = shouldPreview ? track?.preview : track?.stream
-      if (streamObj?.mirrors && streamObj.mirrors.length + 1 > retries) {
+      const numMirrors = streamObj?.mirrors?.length ?? 0
+      const maxRetries = 1 + numMirrors * 3
+      if (streamObj?.url && maxRetries > retries) {
         yield* put(
           play({
             trackId,
