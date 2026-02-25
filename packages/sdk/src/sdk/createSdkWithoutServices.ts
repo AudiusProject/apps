@@ -129,7 +129,11 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
         services?.storage ??
         new Storage({
           storageNodeSelector:
-            services?.storageNodeSelector ?? new StorageNodeSelector({}),
+            services?.storageNodeSelector ??
+            new StorageNodeSelector({
+              endpoint: basePath,
+              logger
+            }),
           logger
         })
     })
