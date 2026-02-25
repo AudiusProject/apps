@@ -1,38 +1,10 @@
-import { AUDIO_LOAD_TIMEOUT_MS } from './constants'
+import { resolveUrlWithCascadingTimeout } from './resolveUrlWithCascadingTimeout'
 
 type StreamObject = { url?: string; mirrors?: string[] }
 
-const tryUrl = async (url: string): Promise<boolean> => {
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      AUDIO_LOAD_TIMEOUT_MS
-    )
-    const response = await fetch(url, {
-      method: 'HEAD',
-      signal: controller.signal
-    })
-    clearTimeout(timeoutId)
-    return response.ok
-  } catch {
-    return false
-  }
-}
-
-const tryUrls = async (urls: string[]): Promise<string> => {
-  for (const url of urls) {
-    if (await tryUrl(url)) {
-      return url
-    }
-  }
-  return urls[0] ?? ''
-}
-
 /**
- * Resolves a working stream URL from a stream object, trying the primary URL
- * and mirrors with a 5s timeout per attempt. Returns the first URL that
- * responds successfully, or the primary URL as fallback.
+ * Resolves a working stream URL from a stream object using cascading timeouts:
+ * try primary (2s) → mirrors (2s) → mirrors (5s) → mirrors (30s)
  *
  * @param streamObj - The stream or preview object with url and mirrors
  * @param skipCount - Number of URLs to skip (for retries after playback error)
@@ -58,7 +30,5 @@ export const resolveStreamUrl = async (
     }
   }
 
-  const urlsToAttempt = urlsToTry.slice(skipCount)
-  const workingUrl = await tryUrls(urlsToAttempt)
-  return workingUrl || urlsToAttempt[0] || null
+  return resolveUrlWithCascadingTimeout(urlsToTry, skipCount)
 }

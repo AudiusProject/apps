@@ -18,7 +18,8 @@ import {
   Genre,
   actionChannelDispatcher,
   getTrackPreviewDuration,
-  Nullable
+  Nullable,
+  resolveStreamUrl
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { EventChannel, eventChannel } from 'redux-saga'
@@ -85,7 +86,7 @@ export const getMirrorStreamUrl = (
       return streamUrl.toString()
     }
   }
-  return streamObj?.url ?? nul
+  return streamObj?.url ?? null
 }
 
 export function* watchPlay() {
@@ -137,11 +138,10 @@ export function* watchPlay() {
         trackDuration = getTrackPreviewDuration(track)
       }
 
-      const contentNodeStreamUrl = getMirrorStreamUrl(
-        track,
-        shouldPreview,
-        retries ?? 0
-      )
+      const streamObj = shouldPreview ? track.preview : track.stream
+      const contentNodeStreamUrl = streamObj?.url
+        ? yield* call(resolveStreamUrl, streamObj, retries ?? 0)
+        : null
 
       const isLongFormContent =
         track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
