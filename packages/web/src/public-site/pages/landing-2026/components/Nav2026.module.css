@@ -1,16 +1,26 @@
-.nav {
+.container {
   position: sticky;
+  container-type: scroll-state;
   top: 0;
   z-index: 100;
   width: 100%;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(17, 17, 17, 0.75);
-  border-bottom: 1px solid rgba(17, 17, 17, 0.7);
+  box-sizing: border-box;
+  height: 88px;
+  margin-bottom: -88px;
+}
+
+.nav {
+  width: 100%;
   display: flex;
   justify-content: center;
   padding: 0 48px;
-  box-sizing: border-box;
+  @container scroll-state(stuck: top) {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(17, 17, 17, 0.75);
+    border-bottom: 1px solid rgba(17, 17, 17, 0.7);
+    transition: background 0.2s ease;
+  }
 }
 
 .inner {
