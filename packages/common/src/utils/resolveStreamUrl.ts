@@ -1,11 +1,14 @@
-import { getAudioLoadTimeoutMs } from './constants'
+import { AUDIO_LOAD_TIMEOUT_MS } from './constants'
 
 type StreamObject = { url?: string; mirrors?: string[] }
 
-const tryUrl = async (url: string, timeoutMs: number): Promise<boolean> => {
+const tryUrl = async (url: string): Promise<boolean> => {
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      AUDIO_LOAD_TIMEOUT_MS
+    )
     const response = await fetch(url, {
       method: 'HEAD',
       signal: controller.signal
@@ -17,10 +20,9 @@ const tryUrl = async (url: string, timeoutMs: number): Promise<boolean> => {
   }
 }
 
-const tryUrls = async (urls: string[], retryCount: number): Promise<string> => {
-  const timeoutMs = getAudioLoadTimeoutMs(retryCount)
+const tryUrls = async (urls: string[]): Promise<string> => {
   for (const url of urls) {
-    if (await tryUrl(url, timeoutMs)) {
+    if (await tryUrl(url)) {
       return url
     }
   }
@@ -57,6 +59,6 @@ export const resolveStreamUrl = async (
   }
 
   const urlsToAttempt = urlsToTry.slice(skipCount)
-  const workingUrl = await tryUrls(urlsToAttempt, skipCount)
+  const workingUrl = await tryUrls(urlsToAttempt)
   return workingUrl || urlsToAttempt[0] || null
 }

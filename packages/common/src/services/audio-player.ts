@@ -15,12 +15,7 @@ export enum AudioError {
 
 export type AudioPlayer = {
   audio: HTMLAudioElement
-  load: (
-    duration: number,
-    onEnd: () => void,
-    mp3Url: Nullable<string>,
-    timeoutMs?: number
-  ) => void
+  load: (duration: number, onEnd: () => void, mp3Url: Nullable<string>) => void
   play: () => void
   pause: () => void
   stop: () => void

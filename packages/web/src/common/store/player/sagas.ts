@@ -17,7 +17,6 @@ import {
 import {
   Genre,
   actionChannelDispatcher,
-  getAudioLoadTimeoutMs,
   getTrackPreviewDuration,
   Nullable
 } from '@audius/common/utils'
@@ -86,7 +85,7 @@ export const getMirrorStreamUrl = (
       return streamUrl.toString()
     }
   }
-  return streamObj?.url ?? null
+  return streamObj?.url ?? nul
 }
 
 export function* watchPlay() {
@@ -147,10 +146,7 @@ export function* watchPlay() {
       const isLongFormContent =
         track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
 
-      const retryCount = retries ?? 0
-      const loadTimeoutMs = getAudioLoadTimeoutMs(retryCount)
-
-      const createEndChannel = async (url: string, timeoutMs: number) => {
+      const createEndChannel = async (url: string) => {
         const endChannel = eventChannel((emitter) => {
           audioPlayer.load(
             trackDuration ||
@@ -178,8 +174,7 @@ export function* watchPlay() {
                 )
               }
             },
-            url,
-            timeoutMs
+            url
           )
           return () => {}
         })
@@ -190,11 +185,7 @@ export function* watchPlay() {
       // If we have a stream URL from API already for content node, use that.
       // If not, we might need the NFT gated signature, so fallback to the API stream endpoint.
       if (contentNodeStreamUrl) {
-        endChannel = yield* call(
-          createEndChannel,
-          contentNodeStreamUrl,
-          loadTimeoutMs
-        )
+        endChannel = yield* call(createEndChannel, contentNodeStreamUrl)
       } else {
         const { data, signature } = yield* call(
           audiusBackendInstance.signGatedContentRequest,
@@ -213,7 +204,7 @@ export function* watchPlay() {
             preview: shouldPreview ? true : undefined
           }
         )
-        endChannel = yield* call(createEndChannel, streamUrl, loadTimeoutMs)
+        endChannel = yield* call(createEndChannel, streamUrl)
       }
 
       yield* spawn(actionChannelDispatcher, endChannel)
