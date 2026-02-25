@@ -91,7 +91,10 @@ export const getMirrorStreamUrl = (
 
 /**
  * Returns the stream URL and load timeout for the given retry index.
- * Uses the cascading pattern: primary (2s) → mirrors (2s) → mirrors (5s) → mirrors (30s).
+ * Uses the cascading pattern - each phase tries primary + all mirrors:
+ * - Phase 0: all urls with 2s
+ * - Phase 1: all urls with 5s
+ * - Phase 2: all urls with 30s
  * No HEAD fetch - the audio element does the actual request.
  */
 const getStreamUrlAndTimeout = (
@@ -115,28 +118,18 @@ const getStreamUrlAndTimeout = (
     }
   }
 
-  const numMirrors = urls.length - 1
-  const maxRetries = 1 + numMirrors * 3
+  const urlsPerPhase = urls.length
+  const maxRetries = urlsPerPhase * 3
 
-  if (numMirrors === 0) {
-    return { url: urls[0], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
-  }
   if (retries >= maxRetries) {
     return { url: urls[0], timeoutMs: defaultTimeout }
   }
 
-  if (retries === 0) {
-    return { url: urls[0], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
-  }
-  if (retries <= numMirrors) {
-    return { url: urls[retries], timeoutMs: CASCADING_TIMEOUTS_MS[0] }
-  }
-  if (retries <= numMirrors * 2) {
-    const mirrorIndex = 1 + (retries - numMirrors - 1)
-    return { url: urls[mirrorIndex], timeoutMs: CASCADING_TIMEOUTS_MS[1] }
-  }
-  const mirrorIndex = 1 + ((retries - numMirrors * 2 - 1) % numMirrors)
-  return { url: urls[mirrorIndex], timeoutMs: CASCADING_TIMEOUTS_MS[2] }
+  const phase = Math.floor(retries / urlsPerPhase)
+  const urlIndex = retries % urlsPerPhase
+  const timeoutMs = CASCADING_TIMEOUTS_MS[phase]
+
+  return { url: urls[urlIndex], timeoutMs }
 }
 
 export function* watchPlay() {
@@ -464,8 +457,8 @@ export function* handleAudioErrors() {
       const retries = yield* select(getPlaybackRetryCount)
       const { shouldPreview } = calculatePlayerBehavior(track, playerBehavior)
       const streamObj = shouldPreview ? track?.preview : track?.stream
-      const numMirrors = streamObj?.mirrors?.length ?? 0
-      const maxRetries = 1 + numMirrors * 3
+      const numUrls = 1 + (streamObj?.mirrors?.length ?? 0)
+      const maxRetries = numUrls * 3
       if (streamObj?.url && maxRetries > retries) {
         yield* put(
           play({

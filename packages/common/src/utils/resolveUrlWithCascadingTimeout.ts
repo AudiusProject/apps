@@ -1,9 +1,9 @@
 /**
- * Cascading timeout phases for URL resolution:
- * 1. Try primary with 2s
- * 2. If fail, try all mirrors with 2s each
- * 3. If all fail, try all mirrors with 5s each
- * 4. If all fail, try all mirrors with 30s each
+ * Cascading timeout phases for URL resolution.
+ * Each phase tries primary + all mirrors with the given timeout:
+ * - Phase 1: 2s
+ * - Phase 2: 5s
+ * - Phase 3: 30s
  */
 export const CASCADING_TIMEOUTS_MS = [2000, 5000, 30000] as const
 
@@ -38,11 +38,11 @@ const tryUrlsWithTimeout = async (
 }
 
 /**
- * Resolves a working URL using cascading timeouts:
- * - Try primary with 2s
- * - If fail, try all mirrors with 2s each
- * - If all fail, try all mirrors with 5s each
- * - If all fail, try all mirrors with 30s each
+ * Resolves a working URL using cascading timeouts.
+ * Each phase tries primary + all mirrors with progressively longer timeouts:
+ * - Phase 1: all urls with 2s
+ * - Phase 2: all urls with 5s
+ * - Phase 3: all urls with 30s
  *
  * @param urls - [primary, ...mirrors]
  * @param skipCount - Number of URLs to skip from the start (for retries after error)
@@ -56,21 +56,10 @@ export const resolveUrlWithCascadingTimeout = async (
     return null
   }
 
-  const [primary, ...mirrors] = urlsToTry
-  const primaryFallback = primary ?? null
+  const primaryFallback = urlsToTry[0] ?? null
 
-  // Phase 1: Try primary with 2s
-  if (primary && (await tryUrlWithTimeout(primary, CASCADING_TIMEOUTS_MS[0]))) {
-    return primary
-  }
-
-  if (mirrors.length === 0) {
-    return primaryFallback
-  }
-
-  // Phases 2-4: Try all mirrors with 2s, 5s, then 30s
   for (const timeoutMs of CASCADING_TIMEOUTS_MS) {
-    const workingUrl = await tryUrlsWithTimeout(mirrors, timeoutMs)
+    const workingUrl = await tryUrlsWithTimeout(urlsToTry, timeoutMs)
     if (workingUrl) {
       return workingUrl
     }
