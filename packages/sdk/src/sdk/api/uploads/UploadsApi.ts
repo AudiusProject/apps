@@ -1,12 +1,12 @@
 import { type ProgressHandler } from '../../services'
 import type { CrossPlatformFile } from '../../types/File'
 
-import type { UploadApiServicesConfig } from './types'
+import type { UploadsApiServicesConfig } from './types'
 
-export default class UploadApi {
+export class UploadsApi {
   private readonly storage
 
-  constructor(services: UploadApiServicesConfig) {
+  constructor(services: UploadsApiServicesConfig) {
     this.storage = services.storageService
   }
 

@@ -21,7 +21,7 @@ import {
   WalletApi,
   type Middleware
 } from './api/generated/default'
-import UploadApi from './api/upload/UploadApi'
+import { UploadsApi } from './api/uploads/UploadsApi'
 import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
 import {
@@ -124,7 +124,7 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     wallets: new WalletApi(apiConfig),
     challenges: new ChallengesApi(apiConfig),
     prizes: new PrizesApi(apiConfig),
-    upload: new UploadApi({
+    uploads: new UploadsApi({
       storageService:
         services?.storage ??
         new Storage({

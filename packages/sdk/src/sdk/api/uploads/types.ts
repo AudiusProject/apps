@@ -1,5 +1,5 @@
 import type { StorageService } from '../../services'
 
-export type UploadApiServicesConfig = {
+export type UploadsApiServicesConfig = {
   storageService: StorageService
 }
