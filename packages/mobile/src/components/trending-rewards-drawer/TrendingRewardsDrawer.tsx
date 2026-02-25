@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
 import { useRemoteVar } from '@audius/common/hooks'
-import { Theme } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
 import {
   audioRewardsPageSelectors,
@@ -21,7 +20,7 @@ import TweetEmbed from 'app/components/tweet-embed'
 import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppScreenParamList } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
-import { useThemeVariant } from 'app/utils/theme'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { AppDrawer, useDrawerState } from '../drawer/AppDrawer'
 const { getTrendingRewardsModalType } = audioRewardsPageSelectors
@@ -143,7 +142,7 @@ const useTweetId = (type: TrendingRewardsModalType) => {
 
 const useIsDark = () => {
   const themeVariant = useThemeVariant()
-  return themeVariant === Theme.DARK
+  return isDarkTheme(themeVariant)
 }
 
 export const TrendingRewardsDrawer = (titleIcon) => {

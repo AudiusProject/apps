@@ -6,7 +6,6 @@ import {
 } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import { themeSelectors } from '@audius/common/store'
-import type { HarmonyTheme } from '@audius/harmony/src/foundations/theme/theme'
 import { useSelector } from 'react-redux'
 
 import { theme as harmonyNativeTheme } from '@audius/harmony-native'
@@ -82,10 +81,10 @@ export type ThemeColors = {
   focus: string
 }
 
-const createMobileThemeFromHarmony = (
-  harmonyTheme: HarmonyTheme
-): ThemeColors => {
-  const { color } = harmonyTheme
+const createMobileThemeFromHarmony = (theme: {
+  color: Record<string, any>
+}): ThemeColors => {
+  const { color } = theme
 
   return {
     background: color.special.background,

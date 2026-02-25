@@ -104,7 +104,7 @@ export const AppearanceSettingsRow = () => {
           eventName: Name.SETTINGS_CHANGE_THEME,
           mode: 'palette',
           palette: value
-        })
+        } as any)
       )
     },
     [dispatch]
