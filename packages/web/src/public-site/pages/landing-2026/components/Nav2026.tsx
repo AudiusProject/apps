@@ -149,81 +149,85 @@ export const Nav2026 = (props: Nav2026Props) => {
 
   return (
     <>
-      <nav className={styles.nav}>
-        <div className={styles.inner}>
-          <a
-            href='/'
-            onClick={onLogoClick}
-            aria-label='Audius home'
-            className={styles.logoLink}
-          >
-            <IconAudiusLogoHorizontal
-              height={32}
-              width='auto'
-              color='default'
-              className={styles.logo}
-            />
-          </a>
-          <div className={styles.right}>
-            {isMobile ? (
-              <button
-                type='button'
-                className={styles.mobileMenuButton}
-                onClick={() => setIsMobileOverlayOpen(true)}
-                aria-label='Open menu'
-              >
-                <IconKebabHorizontal
-                  size='m'
-                  color='default'
-                  className={styles.kebabIcon}
-                />
-              </button>
-            ) : (
-              <>
-                <div ref={dropdownRef} style={{ position: 'relative' }}>
-                  <button
-                    type='button'
-                    className={styles.resourcesButton}
-                    onClick={() => {
-                      if (isDropdownOpen) startCloseDropdown()
-                      else {
-                        setIsDropdownClosing(false)
-                        setIsDropdownOpen(true)
-                      }
-                    }}
-                    aria-expanded={isDropdownOpen && !isDropdownClosing}
-                    aria-haspopup='true'
-                    aria-label='Resources menu'
-                  >
-                    {messages.resources}
-                    <IconCaretDown
-                      size='s'
-                      color='default'
-                      className={`${styles.chevronIcon} ${isDropdownOpen && !isDropdownClosing ? styles.chevronIconOpen : ''}`}
-                    />
-                  </button>
-                  {isDropdownOpen || isDropdownClosing ? (
-                    <ResourcesDropdown
-                      setRenderPublicSite={setRenderPublicSite}
-                      navigate={navigate}
-                      onClose={startCloseDropdown}
-                      onClosingComplete={finishCloseDropdown}
-                      isClosing={isDropdownClosing}
-                    />
-                  ) : null}
-                </div>
+      <div className={styles.container}>
+        <nav className={styles.nav}>
+          <div className={styles.inner}>
+            <a
+              href='/'
+              onClick={onLogoClick}
+              aria-label='Audius home'
+              className={styles.logoLink}
+            >
+              <IconAudiusLogoHorizontal
+                height={32}
+                width='auto'
+                color='default'
+                className={styles.logo}
+              />
+            </a>
+            <div className={styles.right}>
+              {isMobile ? (
                 <button
                   type='button'
-                  className={styles.ctaButton}
-                  onClick={onSignUp}
+                  className={styles.mobileMenuButton}
+                  onClick={() => setIsMobileOverlayOpen(true)}
+                  aria-label='Open menu'
                 >
-                  <span className={styles.ctaLabel}>{messages.getStarted}</span>
+                  <IconKebabHorizontal
+                    size='m'
+                    color='default'
+                    className={styles.kebabIcon}
+                  />
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <div ref={dropdownRef} style={{ position: 'relative' }}>
+                    <button
+                      type='button'
+                      className={styles.resourcesButton}
+                      onClick={() => {
+                        if (isDropdownOpen) startCloseDropdown()
+                        else {
+                          setIsDropdownClosing(false)
+                          setIsDropdownOpen(true)
+                        }
+                      }}
+                      aria-expanded={isDropdownOpen && !isDropdownClosing}
+                      aria-haspopup='true'
+                      aria-label='Resources menu'
+                    >
+                      {messages.resources}
+                      <IconCaretDown
+                        size='s'
+                        color='default'
+                        className={`${styles.chevronIcon} ${isDropdownOpen && !isDropdownClosing ? styles.chevronIconOpen : ''}`}
+                      />
+                    </button>
+                    {isDropdownOpen || isDropdownClosing ? (
+                      <ResourcesDropdown
+                        setRenderPublicSite={setRenderPublicSite}
+                        navigate={navigate}
+                        onClose={startCloseDropdown}
+                        onClosingComplete={finishCloseDropdown}
+                        isClosing={isDropdownClosing}
+                      />
+                    ) : null}
+                  </div>
+                  <button
+                    type='button'
+                    className={styles.ctaButton}
+                    onClick={onSignUp}
+                  >
+                    <span className={styles.ctaLabel}>
+                      {messages.getStarted}
+                    </span>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
       {isMobileOverlayOpen ? (
         <MobileNavOverlay
           onClose={() => setIsMobileOverlayOpen(false)}
