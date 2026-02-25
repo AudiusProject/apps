@@ -1,6 +1,6 @@
 import { playbackRateValueMap, PlaybackRate } from '@audius/common/store'
 import {
-  AUDIO_LOAD_TIMEOUT_MS,
+  getAudioLoadTimeoutMs,
   MIN_BUFFERING_DELAY_MS
 } from '@audius/common/utils'
 
@@ -118,7 +118,8 @@ export class AudioPlayer {
   load = (
     duration: number,
     onEnd: () => void,
-    mp3Url: string | null = null
+    mp3Url: string | null = null,
+    timeoutMs?: number
   ) => {
     this.onEnd = onEnd
     if (mp3Url) {
@@ -186,6 +187,7 @@ export class AudioPlayer {
       this.audio.preload = 'none'
       this.audio.crossOrigin = 'anonymous'
       this.audio.src = mp3Url
+      const loadTimeoutMs = timeoutMs ?? getAudioLoadTimeoutMs(0)
       this.loadTimeout = setTimeout(() => {
         this.loadTimeout = null
         if (this.audio.src && this.audio.readyState < 2) {
@@ -193,7 +195,7 @@ export class AudioPlayer {
           this.audio.src = ''
           this.onError(AudioError.AUDIO, 'timeout')
         }
-      }, AUDIO_LOAD_TIMEOUT_MS)
+      }, loadTimeoutMs)
       this.audio.volume = prevVolume
       this.audio.onloadedmetadata = () => (this.duration = this.audio.duration)
     }
