@@ -72,8 +72,7 @@ export const isNodeHealthy = async (endpoint: string, logger = console) => {
     const resp = await axios({
       baseURL: endpoint,
       url: `/health_check`,
-      method: 'get',
-      timeout: 3000
+      method: 'get'
     })
     if (resp.status !== 200) {
       logger.warn(
