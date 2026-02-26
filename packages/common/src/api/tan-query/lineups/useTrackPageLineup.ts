@@ -126,9 +126,9 @@ export const useTrackPageLineup = (
           offset: 0
         })
 
-        if (remixesData?.tracks) {
+        if (remixesData?.data?.tracks) {
           const processedRemixes = transformAndCleanList(
-            remixesData.tracks,
+            remixesData.data.tracks,
             userTrackMetadataFromSDK
           )
           if (processedRemixes.length > 0) {

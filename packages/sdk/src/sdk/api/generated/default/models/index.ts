@@ -242,6 +242,7 @@ export * from './RemixedTrackAggregate';
 export * from './RemixersCountResponse';
 export * from './RemixersResponse';
 export * from './RemixesResponse';
+export * from './RemixesResponseData';
 export * from './RemixingResponse';
 export * from './ReplyComment';
 export * from './Repost';
