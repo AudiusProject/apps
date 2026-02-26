@@ -110,8 +110,11 @@ export default function App() {
         body: JSON.stringify({ userId, description: description.trim() })
       })
       const data = await res.json().catch(() => ({}))
+      const bodyStr = JSON.stringify(data, null, 2)
+      console.log('[update-description] response body', bodyStr)
       if (res.ok) {
-        setResult('Description updated.')
+        const txHash = data?.transaction_hash ?? data?.transactionHash
+        setResult(txHash ? `Description updated. Tx: ${txHash}` : 'Description updated.')
       } else {
         setResult(data?.error ?? `Error ${res.status}`)
       }

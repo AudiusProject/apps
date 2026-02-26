@@ -12,14 +12,20 @@ import express from 'express'
 const PORT = Number(process.env.PORT) || 3001
 const apiKey = process.env.AUDIUS_API_KEY
 const bearerToken = process.env.AUDIUS_BEARER_TOKEN
+const appName = process.env.APP_NAME || 'auth-example'
 
 if (!apiKey || !bearerToken) {
-  console.error('Set AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN in .env (from audius.co/settings → Developer Apps)')
+  console.error(
+    'Set AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN in .env (from audius.co/settings → Developer Apps)'
+  )
   process.exit(1)
 }
 
 const { sdk } = await import('@audius/sdk')
-const audius = sdk({ apiKey, bearerToken })
+// Provide appName to avoid SDK fetching developer app by apiKey (which can 404 if app not on prod)
+const audius = sdk({ appName, apiKey, bearerToken })
+
+// console.log({ appName, apiKey, bearerToken })
 
 const app = express()
 app.use(express.json())
@@ -32,16 +38,36 @@ app.post('/update-description', async (req, res) => {
     return res.status(400).json({ error: 'Missing userId or description' })
   }
   try {
-    await audius.users.updateUser({
+    const result = await audius.users.updateUser({
       id: userId,
       userId,
       metadata: { bio: String(description) }
     })
-    return res.json({ success: true })
+    const body = {
+      success: true,
+      transaction_hash: result?.transactionHash ?? result?.transaction_hash ?? null
+    }
+    console.log('[update-description] response body', JSON.stringify(body, null, 2))
+    return res.json(body)
   } catch (e) {
-    console.error(e)
+    let body = e?.message ?? 'Unknown error'
+    if (e?.response) {
+      const resHeaders = Object.fromEntries(e.response.headers.entries())
+      console.error('API response:', e.response.status, e.response.statusText)
+      console.error('Response headers:', JSON.stringify(resHeaders, null, 2))
+      if (e?.request) {
+        const reqHeaders = e.request?.headers
+          ? Object.fromEntries(e.request.headers.entries())
+          : {}
+        console.error('Request URL:', e.request?.url ?? e.response?.url)
+        console.error('Request headers:', JSON.stringify(reqHeaders, null, 2))
+      }
+      body = await e.response.text().catch(() => body)
+      if (body) console.error('Body:', body)
+    } else {
+      console.error(e)
+    }
     const status = e?.response?.status ?? 500
-    const body = e?.response ? await e.response.text().catch(() => '') : e?.message ?? 'Unknown error'
     return res.status(status).json({ error: body || 'Update failed' })
   }
 })
