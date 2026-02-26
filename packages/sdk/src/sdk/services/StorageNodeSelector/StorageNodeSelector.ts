@@ -83,13 +83,17 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     }
 
     // Select the next node in rendezvous order from the list of all nodes
-    this.selectedNode = (await this.selectUntilEndOfList()) ?? null
-    this.logger.info('Selected content node', this.selectedNode)
+    const selectedNode = await this.selectUntilEndOfList()
 
-    if (!this.selectedNode) {
-      // We've selected all healthy nodes. Return null and start over next time select() is called
-      this.logger.info(
-        'Selected all healthy nodes. Returning null and starting over next time select() is called'
+    if (selectedNode) {
+      this.selectedNode = selectedNode
+      this.logger.info('Selected content node', this.selectedNode)
+    } else {
+      // No healthy nodes found. Fall back to a random node
+      this.selectedNode = this.getRandomNode()
+      this.logger.warn(
+        'No healthy nodes found. Falling back to random node:',
+        this.selectedNode
       )
       this.selectionState = 'failed_all'
     }
@@ -124,6 +128,17 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     }
 
     return selectedNode
+  }
+
+  private getRandomNode(): string | null {
+    if (!this.orderedNodes?.length) {
+      this.orderedNodes = this.orderNodes(new Date().toString())
+    }
+    if (this.orderedNodes.length === 0) {
+      return null
+    }
+    const randomIndex = Math.floor(Math.random() * this.orderedNodes.length)
+    return this.orderedNodes[randomIndex] ?? null
   }
 
   private orderNodes(key: string) {
