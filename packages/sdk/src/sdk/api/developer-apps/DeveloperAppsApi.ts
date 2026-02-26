@@ -96,18 +96,21 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
       ? (privateKey as string).slice(2).toLowerCase()
       : (privateKey as string).toLowerCase()
 
-    // Register api_key + api_secret in api_keys table (indexer may lag, so retry)
-    await this.registerApiKeyWithRetry({
+    await this.registerDeveloperAppAPIKey({
       address,
-      apiSecret,
-      userId: userId.toString()
+      userId: userId.toString(),
+      metadata: { apiSecret }
     })
 
-    // Create api_access_key for the relay-created app (user from auth headers; indexer may lag, so retry)
-    const bearerToken = await this.createAccessKeyWithRetry({
-      address,
-      userId: userId.toString()
+    const path = `/developer-apps/${encodeURIComponent(address)}/access-keys`
+    const res = await this.request({
+      path,
+      method: 'POST',
+      headers: {},
+      query: { user_id: userId.toString() }
     })
+    const json = (await res.json()) as { api_access_key: string }
+    const bearerToken = json.api_access_key ?? ''
 
     return {
       ...response,
@@ -116,80 +119,6 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
       bearer_token: bearerToken,
       bearerToken
     }
-  }
-
-  /**
-   * Call POST /developer-apps/{address}/register-api-key to insert api_key + api_secret
-   * into api_keys table. Retries on 404 while indexer processes the CreateDeveloperApp tx.
-   */
-  private async registerApiKeyWithRetry(params: {
-    address: string
-    apiSecret: string
-    userId: string
-  }): Promise<void> {
-    const { address, apiSecret, userId } = params
-    const maxAttempts = 5
-    const delayMs = 2000
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await this.registerDeveloperAppAPIKey({
-          address,
-          userId,
-          metadata: { apiSecret }
-        })
-        return
-      } catch (e: unknown) {
-        const status =
-          e && typeof e === 'object' && 'response' in e
-            ? (e as { response?: { status?: number } }).response?.status
-            : undefined
-        if (status === 404 && attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, delayMs))
-          continue
-        }
-        throw e
-      }
-    }
-  }
-
-  /**
-   * Call POST /developer-apps/{address}/access-keys to create the first api_access_key
-   * for a relay-created app. User is identified from request auth headers. Retries on 404
-   * while indexer processes the CreateDeveloperApp tx.
-   */
-  private async createAccessKeyWithRetry(params: {
-    address: string
-    userId: string
-  }): Promise<string> {
-    const { address, userId } = params
-    const maxAttempts = 5
-    const delayMs = 2000
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const path = `/developer-apps/${encodeURIComponent(address)}/access-keys`
-        const res = await this.request({
-          path,
-          method: 'POST',
-          headers: {},
-          query: { user_id: userId }
-        })
-        const json = (await res.json()) as { api_access_key: string }
-        return json.api_access_key ?? ''
-      } catch (e: unknown) {
-        const status =
-          e && typeof e === 'object' && 'response' in e
-            ? (e as { response?: { status?: number } }).response?.status
-            : undefined
-        if (status === 404 && attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, delayMs))
-          continue
-        }
-        throw e
-      }
-    }
-    return ''
   }
 
   /**
