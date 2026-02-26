@@ -27,6 +27,7 @@ export default function App() {
   const [description, setDescription] = useState('')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
   const oauthStateRef = useRef<string | null>(null)
 
   const handleOpenAuth = useCallback(() => {
@@ -65,6 +66,14 @@ export default function App() {
         setProfile({ handle: data.handle ?? data.sub ?? 'Unknown' })
         setUserId(uid)
         setScreen('signed-in')
+        // Prepopulate bio from current profile
+        try {
+          const userRes = await getSDK().users.getUser({ id: uid })
+          const bio = userRes.data?.bio
+          setDescription(bio ?? '')
+        } catch {
+          setDescription('')
+        }
       } catch (e: unknown) {
         if (e && typeof e === 'object' && 'response' in e && e.response && typeof (e.response as Response).text === 'function') {
           const res = e.response as Response
@@ -95,6 +104,7 @@ export default function App() {
     setProfile(null)
     setDescription('')
     setResult(null)
+    setTxHash(null)
     setScreen('home')
     setError(null)
   }, [])
@@ -103,6 +113,7 @@ export default function App() {
     if (!config.writeServerUrl || !userId) return
     setUpdateLoading(true)
     setResult(null)
+    setTxHash(null)
     try {
       const res = await fetch(`${config.writeServerUrl}/update-description`, {
         method: 'POST',
@@ -113,8 +124,9 @@ export default function App() {
       const bodyStr = JSON.stringify(data, null, 2)
       console.log('[update-description] response body', bodyStr)
       if (res.ok) {
-        const txHash = data?.transaction_hash ?? data?.transactionHash
-        setResult(txHash ? `Description updated. Tx: ${txHash}` : 'Description updated.')
+        const hash = data?.transaction_hash ?? data?.transactionHash
+        setTxHash(hash ?? null)
+        setResult(hash ? 'Description updated.' : 'Description updated.')
       } else {
         setResult(data?.error ?? `Error ${res.status}`)
       }
@@ -192,6 +204,18 @@ export default function App() {
             )}
           </TouchableOpacity>
           {result ? <Text style={styles.result}>{result}</Text> : null}
+          {txHash ? (
+            <TouchableOpacity
+              style={styles.txLink}
+              onPress={() =>
+                Linking.openURL(
+                  `https://explorer.audius.engineering/transaction/${txHash}`
+                )
+              }
+            >
+              <Text style={styles.txLinkText}>View transaction</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
         <StatusBar style="auto" />
       </View>
@@ -270,6 +294,8 @@ const styles = StyleSheet.create({
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   result: { fontSize: 13, color: '#333', marginTop: 12 },
+  txLink: { marginTop: 8 },
+  txLinkText: { fontSize: 14, color: '#0066cc', textDecorationLine: 'underline' },
   loader: { marginVertical: 16 },
   error: { color: '#d32f2f', marginTop: 12, fontSize: 13 },
   backBtn: { padding: 16 },
