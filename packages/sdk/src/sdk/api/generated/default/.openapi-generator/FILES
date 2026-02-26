@@ -250,6 +250,8 @@ models/ReceiveTipNotification.ts
 models/ReceiveTipNotificationAction.ts
 models/ReceiveTipNotificationActionData.ts
 models/RedeemAmountResponse.ts
+models/RegisterApiKeyRequestBody.ts
+models/RegisterApiKeyResponse.ts
 models/Related.ts
 models/RelatedArtistResponse.ts
 models/Remix.ts

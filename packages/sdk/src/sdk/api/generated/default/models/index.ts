@@ -229,6 +229,8 @@ export * from './ReceiveTipNotification';
 export * from './ReceiveTipNotificationAction';
 export * from './ReceiveTipNotificationActionData';
 export * from './RedeemAmountResponse';
+export * from './RegisterApiKeyRequestBody';
+export * from './RegisterApiKeyResponse';
 export * from './Related';
 export * from './RelatedArtistResponse';
 export * from './Remix';
