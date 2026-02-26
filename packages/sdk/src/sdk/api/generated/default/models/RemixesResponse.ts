@@ -14,12 +14,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { Track } from './Track';
+import type { RemixesResponseData } from './RemixesResponseData';
 import {
-    TrackFromJSON,
-    TrackFromJSONTyped,
-    TrackToJSON,
-} from './Track';
+    RemixesResponseDataFromJSON,
+    RemixesResponseDataFromJSONTyped,
+    RemixesResponseDataToJSON,
+} from './RemixesResponseData';
 
 /**
  * 
@@ -29,16 +29,10 @@ import {
 export interface RemixesResponse {
     /**
      * 
-     * @type {number}
+     * @type {RemixesResponseData}
      * @memberof RemixesResponse
      */
-    count: number;
-    /**
-     * 
-     * @type {Array<Track>}
-     * @memberof RemixesResponse
-     */
-    tracks?: Array<Track>;
+    data?: RemixesResponseData;
 }
 
 /**
@@ -46,7 +40,6 @@ export interface RemixesResponse {
  */
 export function instanceOfRemixesResponse(value: object): value is RemixesResponse {
     let isInstance = true;
-    isInstance = isInstance && "count" in value && value["count"] !== undefined;
 
     return isInstance;
 }
@@ -61,8 +54,7 @@ export function RemixesResponseFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
-        'count': json['count'],
-        'tracks': !exists(json, 'tracks') ? undefined : ((json['tracks'] as Array<any>).map(TrackFromJSON)),
+        'data': !exists(json, 'data') ? undefined : RemixesResponseDataFromJSON(json['data']),
     };
 }
 
@@ -75,8 +67,7 @@ export function RemixesResponseToJSON(value?: RemixesResponse | null): any {
     }
     return {
         
-        'count': value.count,
-        'tracks': value.tracks === undefined ? undefined : ((value.tracks as Array<any>).map(TrackToJSON)),
+        'data': RemixesResponseDataToJSON(value.data),
     };
 }
 
