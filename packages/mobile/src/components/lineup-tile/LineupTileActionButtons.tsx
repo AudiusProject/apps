@@ -4,7 +4,7 @@ import type { ID, AccessConditions } from '@audius/common/models'
 import { isContentUSDCPurchaseGated } from '@audius/common/models'
 import type { PurchaseableContentType } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
-import { View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 
 import {
   Flex,
@@ -102,10 +102,14 @@ export const LineupTileActionButtons = ({
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const showPublishButton = isOwner && isUnlisted
 
+  // onPressIn fires on touch-down, so we block before Paper's tap completes.
+  // Use direct onPress (not wrapWithBlock) - repost/favorite handlers run after
+  // Lottie animation, too late for the current tap's 100ms check.
   const repostButton = (
     <RepostButton
       wrapperStyle={styles.button}
-      onPress={wrapWithBlock(onPressRepost)}
+      onPressIn={blockTilePress}
+      onPress={onPressRepost}
       isActive={hasReposted}
       isDisabled={disabled}
     />
@@ -114,38 +118,57 @@ export const LineupTileActionButtons = ({
   const favoriteButton = (
     <FavoriteButton
       wrapperStyle={styles.button}
-      onPress={wrapWithBlock(onPressSave)}
+      onPressIn={blockTilePress}
+      onPress={onPressSave}
       isActive={hasSaved}
       isDisabled={disabled}
     />
   )
 
+  // Wrap in RN TouchableOpacity so the tile doesn't stay depressed - RN touchables
+  // let the Paper's RNGH tap properly receive the release and run onFinalize.
   const shareButton = (
-    <IconButton
-      color='subdued'
-      icon={IconShare}
-      disabled={disabled}
+    <TouchableOpacity
+      onPressIn={blockTilePress}
       onPress={wrapWithBlock(onPressShare)}
-      aria-label={messages.shareButtonLabel}
-      size='l'
-      style={{
-        padding: 0
-      }}
-    />
+      disabled={disabled}
+      activeOpacity={0.7}
+      style={styles.button}
+      accessibilityLabel={messages.shareButtonLabel}
+      accessibilityRole='button'
+    >
+      <IconButton
+        color='subdued'
+        icon={IconShare}
+        disabled={disabled}
+        aria-label={messages.shareButtonLabel}
+        size='l'
+        style={{ padding: 0 }}
+        pointerEvents='none'
+      />
+    </TouchableOpacity>
   )
 
   const moreButton = (
-    <IconButton
-      color='subdued'
-      icon={IconKebabHorizontal}
-      disabled={disabled}
+    <TouchableOpacity
+      onPressIn={blockTilePress}
       onPress={wrapWithBlock(onPressOverflow)}
-      aria-label={messages.overflowButtonLabel}
-      size='l'
-      style={{
-        padding: 0
-      }}
-    />
+      disabled={disabled}
+      activeOpacity={0.7}
+      style={styles.button}
+      accessibilityLabel={messages.overflowButtonLabel}
+      accessibilityRole='button'
+    >
+      <IconButton
+        color='subdued'
+        icon={IconKebabHorizontal}
+        disabled={disabled}
+        aria-label={messages.overflowButtonLabel}
+        size='l'
+        style={{ padding: 0 }}
+        pointerEvents='none'
+      />
+    </TouchableOpacity>
   )
 
   const editButton = (

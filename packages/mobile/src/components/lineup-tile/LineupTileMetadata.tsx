@@ -117,6 +117,7 @@ export const LineupTileMetadata = ({
             ...tileStyles.title,
             ...(isPlaying ? tileStyles.titlePlaying : {})
           }}
+          onPressIn={onPressWithPropagationBlock}
           onPress={handleTitlePress}
         >
           <Text
@@ -135,6 +136,7 @@ export const LineupTileMetadata = ({
           ) : null}
         </TouchableOpacity>
         <TouchableOpacity
+          onPressIn={onPressWithPropagationBlock}
           onPress={handlePressArtist}
           activeOpacity={0.7}
           style={{ alignSelf: 'flex-start' }}

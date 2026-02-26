@@ -167,12 +167,7 @@ export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
   const overflowTrackCount = trackCount - DISPLAY_TRACK_COUNT
 
   return (
-    <Pressable
-      onPress={() => {
-        onPressWithPropagationBlock?.()
-        onPress?.()
-      }}
-    >
+    <Pressable onPressIn={onPressWithPropagationBlock} onPress={onPress}>
       {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
         <TrackItem
           key={track.uid}

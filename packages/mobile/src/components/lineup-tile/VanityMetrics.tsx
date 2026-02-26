@@ -22,13 +22,13 @@ export const VanityMetric = (props: VanityMetricProps) => {
 
   const handlePress = () => {
     if (onPress && !disabled) {
-      blockTilePress?.()
       onPress()
     }
   }
 
   return (
     <TouchableOpacity
+      onPressIn={blockTilePress}
       onPress={handlePress}
       disabled={disabled}
       hitSlop={DEFAULT_HIT_SLOP}
