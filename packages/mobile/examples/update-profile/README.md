@@ -1,4 +1,4 @@
-# Authenticated writes example
+# Update profile example
 
 Demonstrates **server-side writes** using your developer app's bearer token. The bearer lives on the server (same token for all writes). Users sign in via OAuth so the client knows their `userId`; they send `{ userId, description }`; your server uses the developer app bearer to perform the write.
 
@@ -16,7 +16,7 @@ From the **apps repo root**:
 ```bash
 npm install
 npm run build -w @audius/sdk
-cd packages/mobile/examples/authenticated-writes/server
+cd packages/mobile/examples/update-profile/server
 cp .env.example .env
 # Edit .env: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN (from audius.co/settings)
 npm install
@@ -32,7 +32,7 @@ Server runs at `http://localhost:3001`:
 In another terminal:
 
 ```bash
-cd packages/mobile/examples/authenticated-writes
+cd packages/mobile/examples/update-profile
 cp .env.example .env
 # Edit .env: EXPO_PUBLIC_AUDIUS_API_KEY (same as server), EXPO_PUBLIC_WRITE_SERVER_URL=http://localhost:3001
 npm install

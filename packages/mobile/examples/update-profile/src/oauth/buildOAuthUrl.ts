@@ -1,5 +1,5 @@
 /**
- * Build the Audius OAuth URL for the WebView (scope=write for authenticated writes).
+ * Build the Audius OAuth URL for the WebView (scope=write for profile updates).
  * See: packages/sdk/src/sdk/oauth/OAuth.ts and types.ts.
  */
 const OAUTH_URL = 'https://audius.co/oauth/auth'
@@ -27,7 +27,7 @@ export function buildOAuthUrl(params: BuildOAuthUrlParams): string {
     scope = 'write',
     redirectUri,
     state,
-    appName = 'AudiusWritesExample',
+    appName = 'UpdateProfileExample',
     apiKey,
     responseMode = 'query',
     display = 'fullScreen'

@@ -39,7 +39,7 @@ export default function App() {
 
   const handleRedirect = useCallback(
     async (url: string) => {
-      if (!url.startsWith(REDIRECT_URI) && !url.startsWith('audiuswrites://oauth/callback')) return
+      if (!url.startsWith(REDIRECT_URI) && !url.startsWith('updateprofile://oauth/callback')) return
       setScreen('home')
       setLoading(true)
       setError(null)
@@ -144,7 +144,7 @@ export default function App() {
       state,
       responseMode: 'query',
       display: 'fullScreen',
-      ...(config.apiKey ? { apiKey: config.apiKey } : { appName: 'AudiusWritesExample' })
+      ...(config.apiKey ? { apiKey: config.apiKey } : { appName: 'UpdateProfileExample' })
     })
     return (
       <View style={styles.container}>
@@ -155,7 +155,7 @@ export default function App() {
           source={{ uri: oauthUrl }}
           style={styles.webview}
           onShouldStartLoadWithRequest={(req) => {
-            if (req.url.startsWith(REDIRECT_URI) || req.url.startsWith('audiuswrites://oauth/callback')) {
+            if (req.url.startsWith(REDIRECT_URI) || req.url.startsWith('updateprofile://oauth/callback')) {
               handleRedirect(req.url)
               return false
             }
@@ -224,7 +224,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.card}>
-          <Text style={styles.title}>Authenticated writes</Text>
+          <Text style={styles.title}>Update profile</Text>
           <Text style={styles.required}>
             Requires your server. Create a .env with:
           </Text>
@@ -242,7 +242,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.center}>
-        <Text style={styles.title}>Authenticated writes</Text>
+        <Text style={styles.title}>Update profile</Text>
         <Text style={styles.subtitle}>
           Sign in with Audius (write scope) to authorize the app, then update your description.
         </Text>

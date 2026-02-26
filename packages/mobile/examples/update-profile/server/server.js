@@ -12,7 +12,7 @@ import express from 'express'
 const PORT = Number(process.env.PORT) || 3001
 const apiKey = process.env.AUDIUS_API_KEY
 const bearerToken = process.env.AUDIUS_BEARER_TOKEN
-const appName = process.env.APP_NAME || 'auth-example'
+const appName = process.env.APP_NAME || 'update-profile'
 
 if (!apiKey || !bearerToken) {
   console.error(

@@ -2,7 +2,7 @@ import type { AudiusSdk } from '@audius/sdk'
 import { sdk } from '@audius/sdk'
 import { config } from './config'
 
-const APP_NAME = 'AudiusWritesExample'
+const APP_NAME = 'UpdateProfileExample'
 
 let unauthenticatedSdk: AudiusSdk | null = null
 let authenticatedSdk: AudiusSdk | null = null
