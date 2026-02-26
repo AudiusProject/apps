@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { useCollection, useCurrentUserId, useUser } from '@audius/common/api'
 import { useGatedCollectionAccess } from '@audius/common/hooks'
@@ -35,6 +35,7 @@ import { CollectionTileStats } from './CollectionTileStats'
 import { CollectionTileTrackList } from './CollectionTileTrackList'
 import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { LineupTileMetadata } from './LineupTileMetadata'
+import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
 import { useEnhancedCollectionTracks } from './useEnhancedCollectionTracks'
 
@@ -120,10 +121,16 @@ export const CollectionTile = (props: CollectionTileProps) => {
     [collection?.playlist_id]
   )
 
+  const childPressedRef = useRef(false)
+
   const handlePress = useCallback(() => {
     if (!tracks.length || !collection) return
 
     setTimeout(() => {
+      if (childPressedRef.current) {
+        childPressedRef.current = false
+        return
+      }
       togglePlay({
         uid: currentTrack?.uid ?? tracks[0]?.uid ?? null,
         id: currentTrack?.track_id ?? tracks[0]?.track_id ?? null,
@@ -131,6 +138,10 @@ export const CollectionTile = (props: CollectionTileProps) => {
       })
     }, 100)
   }, [currentTrack, togglePlay, tracks, collection])
+
+  const handlePressWithPropagationBlock = useCallback(() => {
+    childPressedRef.current = true
+  }, [])
 
   const handlePressTitle = useCallback(() => {
     if (!collection) return
@@ -226,51 +237,55 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const contentType = collection.is_album ? 'album' : 'playlist'
 
   return (
-    <Paper onPress={handlePress} style={style}>
-      <CollectionDogEar collectionId={collection.playlist_id} hideUnlocked />
-      <LineupTileMetadata
-        renderImage={renderImage}
-        onPressTitle={handlePressTitle}
-        title={collection.playlist_name}
-        userId={user.user_id}
-        isPlayingUid={isPlayingUid}
-        type={contentType}
-        trackId={collection.playlist_id}
-        duration={duration}
-        isLongFormContent={false}
-      />
-      <CollectionTileStats
-        collectionId={collection.playlist_id}
-        rankIndex={lineupTileProps.index}
-        isTrending={lineupTileProps.isTrending}
-      />
-      <CollectionTileTrackList
-        tracks={tracks}
-        onPress={handlePressTitle}
-        isAlbum={collection.is_album}
-        trackCount={tracks.length}
-      />
-      {isReadonly ? null : (
-        <LineupTileActionButtons
-          hasReposted={collection.has_current_user_reposted}
-          hasSaved={collection.has_current_user_saved}
-          isOwner={isOwner}
-          isShareHidden={false}
-          isUnlisted={collection.is_private}
-          readonly={isReadonly}
-          contentId={collection.playlist_id}
-          contentType={
-            collection.is_album ? PurchaseableContentType.ALBUM : undefined
-          }
-          streamConditions={collection.stream_conditions}
-          hasStreamAccess={hasStreamAccess}
-          source={source}
-          onPressOverflow={handlePressOverflow}
-          onPressRepost={handlePressRepost}
-          onPressSave={handlePressSave}
-          onPressShare={handlePressShare}
+    <TilePressBlockContext.Provider value={handlePressWithPropagationBlock}>
+      <Paper onPress={handlePress} style={style}>
+        <CollectionDogEar collectionId={collection.playlist_id} hideUnlocked />
+        <LineupTileMetadata
+          renderImage={renderImage}
+          onPressTitle={handlePressTitle}
+          onPressWithPropagationBlock={handlePressWithPropagationBlock}
+          title={collection.playlist_name}
+          userId={user.user_id}
+          isPlayingUid={isPlayingUid}
+          type={contentType}
+          trackId={collection.playlist_id}
+          duration={duration}
+          isLongFormContent={false}
         />
-      )}
-    </Paper>
+        <CollectionTileStats
+          collectionId={collection.playlist_id}
+          rankIndex={lineupTileProps.index}
+          isTrending={lineupTileProps.isTrending}
+        />
+        <CollectionTileTrackList
+          tracks={tracks}
+          onPress={handlePressTitle}
+          onPressWithPropagationBlock={handlePressWithPropagationBlock}
+          isAlbum={collection.is_album}
+          trackCount={tracks.length}
+        />
+        {isReadonly ? null : (
+          <LineupTileActionButtons
+            hasReposted={collection.has_current_user_reposted}
+            hasSaved={collection.has_current_user_saved}
+            isOwner={isOwner}
+            isShareHidden={false}
+            isUnlisted={collection.is_private}
+            readonly={isReadonly}
+            contentId={collection.playlist_id}
+            contentType={
+              collection.is_album ? PurchaseableContentType.ALBUM : undefined
+            }
+            streamConditions={collection.stream_conditions}
+            hasStreamAccess={hasStreamAccess}
+            source={source}
+            onPressOverflow={handlePressOverflow}
+            onPressRepost={handlePressRepost}
+            onPressSave={handlePressSave}
+            onPressShare={handlePressShare}
+          />
+        )}
+      </Paper>
+    </TilePressBlockContext.Provider>
   )
 }

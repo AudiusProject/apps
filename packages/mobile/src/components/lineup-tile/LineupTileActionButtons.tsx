@@ -21,6 +21,7 @@ import { flexRowCentered, makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { LineupTileAccessStatus } from './LineupTileAccessStatus'
+import { useTilePressBlock } from './TilePressBlockContext'
 import type { LineupTileSource } from './types'
 
 const messages = {
@@ -87,7 +88,16 @@ export const LineupTileActionButtons = ({
   onPressEdit
 }: Props) => {
   const styles = useStyles()
+  const blockTilePress = useTilePressBlock()
   const isUSDCEnabled = useIsUSDCEnabled()
+
+  const wrapWithBlock = (handler?: GestureResponderHandler) =>
+    handler
+      ? () => {
+          blockTilePress?.()
+          handler()
+        }
+      : undefined
   const isUSDCPurchase =
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const showPublishButton = isOwner && isUnlisted
@@ -95,7 +105,7 @@ export const LineupTileActionButtons = ({
   const repostButton = (
     <RepostButton
       wrapperStyle={styles.button}
-      onPress={onPressRepost}
+      onPress={wrapWithBlock(onPressRepost)}
       isActive={hasReposted}
       isDisabled={disabled}
     />
@@ -104,7 +114,7 @@ export const LineupTileActionButtons = ({
   const favoriteButton = (
     <FavoriteButton
       wrapperStyle={styles.button}
-      onPress={onPressSave}
+      onPress={wrapWithBlock(onPressSave)}
       isActive={hasSaved}
       isDisabled={disabled}
     />
@@ -115,7 +125,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconShare}
       disabled={disabled}
-      onPress={onPressShare}
+      onPress={wrapWithBlock(onPressShare)}
       aria-label={messages.shareButtonLabel}
       size='l'
       style={{
@@ -129,7 +139,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconKebabHorizontal}
       disabled={disabled}
-      onPress={onPressOverflow}
+      onPress={wrapWithBlock(onPressOverflow)}
       aria-label={messages.overflowButtonLabel}
       size='l'
       style={{
@@ -143,7 +153,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconPencil}
       disabled={disabled}
-      onPress={onPressEdit}
+      onPress={wrapWithBlock(onPressEdit)}
       aria-label={messages.editButtonLabel}
       size='l'
       style={{
@@ -157,7 +167,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconRocket}
       disabled={disabled}
-      onPress={onPressPublish}
+      onPress={wrapWithBlock(onPressPublish)}
       aria-label={messages.publishButtonLabel}
       size='l'
       style={{

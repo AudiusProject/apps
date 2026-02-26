@@ -3,8 +3,7 @@ import type { CommonState } from '@audius/common/store'
 import { playerSelectors } from '@audius/common/store'
 import { pluralize } from '@audius/common/utils'
 import { range } from 'lodash'
-import { Text, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Pressable, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { Box } from '@audius/harmony-native'
@@ -24,6 +23,7 @@ const messages = {
 type LineupTileTrackListProps = {
   isLoading?: boolean
   onPress: GestureResponderHandler
+  onPressWithPropagationBlock?: () => void
   trackCount: number
   tracks: LineupTrack[]
   isAlbum: boolean
@@ -144,7 +144,14 @@ const TrackItem = (props: TrackItemProps) => {
 }
 
 export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
-  const { isLoading, onPress, trackCount, tracks, isAlbum } = props
+  const {
+    isLoading,
+    onPress,
+    onPressWithPropagationBlock,
+    trackCount,
+    tracks,
+    isAlbum
+  } = props
   const styles = useStyles()
 
   if (!tracks.length && isLoading) {
@@ -160,7 +167,12 @@ export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
   const overflowTrackCount = trackCount - DISPLAY_TRACK_COUNT
 
   return (
-    <Pressable onPress={() => onPress?.()}>
+    <Pressable
+      onPress={() => {
+        onPressWithPropagationBlock?.()
+        onPress?.()
+      }}
+    >
       {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
         <TrackItem
           key={track.uid}

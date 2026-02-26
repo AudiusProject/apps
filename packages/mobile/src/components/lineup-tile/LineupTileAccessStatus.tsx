@@ -18,7 +18,7 @@ import {
   gatedContentSelectors
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -38,6 +38,7 @@ import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 import { EventNames } from 'app/types/analytics'
 
+import { useTilePressBlock } from './TilePressBlockContext'
 import { LineupTileSource } from './types'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
@@ -155,6 +156,13 @@ export const LineupTileAccessStatus = ({
   const showButtonText =
     !isUSDCPurchase || isTokenGated || (!hasStreamAccess && !isUnlocking)
 
+  const blockTilePress = useTilePressBlock()
+
+  const handlePressWithBlock = useCallback(() => {
+    blockTilePress?.()
+    handlePress()
+  }, [blockTilePress, handlePress])
+
   const backgroundColor = isUSDCPurchase
     ? color.special.lightGreen
     : isTokenGated
@@ -176,7 +184,7 @@ export const LineupTileAccessStatus = ({
   }
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity onPress={handlePressWithBlock}>
       <Flex
         {...(hasStreamAccess || isUnlocking ? unlockedStyles : lockedStyles)}
         direction='row'
