@@ -39,7 +39,9 @@ const useStyles = makeStyles(({ palette }) => ({
 }))
 
 type Props = {
+  onPressArtwork?: GestureResponderHandler
   onPressTitle?: GestureResponderHandler
+  onPressTopRight?: GestureResponderHandler
   renderImage: RenderImage
   title: string
   userId: ID
@@ -52,7 +54,9 @@ type Props = {
 }
 
 export const LineupTileMetadata = ({
+  onPressArtwork,
   onPressTitle,
+  onPressTopRight,
   renderImage,
   title,
   userId,
@@ -73,13 +77,23 @@ export const LineupTileMetadata = ({
     return getPlaying(state) && isActive
   })
 
+  const artContent = (
+    <LineupTileArt
+      renderImage={renderImage}
+      style={tileStyles.imageContainer}
+      trackId={trackId}
+    />
+  )
+
   return (
     <View style={styles.metadata}>
-      <LineupTileArt
-        renderImage={renderImage}
-        style={tileStyles.imageContainer}
-        trackId={trackId}
-      />
+      {onPressArtwork ? (
+        <TouchableOpacity onPress={onPressArtwork} activeOpacity={1}>
+          {artContent}
+        </TouchableOpacity>
+      ) : (
+        artContent
+      )}
       <FadeInView
         style={
           type === 'track' ? tileStyles.titles : tileStyles.collectionTitles
@@ -126,13 +140,29 @@ export const LineupTileMetadata = ({
           userId={userId}
         />
       </FadeInView>
-      <LineupTileTopRight
-        duration={duration}
-        trackId={trackId}
-        isLongFormContent={isLongFormContent}
-        isCollection={false}
-        isArtistPick={isArtistPick}
-      />
+      {onPressTopRight ? (
+        <TouchableOpacity
+          onPress={onPressTopRight}
+          activeOpacity={1}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          <LineupTileTopRight
+            duration={duration}
+            trackId={trackId}
+            isLongFormContent={isLongFormContent}
+            isCollection={false}
+            isArtistPick={isArtistPick}
+          />
+        </TouchableOpacity>
+      ) : (
+        <LineupTileTopRight
+          duration={duration}
+          trackId={trackId}
+          isLongFormContent={isLongFormContent}
+          isCollection={false}
+          isArtistPick={isArtistPick}
+        />
+      )}
     </View>
   )
 }

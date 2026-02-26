@@ -291,11 +291,13 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const isArtistPick = user?.artist_pick_track_id === track.track_id
 
   return (
-    <Paper onPress={handlePress} style={style}>
+    <Paper style={style}>
       <TrackDogEar trackId={track.track_id} hideUnlocked />
       <LineupTileMetadata
         renderImage={renderImage}
+        onPressArtwork={handlePress}
         onPressTitle={handlePressTitle}
+        onPressTopRight={handlePress}
         title={track.title}
         userId={user.user_id}
         isPlayingUid={isPlayingUid}
