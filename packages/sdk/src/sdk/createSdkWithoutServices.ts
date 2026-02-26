@@ -47,10 +47,11 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
       logLevel: environment !== 'production' ? 'debug' : undefined
     })
 
-  const basePath =
+  const apiEndpoint =
     config.environment === 'development'
       ? developmentConfig.network.apiEndpoint
       : productionConfig.network.apiEndpoint
+  const basePath = `${apiEndpoint}/v1`
 
   const middleware: Middleware[] = []
 
@@ -131,7 +132,7 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
           storageNodeSelector:
             services?.storageNodeSelector ??
             new StorageNodeSelector({
-              endpoint: basePath,
+              endpoint: apiEndpoint, // health_check is at root, not /v1
               logger
             }),
           logger
