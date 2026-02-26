@@ -1,14 +1,6 @@
-import { useCallback, useMemo } from 'react'
-
 import type { ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { View } from 'react-native'
-import {
-  Gesture,
-  GestureDetector,
-  TouchableOpacity
-} from 'react-native-gesture-handler'
-import { runOnJS } from 'react-native-reanimated'
+import { TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { IconVolumeLevel2 } from '@audius/harmony-native'
@@ -49,6 +41,7 @@ const useStyles = makeStyles(({ palette }) => ({
 
 type Props = {
   onPressTitle?: GestureResponderHandler
+  onPressWithPropagationBlock?: () => void
   renderImage: RenderImage
   title: string
   userId: ID
@@ -62,6 +55,7 @@ type Props = {
 
 export const LineupTileMetadata = ({
   onPressTitle,
+  onPressWithPropagationBlock,
   renderImage,
   title,
   userId,
@@ -83,22 +77,15 @@ export const LineupTileMetadata = ({
     return getPlaying(state) && isActive
   })
 
-  const handlePressUser = () => {
-    navigation.push('Profile', { id: userId })
+  const handleTitlePress = () => {
+    onPressWithPropagationBlock?.()
+    onPressTitle?.()
   }
 
-  const handlePressTitleWorklet = useCallback(() => {
-    onPressTitle?.()
-  }, [onPressTitle])
-
-  const titleTapGesture = useMemo(
-    () =>
-      Gesture.Tap().onEnd(() => {
-        'worklet'
-        runOnJS(handlePressTitleWorklet)()
-      }),
-    [handlePressTitleWorklet]
-  )
+  const handlePressArtist = () => {
+    onPressWithPropagationBlock?.()
+    navigation.push('Profile', { id: userId })
+  }
 
   return (
     <View style={styles.metadata}>
@@ -125,30 +112,33 @@ export const LineupTileMetadata = ({
           </Text>
         ) : null}
 
-        <GestureDetector gesture={titleTapGesture}>
-          <View
-            style={{
-              ...tileStyles.title,
-              ...(isPlaying ? tileStyles.titlePlaying : {})
-            }}
+        <TouchableOpacity
+          style={{
+            ...tileStyles.title,
+            ...(isPlaying ? tileStyles.titlePlaying : {})
+          }}
+          onPress={handleTitlePress}
+        >
+          <Text
+            color={isActive ? 'primary' : 'neutral'}
+            weight='bold'
+            numberOfLines={1}
           >
-            <Text
-              color={isActive ? 'primary' : 'neutral'}
-              weight='bold'
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
-            {isPlaying ? (
-              <IconVolumeLevel2
-                fill={primary}
-                style={styles.playingIndicator}
-                size='m'
-              />
-            ) : null}
-          </View>
-        </GestureDetector>
-        <TouchableOpacity onPress={handlePressUser} activeOpacity={1}>
+            {title}
+          </Text>
+          {isPlaying ? (
+            <IconVolumeLevel2
+              fill={primary}
+              style={styles.playingIndicator}
+              size='m'
+            />
+          ) : null}
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handlePressArtist}
+          activeOpacity={0.7}
+          style={{ alignSelf: 'flex-start' }}
+        >
           <View pointerEvents='none'>
             <UserLink
               variant={isActive ? 'active' : 'default'}
