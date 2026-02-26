@@ -1,9 +1,14 @@
 import type { ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { TouchableOpacity, View } from 'react-native'
+import { useCallback, useMemo } from 'react'
+import { View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import { runOnJS } from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
 import { IconVolumeLevel2 } from '@audius/harmony-native'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { Text, FadeInView } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
 import { makeStyles } from 'app/styles'
@@ -39,9 +44,7 @@ const useStyles = makeStyles(({ palette }) => ({
 }))
 
 type Props = {
-  onPressArtwork?: GestureResponderHandler
   onPressTitle?: GestureResponderHandler
-  onPressTopRight?: GestureResponderHandler
   renderImage: RenderImage
   title: string
   userId: ID
@@ -54,9 +57,7 @@ type Props = {
 }
 
 export const LineupTileMetadata = ({
-  onPressArtwork,
   onPressTitle,
-  onPressTopRight,
   renderImage,
   title,
   userId,
@@ -70,6 +71,7 @@ export const LineupTileMetadata = ({
   const styles = useStyles()
   const tileStyles = useTileStyles()
   const { primary } = useThemeColors()
+  const navigation = useNavigation()
 
   const isActive = isPlayingUid
 
@@ -77,23 +79,30 @@ export const LineupTileMetadata = ({
     return getPlaying(state) && isActive
   })
 
-  const artContent = (
-    <LineupTileArt
-      renderImage={renderImage}
-      style={tileStyles.imageContainer}
-      trackId={trackId}
-    />
+  const handlePressUser = () => {
+    navigation.push('Profile', { id: userId })
+  }
+
+  const handlePressTitleWorklet = useCallback(() => {
+    onPressTitle?.()
+  }, [onPressTitle])
+
+  const titleTapGesture = useMemo(
+    () =>
+      Gesture.Tap().onEnd(() => {
+        'worklet'
+        runOnJS(handlePressTitleWorklet)()
+      }),
+    [handlePressTitleWorklet]
   )
 
   return (
     <View style={styles.metadata}>
-      {onPressArtwork ? (
-        <TouchableOpacity onPress={onPressArtwork} activeOpacity={1}>
-          {artContent}
-        </TouchableOpacity>
-      ) : (
-        artContent
-      )}
+      <LineupTileArt
+        renderImage={renderImage}
+        style={tileStyles.imageContainer}
+        trackId={trackId}
+      />
       <FadeInView
         style={
           type === 'track' ? tileStyles.titles : tileStyles.collectionTitles
@@ -112,57 +121,46 @@ export const LineupTileMetadata = ({
           </Text>
         ) : null}
 
-        <TouchableOpacity
-          style={{
-            ...tileStyles.title,
-            ...(isPlaying ? tileStyles.titlePlaying : {})
-          }}
-          onPress={onPressTitle}
-        >
-          <Text
-            color={isActive ? 'primary' : 'neutral'}
-            weight='bold'
-            numberOfLines={1}
+        <GestureDetector gesture={titleTapGesture}>
+          <View
+            style={{
+              ...tileStyles.title,
+              ...(isPlaying ? tileStyles.titlePlaying : {})
+            }}
           >
-            {title}
-          </Text>
-          {isPlaying ? (
-            <IconVolumeLevel2
-              fill={primary}
-              style={styles.playingIndicator}
-              size='m'
+            <Text
+              color={isActive ? 'primary' : 'neutral'}
+              weight='bold'
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            {isPlaying ? (
+              <IconVolumeLevel2
+                fill={primary}
+                style={styles.playingIndicator}
+                size='m'
+              />
+            ) : null}
+          </View>
+        </GestureDetector>
+        <TouchableOpacity onPress={handlePressUser} activeOpacity={1}>
+          <View pointerEvents='none'>
+            <UserLink
+              variant={isActive ? 'active' : 'default'}
+              textVariant='body'
+              userId={userId}
             />
-          ) : null}
+          </View>
         </TouchableOpacity>
-        <UserLink
-          variant={isActive ? 'active' : 'default'}
-          textVariant='body'
-          userId={userId}
-        />
       </FadeInView>
-      {onPressTopRight ? (
-        <TouchableOpacity
-          onPress={onPressTopRight}
-          activeOpacity={1}
-          style={{ alignSelf: 'flex-start' }}
-        >
-          <LineupTileTopRight
-            duration={duration}
-            trackId={trackId}
-            isLongFormContent={isLongFormContent}
-            isCollection={false}
-            isArtistPick={isArtistPick}
-          />
-        </TouchableOpacity>
-      ) : (
-        <LineupTileTopRight
-          duration={duration}
-          trackId={trackId}
-          isLongFormContent={isLongFormContent}
-          isCollection={false}
-          isArtistPick={isArtistPick}
-        />
-      )}
+      <LineupTileTopRight
+        duration={duration}
+        trackId={trackId}
+        isLongFormContent={isLongFormContent}
+        isCollection={false}
+        isArtistPick={isArtistPick}
+      />
     </View>
   )
 }
