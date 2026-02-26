@@ -47,24 +47,3 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.NEW_THEME_MODEL]: false
 }
-
-/**
- * Minimum app version required for a flag to be enabled.
- * Flags with a minVersion are only enabled when appVersion >= minVersion.
- */
-export const featureFlagMinVersions: Partial<Record<FeatureFlags, string>> = {
-  [FeatureFlags.NEW_THEME_MODEL]: '1.5.165'
-}
-
-/** Returns true if actual >= min (semver-style comparison) */
-export const isVersionAtLeast = (actual: string, min: string): boolean => {
-  const a = actual.split('.').map((n) => parseInt(n, 10) || 0)
-  const m = min.split('.').map((n) => parseInt(n, 10) || 0)
-  for (let i = 0; i < Math.max(a.length, m.length); i++) {
-    const av = a[i] ?? 0
-    const mv = m[i] ?? 0
-    if (av > mv) return true
-    if (av < mv) return false
-  }
-  return true
-}
