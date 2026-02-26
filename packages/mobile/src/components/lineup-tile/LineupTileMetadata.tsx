@@ -1,9 +1,14 @@
 import type { ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { TouchableOpacity, View } from 'react-native'
+import { useCallback, useMemo } from 'react'
+import { View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import { runOnJS } from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
 import { IconVolumeLevel2 } from '@audius/harmony-native'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { Text, FadeInView } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
 import { makeStyles } from 'app/styles'
@@ -66,12 +71,30 @@ export const LineupTileMetadata = ({
   const styles = useStyles()
   const tileStyles = useTileStyles()
   const { primary } = useThemeColors()
+  const navigation = useNavigation()
 
   const isActive = isPlayingUid
 
   const isPlaying = useSelector((state) => {
     return getPlaying(state) && isActive
   })
+
+  const handlePressUser = () => {
+    navigation.push('Profile', { id: userId })
+  }
+
+  const handlePressTitleWorklet = useCallback(() => {
+    onPressTitle?.()
+  }, [onPressTitle])
+
+  const titleTapGesture = useMemo(
+    () =>
+      Gesture.Tap().onEnd(() => {
+        'worklet'
+        runOnJS(handlePressTitleWorklet)()
+      }),
+    [handlePressTitleWorklet]
+  )
 
   return (
     <View style={styles.metadata}>
@@ -98,33 +121,38 @@ export const LineupTileMetadata = ({
           </Text>
         ) : null}
 
-        <TouchableOpacity
-          style={{
-            ...tileStyles.title,
-            ...(isPlaying ? tileStyles.titlePlaying : {})
-          }}
-          onPress={onPressTitle}
-        >
-          <Text
-            color={isActive ? 'primary' : 'neutral'}
-            weight='bold'
-            numberOfLines={1}
+        <GestureDetector gesture={titleTapGesture}>
+          <View
+            style={{
+              ...tileStyles.title,
+              ...(isPlaying ? tileStyles.titlePlaying : {})
+            }}
           >
-            {title}
-          </Text>
-          {isPlaying ? (
-            <IconVolumeLevel2
-              fill={primary}
-              style={styles.playingIndicator}
-              size='m'
+            <Text
+              color={isActive ? 'primary' : 'neutral'}
+              weight='bold'
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            {isPlaying ? (
+              <IconVolumeLevel2
+                fill={primary}
+                style={styles.playingIndicator}
+                size='m'
+              />
+            ) : null}
+          </View>
+        </GestureDetector>
+        <TouchableOpacity onPress={handlePressUser} activeOpacity={1}>
+          <View pointerEvents='none'>
+            <UserLink
+              variant={isActive ? 'active' : 'default'}
+              textVariant='body'
+              userId={userId}
             />
-          ) : null}
+          </View>
         </TouchableOpacity>
-        <UserLink
-          variant={isActive ? 'active' : 'default'}
-          textVariant='body'
-          userId={userId}
-        />
       </FadeInView>
       <LineupTileTopRight
         duration={duration}

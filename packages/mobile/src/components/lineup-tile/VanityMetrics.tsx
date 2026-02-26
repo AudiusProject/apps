@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 import type { IconComponent } from '@audius/harmony-native'
 import { DEFAULT_HIT_SLOP, Flex, Text } from '@audius/harmony-native'

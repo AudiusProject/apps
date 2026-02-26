@@ -18,7 +18,7 @@ import {
   gatedContentSelectors
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch, useSelector } from 'react-redux'
 
