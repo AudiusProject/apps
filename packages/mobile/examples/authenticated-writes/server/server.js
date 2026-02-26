@@ -22,10 +22,7 @@ if (!apiKey || !bearerToken) {
 }
 
 const { sdk } = await import('@audius/sdk')
-// Provide appName to avoid SDK fetching developer app by apiKey (which can 404 if app not on prod)
 const audius = sdk({ appName, apiKey, bearerToken })
-
-// console.log({ appName, apiKey, bearerToken })
 
 const app = express()
 app.use(express.json())
@@ -43,36 +40,18 @@ app.post('/update-description', async (req, res) => {
       userId,
       metadata: { bio: String(description) }
     })
-    const body = {
+    return res.json({
       success: true,
-      transaction_hash: result?.transactionHash ?? result?.transaction_hash ?? null
-    }
-    console.log('[update-description] response body', JSON.stringify(body, null, 2))
-    return res.json(body)
+      transaction_hash:
+        result?.transactionHash ?? result?.transaction_hash ?? null
+    })
   } catch (e) {
-    let body = e?.message ?? 'Unknown error'
-    if (e?.response) {
-      const resHeaders = Object.fromEntries(e.response.headers.entries())
-      console.error('API response:', e.response.status, e.response.statusText)
-      console.error('Response headers:', JSON.stringify(resHeaders, null, 2))
-      if (e?.request) {
-        const reqHeaders = e.request?.headers
-          ? Object.fromEntries(e.request.headers.entries())
-          : {}
-        console.error('Request URL:', e.request?.url ?? e.response?.url)
-        console.error('Request headers:', JSON.stringify(reqHeaders, null, 2))
-      }
-      body = await e.response.text().catch(() => body)
-      if (body) console.error('Body:', body)
-    } else {
-      console.error(e)
-    }
     const status = e?.response?.status ?? 500
+    const body = e?.response
+      ? await e.response.text().catch(() => e?.message ?? 'Update failed')
+      : (e?.message ?? 'Update failed')
     return res.status(status).json({ error: body || 'Update failed' })
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`Authenticated writes server at http://localhost:${PORT}`)
-  console.log('POST /update-description  body: { userId, description }')
-})
+app.listen(PORT)
