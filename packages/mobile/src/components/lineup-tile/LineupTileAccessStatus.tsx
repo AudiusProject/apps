@@ -158,10 +158,7 @@ export const LineupTileAccessStatus = ({
 
   const blockTilePress = useTilePressBlock()
 
-  const handlePressWithBlock = useCallback(() => {
-    blockTilePress?.()
-    handlePress()
-  }, [blockTilePress, handlePress])
+  const handlePressWithBlock = useCallback(() => handlePress(), [handlePress])
 
   const backgroundColor = isUSDCPurchase
     ? color.special.lightGreen
@@ -184,7 +181,7 @@ export const LineupTileAccessStatus = ({
   }
 
   return (
-    <TouchableOpacity onPress={handlePressWithBlock}>
+    <TouchableOpacity onPressIn={blockTilePress} onPress={handlePressWithBlock}>
       <Flex
         {...(hasStreamAccess || isUnlocking ? unlockedStyles : lockedStyles)}
         direction='row'
