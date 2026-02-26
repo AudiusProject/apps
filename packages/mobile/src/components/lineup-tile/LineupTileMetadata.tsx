@@ -1,16 +1,20 @@
+import { useCallback, useMemo } from 'react'
+
 import type { ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import {
+  Gesture,
+  GestureDetector,
+  TouchableOpacity
+} from 'react-native-gesture-handler'
 import { runOnJS } from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
 import { IconVolumeLevel2 } from '@audius/harmony-native'
-import { useNavigation } from 'app/hooks/useNavigation'
 import { Text, FadeInView } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 import { useThemeColors } from 'app/utils/theme'
