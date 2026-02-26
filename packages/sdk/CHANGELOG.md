@@ -1,5 +1,12 @@
 # @audius/sdk
 
+## 13.1.0
+
+### Minor Changes
+
+- fdd1e54: Add register dev app key endpoint
+- ad2d058: Added UploadsApi
+
 ## 13.0.1
 
 ### Patch Changes
