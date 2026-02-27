@@ -97,9 +97,10 @@ console.log(users)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name | Type       | Description          | Required?    |
-| :--- | :--------- | :------------------- | :----------- |
-| `id` | `string[]` | The IDs of the users | **Required** |
+| Name     | Type       | Description                           | Required?  |
+| :------- | :--------- | :------------------------------------ | :--------- |
+| `id`     | `string[]` | The IDs of the users                  | _Optional_ |
+| `userId` | `string`   | The ID of the user making the request | _Optional_ |
 
 #### Returns
 
@@ -226,47 +227,6 @@ information about the wallets as described below.
 
 ---
 
-### getDeveloperApps
-
-#### getDeveloperApps(`params`)
-
-Get the developer apps a user owns.
-
-Example:
-
-```ts
-const { data: developerApps } = await audiusSdk.users.getDeveloperApps({
-  id: 'eAZl3',
-})
-
-console.log(developerApps)
-```
-
-#### Params
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name | Type     | Description        | Required?    |
-| :--- | :------- | :----------------- | :----------- |
-| `id` | `string` | The ID of the user | **Required** |
-
-#### Returns
-
-Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the developer apps as described below.
-
-```ts
-{
-  address: string;
-  description?: string;
-  name: string;
-  userId: string;
-}[];
-```
-
----
-
 ### getFavorites
 
 #### getFavorites(`params`)
@@ -335,6 +295,7 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of followers to return. Default value is **10** | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
@@ -404,6 +365,7 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
@@ -432,11 +394,13 @@ console.log(relatedUsers)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name     | Type     | Description                                                        | Required?    |
-| :------- | :------- | :----------------------------------------------------------------- | :----------- |
-| `id`     | `string` | The ID of the user                                                 | **Required** |
-| `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
-| `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| Name             | Type      | Description                                                        | Required?    |
+| :--------------- | :-------- | :----------------------------------------------------------------- | :----------- |
+| `id`             | `string`  | The ID of the user                                                 | **Required** |
+| `limit`          | `number`  | The maximum number of users to return. Default value is **10**     | _Optional_   |
+| `offset`         | `number`  | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId`         | `string`  | The ID of the user making the request                              | _Optional_   |
+| `filterFollowed` | `boolean` | Filter to only users that the current user follows                 | _Optional_   |
 
 #### Returns
 
@@ -468,6 +432,7 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of reposts to return. Default value is **100**  | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
@@ -514,6 +479,7 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
@@ -547,6 +513,7 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
@@ -596,20 +563,20 @@ information about the supporters as described below.
 
 ---
 
-### getSupportings
+### getSupportedUsers
 
-#### getSupportings(`params`)
+#### getSupportedUsers(`params`)
 
 Get users that a user is supporting (they have sent them a tip).
 
 Example:
 
 ```ts
-const { data: supportings } = await audiusSdk.users.getSupportings({
+const { data: supportedUsers } = await audiusSdk.users.getSupportedUsers({
   id: 'eAZl3',
 })
 
-console.log(supportings)
+console.log(supportedUsers)
 ```
 
 #### Params
@@ -622,11 +589,12 @@ example above.
 | `id`     | `string` | The ID of the user                                                 | **Required** |
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the supportings as described below.
+information about the supported users as described below.
 
 ```ts
 {
@@ -690,11 +658,11 @@ console.log(tags)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name     | Type     | Description                                                        | Required?    |
-| :------- | :------- | :----------------------------------------------------------------- | :----------- |
-| `id`     | `string` | The ID of the user                                                 | **Required** |
-| `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
-| `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
+| Name     | Type     | Description                                                    | Required?    |
+| :------- | :------- | :------------------------------------------------------------- | :----------- |
+| `id`     | `string` | The ID of the user                                             | **Required** |
+| `limit`  | `number` | The maximum number of tags to return. Default value is **10**  | _Optional_   |
+| `userId` | `string` | The ID of the user making the request                          | _Optional_   |
 
 #### Returns
 
@@ -765,51 +733,14 @@ console.log(user)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name     | Type     | Description            | Required?    |
-| :------- | :------- | :--------------------- | :----------- |
-| `handle` | `string` | The handle of the user | **Required** |
+| Name     | Type     | Description                           | Required?    |
+| :------- | :------- | :------------------------------------ | :----------- |
+| `handle` | `string` | The handle of the user                | **Required** |
+| `userId` | `string` | The ID of the user making the request | _Optional_   |
 
 #### Returns
 
 The return type is the same as [`getUser`](#getuser)
-
----
-
-### getUserIdByWallet
-
-#### getUserIdByWallet(`params`)
-
-Get a user ID by an associated wallet address.
-
-Example:
-
-```ts
-const { data: userId } = await audiusSdk.users.getUserIdByWallet({
-  associatedWallet: '6f229f7e8462f198e5be9139175a0b460a9fa35b',
-})
-
-console.log(userId)
-```
-
-#### Params
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name               | Type     | Description                               | Required?    |
-| :----------------- | :------- | :---------------------------------------- | :----------- |
-| `associatedWallet` | `string` | A wallet address associated with the user | **Required** |
-
-#### Returns
-
-Returns a `Promise` containing an object with a `data` field. `data` is an object containing the
-user id as described below.
-
-```ts
-{
-  userId: string
-}
-```
 
 ---
 
@@ -834,9 +765,14 @@ console.log(users)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name    | Type     | Description                   | Required?    |
-| :------ | :------- | :---------------------------- | :----------- |
-| `query` | `string` | The query for which to search | **Required** |
+| Name         | Type       | Description                                              | Required?  |
+| :----------- | :--------- | :------------------------------------------------------- | :--------- |
+| `query`      | `string`   | The query for which to search                            | _Optional_ |
+| `offset`     | `number`   | The number of items to skip (for pagination)             | _Optional_ |
+| `limit`      | `number`   | The number of items to fetch (for pagination)            | _Optional_ |
+| `genre`      | `string[]` | Array of genres to filter by                             | _Optional_ |
+| `sortMethod` | `string`   | Sort method: `'relevant'`, `'popular'`, or `'recent'`    | _Optional_ |
+| `isVerified` | `string`   | Filter to only verified users                            | _Optional_ |
 
 #### Returns
 
