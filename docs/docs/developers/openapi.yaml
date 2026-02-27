@@ -690,6 +690,58 @@ paths:
         '500':
           description: Server error
           content: {}
+  /developer-apps/{address}/register-api-key:
+    post:
+      tags:
+      - developer_apps
+      description: Register api_key and api_secret in api_keys table for developer
+        apps created via entity manager transactions. Use when the client sends raw
+        ManageEntity tx instead of POST /developer-apps. Inserts with rps=10,
+        rpm=500000. Requires the app to exist in developer_apps and belong to the
+        authenticated user.
+      operationId: Register Developer App API Key
+      security:
+      - BasicAuth: []
+      - BearerAuth: []
+      parameters:
+      - name: user_id
+        in: query
+        description: The user ID of the user who owns the developer app
+        required: true
+        schema:
+          type: string
+      - name: address
+        in: path
+        description: Developer app address (API key)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        x-codegen-request-body-name: metadata
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/register_api_key_request_body'
+      responses:
+        '200':
+          description: API key registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/register_api_key_response'
+        '400':
+          description: Bad request (api_secret required)
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Developer app not found
+          content: {}
+        '500':
+          description: Server error
+          content: {}
   /developer-apps/{address}/access-keys/deactivate:
     post:
       tags:
@@ -11989,6 +12041,20 @@ components:
           type: string
           description: The ID of the user with a non-zero balance
           example: 7eP5n
+    register_api_key_request_body:
+      type: object
+      required:
+      - api_secret
+      properties:
+        api_secret:
+          type: string
+          description: The API secret (private key hex) for the developer app
+    register_api_key_response:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the registration was successful
     deactivate_access_key_request_body:
       type: object
       required:
@@ -13195,16 +13261,19 @@ components:
         data:
           $ref: '#/components/schemas/developer_app'
     remixes_response:
-      required:
-      - count
       type: object
       properties:
-        count:
-          type: integer
-        tracks:
-          type: array
-          items:
-            $ref: '#/components/schemas/track'
+        data:
+          type: object
+          required:
+          - count
+          properties:
+            count:
+              type: integer
+            tracks:
+              type: array
+              items:
+                $ref: '#/components/schemas/track'
     track:
       required:
       - access
@@ -14226,6 +14295,10 @@ components:
           type: string
         1000x1000:
           type: string
+        mirrors:
+          type: array
+          items:
+            type: string
     track_segment:
       required:
       - duration
@@ -15134,8 +15207,8 @@ components:
           type: string
         verified:
           type: boolean
-        profilePicture:
-          $ref: '#/components/schemas/profilePicture'
+        profile_picture:
+          $ref: '#/components/schemas/profile_picture'
         sub:
           type: string
         iat:
@@ -15169,15 +15242,6 @@ components:
           type: boolean
           description: Whether the account is in the user's in-app wallet
           example: true
-    profilePicture:
-      type: object
-      properties:
-        150x150:
-          type: string
-        480x480:
-          type: string
-        1000x1000:
-          type: string
     sales_json_content:
       type: object
       properties:
