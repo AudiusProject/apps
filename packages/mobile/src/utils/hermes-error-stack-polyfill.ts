@@ -28,6 +28,8 @@ export function applyHermesErrorStackPolyfill(): void {
     return
   }
 
+  // Intentional polyfill for Hermes - must modify Error.prototype to fix invalid receiver
+  // eslint-disable-next-line no-extend-native
   Object.defineProperty(Error.prototype, 'stack', {
     get: function () {
       try {
