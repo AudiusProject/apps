@@ -28,7 +28,6 @@ import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware
 } from './middleware'
-import { addBearerTokenMiddleware } from './middleware/addBearerTokenMiddleware'
 import { OAuth } from './oauth'
 import { Logger, Storage, StorageNodeSelector } from './services'
 import { type SdkConfig } from './types'
@@ -54,10 +53,6 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
   const basePath = `${apiEndpoint}/v1`
 
   const middleware: Middleware[] = []
-
-  if (bearerToken) {
-    middleware.push(addBearerTokenMiddleware({ bearerToken, logger }))
-  }
 
   if (apiSecret || services?.audiusWalletClient) {
     middleware.push(
@@ -89,7 +84,8 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
   const apiConfig = new Configuration({
     fetchApi: fetch,
     middleware,
-    basePath
+    basePath,
+    accessToken: bearerToken
   })
 
   // Initialize OAuth
