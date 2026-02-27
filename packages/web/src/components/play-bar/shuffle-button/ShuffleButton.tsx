@@ -3,6 +3,10 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import cn from 'classnames'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 
+import { useIsMobile } from 'hooks/useIsMobile'
+import { applyThemeToLottie } from 'utils/lottieTheme'
+import { useLottieThemeColors } from 'utils/theme/theme'
+
 import styles from '../PlayBarButton.module.css'
 
 enum ShuffleStates {
@@ -26,36 +30,70 @@ const getShuffleState = (defaultState: ShuffleStates) => {
   }
 }
 
+type AnimationStates = {
+  pbIconShuffleOff: object
+  pbIconShuffleOn: object
+}
+
 type ShuffleButtonProps = {
-  shuffleOff: () => void
-  shuffleOn: () => void
-  isMobile: boolean
-  animations: {
-    pbIconShuffleOff: object
-    pbIconShuffleOn: object
-  }
+  onShuffleOn: () => void
+  onShuffleOff: () => void
 }
 
 const ShuffleButton = ({
-  shuffleOff = () => {},
-  shuffleOn = () => {},
-  isMobile = false,
-  animations
+  onShuffleOn = () => {},
+  onShuffleOff = () => {}
 }: ShuffleButtonProps) => {
+  const themeColors = useLottieThemeColors()
+  const isMobile = useIsMobile()
+  const [animations, setAnimations] = useState<AnimationStates | null>(null)
+  const baseAnimations = useRef<AnimationStates | null>(null)
+
   const [state, setState] = useState({
     shuffleState: getShuffleState(ShuffleStates.OFF),
     isPaused: true,
-    icon: animations ? animations.pbIconShuffleOn : null
+    icon: null as object | null
   })
+
+  useEffect(() => {
+    const loadAnimations = async () => {
+      if (!baseAnimations.current) {
+        const { default: pbIconShuffleOff } = (await import(
+          '../../../assets/animations/pbIconShuffleOff.json'
+        )) as { default: object }
+        const { default: pbIconShuffleOn } = (await import(
+          '../../../assets/animations/pbIconShuffleOn.json'
+        )) as { default: object }
+        baseAnimations.current = {
+          pbIconShuffleOff,
+          pbIconShuffleOn
+        }
+      }
+      setAnimations({
+        pbIconShuffleOff: applyThemeToLottie(
+          baseAnimations.current.pbIconShuffleOff,
+          themeColors,
+          'primary'
+        ),
+        pbIconShuffleOn: applyThemeToLottie(
+          baseAnimations.current.pbIconShuffleOn,
+          themeColors,
+          'neutral'
+        )
+      })
+    }
+    loadAnimations()
+  }, [themeColors])
 
   const handleChange = useCallback(
     (shuffleState: ShuffleStates) => {
+      if (!animations) return
       const { pbIconShuffleOff, pbIconShuffleOn } = animations
-      // Go to the next state.
-      let icon, isPaused
+      let icon: object
+      let isPaused: boolean
       switch (shuffleState) {
         case ShuffleStates.OFF:
-          shuffleOff()
+          onShuffleOff()
           icon = pbIconShuffleOn
           isPaused = true
           break
@@ -64,7 +102,7 @@ const ShuffleButton = ({
           isPaused = false
           break
         case ShuffleStates.ON:
-          shuffleOn()
+          onShuffleOn()
           icon = pbIconShuffleOff
           isPaused = true
           break
@@ -83,7 +121,7 @@ const ShuffleButton = ({
         shuffleState
       })
     },
-    [animations, shuffleOff, shuffleOn]
+    [animations, onShuffleOn, onShuffleOff]
   )
 
   useEffect(() => {
@@ -91,7 +129,9 @@ const ShuffleButton = ({
   }, [handleChange, state.shuffleState])
 
   useEffect(() => {
-    handleChange(state.shuffleState)
+    if (animations) {
+      handleChange(state.shuffleState)
+    }
   }, [animations, handleChange, state.shuffleState])
 
   const nextState = () => {
@@ -109,6 +149,8 @@ const ShuffleButton = ({
       }
     }
   }, [lottieRef, state.isPaused])
+
+  if (!animations || !state.icon) return null
 
   return (
     <button

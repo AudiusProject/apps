@@ -88,13 +88,13 @@ const isGray = (rgba: number[]): boolean => {
   return saturation < 0.15
 }
 
-/** 'accent' = active/on state (primary/gradient), 'neutral' = off state (default color) */
-export type LottieThemeVariant = 'accent' | 'neutral'
+/** 'accent' = active/on state (primary/gradient), 'neutral' = off state, 'primary' = solid primary for consistency */
+export type LottieThemeVariant = 'accent' | 'neutral' | 'primary'
 
 /**
  * Deep clone with color replacement - Lottie stores colors as [r,g,b,a] 0-1.
  * - Gray colors (low saturation) → theme neutral if provided
- * - Accent colors → accent variant: primary/gradient; neutral variant: theme neutral
+ * - Accent colors → accent variant: primary/gradient; neutral variant: theme neutral; primary variant: solid primary
  */
 const replaceColorsInValue = (
   value: unknown,
@@ -113,6 +113,9 @@ const replaceColorsInValue = (
       }
       if (variant === 'neutral' && colors.neutral) {
         return [...hexToRgba(colors.neutral)]
+      }
+      if (variant === 'primary') {
+        return [...hexToRgba(colors.primary)]
       }
       const idx = ctx.accentIndex++
       return [
@@ -172,8 +175,9 @@ const replaceColorsInValue = (
 /**
  * Apply theme colors to a Lottie animation JSON.
  * Returns a deep clone with colors replaced by the theme palette.
- * - variant 'accent': active/on state - uses primary and gradient colors
+ * - variant 'accent': active/on state - uses gradient colors (gradientStop1/2)
  * - variant 'neutral': off state - uses theme neutral/default color
+ * - variant 'primary': solid primary for consistent active states across icons
  */
 export const applyThemeToLottie = (
   lottieJson: object,
