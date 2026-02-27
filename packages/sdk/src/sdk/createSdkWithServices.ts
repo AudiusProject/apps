@@ -31,7 +31,6 @@ import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware
 } from './middleware'
-import { addBearerTokenMiddleware } from './middleware/addBearerTokenMiddleware'
 import { OAuth } from './oauth'
 import {
   PaymentRouterClient,
@@ -461,19 +460,11 @@ const initializeApis = ({
     })
   ]
 
-  if ('bearerToken' in config) {
-    middleware.push(
-      addBearerTokenMiddleware({
-        bearerToken: config.bearerToken,
-        logger: services.logger
-      })
-    )
-  }
-
   const apiClientConfig = new Configuration({
     fetchApi: fetch,
     middleware,
-    basePath
+    basePath,
+    accessToken: 'bearerToken' in config ? config.bearerToken : undefined
   })
 
   const tracks = new TracksApi(apiClientConfig, services)
