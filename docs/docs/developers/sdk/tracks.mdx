@@ -553,9 +553,19 @@ information about the tracks as described below.
 
 ## createTrack
 
-> #### createTrack(`params`, `advancedOptions?`)
+> #### createTrack(`params`, `requestInit?`)
 
-Create and upload a track.
+Create a track by registering its metadata on the protocol. This method accepts metadata including
+CIDs (Content Identifiers) that reference previously uploaded files — it does **not** accept raw
+audio or image files directly.
+
+:::info Uploading files To upload audio and image files, use the
+[Uploads API](/developers/sdk/uploads). Upload your files first to obtain CIDs, then pass those CIDs
+in the `metadata` object here. See the
+[full upload + create example](/developers/sdk/uploads#full-example-upload-and-create-a-track) for a
+complete walkthrough.
+
+:::
 
 <Tabs
   block={true}
@@ -571,18 +581,64 @@ Create and upload a track.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type                                                                                                                           | Description                                                             | Required?    |
-| :----------- | :----------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :----------- |
-| `imageFile`  | `File`                                                                                                                         | A file that will be used as the cover art for the track                 | _Optional_   |
-| `metadata`   | [`UploadTrackMetadata`](/developers/upload-track-metadata)                                                                     | An object containing the details of the track                           | **Required** |
-| `onProgress` | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#uploadtrackprogressevent)` ) => void` | A function that will be called with progress events as the files upload | _Optional_   |
-| `audioFile`  | `File`                                                                                                                         | The audio file of the track                                             | **Required** |
-| `userId`     | `string`                                                                                                                       | The ID of the user                                                      | **Required** |
+| Name       | Type                                                          | Description                                   | Required?    |
+| :--------- | :------------------------------------------------------------ | :-------------------------------------------- | :----------- |
+| `userId`   | `string`                                                      | The ID of the user                            | **Required** |
+| `metadata` | `CreateTrackRequestBody` | An object containing the details of the track | **Required** |
 
-> #### `advancedOptions`
+Fields on `metadata`:
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+| Name                         | Type                     | Description                                                       | Required?    |
+| :--------------------------- | :----------------------- | :---------------------------------------------------------------- | :----------- |
+| `title`                      | `string`                 | Track title                                                       | **Required** |
+| `genre`                      | `Genre`                  | Track genre                                                       | **Required** |
+| `trackCid`                   | `string`                 | CID of the transcoded audio (from Uploads API)                    | **Required** |
+| `trackId`                    | `string`                 | Track ID (auto-generated if not provided)                         | _Optional_   |
+| `description`                | `string`                 | Track description                                                 | _Optional_   |
+| `mood`                       | `Mood`                   | Track mood                                                        | _Optional_   |
+| `bpm`                        | `number`                 | Beats per minute                                                  | _Optional_   |
+| `musicalKey`                 | `string`                 | Musical key of the track                                          | _Optional_   |
+| `tags`                       | `string`                 | Comma-separated tags                                              | _Optional_   |
+| `license`                    | `string`                 | License type                                                      | _Optional_   |
+| `isrc`                       | `string`                 | International Standard Recording Code                             | _Optional_   |
+| `iswc`                       | `string`                 | International Standard Musical Work Code                          | _Optional_   |
+| `releaseDate`                | `Date`                   | Release date                                                      | _Optional_   |
+| `origFileCid`                | `string`                 | CID of the original audio file (from Uploads API)                 | _Optional_   |
+| `origFilename`               | `string`                 | Original filename of the audio file                               | _Optional_   |
+| `coverArtCid`                | `string`                 | CID of the cover art image (from Uploads API)                     | _Optional_   |
+| `coverArtSizes`              | `string`                 | Cover art sizes metadata                                          | _Optional_   |
+| `previewCid`                 | `string`                 | CID of the preview clip (from Uploads API)                        | _Optional_   |
+| `previewStartSeconds`        | `number`                 | Preview start time in seconds                                     | _Optional_   |
+| `duration`                   | `number`                 | Track duration in seconds                                         | _Optional_   |
+| `isDownloadable`             | `boolean`                | Whether the track is downloadable                                 | _Optional_   |
+| `isUnlisted`                 | `boolean`                | Whether the track is unlisted (hidden)                            | _Optional_   |
+| `isStreamGated`              | `boolean`                | Whether streaming is restricted behind an access gate             | _Optional_   |
+| `streamConditions`           | `AccessGate`             | Conditions for stream access gating                               | _Optional_   |
+| `downloadConditions`         | `AccessGate`             | Conditions for download access gating                             | _Optional_   |
+| `fieldVisibility`            | `FieldVisibility`        | Controls visibility of individual track fields                    | _Optional_   |
+| `placementHosts`             | `string`                 | Preferred storage node placement hosts                            | _Optional_   |
+| `stemOf`                     | `StemParent`             | Parent track if this track is a stem                              | _Optional_   |
+| `remixOf`                    | `RemixParentWrite`       | Parent track(s) if this track is a remix                          | _Optional_   |
+| `noAiUse`                    | `boolean`                | Whether AI use is prohibited                                      | _Optional_   |
+| `isOwnedByUser`              | `boolean`                | Whether the track is owned by the user                            | _Optional_   |
+| `coverOriginalSongTitle`     | `string`                 | Original song title (for cover tracks)                            | _Optional_   |
+| `coverOriginalArtist`        | `string`                 | Original artist (for cover tracks)                                | _Optional_   |
+| `parentalWarningType`        | `string`                 | Parental warning type                                             | _Optional_   |
+| `territoryCodes`             | `string[]`               | Territory codes for distribution                                  | _Optional_   |
+| `ddexApp`                    | `string`                 | DDEX application identifier                                       | _Optional_   |
+| `ddexReleaseIds`             | `object`                 | DDEX release identifiers                                          | _Optional_   |
+| `artists`                    | `object[]`               | DDEX resource contributors / artists                              | _Optional_   |
+| `resourceContributors`       | `DdexResourceContributor[]` | DDEX resource contributors                                     | _Optional_   |
+| `indirectResourceContributors` | `DdexResourceContributor[]` | DDEX indirect resource contributors                           | _Optional_   |
+| `rightsController`           | `DdexRightsController`   | DDEX rights controller                                            | _Optional_   |
+| `copyrightLine`              | `CopyrightLine`          | Copyright line                                                    | _Optional_   |
+| `producerCopyrightLine`      | `ProducerCopyrightLine`  | Producer copyright line                                           | _Optional_   |
+
+> #### `requestInit`
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
@@ -591,24 +647,39 @@ argument.
 import { Mood, Genre } from '@audius/sdk'
 import fs from 'fs'
 
-const coverArtBuffer = fs.readFileSync('path/to/cover-art.png')
+// First, upload files using the Uploads API
 const trackBuffer = fs.readFileSync('path/to/track.mp3')
-
-const { trackId } = await audiusSdk.tracks.createTrack({
-  userId: '7eP5n',
-  imageFile: {
-    buffer: Buffer.from(coverArtBuffer),
-    name: 'coverArt',
+const audioUpload = audiusSdk.uploads.createAudioUpload({
+  file: {
+    buffer: Buffer.from(trackBuffer),
+    name: 'track.mp3',
+    type: 'audio/mpeg',
   },
+})
+const audioResult = await audioUpload.start()
+
+const coverArtBuffer = fs.readFileSync('path/to/cover-art.png')
+const imageUpload = audiusSdk.uploads.createImageUpload({
+  file: {
+    buffer: Buffer.from(coverArtBuffer),
+    name: 'cover-art.png',
+    type: 'image/png',
+  },
+})
+const coverArtCid = await imageUpload.start()
+
+// Then, create the track with the returned CIDs.
+// The audio upload result fields (trackCid, origFileCid, etc.) match
+// the metadata field names, so you can spread them directly.
+const { data } = await audiusSdk.tracks.createTrack({
+  userId: '7eP5n',
   metadata: {
     title: 'Monstera',
     description: 'Dedicated to my favorite plant',
     genre: Genre.METAL,
     mood: Mood.AGGRESSIVE,
-  },
-  audioFile: {
-    buffer: Buffer.from(trackBuffer),
-    name: 'monsteraAudio',
+    ...audioResult,
+    coverArtCid: coverArtCid,
   },
 })
 ```
@@ -634,10 +705,11 @@ hash (`blockHash`) and block number (`blockNumber`) for the transaction.
 
 ## updateTrack
 
-> #### updateTrack(`params`, `advancedOptions?`)
+> #### updateTrack(`params`, `requestInit?`)
 
-Update a track. If cover art or any metadata fields are not provided, their values will be kept the
-same as before.
+Update a track's metadata. If any metadata fields are not provided, their values will be kept the
+same as before. To replace audio or cover art, upload new files via the
+[Uploads API](/developers/sdk/uploads) and pass the new CIDs in `metadata`.
 
 <Tabs
   block={true}
@@ -653,44 +725,66 @@ same as before.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name              | Type                                                                                                                          | Description                                                                    | Required?    |
-| :---------------- | :---------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- | :----------- |
-| `trackId`         | `string`                                                                                                                      | The ID of the track                                                            | **Required** |
-| `userId`          | `string`                                                                                                                      | The ID of the user                                                             | **Required** |
-| `audioFile`       | `File`                                                                                                                        | A file that will be used to replace the audio for the track                    | _Optional_   |
-| `imageFile`       | `File`                                                                                                                        | A file that will be used as the cover art for the track                        | _Optional_   |
-| `metadata`        | `Partial<`[`UploadTrackMetadata`](/developers/upload-track-metadata)`>`                                                       | An object containing the details of the track                                  | **Required** |
-| `generatePreview` | `boolean`                                                                                                                     | Whether to regenerate the track preview (used when preview start time changes) | _Optional_   |
-| `onProgress`      | `(progress: number, event: `[`UploadTrackProgressEvent`](/developers/sdk/progress-events#uploadtrackprogressevent)`) => void` | A function that will be called with progress events as files upload            | _Optional_   |
+| Name       | Type                                                                       | Description                               | Required?    |
+| :--------- | :------------------------------------------------------------------------- | :---------------------------------------- | :----------- |
+| `trackId`  | `string`                                                                   | The ID of the track                       | **Required** |
+| `userId`   | `string`                                                                   | The ID of the user                        | **Required** |
+| `metadata` | `UpdateTrackRequestBody` | An object containing the fields to update | **Required** |
 
-> #### `advancedOptions`
+All fields on `metadata` are optional — only include the fields you want to change:
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+| Name                         | Type                     | Description                                                       |
+| :--------------------------- | :----------------------- | :---------------------------------------------------------------- |
+| `title`                      | `string`                 | Track title                                                       |
+| `genre`                      | `Genre`                  | Track genre                                                       |
+| `description`                | `string`                 | Track description                                                 |
+| `mood`                       | `Mood`                   | Track mood                                                        |
+| `bpm`                        | `number`                 | Beats per minute                                                  |
+| `musicalKey`                 | `string`                 | Musical key of the track                                          |
+| `tags`                       | `string`                 | Comma-separated tags                                              |
+| `license`                    | `string`                 | License type                                                      |
+| `isrc`                       | `string`                 | International Standard Recording Code                             |
+| `iswc`                       | `string`                 | International Standard Musical Work Code                          |
+| `releaseDate`                | `Date`                   | Release date                                                      |
+| `trackCid`                   | `string`                 | CID of the transcoded audio (from Uploads API)                    |
+| `origFileCid`                | `string`                 | CID of the original audio file (from Uploads API)                 |
+| `origFilename`               | `string`                 | Original filename of the audio file                               |
+| `coverArtCid`                | `string`                 | CID of the cover art image (from Uploads API)                     |
+| `coverArtSizes`              | `string`                 | Cover art sizes metadata                                          |
+| `previewCid`                 | `string`                 | CID of the preview clip (from Uploads API)                        |
+| `previewStartSeconds`        | `number`                 | Preview start time in seconds                                     |
+| `duration`                   | `number`                 | Track duration in seconds                                         |
+| `isDownloadable`             | `boolean`                | Whether the track is downloadable                                 |
+| `isUnlisted`                 | `boolean`                | Whether the track is unlisted (hidden)                            |
+| `isStreamGated`              | `boolean`                | Whether streaming is restricted behind an access gate             |
+| `streamConditions`           | `AccessGate`             | Conditions for stream access gating                               |
+| `downloadConditions`         | `AccessGate`             | Conditions for download access gating                             |
+| `fieldVisibility`            | `FieldVisibility`        | Controls visibility of individual track fields                    |
+| `placementHosts`             | `string`                 | Preferred storage node placement hosts                            |
+| `stemOf`                     | `StemParent`             | Parent track if this track is a stem                              |
+| `remixOf`                    | `RemixParentWrite`       | Parent track(s) if this track is a remix                          |
+| `parentalWarningType`        | `string`                 | Parental warning type                                             |
+| `ddexApp`                    | `string`                 | DDEX application identifier                                       |
+
+> #### `requestInit`
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
 
 ```ts
-import fs from 'fs'
 import { Mood } from '@audius/sdk'
 
-const coverArtBuffer = fs.readFileSync('path/to/updated-cover-art.png')
-
-const { trackId } = await audiusSdk.tracks.updateTrack({
+const { data } = await audiusSdk.tracks.updateTrack({
   trackId: 'h5pJ3Bz',
-  imageFile: {
-    buffer: Buffer.from(coverArtBuffer),
-    name: 'coverArt',
-  },
+  userId: '7eP5n',
   metadata: {
-    description: 'Dedicated to my favorite plant... new cover art!',
+    description: 'Dedicated to my favorite plant... updated!',
     mood: Mood.YEARNING,
   },
-  onProgress: (progress) => {
-    console.log('Progress: ', progress / 100)
-  },
-  userId: '7eP5n',
 })
 ```
 
@@ -714,7 +808,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ## deleteTrack
 
-> #### deleteTrack(`params`, `advancedOptions?`)
+> #### deleteTrack(`params`, `requestInit?`)
 
 Delete a track
 
@@ -737,10 +831,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
@@ -772,7 +867,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ## favoriteTrack
 
-> #### favoriteTrack(`params`, `advancedOptions?`)
+> #### favoriteTrack(`params`, `requestInit?`)
 
 Favorite a track
 
@@ -802,10 +897,11 @@ example above.
 }
 ```
 
-> #### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
@@ -837,7 +933,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ## unfavoriteTrack
 
-> #### unfavoriteTrack(`params`, `advancedOptions?`)
+> #### unfavoriteTrack(`params`, `requestInit?`)
 
 Unfavorite a track
 
@@ -860,10 +956,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
@@ -895,7 +992,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ## repostTrack
 
-> #### repostTrack(`params`, `advancedOptions?`)
+> #### repostTrack(`params`, `requestInit?`)
 
 Repost a track
 
@@ -925,10 +1022,11 @@ example above.
 }
 ```
 
-> #### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 <TabItem value="example">
@@ -962,7 +1060,7 @@ Return type:
 
 ## unrepostTrack
 
-> #### unrepostTrack(`params`, `advancedOptions?`)
+> #### unrepostTrack(`params`, `requestInit?`)
 
 Unrepost a track
 
@@ -986,10 +1084,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 </TabItem>
 

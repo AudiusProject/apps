@@ -1,4 +1,4 @@
-const apiSidebar = require('./docs/developers/api/sidebar.generated.js');
+const apiSidebar = require('./docs/developers/api/sidebar.generated.js')
 
 module.exports = {
   learn: [],
@@ -27,13 +27,12 @@ module.exports = {
       items: [
         'developers/sdk/overview',
         'developers/sdk/tracks',
-        'developers/upload-track-metadata',
+        'developers/sdk/uploads',
         'developers/sdk/users',
         'developers/sdk/playlists',
         'developers/sdk/albums',
         'developers/sdk/resolve',
         'developers/sdk/oauth',
-        'developers/sdk/advanced-options',
       ],
       collapsed: false,
     },
