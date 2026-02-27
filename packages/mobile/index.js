@@ -1,5 +1,9 @@
 /* eslint-disable import/first */
 /* eslint-disable import/order */
+// Apply Hermes Error.stack polyfill before any other code - fixes "Error.stack getter
+// called with an invalid receiver" from libraries using non-standard error inheritance
+require('./src/utils/hermes-error-stack-polyfill').applyHermesErrorStackPolyfill()
+
 // Import React first to ensure React internals are available
 import React from 'react'
 import 'react-native-gesture-handler'
