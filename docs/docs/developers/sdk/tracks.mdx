@@ -10,7 +10,7 @@ description: Audius Protocol Documentation
 
 ## getTrack
 
-> #### getTrack(`params`)
+> #### getTrack(`params`, `requestInit?`)
 
 Get a track by id.
 
@@ -34,76 +34,20 @@ example above.
 | `trackId` | `string` | The ID of the track                   | **Required** |
 | `userId`  | `string` | The ID of the user making the request | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-Returns a `Promise` containing an object with a `data` field. `data` contains information about the
-track as described below.
-
-```ts
-{
-  artwork?: {
-    _1000x1000?: string;
-    _150x150?: string;
-    _480x480?: string;
-  };
-  description?: string;
-  downloadable?: boolean;
-  duration: number;
-  favoriteCount: number;
-  genre?: string;
-  id: string;
-  isStreamable?: string;
-  mood?: string;
-  permalink?: string;
-  playCount: number;
-  releaseDate: string;
-  remixOf?: {
-    tracks: { parentTrackId: string }[];
-  };
-  repostCount: number;
-  tags?: string[];
-  title: string;
-  trackCid?: string;
-  user: {
-    albumCount: number;
-    artistPickTrackId?: string;
-    bio?: string;
-    coverPhoto?: {
-      _2000?: string;
-      _640?: string;
-    };
-    doesFollowCurrentUser?: boolean;
-    ercWallet: string;
-    followeeCount: number;
-    followerCount: number;
-    handle: string;
-    id: string;
-    isAvailable: boolean;
-    isDeactivated: boolean;
-    isVerified: boolean;
-    location?: string;
-    name: string;
-    playlistCount: number;
-    profilePicture?: {
-      _1000x1000?: string;
-      _150x150?: string;
-      _480x480?: string;
-    };
-    repostCount: number;
-    splWallet: string;
-    supporterCount: number;
-    supportingCount: number;
-    totalAudioBalance: number;
-    trackCount: number;
-  };
-};
-```
+Returns a `Promise` containing an object with a `data` field. `data` contains a
+[`TrackResponse`](#trackresponse) object.
 
 ---
 
 ## getBulkTracks
 
-> #### getBulkTracks(`params`)
+> #### getBulkTracks(`params`, `requestInit?`)
 
 Get a list of tracks using their IDs or permalinks.
 
@@ -128,76 +72,20 @@ example above.
 | `userId`    | `string`   | The ID of the user making the request     | _Optional_ |
 | `isrc`      | `string[]` | An array of ISRC codes to query tracks by | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the tracks as described below.
-
-```ts
-{
-  artwork?: {
-    _1000x1000?: string;
-    _150x150?: string;
-    _480x480?: string;
-  };
-  description?: string;
-  downloadable?: boolean;
-  duration: number;
-  favoriteCount: number;
-  genre?: string;
-  id: string;
-  isStreamable?: string;
-  mood?: string;
-  permalink?: string;
-  playCount: number;
-  releaseDate: string;
-  remixOf?: {
-    tracks: { parentTrackId: string }[];
-  };
-  repostCount: number;
-  tags?: string[];
-  title: string;
-  trackCid?: string;
-  user: {
-    albumCount: number;
-    artistPickTrackId?: string;
-    bio?: string;
-    coverPhoto?: {
-      _2000?: string;
-      _640?: string;
-    };
-    doesFollowCurrentUser?: boolean;
-    ercWallet: string;
-    followeeCount: number;
-    followerCount: number;
-    handle: string;
-    id: string;
-    isAvailable: boolean;
-    isDeactivated: boolean;
-    isVerified: boolean;
-    location?: string;
-    name: string;
-    playlistCount: number;
-    profilePicture?: {
-      _1000x1000?: string;
-      _150x150?: string;
-      _480x480?: string;
-    };
-    repostCount: number;
-    splWallet: string;
-    supporterCount: number;
-    supportingCount: number;
-    totalAudioBalance: number;
-    trackCount: number;
-  };
-}[];
-```
+Returns a `Promise` containing an object with a `data` field. `data` is an array of
+[`TrackResponse`](#trackresponse) objects.
 
 ---
 
 ## getTrendingTracks
 
-> #### getTrendingTracks(`params`)
+> #### getTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending (most popular) tracks on Audius.
 
@@ -221,76 +109,20 @@ the example above.
 | `limit`  | `number`                                   | The number of items to fetch (for pagination)                                      | _Optional_ |
 | `userId` | `string`                                   | The ID of the user making the request                                              | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the tracks as described below.
-
-```ts
-{
-  artwork?: {
-    _1000x1000?: string;
-    _150x150?: string;
-    _480x480?: string;
-  };
-  description?: string;
-  downloadable?: boolean;
-  duration: number;
-  favoriteCount: number;
-  genre?: string;
-  id: string;
-  isStreamable?: string;
-  mood?: string;
-  permalink?: string;
-  playCount: number;
-  releaseDate: string;
-  remixOf?: {
-    tracks: { parentTrackId: string }[];
-  };
-  repostCount: number;
-  tags?: string[];
-  title: string;
-  trackCid?: string;
-  user: {
-    albumCount: number;
-    artistPickTrackId?: string;
-    bio?: string;
-    coverPhoto?: {
-      _2000?: string;
-      _640?: string;
-    };
-    doesFollowCurrentUser?: boolean;
-    ercWallet: string;
-    followeeCount: number;
-    followerCount: number;
-    handle: string;
-    id: string;
-    isAvailable: boolean;
-    isDeactivated: boolean;
-    isVerified: boolean;
-    location?: string;
-    name: string;
-    playlistCount: number;
-    profilePicture?: {
-      _1000x1000?: string;
-      _150x150?: string;
-      _480x480?: string;
-    };
-    repostCount: number;
-    splWallet: string;
-    supporterCount: number;
-    supportingCount: number;
-    totalAudioBalance: number;
-    trackCount: number;
-  };
-}[];
-```
+Returns a `Promise` containing an object with a `data` field. `data` is an array of
+[`TrackResponse`](#trackresponse) objects.
 
 ---
 
 ## getUndergroundTrendingTracks
 
-> #### getUndergroundTrendingTracks(`params`)
+> #### getUndergroundTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending underground tracks on Audius.
 
@@ -312,76 +144,20 @@ the example above.
 | `offset` | `number` | An offset to apply to the list of results. Default value is **0**            | _Optional_ |
 | `userId` | `string` | The ID of the user making the request                                        | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the tracks as described below.
-
-```ts
-{
-  artwork?: {
-    _1000x1000?: string;
-    _150x150?: string;
-    _480x480?: string;
-  };
-  description?: string;
-  downloadable?: boolean;
-  duration: number;
-  favoriteCount: number;
-  genre?: string;
-  id: string;
-  isStreamable?: string;
-  mood?: string;
-  permalink?: string;
-  playCount: number;
-  releaseDate: string;
-  remixOf?: {
-    tracks: { parentTrackId: string }[];
-  };
-  repostCount: number;
-  tags?: string[];
-  title: string;
-  trackCid?: string;
-  user: {
-    albumCount: number;
-    artistPickTrackId?: string;
-    bio?: string;
-    coverPhoto?: {
-      _2000?: string;
-      _640?: string;
-    };
-    doesFollowCurrentUser?: boolean;
-    ercWallet: string;
-    followeeCount: number;
-    followerCount: number;
-    handle: string;
-    id: string;
-    isAvailable: boolean;
-    isDeactivated: boolean;
-    isVerified: boolean;
-    location?: string;
-    name: string;
-    playlistCount: number;
-    profilePicture?: {
-      _1000x1000?: string;
-      _150x150?: string;
-      _480x480?: string;
-    };
-    repostCount: number;
-    splWallet: string;
-    supporterCount: number;
-    supportingCount: number;
-    totalAudioBalance: number;
-    trackCount: number;
-  };
-}[];
-```
+Returns a `Promise` containing an object with a `data` field. `data` is an array of
+[`TrackResponse`](#trackresponse) objects.
 
 ---
 
 ## searchTracks
 
-> #### searchTracks(`params`)
+> #### searchTracks(`params`, `requestInit?`)
 
 Search for tracks.
 
@@ -415,70 +191,14 @@ example above.
 | `bpmMin`              | `string`   | Minimum BPM to filter by                                 | _Optional_ |
 | `bpmMax`              | `string`   | Maximum BPM to filter by                                 | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
-information about the tracks as described below.
-
-```ts
-{
-  artwork?: {
-    _1000x1000?: string;
-    _150x150?: string;
-    _480x480?: string;
-  };
-  description?: string;
-  downloadable?: boolean;
-  duration: number;
-  favoriteCount: number;
-  genre?: string;
-  id: string;
-  isStreamable?: string;
-  mood?: string;
-  permalink?: string;
-  playCount: number;
-  releaseDate: string;
-  remixOf?: {
-    tracks: { parentTrackId: string }[];
-  };
-  repostCount: number;
-  tags?: string[];
-  title: string;
-  trackCid?: string;
-  user: {
-    albumCount: number;
-    artistPickTrackId?: string;
-    bio?: string;
-    coverPhoto?: {
-      _2000?: string;
-      _640?: string;
-    };
-    doesFollowCurrentUser?: boolean;
-    ercWallet: string;
-    followeeCount: number;
-    followerCount: number;
-    handle: string;
-    id: string;
-    isAvailable: boolean;
-    isDeactivated: boolean;
-    isVerified: boolean;
-    location?: string;
-    name: string;
-    playlistCount: number;
-    profilePicture?: {
-      _1000x1000?: string;
-      _150x150?: string;
-      _480x480?: string;
-    };
-    repostCount: number;
-    splWallet: string;
-    supporterCount: number;
-    supportingCount: number;
-    totalAudioBalance: number;
-    trackCount: number;
-  };
-}[];
-```
+Returns a `Promise` containing an object with a `data` field. `data` is an array of
+[`TrackResponse`](#trackresponse) objects.
 
 ---
 
@@ -560,14 +280,14 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the new track's ID (`trackId`), as well as the block
-hash (`blockHash`) and block number (`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
-  trackId: string
+  data: {
+    transactionHash?: string
+    trackId?: string
+  }
 }
 ```
 
@@ -616,13 +336,13 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
@@ -659,13 +379,13 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
@@ -709,13 +429,13 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
@@ -752,13 +472,13 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
@@ -802,13 +522,13 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
@@ -845,19 +565,47 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` containing an object with a `data` field.
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  data: {
+    transactionHash?: string
+  }
 }
 ```
 
 ---
 
 ## Type Reference
+
+### TrackResponse
+
+| Field                | Type       | Description                                               |
+| :------------------- | :--------- | :-------------------------------------------------------- |
+| `artwork`            | `object`   | Artwork images (see below)                                |
+| `artwork._1000x1000` | `string`   | URL of 1000x1000 artwork                                  |
+| `artwork._150x150`   | `string`   | URL of 150x150 artwork                                    |
+| `artwork._480x480`   | `string`   | URL of 480x480 artwork                                    |
+| `description`        | `string`   | Track description                                         |
+| `downloadable`       | `boolean`  | Whether the track is downloadable                         |
+| `duration`           | `number`   | Track duration in seconds                                 |
+| `favoriteCount`      | `number`   | Number of favorites                                       |
+| `genre`              | `string`   | Track genre                                               |
+| `id`                 | `string`   | Track ID                                                  |
+| `isStreamable`       | `string`   | Whether the track is streamable                           |
+| `mood`               | `string`   | Track mood                                                |
+| `permalink`          | `string`   | Permalink URL                                             |
+| `playCount`          | `number`   | Number of plays                                           |
+| `releaseDate`        | `string`   | Release date                                              |
+| `remixOf`            | `object`   | Remix parent info (`tracks: { parentTrackId: string }[]`) |
+| `repostCount`        | `number`   | Number of reposts                                         |
+| `tags`               | `string[]` | Array of tags                                             |
+| `title`              | `string`   | Track title                                               |
+| `trackCid`           | `string`   | CID of the track audio                                    |
+| `user`               | `object`   | The track owner (see [User](users))                       |
+
+---
 
 ### CreateTrackRequestBody
 
