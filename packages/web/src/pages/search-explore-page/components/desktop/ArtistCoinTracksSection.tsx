@@ -1,4 +1,4 @@
-import { useExploreContent } from '@audius/common/api'
+import { useFeaturedArtistCoinTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 
 import { Carousel } from './Carousel'
@@ -8,20 +8,22 @@ import { useExploreSectionTracking } from './useExploreSectionTracking'
 export const ArtistCoinTracksSection = () => {
   const { ref, inView } = useExploreSectionTracking('Artist Coin Tracks')
 
-  const { data, isLoading, isError, isSuccess } = useExploreContent({
-    enabled: inView
-  })
+  const {
+    trackIds = [],
+    isPending,
+    isError
+  } = useFeaturedArtistCoinTracks({ enabled: inView })
 
-  if (isError || (isSuccess && !data?.featuredArtistCoinTracks?.length)) {
+  if (isError || (!isPending && !trackIds?.length)) {
     return null
   }
 
   return (
     <Carousel ref={ref} title={messages.artistCoinExclusives}>
-      {!inView || isLoading || !data ? (
+      {!inView || isPending ? (
         <TileSkeletons noShimmer />
       ) : (
-        <TilePairs data={data.featuredArtistCoinTracks} />
+        <TilePairs data={trackIds} />
       )}
     </Carousel>
   )
