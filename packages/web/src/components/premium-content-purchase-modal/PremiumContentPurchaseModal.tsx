@@ -50,7 +50,7 @@ import { useLocalStorage } from 'react-use'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { useHistoryContext } from 'app/HistoryProvider'
+import { useNavigate, useLocation } from 'react-router'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { ModalForm } from 'components/modal-form/ModalForm'
@@ -58,7 +58,7 @@ import { USDCManualTransfer } from 'components/usdc-manual-transfer/USDCManualTr
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useIsUSDCEnabled } from 'hooks/useIsUSDCEnabled'
 import { useManagedAccountNotAllowedCallback } from 'hooks/useManagedAccountNotAllowedRedirect'
-import { pushUniqueRoute } from 'utils/route'
+import { getPathname } from 'utils/route'
 import zIndex from 'utils/zIndex'
 
 import styles from './PremiumContentPurchaseModal.module.css'
@@ -113,7 +113,8 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   const currentPageIndex = pageToPageIndex(page)
 
   const { submitForm, resetForm } = useFormikContext()
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { data: isAccountComplete = false } = useCurrentAccountUser({
     select: selectIsAccountComplete
   })
@@ -126,9 +127,12 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   // Navigate to track on successful purchase behind the modal
   useEffect(() => {
     if (stage === PurchaseContentStage.FINISH && permalink) {
-      dispatch(pushUniqueRoute(history.location, permalink))
+      const pathname = getPathname(location)
+      if (permalink !== pathname) {
+        navigate(permalink)
+      }
     }
-  }, [stage, permalink, dispatch, history])
+  }, [stage, permalink, navigate, location])
 
   const handleUSDCManualTransferClose = useCallback(() => {
     dispatch(setPurchasePage({ page: PurchaseContentPageType.PURCHASE }))
