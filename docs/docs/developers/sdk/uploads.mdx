@@ -171,7 +171,6 @@ This example demonstrates the full workflow of uploading files via the Uploads A
 a track with the returned CIDs.
 
 ```ts
-import { Mood, Genre } from '@audius/sdk'
 import fs from 'fs'
 
 // Step 1: Upload the audio file
@@ -205,8 +204,8 @@ const { data } = await audiusSdk.tracks.createTrack({
   metadata: {
     title: 'Monstera',
     description: 'Dedicated to my favorite plant',
-    genre: Genre.METAL,
-    mood: Mood.AGGRESSIVE,
+    genre: 'Metal',
+    mood: 'Aggressive',
     ...audioResult,
     coverArtCid: coverArtCid,
   },
