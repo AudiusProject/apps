@@ -817,35 +817,35 @@ await audiusSdk.users.updateUser({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name       | Type                     | Description                       | Required?    |
-| :--------- | :----------------------- | :-------------------------------- | :----------- |
-| `id`       | `string`                 | The ID of the user                | **Required** |
-| `userId`   | `string`                 | The ID of the user (same as id)   | **Required** |
-| `metadata` | `UpdateUserRequestBody`  | An object with details about the user | **Required** |
+| Name       | Type                    | Description                           | Required?    |
+| :--------- | :---------------------- | :------------------------------------ | :----------- |
+| `id`       | `string`                | The ID of the user                    | **Required** |
+| `userId`   | `string`                | The ID of the user (same as id)       | **Required** |
+| `metadata` | `UpdateUserRequestBody` | An object with details about the user | **Required** |
 
 `UpdateUserRequestBody` — all fields are optional, only include the fields you want to change:
 
-| Name                  | Type                   | Description                                     |
-| :-------------------- | :--------------------- | :---------------------------------------------- |
-| `name`                | `string`               | Display name                                    |
-| `handle`              | `string`               | User handle (set only if not already set)       |
-| `bio`                 | `string`               | User bio                                        |
-| `location`            | `string`               | User location                                   |
-| `website`             | `string`               | Website URL                                     |
-| `donation`            | `string`               | Donation link                                   |
-| `twitterHandle`       | `string`               | Twitter handle (without @)                      |
-| `instagramHandle`     | `string`               | Instagram handle (without @)                    |
-| `tiktokHandle`        | `string`               | TikTok handle (without @)                       |
-| `profilePicture`      | `string`               | Profile picture CID or URL (from Uploads API)   |
-| `profilePictureSizes` | `string`               | Profile picture sizes metadata                  |
-| `coverPhoto`          | `string`               | Cover photo CID or URL (from Uploads API)       |
-| `coverPhotoSizes`     | `string`               | Cover photo sizes metadata                      |
-| `profileType`         | `'label' \| null`      | Set to `'label'` for record label profiles      |
-| `isDeactivated`       | `boolean`              | Whether the user is deactivated                 |
-| `artistPickTrackId`   | `string`               | Track hash ID for artist pick                   |
-| `allowAiAttribution`  | `boolean`              | Whether to allow AI attribution                 |
-| `splUsdcPayoutWallet` | `string`               | Solana USDC payout wallet address               |
-| `coinFlairMint`       | `string`               | Coin flair mint address                         |
+| Name                  | Type              | Description                                   |
+| :-------------------- | :---------------- | :-------------------------------------------- |
+| `name`                | `string`          | Display name                                  |
+| `handle`              | `string`          | User handle (set only if not already set)     |
+| `bio`                 | `string`          | User bio                                      |
+| `location`            | `string`          | User location                                 |
+| `website`             | `string`          | Website URL                                   |
+| `donation`            | `string`          | Donation link                                 |
+| `twitterHandle`       | `string`          | Twitter handle (without @)                    |
+| `instagramHandle`     | `string`          | Instagram handle (without @)                  |
+| `tiktokHandle`        | `string`          | TikTok handle (without @)                     |
+| `profilePicture`      | `string`          | Profile picture CID or URL (from Uploads API) |
+| `profilePictureSizes` | `string`          | Profile picture sizes metadata                |
+| `coverPhoto`          | `string`          | Cover photo CID or URL (from Uploads API)     |
+| `coverPhotoSizes`     | `string`          | Cover photo sizes metadata                    |
+| `profileType`         | `'label' \| null` | Set to `'label'` for record label profiles    |
+| `isDeactivated`       | `boolean`         | Whether the user is deactivated               |
+| `artistPickTrackId`   | `string`          | Track hash ID for artist pick                 |
+| `allowAiAttribution`  | `boolean`         | Whether to allow AI attribution               |
+| `splUsdcPayoutWallet` | `string`          | Solana USDC payout wallet address             |
+| `coinFlairMint`       | `string`          | Coin flair mint address                       |
 
 > #### `requestInit`
 
