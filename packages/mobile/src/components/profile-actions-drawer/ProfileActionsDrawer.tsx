@@ -6,11 +6,13 @@ import { ShareSource } from '@audius/common/models'
 import {
   chatActions,
   chatSelectors,
+  sendTokensModalActions,
   shareModalUIActions
 } from '@audius/common/store'
 import { useDispatch, useSelector } from 'react-redux'
 
 import ActionDrawer from 'app/components/action-drawer'
+import { env } from 'app/services/env'
 import { setVisibility } from 'app/store/drawers/slice'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -21,6 +23,7 @@ const PROFILE_ACTIONS_MODAL_NAME = 'ProfileActions'
 
 const messages = {
   shareProfile: 'Share Profile',
+  sendCoins: 'Send Coins',
   blockMessages: 'Block Messages',
   unblockMessages: 'Unblock Messages'
 }
@@ -94,9 +97,26 @@ export const ProfileActionsDrawer = () => {
     }
   }, [dispatch, isMuted, userId])
 
+  const handleSendCoinsPress = useCallback(() => {
+    dispatch(
+      setVisibility({
+        drawer: 'ProfileActions',
+        visible: false
+      })
+    )
+    dispatch(
+      sendTokensModalActions.open({
+        mint: env.WAUDIO_MINT_ADDRESS,
+        isOpen: true,
+        user: user ?? undefined
+      })
+    )
+  }, [dispatch, user])
+
   const rows = useMemo(
     () => [
       { text: messages.shareProfile, callback: handleShareProfilePress },
+      { text: messages.sendCoins, callback: handleSendCoinsPress },
       {
         text: isBlockee ? messages.unblockMessages : messages.blockMessages,
         callback: handleBlockMessagesPress
@@ -110,6 +130,7 @@ export const ProfileActionsDrawer = () => {
     ],
     [
       handleShareProfilePress,
+      handleSendCoinsPress,
       isBlockee,
       handleBlockMessagesPress,
       isMuted,

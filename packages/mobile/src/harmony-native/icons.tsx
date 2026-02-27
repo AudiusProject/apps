@@ -156,6 +156,7 @@ export { default as IconValidationX } from '@audius/harmony/src/assets/icons/Val
 export { default as IconCreditCard } from '@audius/harmony/src/assets/icons/CreditCard.svg'
 export { default as IconWaveform } from '@audius/harmony/src/assets/icons/Waveform.svg'
 export { default as IconMoneyBracket } from '@audius/harmony/src/assets/icons/MoneyBracket.svg'
+export { default as IconMoneySend } from '@audius/harmony/src/assets/icons/MoneySend.svg'
 export { default as IconPin } from '@audius/harmony/src/assets/icons/Pin.svg'
 export { default as IconPaperAirplane } from '@audius/harmony/src/assets/icons/PaperAirplane.svg'
 export { default as IconArrowUpToLine } from '@audius/harmony/src/assets/icons/ArrowUpToLine.svg'
