@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useExploreContent } from '@audius/common/api'
+import { useFeaturedArtistCoinTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { QueueSource } from '@audius/common/store'
 
@@ -12,19 +12,19 @@ import { TrackTileCarousel } from './TrackTileCarousel'
 export const FeaturedArtistCoinTracks = () => {
   const { InViewWrapper, inView } =
     useExploreSectionTracking('Artist Coin Tracks')
-  const { data, isPending } = useExploreContent({ enabled: inView })
+  const { trackIds, isPending } = useFeaturedArtistCoinTracks({
+    enabled: inView
+  })
 
   return (
     <InViewWrapper>
-      {data?.featuredArtistCoinTracks.length ? (
-        <ExploreSection title={messages.artistCoinExclusives}>
-          <TrackTileCarousel
-            tracks={data?.featuredArtistCoinTracks}
-            isLoading={isPending}
-            source={QueueSource.EXPLORE}
-          />
-        </ExploreSection>
-      ) : null}
+      <ExploreSection title={messages.artistCoinExclusives}>
+        <TrackTileCarousel
+          tracks={trackIds}
+          isLoading={isPending}
+          source={QueueSource.EXPLORE}
+        />
+      </ExploreSection>
     </InViewWrapper>
   )
 }
