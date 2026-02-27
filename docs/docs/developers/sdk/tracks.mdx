@@ -222,7 +222,6 @@ complete walkthrough.
 Example:
 
 ```ts
-import { Mood, Genre } from '@audius/sdk'
 import fs from 'fs'
 
 // First, upload files using the Uploads API
@@ -254,8 +253,8 @@ const { data } = await audiusSdk.tracks.createTrack({
   metadata: {
     title: 'Monstera',
     description: 'Dedicated to my favorite plant',
-    genre: Genre.METAL,
-    mood: Mood.AGGRESSIVE,
+    genre: 'Metal',
+    mood: 'Aggressive',
     ...audioResult,
     coverArtCid: coverArtCid,
   },
@@ -301,14 +300,12 @@ same as before. To replace audio or cover art, upload new files via the
 Example:
 
 ```ts
-import { Mood } from '@audius/sdk'
-
 const { data } = await audiusSdk.tracks.updateTrack({
   trackId: 'h5pJ3Bz',
   userId: '7eP5n',
   metadata: {
     description: 'Dedicated to my favorite plant... updated!',
-    mood: Mood.YEARNING,
+    mood: 'Yearning',
   },
 })
 ````
@@ -599,11 +596,11 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | Name                           | Type                                                    | Description                                       | Required?    |
 | :----------------------------- | :------------------------------------------------------ | :------------------------------------------------ | :----------- |
 | `title`                        | `string`                                                | Track title                                       | **Required** |
-| `genre`                        | `Genre`                                                 | Track genre                                       | **Required** |
+| `genre`                        | `string`                                                | Track genre (see [Genre Values](#genre-values))   | **Required** |
 | `trackCid`                     | `string`                                                | CID of the transcoded audio (from Uploads API)    | **Required** |
 | `trackId`                      | `string`                                                | Track ID (auto-generated if not provided)         | _Optional_   |
 | `description`                  | `string`                                                | Track description                                 | _Optional_   |
-| `mood`                         | `Mood`                                                  | Track mood                                        | _Optional_   |
+| `mood`                         | `string`                                                | Track mood (see [Mood Values](#mood-values))      | _Optional_   |
 | `bpm`                          | `number`                                                | Beats per minute                                  | _Optional_   |
 | `musicalKey`                   | `string`                                                | Musical key of the track                          | _Optional_   |
 | `tags`                         | `string`                                                | Comma-separated tags                              | _Optional_   |
@@ -652,9 +649,9 @@ you want to change. Omitted fields retain their current values.
 | Name                  | Type                                    | Description                                       |
 | :-------------------- | :-------------------------------------- | :------------------------------------------------ |
 | `title`               | `string`                                | Track title                                       |
-| `genre`               | `Genre`                                 | Track genre                                       |
+| `genre`               | `string`                                | Track genre (see [Genre Values](#genre-values))   |
 | `description`         | `string`                                | Track description                                 |
-| `mood`                | `Mood`                                  | Track mood                                        |
+| `mood`                | `string`                                | Track mood (see [Mood Values](#mood-values))      |
 | `bpm`                 | `number`                                | Beats per minute                                  |
 | `musicalKey`          | `string`                                | Musical key of the track                          |
 | `tags`                | `string`                                | Comma-separated tags                              |
@@ -743,7 +740,7 @@ Require the listener to hold a specific SPL token.
 ```ts
 const metadata = {
   title: 'Premium Track',
-  genre: Genre.ELECTRONIC,
+  genre: 'Electronic',
   trackCid: '...',
   isStreamGated: true,
   streamConditions: {
@@ -798,7 +795,7 @@ Identifies the parent track(s) that a remix is derived from.
 ```ts
 const metadata = {
   title: 'My Remix',
-  genre: Genre.ELECTRONIC,
+  genre: 'Electronic',
   trackCid: '...',
   remixOf: {
     tracks: [{ parentTrackId: 'D7KyD' }],
@@ -846,3 +843,29 @@ Represents the rights controller for the track (used for DDEX metadata).
   rightsShareUnknown?: string // Optional rights share info
 }
 ```
+
+---
+
+### Genre Values
+
+Valid genre values for the `genre` field. Use these exact string values:
+
+`'Electronic'`, `'Rock'`, `'Metal'`, `'Alternative'`, `'Hip-Hop/Rap'`, `'Experimental'`, `'Punk'`,
+`'Folk'`, `'Pop'`, `'Ambient'`, `'Soundtrack'`, `'World'`, `'Jazz'`, `'Acoustic'`, `'Funk'`,
+`'R&B/Soul'`, `'Devotional'`, `'Classical'`, `'Reggae'`, `'Podcasts'`, `'Country'`, `'Spoken Word'`,
+`'Comedy'`, `'Blues'`, `'Kids'`, `'Audiobooks'`, `'Latin'`, `'Lo-Fi'`, `'Hyperpop'`, `'Dancehall'`,
+`'Techno'`, `'Trap'`, `'House'`, `'Tech House'`, `'Deep House'`, `'Disco'`, `'Electro'`, `'Jungle'`,
+`'Progressive House'`, `'Hardstyle'`, `'Glitch Hop'`, `'Trance'`, `'Future Bass'`, `'Future House'`,
+`'Tropical House'`, `'Downtempo'`, `'Drum & Bass'`, `'Dubstep'`, `'Jersey Club'`, `'Vaporwave'`,
+`'Moombahton'`
+
+---
+
+### Mood Values
+
+Valid mood values for the `mood` field. Use these exact string values:
+
+`'Peaceful'`, `'Romantic'`, `'Sentimental'`, `'Tender'`, `'Easygoing'`, `'Yearning'`,
+`'Sophisticated'`, `'Sensual'`, `'Cool'`, `'Gritty'`, `'Melancholy'`, `'Serious'`, `'Brooding'`,
+`'Fiery'`, `'Defiant'`, `'Aggressive'`, `'Rowdy'`, `'Excited'`, `'Energizing'`, `'Empowering'`,
+`'Stirring'`, `'Upbeat'`, `'Other'`
