@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import type { RefObject } from 'react'
 
 import { useRemixContest, useTrack, useCurrentUserId } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
 import { css } from '@emotion/native'
-import type { FlatList } from 'react-native'
 import { ScrollView, useWindowDimensions } from 'react-native'
 import {
   TabView,
@@ -57,16 +55,12 @@ export type RemixContestTabParamList = {
 
 type RemixContestSectionProps = {
   trackId: ID
-  scrollRef?: RefObject<FlatList | null>
 }
 
 /**
  * Section displaying remix contest information for a track
  */
-export const RemixContestSection = ({
-  trackId,
-  scrollRef
-}: RemixContestSectionProps) => {
+export const RemixContestSection = ({ trackId }: RemixContestSectionProps) => {
   const layout = useWindowDimensions()
   const { data: remixContest } = useRemixContest(trackId)
   const { textIconSubdued, neutral } = useThemeColors()
@@ -104,9 +98,7 @@ export const RemixContestSection = ({
       let content: React.ReactNode
       switch (route.key) {
         case 'details':
-          content = (
-            <RemixContestDetailsTab trackId={trackId} scrollRef={scrollRef} />
-          )
+          content = <RemixContestDetailsTab trackId={trackId} />
           break
         case 'prizes':
           content = <RemixContestPrizesTab trackId={trackId} />
@@ -131,7 +123,7 @@ export const RemixContestSection = ({
         </ScrollView>
       ) : null
     },
-    [trackId, scrollRef]
+    [trackId]
   )
 
   const renderLabel = useCallback(
