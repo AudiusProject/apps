@@ -1,7 +1,9 @@
 import cn from 'classnames'
 
-import FavoriteButton from 'components/alt-button/FavoriteButton'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import AnimatedIconButton, {
+  AnimatedIconType
+} from 'components/animated-button/AnimatedIconButton'
+import { useIsMatrix } from 'utils/theme/theme'
 
 import styles from './TableFavoriteButton.module.css'
 
@@ -16,8 +18,7 @@ export const TableFavoriteButton = ({
   favorited,
   onClick
 }: TableFavoriteButtonProps) => {
-  const isMatrixMode = isMatrix()
-  const isDark = isDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   return (
     <div
@@ -26,12 +27,12 @@ export const TableFavoriteButton = ({
         [styles.notFavorited]: !favorited
       })}
     >
-      <FavoriteButton
+      <AnimatedIconButton
+        icon={AnimatedIconType.FAVORITE}
         isActive={favorited}
         className={styles.icon}
-        onClick={onClick}
-        isDarkMode={isDark}
-        isMatrixMode={isMatrixMode}
+        onClick={onClick ?? (() => {})}
+        isMatrix={isMatrixMode}
       />
     </div>
   )

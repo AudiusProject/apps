@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import {
   SystemAppearance,
   Theme,
@@ -5,7 +7,13 @@ import {
   ThemePalette,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
+import { themeSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
+
+import { getLottieThemeColors } from '../lottieTheme'
+
+/** Re-export for Lottie theming - palette + mode map to design system colors */
+export { getLottieThemeColors }
 
 export const THEME_KEY = 'theme'
 export const THEME_PALETTE_KEY = 'themePalette'
@@ -76,13 +84,32 @@ export const isDarkMode = () => shouldShowDark(getTheme())
 export const isMatrix = () => getTheme() === Theme.MATRIX
 
 export const useIsDarkMode = () => {
-  const theme = useSelector(getTheme)
+  const theme = useSelector(themeSelectors.getTheme)
   return shouldShowDark(theme)
 }
 
 export const useIsMatrix = () => {
-  const theme = useSelector(getTheme)
+  const theme = useSelector(themeSelectors.getTheme)
   return theme === Theme.MATRIX
+}
+
+export const useThemePalette = (): ThemePalette | null => {
+  return useSelector(themeSelectors.getThemePalette)
+}
+
+export const useThemeMode = () => {
+  return useSelector(themeSelectors.getThemeMode)
+}
+
+/** Theme colors for Lottie - respects palette (default/classic/matrix) and light/dark mode */
+export const useLottieThemeColors = () => {
+  const palette = useSelector(themeSelectors.getThemePalette)
+  const theme = useSelector(themeSelectors.getTheme)
+  const isDark = shouldShowDark(theme)
+  return useMemo(
+    () => getLottieThemeColors(palette, isDark, theme),
+    [palette, isDark, theme]
+  )
 }
 
 export const clearTheme = () => {

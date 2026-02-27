@@ -26,7 +26,6 @@ import {
   collectionsSocialActions,
   mobileOverflowMenuUIActions,
   shareModalUIActions,
-  themeSelectors,
   OverflowAction,
   OverflowSource,
   playerSelectors
@@ -50,9 +49,8 @@ import { TextLink, UserLink } from 'components/link'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileSize } from 'components/track/types'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
-import { isMatrix, shouldShowDark } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { DesktopCollectionTileProps } from '../desktop/CollectionTile'
 import { getCollectionWithFallback } from '../helpers'
@@ -63,7 +61,6 @@ import TrackTileArt from './TrackTileArt'
 
 const { collectionPage } = route
 const { getUid, getBuffering, getPlaying } = playerSelectors
-const { getTheme } = themeSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const {
@@ -260,9 +257,8 @@ export const CollectionTile = ({
   const playingUid = useSelector(getUid)
   const isBuffering = useSelector(getBuffering)
   const isPlaying = useSelector(getPlaying)
-  const darkMode = useSelector((state: AppState) =>
-    shouldShowDark(getTheme(state))
-  )
+  const darkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   const goToRoute = useCallback(
     (route: string) => {
@@ -623,7 +619,7 @@ export const CollectionTile = ({
               isLoading={isActive && isBuffering}
               isOwner={isOwner}
               isDarkMode={darkMode}
-              isMatrixMode={isMatrix()}
+              isMatrixMode={isMatrixMode}
               hasStreamAccess={hasStreamAccess}
               streamConditions={collection.stream_conditions}
               isUnlisted={collection.is_private}

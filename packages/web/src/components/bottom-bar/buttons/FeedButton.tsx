@@ -16,14 +16,12 @@ const FeedButton = ({
       uniqueKey='feed-button'
       isMatrix={isMatrixMode}
       isActive={isActive}
-      darkMode={darkMode}
       onClick={onClick}
       href={href}
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconFeedLight.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconFeedDark.json')
+      iconJSON={() =>
+        import('../../../assets/animations/iconFeedLight.json').then(
+          (m) => m.default
+        )
       }
       {...buttonProps}
     />

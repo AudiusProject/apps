@@ -15,15 +15,13 @@ const ExploreButton = ({
     <AnimatedBottomButton
       uniqueKey='explore-button'
       isActive={isActive}
-      darkMode={darkMode}
       isMatrix={isMatrixMode}
       onClick={onClick}
       href={href}
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconSearchExplore.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconSearchExplore.json')
+      iconJSON={() =>
+        import('../../../assets/animations/iconSearchExplore.json').then(
+          (m) => m.default
+        )
       }
       {...buttonProps}
     />

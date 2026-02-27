@@ -31,7 +31,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import ActionButtonRow from 'pages/track-page/components/mobile/ActionButtonRow'
 import { isShareToastDisabled } from 'utils/clipboardUtil'
-import { isDarkMode } from 'utils/theme/theme'
+import { useIsDarkMode } from 'utils/theme/theme'
 
 import { CollectionDogEar } from '../CollectionDogEar'
 import { CollectionMetadataList } from '../CollectionMetadataList'
@@ -97,6 +97,7 @@ const CollectionHeader = ({
   onClickMobileOverflow
 }: MobileCollectionHeaderProps) => {
   const navigate = useNavigate()
+  const darkMode = useIsDarkMode()
 
   const { data: partialCollection } = useCollection(collectionId, {
     select: (collection) =>
@@ -260,7 +261,7 @@ const CollectionHeader = ({
           showRepost={!isOwner && hasStreamAccess && !isPrivate}
           showShare={!isPrivate}
           showOverflow={!isPrivate}
-          darkMode={isDarkMode()}
+          darkMode={darkMode}
           showEdit={isOwner}
         />
       </Flex>

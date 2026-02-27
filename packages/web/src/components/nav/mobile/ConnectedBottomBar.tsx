@@ -11,7 +11,7 @@ import {
 } from 'common/store/pages/signon/actions'
 import BottomBar from 'components/bottom-bar/BottomBar'
 import { getPathname } from 'utils/route'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 const { FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, profilePage, LIBRARY_PAGE } =
   route
 
@@ -19,6 +19,8 @@ const ConnectedBottomBar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const isDarkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
@@ -112,8 +114,8 @@ const ConnectedBottomBar = () => {
       onClickExplore={goToExplore}
       onClickLibrary={goToLibrary}
       onClickProfile={goToProfile}
-      isDarkMode={isDarkMode()}
-      isMatrixMode={isMatrix()}
+      isDarkMode={isDarkMode}
+      isMatrixMode={isMatrixMode}
     />
   )
 }

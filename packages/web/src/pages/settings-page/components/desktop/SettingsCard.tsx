@@ -9,6 +9,8 @@ type SettingsCardProps = {
   description: string
   children: React.ReactNode
   isFull?: boolean
+  /** Renders on the right side of the header (e.g. FilterButton) */
+  headerAction?: React.ReactNode
 }
 
 const SettingsCard = (props: SettingsCardProps) => {
@@ -20,8 +22,11 @@ const SettingsCard = (props: SettingsCardProps) => {
   return (
     <div className={settingsCardStyle}>
       <div>
-        <div className={styles.title}>
-          {props.icon} {props.title}
+        <div className={styles.headerRow}>
+          <div className={styles.title}>
+            {props.icon} {props.title}
+          </div>
+          {props.headerAction ?? null}
         </div>
         <div className={styles.description}>{props.description}</div>
       </div>

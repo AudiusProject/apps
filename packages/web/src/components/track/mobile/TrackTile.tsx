@@ -23,7 +23,6 @@ import {
   tracksSocialActions,
   mobileOverflowMenuUIActions,
   shareModalUIActions,
-  themeSelectors,
   OverflowAction,
   OverflowSource,
   playerSelectors
@@ -46,8 +45,7 @@ import Menu from 'components/menu/Menu'
 import { OwnProps as TrackMenuProps } from 'components/menu/TrackMenu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileProps, TrackTileSize } from 'components/track/types'
-import { AppState } from 'store/types'
-import { isMatrix, shouldShowDark } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { TrackDogEar } from '../TrackDogEar'
 import { TrackTileStats } from '../TrackTileStats'
@@ -61,7 +59,6 @@ import TrackTileArt from './TrackTileArt'
 const { setLockedContentId } = gatedContentActions
 const { getGatedContentStatusMap } = gatedContentSelectors
 const { getUid, getPlaying, getBuffering } = playerSelectors
-const { getTheme } = themeSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
@@ -122,9 +119,8 @@ export const TrackTile = ({
   const isBuffering = useSelector(getBuffering)
   const isPlaying = useSelector(getPlaying)
   const { data: currentUserId } = useCurrentUserId()
-  const darkMode = useSelector((state: AppState) =>
-    shouldShowDark(getTheme(state))
-  )
+  const darkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   const handleRepostTrack = useCallback(
     (trackId: ID, isFeed: boolean) => {
@@ -482,7 +478,7 @@ export const TrackTile = ({
             streamConditions={streamConditions}
             gatedTrackStatus={gatedTrackStatus}
             isDarkMode={darkMode}
-            isMatrixMode={isMatrix()}
+            isMatrixMode={isMatrixMode}
             isTrack
             contentId={track_id}
             contentType='track'

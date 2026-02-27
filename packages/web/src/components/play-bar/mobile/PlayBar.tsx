@@ -29,7 +29,7 @@ import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { audioPlayer } from 'services/audio-player'
 import { AppState } from 'store/types'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import styles from './PlayBar.module.css'
 const { makeGetCurrent } = queueSelectors
@@ -61,6 +61,8 @@ const PlayBar = ({
 }: PlayBarProps) => {
   const { uid } = currentQueueItem
   const track = useCurrentTrack()
+  const isDarkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
   const { data: user } = useUser(track?.owner_id)
 
   const [percentComplete, setPercentComplete] = useState(0)
@@ -150,8 +152,8 @@ const PlayBar = ({
             <FavoriteButton
               isDisabled={track?.is_unlisted}
               onClick={toggleFavorite}
-              isDarkMode={isDarkMode()}
-              isMatrixMode={isMatrix()}
+              isDarkMode={isDarkMode}
+              isMatrixMode={isMatrixMode}
               isActive={has_current_user_saved}
               className={styles.favorite}
             />
