@@ -96,7 +96,7 @@ export const PlainButton = (props: PlainButtonProps) => {
           opacity: interpolate(pressed.value, [0, 1], [1, 0.5])
         })
     }),
-    [variant, isPressable]
+    [variant, Boolean(isPressable)]
   )
 
   const animatedIconProps = useAnimatedProps(
@@ -107,7 +107,7 @@ export const PlainButton = (props: PlainButtonProps) => {
         [dynamicStyles.default.text, dynamicStyles.press.text]
       )
     }),
-    [variant, type],
+    [variant, typeof type === 'string' ? type : 'default-light'],
     animatedPropAdapter
   )
 
@@ -128,14 +128,21 @@ export const PlainButton = (props: PlainButtonProps) => {
 
       ...(size === 'large' ? largeTextStyles : defaultTextStyles)
     }),
-    [size, isPressable, type]
+    [
+      size,
+      Boolean(isPressable),
+      typeof type === 'string' ? type : 'default-light'
+    ]
   )
 
   return (
     <BaseButton
       sharedValue={pressed}
       style={[buttonStyles, animatedButtonStyles]}
-      styles={{ text: textCss, ...styles }}
+      styles={{
+        text: styles?.text ?? textCss,
+        icon: styles?.icon
+      }}
       innerProps={{
         icon:
           Platform.OS === 'android'

@@ -18,6 +18,7 @@ import { useRoute } from 'app/hooks/useRoute'
 import { EditProfileButton } from './EditProfileButton'
 import { MessageButton } from './MessageButton'
 import { MessageLockedButton } from './MessageLockedButton'
+import { SendCoinsButton } from './SendCoinsButton'
 import { SubscribeButton } from './SubscribeButton'
 
 const { useCanCreateChat, getChatPermissionsStatus } = chatSelectors
@@ -85,6 +86,7 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
             <MessageLockedButton userId={user_id} />
           )
         ) : null}
+        {!isOwner ? <SendCoinsButton /> : null}
         {does_current_user_follow ? <SubscribeButton userId={user_id} /> : null}
         <FollowButton
           userId={user_id}

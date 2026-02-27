@@ -150,7 +150,7 @@ export const ProfileHeader = memo(() => {
           {!hasUserFollowed ? null : (
             <ArtistRecommendations onClose={handleCloseArtistRecs} />
           )}
-          <Flex pointerEvents='box-none' mt='s'>
+          <Flex pointerEvents='box-none' mt='s' gap='s'>
             {isOwner ? (
               <UploadTrackButton />
             ) : !isArtistCoinLoading && userId && artistCoin?.mint ? (
