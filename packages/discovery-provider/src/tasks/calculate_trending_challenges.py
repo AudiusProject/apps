@@ -9,10 +9,6 @@ from sqlalchemy.orm.session import Session
 from src.challenges.challenge_event import ChallengeEvent
 from src.challenges.challenge_event_bus import ChallengeEventBus
 from src.models.core.core_indexed_blocks import CoreIndexedBlocks
-from src.queries.get_trending_playlists import (
-    GetTrendingPlaylistsArgs,
-    _get_trending_playlists_with_session,
-)
 from src.queries.get_trending_tracks import _get_trending_tracks_with_session
 from src.queries.get_underground_trending import (
     GetUndergroundTrendingTrackArgs,
@@ -169,37 +165,6 @@ def enqueue_trending_challenges(
                 date,
                 TrendingType.UNDERGROUND_TRACKS,
             )
-
-        trending_playlist_versions = trending_strategy_factory.get_versions_for_type(
-            TrendingType.PLAYLISTS
-        ).keys()
-        for version in trending_playlist_versions:
-            strategy = trending_strategy_factory.get_strategy(
-                TrendingType.PLAYLISTS, version
-            )
-            playlists_args: GetTrendingPlaylistsArgs = {
-                "limit": TRENDING_LIMIT,
-                "offset": 0,
-                "time": time_range,
-            }
-            trending_playlists = _get_trending_playlists_with_session(
-                session, playlists_args, strategy, False
-            )
-            for idx, playlist in enumerate(trending_playlists):
-                challenge_bus.dispatch(
-                    ChallengeEvent.trending_playlist,
-                    latest_blocknumber,
-                    latest_block_datetime,
-                    playlist["playlist_owner_id"],
-                    {
-                        "id": playlist["playlist_id"],
-                        "user_id": playlist["playlist_owner_id"],
-                        "rank": idx + 1,
-                        "type": str(TrendingType.PLAYLISTS),
-                        "version": str(version),
-                        "week": date_to_week(date),
-                    },
-                )
 
     update_end = time.time()
     update_total = update_end - update_start
