@@ -782,30 +782,32 @@ The return type is the same as [`getFollowers`](#getfollowers)
 
 ### updateUser
 
-#### updateUser(`params`, `advancedOptions?`)
+#### updateUser(`params`, `requestInit?`)
 
-Update a user profile.
+Update a user profile. To update a profile picture or cover photo, first upload the image via the
+[Uploads API](/developers/sdk/uploads) and pass the resulting CID in `metadata`.
 
 Example:
 
 ```ts
-import { Mood, Genre } from '@audius/sdk'
 import fs from 'fs'
 
+// Upload a new profile picture
 const profilePicBuffer = fs.readFileSync('path/to/profile-pic.png')
+const profilePicUpload = audiusSdk.uploads.createImageUpload({
+  file: {
+    buffer: Buffer.from(profilePicBuffer),
+    name: 'profilePic.png',
+  },
+})
+const profilePicCid = await profilePicUpload.start()
 
 await audiusSdk.users.updateUser({
   id: '7eP5n',
   userId: '7eP5n',
-  profilePictureFile: {
-    buffer: Buffer.from(profilePicBuffer),
-    name: 'profilePic',
-  },
   metadata: {
     bio: 'up and coming artist from the Bronx',
-  },
-  onProgress: (progress) => {
-    console.log(`Uploading: ${Math.round((progress.loaded / progress.total) * 100)}%`)
+    profilePicture: profilePicCid,
   },
 })
 ```
@@ -815,40 +817,41 @@ await audiusSdk.users.updateUser({
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name                 | Type                                                                       | Description                                                                   | Required?    |
-| :------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `id`                 | `string`                                                                   | The ID of the user                                                            | **Required** |
-| `userId`             | `string`                                                                   | The ID of the user (same as id)                                               | **Required** |
-| `profilePictureFile` | `File`                                                                     | A file to be used as the profile picture                                      | _Optional_   |
-| `coverArtFile`       | `File`                                                                     | A file to be used as the cover art. This is the header on a profile page      | _Optional_   |
-| `metadata`           | _see code block below_                                                     | An object with details about the user                                         | **Required** |
-| `onProgress`         | `(progress: { loaded: number, total: number, transcode: number }) => void` | A function that will be called with progress events as the image files upload | _Optional_   |
+| Name       | Type                     | Description                       | Required?    |
+| :--------- | :----------------------- | :-------------------------------- | :----------- |
+| `id`       | `string`                 | The ID of the user                | **Required** |
+| `userId`   | `string`                 | The ID of the user (same as id)   | **Required** |
+| `metadata` | `UpdateUserRequestBody`  | An object with details about the user | **Required** |
 
-```json title="updateUser metadata payload"
-{
-  name?: string;
-  handle?: string;
-  bio?: string;
-  website?: string;
-  donation?: string;
-  location?: string;
-  profileType?: 'label' | null;
-  metadataMultihash?: string;
-  isDeactivated?: boolean;
-  artistPickTrackId?: string;
-  allowAiAttribution?: boolean;
-  twitterHandle?: string;
-  instagramHandle?: string;
-  tiktokHandle?: string;
-  splUsdcPayoutWallet?: string | null;
-  coinFlairMint?: string | null;
-}
-```
+`UpdateUserRequestBody` — all fields are optional, only include the fields you want to change:
 
-#### `advancedOptions`
+| Name                  | Type                   | Description                                     |
+| :-------------------- | :--------------------- | :---------------------------------------------- |
+| `name`                | `string`               | Display name                                    |
+| `handle`              | `string`               | User handle (set only if not already set)       |
+| `bio`                 | `string`               | User bio                                        |
+| `location`            | `string`               | User location                                   |
+| `website`             | `string`               | Website URL                                     |
+| `donation`            | `string`               | Donation link                                   |
+| `twitterHandle`       | `string`               | Twitter handle (without @)                      |
+| `instagramHandle`     | `string`               | Instagram handle (without @)                    |
+| `tiktokHandle`        | `string`               | TikTok handle (without @)                       |
+| `profilePicture`      | `string`               | Profile picture CID or URL (from Uploads API)   |
+| `profilePictureSizes` | `string`               | Profile picture sizes metadata                  |
+| `coverPhoto`          | `string`               | Cover photo CID or URL (from Uploads API)       |
+| `coverPhotoSizes`     | `string`               | Cover photo sizes metadata                      |
+| `profileType`         | `'label' \| null`      | Set to `'label'` for record label profiles      |
+| `isDeactivated`       | `boolean`              | Whether the user is deactivated                 |
+| `artistPickTrackId`   | `string`               | Track hash ID for artist pick                   |
+| `allowAiAttribution`  | `boolean`              | Whether to allow AI attribution                 |
+| `splUsdcPayoutWallet` | `string`               | Solana USDC payout wallet address               |
+| `coinFlairMint`       | `string`               | Coin flair mint address                         |
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+> #### `requestInit`
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -866,7 +869,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ### followUser
 
-#### followUser(`params`, `advancedOptions?`)
+#### followUser(`params`, `requestInit?`)
 
 Follow a user.
 
@@ -889,10 +892,11 @@ example above.
 | `userId`         | `string` | The ID of the user           | **Required** |
 | `followeeUserId` | `string` | The ID of the user to follow | **Required** |
 
-#### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -910,7 +914,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ### unfollowUser
 
-#### unfollowUser(`params`, `advancedOptions?`)
+#### unfollowUser(`params`, `requestInit?`)
 
 Unfollow a user.
 
@@ -933,10 +937,11 @@ example above.
 | `userId`         | `string` | The ID of the user             | **Required** |
 | `followeeUserId` | `string` | The ID of the user to unfollow | **Required** |
 
-#### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -954,7 +959,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ### subscribeToUser
 
-#### subscribeToUser(`params`, `advancedOptions?`)
+#### subscribeToUser(`params`, `requestInit?`)
 
 Subscribe to a user.
 
@@ -977,10 +982,11 @@ example above.
 | `userId`           | `string` | The ID of the user                 | **Required** |
 | `subscribeeUserId` | `string` | The ID of the user to subscribe to | **Required** |
 
-#### `advancedOptions
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -998,7 +1004,7 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 ### unsubscribeFromUser
 
-#### unsubscribeFromUser(`params`, `advancedOptions?`)
+#### unsubscribeFromUser(`params`, `requestInit?`)
 
 Unsubscribe from a user.
 
@@ -1021,10 +1027,11 @@ example above.
 | `userId`           | `string` | The ID of the user                     | **Required** |
 | `subscribeeUserId` | `string` | The ID of the user to unsubscribe from | **Required** |
 
-#### `advancedOptions`
+> #### `requestInit`
 
-You can pass an optional [`advancedOptions`](/developers/sdk/advanced-options) object as the second
-argument.
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
