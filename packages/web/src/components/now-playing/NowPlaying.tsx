@@ -61,7 +61,7 @@ import {
 import { audioPlayer } from 'services/audio-player'
 import { AppState } from 'store/types'
 import { pushUniqueRoute as pushRoute } from 'utils/route'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 import { withNullGuard } from 'utils/withNullGuard'
 
 import styles from './NowPlaying.module.css'
@@ -136,6 +136,8 @@ const NowPlaying = g(
   }) => {
     const { uid, track, user } = currentQueueItem
     const { history } = useHistoryContext()
+    const isDarkMode = useIsDarkMode()
+    const isMatrixMode = useIsMatrix()
 
     const { data: currentUserId } = useCurrentUserId()
 
@@ -358,8 +360,6 @@ const NowPlaying = g(
       transition: 'box-shadow 0.3s ease-in-out'
     }
 
-    const matrix = isMatrix()
-
     const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
     const gatedTrackStatus =
       track_id &&
@@ -517,8 +517,8 @@ const NowPlaying = g(
             onToggleFavorite={toggleFavorite}
             onShare={onShare}
             onClickOverflow={onClickOverflow}
-            isDarkMode={isDarkMode()}
-            isMatrixMode={matrix}
+            isDarkMode={isDarkMode}
+            isMatrixMode={isMatrixMode}
           />
         </div>
       </div>

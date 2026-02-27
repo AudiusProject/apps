@@ -1,4 +1,4 @@
-/* Bottom Row Track TIle */
+/* Bottom Row Track Tile */
 .iconButton {
   display: flex;
   height: var(--harmony-unit-6);
@@ -8,8 +8,33 @@
   transition: all 0.12s ease-in-out !important;
 }
 
+/* Subdued inactive – matches share icon */
+.iconButton path {
+  fill: var(--harmony-n-400) !important;
+}
+
+.iconButtonActive path {
+  fill: var(--harmony-primary) !important;
+}
+
 .iconButton:hover {
   transform: scale3d(1.18, 1.18, 1.18);
+}
+
+/* Share uses Harmony IconButton – has built-in svg hover, so keep scale subtle */
+.iconButtonShare {
+  display: flex;
+  height: var(--harmony-unit-6);
+  width: var(--harmony-unit-6);
+  align-items: center;
+  justify-content: center;
+  transform: scale3d(1, 1, 1);
+  transition: all 0.12s ease-in-out !important;
+}
+
+/* Match repost/favorite 1.18 total – IconButton adds svg scale(1.1), so ~1.07 here */
+.iconButtonShare:hover {
+  transform: scale3d(1.07, 1.07, 1.07);
 }
 
 .iconButtonContainer.isDisabled .iconButton:hover {
@@ -27,6 +52,12 @@
 .iconShareContainer {
   height: var(--harmony-unit-6);
   width: var(--harmony-unit-6);
+}
+
+/* Repost Lottie has more whitespace – scale up to match favorite/share */
+.iconButtonRepost {
+  transform: scale(1.15);
+  transform-origin: center;
 }
 
 /* Make the icon buttons a larger click target */

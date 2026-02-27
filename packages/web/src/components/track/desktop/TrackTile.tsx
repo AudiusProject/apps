@@ -40,7 +40,7 @@ import { TrackArtwork } from 'components/track/Artwork'
 import { DragDropKind } from 'store/dragndrop/slice'
 import { isDescendantElementOf } from 'utils/domUtils'
 import { fullTrackPage } from 'utils/route'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { OwnerActionButtons } from '../OwnerActionButtons'
 import { TrackDogEar } from '../TrackDogEar'
@@ -99,6 +99,8 @@ export const TrackTile = ({
   showArtistPick = false
 }: TrackTileProps) => {
   const dispatch = useDispatch()
+  const isDarkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
   const { data: currentUserId } = useCurrentUserId()
   const { data: track, isPending } = useTrack(id)
   const { data: partialUser } = useUser(track?.owner_id, {
@@ -415,8 +417,8 @@ export const TrackTile = ({
               isDisabled={disableActions}
               isLoading={isLoading}
               rightActions={renderOverflowMenu()}
-              isDarkMode={isDarkMode()}
-              isMatrixMode={isMatrix()}
+              isDarkMode={isDarkMode}
+              isMatrixMode={isMatrixMode}
               showIconButtons={true}
               onClickShare={onClickShare}
             />
@@ -431,8 +433,8 @@ export const TrackTile = ({
               isDisabled={disableActions}
               isLoading={isLoading}
               rightActions={renderOverflowMenu()}
-              isDarkMode={isDarkMode()}
-              isMatrixMode={isMatrix()}
+              isDarkMode={isDarkMode}
+              isMatrixMode={isMatrixMode}
               showIconButtons={true}
               onClickRepost={onClickRepost}
               onClickFavorite={onClickFavorite}

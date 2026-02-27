@@ -41,7 +41,7 @@ import HoverInfo from 'components/track-flair/HoverInfo'
 import { Size } from 'components/track-flair/types'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { push as pushRoute } from 'utils/navigation'
-import { isDarkMode } from 'utils/theme/theme'
+import { useIsDarkMode } from 'utils/theme/theme'
 
 import ActionButtonRow from './ActionButtonRow'
 import { DownloadSection } from './DownloadSection'
@@ -178,6 +178,7 @@ const TrackHeader = ({
   goToFavoritesPage,
   goToRepostsPage
 }: TrackHeaderProps) => {
+  const darkMode = useIsDarkMode()
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) => {
       return {
@@ -402,7 +403,7 @@ const TrackHeader = ({
           onRepost={onRepost}
           onFavorite={onSaveHeroTrack}
           onShare={onShare}
-          darkMode={isDarkMode()}
+          darkMode={darkMode}
         />
         {coSign ? (
           <div className={cn(styles.coSignInfo, styles.withSectionDivider)}>

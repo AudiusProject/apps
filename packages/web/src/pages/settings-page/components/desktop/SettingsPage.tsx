@@ -21,9 +21,9 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  FilterButton,
   Flex,
   IconAppearance,
-  Select,
   IconEmailAddress,
   IconError,
   IconKey,
@@ -466,27 +466,30 @@ export const SettingsPage = () => {
             title={settingsMessages.appearanceTitle}
             description={settingsMessages.appearanceDescription}
             isFull={true}
-          >
-            {isNewThemeModelEnabled ? (
-              <Flex direction='column' gap='l'>
-                <Select<ThemePalette>
+            headerAction={
+              isNewThemeModelEnabled ? (
+                <FilterButton<ThemePalette>
+                  label={settingsMessages.appearanceTitle}
                   value={effectivePalette}
                   options={paletteOptions}
                   onChange={(value) => onPaletteChange(value)}
-                  label={settingsMessages.appearanceTitle}
+                  variant='replaceLabel'
                   optionsLabel='Theme'
                 />
-                {effectivePalette !== ThemePalette.MATRIX ? (
-                  <SegmentedControl
-                    fullWidth
-                    label='Color mode'
-                    options={modeOptions}
-                    selected={effectiveMode}
-                    onSelectOption={(option) => onModeChange(option)}
-                    key={`tab-slider-${effectivePalette}`}
-                  />
-                ) : null}
-              </Flex>
+              ) : undefined
+            }
+          >
+            {isNewThemeModelEnabled ? (
+              effectivePalette !== ThemePalette.MATRIX ? (
+                <SegmentedControl
+                  fullWidth
+                  label='Color mode'
+                  options={modeOptions}
+                  selected={effectiveMode}
+                  onSelectOption={(option) => onModeChange(option)}
+                  key={`tab-slider-${effectivePalette}`}
+                />
+              ) : null
             ) : (
               <SegmentedControl
                 fullWidth

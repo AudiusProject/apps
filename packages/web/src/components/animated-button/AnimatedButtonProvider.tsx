@@ -12,6 +12,8 @@ import cn from 'classnames'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 
 import { SeoLink } from 'components/link'
+import { applyThemeToLottie } from 'utils/lottieTheme'
+import { useLottieThemeColors } from 'utils/theme/theme'
 
 import styles from './AnimatedButtonProvider.module.css'
 
@@ -129,45 +131,54 @@ const AnimatedButton = ({
       {buttonElement}
     </SeoLink>
   ) : (
-    <button {...rootProps}>{buttonElement}</button>
+    <button {...rootProps} {...buttonProps}>
+      {buttonElement}
+    </button>
   )
 }
 
+export type LottieThemeVariant = 'accent' | 'neutral'
+
 export type AnimatedButtonProviderProps = {
-  darkMode: boolean
+  /** @deprecated No longer used - theme applied via useLottieThemeColors */
+  darkMode?: boolean
   isMatrix: boolean
-  iconDarkJSON: () => Promise<any>
-  iconLightJSON: () => Promise<any>
+  /** Base Lottie JSON loader - theme colors applied at runtime */
+  iconJSON: () => Promise<IconJSON>
+  /** 'accent' = active state, 'neutral' = inactive state. Defaults from isActive. */
+  variant?: LottieThemeVariant
 } & BaseAnimatedButtonProps
 
 const AnimatedButtonProvider = ({
-  darkMode,
-  iconDarkJSON,
-  iconLightJSON,
+  iconJSON: iconJSONLoader,
+  isActive,
+  variant: variantProp,
   ...buttonProps
 }: AnimatedButtonProviderProps) => {
   const [iconJSON, setIconJSON] = useState<IconJSON | null>(null)
-  const defaultAnimations = useRef<IconJSON | null>(null)
-  const darkAnimations = useRef<IconJSON | null>(null)
+  const baseAnimation = useRef<IconJSON | null>(null)
+  const themeColors = useLottieThemeColors()
+  const variant = variantProp ?? (isActive ? 'accent' : 'neutral')
 
   useEffect(() => {
-    const loadAnimations = async () => {
-      if (darkMode) {
-        if (!darkAnimations.current) {
-          darkAnimations.current = await iconDarkJSON()
-        }
-        setIconJSON({ ...darkAnimations.current })
-      } else {
-        if (!defaultAnimations.current) {
-          defaultAnimations.current = await iconLightJSON()
-        }
-        setIconJSON({ ...defaultAnimations.current })
+    const loadAndTheme = async () => {
+      if (!baseAnimation.current) {
+        baseAnimation.current = await iconJSONLoader()
       }
+      setIconJSON(
+        applyThemeToLottie(
+          baseAnimation.current,
+          themeColors,
+          variant
+        ) as IconJSON
+      )
     }
-    loadAnimations()
-  }, [darkMode, setIconJSON, iconDarkJSON, iconLightJSON])
+    loadAndTheme()
+  }, [iconJSONLoader, themeColors, variant])
 
-  return iconJSON && <AnimatedButton iconJSON={iconJSON} {...buttonProps} />
+  return iconJSON ? (
+    <AnimatedButton iconJSON={iconJSON} isActive={isActive} {...buttonProps} />
+  ) : null
 }
 
 export default memo(AnimatedButtonProvider)

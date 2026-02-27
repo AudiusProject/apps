@@ -11,8 +11,15 @@
   height: var(--harmony-unit-6);
 }
 
+/* Repost Lottie has more whitespace – scale up slightly to match favorite/share */
+.repostButton {
+  transform: scale(1.15);
+  transform-origin: center;
+}
+
+/* Subdued inactive state - matches share icon */
 .button path {
-  fill: var(--harmony-neutral) !important;
+  fill: var(--harmony-n-400) !important;
 }
 
 .activeButton path {
@@ -35,6 +42,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.shareHidden {
+  visibility: hidden;
 }
 
 .overflow {

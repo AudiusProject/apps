@@ -6,12 +6,13 @@ import {
   GatedContentStatus
 } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, IconButton, IconShare, Text } from '@audius/harmony'
+import cn from 'classnames'
 
-import FavoriteButton from 'components/alt-button/FavoriteButton'
 import MoreButton from 'components/alt-button/MoreButton'
-import RepostButton from 'components/alt-button/RepostButton'
-import ShareButton from 'components/alt-button/ShareButton'
+import AnimatedIconButton, {
+  AnimatedIconType
+} from 'components/animated-button/AnimatedIconButton'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useIsUSDCEnabled } from 'hooks/useIsUSDCEnabled'
 
@@ -94,14 +95,19 @@ const BottomButtons = (props: BottomButtonsProps) => {
   }
 
   const shareButton = (
-    <ShareButton
-      wrapperClassName={styles.button}
-      className={styles.buttonContent}
-      onClick={props.onShare}
-      isDarkMode={props.isDarkMode}
-      isMatrixMode={props.isMatrixMode}
-      isShareHidden={props.isShareHidden}
-    />
+    <div
+      className={cn(styles.button, {
+        [styles.shareHidden]: props.isShareHidden
+      })}
+    >
+      <IconButton
+        icon={IconShare}
+        onClick={props.onShare}
+        size='l'
+        color='subdued'
+        aria-label='Share'
+      />
+    </div>
   )
 
   if (props.isUnlisted) {
@@ -134,25 +140,29 @@ const BottomButtons = (props: BottomButtonsProps) => {
         alignItems='center'
         justifyContent='space-between'
       >
-        <RepostButton
-          wrapperClassName={styles.button}
+        <AnimatedIconButton
+          icon={AnimatedIconType.REPOST}
+          wrapperClassName={cn(styles.button, styles.repostButton)}
           className={styles.buttonContent}
+          activeClassName={styles.activeButton}
+          disabledClassName={styles.disabledButton}
           onClick={props.toggleRepost}
           isActive={props.hasReposted}
           isDisabled={props.isOwner}
-          isUnlisted={props.isUnlisted}
-          isDarkMode={props.isDarkMode}
-          isMatrixMode={props.isMatrixMode}
+          isMatrix={props.isMatrixMode}
+          stopPropagation
         />
-        <FavoriteButton
+        <AnimatedIconButton
+          icon={AnimatedIconType.FAVORITE}
           wrapperClassName={styles.button}
           className={styles.buttonContent}
+          activeClassName={styles.activeButton}
+          disabledClassName={styles.disabledButton}
           onClick={props.toggleSave}
           isActive={props.hasSaved}
           isDisabled={props.isOwner}
-          isUnlisted={props.isUnlisted}
-          isDarkMode={props.isDarkMode}
-          isMatrixMode={props.isMatrixMode}
+          isMatrix={props.isMatrixMode}
+          stopPropagation
         />
         {shareButton}
       </Flex>

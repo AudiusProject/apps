@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import { applyThemeToLottie } from 'utils/lottieTheme'
+import { useLottieThemeColors } from 'utils/theme/theme'
 
 import ShuffleButton from './ShuffleButton'
 
@@ -19,62 +20,40 @@ const ShuffleButtonProvider = ({
   onShuffleOn,
   onShuffleOff
 }: ShuffleButtonProviderProps) => {
-  const isMatrix = useIsMatrix()
-  const darkMode = useIsDarkMode()
+  const themeColors = useLottieThemeColors()
   const isMobile = useIsMobile()
   const [animations, setAnimations] = useState<AnimationStates | null>(null)
-  const defaultAnimations = useRef<AnimationStates | null>(null)
-  const darkAnimations = useRef<AnimationStates | null>(null)
-  const matrixAnimations = useRef<AnimationStates | null>(null)
+  const baseAnimations = useRef<AnimationStates | null>(null)
 
   useEffect(() => {
     const loadAnimations = async () => {
-      if (isMatrix) {
-        if (!matrixAnimations.current) {
-          const { default: pbIconShuffleOff } = (await import(
-            '../../../assets/animations/pbIconShuffleOffMatrix.json'
-          )) as any
-          const { default: pbIconShuffleOn } = (await import(
-            '../../../assets/animations/pbIconShuffleOnMatrix.json'
-          )) as any
-          matrixAnimations.current = {
-            pbIconShuffleOff,
-            pbIconShuffleOn
-          }
+      if (!baseAnimations.current) {
+        const { default: pbIconShuffleOff } = (await import(
+          '../../../assets/animations/pbIconShuffleOff.json'
+        )) as { default: object }
+        const { default: pbIconShuffleOn } = (await import(
+          '../../../assets/animations/pbIconShuffleOn.json'
+        )) as { default: object }
+        baseAnimations.current = {
+          pbIconShuffleOff,
+          pbIconShuffleOn
         }
-        setAnimations({ ...matrixAnimations.current })
-      } else if (darkMode) {
-        if (!darkAnimations.current) {
-          const { default: pbIconShuffleOff } = (await import(
-            '../../../assets/animations/pbIconShuffleOffDark.json'
-          )) as any
-          const { default: pbIconShuffleOn } = (await import(
-            '../../../assets/animations/pbIconShuffleOnDark.json'
-          )) as any
-          darkAnimations.current = {
-            pbIconShuffleOff,
-            pbIconShuffleOn
-          }
-        }
-        setAnimations({ ...darkAnimations.current })
-      } else {
-        if (!defaultAnimations.current) {
-          const { default: pbIconShuffleOff } = (await import(
-            '../../../assets/animations/pbIconShuffleOff.json'
-          )) as any
-          const { default: pbIconShuffleOn } = (await import(
-            '../../../assets/animations/pbIconShuffleOn.json'
-          )) as any
-          defaultAnimations.current = {
-            pbIconShuffleOff,
-            pbIconShuffleOn
-          }
-        }
-        setAnimations({ ...defaultAnimations.current })
       }
+      setAnimations({
+        pbIconShuffleOff: applyThemeToLottie(
+          baseAnimations.current.pbIconShuffleOff,
+          themeColors,
+          'neutral'
+        ),
+        pbIconShuffleOn: applyThemeToLottie(
+          baseAnimations.current.pbIconShuffleOn,
+          themeColors,
+          'accent'
+        )
+      })
     }
     loadAnimations()
-  }, [darkMode, setAnimations, isMatrix])
+  }, [themeColors])
 
   return (
     animations && (

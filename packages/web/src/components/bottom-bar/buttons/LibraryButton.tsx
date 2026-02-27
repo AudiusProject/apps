@@ -15,15 +15,13 @@ const LibraryButton = ({
     <AnimatedBottomButton
       uniqueKey='library-button'
       isActive={isActive}
-      darkMode={darkMode}
       isMatrix={isMatrixMode}
       onClick={onClick}
       href={href}
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconFavoriteLight.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconFavoriteDark.json')
+      iconJSON={() =>
+        import('../../../assets/animations/iconFavoriteLight.json').then(
+          (m) => m.default
+        )
       }
       {...buttonProps}
     />

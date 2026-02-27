@@ -55,7 +55,7 @@ import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
 import { isDescendantElementOf } from 'utils/domUtils'
 import { push as pushRoute } from 'utils/navigation'
 import { fullTrackPage } from 'utils/route'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { OwnerActionButtons } from '../OwnerActionButtons'
 import { ViewerActionButtons } from '../ViewerActionButtons'
@@ -115,6 +115,8 @@ export const CollectionTile = ({
   noShimmer
 }: DesktopCollectionTileProps) => {
   const dispatch = useDispatch()
+  const isDarkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   const { data: partialCollection } = useCollection(collectionId, {
     select: (collection) => ({
@@ -626,8 +628,8 @@ export const CollectionTile = ({
             isDisabled={disableActions}
             isLoading={isLoading}
             rightActions={renderOverflowMenu()}
-            isDarkMode={isDarkMode()}
-            isMatrixMode={isMatrix()}
+            isDarkMode={isDarkMode}
+            isMatrixMode={isMatrixMode}
             showIconButtons={true}
             onClickShare={onClickShare}
           />
@@ -639,8 +641,8 @@ export const CollectionTile = ({
             isDisabled={disableActions}
             isLoading={isLoading}
             rightActions={renderOverflowMenu()}
-            isDarkMode={isDarkMode()}
-            isMatrixMode={isMatrix()}
+            isDarkMode={isDarkMode}
+            isMatrixMode={isMatrixMode}
             showIconButtons={true}
             onClickFavorite={onClickFavorite}
             onClickRepost={onClickRepost}

@@ -21,6 +21,7 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  FilterButton,
   Flex,
   IconVerified,
   Modal,
@@ -28,7 +29,6 @@ import {
   ModalContentText,
   ModalFooter,
   SegmentedControl,
-  Select,
   Text,
   IconAudiusLogoHorizontalColor,
   IconLogoCircleUSDCPng
@@ -285,11 +285,12 @@ export const SettingsPage = (props: SettingsPageProps) => {
   const renderThemeControls = () =>
     isNewThemeModelEnabled ? (
       <Flex direction='column' gap='l'>
-        <Select<ThemePalette>
+        <FilterButton<ThemePalette>
+          label={messages.appearanceTitle}
           value={effectivePalette}
           options={paletteOptions}
           onChange={(value) => onPaletteChange(value)}
-          label={messages.appearanceTitle}
+          variant='replaceLabel'
           optionsLabel='Theme'
         />
         {effectivePalette !== ThemePalette.MATRIX ? (

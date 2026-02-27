@@ -266,9 +266,9 @@ html[data-theme='default-light'] {
   --harmony-dark-red: #c44357;
   --harmony-green: #0f9e48;
   --harmony-light-green: #a74cff;
-  --harmony-gradient-color-1: #6f55d8;
-  --harmony-gradient-color-2: #d767e1;
-  --harmony-gradient: linear-gradient(315deg, #6f55d8 0%, #d767e1 100%);
+  --harmony-gradient-color-1: #7f6ad6;
+  --harmony-gradient-color-2: #5b44b8;
+  --harmony-gradient: linear-gradient(315deg, #7f6ad6 0%, #5b44b8 100%);
   --harmony-coin-gradient: linear-gradient(
     85deg,
     #7f6ad6 -4.82%,
@@ -319,9 +319,9 @@ html[data-theme='default-dark'] {
   --harmony-dark-red: #c44357;
   --harmony-green: #84df64;
   --harmony-light-green: #c67cff;
-  --harmony-gradient-color-1: #6f55d8;
-  --harmony-gradient-color-2: #d767e1;
-  --harmony-gradient: linear-gradient(315deg, #6f55d8 0%, #d767e1 100%);
+  --harmony-gradient-color-1: #806ad8;
+  --harmony-gradient-color-2: #9e8ee8;
+  --harmony-gradient: linear-gradient(315deg, #806ad8 0%, #9e8ee8 100%);
   --harmony-coin-gradient: linear-gradient(
     85deg,
     #806ad8 -4.82%,

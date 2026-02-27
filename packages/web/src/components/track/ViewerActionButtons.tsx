@@ -4,12 +4,12 @@ import { useCollection, useTrack } from '@audius/common/api'
 import { AccessConditions, ID } from '@audius/common/models'
 import { gatedContentSelectors } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { Flex, Text, Tooltip } from '@audius/harmony'
+import { Flex, IconButton, IconShare, Text, Tooltip } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
-import FavoriteButton from 'components/alt-button/FavoriteButton'
-import RepostButton from 'components/alt-button/RepostButton'
-import ShareButton from 'components/alt-button/ShareButton'
+import AnimatedIconButton, {
+  AnimatedIconType
+} from 'components/animated-button/AnimatedIconButton'
 
 import { GatedConditionsPill } from './GatedConditionsPill'
 import styles from './ViewerActionButtons.module.css'
@@ -198,13 +198,17 @@ const BaseViewerActionButtons = ({
             mount='page'
           >
             <Flex css={{ position: 'relative' }}>
-              <RepostButton
+              <AnimatedIconButton
                 aria-label={repostLabel}
+                icon={AnimatedIconType.REPOST}
                 onClick={onClickRepost}
                 isDisabled={isDisabled}
                 isActive={isReposted}
-                isDarkMode={!!isDarkMode}
-                isMatrixMode={isMatrixMode}
+                isMatrix={isMatrixMode}
+                className={styles.iconButton}
+                activeClassName={styles.iconButtonActive}
+                wrapperClassName={styles.iconButtonRepost}
+                stopPropagation
               />
             </Flex>
           </Tooltip>
@@ -215,12 +219,18 @@ const BaseViewerActionButtons = ({
             mount='page'
           >
             <Flex css={{ position: 'relative' }}>
-              <FavoriteButton
+              <AnimatedIconButton
+                aria-label={
+                  isFavorited ? messages.unfavorite : messages.favorite
+                }
+                icon={AnimatedIconType.FAVORITE}
                 onClick={onClickFavorite}
                 isActive={isFavorited}
                 isDisabled={isDisabled}
-                isDarkMode={!!isDarkMode}
-                isMatrixMode={isMatrixMode}
+                isMatrix={isMatrixMode}
+                className={styles.iconButton}
+                activeClassName={styles.iconButtonActive}
+                stopPropagation
               />
             </Flex>
           </Tooltip>
@@ -231,12 +241,13 @@ const BaseViewerActionButtons = ({
             mount='page'
           >
             <Flex css={{ position: 'relative' }} onClick={onStopPropagation}>
-              <ShareButton
+              <IconButton
+                icon={IconShare}
                 onClick={onClickShare}
-                isDarkMode={!!isDarkMode}
-                className={styles.iconButton}
-                stopPropagation={false}
-                isMatrixMode={isMatrixMode}
+                size='l'
+                color='subdued'
+                aria-label={messages.share}
+                className={styles.iconButtonShare}
               />
             </Flex>
           </Tooltip>

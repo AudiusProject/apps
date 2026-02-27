@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import { applyThemeToLottie } from 'utils/lottieTheme'
+import { useLottieThemeColors } from 'utils/theme/theme'
 
 import RepeatButton from './RepeatButton'
 
@@ -22,75 +23,49 @@ const RepeatButtonProvider = ({
   onRepeatSingle,
   onRepeatAll
 }: RepeatButtonProviderProps) => {
-  const isMatrix = useIsMatrix()
-  const darkMode = useIsDarkMode()
+  const themeColors = useLottieThemeColors()
   const isMobile = useIsMobile()
   const [animations, setAnimations] = useState<AnimationStates | null>(null)
-  const defaultAnimations = useRef<AnimationStates | null>(null)
-  const darkAnimations = useRef<AnimationStates | null>(null)
-  const matrixAnimations = useRef<AnimationStates | null>(null)
+  const baseAnimations = useRef<AnimationStates | null>(null)
 
   useEffect(() => {
     const loadAnimations = async () => {
-      if (isMatrix) {
-        if (!matrixAnimations.current) {
-          const { default: pbIconRepeatAll } = (await import(
-            'assets/animations/pbIconRepeatAllMatrix.json'
-          )) as any
-          const { default: pbIconRepeatSingle } = (await import(
-            'assets/animations/pbIconRepeatSingleMatrix.json'
-          )) as any
-          const { default: pbIconRepeatOff } = (await import(
-            'assets/animations/pbIconRepeatOffMatrix.json'
-          )) as any
-          matrixAnimations.current = {
-            pbIconRepeatAll,
-            pbIconRepeatSingle,
-            pbIconRepeatOff
-          }
+      if (!baseAnimations.current) {
+        const { default: pbIconRepeatAll } = (await import(
+          '../../../assets/animations/pbIconRepeatAll.json'
+        )) as { default: object }
+        const { default: pbIconRepeatSingle } = (await import(
+          '../../../assets/animations/pbIconRepeatSingle.json'
+        )) as { default: object }
+        const { default: pbIconRepeatOff } = (await import(
+          '../../../assets/animations/pbIconRepeatOff.json'
+        )) as { default: object }
+        baseAnimations.current = {
+          pbIconRepeatAll,
+          pbIconRepeatSingle,
+          pbIconRepeatOff
         }
-
-        setAnimations({ ...matrixAnimations.current })
-      } else if (darkMode) {
-        if (!darkAnimations.current) {
-          const { default: pbIconRepeatAll } = (await import(
-            'assets/animations/pbIconRepeatAllDark.json'
-          )) as any
-          const { default: pbIconRepeatSingle } = (await import(
-            'assets/animations/pbIconRepeatSingleDark.json'
-          )) as any
-          const { default: pbIconRepeatOff } = (await import(
-            'assets/animations/pbIconRepeatOffDark.json'
-          )) as any
-          darkAnimations.current = {
-            pbIconRepeatAll,
-            pbIconRepeatSingle,
-            pbIconRepeatOff
-          }
-        }
-        setAnimations({ ...darkAnimations.current })
-      } else {
-        if (!defaultAnimations.current) {
-          const { default: pbIconRepeatAll } = (await import(
-            '../../../assets/animations/pbIconRepeatAll.json'
-          )) as any
-          const { default: pbIconRepeatSingle } = (await import(
-            '../../../assets/animations/pbIconRepeatSingle.json'
-          )) as any
-          const { default: pbIconRepeatOff } = (await import(
-            '../../../assets/animations/pbIconRepeatOff.json'
-          )) as any
-          defaultAnimations.current = {
-            pbIconRepeatAll,
-            pbIconRepeatSingle,
-            pbIconRepeatOff
-          }
-        }
-        setAnimations({ ...defaultAnimations.current })
       }
+      setAnimations({
+        pbIconRepeatAll: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatAll,
+          themeColors,
+          'neutral'
+        ),
+        pbIconRepeatSingle: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatSingle,
+          themeColors,
+          'accent'
+        ),
+        pbIconRepeatOff: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatOff,
+          themeColors,
+          'accent'
+        )
+      })
     }
     loadAnimations()
-  }, [darkMode, setAnimations, isMatrix])
+  }, [themeColors])
 
   return (
     animations && (
