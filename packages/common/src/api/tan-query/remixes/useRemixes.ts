@@ -114,7 +114,8 @@ export const useRemixes = (
         onlyCosigns: isCosign,
         onlyContestEntries: isContestEntry
       })
-      const data = remixesResponse ?? { count: 0, tracks: [] }
+
+      const data = remixesResponse?.data ?? { count: 0, tracks: [] }
       let processedTracks = transformAndCleanList(
         data.tracks ?? [],
         userTrackMetadataFromSDK

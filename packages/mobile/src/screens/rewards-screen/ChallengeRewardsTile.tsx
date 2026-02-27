@@ -44,7 +44,7 @@ import type { ProfileTabScreenParamList } from 'app/screens/app-screen/ProfileTa
 import { make, track } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
 import { getChallengeConfig } from 'app/utils/challenges'
-import { Theme, useThemeVariant } from 'app/utils/theme'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { Panel } from './Panel'
 const { setVisibility } = modalsActions
@@ -106,8 +106,7 @@ export const ChallengeRewardsTile = () => {
   const navigation = useNavigation<ProfileTabScreenParamList>()
   const { spacing } = useTheme()
   const themeVariant = useThemeVariant()
-  const isDarkMode =
-    themeVariant === Theme.DARK || themeVariant === Theme.MATRIX
+  const isDarkMode = isDarkTheme(themeVariant)
   const userChallengesLoading = useSelector(getUserChallengesLoading)
   const userChallenges = useSelector(getUserChallenges)
   const { data: currentAccount } = useCurrentAccount()

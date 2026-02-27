@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useRef } from 'react'
 
 import {
   useCurrentUserId,
@@ -46,6 +46,7 @@ import { TrackDogEar } from '../track/TrackDogEar'
 
 import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { LineupTileMetadata } from './LineupTileMetadata'
+import { TilePressBlockContext } from './TilePressBlockContext'
 import { TrackTileStats } from './TrackTileStats'
 
 const { getUid } = playerSelectors
@@ -136,6 +137,8 @@ const TrackTileComponent = (props: TrackTileProps) => {
     [track?.track_id]
   )
 
+  const childPressedRef = useRef(false)
+
   const handlePress = useCallback(() => {
     if (!track) return
 
@@ -160,6 +163,10 @@ const TrackTileComponent = (props: TrackTileProps) => {
     }
 
     setTimeout(() => {
+      if (childPressedRef.current) {
+        childPressedRef.current = false
+        return
+      }
       togglePlay({
         uid: lineupTileProps.uid,
         id: track.track_id,
@@ -183,6 +190,10 @@ const TrackTileComponent = (props: TrackTileProps) => {
     navigation.push('Track', { trackId: track.track_id })
     onPress?.(track.track_id)
   }, [navigation, onPress, track])
+
+  const handlePressWithPropagationBlock = useCallback(() => {
+    childPressedRef.current = true
+  }, [])
 
   const playbackPositionInfo = useSelector((state) =>
     getTrackPosition(state, {
@@ -291,51 +302,54 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const isArtistPick = user?.artist_pick_track_id === track.track_id
 
   return (
-    <Paper onPress={handlePress} style={style}>
-      <TrackDogEar trackId={track.track_id} hideUnlocked />
-      <LineupTileMetadata
-        renderImage={renderImage}
-        onPressTitle={handlePressTitle}
-        title={track.title}
-        userId={user.user_id}
-        isPlayingUid={isPlayingUid}
-        type='track'
-        trackId={track.track_id}
-        duration={track.duration}
-        isLongFormContent={
-          track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
-        }
-        isArtistPick={showArtistPick && isArtistPick}
-      />
-      <TrackTileStats
-        trackId={track.track_id}
-        rankIndex={lineupTileProps.index}
-        isTrending={lineupTileProps.isTrending}
-        uid={lineupTileProps.uid}
-        actions={lineupTileProps.actions}
-      />
-      {isReadonly ? null : (
-        <LineupTileActionButtons
-          hasReposted={track.has_current_user_reposted}
-          hasSaved={track.has_current_user_saved}
-          isOwner={isOwner}
-          isShareHidden={hideShare}
-          isUnlisted={track.is_unlisted}
-          readonly={isReadonly}
-          contentId={track.track_id}
-          contentType={PurchaseableContentType.TRACK}
-          streamConditions={track.stream_conditions}
-          hasStreamAccess={hasStreamAccess}
-          source={lineupTileProps.source}
-          onPressOverflow={handlePressOverflow}
-          onPressRepost={handlePressRepost}
-          onPressSave={handlePressSave}
-          onPressShare={handlePressShare}
-          onPressPublish={handlePressPublish}
-          onPressEdit={onPressEdit}
+    <TilePressBlockContext.Provider value={handlePressWithPropagationBlock}>
+      <Paper onPress={handlePress} style={style}>
+        <TrackDogEar trackId={track.track_id} hideUnlocked />
+        <LineupTileMetadata
+          renderImage={renderImage}
+          onPressTitle={handlePressTitle}
+          onPressWithPropagationBlock={handlePressWithPropagationBlock}
+          title={track.title}
+          userId={user.user_id}
+          isPlayingUid={isPlayingUid}
+          type='track'
+          trackId={track.track_id}
+          duration={track.duration}
+          isLongFormContent={
+            track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
+          }
+          isArtistPick={showArtistPick && isArtistPick}
         />
-      )}
-    </Paper>
+        <TrackTileStats
+          trackId={track.track_id}
+          rankIndex={lineupTileProps.index}
+          isTrending={lineupTileProps.isTrending}
+          uid={lineupTileProps.uid}
+          actions={lineupTileProps.actions}
+        />
+        {isReadonly ? null : (
+          <LineupTileActionButtons
+            hasReposted={track.has_current_user_reposted}
+            hasSaved={track.has_current_user_saved}
+            isOwner={isOwner}
+            isShareHidden={hideShare}
+            isUnlisted={track.is_unlisted}
+            readonly={isReadonly}
+            contentId={track.track_id}
+            contentType={PurchaseableContentType.TRACK}
+            streamConditions={track.stream_conditions}
+            hasStreamAccess={hasStreamAccess}
+            source={lineupTileProps.source}
+            onPressOverflow={handlePressOverflow}
+            onPressRepost={handlePressRepost}
+            onPressSave={handlePressSave}
+            onPressShare={handlePressShare}
+            onPressPublish={handlePressPublish}
+            onPressEdit={onPressEdit}
+          />
+        )}
+      </Paper>
+    </TilePressBlockContext.Provider>
   )
 }
 

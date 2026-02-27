@@ -21,6 +21,7 @@ import {
   WalletApi,
   type Middleware
 } from './api/generated/default'
+import { UploadsApi } from './api/uploads/UploadsApi'
 import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
 import {
@@ -29,7 +30,7 @@ import {
 } from './middleware'
 import { addBearerTokenMiddleware } from './middleware/addBearerTokenMiddleware'
 import { OAuth } from './oauth'
-import { Logger } from './services'
+import { Logger, Storage, StorageNodeSelector } from './services'
 import { type SdkConfig } from './types'
 
 export const createSdkWithoutServices = (config: SdkConfig) => {
@@ -46,10 +47,11 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
       logLevel: environment !== 'production' ? 'debug' : undefined
     })
 
-  const basePath =
+  const apiEndpoint =
     config.environment === 'development'
       ? developmentConfig.network.apiEndpoint
       : productionConfig.network.apiEndpoint
+  const basePath = `${apiEndpoint}/v1`
 
   const middleware: Middleware[] = []
 
@@ -122,6 +124,19 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     coins: new CoinsApi(apiConfig),
     wallets: new WalletApi(apiConfig),
     challenges: new ChallengesApi(apiConfig),
-    prizes: new PrizesApi(apiConfig)
+    prizes: new PrizesApi(apiConfig),
+    uploads: new UploadsApi({
+      storageService:
+        services?.storage ??
+        new Storage({
+          storageNodeSelector:
+            services?.storageNodeSelector ??
+            new StorageNodeSelector({
+              endpoint: apiEndpoint, // health_check is at root, not /v1
+              logger
+            }),
+          logger
+        })
+    })
   }
 }

@@ -1,5 +1,8 @@
 import { playbackRateValueMap, PlaybackRate } from '@audius/common/store'
-import { MIN_BUFFERING_DELAY_MS } from '@audius/common/utils'
+import {
+  AUDIO_LOAD_TIMEOUT_MS,
+  MIN_BUFFERING_DELAY_MS
+} from '@audius/common/utils'
 
 declare global {
   interface Window {
@@ -44,6 +47,7 @@ export class AudioPlayer {
   duration: number
   playbackRate: PlaybackRate
   bufferingTimeout: ReturnType<typeof setTimeout> | null
+  loadTimeout: ReturnType<typeof setTimeout> | null
   buffering: boolean
   onBufferingChange: (isBuffering: boolean) => void
   concatBufferInterval: ReturnType<typeof setInterval> | null
@@ -75,6 +79,7 @@ export class AudioPlayer {
     this.playbackRate = '1x'
 
     this.bufferingTimeout = null
+    this.loadTimeout = null
     this.buffering = false
     // Callback fired when buffering status changes
     this.onBufferingChange = (isBuffering) => {}
@@ -113,7 +118,8 @@ export class AudioPlayer {
   load = (
     duration: number,
     onEnd: () => void,
-    mp3Url: string | null = null
+    mp3Url: string | null = null,
+    loadTimeoutMs?: number
   ) => {
     this.onEnd = onEnd
     if (mp3Url) {
@@ -134,6 +140,10 @@ export class AudioPlayer {
       if (this.bufferingTimeout) {
         clearTimeout(this.bufferingTimeout)
       }
+      if (this.loadTimeout) {
+        clearTimeout(this.loadTimeout)
+        this.loadTimeout = null
+      }
 
       this.audio = new Audio()
 
@@ -145,6 +155,10 @@ export class AudioPlayer {
       this.audioCtx = null
 
       this.audio.addEventListener('canplay', () => {
+        if (this.loadTimeout) {
+          clearTimeout(this.loadTimeout)
+          this.loadTimeout = null
+        }
         if (!this.audioCtx && !IS_SAFARI && !IS_UI_WEBVIEW) {
           // Set up WebAudio API handles
           const AudioContext = window.AudioContext || window.webkitAudioContext
@@ -173,6 +187,15 @@ export class AudioPlayer {
       this.audio.preload = 'none'
       this.audio.crossOrigin = 'anonymous'
       this.audio.src = mp3Url
+      const timeout = loadTimeoutMs ?? AUDIO_LOAD_TIMEOUT_MS
+      this.loadTimeout = setTimeout(() => {
+        this.loadTimeout = null
+        if (this.audio.src && this.audio.readyState < 2) {
+          this.audio.removeAttribute('src')
+          this.audio.src = ''
+          this.onError(AudioError.AUDIO, 'timeout')
+        }
+      }, timeout)
       this.audio.volume = prevVolume
       this.audio.onloadedmetadata = () => (this.duration = this.audio.duration)
     }

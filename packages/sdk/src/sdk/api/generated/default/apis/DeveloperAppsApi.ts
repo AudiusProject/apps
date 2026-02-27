@@ -23,6 +23,8 @@ import type {
   DeactivateAccessKeyResponse,
   DeveloperAppResponse,
   DeveloperAppsResponse,
+  RegisterApiKeyRequestBody,
+  RegisterApiKeyResponse,
   UpdateDeveloperAppRequestBody,
   WriteResponse,
 } from '../models';
@@ -41,6 +43,10 @@ import {
     DeveloperAppResponseToJSON,
     DeveloperAppsResponseFromJSON,
     DeveloperAppsResponseToJSON,
+    RegisterApiKeyRequestBodyFromJSON,
+    RegisterApiKeyRequestBodyToJSON,
+    RegisterApiKeyResponseFromJSON,
+    RegisterApiKeyResponseToJSON,
     UpdateDeveloperAppRequestBodyFromJSON,
     UpdateDeveloperAppRequestBodyToJSON,
     WriteResponseFromJSON,
@@ -75,6 +81,12 @@ export interface GetDeveloperAppRequest {
 export interface GetDeveloperAppsRequest {
     id: string;
     include?: GetDeveloperAppsIncludeEnum;
+}
+
+export interface RegisterDeveloperAppAPIKeyRequest {
+    userId: string;
+    address: string;
+    metadata: RegisterApiKeyRequestBody;
 }
 
 export interface UpdateDeveloperAppRequest {
@@ -317,6 +329,63 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
      */
     async getDeveloperApps(params: GetDeveloperAppsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeveloperAppsResponse> {
         const response = await this.getDeveloperAppsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Register api_key and api_secret in api_keys table for developer apps created via entity manager transactions. Use when the client sends raw ManageEntity tx instead of POST /developer-apps. Inserts with rps=10, rpm=500000. Requires the app to exist in developer_apps and belong to the authenticated user.
+     */
+    async registerDeveloperAppAPIKeyRaw(params: RegisterDeveloperAppAPIKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RegisterApiKeyResponse>> {
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling registerDeveloperAppAPIKey.');
+        }
+
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling registerDeveloperAppAPIKey.');
+        }
+
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling registerDeveloperAppAPIKey.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/developer-apps/{address}/register-api-key`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RegisterApiKeyRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RegisterApiKeyResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Register api_key and api_secret in api_keys table for developer apps created via entity manager transactions. Use when the client sends raw ManageEntity tx instead of POST /developer-apps. Inserts with rps=10, rpm=500000. Requires the app to exist in developer_apps and belong to the authenticated user.
+     */
+    async registerDeveloperAppAPIKey(params: RegisterDeveloperAppAPIKeyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RegisterApiKeyResponse> {
+        const response = await this.registerDeveloperAppAPIKeyRaw(params, initOverrides);
         return await response.value();
     }
 

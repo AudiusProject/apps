@@ -43,19 +43,41 @@ const commonFoundations = {
 }
 
 export const theme = {
-  day: {
-    type: harmonyThemes.day.type,
+  'default-light': {
+    type: harmonyThemes['default-light'].type,
+    color: colorTheme.defaultLight,
+    ...commonFoundations
+  },
+  'default-dark': {
+    type: harmonyThemes['default-dark'].type,
+    color: colorTheme.defaultDark,
+    ...commonFoundations
+  },
+  'classic-light': {
+    type: harmonyThemes['classic-light'].type,
     color: colorTheme.day,
     ...commonFoundations
   },
-  dark: {
-    type: harmonyThemes.dark.type,
+  'classic-dark': {
+    type: harmonyThemes['classic-dark'].type,
     color: colorTheme.dark,
     ...commonFoundations
   },
   matrix: {
     type: harmonyThemes.matrix.type,
     color: colorTheme.matrix,
+    ...commonFoundations
+  },
+  /** @deprecated Use classic-light */
+  day: {
+    type: harmonyThemes.day.type,
+    color: colorTheme.day,
+    ...commonFoundations
+  },
+  /** @deprecated Use classic-dark */
+  dark: {
+    type: harmonyThemes.dark.type,
+    color: colorTheme.dark,
     ...commonFoundations
   }
 }

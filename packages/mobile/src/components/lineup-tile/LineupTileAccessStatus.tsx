@@ -38,6 +38,7 @@ import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 import { EventNames } from 'app/types/analytics'
 
+import { useTilePressBlock } from './TilePressBlockContext'
 import { LineupTileSource } from './types'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
@@ -155,6 +156,10 @@ export const LineupTileAccessStatus = ({
   const showButtonText =
     !isUSDCPurchase || isTokenGated || (!hasStreamAccess && !isUnlocking)
 
+  const blockTilePress = useTilePressBlock()
+
+  const handlePressWithBlock = useCallback(() => handlePress(), [handlePress])
+
   const backgroundColor = isUSDCPurchase
     ? color.special.lightGreen
     : isTokenGated
@@ -176,7 +181,7 @@ export const LineupTileAccessStatus = ({
   }
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity onPressIn={blockTilePress} onPress={handlePressWithBlock}>
       <Flex
         {...(hasStreamAccess || isUnlocking ? unlockedStyles : lockedStyles)}
         direction='row'

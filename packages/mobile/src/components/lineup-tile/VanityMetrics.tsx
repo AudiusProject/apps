@@ -7,6 +7,8 @@ import { TouchableOpacity } from 'react-native'
 import type { IconComponent } from '@audius/harmony-native'
 import { DEFAULT_HIT_SLOP, Flex, Text } from '@audius/harmony-native'
 
+import { useTilePressBlock } from './TilePressBlockContext'
+
 type VanityMetricProps = {
   icon?: IconComponent
   children?: ReactNode
@@ -16,10 +18,18 @@ type VanityMetricProps = {
 
 export const VanityMetric = (props: VanityMetricProps) => {
   const { icon: Icon, children, onPress, disabled } = props
+  const blockTilePress = useTilePressBlock()
+
+  const handlePress = () => {
+    if (onPress && !disabled) {
+      onPress()
+    }
+  }
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPressIn={blockTilePress}
+      onPress={handlePress}
       disabled={disabled}
       hitSlop={DEFAULT_HIT_SLOP}
     >

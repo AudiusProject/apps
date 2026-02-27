@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { IconVolumeLevel2 } from '@audius/harmony-native'
 import { Text, FadeInView } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
+import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 import { useThemeColors } from 'app/utils/theme'
@@ -40,6 +41,7 @@ const useStyles = makeStyles(({ palette }) => ({
 
 type Props = {
   onPressTitle?: GestureResponderHandler
+  onPressWithPropagationBlock?: () => void
   renderImage: RenderImage
   title: string
   userId: ID
@@ -53,6 +55,7 @@ type Props = {
 
 export const LineupTileMetadata = ({
   onPressTitle,
+  onPressWithPropagationBlock,
   renderImage,
   title,
   userId,
@@ -66,12 +69,23 @@ export const LineupTileMetadata = ({
   const styles = useStyles()
   const tileStyles = useTileStyles()
   const { primary } = useThemeColors()
+  const navigation = useNavigation()
 
   const isActive = isPlayingUid
 
   const isPlaying = useSelector((state) => {
     return getPlaying(state) && isActive
   })
+
+  const handleTitlePress = () => {
+    onPressWithPropagationBlock?.()
+    onPressTitle?.()
+  }
+
+  const handlePressArtist = () => {
+    onPressWithPropagationBlock?.()
+    navigation.push('Profile', { id: userId })
+  }
 
   return (
     <View style={styles.metadata}>
@@ -103,7 +117,8 @@ export const LineupTileMetadata = ({
             ...tileStyles.title,
             ...(isPlaying ? tileStyles.titlePlaying : {})
           }}
-          onPress={onPressTitle}
+          onPressIn={onPressWithPropagationBlock}
+          onPress={handleTitlePress}
         >
           <Text
             color={isActive ? 'primary' : 'neutral'}
@@ -120,11 +135,20 @@ export const LineupTileMetadata = ({
             />
           ) : null}
         </TouchableOpacity>
-        <UserLink
-          variant={isActive ? 'active' : 'default'}
-          textVariant='body'
-          userId={userId}
-        />
+        <TouchableOpacity
+          onPressIn={onPressWithPropagationBlock}
+          onPress={handlePressArtist}
+          activeOpacity={0.7}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          <View pointerEvents='none'>
+            <UserLink
+              variant={isActive ? 'active' : 'default'}
+              textVariant='body'
+              userId={userId}
+            />
+          </View>
+        </TouchableOpacity>
       </FadeInView>
       <LineupTileTopRight
         duration={duration}

@@ -15,6 +15,7 @@ import {
   queueSelectors
 } from '@audius/common/store'
 import {
+  CASCADING_TIMEOUTS_MS,
   Genre,
   actionChannelDispatcher,
   getTrackPreviewDuration,
@@ -88,6 +89,49 @@ export const getMirrorStreamUrl = (
   return streamObj?.url ?? null
 }
 
+/**
+ * Returns the stream URL and load timeout for the given retry index.
+ * Uses the cascading pattern - each phase tries primary + all mirrors:
+ * - Phase 0: all urls with 2s
+ * - Phase 1: all urls with 5s
+ * - Phase 2: all urls with 30s
+ * No HEAD fetch - the audio element does the actual request.
+ */
+const getStreamUrlAndTimeout = (
+  streamObj: { url?: string; mirrors?: string[] } | null | undefined,
+  retries: number
+): { url: string | null; timeoutMs: number } => {
+  const defaultTimeout = CASCADING_TIMEOUTS_MS[2]
+  if (!streamObj?.url) {
+    return { url: null, timeoutMs: defaultTimeout }
+  }
+
+  const urls: string[] = [streamObj.url]
+  const mirrors = streamObj.mirrors ?? []
+  for (const mirror of mirrors) {
+    try {
+      const mirrorUrl = new URL(streamObj.url)
+      mirrorUrl.hostname = new URL(mirror).hostname
+      urls.push(mirrorUrl.toString())
+    } catch {
+      // no-op
+    }
+  }
+
+  const urlsPerPhase = urls.length
+  const maxRetries = urlsPerPhase * 3
+
+  if (retries >= maxRetries) {
+    return { url: urls[0], timeoutMs: defaultTimeout }
+  }
+
+  const phase = Math.floor(retries / urlsPerPhase)
+  const urlIndex = retries % urlsPerPhase
+  const timeoutMs = CASCADING_TIMEOUTS_MS[phase]
+
+  return { url: urls[urlIndex], timeoutMs }
+}
+
 export function* watchPlay() {
   yield* takeLatest(play.type, function* (action: ReturnType<typeof play>) {
     const { uid, trackId, playerBehavior, startTime, onEnd, retries } =
@@ -137,16 +181,16 @@ export function* watchPlay() {
         trackDuration = getTrackPreviewDuration(track)
       }
 
-      const contentNodeStreamUrl = getMirrorStreamUrl(
-        track,
-        shouldPreview,
-        retries ?? 0
-      )
+      const streamObj = shouldPreview ? track.preview : track.stream
+      const { url: contentNodeStreamUrl, timeoutMs: loadTimeoutMs } =
+        streamObj?.url
+          ? getStreamUrlAndTimeout(streamObj, retries ?? 0)
+          : { url: null as string | null, timeoutMs: 30000 }
 
       const isLongFormContent =
         track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
 
-      const createEndChannel = async (url: string) => {
+      const createEndChannel = async (url: string, timeoutMs?: number) => {
         const endChannel = eventChannel((emitter) => {
           audioPlayer.load(
             trackDuration ||
@@ -174,7 +218,8 @@ export function* watchPlay() {
                 )
               }
             },
-            url
+            url,
+            timeoutMs
           )
           return () => {}
         })
@@ -185,7 +230,11 @@ export function* watchPlay() {
       // If we have a stream URL from API already for content node, use that.
       // If not, we might need the NFT gated signature, so fallback to the API stream endpoint.
       if (contentNodeStreamUrl) {
-        endChannel = yield* call(createEndChannel, contentNodeStreamUrl)
+        endChannel = yield* call(
+          createEndChannel,
+          contentNodeStreamUrl,
+          loadTimeoutMs
+        )
       } else {
         const { data, signature } = yield* call(
           audiusBackendInstance.signGatedContentRequest,
@@ -204,7 +253,7 @@ export function* watchPlay() {
             preview: shouldPreview ? true : undefined
           }
         )
-        endChannel = yield* call(createEndChannel, streamUrl)
+        endChannel = yield* call(createEndChannel, streamUrl, undefined)
       }
 
       yield* spawn(actionChannelDispatcher, endChannel)
@@ -408,7 +457,9 @@ export function* handleAudioErrors() {
       const retries = yield* select(getPlaybackRetryCount)
       const { shouldPreview } = calculatePlayerBehavior(track, playerBehavior)
       const streamObj = shouldPreview ? track?.preview : track?.stream
-      if (streamObj?.mirrors && streamObj.mirrors.length + 1 > retries) {
+      const numUrls = 1 + (streamObj?.mirrors?.length ?? 0)
+      const maxRetries = numUrls * 3
+      if (streamObj?.url && maxRetries > retries) {
         yield* put(
           play({
             trackId,

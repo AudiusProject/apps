@@ -16,7 +16,12 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { queryClient } from 'services/query-client'
 import { configureStore } from 'store/configureStore'
-import { getSystemAppearance, getTheme } from 'utils/theme/theme'
+import {
+  getSystemAppearance,
+  getTheme,
+  getThemeModeFromStorage,
+  getThemePaletteFromStorage
+} from 'utils/theme/theme'
 
 import { wagmiAdapter } from './ReownAppKitModal'
 import { createRoutes } from './routes'
@@ -29,10 +34,15 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   const isMobile = useIsMobile()
 
   const [{ store, persistor }] = useState(() => {
+    const theme = getTheme()
+    const themePalette = getThemePaletteFromStorage()
+    const themeMode = getThemeModeFromStorage()
     const initialStoreState = {
       ui: {
         theme: {
-          theme: getTheme(),
+          theme,
+          themePalette,
+          themeMode,
           systemAppearance: getSystemAppearance()
         }
       }

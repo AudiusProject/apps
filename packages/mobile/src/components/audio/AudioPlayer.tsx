@@ -24,11 +24,11 @@ import type { Queueable, CommonState } from '@audius/common/store'
 import {
   Genre,
   removeNullable,
-  getTrackPreviewDuration
+  getTrackPreviewDuration,
+  resolveStreamUrl
 } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
-import { getMirrorStreamUrl } from '@audius/web/src/common/store/player/sagas'
 import { isEqual, uniq } from 'lodash'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
@@ -319,16 +319,13 @@ export const AudioPlayer = () => {
         // Get Track url
         let url: string
 
-        const contentNodeStreamUrl = getMirrorStreamUrl(
-          track,
-          shouldPreview,
-          retries ?? 0
-        )
+        const streamObj = shouldPreview ? track.preview : track.stream
         if (offlineTrackAvailable && isCollectionMarkedForDownload) {
           const audioFilePath = getLocalAudioPath(trackId)
           url = `file://${audioFilePath}`
-        } else if (contentNodeStreamUrl) {
-          url = contentNodeStreamUrl
+        } else if (streamObj?.url) {
+          url =
+            (await resolveStreamUrl(streamObj, retries ?? 0)) ?? streamObj.url
         } else {
           const sdk = await audiusSdk()
           const nftAccessSignature = nftAccessSignatureMap[trackId]?.mp3 ?? null

@@ -250,6 +250,8 @@ models/ReceiveTipNotification.ts
 models/ReceiveTipNotificationAction.ts
 models/ReceiveTipNotificationActionData.ts
 models/RedeemAmountResponse.ts
+models/RegisterApiKeyRequestBody.ts
+models/RegisterApiKeyResponse.ts
 models/Related.ts
 models/RelatedArtistResponse.ts
 models/Remix.ts
@@ -263,6 +265,7 @@ models/RemixedTrackAggregate.ts
 models/RemixersCountResponse.ts
 models/RemixersResponse.ts
 models/RemixesResponse.ts
+models/RemixesResponseData.ts
 models/RemixingResponse.ts
 models/ReplyComment.ts
 models/Repost.ts

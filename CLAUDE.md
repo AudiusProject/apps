@@ -71,6 +71,7 @@ audius-cmd stream
 
 - **packages/web**: React web client with Vite, Redux Toolkit, Emotion CSS
 - **packages/mobile**: React Native app for iOS/Android
+- **packages/mobile/examples**: Runnable mobile examples (auth/sign-in, upload) with READMEs for AI and developer reference—see [packages/mobile/examples/README.md](packages/mobile/examples/README.md)
 - **packages/common**: Shared code between web and mobile (state, models, utilities)
 - **packages/sdk**: JavaScript SDK for interacting with Audius protocol
 - **packages/harmony**: Design system components and tokens
@@ -88,6 +89,7 @@ audius-cmd stream
 - SDK (@audius/sdk) handles all protocol interactions
 - Services layer in packages/common/src/services
 - API adapters for web3 and traditional HTTP endpoints
+- **Mobile examples**: For auth (sign-in/OAuth-style), upload, etc., see `packages/mobile/examples/`; each example has a README with run instructions and source-of-truth file paths.
 
 ### Styling Approach
 

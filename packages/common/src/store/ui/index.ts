@@ -57,7 +57,12 @@ export {
 } from './coinflow-modal/slice'
 
 export { default as themeReducer, actions as themeActions } from './theme/slice'
-export type { SetThemeAction, SetSystemAppearanceAction } from './theme/slice'
+export type {
+  SetThemeAction,
+  SetThemePaletteAction,
+  SetThemeModeAction,
+  SetSystemAppearanceAction
+} from './theme/slice'
 export * as themeSelectors from './theme/selectors'
 
 export { default as toastReducer, actions as toastActions } from './toast/slice'

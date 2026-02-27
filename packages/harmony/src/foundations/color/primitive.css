@@ -120,6 +120,218 @@ html[data-theme='day'] {
   --harmony-glass-overlay: #ffffffd9;
 }
 
+/* Classic Light - same as day (legacy alias) */
+html[data-theme='classic-light'] {
+  /* Primary Colors */
+  --harmony-primary: #cc0fe0ff;
+  --harmony-p-100: #d63fe6ff;
+  --harmony-p-200: #d127e3ff;
+  --harmony-p-300: #cc0fe0ff;
+  --harmony-p-400: #b80ecaff;
+  --harmony-p-500: #a30cb3ff;
+  /* Secondary Colors */
+  --harmony-secondary: #7e1bccff;
+  --harmony-s-100: #9849d6ff;
+  --harmony-s-200: #8b32d1ff;
+  --harmony-s-300: #7e1bccff;
+  --harmony-s-400: #7118b8ff;
+  --harmony-s-500: #6516a3ff;
+  /* Neutral Colors */
+  --harmony-neutral: #6c6780ff;
+  --harmony-n-25: #fafafaff;
+  --harmony-n-50: #f7f7f8ff;
+  --harmony-n-100: #efeff1ff;
+  --harmony-n-150: #e7e7eaff;
+  --harmony-n-200: #d6d5dbff;
+  --harmony-n-300: #c3c1cbff;
+  --harmony-n-400: #a2a0afff;
+  --harmony-n-500: #938fa3ff;
+  --harmony-n-600: #817d95ff;
+  --harmony-n-700: #736e88ff;
+  --harmony-n-800: #6c6780ff;
+  --harmony-n-900: #615d73ff;
+  --harmony-n-950: #524f62ff;
+  /* Special Colors */
+  --harmony-white: #ffffffff;
+  --harmony-background: #f6f5f7ff;
+  --harmony-blue: #1ba1f1ff;
+  --harmony-orange: #ff9400ff;
+  --harmony-red: #d0021bff;
+  --harmony-dark-red: #bb0218ff;
+  --harmony-green: #0f9e48ff;
+  --harmony-light-green: #13c65aff;
+  --harmony-gradient-color-1: #5b23e1ff;
+  --harmony-gradient-color-2: #a22febff;
+  --harmony-gradient: linear-gradient(315deg, #5b23e1ff 0%, #a22febff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #cc0fe0ff -4.82%,
+    #7e1bccff 49.8%,
+    #1ba1f1ff 104.43%
+  );
+  --harmony-trending-blue: #216fdcff;
+  --harmony-glass-overlay: #ffffffd9;
+}
+
+/* Classic Dark - same as dark (legacy alias) */
+html[data-theme='classic-dark'] {
+  /* Primary Colors */
+  --harmony-primary: #d767e1ff;
+  --harmony-p-100: #924699ff;
+  --harmony-p-200: #b356bbff;
+  --harmony-p-300: #d767e1ff;
+  --harmony-p-400: #f479ffff;
+  --harmony-p-500: #f7a4ffff;
+  /* Secondary Colors */
+  --harmony-secondary: #c67cffff;
+  --harmony-s-100: #9a66caff;
+  --harmony-s-200: #b071e4ff;
+  --harmony-s-300: #c67cffff;
+  --harmony-s-400: #cf90ffff;
+  --harmony-s-500: #d7a3ffff;
+  /* Neutral Colors */
+  --harmony-neutral: #c6c8d6ff;
+  --harmony-n-25: #30354aff;
+  --harmony-n-50: #353a51ff;
+  --harmony-n-100: #3c425dff;
+  --harmony-n-150: #444b69ff;
+  --harmony-n-200: #4f577aff;
+  --harmony-n-300: #656f9bff;
+  --harmony-n-400: #7b83a7ff;
+  --harmony-n-500: #969bb6ff;
+  --harmony-n-600: #a6aac0ff;
+  --harmony-n-700: #b6b9cbff;
+  --harmony-n-800: #c6c8d6ff;
+  --harmony-n-900: #d6d7e1ff;
+  --harmony-n-950: #e6e7edff;
+  /* Special Colors */
+  --harmony-white: #2f3348ff;
+  --harmony-background: #202131ff;
+  --harmony-blue: #58b9f4ff;
+  --harmony-orange: #efa947ff;
+  --harmony-red: #f9344cff;
+  --harmony-dark-red: #c43047ff;
+  --harmony-green: #6cdf44ff;
+  --harmony-light-green: #15d864ff;
+  --harmony-gradient-color-1: #9469eeff;
+  --harmony-gradient-color-2: #c781fcff;
+  --harmony-gradient: linear-gradient(315deg, #9469eeff 0%, #c781fcff 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #d767e1ff -4.82%,
+    #c67cffff 49.8%,
+    #58b9f4ff 104.43%
+  );
+  --harmony-trending-blue: #2a85e8ff;
+  --harmony-glass-overlay: #2f334899;
+}
+
+/* Default Light (Neue design system) */
+html[data-theme='default-light'] {
+  /* Primary Colors */
+  --harmony-primary: #7f6ad6;
+  --harmony-p-100: #e9e3ff;
+  --harmony-p-200: #cfc3ff;
+  --harmony-p-300: #7f6ad6;
+  --harmony-p-400: #5b44b8;
+  --harmony-p-500: #3b2a86;
+  /* Secondary Colors */
+  --harmony-secondary: #a74cff;
+  --harmony-s-100: #f0e0ff;
+  --harmony-s-200: #ddbbff;
+  --harmony-s-300: #a74cff;
+  --harmony-s-400: #7d2fdb;
+  --harmony-s-500: #4f159e;
+  /* Neutral Colors */
+  --harmony-neutral: #343b49;
+  --harmony-n-25: #f7f7f8;
+  --harmony-n-50: #f0f1f3;
+  --harmony-n-100: #e6e8ec;
+  --harmony-n-150: #d8dbe2;
+  --harmony-n-200: #c7ccd6;
+  --harmony-n-300: #b2b8c5;
+  --harmony-n-400: #9aa1b0;
+  --harmony-n-500: #7f8798;
+  --harmony-n-600: #636c7e;
+  --harmony-n-700: #4a5263;
+  --harmony-n-800: #343b49;
+  --harmony-n-900: #232834;
+  --harmony-n-950: #141821;
+  /* Special Colors */
+  --harmony-white: #ffffff;
+  --harmony-background: #f6f5f7;
+  --harmony-blue: #7f6ad6;
+  --harmony-orange: #ff9400;
+  --harmony-red: #f94d62;
+  --harmony-dark-red: #c44357;
+  --harmony-green: #0f9e48;
+  --harmony-light-green: #a74cff;
+  --harmony-gradient-color-1: #6f55d8;
+  --harmony-gradient-color-2: #d767e1;
+  --harmony-gradient: linear-gradient(315deg, #6f55d8 0%, #d767e1 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #7f6ad6 -4.82%,
+    #a74cff 49.8%,
+    #7f6ad6 104.43%
+  );
+  --harmony-trending-blue: #2a85e8;
+  --harmony-glass-overlay: #00000014;
+}
+
+/* Default Dark (Neue design system) */
+html[data-theme='default-dark'] {
+  /* Primary Colors */
+  --harmony-primary: #806ad8;
+  --harmony-p-100: #261f40;
+  --harmony-p-200: #443873;
+  --harmony-p-300: #806ad8;
+  --harmony-p-400: #9e8ee8;
+  --harmony-p-500: #d8cfff;
+  /* Secondary Colors */
+  --harmony-secondary: #c67cff;
+  --harmony-s-100: #9a66ca;
+  --harmony-s-200: #b071e4;
+  --harmony-s-300: #c67cff;
+  --harmony-s-400: #cf90ff;
+  --harmony-s-500: #d7a3ff;
+  /* Neutral Colors */
+  --harmony-neutral: #949494;
+  --harmony-n-25: #0f0f0f;
+  --harmony-n-50: #141414;
+  --harmony-n-100: #1f1f1f;
+  --harmony-n-150: #292929;
+  --harmony-n-200: #333333;
+  --harmony-n-300: #474747;
+  --harmony-n-400: #636363;
+  --harmony-n-500: #6b6b6b;
+  --harmony-n-600: #757575;
+  --harmony-n-700: #858585;
+  --harmony-n-800: #949494;
+  --harmony-n-900: #a3a3a3;
+  --harmony-n-950: #b2b2b2;
+  /* Special Colors */
+  --harmony-white: #0f0f0f;
+  --harmony-background: #000000;
+  --harmony-blue: #806ad8;
+  --harmony-orange: #efb360;
+  --harmony-red: #f94d62;
+  --harmony-dark-red: #c44357;
+  --harmony-green: #84df64;
+  --harmony-light-green: #c67cff;
+  --harmony-gradient-color-1: #6f55d8;
+  --harmony-gradient-color-2: #d767e1;
+  --harmony-gradient: linear-gradient(315deg, #6f55d8 0%, #d767e1 100%);
+  --harmony-coin-gradient: linear-gradient(
+    85deg,
+    #806ad8 -4.82%,
+    #c67cff 49.8%,
+    #806ad8 104.43%
+  );
+  --harmony-trending-blue: #2a85e8;
+  --harmony-glass-overlay: #0f0f0f99;
+}
+
 /* Dark Theme */
 html[data-theme='dark'] {
   /* Primary Colors */

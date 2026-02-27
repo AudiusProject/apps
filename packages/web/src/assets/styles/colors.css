@@ -34,7 +34,9 @@
 }
 
 :root,
-html[data-theme='day-v2'] {
+html[data-theme='day'],
+html[data-theme='classic-light'],
+html[data-theme='default-light'] {
   --image-shadow: rgba(10, 10, 10, 0.35);
   --tile-shadow-1: rgba(133, 129, 153, 0.1);
   --tile-shadow-2: #e3e3e3;
@@ -98,7 +100,7 @@ html[data-theme='day-v2'] {
 }
 
 html[data-theme='dark'],
-html[data-theme='dark-v2'] {
+html[data-theme='classic-dark'] {
   --darkmode-static-white: var(--harmony-white);
   --page-header-gradient-color-1: #7652cc;
   --page-header-gradient-color-2: #b05ce6;
@@ -160,8 +162,78 @@ html[data-theme='dark-v2'] {
   --track-slider-handle: var(--harmony-white);
 }
 
-html[data-theme='matrix'],
-html[data-theme='matrix-v2'] {
+/* Default theme (Neue) - neutral grays, uses harmony tokens for header gradient */
+html[data-theme='default-dark'] {
+  --darkmode-static-white: var(--harmony-white);
+  --page-header-gradient-color-1: #6f55d8;
+  --page-header-gradient-color-2: #d767e1;
+  --page-header-gradient: linear-gradient(
+    -22deg,
+    var(--page-header-gradient-color-1) 0%,
+    var(--page-header-gradient-color-2) 100%
+  );
+  --page-header-gradient-1: var(--harmony-n-25);
+  --page-header-gradient-2: rgba(15, 15, 15, 0.85);
+  --page-header-gradient-2-alt: rgba(15, 15, 15, 0.95);
+  --page-header-text-shadow-color: rgba(111, 85, 216, 0.3);
+  --page-header-text-shadow: 0px 2px 4px var(--page-header-text-shadow-color);
+  /* Inherit other dark theme vars from a base - we need the full set */
+  --tile-shadow-1: rgba(17, 17, 34, 0.1);
+  --tile-shadow-2: #1a1a1a;
+  --tile-shadow-3: rgba(17, 17, 34, 0.25);
+  --tile-shadow-1-alt: rgba(17, 17, 34, 0.2);
+  --currently-playing-border: none;
+  --currently-playing-default-shadow: rgba(17, 17, 17, 0.1);
+  --card-image-shadow: rgba(17, 17, 17, 0.25);
+  --input-background: rgba(31, 31, 31, 0.8);
+  --search-bar-background: rgba(31, 31, 31, 0.8);
+  --search-bar-expanded: rgba(31, 31, 31, 1);
+  --search-bar-border: rgba(143, 149, 152, 0.1);
+  --search-bar-shadow: rgba(0, 0, 0, 0.3);
+  --slider-handle: var(--harmony-n-950);
+  --table-shadow: rgba(17, 17, 34, 0.15);
+  --mask: rgba(0, 0, 0, 0.7);
+  --skeleton-gradient: linear-gradient(
+    90deg,
+    #1a1a1a 25%,
+    #141414 37%,
+    #1a1a1a 63%
+  );
+  --skeleton: var(--harmony-n-50);
+  --skeleton-highlight: var(--harmony-n-100);
+  --profile-completion-shadow-1: rgba(0, 0, 0, 0);
+  --profile-completion-shadow-2: rgba(17, 17, 34, 0.15);
+  --default-profile-picture-background: var(--harmony-n-200);
+  --notification-panel-box-shadow: rgba(0, 0, 0, 0.25);
+  --notification-border: rgba(51, 51, 51, 0.5);
+  --notification-background: #1f1f1f;
+  --notification-border-hover: rgba(51, 51, 51, 0.5);
+  --notification-background-hover: #1f1f1f;
+  --notification-background-box-shadow: 0 2px 15px -4px rgba(0, 0, 0, 0.3);
+  --notification-border-active: #333333;
+  --notification-background-active: #141414;
+  --notification-unread-border: #474747;
+  --notification-unread-background: #292929;
+  --notification-unread-border-hover: #474747;
+  --notification-unread-background-hover: #292929;
+  --notification-unread-background-box-shadow: none;
+  --notification-unread-border-active: #474747;
+  --notification-unread-background-active: #1a1a1a;
+  --secondary-gradient: linear-gradient(315deg, #6f55d8 0%, #d767e1 100%);
+  --next-and-previous-buttons: var(--harmony-neutral);
+  --play-button-triangle: var(--harmony-white);
+  --track-slider-rail: var(--harmony-neutral);
+  --track-slider-handle: var(--harmony-white);
+}
+
+html[data-theme='default-light'] {
+  /* Override header gradient to use default theme's surface color */
+  --page-header-gradient-1: var(--harmony-n-25);
+  --page-header-gradient-2: rgba(247, 247, 248, 0.85);
+  --page-header-gradient-2-alt: rgba(247, 247, 248, 0.95);
+}
+
+html[data-theme='matrix'] {
   --darkmode-static-white: var(--harmony-white);
   --page-header-gradient-color-1: #4ff069;
   --page-header-gradient-color-2: #09bd51;

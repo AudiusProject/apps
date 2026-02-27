@@ -23,6 +23,7 @@ const messages = {
 type LineupTileTrackListProps = {
   isLoading?: boolean
   onPress: GestureResponderHandler
+  onPressWithPropagationBlock?: () => void
   trackCount: number
   tracks: LineupTrack[]
   isAlbum: boolean
@@ -143,7 +144,14 @@ const TrackItem = (props: TrackItemProps) => {
 }
 
 export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
-  const { isLoading, onPress, trackCount, tracks, isAlbum } = props
+  const {
+    isLoading,
+    onPress,
+    onPressWithPropagationBlock,
+    trackCount,
+    tracks,
+    isAlbum
+  } = props
   const styles = useStyles()
 
   if (!tracks.length && isLoading) {
@@ -159,7 +167,7 @@ export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
   const overflowTrackCount = trackCount - DISPLAY_TRACK_COUNT
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPressIn={onPressWithPropagationBlock} onPress={onPress}>
       {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
         <TrackItem
           key={track.uid}
