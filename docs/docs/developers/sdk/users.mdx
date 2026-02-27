@@ -765,14 +765,14 @@ console.log(users)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type       | Description                                           | Required?  |
-| :----------- | :--------- | :---------------------------------------------------- | :--------- |
-| `query`      | `string`   | The query for which to search                         | _Optional_ |
-| `offset`     | `number`   | The number of items to skip (for pagination)          | _Optional_ |
-| `limit`      | `number`   | The number of items to fetch (for pagination)         | _Optional_ |
-| `genre`      | `string[]` | Array of genres to filter by                          | _Optional_ |
-| `sortMethod` | `string`   | Sort method: `'relevant'`, `'popular'`, or `'recent'` | _Optional_ |
-| `isVerified` | `string`   | Filter to only verified users                         | _Optional_ |
+| Name         | Type                             | Description                                           | Required?  |
+| :----------- | :------------------------------- | :---------------------------------------------------- | :--------- |
+| `query`      | `string`                         | The query for which to search                         | _Optional_ |
+| `offset`     | `number`                         | The number of items to skip (for pagination)          | _Optional_ |
+| `limit`      | `number`                         | The number of items to fetch (for pagination)         | _Optional_ |
+| `genre`      | [`Genre[]`](tracks#genre-values) | Array of genres to filter by                          | _Optional_ |
+| `sortMethod` | `string`                         | Sort method: `'relevant'`, `'popular'`, or `'recent'` | _Optional_ |
+| `isVerified` | `string`                         | Filter to only verified users                         | _Optional_ |
 
 #### Returns
 

@@ -103,7 +103,7 @@ the example above.
 
 | Name     | Type                                       | Description                                                                        | Required?  |
 | :------- | :----------------------------------------- | :--------------------------------------------------------------------------------- | :--------- |
-| `genre`  | `string`                                   | If provided, the top 100 trending tracks of the genre will be returned             | _Optional_ |
+| `genre`  | [`Genre`](#genre-values)                   | If provided, the top 100 trending tracks of the genre will be returned             | _Optional_ |
 | `time`   | `'week' \| 'month' \| 'year' \| 'allTime'` | A time range for which to return the trending tracks. Default value is `'allTime'` | _Optional_ |
 | `offset` | `number`                                   | The number of items to skip (for pagination)                                       | _Optional_ |
 | `limit`  | `number`                                   | The number of items to fetch (for pagination)                                      | _Optional_ |
@@ -175,21 +175,21 @@ console.log(tracks)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name                  | Type       | Description                                              | Required?  |
-| :-------------------- | :--------- | :------------------------------------------------------- | :--------- |
-| `query`               | `string`   | The query to search for                                  | _Optional_ |
-| `offset`              | `number`   | The number of items to skip (for pagination)             | _Optional_ |
-| `limit`               | `number`   | The number of items to fetch (for pagination)            | _Optional_ |
-| `genre`               | `string[]` | Array of genres to filter by                             | _Optional_ |
-| `sortMethod`          | `string`   | Sort method: `'relevant'`, `'popular'`, or `'recent'`    | _Optional_ |
-| `mood`                | `string[]` | Array of moods to filter by                              | _Optional_ |
-| `onlyDownloadable`    | `string`   | Filter to only downloadable tracks                       | _Optional_ |
-| `includePurchaseable` | `string`   | Include purchaseable tracks in results                   | _Optional_ |
-| `isPurchaseable`      | `string`   | Filter to only purchaseable tracks                       | _Optional_ |
-| `hasDownloads`        | `string`   | Filter tracks that have stems/downloads                  | _Optional_ |
-| `key`                 | `string[]` | Array of musical keys to filter by (e.g., `['C', 'Am']`) | _Optional_ |
-| `bpmMin`              | `string`   | Minimum BPM to filter by                                 | _Optional_ |
-| `bpmMax`              | `string`   | Maximum BPM to filter by                                 | _Optional_ |
+| Name                  | Type                       | Description                                              | Required?  |
+| :-------------------- | :------------------------- | :------------------------------------------------------- | :--------- |
+| `query`               | `string`                   | The query to search for                                  | _Optional_ |
+| `offset`              | `number`                   | The number of items to skip (for pagination)             | _Optional_ |
+| `limit`               | `number`                   | The number of items to fetch (for pagination)            | _Optional_ |
+| `genre`               | [`Genre[]`](#genre-values) | Array of genres to filter by                             | _Optional_ |
+| `sortMethod`          | `string`                   | Sort method: `'relevant'`, `'popular'`, or `'recent'`    | _Optional_ |
+| `mood`                | [`Mood[]`](#mood-values)   | Array of moods to filter by                              | _Optional_ |
+| `onlyDownloadable`    | `string`                   | Filter to only downloadable tracks                       | _Optional_ |
+| `includePurchaseable` | `string`                   | Include purchaseable tracks in results                   | _Optional_ |
+| `isPurchaseable`      | `string`                   | Filter to only purchaseable tracks                       | _Optional_ |
+| `hasDownloads`        | `string`                   | Filter tracks that have stems/downloads                  | _Optional_ |
+| `key`                 | `string[]`                 | Array of musical keys to filter by (e.g., `['C', 'Am']`) | _Optional_ |
+| `bpmMin`              | `string`                   | Minimum BPM to filter by                                 | _Optional_ |
+| `bpmMax`              | `string`                   | Maximum BPM to filter by                                 | _Optional_ |
 
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
@@ -563,29 +563,29 @@ Returns a `Promise` resolving to an object with the following fields:
 
 ### TrackResponse
 
-| Field                | Type       | Description                                               |
-| :------------------- | :--------- | :-------------------------------------------------------- |
-| `artwork`            | `object`   | Artwork images (see below)                                |
-| `artwork._1000x1000` | `string`   | URL of 1000x1000 artwork                                  |
-| `artwork._150x150`   | `string`   | URL of 150x150 artwork                                    |
-| `artwork._480x480`   | `string`   | URL of 480x480 artwork                                    |
-| `description`        | `string`   | Track description                                         |
-| `downloadable`       | `boolean`  | Whether the track is downloadable                         |
-| `duration`           | `number`   | Track duration in seconds                                 |
-| `favoriteCount`      | `number`   | Number of favorites                                       |
-| `genre`              | `string`   | Track genre                                               |
-| `id`                 | `string`   | Track ID                                                  |
-| `isStreamable`       | `string`   | Whether the track is streamable                           |
-| `mood`               | `string`   | Track mood                                                |
-| `permalink`          | `string`   | Permalink URL                                             |
-| `playCount`          | `number`   | Number of plays                                           |
-| `releaseDate`        | `string`   | Release date                                              |
-| `remixOf`            | `object`   | Remix parent info (`tracks: { parentTrackId: string }[]`) |
-| `repostCount`        | `number`   | Number of reposts                                         |
-| `tags`               | `string[]` | Array of tags                                             |
-| `title`              | `string`   | Track title                                               |
-| `trackCid`           | `string`   | CID of the track audio                                    |
-| `user`               | `object`   | The track owner (see [User](users))                       |
+| Field                | Type                     | Description                                               |
+| :------------------- | :----------------------- | :-------------------------------------------------------- |
+| `artwork`            | `object`                 | Artwork images (see below)                                |
+| `artwork._1000x1000` | `string`                 | URL of 1000x1000 artwork                                  |
+| `artwork._150x150`   | `string`                 | URL of 150x150 artwork                                    |
+| `artwork._480x480`   | `string`                 | URL of 480x480 artwork                                    |
+| `description`        | `string`                 | Track description                                         |
+| `downloadable`       | `boolean`                | Whether the track is downloadable                         |
+| `duration`           | `number`                 | Track duration in seconds                                 |
+| `favoriteCount`      | `number`                 | Number of favorites                                       |
+| `genre`              | [`Genre`](#genre-values) | Track genre                                               |
+| `id`                 | `string`                 | Track ID                                                  |
+| `isStreamable`       | `string`                 | Whether the track is streamable                           |
+| `mood`               | [`Mood`](#mood-values)   | Track mood                                                |
+| `permalink`          | `string`                 | Permalink URL                                             |
+| `playCount`          | `number`                 | Number of plays                                           |
+| `releaseDate`        | `string`                 | Release date                                              |
+| `remixOf`            | `object`                 | Remix parent info (`tracks: { parentTrackId: string }[]`) |
+| `repostCount`        | `number`                 | Number of reposts                                         |
+| `tags`               | `string[]`               | Array of tags                                             |
+| `title`              | `string`                 | Track title                                               |
+| `trackCid`           | `string`                 | CID of the track audio                                    |
+| `user`               | `object`                 | The track owner (see [User](users))                       |
 
 ---
 
@@ -596,11 +596,11 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | Name                           | Type                                                    | Description                                       | Required?    |
 | :----------------------------- | :------------------------------------------------------ | :------------------------------------------------ | :----------- |
 | `title`                        | `string`                                                | Track title                                       | **Required** |
-| `genre`                        | `string`                                                | Track genre (see [Genre Values](#genre-values))   | **Required** |
+| `genre`                        | [`Genre`](#genre-values)                                | Track genre                                       | **Required** |
 | `trackCid`                     | `string`                                                | CID of the transcoded audio (from Uploads API)    | **Required** |
 | `trackId`                      | `string`                                                | Track ID (auto-generated if not provided)         | _Optional_   |
 | `description`                  | `string`                                                | Track description                                 | _Optional_   |
-| `mood`                         | `string`                                                | Track mood (see [Mood Values](#mood-values))      | _Optional_   |
+| `mood`                         | [`Mood`](#mood-values)                                  | Track mood                                        | _Optional_   |
 | `bpm`                          | `number`                                                | Beats per minute                                  | _Optional_   |
 | `musicalKey`                   | `string`                                                | Musical key of the track                          | _Optional_   |
 | `tags`                         | `string`                                                | Comma-separated tags                              | _Optional_   |
@@ -649,9 +649,9 @@ you want to change. Omitted fields retain their current values.
 | Name                  | Type                                    | Description                                       |
 | :-------------------- | :-------------------------------------- | :------------------------------------------------ |
 | `title`               | `string`                                | Track title                                       |
-| `genre`               | `string`                                | Track genre (see [Genre Values](#genre-values))   |
+| `genre`               | [`Genre`](#genre-values)                | Track genre                                       |
 | `description`         | `string`                                | Track description                                 |
-| `mood`                | `string`                                | Track mood (see [Mood Values](#mood-values))      |
+| `mood`                | [`Mood`](#mood-values)                  | Track mood                                        |
 | `bpm`                 | `number`                                | Beats per minute                                  |
 | `musicalKey`          | `string`                                | Musical key of the track                          |
 | `tags`                | `string`                                | Comma-separated tags                              |
