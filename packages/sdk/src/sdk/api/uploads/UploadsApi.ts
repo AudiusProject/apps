@@ -42,18 +42,19 @@ export class UploadsApi {
     })
     return {
       abort: upload.abort,
-      start: upload.start().then((res) => ({
-        trackCid: res.results['320'],
-        previewCid:
-          previewStartSeconds !== undefined && previewStartSeconds !== null
-            ? res.results[`320_preview|${previewStartSeconds}`]
-            : undefined,
-        origFileCid: res.orig_file_cid,
-        origFilename: res.orig_filename,
-        duration: parseInt(res?.probe?.format?.duration ?? '0', 10),
-        bpm: res.audio_analysis_results?.bpm,
-        musicalKey: res.audio_analysis_results?.key
-      }))
+      start: () =>
+        upload.start().then((res) => ({
+          trackCid: res.results['320'],
+          previewCid:
+            previewStartSeconds !== undefined && previewStartSeconds !== null
+              ? res.results[`320_preview|${previewStartSeconds}`]
+              : undefined,
+          origFileCid: res.orig_file_cid,
+          origFilename: res.orig_filename,
+          duration: parseInt(res?.probe?.format?.duration ?? '0', 10),
+          bpm: res.audio_analysis_results?.bpm,
+          musicalKey: res.audio_analysis_results?.key
+        }))
     }
   }
 
@@ -88,7 +89,7 @@ export class UploadsApi {
     })
     return {
       abort: upload.abort,
-      start: upload.start().then((res) => res.orig_file_cid)
+      start: () => upload.start().then((res) => res.orig_file_cid)
     }
   }
 }
