@@ -18,4 +18,7 @@ type BaseSelectablePillProps = {
   ViewProps
 
 export type SelectablePillProps = BaseSelectablePillProps &
-  ({ label: string } | { icon: IconComponent })
+  (
+    | { label: string; icon?: IconComponent }
+    | { icon: IconComponent; label?: never }
+  )

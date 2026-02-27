@@ -27,7 +27,6 @@ export const SelectablePill = (props: SelectablePillProps) => {
   const {
     type,
     icon: Icon,
-    label,
     size = 'small',
     isSelected: isSelectedProp,
     isControlled,
@@ -43,8 +42,9 @@ export const SelectablePill = (props: SelectablePillProps) => {
     ...other
   } = props
 
+  const label = 'label' in props ? props.label : undefined
   const isIconOnly = !('label' in props) && !!Icon
-  const displayLabel = 'label' in props ? label : undefined
+  const displayLabel = label
   const a11yLabel = ariaLabel ?? accessibilityLabelProp
   const {
     color,
