@@ -19,8 +19,8 @@ import PlayButton from 'components/play-bar/PlayButton'
 import VolumeBar from 'components/play-bar/VolumeBar'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
-import RepeatButtonProvider from 'components/play-bar/repeat-button/RepeatButtonProvider'
-import ShuffleButtonProvider from 'components/play-bar/shuffle-button/ShuffleButtonProvider'
+import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
+import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
 import { audioPlayer } from 'services/audio-player'
 import { push } from 'utils/navigation'
 
@@ -305,7 +305,7 @@ const PlayBar = () => {
           <div className={styles.buttonControls}>
             <div className={styles.shuffleButton}>
               {isLongFormContent ? null : (
-                <ShuffleButtonProvider
+                <ShuffleButton
                   onShuffleOn={shuffleOn}
                   onShuffleOff={shuffleOff}
                 />
@@ -328,7 +328,7 @@ const PlayBar = () => {
               {isLongFormContent ? (
                 <PlaybackRateButton isMobile={false} />
               ) : (
-                <RepeatButtonProvider
+                <RepeatButton
                   onRepeatOff={repeatOff}
                   onRepeatAll={repeatAll}
                   onRepeatSingle={repeatSingle}

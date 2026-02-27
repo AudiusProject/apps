@@ -3,6 +3,10 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import cn from 'classnames'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 
+import { useIsMobile } from 'hooks/useIsMobile'
+import { applyThemeToLottie } from 'utils/lottieTheme'
+import { useLottieThemeColors } from 'utils/theme/theme'
+
 import styles from '../PlayBarButton.module.css'
 
 enum RepeatStates {
@@ -28,40 +32,83 @@ const getRepeatState = (defaultState: RepeatStates) => {
   }
 }
 
+type AnimationStates = {
+  pbIconRepeatAll: object
+  pbIconRepeatSingle: object
+  pbIconRepeatOff: object
+}
+
 type RepeatButtonProps = {
-  animations: {
-    pbIconRepeatAll: object
-    pbIconRepeatSingle: object
-    pbIconRepeatOff: object
-  }
-  repeatOff: () => void
-  repeatSingle: () => void
-  repeatAll: () => void
-  isMobile: boolean
+  onRepeatOff: () => void
+  onRepeatAll: () => void
+  onRepeatSingle: () => void
 }
 
 const RepeatButton = ({
-  animations,
-  repeatOff = () => {},
-  repeatSingle = () => {},
-  repeatAll = () => {},
-  isMobile = false
+  onRepeatOff = () => {},
+  onRepeatAll = () => {},
+  onRepeatSingle = () => {}
 }: RepeatButtonProps) => {
+  const themeColors = useLottieThemeColors()
+  const isMobile = useIsMobile()
+  const [animations, setAnimations] = useState<AnimationStates | null>(null)
+  const baseAnimations = useRef<AnimationStates | null>(null)
+
   const [state, setState] = useState({
     repeatState: getRepeatState(RepeatStates.OFF),
     isPaused: true,
-    icon: animations ? animations.pbIconRepeatAll : null
+    icon: null as object | null
   })
+
+  useEffect(() => {
+    const loadAnimations = async () => {
+      if (!baseAnimations.current) {
+        const { default: pbIconRepeatAll } = (await import(
+          '../../../assets/animations/pbIconRepeatAll.json'
+        )) as { default: object }
+        const { default: pbIconRepeatSingle } = (await import(
+          '../../../assets/animations/pbIconRepeatSingle.json'
+        )) as { default: object }
+        const { default: pbIconRepeatOff } = (await import(
+          '../../../assets/animations/pbIconRepeatOff.json'
+        )) as { default: object }
+        baseAnimations.current = {
+          pbIconRepeatAll,
+          pbIconRepeatSingle,
+          pbIconRepeatOff
+        }
+      }
+      setAnimations({
+        pbIconRepeatAll: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatAll,
+          themeColors,
+          'neutral'
+        ),
+        pbIconRepeatSingle: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatSingle,
+          themeColors,
+          'primary'
+        ),
+        pbIconRepeatOff: applyThemeToLottie(
+          baseAnimations.current.pbIconRepeatOff,
+          themeColors,
+          'primary'
+        )
+      })
+    }
+    loadAnimations()
+  }, [themeColors])
 
   const handleChange = useCallback(
     (repeatState: RepeatStates) => {
+      if (!animations) return
       const { pbIconRepeatAll, pbIconRepeatSingle, pbIconRepeatOff } =
         animations
-      // Go to the next state.
-      let icon, isPaused
+      let icon: object
+      let isPaused: boolean
       switch (repeatState) {
         case RepeatStates.OFF:
-          repeatOff()
+          onRepeatOff()
           icon = pbIconRepeatAll
           isPaused = true
           break
@@ -70,7 +117,7 @@ const RepeatButton = ({
           isPaused = false
           break
         case RepeatStates.ALL:
-          repeatAll()
+          onRepeatAll()
           icon = pbIconRepeatSingle
           isPaused = true
           break
@@ -79,7 +126,7 @@ const RepeatButton = ({
           isPaused = false
           break
         case RepeatStates.SINGLE:
-          repeatSingle()
+          onRepeatSingle()
           icon = pbIconRepeatOff
           isPaused = true
           break
@@ -98,7 +145,7 @@ const RepeatButton = ({
         repeatState
       })
     },
-    [animations, repeatOff, repeatAll, repeatSingle]
+    [animations, onRepeatOff, onRepeatAll, onRepeatSingle]
   )
 
   useEffect(() => {
@@ -106,7 +153,9 @@ const RepeatButton = ({
   }, [handleChange, state.repeatState])
 
   useEffect(() => {
-    handleChange(state.repeatState)
+    if (animations) {
+      handleChange(state.repeatState)
+    }
   }, [animations, handleChange, state.repeatState])
 
   const nextState = () => {
@@ -124,6 +173,8 @@ const RepeatButton = ({
       }
     }
   }, [lottieRef, state.isPaused])
+
+  if (!animations || !state.icon) return null
 
   return (
     <button

@@ -46,8 +46,8 @@ import { LockedStatusBadge } from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
-import RepeatButtonProvider from 'components/play-bar/repeat-button/RepeatButtonProvider'
-import ShuffleButtonProvider from 'components/play-bar/shuffle-button/ShuffleButtonProvider'
+import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
+import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
 import { PlayButtonStatus } from 'components/play-bar/types'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { TrackDogEar } from 'components/track/TrackDogEar'
@@ -472,7 +472,7 @@ const NowPlaying = g(
         </div>
         <div className={styles.controls}>
           <div className={styles.repeatButton}>
-            <RepeatButtonProvider
+            <RepeatButton
               onRepeatOff={() => repeat(RepeatMode.OFF)}
               onRepeatAll={() => repeat(RepeatMode.ALL)}
               onRepeatSingle={() => repeat(RepeatMode.SINGLE)}
@@ -492,7 +492,7 @@ const NowPlaying = g(
             <NextButtonProvider isMobile onClick={onNext} />
           </div>
           <div className={styles.shuffleButton}>
-            <ShuffleButtonProvider
+            <ShuffleButton
               onShuffleOn={() => shuffle(true)}
               onShuffleOff={() => shuffle(false)}
             />
