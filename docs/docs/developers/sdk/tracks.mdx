@@ -6,9 +6,6 @@ sidebar_label: Tracks
 description: Audius Protocol Documentation
 ---
 
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
-
 ---
 
 ## getTrack
@@ -17,27 +14,7 @@ import TabItem from '@theme/TabItem'
 
 Get a track by id.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name      | Type     | Description                           | Required?    |
-| :-------- | :------- | :------------------------------------ | :----------- |
-| `trackId` | `string` | The ID of the track                   | **Required** |
-| `userId`  | `string` | The ID of the user making the request | _Optional_   |
-
-</TabItem>
-<TabItem value="example">
+Example:
 
 ```ts
 const { data: track } = await audiusSdk.tracks.getTrack({
@@ -47,8 +24,17 @@ const { data: track } = await audiusSdk.tracks.getTrack({
 console.log(track)
 ```
 
-</TabItem>
-<TabItem value="response">
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name      | Type     | Description                           | Required?    |
+| :-------- | :------- | :------------------------------------ | :----------- |
+| `trackId` | `string` | The ID of the track                   | **Required** |
+| `userId`  | `string` | The ID of the user making the request | _Optional_   |
+
+#### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` contains information about the
 track as described below.
@@ -113,9 +99,6 @@ track as described below.
 };
 ```
 
-</TabItem>
-</Tabs>
-
 ---
 
 ## getBulkTracks
@@ -124,16 +107,16 @@ track as described below.
 
 Get a list of tracks using their IDs or permalinks.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+const { data: tracks } = await audiusSdk.tracks.getBulkTracks({
+  id: ['D7KyD', 'PjdWN', 'Jwo2A'],
+})
+console.log(tracks)
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -145,18 +128,7 @@ example above.
 | `userId`    | `string`   | The ID of the user making the request     | _Optional_ |
 | `isrc`      | `string[]` | An array of ISRC codes to query tracks by | _Optional_ |
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-const { data: tracks } = await audiusSdk.tracks.getBulkTracks({
-  id: ['D7KyD', 'PjdWN', 'Jwo2A'],
-})
-console.log(tracks)
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the tracks as described below.
@@ -220,9 +192,6 @@ information about the tracks as described below.
   };
 }[];
 ```
-
-</TabItem>
-</Tabs>
 
 ---
 
@@ -232,18 +201,17 @@ information about the tracks as described below.
 
 Get the top 100 trending (most popular) tracks on Audius.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
 
-Optionally create an object with the following fields and pass it as the first argument.
+```ts
+const { data: tracks } = await audiusSdk.tracks.getTrendingTracks()
+console.log(tracks)
+```
+
+#### Params
+
+Optionally create an object with the following fields and pass it as the first argument, as shown in
+the example above.
 
 | Name     | Type                                       | Description                                                                        | Required?  |
 | :------- | :----------------------------------------- | :--------------------------------------------------------------------------------- | :--------- |
@@ -253,16 +221,7 @@ Optionally create an object with the following fields and pass it as the first a
 | `limit`  | `number`                                   | The number of items to fetch (for pagination)                                      | _Optional_ |
 | `userId` | `string`                                   | The ID of the user making the request                                              | _Optional_ |
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-const { data: tracks } = await audiusSdk.tracks.getTrendingTracks()
-console.log(tracks)
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the tracks as described below.
@@ -327,8 +286,7 @@ information about the tracks as described below.
 }[];
 ```
 
-</TabItem>
-</Tabs>
+---
 
 ## getUndergroundTrendingTracks
 
@@ -336,18 +294,17 @@ information about the tracks as described below.
 
 Get the top 100 trending underground tracks on Audius.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
 
-Optionally create an object with the following fields and pass it as the first argument.
+```ts
+const { data: tracks } = await audiusSdk.tracks.getUndergroundTrendingTracks()
+console.log(tracks)
+```
+
+#### Params
+
+Optionally create an object with the following fields and pass it as the first argument, as shown in
+the example above.
 
 | Name     | Type     | Description                                                                  | Required?  |
 | :------- | :------- | :--------------------------------------------------------------------------- | :--------- |
@@ -355,16 +312,7 @@ Optionally create an object with the following fields and pass it as the first a
 | `offset` | `number` | An offset to apply to the list of results. Default value is **0**            | _Optional_ |
 | `userId` | `string` | The ID of the user making the request                                        | _Optional_ |
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-const { data: tracks } = await audiusSdk.tracks.getUndergroundTrendingTracks()
-console.log(tracks)
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the tracks as described below.
@@ -428,9 +376,6 @@ information about the tracks as described below.
   };
 }[];
 ```
-
-</TabItem>
-</Tabs>
 
 ---
 
@@ -440,16 +385,16 @@ information about the tracks as described below.
 
 Search for tracks.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+const { data: tracks } = await audiusSdk.tracks.searchTracks({
+  query: 'skrillex',
+})
+console.log(tracks)
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -470,18 +415,7 @@ example above.
 | `bpmMin`              | `string`   | Minimum BPM to filter by                                 | _Optional_ |
 | `bpmMax`              | `string`   | Maximum BPM to filter by                                 | _Optional_ |
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-const { data: tracks } = await audiusSdk.tracks.searchTracks({
-  query: 'skrillex',
-})
-console.log(tracks)
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the tracks as described below.
@@ -546,9 +480,6 @@ information about the tracks as described below.
 }[];
 ```
 
-</TabItem>
-</Tabs>
-
 ---
 
 ## createTrack
@@ -568,35 +499,7 @@ complete walkthrough.
 
 :::
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name       | Type                                                | Description                                   | Required?    |
-| :--------- | :-------------------------------------------------- | :-------------------------------------------- | :----------- |
-| `userId`   | `string`                                            | The ID of the user                            | **Required** |
-| `metadata` | [`CreateTrackRequestBody`](#createtrackrequestbody) | An object containing the details of the track | **Required** |
-
-See [`CreateTrackRequestBody`](#createtrackrequestbody) for all available metadata fields.
-
-> #### `requestInit`
-
-You can pass an optional
-[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
-argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
-
-</TabItem>
-<TabItem value="example">
+Example:
 
 ```ts
 import { Mood, Genre } from '@audius/sdk'
@@ -639,8 +542,23 @@ const { data } = await audiusSdk.tracks.createTrack({
 })
 ```
 
-</TabItem>
-<TabItem value="response">
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name       | Type                                                | Description                                   | Required?    |
+| :--------- | :-------------------------------------------------- | :-------------------------------------------- | :----------- |
+| `userId`   | `string`                                            | The ID of the user                            | **Required** |
+| `metadata` | [`CreateTrackRequestBody`](#createtrackrequestbody) | An object containing the details of the track | **Required** |
+
+See [`CreateTrackRequestBody`](#createtrackrequestbody) for all available metadata fields.
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
 
 Returns a `Promise` containing an object with the new track's ID (`trackId`), as well as the block
 hash (`blockHash`) and block number (`blockNumber`) for the transaction.
@@ -653,9 +571,6 @@ hash (`blockHash`) and block number (`blockNumber`) for the transaction.
 }
 ```
 
-</TabItem>
-</Tabs>
-
 ---
 
 ## updateTrack
@@ -666,37 +581,7 @@ Update a track's metadata. If any metadata fields are not provided, their values
 same as before. To replace audio or cover art, upload new files via the
 [Uploads API](/developers/sdk/uploads) and pass the new CIDs in `metadata`.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name       | Type                                                | Description                               | Required?    |
-| :--------- | :-------------------------------------------------- | :---------------------------------------- | :----------- |
-| `trackId`  | `string`                                            | The ID of the track                       | **Required** |
-| `userId`   | `string`                                            | The ID of the user                        | **Required** |
-| `metadata` | [`UpdateTrackRequestBody`](#updatetrackrequestbody) | An object containing the fields to update | **Required** |
-
-All fields are optional — only include the fields you want to change. See
-[`UpdateTrackRequestBody`](#updatetrackrequestbody) for all available fields.
-
-> #### `requestInit`
-
-You can pass an optional
-[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
-argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
-
-</TabItem>
-<TabItem value="example">
+Example:
 
 ```ts
 import { Mood } from '@audius/sdk'
@@ -711,8 +596,25 @@ const { data } = await audiusSdk.tracks.updateTrack({
 })
 ```
 
-</TabItem>
-<TabItem value="response">
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name       | Type                                                | Description                               | Required?    |
+| :--------- | :-------------------------------------------------- | :---------------------------------------- | :----------- |
+| `trackId`  | `string`                                            | The ID of the track                       | **Required** |
+| `userId`   | `string`                                            | The ID of the user                        | **Required** |
+| `metadata` | [`UpdateTrackRequestBody`](#updatetrackrequestbody) | An object containing the fields to update | **Required** |
+
+All fields are optional — only include the fields you want to change. See
+[`UpdateTrackRequestBody`](#updatetrackrequestbody) for all available fields.
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
@@ -723,9 +625,6 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
   blockNumber: number
 }
 ```
-
-</TabItem>
-</Tabs>
 
 ---
 
@@ -735,16 +634,16 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 Delete a track
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+await audiusSdk.tracks.deleteTrack({
+  trackId: 'h5pJ3Bz',
+  userId: '7eP5n',
+})
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -754,24 +653,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-await audiusSdk.tracks.deleteTrack({
-  trackId: 'h5pJ3Bz',
-  userId: '7eP5n',
-})
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
@@ -783,9 +669,6 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 }
 ```
 
-</TabItem>
-</Tabs>
-
 ---
 
 ## favoriteTrack
@@ -794,16 +677,16 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 Favorite a track
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+await audiusSdk.tracks.favoriteTrack({
+  trackId: 'x5pJ3Az'
+  userId: "7eP5n",
+});
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -820,24 +703,11 @@ example above.
 }
 ```
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-await audiusSdk.tracks.favoriteTrack({
-  trackId: 'x5pJ3Az'
-  userId: "7eP5n",
-});
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
@@ -848,9 +718,6 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
   blockNumber: number
 }
 ```
-
-</TabItem>
-</Tabs>
 
 ---
 
@@ -860,16 +727,16 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 Unfavorite a track
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+await audiusSdk.tracks.unfavoriteTrack({
+  trackId: 'x5pJ3Az'
+  userId: "7eP5n",
+});
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -879,24 +746,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-await audiusSdk.tracks.unfavoriteTrack({
-  trackId: 'x5pJ3Az'
-  userId: "7eP5n",
-});
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
@@ -908,9 +762,6 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 }
 ```
 
-</TabItem>
-</Tabs>
-
 ---
 
 ## repostTrack
@@ -919,16 +770,16 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
 
 Repost a track
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
+Example:
+
+```ts
+await audiusSdk.tracks.repostTrack({
+  trackId: 'x5pJ3Az'
+  userId: "7eP5n",
+});
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -945,29 +796,14 @@ example above.
 }
 ```
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
-</TabItem>
-<TabItem value="example">
-
-```ts
-await audiusSdk.tracks.repostTrack({
-  trackId: 'x5pJ3Az'
-  userId: "7eP5n",
-});
-```
-
-</TabItem>
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
-
-Return type:
 
 ```ts
 {
@@ -975,9 +811,6 @@ Return type:
   blockNumber: number
 }
 ```
-
-</TabItem>
-</Tabs>
 
 ---
 
@@ -987,17 +820,16 @@ Return type:
 
 Unrepost a track
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
+Example:
 
-<TabItem value="request">
+```ts
+await audiusSdk.tracks.unrepostTrack({
+  trackId: 'x5pJ3Az',
+  userId: '7eP5n',
+})
+```
+
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -1007,26 +839,11 @@ example above.
 | `trackId` | `string` | The ID of the track | **Required** |
 | `userId`  | `string` | The ID of the user  | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
-</TabItem>
-
-<TabItem value="example">
-
-```ts
-await audiusSdk.tracks.unrepostTrack({
-  trackId: 'x5pJ3Az',
-  userId: '7eP5n',
-})
-```
-
-</TabItem>
-
-<TabItem value="response">
+#### Returns
 
 Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
 (`blockNumber`) for the transaction.
@@ -1037,10 +854,6 @@ Returns a `Promise` containing an object with the block hash (`blockHash`) and b
   blockNumber: number
 }
 ```
-
-</TabItem>
-
-</Tabs>
 
 ---
 
