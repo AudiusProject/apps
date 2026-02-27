@@ -99,6 +99,12 @@ export const TokenGatedConditions = z
   })
   .strict()
 
+export const SignersGatedConditions = z
+  .object({
+    signers: z.array(z.string())
+  })
+  .strict()
+
 export const USDCPurchaseConditions = z
   .object({
     usdcPurchase: z.object({
@@ -148,7 +154,8 @@ export const UploadTrackMetadataSchema = z.object({
         FollowGatedConditions,
         TipGatedConditions,
         USDCPurchaseConditions,
-        TokenGatedConditions
+        TokenGatedConditions,
+        SignersGatedConditions
       ])
     )
     .nullable(),
