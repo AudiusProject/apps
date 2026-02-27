@@ -959,6 +959,12 @@ const sidebar = {
         },
         {
           type: "doc",
+          id: "developers/api/register-developer-app-api-key",
+          label: "Register Developer App API Key",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
           id: "developers/api/deactivate-developer-app-access-key",
           label: "Deactivate Developer App Access Key",
           className: "api-method post",
