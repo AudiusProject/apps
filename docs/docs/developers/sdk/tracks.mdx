@@ -31,9 +31,10 @@ Get a track by id.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name      | Type     | Description         | Required?    |
-| :-------- | :------- | :------------------ | :----------- |
-| `trackId` | `string` | The ID of the track | **Required** |
+| Name      | Type     | Description                           | Required?    |
+| :-------- | :------- | :------------------------------------ | :----------- |
+| `trackId` | `string` | The ID of the track                   | **Required** |
+| `userId`  | `string` | The ID of the user making the request | _Optional_   |
 
 </TabItem>
 <TabItem value="example">
@@ -137,10 +138,12 @@ Get a list of tracks using their IDs or permalinks.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name        | Type       | Description                      | Required?  |
-| :---------- | :--------- | :------------------------------- | :--------- |
-| `id`        | `string[]` | An array of IDs of tracks        | _Optional_ |
-| `permalink` | `string[]` | An array of permalinks of tracks | _Optional_ |
+| Name        | Type       | Description                               | Required?  |
+| :---------- | :--------- | :---------------------------------------- | :--------- |
+| `id`        | `string[]` | An array of IDs of tracks                 | _Optional_ |
+| `permalink` | `string[]` | An array of permalinks of tracks          | _Optional_ |
+| `userId`    | `string`   | The ID of the user making the request     | _Optional_ |
+| `isrc`      | `string[]` | An array of ISRC codes to query tracks by | _Optional_ |
 
 </TabItem>
 <TabItem value="example">
@@ -242,10 +245,13 @@ Get the top 100 trending (most popular) tracks on Audius.
 
 Optionally create an object with the following fields and pass it as the first argument.
 
-| Name    | Type                                                             | Description                                                                                                  | Required?  |
-| :------ | :--------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- | :--------- |
-| `genre` | `Genre` (can be imported from `@audius/sdk`)                     | If provided, the top 100 trending tracks of the genre will be returned                                       | _Optional_ |
-| `time`  | `GetTrendingTracksTimeEnum` (can be imported from `@audius/sdk`) | A time range for which to return the trending tracks. Default value is **GetTrendingTracksTimeEnum.AllTime** | _Optional_ |
+| Name     | Type                                       | Description                                                                        | Required?  |
+| :------- | :----------------------------------------- | :--------------------------------------------------------------------------------- | :--------- |
+| `genre`  | `string`                                   | If provided, the top 100 trending tracks of the genre will be returned             | _Optional_ |
+| `time`   | `'week' \| 'month' \| 'year' \| 'allTime'` | A time range for which to return the trending tracks. Default value is `'allTime'` | _Optional_ |
+| `offset` | `number`                                   | The number of items to skip (for pagination)                                       | _Optional_ |
+| `limit`  | `number`                                   | The number of items to fetch (for pagination)                                      | _Optional_ |
+| `userId` | `string`                                   | The ID of the user making the request                                              | _Optional_ |
 
 </TabItem>
 <TabItem value="example">
@@ -347,6 +353,7 @@ Optionally create an object with the following fields and pass it as the first a
 | :------- | :------- | :--------------------------------------------------------------------------- | :--------- |
 | `limit`  | `number` | If provided, will return only the given number of tracks. Default is **100** | _Optional_ |
 | `offset` | `number` | An offset to apply to the list of results. Default value is **0**            | _Optional_ |
+| `userId` | `string` | The ID of the user making the request                                        | _Optional_ |
 
 </TabItem>
 <TabItem value="example">
@@ -447,9 +454,21 @@ Search for tracks.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name    | Type     | Description             | Required?    |
-| :------ | :------- | :---------------------- | :----------- |
-| `query` | `string` | The query to search for | **Required** |
+| Name                  | Type       | Description                                              | Required?  |
+| :-------------------- | :--------- | :------------------------------------------------------- | :--------- |
+| `query`               | `string`   | The query to search for                                  | _Optional_ |
+| `offset`              | `number`   | The number of items to skip (for pagination)             | _Optional_ |
+| `limit`               | `number`   | The number of items to fetch (for pagination)            | _Optional_ |
+| `genre`               | `string[]` | Array of genres to filter by                             | _Optional_ |
+| `sortMethod`          | `string`   | Sort method: `'relevant'`, `'popular'`, or `'recent'`    | _Optional_ |
+| `mood`                | `string[]` | Array of moods to filter by                              | _Optional_ |
+| `onlyDownloadable`    | `string`   | Filter to only downloadable tracks                       | _Optional_ |
+| `includePurchaseable` | `string`   | Include purchaseable tracks in results                   | _Optional_ |
+| `isPurchaseable`      | `string`   | Filter to only purchaseable tracks                       | _Optional_ |
+| `hasDownloads`        | `string`   | Filter tracks that have stems/downloads                  | _Optional_ |
+| `key`                 | `string[]` | Array of musical keys to filter by (e.g., `['C', 'Am']`) | _Optional_ |
+| `bpmMin`              | `string`   | Minimum BPM to filter by                                 | _Optional_ |
+| `bpmMax`              | `string`   | Maximum BPM to filter by                                 | _Optional_ |
 
 </TabItem>
 <TabItem value="example">
@@ -526,51 +545,6 @@ information about the tracks as described below.
   };
 }[];
 ```
-
-</TabItem>
-</Tabs>
-
----
-
-## getTrackStreamUrl
-
-> #### getTrackStreamUrl(`params`)
-
-Get the url of the track's streamable mp3 file.
-
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument, as shown in the
-example above.
-
-| Name      | Type     | Description         | Required?    |
-| :-------- | :------- | :------------------ | :----------- |
-| `trackId` | `string` | The ID of the track | **Required** |
-
-</TabItem>
-<TabItem value="example">
-
-```ts
-const url = await audiusSdk.tracks.getTrackStreamUrl({
-  trackId: 'PjdWN',
-})
-const audio = new Audio(url)
-audio.play()
-```
-
-</TabItem>
-<TabItem value="response">
-
-Returns a `Promise` containing a `string` url which can be used to stream the track.
 
 </TabItem>
 </Tabs>
