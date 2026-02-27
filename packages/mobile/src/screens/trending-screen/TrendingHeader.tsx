@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 
+import { TimeRange } from '@audius/common/models'
 import type { Modals, TrendingCategory } from '@audius/common/store'
 import {
   modalsActions,
@@ -7,6 +8,7 @@ import {
   trendingPageLineupActions,
   trendingPageSelectors
 } from '@audius/common/store'
+import { ALL_GENRES } from '@audius/common/utils'
 import type { ViewStyle } from 'react-native'
 import { ScrollView, View } from 'react-native'
 import type { SvgProps } from 'react-native-svg'
@@ -14,7 +16,6 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   Flex,
-  IconButton,
   IconLeading,
   SelectablePill,
   useTheme
@@ -87,6 +88,12 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
   const { spacing } = useTheme()
   const dispatch = useDispatch()
   const category = useSelector(getTrendingCategory) ?? 'tracks'
+  const timeRange = useSelector(trendingPageSelectors.getTrendingTimeRange)
+  const genre = useSelector(trendingPageSelectors.getTrendingGenre)
+
+  const hasActiveFilters =
+    (timeRange ?? TimeRange.WEEK) !== TimeRange.WEEK ||
+    (genre ?? ALL_GENRES) !== ALL_GENRES
 
   const handleOpenFilter = () => {
     dispatch(setVisibility({ modal: filterModal, visible: true }))
@@ -116,12 +123,17 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
           </GradientText>
         </View>
         {category === 'tracks' ? (
-          <IconButton
-            icon={IconLeading}
-            size='s'
-            onPress={handleOpenFilter}
-            aria-label='Open filter'
-          />
+          <Flex>
+            <SelectablePill
+              type='button'
+              icon={IconLeading}
+              size='large'
+              isSelected={hasActiveFilters}
+              isControlled
+              onPress={handleOpenFilter}
+              accessibilityLabel='Open filter'
+            />
+          </Flex>
         ) : null}
       </View>
       <ScrollView

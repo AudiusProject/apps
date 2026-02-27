@@ -38,8 +38,14 @@ export const SelectablePill = (props: SelectablePillProps) => {
     style: styleProp,
     fullWidth,
     disableUnselectAnimation,
+    'aria-label': ariaLabel,
+    accessibilityLabel: accessibilityLabelProp,
     ...other
   } = props
+
+  const isIconOnly = !('label' in props) && !!Icon
+  const displayLabel = 'label' in props ? label : undefined
+  const a11yLabel = ariaLabel ?? accessibilityLabelProp
   const {
     color,
     motion,
@@ -153,6 +159,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
       onTouchCancel={handleTouchCancel}
       onPress={handlePress}
       hitSlop={DEFAULT_HIT_SLOP}
+      accessibilityLabel={isIconOnly ? a11yLabel : undefined}
       style={[
         css({ alignSelf: 'flex-start', borderRadius: cornerRadius['2xl'] }),
         styleProp
@@ -178,19 +185,24 @@ export const SelectablePill = (props: SelectablePillProps) => {
         style={[animatedRootStyles, fullWidth ? { width: '100%' } : undefined]}
         {...other}
       >
-        {size !== 'small' && Icon ? (
+        {(isIconOnly || (size !== 'small' && Icon)) && Icon ? (
           <Icon
             size='s'
             color={isSelected || isPressing ? 'white' : 'default'}
           />
         ) : null}
-        <AnimatedText
-          numberOfLines={1}
-          variant='body'
-          style={[animatedTextStyles, { lineHeight: typography.lineHeight.m }]}
-        >
-          {label}
-        </AnimatedText>
+        {displayLabel != null ? (
+          <AnimatedText
+            numberOfLines={1}
+            variant='body'
+            style={[
+              animatedTextStyles,
+              { lineHeight: typography.lineHeight.m }
+            ]}
+          >
+            {displayLabel}
+          </AnimatedText>
+        ) : null}
       </AnimatedFlex>
     </Pressable>
   )
