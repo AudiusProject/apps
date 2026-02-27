@@ -581,58 +581,58 @@ complete walkthrough.
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name       | Type                                                          | Description                                   | Required?    |
-| :--------- | :------------------------------------------------------------ | :-------------------------------------------- | :----------- |
-| `userId`   | `string`                                                      | The ID of the user                            | **Required** |
+| Name       | Type                     | Description                                   | Required?    |
+| :--------- | :----------------------- | :-------------------------------------------- | :----------- |
+| `userId`   | `string`                 | The ID of the user                            | **Required** |
 | `metadata` | `CreateTrackRequestBody` | An object containing the details of the track | **Required** |
 
 Fields on `metadata`:
 
-| Name                         | Type                     | Description                                                       | Required?    |
-| :--------------------------- | :----------------------- | :---------------------------------------------------------------- | :----------- |
-| `title`                      | `string`                 | Track title                                                       | **Required** |
-| `genre`                      | `Genre`                  | Track genre                                                       | **Required** |
-| `trackCid`                   | `string`                 | CID of the transcoded audio (from Uploads API)                    | **Required** |
-| `trackId`                    | `string`                 | Track ID (auto-generated if not provided)                         | _Optional_   |
-| `description`                | `string`                 | Track description                                                 | _Optional_   |
-| `mood`                       | `Mood`                   | Track mood                                                        | _Optional_   |
-| `bpm`                        | `number`                 | Beats per minute                                                  | _Optional_   |
-| `musicalKey`                 | `string`                 | Musical key of the track                                          | _Optional_   |
-| `tags`                       | `string`                 | Comma-separated tags                                              | _Optional_   |
-| `license`                    | `string`                 | License type                                                      | _Optional_   |
-| `isrc`                       | `string`                 | International Standard Recording Code                             | _Optional_   |
-| `iswc`                       | `string`                 | International Standard Musical Work Code                          | _Optional_   |
-| `releaseDate`                | `Date`                   | Release date                                                      | _Optional_   |
-| `origFileCid`                | `string`                 | CID of the original audio file (from Uploads API)                 | _Optional_   |
-| `origFilename`               | `string`                 | Original filename of the audio file                               | _Optional_   |
-| `coverArtCid`                | `string`                 | CID of the cover art image (from Uploads API)                     | _Optional_   |
-| `coverArtSizes`              | `string`                 | Cover art sizes metadata                                          | _Optional_   |
-| `previewCid`                 | `string`                 | CID of the preview clip (from Uploads API)                        | _Optional_   |
-| `previewStartSeconds`        | `number`                 | Preview start time in seconds                                     | _Optional_   |
-| `duration`                   | `number`                 | Track duration in seconds                                         | _Optional_   |
-| `isDownloadable`             | `boolean`                | Whether the track is downloadable                                 | _Optional_   |
-| `isUnlisted`                 | `boolean`                | Whether the track is unlisted (hidden)                            | _Optional_   |
-| `isStreamGated`              | `boolean`                | Whether streaming is restricted behind an access gate             | _Optional_   |
-| `streamConditions`           | `AccessGate`             | Conditions for stream access gating                               | _Optional_   |
-| `downloadConditions`         | `AccessGate`             | Conditions for download access gating                             | _Optional_   |
-| `fieldVisibility`            | `FieldVisibility`        | Controls visibility of individual track fields                    | _Optional_   |
-| `placementHosts`             | `string`                 | Preferred storage node placement hosts                            | _Optional_   |
-| `stemOf`                     | `StemParent`             | Parent track if this track is a stem                              | _Optional_   |
-| `remixOf`                    | `RemixParentWrite`       | Parent track(s) if this track is a remix                          | _Optional_   |
-| `noAiUse`                    | `boolean`                | Whether AI use is prohibited                                      | _Optional_   |
-| `isOwnedByUser`              | `boolean`                | Whether the track is owned by the user                            | _Optional_   |
-| `coverOriginalSongTitle`     | `string`                 | Original song title (for cover tracks)                            | _Optional_   |
-| `coverOriginalArtist`        | `string`                 | Original artist (for cover tracks)                                | _Optional_   |
-| `parentalWarningType`        | `string`                 | Parental warning type                                             | _Optional_   |
-| `territoryCodes`             | `string[]`               | Territory codes for distribution                                  | _Optional_   |
-| `ddexApp`                    | `string`                 | DDEX application identifier                                       | _Optional_   |
-| `ddexReleaseIds`             | `object`                 | DDEX release identifiers                                          | _Optional_   |
-| `artists`                    | `object[]`               | DDEX resource contributors / artists                              | _Optional_   |
-| `resourceContributors`       | `DdexResourceContributor[]` | DDEX resource contributors                                     | _Optional_   |
-| `indirectResourceContributors` | `DdexResourceContributor[]` | DDEX indirect resource contributors                           | _Optional_   |
-| `rightsController`           | `DdexRightsController`   | DDEX rights controller                                            | _Optional_   |
-| `copyrightLine`              | `CopyrightLine`          | Copyright line                                                    | _Optional_   |
-| `producerCopyrightLine`      | `ProducerCopyrightLine`  | Producer copyright line                                           | _Optional_   |
+| Name                           | Type                        | Description                                           | Required?    |
+| :----------------------------- | :-------------------------- | :---------------------------------------------------- | :----------- |
+| `title`                        | `string`                    | Track title                                           | **Required** |
+| `genre`                        | `Genre`                     | Track genre                                           | **Required** |
+| `trackCid`                     | `string`                    | CID of the transcoded audio (from Uploads API)        | **Required** |
+| `trackId`                      | `string`                    | Track ID (auto-generated if not provided)             | _Optional_   |
+| `description`                  | `string`                    | Track description                                     | _Optional_   |
+| `mood`                         | `Mood`                      | Track mood                                            | _Optional_   |
+| `bpm`                          | `number`                    | Beats per minute                                      | _Optional_   |
+| `musicalKey`                   | `string`                    | Musical key of the track                              | _Optional_   |
+| `tags`                         | `string`                    | Comma-separated tags                                  | _Optional_   |
+| `license`                      | `string`                    | License type                                          | _Optional_   |
+| `isrc`                         | `string`                    | International Standard Recording Code                 | _Optional_   |
+| `iswc`                         | `string`                    | International Standard Musical Work Code              | _Optional_   |
+| `releaseDate`                  | `Date`                      | Release date                                          | _Optional_   |
+| `origFileCid`                  | `string`                    | CID of the original audio file (from Uploads API)     | _Optional_   |
+| `origFilename`                 | `string`                    | Original filename of the audio file                   | _Optional_   |
+| `coverArtCid`                  | `string`                    | CID of the cover art image (from Uploads API)         | _Optional_   |
+| `coverArtSizes`                | `string`                    | Cover art sizes metadata                              | _Optional_   |
+| `previewCid`                   | `string`                    | CID of the preview clip (from Uploads API)            | _Optional_   |
+| `previewStartSeconds`          | `number`                    | Preview start time in seconds                         | _Optional_   |
+| `duration`                     | `number`                    | Track duration in seconds                             | _Optional_   |
+| `isDownloadable`               | `boolean`                   | Whether the track is downloadable                     | _Optional_   |
+| `isUnlisted`                   | `boolean`                   | Whether the track is unlisted (hidden)                | _Optional_   |
+| `isStreamGated`                | `boolean`                   | Whether streaming is restricted behind an access gate | _Optional_   |
+| `streamConditions`             | `AccessGate`                | Conditions for stream access gating                   | _Optional_   |
+| `downloadConditions`           | `AccessGate`                | Conditions for download access gating                 | _Optional_   |
+| `fieldVisibility`              | `FieldVisibility`           | Controls visibility of individual track fields        | _Optional_   |
+| `placementHosts`               | `string`                    | Preferred storage node placement hosts                | _Optional_   |
+| `stemOf`                       | `StemParent`                | Parent track if this track is a stem                  | _Optional_   |
+| `remixOf`                      | `RemixParentWrite`          | Parent track(s) if this track is a remix              | _Optional_   |
+| `noAiUse`                      | `boolean`                   | Whether AI use is prohibited                          | _Optional_   |
+| `isOwnedByUser`                | `boolean`                   | Whether the track is owned by the user                | _Optional_   |
+| `coverOriginalSongTitle`       | `string`                    | Original song title (for cover tracks)                | _Optional_   |
+| `coverOriginalArtist`          | `string`                    | Original artist (for cover tracks)                    | _Optional_   |
+| `parentalWarningType`          | `string`                    | Parental warning type                                 | _Optional_   |
+| `territoryCodes`               | `string[]`                  | Territory codes for distribution                      | _Optional_   |
+| `ddexApp`                      | `string`                    | DDEX application identifier                           | _Optional_   |
+| `ddexReleaseIds`               | `object`                    | DDEX release identifiers                              | _Optional_   |
+| `artists`                      | `object[]`                  | DDEX resource contributors / artists                  | _Optional_   |
+| `resourceContributors`         | `DdexResourceContributor[]` | DDEX resource contributors                            | _Optional_   |
+| `indirectResourceContributors` | `DdexResourceContributor[]` | DDEX indirect resource contributors                   | _Optional_   |
+| `rightsController`             | `DdexRightsController`      | DDEX rights controller                                | _Optional_   |
+| `copyrightLine`                | `CopyrightLine`             | Copyright line                                        | _Optional_   |
+| `producerCopyrightLine`        | `ProducerCopyrightLine`     | Producer copyright line                               | _Optional_   |
 
 > #### `requestInit`
 
@@ -725,46 +725,46 @@ same as before. To replace audio or cover art, upload new files via the
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name       | Type                                                                       | Description                               | Required?    |
-| :--------- | :------------------------------------------------------------------------- | :---------------------------------------- | :----------- |
-| `trackId`  | `string`                                                                   | The ID of the track                       | **Required** |
-| `userId`   | `string`                                                                   | The ID of the user                        | **Required** |
+| Name       | Type                     | Description                               | Required?    |
+| :--------- | :----------------------- | :---------------------------------------- | :----------- |
+| `trackId`  | `string`                 | The ID of the track                       | **Required** |
+| `userId`   | `string`                 | The ID of the user                        | **Required** |
 | `metadata` | `UpdateTrackRequestBody` | An object containing the fields to update | **Required** |
 
 All fields on `metadata` are optional — only include the fields you want to change:
 
-| Name                         | Type                     | Description                                                       |
-| :--------------------------- | :----------------------- | :---------------------------------------------------------------- |
-| `title`                      | `string`                 | Track title                                                       |
-| `genre`                      | `Genre`                  | Track genre                                                       |
-| `description`                | `string`                 | Track description                                                 |
-| `mood`                       | `Mood`                   | Track mood                                                        |
-| `bpm`                        | `number`                 | Beats per minute                                                  |
-| `musicalKey`                 | `string`                 | Musical key of the track                                          |
-| `tags`                       | `string`                 | Comma-separated tags                                              |
-| `license`                    | `string`                 | License type                                                      |
-| `isrc`                       | `string`                 | International Standard Recording Code                             |
-| `iswc`                       | `string`                 | International Standard Musical Work Code                          |
-| `releaseDate`                | `Date`                   | Release date                                                      |
-| `trackCid`                   | `string`                 | CID of the transcoded audio (from Uploads API)                    |
-| `origFileCid`                | `string`                 | CID of the original audio file (from Uploads API)                 |
-| `origFilename`               | `string`                 | Original filename of the audio file                               |
-| `coverArtCid`                | `string`                 | CID of the cover art image (from Uploads API)                     |
-| `coverArtSizes`              | `string`                 | Cover art sizes metadata                                          |
-| `previewCid`                 | `string`                 | CID of the preview clip (from Uploads API)                        |
-| `previewStartSeconds`        | `number`                 | Preview start time in seconds                                     |
-| `duration`                   | `number`                 | Track duration in seconds                                         |
-| `isDownloadable`             | `boolean`                | Whether the track is downloadable                                 |
-| `isUnlisted`                 | `boolean`                | Whether the track is unlisted (hidden)                            |
-| `isStreamGated`              | `boolean`                | Whether streaming is restricted behind an access gate             |
-| `streamConditions`           | `AccessGate`             | Conditions for stream access gating                               |
-| `downloadConditions`         | `AccessGate`             | Conditions for download access gating                             |
-| `fieldVisibility`            | `FieldVisibility`        | Controls visibility of individual track fields                    |
-| `placementHosts`             | `string`                 | Preferred storage node placement hosts                            |
-| `stemOf`                     | `StemParent`             | Parent track if this track is a stem                              |
-| `remixOf`                    | `RemixParentWrite`       | Parent track(s) if this track is a remix                          |
-| `parentalWarningType`        | `string`                 | Parental warning type                                             |
-| `ddexApp`                    | `string`                 | DDEX application identifier                                       |
+| Name                  | Type               | Description                                           |
+| :-------------------- | :----------------- | :---------------------------------------------------- |
+| `title`               | `string`           | Track title                                           |
+| `genre`               | `Genre`            | Track genre                                           |
+| `description`         | `string`           | Track description                                     |
+| `mood`                | `Mood`             | Track mood                                            |
+| `bpm`                 | `number`           | Beats per minute                                      |
+| `musicalKey`          | `string`           | Musical key of the track                              |
+| `tags`                | `string`           | Comma-separated tags                                  |
+| `license`             | `string`           | License type                                          |
+| `isrc`                | `string`           | International Standard Recording Code                 |
+| `iswc`                | `string`           | International Standard Musical Work Code              |
+| `releaseDate`         | `Date`             | Release date                                          |
+| `trackCid`            | `string`           | CID of the transcoded audio (from Uploads API)        |
+| `origFileCid`         | `string`           | CID of the original audio file (from Uploads API)     |
+| `origFilename`        | `string`           | Original filename of the audio file                   |
+| `coverArtCid`         | `string`           | CID of the cover art image (from Uploads API)         |
+| `coverArtSizes`       | `string`           | Cover art sizes metadata                              |
+| `previewCid`          | `string`           | CID of the preview clip (from Uploads API)            |
+| `previewStartSeconds` | `number`           | Preview start time in seconds                         |
+| `duration`            | `number`           | Track duration in seconds                             |
+| `isDownloadable`      | `boolean`          | Whether the track is downloadable                     |
+| `isUnlisted`          | `boolean`          | Whether the track is unlisted (hidden)                |
+| `isStreamGated`       | `boolean`          | Whether streaming is restricted behind an access gate |
+| `streamConditions`    | `AccessGate`       | Conditions for stream access gating                   |
+| `downloadConditions`  | `AccessGate`       | Conditions for download access gating                 |
+| `fieldVisibility`     | `FieldVisibility`  | Controls visibility of individual track fields        |
+| `placementHosts`      | `string`           | Preferred storage node placement hosts                |
+| `stemOf`              | `StemParent`       | Parent track if this track is a stem                  |
+| `remixOf`             | `RemixParentWrite` | Parent track(s) if this track is a remix              |
+| `parentalWarningType` | `string`           | Parental warning type                                 |
+| `ddexApp`             | `string`           | DDEX application identifier                           |
 
 > #### `requestInit`
 
