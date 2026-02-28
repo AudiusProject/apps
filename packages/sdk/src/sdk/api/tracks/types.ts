@@ -99,12 +99,6 @@ export const TokenGatedConditions = z
   })
   .strict()
 
-export const SignersGatedConditions = z
-  .object({
-    signers: z.array(z.string())
-  })
-  .strict()
-
 export const USDCPurchaseConditions = z
   .object({
     usdcPurchase: z.object({
@@ -154,11 +148,11 @@ export const UploadTrackMetadataSchema = z.object({
         FollowGatedConditions,
         TipGatedConditions,
         USDCPurchaseConditions,
-        TokenGatedConditions,
-        SignersGatedConditions
+        TokenGatedConditions
       ])
     )
     .nullable(),
+  accessAuthorities: z.optional(z.array(z.string()).nullable()),
   isDownloadGated: z.optional(z.boolean()),
   downloadConditions: z
     .optional(

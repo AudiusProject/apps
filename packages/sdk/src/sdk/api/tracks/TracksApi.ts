@@ -343,6 +343,7 @@ export class TracksApi extends GeneratedTracksApi {
       action: Action.CREATE,
       metadata: JSON.stringify({
         cid: '',
+        access_authorities: metadata.accessAuthorities ?? undefined,
         data: {
           ...snakecaseKeys(metadata),
           owner_id: decodedUserId,
@@ -433,6 +434,7 @@ export class TracksApi extends GeneratedTracksApi {
       action: Action.UPDATE,
       metadata: JSON.stringify({
         cid: '',
+        access_authorities: metadata.accessAuthorities ?? undefined,
         data: {
           ...snakecaseKeys(metadata),
           download_conditions:
