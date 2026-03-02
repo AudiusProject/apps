@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { WebView } from 'react-native-webview'
 import { StatusBar } from 'expo-status-bar'
+import { Audio } from 'expo-av'
 import * as Linking from 'expo-linking'
 import { buildOAuthUrl, randomState } from './src/oauth/buildOAuthUrl'
 import { getAuthenticatedSDK, getSDK, clearAuthenticatedSDK } from './src/sdk'
@@ -40,10 +41,12 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [profile, setProfile] = useState<{ handle: string; name?: string; userId?: string } | null>(null)
-  const [feedItems, setFeedItems] = useState<Array<{ type: string; title: string; subtitle?: string }>>([])
+  const [feedItems, setFeedItems] = useState<Array<{ type: string; title: string; subtitle?: string; trackId?: string }>>([])
   const [feedLoading, setFeedLoading] = useState(false)
   const [feedError, setFeedError] = useState<string | null>(null)
+  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null)
   const oauthStateRef = useRef<string | null>(null)
+  const soundRef = useRef<Audio.Sound | null>(null)
 
   const handleOpenAuth = useCallback(() => {
     setError(null)
@@ -108,6 +111,18 @@ export default function App() {
   )
 
   useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false
+    })
+    return () => {
+      soundRef.current?.unloadAsync().catch(() => {})
+    }
+  }, [])
+
+  useEffect(() => {
     const sub = Linking.addEventListener('url', (event) => {
       handleRedirect(event.url)
     })
@@ -116,6 +131,39 @@ export default function App() {
     })
     return () => sub.remove()
   }, [handleRedirect])
+
+  const handlePlayTrack = useCallback(async (trackId: string) => {
+    try {
+      if (playingTrackId === trackId && soundRef.current) {
+        await soundRef.current.stopAsync()
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+        setPlayingTrackId(null)
+        return
+      }
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+      }
+      setPlayingTrackId(trackId)
+      const sdk = getSDK()
+      const streamUrl = await sdk.tracks.getTrackStreamUrl({ trackId })
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: streamUrl },
+        { shouldPlay: true }
+      )
+      soundRef.current = sound
+      await sound.setStatusAsync({ progressUpdateIntervalMillis: 500 })
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinishAndNotReset) {
+          setPlayingTrackId(null)
+          soundRef.current = null
+        }
+      })
+    } catch {
+      setPlayingTrackId(null)
+    }
+  }, [playingTrackId])
 
   const handleSignOut = useCallback(() => {
     clearAuthenticatedSDK()
@@ -138,13 +186,15 @@ export default function App() {
       .then((res) => {
         if (cancelled) return
         const data = res?.data ?? []
-        const items = data.slice(0, 10).map((entry: { type: string; item?: { title?: string; playlistName?: string; user?: { name?: string; handle?: string } } }) => {
+        const items = data.slice(0, 10).map((entry: { type: string; item?: { id?: string; track_id?: string; title?: string; playlistName?: string; user?: { name?: string; handle?: string } } }) => {
           const item = entry.item
           if (entry.type === 'track' && item) {
+            const trackId = item.id ?? String((item as { track_id?: string }).track_id ?? '')
             return {
               type: 'track',
               title: item.title ?? 'Track',
-              subtitle: item.user?.name ?? item.user?.handle
+              subtitle: item.user?.name ?? item.user?.handle,
+              ...(trackId ? { trackId } : {})
             }
           }
           if (entry.type === 'playlist' && item) {
@@ -235,11 +285,25 @@ export default function App() {
             ) : (
               feedItems.map((item, i) => (
                 <View key={i} style={styles.feedItem}>
-                  <Text style={styles.feedItemType}>{item.type}</Text>
-                  <Text style={styles.feedItemTitle}>{item.title}</Text>
-                  {item.subtitle ? (
-                    <Text style={styles.feedItemSubtitle}>{item.subtitle}</Text>
-                  ) : null}
+                  <View style={styles.feedItemContent}>
+                    <View>
+                      <Text style={styles.feedItemType}>{item.type}</Text>
+                      <Text style={styles.feedItemTitle}>{item.title}</Text>
+                      {item.subtitle ? (
+                        <Text style={styles.feedItemSubtitle}>{item.subtitle}</Text>
+                      ) : null}
+                    </View>
+                    {item.type === 'track' && item.trackId ? (
+                      <TouchableOpacity
+                        style={[styles.feedPlayBtn, playingTrackId === item.trackId && styles.feedPlayBtnActive]}
+                        onPress={() => handlePlayTrack(item.trackId!)}
+                      >
+                        <Text style={styles.feedPlayBtnText}>
+                          {playingTrackId === item.trackId ? '⏹' : '▶'}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
                 </View>
               ))
             )}
@@ -316,6 +380,18 @@ const styles = StyleSheet.create({
   feedError: { fontSize: 13, color: '#d32f2f' },
   feedMuted: { fontSize: 13, color: '#888' },
   feedItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  feedItemContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  feedPlayBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#CC0FE0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12
+  },
+  feedPlayBtnActive: { backgroundColor: '#9a0bb3' },
+  feedPlayBtnText: { fontSize: 18, color: '#fff' },
   feedItemType: { fontSize: 11, color: '#888', textTransform: 'capitalize', marginBottom: 2 },
   feedItemTitle: { fontSize: 15, fontWeight: '500' },
   feedItemSubtitle: { fontSize: 13, color: '#666', marginTop: 2 }

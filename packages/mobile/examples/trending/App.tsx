@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import {
   StyleSheet,
@@ -5,14 +6,66 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native'
+import { Audio } from 'expo-av'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useTrendingTracks } from './src/hooks/useTrendingTracks'
+import { getSDK } from './src/sdk'
 
 const queryClient = new QueryClient()
 
 function TrendingScreen() {
   const { data: tracks, isPending, error } = useTrendingTracks()
+  const [playingId, setPlayingId] = useState<string | null>(null)
+  const soundRef = useRef<Audio.Sound | null>(null)
+
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false
+    })
+    return () => {
+      soundRef.current?.unloadAsync().catch(() => {})
+    }
+  }, [])
+
+  const handlePlay = useCallback(async (item: { id?: string; track_id?: string; title?: string }) => {
+    const trackId = item.id ?? String((item as { track_id?: string }).track_id ?? '')
+    if (!trackId) return
+    try {
+      if (playingId === trackId && soundRef.current) {
+        await soundRef.current.stopAsync()
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+        setPlayingId(null)
+        return
+      }
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+      }
+      setPlayingId(trackId)
+      const sdk = getSDK()
+      const streamUrl = await sdk.tracks.getTrackStreamUrl({ trackId })
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: streamUrl },
+        { shouldPlay: true }
+      )
+      soundRef.current = sound
+      await sound.setStatusAsync({ progressUpdateIntervalMillis: 500 })
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinishAndNotReset) {
+          setPlayingId(null)
+          soundRef.current = null
+        }
+      })
+    } catch {
+      setPlayingId(null)
+    }
+  }, [playingId])
 
   if (isPending) {
     return (
@@ -35,24 +88,43 @@ function TrendingScreen() {
 
   const list = tracks ?? []
 
+  const trackIdForItem = (item: { id?: string; track_id?: string }) =>
+    item.id ?? String((item as { track_id?: string }).track_id ?? '')
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Trending on Audius</Text>
       <Text style={styles.subtitle}>SDK + Expo example</Text>
       <FlatList
         data={list}
-        keyExtractor={(item) => item.id ?? String(item.track_id ?? Math.random())}
-        renderItem={({ item }) => (
-          <View style={styles.trackItem}>
-            <Text style={styles.trackTitle}>{item.title}</Text>
-            <Text style={styles.trackArtist}>
-              {item.user?.name ?? 'Unknown Artist'}
-            </Text>
-            <Text style={styles.trackPlays}>
-              {item.playCount?.toLocaleString() ?? 0} plays
-            </Text>
-          </View>
-        )}
+        keyExtractor={(item) => trackIdForItem(item) || String(Math.random())}
+        renderItem={({ item }) => {
+          const id = trackIdForItem(item)
+          const isPlaying = id ? playingId === id : false
+          return (
+            <View style={styles.trackItem}>
+              <View style={styles.trackItemContent}>
+                <View style={styles.trackItemText}>
+                  <Text style={styles.trackTitle}>{item.title}</Text>
+                  <Text style={styles.trackArtist}>
+                    {item.user?.name ?? 'Unknown Artist'}
+                  </Text>
+                  <Text style={styles.trackPlays}>
+                    {item.playCount?.toLocaleString() ?? 0} plays
+                  </Text>
+                </View>
+                {id ? (
+                  <TouchableOpacity
+                    style={[styles.playBtn, isPlaying && styles.playBtnActive]}
+                    onPress={() => handlePlay(item)}
+                  >
+                    <Text style={styles.playBtnText}>{isPlaying ? '⏹' : '▶'}</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+          )
+        }}
         contentContainerStyle={styles.list}
       />
       <StatusBar style="auto" />
@@ -111,6 +183,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  trackItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  trackItemText: { flex: 1 },
+  playBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#CC0FE0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+  },
+  playBtnActive: { backgroundColor: '#9a0bb3' },
+  playBtnText: { fontSize: 18, color: '#fff' },
   trackTitle: {
     fontSize: 16,
     fontWeight: '600',

@@ -15,6 +15,7 @@
     "buffer": "^6.0.3",
     "events": "^3.3.0",
     "expo": "~54.0.33",
+    "expo-av": "~15.0.1",
     "expo-crypto": "^15.0.8",
     "expo-status-bar": "~3.0.9",
     "querystring-es3": "^0.2.1",
