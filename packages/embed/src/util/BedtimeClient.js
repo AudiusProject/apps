@@ -107,10 +107,10 @@ export const getCollectionWithHashId = async (hashId) => {
   return getFormattedCollectionResponse(res.data)
 }
 
-export const getCollectionByPermalink = async (handle, slug) => {
-  const res = await audiusSdk.playlists.getPlaylistByHandleAndSlug({
-    handle,
-    slug
+export const getCollectionByPermalink = async (handle, slug, type) => {
+  const permalink = `/${handle}/${type}/${slug}`
+  const res = await audiusSdk.playlists.getBulkPlaylists({
+    permalink: [permalink]
   })
   return getFormattedCollectionResponse(res.data)
 }
