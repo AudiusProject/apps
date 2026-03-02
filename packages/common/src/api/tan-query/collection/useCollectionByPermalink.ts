@@ -42,10 +42,8 @@ export const getCollectionByPermalinkQueryFn = async (
   queryClient: QueryClient,
   sdk: any
 ) => {
-  const { handle, slug } = playlistPermalinkToHandleAndSlug(permalink)
-  const { data = [] } = await sdk.playlists.getPlaylistByHandleAndSlug({
-    handle,
-    slug,
+  const { data = [] } = await sdk.playlists.getBulkPlaylists({
+    permalink: [permalink],
     userId: OptionalId.parse(currentUserId)
   })
 
