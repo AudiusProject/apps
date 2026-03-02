@@ -504,6 +504,14 @@ def validate_track_tx(params: ManageEntityParameters):
                 f"Cannot create track {track_id} below the offset"
             )
 
+        if params.metadata is None:
+            raise IndexingValidationError("Metadata is required for track creation")
+
+        if params.metadata.get("owner_id", None) is None:
+            raise IndexingValidationError(
+                "owner_id is required in metadata for track creation"
+            )
+
     if params.action == Action.CREATE or params.action == Action.UPDATE:
         if not params.metadata:
             raise IndexingValidationError(
