@@ -72,7 +72,7 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    await this.entityManager.manageEntity({
+    const res = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId: newCommentId,
@@ -82,7 +82,10 @@ export class CommentsApi extends GeneratedCommentsApi {
         data: snakecaseKeys({ entityType, ...metadata })
       })
     })
-    return encodeHashId(newCommentId)
+    return {
+      ...res,
+      commentId: encodeHashId(newCommentId)!
+    }
   }
 
   override async createComment(
@@ -91,7 +94,7 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId } = params
-      const commentId = await this.createCommentWithEntityManager({
+      return await this.createCommentWithEntityManager({
         userId,
         entityId: encodeHashId(metadata.entityId) ?? '',
         entityType: metadata.entityType,
@@ -101,10 +104,6 @@ export class CommentsApi extends GeneratedCommentsApi {
         trackTimestampS: metadata.trackTimestampS,
         mentions: metadata.mentions
       })
-      return {
-        success: true,
-        commentId: commentId ?? undefined
-      }
     }
     return super.createComment(params, requestInit)
   }
@@ -123,7 +122,7 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId,
@@ -133,7 +132,6 @@ export class CommentsApi extends GeneratedCommentsApi {
         data: snakecaseKeys({ body, entityId: trackId })
       })
     })
-    return response
   }
 
   override async updateComment(
@@ -142,15 +140,12 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId, commentId } = params
-      await this.updateCommentWithEntityManager({
+      return await this.updateCommentWithEntityManager({
         userId,
         entityId: commentId,
         trackId: encodeHashId(metadata.entityId) ?? '',
         body: metadata.body
       })
-      return {
-        success: true
-      }
     }
     return super.updateComment(params, requestInit)
   }
@@ -169,14 +164,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId,
       action: Action.DELETE,
       metadata: ''
     })
-    return response
   }
 
   override async deleteComment(
@@ -188,10 +182,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         entityId: params.commentId
       }
-      await this.deleteCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.deleteCommentWithEntityManager(metadata)
     }
     return super.deleteComment(params, requestInit)
   }
@@ -210,7 +201,7 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId: commentId,
@@ -220,7 +211,6 @@ export class CommentsApi extends GeneratedCommentsApi {
         data: snakecaseKeys({ entityId: trackId, entityType: EntityType.TRACK })
       })
     })
-    return response
   }
 
   override async reactToComment(
@@ -234,10 +224,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         isLiked: true,
         trackId: params.commentId // trackId represents the entity being commented on
       }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reactToCommentWithEntityManager(metadata)
     }
     return super.reactToComment(params, requestInit)
   }
@@ -253,10 +240,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         isLiked: false,
         trackId: params.commentId
       }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reactToCommentWithEntityManager(metadata)
     }
     return super.unreactToComment(params, requestInit)
   }
@@ -270,7 +254,7 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId,
@@ -280,7 +264,6 @@ export class CommentsApi extends GeneratedCommentsApi {
         data: snakecaseKeys({ entityId: trackId })
       })
     })
-    return response
   }
 
   override async pinComment(
@@ -294,10 +277,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         trackId: params.commentId, // trackId represents the entity being commented on
         isPin: true
       }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.pinCommentWithEntityManager(metadata)
     }
     return super.pinComment(params, requestInit)
   }
@@ -313,10 +293,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         trackId: params.commentId,
         isPin: false
       }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.pinCommentWithEntityManager(metadata)
     }
     return super.unpinComment(params, requestInit)
   }
@@ -335,14 +312,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.COMMENT,
       entityId,
       action: Action.REPORT,
       metadata: ''
     })
-    return response
   }
 
   override async reportComment(
@@ -354,10 +330,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         entityId: params.commentId
       }
-      await this.reportCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reportCommentWithEntityManager(metadata)
     }
     return super.reportComment(params, requestInit)
   }
@@ -369,14 +342,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
       entityId: mutedUserId,
       action: isMuted ? Action.UNMUTE : Action.MUTE,
       metadata: ''
     })
-    return response
   }
 
   /** @hidden
@@ -391,10 +363,9 @@ export class CommentsApi extends GeneratedCommentsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    const response = await this.entityManager.manageEntity({
+    return await this.entityManager.manageEntity({
       ...config,
       metadata: ''
     })
-    return response
   }
 }

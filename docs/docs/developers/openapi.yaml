@@ -1084,7 +1084,7 @@ paths:
     get:
       tags:
       - playlists
-      description: Gets a list of playlists by ID
+      description: Gets a list of playlists by ID, UPC, or permalink
       operationId: Get Bulk Playlists
       parameters:
       - name: user_id
@@ -1095,6 +1095,15 @@ paths:
       - name: id
         in: query
         description: The ID of the playlist(s)
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: permalink
+        in: query
+        description: The permalink(s) of the playlist(s)
         style: form
         explode: true
         schema:
@@ -1161,37 +1170,6 @@ paths:
         '500':
           description: Server error
           content: {}
-  /playlists/by_permalink/{handle}/{slug}:
-    get:
-      tags:
-      - playlists
-      description: Get a playlist by handle and slug
-      operationId: Get Playlist By Handle and Slug
-      parameters:
-      - name: handle
-        in: path
-        description: playlist owner handle
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        description: playlist slug
-        required: true
-        schema:
-          type: string
-      - name: user_id
-        in: query
-        description: The user ID of the user making the request
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/playlist_response'
   /playlists/search:
     get:
       tags:
@@ -10415,12 +10393,16 @@ components:
     create_user_response:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the user was created successfully
         transaction_hash:
           type: string
           description: The blockchain transaction hash
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
         user_id:
           type: string
           description: The ID of the created user
@@ -10595,12 +10577,16 @@ components:
     create_comment_response:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the comment was created successfully
         transaction_hash:
           type: string
           description: The blockchain transaction hash
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
         comment_id:
           type: string
           description: The ID of the created comment
@@ -10644,12 +10630,16 @@ components:
     write_response:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the operation was successful
         transaction_hash:
           type: string
           description: The blockchain transaction hash
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
     playlist_artwork:
       type: object
       properties:
@@ -11116,6 +11106,13 @@ components:
         transaction_hash:
           type: string
           description: Transaction hash of the creation
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
     playlist_response:
       required:
       - latest_chain_block
@@ -12203,12 +12200,16 @@ components:
     create_playlist_response:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the playlist was created successfully
         transaction_hash:
           type: string
           description: The blockchain transaction hash
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
         playlist_id:
           type: string
           description: The ID of the created playlist
@@ -13074,12 +13075,16 @@ components:
     create_track_response:
       type: object
       properties:
-        success:
-          type: boolean
-          description: Whether the track was created successfully
         transaction_hash:
           type: string
           description: The blockchain transaction hash
+        block_hash:
+          type: string
+          description: The blockchain block hash
+        block_number:
+          type: integer
+          format: int64
+          description: The blockchain block number/height
         track_id:
           type: string
           description: The ID of the created track

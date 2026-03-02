@@ -21,17 +21,23 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreatePlaylistResponse {
     /**
-     * Whether the playlist was created successfully
-     * @type {boolean}
-     * @memberof CreatePlaylistResponse
-     */
-    success?: boolean;
-    /**
      * The blockchain transaction hash
      * @type {string}
      * @memberof CreatePlaylistResponse
      */
     transactionHash?: string;
+    /**
+     * The blockchain block hash
+     * @type {string}
+     * @memberof CreatePlaylistResponse
+     */
+    blockHash?: string;
+    /**
+     * The blockchain block number/height
+     * @type {number}
+     * @memberof CreatePlaylistResponse
+     */
+    blockNumber?: number;
     /**
      * The ID of the created playlist
      * @type {string}
@@ -59,8 +65,9 @@ export function CreatePlaylistResponseFromJSONTyped(json: any, ignoreDiscriminat
     }
     return {
         
-        'success': !exists(json, 'success') ? undefined : json['success'],
         'transactionHash': !exists(json, 'transaction_hash') ? undefined : json['transaction_hash'],
+        'blockHash': !exists(json, 'block_hash') ? undefined : json['block_hash'],
+        'blockNumber': !exists(json, 'block_number') ? undefined : json['block_number'],
         'playlistId': !exists(json, 'playlist_id') ? undefined : json['playlist_id'],
     };
 }
@@ -74,8 +81,9 @@ export function CreatePlaylistResponseToJSON(value?: CreatePlaylistResponse | nu
     }
     return {
         
-        'success': value.success,
         'transaction_hash': value.transactionHash,
+        'block_hash': value.blockHash,
+        'block_number': value.blockNumber,
         'playlist_id': value.playlistId,
     };
 }

@@ -44,6 +44,18 @@ export interface CreateDeveloperAppResponse {
      * @memberof CreateDeveloperAppResponse
      */
     transactionHash?: string;
+    /**
+     * The blockchain block hash
+     * @type {string}
+     * @memberof CreateDeveloperAppResponse
+     */
+    blockHash?: string;
+    /**
+     * The blockchain block number/height
+     * @type {number}
+     * @memberof CreateDeveloperAppResponse
+     */
+    blockNumber?: number;
 }
 
 /**
@@ -69,6 +81,8 @@ export function CreateDeveloperAppResponseFromJSONTyped(json: any, ignoreDiscrim
         'apiSecret': !exists(json, 'api_secret') ? undefined : json['api_secret'],
         'bearerToken': !exists(json, 'bearer_token') ? undefined : json['bearer_token'],
         'transactionHash': !exists(json, 'transaction_hash') ? undefined : json['transaction_hash'],
+        'blockHash': !exists(json, 'block_hash') ? undefined : json['block_hash'],
+        'blockNumber': !exists(json, 'block_number') ? undefined : json['block_number'],
     };
 }
 
@@ -85,6 +99,8 @@ export function CreateDeveloperAppResponseToJSON(value?: CreateDeveloperAppRespo
         'api_secret': value.apiSecret,
         'bearer_token': value.bearerToken,
         'transaction_hash': value.transactionHash,
+        'block_hash': value.blockHash,
+        'block_number': value.blockNumber,
     };
 }
 

@@ -44,7 +44,7 @@ Returns a `Promise` containing an object with a `data` field. `data` contains a
 
 > #### getBulkPlaylists(`params`)
 
-Get a list of playlists by id.
+Get a list of playlists by ID, UPC, or permalink.
 
 Example:
 
@@ -61,11 +61,12 @@ console.log(playlists)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name     | Type       | Description                           | Required?  |
-| :------- | :--------- | :------------------------------------ | :--------- |
-| `id`     | `string[]` | An array of playlist IDs              | _Optional_ |
-| `upc`    | `string[]` | An array of UPC codes                 | _Optional_ |
-| `userId` | `string`   | The ID of the user making the request | _Optional_ |
+| Name        | Type       | Description                           | Required?  |
+| :---------- | :--------- | :------------------------------------ | :--------- |
+| `id`        | `string[]` | An array of playlist IDs              | _Optional_ |
+| `permalink` | `string[]` | An array of permalinks of playlists   | _Optional_ |
+| `upc`       | `string[]` | An array of UPC codes                 | _Optional_ |
+| `userId`    | `string`   | The ID of the user making the request | _Optional_ |
 
 #### Returns
 

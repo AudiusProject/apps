@@ -24,28 +24,14 @@ export const getCollectionByPermalinkQueryKey = (
   ] as unknown as QueryKey<ID>
 }
 
-export const playlistPermalinkToHandleAndSlug = (permalink: string) => {
-  const splitPermalink = permalink.split('/')
-  if (splitPermalink.length !== 4) {
-    throw Error(
-      'Permalink formatted incorrectly. Should follow /<handle>/playlist/<slug> format.'
-    )
-  }
-  const handle = splitPermalink[1]
-  const slug = splitPermalink[3]
-  return { handle, slug }
-}
-
 export const getCollectionByPermalinkQueryFn = async (
   permalink: string,
   currentUserId: number | null | undefined,
   queryClient: QueryClient,
   sdk: any
 ) => {
-  const { handle, slug } = playlistPermalinkToHandleAndSlug(permalink)
-  const { data = [] } = await sdk.playlists.getPlaylistByHandleAndSlug({
-    handle,
-    slug,
+  const { data = [] } = await sdk.playlists.getBulkPlaylists({
+    permalink: [permalink],
     userId: OptionalId.parse(currentUserId)
   })
 

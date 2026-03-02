@@ -21,17 +21,23 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateTrackResponse {
     /**
-     * Whether the track was created successfully
-     * @type {boolean}
-     * @memberof CreateTrackResponse
-     */
-    success?: boolean;
-    /**
      * The blockchain transaction hash
      * @type {string}
      * @memberof CreateTrackResponse
      */
     transactionHash?: string;
+    /**
+     * The blockchain block hash
+     * @type {string}
+     * @memberof CreateTrackResponse
+     */
+    blockHash?: string;
+    /**
+     * The blockchain block number/height
+     * @type {number}
+     * @memberof CreateTrackResponse
+     */
+    blockNumber?: number;
     /**
      * The ID of the created track
      * @type {string}
@@ -59,8 +65,9 @@ export function CreateTrackResponseFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'success': !exists(json, 'success') ? undefined : json['success'],
         'transactionHash': !exists(json, 'transaction_hash') ? undefined : json['transaction_hash'],
+        'blockHash': !exists(json, 'block_hash') ? undefined : json['block_hash'],
+        'blockNumber': !exists(json, 'block_number') ? undefined : json['block_number'],
         'trackId': !exists(json, 'track_id') ? undefined : json['track_id'],
     };
 }
@@ -74,8 +81,9 @@ export function CreateTrackResponseToJSON(value?: CreateTrackResponse | null): a
     }
     return {
         
-        'success': value.success,
         'transaction_hash': value.transactionHash,
+        'block_hash': value.blockHash,
+        'block_number': value.blockNumber,
         'track_id': value.trackId,
     };
 }

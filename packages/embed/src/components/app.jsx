@@ -48,12 +48,13 @@ const DEFAULT_DOMINANT_COLOR = '#7e1bcc'
 
 const RequestType = Object.seal({
   TRACK: 'track',
-  COLLECTION: 'collection'
+  ALBUM: 'album',
+  PLAYLIST: 'playlist'
 })
 
 const pathComponentRequestTypeMap = {
-  playlist: RequestType.COLLECTION,
-  album: RequestType.COLLECTION,
+  playlist: RequestType.PLAYLIST,
+  album: RequestType.ALBUM,
   track: RequestType.TRACK
 }
 
@@ -214,12 +215,16 @@ const App = (props) => {
 
           setDominantColor({ primary: color })
         }
-      } else if (requestType === RequestType.COLLECTION) {
+      } else if (
+        requestType === RequestType.ALBUM ||
+        requestType === RequestType.PLAYLIST
+      ) {
         let collection
         if (request.handle && request.slug) {
           collection = await getCollectionByPermalink(
             request.handle,
-            request.slug
+            request.slug,
+            requestType
           )
         } else if (request.hashId) {
           collection = await getCollectionWithHashId(request.hashId)
