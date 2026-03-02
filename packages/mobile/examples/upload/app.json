@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Audius Upload",
+    "slug": "audius-upload",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow access to pick audio files for upload.",
+        "NSPhotoLibraryUsageDescription": "Allow access to pick cover art for your track."
+      }
+    },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#ffffff" },
+      "permissions": ["READ_EXTERNAL_STORAGE", "READ_MEDIA_AUDIO"]
+    }
+  }
+}
