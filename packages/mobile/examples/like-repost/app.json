@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Audius Like/Repost",
+    "slug": "audius-like-repost",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#ffffff" } }
+  }
+}
