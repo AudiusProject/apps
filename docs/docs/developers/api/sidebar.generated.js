@@ -515,12 +515,6 @@ const sidebar = {
         },
         {
           type: "doc",
-          id: "developers/api/get-playlist-by-handle-and-slug",
-          label: "Get Playlist By Handle and Slug",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
           id: "developers/api/search-playlists",
           label: "Search Playlists",
           className: "api-method get",
