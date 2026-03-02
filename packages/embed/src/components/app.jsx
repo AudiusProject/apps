@@ -215,13 +215,16 @@ const App = (props) => {
 
           setDominantColor({ primary: color })
         }
-      } else if (requestType === RequestType.COLLECTION) {
+      } else if (
+        requestType === RequestType.ALBUM ||
+        requestType === RequestType.PLAYLIST
+      ) {
         let collection
         if (request.handle && request.slug) {
           collection = await getCollectionByPermalink(
             request.handle,
             request.slug,
-            request.type
+            requestType
           )
         } else if (request.hashId) {
           collection = await getCollectionWithHashId(request.hashId)
