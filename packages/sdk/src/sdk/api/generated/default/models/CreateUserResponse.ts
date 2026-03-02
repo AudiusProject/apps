@@ -21,17 +21,23 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateUserResponse {
     /**
-     * Whether the user was created successfully
-     * @type {boolean}
-     * @memberof CreateUserResponse
-     */
-    success?: boolean;
-    /**
      * The blockchain transaction hash
      * @type {string}
      * @memberof CreateUserResponse
      */
     transactionHash?: string;
+    /**
+     * The blockchain block hash
+     * @type {string}
+     * @memberof CreateUserResponse
+     */
+    blockHash?: string;
+    /**
+     * The blockchain block number/height
+     * @type {number}
+     * @memberof CreateUserResponse
+     */
+    blockNumber?: number;
     /**
      * The ID of the created user
      * @type {string}
@@ -59,8 +65,9 @@ export function CreateUserResponseFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'success': !exists(json, 'success') ? undefined : json['success'],
         'transactionHash': !exists(json, 'transaction_hash') ? undefined : json['transaction_hash'],
+        'blockHash': !exists(json, 'block_hash') ? undefined : json['block_hash'],
+        'blockNumber': !exists(json, 'block_number') ? undefined : json['block_number'],
         'userId': !exists(json, 'user_id') ? undefined : json['user_id'],
     };
 }
@@ -74,8 +81,9 @@ export function CreateUserResponseToJSON(value?: CreateUserResponse | null): any
     }
     return {
         
-        'success': value.success,
         'transaction_hash': value.transactionHash,
+        'block_hash': value.blockHash,
+        'block_number': value.blockNumber,
         'user_id': value.userId,
     };
 }

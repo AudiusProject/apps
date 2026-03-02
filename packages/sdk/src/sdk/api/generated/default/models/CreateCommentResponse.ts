@@ -21,17 +21,23 @@ import { exists, mapValues } from '../runtime';
  */
 export interface CreateCommentResponse {
     /**
-     * Whether the comment was created successfully
-     * @type {boolean}
-     * @memberof CreateCommentResponse
-     */
-    success?: boolean;
-    /**
      * The blockchain transaction hash
      * @type {string}
      * @memberof CreateCommentResponse
      */
     transactionHash?: string;
+    /**
+     * The blockchain block hash
+     * @type {string}
+     * @memberof CreateCommentResponse
+     */
+    blockHash?: string;
+    /**
+     * The blockchain block number/height
+     * @type {number}
+     * @memberof CreateCommentResponse
+     */
+    blockNumber?: number;
     /**
      * The ID of the created comment
      * @type {string}
@@ -59,8 +65,9 @@ export function CreateCommentResponseFromJSONTyped(json: any, ignoreDiscriminato
     }
     return {
         
-        'success': !exists(json, 'success') ? undefined : json['success'],
         'transactionHash': !exists(json, 'transaction_hash') ? undefined : json['transaction_hash'],
+        'blockHash': !exists(json, 'block_hash') ? undefined : json['block_hash'],
+        'blockNumber': !exists(json, 'block_number') ? undefined : json['block_number'],
         'commentId': !exists(json, 'comment_id') ? undefined : json['comment_id'],
     };
 }
@@ -74,8 +81,9 @@ export function CreateCommentResponseToJSON(value?: CreateCommentResponse | null
     }
     return {
         
-        'success': value.success,
         'transaction_hash': value.transactionHash,
+        'block_hash': value.blockHash,
+        'block_number': value.blockNumber,
         'comment_id': value.commentId,
     };
 }
