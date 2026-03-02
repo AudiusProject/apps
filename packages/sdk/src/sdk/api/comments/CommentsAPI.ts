@@ -142,15 +142,12 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId, commentId } = params
-      await this.updateCommentWithEntityManager({
+      return await this.updateCommentWithEntityManager({
         userId,
         entityId: commentId,
         trackId: encodeHashId(metadata.entityId) ?? '',
         body: metadata.body
       })
-      return {
-        success: true
-      }
     }
     return super.updateComment(params, requestInit)
   }
@@ -188,10 +185,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         entityId: params.commentId
       }
-      await this.deleteCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.deleteCommentWithEntityManager(metadata)
     }
     return super.deleteComment(params, requestInit)
   }
@@ -234,10 +228,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         isLiked: true,
         trackId: params.commentId // trackId represents the entity being commented on
       }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reactToCommentWithEntityManager(metadata)
     }
     return super.reactToComment(params, requestInit)
   }
@@ -253,10 +244,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         isLiked: false,
         trackId: params.commentId
       }
-      await this.reactToCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reactToCommentWithEntityManager(metadata)
     }
     return super.unreactToComment(params, requestInit)
   }
@@ -294,10 +282,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         trackId: params.commentId, // trackId represents the entity being commented on
         isPin: true
       }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.pinCommentWithEntityManager(metadata)
     }
     return super.pinComment(params, requestInit)
   }
@@ -313,10 +298,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         trackId: params.commentId,
         isPin: false
       }
-      await this.pinCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.pinCommentWithEntityManager(metadata)
     }
     return super.unpinComment(params, requestInit)
   }
@@ -354,10 +336,7 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         entityId: params.commentId
       }
-      await this.reportCommentWithEntityManager(metadata)
-      return {
-        success: true
-      }
+      return await this.reportCommentWithEntityManager(metadata)
     }
     return super.reportComment(params, requestInit)
   }
