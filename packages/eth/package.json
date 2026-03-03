@@ -21,6 +21,7 @@
     "url": "https://github.com/AudiusProject/apps/issues"
   },
   "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/eth",
+  "sideEffects": false,
   "dependencies": {
     "viem": "2.21.21"
   }
