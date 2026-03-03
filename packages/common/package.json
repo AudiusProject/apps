@@ -35,6 +35,7 @@
     "url": "https://github.com/AudiusProject/apps/issues"
   },
   "dependencies": {
+    "@audius/eth": "*",
     "@audius/fetch-nft": "0.2.8",
     "@audius/fixed-decimal": "*",
     "@audius/sdk": "*",

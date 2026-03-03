@@ -1,5 +1,3 @@
-import type { PublicClient, Transport, WalletClient } from 'viem'
-import type { mainnet } from 'viem/chains'
 import { z } from 'zod'
 
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
@@ -8,19 +6,6 @@ import type { ArchiverService } from './services/Archiver'
 import type { AudiusWalletClient } from './services/AudiusWalletClient'
 import { EmailEncryptionService } from './services/Encryption'
 import type { EntityManagerService } from './services/EntityManager'
-import {
-  AudiusTokenClient,
-  ClaimsManagerClient,
-  DelegateManagerClient,
-  EthRewardsManagerClient,
-  GovernanceClient,
-  RegistryClient,
-  ServiceProviderFactoryClient,
-  TrustedNotifierManagerClient,
-  AudiusWormholeClient
-} from './services/Ethereum'
-import { ServiceTypeManagerClient } from './services/Ethereum/contracts/ServiceTypeManager'
-import { StakingClient } from './services/Ethereum/contracts/Staking/StakingClient'
 import type { LoggerService } from './services/Logger'
 import type {
   PaymentRouterClient,
@@ -52,65 +37,6 @@ export type ServicesContainer = {
    * For interacting with the user or app's wallet for signatures or secrets.
    */
   audiusWalletClient: AudiusWalletClient
-
-  ethWalletClient: WalletClient<Transport, typeof mainnet>
-
-  ethPublicClient: PublicClient<Transport, typeof mainnet>
-
-  /**
-   * Contract client to interact with the Audius token
-   */
-  audiusTokenClient: AudiusTokenClient
-
-  /**
-   * Contract client to interact with claiming rewards
-   */
-  claimsManagerClient: ClaimsManagerClient
-
-  /**
-   * Contract client to interact with staking and delegating stake
-   */
-  delegateManagerClient: DelegateManagerClient
-
-  /**
-   * Contract client to interact with the staking system
-   */
-  stakingClient: StakingClient
-
-  /**
-   * Contract client to interact with the trusted notifier services
-   */
-  trustedNotifierManagerClient: TrustedNotifierManagerClient
-
-  /**
-   * Contract client to interact with wormhole
-   */
-  audiusWormholeClient: AudiusWormholeClient
-
-  /**
-   * Contract client to interact with the eth contract registry
-   */
-  registryClient: RegistryClient
-
-  /**
-   * Contract client to interact with the governance contract
-   */
-  governanceClient: GovernanceClient
-
-  /**
-   * Contract client to interact with service types
-   */
-  serviceTypeManagerClient: ServiceTypeManagerClient
-
-  /**
-   * Contract client to interact with service provider info
-   */
-  serviceProviderFactoryClient: ServiceProviderFactoryClient
-
-  /**
-   * Contract client to interact with the ethereum rewards manager
-   */
-  ethRewardsManagerClient: EthRewardsManagerClient
 
   /**
    * Service used to log and set a desired log level
