@@ -2,6 +2,11 @@ import type { TypedData } from 'viem'
 
 import { abi } from './abi'
 
+/**
+ * The AUDIO ERC-20 token contract.
+ * Initial supply of 1 billion tokens (18 decimals).
+ * Supports EIP-2612 gasless `permit()` approvals.
+ */
 export const AudiusToken = {
   abi,
   address: '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998' as const,

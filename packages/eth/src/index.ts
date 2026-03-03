@@ -9,6 +9,9 @@ export { EthRewardsManager } from './eth-rewards-manager/ethRewardsManager'
 export { Governance } from './governance/governance'
 export { Registry } from './registry/registry'
 export { ServiceProviderFactory } from './service-provider-factory/serviceProviderFactory'
-export { ServiceTypeManager } from './service-type-manager/serviceTypeManager'
+export {
+  ServiceTypeManager,
+  VALIDATOR_SERVICE_TYPE
+} from './service-type-manager/serviceTypeManager'
 export { Staking } from './staking/staking'
 export { TrustedNotifierManager } from './trusted-notifier-manager/trustedNotifierManager'
