@@ -1,5 +1,3 @@
-import type { TypedData } from 'viem'
-
 import { abi } from './abi'
 
 /**
@@ -28,7 +26,7 @@ export const AudiusToken = {
       { name: 'nonce', type: 'uint256' },
       { name: 'deadline', type: 'uint256' }
     ]
-  } as const satisfies TypedData
+  } as const
 }
 
 export type AudiusTokenTypes = typeof AudiusToken.types

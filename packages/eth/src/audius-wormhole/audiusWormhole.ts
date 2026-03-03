@@ -1,5 +1,3 @@
-import type { TypedData } from 'viem'
-
 import { abi } from './abi'
 
 /**
@@ -30,7 +28,7 @@ export const AudiusWormhole = {
       { name: 'nonce', type: 'uint32' },
       { name: 'deadline', type: 'uint256' }
     ]
-  } as const satisfies TypedData
+  } as const
 }
 
 export type AudiusWormholeTypes = typeof AudiusWormhole.types
