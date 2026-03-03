@@ -1,15 +1,14 @@
-import { Governance } from '@audius/eth'
-
-import { EthereumContract } from '../EthereumContract'
+import type { Hex, PublicClient } from 'viem'
 
 import type { GovernanceConfig } from './types'
 
-export class GovernanceClient extends EthereumContract {
-  contract: Governance
+export class GovernanceClient {
+  public readonly contractAddress: Hex
+
+  public readonly publicClient: PublicClient
 
   constructor(config: GovernanceConfig) {
-    super(config)
-
-    this.contract = new Governance(this.client)
+    this.contractAddress = config.address
+    this.publicClient = config.ethPublicClient
   }
 }

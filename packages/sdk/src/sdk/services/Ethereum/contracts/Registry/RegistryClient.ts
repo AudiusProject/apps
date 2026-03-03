@@ -1,15 +1,14 @@
-import { Registry } from '@audius/eth'
-
-import { EthereumContract } from '../EthereumContract'
+import type { Hex, PublicClient } from 'viem'
 
 import type { RegistryConfig } from './types'
 
-export class RegistryClient extends EthereumContract {
-  contract: Registry
+export class RegistryClient {
+  public readonly contractAddress: Hex
+
+  public readonly publicClient: PublicClient
 
   constructor(config: RegistryConfig) {
-    super(config)
-
-    this.contract = new Registry(this.client)
+    this.contractAddress = config.address
+    this.publicClient = config.ethPublicClient
   }
 }

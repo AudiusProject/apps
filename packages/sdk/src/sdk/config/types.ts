@@ -38,6 +38,10 @@ export type SdkServicesConfig = {
       audiusWormholeAddress: Hex
       delegateManagerAddress: Hex
       stakingAddress: Hex
+      governanceAddress: Hex
+      registryAddress: Hex
+      claimsManagerAddress: Hex
+      trustedNotifierManagerAddress: Hex
     }
   }
 }

@@ -1,6 +1,9 @@
 import { promises } from 'fs'
 import path from 'path'
 
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
 import type { SdkServicesConfig } from '../config/types'
 import {
   EthRewardsManagerClient,
@@ -55,7 +58,12 @@ const productionConfig: SdkServicesConfig = {
       audiusTokenAddress: '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998',
       audiusWormholeAddress: '0x6E7a1F7339bbB62b23D44797b63e4258d283E095',
       delegateManagerAddress: '0x4d7968ebfD390D5E7926Cb3587C39eFf2F9FB225',
-      stakingAddress: '0xe6D97B2099F142513be7A2a068bE040656Ae4591'
+      stakingAddress: '0xe6D97B2099F142513be7A2a068bE040656Ae4591',
+      governanceAddress: '0x4DEcA517D6817B6510798b7328F2314d3003AbAC',
+      registryAddress: '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C',
+      claimsManagerAddress: '0x44617F9dCEd9787C3B06a05B35B4C779a2AA1334',
+      trustedNotifierManagerAddress:
+        '0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39'
     }
   }
 }
@@ -102,7 +110,11 @@ const developmentConfig: SdkServicesConfig = {
       audiusTokenAddress: '0xdcB2fC9469808630DD0744b0adf97C0003fC29B2',
       audiusWormholeAddress: '0x',
       delegateManagerAddress: '0x',
-      stakingAddress: '0x'
+      stakingAddress: '0x',
+      governanceAddress: '0x',
+      registryAddress: '0x',
+      claimsManagerAddress: '0x',
+      trustedNotifierManagerAddress: '0x'
     }
   }
 }
@@ -110,15 +122,23 @@ const developmentConfig: SdkServicesConfig = {
 const generateServicesConfig = async (
   config: SdkServicesConfig
 ): Promise<SdkServicesConfig> => {
-  const serviceProviderFactory = new ServiceProviderFactoryClient(
-    getDefaultServiceProviderFactoryConfig(config)
-  )
-  const ethRewardsManager = new EthRewardsManagerClient(
-    getDefaultEthRewardsManagerConfig(config)
-  )
-  const serviceTypeManager = new ServiceTypeManagerClient(
-    getDefaultServiceTypeManagerConfig(config)
-  )
+  const ethPublicClient = createPublicClient({
+    chain: mainnet,
+    transport: http(config.ethereum.rpcEndpoint)
+  })
+
+  const serviceProviderFactory = new ServiceProviderFactoryClient({
+    ethPublicClient,
+    ...getDefaultServiceProviderFactoryConfig(config)
+  })
+  const ethRewardsManager = new EthRewardsManagerClient({
+    ethPublicClient,
+    ...getDefaultEthRewardsManagerConfig(config)
+  })
+  const serviceTypeManager = new ServiceTypeManagerClient({
+    ethPublicClient,
+    ...getDefaultServiceTypeManagerConfig(config)
+  })
 
   const validators = await serviceProviderFactory.getValidators()
   const contentNodes = await serviceProviderFactory.getContentNodes()
@@ -127,7 +147,7 @@ const generateServicesConfig = async (
     throw Error('Storage node services not found')
   }
   const antiAbuseAddresses =
-    await ethRewardsManager.contract.getAntiAbuseOracleAddresses()
+    await ethRewardsManager.getAntiAbuseOracleAddresses()
 
   if (!antiAbuseAddresses || antiAbuseAddresses.length === 0) {
     throw Error('Anti Abuse node services not found')

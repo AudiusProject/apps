@@ -1,13 +1,24 @@
 import { toChainId, chains } from '@wormhole-foundation/sdk-base'
-import { type Account, type Hex } from 'viem'
+import {
+  type Account,
+  type Hex,
+  type PublicClient,
+  type Transport,
+  type WalletClient
+} from 'viem'
+import type { mainnet } from 'viem/chains'
 import { z } from 'zod'
 
 import { EthAddressSchema } from '../../../../types/EthAddress'
 import { HexSchema } from '../../../../types/Hex'
-import { GasFeeSchema, type EthereumClientConfig } from '../types'
+import type { AudiusWalletClient } from '../../../AudiusWalletClient'
+import { GasFeeSchema } from '../types'
 
-export type AudiusWormholeConfig = AudiusWormholeConfigInternal &
-  EthereumClientConfig
+export type AudiusWormholeConfig = AudiusWormholeConfigInternal & {
+  audiusWalletClient: AudiusWalletClient
+  ethPublicClient: PublicClient<Transport, typeof mainnet>
+  ethWalletClient: WalletClient<Transport, typeof mainnet>
+}
 
 export type AudiusWormholeConfigInternal = {
   address: Hex

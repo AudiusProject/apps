@@ -1,9 +1,7 @@
-import { PublicClient, type Transport, type WalletClient } from 'viem'
-import type { mainnet } from 'viem/chains'
+import { PublicClient } from 'viem'
 import { z } from 'zod'
 
 import { SdkServicesConfig } from '../../../config/types'
-import type { AudiusWalletClient } from '../../AudiusWalletClient'
 
 export type EthereumContractConfigInternal = {
   /** Ethereum RPC Endpoint */
@@ -12,12 +10,6 @@ export type EthereumContractConfigInternal = {
   client: PublicClient
   /** Contract addesses */
   addresses: SdkServicesConfig['ethereum']['addresses']
-}
-
-export type EthereumClientConfig = {
-  audiusWalletClient: AudiusWalletClient
-  ethPublicClient: PublicClient<Transport, typeof mainnet>
-  ethWalletClient: WalletClient<Transport, typeof mainnet>
 }
 
 export const GasFeeSchema = z

@@ -1,8 +1,8 @@
-import type { Hex } from 'viem'
+import type { Hex, PublicClient, Transport } from 'viem'
+import type { mainnet } from 'viem/chains'
 
-import type { EthereumClientConfig } from '../types'
-
-export type DelegateManagerConfig = DelegateManagerConfigInternal &
-  EthereumClientConfig
+export type DelegateManagerConfig = DelegateManagerConfigInternal & {
+  ethPublicClient: PublicClient<Transport, typeof mainnet>
+}
 
 export type DelegateManagerConfigInternal = { address: Hex }

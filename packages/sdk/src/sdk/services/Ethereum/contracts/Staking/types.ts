@@ -1,7 +1,8 @@
-import type { Hex } from 'viem'
+import type { Hex, PublicClient, Transport } from 'viem'
+import type { mainnet } from 'viem/chains'
 
-import type { EthereumClientConfig } from '../types'
-
-export type StakingConfig = StakingConfigInternal & EthereumClientConfig
+export type StakingConfig = StakingConfigInternal & {
+  ethPublicClient: PublicClient<Transport, typeof mainnet>
+}
 
 export type StakingConfigInternal = { address: Hex }
