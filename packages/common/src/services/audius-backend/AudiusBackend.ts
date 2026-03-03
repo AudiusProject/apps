@@ -19,10 +19,15 @@ import {
   Transaction,
   VersionedTransaction
 } from '@solana/web3.js'
-import { getAddress } from 'viem'
+import { getAddress, type Hex } from 'viem'
 
 import { userMetadataToSdk } from '~/adapters/user'
 import { Env } from '~/services/env'
+import {
+  createEthPublicClient,
+  getAudioBalance,
+  getFullAudioBalance
+} from '~/services/ethereum/ethereum'
 import dayjs from '~/utils/dayjs'
 
 import { ID, ComputedUserProperties, WriteableUserMetadata } from '../../models'
@@ -702,19 +707,16 @@ export const audiusBackend = ({
    * @returns {Promise<AudioWei | null>} balance or null if failed to fetch balance
    */
   async function getBalance({
-    ethAddress,
-    sdk
+    ethAddress
   }: {
     ethAddress: string
-    sdk: AudiusSdkWithServices
   }): Promise<AudioWei | null> {
     if (!ethAddress) return null
 
     try {
-      const checksumWallet = getAddress(ethAddress)
-      const balance = await sdk.services.audiusTokenClient.balanceOf({
-        account: checksumWallet
-      })
+      const checksumWallet = getAddress(ethAddress) as Hex
+      const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
+      const balance = await getAudioBalance(ethClient, checksumWallet)
       return AUDIO(balance).value
     } catch (e) {
       console.error(e)
@@ -788,27 +790,14 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(
-    address: string,
-    sdk: AudiusSdkWithServices
-  ) {
+  async function getAddressTotalStakedBalance(address: string) {
     if (!address) return null
 
     try {
-      const checksumWallet = getAddress(address)
-      const [balance, delegatedBalance, stakedBalance] = await Promise.all([
-        sdk.services.audiusTokenClient.balanceOf({
-          account: checksumWallet
-        }),
-        sdk.services.delegateManagerClient.getTotalDelegatorStake({
-          delegatorAddress: checksumWallet
-        }),
-        sdk.services.stakingClient.totalStakedFor({
-          account: checksumWallet
-        })
-      ])
-
-      return AUDIO(balance + delegatedBalance + stakedBalance).value
+      const checksumWallet = getAddress(address) as Hex
+      const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
+      const fullBalance = await getFullAudioBalance(ethClient, checksumWallet)
+      return AUDIO(fullBalance).value
     } catch (e) {
       reportError({ error: e as Error })
       console.error(e)

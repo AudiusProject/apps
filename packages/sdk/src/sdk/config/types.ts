@@ -34,14 +34,6 @@ export type SdkServicesConfig = {
       serviceTypeManagerAddress: Hex
       serviceProviderFactoryAddress: Hex
       ethRewardsManagerAddress: Hex
-      audiusTokenAddress: Hex
-      audiusWormholeAddress: Hex
-      delegateManagerAddress: Hex
-      stakingAddress: Hex
-      governanceAddress: Hex
-      registryAddress: Hex
-      claimsManagerAddress: Hex
-      trustedNotifierManagerAddress: Hex
     }
   }
 }

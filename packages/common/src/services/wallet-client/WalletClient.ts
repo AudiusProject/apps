@@ -1,6 +1,8 @@
+import { AudiusWormhole } from '@audius/eth'
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
 import { type AudiusSdkWithServices, Id } from '@audius/sdk'
 import { PublicKey } from '@solana/web3.js'
+import { type Hex } from 'viem'
 
 import { userWalletsFromSDK } from '~/adapters'
 import { ID } from '~/models/Identifiers'
@@ -13,6 +15,12 @@ import {
   pollForTokenBalanceChange
 } from '../audius-backend'
 import { Env } from '../env'
+import {
+  createEthPublicClient,
+  createEthWalletClient,
+  permitAudioToken,
+  wormholeTransferTokens
+} from '../ethereum/ethereum'
 
 export const MIN_TRANSFERRABLE_WEI = AUDIO('0.001').value
 
@@ -47,39 +55,6 @@ export class WalletClient {
     return new PublicKey(address)
   }
 
-  /** Get user's current ETH Audio balance. Returns null on failure. */
-  async getCurrentBalance({
-    ethAddress
-  }: {
-    ethAddress: string
-  }): Promise<AudioWei | null> {
-    try {
-      const sdk = await this.audiusSdk()
-      const balance = await this.audiusBackendInstance.getBalance({
-        ethAddress,
-        sdk
-      })
-      return BigInt(balance?.toString() ?? 0) as AudioWei
-    } catch (err) {
-      console.error(err)
-      return null
-    }
-  }
-
-  /** Get user's current SOL Audio balance. Returns null on failure. */
-  async getCurrentWAudioBalance({
-    ethAddress
-  }: {
-    ethAddress: string
-  }): Promise<AudioWei | null> {
-    const sdk = await this.audiusSdk()
-    const balance = await this.audiusBackendInstance.getWAudioBalance({
-      ethAddress,
-      sdk
-    })
-    return balance ? (BigInt(balance.toString()) as AudioWei) : null
-  }
-
   async getAssociatedTokenAccountInfo({ address }: { address: string }) {
     try {
       const sdk = await this.audiusSdk()
@@ -112,32 +87,36 @@ export class WalletClient {
     const ercAudioBalance = BigInt(
       (
         await this.audiusBackendInstance.getBalance({
-          ethAddress,
-          sdk
+          ethAddress
         })
       )?.toString() ?? 0
     ) as AudioWei
 
     if (!isNullOrUndefined(ercAudioBalance) && ercAudioBalance > BigInt(0)) {
       const balance = ercAudioBalance
-      const permitTxHash = await sdk.services.audiusTokenClient.permit({
-        args: {
-          value: balance,
-          spender: sdk.services.audiusWormholeClient.contractAddress
-        }
+
+      const ethPublicClient = createEthPublicClient(this.env.ETH_PROVIDER_URL)
+      const ethWalletClient = createEthWalletClient(this.env.ETH_PROVIDER_URL)
+
+      const permitTxHash = await permitAudioToken({
+        ethPublicClient,
+        ethWalletClient,
+        signer: sdk.services.audiusWalletClient,
+        spender: AudiusWormhole.address,
+        value: balance
       })
       console.debug(
         `Permitted AudiusWormhole to transfer ${balance} tokens...`,
         { permitTxHash }
       )
-      const transferTxHash =
-        await sdk.services.audiusWormholeClient.transferTokens({
-          args: {
-            amount: balance,
-            recipientChain: 'Solana',
-            recipient: `0x${account.address.toBuffer().toString('hex')}`
-          }
-        })
+
+      const transferTxHash = await wormholeTransferTokens({
+        ethPublicClient,
+        ethWalletClient,
+        signer: sdk.services.audiusWalletClient,
+        amount: balance,
+        recipient: `0x${account.address.toBuffer().toString('hex')}` as Hex
+      })
       console.debug(
         `AudiusWormhole transferred ${balance} tokens into the Wormhole...`,
         { transferTxHash }
@@ -182,8 +161,7 @@ export class WalletClient {
         ...associatedWallets.wallets.map(async (wallet) => {
           const balance =
             await this.audiusBackendInstance.getAddressTotalStakedBalance(
-              wallet,
-              sdk
+              wallet
             )
           return BigInt(balance?.toString() ?? 0) as AudioWei
         }),
@@ -221,14 +199,12 @@ export class WalletClient {
     wallets: string[]
   ): Promise<{ address: string; balance: AudioWei }[]> {
     try {
-      const sdk = await this.audiusSdk()
       const balances: { address: string; balance: AudioWei }[] =
         await Promise.all(
           wallets.map(async (wallet) => {
             const balance =
               await this.audiusBackendInstance.getAddressTotalStakedBalance(
-                wallet,
-                sdk
+                wallet
               )
             return {
               address: wallet,

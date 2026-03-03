@@ -8,7 +8,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 import { call, getContext } from 'typed-redux-saga'
-import { getAddress } from 'viem'
+import { getAddress, type Hex } from 'viem'
 
 import {
   getQueryContext,
@@ -17,6 +17,11 @@ import {
 } from '~/api/tan-query/utils/QueryContext'
 import { Chain, ID } from '~/models'
 import { Feature } from '~/models/ErrorReporting'
+import {
+  createEthPublicClient,
+  getAudioBalance,
+  getFullAudioBalance
+} from '~/services/ethereum/ethereum'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -43,7 +48,7 @@ export const getWalletAudioBalanceQueryKey = ({
 
 type FetchAudioBalanceContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'audiusBackend' | 'reportToSentry'
+  'audiusSdk' | 'audiusBackend' | 'reportToSentry' | 'env'
 >
 
 const getWalletAudioBalanceQueryFn =
@@ -54,26 +59,18 @@ const getWalletAudioBalanceQueryFn =
     ReturnType<typeof getWalletAudioBalanceQueryKey>
   >) => {
     const [_ignored, chain, address, { includeStaked }] = queryKey
-    const { audiusSdk, audiusBackend, reportToSentry } = context
+    const { audiusSdk, audiusBackend, reportToSentry, env } = context
     try {
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
-        const checksumWallet = getAddress(address)
-        const balance = await sdk.services.audiusTokenClient.balanceOf({
-          account: checksumWallet
-        })
+        const checksumWallet = getAddress(address) as Hex
+        const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
+        const balance = await getAudioBalance(ethClient, checksumWallet)
         if (!includeStaked) {
           return AUDIO(balance).value
         }
-        const delegatedBalance =
-          await sdk.services.delegateManagerClient.getTotalDelegatorStake({
-            delegatorAddress: checksumWallet
-          })
-        const stakedBalance = await sdk.services.stakingClient.totalStakedFor({
-          account: checksumWallet
-        })
-
-        return AUDIO(balance + delegatedBalance + stakedBalance).value
+        const fullBalance = await getFullAudioBalance(ethClient, checksumWallet)
+        return AUDIO(fullBalance).value
       } else {
         const wAudioSolBalance = await audiusBackend.getAddressWAudioBalance({
           address,
