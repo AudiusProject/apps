@@ -34,6 +34,7 @@
     "web:e2e": "npm run test:e2e -w @audius/web",
     "web:test": "turbo run test --filter=@audius/web",
     "web:example:trending": "cd packages/web/examples/trending && npm run dev",
+    "web:example:update-profile": "cd packages/web/examples/update-profile && npm run dev",
     "DESKTOP====================================": "",
     "desktop:dev": "concurrently -k 'BROWSER=none npm run start:dev -w @audius/web' 'wait-on http://0.0.0.0:3000 && npm run electron:localhost -w @audius/web -- 3000'",
     "desktop:prod": "concurrently -k 'BROWSER=none npm run start:prod -w @audius/web' 'wait-on http://0.0.0.0:3002 && npm run electron:localhost -w @audius/web -- 3002'",

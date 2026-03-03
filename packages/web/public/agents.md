@@ -100,7 +100,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Music player, app, frontend | Use [Audius API](https://api.audius.co) and [SDK](https://www.npmjs.com/package/@audius/sdk). Start with [create-audius-app](https://docs.audius.co/developers/guides/create-audius-app). |
 | User auth, OAuth            | [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius)                                                                                                         |
-| Web examples (SDK, trending, play, artwork) | **apps** monorepo: `packages/web/examples` — **trending** (Vite + React, getTrendingTracks, track artwork with mirror fallback, play via getTrackStreamUrl). Run: `npm run build -w @audius/sdk` then `npm run web:example:trending`. |
+| Web examples (SDK, trending, play, artwork, OAuth, writes) | **apps** monorepo: `packages/web/examples` — **trending** (Vite + React, getTrendingTracks, track artwork with mirror fallback, play via getTrackStreamUrl). **update-profile** (OAuth write scope, server bearer, updateUser for description). Run: `npm run build -w @audius/sdk` then `npm run web:example:trending` or `npm run web:example:update-profile`. |
 | Mobile examples (OAuth, writes) | **apps** monorepo: `packages/mobile/examples` — **trending** (Expo, play), **auth-sign-in** (OAuth), **like-repost** (server + bearer, like/repost), **update-profile** (server + bearer, update user). Each has a README; server examples need .env. Run e.g. `npm run mobile:example:trending`. |
 | Run a node, protocol dev    | Use [Open Audio Protocol](https://openaudio.org). Read [openaudio.org/agents.md](https://openaudio.org/agents.md) and [skill.md](https://openaudio.org/skill.md).                         |
 
@@ -121,7 +121,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 - **API base**: https://api.audius.co/v1
 - **SDK**: [@audius/sdk on npm](https://www.npmjs.com/package/@audius/sdk)
 - **GitHub**: [github.com/audiusproject](https://github.com/audiusproject) (apps, sdk in monorepo)
-- **Web examples**: `packages/web/examples` — **trending** (Vite + React, SDK, getTrendingTracks, track artwork with mirrors, play via getTrackStreamUrl). Run: `npm run web:example:trending` after building SDK.
+- **Web examples**: `packages/web/examples` — **trending** (Vite + React, SDK, getTrendingTracks, track artwork with mirrors, play via getTrackStreamUrl). **update-profile** (OAuth write scope, server bearer, updateUser). Run: `npm run web:example:trending` or `npm run web:example:update-profile` after building SDK.
 - **Mobile examples**: `packages/mobile/examples` — **trending** (Expo, play), **auth-sign-in** (OAuth), **like-repost** (server + bearer), **update-profile** (server + bearer). See each example’s README; server-based ones need .env.
 - **create-audius-app**: `npx create-audius-app`
 
@@ -139,7 +139,7 @@ Suggested paths—adapt freely. Agents and builders use these as a jumping-off p
 | Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
 | Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
 | GitHub Org              | https://github.com/audiusproject                            |
-| Web examples            | packages/web/examples in apps repo (trending: play, artwork mirrors) |
+| Web examples            | packages/web/examples in apps repo (trending: play, artwork mirrors; update-profile: OAuth, updateUser) |
 | Mobile examples         | packages/mobile/examples in apps repo (trending, auth, like-repost, update-profile) |
 | Open Audio Protocol     | https://openaudio.org                                       |
 | OAP agents.md           | https://openaudio.org/agents.md                             |

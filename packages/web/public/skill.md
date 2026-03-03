@@ -215,10 +215,13 @@ Runnable examples live in the **apps** monorepo under `packages/web/examples/`. 
 | Example   | What it shows | How to run |
 |----------|----------------|------------|
 | **trending** | SDK singleton, `getTrendingTracks`, track **artwork with mirror fallback**, **play** via `getTrackStreamUrl` + HTML5 Audio, React Query | From apps root: `npm run build -w @audius/sdk` then `cd packages/web/examples/trending && npm install && npm run dev`. Or `npm run web:example:trending`. |
+| **update-profile** | OAuth (write scope), redirect flow, `verifyIDToken`, server bearer, `updateUser` for user description | Run server first (see README). Then `cd packages/web/examples/update-profile && npm run dev`. Or `npm run web:example:update-profile`. Requires .env. |
 
 **Key files (web trending):** `src/sdk.ts` (getSDK), `src/hooks/useTrendingTracks.ts`, `src/components/TrackArtworkImage.tsx` (mirror retry on image error), `src/utils/artwork.ts` (getArtworkUrl, getNextMirrorUrl), `src/App.tsx` (play/stop with single Audio ref).
 
-**Keywords:** SDK setup, Vite, React, trending tracks, getTrendingTracks, getTrackStreamUrl, track artwork, mirrors, React Query, web example.
+**Key files (web update-profile):** `src/sdk.ts`, `src/config.ts`, `src/oauth/buildOAuthUrl.ts`, `src/App.tsx` (OAuth redirect, form, update POST), `server/server.js` (developer app bearer, `updateUser`).
+
+**Keywords:** SDK setup, Vite, React, trending tracks, getTrendingTracks, getTrackStreamUrl, track artwork, mirrors, React Query, OAuth, update profile, verifyIDToken, updateUser, web example.
 
 ## Mobile Examples (Expo + React Native)
 
@@ -256,7 +259,7 @@ Runnable examples in **apps** under `packages/mobile/examples/`. Use them for OA
 | API Plans               | https://api.audius.co/plans                                 |
 | SDK npm                 | https://www.npmjs.com/package/@audius/sdk                   |
 | GitHub apps             | https://github.com/audiusproject/apps                       |
-| Web examples (apps)     | packages/web/examples (trending: play + artwork mirrors)    |
+| Web examples (apps)     | packages/web/examples (trending: play + artwork mirrors; update-profile: OAuth, updateUser)    |
 | Mobile examples (apps)  | packages/mobile/examples (trending, auth, like-repost, update-profile) |
 | Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
 | Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
