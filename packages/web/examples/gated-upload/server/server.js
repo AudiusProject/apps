@@ -3,7 +3,7 @@
  *
  * - POST /create-track — same as upload example
  * - GET /stream/:trackId — geo-gate: only redirects to Audius stream if client
- *   IP is in allowed countries (from ip-api.com). Uses icanhazip-style IP
+ *   IP is in allowed countries (from ip-api.com). Uses client-fetched public IP (ipify)
  *   resolution: we get client IP from the request, then fetch geo from ip-api.com.
  * - GET /my-region — returns { ip, country, city, allowed } for the requesting client
  *
@@ -33,12 +33,20 @@ const audius = sdk({ appName, apiKey, bearerToken })
 // Audius API base (production)
 const AUDIUS_API_BASE = 'https://api.audius.co/v1'
 
+function isLocalhost(ip) {
+  if (!ip) return true
+  const s = String(ip).trim()
+  return s === '::1' || s === '127.0.0.1' || s.startsWith('::ffff:127.')
+}
+
 async function getGeoForIp(ip) {
-  if (!ip || ip === '::1' || ip === '127.0.0.1') {
+  if (!ip || isLocalhost(ip)) {
     return { country: null, city: null }
   }
   try {
-    const res = await fetch(`http://ip-api.com/json/${ip}?fields=country,city,status`)
+    const res = await fetch(
+      `http://ip-api.com/json/${ip}?fields=country,city,status`
+    )
     const data = await res.json()
     if (data.status === 'fail') return { country: null, city: null }
     return { country: data.country ?? null, city: data.city ?? null }
@@ -71,23 +79,45 @@ app.use((req, res, next) => {
   next()
 })
 
-// GET /my-region — returns client's IP, country, city, and whether streaming is allowed
+// GET /my-region — returns client's IP, country, city, and whether streaming is allowed.
+// When request comes from localhost, client can pass ?ip= to use their public IP (e.g. from ipify).
 app.get('/my-region', async (req, res) => {
-  const ip = getClientIp(req)
-  const { country, city } = await getGeoForIp(ip)
-  const allowed = country ? allowedCountries.includes(country.toLowerCase()) : false
-  return res.json({ ip, country: country ?? 'Unknown', city: city ?? null, allowed })
+  const reqIp = getClientIp(req)
+  const clientIp =
+    req.query.ip && typeof req.query.ip === 'string'
+      ? req.query.ip.trim()
+      : null
+  // Use client-provided IP for geo when request is from localhost (local dev)
+  const ipForGeo = isLocalhost(reqIp) && clientIp ? clientIp : reqIp
+  const { country, city } = await getGeoForIp(ipForGeo)
+  const allowed = country
+    ? allowedCountries.includes(country.toLowerCase())
+    : false
+  return res.json({
+    ip: reqIp,
+    country: country ?? 'Unknown',
+    city: city ?? null,
+    allowed
+  })
 })
 
-// GET /stream/:trackId — geo-gate: redirect to Audius stream URL only if allowed
+// GET /stream/:trackId — geo-gate: redirect to Audius stream URL only if allowed.
+// When request is from localhost, client can pass ?client_ip= (from ipify) to use real IP for geo.
 app.get('/stream/:trackId', async (req, res) => {
   const { trackId } = req.params
   if (!trackId) {
     return res.status(400).json({ error: 'Missing trackId' })
   }
-  const ip = getClientIp(req)
-  const { country } = await getGeoForIp(ip)
-  const allowed = country ? allowedCountries.includes(country.toLowerCase()) : false
+  const reqIp = getClientIp(req)
+  const clientIp =
+    req.query.client_ip && typeof req.query.client_ip === 'string'
+      ? req.query.client_ip.trim()
+      : null
+  const ipForGeo = isLocalhost(reqIp) && clientIp ? clientIp : reqIp
+  const { country } = await getGeoForIp(ipForGeo)
+  const allowed = country
+    ? allowedCountries.includes(country.toLowerCase())
+    : false
 
   if (!allowed) {
     return res.status(403).json({
@@ -107,7 +137,9 @@ app.post('/create-track', async (req, res) => {
     return res.status(400).json({ error: 'Missing userId or metadata' })
   }
   if (!metadata.title || !metadata.genre || !metadata.trackCid) {
-    return res.status(400).json({ error: 'metadata must include title, genre, trackCid' })
+    return res
+      .status(400)
+      .json({ error: 'metadata must include title, genre, trackCid' })
   }
   try {
     const duration =
@@ -120,11 +152,23 @@ app.post('/create-track', async (req, res) => {
         title: String(metadata.title),
         genre: metadata.genre,
         trackCid: String(metadata.trackCid),
-        description: metadata.description != null ? String(metadata.description) : null,
+        description:
+          metadata.description != null ? String(metadata.description) : null,
+        accessAuthorities:
+          metadata.accessAuthorities != null ? metadata.accessAuthorities : [],
         duration,
-        origFileCid: metadata.origFileCid != null ? String(metadata.origFileCid) : undefined,
-        origFilename: metadata.origFilename != null ? String(metadata.origFilename) : undefined,
-        coverArtCid: metadata.coverArtCid != null ? String(metadata.coverArtCid) : undefined,
+        origFileCid:
+          metadata.origFileCid != null
+            ? String(metadata.origFileCid)
+            : undefined,
+        origFilename:
+          metadata.origFilename != null
+            ? String(metadata.origFilename)
+            : undefined,
+        coverArtCid:
+          metadata.coverArtCid != null
+            ? String(metadata.coverArtCid)
+            : undefined,
         isUnlisted: metadata.isUnlisted === true
       }
     })
@@ -139,7 +183,7 @@ app.post('/create-track', async (req, res) => {
       try {
         const text = await e.response.text()
         body = text || body
-      } catch {}
+      } catch { }
     }
     return res.status(status).json({ error: body || 'Create track failed' })
   }

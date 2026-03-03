@@ -147,13 +147,37 @@ export default function App() {
     return () => window.removeEventListener('message', onMessage)
   }, [completeSignIn])
 
-  // Fetch /my-region when signed in
+  // Fetch /my-region when signed in. When server sees localhost (::1), it can't resolve geo.
+  // Client fetches public IP from ipify, then retries /my-region?ip= for accurate region display.
   useEffect(() => {
     if (!config.writeServerUrl || screen !== 'signed-in') return
-    fetch(`${config.writeServerUrl}/my-region`)
-      .then((r) => r.json())
-      .then(setRegionInfo)
-      .catch(() => setRegionInfo(null))
+    let cancelled = false
+    async function load() {
+      try {
+        const res = await fetch(`${config.writeServerUrl}/my-region`)
+        const data = await res.json()
+        if (cancelled) return
+        // If server saw localhost and has no geo, fetch our public IP and retry
+        if (data.country === 'Unknown' && (data.ip === '::1' || data.ip === '127.0.0.1')) {
+          const ipRes = await fetch('https://api.ipify.org')
+          const publicIp = (await ipRes.text()).trim()
+          if (cancelled || !publicIp) return
+          const retryRes = await fetch(
+            `${config.writeServerUrl}/my-region?ip=${encodeURIComponent(publicIp)}`
+          )
+          const retryData = await retryRes.json()
+          if (!cancelled) setRegionInfo(retryData)
+          return
+        }
+        setRegionInfo(data)
+      } catch {
+        if (!cancelled) setRegionInfo(null)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [screen])
 
   const handleOpenAuth = useCallback(() => {
@@ -261,8 +285,7 @@ export default function App() {
             duration: duration ? Math.round(duration) : undefined,
             origFileCid: audioUploadResponse.orig_file_cid,
             origFilename: audioUploadResponse.orig_filename,
-            coverArtCid: imageUploadResponse?.orig_file_cid,
-            isUnlisted: true
+            coverArtCid: imageUploadResponse?.orig_file_cid
           }
         })
       })
@@ -281,9 +304,18 @@ export default function App() {
     }
   }, [profile, audioFile, coverFile, title, genre, description])
 
-  const handleStream = useCallback(() => {
+  const handleStream = useCallback(async () => {
     if (!config.writeServerUrl || !trackId) return
-    window.open(`${config.writeServerUrl}/stream/${encodeURIComponent(trackId)}`, '_blank')
+    // Fetch public IP from ipify so server can geo-check when request comes from localhost
+    let url = `${config.writeServerUrl}/stream/${encodeURIComponent(trackId)}`
+    try {
+      const ipRes = await fetch('https://api.ipify.org')
+      const publicIp = (await ipRes.text()).trim()
+      if (publicIp) url += `?client_ip=${encodeURIComponent(publicIp)}`
+    } catch {
+      // Proceed without client_ip; will fail geo if localhost
+    }
+    window.open(url, '_blank')
   }, [trackId])
 
   if (!config.isConfigured) {
@@ -329,7 +361,7 @@ export default function App() {
                 <span style={{ color: '#c62828' }}> ✗ Not in allowed region</span>
               )}
               <p className="gateNote">
-                Server uses ip-api.com to resolve your IP; when running locally you may see localhost.
+                Region from ip-api.com. When localhost, client uses ipify for public IP.
               </p>
             </div>
           )}

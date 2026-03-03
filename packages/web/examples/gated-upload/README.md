@@ -50,4 +50,4 @@ Or: `npm run web:example:gated-upload` from repo root.
 
 ## Local testing
 
-When running locally, the server sees `127.0.0.1` as the client IP, so ip-api.com returns no useful geo. For real geo-gating, deploy the server (e.g. Vercel, Railway) so it sees real client IPs. The example still demonstrates the pattern.
+When running locally, the server sees `::1`/`127.0.0.1` as the client IP. The client uses ipify (api.ipify.org) to fetch your public IP and passes it as `?ip=` (for /my-region) or `?client_ip=` (for /stream), so geo-gating uses your real IP. No extra config needed.

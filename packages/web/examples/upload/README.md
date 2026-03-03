@@ -7,8 +7,6 @@ Minimal Vite + React app that lets users **sign in via OAuth** (popup) and **upl
 - **uploadTrackFiles** — client uploads audio + cover to storage
 - **Server-side createTrack** — client POSTs `{ userId, metadata }`; server uses developer app bearer
 
-Mirrors the [mobile upload example](../../mobile/examples/upload/): same SDK usage, OAuth flow, and server contract.
-
 ## Requirements
 
 - **Your own server** with `AUDIUS_API_KEY` and `AUDIUS_BEARER_TOKEN` in `.env`
