@@ -1,24 +1,6 @@
-import type { PublicClient } from 'viem'
-
 import { abi } from './abi'
-import { ETH_REWARDS_MANAGER_CONTRACT_ADDRESS } from './constants'
 
-export class EthRewardsManager {
-  client: PublicClient
-  address: `0x${string}`
-
-  constructor(
-    client: PublicClient,
-    { address }: { address?: `0x${string}` } = {}
-  ) {
-    this.client = client
-    this.address = address ?? ETH_REWARDS_MANAGER_CONTRACT_ADDRESS
-  }
-
-  getAntiAbuseOracleAddresses = () =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getAntiAbuseOracleAddresses'
-    })
+export const EthRewardsManager = {
+  abi,
+  address: '0x5aa6B99A2B461bA8E97207740f0A689C5C39C3b0' as const
 }

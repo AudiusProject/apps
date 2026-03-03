@@ -2,14 +2,14 @@ import type { TypedData } from 'viem'
 
 import { abi } from './abi'
 
-export type AudiusTokenTypes = typeof AudiusToken.types
-export class AudiusToken {
-  public static readonly abi = abi
-
-  public static readonly address =
-    '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998' as const
-
-  public static readonly types = {
+export const AudiusToken = {
+  abi,
+  address: '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998' as const,
+  domain: {
+    name: 'Audius',
+    version: '1'
+  } as const,
+  types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
       { name: 'version', type: 'string' },
@@ -25,3 +25,5 @@ export class AudiusToken {
     ]
   } as const satisfies TypedData
 }
+
+export type AudiusTokenTypes = typeof AudiusToken.types
