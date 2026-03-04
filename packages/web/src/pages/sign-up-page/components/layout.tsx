@@ -16,8 +16,6 @@ import {
   Flex,
   FlexProps,
   IconArrowRight,
-  Paper,
-  PaperProps,
   Text
 } from '@audius/harmony'
 import styled, { CSSObject } from '@emotion/styled'
@@ -187,7 +185,7 @@ type PageFooterProps = {
   buttonProps?: ButtonProps
   centered?: boolean
   sticky?: boolean
-} & Omit<PaperProps & BoxProps, 'prefix'>
+} & Omit<FlexProps & BoxProps, 'prefix'>
 
 export const PageFooter = (props: PageFooterProps) => {
   const { prefix, postfix, buttonProps, centered, sticky, ...other } = props
@@ -203,22 +201,17 @@ export const PageFooter = (props: PageFooterProps) => {
   const showButtonsSideBySide = !isMobile && postfix && !prefix
 
   return (
-    <Paper
+    <Flex
       w='100%'
       p='l'
       justifyContent='center'
       gap='l'
       alignItems='center'
       direction='column'
-      shadow={isMobile && !sticky ? 'flat' : 'midInverted'}
-      backgroundColor='white'
       css={{
         overflow: 'unset',
         flexShrink: 0,
-        zIndex: 1,
-        ...(sticky && { position: 'sticky', bottom: 0 }),
-        borderBottomRightRadius: 0,
-        borderBottomLeftRadius: 0
+        ...(sticky && { position: 'sticky', bottom: 0, zIndex: 1 })
       }}
       {...other}
     >
@@ -229,7 +222,7 @@ export const PageFooter = (props: PageFooterProps) => {
           justifyContent='space-between'
           alignItems='center'
           gap='l'
-          css={centered ? { maxWidth: 343 } : undefined}
+          css={{ maxWidth: '100%' }}
         >
           {postfix}
           <Button
@@ -249,7 +242,7 @@ export const PageFooter = (props: PageFooterProps) => {
             iconRight={IconArrowRight}
             fullWidth
             isLoading={isSubmitting}
-            css={!isMobile && centered && { width: 343 }}
+
             disabled={!touched || !isValid}
             {...buttonProps}
           >
@@ -258,7 +251,7 @@ export const PageFooter = (props: PageFooterProps) => {
           {postfix}
         </>
       )}
-    </Paper>
+    </Flex>
   )
 }
 

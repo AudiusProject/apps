@@ -17,7 +17,6 @@ import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { restrictedHandles } from 'utils/restrictedHandles'
 
 import { HandleField } from '../components/HandleField'
-import { OutOfText } from '../components/OutOfText'
 import { Heading, Page, PageFooter } from '../components/layout'
 import { useFastReferral } from '../hooks/useFastReferral'
 
@@ -77,7 +76,6 @@ export const PickHandlePage = () => {
         autoFocusInputRef={handleInputRef}
       >
         <Heading
-          prefix={isMobile ? null : <OutOfText numerator={1} denominator={2} />}
           heading={pickHandlePageMessages.title}
           description={pickHandlePageMessages.description}
           centered={!isMobile}

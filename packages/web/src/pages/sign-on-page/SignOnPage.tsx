@@ -1,32 +1,31 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import { FEED_PAGE } from '@audius/common/src/utils/route'
+import { SystemAppearance } from '@audius/common/models'
+import { themeSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Box,
   Flex,
+  IconAudiusLogoHorizontal,
   IconCloseAlt,
   Paper,
-  Text,
-  TextLink,
+  ThemeProvider as HarmonyThemeProvider,
   useTheme
 } from '@audius/harmony'
+import type { Theme } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   Link,
   Navigate,
-  Route,
-  Routes,
   useLocation,
   useNavigate,
   matchPath,
   useSearchParams
 } from 'react-router'
-import { useEffectOnce, useLocalStorage, useMeasure } from 'react-use'
+import { useEffectOnce, useLocalStorage } from 'react-use'
 
-import djBackground from 'assets/img/2-DJ-4-3.jpg'
-import djPortrait from 'assets/img/DJportrait.jpg'
-import imagePhone from 'assets/img/imagePhone.png'
+import landingImg from 'public-site/pages/landing-2026/assets/landing.png'
 import {
   fetchReferrer,
   setField,
@@ -41,28 +40,18 @@ import {
 import { EditingStatus } from 'common/store/pages/signon/types'
 import { useMedia } from 'hooks/useMedia'
 import { SignInPage } from 'pages/sign-in-page'
-import { AudiusValues } from 'pages/sign-on-page/AudiusValues'
 import SignUpPage from 'pages/sign-up-page'
 import { NavHeader } from 'pages/sign-up-page/components/NavHeader'
-import { ScrollView } from 'pages/sign-up-page/components/layout'
 
 const {
   SIGN_IN_CONFIRM_EMAIL_PAGE,
   SIGN_IN_PAGE,
-  SIGN_UP_APP_CTA_PAGE,
   SIGN_UP_EMAIL_PAGE,
   SIGN_UP_LOADING_PAGE,
   SIGN_UP_PAGE,
   SIGN_UP_PASSWORD_PAGE,
-  SIGN_UP_REVIEW_HANDLE_PAGE,
-  SIGN_UP_GENRES_PAGE,
-  SIGN_UP_ARTISTS_PAGE
+  SIGN_UP_REVIEW_HANDLE_PAGE
 } = route
-
-const messages = {
-  newToAudius: 'New to Audius?',
-  createAccount: 'Create an Account'
-}
 
 type RootProps = {
   children: ReactNode
@@ -70,122 +59,111 @@ type RootProps = {
 
 const DesktopSignOnRoot = (props: RootProps) => {
   const { children } = props
-  const { spacing, motion, color } = useTheme()
+  const { spacing } = useTheme()
 
   const routeOnExit = useSelector(getRouteOnExit)
   const location = useLocation()
 
   const hideCloseButton = [
-    SIGN_UP_GENRES_PAGE,
-    SIGN_UP_ARTISTS_PAGE,
-    SIGN_UP_APP_CTA_PAGE,
     SIGN_UP_LOADING_PAGE
   ].some((path) => {
     const match = matchPath(path, location.pathname)
     return match && match.pathname === location.pathname
   })
 
-  const collapsedDesktopPageMatch = [
+  const isCompactCard = [
     SIGN_IN_PAGE,
     SIGN_IN_CONFIRM_EMAIL_PAGE,
     SIGN_UP_PAGE,
     SIGN_UP_EMAIL_PAGE,
     SIGN_UP_PASSWORD_PAGE,
-    SIGN_UP_REVIEW_HANDLE_PAGE,
-    SIGN_UP_APP_CTA_PAGE
+    SIGN_UP_REVIEW_HANDLE_PAGE
   ].some((path) => {
     const match = matchPath(path, location.pathname)
     return match && match.pathname === location.pathname
   })
 
-  const isExpanded = !collapsedDesktopPageMatch
-
   return (
     <Flex
       w='100%'
-      p='unit14'
-      justifyContent='center'
       css={{
-        background: `radial-gradient(circle at top left, #B749D6 50%, ${color.secondary.s500} 100%)`
+        position: 'relative',
+        minHeight: '100vh'
       }}
     >
-      {!hideCloseButton ? (
-        <Link
-          to={routeOnExit}
-          css={{
-            zIndex: 1,
-            position: 'absolute',
-            left: spacing.xl,
-            top: spacing.xl
-          }}
-        >
-          <IconCloseAlt color='white' />
-        </Link>
-      ) : null}
-      <Paper
-        w='100%'
+      {/* Background image + dark overlay */}
+      <Box
         css={{
-          flex: 1,
-          maxWidth: 1440,
-          minWidth: 744,
-          overflow: 'hidden'
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url(${landingImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'grayscale(100%)'
+        }}
+      />
+      <Box
+        css={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.3)'
+        }}
+      />
+
+      {/* Nav overlay: X close (left) + Audius logo (right) */}
+      {!hideCloseButton ? (
+        <Flex
+          css={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            padding: spacing.xl,
+            zIndex: 2
+          }}
+          justifyContent='space-between'
+          alignItems='center'
+        >
+          <Link
+            to={routeOnExit}
+            css={{ display: 'flex', alignItems: 'center' }}
+          >
+            <IconCloseAlt color='white' height={32} width={32} />
+          </Link>
+          <IconAudiusLogoHorizontal color='white' height={32} width={157} />
+        </Flex>
+      ) : null}
+
+      {/* Centered card */}
+      <Flex
+        w='100%'
+        justifyContent='center'
+        alignItems='center'
+        p='2xl'
+        css={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100vh',
+          paddingTop: 80
         }}
       >
-        <ScrollView
+        <Paper
+          borderRadius='l'
+          border='strong'
           direction='column'
-          h='100%'
-          w={isExpanded ? '100%' : 584}
-          flex={isExpanded ? undefined : '1 0 0'}
           css={{
-            maxWidth: isExpanded ? '100%' : 584,
-            minWidth: 400,
-            background: color.background.white,
-            zIndex: 1,
-            transition: `width ${motion.expressive}`
+            maxWidth: isCompactCard ? 560 : 760,
+            width: '100%',
+            maxHeight: 'calc(100vh - 120px)',
+            overflow: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            '::-webkit-scrollbar': { display: 'none' }
           }}
         >
           {children}
-        </ScrollView>
-        <Flex
-          alignItems='center'
-          justifyContent='center'
-          flex='1 0 0'
-          css={{
-            zIndex: 0,
-            overflow: 'hidden',
-            backgroundImage: `radial-gradient(77.16% 77.16% at 50% 51.81%, rgba(91, 35, 225, 0.80) 0%, rgba(113, 41, 230, 0.64) 67.96%, rgba(162, 47, 235, 0.50) 100%), url(${djBackground})`,
-            backgroundColor: 'lightgray',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        >
-          <Routes>
-            <Route
-              path='signup/app-cta'
-              element={
-                /* @ts-ignore box type incorrect */
-                <Box as='img' w='100%' src={imagePhone} />
-              }
-            />
-            <Route
-              path='signin'
-              element={isExpanded ? null : <AudiusValues />}
-            />
-            <Route
-              path='signup'
-              element={isExpanded ? null : <AudiusValues />}
-            />
-            <Route
-              path='signup/*'
-              element={isExpanded ? null : <AudiusValues />}
-            />
-            <Route
-              path='signin/*'
-              element={isExpanded ? null : <AudiusValues />}
-            />
-          </Routes>
-        </Flex>
-      </Paper>
+        </Paper>
+      </Flex>
     </Flex>
   )
 }
@@ -194,167 +172,114 @@ type MobileSignOnRootProps = RootProps & {
   isLoaded?: boolean
 }
 
-type PanelState = 'collapsed' | 'expanding' | 'expanded' | 'collapsing'
-
 const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
   const { children, isLoaded } = props
-  const [panelState, setPanelState] = useState<PanelState>('collapsed')
-  const { motion } = useTheme()
-  const [ref, { height: panelHeight }] = useMeasure<HTMLDivElement>()
-  const collapsedPanelHeight = useRef(panelHeight)
-
+  const { spacing, motion } = useTheme()
+  const routeOnExit = useSelector(getRouteOnExit)
   const location = useLocation()
-  const collapsedMobilePageMatch = [
-    SIGN_IN_PAGE,
-    SIGN_UP_PAGE,
-    SIGN_UP_EMAIL_PAGE
+
+  const hideCloseButton = [
+    SIGN_UP_LOADING_PAGE
   ].some((path) => {
     const match = matchPath(path, location.pathname)
     return match && match.pathname === location.pathname
   })
 
-  const shouldPageExpand = !collapsedMobilePageMatch
-
-  useLayoutEffect(() => {
-    if (panelState === 'collapsed') {
-      collapsedPanelHeight.current = panelHeight
-    }
-  }, [panelState, panelHeight])
-
-  // TODO: use `onTransitionEnd`
-  useEffect(() => {
-    if (shouldPageExpand) {
-      setPanelState('expanding')
-      const timeout = setTimeout(() => {
-        setPanelState('expanded')
-      }, 100)
-      return () => clearTimeout(timeout)
-    } else if (!shouldPageExpand && panelState === 'expanded') {
-      setPanelState('collapsing')
-      const timeout = setTimeout(() => {
-        setPanelState('collapsed')
-      }, 500)
-      return () => clearTimeout(timeout)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldPageExpand])
-
-  const panelHeightMap = {
-    collapsed: 'auto',
-    expanding: panelHeight,
-    expanded: '100%',
-    collapsing: collapsedPanelHeight.current
-  }
-
   return (
-    <Flex direction='column' w='100%'>
-      <Flex
-        ref={ref}
-        direction='column'
-        borderBottomLeftRadius={panelState === 'expanded' ? undefined : '2xl'}
-        borderBottomRightRadius={panelState === 'expanded' ? undefined : '2xl'}
-        h={panelHeightMap[panelState]}
+    <Flex
+      direction='column'
+      w='100%'
+      css={{
+        position: 'relative',
+        minHeight: '100vh'
+      }}
+    >
+      {/* Background image + dark overlay */}
+      <Box
         css={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          backgroundColor: 'white',
-          zIndex: 1,
-          transition: `height ${motion.calm}, border-radius ${motion.calm}, transform ${motion.calm} 0.5s`,
-          transform: isLoaded ? 'translateY(0px)' : 'translateY(-100%)'
-        }}
-      >
-        {children}
-      </Flex>
-      <Flex
-        direction='column'
-        alignItems='center'
-        pb='2xl'
-        css={{
-          paddingTop: collapsedPanelHeight.current,
-          flexGrow: 1,
-          backgroundImage: `radial-gradient(77.16% 77.16% at 50% 51.81%, rgba(91, 35, 225, 0.80) 0%, rgba(113, 41, 230, 0.64) 67.96%, rgba(162, 47, 235, 0.50) 100%), url(${djPortrait})`,
-          backgroundColor: 'lightgray',
+          position: 'fixed',
+          inset: 0,
+          backgroundImage: `url(${landingImg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'bottom'
+          backgroundPosition: 'center',
+          filter: 'grayscale(100%)'
+        }}
+      />
+      <Box
+        css={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.3)'
+        }}
+      />
+
+      {/* Nav overlay */}
+      {!hideCloseButton ? (
+        <Flex
+          css={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            padding: spacing.l,
+            zIndex: 3
+          }}
+          justifyContent='space-between'
+          alignItems='center'
+        >
+          <Link
+            to={routeOnExit}
+            css={{ display: 'flex', alignItems: 'center' }}
+          >
+            <IconCloseAlt color='white' height={32} width={32} />
+          </Link>
+          <IconAudiusLogoHorizontal color='white' height={32} width={157} />
+        </Flex>
+      ) : null}
+
+      {/* Card content */}
+      <Flex
+        w='100%'
+        justifyContent='center'
+        alignItems='flex-start'
+        p='l'
+        css={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100vh',
+          paddingTop: 72,
+          opacity: isLoaded ? 1 : 0,
+          transition: `opacity ${motion.expressive}`
         }}
       >
-        <Routes>
-          <Route
-            path='signup'
-            element={
-              <AudiusValues
-                css={{
-                  margin: 'auto',
-                  opacity: isLoaded ? 1 : 0,
-                  transition: `opacity ${motion.expressive} 1s`
-                }}
-              />
-            }
-          />
-          <Route
-            path='signup/*'
-            element={
-              <AudiusValues
-                css={{
-                  margin: 'auto',
-                  opacity: isLoaded ? 1 : 0,
-                  transition: `opacity ${motion.expressive} 1s`
-                }}
-              />
-            }
-          />
-          <Route
-            path='signin'
-            element={
-              <Text
-                variant='title'
-                strength='weak'
-                color='white'
-                css={{
-                  marginTop: 'auto',
-                  opacity: isLoaded ? 1 : 0,
-                  transition: `opacity ${motion.expressive} 1s`
-                }}
-              >
-                {messages.newToAudius}{' '}
-                <TextLink variant='inverted' showUnderline asChild>
-                  <Link to={SIGN_UP_PAGE}>{messages.createAccount}</Link>
-                </TextLink>
-              </Text>
-            }
-          />
-          <Route
-            path='signin/*'
-            element={
-              <Text
-                variant='title'
-                strength='weak'
-                color='white'
-                css={{
-                  marginTop: 'auto',
-                  opacity: isLoaded ? 1 : 0,
-                  transition: `opacity ${motion.expressive} 1s`
-                }}
-              >
-                {messages.newToAudius}{' '}
-                <TextLink variant='inverted' showUnderline asChild>
-                  <Link to={SIGN_UP_PAGE}>{messages.createAccount}</Link>
-                </TextLink>
-              </Text>
-            }
-          />
-        </Routes>
+        <Paper
+          borderRadius='l'
+          border='strong'
+          direction='column'
+          css={{
+            width: '100%',
+            maxWidth: 560,
+            overflow: 'auto'
+          }}
+        >
+          {children}
+        </Paper>
       </Flex>
     </Flex>
   )
 }
 
+const { getSystemAppearance } = themeSelectors
+
 export const SignOnPage = () => {
   const { isMobile } = useMedia()
   const signOnStatus = useSelector(getStatus)
   const routeOnExit = useSelector(getRouteOnExit)
+  const systemAppearance = useSelector(getSystemAppearance)
+  const signOnTheme: Theme =
+    systemAppearance === SystemAppearance.DARK
+      ? 'default-dark'
+      : 'default-light'
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -436,9 +361,11 @@ export const SignOnPage = () => {
   }
 
   return (
-    <SignOnRoot isLoaded={isLoaded}>
-      <NavHeader />
-      {isSignUp ? <SignUpPage /> : <SignInPage />}
-    </SignOnRoot>
+    <HarmonyThemeProvider theme={signOnTheme}>
+      <SignOnRoot isLoaded={isLoaded}>
+        <NavHeader />
+        {isSignUp ? <SignUpPage /> : <SignInPage />}
+      </SignOnRoot>
+    </HarmonyThemeProvider>
   )
 }

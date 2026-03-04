@@ -56,8 +56,9 @@ const selectHarmonyTheme = (state: AppState): Theme => {
     case LegacyTheme.MATRIX:
       return 'matrix'
     case LegacyTheme.AUTO:
-    default:
       return sysAppearance === 'dark' ? 'classic-dark' : 'classic-light'
+    default:
+      return sysAppearance === 'dark' ? 'default-dark' : 'default-light'
   }
 }
 

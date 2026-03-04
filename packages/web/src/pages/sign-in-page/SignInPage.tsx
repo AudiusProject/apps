@@ -6,21 +6,17 @@ import { signInSchema, signInErrorMessages } from '@audius/common/schemas'
 import { route } from '@audius/common/utils'
 import {
   Flex,
-  IconAudiusLogoHorizontalColor,
+  IconAudiusLogoHorizontal,
   Button,
-  IconArrowRight,
   TextLink,
-  Box
+  Text
 } from '@audius/harmony'
 import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useField } from 'formik'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
-import { useWindowSize } from 'react-use'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import audiusLogoColored from 'assets/img/audiusLogoColored.png'
-import audiusLogoWhite from 'assets/img/audiusLogoWhite.png'
 import { setValueField, signIn } from 'common/store/pages/signon/actions'
 import {
   getEmailField,
@@ -29,22 +25,24 @@ import {
   getStatus
 } from 'common/store/pages/signon/selectors'
 import { HarmonyPasswordField } from 'components/form-fields/HarmonyPasswordField'
-import PreloadImage from 'components/preload-image/PreloadImage'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { GuestEmailHint } from 'pages/sign-on-page/GuestEmailHint'
 import { EmailField } from 'pages/sign-up-page/components/EmailField'
 import { ForgotPasswordModal } from 'pages/sign-up-page/components/ForgotPasswordModal'
-import { Heading, ScrollView } from 'pages/sign-up-page/components/layout'
+import { Heading } from 'pages/sign-up-page/components/layout'
 import { identify } from 'services/analytics'
 import { useSelector } from 'utils/reducer'
-import { isDarkMode } from 'utils/theme/theme'
-
-import { SignInWithMetaMaskButton } from './SignInWithMetaMaskButton'
 
 const { SIGN_IN_CONFIRM_EMAIL_PAGE, SIGN_UP_PAGE } = route
 
-const smallDesktopWindowHeight = 900
+const messages = {
+  ...signInPageMessages,
+  title: 'Welcome Back',
+  newToAudius: 'New to Audius?',
+  createAnAccount: 'Create an Account',
+  logIn: 'Log In'
+}
 
 type SignInValues = {
   email: string
@@ -54,8 +52,6 @@ type SignInValues = {
 export const SignInPage = () => {
   const dispatch = useDispatch()
   const { isMobile } = useMedia()
-  const { height: windowHeight } = useWindowSize()
-  const isSmallDesktop = windowHeight < smallDesktopWindowHeight
   const navigate = useNavigateToPage()
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const { value: existingEmail } = useSelector(getEmailField)
@@ -72,8 +68,6 @@ export const SignInPage = () => {
   useEffect(() => {
     if (requiresOtp) {
       navigate(SIGN_IN_CONFIRM_EMAIL_PAGE)
-      // This unsets the otp error so we can come back to this page
-      // if necessary
       dispatch(setValueField('password', existingPassword))
     }
   }, [navigate, requiresOtp, existingPassword, dispatch])
@@ -104,72 +98,42 @@ export const SignInPage = () => {
         validationSchema={SignInSchema}
         validateOnChange={false}
       >
-        <ScrollView
+        <Flex
+          as={Form}
           direction='column'
-          justifyContent='space-between'
-          ph={isMobile ? 'm' : '2xl'}
-          pt='unit14'
-          pb={isMobile ? '2xl' : 'unit14'}
-          gap='l'
+          gap='2xl'
+          alignItems='center'
+          p='2xl'
         >
-          <Flex as={Form} direction='column' gap='2xl'>
-            <Box alignSelf={isSmallDesktop ? 'flex-start' : 'center'}>
-              {isMobile || isSmallDesktop ? (
-                <IconAudiusLogoHorizontalColor />
-              ) : (
-                <PreloadImage
-                  src={isDarkMode() ? audiusLogoWhite : audiusLogoColored}
-                  alt='Audius Logo'
-                  css={{
-                    height: 160,
-                    width: 160,
-                    objectFit: 'contain'
-                  }}
-                />
-              )}
-            </Box>
-            <Heading
-              heading={signInPageMessages.title}
-              centered={isMobile}
-              tag='h1'
-            />
-            <Flex direction='column' gap='l'>
-              <EmailField />
-              <SignInPasswordField />
-              <GuestEmailHint />
-            </Flex>
-            <Flex direction='column' gap='l' w='100%'>
-              <Button
-                iconRight={IconArrowRight}
-                type='submit'
-                isLoading={signInStatus === 'loading'}
-                fullWidth
-              >
-                {signInPageMessages.signIn}
-              </Button>
-              {!isMobile ? <SignInWithMetaMaskButton /> : null}
-              <TextLink
-                variant='visible'
-                css={{ alignSelf: isMobile ? 'center' : undefined }}
-                onClick={() => {
-                  setShowForgotPassword(true)
-                }}
-              >
-                {signInPageMessages.forgotPassword}
-              </TextLink>
-            </Flex>
-          </Flex>
-          {!isMobile ? (
-            <Button
-              variant='secondary'
-              asChild
-              fullWidth
-              style={{ flexShrink: 0 }}
+          <IconAudiusLogoHorizontal height={56} width={275} color='default' />
+          <Heading heading={messages.title} centered tag='h1' />
+          <Flex direction='column' gap='l' w='100%'>
+            <EmailField />
+            <SignInPasswordField />
+            <TextLink
+              variant='visible'
+              onClick={() => setShowForgotPassword(true)}
             >
-              <Link to={SIGN_UP_PAGE}>{signInPageMessages.createAccount}</Link>
+              {messages.forgotPassword}
+            </TextLink>
+            <GuestEmailHint />
+          </Flex>
+          <Flex direction='column' gap='l' w='100%' alignItems='center'>
+            <Text variant='body' size={isMobile ? 'm' : 'l'} color='subdued'>
+              {messages.newToAudius}{' '}
+              <TextLink variant='visible' asChild>
+                <Link to={SIGN_UP_PAGE}>{messages.createAnAccount}</Link>
+              </TextLink>
+            </Text>
+            <Button
+              type='submit'
+              isLoading={signInStatus === 'loading'}
+              fullWidth
+            >
+              {messages.logIn}
             </Button>
-          ) : null}
-        </ScrollView>
+          </Flex>
+        </Flex>
       </Formik>
       <ForgotPasswordModal
         isOpen={showForgotPassword}

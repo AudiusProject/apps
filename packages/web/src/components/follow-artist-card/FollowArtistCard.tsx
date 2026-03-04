@@ -33,12 +33,18 @@ import { SelectArtistsPreviewContext } from './selectArtistsPreviewContext'
 type FollowArtistTileProps = {
   user: UserMetadata
   mobileWidth?: string
+  /** When true, uses a smaller card size for dense grids (e.g. 4-column sign-up) */
+  compact?: boolean
 } & HTMLProps<HTMLInputElement>
+
+const COMPACT_CARD_WIDTH = 168
+const COMPACT_CARD_HEIGHT = 200
 
 export const FollowArtistCard = (props: FollowArtistTileProps) => {
   const {
     user: { name, user_id, is_verified, track_count, follower_count },
-    mobileWidth = 'calc(50% - 4px)'
+    mobileWidth = 'calc(50% - 4px)',
+    compact = false
   } = props
   const dispatch = useDispatch()
   const { isMobile } = useMedia()
@@ -108,8 +114,11 @@ export const FollowArtistCard = (props: FollowArtistTileProps) => {
     </Box>
   ))
 
+  const cardWidth = isMobile ? mobileWidth : compact ? COMPACT_CARD_WIDTH : 235
+  const cardHeight = isMobile ? undefined : compact ? COMPACT_CARD_HEIGHT : 220
+
   return (
-    <Paper h={220} w={isMobile ? mobileWidth : 235}>
+    <Paper h={cardHeight ?? 220} w={cardWidth}>
       <Flex w='100%' direction='column' alignItems='center'>
         {isPlaying ? (
           <Box
@@ -129,7 +138,7 @@ export const FollowArtistCard = (props: FollowArtistTileProps) => {
         {avatar}
         <Box
           w='100%'
-          h={68}
+          h={compact ? 52 : 68}
           css={{
             backgroundImage: `url(${coverPhoto})`,
             backgroundSize: 'cover',
@@ -154,8 +163,8 @@ export const FollowArtistCard = (props: FollowArtistTileProps) => {
         <Flex
           direction='column'
           alignItems='center'
-          gap='l'
-          pt='3xl'
+          gap={compact ? 's' : 'l'}
+          pt={compact ? '2xl' : '3xl'}
           pb='l'
           ph='s'
           w='100%'
@@ -218,13 +227,19 @@ export const FollowArtistCard = (props: FollowArtistTileProps) => {
   )
 }
 
-export const FollowArtistTileSkeleton = () => {
+export const FollowArtistTileSkeleton = ({
+  compact = false
+}: {
+  compact?: boolean
+} = {}) => {
   const { isMobile } = useMedia()
+  const desktopWidth = compact ? COMPACT_CARD_WIDTH : 235
+  const desktopHeight = compact ? COMPACT_CARD_HEIGHT : 220
 
   return (
     <Paper
-      h={220}
-      w={isMobile ? 'calc(50% - 4px)' : 235}
+      h={isMobile ? 220 : desktopHeight}
+      w={isMobile ? 'calc(50% - 4px)' : desktopWidth}
       direction='column'
       ph='m'
       pb='l'

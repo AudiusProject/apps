@@ -16,9 +16,8 @@ import { SelectablePillField } from 'components/form-fields/SelectablePillField'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
-import { AccountHeader } from '../components/AccountHeader'
 import { SkipButton } from '../components/SkipButton'
-import { Heading, Page, PageFooter, ScrollView } from '../components/layout'
+import { Heading, Page, PageFooter } from '../components/layout'
 
 const { SIGN_UP_ARTISTS_PAGE } = route
 
@@ -48,7 +47,6 @@ export const SelectGenresPage = () => {
     (label: string): MouseEventHandler<HTMLInputElement> =>
     (e) => {
       if ((e.target as HTMLInputElement).checked) {
-        // add to genres list
         const newGenres = [...currentGenres, label as Genre]
         dispatch(
           make(Name.CREATE_ACCOUNT_SELECT_GENRE, {
@@ -58,7 +56,6 @@ export const SelectGenresPage = () => {
         )
         setCurrentGenres(newGenres)
       } else {
-        // remove from genres list
         const newGenres = [...currentGenres]
         const genreIndex = currentGenres.indexOf(label as Genre)
         newGenres.splice(genreIndex, 1)
@@ -67,57 +64,53 @@ export const SelectGenresPage = () => {
     }
 
   return (
-    <ScrollView gap={isMobile ? '2xl' : '3xl'}>
-      <AccountHeader mode='viewing' />
-      <Formik
-        initialValues={initialValues}
-        onSubmit={handleSubmit}
-        validationSchema={toFormikValidationSchema(selectGenresSchema)}
-        validateOnMount
-      >
-        {() => (
-          <Page
-            as={Form}
-            centered
-            css={{ paddingTop: 0 }}
-            transition='horizontal'
+    <Formik
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      validationSchema={toFormikValidationSchema(selectGenresSchema)}
+      validateOnMount
+    >
+      {() => (
+        <Page
+          as={Form}
+          centered
+          transition='horizontal'
+        >
+          <Flex
+            direction='column'
+            gap='2xl'
+            css={!isMobile ? { maxWidth: '641px' } : undefined}
           >
+            <Heading
+              heading={selectGenresPageMessages.header}
+              description={selectGenresPageMessages.description}
+              alignItems={!isMobile ? 'center' : undefined}
+            />
             <Flex
-              direction='column'
-              gap='2xl'
-              css={!isMobile ? { maxWidth: '641px' } : undefined}
+              justifyContent={isMobile ? 'flex-start' : 'center'}
+              alignItems='flex-start'
+              gap='s'
+              wrap='wrap'
             >
-              <Heading
-                heading={selectGenresPageMessages.header}
-                description={selectGenresPageMessages.description}
-                alignItems={!isMobile ? 'center' : undefined}
-              />
-              <Flex
-                justifyContent={isMobile ? 'flex-start' : 'center'}
-                alignItems='flex-start'
-                gap='s'
-                wrap='wrap'
-              >
-                {selectableGenres.map((genre) => {
-                  const { label, value } = genre
-                  return (
-                    <SelectablePillField
-                      key={label}
-                      name='genres'
-                      label={label}
-                      value={value}
-                      size='large'
-                      type='checkbox'
-                      onClick={handleOnClick(label)}
-                    />
-                  )
-                })}
-              </Flex>
+              {selectableGenres.map((genre) => {
+                const { label, value } = genre
+                return (
+                  <SelectablePillField
+                    key={label}
+                    name='genres'
+                    label={label}
+                    value={value}
+                    size='large'
+                    type='checkbox'
+                    onClick={handleOnClick(label)}
+                  />
+                )
+              })}
             </Flex>
-            <PageFooter centered sticky postfix={<SkipButton />} />
-          </Page>
-        )}
-      </Formik>
-    </ScrollView>
+          </Flex>
+          <PageFooter centered sticky postfix={<SkipButton />} />
+        </Page>
+      )}
+    </Formik>
   )
 }
