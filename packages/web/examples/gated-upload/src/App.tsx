@@ -19,7 +19,13 @@ const GENRES = [
 ] as const
 
 type Screen = 'home' | 'signed-in'
-type RegionInfo = { ip?: string; country?: string; city?: string | null; allowed?: boolean } | null
+type RegionInfo = {
+  ip?: string
+  country?: string
+  city?: string | null
+  allowed?: boolean
+  allowedCountries?: string[]
+} | null
 
 async function formatApiError(reason: unknown): Promise<string> {
   if (reason != null && typeof reason === 'object' && 'response' in reason) {
@@ -69,6 +75,7 @@ export default function App() {
         setScreen('signed-in')
         setResult(null)
         setTrackId(null)
+        setRegionInfo(null)
       } catch (e: unknown) {
         if (
           e &&
@@ -147,8 +154,7 @@ export default function App() {
     return () => window.removeEventListener('message', onMessage)
   }, [completeSignIn])
 
-  // Fetch /my-region when signed in. When server sees localhost (::1), it can't resolve geo.
-  // Client fetches public IP from ipify, then retries /my-region?ip= for accurate region display.
+  // Fetch /my-region when signed in. When server sees localhost, client fetches public IP from ipify and retries.
   useEffect(() => {
     if (!config.writeServerUrl || screen !== 'signed-in') return
     let cancelled = false
@@ -157,7 +163,6 @@ export default function App() {
         const res = await fetch(`${config.writeServerUrl}/my-region`)
         const data = await res.json()
         if (cancelled) return
-        // If server saw localhost and has no geo, fetch our public IP and retry
         if (data.country === 'Unknown' && (data.ip === '::1' || data.ip === '127.0.0.1')) {
           const ipRes = await fetch('https://api.ipify.org')
           const publicIp = (await ipRes.text()).trim()
@@ -178,7 +183,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [screen])
+  }, [config.writeServerUrl, screen])
 
   const handleOpenAuth = useCallback(() => {
     setError(null)
@@ -285,7 +290,7 @@ export default function App() {
             duration: duration ? Math.round(duration) : undefined,
             origFileCid: audioUploadResponse.orig_file_cid,
             origFilename: audioUploadResponse.orig_filename,
-            coverArtCid: imageUploadResponse?.orig_file_cid
+            coverArtSizes: imageUploadResponse?.orig_file_cid
           }
         })
       })
@@ -306,7 +311,6 @@ export default function App() {
 
   const handleStream = useCallback(async () => {
     if (!config.writeServerUrl || !trackId) return
-    // Fetch public IP from ipify so server can geo-check when request comes from localhost
     let url = `${config.writeServerUrl}/stream/${encodeURIComponent(trackId)}`
     try {
       const ipRes = await fetch('https://api.ipify.org')
@@ -316,13 +320,13 @@ export default function App() {
       // Proceed without client_ip; will fail geo if localhost
     }
     window.open(url, '_blank')
-  }, [trackId])
+  }, [config.writeServerUrl, trackId])
 
   if (!config.isConfigured) {
     return (
       <div className="center">
         <div className="card">
-          <h1 className="title">Geo-gated upload</h1>
+          <h1 className="title">Gated upload</h1>
           <p className="required">Requires your server. Create a .env with:</p>
           <p className="code">VITE_AUDIUS_API_KEY=your_api_key</p>
           <p className="code">VITE_WRITE_SERVER_URL=http://localhost:3004</p>
@@ -344,14 +348,15 @@ export default function App() {
               Sign out
             </button>
           </div>
-          <h1 className="title">Geo-gated upload</h1>
+          <h1 className="title">Gated upload</h1>
           <p className="subtitle">
-            Upload a track. Streaming is geo-gated by the server (ip-api.com).
+            Upload a track. Streaming is geo-gated + protocol-gated (access_authorities).
           </p>
 
           {regionInfo && (
             <div className="regionInfo">
-              <strong>Streaming allowed in:</strong> United States (configurable)
+              <strong>Streaming allowed in:</strong>{' '}
+              {regionInfo.allowedCountries?.join(', ') ?? 'United States'}
               <br />
               <strong>Your region:</strong> {regionInfo.country ?? 'Unknown'}
               {regionInfo.city ? `, ${regionInfo.city}` : ''}
@@ -450,9 +455,9 @@ export default function App() {
   return (
     <div className="center">
       <div className="card">
-        <h1 className="title">Geo-gated upload</h1>
+        <h1 className="title">Gated upload</h1>
         <p className="subtitle">
-          Sign in with Audius, upload a track. The server gates streaming by IP/geo (ip-api.com).
+          Sign in with Audius, upload a track. Streaming is geo-gated + protocol-gated.
         </p>
         {loading ? (
           <div className="loader">

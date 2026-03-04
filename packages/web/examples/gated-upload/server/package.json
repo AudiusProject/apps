@@ -9,7 +9,11 @@
   },
   "dependencies": {
     "@audius/sdk": "file:../../../../sdk",
+    "@noble/curves": "^1.7.0",
+    "@noble/hashes": "^1.7.0",
+    "canonicalize": "^2.1.0",
     "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
     "express": "^4.21.0"
   }
 }

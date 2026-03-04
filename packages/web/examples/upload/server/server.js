@@ -67,8 +67,7 @@ app.post('/create-track', async (req, res) => {
         duration,
         origFileCid: metadata.origFileCid != null ? String(metadata.origFileCid) : undefined,
         origFilename: metadata.origFilename != null ? String(metadata.origFilename) : undefined,
-        coverArtCid: metadata.coverArtCid != null ? String(metadata.coverArtCid) : undefined,
-        isUnlisted: metadata.isUnlisted === true
+        coverArtSizes: metadata.coverArtSizes != null ? String(metadata.coverArtSizes) : undefined
       }
     })
     return res.json({

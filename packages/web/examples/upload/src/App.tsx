@@ -245,7 +245,7 @@ export default function App() {
             duration: duration ? Math.round(duration) : undefined,
             origFileCid: audioUploadResponse.orig_file_cid,
             origFilename: audioUploadResponse.orig_filename,
-            coverArtCid: imageUploadResponse?.orig_file_cid
+            coverArtSizes: imageUploadResponse?.orig_file_cid
           }
         })
       })

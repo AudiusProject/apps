@@ -1,19 +1,24 @@
-# Geo-gated upload (Web)
+# Gated upload (Web)
 
-Minimal Vite + React app that demonstrates **geo-gated streaming** using SDK primitives. Users sign in via OAuth (popup), upload a track, and can stream only if their IP resolves to an allowed country (via [ip-api.com](http://ip-api.com)).
+Minimal Vite + React app that demonstrates **programmable distribution** with geo-gating. Users sign in via OAuth (popup), upload a track, and stream via the access server.
 
-Pattern inspired by [gate-release-access.mdx](https://github.com/AudiusProject/open-audio-docs/blob/main/docs/pages/tutorials/gate-release-access.mdx): an access server controls who can stream. Here we use **IP → geo** (ip-api.com) instead of programmable distribution signing.
+The uploaded track contains an "access authority" which is a key that controls who is allowed to stream the track. Unless the access authority signs the request to the protocol, the track cannot be streamed.
+
+This example uses a geofenced stream to demonstrate this. The track is uploaded and streaming access is only granted to ALLOWED_COUNTRIES, set in the environment.
+
+Pattern from [gate-release-access.mdx](https://github.com/AudiusProject/open-audio-docs/blob/main/docs/pages/tutorials/gate-release-access.mdx): tracks have `access_authorities` set to the server's signer address. The server holds the private key and signs stream URLs. The node validates the signature. Additionally, the server only redirects if the client IP is in allowed countries (ip-api.com).
 
 ## How it works
 
-1. **Upload** — Same as the [upload example](../upload/): OAuth, uploadTrackFiles, create-track.
-2. **Stream** — Client hits `GET /stream/:trackId` on our server. Server gets client IP from the request, fetches geo from ip-api.com, and only redirects to the Audius stream URL if the country is in the allowlist.
-3. **/my-region** — Returns `{ ip, country, city, allowed }` for the requesting client (for UX).
+1. **Upload** — Same as the [upload example](../upload/): OAuth, uploadTrackFiles, create-track. The server sets `access_authorities: [signerAddress]` so only our server can authorize streams.
+2. **Stream** — Client hits `GET /stream/:trackId`. Server checks geo (client IP must be in ALLOWED_COUNTRIES), fetches stream URL from API, signs it, and redirects. Protocol validates the signature; server enforces geo.
+3. **My region** — `GET /my-region` returns `{ ip, country, city, allowed }` for the requesting client. When running locally, the client fetches its public IP from ipify and retries with `?ip=` for accurate geo.
 
 ## Requirements
 
 - AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN
-- Optional: ALLOWED_COUNTRIES (comma-separated, default: `United States`)
+- SIGNER_PRIVATE_KEY (required for gated streaming)
+- ALLOWED_COUNTRIES (optional, default: United States; comma-separated)
 
 ## How to run
 
@@ -24,17 +29,16 @@ npm install
 npm run build -w @audius/sdk
 cd packages/web/examples/gated-upload/server
 cp .env.example .env
-# Edit: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN
-# Optional: ALLOWED_COUNTRIES=United States,Canada
+# Edit: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN, SIGNER_PRIVATE_KEY, AUTHORIZED_COUNTRIES
 npm install
 npm start
 ```
 
 Server at `http://localhost:3004`:
 
-- `POST /create-track` — create track (same as upload example)
-- `GET /stream/:trackId` — geo-gate; redirects if allowed, 403 otherwise
-- `GET /my-region` — returns client's geo and whether streaming is allowed
+- `POST /create-track` — create track with access_authorities = signer address
+- `GET /stream/:trackId` — geo-gate + sign stream URL and redirect (ip-api.com + protocol)
+- `GET /my-region` — returns client IP, country, city, allowed
 
 ### 2. Run the client
 
@@ -48,6 +52,4 @@ npm run dev
 
 Or: `npm run web:example:gated-upload` from repo root.
 
-## Local testing
-
-When running locally, the server sees `::1`/`127.0.0.1` as the client IP. The client uses ipify (api.ipify.org) to fetch your public IP and passes it as `?ip=` (for /my-region) or `?client_ip=` (for /stream), so geo-gating uses your real IP. No extra config needed.
+## Next steps

@@ -1,146 +1,197 @@
+/* eslint-disable no-console */
 /**
- * Gated upload server: create-track + geo-gated stream.
+ * Gated upload server: create-track + geo-gated stream signing.
  *
- * - POST /create-track — same as upload example
- * - GET /stream/:trackId — geo-gate: only redirects to Audius stream if client
- *   IP is in allowed countries (from ip-api.com). Uses client-fetched public IP (ipify)
- *   resolution: we get client IP from the request, then fetch geo from ip-api.com.
- * - GET /my-region — returns { ip, country, city, allowed } for the requesting client
+ * POST /create-track — create track with access_authorities (server signs stream access)
+ * GET /stream/:trackId — geo-gate + sign stream URL, redirect (protocol enforces access_authorities)
+ * GET /my-region — { ip, country, city, allowed, allowedCountries }
  *
- * Env: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN, ALLOWED_COUNTRIES (comma-separated, default: United States)
+ * Geo: ip-api.com. From localhost, pass ?ip= or ?client_ip= (e.g. from ipify).
+ * Env: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN, SIGNER_PRIVATE_KEY, ALLOWED_COUNTRIES (default: United States)
  */
 import 'dotenv/config'
+import { secp256k1 } from '@noble/curves/secp256k1'
+import { keccak_256 } from '@noble/hashes/sha3'
+import { hexToBytes, utf8ToBytes, concatBytes } from '@noble/hashes/utils'
+import canonicalize from 'canonicalize'
+import { Wallet } from 'ethers'
 import express from 'express'
 
 const PORT = Number(process.env.PORT) || 3004
 const apiKey = process.env.AUDIUS_API_KEY
 const bearerToken = process.env.AUDIUS_BEARER_TOKEN
-const appName = process.env.APP_NAME || 'gated-upload-example'
-const allowedCountries = (process.env.ALLOWED_COUNTRIES || 'United States')
-  .split(',')
-  .map((s) => s.trim().toLowerCase())
+const signerPrivateKey = process.env.SIGNER_PRIVATE_KEY
 
 if (!apiKey || !bearerToken) {
-  console.error(
-    'Set AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN in .env (from audius.co/settings → Developer Apps)'
-  )
+  console.error('Set AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN in .env')
+  process.exit(1)
+}
+if (!signerPrivateKey) {
+  console.error('Set SIGNER_PRIVATE_KEY in .env')
   process.exit(1)
 }
 
-const { sdk } = await import('@audius/sdk')
-const audius = sdk({ appName, apiKey, bearerToken })
+const signerWallet = new Wallet(
+  signerPrivateKey.startsWith('0x') ? signerPrivateKey : `0x${signerPrivateKey}`
+)
+const signerAddress = signerWallet.address
 
-// Audius API base (production)
-const AUDIUS_API_BASE = 'https://api.audius.co/v1'
+const allowedCountries = (process.env.ALLOWED_COUNTRIES || 'United States')
+  .split(',')
+  .map((s) => s.trim().toLowerCase())
+const allowedStr = allowedCountries
+  .map((c) => c[0].toUpperCase() + c.slice(1))
+  .join(', ')
 
-function isLocalhost(ip) {
-  if (!ip) return true
-  const s = String(ip).trim()
-  return s === '::1' || s === '127.0.0.1' || s.startsWith('::ffff:127.')
-}
+const { sdk, decodeHashId } = await import('@audius/sdk')
+const audius = sdk({
+  appName: process.env.APP_NAME || 'gated-upload-example',
+  apiKey,
+  bearerToken
+})
 
-async function getGeoForIp(ip) {
-  if (!ip || isLocalhost(ip)) {
-    return { country: null, city: null }
-  }
+const isLocalhost = (ip) =>
+  !ip ||
+  ['::1', '127.0.0.1'].includes(String(ip).trim()) ||
+  String(ip).startsWith('::ffff:127.')
+
+async function getGeo(ip) {
+  if (!ip || isLocalhost(ip)) return { country: null, city: null }
   try {
     const res = await fetch(
       `http://ip-api.com/json/${ip}?fields=country,city,status`
     )
     const data = await res.json()
-    if (data.status === 'fail') return { country: null, city: null }
-    return { country: data.country ?? null, city: data.city ?? null }
+    return data.status === 'fail'
+      ? { country: null, city: null }
+      : { country: data.country ?? null, city: data.city ?? null }
   } catch {
     return { country: null, city: null }
   }
 }
 
-function getClientIp(req) {
+function getIpContext(req, ipParam = 'client_ip') {
   const forwarded = req.headers['x-forwarded-for']
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
-  return req.socket?.remoteAddress ?? req.ip ?? null
+  const reqIp = forwarded
+    ? forwarded.split(',')[0].trim()
+    : (req.socket?.remoteAddress ?? req.ip ?? null)
+  const clientIp =
+    typeof req.query[ipParam] === 'string' ? req.query[ipParam].trim() : null
+  const ipForGeo = isLocalhost(reqIp) && clientIp ? clientIp : reqIp
+  return { reqIp, ipForGeo }
 }
+
+async function fetchTrack(trackId) {
+  try {
+    const { data } = await audius.tracks.getTrack({ trackId: String(trackId) })
+    const cid = data?.trackCid ?? null
+    const streamUrl = data?.stream?.url ?? data?.stream?.mirrors?.[0] ?? null
+    return cid && streamUrl ? { cid, streamUrl } : null
+  } catch {
+    return null
+  }
+}
+
+function signStreamUrl(cid, trackId, privateKeyHex) {
+  const data = {
+    upload_id: '',
+    cid,
+    shouldCache: 0,
+    timestamp: Date.now(),
+    trackId: Number(trackId),
+    userId: 0
+  }
+  const canonical = canonicalize(data)
+  if (!canonical) throw new Error('canonicalize failed')
+  const hash = keccak_256(utf8ToBytes(canonical))
+  const prefix = new TextEncoder().encode(
+    `\x19Ethereum Signed Message:\n${hash.length}`
+  )
+  const hashToSign = keccak_256(concatBytes(prefix, hash))
+  const pk = hexToBytes(privateKeyHex.replace(/^0x/, '').padStart(64, '0'))
+  const { r, s, recovery } = secp256k1.sign(hashToSign, pk)
+  const sigHex = `0x${r.toString(16).padStart(64, '0')}${s.toString(16).padStart(64, '0')}${(recovery + 27).toString(16).padStart(2, '0')}`
+  return JSON.stringify({ data: JSON.stringify(data), signature: sigHex })
+}
+
+const opt = (v) => (v != null ? String(v) : undefined)
 
 const app = express()
 app.use(express.json({ limit: '1mb' }))
-
 app.use((req, res, next) => {
-  const origin = req.headers.origin
-  if (origin && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin)
-  }
+  const o = req.headers.origin
+  if (o && /^https?:\/\/localhost(:\d+)?$/.test(o))
+    res.setHeader('Access-Control-Allow-Origin', o)
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204)
-  }
-  next()
+  req.method === 'OPTIONS' ? res.sendStatus(204) : next()
 })
 
-// GET /my-region — returns client's IP, country, city, and whether streaming is allowed.
-// When request comes from localhost, client can pass ?ip= to use their public IP (e.g. from ipify).
 app.get('/my-region', async (req, res) => {
-  const reqIp = getClientIp(req)
-  const clientIp =
-    req.query.ip && typeof req.query.ip === 'string'
-      ? req.query.ip.trim()
-      : null
-  // Use client-provided IP for geo when request is from localhost (local dev)
-  const ipForGeo = isLocalhost(reqIp) && clientIp ? clientIp : reqIp
-  const { country, city } = await getGeoForIp(ipForGeo)
+  const { reqIp, ipForGeo } = getIpContext(req, 'ip')
+  const { country, city } = await getGeo(ipForGeo)
   const allowed = country
     ? allowedCountries.includes(country.toLowerCase())
     : false
-  return res.json({
+  res.json({
     ip: reqIp,
     country: country ?? 'Unknown',
     city: city ?? null,
-    allowed
+    allowed,
+    allowedCountries: allowedStr.split(', ')
   })
 })
 
-// GET /stream/:trackId — geo-gate: redirect to Audius stream URL only if allowed.
-// When request is from localhost, client can pass ?client_ip= (from ipify) to use real IP for geo.
 app.get('/stream/:trackId', async (req, res) => {
   const { trackId } = req.params
-  if (!trackId) {
-    return res.status(400).json({ error: 'Missing trackId' })
-  }
-  const reqIp = getClientIp(req)
-  const clientIp =
-    req.query.client_ip && typeof req.query.client_ip === 'string'
-      ? req.query.client_ip.trim()
-      : null
-  const ipForGeo = isLocalhost(reqIp) && clientIp ? clientIp : reqIp
-  const { country } = await getGeoForIp(ipForGeo)
+  if (!trackId) return res.status(400).json({ error: 'Missing trackId' })
+
+  const { ipForGeo } = getIpContext(req)
+  const { country } = await getGeo(ipForGeo)
   const allowed = country
     ? allowedCountries.includes(country.toLowerCase())
     : false
-
   if (!allowed) {
     return res.status(403).json({
-      error: `Streaming only available in: ${allowedCountries.join(', ')}`,
+      error: `Streaming only available in: ${allowedStr}`,
       yourCountry: country ?? 'Unknown'
     })
   }
 
-  const streamUrl = `${AUDIUS_API_BASE}/tracks/${encodeURIComponent(trackId)}/stream`
-  return res.redirect(302, streamUrl)
+  const track = await fetchTrack(trackId)
+  if (!track)
+    return res
+      .status(404)
+      .json({ error: 'Track not found or stream unavailable' })
+
+  const numericTrackId = decodeHashId(trackId) ?? parseInt(trackId, 10)
+  if (numericTrackId == null || Number.isNaN(numericTrackId)) {
+    return res.status(400).json({ error: 'Invalid track ID format' })
+  }
+
+  try {
+    const url = new URL(track.streamUrl)
+    url.searchParams.set(
+      'signature',
+      signStreamUrl(track.cid, numericTrackId, signerPrivateKey)
+    )
+    return res.redirect(302, url.toString())
+  } catch (e) {
+    console.error('signStreamUrl failed', e)
+    return res.status(500).json({ error: 'Failed to sign stream URL' })
+  }
 })
 
-// POST /create-track — same as upload example
 app.post('/create-track', async (req, res) => {
   const { userId, metadata } = req.body ?? {}
-  if (!userId || !metadata) {
+  if (!userId || !metadata)
     return res.status(400).json({ error: 'Missing userId or metadata' })
-  }
   if (!metadata.title || !metadata.genre || !metadata.trackCid) {
     return res
       .status(400)
       .json({ error: 'metadata must include title, genre, trackCid' })
   }
+
   try {
     const duration =
       metadata.duration != null && Number(metadata.duration) > 0
@@ -154,42 +205,29 @@ app.post('/create-track', async (req, res) => {
         trackCid: String(metadata.trackCid),
         description:
           metadata.description != null ? String(metadata.description) : null,
-        accessAuthorities:
-          metadata.accessAuthorities != null ? metadata.accessAuthorities : [],
+        accessAuthorities: [signerAddress],
         duration,
-        origFileCid:
-          metadata.origFileCid != null
-            ? String(metadata.origFileCid)
-            : undefined,
-        origFilename:
-          metadata.origFilename != null
-            ? String(metadata.origFilename)
-            : undefined,
-        coverArtCid:
-          metadata.coverArtCid != null
-            ? String(metadata.coverArtCid)
-            : undefined,
-        isUnlisted: metadata.isUnlisted === true
+        origFileCid: opt(metadata.origFileCid),
+        origFilename: opt(metadata.origFilename),
+        coverArtSizes: opt(metadata.coverArtSizes)
       }
     })
-    return res.json({
-      success: true,
-      trackId: result?.id ?? result?.track_id ?? result?.trackId ?? null
-    })
+    const txHash = result?.transactionHash ?? result?.transaction_hash
+    if (txHash) console.log('[create-track] tx hash:', txHash)
+    const trackId = result?.id ?? result?.track_id ?? result?.trackId
+    return res.json({ success: true, trackId })
   } catch (e) {
     const status = e?.response?.status ?? 500
     let body = e?.message ?? 'Create track failed'
-    if (e?.response) {
-      try {
-        const text = await e.response.text()
-        body = text || body
-      } catch { }
-    }
-    return res.status(status).json({ error: body || 'Create track failed' })
+    try {
+      if (e?.response) body = (await e.response.text()) || body
+    } catch {}
+    return res.status(status).json({ error: body })
   }
 })
 
 app.listen(PORT, () => {
   console.log(`Gated-upload server at http://localhost:${PORT}`)
-  console.log(`  Stream allowed in: ${allowedCountries.join(', ')}`)
+  console.log(`  Signer: ${signerAddress}`)
+  console.log(`  Geo allowed: ${allowedStr}`)
 })
