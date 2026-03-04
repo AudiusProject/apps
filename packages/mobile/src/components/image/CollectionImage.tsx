@@ -84,10 +84,8 @@ export const useCollectionImage = ({
     return { source: undefined, hasNoArtwork: true, onError: onImageError }
   }
 
-  // @ts-expect-error - url is added for in-session edits
   if (artwork?.url) {
     return {
-      // @ts-expect-error - url is added for in-session edits
       source: primitiveToImageSource(artwork.url),
       hasNoArtwork: false,
       onError: onImageError
