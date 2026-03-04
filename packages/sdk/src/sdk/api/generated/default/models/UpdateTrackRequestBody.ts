@@ -190,6 +190,12 @@ export interface UpdateTrackRequestBody {
      */
     isStreamGated?: boolean;
     /**
+     * Wallet addresses that can sign to authorize stream access (programmable distribution). When empty or omitted, the track is public and validator/creator nodes can serve it.
+     * @type {Array<string>}
+     * @memberof UpdateTrackRequestBody
+     */
+    accessAuthorities?: Array<string> | null;
+    /**
      * 
      * @type {AccessGate}
      * @memberof UpdateTrackRequestBody
@@ -280,6 +286,7 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
         'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
+        'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
         'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
@@ -322,6 +329,7 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
         'is_downloadable': value.isDownloadable,
         'is_unlisted': value.isUnlisted,
         'is_stream_gated': value.isStreamGated,
+        'access_authorities': value.accessAuthorities,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),
         'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),

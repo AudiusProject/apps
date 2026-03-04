@@ -1,0 +1,85 @@
+---
+id: gate-release-access
+title: Gate Release Access
+pagination_label: Gate Release Access
+sidebar_label: Gate Release Access
+description: Programmable distribution with access authorities and gate-release-access signing
+toc_min_heading_level: 2
+---
+
+**Programmable distribution** lets you control who can stream a track. Instead of making every track publicly streamable, you designate one or more wallet addresses as **access authorities**. Only requests signed by those addresses are accepted by the protocol. Your server holds the key and decides who gets access.
+
+## How It Works
+
+When you create a track, you set `access_authorities` to the wallet address(es) that can authorize stream requests. Validator nodes enforce this: if a stream request is unsigned or signed by an address not in `access_authorities`, the node returns 401 and rejects it.
+
+Your **access server** holds the private key for one of those addresses. When a user requests a stream, your server:
+
+1. Verifies the user is allowed (e.g. logged in, in the right region, has paid, follows you)
+2. Fetches the stream URL from the Audius API
+3. Signs a short-lived signature in the gate-release-access format
+4. Redirects the user to the stream URL with the signature attached
+
+The node validates your signature, confirms the signer is in the track’s `access_authorities`, and serves the audio. Without your server’s signature, direct requests to the node fail.
+
+## Access Authorities
+
+`access_authorities` is an array of Ethereum addresses. Any one of them can sign to authorize a stream. Common patterns:
+
+- **Single signer** — One address (e.g. your server’s wallet). Simplest and most common.
+- **Multiple signers** — Several addresses for redundancy or delegated access.
+- **Empty or omitted** — The track is public; no signature required.
+
+Tracks with `access_authorities` are **gated**. Tracks without it are **public** and can be streamed by anyone with the URL.
+
+## Example: Gated Upload
+
+The [gated-upload example](https://github.com/AudiusProject/apps/tree/main/packages/web/examples/gated-upload) implements programmable distribution with geo-gating.
+
+**Server**
+
+- `POST /create-track` — Creates a track with `access_authorities: [signerAddress]`. The server’s wallet is the only authority.
+- `GET /stream/:trackId` — Checks the client’s IP via ip-api.com. If the client is in `ALLOWED_COUNTRIES`, fetches the track from the SDK, signs the stream URL, and redirects. Otherwise returns 403.
+- `GET /my-region` — Returns the client’s IP, country, city, and whether they’re allowed (for UI feedback).
+
+**Client**
+
+- OAuth login, upload via SDK (`uploadTrackFiles`, then `create-track` with the server), and streaming via `GET /stream/:trackId` (server redirects to signed URL).
+
+Run the server from `packages/web/examples/gated-upload/server` with `AUDIUS_API_KEY`, `AUDIUS_BEARER_TOKEN`, and `SIGNER_PRIVATE_KEY` in `.env`. See the [README](https://github.com/AudiusProject/apps/blob/main/packages/web/examples/gated-upload/README.md) for full setup.
+
+## What You Can Build
+
+Programmable distribution supports many use cases where you want to gate streaming behind your own logic.
+
+### Geo-Gated Releases
+
+Only allow streaming from certain countries. The gated-upload example uses ip-api.com to resolve IP → country and blocks requests outside `ALLOWED_COUNTRIES`. Useful for licensing, regional rollouts, or compliance.
+
+### Private Groups
+
+Restrict streams to members of a private community. Your access server checks whether the user is logged in and in the group (e.g. Discord role, invite list, subscription). Only then does it sign the stream URL.
+
+### Frontend-Gated Releases
+
+Limit streaming to users who arrive through your app or frontend. Your server can verify a session, referrer, or token before signing. Direct links from other sites fail without that check.
+
+### Paid / Premium Content
+
+Require payment, subscription, or NFT ownership before signing. Your server verifies the purchase or membership and signs only for eligible users.
+
+### Time-Based or Schedule-Based Access
+
+Release content at a specific time or after a countdown. Your server checks the current time or event state before signing.
+
+## Summary
+
+| Concept | Meaning |
+| ------- | ------- |
+| **access_authorities** | Wallet addresses that can sign to authorize stream access |
+| **Gated track** | Has `access_authorities`; requires a valid signature to stream |
+| **Public track** | No `access_authorities`; anyone can stream |
+| **Access server** | Your backend that holds the signing key and enforces access logic |
+| **gate-release-access** | Signature format the protocol expects on stream URLs |
+
+For implementation details (signature format, canonical JSON, EIP-191 hashing), see the [Open Audio Protocol gate-release-access tutorial](https://github.com/AudiusProject/open-audio-docs/blob/main/docs/pages/tutorials/gate-release-access.mdx) and the [gated-upload server source](https://github.com/AudiusProject/apps/blob/main/packages/web/examples/gated-upload/server/server.js).
