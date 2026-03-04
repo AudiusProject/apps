@@ -540,7 +540,9 @@ function* signUp() {
                 updatedUser
               )
               primeUserData({ users: [updatedUser], queryClient })
-              queryClient.invalidateQueries({ queryKey: getUserQueryKey(userId) })
+              queryClient.invalidateQueries({
+                queryKey: getUserQueryKey(userId)
+              })
               queryClient.invalidateQueries({
                 queryKey: getCurrentAccountQueryKey()
               })
