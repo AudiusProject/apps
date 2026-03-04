@@ -5,25 +5,20 @@ description: "Gets an unclaimed blockchain comment ID"
 sidebar_label: "Get unclaimed comment ID"
 hide_title: true
 hide_table_of_contents: true
-api: eJyVUk1PwzAM/SuVz9O6IXHZDQmEdkPi4zJNyEvNGmiTkLgTU9X/jp0NWAEhcWrqvGe/vOceGLcJFiswvm3JcYL1BCpKJtrA1jtYwDVxKtAVnTMN2paqYtN482JqtK440orlJUzAB4qorGV14J1wRsBIKXiXSCb3cDab6Wc89LYzhlISrPGOhagQDKGxJk8on5Piekimphb1xPtAwvSbZzIsxBBVD9vDlAr5FJU4WreFYZgAW2609Kn10VaPHwoFoZjzXzVS3FEsKEYfR0IzpSWuvfqwpawGuZaf8sPn8nSc3KfcTKPooYuNQGvmkBZlicFOsatsl6bGl7s5DBKRdU8+P+co/uJmCd+Du8ik4mFeHG61/+FmPp2BSAw+cYvZRoct/Z3ZqHf/9dp/7MfRe6Y3LoNgnYrIj+2P/pzs4WQUiK5lLXIV0vcbTHQfm2HQ8mtHcS91Oe4wWtyoIau1tK4JK4rZ0hfaqyOyVEHT2GHTqZQfG6XefiZ3fXUn+b8DeTgTmg==
+api: eJyVVdtu2zgQ/ZXBPCWGaidt2gdhsYCLZHPBpg1Qp9k2ChqaHFuMJVJLUr7U0L8vhpZvTTaLfZJAnpk5c4Y8XGIQY4/pPUpblmSCx4cEFXnpdBW0NZjiOQUPwkBtZCF0SQqGhZUTmQttoA2Dy1NM0FbkBEddqlXcTswe0JGvrPHkMV3i26Mj/uwX/VJLSd5jgtKaQCYwRFRVoWWs0HvyjFuilzmVgv/CoiJM0Q6fSAZMsHLMJ+hVFSXCLsoHp80YmybBoEPBSxuuP7T6sWaITcOY9y9yJDclB+ScdXtEY0hJIbesw5giGxFyTLG31rm3Ww4T9DEZj2KJtSswxTyEyqe9nqh0V9RK174rbW96jM0Dw2XtdFh84fZXHX4UXst+zWU2bXIOTh5RmOKQMfjrhC8GgxuI4cDxZEKrMsx0yOEs5OSoLqFyeioCwYQWMLIOZk4Hgs3UfTczmel09nN0Orx66wleKcMFIOQElfB+Zp2CkaaCT40JQhsPC1u7F4mkmXl8fMwMZ7RO/4wJ07bMb0Ph6cPJQe3JGVFS2gZOaHH4exuYmUFOsEaAFAaGBMIsYCqKmrow2KVV1j7w/r/yAW0gpznrU4oAB1FB1kqH3NYBjuZQORrp+WFU62wuyqqgV7tQf30qZPk+H97dfri+GM+vn66PPg2+vft8Opl9u7t6+n7+tfxTn9SbhjqdCzsDHWBm3cSnPIHjVR/9m0tQJK0iH+XeTgOkI8UjEYXPzNsunM2DEzKscHuTd7Z8YVaZedeFU3J62ubeqCOUcuT9TuA2W2ZOunDrY4j2W6h1IHa1AJmTnPjtAdvsrM4XN6dicQUzURQUNrnWIyPNhNLMvIlStCg7ipR4/jAkbcYgZCAFdWUNHCjtSAawM0PO57o65Oj+OjbOVhgQVeXslFQCxpo3jqZ2QgrGTpgQO9kUOCiFEWNyUFpFh5nBJsGPJBy5/7q3EYRJ+/NHPFyY4tXd4NltXs95BYVgJ2T4BH6OY766G7RLu8y6zKVJUJuRjTRaT+zfXD7L349eBF+PYbXLtrXaOe4ecUeV9aEU0Z35Sr3+FOzlXm5N9H88O61mgeahVxVCR1mjhy5b29153pI9n+fXLrc+MGS5ZLe4dUXT8PLfNbkFpvcPCU6F02LIgtw/NAnmJBS56NQTWrAiUlLFJh8dA9PnDxVb9uZBOD8bYNP8A7qboS4=
 sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from "@theme/ApiTabs";
-import DiscriminatorTabs from "@theme/DiscriminatorTabs";
 import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
-import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
-import MimeTabs from "@theme/MimeTabs";
-import ParamsItem from "@theme/ParamsItem";
-import ResponseSamples from "@theme/ResponseSamples";
-import SchemaItem from "@theme/SchemaItem";
-import SchemaTabs from "@theme/SchemaTabs";
-import Markdown from "@theme/Markdown";
-import Heading from "@theme/Heading";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
 import OperationTabs from "@theme/OperationTabs";
 import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
 
 <Heading
   as={"h1"}
@@ -35,6 +30,7 @@ import TabItem from "@theme/TabItem";
 <MethodEndpoint
   method={"get"}
   path={"/comments/unclaimed_id"}
+  context={"endpoint"}
 >
   
 </MethodEndpoint>
@@ -43,100 +39,23 @@ import TabItem from "@theme/TabItem";
 
 Gets an unclaimed blockchain comment ID
 
-<div>
-  <div>
-    <ApiTabs
-      label={undefined}
-      id={undefined}
-    >
-      <TabItem
-        label={"200"}
-        value={"200"}
-      >
-        <div>
-          
-          
-          Success
-          
-          
-        </div><div>
-          <MimeTabs
-            className={"openapi-tabs__mime"}
-            schemaType={"response"}
-          >
-            <TabItem
-              label={"application/json"}
-              value={"application/json"}
-            >
-              <SchemaTabs
-                className={"openapi-tabs__schema"}
-              >
-                <TabItem
-                  label={"Schema"}
-                  value={"Schema"}
-                >
-                  <details
-                    style={{}}
-                    className={"openapi-markdown__details response"}
-                    data-collapsed={false}
-                    open={true}
-                  >
-                    <summary
-                      style={{}}
-                      className={"openapi-markdown__details-summary-response"}
-                    >
-                      <strong>
-                        Schema
-                      </strong>
-                    </summary><div
-                      style={{"textAlign":"left","marginLeft":"1rem"}}
-                    >
-                      
-                    </div><ul
-                      style={{"marginLeft":"1rem"}}
-                    >
-                      <SchemaItem
-                        collapsible={false}
-                        name={"data"}
-                        required={false}
-                        schemaName={"string"}
-                        qualifierMessage={undefined}
-                        schema={{"type":"string"}}
-                      >
-                        
-                      </SchemaItem>
-                    </ul>
-                  </details>
-                </TabItem><TabItem
-                  label={"Example (from schema)"}
-                  value={"Example (from schema)"}
-                >
-                  <ResponseSamples
-                    responseExample={"{\n  \"data\": \"string\"\n}"}
-                    language={"json"}
-                  >
-                    
-                  </ResponseSamples>
-                </TabItem>
-              </SchemaTabs>
-            </TabItem>
-          </MimeTabs>
-        </div>
-      </TabItem><TabItem
-        label={"500"}
-        value={"500"}
-      >
-        <div>
-          
-          
-          Server error
-          
-          
-        </div><div>
-          
-        </div>
-      </TabItem>
-    </ApiTabs>
-  </div>
-</div>
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./get-unclaimed-comment-id.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./get-unclaimed-comment-id.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
       

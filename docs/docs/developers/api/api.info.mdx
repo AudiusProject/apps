@@ -1,66 +1,144 @@
 ---
 id: api
-title: 'API'
-description: 'Audius V1 REST API Documentation'
+title: "API"
+description: "Audius V1 API"
 sidebar_label: Introduction
 sidebar_position: 0
-hide_title: false
+hide_title: true
 custom_edit_url: null
-slug: /api
 ---
 
-# Audius API
+import ApiLogo from "@theme/ApiLogo";
+import Heading from "@theme/Heading";
+import SchemaTabs from "@theme/SchemaTabs";
+import TabItem from "@theme/TabItem";
+import Export from "@theme/ApiExplorer/Export";
 
-The Audius REST API provides programmatic access to the largest open music catalogs on the internet.
-Query, stream, and search for tracks, users, and playlists across the
-[Open Audio Protocol](https://openaudio.org) using the Audius API.
+<span
+  className={"theme-doc-version-badge badge badge--secondary"}
+  children={"Version: 1.0"}
+>
+</span>
 
-## API Endpoints
+<Export
+  url={"https://api.audius.co/v1/swagger.yaml"}
+  proxy={undefined}
+>
+  
+</Export>
 
-(`https://api.audius.co/v1`) provides all essential endpoints for querying tracks, users, playlists,
-and more. This is the recommended starting point for most integrations.
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"API"}
+>
+</Heading>
 
-[Interactive Swagger UI](https://api.audius.co/v1) |
-[Swagger YAML](https://api.audius.co/v1/swagger.yaml)
 
-:::tip
 
-If you're developing with AI, include the swagger.yaml file to your development environment.
+Audius V1 API
 
-:::
-
-## Usage
-
-### 1. Create an API Key
-
-Creating an API key is free and grants you higher rate limits and user authentication features.
-
-Visit [api.audius.co/plans](https://api.audius.co/plans) or
-[audius.co/settings](https://audius.co/settings) to register an API key.
-
-### 2. Send Requests
-
-Send requests using either your API Secret or Bearer Token.
-
-```bash
-curl -X GET "https://api.audius.co/v1/tracks/trending" -H "Authorization: Bearer <YOUR-API-BEARER-TOKEN>"
-```
-
-:::note
-
-Your API Secret is like a wallet password. It is unchangeable and should be stored securely. Using a
-bearer token is preferable as it can be rotated.
-
-:::
-
----
-
-## Interactive Documentation
-
-All endpoints below are automatically generated from our live API specification. Each endpoint
-includes:
-
-- Request parameters and schemas
-- Example requests in multiple languages (cURL, Python, JavaScript, Go)
-- Response schemas and examples
-- Try-it-out functionality (where applicable)
+<div
+  style={{"marginBottom":"2rem"}}
+>
+  <Heading
+    id={"authentication"}
+    as={"h2"}
+    className={"openapi-tabs__heading"}
+    children={"Authentication"}
+  >
+  </Heading><SchemaTabs
+    className={"openapi-tabs__security-schemes"}
+  >
+    <TabItem
+      label={"HTTP: Basic Auth"}
+      value={"BasicAuth"}
+    >
+      
+      
+      HTTP Basic Authentication with Ethereum private key for write operations.
+      
+      **Authentication**
+      
+      Use HTTP Basic Authentication where the password field contains your Ethereum private key:
+      ```
+      Authorization: Basic <base64(username:privatekey)>
+      ```
+      
+      The username can be any value. The password must be your Ethereum private key in hex format (with or without 0x prefix).
+      
+      Example:
+      ```
+      Authorization: Basic dXNlcm5hbWU6MHgxMjM0NTY3ODkwYWJjZGVmLi4u
+      ```
+      
+      **How it works:**
+      1. The API decodes the Basic Auth credentials
+      2. Extracts the private key from the password field
+      3. Derives the Ethereum address from the private key
+      4. Uses this address for authorization checks
+      
+      **Authorization**
+      
+      The derived wallet address must be either:
+      - The wallet of the user being acted upon (direct ownership)
+      - A wallet with an approved, non-revoked grant for the user (manager mode)
+      
+      
+      <div>
+        <table>
+          <tbody>
+            <tr>
+              <th>
+                Security Scheme Type:
+              </th><td>
+                http
+              </td>
+            </tr><tr>
+              <th>
+                HTTP Authorization Scheme:
+              </th><td>
+                basic
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </TabItem><TabItem
+      label={"HTTP: Bearer Auth"}
+      value={"BearerAuth"}
+    >
+      
+      
+      The API bearer token or OAuth JWT token for the user.
+      
+      
+      <div>
+        <table>
+          <tbody>
+            <tr>
+              <th>
+                Security Scheme Type:
+              </th><td>
+                http
+              </td>
+            </tr><tr>
+              <th>
+                HTTP Authorization Scheme:
+              </th><td>
+                bearer
+              </td>
+            </tr><tr>
+              <th>
+                Bearer format:
+              </th><td>
+                JWT
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </TabItem>
+  </SchemaTabs>
+</div>
+      

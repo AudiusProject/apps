@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object","required":["amount"],"properties":{"amount":{"type":"integer","description":"Static amount indicator (always 1)","example":1}},"title":"redeem_amount_response"}}}}}}

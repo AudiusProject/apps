@@ -1,0 +1,1 @@
+{"parameters":[{"name":"id","in":"path","description":"The user ID (child user whose manager is being removed)","required":true,"schema":{"type":"string"}},{"name":"managerUserId","in":"path","description":"The user ID of the manager to remove","required":true,"schema":{"type":"string"}}]}

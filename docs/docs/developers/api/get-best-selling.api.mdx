@@ -1,271 +1,69 @@
 ---
 id: get-best-selling
-title: "Get best selling tracks and/or albums"
-description: "Get best selling tracks and playlists"
-sidebar_label: "Get best selling tracks and/or albums"
+title: "Get best selling tracks and playlists with related entities"
+description: "Get best selling tracks and/or albums with related entities"
+sidebar_label: "Get best selling tracks and playlists with related entities"
 hide_title: true
 hide_table_of_contents: true
-api: eJytVU1v2zAM/SuCTtuQxe2wXXJrsaHobUDbXYYiUGw6ViNbmkh3DYz895Gy89EkS4t1J1sSqff49dRpMnPUk58anoLzEfT9SBeAebSBrG/0RF8BqRkgKQTnbDNXFE2+QGWaQgVnls4ioR5pHyAa8bkuBq9L8brpvdggmGhqIIiC1+mGF2zoyxKB+NgK2K8W4lLvU7itQDVtPYOofKksQY2KvMKFDWN1h1C2TpU+qmDmtkkc1Dv+3zh9UM7Wlt7zxZhXUBs96TQtg+DbhmAOUa9Wow2nZP1PlEqgvHotTIsQp7Z4GUgM1fVXQaL1sjaLVAxeR2BXpGOwSFGSv4uaTl6EFCvByz0TbyjFZh0XT82WJ4DkqtK0jnjLOMdr4CxJf/Wr1Dv8NW7G2/erFbdbBAy+QUC57tPZmXyeE7pp8xxQmmygIyYmBGfzVO3sAcWuO6TlZw+QS2ZClP4k26MUhnatTIxGokpllH3JqI1QCPEBsi+U/92sa0aWXBqX01A77odl2QQ07Q8O0wlPpg4u1W1I3Tqh+6lcMzqGsqF9rDPWflqmfDpM+VRywad/O14XTUzY5vOxsl2aYqc3t6UThy9H6wzxkTsMYvRxz4NdWDsqL9oyT3oRDFW8yAbhyoTeR9yoDaa7eqlpo2PLiijgJMtMsGPTFrbFce6zx3MtTWib0qfsDMFefL8+mIuL5KR+nKv+VO7vT87HZ5Lm4JFqkzpxGLYT4pmxYKXa4T5Qt4381eo7VJXgiTLe5+lmPinubsjUVuJH+lmuOPqKiYtF180Mwl10q5Vs9/IgGSwsmpmTgSiNQzhB+D9q9dGYFrDcfTUejWvFSIvCvZnlWr5PIK/fhjcAv1rOT9DYvh1vIPKCyJ+AHx6RLfa9LKIVcG4YUaMKTMEPnnRP73PBIh52U3eg4HLLZsqvvt2yuPwBxnT0NQ==
+api: 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
 sidebar_class_name: "get api-method"
 info_path: developers/api/api
 custom_edit_url: null
 ---
 
-import ApiTabs from "@theme/ApiTabs";
-import DiscriminatorTabs from "@theme/DiscriminatorTabs";
 import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
-import SecuritySchemes from "@theme/ApiExplorer/SecuritySchemes";
-import MimeTabs from "@theme/MimeTabs";
-import ParamsItem from "@theme/ParamsItem";
-import ResponseSamples from "@theme/ResponseSamples";
-import SchemaItem from "@theme/SchemaItem";
-import SchemaTabs from "@theme/SchemaTabs";
-import Markdown from "@theme/Markdown";
-import Heading from "@theme/Heading";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
 import OperationTabs from "@theme/OperationTabs";
 import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
 
 <Heading
   as={"h1"}
   className={"openapi__heading"}
-  children={"Get best selling tracks and/or albums"}
+  children={"Get best selling tracks and playlists with related entities"}
 >
 </Heading>
 
 <MethodEndpoint
   method={"get"}
   path={"/explore/best-selling"}
+  context={"endpoint"}
 >
   
 </MethodEndpoint>
 
 
 
-Get best selling tracks and playlists
+Get best selling tracks and/or albums with related entities
 
 <Heading
   id={"request"}
   as={"h2"}
   className={"openapi-tabs__heading"}
-  children={"Request"}
 >
+  <Translate id="theme.openapi.request.title">Request</Translate>
 </Heading>
 
-<details
-  style={{"marginBottom":"1rem"}}
-  className={"openapi-markdown__details"}
-  data-collapsed={false}
-  open={true}
+<ParamsDetails
+  {...require("./get-best-selling.ParamsDetails.json")}
 >
-  <summary
-    style={{}}
-  >
-    <h3
-      className={"openapi-markdown__details-summary-header-params"}
-    >
-      Query Parameters
-    </h3>
-  </summary><div>
-    <ul>
-      <ParamsItem
-        className={"paramsItem"}
-        param={{"name":"offset","in":"query","description":"The number of items to skip. Useful for pagination (page number * limit)","schema":{"type":"integer"}}}
-      >
-        
-      </ParamsItem><ParamsItem
-        className={"paramsItem"}
-        param={{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}}}
-      >
-        
-      </ParamsItem><ParamsItem
-        className={"paramsItem"}
-        param={{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}}
-      >
-        
-      </ParamsItem><ParamsItem
-        className={"paramsItem"}
-        param={{"name":"type","in":"query","description":"The type of content to filter by","schema":{"type":"string","default":"all","enum":["all","track","album"]}}}
-      >
-        
-      </ParamsItem>
-    </ul>
-  </div>
-</details><div>
-  <div>
-    <ApiTabs
-      label={undefined}
-      id={undefined}
-    >
-      <TabItem
-        label={"200"}
-        value={"200"}
-      >
-        <div>
-          
-          
-          Success
-          
-          
-        </div><div>
-          <MimeTabs
-            className={"openapi-tabs__mime"}
-            schemaType={"response"}
-          >
-            <TabItem
-              label={"application/json"}
-              value={"application/json"}
-            >
-              <SchemaTabs
-                className={"openapi-tabs__schema"}
-              >
-                <TabItem
-                  label={"Schema"}
-                  value={"Schema"}
-                >
-                  <details
-                    style={{}}
-                    className={"openapi-markdown__details response"}
-                    data-collapsed={false}
-                    open={true}
-                  >
-                    <summary
-                      style={{}}
-                      className={"openapi-markdown__details-summary-response"}
-                    >
-                      <strong>
-                        Schema
-                      </strong>
-                    </summary><div
-                      style={{"textAlign":"left","marginLeft":"1rem"}}
-                    >
-                      
-                    </div><ul
-                      style={{"marginLeft":"1rem"}}
-                    >
-                      <SchemaItem
-                        collapsible={true}
-                        className={"schemaItem"}
-                      >
-                        <details
-                          style={{}}
-                          className={"openapi-markdown__details"}
-                        >
-                          <summary
-                            style={{}}
-                          >
-                            <span
-                              className={"openapi-schema__container"}
-                            >
-                              <strong
-                                className={"openapi-schema__property"}
-                              >
-                                data
-                              </strong><span
-                                className={"openapi-schema__name"}
-                              >
-                                 object[]
-                              </span>
-                            </span>
-                          </summary><div
-                            style={{"marginLeft":"1rem"}}
-                          >
-                            <li>
-                              <div
-                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem","paddingBottom":".5rem"}}
-                              >
-                                Array [
-                              </div>
-                            </li><SchemaItem
-                              collapsible={false}
-                              name={"content_id"}
-                              required={true}
-                              schemaName={"string"}
-                              qualifierMessage={undefined}
-                              schema={{"type":"string"}}
-                            >
-                              
-                            </SchemaItem><SchemaItem
-                              collapsible={false}
-                              name={"content_type"}
-                              required={false}
-                              schemaName={"string"}
-                              qualifierMessage={"**Possible values:** [`track`, `album`]"}
-                              schema={{"type":"string","example":"track","enum":["track","album"]}}
-                            >
-                              
-                            </SchemaItem><SchemaItem
-                              collapsible={false}
-                              name={"title"}
-                              required={true}
-                              schemaName={"string"}
-                              qualifierMessage={undefined}
-                              schema={{"type":"string"}}
-                            >
-                              
-                            </SchemaItem><SchemaItem
-                              collapsible={false}
-                              name={"owner_id"}
-                              required={true}
-                              schemaName={"string"}
-                              qualifierMessage={undefined}
-                              schema={{"type":"string"}}
-                            >
-                              
-                            </SchemaItem><li>
-                              <div
-                                style={{"fontSize":"var(--ifm-code-font-size)","opacity":"0.6","marginLeft":"-.5rem"}}
-                              >
-                                ]
-                              </div>
-                            </li>
-                          </div>
-                        </details>
-                      </SchemaItem>
-                    </ul>
-                  </details>
-                </TabItem><TabItem
-                  label={"Example (from schema)"}
-                  value={"Example (from schema)"}
-                >
-                  <ResponseSamples
-                    responseExample={"{\n  \"data\": [\n    {\n      \"content_id\": \"string\",\n      \"content_type\": \"track\",\n      \"title\": \"string\",\n      \"owner_id\": \"string\"\n    }\n  ]\n}"}
-                    language={"json"}
-                  >
-                    
-                  </ResponseSamples>
-                </TabItem>
-              </SchemaTabs>
-            </TabItem>
-          </MimeTabs>
-        </div>
-      </TabItem><TabItem
-        label={"400"}
-        value={"400"}
-      >
-        <div>
-          
-          
-          Bad request
-          
-          
-        </div><div>
-          
-        </div>
-      </TabItem><TabItem
-        label={"500"}
-        value={"500"}
-      >
-        <div>
-          
-          
-          Server error
-          
-          
-        </div><div>
-          
-        </div>
-      </TabItem>
-    </ApiTabs>
-  </div>
-</div>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./get-best-selling.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./get-best-selling.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
       

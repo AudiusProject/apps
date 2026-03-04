@@ -1,0 +1,1 @@
+{"title":"Body","body":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["app_api_key"],"properties":{"app_api_key":{"type":"string","description":"The developer app address (API key) to grant authorization to"}},"title":"create_grant_request_body"}}}}}

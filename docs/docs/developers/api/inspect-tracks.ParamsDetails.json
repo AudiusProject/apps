@@ -1,0 +1,1 @@
+{"parameters":[{"name":"id","in":"query","description":"List of track IDs to inspect","required":true,"style":"form","explode":true,"schema":{"type":"array","items":{"type":"string"}}},{"name":"original","in":"query","description":"Optional - if set to true inspects the original file quality","schema":{"type":"boolean","default":false}}]}

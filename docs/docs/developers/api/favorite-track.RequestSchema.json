@@ -1,0 +1,1 @@
+{"title":"Body","body":{"required":false,"x-codegen-request-body-name":"metadata","content":{"application/json":{"schema":{"type":"object","description":"Optional metadata for favorite/save operations","properties":{"is_save_of_repost":{"type":"boolean","description":"Set to true when favoriting a reposted item (used for notifications)"}},"title":"favorite_request_body"}}}}}

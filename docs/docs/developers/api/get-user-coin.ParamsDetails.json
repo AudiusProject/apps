@@ -1,0 +1,1 @@
+{"parameters":[{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}},{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"Dez1g5f3h4j5k6l7m8n9o0p1q2r3s4t5u6v7w8x9y0z"}}]}

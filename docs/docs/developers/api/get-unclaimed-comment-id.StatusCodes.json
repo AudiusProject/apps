@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object","properties":{"data":{"type":"string"}},"title":"unclaimed_id_response"}}}},"500":{"description":"Server error","content":{}}}}
