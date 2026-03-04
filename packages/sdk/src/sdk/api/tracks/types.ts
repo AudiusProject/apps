@@ -152,6 +152,7 @@ export const UploadTrackMetadataSchema = z.object({
       ])
     )
     .nullable(),
+  accessAuthorities: z.optional(z.array(z.string()).nullable()),
   isDownloadGated: z.optional(z.boolean()),
   downloadConditions: z
     .optional(

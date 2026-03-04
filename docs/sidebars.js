@@ -12,6 +12,7 @@ module.exports = {
         'developers/guides/create-audius-app',
         'developers/guides/log-in-with-audius',
         'developers/guides/image-mirrors',
+        'developers/guides/gate-release-access',
         'developers/guides/hedgehog',
         'developers/guides/link-audius-account-to-protocol-dashboard',
         'developers/guides/subgraph',

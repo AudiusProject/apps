@@ -4,7 +4,12 @@
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { themes as prismThemes } from 'prism-react-renderer'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -175,6 +180,23 @@ const config = {
     mermaid: true,
   },
   plugins: [
+    function responseSamplesAliasPlugin() {
+      return {
+        name: 'response-samples-alias',
+        configureWebpack() {
+          return {
+            resolve: {
+              alias: {
+                '@theme/ResponseSamples': path.resolve(
+                  __dirname,
+                  'src/theme/ResponseSamples/index.jsx'
+                ),
+              },
+            },
+          }
+        },
+      }
+    },
     [
       'docusaurus-plugin-openapi-docs',
       {
