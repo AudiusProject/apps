@@ -20,6 +20,7 @@ export type PlaylistsApiServicesConfig = {
 
 const CreatePlaylistMetadataSchema = z
   .object({
+    playlistId: z.optional(HashId),
     description: z.optional(z.string().max(1000)),
     playlistName: z.string(),
     isPrivate: z.optional(z.boolean()),
@@ -53,12 +54,24 @@ export type CreatePlaylistMetadata = z.input<
   typeof CreatePlaylistMetadataSchema
 >
 
+export const UploadPlaylistProgressEventSchema = ProgressEventSchema.extend({
+  /**
+   * Index of the track being uploaded in the playlist tracks array, or 'image' if for the image
+   */
+  key: z.number().or(z.literal('image'))
+})
+
+export const UploadPlaylistProgressHandlerSchema = z
+  .function()
+  .args(z.number(), UploadPlaylistProgressEventSchema)
+  .returns(z.void())
+
 export const CreatePlaylistSchema = z
   .object({
     playlistId: z.optional(HashId),
     imageFile: z.optional(ImageFile),
     metadata: CreatePlaylistMetadataSchema,
-    onProgress: z.optional(z.function()),
+    onProgress: UploadPlaylistProgressHandlerSchema.optional(),
     trackIds: z.optional(z.array(HashId)),
     userId: HashId
   })
@@ -101,24 +114,12 @@ const PlaylistTrackMetadataSchema = UploadTrackMetadataSchema.partial({
  */
 export type PlaylistTrackMetadata = z.infer<typeof PlaylistTrackMetadataSchema>
 
-export const UploadPlaylistProgressEventSchema = ProgressEventSchema.extend({
-  /**
-   * Index of the track being uploaded in the playlist tracks array, or 'image' if for the image
-   */
-  key: z.number().or(z.literal('image'))
-})
-
 /**
  * The progress event for updating a playlist
  */
 type UploadPlaylistProgressEvent = z.input<
   typeof UploadPlaylistProgressEventSchema
 >
-
-export const UploadPlaylistProgressHandlerSchema = z
-  .function()
-  .args(z.number(), UploadPlaylistProgressEventSchema)
-  .returns(z.void())
 
 export type UploadPlaylistProgressHandler = (
   /**
@@ -166,7 +167,7 @@ export const UpdatePlaylistMetadataSchema =
             })
           )
         ),
-        coverArtCid: z.optional(z.string())
+        playlistImageSizesMultihash: z.optional(z.string())
       })
     )
     .strict()
