@@ -130,7 +130,7 @@ export const FinishProfilePage = () => {
       }
       dispatch(setFinishedPhase1(true))
       if (isFastReferral) {
-        // dispatch(signUp())
+        dispatch(signUp())
         navigate(SIGN_UP_LOADING_PAGE, { replace: true })
       } else {
         navigate('/signup/select-genres', { replace: true })
