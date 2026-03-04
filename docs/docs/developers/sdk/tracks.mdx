@@ -256,7 +256,7 @@ const { data } = await audiusSdk.tracks.createTrack({
     genre: 'Metal',
     mood: 'Aggressive',
     ...audioResult,
-    coverArtCid: coverArtCid,
+    coverArtSizes: coverArtCid,
   },
 })
 ```
@@ -610,8 +610,7 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | `releaseDate`                  | `Date`                                                  | Release date                                      | _Optional_   |
 | `origFileCid`                  | `string`                                                | CID of the original audio file (from Uploads API) | _Optional_   |
 | `origFilename`                 | `string`                                                | Original filename of the audio file               | _Optional_   |
-| `coverArtCid`                  | `string`                                                | CID of the cover art image (from Uploads API)     | _Optional_   |
-| `coverArtSizes`                | `string`                                                | Cover art sizes metadata                          | _Optional_   |
+| `coverArtSizes`                | `string`                                                | CID of the cover art image (from Uploads API)     | _Optional_   |
 | `previewCid`                   | `string`                                                | CID of the preview clip (from Uploads API)        | _Optional_   |
 | `previewStartSeconds`          | `number`                                                | Preview start time in seconds                     | _Optional_   |
 | `duration`                     | `number`                                                | Track duration in seconds                         | _Optional_   |
@@ -662,8 +661,7 @@ you want to change. Omitted fields retain their current values.
 | `trackCid`            | `string`                                | CID of the transcoded audio (from Uploads API)    |
 | `origFileCid`         | `string`                                | CID of the original audio file (from Uploads API) |
 | `origFilename`        | `string`                                | Original filename of the audio file               |
-| `coverArtCid`         | `string`                                | CID of the cover art image (from Uploads API)     |
-| `coverArtSizes`       | `string`                                | Cover art sizes metadata                          |
+| `coverArtSizes`       | `string`                                | CID of the cover art image (from Uploads API)     |
 | `previewCid`          | `string`                                | CID of the preview clip (from Uploads API)        |
 | `previewStartSeconds` | `number`                                | Preview start time in seconds                     |
 | `duration`            | `number`                                | Track duration in seconds                         |

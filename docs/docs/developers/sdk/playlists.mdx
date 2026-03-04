@@ -175,7 +175,7 @@ Returns a `Promise` containing an object with a `data` field. `data` is an array
 Create a new playlist.
 
 To upload a cover image, use the [Uploads API](/developers/sdk/uploads). Upload your image first to
-obtain a CID, then pass it as `coverArt` in the `metadata` object.
+obtain a CID, then pass it as `playlistImageSizesMultihash` in the `metadata` object.
 
 Example:
 
@@ -195,7 +195,7 @@ const { data } = await audiusSdk.playlists.createPlaylist({
       { trackId: 'ePR5Ll', timestamp: Math.round(Date.now() / 1000) },
       { trackId: 'GManBz', timestamp: Math.round(Date.now() / 1000) },
     ],
-    coverArt: coverArtCid,
+    playlistImageSizesMultihash: coverArtCid,
   },
 })
 
@@ -259,7 +259,7 @@ const { data } = await audiusSdk.playlists.updatePlaylist({
       { trackId: 'GManBz', timestamp: Math.round(Date.now() / 1000) },
       { trackId: 'KWJm0x', timestamp: Math.round(Date.now() / 1000) },
     ],
-    coverArt: coverArtCid,
+    playlistImageSizesMultihash: coverArtCid,
   },
 })
 
@@ -540,7 +540,7 @@ Returns a `Promise` resolving to an object with the following fields:
 | ----------------------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------- |
 | `playlistName`          | `string`                                                      | Yes      | The name of the playlist                              |
 | `playlistId`            | `string`                                                      | No       | Optional playlist ID (auto-generated if not provided) |
-| `coverArtCid`           | `string`                                                      | No       | CID of the cover art image (from Uploads API)         |
+| `playlistImageSizesMultihash` | `string`                                                | No       | CID of the cover art image (from Uploads API)         |
 | `description`           | `string`                                                      | No       | The playlist description                              |
 | `isAlbum`               | `boolean`                                                     | No       | Whether this is an album                              |
 | `isPrivate`             | `boolean`                                                     | No       | Whether the playlist is private                       |
@@ -569,7 +569,7 @@ All fields are optional — only include the fields you want to change.
 | Field                   | Type                                                          | Required | Description                                    |
 | ----------------------- | ------------------------------------------------------------- | -------- | ---------------------------------------------- |
 | `playlistName`          | `string`                                                      | No       | The name of the playlist                       |
-| `coverArtCid`           | `string`                                                      | No       | CID of the cover art image (from Uploads API)  |
+| `playlistImageSizesMultihash` | `string`                                                | No       | CID of the cover art image (from Uploads API)  |
 | `description`           | `string`                                                      | No       | The playlist description                       |
 | `isAlbum`               | `boolean`                                                     | No       | Whether this is an album                       |
 | `isPrivate`             | `boolean`                                                     | No       | Whether the playlist is private                |
