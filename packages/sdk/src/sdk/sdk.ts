@@ -25,7 +25,7 @@ const createSdkWithApiName = (config: SdkWithAppNameOnlyConfig) => {
 
 const createSdkWithApiKey = (config: SdkWithApiKeyOnlyConfig) => {
   DevAppSchemaWithApiKeyOnly.parse(config)
-  return createSdkWithServices(config)
+  return createSdkWithoutServices(config)
 }
 
 const createSdkWithApiSecret = (config: SdkWithApiSecretConfig) => {
