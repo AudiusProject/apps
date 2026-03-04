@@ -8,7 +8,6 @@ import IconPlay from '@audius/harmony/src/assets/icons/Play.svg'
 import IconRepost from '@audius/harmony/src/assets/icons/Repost.svg'
 import IconShare from '@audius/harmony/src/assets/icons/Share.svg'
 import { Artwork } from '@audius/harmony/src/components/artwork/Artwork'
-import { IconImage } from '@audius/harmony/src/icons/individual/IconImage'
 import { Button } from '@audius/harmony/src/components/button/Button/Button'
 import { IconButton } from '@audius/harmony/src/components/button/IconButton/IconButton'
 import { PlainButton } from '@audius/harmony/src/components/button/PlainButton/PlainButton'
@@ -20,6 +19,7 @@ import { Paper } from '@audius/harmony/src/components/layout/Paper'
 import { Tag } from '@audius/harmony/src/components/tag'
 import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
+import { IconImage } from '@audius/harmony/src/icons/individual/IconImage'
 import { Link } from 'react-router'
 
 import { ServerUserGeneratedText } from 'components/user-generated-text/ServerUserGeneratedText'
@@ -122,12 +122,7 @@ export const MobileServerTrackPage = ({
               Track
             </Text>
             {artworkSrc ? (
-              <Artwork
-                src={artworkSrc}
-                isLoading={false}
-                h={224}
-                w={224}
-              />
+              <Artwork src={artworkSrc} isLoading={false} h={224} w={224} />
             ) : (
               <Box
                 h={224}

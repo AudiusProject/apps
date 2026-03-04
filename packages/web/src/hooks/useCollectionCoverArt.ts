@@ -41,9 +41,6 @@ export const useCollectionCoverArt = ({
   })
 
   // Return edited artwork from this session, if it exists
-  // TODO(PAY-3588) Update field once we've switched to another property name
-  // for local changes to artwork
-  // @ts-expect-error - url is added for in-session edits, not on collection artwork type
   if (artwork?.url) return { imageUrl: artwork.url, hasNoArtwork: false }
 
   return {

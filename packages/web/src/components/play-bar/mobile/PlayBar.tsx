@@ -171,9 +171,7 @@ const PlayBar = ({
                     [styles.imageEmpty]: hasNoArtwork
                   })}
                   style={
-                    image
-                      ? { backgroundImage: `url(${image})` }
-                      : undefined
+                    image ? { backgroundImage: `url(${image})` } : undefined
                   }
                 >
                   {hasNoArtwork ? (
