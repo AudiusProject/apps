@@ -19,10 +19,10 @@
     "gen:api-docs": "npm run sync:api-spec && rm -f docs/developers/api/sidebar.ts && npm run docusaurus -- gen-api-docs api && node scripts/patch-api-sidebar.cjs"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.5.2",
-    "@docusaurus/plugin-google-gtag": "^3.5.2",
-    "@docusaurus/preset-classic": "^3.5.2",
-    "@docusaurus/theme-mermaid": "^3.5.2",
+    "@docusaurus/core": "3.9.2",
+    "@docusaurus/plugin-google-gtag": "3.9.2",
+    "@docusaurus/preset-classic": "3.9.2",
+    "@docusaurus/theme-mermaid": "3.9.2",
     "@mdx-js/react": "3.0.0",
     "clsx": "2.0.0",
     "docusaurus-plugin-openapi-docs": "^4.2.0",
@@ -32,8 +32,8 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.5.2",
-    "@docusaurus/types": "^3.5.2",
+    "@docusaurus/module-type-aliases": "3.9.2",
+    "@docusaurus/types": "3.9.2",
     "wrangler": "3.30.1"
   },
   "browserslist": {
