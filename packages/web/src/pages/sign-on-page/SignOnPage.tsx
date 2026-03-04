@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 
-import { FEED_PAGE } from '@audius/common/src/utils/route'
 import { SystemAppearance } from '@audius/common/models'
+import { FEED_PAGE } from '@audius/common/src/utils/route'
 import { themeSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -25,7 +25,6 @@ import {
 } from 'react-router'
 import { useEffectOnce, useLocalStorage } from 'react-use'
 
-import landingImg from 'public-site/pages/landing-2026/assets/landing.png'
 import {
   fetchReferrer,
   setField,
@@ -42,6 +41,7 @@ import { useMedia } from 'hooks/useMedia'
 import { SignInPage } from 'pages/sign-in-page'
 import SignUpPage from 'pages/sign-up-page'
 import { NavHeader } from 'pages/sign-up-page/components/NavHeader'
+import landingImg from 'public-site/pages/landing-2026/assets/landing.png'
 
 const {
   SIGN_IN_CONFIRM_EMAIL_PAGE,
@@ -64,9 +64,7 @@ const DesktopSignOnRoot = (props: RootProps) => {
   const routeOnExit = useSelector(getRouteOnExit)
   const location = useLocation()
 
-  const hideCloseButton = [
-    SIGN_UP_LOADING_PAGE
-  ].some((path) => {
+  const hideCloseButton = [SIGN_UP_LOADING_PAGE].some((path) => {
     const match = matchPath(path, location.pathname)
     return match && match.pathname === location.pathname
   })
@@ -178,9 +176,7 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
   const routeOnExit = useSelector(getRouteOnExit)
   const location = useLocation()
 
-  const hideCloseButton = [
-    SIGN_UP_LOADING_PAGE
-  ].some((path) => {
+  const hideCloseButton = [SIGN_UP_LOADING_PAGE].some((path) => {
     const match = matchPath(path, location.pathname)
     return match && match.pathname === location.pathname
   })

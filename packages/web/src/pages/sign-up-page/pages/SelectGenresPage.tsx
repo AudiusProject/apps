@@ -71,11 +71,7 @@ export const SelectGenresPage = () => {
       validateOnMount
     >
       {() => (
-        <Page
-          as={Form}
-          centered
-          transition='horizontal'
-        >
+        <Page as={Form} centered transition='horizontal'>
           <Flex
             direction='column'
             gap='2xl'

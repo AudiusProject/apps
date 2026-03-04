@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { Flex, IconCaretLeft, PlainButton, useTheme } from '@audius/harmony'
+import { Flex, IconCaretLeft, PlainButton } from '@audius/harmony'
 import { useMatch, useNavigate } from 'react-router'
 
 import { useDetermineAllowedRoute } from '../utils/useDetermineAllowedRoutes'
@@ -27,7 +27,6 @@ const useIsBackAllowed = () => {
 export const NavHeader = () => {
   const isBackAllowed = useIsBackAllowed()
   const navigate = useNavigate()
-  const { spacing } = useTheme()
 
   const handleBack = useCallback(() => {
     navigate(-1)
