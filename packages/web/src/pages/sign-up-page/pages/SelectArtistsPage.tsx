@@ -10,7 +10,7 @@ import {
   convertGenreLabelToValue,
   route
 } from '@audius/common/utils'
-import { Flex, Paper, SelectablePill, Text } from '@audius/harmony'
+import { Flex, Paper, SelectablePill, Text, useTheme } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { Form, Formik, useFormikContext } from 'formik'
 import { range } from 'lodash'
@@ -67,6 +67,7 @@ export const SelectArtistsPage = () => {
   const navigate = useNavigateToPage()
   const headerContainerRef = useRef<HTMLDivElement | null>(null)
   const { isMobile } = useMedia()
+  const { color } = useTheme()
 
   const handleChangeGenre = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setCurrentGenre(e.target.value)
@@ -251,22 +252,33 @@ export const SelectArtistsPage = () => {
                 </ArtistsList>
               </SelectArtistsPreviewContextProvider>
             </AnimatedFlex>
-            <PageFooter
-              centered
-              sticky
-              buttonProps={{
-                disabled: isSubmitting,
-                isLoading: isSubmitting || isValidating
+            <Flex
+              w='100%'
+              css={{
+                flexShrink: 0,
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 1,
+                backgroundColor: color.background.default
               }}
-              prefix={
-                <Flex direction='column' gap='m' alignItems='center'>
-                  <Text variant='body'>
-                    {selectArtistsPageMessages.selected}{' '}
-                    {selectedArtists.length || 0}/3
-                  </Text>
-                </Flex>
-              }
-            />
+            >
+              <PageFooter
+                centered
+                sticky={false}
+                buttonProps={{
+                  disabled: isSubmitting,
+                  isLoading: isSubmitting || isValidating
+                }}
+                prefix={
+                  <Flex direction='column' gap='m' alignItems='center'>
+                    <Text variant='body'>
+                      {selectArtistsPageMessages.selected}{' '}
+                      {selectedArtists.length || 0}/3
+                    </Text>
+                  </Flex>
+                }
+              />
+            </Flex>
           </Page>
         )
       }}
