@@ -16,8 +16,7 @@ import {
   updateRouteOnExit
 } from 'common/store/pages/signon/actions'
 
-const REQUIRES_ACCOUNT_TOAST_COOLDOWN_MS = 30_000
-let lastRequiresAccountToastTime = 0
+let hasShownRequiresAccountToastThisSession = false
 
 export type RestrictionType = 'none' | 'guest' | 'account'
 
@@ -75,10 +74,8 @@ export const useRequiresAccountCallback = <T extends (...args: any) => any>(
         dispatch(updateRouteOnExit(returnRoute))
         dispatch(updateRouteOnCompletion(returnRoute))
         dispatch(openSignOn(/** signIn */ false))
-        // Dedupe toast to avoid spamming "Finish setting up your account" on rapid effect runs
-        const now = Date.now()
-        if (now - lastRequiresAccountToastTime > REQUIRES_ACCOUNT_TOAST_COOLDOWN_MS) {
-          lastRequiresAccountToastTime = now
+        if (!hasShownRequiresAccountToastThisSession) {
+          hasShownRequiresAccountToastThisSession = true
           dispatch(
             showRequiresAccountToast(
               accountStatus === Status.SUCCESS && !isAccountComplete
