@@ -1,7 +1,7 @@
 /**
  * PKCE (Proof Key for Code Exchange) helpers per RFC 7636.
  *
- * Works in both browser (Web Crypto) and Node ≥ 15 (`globalThis.crypto`).
+ * Works in both browser (Web Crypto) and Node ≥ 22 (built-in Web Crypto via `globalThis.crypto`).
  */
 
 /**
