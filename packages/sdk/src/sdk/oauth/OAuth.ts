@@ -485,19 +485,20 @@ export class OAuth {
 
   /**
    * Refresh the access token using the stored refresh token.
-   * Updates the token store on success. Returns `true` if refresh succeeded.
+   * Updates the token store on success.
+   * Returns the new access token, or `null` if refresh failed.
    */
-  async refreshAccessToken(): Promise<boolean> {
+  async refreshAccessToken(): Promise<string | null> {
     if (!this.config.tokenStore || !this.config.basePath) {
       this._surfaceError(
         'Token store and basePath are required for token refresh.'
       )
-      return false
+      return null
     }
     const refreshToken = this.config.tokenStore.refreshToken
     if (!refreshToken) {
       this._surfaceError('No refresh token available.')
-      return false
+      return null
     }
     try {
       const res = await fetch(`${this.config.basePath}/oauth/token`, {
@@ -510,7 +511,7 @@ export class OAuth {
         })
       })
       if (!res.ok) {
-        return false
+        return null
       }
       const tokens = await res.json()
       if (tokens.access_token && tokens.refresh_token) {
@@ -518,11 +519,11 @@ export class OAuth {
           tokens.access_token,
           tokens.refresh_token
         )
-        return true
+        return tokens.access_token
       }
-      return false
+      return null
     } catch {
-      return false
+      return null
     }
   }
 
