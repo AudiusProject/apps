@@ -1,0 +1,1 @@
+{"parameters":[{"name":"metadata_id","in":"path","description":"A Metdata CID","required":true,"schema":{"type":"string"}}]}

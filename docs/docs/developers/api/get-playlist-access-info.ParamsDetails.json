@@ -1,0 +1,1 @@
+{"parameters":[{"name":"playlist_id","in":"path","description":"A Playlist ID","required":true,"schema":{"type":"string"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}]}

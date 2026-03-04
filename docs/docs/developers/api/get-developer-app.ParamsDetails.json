@@ -1,0 +1,1 @@
+{"parameters":[{"name":"address","in":"path","description":"A developer app address (API Key)","required":true,"schema":{"type":"string"}}]}

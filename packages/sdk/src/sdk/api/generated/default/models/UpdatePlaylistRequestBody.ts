@@ -124,11 +124,11 @@ export interface UpdatePlaylistRequestBody {
      */
     releaseDate?: Date;
     /**
-     * IPFS CID for cover art
+     * CID for the playlist cover art
      * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    coverArtCid?: string;
+    playlistImageSizesMultihash?: string;
     /**
      * Array of track IDs to include in the playlist
      * @type {Array<PlaylistAddedTimestamp>}
@@ -226,7 +226,7 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'license': !exists(json, 'license') ? undefined : json['license'],
         'upc': !exists(json, 'upc') ? undefined : json['upc'],
         'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
-        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
+        'playlistImageSizesMultihash': !exists(json, 'playlist_image_sizes_multihash') ? undefined : json['playlist_image_sizes_multihash'],
         'playlistContents': !exists(json, 'playlist_contents') ? undefined : ((json['playlist_contents'] as Array<any>).map(PlaylistAddedTimestampFromJSON)),
         'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'isScheduledRelease': !exists(json, 'is_scheduled_release') ? undefined : json['is_scheduled_release'],
@@ -260,7 +260,7 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'license': value.license,
         'upc': value.upc,
         'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
-        'cover_art_cid': value.coverArtCid,
+        'playlist_image_sizes_multihash': value.playlistImageSizesMultihash,
         'playlist_contents': value.playlistContents === undefined ? undefined : ((value.playlistContents as Array<any>).map(PlaylistAddedTimestampToJSON)),
         'is_stream_gated': value.isStreamGated,
         'is_scheduled_release': value.isScheduledRelease,

@@ -1,0 +1,1 @@
+{"parameters":[{"name":"token","in":"query","description":"JWT to verify","required":true,"schema":{"type":"string"}}]}

@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object","properties":{"data":{"type":"array","items":{"type":"object","required":["user_id","address"],"properties":{"user_id":{"type":"string"},"address":{"type":"string"}},"title":"user_id_address"}}},"title":"user_ids_addresses_response"}}}}}}

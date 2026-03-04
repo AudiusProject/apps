@@ -1,0 +1,1 @@
+{"parameters":[{"name":"wallets","in":"query","description":"The wallets for which to fetch connected Audius user profiles.","required":true,"style":"form","explode":false,"schema":{"type":"array","items":{"type":"string"}}}]}

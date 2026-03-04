@@ -1,0 +1,1 @@
+{"parameters":[{"name":"ids","in":"query","description":"User IDs to fetch subscribers for","required":true,"style":"form","explode":false,"schema":{"type":"array","items":{"type":"string"}}}]}

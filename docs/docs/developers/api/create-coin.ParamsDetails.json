@@ -1,0 +1,1 @@
+{"parameters":[{"name":"user_id","in":"query","description":"The user ID to create a coin","required":true,"schema":{"type":"string","example":"7eP5n"}}]}

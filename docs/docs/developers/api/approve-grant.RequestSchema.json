@@ -1,0 +1,1 @@
+{"title":"Body","body":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["grantor_user_id"],"properties":{"grantor_user_id":{"type":"string","description":"The user ID of the child user who proposed the manager (grantor)"}},"title":"approve_grant_request_body"}}}}}

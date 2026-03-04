@@ -411,7 +411,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
           }
         })
         .start()
-      metadata.coverArtCid = res.orig_file_cid
+      metadata.playlistImageSizesMultihash = res.orig_file_cid
     }
 
     if (this.entityManager) {

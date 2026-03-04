@@ -1,0 +1,1 @@
+{"parameters":[{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}},{"name":"original","in":"query","description":"Optional - if set to true inspects the original file quality","schema":{"type":"boolean","default":false}}]}

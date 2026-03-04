@@ -175,7 +175,7 @@ Returns a `Promise` containing an object with a `data` field. `data` is an array
 Create a new playlist.
 
 To upload a cover image, use the [Uploads API](/developers/sdk/uploads). Upload your image first to
-obtain a CID, then pass it as `coverArt` in the `metadata` object.
+obtain a CID, then pass it as `playlistImageSizesMultihash` in the `metadata` object.
 
 Example:
 
@@ -195,7 +195,7 @@ const { data } = await audiusSdk.playlists.createPlaylist({
       { trackId: 'ePR5Ll', timestamp: Math.round(Date.now() / 1000) },
       { trackId: 'GManBz', timestamp: Math.round(Date.now() / 1000) },
     ],
-    coverArt: coverArtCid,
+    playlistImageSizesMultihash: coverArtCid,
   },
 })
 
@@ -259,7 +259,7 @@ const { data } = await audiusSdk.playlists.updatePlaylist({
       { trackId: 'GManBz', timestamp: Math.round(Date.now() / 1000) },
       { trackId: 'KWJm0x', timestamp: Math.round(Date.now() / 1000) },
     ],
-    coverArt: coverArtCid,
+    playlistImageSizesMultihash: coverArtCid,
   },
 })
 
@@ -536,60 +536,60 @@ Returns a `Promise` resolving to an object with the following fields:
 
 ### CreatePlaylistRequestBody
 
-| Field                   | Type                                                          | Required | Description                                           |
-| ----------------------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------- |
-| `playlistName`          | `string`                                                      | Yes      | The name of the playlist                              |
-| `playlistId`            | `string`                                                      | No       | Optional playlist ID (auto-generated if not provided) |
-| `coverArtCid`           | `string`                                                      | No       | CID of the cover art image (from Uploads API)         |
-| `description`           | `string`                                                      | No       | The playlist description                              |
-| `isAlbum`               | `boolean`                                                     | No       | Whether this is an album                              |
-| `isPrivate`             | `boolean`                                                     | No       | Whether the playlist is private                       |
-| `genre`                 | [`Genre`](tracks#genre-values)                                | No       | Playlist/album genre                                  |
-| `mood`                  | [`Mood`](tracks#mood-values)                                  | No       | Playlist/album mood                                   |
-| `tags`                  | `string`                                                      | No       | Comma-separated tags                                  |
-| `license`               | `string`                                                      | No       | License type                                          |
-| `upc`                   | `string`                                                      | No       | Universal Product Code (for albums)                   |
-| `releaseDate`           | `Date`                                                        | No       | Release date                                          |
-| `playlistContents`      | [`PlaylistAddedTimestamp[]`](#playlistaddedtimestamp)         | No       | Array of tracks to include in the playlist            |
-| `isStreamGated`         | `boolean`                                                     | No       | Whether streaming is behind an access gate            |
-| `isScheduledRelease`    | `boolean`                                                     | No       | Whether this is a scheduled release                   |
-| `streamConditions`      | [`AccessGate`](tracks#accessgate)                             | No       | Conditions for stream access gating                   |
-| `ddexApp`               | `string`                                                      | No       | DDEX application identifier                           |
-| `ddexReleaseIds`        | `object`                                                      | No       | DDEX release identifiers                              |
-| `artists`               | [`DdexResourceContributor[]`](tracks#ddexresourcecontributor) | No       | DDEX resource contributors / artists                  |
-| `copyrightLine`         | `object`                                                      | No       | Copyright line                                        |
-| `producerCopyrightLine` | `object`                                                      | No       | Producer copyright line                               |
-| `parentalWarningType`   | `string`                                                      | No       | Parental warning type                                 |
-| `isImageAutogenerated`  | `boolean`                                                     | No       | Whether the image is autogenerated                    |
+| Field                         | Type                                                          | Required | Description                                           |
+| ----------------------------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------- |
+| `playlistName`                | `string`                                                      | Yes      | The name of the playlist                              |
+| `playlistId`                  | `string`                                                      | No       | Optional playlist ID (auto-generated if not provided) |
+| `playlistImageSizesMultihash` | `string`                                                      | No       | CID of the cover art image (from Uploads API)         |
+| `description`                 | `string`                                                      | No       | The playlist description                              |
+| `isAlbum`                     | `boolean`                                                     | No       | Whether this is an album                              |
+| `isPrivate`                   | `boolean`                                                     | No       | Whether the playlist is private                       |
+| `genre`                       | [`Genre`](tracks#genre-values)                                | No       | Playlist/album genre                                  |
+| `mood`                        | [`Mood`](tracks#mood-values)                                  | No       | Playlist/album mood                                   |
+| `tags`                        | `string`                                                      | No       | Comma-separated tags                                  |
+| `license`                     | `string`                                                      | No       | License type                                          |
+| `upc`                         | `string`                                                      | No       | Universal Product Code (for albums)                   |
+| `releaseDate`                 | `Date`                                                        | No       | Release date                                          |
+| `playlistContents`            | [`PlaylistAddedTimestamp[]`](#playlistaddedtimestamp)         | No       | Array of tracks to include in the playlist            |
+| `isStreamGated`               | `boolean`                                                     | No       | Whether streaming is behind an access gate            |
+| `isScheduledRelease`          | `boolean`                                                     | No       | Whether this is a scheduled release                   |
+| `streamConditions`            | [`AccessGate`](tracks#accessgate)                             | No       | Conditions for stream access gating                   |
+| `ddexApp`                     | `string`                                                      | No       | DDEX application identifier                           |
+| `ddexReleaseIds`              | `object`                                                      | No       | DDEX release identifiers                              |
+| `artists`                     | [`DdexResourceContributor[]`](tracks#ddexresourcecontributor) | No       | DDEX resource contributors / artists                  |
+| `copyrightLine`               | `object`                                                      | No       | Copyright line                                        |
+| `producerCopyrightLine`       | `object`                                                      | No       | Producer copyright line                               |
+| `parentalWarningType`         | `string`                                                      | No       | Parental warning type                                 |
+| `isImageAutogenerated`        | `boolean`                                                     | No       | Whether the image is autogenerated                    |
 
 ### UpdatePlaylistRequestBody
 
 All fields are optional — only include the fields you want to change.
 
-| Field                   | Type                                                          | Required | Description                                    |
-| ----------------------- | ------------------------------------------------------------- | -------- | ---------------------------------------------- |
-| `playlistName`          | `string`                                                      | No       | The name of the playlist                       |
-| `coverArtCid`           | `string`                                                      | No       | CID of the cover art image (from Uploads API)  |
-| `description`           | `string`                                                      | No       | The playlist description                       |
-| `isAlbum`               | `boolean`                                                     | No       | Whether this is an album                       |
-| `isPrivate`             | `boolean`                                                     | No       | Whether the playlist is private                |
-| `genre`                 | [`Genre`](tracks#genre-values)                                | No       | Playlist/album genre                           |
-| `mood`                  | [`Mood`](tracks#mood-values)                                  | No       | Playlist/album mood                            |
-| `tags`                  | `string`                                                      | No       | Comma-separated tags                           |
-| `license`               | `string`                                                      | No       | License type                                   |
-| `upc`                   | `string`                                                      | No       | Universal Product Code (for albums)            |
-| `releaseDate`           | `Date`                                                        | No       | Release date                                   |
-| `playlistContents`      | [`PlaylistAddedTimestamp[]`](#playlistaddedtimestamp)         | No       | Array of tracks in the playlist (replaces all) |
-| `isStreamGated`         | `boolean`                                                     | No       | Whether streaming is behind an access gate     |
-| `isScheduledRelease`    | `boolean`                                                     | No       | Whether this is a scheduled release            |
-| `streamConditions`      | [`AccessGate`](tracks#accessgate)                             | No       | Conditions for stream access gating            |
-| `ddexApp`               | `string`                                                      | No       | DDEX application identifier                    |
-| `ddexReleaseIds`        | `object`                                                      | No       | DDEX release identifiers                       |
-| `artists`               | [`DdexResourceContributor[]`](tracks#ddexresourcecontributor) | No       | DDEX resource contributors / artists           |
-| `copyrightLine`         | `object`                                                      | No       | Copyright line                                 |
-| `producerCopyrightLine` | `object`                                                      | No       | Producer copyright line                        |
-| `parentalWarningType`   | `string`                                                      | No       | Parental warning type                          |
-| `isImageAutogenerated`  | `boolean`                                                     | No       | Whether the image is autogenerated             |
+| Field                         | Type                                                          | Required | Description                                    |
+| ----------------------------- | ------------------------------------------------------------- | -------- | ---------------------------------------------- |
+| `playlistName`                | `string`                                                      | No       | The name of the playlist                       |
+| `playlistImageSizesMultihash` | `string`                                                      | No       | CID of the cover art image (from Uploads API)  |
+| `description`                 | `string`                                                      | No       | The playlist description                       |
+| `isAlbum`                     | `boolean`                                                     | No       | Whether this is an album                       |
+| `isPrivate`                   | `boolean`                                                     | No       | Whether the playlist is private                |
+| `genre`                       | [`Genre`](tracks#genre-values)                                | No       | Playlist/album genre                           |
+| `mood`                        | [`Mood`](tracks#mood-values)                                  | No       | Playlist/album mood                            |
+| `tags`                        | `string`                                                      | No       | Comma-separated tags                           |
+| `license`                     | `string`                                                      | No       | License type                                   |
+| `upc`                         | `string`                                                      | No       | Universal Product Code (for albums)            |
+| `releaseDate`                 | `Date`                                                        | No       | Release date                                   |
+| `playlistContents`            | [`PlaylistAddedTimestamp[]`](#playlistaddedtimestamp)         | No       | Array of tracks in the playlist (replaces all) |
+| `isStreamGated`               | `boolean`                                                     | No       | Whether streaming is behind an access gate     |
+| `isScheduledRelease`          | `boolean`                                                     | No       | Whether this is a scheduled release            |
+| `streamConditions`            | [`AccessGate`](tracks#accessgate)                             | No       | Conditions for stream access gating            |
+| `ddexApp`                     | `string`                                                      | No       | DDEX application identifier                    |
+| `ddexReleaseIds`              | `object`                                                      | No       | DDEX release identifiers                       |
+| `artists`                     | [`DdexResourceContributor[]`](tracks#ddexresourcecontributor) | No       | DDEX resource contributors / artists           |
+| `copyrightLine`               | `object`                                                      | No       | Copyright line                                 |
+| `producerCopyrightLine`       | `object`                                                      | No       | Producer copyright line                        |
+| `parentalWarningType`         | `string`                                                      | No       | Parental warning type                          |
+| `isImageAutogenerated`        | `boolean`                                                     | No       | Whether the image is autogenerated             |
 
 ### PlaylistAddedTimestamp
 

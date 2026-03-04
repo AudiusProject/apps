@@ -1,0 +1,1 @@
+{"parameters":[{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}},{"name":"id","in":"query","description":"The ID of the user(s)","style":"form","explode":true,"schema":{"type":"array","items":{"type":"string"}}}]}

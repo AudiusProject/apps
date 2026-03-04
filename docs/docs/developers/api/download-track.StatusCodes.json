@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"Success","content":{}},"216":{"description":"Partial content","content":{}},"400":{"description":"Bad request","content":{}},"416":{"description":"Content range invalid","content":{}},"500":{"description":"Server error","content":{}}}}
