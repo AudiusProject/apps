@@ -16,6 +16,8 @@ import {
   updateRouteOnExit
 } from 'common/store/pages/signon/actions'
 
+let hasShownRequiresAccountToastThisSession = false
+
 export type RestrictionType = 'none' | 'guest' | 'account'
 
 const canAccess = (
@@ -72,11 +74,14 @@ export const useRequiresAccountCallback = <T extends (...args: any) => any>(
         dispatch(updateRouteOnExit(returnRoute))
         dispatch(updateRouteOnCompletion(returnRoute))
         dispatch(openSignOn(/** signIn */ false))
-        dispatch(
-          showRequiresAccountToast(
-            accountStatus === Status.SUCCESS && !isAccountComplete
+        if (!hasShownRequiresAccountToastThisSession) {
+          hasShownRequiresAccountToastThisSession = true
+          dispatch(
+            showRequiresAccountToast(
+              accountStatus === Status.SUCCESS && !isAccountComplete
+            )
           )
-        )
+        }
         onOpenAuthModal?.()
         return
       }
