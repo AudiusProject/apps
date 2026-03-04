@@ -42,7 +42,7 @@ const { getTheme } = themeSelectors
 
 const Artwork = ({ track }: { track?: Track | null }) => {
   const { track_id } = track || {}
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: track_id,
     size: SquareSizes.SIZE_480_BY_480
   })

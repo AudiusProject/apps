@@ -2,6 +2,7 @@ import { memo } from 'react'
 
 import { SquareSizes, ID } from '@audius/common/models'
 import {
+  IconImage,
   IconLock,
   IconPlaybackPlay as IconPlay,
   IconPlaybackPause as IconPause
@@ -39,16 +40,20 @@ export const ArtworkIcon = ({
   isPlaying,
   artworkIconClassName,
   hasStreamAccess,
-  isTrack
+  isTrack,
+  hasNoArtwork
 }: {
   isBuffering: boolean
   isPlaying: boolean
   artworkIconClassName?: string
   hasStreamAccess?: boolean
   isTrack?: boolean
+  hasNoArtwork?: boolean
 }) => {
   let artworkIcon
-  if (isTrack && !hasStreamAccess) {
+  if (hasNoArtwork) {
+    artworkIcon = <IconImage width={36} height={36} />
+  } else if (isTrack && !hasStreamAccess) {
     artworkIcon = <IconLock width={36} height={36} />
   } else if (isBuffering) {
     artworkIcon = <LoadingSpinner className={styles.spinner} />
@@ -72,6 +77,7 @@ type ArtworkProps = TileArtworkProps & {
   image: any
   label?: string
   isTrack?: boolean
+  hasNoArtwork?: boolean
 }
 
 const Artwork = memo(
@@ -88,19 +94,22 @@ const Artwork = memo(
     label,
     hasStreamAccess,
     isTrack,
-    noShimmer
+    noShimmer,
+    hasNoArtwork
   }: ArtworkProps) => {
     const imageElement = (
       <DynamicImage
         wrapperClassName={cn(styles.artworkWrapper, {
           [styles.artworkInset]: !coSign,
           [styles.small]: size === 'small',
-          [styles.large]: size === 'large'
+          [styles.large]: size === 'large',
+          [styles.artworkEmpty]: hasNoArtwork ?? false
         })}
         className={styles.artwork}
         image={showSkeleton ? '' : image}
         aria-label={label}
         noShimmer={noShimmer}
+        useSkeleton={!hasNoArtwork}
       >
         {showArtworkIcon && (
           <ArtworkIcon
@@ -109,6 +118,7 @@ const Artwork = memo(
             artworkIconClassName={artworkIconClassName}
             hasStreamAccess={hasStreamAccess}
             isTrack={isTrack}
+            hasNoArtwork={hasNoArtwork}
           />
         )}
       </DynamicImage>
@@ -131,19 +141,21 @@ const Artwork = memo(
 )
 
 export const TrackArtwork = memo((props: TileArtworkProps) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: props.id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  return <Artwork {...props} image={image} isTrack />
+  return (
+    <Artwork {...props} image={image} isTrack hasNoArtwork={hasNoArtwork} />
+  )
 })
 
 export const CollectionArtwork = memo((props: TileArtworkProps) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useCollectionCoverArt({
     collectionId: props.id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  return <Artwork {...props} image={image} />
+  return <Artwork {...props} image={image} hasNoArtwork={hasNoArtwork} />
 })

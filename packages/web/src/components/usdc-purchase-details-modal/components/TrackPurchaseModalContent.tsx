@@ -21,7 +21,7 @@ export const TrackPurchaseModalContent = ({
   const { data: partialTrack } = useTrack(contentId, {
     select: (track) => pick(track, ['title', 'permalink'])
   })
-  const trackArtwork = useTrackCoverArt({
+  const { imageUrl: trackArtwork } = useTrackCoverArt({
     trackId: contentId,
     size: SquareSizes.SIZE_150_BY_150
   })

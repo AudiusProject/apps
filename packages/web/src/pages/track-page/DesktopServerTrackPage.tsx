@@ -19,6 +19,7 @@ import { Paper } from '@audius/harmony/src/components/layout/Paper'
 import { Tag } from '@audius/harmony/src/components/tag'
 import { Text } from '@audius/harmony/src/components/text'
 import { TextLink } from '@audius/harmony/src/components/text-link'
+import { IconImage } from '@audius/harmony/src/icons/individual/IconImage'
 import { Link } from 'react-router'
 
 import { ServerUserGeneratedText } from 'components/user-generated-text/ServerUserGeneratedText'
@@ -79,6 +80,13 @@ export const DesktopServerTrackPage = ({
     field_visibility,
     artwork
   } = track
+
+  const hasArtwork =
+    artwork &&
+    Object.entries(artwork).some(
+      ([k, v]) => k !== 'mirrors' && typeof v === 'string' && v.length > 0
+    )
+  const artworkSrc = hasArtwork ? artwork['480x480'] : undefined
   const { handle, name, cover_photo, profile_picture } = user
 
   // Use user cover photo as primary, fallback to profile picture with blur
@@ -130,12 +138,25 @@ export const DesktopServerTrackPage = ({
       >
         <Paper direction='column' w='100%'>
           <Flex p='l' gap='xl'>
-            <Artwork
-              src={artwork['480x480']}
-              isLoading={false}
-              h={320}
-              w={320}
-            />
+            {artworkSrc ? (
+              <Artwork src={artworkSrc} isLoading={false} h={320} w={320} />
+            ) : (
+              <Box
+                h={320}
+                w={320}
+                borderRadius='s'
+                backgroundColor='surface2'
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  '& svg path': { fill: 'var(--harmony-static-white)' }
+                }}
+              >
+                <IconImage width={80} height={80} />
+              </Box>
+            )}
             <Flex direction='column' gap='2xl'>
               <Flex direction='column' gap='l'>
                 <Text variant='label'>Track</Text>

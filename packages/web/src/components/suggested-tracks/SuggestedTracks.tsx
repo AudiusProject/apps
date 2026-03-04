@@ -47,7 +47,7 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
   const { track_id, title, owner_id } = track
   const { data: user } = useUser(owner_id)
   const { data: collection } = useCollection(collectionId)
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: track_id,
     size: SquareSizes.SIZE_150_BY_150
   })

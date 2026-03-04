@@ -166,7 +166,7 @@ const CollectionHeader = ({
     onClickMobileOverflow?.(collectionId, overflowActions)
   }
 
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId,
     size: SquareSizes.SIZE_1000_BY_1000
   })

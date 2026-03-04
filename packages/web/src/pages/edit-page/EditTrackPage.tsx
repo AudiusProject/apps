@@ -93,7 +93,7 @@ export const EditTrackPage = (props: EditPageProps) => {
     }
   }
 
-  const coverArtUrl = useTrackCoverArt({
+  const { imageUrl: coverArtUrl } = useTrackCoverArt({
     trackId: track?.track_id,
     size: SquareSizes.SIZE_1000_BY_1000
   })

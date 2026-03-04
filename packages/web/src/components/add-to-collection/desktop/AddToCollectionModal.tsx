@@ -219,7 +219,7 @@ const CollectionItem = ({
   collection,
   collectionType
 }: CollectionItemProps) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId: collection.playlist_id,
     size: SquareSizes.SIZE_150_BY_150
   })

@@ -24,11 +24,11 @@ export const TrackNameWithArtwork = ({
     enabled: !isTrack,
     select: (collection) => collection.playlist_name
   })
-  const trackArtwork = useTrackCoverArt({
+  const { imageUrl: trackArtwork } = useTrackCoverArt({
     trackId: id,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const albumArtwork = useCollectionCoverArt({
+  const { imageUrl: albumArtwork } = useCollectionCoverArt({
     collectionId: id,
     size: SquareSizes.SIZE_150_BY_150
   })

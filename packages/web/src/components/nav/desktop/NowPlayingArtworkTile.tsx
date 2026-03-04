@@ -4,6 +4,7 @@ import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
 import {
+  IconImage,
   IconWaveForm as IconVisualizer,
   IconButton,
   useTheme,
@@ -56,7 +57,7 @@ export const NowPlayingArtworkTile = () => {
   })
   const { title, isStreamGated, permalink, isOwner } = partialTrack ?? {}
 
-  const trackCoverArtImage = useTrackCoverArt({
+  const { imageUrl: trackCoverArtImage, hasNoArtwork } = useTrackCoverArt({
     trackId: trackId ?? undefined,
     size: SquareSizes.SIZE_480_BY_480
   })
@@ -100,7 +101,26 @@ export const NowPlayingArtworkTile = () => {
         style={slideInProps}
       >
         <Link to={permalink} aria-label={messages.viewTrack}>
-          <DynamicImage useSkeleton={false} image={trackCoverArtImage}>
+          <DynamicImage
+            key={trackId}
+            useSkeleton={!hasNoArtwork}
+            image={trackCoverArtImage}
+          >
+            {hasNoArtwork ? (
+              <Box
+                css={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2,
+                  '& svg path': { fill: 'var(--harmony-static-white)' }
+                }}
+              >
+                <IconImage width={48} height={48} />
+              </Box>
+            ) : null}
             <IconButton
               activeColor='active'
               ripple

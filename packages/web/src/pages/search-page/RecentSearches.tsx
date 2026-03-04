@@ -112,7 +112,7 @@ const RecentSearchTrack = (props: { searchItem: SearchItem }) => {
   })
   const { data: user } = useUser(partialTrack?.owner_id)
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: partialTrack?.track_id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -185,7 +185,7 @@ const RecentSearchCollection = (props: { searchItem: SearchItem }) => {
   const { playlist_id, playlist_name, permalink, playlist_owner_id, is_album } =
     partialCollection ?? {}
 
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId: playlist_id,
     size: SquareSizes.SIZE_150_BY_150
   })
