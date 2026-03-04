@@ -1,18 +1,10 @@
-import type { DecodedUserToken, UsersApi } from '../api/generated/default'
+import type { DecodedUserToken } from '../api/generated/default'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
-import { parseParams } from '../utils/parseParams'
 
 import { generateCodeVerifier, generateCodeChallenge } from './pkce'
 import type { OAuthTokenStore } from './tokenStore'
-import {
-  OAuthScope,
-  IsWriteAccessGrantedSchema,
-  IsWriteAccessGrantedRequest,
-  WriteOnceParams,
-  OAuthEnv,
-  OAUTH_URL
-} from './types'
+import { OAuthScope, WriteOnceParams, OAuthEnv, OAUTH_URL } from './types'
 
 export type LoginSuccessCallback = (
   profile: DecodedUserToken,
@@ -122,7 +114,6 @@ const PKCE_REDIRECT_URI_KEY = 'audiusPkceRedirectUri'
 type OAuthConfig = {
   appName?: string
   apiKey?: string
-  usersApi: UsersApi
   logger?: LoggerService
   tokenStore?: OAuthTokenStore
   basePath?: string
@@ -172,28 +163,6 @@ export class OAuth {
       },
       false
     )
-  }
-
-  async isWriteAccessGranted(params: IsWriteAccessGrantedRequest) {
-    const { userId, apiKey } = await parseParams(
-      'isWriteAccessGranted',
-      IsWriteAccessGrantedSchema
-    )(params)
-    if (!this.apiKey && !apiKey) {
-      this._surfaceError(
-        'Need to init Audius SDK with API key or pass in API Key directly to oauth.isWriteAccessGranted.'
-      )
-    }
-    const authorizedApps = await this.config.usersApi.getAuthorizedApps({
-      id: userId
-    })
-
-    const foundIndex = authorizedApps.data?.findIndex(
-      (a) =>
-        a.address.toLowerCase() ===
-        `0x${(apiKey || this.apiKey)!.toLowerCase()}`
-    )
-    return foundIndex !== undefined && foundIndex > -1
   }
 
   login({
@@ -362,16 +331,6 @@ export class OAuth {
     element.replaceWith(button)
   }
 
-  /**
-   * Verify if the given jwt ID token was signed by the subject (user) in the payload
-   * @deprecated see `UsersApi.verifyIDToken`
-   * @param token the token to verify
-   * @returns
-   */
-  async verifyToken(token: string) {
-    return await this.config.usersApi.verifyIDToken({ token })
-  }
-
   getCsrfToken() {
     return window.localStorage.getItem(CSRF_TOKEN_KEY)
   }
@@ -497,13 +456,30 @@ export class OAuth {
       this._surfaceError('State mismatch.')
     }
     // Verify token and decode
-    const decodedJwt = await this.verifyToken(event.data.token)
-    if (decodedJwt?.data) {
-      if (this.loginSuccessCallback) {
-        this.loginSuccessCallback(decodedJwt.data, event.data.token)
+    if (!this.config.basePath) {
+      this._surfaceError('basePath is required for token verification.')
+      return
+    }
+    try {
+      const verifyRes = await fetch(
+        `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
+      )
+      if (!verifyRes.ok) {
+        this._surfaceError('The token was invalid.')
+        return
       }
-    } else {
-      this._surfaceError('The token was invalid.')
+      const decoded = (await verifyRes.json()) as {
+        data?: DecodedUserToken
+      }
+      if (decoded?.data) {
+        if (this.loginSuccessCallback) {
+          this.loginSuccessCallback(decoded.data, event.data.token)
+        }
+      } else {
+        this._surfaceError('The token was invalid.')
+      }
+    } catch {
+      this._surfaceError('Token verification request failed.')
     }
   }
 

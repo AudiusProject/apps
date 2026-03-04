@@ -112,7 +112,6 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     typeof window !== 'undefined'
       ? new OAuth({
           apiKey,
-          usersApi,
           tokenStore,
           basePath
         })

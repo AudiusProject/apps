@@ -147,7 +147,6 @@ export const createSdkWithServices = (config: SdkConfig) => {
     ? new OAuth({
         appName,
         apiKey,
-        usersApi: apis.users,
         logger: services.logger
       })
     : undefined
