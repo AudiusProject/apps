@@ -8,6 +8,7 @@ import IconPlay from '@audius/harmony/src/assets/icons/Play.svg'
 import IconRepost from '@audius/harmony/src/assets/icons/Repost.svg'
 import IconShare from '@audius/harmony/src/assets/icons/Share.svg'
 import { Artwork } from '@audius/harmony/src/components/artwork/Artwork'
+import { IconImage } from '@audius/harmony/src/icons/individual/IconImage'
 import { Button } from '@audius/harmony/src/components/button/Button/Button'
 import { IconButton } from '@audius/harmony/src/components/button/IconButton/IconButton'
 import { PlainButton } from '@audius/harmony/src/components/button/PlainButton/PlainButton'
@@ -79,6 +80,13 @@ export const DesktopServerTrackPage = ({
     field_visibility,
     artwork
   } = track
+
+  const hasArtwork =
+    artwork &&
+    Object.entries(artwork).some(
+      ([k, v]) => k !== 'mirrors' && typeof v === 'string' && v.length > 0
+    )
+  const artworkSrc = hasArtwork ? artwork['480x480'] : undefined
   const { handle, name, cover_photo, profile_picture } = user
 
   // Use user cover photo as primary, fallback to profile picture with blur
@@ -130,12 +138,30 @@ export const DesktopServerTrackPage = ({
       >
         <Paper direction='column' w='100%'>
           <Flex p='l' gap='xl'>
-            <Artwork
-              src={artwork['480x480']}
-              isLoading={false}
-              h={320}
-              w={320}
-            />
+            {artworkSrc ? (
+              <Artwork
+                src={artworkSrc}
+                isLoading={false}
+                h={320}
+                w={320}
+              />
+            ) : (
+              <Box
+                h={320}
+                w={320}
+                borderRadius='s'
+                backgroundColor='surface2'
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  '& svg path': { fill: 'var(--harmony-static-white)' }
+                }}
+              >
+                <IconImage width={80} height={80} />
+              </Box>
+            )}
             <Flex direction='column' gap='2xl'>
               <Flex direction='column' gap='l'>
                 <Text variant='label'>Track</Text>

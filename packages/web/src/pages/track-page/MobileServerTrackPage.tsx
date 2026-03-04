@@ -8,6 +8,7 @@ import IconPlay from '@audius/harmony/src/assets/icons/Play.svg'
 import IconRepost from '@audius/harmony/src/assets/icons/Repost.svg'
 import IconShare from '@audius/harmony/src/assets/icons/Share.svg'
 import { Artwork } from '@audius/harmony/src/components/artwork/Artwork'
+import { IconImage } from '@audius/harmony/src/icons/individual/IconImage'
 import { Button } from '@audius/harmony/src/components/button/Button/Button'
 import { IconButton } from '@audius/harmony/src/components/button/IconButton/IconButton'
 import { PlainButton } from '@audius/harmony/src/components/button/PlainButton/PlainButton'
@@ -79,6 +80,13 @@ export const MobileServerTrackPage = ({
     field_visibility,
     artwork
   } = track
+
+  const hasArtwork =
+    artwork &&
+    Object.entries(artwork).some(
+      ([k, v]) => k !== 'mirrors' && typeof v === 'string' && v.length > 0
+    )
+  const artworkSrc = hasArtwork ? artwork['480x480'] : undefined
   const { handle, name, cover_photo, profile_picture } = user
 
   // Use user cover photo as primary, fallback to profile picture with blur
@@ -113,12 +121,30 @@ export const MobileServerTrackPage = ({
             <Text variant='label' color='subdued'>
               Track
             </Text>
-            <Artwork
-              src={artwork['480x480']}
-              isLoading={false}
-              h={224}
-              w={224}
-            />
+            {artworkSrc ? (
+              <Artwork
+                src={artworkSrc}
+                isLoading={false}
+                h={224}
+                w={224}
+              />
+            ) : (
+              <Box
+                h={224}
+                w={224}
+                borderRadius='s'
+                backgroundColor='surface2'
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  '& svg path': { fill: 'var(--harmony-static-white)' }
+                }}
+              >
+                <IconImage width={56} height={56} />
+              </Box>
+            )}
             <Flex direction='column' gap='s'>
               <Text variant='heading' size='s'>
                 {title}

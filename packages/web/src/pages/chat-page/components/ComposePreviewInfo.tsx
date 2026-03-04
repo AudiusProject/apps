@@ -44,7 +44,7 @@ type ComposerTrackInfoProps = {
 
 export const ComposerTrackInfo = (props: ComposerTrackInfoProps) => {
   const { trackId } = props
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -73,7 +73,7 @@ type ComposerCollectionInfoProps = {
 
 export const ComposerCollectionInfo = (props: ComposerCollectionInfoProps) => {
   const { collectionId } = props
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId,
     size: SquareSizes.SIZE_150_BY_150
   })

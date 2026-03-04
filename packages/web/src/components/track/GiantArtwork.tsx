@@ -2,7 +2,7 @@ import { memo, useEffect } from 'react'
 
 import { SquareSizes, Remix } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { IconArrowLeft } from '@audius/harmony'
+import { IconArrowLeft, IconImage } from '@audius/harmony'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import TrackFlair from 'components/track-flair/TrackFlair'
@@ -24,25 +24,31 @@ const messages = {
 
 const GiantArtwork = (props: GiantArtworkProps) => {
   const { trackId, callback, onIconLeftClick } = props
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
   useEffect(() => {
-    if (image) callback()
-  }, [image, callback])
+    if (image || hasNoArtwork) callback()
+  }, [image, hasNoArtwork, callback])
 
   const imageElement = (
     <DynamicImage
       wrapperClassName={styles.imageWrapper}
       image={image}
       alt={messages.artworkAltText}
+      useSkeleton={!hasNoArtwork}
     >
-      {onIconLeftClick && (
+      {hasNoArtwork ? (
+        <div className={styles.emptyArtworkIcon}>
+          <IconImage width={80} height={80} />
+        </div>
+      ) : null}
+      {onIconLeftClick && !hasNoArtwork ? (
         <div className={styles.iconLeftWrapper} onClick={onIconLeftClick}>
           <IconArrowLeft width={24} height={24} />
         </div>
-      )}
+      ) : null}
     </DynamicImage>
   )
 

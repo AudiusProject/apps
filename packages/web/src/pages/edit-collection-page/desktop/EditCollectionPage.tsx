@@ -53,7 +53,7 @@ export const EditCollectionPage = () => {
   const { data: tracks, isLoading: isTracksLoading } =
     useCollectionTracks(playlist_id)
 
-  const artworkUrl = useCollectionCoverArt({
+  const { imageUrl: artworkUrl } = useCollectionCoverArt({
     collectionId: playlist_id,
     size: SquareSizes.SIZE_1000_BY_1000
   })

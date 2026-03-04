@@ -40,7 +40,7 @@ const TrackTileArt = ({
   artworkIconClassName,
   callback
 }: TrackTileArtProps) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -48,9 +48,15 @@ const TrackTileArt = ({
   const imageProps = {
     image: showSkeleton ? '' : image,
     noShimmer,
+    useSkeleton: !hasNoArtwork,
     wrapperClassName: coSign
       ? styles.imageWrapper
-      : cn(styles.container, styles.imageWrapper, className),
+      : cn(
+          styles.container,
+          styles.imageWrapper,
+          className,
+          hasNoArtwork && styles.artworkEmpty
+        ),
     'aria-label': label,
     onLoad: callback
   }
@@ -60,7 +66,11 @@ const TrackTileArt = ({
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
-        artworkIconClassName={artworkIconClassName}
+        artworkIconClassName={cn(
+          artworkIconClassName,
+          hasNoArtwork && styles.artworkIconVisible
+        )}
+        hasNoArtwork={hasNoArtwork}
       />
     </DynamicImage>
   )
@@ -88,7 +98,7 @@ const CollectionTileArt = ({
   artworkIconClassName,
   callback
 }: TrackTileArtProps) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useCollectionCoverArt({
     collectionId: id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -96,9 +106,15 @@ const CollectionTileArt = ({
   const imageProps = {
     image: showSkeleton ? '' : image,
     noShimmer,
+    useSkeleton: !hasNoArtwork,
     wrapperClassName: coSign
       ? styles.imageWrapper
-      : cn(styles.container, styles.imageWrapper, className),
+      : cn(
+          styles.container,
+          styles.imageWrapper,
+          className,
+          hasNoArtwork && styles.artworkEmpty
+        ),
     'aria-label': label,
     onLoad: callback
   }
@@ -108,7 +124,11 @@ const CollectionTileArt = ({
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
-        artworkIconClassName={artworkIconClassName}
+        artworkIconClassName={cn(
+          artworkIconClassName,
+          hasNoArtwork && styles.artworkIconVisible
+        )}
+        hasNoArtwork={hasNoArtwork}
       />
     </DynamicImage>
   )
