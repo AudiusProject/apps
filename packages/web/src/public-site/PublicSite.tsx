@@ -56,11 +56,12 @@ const ExternalRedirect = ({ to }: { to: string }) => {
 
 type PublicSiteProps = {
   isMobile: boolean
+  isAuthenticated: boolean
   setRenderPublicSite: (shouldRender: boolean) => void
 }
 
 export const PublicSite = (props: PublicSiteProps) => {
-  const { isMobile, setRenderPublicSite } = props
+  const { isMobile, isAuthenticated, setRenderPublicSite } = props
   const [isMobileOrNarrow, setIsMobileOrNarrow] = useState(isMobile)
   const handleMobileMediaQuery = useCallback(() => {
     if (MOBILE_WIDTH_MEDIA_QUERY.matches) setIsMobileOrNarrow(true)
@@ -199,6 +200,7 @@ export const PublicSite = (props: PublicSiteProps) => {
                         element={
                           <LandingPage2026
                             isMobile={isMobileOrNarrow}
+                            isAuthenticated={isAuthenticated}
                             openNavScreen={openNavScreen}
                             setRenderPublicSite={setRenderPublicSite}
                           />

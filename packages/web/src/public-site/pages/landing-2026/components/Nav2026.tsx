@@ -28,10 +28,11 @@ import IconHelpSupport from '../assets/icon-help-support.svg'
 
 import styles from './Nav2026.module.css'
 
-const { SIGN_UP_PAGE, DOWNLOAD_LINK } = route
+const { SIGN_UP_PAGE, TRENDING_PAGE, DOWNLOAD_LINK } = route
 
 const messages = {
-  getStarted: 'Get Started',
+  signUp: 'Sign Up',
+  launch: 'Launch',
   resources: 'Resources'
 }
 
@@ -83,12 +84,13 @@ const SOCIAL_LINKS = [
 
 type Nav2026Props = {
   isMobile: boolean
+  isAuthenticated: boolean
   openNavScreen: () => void
   setRenderPublicSite: (shouldRender: boolean) => void
 }
 
 export const Nav2026 = (props: Nav2026Props) => {
-  const { isMobile, setRenderPublicSite } = props
+  const { isMobile, isAuthenticated, setRenderPublicSite } = props
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isDropdownClosing, setIsDropdownClosing] = useState(false)
@@ -136,9 +138,10 @@ export const Nav2026 = (props: Nav2026Props) => {
     }
   }, [isMobileOverlayOpen])
 
-  const onSignUp = (e: MouseEvent) => {
+  const onCtaClick = (e: MouseEvent) => {
     setIsMobileOverlayOpen(false)
-    handleClickRoute(SIGN_UP_PAGE, setRenderPublicSite, navigate)(e)
+    const routeToUse = isAuthenticated ? TRENDING_PAGE : SIGN_UP_PAGE
+    handleClickRoute(routeToUse, setRenderPublicSite, navigate)(e)
   }
 
   const onLogoClick = (e: MouseEvent) => {
@@ -216,10 +219,10 @@ export const Nav2026 = (props: Nav2026Props) => {
                   <button
                     type='button'
                     className={styles.ctaButton}
-                    onClick={onSignUp}
+                    onClick={onCtaClick}
                   >
                     <span className={styles.ctaLabel}>
-                      {messages.getStarted}
+                      {isAuthenticated ? messages.launch : messages.signUp}
                     </span>
                   </button>
                 </>
@@ -231,7 +234,8 @@ export const Nav2026 = (props: Nav2026Props) => {
       {isMobileOverlayOpen ? (
         <MobileNavOverlay
           onClose={() => setIsMobileOverlayOpen(false)}
-          onSignUp={onSignUp}
+          onCtaClick={onCtaClick}
+          ctaLabel={isAuthenticated ? messages.launch : messages.signUp}
           onLogoClick={onLogoClick}
         />
       ) : null}
@@ -241,11 +245,13 @@ export const Nav2026 = (props: Nav2026Props) => {
 
 function MobileNavOverlay({
   onClose,
-  onSignUp,
+  onCtaClick,
+  ctaLabel,
   onLogoClick
 }: {
   onClose: () => void
-  onSignUp: (e: MouseEvent) => void
+  onCtaClick: (e: MouseEvent) => void
+  ctaLabel: string
   onLogoClick: (e: MouseEvent) => void
 }) {
   const handleItemClick = (href: string) => () => {
@@ -315,9 +321,9 @@ function MobileNavOverlay({
           <button
             type='button'
             className={styles.overlayCtaButton}
-            onClick={onSignUp}
+            onClick={onCtaClick}
           >
-            <span className={styles.ctaLabel}>{messages.getStarted}</span>
+            <span className={styles.ctaLabel}>{ctaLabel}</span>
           </button>
         </div>
       </div>
