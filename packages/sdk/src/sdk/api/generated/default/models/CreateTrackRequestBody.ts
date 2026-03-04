@@ -154,13 +154,13 @@ export interface CreateTrackRequestBody {
      */
     releaseDate?: Date;
     /**
-     * IPFS CID for the track audio file (required)
+     * CID for the track audio file (required)
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
     trackCid: string;
     /**
-     * IPFS CID for the original track file
+     * CID for the original track file
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
@@ -172,19 +172,13 @@ export interface CreateTrackRequestBody {
      */
     origFilename?: string;
     /**
-     * IPFS CID for cover art
-     * @type {string}
-     * @memberof CreateTrackRequestBody
-     */
-    coverArtCid?: string;
-    /**
-     * Cover art sizes metadata
+     * CID for the track cover art
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
     coverArtSizes?: string;
     /**
-     * IPFS CID for the track preview
+     * CID for the track preview
      * @type {string}
      * @memberof CreateTrackRequestBody
      */
@@ -219,6 +213,12 @@ export interface CreateTrackRequestBody {
      * @memberof CreateTrackRequestBody
      */
     isStreamGated?: boolean | null;
+    /**
+     * Wallet addresses that can sign to authorize stream access (programmable distribution). When empty or omitted, the track is public and validator/creator nodes can serve it.
+     * @type {Array<string>}
+     * @memberof CreateTrackRequestBody
+     */
+    accessAuthorities?: Array<string> | null;
     /**
      * 
      * @type {AccessGate}
@@ -378,7 +378,6 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'trackCid': json['track_cid'],
         'origFileCid': !exists(json, 'orig_file_cid') ? undefined : json['orig_file_cid'],
         'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
-        'coverArtCid': !exists(json, 'cover_art_cid') ? undefined : json['cover_art_cid'],
         'coverArtSizes': !exists(json, 'cover_art_sizes') ? undefined : json['cover_art_sizes'],
         'previewCid': !exists(json, 'preview_cid') ? undefined : json['preview_cid'],
         'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
@@ -386,6 +385,7 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'isDownloadable': !exists(json, 'is_downloadable') ? undefined : json['is_downloadable'],
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
         'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
+        'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
         'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
@@ -433,7 +433,6 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'track_cid': value.trackCid,
         'orig_file_cid': value.origFileCid,
         'orig_filename': value.origFilename,
-        'cover_art_cid': value.coverArtCid,
         'cover_art_sizes': value.coverArtSizes,
         'preview_cid': value.previewCid,
         'preview_start_seconds': value.previewStartSeconds,
@@ -441,6 +440,7 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'is_downloadable': value.isDownloadable,
         'is_unlisted': value.isUnlisted,
         'is_stream_gated': value.isStreamGated,
+        'access_authorities': value.accessAuthorities,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),
         'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
