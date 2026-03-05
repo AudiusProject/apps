@@ -108,7 +108,7 @@ const DesktopSignOnRoot = (props: RootProps) => {
         }}
       />
 
-      {/* Nav overlay: X close (left) + Audius logo (right) */}
+      {/* Nav overlay: X close (left) + Audius logo (right) - always white in light/dark mode */}
       {!hideCloseButton ? (
         <Flex
           css={{
@@ -117,7 +117,8 @@ const DesktopSignOnRoot = (props: RootProps) => {
             left: 0,
             right: 0,
             padding: spacing.xl,
-            zIndex: 2
+            zIndex: 2,
+            '& svg, & svg path': { fill: '#FFFFFF' }
           }}
           justifyContent='space-between'
           alignItems='center'
