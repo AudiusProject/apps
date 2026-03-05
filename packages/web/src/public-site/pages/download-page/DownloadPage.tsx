@@ -41,6 +41,7 @@ const messages = {
 
 type DownloadPageProps = {
   isMobile: boolean
+  isAuthenticated: boolean
   openNavScreen: () => void
   setRenderPublicSite: (shouldRender: boolean) => void
 }
@@ -181,6 +182,7 @@ const DownloadPage = (props: DownloadPageProps) => {
         ) : null}
         <Nav2026
           isMobile={isMobileOrNarrow}
+          isAuthenticated={props.isAuthenticated}
           openNavScreen={props.openNavScreen}
           setRenderPublicSite={props.setRenderPublicSite}
         />

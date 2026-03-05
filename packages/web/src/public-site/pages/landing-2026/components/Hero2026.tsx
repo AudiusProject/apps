@@ -9,7 +9,7 @@ import landingImg from '../assets/landing.png'
 
 import styles from './Hero2026.module.css'
 
-const { SIGN_UP_PAGE } = route
+const { TRENDING_PAGE } = route
 
 const messages = {
   line1: 'Find your people.',
@@ -26,7 +26,7 @@ export const Hero2026 = (props: Hero2026Props) => {
   const navigate = useNavigate()
 
   const onGetStarted = (e: MouseEvent) => {
-    handleClickRoute(SIGN_UP_PAGE, props.setRenderPublicSite, navigate)(e)
+    handleClickRoute(TRENDING_PAGE, props.setRenderPublicSite, navigate)(e)
   }
 
   return (

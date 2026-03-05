@@ -26,6 +26,7 @@ const MOBILE_MEDIA_QUERY =
 
 type LandingPage2026Props = {
   isMobile: boolean
+  isAuthenticated: boolean
   openNavScreen: () => void
   setRenderPublicSite: (shouldRender: boolean) => void
 }
@@ -112,6 +113,7 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
         ) : null}
         <Nav2026
           isMobile={isMobileOrNarrow}
+          isAuthenticated={props.isAuthenticated}
           openNavScreen={props.openNavScreen}
           setRenderPublicSite={props.setRenderPublicSite}
         />
