@@ -117,8 +117,7 @@ const DesktopSignOnRoot = (props: RootProps) => {
             left: 0,
             right: 0,
             padding: spacing.xl,
-            zIndex: 2,
-            '& svg, & svg path': { fill: '#FFFFFF' }
+            zIndex: 2
           }}
           justifyContent='space-between'
           alignItems='center'
@@ -127,9 +126,13 @@ const DesktopSignOnRoot = (props: RootProps) => {
             to={routeOnExit}
             css={{ display: 'flex', alignItems: 'center' }}
           >
-            <IconCloseAlt color='white' height={32} width={32} />
+            <IconCloseAlt color='staticWhite' size='xl' />
           </Link>
-          <IconAudiusLogoHorizontal color='white' height={32} width={157} />
+          <IconAudiusLogoHorizontal
+            color='staticWhite'
+            height={32}
+            width={157}
+          />
         </Flex>
       ) : null}
 
