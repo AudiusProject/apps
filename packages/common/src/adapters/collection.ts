@@ -14,7 +14,7 @@ import {
   type UpdateAlbumRequestBody,
   type UpdatePlaylistRequestBody
 } from '@audius/sdk'
-import dayjs from 'dayjs'
+import dayjs from '~/utils/dayjs'
 import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 

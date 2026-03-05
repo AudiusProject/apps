@@ -14,7 +14,7 @@ import {
   OptionalId
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
-import dayjs from 'dayjs'
+import dayjs from '~/utils/dayjs'
 import { omit, pick, mapValues } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
