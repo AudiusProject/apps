@@ -22,7 +22,8 @@ import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, usePrevious } from 'react-use'
 
-import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'
+import Header from 'components/header/mobile/Header'
+import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { CenterPreset } from 'components/nav/mobile/NavContext'
 import { SearchResults } from 'pages/search-page/SearchResults'
@@ -129,15 +130,13 @@ const SearchExplorePage = ({
     categoryKey
   ])
 
-  const [, setBannerIsVisible] = useState(false)
+  const { setCenter, setRight } = useContext(NavContext)!
+  const { setHeader } = useContext(HeaderContext)
 
   useEffect(() => {
-    const img = new window.Image()
-    img.src = BackgroundWaves
-    img.onload = () => setBannerIsVisible(true)
-  }, [])
+    setHeader(<Header title={messages.explore} />)
+  }, [setHeader])
 
-  const { setLeft, setCenter, setRight } = useContext(NavContext)!
   const handleCategoryChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
@@ -163,11 +162,10 @@ const SearchExplorePage = ({
     ]
   }, [categoryKey])
 
-  // Hide search header
   useEffect(() => {
     setRight(null)
     setCenter(CenterPreset.LOGO)
-  }, [setLeft, setCenter, setRight])
+  }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = categoryKey === 'tracks' || categoryKey === 'all'
@@ -179,6 +177,7 @@ const SearchExplorePage = ({
     <MobilePageContainer
       title={messages.explore}
       containerClassName='search-explore-page'
+      hasDefaultHeader
     >
       <Flex direction='column' w='100%' style={{ overflow: 'hidden' }}>
         <Flex direction='column' ph='l' pt='l' backgroundColor='surface1'>
