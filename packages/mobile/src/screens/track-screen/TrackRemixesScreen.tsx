@@ -1,3 +1,5 @@
+import { useCallback, useState } from 'react'
+
 import {
   useCurrentUserId,
   useRemixContest,
@@ -12,6 +14,7 @@ import { Text as RNText, View } from 'react-native'
 
 import {
   Button,
+  FilterButton,
   Flex,
   IconRemix,
   IconTrophy,
@@ -56,17 +59,37 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   }
 }))
 
+const SORT_OPTIONS = [
+  { label: 'Most Recent', value: 'recent' as const },
+  { label: 'Most Plays', value: 'plays' as const },
+  { label: 'Most Favorites', value: 'likes' as const }
+]
+
 export const TrackRemixesScreen = () => {
   const { onOpen: openPickWinnersDrawer } = useDrawer('PickWinners')
   const { data: currentUserId } = useCurrentUserId()
   const { params } = useRoute<'TrackRemixes'>()
   const { data: track } = useTrackByParams(params)
   const trackId = track?.track_id
+
+  const [sortMethod, setSortMethod] = useState<'recent' | 'plays' | 'likes'>(
+    'recent'
+  )
+  const [isCosign, setIsCosign] = useState(false)
+  const [isContestEntry, setIsContestEntry] = useState(false)
+
+  const handleSortChange = useCallback((value: string | undefined) => {
+    setSortMethod((value as 'recent' | 'plays' | 'likes') ?? 'recent')
+  }, [])
+
   const { data, count, isFetching, isPending, loadNextPage, lineup, pageSize } =
     useRemixesLineup({
       trackId: track?.track_id,
       includeOriginal: true,
-      includeWinners: true
+      includeWinners: true,
+      sortMethod,
+      isCosign,
+      isContestEntry
     })
   const { data: contest } = useRemixContest(trackId)
   const isRemixContest = !!contest
@@ -94,13 +117,40 @@ export const TrackRemixesScreen = () => {
   )
 
   const remixesDelineator = (
-    <Flex justifyContent='space-between' ph='l' pt='xl'>
+    <Flex ph='l' pt='xl' gap='m'>
       {count ? (
         <Text variant='title'>
           {messages.remixesTitle}
           {count !== undefined ? ` (${count})` : ''}
         </Text>
       ) : null}
+      <Flex row gap='s' wrap='wrap'>
+        <FilterButton
+          label={messages.coSigned}
+          value={isCosign ? 'true' : undefined}
+          onPress={() => setIsCosign((prev) => !prev)}
+          onChange={(v) => setIsCosign(v === 'true')}
+          size='small'
+        />
+        {isRemixContest ? (
+          <FilterButton
+            label={messages.contestEntries}
+            value={isContestEntry ? 'true' : undefined}
+            onPress={() => setIsContestEntry((prev) => !prev)}
+            onChange={(v) => setIsContestEntry(v === 'true')}
+            size='small'
+          />
+        ) : null}
+        <FilterButton
+          label='Sort'
+          value={sortMethod}
+          variant='replaceLabel'
+          onChange={handleSortChange}
+          options={SORT_OPTIONS}
+          disableSearch
+          size='small'
+        />
+      </Flex>
     </Flex>
   )
 
