@@ -29,11 +29,11 @@ import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { env } from 'services/env'
 import { useSelector } from 'utils/reducer'
 
-import { AccountHeader } from '../components/AccountHeader'
 import { PreviewArtistHint } from '../components/PreviewArtistHint'
 import {
   Heading,
   HiddenLegend,
+  Page,
   PageFooter,
   ScrollView
 } from '../components/layout'
@@ -50,12 +50,10 @@ const initialValues: SelectArtistsValues = {
   selectedArtists: []
 }
 
-// This is a workaround for local dev environments that don't have any artists
-// This will ensure any errors set on mount get cleared out
 const DevModeClearErrors = () => {
   const { setErrors } = useFormikContext()
   useEffect(() => {
-    setErrors({}) // empty all errors
+    setErrors({})
   }, [setErrors])
   return null
 }
@@ -67,9 +65,9 @@ export const SelectArtistsPage = () => {
   const [currentGenre, setCurrentGenre] = useState('Featured')
   const dispatch = useDispatch()
   const navigate = useNavigateToPage()
-  const { color } = useTheme()
   const headerContainerRef = useRef<HTMLDivElement | null>(null)
   const { isMobile } = useMedia()
+  const { color } = useTheme()
 
   const handleChangeGenre = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setCurrentGenre(e.target.value)
@@ -79,13 +77,11 @@ export const SelectArtistsPage = () => {
     (values: SelectArtistsValues) => {
       const { selectedArtists } = values
 
-      // Only add artists if some were selected
       if (selectedArtists.length > 0) {
         const artistsIDArray = [...selectedArtists].map((a) => Number(a))
         dispatch(addFollowArtists(artistsIDArray))
       }
 
-      // Always create the account (whether artists selected or not)
       dispatch(signUp())
 
       if (isMobile) {
@@ -116,11 +112,9 @@ export const SelectArtistsPage = () => {
     ? isFeaturedArtistsPending
     : isTopArtistsPending
 
-  // Note: this doesn't catch when running `web:prod`
   const isDevEnvironment =
     env.ENVIRONMENT === 'development' ||
     window.localStorage.getItem('FORCE_DEV') === 'true'
-  // This a workaround flag for local envs that don't have any artists and get stuck at this screen
   const noArtistsSkipValidation =
     (!artists || artists.length === 0) && isDevEnvironment
 
@@ -140,7 +134,11 @@ export const SelectArtistsPage = () => {
 
   const artistContent = artists?.length ? (
     artists.map((user) => (
-      <FollowArtistCard key={user.user_id} user={user as UserMetadata} />
+      <FollowArtistCard
+        key={user.user_id}
+        user={user as UserMetadata}
+        compact={!isMobile}
+      />
     ))
   ) : (
     <Flex pv='xl' gap='xs' alignItems='center'>
@@ -155,52 +153,29 @@ export const SelectArtistsPage = () => {
     <Formik
       initialValues={initialValues}
       onSubmit={handleSubmit}
-      // If using no artists + local dev workaround we just remove all validation
       validationSchema={!noArtistsSkipValidation ? formikSchema : undefined}
       validateOnMount
     >
       {({ values, isValid, isSubmitting, isValidating }) => {
         const { selectedArtists } = values
         return (
-          <ScrollView as={Form} gap={isMobile ? undefined : '3xl'}>
-            <AccountHeader
-              mode='viewing'
-              backButtonText={
-                isMobile ? undefined : selectArtistsPageMessages.backToGenres
-              }
-            />
+          <Page as={Form} centered transition='horizontal'>
             {noArtistsSkipValidation && !isValid ? (
               <DevModeClearErrors />
             ) : undefined}
-            <AnimatedFlex
-              direction='column'
-              mh={isMobile ? undefined : '5xl'}
-              mb={isMobile ? undefined : 'xl'}
-              style={styles}
-            >
+            <AnimatedFlex direction='column' style={styles}>
               <Flex
                 direction='column'
                 gap='xl'
                 pt={isMobile ? '2xl' : undefined}
                 pb='xl'
-                shadow={isMobile ? 'mid' : undefined}
-                css={{
-                  ...(isMobile && {
-                    zIndex: 2,
-                    backgroundColor: color.background.white,
-                    position: 'sticky',
-                    top: headerContainerRef?.current
-                      ? -(32 + headerContainerRef.current.clientHeight)
-                      : undefined
-                  })
-                }}
               >
                 <Heading
                   ref={headerContainerRef}
                   ph={isMobile ? 'l' : undefined}
                   heading={selectArtistsPageMessages.header}
                   description={selectArtistsPageMessages.description}
-                  centered={!isMobile}
+                  centered
                 />
                 <ScrollView
                   orientation='horizontal'
@@ -218,7 +193,6 @@ export const SelectArtistsPage = () => {
                       genre as GenreLabel
                     )
                     return (
-                      // TODO: max of 6, kebab overflow
                       <SelectablePill
                         key={genre}
                         type='radio'
@@ -239,7 +213,7 @@ export const SelectArtistsPage = () => {
                   pv='xl'
                   ph={isMobile ? 'l' : 'xl'}
                   css={{
-                    minHeight: 500,
+                    minHeight: 400,
                     minWidth: !isMobile ? 530 : undefined
                   }}
                   direction='column'
@@ -253,33 +227,59 @@ export const SelectArtistsPage = () => {
                     gap={isMobile ? 's' : 'm'}
                     wrap='wrap'
                     justifyContent='center'
+                    css={
+                      !isMobile
+                        ? {
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            maxWidth: 720,
+                            margin: '0 auto',
+                            width: '100%',
+                            boxSizing: 'border-box'
+                          }
+                        : undefined
+                    }
                   >
                     {isLoading
                       ? range(9).map((index) => (
-                          <FollowArtistTileSkeleton key={index} />
+                          <FollowArtistTileSkeleton
+                            key={index}
+                            compact={!isMobile}
+                          />
                         ))
                       : artistContent}
                   </Flex>
                 </ArtistsList>
               </SelectArtistsPreviewContextProvider>
             </AnimatedFlex>
-            <PageFooter
-              centered
-              sticky
-              buttonProps={{
-                disabled: isSubmitting,
-                isLoading: isSubmitting || isValidating
+            <Flex
+              w='100%'
+              css={{
+                flexShrink: 0,
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 1,
+                backgroundColor: color.background.default
               }}
-              prefix={
-                <Flex direction='column' gap='m' alignItems='center'>
-                  <Text variant='body'>
-                    {selectArtistsPageMessages.selected}{' '}
-                    {selectedArtists.length || 0}/3
-                  </Text>
-                </Flex>
-              }
-            />
-          </ScrollView>
+            >
+              <PageFooter
+                centered
+                sticky={false}
+                buttonProps={{
+                  disabled: isSubmitting,
+                  isLoading: isSubmitting || isValidating
+                }}
+                prefix={
+                  <Flex direction='column' gap='m' alignItems='center'>
+                    <Text variant='body'>
+                      {selectArtistsPageMessages.selected}{' '}
+                      {selectedArtists.length || 0}/3
+                    </Text>
+                  </Flex>
+                }
+              />
+            </Flex>
+          </Page>
         )
       }}
     </Formik>

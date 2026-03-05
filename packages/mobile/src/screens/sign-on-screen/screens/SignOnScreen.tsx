@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 import { css } from '@emotion/native'
@@ -9,32 +8,20 @@ import {
   updateRouteOnCompletion,
   setValueField
 } from 'common/store/pages/signon/actions'
-import { ImageBackground, SafeAreaView } from 'react-native'
-import Animated, {
-  CurvedTransition,
-  FadeIn,
-  FadeOut,
-  SlideInUp
-} from 'react-native-reanimated'
+import { useDarkMode } from 'react-native-dynamic'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { usePrevious } from 'react-use'
 
 import {
+  Divider,
   Flex,
-  IconAudiusLogoHorizontalColorNew,
   IconAudiusLogoHorizontalNew,
-  Paper,
-  RadialGradient,
   Text,
   TextLink,
-  useTheme
+  ThemeProvider as HarmonyThemeProvider
 } from '@audius/harmony-native'
-import DJBackground from 'app/assets/images/DJportrait.jpg'
 import type { NonLinkProps } from 'app/harmony-native/components/TextLink/types'
 import { dispatch } from 'app/store'
 
-import { AudiusValues } from '../components/AudiusValues'
-import { PANEL_EXPAND_DURATION } from '../constants'
 import type { SignOnScreenParamList } from '../types'
 
 import { CreateEmailScreen } from './CreateEmailScreen'
@@ -46,99 +33,22 @@ const messages = {
   createAccount: 'Create an Account'
 }
 
-const AnimatedPaper = Animated.createAnimatedComponent(Paper)
-const AnimatedFlex = Animated.createAnimatedComponent(Flex)
-
 const CreateAccountLink = (props: NonLinkProps) => {
   const { onPress } = props
-  const { spacing } = useTheme()
 
   return (
-    <AnimatedFlex
+    <Flex
       alignItems='center'
       justifyContent='flex-end'
       style={css({ flexGrow: 1 })}
-      entering={FadeIn}
-      exiting={FadeOut}
     >
-      <SafeAreaView style={{ paddingBottom: spacing['3xl'] }}>
-        <Text
-          variant='title'
-          strength='weak'
-          textAlign='center'
-          color='inverse'
-          style={{ justifyContent: 'flex-end' }}
-        >
-          {messages.newToAudius}{' '}
-          <TextLink showUnderline onPress={onPress}>
-            {messages.createAccount}
-          </TextLink>
-        </Text>
-      </SafeAreaView>
-    </AnimatedFlex>
-  )
-}
-
-const Background = () => {
-  return (
-    <Flex
-      h='100%'
-      w='100%'
-      alignItems='center'
-      justifyContent='flex-end'
-      style={css({
-        position: 'absolute',
-        top: 0,
-        left: 0
-      })}
-    >
-      <RadialGradient
-        style={css({ position: 'absolute', zIndex: 1 })}
-        colors={[
-          'rgba(91, 35, 225, 0.8)',
-          'rgba(113, 41, 230, 0.64)',
-          'rgba(162, 47, 235, 0.5)'
-        ]}
-        stops={[0, 0.67, 1]}
-        radius={100}
-      />
-      <ImageBackground
-        source={DJBackground}
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          top: 0
-        }}
-        resizeMode='cover'
-      />
+      <Text variant='title' strength='weak' textAlign='center' color='subdued'>
+        {messages.newToAudius}{' '}
+        <TextLink showUnderline onPress={onPress}>
+          {messages.createAccount}
+        </TextLink>
+      </Text>
     </Flex>
-  )
-}
-
-type ExpandablePanelProps = {
-  children: ReactNode
-}
-
-const ExpandablePanel = (props: ExpandablePanelProps) => {
-  const { children } = props
-  const insets = useSafeAreaInsets()
-  const { cornerRadius } = useTheme()
-  return (
-    <AnimatedPaper
-      entering={SlideInUp.duration(PANEL_EXPAND_DURATION)}
-      layout={CurvedTransition}
-      style={css({
-        overflow: 'hidden',
-        paddingTop: insets.top,
-        borderBottomLeftRadius: cornerRadius['3xl'],
-        borderBottomRightRadius: cornerRadius['3xl']
-      })}
-    >
-      <Flex gap='2xl' ph='l' pv='2xl'>
-        {children}
-      </Flex>
-    </AnimatedPaper>
   )
 }
 
@@ -158,7 +68,6 @@ type SignOnScreenProps = {
  */
 export const SignOnScreen = (props: SignOnScreenProps) => {
   const { isSplashScreenDismissed } = props
-  const theme = useTheme()
   const { params } = useRoute<RouteProp<SignOnScreenParamList, 'SignOn'>>()
   const {
     screen: screenParam = 'sign-up',
@@ -166,7 +75,7 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
     routeOnCompletion
   } = params ?? {}
   const [screen, setScreen] = useState<SignOnScreenType>(screenParam)
-  const previousScreen = usePrevious(screen)
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     if (guestEmail) {
@@ -181,38 +90,41 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
     setScreen(screenParam)
   }, [guestEmail, routeOnCompletion, screenParam])
 
+  const isDarkMode = useDarkMode()
+  const signOnThemeName = isDarkMode ? 'default-dark' : 'default-light'
+
+  if (!isSplashScreenDismissed) return null
+
   return (
-    <>
-      <Background />
-      {isSplashScreenDismissed ? (
-        <Flex flex={1} style={css({ flexGrow: 1, zIndex: 2 })} h='100%'>
-          <ExpandablePanel>
-            {theme.type === 'dark' ? (
-              <IconAudiusLogoHorizontalNew
-                style={css({ alignSelf: 'center' })}
-                width={200}
-                color='inverse'
-              />
-            ) : (
-              <IconAudiusLogoHorizontalColorNew
-                style={css({ alignSelf: 'center' })}
-              />
-            )}
-            {screen === 'sign-up' ? (
-              <CreateEmailScreen onChangeScreen={setScreen} />
-            ) : (
-              <SignInScreen />
-            )}
-          </ExpandablePanel>
+    <HarmonyThemeProvider themeName={signOnThemeName}>
+      <Flex
+        flex={1}
+        h='100%'
+        backgroundColor='surface1'
+        style={css({ paddingTop: insets.top })}
+      >
+        <Divider />
+        <Flex
+          flex={1}
+          alignItems='stretch'
+          style={css({ gap: 48, paddingHorizontal: 16, paddingVertical: 80 })}
+        >
+          <IconAudiusLogoHorizontalNew
+            style={css({ alignSelf: 'center' })}
+            height={48}
+            width={236}
+            color='default'
+          />
           {screen === 'sign-up' ? (
-            <AudiusValues
-              isPanelExpanded={previousScreen && previousScreen !== screen}
-            />
+            <CreateEmailScreen onChangeScreen={setScreen} />
           ) : (
-            <CreateAccountLink onPress={() => setScreen('sign-up')} />
+            <SignInScreen />
           )}
+          {screen === 'sign-in' ? (
+            <CreateAccountLink onPress={() => setScreen('sign-up')} />
+          ) : null}
         </Flex>
-      ) : null}
-    </>
+      </Flex>
+    </HarmonyThemeProvider>
   )
 }

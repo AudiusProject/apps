@@ -54,7 +54,11 @@ export const useDetermineAllowedRoute = () => {
         correctedRoute: FEED_PAGE
       }
     }
-    const attemptedPath = requestedRoute.toString().replace('/signup/', '')
+    // Normalize path: strip /signup/ or signup/ prefix and trailing slash so "select-genres" always matches
+    const attemptedPath = requestedRoute
+      .toString()
+      .replace(/^\/?signup\/?/, '')
+      .replace(/^\/|\/$/g, '')
     // Have to type as string[] to avoid too narrow of a type for comparing against
     let allowedRoutes: string[] = [SignUpPath.createEmail]
 
@@ -124,17 +128,35 @@ export const useDetermineAllowedRoute = () => {
       }
     }
 
-    const isAllowedRoute = allowedRoutes.includes(attemptedPath)
-    // If requested route is allowed return that, otherwise return the last step in the route stack
-    const correctedPath =
+    let isAllowedRoute = allowedRoutes.includes(attemptedPath)
+    // When past account phase, ensure select-genres is always allowed so we never redirect to a later step
+    if (
+      pastAccountPhase &&
+      attemptedPath === SignUpPath.selectGenres &&
+      !isAllowedRoute
+    ) {
+      isAllowedRoute = true
+    }
+    // If requested route is allowed return that, otherwise return the appropriate step
+    let correctedPath =
       attemptedPath === '/signup' && hasAlreadySignedUp
         ? allowedRoutes[allowedRoutes.length - 1]
         : isAllowedRoute
           ? attemptedPath
-          : // IF we attempted to go to /signup directly, that means it was a link from somewhere else in the app, so we should start back at the beginning
-            attemptedPath === '/signup'
+          : attemptedPath === 'signup' || attemptedPath === ''
             ? allowedRoutes[0]
             : allowedRoutes[allowedRoutes.length - 1]
+
+    // After finish-profile we must show select-genres before select-artists: if we're past account phase
+    // and would redirect to select-artists but user hasn't done genres yet, send them to select-genres
+    if (
+      pastAccountPhase &&
+      !isAllowedRoute &&
+      correctedPath === SignUpPath.selectArtists &&
+      !(signUpState.genres && signUpState.genres.length > 0)
+    ) {
+      correctedPath = SignUpPath.selectGenres
+    }
 
     if (correctedPath === SignUpPath.completedRedirect) {
       setIsWelcomeModalOpen(true)
