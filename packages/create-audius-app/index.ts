@@ -18,10 +18,10 @@ process.on('SIGTERM', handleSigTerm)
 
 const program = new Command(packageJson.name)
   .version(packageJson.version)
-  .arguments('<project-directory>')
+  .arguments('[project-directory]')
   .usage(`${green('<project-directory>')} [options]`)
   .action((name) => {
-    projectPath = name
+    projectPath = name ?? ''
   })
   .option(
     '-e, --example [name]',
