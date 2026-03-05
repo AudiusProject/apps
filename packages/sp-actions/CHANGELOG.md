@@ -1,5 +1,11 @@
 # @audius/sp-actions
 
+## 1.0.25
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.21
+
 ## 1.0.24
 
 ### Patch Changes
