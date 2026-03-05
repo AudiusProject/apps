@@ -45,9 +45,7 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
             className={styles.ctaButton}
             onClick={onStartExploring}
           >
-            <span className={styles.ctaLabel}>
-              {messages.startExploring}
-            </span>
+            <span className={styles.ctaLabel}>{messages.startExploring}</span>
           </button>
         </div>
       </div>

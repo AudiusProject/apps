@@ -190,6 +190,7 @@ export const PublicSite = (props: PublicSiteProps) => {
                         element={
                           <DownloadPage
                             isMobile={isMobileOrNarrow}
+                            isAuthenticated={isAuthenticated}
                             openNavScreen={openNavScreen}
                             setRenderPublicSite={setRenderPublicSite}
                           />
