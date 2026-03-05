@@ -1,5 +1,31 @@
 # @audius/sdk
 
+## 14.0.0
+
+### Major Changes
+
+- d864806: Remove getPlaylistByHandleAndSlug in favor of getBulkPlaylists
+
+  - Removes `sdk.playlists.getPlaylistByHandleAndSlug()` in favor of calling `sdk.playlists.getBulkPlaylists({ permalink: ['/handle/playlist/playlist-name-slug'] })`
+  - Changes return values of `CommentsAPI` to match other APIs, removing `success` param.
+
+### Minor Changes
+
+- 71bb31b: Add programmable distribution config to stream_conditions
+
+### Patch Changes
+
+- 71bb31b: Fix missing bearer token for PUT /users
+- a7a9e17: Fix create/upload/update playlist in legacy path
+
+  - `publishTracks` returns string track IDs, which were being incorrectly parsed as though they were numbers that needed converting. This was changed behavior from recent SDK changes made to match the POST endpoints as this was working previously
+  - `createPlaylist` wasn't equipped to handle using a preset `playlistId` like our client expects, rejecting calls that had `playlistId` already set in the metadata (which would happen on our creation of playlists from scratch).
+  - `createPlaylistInternal` was being passed parsed parameters in the `createPlaylist` case, and unparsed in the `uploadPlaylist` case, and used types that made it hard to squeeze both callsites in. This was resulting in incorrectly setting some IDs to hash IDs (eg in `playlistContents`) and was uncovered when fixing the playlistId bug above
+  - `updatePlaylist` had incorrect schema still referencing `coverArtCid` instead of `playlistImageSizesMultihash`, blocking any playlist updates that included an image update
+
+- 8f12bb7: Fix cover art CID metadata properties for playlists and tracks.
+- 6cb4b6f: Fix UploadsApi to make start() a function
+
 ## 13.1.0
 
 ### Minor Changes
