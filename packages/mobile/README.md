@@ -4,6 +4,20 @@ The Audius React Native mobile client
 
 ## Setup
 
+### Bootsplash (launch screen)
+
+The native splash screen uses [react-native-bootsplash](https://github.com/zoontek/react-native-bootsplash). To regenerate assets after changing the logo or background color (e.g. to match theme in `@audius/harmony`):
+
+```bash
+# Default [Neue] theme: light #F6F5F7, dark is set in values-night (Android) and Colors.xcassets (iOS)
+npx react-native-bootsplash generate src/assets/images/bootsplash_logo.png \
+  --background '#F6F5F7' \
+  --platforms ios,android \
+  --assets-output assets/bootsplash
+```
+
+This updates Android `res/values/colors.xml`, iOS `BootSplash.storyboard`, and `Colors.xcassets` / `Images.xcassets`. After regenerating, do a clean build and reinstall the app so the cached launch screen is replaced.
+
 ## Running iOS
 
 ```bash
