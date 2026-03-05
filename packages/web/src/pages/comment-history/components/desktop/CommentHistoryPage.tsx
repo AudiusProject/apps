@@ -8,6 +8,7 @@ import {
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
 import { profilePage } from '@audius/common/src/utils/route'
+import { dayjs } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -20,7 +21,6 @@ import {
   Text,
   TextLink
 } from '@audius/harmony'
-import dayjs from 'dayjs'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useNavigate } from 'react-router'
 

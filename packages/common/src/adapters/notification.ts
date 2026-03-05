@@ -10,7 +10,7 @@ import {
   instanceOfPlaylistMilestoneNotificationActionData,
   instanceOfTrackMilestoneNotificationActionData
 } from '@audius/sdk'
-import dayjs from 'dayjs'
+import dayjs from '~/utils/dayjs'
 
 import { BadgeTier, type ID } from '~/models'
 import type { ChallengeRewardID } from '~/models/AudioRewards'
