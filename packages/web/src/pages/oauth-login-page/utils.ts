@@ -6,6 +6,7 @@ import base64url from 'base64url'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { audiusSdk } from 'services/audius-sdk'
 import { identityService } from 'services/audius-sdk/identity'
+import { env } from 'services/env'
 
 import { messages } from './messages'
 
@@ -156,6 +157,50 @@ export const formOAuthResponse = async ({
   }
   const signature = signedData.signature
   return `${header}.${payload}.${base64url.encode(signature)}`
+}
+
+export const exchangeForAuthorizationCode = async ({
+  account,
+  userEmail,
+  apiKey,
+  redirectUri,
+  codeChallenge,
+  codeChallengeMethod,
+  scope,
+  onError
+}: {
+  account: UserMetadata
+  userEmail: string | null
+  apiKey: string
+  redirectUri: string
+  codeChallenge: string
+  codeChallengeMethod: string
+  scope: string
+  onError: () => void
+}): Promise<string | null> => {
+  // 1. Build JWT (same as implicit flow — proves user identity to API)
+  const jwt = await formOAuthResponse({ account, userEmail, apiKey, onError })
+  if (!jwt) return null
+
+  // 2. Exchange JWT + PKCE params for authorization code
+  const res = await fetch(`${env.API_URL}/v1/oauth/authorize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token: jwt,
+      client_id: apiKey,
+      redirect_uri: redirectUri,
+      code_challenge: codeChallenge,
+      code_challenge_method: codeChallengeMethod,
+      scope
+    })
+  })
+  if (!res.ok) {
+    onError()
+    return null
+  }
+  const { code } = await res.json()
+  return code
 }
 
 export const authWrite = async ({ userId, appApiKey }: CreateGrantRequest) => {
