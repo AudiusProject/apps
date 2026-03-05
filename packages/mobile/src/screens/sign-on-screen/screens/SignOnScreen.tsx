@@ -9,7 +9,8 @@ import {
   updateRouteOnCompletion,
   setValueField
 } from 'common/store/pages/signon/actions'
-import { ImageBackground, SafeAreaView } from 'react-native'
+import { useDarkMode } from 'react-native-dynamic'
+import { ImageBackground, Pressable, SafeAreaView } from 'react-native'
 import Animated, {
   CurvedTransition,
   FadeIn,
@@ -21,12 +22,12 @@ import { usePrevious } from 'react-use'
 
 import {
   Flex,
-  IconAudiusLogoHorizontalColorNew,
   IconAudiusLogoHorizontalNew,
+  IconCloseAlt,
   Paper,
-  RadialGradient,
   Text,
   TextLink,
+  ThemeProvider as HarmonyThemeProvider,
   useTheme
 } from '@audius/harmony-native'
 import DJBackground from 'app/assets/images/DJportrait.jpg'
@@ -79,29 +80,19 @@ const CreateAccountLink = (props: NonLinkProps) => {
   )
 }
 
+const BACKGROUND_OVERLAY_OPACITY = 0.4
+
 const Background = () => {
   return (
     <Flex
       h='100%'
       w='100%'
-      alignItems='center'
-      justifyContent='flex-end'
       style={css({
         position: 'absolute',
         top: 0,
         left: 0
       })}
     >
-      <RadialGradient
-        style={css({ position: 'absolute', zIndex: 1 })}
-        colors={[
-          'rgba(91, 35, 225, 0.8)',
-          'rgba(113, 41, 230, 0.64)',
-          'rgba(162, 47, 235, 0.5)'
-        ]}
-        stops={[0, 0.67, 1]}
-        radius={100}
-      />
       <ImageBackground
         source={DJBackground}
         style={{
@@ -111,6 +102,55 @@ const Background = () => {
           top: 0
         }}
         resizeMode='cover'
+      />
+      <Flex
+        style={css({
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: `rgba(0, 0, 0, ${BACKGROUND_OVERLAY_OPACITY})`
+        })}
+      />
+    </Flex>
+  )
+}
+
+const NAV_LOGO_HEIGHT = 32
+const NAV_LOGO_WIDTH = 157
+const NAV_CLOSE_SIZE = 32
+
+const SignOnOverlayNav = () => {
+  const insets = useSafeAreaInsets()
+  const { spacing } = useTheme()
+  return (
+    <Flex
+      flexDirection='row'
+      justifyContent='space-between'
+      alignItems='center'
+      style={css({
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingTop: insets.top,
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.m,
+        zIndex: 1
+      })}
+    >
+      <Pressable hitSlop={12}>
+        <IconCloseAlt
+          width={NAV_CLOSE_SIZE}
+          height={NAV_CLOSE_SIZE}
+          color='white'
+        />
+      </Pressable>
+      <IconAudiusLogoHorizontalNew
+        width={NAV_LOGO_WIDTH}
+        height={NAV_LOGO_HEIGHT}
+        color='white'
       />
     </Flex>
   )
@@ -158,7 +198,6 @@ type SignOnScreenProps = {
  */
 export const SignOnScreen = (props: SignOnScreenProps) => {
   const { isSplashScreenDismissed } = props
-  const theme = useTheme()
   const { params } = useRoute<RouteProp<SignOnScreenParamList, 'SignOn'>>()
   const {
     screen: screenParam = 'sign-up',
@@ -181,37 +220,37 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
     setScreen(screenParam)
   }, [guestEmail, routeOnCompletion, screenParam])
 
+  const isDarkMode = useDarkMode()
+  const signOnThemeName = isDarkMode ? 'default-dark' : 'default-light'
+
   return (
     <>
       <Background />
       {isSplashScreenDismissed ? (
-        <Flex flex={1} style={css({ flexGrow: 1, zIndex: 2 })} h='100%'>
-          <ExpandablePanel>
-            {theme.type === 'dark' ? (
+        <HarmonyThemeProvider themeName={signOnThemeName}>
+          <Flex flex={1} style={css({ flexGrow: 1, zIndex: 2 })} h='100%'>
+            <SignOnOverlayNav />
+            <ExpandablePanel>
               <IconAudiusLogoHorizontalNew
                 style={css({ alignSelf: 'center' })}
                 width={200}
-                color='inverse'
+                color='default'
               />
-            ) : (
-              <IconAudiusLogoHorizontalColorNew
-                style={css({ alignSelf: 'center' })}
-              />
-            )}
+              {screen === 'sign-up' ? (
+                <CreateEmailScreen onChangeScreen={setScreen} />
+              ) : (
+                <SignInScreen />
+              )}
+            </ExpandablePanel>
             {screen === 'sign-up' ? (
-              <CreateEmailScreen onChangeScreen={setScreen} />
+              <AudiusValues
+                isPanelExpanded={previousScreen && previousScreen !== screen}
+              />
             ) : (
-              <SignInScreen />
+              <CreateAccountLink onPress={() => setScreen('sign-up')} />
             )}
-          </ExpandablePanel>
-          {screen === 'sign-up' ? (
-            <AudiusValues
-              isPanelExpanded={previousScreen && previousScreen !== screen}
-            />
-          ) : (
-            <CreateAccountLink onPress={() => setScreen('sign-up')} />
-          )}
-        </Flex>
+          </Flex>
+        </HarmonyThemeProvider>
       ) : null}
     </>
   )

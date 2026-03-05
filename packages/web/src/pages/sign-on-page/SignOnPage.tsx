@@ -209,7 +209,7 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
         }}
       />
 
-      {/* Nav overlay */}
+      {/* Nav overlay: safe area for notch/status bar */}
       {!hideCloseButton ? (
         <Flex
           css={{
@@ -217,7 +217,10 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
             top: 0,
             left: 0,
             right: 0,
-            padding: spacing.l,
+            paddingTop: `max(${spacing.l}, env(safe-area-inset-top))`,
+            paddingLeft: `max(${spacing.l}, env(safe-area-inset-left))`,
+            paddingRight: `max(${spacing.l}, env(safe-area-inset-right))`,
+            paddingBottom: spacing.l,
             zIndex: 3
           }}
           justifyContent='space-between'
@@ -233,7 +236,7 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
         </Flex>
       ) : null}
 
-      {/* Card content */}
+      {/* Card content: full viewport with safe area, card scrolls inside */}
       <Flex
         w='100%'
         justifyContent='center'
@@ -242,8 +245,11 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
         css={{
           position: 'relative',
           zIndex: 1,
-          minHeight: '100vh',
-          paddingTop: 72,
+          minHeight: '100dvh',
+          paddingTop: 'calc(72px + env(safe-area-inset-top, 0px))',
+          paddingLeft: `max(${spacing.l}, env(safe-area-inset-left))`,
+          paddingRight: `max(${spacing.l}, env(safe-area-inset-right))`,
+          paddingBottom: `max(${spacing.l}, env(safe-area-inset-bottom))`,
           opacity: isLoaded ? 1 : 0,
           transition: `opacity ${motion.expressive}`
         }}
@@ -255,7 +261,12 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
           css={{
             width: '100%',
             maxWidth: 560,
-            overflow: 'auto'
+            maxHeight: 'calc(100dvh - 120px)',
+            overflow: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            '&::-webkit-scrollbar': { display: 'none' }
           }}
         >
           {children}
