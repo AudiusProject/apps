@@ -8,14 +8,20 @@ import {
   useRemixersCount,
   useRemixesLineup
 } from '@audius/common/api'
-import { remixMessages } from '@audius/common/messages'
+import { remixMessages as messages } from '@audius/common/messages'
 import {
-  remixesPageLineupActions,
   remixesPageActions,
+  remixesPageLineupActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { route, pluralize } from '@audius/common/utils'
-import { IconRemix as IconRemixes } from '@audius/harmony'
+import { route } from '@audius/common/utils'
+import {
+  Flex,
+  Text,
+  IconRemix as IconRemixes,
+  IconTrophy,
+  FilterButton
+} from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router'
 
@@ -24,7 +30,8 @@ import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useSubPageHeader } from 'components/nav/mobile/NavContext'
-import UserBadges from 'components/user-badges/UserBadges'
+import { useRemixPageParams } from 'pages/remixes-page/hooks'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { push as pushRoute } from 'utils/navigation'
 import { fullTrackRemixesPage } from 'utils/route'
 
@@ -33,14 +40,6 @@ import styles from './RemixesPage.module.css'
 const { profilePage } = route
 const { getTrackId } = remixesPageSelectors
 const { fetchTrackSucceeded, reset } = remixesPageActions
-
-const messages = {
-  remixes: 'Remix',
-  by: 'by',
-  of: 'of',
-  getDescription: (trackName: string, artistName: string) =>
-    `${messages.remixes} ${messages.of} ${trackName} ${messages.by} ${artistName}`
-}
 
 type RemixesPageProps = {
   containerRef?: React.RefObject<HTMLDivElement>
@@ -52,7 +51,7 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const originalTrackId = useSelector(getTrackId)
   const { data: originalTrack } = useTrack(originalTrackId)
   const { data: remixContest } = useRemixContest(originalTrackId)
-  const { data: count = null } = useRemixersCount({ trackId: originalTrackId })
+  useRemixersCount({ trackId: originalTrackId })
 
   const { data: originalTrackByPermalink } = useTrackByPermalink(
     handle && slug ? `/${handle}/${slug}` : null
@@ -86,10 +85,16 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     }
   }, [dispatch, user])
 
-  // All hooks must be called before any early returns
   useSubPageHeader()
+
+  const updateSortParam = useUpdateSearchParams('sortMethod')
+  const updateIsCosignParam = useUpdateSearchParams('isCosign')
+  const updateIsContestEntryParam = useUpdateSearchParams('isContestEntry')
+  const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
+
   const {
     data,
+    count: lineupCount,
     isFetching,
     isPending,
     isError,
@@ -101,14 +106,22 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     lineup,
     pageSize
   } = useRemixesLineup({
-    trackId: track?.track_id
+    trackId: track?.track_id,
+    includeOriginal: true,
+    includeWinners: true,
+    sortMethod,
+    isCosign,
+    isContestEntry
   })
+
+  const { data: contest } = useRemixContest(track?.track_id)
   const { setHeader } = useContext(HeaderContext)
 
   const isRemixContest = !!remixContest
   const title = isRemixContest
-    ? remixMessages.submissionsTitle
-    : remixMessages.remixesTitle
+    ? messages.submissionsTitle
+    : messages.remixesTitle
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
 
   useEffect(() => {
     if (track && user) {
@@ -118,50 +131,96 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
             className={styles.header}
             title={
               <>
-                <IconRemixes className={styles.iconRemix} color='heading' />
-                <span>{title}</span>
+                {isRemixContest ? (
+                  <IconTrophy className={styles.iconRemix} color='heading' />
+                ) : (
+                  <IconRemixes className={styles.iconRemix} color='heading' />
+                )}
+                <Text variant='heading' size='xs'>
+                  {title}
+                </Text>
               </>
             }
           />
         </>
       )
     }
-  }, [setHeader, title, track, user, goToArtistPage, goToTrackPage])
+  }, [
+    setHeader,
+    title,
+    track,
+    user,
+    goToArtistPage,
+    goToTrackPage,
+    isRemixContest
+  ])
 
   if (!track || !user) {
     return null
   }
 
+  const winnersDelineator = (
+    <Flex justifyContent='space-between' gap='l' mb='xl'>
+      <Text variant='title'>{messages.winners}</Text>
+    </Flex>
+  )
+
+  const remixesDelineator = (
+    <Flex justifyContent='space-between' gap='l' mb='xl' direction='column'>
+      <Text variant='title'>
+        {messages.remixesTitle}
+        {lineupCount ? ` (${lineupCount})` : ''}
+      </Text>
+      <Flex gap='s' css={{ flexWrap: 'wrap' }}>
+        <FilterButton
+          label={messages.coSigned}
+          value={isCosign ? 'true' : null}
+          onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+        />
+        {isRemixContest ? (
+          <FilterButton
+            label={messages.contestEntries}
+            value={isContestEntry ? 'true' : null}
+            onClick={() =>
+              updateIsContestEntryParam(isContestEntry ? '' : 'true')
+            }
+          />
+        ) : null}
+        <FilterButton
+          value={sortMethod ?? 'recent'}
+          variant='replaceLabel'
+          onChange={updateSortParam}
+          options={[
+            { label: 'Most Recent', value: 'recent' },
+            { label: 'Most Plays', value: 'plays' },
+            { label: 'Most Favorites', value: 'likes' }
+          ]}
+        />
+      </Flex>
+    </Flex>
+  )
+
+  const delineatorMap =
+    winnerCount > 0
+      ? {
+          0: winnersDelineator,
+          [winnerCount]: remixesDelineator
+        }
+      : {
+          0: remixesDelineator
+        }
+
+  const maxEntries =
+    lineupCount && winnerCount ? lineupCount + winnerCount + 1 : undefined
+
   return (
     <MobilePageContainer
       title={title}
-      description={messages.getDescription(track.title, user.name)}
       canonicalUrl={fullTrackRemixesPage(track.permalink)}
       containerClassName={styles.container}
     >
-      <div className={styles.tracksContainer}>
-        <div className={styles.subHeader}>
-          {`${count || ''} ${pluralize(
-            messages.remixes,
-            count,
-            'es',
-            !count
-          )} ${messages.of}`}
-          <div className={styles.track}>
-            <div className={styles.link} onClick={goToTrackPage}>
-              {track.title}
-            </div>
-            {messages.by}
-            <div className={styles.link} onClick={goToArtistPage}>
-              {user.name}
-              <UserBadges
-                userId={user.user_id}
-                size='3xs'
-                className={styles.iconVerified}
-              />
-            </div>
-          </div>
-        </div>
+      <Flex direction='column' mt='3xl' gap='l' w='100%'>
+        <Text variant='title'>{messages.originalTrack}</Text>
         <TanQueryLineup
           data={data}
           isFetching={isFetching}
@@ -175,8 +234,10 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
           lineup={lineup}
           actions={remixesPageLineupActions}
           pageSize={pageSize}
+          delineatorMap={delineatorMap}
+          maxEntries={maxEntries}
         />
-      </div>
+      </Flex>
     </MobilePageContainer>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import {
   useUser,
@@ -6,38 +6,44 @@ import {
   useTrackByPermalink,
   useRemixContest,
   useRemixersCount,
-  useRemixesLineup
+  useRemixesLineup,
+  useCurrentUserId,
+  useRemixes
 } from '@audius/common/api'
-import { remixMessages } from '@audius/common/messages'
+import { remixMessages as messages } from '@audius/common/messages'
+import { Name } from '@audius/common/models'
 import {
-  remixesPageLineupActions,
   remixesPageActions,
+  remixesPageLineupActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { pluralize } from '@audius/common/utils'
-import { IconRemix, Text } from '@audius/harmony'
+import { dayjs } from '@audius/common/utils'
+import {
+  IconRemix,
+  Text,
+  Flex,
+  FilterButton,
+  IconTrophy,
+  Button
+} from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 
+import { MIN_PAGE_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
-import { TrackLink } from 'components/link/TrackLink'
-import { UserLink } from 'components/link/UserLink'
 import Page from 'components/page/Page'
-import { fullTrackRemixesPage } from 'utils/route'
+import { useRemixPageParams } from 'pages/remixes-page/hooks'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
+import { track as trackEvent, make } from 'services/analytics'
+import { fullTrackRemixesPage, pickWinnersPage } from 'utils/route'
 
 import styles from './RemixesPage.module.css'
 
 const { getTrackId } = remixesPageSelectors
 const { fetchTrackSucceeded, reset } = remixesPageActions
 
-const messages = {
-  remixes: 'Remix',
-  by: 'by',
-  of: 'of',
-  getDescription: (trackName: string, artistName: string) =>
-    `${messages.remixes} ${messages.of} ${trackName} ${messages.by} ${artistName}`
-}
+export const REMIXES_PAGE_SIZE = 10
 
 type RemixesPageProps = {
   containerRef?: React.RefObject<HTMLDivElement>
@@ -48,8 +54,7 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
   const originalTrackId = useSelector(getTrackId)
   const { data: originalTrack } = useTrack(originalTrackId)
-  const { data: remixContest } = useRemixContest(originalTrackId)
-  const { data: count = null } = useRemixersCount({ trackId: originalTrackId })
+  useRemixersCount({ trackId: originalTrackId })
 
   const { data: originalTrackByPermalink } = useTrackByPermalink(
     handle && slug ? `/${handle}/${slug}` : null
@@ -57,6 +62,40 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const track = originalTrackByPermalink ?? originalTrack
   const { data: user } = useUser(track?.owner_id)
   const trackId = track?.track_id
+
+  const updateSortParam = useUpdateSearchParams('sortMethod')
+  const updateIsCosignParam = useUpdateSearchParams('isCosign')
+  const updateIsContestEntryParam = useUpdateSearchParams('isContestEntry')
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: contest } = useRemixContest(trackId)
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
+  const { data: remixes } = useRemixes({
+    trackId: trackId ?? undefined,
+    isContestEntry: true
+  })
+  const remixCount = remixes?.pages[0]?.count ?? 0
+
+  const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
+  const {
+    data,
+    count: lineupCount,
+    isFetching,
+    isPending,
+    isError,
+    hasNextPage,
+    play,
+    pause,
+    loadNextPage,
+    isPlaying,
+    lineup
+  } = useRemixesLineup({
+    trackId: trackId ?? undefined,
+    includeOriginal: true,
+    includeWinners: true,
+    sortMethod,
+    isCosign,
+    isContestEntry
+  })
 
   useEffect(() => {
     if (trackId) {
@@ -71,69 +110,132 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     }
   }, [dispatch])
 
-  // All hooks must be called before any early returns
-  const {
-    data,
-    isFetching,
-    isPending,
-    isError,
-    hasNextPage,
-    play,
-    pause,
-    loadNextPage,
-    isPlaying,
-    lineup,
-    pageSize
-  } = useRemixesLineup({
-    trackId: track?.track_id
-  })
+  const pickWinnersRoute = track ? pickWinnersPage(track.permalink) : ''
+  const handlePickWinnersClick = useCallback(() => {
+    if (contest?.eventId && track) {
+      trackEvent(
+        make({
+          eventName: Name.REMIX_CONTEST_PICK_WINNERS_OPEN,
+          remixContestId: contest?.eventId,
+          trackId: track.track_id
+        })
+      )
+    }
+  }, [contest?.eventId, track])
 
   if (!track || !user) {
     return null
   }
 
-  const isRemixContest = !!remixContest
+  const isRemixContest = !!contest
+  const isTrackOwner = currentUserId === track.owner_id
+  const isRemixContestEnded =
+    isRemixContest && dayjs(contest.endDate).isBefore(dayjs())
+  const showPickWinnersButton =
+    isTrackOwner && isRemixContestEnded && remixCount > 0
+
   const title = isRemixContest
-    ? remixMessages.submissionsTitle
-    : remixMessages.remixesTitle
+    ? messages.submissionsTitle
+    : messages.remixesTitle
 
   const renderHeader = () => (
     <Header
-      icon={IconRemix}
+      icon={isRemixContest ? IconTrophy : IconRemix}
       primary={title}
-      secondary={
-        <Text variant='title' size='l' strength='weak'>
-          {count} {pluralize(messages.remixes, count, 'es', !count)}{' '}
-          {messages.of}{' '}
-          <TrackLink trackId={track.track_id} variant='secondary' />{' '}
-          {messages.by} <UserLink userId={user.user_id} variant='secondary' />
-        </Text>
-      }
       containerStyles={styles.header}
+      rightDecorator={
+        showPickWinnersButton ? (
+          <Button size='small' asChild onClick={handlePickWinnersClick}>
+            <Link to={pickWinnersRoute}>
+              {winnerCount > 0 ? messages.editWinners : messages.pickWinners}
+            </Link>
+          </Button>
+        ) : null
+      }
     />
   )
+
+  const winnersDelineator = (
+    <Flex justifyContent='space-between' mb='xl'>
+      <Text variant='heading'>{messages.winners}</Text>
+    </Flex>
+  )
+
+  const remixesDelineator = (
+    <Flex justifyContent='space-between' mb='xl'>
+      <Text variant='heading'>
+        {messages.remixesTitle}
+        {lineupCount !== undefined ? ` (${lineupCount})` : ''}
+      </Text>
+      <Flex gap='s'>
+        <FilterButton
+          label={messages.coSigned}
+          value={isCosign ? 'true' : null}
+          onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+        />
+        {isRemixContest ? (
+          <FilterButton
+            label={messages.contestEntries}
+            value={isContestEntry ? 'true' : null}
+            onClick={() =>
+              updateIsContestEntryParam(isContestEntry ? '' : 'true')
+            }
+          />
+        ) : null}
+        <FilterButton
+          value={sortMethod ?? 'recent'}
+          variant='replaceLabel'
+          onChange={updateSortParam}
+          options={[
+            { label: 'Most Recent', value: 'recent' },
+            { label: 'Most Plays', value: 'plays' },
+            { label: 'Most Favorites', value: 'likes' }
+          ]}
+        />
+      </Flex>
+    </Flex>
+  )
+
+  const delineatorMap =
+    winnerCount > 0
+      ? {
+          0: winnersDelineator,
+          [winnerCount]: remixesDelineator
+        }
+      : {
+          0: remixesDelineator
+        }
+
+  const maxEntries =
+    lineupCount !== undefined && winnerCount
+      ? lineupCount + winnerCount + 1
+      : undefined
 
   return (
     <Page
       title={title}
-      description={messages.getDescription(track.title, user.name)}
       canonicalUrl={fullTrackRemixesPage(track.permalink)}
       header={renderHeader()}
     >
-      <TanQueryLineup
-        data={data}
-        isFetching={isFetching}
-        isPending={isPending}
-        isError={isError}
-        hasNextPage={hasNextPage}
-        play={play}
-        pause={pause}
-        loadNextPage={loadNextPage}
-        isPlaying={isPlaying}
-        lineup={lineup}
-        actions={remixesPageLineupActions}
-        pageSize={pageSize}
-      />
+      <Flex direction='column' gap='xl' css={{ minWidth: MIN_PAGE_WIDTH_PX }}>
+        <Text variant='heading'>{messages.originalTrack}</Text>
+        <TanQueryLineup
+          data={data}
+          isFetching={isFetching}
+          isPending={isPending}
+          isError={isError}
+          hasNextPage={hasNextPage}
+          play={play}
+          pause={pause}
+          loadNextPage={loadNextPage}
+          isPlaying={isPlaying}
+          lineup={lineup}
+          pageSize={REMIXES_PAGE_SIZE}
+          actions={remixesPageLineupActions}
+          delineatorMap={delineatorMap}
+          maxEntries={maxEntries}
+        />
+      </Flex>
     </Page>
   )
 }
