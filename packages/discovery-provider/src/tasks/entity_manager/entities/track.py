@@ -274,6 +274,16 @@ def populate_track_record_metadata(track_record: Track, track_metadata, handle, 
                         api_key.lower()
                         for api_key in track_metadata["allowed_api_keys"]
                     ]
+        elif key == "access_authorities":
+            if key in track_metadata:
+                if track_metadata[key] is None:
+                    track_record.access_authorities = None
+                elif isinstance(track_metadata[key], list):
+                    track_record.access_authorities = [
+                        str(addr).strip()
+                        for addr in track_metadata["access_authorities"]
+                        if isinstance(addr, str)
+                    ]
         elif key == "stem_of":
             if "stem_of" in track_metadata and is_valid_json_field(
                 track_metadata, "stem_of"
