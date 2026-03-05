@@ -90,7 +90,7 @@ async function run() {
     process.exit(1)
   }
 
-  const exampleOption = program.opts().example ?? program.example
+  const exampleOption = program.opts().example
   if (exampleOption === true) {
     console.error(
       'Please provide an example name, otherwise remove the example option.'
