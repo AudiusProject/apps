@@ -29,9 +29,11 @@ import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
 import {
   addAppInfoMiddleware,
-  addRequestSignatureMiddleware
+  addRequestSignatureMiddleware,
+  addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
+import { OAuthTokenStore } from './oauth/tokenStore'
 import {
   PaymentRouterClient,
   getDefaultPaymentRouterClientConfig
@@ -133,7 +135,7 @@ export const createSdkWithServices = (config: SdkConfig) => {
     )
   }
 
-  // Initialize APIs
+  // Initialize APIs (also creates tokenStore and oauth)
   const apis = initializeApis({
     config,
     apiKey,
@@ -142,17 +144,7 @@ export const createSdkWithServices = (config: SdkConfig) => {
     services
   })
 
-  // Initialize OAuth
-  const oauth = isBrowser
-    ? new OAuth({
-        appName,
-        apiKey,
-        logger: services.logger
-      })
-    : undefined
-
   return {
-    oauth,
     ...apis
   }
 }
@@ -459,11 +451,36 @@ const initializeApis = ({
     })
   ]
 
+  // Token store for PKCE flow — provides dynamic accessToken to Configuration
+  const tokenStore = new OAuthTokenStore()
+
+  // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
+  const oauth =
+    typeof window !== 'undefined'
+      ? new OAuth({
+          apiKey,
+          tokenStore,
+          basePath
+        })
+      : undefined
+
+  if (apiKey && oauth) {
+    middleware.push(
+      addTokenRefreshMiddleware({
+        oauth
+      })
+    )
+  }
+
+  const bearerToken = 'bearerToken' in config ? config.bearerToken : undefined
+
   const apiClientConfig = new Configuration({
     fetchApi: fetch,
     middleware,
     basePath,
-    accessToken: 'bearerToken' in config ? config.bearerToken : undefined
+    // Static bearerToken takes precedence; otherwise use the dynamic store
+    // so PKCE login can inject tokens after construction.
+    accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
   })
 
   const tracks = new TracksApi(apiClientConfig, services)
@@ -506,6 +523,8 @@ const initializeApis = ({
   const search = new SearchApi(apiClientConfig)
 
   return {
+    oauth,
+    tokenStore,
     tracks,
     users,
     albums,
