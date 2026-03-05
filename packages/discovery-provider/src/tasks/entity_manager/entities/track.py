@@ -556,18 +556,15 @@ def validate_track_tx(params: ManageEntityParameters):
 
 
 def get_handle(params: ManageEntityParameters):
-    # TODO: get the track owner user handle
     handle = (
         params.session.query(User.handle)
         .filter(User.user_id == params.user_id, User.is_current == True)
         .first()
     )
-    if not handle or not handle[0]:
-        raise IndexingValidationError(
-            f"Cannot find handle for user ID {params.user_id}"
-        )
-
-    return handle[0]
+    if handle and handle[0]:
+        return handle[0]
+    # Guest users: use synthetic handle for routing
+    return f"user-{params.user_id}"
 
 
 def update_track_record(
