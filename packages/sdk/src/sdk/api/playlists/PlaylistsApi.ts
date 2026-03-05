@@ -718,7 +718,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   }
 
   /** @internal
-   * Method to create a playlist with already parsed inputs
+   * Method to create a playlist from raw inputs, parsing them with CreatePlaylistSchema
    * This is used for both playlists and albums
    */
   public async createPlaylistInternal(
