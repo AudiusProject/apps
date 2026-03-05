@@ -78,6 +78,7 @@ export const Artwork = ({ track }: ArtworkProps) => {
   return (
     <View style={[styles.root, { shadowColor }]}>
       <TrackImage
+        key={track?.track_id}
         trackId={track?.track_id}
         style={styles.image}
         size={SquareSizes.SIZE_1000_BY_1000}

@@ -432,6 +432,14 @@ def parse_metadata(metadata: str, action: str, entity_type: str):
         cid = data["cid"]
         metadata_json = data["data"]
 
+        if entity_type == EntityType.TRACK and "access_authorities" in data:
+            if (
+                "access_authorities" not in metadata_json
+                or metadata_json["access_authorities"] is None
+            ):
+                metadata_json = dict(metadata_json)
+                metadata_json["access_authorities"] = data["access_authorities"]
+
         # Don't format metadata for UPDATEs
         # This is to support partial updates
         # Individual entities are responsible for updating existing records with metadata

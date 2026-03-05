@@ -48,7 +48,7 @@ const messages = {
 }
 
 const TrackArt = ({ trackId }: { trackId: ID }) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_480_BY_480
   })
@@ -56,7 +56,7 @@ const TrackArt = ({ trackId }: { trackId: ID }) => {
 }
 
 const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId,
     size: SquareSizes.SIZE_480_BY_480
   })

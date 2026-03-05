@@ -121,7 +121,7 @@ const EditCollectionPage = g(
       }
     }, [setReorderedTracks, reorderedTracks, tracks])
 
-    const artworkUrl = useCollectionCoverArt({
+    const { imageUrl: artworkUrl } = useCollectionCoverArt({
       collectionId: playlist_id,
       size: SquareSizes.SIZE_1000_BY_1000
     })

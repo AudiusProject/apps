@@ -103,11 +103,13 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         const metadata = albumMetadataForCreateWithSDK(
           params.collectionMetadata
         )
-        metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Math.round(Date.now() / 1000),
-          trackId: Id.parse(t.trackId),
-          metadataTimestamp: Math.round(Date.now() / 1000)
-        }))
+        metadata.playlistContents = publishedTracks
+          .filter((t) => !!t.trackId)
+          .map((t) => ({
+            timestamp: Math.round(Date.now() / 1000),
+            trackId: t.trackId!,
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
@@ -117,11 +119,13 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         const metadata = playlistMetadataForCreateWithSDK(
           params.collectionMetadata
         )
-        metadata.playlistContents = publishedTracks.map((t) => ({
-          timestamp: Math.round(Date.now() / 1000),
-          trackId: Id.parse(t.trackId),
-          metadataTimestamp: Math.round(Date.now() / 1000)
-        }))
+        metadata.playlistContents = publishedTracks
+          .filter((t) => !!t.trackId)
+          .map((t) => ({
+            timestamp: Math.round(Date.now() / 1000),
+            trackId: t.trackId!,
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
           imageFile: coverArtFile,

@@ -362,6 +362,16 @@ function* fetchLocalAccountAsync() {
       users: [cachedAccountUser],
       queryClient
     })
+    // Set walletAddresses so useCurrentAccount/useWalletAddresses work correctly.
+    // Without this, components that depend on currentUserWallet stay disabled.
+    const web3WalletAddress = wallet
+    yield* put(
+      setWalletAddresses({ currentUser: wallet, web3User: web3WalletAddress })
+    )
+    queryClient.setQueryData(getWalletAddressesQueryKey(), {
+      currentUser: wallet,
+      web3User: web3WalletAddress
+    })
     queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
     yield* put(fetchAccountSucceeded(cachedAccount))
   }

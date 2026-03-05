@@ -23,7 +23,7 @@ export const TrackArtwork = (props: TrackArtworkProps) => {
     ...other
   } = props
 
-  const imageSource = useTrackCoverArt({ trackId, size })
+  const { imageUrl: imageSource } = useTrackCoverArt({ trackId, size })
 
   const artworkElement = (
     <Artwork src={imageSource} isLoading={isLoading} {...other} />

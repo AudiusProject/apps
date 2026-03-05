@@ -14,6 +14,13 @@ import { preload } from 'utils/image'
 import { dominantColor } from 'utils/imageProcessingUtil'
 import { useSelector } from 'utils/reducer'
 
+const hasValidArtwork = (artwork: unknown): boolean =>
+  !!artwork &&
+  typeof artwork === 'object' &&
+  Object.entries(artwork).some(
+    ([k, v]) => k !== 'mirrors' && typeof v === 'string' && v.length > 0
+  )
+
 export const useTrackCoverArt = ({
   trackId,
   size,
@@ -23,9 +30,17 @@ export const useTrackCoverArt = ({
   size: SquareSizes
   defaultImage?: string
 }) => {
-  const { data: artwork } = useTrack(trackId, {
-    select: (track) => track?.artwork
+  const { data: artworkData } = useTrack(trackId, {
+    select: (track) =>
+      track != null
+        ? {
+            artwork: track.artwork,
+            hasNoArtwork: !hasValidArtwork(track.artwork)
+          }
+        : undefined
   })
+  const artwork = artworkData?.artwork
+  const hasNoArtwork = artworkData?.hasNoArtwork ?? false
   const { imageUrl } = useImageSize({
     artwork,
     targetSize: size,
@@ -36,10 +51,19 @@ export const useTrackCoverArt = ({
   // Return edited artwork from this session, if it exists
   // TODO(PAY-3588) Update field once we've switched to another property name
   // for local changes to artwork
-  // @ts-ignore
-  if (artwork?.url) return artwork.url
+  // @ts-expect-error - url is added for in-session edits, not on CoverArtSizesWithMirror type
+  if (artwork?.url) return { imageUrl: artwork.url, hasNoArtwork: false }
 
-  return imageUrl
+  // @ts-expect-error - url is added for in-session edits
+  const noArtwork = hasNoArtwork && !artwork?.url
+  // Don't pass a URL when track has no artwork, or when track data isn't loaded yet
+  // (artworkData undefined), so we never show the previous track's image.
+  const safeImageUrl =
+    noArtwork || artworkData === undefined ? undefined : imageUrl
+  return {
+    imageUrl: safeImageUrl,
+    hasNoArtwork: noArtwork
+  }
 }
 
 export const useTrackCoverArtDominantColors = ({
@@ -49,7 +73,7 @@ export const useTrackCoverArtDominantColors = ({
 }) => {
   const dispatch = useDispatch()
 
-  const trackCoverArtImage = useTrackCoverArt({
+  const { imageUrl: trackCoverArtImage } = useTrackCoverArt({
     trackId: trackId ?? undefined,
     size: SquareSizes.SIZE_150_BY_150
   })

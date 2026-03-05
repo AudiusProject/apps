@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { cyan, green, red, bold } from 'picocolors'
-import Commander from 'commander'
+import { Command } from 'commander'
 import path from 'path'
 import prompts from 'prompts'
 import { createApp } from './create-app'
+import type { ExampleType } from './helpers/examples'
 import { validateNpmName } from './helpers/validate-pkg'
 import packageJson from './package.json'
 import { isFolderEmpty } from './helpers/is-folder-empty'
@@ -16,12 +17,12 @@ const handleSigTerm = () => process.exit(0)
 process.on('SIGINT', handleSigTerm)
 process.on('SIGTERM', handleSigTerm)
 
-const program = new Commander.Command(packageJson.name)
+const program = new Command(packageJson.name)
   .version(packageJson.version)
-  .arguments('<project-directory>')
+  .arguments('[project-directory]')
   .usage(`${green('<project-directory>')} [options]`)
   .action((name) => {
-    projectPath = name
+    projectPath = name ?? ''
   })
   .option(
     '-e, --example [name]',
@@ -89,7 +90,8 @@ async function run() {
     process.exit(1)
   }
 
-  if (program.example === true) {
+  const exampleOption = program.opts().example
+  if (exampleOption === true) {
     console.error(
       'Please provide an example name, otherwise remove the example option.'
     )
@@ -107,7 +109,7 @@ async function run() {
     process.exit(1)
   }
 
-  const example = program.example.trim()
+  const example = (typeof exampleOption === 'string' ? exampleOption : 'react-hono').trim() as ExampleType
 
   await createApp({
     appPath: resolvedProjectPath,

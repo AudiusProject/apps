@@ -9,11 +9,11 @@ import promoBg from '../assets/promo-bg.jpg'
 
 import styles from './CreateFutureCTA.module.css'
 
-const { SIGN_UP_PAGE } = route
+const { EXPLORE_PAGE } = route
 
 const messages = {
   headline: 'Create the future of music, together.',
-  getStarted: 'Get Started'
+  startExploring: 'Start Exploring'
 }
 
 type CreateFutureCTAProps = {
@@ -24,8 +24,8 @@ type CreateFutureCTAProps = {
 export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
   const navigate = useNavigate()
 
-  const onSignUp = (e: MouseEvent) => {
-    handleClickRoute(SIGN_UP_PAGE, props.setRenderPublicSite, navigate)(e)
+  const onStartExploring = (e: MouseEvent) => {
+    handleClickRoute(EXPLORE_PAGE, props.setRenderPublicSite, navigate)(e)
   }
 
   return (
@@ -40,8 +40,12 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
           <h2 id='cta-heading' className={styles.headline}>
             {messages.headline}
           </h2>
-          <button type='button' className={styles.ctaButton} onClick={onSignUp}>
-            <span className={styles.ctaLabel}>{messages.getStarted}</span>
+          <button
+            type='button'
+            className={styles.ctaButton}
+            onClick={onStartExploring}
+          >
+            <span className={styles.ctaLabel}>{messages.startExploring}</span>
           </button>
         </div>
       </div>

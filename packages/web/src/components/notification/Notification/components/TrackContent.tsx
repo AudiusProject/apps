@@ -15,7 +15,7 @@ type TrackContentProps = {
 export const TrackContent = (props: TrackContentProps) => {
   const { track, hideTitle = false } = props
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: track.track_id,
     size: SquareSizes.SIZE_150_BY_150
   })

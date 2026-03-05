@@ -81,6 +81,8 @@ export const Artwork = (props: ArtworkProps) => {
         borderRadius={borderRadius}
         border='default'
         shadow={shadow}
+        w='100%'
+        h='100%'
         style={{ borderWidth }}
       >
         {isLoading && hasImageSource ? (
@@ -102,7 +104,7 @@ export const Artwork = (props: ArtworkProps) => {
           style={{
             backgroundColor:
               !hasImageSource && children
-                ? color.neutral.n400
+                ? color.neutral.n100
                 : color.background.surface2
           }}
         />

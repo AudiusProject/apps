@@ -69,7 +69,7 @@ const Artwork = ({
   isLoading,
   coverArtSizes
 }: ArtworkProps) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_150_BY_150
   })

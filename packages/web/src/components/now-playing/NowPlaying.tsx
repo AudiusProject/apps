@@ -34,7 +34,11 @@ import {
   PurchaseableContentType
 } from '@audius/common/store'
 import { Genre, route } from '@audius/common/utils'
-import { IconCaretRight as IconCaret, Scrubber } from '@audius/harmony'
+import {
+  IconCaretRight as IconCaret,
+  IconImage,
+  Scrubber
+} from '@audius/harmony'
 import { Location } from 'history'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -213,7 +217,7 @@ const NowPlaying = g(
     } = track
 
     const { name, handle } = user
-    const image = useTrackCoverArt({
+    const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
       trackId: track_id,
       size: SquareSizes.SIZE_480_BY_480
     })
@@ -403,7 +407,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id} borderOffset={2} />
-              <DynamicImage image={image} />
+              <DynamicImage image={image} useSkeleton={!hasNoArtwork}>
+                {hasNoArtwork ? (
+                  <div className={styles.emptyArtworkIcon}>
+                    <IconImage width={80} height={80} />
+                  </div>
+                ) : null}
+              </DynamicImage>
             </div>
           </TrackFlair>
         ) : (
@@ -415,7 +425,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id as ID} borderOffset={2} />
-              <DynamicImage image={image} />
+              <DynamicImage image={image} useSkeleton={!hasNoArtwork}>
+                {hasNoArtwork ? (
+                  <div className={styles.emptyArtworkIcon}>
+                    <IconImage width={80} height={80} />
+                  </div>
+                ) : null}
+              </DynamicImage>
             </div>
           </div>
         )}

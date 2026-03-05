@@ -142,6 +142,7 @@ class TrackMetadata(TypedDict):
     producer_copyright_line: Optional[Copyright]
     parental_warning_type: Optional[str]
     allowed_api_keys: Optional[str]
+    access_authorities: Optional[List[str]]
     bpm: Optional[float]
     is_custom_bpm: Optional[bool]
     musical_key: Optional[str]
@@ -203,6 +204,7 @@ track_metadata_format: TrackMetadata = {
     "producer_copyright_line": None,
     "parental_warning_type": None,
     "allowed_api_keys": None,
+    "access_authorities": None,
     "bpm": None,
     "is_custom_bpm": False,
     "musical_key": None,

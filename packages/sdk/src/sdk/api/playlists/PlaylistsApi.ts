@@ -90,14 +90,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerCreatePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
-    const parsedParameters = await parseParams(
-      'createPlaylist',
-      CreatePlaylistSchema
-    )(params)
-
-    // Call createPlaylistInternal with parsed inputs
-    return await this.createPlaylistInternal(parsedParameters, advancedOptions)
+    return await this.createPlaylistInternal(params, advancedOptions)
   }
 
   override async createPlaylist(
@@ -105,11 +98,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      const { metadata } = params
-      return await this.createPlaylistWithEntityManager({
-        userId: params.userId,
-        metadata
-      })
+      return await this.createPlaylistWithEntityManager(params)
     }
     return super.createPlaylist(params, requestInit)
   }
@@ -175,9 +164,9 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         // Transform track metadata (cast: SDK upload schema and API body types align at runtime)
         const trackMetadata = this.combineMetadata(
           this.trackUploadHelper.transformTrackUploadMetadataV2(
-            t as unknown as CreateTrackRequestBody,
+            t as CreateTrackRequestBody,
             userId
-          ) as CreateTrackRequestBody,
+          ),
           playlistMetadata
         )
 
@@ -729,43 +718,40 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
   }
 
   /** @internal
-   * Method to create a playlist with already parsed inputs
+   * Method to create a playlist from raw inputs, parsing them with CreatePlaylistSchema
    * This is used for both playlists and albums
    */
-  public async createPlaylistInternal<Metadata extends PlaylistMetadata>(
-    {
-      userId,
-      imageFile,
-      metadata,
-      onProgress,
-      trackIds,
-      playlistId: providedPlaylistId
-    }: z.infer<typeof CreatePlaylistSchema> & { metadata: Metadata },
+  public async createPlaylistInternal(
+    params: z.input<typeof CreatePlaylistSchema>,
     advancedOptions?: AdvancedOptions
   ) {
+    const { userId, imageFile, metadata, onProgress } = await parseParams(
+      'createPlaylistInternal',
+      CreatePlaylistSchema
+    )(params)
+
     // Upload cover art to storage node
     const coverArtResponse =
       imageFile &&
       (await this.storage
         .uploadFile({
           file: imageFile,
-          onProgress,
+          onProgress: (event) =>
+            onProgress?.(event.loaded / event.total, {
+              ...event,
+              key: 'image'
+            }),
           metadata: {
             template: 'img_square'
           }
         })
         .start())
 
+    const providedPlaylistId = metadata.playlistId
     const playlistId = providedPlaylistId || (await this.generatePlaylistId())
-    const timestamp = getCurrentTimestamp()
 
-    // Update metadata to include track ids
     const updatedMetadata = {
       ...metadata,
-      playlistContents: (trackIds ?? []).map((trackId) => ({
-        trackId,
-        timestamp
-      })),
       playlistImageSizesMultihash: coverArtResponse?.orig_file_cid
     }
 

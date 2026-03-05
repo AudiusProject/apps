@@ -23,11 +23,11 @@ export const ChatBlastHeader = ({ chat }: { chat: ChatBlast }) => {
       chat
     })
   const decodedId = OptionalHashId.parse(audienceContentId)
-  const albumArtwork = useCollectionCoverArt({
+  const { imageUrl: albumArtwork } = useCollectionCoverArt({
     collectionId: decodedId,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const trackArtwork = useTrackCoverArt({
+  const { imageUrl: trackArtwork } = useTrackCoverArt({
     trackId: decodedId,
     size: SquareSizes.SIZE_150_BY_150
   })

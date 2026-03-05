@@ -1,6 +1,9 @@
 import {
   getAccountStatusQueryKey,
+  getCurrentAccountQueryKey,
   getWalletAccountSaga,
+  getUserQueryKey,
+  primeUserData,
   queryAccountUser,
   queryHasAccount,
   queryIsAccountComplete,
@@ -522,6 +525,27 @@ function* signUp() {
                   isGuest: true
                 })
               )
+
+              // Optimistically update localStorage so getLocalAccount returns
+              // complete user data before discovery provider has indexed.
+              const updatedUser = {
+                ...account.user,
+                handle,
+                handle_lc: handle.toLowerCase(),
+                name,
+                location: location ?? null
+              }
+              yield* call(
+                [localStorage, localStorage.setAudiusAccountUser],
+                updatedUser
+              )
+              primeUserData({ users: [updatedUser], queryClient })
+              queryClient.invalidateQueries({
+                queryKey: getUserQueryKey(userId)
+              })
+              queryClient.invalidateQueries({
+                queryKey: getCurrentAccountQueryKey()
+              })
 
               return userId
             } else {

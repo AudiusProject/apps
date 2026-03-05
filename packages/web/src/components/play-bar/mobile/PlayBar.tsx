@@ -15,7 +15,8 @@ import {
   tracksSocialActions,
   playerSelectors
 } from '@audius/common/store'
-import { IconLock } from '@audius/harmony'
+import { IconImage, IconLock } from '@audius/harmony'
+import cn from 'classnames'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
 
@@ -84,7 +85,7 @@ const PlayBar = ({
     return () => clearInterval(seekInterval)
   })
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: track ? track.track_id : undefined,
     size: SquareSizes.SIZE_150_BY_150,
     defaultImage: ''
@@ -166,11 +167,18 @@ const PlayBar = ({
                 id={track?.track_id}
               >
                 <div
-                  className={styles.image}
-                  style={{
-                    backgroundImage: `url(${image})`
-                  }}
+                  className={cn(styles.image, {
+                    [styles.imageEmpty]: hasNoArtwork
+                  })}
+                  style={
+                    image ? { backgroundImage: `url(${image})` } : undefined
+                  }
                 >
+                  {hasNoArtwork ? (
+                    <div className={styles.emptyArtworkIcon}>
+                      <IconImage width={14} height={14} />
+                    </div>
+                  ) : null}
                   {shouldShowPreviewLock ? (
                     <div className={styles.lockOverlay}>
                       <IconLock className={styles.iconLock} />

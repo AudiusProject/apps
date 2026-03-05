@@ -50,6 +50,7 @@ const moveBehind = (ref: RefObject<HTMLDivElement | null>) => {
     ref.current.style.animation = 'none'
     ref.current.style.zIndex = '1'
     ref.current.style.backgroundColor = 'unset'
+    ref.current.style.backgroundImage = 'none'
   }
 }
 
