@@ -4,6 +4,7 @@ import { Command } from 'commander'
 import path from 'path'
 import prompts from 'prompts'
 import { createApp } from './create-app'
+import type { ExampleType } from './helpers/examples'
 import { validateNpmName } from './helpers/validate-pkg'
 import packageJson from './package.json'
 import { isFolderEmpty } from './helpers/is-folder-empty'
@@ -108,7 +109,7 @@ async function run() {
     process.exit(1)
   }
 
-  const example = (typeof exampleOption === 'string' ? exampleOption : 'react-hono').trim()
+  const example = (typeof exampleOption === 'string' ? exampleOption : 'react-hono').trim() as ExampleType
 
   await createApp({
     appPath: resolvedProjectPath,
