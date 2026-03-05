@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 import { SystemAppearance } from '@audius/common/models'
 import { FEED_PAGE } from '@audius/common/src/utils/route'
@@ -166,20 +166,10 @@ const DesktopSignOnRoot = (props: RootProps) => {
   )
 }
 
-type MobileSignOnRootProps = RootProps & {
-  isLoaded?: boolean
-}
+type MobileSignOnRootProps = RootProps
 
 const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
-  const { children, isLoaded } = props
-  const { spacing, motion } = useTheme()
-  const routeOnExit = useSelector(getRouteOnExit)
-  const location = useLocation()
-
-  const hideCloseButton = [SIGN_UP_LOADING_PAGE].some((path) => {
-    const match = matchPath(path, location.pathname)
-    return match && match.pathname === location.pathname
-  })
+  const { children } = props
 
   return (
     <Flex
@@ -187,90 +177,29 @@ const MobileSignOnRoot = (props: MobileSignOnRootProps) => {
       w='100%'
       css={{
         position: 'relative',
-        minHeight: '100vh'
+        minHeight: '100dvh',
+        backgroundColor: 'var(--harmony-bg-surface-1)',
+        paddingTop: 'env(safe-area-inset-top, 0px)'
       }}
     >
-      {/* Background image + dark overlay */}
-      <Box
-        css={{
-          position: 'fixed',
-          inset: 0,
-          backgroundImage: `url(${landingImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'grayscale(100%)'
-        }}
-      />
-      <Box
-        css={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        }}
-      />
-
-      {/* Nav overlay: safe area for notch/status bar */}
-      {!hideCloseButton ? (
-        <Flex
-          css={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            paddingTop: `max(${spacing.l}, env(safe-area-inset-top))`,
-            paddingLeft: `max(${spacing.l}, env(safe-area-inset-left))`,
-            paddingRight: `max(${spacing.l}, env(safe-area-inset-right))`,
-            paddingBottom: spacing.l,
-            zIndex: 3
-          }}
-          justifyContent='space-between'
-          alignItems='center'
-        >
-          <Link
-            to={routeOnExit}
-            css={{ display: 'flex', alignItems: 'center' }}
-          >
-            <IconCloseAlt color='white' height={32} width={32} />
-          </Link>
-          <IconAudiusLogoHorizontal color='white' height={32} width={157} />
-        </Flex>
-      ) : null}
-
-      {/* Card content: full viewport with safe area, card scrolls inside */}
       <Flex
+        direction='column'
         w='100%'
-        justifyContent='center'
-        alignItems='flex-start'
-        p='l'
+        flex={1}
+        justifyContent='flex-start'
+        alignItems='stretch'
         css={{
-          position: 'relative',
-          zIndex: 1,
-          minHeight: '100dvh',
-          paddingTop: 'calc(72px + env(safe-area-inset-top, 0px))',
-          paddingLeft: `max(${spacing.l}, env(safe-area-inset-left))`,
-          paddingRight: `max(${spacing.l}, env(safe-area-inset-right))`,
-          paddingBottom: `max(${spacing.l}, env(safe-area-inset-bottom))`,
-          opacity: isLoaded ? 1 : 0,
-          transition: `opacity ${motion.expressive}`
+          overflow: 'auto',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          minHeight: 0,
+          '&::-webkit-scrollbar': { display: 'none' }
         }}
       >
-        <Paper
-          borderRadius='l'
-          border='strong'
-          direction='column'
-          css={{
-            width: '100%',
-            maxWidth: 560,
-            maxHeight: 'calc(100dvh - 120px)',
-            overflow: 'auto',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            '&::-webkit-scrollbar': { display: 'none' }
-          }}
-        >
+        <Flex direction='column' w='100%' css={{ flexShrink: 0 }}>
           {children}
-        </Paper>
+        </Flex>
       </Flex>
     </Flex>
   )
@@ -354,14 +283,9 @@ export const SignOnPage = () => {
     }
   })
 
-  const [isLoaded, setIsLoaded] = useState(false)
   const SignOnRoot = isMobile ? MobileSignOnRoot : DesktopSignOnRoot
   const location = useLocation()
   const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
-
-  useEffectOnce(() => {
-    setIsLoaded(true)
-  })
 
   if (signOnStatus === EditingStatus.SUCCESS) {
     return <Navigate to={completionRoute || FEED_PAGE} />
@@ -369,7 +293,7 @@ export const SignOnPage = () => {
 
   return (
     <HarmonyThemeProvider theme={signOnTheme}>
-      <SignOnRoot isLoaded={isLoaded}>
+      <SignOnRoot>
         <NavHeader />
         {isSignUp ? <SignUpPage /> : <SignInPage />}
       </SignOnRoot>

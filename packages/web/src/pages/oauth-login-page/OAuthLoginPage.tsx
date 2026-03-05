@@ -484,8 +484,8 @@ export const OAuthLoginPage = () => {
                   <>
                     <Flex mt='l'>
                       <Text variant='body' size='s' color='subdued'>
-                          {messages.otpPrompt}
-                        </Text>
+                        {messages.otpPrompt}
+                      </Text>
                     </Flex>
                     {/* @ts-ignore */}
                     <Input

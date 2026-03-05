@@ -7,6 +7,7 @@ import { route } from '@audius/common/utils'
 import {
   Flex,
   IconAudiusLogoHorizontal,
+  IconArrowRight,
   Button,
   TextLink,
   Text
@@ -39,9 +40,11 @@ const { SIGN_IN_CONFIRM_EMAIL_PAGE, SIGN_UP_PAGE } = route
 const messages = {
   ...signInPageMessages,
   title: 'Welcome Back',
+  mobileTitle: 'Sign Into Audius',
   newToAudius: 'New to Audius?',
   createAnAccount: 'Create an Account',
-  logIn: 'Log In'
+  logIn: 'Log In',
+  mobileLogIn: 'Sign In'
 }
 
 type SignInValues = {
@@ -90,6 +93,9 @@ export const SignInPage = () => {
     [dispatch]
   )
 
+  const logoHeight = isMobile ? 48 : 56
+  const logoWidth = isMobile ? 236 : 275
+
   return (
     <>
       <Formik
@@ -98,42 +104,91 @@ export const SignInPage = () => {
         validationSchema={SignInSchema}
         validateOnChange={false}
       >
-        <Flex
-          as={Form}
-          direction='column'
-          gap='2xl'
-          alignItems='center'
-          p='2xl'
-        >
-          <IconAudiusLogoHorizontal height={56} width={275} color='default' />
-          <Heading heading={messages.title} centered tag='h1' />
-          <Flex direction='column' gap='l' w='100%'>
-            <EmailField />
-            <SignInPasswordField />
-            <TextLink
-              variant='visible'
-              onClick={() => setShowForgotPassword(true)}
-            >
-              {messages.forgotPassword}
-            </TextLink>
-            <GuestEmailHint />
-          </Flex>
-          <Flex direction='column' gap='l' w='100%' alignItems='center'>
-            <Text variant='body' size={isMobile ? 'm' : 'l'} color='subdued'>
+        {isMobile ? (
+          <Flex
+            as={Form}
+            direction='column'
+            alignItems='center'
+            w='100%'
+            css={{ gap: 48, padding: '80px 24px' }}
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.mobileTitle} centered tag='h1' />
+            <Flex direction='column' gap='l' w='100%'>
+              <EmailField />
+              <SignInPasswordField />
+              <GuestEmailHint />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
+              <Button
+                type='submit'
+                iconRight={IconArrowRight}
+                isLoading={signInStatus === 'loading'}
+                fullWidth
+              >
+                {messages.mobileLogIn}
+              </Button>
+              <TextLink
+                variant='visible'
+                onClick={() => setShowForgotPassword(true)}
+              >
+                {messages.forgotPassword}
+              </TextLink>
+            </Flex>
+            <Flex flex={1} />
+            <Text variant='body' size='m' color='subdued'>
               {messages.newToAudius}{' '}
               <TextLink variant='visible' asChild>
                 <Link to={SIGN_UP_PAGE}>{messages.createAnAccount}</Link>
               </TextLink>
             </Text>
-            <Button
-              type='submit'
-              isLoading={signInStatus === 'loading'}
-              fullWidth
-            >
-              {messages.logIn}
-            </Button>
           </Flex>
-        </Flex>
+        ) : (
+          <Flex
+            as={Form}
+            direction='column'
+            gap='2xl'
+            alignItems='center'
+            p='2xl'
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.title} centered tag='h1' />
+            <Flex direction='column' gap='l' w='100%'>
+              <EmailField />
+              <SignInPasswordField />
+              <TextLink
+                variant='visible'
+                onClick={() => setShowForgotPassword(true)}
+              >
+                {messages.forgotPassword}
+              </TextLink>
+              <GuestEmailHint />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
+              <Text variant='body' size='l' color='subdued'>
+                {messages.newToAudius}{' '}
+                <TextLink variant='visible' asChild>
+                  <Link to={SIGN_UP_PAGE}>{messages.createAnAccount}</Link>
+                </TextLink>
+              </Text>
+              <Button
+                type='submit'
+                isLoading={signInStatus === 'loading'}
+                fullWidth
+              >
+                {messages.logIn}
+              </Button>
+            </Flex>
+          </Flex>
+        )}
       </Formik>
       <ForgotPasswordModal
         isOpen={showForgotPassword}

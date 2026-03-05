@@ -8,6 +8,7 @@ import {
   Button,
   Flex,
   IconAudiusLogoHorizontal,
+  IconArrowRight,
   Text,
   TextLink
 } from '@audius/harmony'
@@ -31,9 +32,12 @@ const { SIGN_IN_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 const messages = {
   ...createEmailPageMessages,
   title: 'Sign Up',
+  mobileTitle: 'Sign Up For Audius',
   alreadyHaveAccount: 'Already have an account?',
   logIn: 'Log In',
-  continueButton: 'Continue'
+  mobileLogIn: 'Sign In',
+  continueButton: 'Continue',
+  mobileSignUpButton: 'Sign Up Free'
 }
 
 type SignUpEmailValues = {
@@ -68,6 +72,9 @@ export const CreateEmailPage = () => {
     [dispatch, navigate]
   )
 
+  const logoHeight = isMobile ? 48 : 56
+  const logoWidth = isMobile ? 236 : 275
+
   return (
     <Formik
       initialValues={initialValues}
@@ -76,37 +83,78 @@ export const CreateEmailPage = () => {
       validateOnMount={!!existingEmailValue}
       validateOnChange={false}
     >
-      {({ isSubmitting }) => (
-        <Flex
-          as={Form}
-          direction='column'
-          gap='2xl'
-          alignItems='center'
-          p='2xl'
-        >
-          <IconAudiusLogoHorizontal height={56} width={275} color='default' />
-          <Heading heading={messages.title} tag='h1' centered />
-          <Flex direction='column' gap='l' w='100%'>
-            <NewEmailField />
+      {({ isSubmitting }) =>
+        isMobile ? (
+          <Flex
+            as={Form}
+            direction='column'
+            alignItems='center'
+            w='100%'
+            css={{ gap: 48, padding: '80px 24px' }}
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.mobileTitle} tag='h1' centered />
+            <Flex direction='column' gap='l' w='100%'>
+              <NewEmailField />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
+              <Button
+                variant='primary'
+                type='submit'
+                iconRight={IconArrowRight}
+                fullWidth
+                isLoading={isSubmitting}
+              >
+                {messages.mobileSignUpButton}
+              </Button>
+              <Text variant='body' size='m' color='subdued'>
+                {messages.alreadyHaveAccount}{' '}
+                <TextLink variant='visible' asChild>
+                  <Link to={SIGN_IN_PAGE}>{messages.mobileLogIn}</Link>
+                </TextLink>
+              </Text>
+            </Flex>
           </Flex>
-          <Flex direction='column' gap='l' w='100%' alignItems='center'>
-            <Text variant='body' size={isMobile ? 'm' : 'l'} color='subdued'>
-              {messages.alreadyHaveAccount}{' '}
-              <TextLink variant='visible' asChild>
-                <Link to={SIGN_IN_PAGE}>{messages.logIn}</Link>
-              </TextLink>
-            </Text>
-            <Button
-              variant='primary'
-              type='submit'
-              fullWidth
-              isLoading={isSubmitting}
-            >
-              {messages.continueButton}
-            </Button>
+        ) : (
+          <Flex
+            as={Form}
+            direction='column'
+            gap='2xl'
+            alignItems='center'
+            p='2xl'
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.title} tag='h1' centered />
+            <Flex direction='column' gap='l' w='100%'>
+              <NewEmailField />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
+              <Text variant='body' size='l' color='subdued'>
+                {messages.alreadyHaveAccount}{' '}
+                <TextLink variant='visible' asChild>
+                  <Link to={SIGN_IN_PAGE}>{messages.logIn}</Link>
+                </TextLink>
+              </Text>
+              <Button
+                variant='primary'
+                type='submit'
+                fullWidth
+                isLoading={isSubmitting}
+              >
+                {messages.continueButton}
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
-      )}
+        )
+      }
     </Formik>
   )
 }

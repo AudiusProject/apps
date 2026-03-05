@@ -256,7 +256,7 @@ html[data-theme='default-light'] {
   --harmony-n-700: #4a5263;
   --harmony-n-800: #343b49;
   --harmony-n-900: #232834;
-  --harmony-n-950: #141821;
+  --harmony-n-950: #0c0f14;
   /* Special Colors */
   --harmony-white: #ffffff;
   --harmony-background: #f6f5f7;
@@ -296,7 +296,7 @@ html[data-theme='default-dark'] {
   --harmony-s-400: #cf90ff;
   --harmony-s-500: #d7a3ff;
   /* Neutral Colors */
-  --harmony-neutral: #949494;
+  --harmony-neutral: #d1d1d1;
   --harmony-n-25: #0f0f0f;
   --harmony-n-50: #141414;
   --harmony-n-100: #1f1f1f;
@@ -304,12 +304,12 @@ html[data-theme='default-dark'] {
   --harmony-n-200: #333333;
   --harmony-n-300: #474747;
   --harmony-n-400: #636363;
-  --harmony-n-500: #6b6b6b;
-  --harmony-n-600: #757575;
-  --harmony-n-700: #858585;
-  --harmony-n-800: #949494;
-  --harmony-n-900: #a3a3a3;
-  --harmony-n-950: #b2b2b2;
+  --harmony-n-500: #757575;
+  --harmony-n-600: #8f8f8f;
+  --harmony-n-700: #9e9e9e;
+  --harmony-n-800: #d1d1d1;
+  --harmony-n-900: #e0e0e0;
+  --harmony-n-950: #ededed;
   /* Special Colors */
   --harmony-white: #0f0f0f;
   --harmony-background: #000000;

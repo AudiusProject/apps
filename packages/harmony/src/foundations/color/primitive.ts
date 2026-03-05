@@ -41,7 +41,7 @@ const defaultLightPrimitives = {
     n700: '#4A5263',
     n800: '#343B49',
     n900: '#232834',
-    n950: '#141821',
+    n950: '#0C0F14',
     default: '#343B49',
     neutral: '#343B49'
   },
@@ -107,14 +107,14 @@ const defaultDarkPrimitives = {
     n200: '#333333',
     n300: '#474747',
     n400: '#636363',
-    n500: '#6B6B6B',
-    n600: '#757575',
-    n700: '#858585',
-    n800: '#949494',
-    n900: '#A3A3A3',
-    n950: '#B2B2B2',
-    default: '#949494',
-    neutral: '#949494'
+    n500: '#757575',
+    n600: '#8F8F8F',
+    n700: '#9E9E9E',
+    n800: '#D1D1D1',
+    n900: '#E0E0E0',
+    n950: '#EDEDED',
+    default: '#D1D1D1',
+    neutral: '#D1D1D1'
   },
   special: {
     background: '#000000',
