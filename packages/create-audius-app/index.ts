@@ -89,7 +89,8 @@ async function run() {
     process.exit(1)
   }
 
-  if (program.example === true) {
+  const exampleOption = program.opts().example ?? program.example
+  if (exampleOption === true) {
     console.error(
       'Please provide an example name, otherwise remove the example option.'
     )
@@ -107,7 +108,7 @@ async function run() {
     process.exit(1)
   }
 
-  const example = program.example.trim()
+  const example = (typeof exampleOption === 'string' ? exampleOption : 'react-hono').trim()
 
   await createApp({
     appPath: resolvedProjectPath,
