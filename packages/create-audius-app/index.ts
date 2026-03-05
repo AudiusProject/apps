@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { cyan, green, red, bold } from 'picocolors'
-import Commander from 'commander'
+import { Command } from 'commander'
 import path from 'path'
 import prompts from 'prompts'
 import { createApp } from './create-app'
@@ -16,7 +16,7 @@ const handleSigTerm = () => process.exit(0)
 process.on('SIGINT', handleSigTerm)
 process.on('SIGTERM', handleSigTerm)
 
-const program = new Commander.Command(packageJson.name)
+const program = new Command(packageJson.name)
   .version(packageJson.version)
   .arguments('<project-directory>')
   .usage(`${green('<project-directory>')} [options]`)
