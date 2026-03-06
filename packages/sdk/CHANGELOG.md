@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 14.0.1
+
+### Patch Changes
+
+- e44d789: Do not coerce access authorities to undefined
+
 ## 14.0.0
 
 ### Major Changes
