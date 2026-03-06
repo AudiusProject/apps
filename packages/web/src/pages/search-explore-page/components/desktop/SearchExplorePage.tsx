@@ -229,9 +229,10 @@ const SearchExplorePage = ({
             ph='unit14'
             css={{
               backgroundImage: `url(${exploreHeaderLanding})`,
-              backgroundPosition: 'center',
+              backgroundPosition: '50% 25%',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
+              border: '1px solid var(--harmony-border-default)',
               opacity: bannerIsVisible ? 1 : 0,
               transition: `opacity ${motion.quick}`
             }}
