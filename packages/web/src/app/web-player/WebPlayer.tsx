@@ -229,6 +229,9 @@ const {
   EXPLORE_PAGE,
   SAVED_PAGE,
   LIBRARY_PAGE,
+  LIBRARY_TRACKS_PAGE,
+  LIBRARY_ALBUMS_PAGE,
+  LIBRARY_PLAYLISTS_PAGE,
   HISTORY_PAGE,
   DASHBOARD_PAGE,
   COIN_DETAIL_PAGE,
@@ -865,8 +868,20 @@ const WebPlayer = (props: WebPlayerProps) => {
                     />
                   </>
                 )}
-                <Route path={SAVED_PAGE} element={<LibraryPage />} />
-                <Route path={LIBRARY_PAGE} element={<LibraryPage />} />
+                <Route
+                  path={SAVED_PAGE}
+                  element={<Navigate to={LIBRARY_TRACKS_PAGE} replace />}
+                />
+                <Route
+                  path={LIBRARY_PAGE}
+                  element={<Navigate to={LIBRARY_TRACKS_PAGE} replace />}
+                />
+                <Route path={LIBRARY_TRACKS_PAGE} element={<LibraryPage />} />
+                <Route path={LIBRARY_ALBUMS_PAGE} element={<LibraryPage />} />
+                <Route
+                  path={LIBRARY_PLAYLISTS_PAGE}
+                  element={<LibraryPage />}
+                />
                 <Route path={HISTORY_PAGE} element={<HistoryPage />} />
                 {!isProduction ? (
                   <Route path={DEV_TOOLS_PAGE} element={<DevTools />} />
@@ -1271,8 +1286,20 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={UPLOAD_PAGE}
                   element={<UploadPage scrollToTop={scrollToTop} />}
                 />
-                <Route path={SAVED_PAGE} element={<LibraryPage />} />
-                <Route path={LIBRARY_PAGE} element={<LibraryPage />} />
+                <Route
+                  path={SAVED_PAGE}
+                  element={<Navigate to={LIBRARY_TRACKS_PAGE} replace />}
+                />
+                <Route
+                  path={LIBRARY_PAGE}
+                  element={<Navigate to={LIBRARY_TRACKS_PAGE} replace />}
+                />
+                <Route path={LIBRARY_TRACKS_PAGE} element={<LibraryPage />} />
+                <Route path={LIBRARY_ALBUMS_PAGE} element={<LibraryPage />} />
+                <Route
+                  path={LIBRARY_PLAYLISTS_PAGE}
+                  element={<LibraryPage />}
+                />
                 <Route path={HISTORY_PAGE} element={<HistoryPage />} />
                 {!isProduction ? (
                   <Route path={DEV_TOOLS_PAGE} element={<DevTools />} />

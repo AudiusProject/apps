@@ -190,6 +190,7 @@ const LibraryPage = () => {
 
   const { tabs, body } = useTabs({
     isMobile: false,
+    selectedTabLabel: currentTab,
     didChangeTabsFrom: (_, to) => {
       onChangeTab(to as LibraryPageTabs)
     },

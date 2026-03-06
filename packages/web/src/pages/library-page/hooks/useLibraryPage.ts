@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   useCurrentAccount,
@@ -19,6 +19,7 @@ import {
   libraryPageTracksLineupActions as tracksActions,
   libraryPageActions as saveActions,
   libraryPageSelectors,
+  LibraryCategory,
   LibraryPageTabs,
   queueSelectors,
   tracksSocialActions as socialActions,
@@ -34,15 +35,29 @@ import { route } from '@audius/common/utils'
 import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 
 import { TrackEvent, make } from 'common/store/analytics/actions'
 import { push } from 'utils/navigation'
 
+import {
+  getTabFromPathname,
+  getLibraryPath,
+  categoryFromFilterParam,
+  filterParamFromCategory,
+  LIBRARY_FILTER_PARAM,
+  LIBRARY_SEARCH_PARAM
+} from '../lib/libraryUrl'
+
 const { profilePage } = route
 const { makeGetCurrent } = queueSelectors
 const { getPlaying, getBuffering } = playerSelectors
-const { getLibraryTracksLineup, hasReachedEnd, getTracksCategory } =
-  libraryPageSelectors
+const {
+  getLibraryTracksLineup,
+  hasReachedEnd,
+  getTracksCategory,
+  getCategory
+} = libraryPageSelectors
 const { updatedPlaylistViewed } = playlistUpdatesActions
 
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
@@ -77,6 +92,11 @@ type LibraryPageState = {
 
 export const useLibraryPage = () => {
   const dispatch = useDispatch()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const lastCategoryUrlRef = useRef<string | null>(null)
+
   const currentTrack = useCurrentTrack()
   const tracks = useLineupTable(getLibraryTracksLineup)
 
@@ -101,15 +121,69 @@ export const useLibraryPage = () => {
     }
   })
 
+  const urlTab = getTabFromPathname(location.pathname)
+  const urlFilter = searchParams.get(LIBRARY_FILTER_PARAM)
+  const urlSearch = searchParams.get(LIBRARY_SEARCH_PARAM) ?? ''
+
   const [state, setState] = useState<LibraryPageState>({
-    filterText: '',
+    filterText: urlSearch,
     sortMethod: '',
     sortDirection: '',
     initialOrder: null,
     allTracksFetched: false,
-    currentTab: ProfileTabs.TRACKS,
+    currentTab: urlTab,
     shouldReturnToTrackPurchases: false
   })
+
+  const selectedCategoryForUrlTab = useSelector(
+    (state: Parameters<typeof getCategory>[0]) =>
+      getCategory(state, { currentTab: urlTab })
+  )
+
+  // Sync from URL to state and Redux when location changes
+  useEffect(() => {
+    const tab = getTabFromPathname(location.pathname)
+    let category = categoryFromFilterParam(urlFilter)
+    if (
+      tab === LibraryPageTabs.PLAYLISTS &&
+      category === LibraryCategory.Purchase
+    ) {
+      category = LibraryCategory.All
+    }
+    const search = urlSearch
+
+    lastCategoryUrlRef.current = filterParamFromCategory(category)
+    setState((prev) => ({
+      ...prev,
+      currentTab: tab,
+      filterText: search
+    }))
+    dispatch(
+      saveActions.setSelectedCategory({
+        currentTab: tab,
+        category
+      })
+    )
+  }, [location.pathname, urlFilter, urlSearch, dispatch])
+
+  // When user changes category via menu (Redux updates), sync to URL
+  useEffect(() => {
+    const urlCategoryParam = filterParamFromCategory(selectedCategoryForUrlTab)
+    if (lastCategoryUrlRef.current === urlCategoryParam) return
+    lastCategoryUrlRef.current = urlCategoryParam
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (urlCategoryParam === 'all') {
+          next.delete(LIBRARY_FILTER_PARAM)
+        } else {
+          next.set(LIBRARY_FILTER_PARAM, urlCategoryParam)
+        }
+        return next
+      },
+      { replace: true }
+    )
+  }, [selectedCategoryForUrlTab, setSearchParams])
 
   const fetchLibraryTracks = useCallback(
     (
@@ -310,17 +384,42 @@ export const useLibraryPage = () => {
     handleFetchSavedTracks()
   }, [tracksCategory, handleFetchSavedTracks])
 
+  const updateSearchParam = useCallback(
+    (search: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (search.trim() === '') {
+            next.delete(LIBRARY_SEARCH_PARAM)
+          } else {
+            next.set(LIBRARY_SEARCH_PARAM, search)
+          }
+          return next
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
+
+  const debouncedUpdateSearchParam = useMemo(
+    () => debounce(updateSearchParam, 300),
+    [updateSearchParam]
+  )
+
   const onFilterChange = useCallback(
     (e: any) => {
+      const value = e.target.value
       const callBack = !state.allTracksFetched
         ? handleFetchSavedTracks
         : undefined
-      setState((prev) => ({ ...prev, filterText: e.target.value }))
+      setState((prev) => ({ ...prev, filterText: value }))
+      debouncedUpdateSearchParam(value)
       if (callBack) {
         callBack()
       }
     },
-    [state.allTracksFetched, handleFetchSavedTracks]
+    [state.allTracksFetched, handleFetchSavedTracks, debouncedUpdateSearchParam]
   )
 
   const onSortChange = useCallback(
@@ -554,9 +653,15 @@ export const useLibraryPage = () => {
     [formatMetadata, tracks.entries, state.initialOrder, updateLineupOrder]
   )
 
-  const onChangeTab = useCallback((tab: LibraryPageTabs) => {
-    setState((prev) => ({ ...prev, currentTab: tab }))
-  }, [])
+  const onChangeTab = useCallback(
+    (tab: LibraryPageTabs) => {
+      setState((prev) => ({ ...prev, currentTab: tab }))
+      const path = getLibraryPath(tab)
+      const search = searchParams.toString()
+      navigate(search ? `${path}?${search}` : path)
+    },
+    [navigate, searchParams]
+  )
 
   const isQueuedValue = isQueued()
   const playingUid = getPlayingUid()

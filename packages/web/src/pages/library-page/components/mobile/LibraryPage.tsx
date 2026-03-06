@@ -593,6 +593,7 @@ const LibraryPage = () => {
   const { tabs, body } = useTabs({
     tabs: tabHeaders,
     elements,
+    selectedTabLabel: currentTab,
     initialScrollOffset: SCROLL_HEIGHT,
     onTabClick: handleTabClick
   })
