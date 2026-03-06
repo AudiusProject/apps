@@ -120,7 +120,10 @@ export const useProfilePage = (
   const currentTrack = useCurrentTrack()
 
   // Local state
-  const [activeTab, setActiveTab] = useState<ProfilePageTabs | null>(null)
+  const [activeTab, setActiveTab] = useState<ProfilePageTabs | null>(() => {
+    // Initialize with tab from URL if present
+    return params?.tab ? getTabForRoute(params.tab) : null
+  })
   const [editMode, setEditMode] = useState(false)
   const [shouldMaskContent, setShouldMaskContent] = useState(false)
   const [tracksLineupOrder, setTracksLineupOrder] = useState<TracksSortMode>(
@@ -230,7 +233,8 @@ export const useProfilePage = (
 
   // Reset state when profile changes
   useEffect(() => {
-    setActiveTab(null)
+    // Preserve tab from URL if present, otherwise reset to null
+    setActiveTab(params?.tab ? getTabForRoute(params.tab) : null)
     setEditMode(false)
     setUpdatedName(null)
     setUpdatedCoverPhoto(null)
@@ -243,7 +247,7 @@ export const useProfilePage = (
     setUpdatedWebsite(null)
     setUpdatedArtistCoinBadge(null)
     setAreArtistRecommendationsVisible(false)
-  }, [profile?.handle])
+  }, [profile?.handle, params?.tab])
 
   // Check if owner changed from visitor to owner
   useEffect(() => {
