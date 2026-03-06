@@ -17,7 +17,7 @@ import { KeyboardAvoidingView } from 'app/components/core'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer/constants'
 import { make, track } from 'app/services/analytics'
 
-import { useAppDrawerNavigation } from '../app-drawer-screen'
+import { useAppTabNavigation } from '../app-screen'
 
 import { useKeyboardAvoidingPlaybarStyle } from './hooks/useKeyboardAvoidingPlaybarStyle'
 
@@ -33,7 +33,7 @@ const messages = {
 }
 
 export const ChatBlastCTA = () => {
-  const navigation = useAppDrawerNavigation()
+  const navigation = useAppTabNavigation()
   const keyboardAvoidingPlaybarStyle = useKeyboardAvoidingPlaybarStyle()
   const hasCurrentlyPlayingTrack = useSelector(getHasTrack)
 
