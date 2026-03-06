@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 
 import { ThemeProvider } from '@audius/harmony'
 
-import { MetaTags } from 'components/meta-tags/MetaTags'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
+import { MetaTags } from 'components/meta-tags/MetaTags'
 import { dismissCookieBanner as dismissCookieBannerAction } from 'store/application/ui/cookieBanner/actions'
 import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
 

@@ -69,7 +69,12 @@ export const FAQ2026 = (_props: FAQ2026Props) => {
         <h2 id='faq-heading' className={styles.headline}>
           Frequently Asked Questions
         </h2>
-        <div className={styles.faqList} role='list' itemScope itemType='https://schema.org/FAQPage'>
+        <div
+          className={styles.faqList}
+          role='list'
+          itemScope
+          itemType='https://schema.org/FAQPage'
+        >
           {faqItems.map((item, index) => {
             const isOpen = openSet.has(index)
             return (
