@@ -70,7 +70,7 @@ export const ChallengeRewardsTile = ({
   const [haveChallengesLoaded, setHaveChallengesLoaded] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
   const navigate = useNavigate()
-  const { spacing } = useTheme()
+  const { spacing, color } = useTheme()
   const { isVerified } = useTierAndVerifiedForUser(currentUser?.user_id)
 
   useEffect(() => {
@@ -256,7 +256,7 @@ export const ChallengeRewardsTile = ({
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    backgroundColor: color.special.glassOverlay,
                     backdropFilter: 'blur(5px)',
                     borderRadius: spacing.l,
                     zIndex: 10,
