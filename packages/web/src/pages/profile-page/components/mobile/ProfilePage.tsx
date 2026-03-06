@@ -345,7 +345,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     didChangeTabsFrom,
     tabs: profileTabs,
     elements: profileElements,
-    initialTab: activeTab || undefined,
+    selectedTabLabel: activeTab ?? undefined,
     pathname: profilePage(handle)
   })
 

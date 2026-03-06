@@ -329,7 +329,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     isMobile: false,
     tabs: headers,
     tabRecalculator,
-    initialTab: activeTab || undefined,
+    selectedTabLabel: activeTab ?? undefined,
     elements,
     pathname: profilePage(handle)
   })

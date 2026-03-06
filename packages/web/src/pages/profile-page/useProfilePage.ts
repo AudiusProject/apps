@@ -230,7 +230,7 @@ export const useProfilePage = (
 
   // Reset state when profile changes
   useEffect(() => {
-    setActiveTab(null)
+    setActiveTab(params?.tab ? getTabForRoute(params.tab) : null)
     setEditMode(false)
     setUpdatedName(null)
     setUpdatedCoverPhoto(null)
@@ -243,6 +243,8 @@ export const useProfilePage = (
     setUpdatedWebsite(null)
     setUpdatedArtistCoinBadge(null)
     setAreArtistRecommendationsVisible(false)
+    // We intentionally only reset when switching profiles, not when changing tabs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.handle])
 
   // Check if owner changed from visitor to owner

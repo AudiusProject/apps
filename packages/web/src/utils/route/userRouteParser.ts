@@ -47,7 +47,7 @@ export const parseUserRoute = (
     return { userId, handle: null, tab: null }
   }
 
-  const profilePageMatch = matchPath(PROFILE_PAGE, route)
+  const profilePageMatch = matchPath({ path: PROFILE_PAGE, end: true }, route)
   if (profilePageMatch?.params?.handle) {
     const { handle } = profilePageMatch.params
     // Decode handle to prevent double-encoding when used in API calls
@@ -58,7 +58,10 @@ export const parseUserRoute = (
     }
   }
 
-  const commentHistoryMatch = matchPath(PROFILE_PAGE_COMMENTS, route)
+  const commentHistoryMatch = matchPath(
+    { path: PROFILE_PAGE_COMMENTS, end: true },
+    route
+  )
   if (commentHistoryMatch?.params?.handle) {
     const { handle } = commentHistoryMatch.params
     // Decode handle to prevent double-encoding when used in API calls
@@ -68,7 +71,10 @@ export const parseUserRoute = (
     }
   }
 
-  const profilePageTabMatch = matchPath(`${PROFILE_PAGE}/:tab`, route)
+  const profilePageTabMatch = matchPath(
+    { path: `${PROFILE_PAGE}/:tab`, end: true },
+    route
+  )
   if (profilePageTabMatch?.params) {
     const { handle, tab } = profilePageTabMatch.params as {
       handle?: string
