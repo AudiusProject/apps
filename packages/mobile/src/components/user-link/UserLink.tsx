@@ -34,6 +34,7 @@ export const UserLink = (props: UserLinkProps) => {
     badgeSize = 's',
     style,
     textLinkStyle,
+    onPress: onPressProp,
     disabled,
     hideArtistCoinBadge,
     ...other
@@ -65,8 +66,12 @@ export const UserLink = (props: UserLinkProps) => {
           animatedPressed.value = withTiming(0, motion.press)
         }
       }}
-      onPress={() => {
+      onPress={(event) => {
         if (disabled) return
+        if (onPressProp) {
+          onPressProp(event)
+          return
+        }
         navigation.push('Profile', { id: userId })
       }}
     >
