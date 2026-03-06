@@ -22,6 +22,7 @@ import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
+import exploreHeaderLanding from 'assets/img/explore-header-landing.png'
 import Page from 'components/page/Page'
 import useTabs from 'hooks/useTabs/useTabs'
 import { filters } from 'pages/search-page/SearchFilters'
@@ -47,9 +48,6 @@ import { LabelSpotlightSection } from './LabelSpotlightSection'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
-
-// Use public URL so the image resolves in all Vite entry points (web player vs public site)
-const LANDING_HERO_IMAGE_URL = `${import.meta.env.BASE_URL}landing-2026/landing.png`
 
 export type SearchExplorePageProps = {
   title: string
@@ -188,7 +186,7 @@ const SearchExplorePage = ({
 
   useEffect(() => {
     const img = new window.Image()
-    img.src = LANDING_HERO_IMAGE_URL
+    img.src = exploreHeaderLanding
     img.onload = () => setBannerIsVisible(true)
   }, [])
 
@@ -230,7 +228,7 @@ const SearchExplorePage = ({
             pv='xl'
             ph='unit14'
             css={{
-              backgroundImage: `url(${LANDING_HERO_IMAGE_URL})`,
+              backgroundImage: `url(${exploreHeaderLanding})`,
               backgroundPosition: 'center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
