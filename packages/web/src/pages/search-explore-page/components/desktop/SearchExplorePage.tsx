@@ -151,14 +151,14 @@ const SearchExplorePage = ({
       } else {
         newParams.delete('query')
       }
-      setSearchParams(newParams)
+      setSearchParams(newParams, { replace: true })
     } else if (categoryKey === SearchTabs.ALL.toLowerCase()) {
       // clear filters when searching all
       const newParams = new URLSearchParams()
       if (debouncedValue) {
         newParams.set('query', debouncedValue)
       }
-      setSearchParams(newParams)
+      setSearchParams(newParams, { replace: true })
     }
   }, [
     debouncedValue,

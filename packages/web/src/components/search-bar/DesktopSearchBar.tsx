@@ -167,7 +167,7 @@ export const DesktopSearchBar = () => {
     if (isSearchPage && debouncedValue !== previousDebouncedValue) {
       const newParams = new URLSearchParams(searchParams)
       newParams.set('query', debouncedValue)
-      setSearchParams(newParams)
+      setSearchParams(newParams, { replace: true })
     }
   }, [
     debouncedValue,
@@ -351,7 +351,7 @@ export const DesktopSearchBar = () => {
           if (isSearchPage) {
             const newParams = new URLSearchParams(searchParams)
             newParams.set('query', debouncedValue)
-            setSearchParams(newParams)
+            setSearchParams(newParams, { replace: true })
           } else {
             navigate(searchResultsPage('all', inputValue))
           }
@@ -412,7 +412,7 @@ export const DesktopSearchBar = () => {
           if (isSearchPage) {
             const newParams = new URLSearchParams(searchParams)
             newParams.set('query', debouncedValue)
-            setSearchParams(newParams)
+            setSearchParams(newParams, { replace: true })
           } else {
             navigate(searchResultsPage('all', inputValue))
           }
