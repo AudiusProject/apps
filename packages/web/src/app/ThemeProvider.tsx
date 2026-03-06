@@ -1,14 +1,14 @@
 import { ReactNode, useEffect, useMemo } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SystemAppearance,
   Theme as LegacyTheme,
   ThemeMode,
   ThemePalette
 } from '@audius/common/models'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { themeActions, themeSelectors } from '@audius/common/store'
 import { FeatureFlags } from '@audius/common/services'
+import { themeActions, themeSelectors } from '@audius/common/store'
 import {
   resolveTheme,
   ThemeProvider as HarmonyThemeProvider
@@ -16,10 +16,7 @@ import {
 import type { Theme } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  PREFERS_DARK_MEDIA_QUERY,
-  THEME_PALETTE_KEY
-} from 'utils/theme/theme'
+import { PREFERS_DARK_MEDIA_QUERY, THEME_PALETTE_KEY } from 'utils/theme/theme'
 
 const { setSystemAppearance, setThemePalette } = themeActions
 
@@ -87,7 +84,10 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
 
   // Sync stored theme palette with feature flag: flag on → default, flag off → classic. Matrix unchanged.
   useEffect(() => {
-    if (legacyTheme === LegacyTheme.MATRIX || themePalette === ThemePalette.MATRIX) {
+    if (
+      legacyTheme === LegacyTheme.MATRIX ||
+      themePalette === ThemePalette.MATRIX
+    ) {
       return
     }
     if (isNewThemeModelEnabled) {
@@ -105,12 +105,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
         }
       }
     }
-  }, [
-    isNewThemeModelEnabled,
-    themePalette,
-    legacyTheme,
-    dispatch
-  ])
+  }, [isNewThemeModelEnabled, themePalette, legacyTheme, dispatch])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {

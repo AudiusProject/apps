@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   Theme,
   ThemeMode,
@@ -8,9 +9,8 @@ import {
   SystemAppearance,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { themeActions, themeSelectors } from '@audius/common/store'
 import { FeatureFlags } from '@audius/common/services'
+import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAppState } from '@react-native-community/hooks'
@@ -97,11 +97,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
     }
 
     if (isNewThemeModelEnabled) {
-      return resolveToHarmonyTheme(
-        ThemePalette.DEFAULT,
-        mode,
-        sysAppearance
-      )
+      return resolveToHarmonyTheme(ThemePalette.DEFAULT, mode, sysAppearance)
     }
 
     switch (theme) {
@@ -117,13 +113,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
           ? 'classic-dark'
           : 'classic-light'
     }
-  }, [
-    theme,
-    themePalette,
-    themeMode,
-    systemAppearance,
-    isNewThemeModelEnabled
-  ])
+  }, [theme, themePalette, themeMode, systemAppearance, isNewThemeModelEnabled])
 
   // Sync stored theme palette with feature flag: flag on → default, flag off → classic. Matrix unchanged.
   useEffect(() => {
@@ -139,12 +129,7 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
         dispatch(setThemePalette({ themePalette: ThemePalette.CLASSIC }))
       }
     }
-  }, [
-    isNewThemeModelEnabled,
-    themePalette,
-    theme,
-    dispatch
-  ])
+  }, [isNewThemeModelEnabled, themePalette, theme, dispatch])
 
   useAsync(async () => {
     const [savedTheme, savedPalette, savedMode] = await Promise.all([
