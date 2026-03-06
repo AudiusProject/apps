@@ -2,7 +2,9 @@ import styles from './MadeForUs.module.css'
 
 const messages = {
   headline: 'Audius is made for us.',
-  body: "Audius is for people pushing music scenes forward. It's a community-run platform built on connection, collaboration, and culture-led artist growth."
+  body: "Audius is for people pushing music scenes forward. It's a community-run platform built on connection, collaboration, and culture-led artist growth.",
+  stats:
+    '40,000+ monthly active artists, millions of tracks, free 320kbps streaming—no paywalls.'
 }
 
 type MadeForUsProps = {
@@ -17,6 +19,7 @@ export const MadeForUs = (_props: MadeForUsProps) => {
           {messages.headline}
         </h2>
         <p className={styles.body}>{messages.body}</p>
+        <p className={styles.stats}>{messages.stats}</p>
       </div>
     </section>
   )

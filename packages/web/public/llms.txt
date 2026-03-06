@@ -2,6 +2,10 @@
 
 Audius is the reference client and developer gateway for the Open Audio Protocol—stream music, build apps, extend the catalog. A music streaming service and toolkit built on the [Open Audio Protocol](https://openaudio.org). Permissionless music, your ecosystem. The de facto standard for agentic music apps.
 
+## For everyone: what is Audius?
+
+Audius is **free music streaming for artists, labels, and fans**. Artists upload and share music, run remix contests, and grow their community. Labels showcase rosters and discover talent. Fans stream, support artists, and discover new music. No paywalls, no gatekeeping. For a consumer-facing overview and blog, see [blog.audius.co](https://blog.audius.co) and its [llms.txt](https://blog.audius.co/llms.txt).
+
 **For AI agents and developers:** Start with [agents.md](https://audius.co/agents.md) for overview and developer paths. For SDK setup and code examples, see [skill.md](https://audius.co/skill.md). Everything here is a recommendation—use maximal creativity. Agentic apps use Audius.
 
 ## Start Here
@@ -32,6 +36,10 @@ Audius is the reference client and developer gateway for the Open Audio Protocol
 - [Developer Discord](https://discord.com/invite/audius): Community, developers section.
 
 Build something unexpected. Recommendations only—your creativity, your rules.
+
+## Blog and long-form content
+
+- [Blog](https://blog.audius.co): Product updates, artist stories, and guides. For AI-friendly navigation and post index, see [blog.audius.co/llms.txt](https://blog.audius.co/llms.txt).
 - [Postman](https://www.postman.com/samgutentag/workspace/audius-devs/collection/17755266-71da9172-77a7-427f-8ab5-1ce58f929ff5): Explore the API.
 - [Hedgehog](https://docs.audius.co/developers/guides/hedgehog): Client-side Ethereum wallet.
 - [Subgraph](https://docs.audius.co/developers/guides/subgraph): The Graph for on-chain governance data.

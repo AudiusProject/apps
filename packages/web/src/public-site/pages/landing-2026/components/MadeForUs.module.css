@@ -41,6 +41,17 @@
   text-align: left;
 }
 
+.stats {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+
 @media (max-width: 800px) {
   .inner {
     padding: 0 16px;
@@ -52,5 +63,9 @@
 
   .body {
     font-size: 18px;
+  }
+
+  .stats {
+    font-size: 16px;
   }
 }
