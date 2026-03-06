@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux'
 
 import { LockedStatusBadge, Text } from 'app/components/core'
 import { useDrawer } from 'app/hooks/useDrawer'
-import { useNavigation } from 'app/hooks/useNavigation'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
@@ -51,7 +51,7 @@ export const TrackInfo = (props: TrackInfoProps) => {
   const styles = useStyles()
   const { hasStreamAccess } = useGatedContentAccess(track)
   const { onClose } = useDrawer('NowPlaying')
-  const navigation = useNavigation()
+  const navigation = useAppTabNavigation()
   const isPreviewing = useSelector(getPreviewing)
   const shouldShowPreviewLock =
     isPreviewing ||
@@ -60,8 +60,10 @@ export const TrackInfo = (props: TrackInfoProps) => {
       !hasStreamAccess)
 
   const handlePressArtist = useCallback(() => {
-    onClose()
-    navigation?.push('Profile', { id: user?.user_id })
+    if (user?.user_id) {
+      onClose()
+      navigation?.push('Profile', { id: user.user_id })
+    }
   }, [navigation, user?.user_id, onClose])
 
   if (!user || !track) return null

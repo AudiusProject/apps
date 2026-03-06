@@ -2,9 +2,9 @@ import { useContext } from 'react'
 
 import { useNavigation } from 'app/hooks/useNavigation'
 
-import { AppTabNavigationContext } from '../app-screen'
+import { AppTabNavigationContext } from './AppTabNavigationProvider'
 
-export const useAppDrawerNavigation = () => {
+export const useAppTabNavigation = () => {
   const { navigation: contextNavigation } = useContext(AppTabNavigationContext)
   return useNavigation({ customNavigation: contextNavigation })
 }

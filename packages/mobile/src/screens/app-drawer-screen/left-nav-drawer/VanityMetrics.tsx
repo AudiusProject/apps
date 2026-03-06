@@ -10,11 +10,11 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
 
 import { Divider, Flex, Text } from '@audius/harmony-native'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 
 import { AppDrawerContext } from '../AppDrawerContext'
-import { useAppDrawerNavigation } from '../useAppDrawerNavigation'
 
 const { setFollowers } = followersUserListActions
 const { setFollowing } = followingUserListActions
@@ -77,7 +77,7 @@ export const VanityMetrics = () => {
   const { user_id, followee_count = 0, follower_count = 0 } = accountUser ?? {}
 
   const dispatch = useDispatch()
-  const navigation = useAppDrawerNavigation()
+  const navigation = useAppTabNavigation()
   const { drawerHelpers } = useContext(AppDrawerContext)
 
   const handlePressFollowing = useCallback(() => {
