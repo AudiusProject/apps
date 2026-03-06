@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   Theme,
   ThemeMode,
@@ -8,6 +9,7 @@ import {
   SystemAppearance,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -22,7 +24,6 @@ import {
   THEME_PALETTE_KEY,
   THEME_STORAGE_KEY
 } from 'app/constants/storage-keys'
-import type { AppState } from 'app/store'
 
 const { getTheme, getThemePalette, getThemeMode, getSystemAppearance } =
   themeSelectors
@@ -66,51 +67,69 @@ const resolveToHarmonyTheme = (
   return resolvedMode === 'light' ? 'classic-light' : 'classic-dark'
 }
 
-const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
-  const theme = getTheme(state)
-  const themePalette = getThemePalette(state)
-  const themeMode = getThemeMode(state)
-  const systemAppearance = getSystemAppearance(state)
+export const ThemeProvider = (props: ThemeProviderProps) => {
+  const { children } = props
+  const isDarkMode = useDarkMode()
+  const dispatch = useDispatch()
+  const appState = useAppState()
+  const theme = useSelector(getTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
+  const systemAppearance = useSelector(getSystemAppearance)
+  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
+    FeatureFlags.NEW_THEME_MODEL
+  )
 
-  if (themePalette != null) {
-    const mode =
+  const harmonyTheme = useMemo((): HarmonyThemeName => {
+    const mode: ThemeMode =
       themeMode ??
       (theme === Theme.LIGHT
         ? ThemeMode.LIGHT
         : theme === Theme.DARK
           ? ThemeMode.DARK
           : ThemeMode.AUTO)
-    const sysAppearance =
+    const sysAppearance: SystemAppearance =
       systemAppearance ??
       (theme === Theme.DARK ? SystemAppearance.DARK : SystemAppearance.LIGHT)
-    return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
-  }
 
-  switch (theme) {
-    case Theme.LIGHT:
-      return 'classic-light'
-    case Theme.DARK:
-      return 'classic-dark'
-    case Theme.MATRIX:
-      return 'matrix'
-    case Theme.AUTO:
-    default:
-      switch (systemAppearance) {
-        case SystemAppearance.DARK:
-          return 'classic-dark'
-        case SystemAppearance.LIGHT:
-        default:
-          return 'classic-light'
+    if (themePalette != null) {
+      return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
+    }
+
+    if (isNewThemeModelEnabled) {
+      return resolveToHarmonyTheme(ThemePalette.DEFAULT, mode, sysAppearance)
+    }
+
+    switch (theme) {
+      case Theme.LIGHT:
+        return 'classic-light'
+      case Theme.DARK:
+        return 'classic-dark'
+      case Theme.MATRIX:
+        return 'matrix'
+      case Theme.AUTO:
+      default:
+        return sysAppearance === SystemAppearance.DARK
+          ? 'classic-dark'
+          : 'classic-light'
+    }
+  }, [theme, themePalette, themeMode, systemAppearance, isNewThemeModelEnabled])
+
+  // Sync stored theme palette with feature flag: flag on → default, flag off → classic. Matrix unchanged.
+  useEffect(() => {
+    if (theme === Theme.MATRIX || themePalette === ThemePalette.MATRIX) {
+      return
+    }
+    if (isNewThemeModelEnabled) {
+      if (themePalette === null || themePalette === ThemePalette.CLASSIC) {
+        dispatch(setThemePalette({ themePalette: ThemePalette.DEFAULT }))
       }
-  }
-}
-
-export const ThemeProvider = (props: ThemeProviderProps) => {
-  const { children } = props
-  const isDarkMode = useDarkMode()
-  const dispatch = useDispatch()
-  const appState = useAppState()
-  const theme = useSelector(selectHarmonyTheme)
+    } else {
+      if (themePalette === ThemePalette.DEFAULT) {
+        dispatch(setThemePalette({ themePalette: ThemePalette.CLASSIC }))
+      }
+    }
+  }, [isNewThemeModelEnabled, themePalette, theme, dispatch])
 
   useAsync(async () => {
     const [savedTheme, savedPalette, savedMode] = await Promise.all([
@@ -155,6 +174,8 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [isDarkMode, dispatch, appState])
 
   return (
-    <HarmonyThemeProvider themeName={theme}>{children}</HarmonyThemeProvider>
+    <HarmonyThemeProvider themeName={harmonyTheme}>
+      {children}
+    </HarmonyThemeProvider>
   )
 }
