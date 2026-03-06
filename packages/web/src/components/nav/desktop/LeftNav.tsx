@@ -131,7 +131,7 @@ export const LeftNav = (props: OwnProps) => {
         </Scrollbar>
       </Flex>
       {navLoaded ? (
-        <Flex direction='column' alignItems='center'>
+        <Flex direction='column' alignItems='center' gap='s'>
           <ProfileCompletionPanel />
           <LeftNavCTA />
           <NowPlayingArtworkTile />
