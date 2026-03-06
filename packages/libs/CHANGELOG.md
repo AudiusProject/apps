@@ -1,5 +1,12 @@
 # @audius/sdk
 
+## 6.0.22
+
+### Patch Changes
+
+- Updated dependencies [e44d789]
+  - @audius/sdk@14.0.1
+
 ## 6.0.21
 
 ### Patch Changes
