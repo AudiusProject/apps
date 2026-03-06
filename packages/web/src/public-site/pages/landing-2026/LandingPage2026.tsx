@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 
 import { ThemeProvider } from '@audius/harmony'
 
+import { MetaTags } from 'components/meta-tags/MetaTags'
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
 import { dismissCookieBanner as dismissCookieBannerAction } from 'store/application/ui/cookieBanner/actions'
 import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
 
 import styles from './LandingPage2026.module.css'
 import { CreateFutureCTA } from './components/CreateFutureCTA'
-import { FAQ2026 } from './components/FAQ2026'
+import { FAQ2026, faqItems } from './components/FAQ2026'
 import { FeaturedContests2026 } from './components/FeaturedContests2026'
 import { Footer2026 } from './components/Footer2026'
 import { GrowthStartsHere } from './components/GrowthStartsHere'
@@ -101,8 +102,28 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     return dismissCookieBannerAction()
   }
 
+  const homepageUrl = 'https://audius.co'
+  const faqPageStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  }
+
   return (
     <ThemeProvider theme='day'>
+      <MetaTags
+        title='Audius — Free Music Streaming for Artists, Labels & Fans'
+        description='Audius is a decentralized music streaming platform for artists, labels, and fans. Stream and share music, upload tracks, and grow your audience—free.'
+        canonicalUrl={`${homepageUrl}/`}
+        structuredData={faqPageStructuredData}
+      />
       <div
         id='landing-page-2026'
         className={styles.page}
@@ -111,12 +132,14 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
         {showCookieBanner ? (
           <CookieBanner isPlaying={false} dismiss={onDismissCookie} />
         ) : null}
-        <Nav2026
-          isMobile={isMobileOrNarrow}
-          isAuthenticated={props.isAuthenticated}
-          openNavScreen={props.openNavScreen}
-          setRenderPublicSite={props.setRenderPublicSite}
-        />
+        <header>
+          <Nav2026
+            isMobile={isMobileOrNarrow}
+            isAuthenticated={props.isAuthenticated}
+            openNavScreen={props.openNavScreen}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+        </header>
         <main className={styles.main}>
           <Hero2026
             isMobile={isMobileOrNarrow}

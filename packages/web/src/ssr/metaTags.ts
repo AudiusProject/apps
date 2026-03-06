@@ -32,8 +32,10 @@ export const createSeoDescription = (msg: string, userPage?: boolean) => {
   return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
 }
 
-// Get base public URL based on environment
-const getPublicUrl = (): string => {
+/**
+ * Get base public URL based on environment (used for canonical, og:url, etc.)
+ */
+export const getPublicUrl = (): string => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
     case 'production':
@@ -95,18 +97,23 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
 }
 
 /**
- * Default meta tag context
+ * Default meta tag context (homepage / landing)
+ * GEO: Title and canonical so AI engines and crawlers get strong signals.
  */
-export const getDefaultContext = () => ({
-  title: 'Audius - Empowering Creators',
-  description:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  ogDescription:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  image: DEFAULT_IMAGE_URL,
-  imageAlt: 'The Audius Platform',
-  thumbnail: true
-})
+export const getDefaultContext = () => {
+  const publicUrl = getPublicUrl()
+  return {
+    title: 'Audius — Free Music Streaming for Artists, Labels & Fans',
+    description:
+      'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+    ogDescription:
+      'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+    canonicalUrl: `${publicUrl}/`,
+    image: DEFAULT_IMAGE_URL,
+    imageAlt: 'The Audius Platform',
+    thumbnail: true
+  }
+}
 
 /**
  * Upload page meta tag context

@@ -25,7 +25,7 @@ function ChevronDown({ className }: { className?: string }) {
   )
 }
 
-const faqItems = [
+export const faqItems = [
   {
     question: 'Who is Audius made for?',
     answer: 'Audius is made for us, the people pushing music scenes forward.'
@@ -69,28 +69,44 @@ export const FAQ2026 = (_props: FAQ2026Props) => {
         <h2 id='faq-heading' className={styles.headline}>
           Frequently Asked Questions
         </h2>
-        <div className={styles.faqList} role='list'>
+        <div className={styles.faqList} role='list' itemScope itemType='https://schema.org/FAQPage'>
           {faqItems.map((item, index) => {
             const isOpen = openSet.has(index)
             return (
-              <button
+              <div
                 key={index}
-                type='button'
-                className={styles.faqItem}
-                onClick={() => toggle(index)}
-                aria-expanded={isOpen}
+                className={styles.faqItemWrapper}
                 role='listitem'
+                itemScope
+                itemProp='mainEntity'
+                itemType='https://schema.org/Question'
               >
-                <div className={styles.faqHeader}>
-                  <p className={styles.faqQuestion}>{item.question}</p>
-                  <ChevronDown className={styles.chevron} />
-                </div>
-                {isOpen ? (
-                  <div className={styles.faqContent}>
-                    <p className={styles.faqAnswer}>{item.answer}</p>
+                <button
+                  type='button'
+                  className={styles.faqItem}
+                  onClick={() => toggle(index)}
+                  aria-expanded={isOpen}
+                >
+                  <div className={styles.faqHeader}>
+                    <p className={styles.faqQuestion} itemProp='name'>
+                      {item.question}
+                    </p>
+                    <ChevronDown className={styles.chevron} />
                   </div>
-                ) : null}
-              </button>
+                </button>
+                {/* GEO: Answer always in DOM so crawlers/AI can index it; hidden via CSS when collapsed */}
+                <div
+                  itemScope
+                  itemProp='acceptedAnswer'
+                  itemType='https://schema.org/Answer'
+                  className={`${styles.faqContent} ${isOpen ? styles.faqContentOpen : styles.faqContentClosed}`}
+                  aria-hidden={!isOpen}
+                >
+                  <p className={styles.faqAnswer} itemProp='text'>
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
             )
           })}
         </div>

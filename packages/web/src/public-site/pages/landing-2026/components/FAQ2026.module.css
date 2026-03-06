@@ -39,6 +39,10 @@
   cursor: pointer;
 }
 
+.faqItemWrapper {
+  width: 100%;
+}
+
 .faqItem {
   width: 100%;
   background: none;
@@ -134,6 +138,18 @@
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding: 16px 0;
   overflow: hidden;
+}
+
+.faqContentClosed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top-width: 0;
+  overflow: hidden;
+}
+
+.faqContentOpen {
+  /* expanded state uses default .faqContent */
 }
 
 .faqAnswer {

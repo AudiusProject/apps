@@ -44,6 +44,11 @@
     />
     <meta name="theme-color" content="#000000" />
 
+    <title>Audius — Free Music Streaming for Artists, Labels &amp; Fans</title>
+    <link rel="canonical" href="https://audius.co/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://audius.co/" />
+
     <link rel="manifest" href="/manifest.json" />
 
     <meta name="application-name" content="Audius" />
@@ -121,6 +126,45 @@
       src="https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json/tag.js"
     ></script>
     <!-- end Optimizely -->
+
+    <!-- GEO: Organization, WebSite, SoftwareApplication schema for AI engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://audius.co/#organization",
+          "name": "Audius",
+          "url": "https://audius.co",
+          "logo": "https://og.audius.co/default",
+          "sameAs": [
+            "https://twitter.com/audius",
+            "https://github.com/audiusproject",
+            "https://discord.gg/audius",
+            "https://instagram.com/audius"
+          ],
+          "description": "Audius is a decentralized music streaming and sharing platform that puts power back into the hands of content creators."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://audius.co/#website",
+          "url": "https://audius.co",
+          "name": "Audius",
+          "publisher": { "@id": "https://audius.co/#organization" },
+          "description": "Free music streaming for artists, labels, and fans. Stream and share music on the decentralized Audius platform."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Audius",
+          "applicationCategory": "MusicApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "description": "Free music streaming for artists, labels, and fans. Upload, stream, and share music on the decentralized Audius platform."
+        }
+      ]
+    }
+    </script>
 
     <!-- start Meta Pixel -->
     <script async type="text/javascript">
