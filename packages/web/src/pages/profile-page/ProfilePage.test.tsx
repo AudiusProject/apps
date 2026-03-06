@@ -62,7 +62,11 @@ const ProfilePageWithRef = () => {
   )
 }
 
-export function renderProfilePage(user: any, options?: RenderOptions) {
+export function renderProfilePage(
+  user: any,
+  options?: RenderOptions & { initialRoute?: string }
+) {
+  const { initialRoute, ...renderOptions } = options ?? {}
   mswServer.use(
     mockUserByHandle(user),
     mockRelatedUsers(user),
@@ -75,8 +79,9 @@ export function renderProfilePage(user: any, options?: RenderOptions) {
     <Routes>
       <Route path='/' element={<Navigate to='/test-user' replace />} />
       <Route path='/:handle' element={<ProfilePageWithRef />} />
+      <Route path='/:handle/:tab' element={<ProfilePageWithRef />} />
     </Routes>,
-    options
+    { ...renderOptions, initialRoute }
   )
 }
 
@@ -248,5 +253,27 @@ describe('ProfilePage', () => {
     expect(buyButton).toBeInTheDocument()
     expect(await screen.findByText('$MOCK')).toBeInTheDocument()
     expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()
+  })
+
+  it('should navigate to the correct tab when using sub-routes', async () => {
+    renderProfilePage(artistUser, {
+      initialRoute: `/${artistUser.handle}/albums`
+    })
+
+    // Wait for the profile to load
+    expect(
+      await screen.findByRole('heading', {
+        name: new RegExp(`^${artistUser.name}\\s*$`)
+      })
+    ).toBeInTheDocument()
+
+    // Verify that the Albums tab is active (not the first tab)
+    const navBanner = await screen.findByTestId('nav-banner')
+    const albumsTab = await within(navBanner).findByText('Albums')
+    expect(albumsTab).toBeInTheDocument()
+
+    // The active tab should have specific styling - check parent for active class
+    const albumsTabParent = albumsTab.closest('[role="tab"]')
+    expect(albumsTabParent).toBeInTheDocument()
   })
 })
