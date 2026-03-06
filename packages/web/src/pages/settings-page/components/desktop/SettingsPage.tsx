@@ -345,7 +345,11 @@ export const SettingsPage = () => {
 
   const effectivePalette =
     themePalette ??
-    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.CLASSIC)
+    (theme === Theme.MATRIX
+      ? ThemePalette.MATRIX
+      : isNewThemeModelEnabled
+        ? ThemePalette.DEFAULT
+        : ThemePalette.CLASSIC)
   const effectiveMode =
     themeMode ??
     (theme === Theme.LIGHT

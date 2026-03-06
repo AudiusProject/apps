@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useMemo } from 'react'
 
 import {
   SystemAppearance,
@@ -6,61 +6,25 @@ import {
   ThemeMode,
   ThemePalette
 } from '@audius/common/models'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { themeActions, themeSelectors } from '@audius/common/store'
+import { FeatureFlags } from '@audius/common/services'
 import {
   resolveTheme,
   ThemeProvider as HarmonyThemeProvider
 } from '@audius/harmony'
 import type { Theme } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { AppState } from 'store/types'
-import { useSelector } from 'utils/reducer'
-import { PREFERS_DARK_MEDIA_QUERY } from 'utils/theme/theme'
+import {
+  PREFERS_DARK_MEDIA_QUERY,
+  THEME_PALETTE_KEY
+} from 'utils/theme/theme'
 
-const { setSystemAppearance } = themeActions
+const { setSystemAppearance, setThemePalette } = themeActions
 
 const { getTheme, getThemePalette, getThemeMode, getSystemAppearance } =
   themeSelectors
-
-const selectHarmonyTheme = (state: AppState): Theme => {
-  const themePalette = getThemePalette(state)
-  const themeMode = getThemeMode(state)
-  const legacyTheme = getTheme(state)
-  const systemAppearance = getSystemAppearance(state)
-
-  const sysAppearance: 'light' | 'dark' =
-    systemAppearance === SystemAppearance.DARK ? 'dark' : 'light'
-  const mode: 'auto' | 'light' | 'dark' =
-    themeMode === ThemeMode.AUTO
-      ? 'auto'
-      : themeMode === ThemeMode.DARK
-        ? 'dark'
-        : 'light'
-
-  if (themePalette != null) {
-    const palette: 'default' | 'classic' | 'matrix' =
-      themePalette === ThemePalette.DEFAULT
-        ? 'default'
-        : themePalette === ThemePalette.MATRIX
-          ? 'matrix'
-          : 'classic'
-    return resolveTheme(palette, mode, sysAppearance)
-  }
-
-  switch (legacyTheme) {
-    case LegacyTheme.LIGHT:
-      return 'classic-light'
-    case LegacyTheme.DARK:
-      return 'classic-dark'
-    case LegacyTheme.MATRIX:
-      return 'matrix'
-    case LegacyTheme.AUTO:
-      return sysAppearance === 'dark' ? 'classic-dark' : 'classic-light'
-    default:
-      return sysAppearance === 'dark' ? 'default-dark' : 'default-light'
-  }
-}
 
 type ThemeProviderProps = {
   children: ReactNode
@@ -68,8 +32,85 @@ type ThemeProviderProps = {
 
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  const harmonyTheme = useSelector(selectHarmonyTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
+  const legacyTheme = useSelector(getTheme)
+  const systemAppearance = useSelector(getSystemAppearance)
+  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
+    FeatureFlags.NEW_THEME_MODEL
+  )
   const dispatch = useDispatch()
+
+  const harmonyTheme = useMemo((): Theme => {
+    const sysAppearance: 'light' | 'dark' =
+      systemAppearance === SystemAppearance.DARK ? 'dark' : 'light'
+    const mode: 'auto' | 'light' | 'dark' =
+      themeMode === ThemeMode.AUTO
+        ? 'auto'
+        : themeMode === ThemeMode.DARK
+          ? 'dark'
+          : 'light'
+
+    if (themePalette != null) {
+      const palette: 'default' | 'classic' | 'matrix' =
+        themePalette === ThemePalette.DEFAULT
+          ? 'default'
+          : themePalette === ThemePalette.MATRIX
+            ? 'matrix'
+            : 'classic'
+      return resolveTheme(palette, mode, sysAppearance)
+    }
+
+    if (isNewThemeModelEnabled) {
+      return resolveTheme('default', mode, sysAppearance)
+    }
+
+    switch (legacyTheme) {
+      case LegacyTheme.LIGHT:
+        return 'classic-light'
+      case LegacyTheme.DARK:
+        return 'classic-dark'
+      case LegacyTheme.MATRIX:
+        return 'matrix'
+      case LegacyTheme.AUTO:
+        return sysAppearance === 'dark' ? 'classic-dark' : 'classic-light'
+      default:
+        return sysAppearance === 'dark' ? 'default-dark' : 'default-light'
+    }
+  }, [
+    themePalette,
+    themeMode,
+    legacyTheme,
+    systemAppearance,
+    isNewThemeModelEnabled
+  ])
+
+  // Sync stored theme palette with feature flag: flag on → default, flag off → classic. Matrix unchanged.
+  useEffect(() => {
+    if (legacyTheme === LegacyTheme.MATRIX || themePalette === ThemePalette.MATRIX) {
+      return
+    }
+    if (isNewThemeModelEnabled) {
+      if (themePalette === null || themePalette === ThemePalette.CLASSIC) {
+        dispatch(setThemePalette({ themePalette: ThemePalette.DEFAULT }))
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(THEME_PALETTE_KEY, ThemePalette.DEFAULT)
+        }
+      }
+    } else {
+      if (themePalette === ThemePalette.DEFAULT) {
+        dispatch(setThemePalette({ themePalette: ThemePalette.CLASSIC }))
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(THEME_PALETTE_KEY, ThemePalette.CLASSIC)
+        }
+      }
+    }
+  }, [
+    isNewThemeModelEnabled,
+    themePalette,
+    legacyTheme,
+    dispatch
+  ])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
