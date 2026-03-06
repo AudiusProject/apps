@@ -81,7 +81,7 @@ export function renderProfilePage(
       <Route path='/:handle' element={<ProfilePageWithRef />} />
       <Route path='/:handle/:tab' element={<ProfilePageWithRef />} />
     </Routes>,
-    { ...renderOptions, initialRoute }
+    renderOptions
   )
 }
 
