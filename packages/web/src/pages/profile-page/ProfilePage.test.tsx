@@ -66,7 +66,7 @@ export function renderProfilePage(
   user: any,
   options?: RenderOptions & { initialRoute?: string }
 ) {
-  const { initialRoute, ...renderOptions } = options ?? {}
+  const { ...renderOptions } = options ?? {}
   mswServer.use(
     mockUserByHandle(user),
     mockRelatedUsers(user),
