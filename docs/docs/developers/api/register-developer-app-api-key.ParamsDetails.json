@@ -1,1 +1,0 @@
-{"parameters":[{"name":"user_id","in":"query","description":"The user ID of the user who owns the developer app","required":true,"schema":{"type":"string"}},{"name":"address","in":"path","description":"Developer app address (API key)","required":true,"schema":{"type":"string"}}]}

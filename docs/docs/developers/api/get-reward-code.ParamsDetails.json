@@ -1,1 +1,0 @@
-{"parameters":[{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"}},{"name":"code","in":"path","description":"The reward code to retrieve","required":true,"schema":{"type":"string","example":"XYZ123"}}]}

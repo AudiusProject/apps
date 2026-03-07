@@ -1,1 +1,0 @@
-{"title":"Body","body":{"x-codegen-request-body-name":"metadata","required":true,"content":{"application/json":{"schema":{"type":"object","required":["api_access_key"],"properties":{"api_access_key":{"type":"string","description":"The bearer token (API access key) to deactivate"}},"title":"deactivate_access_key_request_body"}}}}}

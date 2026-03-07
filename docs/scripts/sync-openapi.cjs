@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SOURCE = 'https://api.audius.co/v1/swagger.yaml';
-const TARGET = path.join(__dirname, '../docs/developers/openapi.yaml');
+const TARGET = path.join(__dirname, '../docs/public/openapi.yaml');
 
 const SERVER_RE = /-\s*url:\s*['" ]?\/v1['" ]?/g;
 
@@ -31,11 +31,20 @@ function fetch(url) {
   try {
     console.log(`Fetching ${SOURCE}...`);
     const raw = await fetch(SOURCE);
-    const patched = raw
+    let patched = raw
       .replace(/https:\/\/discoveryprovider\.audius\.co/g, 'https://api.audius.co')
       .replace(SERVER_RE, '- url: https://api.audius.co/v1');
+    // Deduplicate servers — keep only first entry per URL (removes "Server 2" etc.)
+    patched = patched.replace(
+      /(servers:\s*\n)(\s*-\s*url:\s*https:\/\/api\.audius\.co\/v1(?:\s*\n\s*description:\s*[^\n]*)?\s*\n)(\s*-\s*url:\s*https:\/\/api\.audius\.co\/v1(?:\s*\n\s*description:\s*[^\n]*)?\s*\n)+/,
+      '$1$2'
+    );
     fs.writeFileSync(TARGET, patched, 'utf8');
     console.log(`Synced spec to ${TARGET}`);
+    // Also write to docs/public/ so Scalar can load it from /openapi.yaml
+    fs.mkdirSync(path.dirname(PUBLIC_TARGET), { recursive: true });
+    fs.writeFileSync(PUBLIC_TARGET, patched, 'utf8');
+    console.log(`Synced spec to ${PUBLIC_TARGET}`);
   } catch (err) {
     console.error('Failed to sync OpenAPI spec:', err.message);
     process.exitCode = 1;

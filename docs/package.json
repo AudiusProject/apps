@@ -2,51 +2,23 @@
   "name": "docs-audius-org",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start",
-    "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "prepare:translations": "sh scripts/prepare-translations.sh",
-    "write-heading-ids": "docusaurus write-heading-ids",
-    "pages:dev": "wrangler pages dev --compatibility-date=2024-02-23 --proxy 3000 -- npm run start",
-    "pages:deploy": "npm run build && wrangler pages deploy ./build",
+    "dev": "vocs dev",
+    "build": "vocs build",
+    "preview": "vocs preview",
+    "pages:dev": "npx wrangler pages dev --compatibility-date=2024-02-23 --proxy 5173 -- npm run dev",
+    "pages:deploy": "npm run build && npx wrangler pages deploy ./docs/dist",
     "sync:api-spec": "node scripts/sync-openapi.cjs",
-    "gen:api-docs": "npm run sync:api-spec && npm run docusaurus -- clean-api-docs api && npm run docusaurus -- gen-api-docs api && node scripts/patch-api-sidebar.cjs"
+    "gen:api-docs": "npm run sync:api-spec"
   },
   "dependencies": {
-    "@docusaurus/core": "3.9.2",
-    "@docusaurus/plugin-google-gtag": "3.9.2",
-    "@docusaurus/preset-classic": "3.9.2",
-    "@docusaurus/theme-mermaid": "3.9.2",
-    "@mdx-js/react": "3.0.0",
-    "clsx": "2.0.0",
-    "docusaurus-plugin-openapi-docs": "^4.2.0",
-    "docusaurus-theme-openapi-docs": "^4.2.0",
-    "prism-react-renderer": "2.3.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vocs": "^1.0.8"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.9.2",
-    "@docusaurus/types": "3.9.2",
     "wrangler": "3.30.1"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 3 chrome version",
-      "last 3 firefox version",
-      "last 5 safari version"
-    ]
   },
   "engines": {
     "node": ">=18.0"

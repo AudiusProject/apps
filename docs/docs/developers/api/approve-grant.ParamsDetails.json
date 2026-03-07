@@ -1,1 +1,0 @@
-{"parameters":[{"name":"id","in":"path","description":"The user ID of the manager (grantee) approving the request","required":true,"schema":{"type":"string"}}]}

@@ -1,1 +1,0 @@
-{"parameters":[{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}},{"name":"supported_user_id","in":"path","description":"A User ID of a supported user","required":true,"schema":{"type":"string"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}]}

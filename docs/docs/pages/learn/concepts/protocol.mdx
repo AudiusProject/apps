@@ -1,0 +1,75 @@
+---
+title: Protocol
+description: Audius Protocol Documentation
+---
+
+Audius is a decentralized, community-owned and artist-controlled music-sharing protocol. Audius
+provides a blockchain-based alternative to existing streaming platforms to help artists publish and
+monetize their work and distribute it directly to fans.
+
+The mission of the project is to give everyone the freedom to share, monetize, and listen to any
+audio.
+
+The Audius Protocol [repository](https://github.com/AudiusProject/apps) is a
+mono-repository that has all the pieces that make and support the protocol including smart
+contracts, services, and other supporting libraries.
+
+If you are interested in operating a service, see the [`running a node`](https://docs.openaudio.org)
+section. If you're interested in contributing to the Audius protocol, explore the code below!
+
+```mermaid
+flowchart LR
+  A(((Artists)))--->|Publish Content|B([Audius Content Ledger])
+  B--->|Index Content Metadata|D[(Discovery Node)];
+  D--->|Discover Content|F;
+  A(((Artists)))--->|Upload Content|C[(Content Node)];
+  C--->|Stream Content|F(((Fans)));
+  click C href "/learn/architecture/content-node"
+  click D href "/learn/architecture/discovery-node"
+```
+
+Audius consists of three demographics of users: Artists (content creators), Fans (content
+consumers), and Node Operators. Some users check fall into all three demographics!
+
+- **Artists** upload tracks, create albums, and share content to their following
+- **Fans** stream tracks, create playlists, subscribe to & follow artists, and re-share content to
+  their following
+- **Node Operators** serve app traffic, stream songs, and help secure the network
+
+Node Operators can provide one or more of the following services by staking $AUDIO tokens and
+registering their service:
+
+- Discovery node \(host an endpoint with SSL support and register endpoint with stake\)
+- Content node \(host an endpoint with SSL support and register endpoint with stake\)
+
+In the above diagram, creators can either run a content node themselves or use one of the
+network-registered content nodes.
+
+For more details on the Audius architecture, see the
+[Audius protocol whitepaper](/reference/whitepaper).
+
+---
+
+## Audius Services
+
+| Service                                              | Description                                                                                                        | GitHub                                                                                      |
+| :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ |
+| [Content Node](/learn/architecture/content-node)     | Maintains the availability of users' content on IPFS including user metadata, images, and audio content            | [Link](https://github.com/AudiusProject/audius-docker-compose/tree/main/creator-node)       |
+| [Discovery Node](/learn/architecture/discovery-node) | Indexes and stores the contents of the Audius contracts on the Ethereum blockchain for clients to query via an API | [Link](https://github.com/AudiusProject/audius-docker-compose/tree/main/discovery-provider) |
+| Identity Service                                     | Stores encrypted auth ciphertexts, does Twitter OAuth and relays transactions (pays gas) on behalf of users        | [Link](https://github.com/AudiusProject/audius-docker-compose/tree/main/identity-service)   |
+
+---
+
+## Audius Smart Contracts & Libs
+
+| Lib                                                                                         | Description                                                                                                                                          |
+| :------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`libs`](https://github.com/AudiusProject/apps/tree/main/packages/libs)          | An easy interface to the distributed web and Audius services: Identity Service, Discovery Node \(discovery provider\), Content Node \(creator node\) |
+| [`contracts`](https://github.com/AudiusProject/apps/tree/main/contracts)         | The smart contracts being developed for the Audius streaming protocol                                                                                |
+| [`eth-contracts`](https://github.com/AudiusProject/apps/tree/main/eth-contracts) | The Ethereum smart contracts being developed for the Audius streaming protocol                                                                       |
+
+---
+
+## Node Operators Quickstart
+
+A quick start guide to running Nodes on Audius can be found [here](https://docs.openaudio.org)

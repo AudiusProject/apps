@@ -1,1 +1,0 @@
-{"parameters":[{"name":"ticker","in":"path","description":"The ticker symbol of the coin","required":true,"schema":{"type":"string","example":"$AUDIO"}}]}

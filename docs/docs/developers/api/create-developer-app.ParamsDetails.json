@@ -1,1 +1,0 @@
-{"parameters":[{"name":"user_id","in":"query","description":"The user ID of the user creating the developer app","required":true,"schema":{"type":"string"}}]}

@@ -1,1 +1,0 @@
-{"parameters":[{"name":"handle","in":"path","description":"A User handle","required":true,"schema":{"type":"string"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}]}

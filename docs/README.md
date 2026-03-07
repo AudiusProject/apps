@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-Install dependencies, run:
+Install dependencies:
 
 ```sh
 npm install
@@ -12,13 +12,13 @@ npm install
 
 ## Development Server
 
-To run the docs locally, run:
+To run the docs locally:
 
 ```sh
-npm run start
+npm run dev
 ```
 
-To develop on Cloudflare pages and test the whole stack, run:
+To develop on Cloudflare pages and test the whole stack:
 
 ```sh
 npm run pages:dev
@@ -26,47 +26,20 @@ npm run pages:dev
 
 ---
 
-## Generate REST API docs
+## Updating the API Spec
 
-### Configure
-
-Open `docusaurus.config.js` and find the `config:plugins:docusaurus-plugin-openapi-docs:config`
-section values.
-
-Edit the commented fields to suit your needs
-
-```js
-config: {
- api: {
-   specPath: 'docs/developers/openapi.yaml', // synced from https://api.audius.co/v1/swagger.yaml
-   outputDir: 'docs/developers/api', // output directory for generated *.mdx and sidebar.js files
-   sidebarOptions: {
-     groupPathsBy: 'tag', // generate a sidebar.js slice that groups operations by tag
-   },
- },
-},
-```
-
-> [!NOTE]
->
-> Use `npm run gen:api-docs` (below) to sync the live spec and keep the base URL set to `https://api.audius.co/v1`.
-
-### Updating the Live API Docs
-
-1. From the repo root, run:
+The API reference uses Stoplight Elements and loads the OpenAPI spec from `/openapi.yaml`. To sync the latest spec from the live API:
 
 ```sh
-npm run gen:api-docs
+npm run sync:api-spec
 ```
 
 This script:
 
 - Downloads `https://api.audius.co/v1/swagger.yaml`
 - Rewrites any legacy `discoveryprovider.audius.co` hosts to `api.audius.co`
-- Saves the patched spec to `docs/developers/openapi.yaml`
-- Regenerates every API doc (and `docs/developers/api/sidebar.ts`) from the live spec
-
-> Powered by [docusaurus-plugin-openapi-docs](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs)
+- Saves the patched spec to `docs/public/openapi.yaml`
+- Deduplicates server entries
 
 ---
 
@@ -80,9 +53,7 @@ npm run build
 
 ## Publish
 
-Running the following commands will create a public test site to view your changes.
-
-To deploy to docs.audius.co, ensure the commands are run from the `main` branch.
+To deploy to docs.audius.co, run from the `main` branch:
 
 ```sh
 npm run build

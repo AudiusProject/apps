@@ -1,1 +1,0 @@
-{"parameters":[{"name":"type","in":"query","description":"The type of reactions for which to query.","schema":{"type":"string"}},{"name":"reacted_to_ids","in":"query","description":"The `reacted_to` transaction id(s) of the reactions in question.","required":true,"style":"form","explode":false,"schema":{"type":"array","items":{"type":"string"}}}]}

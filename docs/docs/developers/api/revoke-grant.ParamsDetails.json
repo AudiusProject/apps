@@ -1,1 +1,0 @@
-{"parameters":[{"name":"id","in":"path","description":"The user ID (grantor)","required":true,"schema":{"type":"string"}},{"name":"address","in":"path","description":"The app API key (grantee address) to revoke","required":true,"schema":{"type":"string"}}]}
