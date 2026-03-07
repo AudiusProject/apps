@@ -1,1 +1,0 @@
-{"parameters":[{"name":"limit","in":"query","description":"The number of items to fetch","schema":{"type":"integer"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}},{"name":"with_users","in":"query","description":"Boolean to include user info with tracks","schema":{"type":"boolean"}}]}

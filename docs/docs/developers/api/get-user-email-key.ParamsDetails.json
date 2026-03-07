@@ -1,1 +1,0 @@
-{"parameters":[{"name":"receiving_user_id","in":"path","description":"ID of user receiving email access","required":true,"schema":{"type":"string"}},{"name":"grantor_user_id","in":"path","description":"ID of user granting email access","required":true,"schema":{"type":"string"}}]}

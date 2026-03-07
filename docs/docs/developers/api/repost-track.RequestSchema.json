@@ -1,1 +1,0 @@
-{"title":"Body","body":{"required":false,"content":{"application/json":{"schema":{"type":"object","description":"Optional metadata for repost operations","properties":{"is_repost_of_repost":{"type":"boolean","description":"Set to true when reposting an item that was reposted (used for notifications)"}},"title":"repost_request_body"}}}}}

@@ -1,0 +1,121 @@
+---
+title: Getting Started
+description: Audius Protocol Documentation
+toc_min_heading_level: 2
+---
+
+
+## Quick Start
+
+```sh
+npx create-audius-app
+cd my-app
+npm run dev
+```
+
+---
+
+## Creating an App
+
+The easiest way to start building a new application on top of the Audius Protocol is by using
+`create-audius-app`. This CLI tool enables you to quickly start building a new Audius application,
+with everything set up for you. You can create a new app using the default Audius react template, or
+by using one of the [examples][example-repo].
+
+:::info[Minimum Node Version]
+
+You’ll need to have Node >= 18 on your local development machine. You can use [nvm][nvm-url]
+(macOS/Linux) or [nvm-windows][nvm-windows-url] to switch Node versions between different projects.
+
+:::
+
+To create a new app run the following command:
+
+```sh
+npx create-audius-app
+```
+
+You will be asked for the name of your project, and all the necessary dependencies will be
+installed.
+
+{/* prettier-ignore */}
+<figure className="screensnippet-wrapper">
+  <img src="/img/create-audius-app/create-audius-app-terminal.svg" />
+</figure>
+
+### Non Interactive Mode
+
+To bypass the prompt for an app name, append it to the create command like this:
+
+```sh
+npx create-audius-app my-first-audius-app
+```
+
+Explore other command line options by running `npx create-audius-app --help`
+
+### Output
+
+Running `create-audius-app` will create a directory called `my-app` inside the current folder.
+Inside that directory, it will generate the initial project structure and install the transitive
+dependencies:
+
+```sh
+my-app
+├── README.md
+├── gitignore
+├── index.html
+├── node_modules
+├── package-lock.json
+├── package.json
+├── public
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets
+│   ├── emotion.d.ts
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+```
+
+No configuration or complicated folder structures, only the files you need to build your app. Once
+the installation is done, you can open your project folder:
+
+```sh
+cd my-app
+```
+
+## Launch Your App
+
+Once inside the `my-app` directory run the following command and take note of the local host port:
+
+```sh
+npm run dev
+```
+
+{/* prettier-ignore */}
+<figure className="screensnippet-wrapper">
+  <img src="/img/create-audius-app/run-app-terminal.svg" />
+  <figcaption>This example uses port <code>5173</code> on localhost.</figcaption>
+</figure>
+
+---
+
+## Design
+
+Applications started from `create-audius-app` leverage the [Harmony][harmony-docs] design system.
+
+Harmony is all about collaboration, reusability, and scalability. It aims to harmonize code and
+Figma, provides a shared language for designers and developers, and provide consistent, reusable
+components for use across platforms.
+
+Read more about Harmony and using it across your other projects at
+[https://harmony.audius.co/][harmony-docs].
+
+{/* prettier-ignore */}
+[example-repo]: https://github.com/AudiusProject/apps/tree/main/packages/create-audius-app/examples
+[nvm-url]: https://github.com/nvm-sh/nvm#installation
+[nvm-windows-url]: https://github.com/coreybutler/nvm-windows#node-version-manager-nvm-for-windows
+[harmony-docs]: https://harmony.audius.co/

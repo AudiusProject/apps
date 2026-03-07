@@ -1,1 +1,0 @@
-{"parameters":[{"name":"track_id","in":"path","description":"A Track ID","required":true,"schema":{"type":"string"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","required":true,"schema":{"type":"string"}}]}

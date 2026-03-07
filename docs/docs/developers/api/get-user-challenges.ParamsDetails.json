@@ -1,1 +1,0 @@
-{"parameters":[{"name":"id","in":"path","description":"A User ID","required":true,"schema":{"type":"string"}},{"name":"show_historical","in":"query","description":"Whether to show challenges that are inactive but completed","schema":{"type":"boolean","default":false}}]}

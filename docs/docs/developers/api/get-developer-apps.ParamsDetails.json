@@ -1,1 +1,0 @@
-{"parameters":[{"name":"id","in":"path","description":"The user ID whose developer apps to list","required":true,"schema":{"type":"string"}},{"name":"include","in":"query","description":"Include metrics when set to \"metrics\"","schema":{"type":"string","enum":["metrics"]}}]}

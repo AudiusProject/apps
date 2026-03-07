@@ -1,1 +1,0 @@
-{"title":"Body","body":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["manager_user_id"],"properties":{"manager_user_id":{"type":"string","description":"The user ID of the user to add as manager"}},"title":"add_manager_request_body"}}}}}

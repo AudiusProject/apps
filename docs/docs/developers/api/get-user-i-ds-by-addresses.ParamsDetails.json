@@ -1,1 +1,0 @@
-{"parameters":[{"name":"address","in":"query","description":"Wallet address","required":true,"style":"form","explode":true,"example":["0x1234567890abcdef1234567890abcdef12345678","E2LCbKdo2L3ikt1gK6pwp1pDLuhAfHBNf6fEQXpAqrf9"],"schema":{"type":"array","items":{"type":"string"}}}]}

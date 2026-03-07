@@ -1,1 +1,0 @@
-{"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object","properties":{"data":{"type":"array","items":{"type":"string"}}},"title":"tags_response"}}}},"400":{"description":"Bad request","content":{}},"500":{"description":"Server error","content":{}}}}

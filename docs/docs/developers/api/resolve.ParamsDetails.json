@@ -1,1 +1,0 @@
-{"parameters":[{"name":"url","in":"query","description":"URL to resolve. Either fully formed URL (https://audius.co) or just the absolute path","required":true,"schema":{"type":"string"}}]}

@@ -1,0 +1,36 @@
+---
+title: Progress Events
+description: Audius Protocol Documentation
+---
+
+import { Tabs } from '../../components/Tabs.jsx'
+import { TabItem } from '../../components/Tabs.jsx'
+
+# Progress Events
+
+Some methods have optional `onProgress` callbacks to handle progress events for uploading resources.
+
+The first argument to the `onProgress` callback is always a rolled up progress value from 0-1. The
+second will be one of the following types depending on the method.
+
+## UploadTrackProgressEvent
+
+```ts
+{
+  key: 'audio' | 'image' // Which file upload triggered the event
+  loaded: number // How much of the file has been uploaded, in bytes
+  total: number // Total number of bytes of the file
+  transcode: number // Completion percent (from 0-1) of the transcoding
+}
+```
+
+## UploadPlaylistProgressEvent
+
+```ts
+{
+  key: 'image' | number // The index of the audioFile or 'image'
+  loaded: number // How much of the file has been uploaded, in bytes
+  total: number // Total number of bytes of the file
+  transcode: number // Completion percent (from 0-1) of the transcoding
+}
+```

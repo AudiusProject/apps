@@ -1,1 +1,0 @@
-{"parameters":[{"name":"week","in":"query","description":"Target week in YYYY-MM-DD format. Defaults to the most recent week with data.","schema":{"type":"string","format":"date"}},{"name":"user_id","in":"query","description":"The user ID of the user making the request","schema":{"type":"string"}}]}

@@ -1,0 +1,284 @@
+/* ─────────────────────────────────────────────
+   Audius design tokens → Vocs CSS variables
+   Light: Default [Neue].tokens.json
+   Dark:  Dark [Neue].tokens.json
+───────────────────────────────────────────── */
+
+/* ── Light mode ── */
+:root {
+  /* Backgrounds */
+  --vocs-color_background:          #FFFFFF;
+  --vocs-color_background2:         #F7F7F8;  /* N25  – subtle surfaces     */
+  --vocs-color_background3:         #F0F1F3;  /* N50  – code blocks, search */
+  --vocs-color_background4:         #E6E8EC;  /* N100 – hover/input bg      */
+  --vocs-color_background5:         #D8DBE2;  /* N150 – stronger emphasis   */
+  --vocs-color_backgroundDark:      #F7F7F8;  /* sidebar bg                 */
+  --vocs-color_backgroundDarkTint:  #F0F1F3;
+
+  /* Borders */
+  --vocs-color_border:   #E6E8EC;  /* N100 */
+  --vocs-color_border2:  #D8DBE2;  /* N150 */
+
+  /* Text */
+  --vocs-color_text:       #343B49;  /* N800 – body              */
+  --vocs-color_text2:      #4A5263;  /* N700 – secondary text    */
+  --vocs-color_text3:      #636C7E;  /* N600 – muted             */
+  --vocs-color_text4:      #7F8798;  /* N500 – placeholder       */
+  --vocs-color_heading:    #232834;  /* N900 – headings          */
+  --vocs-color_title:      #232834;  /* N900 – page title        */
+  --vocs-color_textHover:  #232834;
+
+  /* Accent (P300) */
+  --vocs-color_textAccent:       #7F6AD6;
+  --vocs-color_textAccentHover:  #5B44B8;
+  --vocs-color_borderAccent:     #7F6AD6;
+  --vocs-color_backgroundAccent: #7F6AD6;
+  --vocs-color_backgroundAccentHover: #5B44B8;
+  --vocs-color_backgroundAccentText:  #FFFFFF;
+
+  /* Callout – info (purple tint to match brand) */
+  --vocs-color_infoBackground:  #F0ECFF;
+  --vocs-color_infoBorder:      #7F6AD6;
+  --vocs-color_infoText:        #5B44B8;
+  --vocs-color_infoTextHover:   #3B2A86;
+
+  /* Callout – note */
+  --vocs-color_noteBackground:  #F7F7F8;
+  --vocs-color_noteBorder:      #B2B8C5;
+  --vocs-color_noteText:        #4A5263;
+
+  /* Callout – tip (green) */
+  --vocs-color_tipBackground:  #EDFFF5;
+  --vocs-color_tipBorder:      #0F9E48;
+  --vocs-color_tipText:        #0F9E48;
+  --vocs-color_tipTextHover:   #0d8a3e;
+
+  /* Callout – warning (orange) */
+  --vocs-color_warningBackground:  #FFF6E6;
+  --vocs-color_warningBorder:      #FF9400;
+  --vocs-color_warningText:        #c47200;
+  --vocs-color_warningTextHover:   #a36000;
+
+  /* Callout – danger (red) */
+  --vocs-color_dangerBackground:  #FFF0F2;
+  --vocs-color_dangerBorder:      #F94D62;
+  --vocs-color_dangerText:        #C44357;
+  --vocs-color_dangerTextHover:   #a3384a;
+
+  /* Callout – success */
+  --vocs-color_successBackground:  #EDFFF5;
+  --vocs-color_successBorder:      #0F9E48;
+  --vocs-color_successText:        #0F9E48;
+  --vocs-color_successTextHover:   #0d8a3e;
+
+  /* Blockquote */
+  --vocs-color_blockquoteBorder:  #D8DBE2;
+  --vocs-color_blockquoteText:    #636C7E;
+
+  /* Misc */
+  --vocs-color_shadow:   rgba(0,0,0,0.06);
+  --vocs-color_shadow2:  rgba(0,0,0,0.10);
+}
+
+/* ── Remove Vocs sidebar right border (docs layout) ── */
+[data-layout="docs"] [class*="gutterLeft"] {
+  border-right: none !important;
+}
+
+/* ── Dark mode ── */
+:root.dark {
+  /* Backgrounds */
+  --vocs-color_background:          #141414;  /* N50  – page bg          */
+  --vocs-color_background2:         #1F1F1F;  /* N100 – surfaces         */
+  --vocs-color_background3:         #292929;  /* N150 – code, search     */
+  --vocs-color_background4:         #333333;  /* N200 – hover            */
+  --vocs-color_background5:         #474747;  /* N300 – emphasis         */
+  --vocs-color_backgroundDark:      #1F1F1F;  /* sidebar bg              */
+  --vocs-color_backgroundDarkTint:  #1F1F1F;
+
+  /* Borders */
+  --vocs-color_border:   #333333;  /* N200 */
+  --vocs-color_border2:  #474747;  /* N300 */
+
+  /* Text — bright enough on near-black bg (mirrors Vocs whiteA defaults) */
+  --vocs-color_text:       #E0E0E0;  /* ~rgba(255,255,255,0.87) — body text  */
+  --vocs-color_text2:      #C4C4C4;  /* ~rgba(255,255,255,0.73) — secondary  */
+  --vocs-color_text3:      #A0A0A0;  /* ~rgba(255,255,255,0.58) — muted/nav  */
+  --vocs-color_text4:      #7A7A7A;  /* ~rgba(255,255,255,0.42) — hint text  */
+  --vocs-color_heading:    #FFFFFF;  /* full white for headings              */
+  --vocs-color_title:      #FFFFFF;
+  --vocs-color_textHover:  #FFFFFF;
+
+  /* Accent (P300 dark) */
+  --vocs-color_textAccent:       #9E8EE8;
+  --vocs-color_textAccentHover:  #b7a8f0;
+  --vocs-color_borderAccent:     #806AD8;
+  --vocs-color_backgroundAccent: #806AD8;
+  --vocs-color_backgroundAccentHover: #9E8EE8;
+  --vocs-color_backgroundAccentText:  #FFFFFF;
+
+  /* Callout – info */
+  --vocs-color_infoBackground:  #1e1a2e;
+  --vocs-color_infoBorder:      #806AD8;
+  --vocs-color_infoText:        #9E8EE8;
+  --vocs-color_infoTextHover:   #b7a8f0;
+
+  /* Callout – note */
+  --vocs-color_noteBackground:  #1F1F1F;
+  --vocs-color_noteBorder:      #474747;
+  --vocs-color_noteText:        #C4C4C4;
+
+  /* Callout – tip (bright green) */
+  --vocs-color_tipBackground:  #0d2115;
+  --vocs-color_tipBorder:      #84DF64;
+  --vocs-color_tipText:        #84DF64;
+  --vocs-color_tipTextHover:   #a0e87f;
+
+  /* Callout – warning (muted orange) */
+  --vocs-color_warningBackground:  #231a0c;
+  --vocs-color_warningBorder:      #EFB360;
+  --vocs-color_warningText:        #EFB360;
+  --vocs-color_warningTextHover:   #f7c97f;
+
+  /* Callout – danger */
+  --vocs-color_dangerBackground:  #2a1216;
+  --vocs-color_dangerBorder:      #F94D62;
+  --vocs-color_dangerText:        #F94D62;
+  --vocs-color_dangerTextHover:   #fb7081;
+
+  /* Callout – success */
+  --vocs-color_successBackground:  #0d2115;
+  --vocs-color_successBorder:      #84DF64;
+  --vocs-color_successText:        #84DF64;
+  --vocs-color_successTextHover:   #a0e87f;
+
+  /* Blockquote */
+  --vocs-color_blockquoteBorder:  #474747;
+  --vocs-color_blockquoteText:    #A0A0A0;
+
+  /* Misc */
+  --vocs-color_shadow:   rgba(0,0,0,0.3);
+  --vocs-color_shadow2:  rgba(0,0,0,0.5);
+}
+
+/* ── Logo: invert mono logo to white in dark mode ── */
+:root.dark img[src="/img/logo-mono.svg"] {
+  filter: invert(1);
+}
+
+/* ── Welcome banner image ── */
+img.welcomeBanner {
+  width: 100%;
+  max-width: 820px;
+  height: clamp(120px, 18vw, 240px);
+  object-fit: cover;
+  object-position: center;
+  margin-bottom: 20px;
+  border-radius: 24px;
+}
+
+/* ── Screen snippet display boxes ── */
+.screensnippet-wrapper {
+  background: var(--vocs-color_background2);
+  border-radius: 12px;
+  border: 1px solid var(--vocs-color_border);
+  padding: 0.5rem;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.screensnippet-wrapper img {
+  max-height: 500px;
+}
+
+.screensnippet-wrapper figcaption {
+  background: var(--vocs-color_background);
+  color: var(--vocs-color_text3);
+  font-size: smaller;
+  font-weight: 500;
+  padding: 0.25rem 1rem;
+  border-radius: 18px;
+  white-space: normal;
+}
+
+.screensnippet-wrapper .add-shadow {
+  box-shadow:
+    0 3px 10px -4px var(--vocs-color_shadow),
+    0 7px 20px -4px var(--vocs-color_shadow2);
+}
+
+.screensnippet-wrapper:has(.add-shadow-margin) {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.screensnippet-wrapper .add-shadow-margin {
+  margin: 20px 0;
+}
+
+.screensnippet-wrapper .add-border-radius {
+  border-radius: 24px;
+}
+
+/* ── Centered layout for home/learn pages ── */
+.learnCentered {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.learnCentered p {
+  margin-bottom: 1rem;
+}
+
+/* ── CTA button ── */
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--vocs-color_backgroundAccent);
+  color: var(--vocs-color_backgroundAccentText) !important;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none !important;
+  box-shadow: 0 2px 12px rgba(127, 106, 214, 0.3);
+  transition: background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  border: none;
+  gap: 10px;
+}
+
+.ctaButton:hover {
+  background: var(--vocs-color_backgroundAccentHover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(127, 106, 214, 0.45);
+}
+
+/* ── Download badges ── */
+.downloadBadges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.downloadBadges a {
+  text-decoration: none;
+}
+
+.storeBadge {
+  height: 40px;
+  width: auto;
+  display: block;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.storeLink:hover .storeBadge {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}

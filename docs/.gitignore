@@ -1,3 +1,4 @@
 merged.txt
 .wrangler
-i18n/
+i18n/docs/dist/
+build/

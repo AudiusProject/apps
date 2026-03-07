@@ -1,1 +1,0 @@
-{"responses":{"200":{"description":"Success","content":{"application/json":{"schema":{"type":"object","required":["data"],"properties":{"data":{"type":"integer","description":"The total number of users with a non-zero balance of the specific coin","example":42}},"title":"coin_members_count_response"}}}}}}

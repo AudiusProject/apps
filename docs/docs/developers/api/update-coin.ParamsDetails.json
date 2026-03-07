@@ -1,1 +1,0 @@
-{"parameters":[{"name":"mint","in":"path","description":"The mint address of the coin","required":true,"schema":{"type":"string","example":"bearR26zyyB3fNQm5wWv1ZfN8MPQDUMwaAuoG79b1Yj"}},{"name":"user_id","in":"query","description":"The user ID making the update (must be the coin owner)","required":true,"schema":{"type":"string","example":"7eP5n"}}]}

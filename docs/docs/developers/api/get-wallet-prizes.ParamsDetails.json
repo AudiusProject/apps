@@ -1,1 +1,0 @@
-{"parameters":[{"name":"wallet","in":"path","description":"The wallet address to get prizes for","required":true,"schema":{"type":"string","example":"HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC"}}]}

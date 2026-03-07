@@ -1,0 +1,104 @@
+---
+title: Image Loading & Mirrors
+description: Reliable image loading with validator mirror fallback
+toc_min_heading_level: 2
+---
+
+Images (artwork, profile pictures, cover photos) served by Audius are replicated across validator
+nodes. When an image fails to load—due to node unavailability or network issues—your app should
+retry using alternate mirror hosts. Without mirror fallback, image loading is unreliable.
+
+## API Response Structure
+
+Artwork and profile image objects in API responses include size variants **and** a `mirrors` array:
+
+```json
+{
+  "artwork": {
+    "150x150": "https://audius-content-7.cultur3stake.com/content/Qmd9Z9BS6NAGASFWcTdk1bhSaiJR84czJXeKNgLcL7hH4L/150x150.jpg",
+    "480x480": "https://audius-content-7.cultur3stake.com/content/Qmd9Z9BS6NAGASFWcTdk1bhSaiJR84czJXeKNgLcL7hH4L/480x480.jpg",
+    "1000x1000": "https://audius-content-7.cultur3stake.com/content/Qmd9Z9BS6NAGASFWcTdk1bhSaiJR84czJXeKNgLcL7hH4L/1000x1000.jpg",
+    "mirrors": [
+      "https://audius-creator-6.theblueprint.xyz",
+      "https://cn0.mainnet.audiusindex.org",
+      "https://creatornode2.audius.co"
+    ]
+  }
+}
+```
+
+- **Size variants** (`150x150`, `480x480`, `1000x1000`): Use the variant closest to the displayed
+  size for performance.
+- **mirrors**: Alternate validator node host roots. Mirror order is arbitrary; try each until one
+  succeeds.
+
+Profile objects use the same pattern for `profile_picture` and `cover_photo` (with `_150x150`,
+`_480x480`, `_1000x1000` and `mirrors` in some adapters).
+
+## Mirror Fallback Strategy
+
+When an image URL fails to load:
+
+1. Take the current URL (e.g. from a size variant).
+2. Replace the host (scheme + authority) with each mirror root, in order.
+3. Try each resulting URL until one loads successfully or all are exhausted.
+4. Optionally fall back to a placeholder or `onError` handler afterward.
+
+Example host-swap logic (conceptual):
+
+```js
+// Given: originalUrl, mirrors = ["https://cn0.mainnet.audiusindex.org", ...]
+function buildMirrorUrl(originalUrl, mirrorHost) {
+  const url = new URL(originalUrl)
+  url.host = new URL(mirrorHost).host
+  return url.toString()
+}
+```
+
+## Best Practices
+
+### 1. Preserve mirrors in normalization
+
+Do not reduce artwork or profile objects to a single URL string during normalization. If you do,
+mirrors are lost and cannot be used for retries. Keep `mirrors` attached to the image metadata that
+your image component receives.
+
+### 2. Use a shared image component with mirror retry
+
+Avoid raw `<img src={...} />` for Audius content. Centralize mirror-aware loading in one component
+(e.g. `RetryImage`, `ArtworkImage`) that:
+
+1. Tries the primary URL.
+2. On `onError`, retries with each mirror (by swapping host).
+3. Falls back to `fallbackSrc` or `onError` only after all mirrors fail.
+
+### 3. Apply consistently everywhere
+
+Mirror retry must be used for **all** Audius images—track art, playlist art, profile pictures, cover
+photos, etc. Partial adoption (e.g. only where `RetryImage` is used) leaves gaps and broken images
+in other views.
+
+### 4. Use size-aware variant selection
+
+Pick the size variant closest to the displayed dimensions (and device pixel ratio) to avoid loading
+oversized images. Register or pass all variants plus mirrors so the component can retry with the
+same size on different hosts.
+
+## Common Pitfalls
+
+| Pitfall                                       | Consequence                                                |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| `getArtworkUrl()` returning only a single URL | Mirrors are dropped; no retry possible.                    |
+| Raw `<img>` instead of mirror-aware component | No retry on failure.                                       |
+| Mirror logic only in some components          | Inconsistent behavior; images fail in non-covered screens. |
+| Ignoring mirrors in API responses             | Same as above; no fallback hosts available.                |
+
+## Reference Implementation
+
+The Audius embed player uses mirror fallback in `getArtworkUrl`. See
+[getArtworkUrl.js](https://github.com/AudiusProject/apps/blob/main/packages/embed/src/util/getArtworkUrl.js)
+in the apps repo.: it preloads the primary URL, and on failure, swaps the host with each mirror and
+retries before returning.
+
+For React apps, implement or use a shared component that accepts the full artwork/profile object
+(with variants and mirrors) and performs the same retry logic on load failure.
