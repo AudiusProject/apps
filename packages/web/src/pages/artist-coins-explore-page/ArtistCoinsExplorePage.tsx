@@ -26,7 +26,7 @@ import {
 } from '@audius/harmony'
 import { useNavigate } from 'react-router'
 
-import imageCoinsBackgroundImage from 'assets/img/publicSite/imageCoinsBackgroundImage2x.webp'
+import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
 import { ExternalLink } from 'components/link'
 import Page from 'components/page/Page'
 import { isMobile } from 'utils/clientUtil'

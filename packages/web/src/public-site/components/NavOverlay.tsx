@@ -18,7 +18,7 @@ import cn from 'classnames'
 import ReactDOM from 'react-dom'
 import { Link, useNavigate } from 'react-router'
 
-import HeroBackground from 'assets/img/publicSite/HeroBG@2x.webp'
+import navOverlayBackground from 'assets/img/hero-bg.jpg'
 
 import styles from './NavOverlay.module.css'
 import { handleClickRoute } from './handleClickRoute'
@@ -142,7 +142,7 @@ const NavOverlay = (props: NavOverlayProps) => {
         <div
           className={cn(styles.backgroundContainer)}
           style={{
-            backgroundImage: `url(${HeroBackground})`
+            backgroundImage: `url(${navOverlayBackground})`
           }}
         >
           <div className={cn(styles.background)}></div>
