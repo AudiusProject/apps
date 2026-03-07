@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { Helmet } from 'react-helmet'
+
 import styles from './FAQ2026.module.css'
 
 /** Inline chevron so we control color (white default, purple on hover) without Harmony theme override */
@@ -63,8 +65,26 @@ export const FAQ2026 = (_props: FAQ2026Props) => {
     })
   }
 
+  const faqPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  }
+
   return (
     <section className={styles.section} aria-labelledby='faq-heading'>
+      <Helmet encodeSpecialCharacters={false}>
+        <script type='application/ld+json'>
+          {JSON.stringify(faqPageSchema)}
+        </script>
+      </Helmet>
       <div className={styles.container}>
         <h2 id='faq-heading' className={styles.headline}>
           Frequently Asked Questions
