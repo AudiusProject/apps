@@ -7,13 +7,13 @@ import {
 } from '@audius/common/store'
 import { useDispatch } from 'react-redux'
 
-import { IconFeed } from '@audius/harmony-native'
-import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
+import { Screen, ScreenContent } from 'app/components/core'
 import { Lineup } from 'app/components/lineup'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { SuggestedFollows } from 'app/components/suggested-follows'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
+import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { FeedFilterButton } from './FeedFilterButton'
 const { getDiscoverFeedLineup } = feedPageSelectors
@@ -39,12 +39,16 @@ export const FeedScreen = () => {
   )
 
   return (
-    <Screen url='Feed'>
-      <ScreenHeader text={messages.header} icon={IconFeed}>
-        <OnlineOnly>
-          <FeedFilterButton />
-        </OnlineOnly>
-      </ScreenHeader>
+    <Screen
+      url='Feed'
+      header={() => (
+        <MobileRootHeader title={messages.header} showDivider={false}>
+          <OnlineOnly>
+            <FeedFilterButton />
+          </OnlineOnly>
+        </MobileRootHeader>
+      )}
+    >
       <ScreenContent>
         <Lineup
           pullToRefresh

@@ -21,11 +21,11 @@ const { setSelectedCategory } = libraryPageActions
 const useStyles = makeStyles(({ spacing }) => ({
   container: {
     flexGrow: 1,
-    flexDirection: 'row',
-    marginTop: spacing(3)
+    flexDirection: 'row'
   },
   scrollContainer: {
-    columnGap: spacing(2)
+    columnGap: spacing(2),
+    paddingHorizontal: spacing(4)
   }
 }))
 
@@ -130,6 +130,7 @@ export const LibraryCategorySelectionMenu = () => {
     <View style={styles.container}>
       <ScrollView
         horizontal
+        showsHorizontalScrollIndicator={false}
         accessibilityRole='radiogroup'
         contentContainerStyle={styles.scrollContainer}
         alwaysBounceHorizontal={false}
@@ -140,6 +141,7 @@ export const LibraryCategorySelectionMenu = () => {
             <SelectablePill
               key={value}
               type='radio'
+              size='large'
               label={label}
               value={value}
               onChange={handleChange}

@@ -8,8 +8,10 @@ import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
+import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
+import { TrendingFilterButton } from './TrendingFilterButton'
 import { TrendingFilterChips } from './TrendingFilterChips'
 import { TrendingHeader } from './TrendingHeader'
 import { TrendingTracksLineup } from './TrendingTracksLineup'
@@ -34,13 +36,21 @@ export const TrendingScreen = () => {
   >('tracks')
 
   return (
-    <Screen url='Trending'>
+    <Screen
+      url='Trending'
+      header={() => (
+        <MobileRootHeader title={titleByCategory[category]} showDivider={false}>
+          {category === 'tracks' ? <TrendingFilterButton /> : null}
+        </MobileRootHeader>
+      )}
+    >
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
         <ScreenPrimaryContent>
           <TrendingHeader
             title={titleByCategory[category]}
             icon={IconTrending}
             filterModal={TRENDING_FILTER_MODAL}
+            showTitleRow={false}
           />
         </ScreenPrimaryContent>
         <ScreenContent>
