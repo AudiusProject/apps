@@ -593,7 +593,16 @@ export const AudioPlayer = () => {
     }
   }, [])
 
-  TrackPlayer.addEventListener(Event.PlaybackState, handlePlayerStateChange)
+  useEffect(() => {
+    const subscription = TrackPlayer.addEventListener(
+      Event.PlaybackState,
+      handlePlayerStateChange
+    )
+
+    return () => {
+      subscription.remove()
+    }
+  }, [handlePlayerStateChange])
 
   // Seek handler
   useEffect(() => {
