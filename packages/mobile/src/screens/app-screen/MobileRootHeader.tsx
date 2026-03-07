@@ -82,10 +82,7 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
       <View style={[styles.row, { marginTop: insets.top }]}>
         <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
         <View style={styles.titleContainer}>
-          <GradientText
-            accessibilityRole='header'
-            style={styles.title}
-          >
+          <GradientText accessibilityRole='header' style={styles.title}>
             {title}
           </GradientText>
         </View>

@@ -1,12 +1,7 @@
 import { LibraryPageTabs } from '@audius/common/store'
-
 import { View } from 'react-native'
 
-import {
-  IconAlbum,
-  IconNote,
-  IconPlaylists
-} from '@audius/harmony-native'
+import { IconAlbum, IconNote, IconPlaylists } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
