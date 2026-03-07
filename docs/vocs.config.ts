@@ -188,21 +188,7 @@ export default defineConfig({
       collapsed: true,
       items: [
         { text: 'Overview', link: '/reference/overview' },
-        { text: 'ETH Contracts', link: '/reference/eth-contracts' },
-        {
-          text: 'Solana Programs',
-          link: '/reference/solana-programs',
-        },
-        { text: 'Whitepaper', link: '/reference/whitepaper' },
-        {
-          text: 'Protocol Dashboard',
-          items: [
-            {
-              text: 'Link Profile',
-              link: '/reference/protocol-dashboard/link-profile',
-            },
-          ],
-        },
+        { text: 'Link Protocol Profile', link: '/reference/protocol-dashboard/link-profile' },
       ],
     },
   ],
