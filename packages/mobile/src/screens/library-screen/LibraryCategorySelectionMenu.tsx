@@ -25,7 +25,8 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   scrollContainer: {
     columnGap: spacing(2),
-    paddingHorizontal: spacing(4)
+    paddingHorizontal: spacing(4),
+    paddingBottom: spacing(2)
   }
 }))
 

@@ -4,6 +4,7 @@ import { useMarkNotificationsAsViewed } from '@audius/common/api'
 import { useFocusEffect } from '@react-navigation/native'
 
 import { Screen, ScreenContent } from 'app/components/core'
+import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
@@ -28,6 +29,7 @@ export const NotificationsScreen = () => {
     <Screen
       header={() => <MobileRootHeader title={messages.header} />}
     >
+      <ScreenPrimaryContent>{null}</ScreenPrimaryContent>
       <ScreenContent>
         <ScreenSecondaryContent>
           <NotificationList />

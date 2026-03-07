@@ -43,10 +43,9 @@ const libraryScreens = [
   }
 ]
 
-const useStyles = makeStyles(({ palette, spacing }) => ({
+const useStyles = makeStyles(({ palette }) => ({
   subHeader: {
-    backgroundColor: palette.white,
-    paddingVertical: spacing(2)
+    backgroundColor: palette.white
   }
 }))
 
