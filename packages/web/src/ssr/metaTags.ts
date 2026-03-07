@@ -97,8 +97,43 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
 }
 
 /**
- * Default meta tag context (homepage / landing)
- * GEO: Title and canonical so AI engines and crawlers get strong signals.
+ * Homepage schema markup for Organization, WebSite, SoftwareApplication
+ */
+const getHomepageStructuredData = () => {
+  const publicUrl = getPublicUrl()
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${publicUrl}/#organization`,
+        name: 'Audius',
+        url: publicUrl,
+        sameAs: [
+          'https://twitter.com/audius',
+          'https://discord.gg/audius',
+          'https://github.com/AudiusProject'
+        ]
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${publicUrl}/#website`,
+        url: publicUrl,
+        name: 'Audius',
+        publisher: { '@id': `${publicUrl}/#organization` }
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Audius',
+        applicationCategory: 'MusicApplication',
+        operatingSystem: 'Web, iOS, Android'
+      }
+    ]
+  }
+}
+
+/**
+ * Default meta tag context
  */
 export const getDefaultContext = () => {
   const publicUrl = getPublicUrl()
@@ -108,10 +143,12 @@ export const getDefaultContext = () => {
       'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
     ogDescription:
       'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-    canonicalUrl: `${publicUrl}/`,
     image: DEFAULT_IMAGE_URL,
     imageAlt: 'The Audius Platform',
-    thumbnail: true
+    thumbnail: true,
+    canonicalUrl: `${publicUrl}/`,
+    webUrl: `${publicUrl}/`,
+    structuredData: getHomepageStructuredData()
   }
 }
 

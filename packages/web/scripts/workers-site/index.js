@@ -49,7 +49,7 @@ function isCrawler(val) {
     return false
   }
   const crawlerTest =
-    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|discordbot|duckduckbot|embedly|facebookexternalhit|gigabot|googlebot|google-inspectiontool|ia_archiver|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|reaper|slackbot|snap|telegrambot|twitterbot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|zend|zoominfobot/i
+    /forcessr|ahrefs(bot|siteaudit)|altavista|anthropic-ai|baiduspider|bingbot|chatgpt-user|claude-web|cohere-ai|discordbot|duckduckbot|embedly|facebookexternalhit|gigabot|googlebot|google-extended|google-inspectiontool|gptbot|ia_archiver|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|perplexitybot|reaper|slackbot|snap|telegrambot|twitterbot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|zend|zoominfobot/i
   return crawlerTest.test(val)
 }
 
@@ -139,14 +139,49 @@ class SEOHandlerHead {
 
     if (!metadata || !name || !metadata.data || metadata.data.length === 0) {
       // We didn't parse this to anything we have custom tags for, so just return the default tags
-      const tags = `<meta property="og:title" content="Audius - Empowering Creators">
+      const baseUrl = `https://${self.host}`
+      const schemaLd = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'Organization',
+            '@id': `${baseUrl}/#organization`,
+            name: 'Audius',
+            url: baseUrl,
+            sameAs: [
+              'https://twitter.com/audius',
+              'https://discord.gg/audius',
+              'https://github.com/AudiusProject'
+            ]
+          },
+          {
+            '@type': 'WebSite',
+            '@id': `${baseUrl}/#website`,
+            url: baseUrl,
+            name: 'Audius',
+            publisher: { '@id': `${baseUrl}/#organization` }
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Audius',
+            applicationCategory: 'MusicApplication',
+            operatingSystem: 'Web, iOS, Android'
+          }
+        ]
+      })
+      const tags = `<title>Audius — Free Music Streaming for Artists, Labels & Fans</title>
+      <link rel="canonical" href="${baseUrl}/">
+      <meta property="og:url" content="${baseUrl}/">
+      <meta property="og:type" content="website">
+      <meta property="og:title" content="Audius — Free Music Streaming for Artists, Labels & Fans">
       <meta name="description" content="Audius is a music streaming and sharing platform that puts power back into the hands of content creators." data-react-helmet="true">
       <meta property="og:description" content="Audius is a music streaming and sharing platform that puts power back into the hands of content creators.">
       <meta property="og:image" content="https://audius.co/ogImage.jpg">
-      <meta name="twitter:title" content="Audius - Empowering Creators">
+      <meta name="twitter:title" content="Audius — Free Music Streaming for Artists, Labels & Fans">
       <meta name="twitter:description" content="Audius is a music streaming and sharing platform that puts power back into the hands of content creators.">
       <meta name="twitter:image" content="https://audius.co/ogImage.jpg">
-      <meta name="twitter:image:alt" content="The Audius Platform">`
+      <meta name="twitter:image:alt" content="The Audius Platform">
+      <script type="application/ld+json">${schemaLd}</script>`
       element.append(tags, { html: true })
       return
     }
