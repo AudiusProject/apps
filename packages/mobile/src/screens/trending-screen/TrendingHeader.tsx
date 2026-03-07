@@ -42,6 +42,8 @@ type TrendingHeaderProps = {
   title: string
   icon: ComponentType<SvgProps>
   filterModal: Modals
+  /** When false, only the category pills are shown (title row is in native header) */
+  showTitleRow?: boolean
   styles?: StylesProp<{ root: ViewStyle }>
 }
 
@@ -57,6 +59,12 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     shadowOpacity: 0.12,
     shadowOffset: { height: 2, width: 0 },
     shadowRadius: 2
+  },
+  rootNoBorders: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0
   },
   titleRow: {
     flexDirection: 'row',
@@ -83,7 +91,13 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 }))
 
 export const TrendingHeader = (props: TrendingHeaderProps) => {
-  const { title, icon: Icon, filterModal, styles: stylesProp } = props
+  const {
+    title,
+    icon: Icon,
+    filterModal,
+    showTitleRow = true,
+    styles: stylesProp
+  } = props
   const styles = useStyles()
   const { spacing } = useTheme()
   const dispatch = useDispatch()
@@ -109,33 +123,39 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
     }
   }
 
+  const rootStyle = showTitleRow
+    ? [styles.root, stylesProp?.root]
+    : [styles.root, styles.rootNoBorders, stylesProp?.root]
+
   return (
-    <View style={[styles.root, stylesProp?.root]}>
-      <View style={styles.titleRow}>
-        <View style={styles.headerContent}>
-          <GradientIcon
-            icon={Icon as ComponentType<SvgProps>}
-            height={20}
-            style={styles.headerIcon}
-          />
-          <GradientText accessibilityRole='header' style={styles.header}>
-            {title}
-          </GradientText>
-        </View>
-        {category === 'tracks' ? (
-          <Flex>
-            <SelectablePill
-              type='button'
-              icon={IconLeading}
-              size='large'
-              isSelected={hasActiveFilters}
-              isControlled
-              onPress={handleOpenFilter}
-              accessibilityLabel='Open filter'
+    <View style={rootStyle}>
+      {showTitleRow ? (
+        <View style={styles.titleRow}>
+          <View style={styles.headerContent}>
+            <GradientIcon
+              icon={Icon as ComponentType<SvgProps>}
+              height={20}
+              style={styles.headerIcon}
             />
-          </Flex>
-        ) : null}
-      </View>
+            <GradientText accessibilityRole='header' style={styles.header}>
+              {title}
+            </GradientText>
+          </View>
+          {category === 'tracks' ? (
+            <Flex>
+              <SelectablePill
+                type='button'
+                icon={IconLeading}
+                size='large'
+                isSelected={hasActiveFilters}
+                isControlled
+                onPress={handleOpenFilter}
+                accessibilityLabel='Open filter'
+              />
+            </Flex>
+          ) : null}
+        </View>
+      ) : null}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

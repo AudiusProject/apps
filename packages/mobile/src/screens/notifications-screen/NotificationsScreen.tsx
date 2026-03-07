@@ -3,11 +3,11 @@ import { useCallback } from 'react'
 import { useMarkNotificationsAsViewed } from '@audius/common/api'
 import { useFocusEffect } from '@react-navigation/native'
 
-import { IconNotificationOn } from '@audius/harmony-native'
-import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
+import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
+import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { NotificationList } from './NotificationList'
 
@@ -26,14 +26,8 @@ export const NotificationsScreen = () => {
   useFocusEffect(handleMarkAsViewed)
 
   return (
-    <Screen>
-      <ScreenPrimaryContent>
-        <ScreenHeader
-          text={messages.header}
-          icon={IconNotificationOn}
-          iconProps={{ height: 28, width: 28 }}
-        />
-      </ScreenPrimaryContent>
+    <Screen header={() => <MobileRootHeader title={messages.header} />}>
+      <ScreenPrimaryContent>{null}</ScreenPrimaryContent>
       <ScreenContent>
         <ScreenSecondaryContent>
           <NotificationList />

@@ -1,16 +1,13 @@
 import { LibraryPageTabs } from '@audius/common/store'
+import { View } from 'react-native'
 
-import {
-  IconAlbum,
-  IconLibrary,
-  IconNote,
-  IconPlaylists
-} from '@audius/harmony-native'
-import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
+import { IconAlbum, IconNote, IconPlaylists } from '@audius/harmony-native'
+import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { TopTabNavigator } from 'app/components/top-tab-bar'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
+import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { makeStyles } from 'app/styles'
 
 import { AlbumsTab } from './AlbumsTab'
@@ -41,29 +38,28 @@ const libraryScreens = [
   }
 ]
 
-const useHeaderStyles = makeStyles(({ spacing }) => ({
-  root: {
-    flexWrap: 'wrap',
-    height: 88,
-    paddingVertical: spacing(2)
+const useStyles = makeStyles(({ palette }) => ({
+  subHeader: {
+    backgroundColor: palette.white
   }
 }))
 
 export const LibraryScreen = () => {
   useAppTabScreen()
-  const headerStyles = useHeaderStyles()
+  const styles = useStyles()
 
   return (
-    <Screen>
-      <ScreenPrimaryContent>
-        <ScreenHeader
-          text={messages.header}
-          icon={IconLibrary}
-          styles={headerStyles}
-        >
+    <Screen
+      header={() => (
+        <MobileRootHeader title={messages.header} showDivider={false}>
           <LibraryDownloadSection />
+        </MobileRootHeader>
+      )}
+    >
+      <ScreenPrimaryContent>
+        <View style={styles.subHeader}>
           <LibraryCategorySelectionMenu />
-        </ScreenHeader>
+        </View>
       </ScreenPrimaryContent>
       <ScreenContent isOfflineCapable>
         <ScreenSecondaryContent>
