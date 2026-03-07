@@ -7,8 +7,8 @@
     "dev": "vocs dev",
     "build": "vocs build",
     "preview": "vocs preview",
-    "pages:dev": "wrangler pages dev --compatibility-date=2024-02-23 --proxy 5173 -- npm run dev",
-    "pages:deploy": "npm run build && wrangler pages deploy ./docs/dist",
+    "pages:dev": "npx wrangler pages dev --compatibility-date=2024-02-23 --proxy 5173 -- npm run dev",
+    "pages:deploy": "npm run build && npx wrangler pages deploy ./docs/dist",
     "sync:api-spec": "node scripts/sync-openapi.cjs",
     "gen:api-docs": "npm run sync:api-spec"
   },
