@@ -13,7 +13,6 @@
     "gen:api-docs": "npm run sync:api-spec"
   },
   "dependencies": {
-    "@scalar/api-reference-react": "^0.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vocs": "^1.0.8"

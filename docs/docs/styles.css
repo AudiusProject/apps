@@ -161,7 +161,10 @@
   --vocs-color_shadow2:  rgba(0,0,0,0.5);
 }
 
-/* ── Logo: invert mono logo to white in dark mode ── */
+/* ── Logo: black in light mode, white in dark mode ── */
+:root:not(.dark) img[src*="logo"] {
+  filter: grayscale(1) brightness(0);
+}
 :root.dark img[src="/img/logo-mono.svg"] {
   filter: invert(1);
 }

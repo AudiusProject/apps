@@ -4,8 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SOURCE = 'https://api.audius.co/v1/swagger.yaml';
-const TARGET = path.join(__dirname, '../docs/developers/openapi.yaml');
-const PUBLIC_TARGET = path.join(__dirname, '../docs/public/openapi.yaml');
+const TARGET = path.join(__dirname, '../docs/public/openapi.yaml');
 
 const SERVER_RE = /-\s*url:\s*['" ]?\/v1['" ]?/g;
 

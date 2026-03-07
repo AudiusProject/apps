@@ -1,11 +1,11 @@
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
-  title: 'Audius Dev Docs',
+  title: 'Audius Developer Docs',
   description:
     'Audius is a fully decentralized music platform. Build on the largest open music catalog on the internet.',
   logoUrl: {
-    light: '/img/logo-color.png',
+    light: '/img/logo-mono.svg',
     dark: '/img/logo-mono.svg',
   },
   iconUrl: '/img/favicon.ico',

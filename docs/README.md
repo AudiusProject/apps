@@ -38,7 +38,7 @@ This script:
 
 - Downloads `https://api.audius.co/v1/swagger.yaml`
 - Rewrites any legacy `discoveryprovider.audius.co` hosts to `api.audius.co`
-- Saves the patched spec to `docs/public/openapi.yaml` and `docs/developers/openapi.yaml`
+- Saves the patched spec to `docs/public/openapi.yaml`
 - Deduplicates server entries
 
 ---

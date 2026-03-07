@@ -23,6 +23,8 @@ export default function CopyBox() {
           border: '1px solid var(--vocs-color_border)',
           background: 'var(--vocs-color_background3)',
           overflow: 'hidden',
+          boxShadow:
+            '0 4px 4px #7F6AD625, 0 -4px 4px #7F6AD625, 4px 0 4px #7F6AD625, -4px 0 4px #7F6AD625',
         }}
       >
         {/* Text */}
@@ -50,7 +52,6 @@ export default function CopyBox() {
             padding: '0 14px',
             background: 'none',
             border: 'none',
-            borderLeft: '1px solid var(--vocs-color_border)',
             cursor: 'pointer',
             color: copied ? 'var(--vocs-color_tipText, #0F9E48)' : 'var(--vocs-color_text3)',
             display: 'flex',
