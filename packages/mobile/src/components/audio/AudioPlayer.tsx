@@ -593,6 +593,10 @@ export const AudioPlayer = () => {
     }
   }, [])
 
+  // Single subscription with cleanup on unmount only. handlePlayerStateChange
+  // is stable (useCallback with [] deps) and only uses refs/TrackPlayer, so
+  // we avoid re-running this effect to prevent removing the listener during
+  // track switches (which can break playback when playing a second track).
   useEffect(() => {
     const subscription = TrackPlayer.addEventListener(
       Event.PlaybackState,
@@ -602,7 +606,8 @@ export const AudioPlayer = () => {
     return () => {
       subscription.remove()
     }
-  }, [handlePlayerStateChange])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: register once, cleanup on unmount only
+  }, [])
 
   // Seek handler
   useEffect(() => {
