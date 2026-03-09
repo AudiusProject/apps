@@ -22,6 +22,7 @@ import { messages } from './messages'
 import { Display } from './types'
 import {
   authWrite,
+  exchangeForAuthorizationCode,
   formOAuthResponse,
   getDeveloperApp,
   getIsAppAuthorized,
@@ -44,12 +45,23 @@ const useParsedQueryParams = () => {
     redirect_uri: redirectUri,
     app_name: appName,
     response_mode: responseMode,
-    api_key: apiKey,
+    api_key,
+    client_id,
     origin,
     tx,
     display: displayQueryParam,
+    response_type: responseType,
+    code_challenge: codeChallenge,
+    code_challenge_method: codeChallengeMethod,
     ...rest
   } = queryString.parse(search)
+
+  const apiKey =
+    typeof api_key === 'string'
+      ? api_key
+      : typeof client_id === 'string'
+        ? client_id
+        : undefined
 
   const parsedRedirectUri = useMemo<'postmessage' | URL | null>(() => {
     if (redirectUri && typeof redirectUri === 'string') {
@@ -112,6 +124,14 @@ const useParsedQueryParams = () => {
       } else if (!isValidApiKey(apiKey)) {
         error = messages.invalidApiKeyError
       }
+      // PKCE-specific validations when response_type=code
+      if (!error && responseType === 'code') {
+        if (!codeChallenge || typeof codeChallenge !== 'string') {
+          error = messages.missingCodeChallengeError
+        } else if (codeChallengeMethod !== 'S256') {
+          error = messages.invalidCodeChallengeMethodError
+        }
+      }
     } else if (scope === 'write_once') {
       // Write-once scope-specific validations:
       const { error: writeOnceParamsError, txParams: txParamsRes } =
@@ -148,7 +168,10 @@ const useParsedQueryParams = () => {
     error,
     tx,
     txParams,
-    display
+    display,
+    responseType,
+    codeChallenge,
+    codeChallengeMethod
   }
 }
 
@@ -186,6 +209,9 @@ export const useOAuthSetup = ({
     txParams,
     tx,
     display,
+    responseType,
+    codeChallenge,
+    codeChallengeMethod,
     error: initError
   } = useParsedQueryParams()
   const { data: accountStatus } = useAccountStatus()
@@ -503,6 +529,59 @@ export const useOAuthSetup = ({
       }
     }
 
+    // PKCE flow: exchange for authorization code and redirect with code
+    if (responseType === 'code') {
+      const code = await exchangeForAuthorizationCode({
+        account,
+        userEmail,
+        apiKey: apiKey as string,
+        redirectUri: (redirectUri as string) ?? 'postMessage',
+        codeChallenge: codeChallenge as string,
+        codeChallengeMethod: (codeChallengeMethod as string) ?? 'S256',
+        scope: scope as string,
+        onError: () => {
+          onError({
+            isUserError: false,
+            errorMessage: messages.miscError
+          })
+        }
+      })
+      if (!code) return
+
+      record(
+        make(Name.AUDIUS_OAUTH_COMPLETE, {
+          appId: (apiKey || appName)!,
+          scope: scope!,
+          alreadyAuthorized: !shouldCreateWriteGrant
+        })
+      )
+
+      if (parsedRedirectUri === 'postmessage') {
+        if (parsedOrigin && window.opener) {
+          window.opener.postMessage({ state, code }, parsedOrigin.origin)
+        } else {
+          onError({
+            isUserError: false,
+            errorMessage: messages.noWindowError
+          })
+        }
+      } else if (parsedRedirectUri) {
+        if (responseMode === 'query') {
+          if (state != null) {
+            parsedRedirectUri.searchParams.append('state', state as string)
+          }
+          parsedRedirectUri.searchParams.append('code', code)
+          window.location.href = parsedRedirectUri.toString()
+        } else {
+          const statePart = state != null ? `state=${state}&` : ''
+          parsedRedirectUri.hash = `#${statePart}code=${code}`
+          window.location.href = parsedRedirectUri.toString()
+        }
+      }
+      return
+    }
+
+    // Implicit flow: form JWT and redirect
     await formResponseAndRedirect({
       account,
       grantCreated: shouldCreateWriteGrant

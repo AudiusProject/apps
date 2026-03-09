@@ -1,16 +1,10 @@
-import type { DecodedUserToken, UsersApi } from '../api/generated/default'
+import type { DecodedUserToken } from '../api/generated/default'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
-import { parseParams } from '../utils/parseParams'
 
-import {
-  OAuthScope,
-  IsWriteAccessGrantedSchema,
-  IsWriteAccessGrantedRequest,
-  WriteOnceParams,
-  OAuthEnv,
-  OAUTH_URL
-} from './types'
+import { generateCodeVerifier, generateCodeChallenge } from './pkce'
+import type { OAuthTokenStore } from './tokenStore'
+import { OAuthScope, WriteOnceParams, OAuthEnv, OAUTH_URL } from './types'
 
 export type LoginSuccessCallback = (
   profile: DecodedUserToken,
@@ -114,12 +108,15 @@ const generateAudiusLogoSvg = (size: 'small' | 'medium' | 'large') => {
 }
 
 const CSRF_TOKEN_KEY = 'audiusOauthState'
+const PKCE_VERIFIER_KEY = 'audiusPkceCodeVerifier'
+const PKCE_REDIRECT_URI_KEY = 'audiusPkceRedirectUri'
 
 type OAuthConfig = {
   appName?: string
   apiKey?: string
-  usersApi: UsersApi
   logger?: LoggerService
+  tokenStore?: OAuthTokenStore
+  basePath?: string
 }
 
 export class OAuth {
@@ -168,29 +165,30 @@ export class OAuth {
     )
   }
 
-  async isWriteAccessGranted(params: IsWriteAccessGrantedRequest) {
-    const { userId, apiKey } = await parseParams(
-      'isWriteAccessGranted',
-      IsWriteAccessGrantedSchema
-    )(params)
-    if (!this.apiKey && !apiKey) {
-      this._surfaceError(
-        'Need to init Audius SDK with API key or pass in API Key directly to oauth.isWriteAccessGranted.'
-      )
-    }
-    const authorizedApps = await this.config.usersApi.getAuthorizedApps({
-      id: userId
+  login({
+    scope = 'read',
+    params,
+    redirectUri = 'postMessage',
+    display = 'popup',
+    responseMode = 'fragment'
+  }: {
+    scope?: OAuthScope
+    params?: WriteOnceParams
+    redirectUri?: string
+    display?: 'popup' | 'fullScreen'
+    responseMode?: 'fragment' | 'query'
+  }) {
+    // Delegate to async implementation
+    this._loginAsync({
+      scope,
+      params,
+      redirectUri,
+      display,
+      responseMode
     })
-
-    const foundIndex = authorizedApps.data?.findIndex(
-      (a) =>
-        a.address.toLowerCase() ===
-        `0x${(apiKey || this.apiKey)!.toLowerCase()}`
-    )
-    return foundIndex !== undefined && foundIndex > -1
   }
 
-  login({
+  private async _loginAsync({
     scope = 'read',
     params,
     redirectUri = 'postMessage',
@@ -234,8 +232,34 @@ export class OAuth {
       return
     }
 
+    // Determine whether to use PKCE (auto-detect: write scope + apiKey + no apiSecret)
+    const usePkce =
+      effectiveScope === 'write' &&
+      this.apiKey != null &&
+      this.config.tokenStore != null &&
+      this.config.basePath != null
+
     const csrfToken = generateId()
     window.localStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
+
+    let pkceParams = ''
+    if (usePkce) {
+      const codeVerifier = generateCodeVerifier()
+      window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
+      window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, redirectUri)
+      try {
+        const codeChallenge = await generateCodeChallenge(codeVerifier)
+        pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
+      } catch (e) {
+        this._surfaceError(
+          e instanceof Error
+            ? `PKCE code challenge generation failed: ${e.message}`
+            : 'PKCE code challenge generation failed.'
+        )
+        return
+      }
+    }
+
     const windowOptions =
       'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=375, height=785, top=100, left=100'
     const originURISafe = encodeURIComponent(window.location.origin)
@@ -256,7 +280,7 @@ export class OAuth {
 
     const fullOauthUrl = `${
       OAUTH_URL[this.env]
-    }?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}&display=${display}`
+    }?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
 
     if (redirectUri === 'postMessage') {
       this.activePopupWindow = window.open(fullOauthUrl, '', windowOptions)
@@ -316,16 +340,6 @@ export class OAuth {
     element.replaceWith(button)
   }
 
-  /**
-   * Verify if the given jwt ID token was signed by the subject (user) in the payload
-   * @deprecated see `UsersApi.verifyIDToken`
-   * @param token the token to verify
-   * @returns
-   */
-  async verifyToken(token: string) {
-    return await this.config.usersApi.verifyIDToken({ token })
-  }
-
   getCsrfToken() {
     return window.localStorage.getItem(CSRF_TOKEN_KEY)
   }
@@ -348,6 +362,90 @@ export class OAuth {
 
   async _receiveMessage(event: MessageEvent) {
     const oauthOrigin = new URL(OAUTH_URL[this.env]).origin
+
+    // PKCE flow — consent screen posts { state, code }
+    if (
+      event.origin === oauthOrigin &&
+      event.source === this.activePopupWindow &&
+      event.data.state &&
+      event.data.code &&
+      this.config.tokenStore &&
+      this.config.basePath
+    ) {
+      this._clearPopupCheckInterval()
+      if (this.activePopupWindow) {
+        if (!this.activePopupWindow.closed) {
+          this.activePopupWindow.close()
+        }
+        this.activePopupWindow = null
+      }
+
+      if (this.getCsrfToken() !== event.data.state) {
+        this._surfaceError('State mismatch.')
+        return
+      }
+
+      const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
+      const storedRedirectUri = window.sessionStorage.getItem(
+        PKCE_REDIRECT_URI_KEY
+      )
+      // Clean up PKCE session state
+      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+
+      if (!codeVerifier) {
+        this._surfaceError('PKCE code verifier not found in session storage.')
+        return
+      }
+
+      // Exchange authorization code for tokens
+      try {
+        const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'authorization_code',
+            code: event.data.code,
+            code_verifier: codeVerifier,
+            client_id: this.apiKey,
+            redirect_uri: storedRedirectUri ?? 'postMessage'
+          })
+        })
+        if (!tokenRes.ok) {
+          const err = await tokenRes.json().catch(() => ({}))
+          this._surfaceError(err.error_description ?? 'Token exchange failed.')
+          return
+        }
+        const tokens = await tokenRes.json()
+        this.config.tokenStore.setTokens(
+          tokens.access_token,
+          tokens.refresh_token
+        )
+
+        // Fetch user profile via /oauth/me
+        const meRes = await fetch(`${this.config.basePath}/oauth/me`, {
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`
+          }
+        })
+        if (!meRes.ok) {
+          this._surfaceError('Failed to fetch user profile.')
+          return
+        }
+        const profile = (await meRes.json()) as DecodedUserToken
+
+        if (this.loginSuccessCallback) {
+          this.loginSuccessCallback(profile, tokens.access_token)
+        }
+      } catch (e) {
+        this._surfaceError(
+          e instanceof Error ? e.message : 'Token exchange failed.'
+        )
+      }
+      return
+    }
+
+    // Implicit flow — consent screen posts { state, token }
     if (
       event.origin !== oauthOrigin ||
       event.source !== this.activePopupWindow ||
@@ -367,13 +465,108 @@ export class OAuth {
       this._surfaceError('State mismatch.')
     }
     // Verify token and decode
-    const decodedJwt = await this.verifyToken(event.data.token)
-    if (decodedJwt?.data) {
-      if (this.loginSuccessCallback) {
-        this.loginSuccessCallback(decodedJwt.data, event.data.token)
-      }
-    } else {
-      this._surfaceError('The token was invalid.')
+    if (!this.config.basePath) {
+      this._surfaceError('basePath is required for token verification.')
+      return
     }
+    try {
+      const verifyRes = await fetch(
+        `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
+      )
+      if (!verifyRes.ok) {
+        this._surfaceError('The token was invalid.')
+        return
+      }
+      const decoded = (await verifyRes.json()) as {
+        data?: DecodedUserToken
+      }
+      if (decoded?.data) {
+        if (this.loginSuccessCallback) {
+          this.loginSuccessCallback(decoded.data, event.data.token)
+        }
+      } else {
+        this._surfaceError('The token was invalid.')
+      }
+    } catch {
+      this._surfaceError('Token verification request failed.')
+    }
+  }
+
+  /**
+   * Returns true if a refresh token is currently stored and a refresh
+   * exchange could be attempted.
+   */
+  get hasRefreshToken(): boolean {
+    return !!this.config.tokenStore?.refreshToken
+  }
+
+  /**
+   * Refresh the access token using the stored refresh token.
+   * Updates the token store on success.
+   * Returns the new access token, or `null` if refresh failed.
+   */
+  async refreshAccessToken(): Promise<string | null> {
+    if (!this.config.tokenStore || !this.config.basePath) {
+      this._surfaceError(
+        'Token store and basePath are required for token refresh.'
+      )
+      return null
+    }
+    const refreshToken = this.config.tokenStore.refreshToken
+    if (!refreshToken) {
+      this._surfaceError('No refresh token available.')
+      return null
+    }
+    try {
+      const res = await fetch(`${this.config.basePath}/oauth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: this.apiKey
+        })
+      })
+      if (!res.ok) {
+        return null
+      }
+      const tokens = await res.json()
+      if (tokens.access_token && tokens.refresh_token) {
+        this.config.tokenStore.setTokens(
+          tokens.access_token,
+          tokens.refresh_token
+        )
+        return tokens.access_token
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Revoke the current refresh token server-side, clear all stored tokens
+   * and PKCE session state. After this call, all API instances revert to
+   * unauthenticated.
+   */
+  async logout(): Promise<void> {
+    if (this.config.tokenStore?.refreshToken && this.config.basePath) {
+      try {
+        await fetch(`${this.config.basePath}/oauth/revoke`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: this.config.tokenStore.refreshToken,
+            client_id: this.apiKey
+          })
+        })
+      } catch {
+        // Per RFC 7009, revocation errors are non-fatal
+      }
+    }
+    this.config.tokenStore?.clear()
+    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+    window.localStorage.removeItem(CSRF_TOKEN_KEY)
   }
 }

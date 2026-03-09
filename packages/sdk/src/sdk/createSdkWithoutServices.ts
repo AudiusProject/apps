@@ -26,9 +26,11 @@ import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
 import {
   addAppInfoMiddleware,
-  addRequestSignatureMiddleware
+  addRequestSignatureMiddleware,
+  addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
+import { OAuthTokenStore } from './oauth/tokenStore'
 import { Logger, Storage, StorageNodeSelector } from './services'
 import { type SdkConfig } from './types'
 
@@ -53,6 +55,19 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
   const basePath = `${apiEndpoint}/v1`
 
   const middleware: Middleware[] = []
+
+  // Token store for PKCE flow — provides dynamic accessToken to Configuration
+  const tokenStore = new OAuthTokenStore()
+
+  // Initialize OAuth early so it can be passed to middleware
+  const oauth =
+    typeof window !== 'undefined'
+      ? new OAuth({
+          apiKey,
+          tokenStore,
+          basePath
+        })
+      : undefined
 
   if (apiSecret || services?.audiusWalletClient) {
     middleware.push(
@@ -81,25 +96,30 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     )
   }
 
+  // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
+  if (apiKey && oauth) {
+    middleware.push(
+      addTokenRefreshMiddleware({
+        oauth
+      })
+    )
+  }
+
   const apiConfig = new Configuration({
     fetchApi: fetch,
     middleware,
     basePath,
-    accessToken: bearerToken
+    // Static bearerToken takes precedence; otherwise use the dynamic store
+    // so PKCE login can inject tokens after construction.
+    accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
   })
 
-  // Initialize OAuth
+  // Initialize API clients
   const usersApi = new UsersApi(apiConfig)
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          apiKey,
-          usersApi
-        })
-      : undefined
 
   return {
     oauth,
+    tokenStore,
     tracks: new TracksApi(apiConfig),
     users: usersApi,
     // albums
