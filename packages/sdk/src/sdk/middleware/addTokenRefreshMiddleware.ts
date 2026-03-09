@@ -8,6 +8,9 @@ import type { OAuth } from '../oauth/OAuth'
  * `OAuth.refreshAccessToken()` which checks for a refresh token, performs the
  * HTTP exchange, and updates the token store.  On success the original request
  * is retried with the fresh access token.  On failure the 401 propagates.
+ *
+ * When the client is unauthenticated (no refresh token stored) the middleware
+ * short-circuits immediately, avoiding noisy error callbacks.
  */
 export const addTokenRefreshMiddleware = ({
   oauth
@@ -19,6 +22,11 @@ export const addTokenRefreshMiddleware = ({
   return {
     post: async (context: ResponseContext): Promise<Response | void> => {
       if (context.response.status !== 401) {
+        return context.response
+      }
+
+      // Skip refresh when unauthenticated to avoid noisy error callbacks.
+      if (!oauth.hasRefreshToken) {
         return context.response
       }
 

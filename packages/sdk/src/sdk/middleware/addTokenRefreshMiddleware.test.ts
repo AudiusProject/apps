@@ -13,9 +13,11 @@ function mockResponse(status: number, body?: object): Response {
 }
 
 function createMockOAuth(
-  refreshBehaviour: () => Promise<string | null>
+  refreshBehaviour: () => Promise<string | null>,
+  hasRefreshToken = true
 ): OAuth {
   return {
+    hasRefreshToken,
     refreshAccessToken: refreshBehaviour
   } as unknown as OAuth
 }
@@ -38,6 +40,23 @@ describe('addTokenRefreshMiddleware', () => {
     })
 
     expect(result).toBe(response)
+  })
+
+  it('passes through 401 without calling refreshAccessToken when unauthenticated', async () => {
+    const refreshFn = vi.fn()
+    const oauth = createMockOAuth(refreshFn, false)
+    const mw = addTokenRefreshMiddleware({ oauth })
+    const response = mockResponse(401)
+
+    const result = await mw.post!({
+      fetch,
+      url: 'https://api.example.com/v1/users/me',
+      init: {},
+      response
+    })
+
+    expect(result).toBe(response)
+    expect(refreshFn).not.toHaveBeenCalled()
   })
 
   it('passes through 401 when refresh returns null (no refresh token)', async () => {
