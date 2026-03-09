@@ -160,7 +160,9 @@ describe('OAuth.refreshAccessToken', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 200 })
+        new Response(JSON.stringify({ error: 'invalid_grant' }), {
+          status: 200
+        })
       )
     )
 
