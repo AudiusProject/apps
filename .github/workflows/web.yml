@@ -501,6 +501,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+  web-cleanup-preview:
+    name: Cleanup PR preview workers
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Delete PR preview workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          cd packages/web
+          MAIN_NAME="audius-web-preview-pr-${PR_NUM}"
+          SSR_NAME="audius-web-ssr-preview-pr-${PR_NUM}"
+          npx wrangler@4.54.0 delete --name "$MAIN_NAME" --config ./wrangler.toml --force 2>/dev/null || true
+          npx wrangler@4.54.0 delete --name "$SSR_NAME" --config ./src/ssr/wrangler.toml --force 2>/dev/null || true
+        continue-on-error: true
+
   web-check-ssr-bundlesize:
     name: Web Check SSR Bundlesize
     runs-on: ubuntu-latest
