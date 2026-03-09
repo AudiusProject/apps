@@ -3,16 +3,19 @@
 Artist-facing entrypoint to distributor apps.
 
 ## Development
+
 ```
-npm run start:<dev|stage|prod>
+npm run start:prod
 ```
 
 ## Build
+
 ```
-npm run build:<dev|stage|prod>
+npm run build:prod
 ```
 
 ## Deploy
+
 ```
-npm run deploy:<dev|stage|prod>
+npm run deploy:prod
 ```

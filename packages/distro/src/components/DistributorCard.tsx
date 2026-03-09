@@ -6,8 +6,6 @@ import { useCallback } from 'react'
 import { Status } from '../contexts/types'
 import { PreloadImage } from './PreloadImage'
 
-const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'stage' | 'prod'
-
 type DistributorCardProps = {
   appKey: string
   url?: string
@@ -37,8 +35,7 @@ export const DistributorCard = ({
       apiKey: appKey
     })
     distroSdk.oauth!.init({
-      successCallback: () => undefined,
-      env: env === 'prod' ? 'production' : 'development'
+      successCallback: () => undefined
     })
     distroSdk.oauth!.login({
       scope: 'write',

@@ -39,6 +39,16 @@
       "name": "orchard",
       "appKey": "d3a331d096ed4377654fe25fb33613f746667db8",
       "url": "http://ddex.audius.co"
+    },
+    {
+      "name": "onchainmusic",
+      "appKey": "6c1ef2e9c33e2ba1c0d352e41e06e8a3c7721c6f",
+      "url": "http://ddex.audius.co"
+    },
+    {
+      "name": "volume",
+      "appKey": "ebad928af3e5609578707b3f60c3b0d98e6ef8e1",
+      "url": "http://ddex.audius.co"
     }
   ]
 }
