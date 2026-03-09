@@ -69,11 +69,16 @@ class AudiusdClient(CoreClient):
 
     def __init__(self):
         self.endpoint = self.get_audiusd_endpoint()
-        creds = grpc.ssl_channel_credentials()
-        self.channel = grpc.secure_channel(self.endpoint, creds)
+        if environment == "dev":
+            self.channel = grpc.insecure_channel(self.endpoint)
+        else:
+            creds = grpc.ssl_channel_credentials()
+            self.channel = grpc.secure_channel(self.endpoint, creds)
         self.core_service = CoreServiceStub(channel=self.channel)
 
     def get_audiusd_endpoint(self) -> str:
+        if environment == "dev":
+            return "openaudio-1:50051"
         return "grpc.audius.engineering:443"
 
     def get_core_endpoint(self) -> str:
