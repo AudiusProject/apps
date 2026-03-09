@@ -1,9 +1,5 @@
 {
   "editor.rulers": [100],
-  "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "#7E1BCC",
-    "titleBar.activeForeground": "#FFF"
-  },
   "prettier.proseWrap": "always",
   "[mdx]": {
     "editor.formatOnSave": true,
