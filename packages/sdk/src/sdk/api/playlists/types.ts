@@ -25,7 +25,7 @@ const CreatePlaylistMetadataSchema = z
     playlistName: z.string(),
     isPrivate: z.optional(z.boolean()),
     isAlbum: z.optional(z.boolean()),
-    coverArtCid: z.optional(z.string()),
+    playlistImageSizesMultihash: z.optional(z.string()),
     license: z.optional(z.string()),
     mood: z.optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]])),
     releaseDate: z.optional(z.date()),
