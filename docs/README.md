@@ -1,61 +1,51 @@
 # docs.audius.co
 
-## Dependencies
+Audius Developer Docs built with [Vocs](https://vocs.dev).
 
-Install dependencies:
+## Setup
 
 ```sh
 npm install
 ```
 
----
-
-## Development Server
-
-To run the docs locally:
+## Development
 
 ```sh
 npm run dev
 ```
 
-To develop on Cloudflare pages and test the whole stack:
+Runs the Vocs dev server. For Cloudflare Pages testing:
 
 ```sh
 npm run pages:dev
 ```
 
----
+## Build & Preview
 
-## Updating the API Spec
+```sh
+npm run build
+npm run preview
+```
 
-The API reference uses Stoplight Elements and loads the OpenAPI spec from `/openapi.yaml`. To sync the latest spec from the live API:
+`preview` serves the production build locally.
+
+## Deploy
+
+From the `main` branch:
+
+```sh
+npm run pages:deploy
+```
+
+Builds and deploys to Cloudflare Pages. Requires `wrangler login` if not authenticated.
+
+## API Spec
+
+The API reference loads the OpenAPI spec from `/openapi.yaml`. To sync from the live API:
 
 ```sh
 npm run sync:api-spec
 ```
 
-This script:
-
-- Downloads `https://api.audius.co/v1/swagger.yaml`
-- Rewrites any legacy `discoveryprovider.audius.co` hosts to `api.audius.co`
-- Saves the patched spec to `docs/public/openapi.yaml`
-- Deduplicates server entries
-
----
-
-## Build
-
-```sh
-npm run build
-```
-
----
-
-## Publish
-
-To deploy to docs.audius.co, run from the `main` branch:
-
-```sh
-npm run build
-npm run pages:deploy
-```
+Downloads `https://api.audius.co/v1/swagger.yaml`, patches hosts to `api.audius.co`, deduplicates
+servers, and saves to `docs/public/openapi.yaml`.
