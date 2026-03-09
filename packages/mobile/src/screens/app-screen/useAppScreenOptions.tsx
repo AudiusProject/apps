@@ -33,7 +33,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   },
   title: {
     fontSize: 18,
-    fontFamily: typography.fontByWeight.heavy,
+    fontFamily: typography.fontByWeight.bold,
     color: palette.neutralLight5,
     textTransform: 'uppercase'
   },
