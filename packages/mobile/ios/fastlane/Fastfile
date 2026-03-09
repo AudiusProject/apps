@@ -72,14 +72,14 @@ platform :ios do
     # build numbers start at 1
 
     app_store_connect_api_key
-    increment_build_number(
-      build_number: app_store_build_number(
-        app_identifier: options[:bundle_id],
-        initial_build_number: 0,
-        version: plistVersionNumber.to_s,
-        live: false
-      ) + 1,
+    next_build = app_store_build_number(
+      app_identifier: options[:bundle_id],
+      initial_build_number: 0,
+      version: plistVersionNumber.to_s,
+      live: false
     )
+    next_build = (next_build.nil? ? 0 : next_build) + 1
+    increment_build_number(build_number: next_build)
 
     # Build ios
     gym(
@@ -123,7 +123,7 @@ platform :ios do
   end
 
   desc "Build + upload via TestFlight"
-  lane:build_and_upload do |options|
+  lane :build_and_upload do |options|
     if options[:bundle_id] === AUDIUSMUSIC_ID
       scheme = 'AudiusReactNative'
     elsif options[:bundle_id] === AUDIUSMUSIC_RELEASECANDIDATE_ID
