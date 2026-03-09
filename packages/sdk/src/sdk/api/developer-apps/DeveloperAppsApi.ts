@@ -51,10 +51,8 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     params: EntityManagerCreateDeveloperAppRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    const { name, userId, description, imageUrl } = await parseParams(
-      'createDeveloperApp',
-      CreateDeveloperAppSchema
-    )(params)
+    const { name, userId, description, imageUrl, redirectUris } =
+      await parseParams('createDeveloperApp', CreateDeveloperAppSchema)(params)
 
     const privateKey = generatePrivateKey()
     const address = privateKeyToAddress(privateKey)
@@ -84,7 +82,8 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
         app_signature: {
           message,
           signature
-        }
+        },
+        redirect_uris: redirectUris
       }),
       ...advancedOptions
     })
@@ -168,7 +167,7 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
     params: EntityManagerUpdateDeveloperAppRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    const { appApiKey, name, userId, description, imageUrl } =
+    const { appApiKey, name, userId, description, imageUrl, redirectUris } =
       await parseParams('updateDeveloperApp', UpdateDeveloperAppSchema)(params)
 
     if (!this.entityManager) {
@@ -183,7 +182,8 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
         address: `0x${appApiKey}`,
         name,
         description,
-        image_url: imageUrl
+        image_url: imageUrl,
+        redirect_uris: redirectUris
       }),
       ...advancedOptions
     })
