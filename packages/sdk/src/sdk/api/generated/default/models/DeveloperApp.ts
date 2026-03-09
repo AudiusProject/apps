@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -50,6 +49,12 @@ export interface DeveloperApp {
      * @memberof DeveloperApp
      */
     imageUrl?: string;
+    /**
+     * Pre-registered OAuth callback URLs for this app
+     * @type {Array<string>}
+     * @memberof DeveloperApp
+     */
+    redirectUris?: Array<string>;
 }
 
 /**
@@ -79,6 +84,7 @@ export function DeveloperAppFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'name': json['name'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'imageUrl': !exists(json, 'image_url') ? undefined : json['image_url'],
+        'redirectUris': !exists(json, 'redirect_uris') ? undefined : json['redirect_uris'],
     };
 }
 
@@ -96,6 +102,7 @@ export function DeveloperAppToJSON(value?: DeveloperApp | null): any {
         'name': value.name,
         'description': value.description,
         'image_url': value.imageUrl,
+        'redirect_uris': value.redirectUris,
     };
 }
 

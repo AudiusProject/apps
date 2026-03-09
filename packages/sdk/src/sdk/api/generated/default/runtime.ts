@@ -1,8 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -13,7 +12,7 @@
  */
 
 
-export const BASE_PATH = "/v1".replace(/\/+$/, "");
+export const BASE_PATH = "https://api.audius.co/v1".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path

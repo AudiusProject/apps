@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -33,11 +32,17 @@ export interface UpdateDeveloperAppRequestBody {
      */
     description?: string;
     /**
-     * App logo/image URL (camelCase)
+     * App logo/image URL
      * @type {string}
      * @memberof UpdateDeveloperAppRequestBody
      */
     imageUrl?: string;
+    /**
+     * Pre-registered OAuth redirect/callback URIs
+     * @type {Array<string>}
+     * @memberof UpdateDeveloperAppRequestBody
+     */
+    redirectUris?: Array<string>;
 }
 
 /**
@@ -62,7 +67,8 @@ export function UpdateDeveloperAppRequestBodyFromJSONTyped(json: any, ignoreDisc
         
         'name': json['name'],
         'description': !exists(json, 'description') ? undefined : json['description'],
-        'imageUrl': !exists(json, 'imageUrl') ? undefined : json['imageUrl'],
+        'imageUrl': !exists(json, 'image_url') ? undefined : json['image_url'],
+        'redirectUris': !exists(json, 'redirect_uris') ? undefined : json['redirect_uris'],
     };
 }
 
@@ -77,7 +83,8 @@ export function UpdateDeveloperAppRequestBodyToJSON(value?: UpdateDeveloperAppRe
         
         'name': value.name,
         'description': value.description,
-        'imageUrl': value.imageUrl,
+        'image_url': value.imageUrl,
+        'redirect_uris': value.redirectUris,
     };
 }
 
