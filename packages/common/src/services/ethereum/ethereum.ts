@@ -128,7 +128,7 @@ export async function permitAudioToken({
     throw new Error('No wallet address available')
   }
 
-  const deadline = BigInt(Date.now() + ONE_HOUR_IN_MS)
+  const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 60)
 
   const nonce = await ethPublicClient.readContract({
     address: AudiusToken.address,
