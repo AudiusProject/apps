@@ -139,6 +139,7 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
         </Flex>
       </Flex>
       <Flex
+        backgroundColor='white'
         style={{
           zIndex: 1,
           borderBottomWidth: 1,

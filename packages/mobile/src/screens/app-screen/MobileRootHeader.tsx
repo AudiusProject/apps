@@ -41,7 +41,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   title: {
     fontSize: 24,
     lineHeight: 32,
-    fontFamily: typography.fontByWeight.heavy
+    fontFamily: typography.fontByWeight.bold
   },
   titleContainer: {
     flex: 1,
