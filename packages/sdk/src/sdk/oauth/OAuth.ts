@@ -247,8 +247,17 @@ export class OAuth {
       const codeVerifier = generateCodeVerifier()
       window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
       window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, redirectUri)
-      const codeChallenge = await generateCodeChallenge(codeVerifier)
-      pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
+      try {
+        const codeChallenge = await generateCodeChallenge(codeVerifier)
+        pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
+      } catch (e) {
+        this._surfaceError(
+          e instanceof Error
+            ? `PKCE code challenge generation failed: ${e.message}`
+            : 'PKCE code challenge generation failed.'
+        )
+        return
+      }
     }
 
     const windowOptions =
@@ -488,7 +497,7 @@ export class OAuth {
    * exchange could be attempted.
    */
   get hasRefreshToken(): boolean {
-    return !!(this.config.tokenStore?.refreshToken)
+    return !!this.config.tokenStore?.refreshToken
   }
 
   /**
