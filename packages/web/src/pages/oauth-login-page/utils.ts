@@ -183,24 +183,29 @@ export const exchangeForAuthorizationCode = async ({
   if (!jwt) return null
 
   // 2. Exchange JWT + PKCE params for authorization code
-  const res = await fetch(`${env.API_URL}/v1/oauth/authorize`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      token: jwt,
-      client_id: apiKey,
-      redirect_uri: redirectUri,
-      code_challenge: codeChallenge,
-      code_challenge_method: codeChallengeMethod,
-      scope
+  try {
+    const res = await fetch(`${env.API_URL}/v1/oauth/authorize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: jwt,
+        client_id: apiKey,
+        redirect_uri: redirectUri,
+        code_challenge: codeChallenge,
+        code_challenge_method: codeChallengeMethod,
+        scope
+      })
     })
-  })
-  if (!res.ok) {
+    if (!res.ok) {
+      onError()
+      return null
+    }
+    const { code } = await res.json()
+    return code
+  } catch {
     onError()
     return null
   }
-  const { code } = await res.json()
-  return code
 }
 
 export const authWrite = async ({ userId, appApiKey }: CreateGrantRequest) => {
