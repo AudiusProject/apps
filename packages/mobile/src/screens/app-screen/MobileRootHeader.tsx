@@ -26,9 +26,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   logoContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    top: 22,
-    width: 78,
-    height: 16,
+    top: 14,
+    width: 120,
+    height: 25,
     opacity: 0.45
   },
   row: {
@@ -77,7 +77,7 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <IconAudiusLogoHorizontal height={16} width={78} color='subdued' />
+        <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
       </View>
       <View style={[styles.row, { marginTop: insets.top }]}>
         <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
