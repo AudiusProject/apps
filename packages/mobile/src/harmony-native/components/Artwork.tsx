@@ -81,8 +81,6 @@ export const Artwork = (props: ArtworkProps) => {
         borderRadius={borderRadius}
         border='default'
         shadow={shadow}
-        w='100%'
-        h='100%'
         style={{ borderWidth }}
       >
         {isLoading && hasImageSource ? (
