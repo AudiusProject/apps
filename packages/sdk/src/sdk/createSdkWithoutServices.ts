@@ -59,6 +59,16 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
   // Token store for PKCE flow — provides dynamic accessToken to Configuration
   const tokenStore = new OAuthTokenStore()
 
+  // Initialize OAuth early so it can be passed to middleware
+  const oauth =
+    typeof window !== 'undefined'
+      ? new OAuth({
+          apiKey,
+          tokenStore,
+          basePath
+        })
+      : undefined
+
   if (apiSecret || services?.audiusWalletClient) {
     middleware.push(
       addRequestSignatureMiddleware({
@@ -87,12 +97,10 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
   }
 
   // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
-  if (apiKey) {
+  if (apiKey && oauth) {
     middleware.push(
       addTokenRefreshMiddleware({
-        tokenStore,
-        apiKey,
-        basePath
+        oauth
       })
     )
   }
@@ -106,17 +114,8 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
   })
 
-  // Initialize OAuth
+  // Initialize API clients
   const usersApi = new UsersApi(apiConfig)
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          apiKey,
-          usersApi,
-          tokenStore,
-          basePath
-        })
-      : undefined
 
   return {
     oauth,

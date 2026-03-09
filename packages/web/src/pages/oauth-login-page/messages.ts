@@ -51,6 +51,10 @@ export const messages = {
   signedInAs: `You’re Signed in as`,
   missingApiKeyError: 'Whoops, this is an invalid link (app API Key missing)',
   invalidApiKeyError: 'Whoops, this is an invalid link (app API Key invalid)',
+  missingCodeChallengeError:
+    'Whoops, this is an invalid link (code_challenge is required for PKCE flow).',
+  invalidCodeChallengeMethodError:
+    'Whoops, this is an invalid link (code_challenge_method must be S256).',
   approveTxToConnectProfile:
     'Approve the pending transaction in your wallet to finish connecting your Audius profile.',
   back: 'Back',
