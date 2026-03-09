@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
+ * ## Overview  The Audius API provides REST access to the world\'s largest open music catalog, built on the [Open Audio Protocol](https://openaudio.org). Use it to query and stream tracks, users, playlists, and more—perfect for building music players, discovery apps, and audio-native products.  ## Key Capabilities  - **Users** — Profiles, followers, following, search - **Tracks** — Search, trending, stream, favorites, reposts - **Playlists** — Create, update, browse, curate - **Resolve** — Look up content by Audius canonical URLs (e.g. `audius.co/artist/...`) - **Explore** — Trending content, charts, discovery - **Comments, Tips, Rewards** — Social features and engagement  ## Authentication  - **Read-only** — Most endpoints work without credentials. Use an API key for higher rate limits. - **Writes** — Upload, favorite, repost, and other mutations require an API key and secret. Get keys at [api.audius.co/plans](https://api.audius.co/plans) or [audius.co/settings](https://audius.co/settings).  ## Resources  - [API Docs](https://docs.audius.co/api) — Full reference and guides - [API Plans](https://api.audius.co/plans) — Get API keys (free tier available) - [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius) — OAuth for user actions - [JavaScript SDK](https://www.npmjs.com/package/@audius/sdk) — `@audius/sdk` for Node and browser 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -13,7 +13,7 @@
  */
 
 
-export const BASE_PATH = "/v1".replace(/\/+$/, "");
+export const BASE_PATH = "https://api.audius.co/v1".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path

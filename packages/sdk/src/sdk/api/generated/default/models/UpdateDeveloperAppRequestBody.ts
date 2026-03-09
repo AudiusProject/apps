@@ -2,8 +2,8 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
+ * ## Overview  The Audius API provides REST access to the world\'s largest open music catalog, built on the [Open Audio Protocol](https://openaudio.org). Use it to query and stream tracks, users, playlists, and more—perfect for building music players, discovery apps, and audio-native products.  ## Key Capabilities  - **Users** — Profiles, followers, following, search - **Tracks** — Search, trending, stream, favorites, reposts - **Playlists** — Create, update, browse, curate - **Resolve** — Look up content by Audius canonical URLs (e.g. `audius.co/artist/...`) - **Explore** — Trending content, charts, discovery - **Comments, Tips, Rewards** — Social features and engagement  ## Authentication  - **Read-only** — Most endpoints work without credentials. Use an API key for higher rate limits. - **Writes** — Upload, favorite, repost, and other mutations require an API key and secret. Get keys at [api.audius.co/plans](https://api.audius.co/plans) or [audius.co/settings](https://audius.co/settings).  ## Resources  - [API Docs](https://docs.audius.co/api) — Full reference and guides - [API Plans](https://api.audius.co/plans) — Get API keys (free tier available) - [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius) — OAuth for user actions - [JavaScript SDK](https://www.npmjs.com/package/@audius/sdk) — `@audius/sdk` for Node and browser 
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -33,11 +33,17 @@ export interface UpdateDeveloperAppRequestBody {
      */
     description?: string;
     /**
-     * App logo/image URL (camelCase)
+     * App logo/image URL
      * @type {string}
      * @memberof UpdateDeveloperAppRequestBody
      */
     imageUrl?: string;
+    /**
+     * Pre-registered OAuth redirect/callback URIs
+     * @type {Array<string>}
+     * @memberof UpdateDeveloperAppRequestBody
+     */
+    redirectUris?: Array<string>;
 }
 
 /**
@@ -62,7 +68,8 @@ export function UpdateDeveloperAppRequestBodyFromJSONTyped(json: any, ignoreDisc
         
         'name': json['name'],
         'description': !exists(json, 'description') ? undefined : json['description'],
-        'imageUrl': !exists(json, 'imageUrl') ? undefined : json['imageUrl'],
+        'imageUrl': !exists(json, 'image_url') ? undefined : json['image_url'],
+        'redirectUris': !exists(json, 'redirect_uris') ? undefined : json['redirect_uris'],
     };
 }
 
@@ -77,7 +84,8 @@ export function UpdateDeveloperAppRequestBodyToJSON(value?: UpdateDeveloperAppRe
         
         'name': value.name,
         'description': value.description,
-        'imageUrl': value.imageUrl,
+        'image_url': value.imageUrl,
+        'redirect_uris': value.redirectUris,
     };
 }
 
