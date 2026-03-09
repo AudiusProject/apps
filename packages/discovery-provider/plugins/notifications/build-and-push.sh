@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to build and push the discovery-provider-notifications Docker image
+# Script to build and push the notifications Docker image
 # Usage: ./build-and-push.sh [version]
 # Example: ./build-and-push.sh v1.0.0
 # If no version is provided, it will use 'latest'
@@ -16,8 +16,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Docker image name (must match image used in docker-compose / k8s)
-IMAGE_NAME="audius/discovery-provider-notifications"
+# Docker image name (must match image used in k8s)
+IMAGE_NAME="audius/notifications"
 VERSION="${1:-latest}"
 
 echo -e "${GREEN}Building Docker image: ${IMAGE_NAME}:${VERSION}${NC}"
