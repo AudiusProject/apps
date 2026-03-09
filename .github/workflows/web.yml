@@ -452,24 +452,28 @@ jobs:
         id: deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
         run: |
           cd packages/web
-          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env preview
-          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./wrangler.toml --env preview 2>&1 | tee deploy.log
-          PREVIEW_URL=$(grep -oE 'https://[^[:space:]]+\.workers\.dev' deploy.log | tail -1) || echo "https://audius-web-preview.workers.dev"
-          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          SSR_NAME="audius-web-ssr-preview-pr-${PR_NUM}"
+          MAIN_NAME="audius-web-preview-pr-${PR_NUM}"
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env preview --name "$SSR_NAME"
+          cp wrangler.toml wrangler.preview.pr.toml
+          sed -i "s/audius-web-ssr-preview/audius-web-ssr-preview-pr-${PR_NUM}/g; s/audius-web-preview/audius-web-preview-pr-${PR_NUM}/g" wrangler.preview.pr.toml
+          npm_config_yes=true npx wrangler@4.54.0 deploy --config ./wrangler.preview.pr.toml --env preview 2>&1 | tee deploy.log
+          echo "url=https://${MAIN_NAME}.audius.workers.dev" >> $GITHUB_OUTPUT
 
       - name: Comment on PR with preview URL
         uses: actions/github-script@v7
         if: steps.deploy.outcome == 'success' && github.event_name == 'pull_request'
         with:
           script: |
-            const previewUrl = '${{ steps.deploy.outputs.url }}' || 'https://audius-web-preview.workers.dev';
+            const previewUrl = '${{ steps.deploy.outputs.url }}' || 'https://audius-web-preview.audius.workers.dev';
             const body = `## 🌐 Web preview ready
 
             **Preview URL:** ${previewUrl}
 
-            Built from this PR. The preview is shared across PRs (latest deploy wins).
+            Unique preview for this PR (deployed from this branch).
             _[Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_`;
             const marker = '<!-- audius-web-preview -->';
             const bodyWithMarker = body + '\n' + marker;
