@@ -1,9 +1,10 @@
 import json
 import time
-from typing import Optional, TypedDict, Union, cast
+from typing import List, Optional, TypedDict, Union, cast
 
 from src.exceptions import IndexingValidationError
 from src.models.grants.developer_app import DeveloperApp
+from src.models.grants.oauth_redirect_uri import OauthRedirectUri
 from src.tasks.entity_manager.utils import (
     Action,
     EntityType,
@@ -23,6 +24,8 @@ logger = StructuredLogger(__name__)
 MAX_DESCRIPTION_LENGTH = 160
 MAX_IMAGE_URL_LENGTH = 2000
 MAX_APP_COUNT = 5
+MAX_REDIRECT_URI_LENGTH = 2000
+MAX_REDIRECT_URIS = 50
 
 
 class AppSignature(TypedDict):
@@ -36,6 +39,7 @@ class CreateDeveloperAppMetadata(TypedDict):
     image_url: Union[str, None]
     is_personal_access: Union[bool, None]
     app_signature: Union[AppSignature, None]
+    redirect_uris: Union[List[str], None]
 
 
 class UpdateDeveloperAppMetadata(TypedDict):
@@ -43,6 +47,7 @@ class UpdateDeveloperAppMetadata(TypedDict):
     description: Union[str, None]
     image_url: Union[str, None]
     address: Union[str, None]
+    redirect_uris: Union[List[str], None]
 
 
 class DeleteDeveloperAppMetadata(TypedDict):
@@ -65,6 +70,7 @@ def get_create_developer_app_metadata_from_raw(
         "description": None,
         "app_signature": None,
         "image_url": None,
+        "redirect_uris": None,
     }
 
     if raw_metadata:
@@ -80,6 +86,12 @@ def get_create_developer_app_metadata_from_raw(
                 "is_personal_access", None
             )
             metadata["app_signature"] = json_metadata.get("app_signature", None)
+            redirect_uris_raw = json_metadata.get("redirect_uris", None)
+            if isinstance(redirect_uris_raw, list) and all(
+                isinstance(u, str) and len(u) <= MAX_REDIRECT_URI_LENGTH
+                for u in redirect_uris_raw
+            ):
+                metadata["redirect_uris"] = redirect_uris_raw[:MAX_REDIRECT_URIS]
             return metadata
         except Exception as e:
             logger.error(
@@ -97,6 +109,7 @@ def get_update_developer_app_metadata_from_raw(
         "description": None,
         "image_url": None,
         "address": None,
+        "redirect_uris": None,
     }
 
     if raw_metadata:
@@ -113,6 +126,12 @@ def get_update_developer_app_metadata_from_raw(
             image_url_raw = json_metadata.get("image_url", None)
             if image_url_raw and is_fqdn(image_url_raw):
                 metadata["image_url"] = image_url_raw
+            redirect_uris_raw = json_metadata.get("redirect_uris", None)
+            if isinstance(redirect_uris_raw, list) and all(
+                isinstance(u, str) and len(u) <= MAX_REDIRECT_URI_LENGTH
+                for u in redirect_uris_raw
+            ):
+                metadata["redirect_uris"] = redirect_uris_raw[:MAX_REDIRECT_URIS]
             return metadata
         except Exception as e:
             logger.error(
@@ -371,6 +390,10 @@ def create_developer_app(params: ManageEntityParameters):
 
     validate_developer_app_record(developer_app_record)
     params.add_record(address, developer_app_record)
+
+    for uri in metadata.get("redirect_uris") or []:
+        params.session.add(OauthRedirectUri(client_id=address, redirect_uri=uri))
+
     return developer_app_record
 
 
@@ -397,6 +420,15 @@ def update_developer_app(params: ManageEntityParameters):
 
     validate_developer_app_record(developer_app_record)
     params.add_record(address, developer_app_record)
+
+    redirect_uris = metadata.get("redirect_uris")
+    if redirect_uris is not None:
+        params.session.query(OauthRedirectUri).filter(
+            OauthRedirectUri.client_id == address
+        ).delete(synchronize_session=False)
+        for uri in redirect_uris:
+            params.session.add(OauthRedirectUri(client_id=address, redirect_uri=uri))
+
     return developer_app_record
 
 
@@ -423,6 +455,11 @@ def delete_developer_app(params: ManageEntityParameters):
 
     validate_developer_app_record(revoked_developer_app)
     params.add_record(address, revoked_developer_app)
+
+    params.session.query(OauthRedirectUri).filter(
+        OauthRedirectUri.client_id == address
+    ).delete(synchronize_session=False)
+
     return revoked_developer_app
 
 
