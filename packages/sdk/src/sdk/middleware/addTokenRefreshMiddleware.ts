@@ -1,5 +1,6 @@
 import type { Middleware, ResponseContext } from '../api/generated/default'
 import type { OAuth } from '../oauth/OAuth'
+import fetch from '../utils/fetch'
 
 /**
  * Middleware that transparently refreshes an expired access token on 401.
@@ -53,7 +54,7 @@ export const addTokenRefreshMiddleware = ({
           Authorization: `Bearer ${newAccessToken}`
         }
       }
-      return context.fetch(context.url, retryInit)
+      return fetch(context.url, retryInit)
     }
   }
 }
