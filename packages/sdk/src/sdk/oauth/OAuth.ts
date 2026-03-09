@@ -484,6 +484,14 @@ export class OAuth {
   }
 
   /**
+   * Returns true if a refresh token is currently stored and a refresh
+   * exchange could be attempted.
+   */
+  get hasRefreshToken(): boolean {
+    return !!(this.config.tokenStore?.refreshToken)
+  }
+
+  /**
    * Refresh the access token using the stored refresh token.
    * Updates the token store on success.
    * Returns the new access token, or `null` if refresh failed.
