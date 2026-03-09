@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import type {
   BottomTabNavigationEventMap,
@@ -69,6 +69,18 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
   const { translationAnim, navigation, state } = props
   const { routes, index: activeIndex } = state
   const insets = useSafeAreaInsets()
+  const lastNonZeroBottomInset = useRef(insets.bottom)
+
+  useEffect(() => {
+    if (insets.bottom > 0) {
+      lastNonZeroBottomInset.current = insets.bottom
+    }
+  }, [insets.bottom])
+
+  // Preserve the previous non-zero inset to avoid brief 0 inset flashes,
+  // which can expose the view behind the tab bar safe area.
+  const effectiveBottomInset =
+    insets.bottom === 0 ? lastNonZeroBottomInset.current : insets.bottom
 
   const handlePress = useCallback(
     (isFocused: boolean, routeName: string, routeKey: string) => {
@@ -100,7 +112,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
     <Animated.View
       style={[
         { zIndex: 4, elevation: 4 },
-        interpolatePostion(translationAnim, insets.bottom)
+        interpolatePostion(translationAnim, effectiveBottomInset)
       ]}
     >
       <Flex
@@ -110,7 +122,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
         backgroundColor='surface1'
         wrap='nowrap'
         justifyContent='space-evenly'
-        pb={insets.bottom}
+        pb={effectiveBottomInset}
       >
         {routes.map(({ name, key }, index) => {
           const BottomTabBarButton = bottomTabBarButtons[name]
