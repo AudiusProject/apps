@@ -3,6 +3,10 @@ RUN apk add --no-cache --virtual .gyp python3 make g++
 
 WORKDIR /notifications
 
+# Use writable dir for npm cache (avoids "mkdir /root: read-only file system" in some environments)
+ENV NPM_CONFIG_CACHE=/tmp/.npm
+ENV HOME=/notifications
+
 RUN apk add --no-cache python3 py3-pip build-base
 
 COPY package*.json ./
