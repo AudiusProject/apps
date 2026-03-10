@@ -1,5 +1,18 @@
 # @audius/sdk
 
+## 14.1.0
+
+### Minor Changes
+
+- 0cbaf44: Add support for OAuth2.0 PKCE access/refresh tokens
+- 8fc2f10: Add accessAuthorities to track model
+
+### Patch Changes
+
+- e9ffc03: Support redirect_uri in entity manager writes
+- bd1ed10: Fix creation of legacy playlists
+- 7dfa92a: Update SDK with latest types
+
 ## 14.0.1
 
 ### Patch Changes
