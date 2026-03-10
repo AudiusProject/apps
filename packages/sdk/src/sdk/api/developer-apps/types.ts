@@ -23,7 +23,8 @@ export const CreateDeveloperAppSchema = z.object({
         message: 'Invalid URL'
       })
   ),
-  userId: HashId
+  userId: HashId,
+  redirectUris: z.array(z.string().max(2000)).max(50).optional()
 })
 
 export type EntityManagerCreateDeveloperAppRequest = z.input<
@@ -44,7 +45,8 @@ export const UpdateDeveloperAppSchema = z.object({
         message: 'Invalid URL'
       })
   ),
-  userId: HashId
+  userId: HashId,
+  redirectUris: z.array(z.string().max(2000)).max(50).optional()
 })
 
 export type EntityManagerUpdateDeveloperAppRequest = z.input<
