@@ -1,11 +1,13 @@
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useMemo } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SystemAppearance,
   Theme as LegacyTheme,
   ThemeMode,
   ThemePalette
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { themeActions, themeSelectors } from '@audius/common/store'
 import {
   resolveTheme,
@@ -66,9 +68,35 @@ type ThemeProviderProps = {
   children: ReactNode
 }
 
+/**
+ * When new theme flag is on: classic-* → default-* (upgrade).
+ * When new theme flag is off: default-* → classic-* (downgrade).
+ * Matrix is unchanged.
+ */
+const applyThemeFlag = (
+  theme: Theme,
+  isNewThemeModelEnabled: boolean
+): Theme => {
+  if (isNewThemeModelEnabled) {
+    if (theme === 'classic-light') return 'default-light'
+    if (theme === 'classic-dark') return 'default-dark'
+  } else {
+    if (theme === 'default-light') return 'classic-light'
+    if (theme === 'default-dark') return 'classic-dark'
+  }
+  return theme
+}
+
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  const harmonyTheme = useSelector(selectHarmonyTheme)
+  const harmonyThemeFromState = useSelector(selectHarmonyTheme)
+  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
+    FeatureFlags.NEW_THEME_MODEL
+  )
+  const harmonyTheme = useMemo(
+    () => applyThemeFlag(harmonyThemeFromState, isNewThemeModelEnabled),
+    [harmonyThemeFromState, isNewThemeModelEnabled]
+  )
   const dispatch = useDispatch()
 
   useEffect(() => {

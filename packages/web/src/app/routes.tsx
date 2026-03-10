@@ -72,10 +72,10 @@ const RootLayout = () => {
         <HeaderContextProvider>
           <NavProvider>
             <ScrollProvider>
-              <ThemeProvider>
-                <ToastContextProvider>
-                  <AppContextProvider>
-                    <AudiusQueryProvider>
+              <AppContextProvider>
+                <AudiusQueryProvider>
+                  <ThemeProvider>
+                    <ToastContextProvider>
                       <MainContentContextProvider>
                         <SyncLocalStorageUserProvider
                           localStorage={localStorage}
@@ -90,10 +90,10 @@ const RootLayout = () => {
                           </Suspense>
                         </SyncLocalStorageUserProvider>
                       </MainContentContextProvider>
-                    </AudiusQueryProvider>
-                  </AppContextProvider>
-                </ToastContextProvider>
-              </ThemeProvider>
+                    </ToastContextProvider>
+                  </ThemeProvider>
+                </AudiusQueryProvider>
+              </AppContextProvider>
             </ScrollProvider>
           </NavProvider>
         </HeaderContextProvider>
