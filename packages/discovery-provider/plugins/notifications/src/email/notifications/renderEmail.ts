@@ -121,26 +121,44 @@ const getPlaylistImage = (playlist: PlaylistResource) => {
   return playlistImageUrl
 }
 
+const BATCH_SIZE = 100
+
+function* inBatches<T>(arr: Iterable<T>, size: number): Generator<T[]> {
+  let batch: T[] = []
+  for (const item of arr) {
+    batch.push(item)
+    if (batch.length >= size) {
+      yield batch
+      batch = []
+    }
+  }
+  if (batch.length > 0) yield batch
+}
+
 export const fetchResources = async (
   dnDb: Knex,
   identityDb: Knex,
   ids: ResourceIds
 ): Promise<Resources> => {
-  const userRows: UserResource[] = await dnDb
-    .select(
-      'users.user_id',
-      'users.handle',
-      'users.twitter_handle as twitterHandle',
-      'users.instagram_handle as instagramHandle',
-      'users.tiktok_handle as tikTokHandle',
-      'users.name',
-      'users.profile_picture_sizes',
-      'users.profile_picture',
-      'users.creator_node_endpoint'
-    )
-    .from('users')
-    .whereIn('user_id', Array.from(ids.users))
-    .andWhere('is_current', true)
+  const userRows: UserResource[] = []
+  for (const batch of inBatches(ids.users ?? [], BATCH_SIZE)) {
+    const rows = await dnDb
+      .select(
+        'users.user_id',
+        'users.handle',
+        'users.twitter_handle as twitterHandle',
+        'users.instagram_handle as instagramHandle',
+        'users.tiktok_handle as tikTokHandle',
+        'users.name',
+        'users.profile_picture_sizes',
+        'users.profile_picture',
+        'users.creator_node_endpoint'
+      )
+      .from('users')
+      .whereIn('user_id', batch)
+      .andWhere('is_current', true)
+    userRows.push(...rows)
+  }
 
   const users = userRows.reduce((acc, user) => {
     acc[user.user_id] = {
@@ -150,24 +168,29 @@ export const fetchResources = async (
     return acc
   }, {} as { [userId: number]: UserResource & { imageUrl: string } })
 
-  const trackRows: TrackResource[] = await dnDb
-    .select(
-      'tracks.track_id',
-      'tracks.title',
-      'tracks.owner_id',
-      'tracks.cover_art_sizes',
-      'tracks.stream_conditions',
-      { ownerName: 'users.name' },
-      'users.creator_node_endpoint',
-      'track_routes.slug'
-    )
-    .from('tracks')
-    .join('users', 'users.user_id', 'tracks.owner_id')
-    .join('track_routes', 'track_routes.track_id', 'tracks.track_id')
-    .whereIn('tracks.track_id', Array.from(ids.tracks))
-    .andWhere('tracks.is_current', true)
-    .andWhere('users.is_current', true)
-    .andWhere('track_routes.is_current', true)
+  const trackRows: TrackResource[] = []
+  const trackIds = Array.from(ids.tracks ?? [])
+  for (const batch of inBatches(trackIds, BATCH_SIZE)) {
+    const rows = await dnDb
+      .select(
+        'tracks.track_id',
+        'tracks.title',
+        'tracks.owner_id',
+        'tracks.cover_art_sizes',
+        'tracks.stream_conditions',
+        { ownerName: 'users.name' },
+        'users.creator_node_endpoint',
+        'track_routes.slug'
+      )
+      .from('tracks')
+      .join('users', 'users.user_id', 'tracks.owner_id')
+      .join('track_routes', 'track_routes.track_id', 'tracks.track_id')
+      .whereIn('tracks.track_id', batch)
+      .andWhere('tracks.is_current', true)
+      .andWhere('users.is_current', true)
+      .andWhere('track_routes.is_current', true)
+    trackRows.push(...rows)
+  }
   const tracks = trackRows.reduce((acc, track) => {
     acc[track.track_id] = {
       ...track,
@@ -176,28 +199,33 @@ export const fetchResources = async (
     return acc
   }, {} as { [trackId: number]: TrackResource & { imageUrl: string } })
 
-  const playlistRows: PlaylistResource[] = await dnDb
-    .select(
-      'playlists.playlist_id',
-      'playlists.playlist_name',
-      'playlists.is_album',
-      'playlists.playlist_image_sizes_multihash',
-      'playlists.playlist_image_multihash',
-      { ownerName: 'users.name' },
-      'users.creator_node_endpoint',
-      'playlist_routes.slug'
-    )
-    .from('playlists')
-    .join('users', 'users.user_id', 'playlists.playlist_owner_id')
-    .join(
-      'playlist_routes',
-      'playlist_routes.playlist_id',
-      'playlists.playlist_id'
-    )
-    .whereIn('playlists.playlist_id', Array.from(ids.playlists))
-    .andWhere('playlists.is_current', true)
-    .andWhere('users.is_current', true)
-    .andWhere('playlist_routes.is_current', true)
+  const playlistRows: PlaylistResource[] = []
+  const playlistIds = Array.from(ids.playlists ?? [])
+  for (const batch of inBatches(playlistIds, BATCH_SIZE)) {
+    const rows = await dnDb
+      .select(
+        'playlists.playlist_id',
+        'playlists.playlist_name',
+        'playlists.is_album',
+        'playlists.playlist_image_sizes_multihash',
+        'playlists.playlist_image_multihash',
+        { ownerName: 'users.name' },
+        'users.creator_node_endpoint',
+        'playlist_routes.slug'
+      )
+      .from('playlists')
+      .join('users', 'users.user_id', 'playlists.playlist_owner_id')
+      .join(
+        'playlist_routes',
+        'playlist_routes.playlist_id',
+        'playlists.playlist_id'
+      )
+      .whereIn('playlists.playlist_id', batch)
+      .andWhere('playlists.is_current', true)
+      .andWhere('users.is_current', true)
+      .andWhere('playlist_routes.is_current', true)
+    playlistRows.push(...rows)
+  }
 
   const playlists = playlistRows.reduce((acc, playlist) => {
     acc[playlist.playlist_id] = {
