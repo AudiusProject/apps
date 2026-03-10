@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useCallback, useContext } from 'react'
 
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
@@ -76,9 +76,11 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
-      </View>
+      {Platform.OS === 'ios' ? (
+        <View style={styles.logoContainer}>
+          <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
+        </View>
+      ) : null}
       <View style={[styles.row, { marginTop: insets.top }]}>
         <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
         <View style={styles.titleContainer}>
