@@ -107,7 +107,7 @@ export const formOAuthResponse = async ({
 }: {
   account: UserMetadata
   userEmail?: string | null
-  apiKey: string | string[] | null
+  apiKey?: string
   onError: () => void
   txSignature?: { message: string; signature: string }
 }) => {
