@@ -20,9 +20,8 @@ export const ContentWrapper = ({
       <Paper
         shadow='mid'
         w='375px'
+        css={{ maxWidth: '100%' }}
         direction='column'
-        mv='3xl'
-        alignSelf='flex-start'
         border='strong'
         borderRadius='xl'
       >

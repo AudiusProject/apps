@@ -5,6 +5,7 @@
   right: 0;
   bottom: 0;
   justify-content: center;
+  align-items: center;
   display: flex;
   overflow: scroll;
 }
@@ -43,13 +44,14 @@
 }
 
 .container {
-  width: 375px;
+  width: 100%;
+  max-width: 375px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   padding: 32px 24px;
   justify-content: center;
-  flex: 1;
+  flex: 0 1 auto;
 }
 
 @media (max-width: 375px) {
