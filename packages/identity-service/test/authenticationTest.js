@@ -276,6 +276,31 @@ describe('test authentication routes', function () {
     assert.strictEqual(otp2, otp3)
   })
 
+  it('does not cache otp values when email send fails', async function () {
+    const redis = app.get('redis')
+    await signUpUser()
+
+    app.set('sendgrid', {
+      send: async () => {
+        throw new Error('send failed')
+      }
+    })
+
+    await request(app)
+      .get('/authentication')
+      .query({
+        lookupKey:
+          '9bdc91e1bb7ef60177131690b18349625778c14656dc17814945b52a3f07ac77',
+        username: 'dheeraj@audius.co'
+      })
+      .expect(500)
+
+    const otp = await redis.get('otp:dheeraj@audius.co')
+    const otpCount = await redis.get('otp:dheeraj@audius.co:count')
+    assert.strictEqual(otp, null)
+    assert.strictEqual(otpCount, null)
+  })
+
   it('associates user record on sign up', async function () {
     const expectedWalletAddress = '0x1ea101eccdc55a2db6196eff5440ece24ecb55af'
     const iv = 'ebc1d6a0f87fdf108fb42ec6a5bee016'

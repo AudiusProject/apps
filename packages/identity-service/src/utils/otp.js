@@ -92,6 +92,10 @@ const sendOtp = async ({ email, redis, sendgrid }) => {
     html
   }
 
+  if (sendgrid) {
+    await sendgrid.send(emailParams)
+  }
+
   await redis.set(
     `${OTP_REDIS_PREFIX}:${email}`,
     otp,
@@ -100,10 +104,6 @@ const sendOtp = async ({ email, redis, sendgrid }) => {
   )
 
   await updateOtpCount({ email, redis })
-
-  if (sendgrid) {
-    await sendgrid.send(emailParams)
-  }
 }
 
 module.exports = {
