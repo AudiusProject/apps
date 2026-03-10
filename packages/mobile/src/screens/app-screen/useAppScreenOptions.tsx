@@ -7,7 +7,7 @@ import type {
   NativeStackNavigationProp
 } from '@react-navigation/native-stack'
 import { CardStyleInterpolators } from '@react-navigation/stack'
-import { Text, View } from 'react-native'
+import { Platform, Text, View } from 'react-native'
 
 import {
   IconAudiusLogoHorizontal,
@@ -124,6 +124,7 @@ export const useAppScreenOptions = <
               </Text>
             )
           }
+          if (Platform.OS === 'android') return null
           return (
             <View>
               <IconAudiusLogoHorizontal
