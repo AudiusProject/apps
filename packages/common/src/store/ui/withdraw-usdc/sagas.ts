@@ -86,7 +86,8 @@ function* doWithdrawUSDCCoinflow({
       track,
       make,
       analyticsFields,
-      signer: rootSolanaAccount
+      signer: rootSolanaAccount,
+      feePayerSigner: rootSolanaAccount
     })
 
     console.debug(
@@ -209,6 +210,7 @@ function* doWithdrawUSDCManualTransfer({
   const withdrawalAmountDollars = amount / 100
   const queryClient = yield* getContext('queryClient')
   const sdk = yield* getSDK()
+  const solanaWalletService = yield* getContext('solanaWalletService')
   const connection = sdk.services.solanaClient.connection
   const env = yield* getContext('env')
   const mint = new PublicKey(env.USDC_MINT_ADDRESS)
@@ -234,6 +236,10 @@ function* doWithdrawUSDCManualTransfer({
     }
     const ethWallet = user.wallet
     const destinationWallet = new PublicKey(destinationAddress)
+    const rootSolanaAccount = yield* call([solanaWalletService, 'getKeypair'])
+    if (!rootSolanaAccount) {
+      throw new Error('Missing solana root wallet')
+    }
 
     const signature = yield* call(transferFromUserBank, {
       connection,
@@ -244,7 +250,8 @@ function* doWithdrawUSDCManualTransfer({
       destinationWallet,
       track,
       make,
-      analyticsFields
+      analyticsFields,
+      feePayerSigner: rootSolanaAccount
     })
 
     console.debug('Withdraw USDC - successfully transferred USDC.', {

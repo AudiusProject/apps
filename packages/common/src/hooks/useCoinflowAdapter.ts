@@ -64,11 +64,6 @@ export const useCoinflowWithdrawalAdapter = () => {
           sendTransaction: async (
             transaction: Transaction | VersionedTransaction
           ) => {
-            if (transaction instanceof VersionedTransaction) {
-              throw new Error(
-                'VersionedTransaction not supported in withdrawal adapter'
-              )
-            }
             if (!currentUser) {
               throw new Error('Missing current user')
             }

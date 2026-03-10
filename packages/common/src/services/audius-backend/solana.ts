@@ -17,7 +17,8 @@ import {
   Keypair,
   PublicKey,
   Transaction,
-  TransactionInstruction
+  TransactionInstruction,
+  VersionedTransaction
 } from '@solana/web3.js'
 
 import { CommonStoreContext } from '~/store/storeContext'
@@ -261,7 +262,7 @@ export const decorateCoinflowWithdrawalTransaction = async (
     ethAddress,
     wallet
   }: {
-    transaction: Transaction
+    transaction: Transaction | VersionedTransaction
     ethAddress: string
     wallet: Keypair
   }
@@ -278,7 +279,9 @@ export const decorateCoinflowWithdrawalTransaction = async (
 
   // Filter any compute budget instructions since the budget will
   // definitely change
-  const instructions = transaction.instructions.filter(
+  const originalInstructions =
+    await sdk.services.solanaClient.getInstructions(transaction)
+  const instructions = originalInstructions.filter(
     (instruction) =>
       !instruction.programId.equals(ComputeBudgetProgram.programId)
   )
@@ -447,6 +450,8 @@ type TransferFromUserBankParams = {
   analyticsFields: any
   /** If included, will attach a signed memo indicating a recovery transaction.  */
   signer?: Keypair
+  /** If included, this keypair pays tx/ATA fees instead of relay. */
+  feePayerSigner?: Keypair
 }
 
 export const transferFromUserBank = async ({
@@ -459,11 +464,15 @@ export const transferFromUserBank = async ({
   track,
   make,
   analyticsFields,
-  signer
+  signer,
+  feePayerSigner
 }: TransferFromUserBankParams) => {
   let isCreatingTokenAccount = false
   try {
     const instructions: TransactionInstruction[] = []
+    const feePayer = feePayerSigner?.publicKey
+      ? feePayerSigner.publicKey
+      : await sdk.services.solanaRelay.getFeePayer()
 
     // Check if destinationWallet is already an associated token account
     let destination = destinationWallet
@@ -520,10 +529,9 @@ export const transferFromUserBank = async ({
             ...analyticsFields
           })
         )
-        const payerKey = await sdk.services.solanaRelay.getFeePayer()
         const createAtaInstruction =
           createAssociatedTokenAccountIdempotentInstruction(
-            payerKey,
+            feePayer,
             destination,
             destinationWallet,
             mint
@@ -546,7 +554,8 @@ export const transferFromUserBank = async ({
       await sdk.services.claimableTokensClient.createTransferInstruction({
         ethWallet,
         mint,
-        destination
+        destination,
+        feePayer
       })
     instructions.push(transferInstruction)
 
@@ -566,11 +575,20 @@ export const transferFromUserBank = async ({
     }
 
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions
+      instructions,
+      feePayer: feePayerSigner?.publicKey
     })
 
-    if (signer) {
-      transaction.sign([signer])
+    const signers = [signer, feePayerSigner].filter(
+      (keypair): keypair is Keypair => !!keypair
+    )
+    if (signers.length) {
+      const uniqueSigners = signers.filter(
+        (keypair, index) =>
+          signers.findIndex((s) => s.publicKey.equals(keypair.publicKey)) ===
+          index
+      )
+      transaction.sign(uniqueSigners)
     }
 
     const signature =
