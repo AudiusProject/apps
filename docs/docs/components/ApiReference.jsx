@@ -104,6 +104,18 @@ function buildStyles() {
       --color-text-light: rgba(255,255,255,0.5) !important;
     }
 
+    /* In light mode, .sl-inverted panels have a light background — use dark text */
+    .sl-elements .sl-inverted:not(.dark *) {
+      color: #1A1F2E !important;
+    }
+    .sl-elements .sl-inverted input,
+    .sl-elements .sl-inverted select,
+    .sl-elements .sl-inverted textarea {
+      color: #1A1F2E !important;
+      background: #FFFFFF !important;
+      border-color: #D0D4DC !important;
+    }
+
     /* sl-panel__titlebar — API Base URL lives here; force dark text */
     .sl-elements .sl-panel__titlebar:not(.sl-inverted),
     .sl-elements .sl-panel__titlebar:not(.sl-inverted) * {
@@ -164,7 +176,7 @@ function buildStyles() {
     }
     .sl-elements .HttpOperation__Parameters .sl-text-base { font-size: 0.875rem; }
 
-    /* Code blocks — smaller font */
+    /* Code blocks — smaller font + light mode background */
     .sl-elements pre,
     .sl-elements code,
     .sl-elements .sl-bg-code,
@@ -174,6 +186,25 @@ function buildStyles() {
     .sl-elements [class*="JsonEditor"] {
       font-size: 0.8125rem !important;
     }
+    .sl-elements pre,
+    .sl-elements .sl-bg-code,
+    .sl-elements .sl-code-editor,
+    .sl-elements [class*="sl-code-viewer"],
+    .sl-elements [class*="CodeEditor"],
+    .sl-elements [class*="JsonEditor"] {
+      background-color: #F0F1F3 !important;
+      color: #1A1F2E !important;
+    }
+    .sl-elements .token.string    { color: #0550AE !important; }
+    .sl-elements .token.number    { color: #0550AE !important; }
+    .sl-elements .token.boolean   { color: #0550AE !important; }
+    .sl-elements .token.null      { color: #0550AE !important; }
+    .sl-elements .token.property  { color: #6639BA !important; }
+    .sl-elements .token.key       { color: #6639BA !important; }
+    .sl-elements .token.punctuation,
+    .sl-elements .token.operator  { color: #333333 !important; }
+    .sl-elements .token.keyword   { color: #CF222E !important; }
+    .sl-elements .token.comment   { color: #6E7781 !important; }
 
     /* ══════════════════════════════════════
        DARK MODE — brighter text for contrast
@@ -372,11 +403,32 @@ function patchStoplightDOM(root) {
       el.style.setProperty('--color-text-muted', '#C0C0C0')
       el.style.setProperty('--color-text-light', '#B0B0B0')
       el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
+      el.style.setProperty('--color-canvas-100', '#1F1F1F')
+      el.style.setProperty('--color-canvas-50', '#1A1A1A')
+      el.style.setProperty('--color-canvas-200', '#242424')
     } else {
       el.style.setProperty('--color-text-muted', '#343B49')
       el.style.setProperty('--color-text-light', '#4A5263')
+      el.style.setProperty('--color-canvas-dialog', '#FFFFFF')
+      el.style.setProperty('--color-canvas-100', '#F7F7F8')
+      el.style.setProperty('--color-canvas-50', '#F7F7F8')
+      el.style.setProperty('--color-canvas-200', '#F0F1F3')
     }
   })
+
+  // In light mode, .sl-inverted elements (code panels) override canvas vars back
+  // to Stoplight's dark defaults — reset them explicitly.
+  if (!isDark) {
+    root.querySelectorAll('.sl-inverted').forEach((el) => {
+      el.style.setProperty('--color-canvas-100', '#F7F7F8')
+      el.style.setProperty('--color-canvas-50', '#F7F7F8')
+      el.style.setProperty('--color-canvas-200', '#F0F1F3')
+      el.style.setProperty('--color-canvas-dialog', '#FFFFFF')
+      el.style.setProperty('--color-text-muted', '#343B49')
+      el.style.setProperty('--color-text-light', '#4A5263')
+      el.style.setProperty('color', '#1A1F2E')
+    })
+  }
 
   // Light mode only: fix washed-out text (darken anything where R,G,B > 150)
   const aside = root.querySelector('aside')
