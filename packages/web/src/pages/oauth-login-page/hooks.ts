@@ -36,11 +36,26 @@ import {
   WriteOnceTx
 } from './utils'
 
+// Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
+// This handles Swagger UI sending 'scope=read write' when multiple scopes are selected.
+const collapseScopes = (
+  raw: string | string[] | (string | null)[] | null | undefined
+): string | null => {
+  if (!raw) return null
+  const tokens = (
+    Array.isArray(raw) ? raw : (raw as string).split(/\s+/)
+  ).filter((t): t is string => typeof t === 'string' && t.length > 0)
+  if (tokens.includes('write_once')) return 'write_once'
+  if (tokens.includes('write')) return 'write'
+  if (tokens.includes('read')) return 'read'
+  return typeof raw === 'string' ? raw : null
+}
+
 const useParsedQueryParams = () => {
   const { search } = useLocation()
 
   const {
-    scope,
+    scope: rawScope,
     state,
     redirect_uri: redirectUri,
     app_name: appName,
@@ -55,6 +70,8 @@ const useParsedQueryParams = () => {
     code_challenge_method: codeChallengeMethod,
     ...rest
   } = queryString.parse(search)
+
+  const scope = collapseScopes(rawScope)
 
   const apiKey =
     typeof api_key === 'string'
