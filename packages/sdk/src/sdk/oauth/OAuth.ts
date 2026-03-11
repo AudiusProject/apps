@@ -517,7 +517,7 @@ export class OAuth {
       return
     }
 
-    this._surfaceError('Received message with unknown format.')
+    this._settleLogin(new Error('Received message with unknown format.'))
   }
 
   /**
