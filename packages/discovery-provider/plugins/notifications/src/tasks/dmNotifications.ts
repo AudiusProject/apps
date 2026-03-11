@@ -142,6 +142,7 @@ async function getNewBlasts(
   messages: DMNotification[]
 }> {
   let lastIndexedBlastTimestamp
+  let effectiveBlastId = lastIndexedBlastId
   if (lastIndexedBlastId) {
     const result = await discoveryDB
       .select('chat_blast.created_at as timestamp')
@@ -151,9 +152,26 @@ async function getNewBlasts(
     lastIndexedBlastTimestamp = result?.timestamp
   }
 
-  // First time running the task, set the timestamp cursor to a very old date
+  // First time running (e.g. new Redis): do not backfill. Set cursor to latest blast
+  // so we only process new blasts going forward and avoid flooding users with old notifications.
+  let skipSendingBlasts = false
   if (!lastIndexedBlastTimestamp) {
-    lastIndexedBlastTimestamp = new Date(0).toISOString()
+    const latestBlast = await discoveryDB
+      .select('blast_id', 'created_at')
+      .from('chat_blast')
+      .whereRaw(
+        `chat_blast.created_at <= NOW() - INTERVAL '${config.blastDelay} seconds'`
+      )
+      .orderBy('chat_blast.created_at', 'desc')
+      .first()
+    if (latestBlast) {
+      effectiveBlastId = latestBlast.blast_id
+      lastIndexedBlastTimestamp = latestBlast.created_at
+      skipSendingBlasts = true
+    } else {
+      // No blasts yet; use now so we don't match anything
+      lastIndexedBlastTimestamp = new Date().toISOString()
+    }
   }
   const userId = lastIndexedBlastUserId
 
@@ -177,7 +195,7 @@ async function getNewBlasts(
     )
     SELECT blast_id, from_user_id AS sender_user_id, to_user_id AS receiver_user_id, created_at FROM targ;
     `,
-    [lastIndexedBlastId, userId, userId, config.blastUserBatchSize]
+    [effectiveBlastId, userId, userId, config.blastUserBatchSize]
   )
 
   // Need to calculate pending chat ids for each message for deep linking
@@ -204,9 +222,7 @@ async function getNewBlasts(
       )
       .orderBy('chat_blast.created_at', 'asc')
       .first()
-    newBlastIdCursor = blastIdResult
-      ? blastIdResult.blast_id
-      : lastIndexedBlastId
+    newBlastIdCursor = blastIdResult ? blastIdResult.blast_id : effectiveBlastId
     newUserIdCursor = blastIdResult ? null : lastIndexedBlastUserId
   } else {
     newBlastIdCursor = formattedMessages[0].blast_id
@@ -216,7 +232,7 @@ async function getNewBlasts(
   return {
     lastIndexedBlastId: newBlastIdCursor,
     lastIndexedBlastUserId: newUserIdCursor,
-    messages: formattedMessages
+    messages: skipSendingBlasts ? [] : formattedMessages
   }
 }
 
