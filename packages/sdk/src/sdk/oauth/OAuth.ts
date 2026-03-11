@@ -148,6 +148,9 @@ export class OAuth {
     )
   }
 
+  /**
+   * @deprecated No longer necessary to call init() before login(). Use loginAsync() which returns a promise, or pass an onSuccess/onError callbacks to login().
+   */
   init({
     successCallback,
     errorCallback
@@ -165,7 +168,8 @@ export class OAuth {
     redirectUri = 'postMessage',
     display = 'popup',
     responseMode = 'fragment',
-    onSuccess
+    onSuccess,
+    onError
   }: {
     scope?: OAuthScope
     params?: WriteOnceParams
@@ -173,11 +177,8 @@ export class OAuth {
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
     onSuccess?: LoginSuccessCallback
+    onError?: LoginErrorCallback
   }) {
-    if (!this.loginSuccessCallback && !onSuccess) {
-      this._surfaceError('Login onSuccess callback not set.')
-      return
-    }
     this.loginAsync({ scope, params, redirectUri, display, responseMode })
       .then(({ profile, encodedJwt }) => {
         if (onSuccess) {
@@ -187,7 +188,15 @@ export class OAuth {
         }
       })
       .catch((err: Error) => {
-        this._surfaceError(err.message)
+        const errorMessage =
+          err instanceof Error ? err.message : 'An unknown error occurred.'
+        if (onError) {
+          onError(errorMessage)
+        } else if (this.loginErrorCallback) {
+          this.loginErrorCallback(errorMessage)
+        } else {
+          this.logger.error(errorMessage)
+        }
       })
   }
 
@@ -378,16 +387,85 @@ export class OAuth {
     return window.localStorage.getItem(CSRF_TOKEN_KEY)
   }
 
-  /* ------- INTERNAL FUNCTIONS ------- */
+  /**
+   * Returns true if a refresh token is currently stored and a refresh
+   * exchange could be attempted.
+   */
+  get hasRefreshToken(): boolean {
+    return !!this.config.tokenStore?.refreshToken
+  }
 
-  _surfaceError(errorMessage: string) {
-    if (this.loginErrorCallback) {
-      this.loginErrorCallback(errorMessage)
-    } else {
-      this.logger.error(errorMessage)
+  /**
+   * Refresh the access token using the stored refresh token.
+   * Updates the token store on success.
+   * Returns the new access token, or `null` if refresh failed.
+   */
+  async refreshAccessToken(): Promise<string | null> {
+    if (!this.config.tokenStore || !this.config.basePath) {
+      this.logger.error(
+        'Token store and basePath are required for token refresh.'
+      )
+      return null
+    }
+    const refreshToken = this.config.tokenStore.refreshToken
+    if (!refreshToken) {
+      this.logger.error('No refresh token available.')
+      return null
+    }
+    try {
+      const res = await fetch(`${this.config.basePath}/oauth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: this.apiKey
+        })
+      })
+      if (!res.ok) {
+        return null
+      }
+      const tokens = await res.json()
+      if (tokens.access_token && tokens.refresh_token) {
+        this.config.tokenStore.setTokens(
+          tokens.access_token,
+          tokens.refresh_token
+        )
+        return tokens.access_token
+      }
+      return null
+    } catch {
+      return null
     }
   }
 
+  /**
+   * Revoke the current refresh token server-side, clear all stored tokens
+   * and PKCE session state. After this call, all API instances revert to
+   * unauthenticated.
+   */
+  async logout(): Promise<void> {
+    if (this.config.tokenStore?.refreshToken && this.config.basePath) {
+      try {
+        await fetch(`${this.config.basePath}/oauth/revoke`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: this.config.tokenStore.refreshToken,
+            client_id: this.apiKey
+          })
+        })
+      } catch {
+        // Per RFC 7009, revocation errors are non-fatal
+      }
+    }
+    this.config.tokenStore?.clear()
+    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+    window.localStorage.removeItem(CSRF_TOKEN_KEY)
+  }
+
+  /* ------- INTERNAL FUNCTIONS ------- */
   private _settleLogin(resultOrError: LoginResult | Error) {
     if (resultOrError instanceof Error) {
       this._currentLoginReject?.(resultOrError)
@@ -551,83 +629,5 @@ export class OAuth {
     }
 
     this._settleLogin(new Error('Received message with unknown format.'))
-  }
-
-  /**
-   * Returns true if a refresh token is currently stored and a refresh
-   * exchange could be attempted.
-   */
-  get hasRefreshToken(): boolean {
-    return !!this.config.tokenStore?.refreshToken
-  }
-
-  /**
-   * Refresh the access token using the stored refresh token.
-   * Updates the token store on success.
-   * Returns the new access token, or `null` if refresh failed.
-   */
-  async refreshAccessToken(): Promise<string | null> {
-    if (!this.config.tokenStore || !this.config.basePath) {
-      this._surfaceError(
-        'Token store and basePath are required for token refresh.'
-      )
-      return null
-    }
-    const refreshToken = this.config.tokenStore.refreshToken
-    if (!refreshToken) {
-      this._surfaceError('No refresh token available.')
-      return null
-    }
-    try {
-      const res = await fetch(`${this.config.basePath}/oauth/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-          client_id: this.apiKey
-        })
-      })
-      if (!res.ok) {
-        return null
-      }
-      const tokens = await res.json()
-      if (tokens.access_token && tokens.refresh_token) {
-        this.config.tokenStore.setTokens(
-          tokens.access_token,
-          tokens.refresh_token
-        )
-        return tokens.access_token
-      }
-      return null
-    } catch {
-      return null
-    }
-  }
-
-  /**
-   * Revoke the current refresh token server-side, clear all stored tokens
-   * and PKCE session state. After this call, all API instances revert to
-   * unauthenticated.
-   */
-  async logout(): Promise<void> {
-    if (this.config.tokenStore?.refreshToken && this.config.basePath) {
-      try {
-        await fetch(`${this.config.basePath}/oauth/revoke`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: this.config.tokenStore.refreshToken,
-            client_id: this.apiKey
-          })
-        })
-      } catch {
-        // Per RFC 7009, revocation errors are non-fatal
-      }
-    }
-    this.config.tokenStore?.clear()
-    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-    window.localStorage.removeItem(CSRF_TOKEN_KEY)
   }
 }
