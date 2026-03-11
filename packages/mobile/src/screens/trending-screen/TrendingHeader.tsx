@@ -1,6 +1,8 @@
 import type { ComponentType } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import { TimeRange } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { Modals, TrendingCategory } from '@audius/common/store'
 import {
   modalsActions,
@@ -36,7 +38,8 @@ const categoryLabels: Record<TrendingCategory, string> = {
   winners: 'Winners'
 }
 
-const categories: TrendingCategory[] = ['tracks', 'underground', 'winners']
+const baseCategories: TrendingCategory[] = ['tracks', 'underground']
+const categoriesWithWinners: TrendingCategory[] = [...baseCategories, 'winners']
 
 type TrendingHeaderProps = {
   title: string
@@ -101,9 +104,15 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
   const styles = useStyles()
   const { spacing } = useTheme()
   const dispatch = useDispatch()
+  const { isEnabled: isTrendingWinnersEnabled } = useFeatureFlag(
+    FeatureFlags.TRENDING_WINNERS
+  )
   const category = useSelector(getTrendingCategory) ?? 'tracks'
   const timeRange = useSelector(trendingPageSelectors.getTrendingTimeRange)
   const genre = useSelector(trendingPageSelectors.getTrendingGenre)
+  const categories = isTrendingWinnersEnabled
+    ? categoriesWithWinners
+    : baseCategories
 
   const hasActiveFilters =
     (timeRange ?? TimeRange.WEEK) !== TimeRange.WEEK ||
