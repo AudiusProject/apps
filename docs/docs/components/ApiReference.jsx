@@ -305,6 +305,21 @@ function buildStyles() {
       border-color: #474747 !important;
     }
 
+    /* Portaled popovers (language picker, etc.) */
+    .dark .sl-popover {
+      background-color: #1E1E1E !important;
+      border-color: #333333 !important;
+      color: #E0E0E0 !important;
+    }
+    .dark .sl-popover * { color: #E0E0E0 !important; }
+    .dark .sl-popover [class*="sl-bg-canvas"] {
+      background-color: #1E1E1E !important;
+    }
+    .dark .sl-popover li:hover,
+    .dark .sl-popover [class*="sl-bg-canvas"]:hover {
+      background-color: #2A2A2A !important;
+    }
+
     /* ══════════════════════════════════════
        CODE BLOCK TOKEN COLORS
        Stoplight injects a <style> that sets
@@ -470,13 +485,16 @@ export default function ApiReference() {
     const patchPortals = () => {
       const isDark = document.documentElement.classList.contains('dark')
       if (!isDark) return
-      document.body.querySelectorAll('.sl-bg-canvas-dialog, [data-theme]').forEach((el) => {
-        if (root.contains(el)) return // already handled above
-        el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
-        if (el.classList.contains('sl-bg-canvas-dialog')) {
-          el.style.setProperty('background-color', '#1E1E1E', 'important')
-        }
-      })
+      document.body
+        .querySelectorAll('.sl-bg-canvas-dialog, .sl-popover, [data-theme]')
+        .forEach((el) => {
+          if (root.contains(el)) return // already handled above
+          el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
+          el.style.setProperty('--color-canvas-100', '#1E1E1E')
+          if (el.classList.contains('sl-bg-canvas-dialog') || el.classList.contains('sl-popover')) {
+            el.style.setProperty('background-color', '#1E1E1E', 'important')
+          }
+        })
     }
     patchPortals()
     const bodyObserver = new MutationObserver(patchPortals)
