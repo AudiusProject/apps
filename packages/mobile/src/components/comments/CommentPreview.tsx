@@ -3,13 +3,16 @@ import { useCallback, useEffect } from 'react'
 import { useComment } from '@audius/common/api'
 import {
   CommentSectionProvider,
-  useCurrentCommentSection
+  useCurrentCommentSection,
+  usePostComment
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
-import { trackPageSelectors } from '@audius/common/store'
+import { playerSelectors, trackPageSelectors } from '@audius/common/store'
+import type { CommentMention } from '@audius/sdk'
 import { OptionalHashId } from '@audius/sdk'
 import { TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import TrackPlayer from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { tracksActions } from '~/store/pages/track/lineup/actions'
 
@@ -88,8 +91,11 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
   const {
     commentSectionLoading: isLoading,
     commentIds,
-    isEntityOwner
+    isEntityOwner,
+    entityId
   } = useCurrentCommentSection()
+  const [postComment] = usePostComment()
+  const playerTrackId = useSelector(playerSelectors.getTrackId)
 
   const handlePress = useCallback(() => {
     openCommentDrawer()
@@ -98,6 +104,20 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
   const handleFormPress = useCallback(() => {
     openCommentDrawer({ autoFocusInput: true })
   }, [openCommentDrawer])
+
+  const handleSubmitPreview = useCallback(
+    async (message: string, mentions?: CommentMention[]) => {
+      const { position: currentPosition } = await TrackPlayer.getProgress()
+      const trackTimestampS =
+        playerTrackId !== null &&
+        currentPosition !== undefined &&
+        playerTrackId === entityId
+          ? Math.floor(currentPosition)
+          : undefined
+      postComment(message, undefined, trackTimestampS, mentions)
+    },
+    [postComment, entityId, playerTrackId]
+  )
 
   // Loading state
   if (isLoading) {
@@ -124,7 +144,7 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
         <TouchableWithoutFeedback onPress={handleFormPress}>
           <View>
             <View>
-              <CommentForm isPreview />
+              <CommentForm isPreview onSubmit={handleSubmitPreview} />
             </View>
           </View>
         </TouchableWithoutFeedback>
