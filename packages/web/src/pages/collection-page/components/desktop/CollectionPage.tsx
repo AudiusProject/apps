@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
+import { useFavoriteTrack, useUnfavoriteTrack } from '@audius/common/api'
 import {
   Variant,
   Status,
@@ -12,14 +13,12 @@ import {
 import {
   CollectionTrack,
   CollectionsPageType,
-  tracksSocialActions,
   usePremiumContentPurchaseModal,
   PurchaseableContentType
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { Divider, Flex, Paper, Text } from '@audius/harmony'
 import { Id } from '@audius/sdk'
-import { useDispatch } from 'react-redux'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
@@ -87,7 +86,6 @@ type CollectionPageProps = {
 }
 
 const CollectionPage = ({ type }: CollectionPageProps) => {
-  const dispatch = useDispatch()
   const mainContentRef = useMainContentRef()
   const {
     collection,
@@ -129,16 +127,23 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     [openPremiumContentModal]
   )
 
-  const { saveTrack, unsaveTrack } = tracksSocialActions
+  const { mutate: favoriteTrack } = useFavoriteTrack()
+  const { mutate: unfavoriteTrack } = useUnfavoriteTrack()
   const toggleSaveTrack = useCallback(
     (track: Track) => {
       if (track.has_current_user_saved) {
-        dispatch(unsaveTrack(track.track_id, FavoriteSource.COLLECTION_PAGE))
+        unfavoriteTrack({
+          trackId: track.track_id,
+          source: FavoriteSource.COLLECTION_PAGE
+        })
       } else {
-        dispatch(saveTrack(track.track_id, FavoriteSource.COLLECTION_PAGE))
+        favoriteTrack({
+          trackId: track.track_id,
+          source: FavoriteSource.COLLECTION_PAGE
+        })
       }
     },
-    [dispatch, saveTrack, unsaveTrack]
+    [favoriteTrack, unfavoriteTrack]
   )
 
   // Compute values needed for useMemo (handle undefined collection case)
