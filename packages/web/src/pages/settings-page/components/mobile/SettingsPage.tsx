@@ -1,7 +1,6 @@
 import { useCallback, useContext, useEffect, useState, FC } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import {
   Name,
@@ -10,7 +9,6 @@ import {
   ThemeMode,
   ThemePalette
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   settingsPageActions,
   themeSelectors,
@@ -136,9 +134,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
     tier === 'gold' ||
     tier === 'platinum' ||
     process.env.NODE_ENV === 'development'
-  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
-    FeatureFlags.NEW_THEME_MODEL
-  )
 
   const effectivePalette =
     themePalette ??
@@ -252,69 +247,35 @@ export const SettingsPage = (props: SettingsPageProps) => {
     { key: ThemeMode.DARK, text: settingsMessages.darkMode }
   ]
 
-  const legacyThemeOptions = [
-    { key: Theme.AUTO, text: settingsMessages.autoMode },
-    { key: Theme.DARK, text: settingsMessages.darkMode },
-    { key: Theme.LIGHT, text: settingsMessages.lightMode },
-    ...(showMatrix
-      ? [{ key: Theme.MATRIX, text: settingsMessages.matrixMode }]
-      : [])
-  ]
-
-  const toggleLegacyTheme = (option: Theme) => {
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
-      })
-    )
-    dispatch(setTheme({ theme: option }))
-    if (option === Theme.MATRIX) {
-      dispatch(show())
-    }
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(THEME_KEY, option)
-    }
-  }
-
   // Render out subPage if we're on one.
   if (subPage && subPage in SubPages) {
     const SubPageComponent = SubPages[subPage]
     return <SubPageComponent {...props} />
   }
 
-  const renderThemeControls = () =>
-    isNewThemeModelEnabled ? (
-      <Flex direction='column' gap='l'>
-        <FilterButton<ThemePalette>
-          label={messages.appearanceTitle}
-          value={effectivePalette}
-          options={paletteOptions}
-          onChange={(value) => onPaletteChange(value)}
-          variant='replaceLabel'
-          optionsLabel='Theme'
-        />
-        {effectivePalette !== ThemePalette.MATRIX ? (
-          <SegmentedControl
-            isMobile
-            fullWidth
-            label='Color mode'
-            options={modeOptions}
-            selected={effectiveMode}
-            onSelectOption={(option) => onModeChange(option)}
-            key={`tab-slider-${effectivePalette}`}
-          />
-        ) : null}
-      </Flex>
-    ) : (
-      <SegmentedControl
-        isMobile
-        fullWidth
-        options={legacyThemeOptions}
-        selected={theme ?? Theme.AUTO}
-        onSelectOption={(option) => toggleLegacyTheme(option)}
-        key={`tab-slider-legacy-${legacyThemeOptions.length}`}
+  const renderThemeControls = () => (
+    <Flex direction='column' gap='l'>
+      <FilterButton<ThemePalette>
+        label={messages.appearanceTitle}
+        value={effectivePalette}
+        options={paletteOptions}
+        onChange={(value) => onPaletteChange(value)}
+        variant='replaceLabel'
+        optionsLabel='Theme'
       />
-    )
+      {effectivePalette !== ThemePalette.MATRIX ? (
+        <SegmentedControl
+          isMobile
+          fullWidth
+          label='Color mode'
+          options={modeOptions}
+          selected={effectiveMode}
+          onSelectOption={(option) => onModeChange(option)}
+          key={`tab-slider-${effectivePalette}`}
+        />
+      ) : null}
+    </Flex>
+  )
 
   return (
     <Page

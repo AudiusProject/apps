@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import {
   Theme,
   ThemeMode,
@@ -9,7 +8,6 @@ import {
   SystemAppearance,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -107,38 +105,12 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
   }
 }
 
-/**
- * When new theme flag is on: classic-* → default-* (upgrade).
- * When new theme flag is off: default-* → classic-* (downgrade).
- * Matrix is unchanged.
- */
-const applyThemeFlag = (
-  themeName: HarmonyThemeName,
-  isNewThemeModelEnabled: boolean
-): HarmonyThemeName => {
-  if (isNewThemeModelEnabled) {
-    if (themeName === 'classic-light') return 'default-light'
-    if (themeName === 'classic-dark') return 'default-dark'
-  } else {
-    if (themeName === 'default-light') return 'classic-light'
-    if (themeName === 'default-dark') return 'classic-dark'
-  }
-  return themeName
-}
-
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
   const isDarkMode = useDarkMode()
   const dispatch = useDispatch()
   const appState = useAppState()
-  const themeFromState = useSelector(selectHarmonyTheme)
-  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
-    FeatureFlags.NEW_THEME_MODEL
-  )
-  const theme = useMemo(
-    () => applyThemeFlag(themeFromState, isNewThemeModelEnabled),
-    [themeFromState, isNewThemeModelEnabled]
-  )
+  const theme = useSelector(selectHarmonyTheme)
 
   useAsync(async () => {
     const [savedTheme, savedPalette, savedMode] = await Promise.all([
@@ -147,25 +119,42 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
       AsyncStorage.getItem(THEME_MODE_KEY)
     ])
 
-    // Handle legacy "default" value - treat as AUTO
-    const theme =
-      savedTheme === LEGACY_THEME_DEFAULT
-        ? Theme.AUTO
-        : ((savedTheme as Nullable<Theme>) ?? Theme.AUTO)
+    const isLegacyTheme =
+      savedTheme === LEGACY_THEME_DEFAULT ||
+      savedTheme == null ||
+      savedPalette == null ||
+      savedPalette === ThemePalette.CLASSIC
 
-    dispatch(setTheme({ theme }))
-
-    if (
-      savedPalette &&
-      Object.values(ThemePalette).includes(savedPalette as ThemePalette)
-    ) {
-      dispatch(setThemePalette({ themePalette: savedPalette as ThemePalette }))
-    }
-    if (
-      savedMode &&
-      Object.values(ThemeMode).includes(savedMode as ThemeMode)
-    ) {
-      dispatch(setThemeMode({ themeMode: savedMode as ThemeMode }))
+    if (isLegacyTheme) {
+      // Migrate: wipe legacy/classic and set everyone to default palette + auto
+      await Promise.all([
+        AsyncStorage.setItem(THEME_STORAGE_KEY, Theme.AUTO),
+        AsyncStorage.setItem(THEME_PALETTE_KEY, ThemePalette.DEFAULT),
+        AsyncStorage.setItem(THEME_MODE_KEY, ThemeMode.AUTO)
+      ])
+      dispatch(setTheme({ theme: Theme.AUTO }))
+      dispatch(setThemePalette({ themePalette: ThemePalette.DEFAULT }))
+      dispatch(setThemeMode({ themeMode: ThemeMode.AUTO }))
+    } else {
+      const theme =
+        savedTheme === LEGACY_THEME_DEFAULT
+          ? Theme.AUTO
+          : ((savedTheme as Nullable<Theme>) ?? Theme.AUTO)
+      dispatch(setTheme({ theme }))
+      if (
+        savedPalette &&
+        Object.values(ThemePalette).includes(savedPalette as ThemePalette)
+      ) {
+        dispatch(
+          setThemePalette({ themePalette: savedPalette as ThemePalette })
+        )
+      }
+      if (
+        savedMode &&
+        Object.values(ThemeMode).includes(savedMode as ThemeMode)
+      ) {
+        dispatch(setThemeMode({ themeMode: savedMode as ThemeMode }))
+      }
     }
   }, [dispatch])
 

@@ -14,8 +14,7 @@ export enum FeatureFlags {
   FAST_REFERRAL = 'fast_referral',
   REACT_QUERY_SYNC = 'react_query_sync',
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
-  LAUNCHPAD_VERIFICATION = 'launchpad_verification',
-  NEW_THEME_MODEL = 'new_theme_model'
+  LAUNCHPAD_VERIFICATION = 'launchpad_verification'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -44,6 +43,5 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.FAST_REFERRAL]: false,
   [FeatureFlags.REACT_QUERY_SYNC]: false,
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
-  [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
-  [FeatureFlags.NEW_THEME_MODEL]: false
+  [FeatureFlags.LAUNCHPAD_VERIFICATION]: true
 }
