@@ -64,11 +64,10 @@ const useStyles = makeStyles(({ spacing }) => ({
     position: 'absolute',
     left: 0,
     top: 0,
-    opacity: 0,
     zIndex: -1,
     pointerEvents: 'none'
-    // Keep in viewport so iOS loads the image (off-screen views may not load).
-    // Invisible so the user doesn't see it; we only use it for capture.
+    // No opacity: 0 — native capture can produce a blank image for transparent views.
+    // Kept in viewport so iOS loads images; hidden behind the drawer via zIndex.
   }
 }))
 
@@ -122,7 +121,8 @@ export const ShareDrawer = () => {
     handleShareToInstagramStory,
     handleShareToSnapchat,
     handleShareToTikTok: handleShareVideoToTiktok,
-    selectedPlatform
+    selectedPlatform,
+    stickerArtworkSource
   } = useShareToStory({ content, viewShotRef })
 
   const handleCopyLink = useCallback(() => {
@@ -266,13 +266,14 @@ export const ShareDrawer = () => {
         <ViewShot
           style={styles.viewShot}
           ref={viewShotRef}
-          options={{ format: 'png' }}
+          options={{ format: 'png', useRenderInContext: true }}
         >
           <ShareToStorySticker
             onLoad={handleShareToStoryStickerLoad}
             track={content?.track}
             artist={content?.artist}
             omitLogo={selectedPlatform === 'tiktok'}
+            artworkSource={stickerArtworkSource}
           />
         </ViewShot>
       ) : null}
