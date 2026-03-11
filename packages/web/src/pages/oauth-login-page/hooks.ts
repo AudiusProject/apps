@@ -47,7 +47,7 @@ const collapseScopes = (
     ? raw.filter((t): t is string => typeof t === 'string')
     : [raw]
   const tokens = strings
-    .flatMap((s) => s.split(/\s+/))
+    .flatMap((s) => (s != null ? s.split(/\s+/) : []))
     .filter((t) => t.length > 0)
   if (tokens.includes('write')) return 'write'
   if (tokens.includes('write_once')) return 'write_once'
