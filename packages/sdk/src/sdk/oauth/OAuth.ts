@@ -387,17 +387,16 @@ export class OAuth {
   }
 
   async _receiveMessage(event: MessageEvent) {
-    const oauthOrigin = new URL(this.config.basePath ?? '').origin
+    if (
+      !event.data ||
+      !event.data.state ||
+      event.source !== this.activePopupWindow
+    ) {
+      return
+    }
 
     // PKCE flow — consent screen posts { state, code }
-    if (
-      event.origin === oauthOrigin &&
-      event.source === this.activePopupWindow &&
-      event.data.state &&
-      event.data.code &&
-      this.config.tokenStore &&
-      this.config.basePath
-    ) {
+    if (event.data.code) {
       this._clearPopupCheckInterval()
       if (this.activePopupWindow) {
         if (!this.activePopupWindow.closed) {
@@ -447,7 +446,7 @@ export class OAuth {
           return
         }
         const tokens = await tokenRes.json()
-        this.config.tokenStore.setTokens(
+        this.config.tokenStore?.setTokens(
           tokens.access_token,
           tokens.refresh_token
         )
@@ -474,54 +473,51 @@ export class OAuth {
     }
 
     // Implicit flow — consent screen posts { state, token }
-    if (
-      event.origin !== oauthOrigin ||
-      event.source !== this.activePopupWindow ||
-      !event.data.state ||
-      !event.data.token
-    ) {
-      return
-    }
-    this._clearPopupCheckInterval()
-    if (this.activePopupWindow) {
-      if (!this.activePopupWindow.closed) {
-        this.activePopupWindow.close()
+    if (event.data.token) {
+      this._clearPopupCheckInterval()
+      if (this.activePopupWindow) {
+        if (!this.activePopupWindow.closed) {
+          this.activePopupWindow.close()
+        }
+        this.activePopupWindow = null
       }
-      this.activePopupWindow = null
-    }
-    if (this.getCsrfToken() !== event.data.state) {
-      this._settleLogin(new Error('State mismatch.'))
-      return
-    }
-    // Verify token and decode
-    if (!this.config.basePath) {
-      this._settleLogin(
-        new Error('basePath is required for token verification.')
-      )
-      return
-    }
-    try {
-      const verifyRes = await fetch(
-        `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
-      )
-      if (!verifyRes.ok) {
-        this._settleLogin(new Error('The token was invalid.'))
+      if (this.getCsrfToken() !== event.data.state) {
+        this._settleLogin(new Error('State mismatch.'))
         return
       }
-      const decoded = (await verifyRes.json()) as {
-        data?: DecodedUserToken
+      // Verify token and decode
+      if (!this.config.basePath) {
+        this._settleLogin(
+          new Error('basePath is required for token verification.')
+        )
+        return
       }
-      if (decoded?.data) {
-        this._settleLogin({
-          profile: decoded.data,
-          encodedJwt: event.data.token
-        })
-      } else {
-        this._settleLogin(new Error('The token was invalid.'))
+      try {
+        const verifyRes = await fetch(
+          `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
+        )
+        if (!verifyRes.ok) {
+          this._settleLogin(new Error('The token was invalid.'))
+          return
+        }
+        const decoded = (await verifyRes.json()) as {
+          data?: DecodedUserToken
+        }
+        if (decoded?.data) {
+          this._settleLogin({
+            profile: decoded.data,
+            encodedJwt: event.data.token
+          })
+        } else {
+          this._settleLogin(new Error('The token was invalid.'))
+        }
+      } catch {
+        this._settleLogin(new Error('Token verification request failed.'))
       }
-    } catch {
-      this._settleLogin(new Error('Token verification request failed.'))
+      return
     }
+
+    this._surfaceError('Received message with unknown format.')
   }
 
   /**
