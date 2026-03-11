@@ -1,9 +1,9 @@
 import type { Track, User } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
-import type { StyleProp, ViewStyle } from 'react-native'
+import type { ImageSourcePropType, StyleProp, ViewStyle } from 'react-native'
 import { View } from 'react-native'
 
-import { Divider } from '@audius/harmony-native'
+import { Artwork, Divider } from '@audius/harmony-native'
 import AudiusLogo from 'app/assets/images/audiusLogoHorizontal.svg'
 import { Text } from 'app/components/core'
 import { UserBadges } from 'app/components/user-badges'
@@ -33,6 +33,11 @@ type ShareToStoryStickerProps = {
   /** Called once the image loads successfully */
   onLoad: () => void
   omitLogo?: boolean
+  /**
+   * Pre-resolved artwork source (e.g. from useTrackImage with mirror fallback).
+   * When provided, use this instead of TrackImage so the sticker always has a working image URL for capture.
+   */
+  artworkSource?: ImageSourcePropType
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -83,7 +88,8 @@ export const ShareToStorySticker = ({
   artist,
   style,
   onLoad,
-  omitLogo = false
+  omitLogo = false,
+  artworkSource
 }: ShareToStoryStickerProps) => {
   const styles = useStyles()
 
@@ -91,12 +97,21 @@ export const ShareToStorySticker = ({
   return (
     <View style={[styles.container, style]}>
       <View>
-        <TrackImage
-          trackId={track.track_id}
-          size={SquareSizes.SIZE_480_BY_480}
-          style={styles.trackImage}
-          onLoad={onLoad}
-        />
+        {artworkSource != null ? (
+          <Artwork
+            source={artworkSource}
+            onLoad={onLoad}
+            borderRadius='s'
+            style={styles.trackImage}
+          />
+        ) : (
+          <TrackImage
+            trackId={track.track_id}
+            size={SquareSizes.SIZE_480_BY_480}
+            style={styles.trackImage}
+            onLoad={onLoad}
+          />
+        )}
         <Text
           color='staticNeutral'
           allowFontScaling={false}
