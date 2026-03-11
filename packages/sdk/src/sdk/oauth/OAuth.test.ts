@@ -235,7 +235,7 @@ describe('OAuth message listener lifecycle', () => {
   it('attaches a message listener when loginAsync starts (postMessage flow)', async () => {
     const oauth = makeOAuth({ basePath: 'https://api.example.com' })
     // Kick off a login — don't await so we can inspect immediately
-    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    oauth.loginAsync({ redirectUri: 'postMessage' })
     // Flush microtasks
     await Promise.resolve()
     expect(window.addEventListener).toHaveBeenCalledWith(
@@ -247,9 +247,9 @@ describe('OAuth message listener lifecycle', () => {
 
   it('does not attach a duplicate listener on repeated loginAsync calls', async () => {
     const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    oauth.loginAsync({ redirectUri: 'postMessage' })
     await Promise.resolve()
-    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    oauth.loginAsync({ redirectUri: 'postMessage' })
     await Promise.resolve()
     // Should still only be registered once
     const messageAddCalls = vi
@@ -287,7 +287,7 @@ describe('OAuth message listener lifecycle', () => {
     const oauth = makeOAuth({ basePath: 'https://api.example.com' })
     // When redirectUri is a real URL the code does window.location.href = …
     // and never enters the postMessage branch — don't await the never-settling promise
-    void oauth.loginAsync({ redirectUri: 'https://myapp.example.com/callback' })
+    oauth.loginAsync({ redirectUri: 'https://myapp.example.com/callback' })
     await Promise.resolve()
     expect(window.addEventListener).not.toHaveBeenCalledWith(
       'message',
