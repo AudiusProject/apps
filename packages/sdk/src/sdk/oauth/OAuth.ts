@@ -211,6 +211,10 @@ export class OAuth {
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
   }): Promise<LoginResult> {
+    if (this._currentLoginResolve != null) {
+      return Promise.reject(new Error('A login is already in progress.'))
+    }
+
     const promise = new Promise<LoginResult>((resolve, reject) => {
       this._currentLoginResolve = resolve
       this._currentLoginReject = reject
