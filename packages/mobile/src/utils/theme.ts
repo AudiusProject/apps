@@ -1,9 +1,6 @@
-import {
-  Theme,
-  ThemeMode,
-  ThemePalette,
-  SystemAppearance
-} from '@audius/common/models'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { Theme, ThemeMode, ThemePalette, SystemAppearance } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { CommonState } from '@audius/common/store'
 import { themeSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
@@ -179,6 +176,21 @@ export type ResolvedThemeName =
 export const isDarkTheme = (theme: ResolvedThemeName): boolean =>
   theme === 'default-dark' || theme === 'classic-dark' || theme === 'matrix'
 
+/**
+ * Keep legacy `makeStyles` resolution aligned with the Harmony theme provider.
+ * When the new theme model is disabled, downgrade default-* to classic-*.
+ */
+const applyThemeFlag = (
+  themeName: ResolvedThemeName,
+  isNewThemeModelEnabled: boolean
+): ResolvedThemeName => {
+  if (!isNewThemeModelEnabled) {
+    if (themeName === 'default-light') return 'classic-light'
+    if (themeName === 'default-dark') return 'classic-dark'
+  }
+  return themeName
+}
+
 export const themeColorsByThemeVariant: Record<ResolvedThemeName, ThemeColors> =
   {
     'default-light': defaultLightThemeColors,
@@ -251,7 +263,12 @@ export const useResolvedThemeName = (): ResolvedThemeName => {
 }
 
 export const useThemeVariant = (): ResolvedThemeName => {
-  return useResolvedThemeName()
+  const resolvedThemeName = useResolvedThemeName()
+  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
+    FeatureFlags.NEW_THEME_MODEL
+  )
+
+  return applyThemeFlag(resolvedThemeName, isNewThemeModelEnabled)
 }
 
 export const useThemeColors = () => {
