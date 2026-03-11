@@ -45,8 +45,8 @@ const collapseScopes = (
   const tokens = (
     Array.isArray(raw) ? raw : (raw as string).split(/\s+/)
   ).filter((t): t is string => typeof t === 'string' && t.length > 0)
-  if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('write')) return 'write'
+  if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('read')) return 'read'
   return typeof raw === 'string' ? raw : null
 }
