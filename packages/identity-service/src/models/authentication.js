@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
       walletAddress: {
         type: DataTypes.STRING,
         allowNull: true
+      },
+      skipOtp: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       }
     },
     {

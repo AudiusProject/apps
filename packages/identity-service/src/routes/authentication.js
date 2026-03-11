@@ -44,6 +44,11 @@ module.exports = function (app) {
 
       if (body && body.iv && body.cipherText && body.lookupKey) {
         try {
+          const hasSkipOtp = body.skipOtp !== undefined
+          if (hasSkipOtp && typeof body.skipOtp !== 'boolean') {
+            return errorResponseBadRequest('Invalid skipOtp')
+          }
+
           const transaction = await models.sequelize.transaction()
 
           // default to null
@@ -157,24 +162,28 @@ module.exports = function (app) {
             paranoid: false
           })
           if (!existingRecord) {
-            await models.Authentication.create(
-              {
-                iv: body.iv,
-                cipherText: body.cipherText,
-                lookupKey: body.lookupKey,
-                walletAddress
-              },
-              { transaction }
-            )
+            const createAttrs = {
+              iv: body.iv,
+              cipherText: body.cipherText,
+              lookupKey: body.lookupKey,
+              walletAddress
+            }
+            if (hasSkipOtp) {
+              createAttrs.skipOtp = body.skipOtp
+            }
+            await models.Authentication.create(createAttrs, { transaction })
           } else if (existingRecord.isSoftDeleted()) {
             await existingRecord.restore({ transaction })
           } else {
             // old auth artifacts may not be recoverable
             // restart sign up flow and overwrite existing auth artifacts
-            existingRecord = await existingRecord.update({
+            const updateAttrs = {
               iv: body.iv,
               cipherText: body.cipherText,
               updatedAt: Date.now()
+            }
+            existingRecord = await existingRecord.update(updateAttrs, {
+              transaction
             })
           }
 
@@ -258,7 +267,10 @@ module.exports = function (app) {
         req.logger.error('Missing sendgrid api key')
       }
 
-      const otpRequired = await requiresOtp({ email, visitorId })
+      const otpRequired =
+        existingUser.skipOtp === true
+          ? false
+          : await requiresOtp({ email, visitorId })
       if (!otpRequired) {
         return successResponse(existingUser)
       } else if (!otp) {
