@@ -496,17 +496,27 @@ export default function ApiReference() {
     // Also watch document.body for portaled dialogs (e.g. auth dropdown)
     const patchPortals = () => {
       const isDark = document.documentElement.classList.contains('dark')
-      if (!isDark) return
-      document.body
-        .querySelectorAll('.sl-bg-canvas-dialog, .sl-popover, [data-theme]')
-        .forEach((el) => {
-          if (root.contains(el)) return // already handled above
+      const selector =
+        '[data-stoplight-elements] .sl-bg-canvas-dialog, ' +
+        '[data-stoplight-elements] .sl-popover, ' +
+        '[data-stoplight-elements] [data-theme], ' +
+        '[data-stoplight-elements][data-theme]'
+
+      document.body.querySelectorAll(selector).forEach((el) => {
+        if (root.contains(el)) return // already handled above
+
+        if (isDark) {
           el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
           el.style.setProperty('--color-canvas-100', '#1E1E1E')
           if (el.classList.contains('sl-bg-canvas-dialog') || el.classList.contains('sl-popover')) {
             el.style.setProperty('background-color', '#1E1E1E', 'important')
           }
-        })
+        } else {
+          el.style.removeProperty('--color-canvas-dialog')
+          el.style.removeProperty('--color-canvas-100')
+          el.style.removeProperty('background-color')
+        }
+      })
     }
     patchPortals()
     const bodyObserver = new MutationObserver(patchPortals)
