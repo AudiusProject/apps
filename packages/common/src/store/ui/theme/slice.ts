@@ -57,9 +57,9 @@ const themeSlice = createSlice({
             : action.payload.theme === Theme.DARK
               ? ThemeMode.DARK
               : ThemeMode.AUTO
-        // Preserve palette when updating mode; default to classic for legacy
+        // Preserve palette when updating mode; default to default (Neue) for all users
         if (state.themePalette === null) {
-          state.themePalette = ThemePalette.CLASSIC
+          state.themePalette = ThemePalette.DEFAULT
         }
       }
     },

@@ -1,10 +1,8 @@
 import { useCallback } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { settingsMessages as messages } from '@audius/common/messages'
 import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   useTierAndVerifiedForUser,
   themeActions,
@@ -33,9 +31,6 @@ export const AppearanceSettingsRow = () => {
   const { data: accountId } = useCurrentUserId()
   const dispatch = useDispatch()
   const { tier } = useTierAndVerifiedForUser(accountId)
-  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
-    FeatureFlags.NEW_THEME_MODEL
-  )
 
   const showMatrix =
     tier === 'gold' ||
@@ -44,7 +39,7 @@ export const AppearanceSettingsRow = () => {
 
   const effectivePalette =
     themePalette ??
-    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.CLASSIC)
+    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.DEFAULT)
   const effectiveMode =
     themeMode ??
     (theme === Theme.LIGHT
@@ -53,20 +48,12 @@ export const AppearanceSettingsRow = () => {
         ? ThemeMode.DARK
         : ThemeMode.AUTO)
 
-  const appearanceOptions = [
-    { key: Theme.AUTO, text: messages.autoMode },
-    { key: Theme.LIGHT, text: messages.lightMode },
-    { key: Theme.DARK, text: messages.darkMode }
-  ]
-
-  if (showMatrix) {
-    appearanceOptions.push({ key: Theme.MATRIX, text: messages.matrixMode })
-  }
-
   const paletteOptions = [
     { key: ThemePalette.DEFAULT, text: messages.defaultPalette },
     { key: ThemePalette.CLASSIC, text: messages.classicPalette },
-    { key: ThemePalette.MATRIX, text: messages.matrixMode }
+    ...(showMatrix
+      ? [{ key: ThemePalette.MATRIX, text: messages.matrixMode }]
+      : [])
   ]
 
   const modeOptions = [
@@ -74,23 +61,6 @@ export const AppearanceSettingsRow = () => {
     { key: ThemeMode.LIGHT, text: messages.lightMode },
     { key: ThemeMode.DARK, text: messages.darkMode }
   ]
-
-  const handleSetTheme = useCallback(
-    (selectedTheme: Theme) => {
-      dispatch(setTheme({ theme: selectedTheme }))
-      track(
-        make({
-          eventName: Name.SETTINGS_CHANGE_THEME,
-          mode: selectedTheme.toLowerCase() as
-            | 'dark'
-            | 'light'
-            | 'matrix'
-            | 'auto'
-        })
-      )
-    },
-    [dispatch]
-  )
 
   const handlePaletteChange = useCallback(
     (value: ThemePalette) => {
@@ -140,32 +110,23 @@ export const AppearanceSettingsRow = () => {
         {messages.appearanceDescription}
       </SettingsRowDescription>
       <SettingsRowContent>
-        {isNewThemeModelEnabled ? (
-          <Flex direction='column' gap='l'>
-            <SegmentedControl
-              fullWidth
-              options={paletteOptions}
-              selected={effectivePalette}
-              onSelectOption={handlePaletteChange}
-            />
-            {effectivePalette !== ThemePalette.MATRIX ? (
-              <SegmentedControl
-                fullWidth
-                options={modeOptions}
-                selected={effectiveMode}
-                onSelectOption={handleModeChange}
-                key={`mode-${effectivePalette}`}
-              />
-            ) : null}
-          </Flex>
-        ) : (
+        <Flex direction='column' gap='l'>
           <SegmentedControl
             fullWidth
-            options={appearanceOptions}
-            selected={theme ?? Theme.AUTO}
-            onSelectOption={handleSetTheme}
+            options={paletteOptions}
+            selected={effectivePalette}
+            onSelectOption={handlePaletteChange}
           />
-        )}
+          {effectivePalette !== ThemePalette.MATRIX ? (
+            <SegmentedControl
+              fullWidth
+              options={modeOptions}
+              selected={effectiveMode}
+              onSelectOption={handleModeChange}
+              key={`mode-${effectivePalette}`}
+            />
+          ) : null}
+        </Flex>
       </SettingsRowContent>
     </SettingsRow>
   )

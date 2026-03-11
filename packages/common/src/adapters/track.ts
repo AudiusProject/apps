@@ -14,7 +14,6 @@ import {
   OptionalId
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
-import dayjs from '~/utils/dayjs'
 import { omit, pick, mapValues } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
@@ -27,6 +26,7 @@ import {
 import { StemTrackMetadata, UserTrackMetadata } from '~/models/Track'
 import type { TrackMetadataForUpload } from '~/store/upload/types'
 import { formatMusicalKey, License, Maybe, squashNewLines } from '~/utils'
+import dayjs from '~/utils/dayjs'
 
 import { accessConditionsFromSDK } from './accessConditionsFromSDK'
 import { accessConditionsToSDK } from './accessConditionsToSDK'

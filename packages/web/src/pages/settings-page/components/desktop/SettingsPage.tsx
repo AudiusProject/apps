@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
-import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -149,9 +148,6 @@ export const SettingsPage = () => {
     tier === 'gold' ||
     tier === 'platinum' ||
     process.env.NODE_ENV === 'development'
-  const { isEnabled: isNewThemeModelEnabled } = useFeatureFlag(
-    FeatureFlags.NEW_THEME_MODEL
-  )
 
   const [isSignOutModalVisible, setIsSignOutModalVisible] = useState(false)
   const [
@@ -417,36 +413,6 @@ export const SettingsPage = () => {
     []
   )
 
-  const legacyThemeOptions = useMemo(() => {
-    const options = [
-      { key: Theme.AUTO, text: settingsMessages.autoMode },
-      { key: Theme.DARK, text: settingsMessages.darkMode },
-      { key: Theme.LIGHT, text: settingsMessages.lightMode }
-    ]
-    if (showMatrix) {
-      options.push({ key: Theme.MATRIX, text: settingsMessages.matrixMode })
-    }
-    return options
-  }, [showMatrix])
-
-  const toggleLegacyTheme = useCallback(
-    (option: Theme) => {
-      dispatch(
-        make(Name.SETTINGS_CHANGE_THEME, {
-          mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
-        })
-      )
-      dispatch(setTheme({ theme: option }))
-      if (option === Theme.MATRIX) {
-        dispatch(show())
-      }
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(THEME_KEY, option)
-      }
-    },
-    [dispatch]
-  )
-
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
 
@@ -467,38 +433,26 @@ export const SettingsPage = () => {
             description={settingsMessages.appearanceDescription}
             isFull={true}
             headerAction={
-              isNewThemeModelEnabled ? (
-                <FilterButton<ThemePalette>
-                  label={settingsMessages.appearanceTitle}
-                  value={effectivePalette}
-                  options={paletteOptions}
-                  onChange={(value) => onPaletteChange(value)}
-                  variant='replaceLabel'
-                  optionsLabel='Theme'
-                />
-              ) : undefined
+              <FilterButton<ThemePalette>
+                label={settingsMessages.appearanceTitle}
+                value={effectivePalette}
+                options={paletteOptions}
+                onChange={(value) => onPaletteChange(value)}
+                variant='replaceLabel'
+                optionsLabel='Theme'
+              />
             }
           >
-            {isNewThemeModelEnabled ? (
-              effectivePalette !== ThemePalette.MATRIX ? (
-                <SegmentedControl
-                  fullWidth
-                  label='Color mode'
-                  options={modeOptions}
-                  selected={effectiveMode}
-                  onSelectOption={(option) => onModeChange(option)}
-                  key={`tab-slider-${effectivePalette}`}
-                />
-              ) : null
-            ) : (
+            {effectivePalette !== ThemePalette.MATRIX ? (
               <SegmentedControl
                 fullWidth
-                options={legacyThemeOptions}
-                selected={theme ?? Theme.AUTO}
-                onSelectOption={(option) => toggleLegacyTheme(option)}
-                key={`tab-slider-legacy-${legacyThemeOptions.length}`}
+                label='Color mode'
+                options={modeOptions}
+                selected={effectiveMode}
+                onSelectOption={(option) => onModeChange(option)}
+                key={`tab-slider-${effectivePalette}`}
               />
-            )}
+            ) : null}
           </SettingsCard>
         ) : null}
         {!isManagedAccount ? (

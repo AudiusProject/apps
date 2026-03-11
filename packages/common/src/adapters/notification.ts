@@ -10,7 +10,6 @@ import {
   instanceOfPlaylistMilestoneNotificationActionData,
   instanceOfTrackMilestoneNotificationActionData
 } from '@audius/sdk'
-import dayjs from '~/utils/dayjs'
 
 import { BadgeTier, type ID } from '~/models'
 import type { ChallengeRewardID } from '~/models/AudioRewards'
@@ -21,6 +20,7 @@ import {
   NotificationType,
   type Notification
 } from '~/store/notifications/types'
+import dayjs from '~/utils/dayjs'
 import { removeNullable } from '~/utils/typeUtils'
 
 const getTimeAgo = (date: number) => {

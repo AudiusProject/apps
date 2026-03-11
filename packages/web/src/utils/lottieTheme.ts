@@ -42,7 +42,7 @@ const hexToRgba = (hex: string): [number, number, number, number] => {
 export const getLottieThemeColors = (
   palette: ThemePalette | null,
   isDark: boolean,
-  /** Legacy theme - used when palette is null (e.g. NEW_THEME_MODEL off) */
+  /** Legacy theme - used when palette is null */
   legacyTheme?: Theme | null
 ): LottieThemeColors => {
   if (palette === ThemePalette.MATRIX || legacyTheme === Theme.MATRIX) {
