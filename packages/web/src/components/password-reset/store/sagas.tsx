@@ -9,14 +9,15 @@ function* watchChangePassword() {
     actions.CHANGE_PASSWORD,
     function* (action: actions.ChangePasswordAction) {
       try {
-        yield call(authService.resetPassword, {
+        yield call([authService, authService.resetPassword], {
           username: action.email,
-          password: action.password
+          password: action.password,
+          oldLookupKey: action.lookupKey
         })
+        yield put(actions.changePasswordSucceeded())
       } catch (e) {
         yield put(actions.changePasswordFailed())
       }
-      yield put(actions.changePasswordSucceeded())
     }
   )
 }

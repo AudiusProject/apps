@@ -7,6 +7,7 @@ export type ChangePasswordAction = {
   type: typeof CHANGE_PASSWORD
   email: string
   password: string
+  lookupKey?: string
 }
 
 export type ChangePasswordSucceededAction = {
@@ -24,11 +25,13 @@ export type ChangePasswordActions =
 
 export const changePassword = (
   email: string,
-  password: string
+  password: string,
+  lookupKey?: string
 ): ChangePasswordActions => ({
   type: CHANGE_PASSWORD,
   email,
-  password
+  password,
+  lookupKey
 })
 
 export const changePasswordSucceeded = (): ChangePasswordActions => ({
