@@ -292,6 +292,14 @@ export class OAuth {
     }=${appIdURISafe}`
     const responseModeParam = `response_mode=${responseMode}`
 
+    if (!this.config.basePath) {
+      this._settleLogin(
+        new Error(
+          'OAuth configuration error: basePath is not set. Please provide a valid basePath before calling loginAsync.'
+        )
+      )
+      return promise
+    }
     const fullOauthUrl = `${
       this.config.basePath
     }/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
