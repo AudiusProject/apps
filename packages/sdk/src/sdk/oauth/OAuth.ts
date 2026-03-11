@@ -310,6 +310,14 @@ export class OAuth {
 
     if (redirectUri === 'postMessage') {
       this.activePopupWindow = window.open(fullOauthUrl, '', windowOptions)
+      if (!this.activePopupWindow) {
+        this._settleLogin(
+          new Error(
+            'The login popup was blocked. Please allow popups for this site and try again.'
+          )
+        )
+        return promise
+      }
       this._clearPopupCheckInterval()
       this.popupCheckInterval = setInterval(() => {
         if (this.activePopupWindow?.closed) {
