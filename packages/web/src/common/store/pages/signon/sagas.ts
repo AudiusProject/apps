@@ -98,6 +98,7 @@ const { toast } = toastActions
 
 const SIGN_UP_TIMEOUT_MILLIS = 20 /* min */ * 60 * 1000
 const DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS = 5_000
+const PASSWORD_RESET_REQUIRED_KEY = 'password-reset-required'
 
 const messages = {
   incompleteAccount:
@@ -105,6 +106,11 @@ const messages = {
   emailCheckFailed: 'Something has gone wrong, please try again later.',
   deactivatedAccount:
     'Your account has been deactivated. Please contact support.'
+}
+
+const hasPendingPasswordReset = () => {
+  if (typeof window === 'undefined') return false
+  return Boolean(window.localStorage.getItem(PASSWORD_RESET_REQUIRED_KEY))
 }
 
 function* getDefautFollowUserIds() {
@@ -958,6 +964,9 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       yield* put(requestPushNotificationPermissions())
     } else {
       setHasRequestedBrowserPermission()
+      while (hasPendingPasswordReset()) {
+        yield* delay(500)
+      }
       yield* put(accountActions.showPushNotificationConfirmation())
       if (user.handle === 'fbtest') {
         yield put(pushRoute('/fb/share'))

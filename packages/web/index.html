@@ -66,10 +66,16 @@
     <script async type="text/javascript">
       // Account recovery
       try {
+        const RESET_REQUIRED_KEY = 'password-reset-required'
         const urlParams = new URLSearchParams(window.location.search)
         const useHashRouting = '%USE_HASH_ROUTING%' === 'true'
         const login = urlParams.get('login')
         const warning = urlParams.get('warning')
+        const mode = urlParams.get('mode')
+        const email = urlParams.get('email')
+        const lookupKey = urlParams.get('lookupKey')
+        const hasEmail = Boolean(email)
+        const hasLookupKey = Boolean(lookupKey)
 
         let entropy = null
         if (login) {
@@ -82,9 +88,38 @@
           redirectUrl += location.pathname
           window.history.replaceState({}, document.title, redirectUrl)
         }
-        if (warning === 'RECOVERY_DO_NOT_SHARE') {
-          const email = urlParams.get('email')
-          window.localStorage.setItem('password-reset-required', email)
+
+        const isEmailPasswordRecovery = mode === 'emailpassword'
+        const isPasswordRecovery =
+          !isEmailPasswordRecovery &&
+          (warning === 'RECOVERY_DO_NOT_SHARE' || mode === 'password')
+        const isRecoveryMode = isPasswordRecovery || isEmailPasswordRecovery
+
+        if (isRecoveryMode) {
+          let resetPayload = null
+
+          if (isEmailPasswordRecovery && hasLookupKey) {
+            resetPayload = {
+              mode: 'emailpassword',
+              email: email ?? undefined,
+              lookupKey
+            }
+          } else if (isPasswordRecovery && hasEmail) {
+            resetPayload = {
+              mode: 'password',
+              email
+            }
+          }
+
+          if (resetPayload) {
+            window.localStorage.setItem(
+              RESET_REQUIRED_KEY,
+              JSON.stringify(resetPayload)
+            )
+          } else {
+            window.localStorage.removeItem(RESET_REQUIRED_KEY)
+          }
+
           let redirectUrl = location.protocol + '//' + location.host
           if (useHashRouting) {
             redirectUrl += '/#'
