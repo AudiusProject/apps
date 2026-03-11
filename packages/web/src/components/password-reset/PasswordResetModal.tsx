@@ -136,7 +136,6 @@ export const PasswordResetModal = () => {
   ) => {
     dispatch(changePassword(email, password, lookupKey))
     setIsLoading(true)
-    window.localStorage.removeItem(RESET_REQUIRED_KEY)
   }
 
   // When the component mounts, show the modal if the reset key exists
