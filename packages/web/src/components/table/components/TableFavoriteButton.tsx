@@ -24,7 +24,7 @@ export const TableFavoriteButton = ({
     <div
       onClick={onClick}
       className={cn(styles.tableFavoriteButton, className, {
-        [styles.notFavorited]: !favorited
+        [styles.favorited]: favorited
       })}
     >
       <AnimatedIconButton
