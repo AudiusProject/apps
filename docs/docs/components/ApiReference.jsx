@@ -6,7 +6,10 @@ const API_URL = '/openapi.yaml'
 let scriptReady = false
 const readyCallbacks = []
 function whenScriptReady(cb) {
-  if (scriptReady) { cb(); return }
+  if (scriptReady) {
+    cb()
+    return
+  }
   readyCallbacks.push(cb)
 }
 
@@ -101,6 +104,18 @@ function buildStyles() {
       --color-text-light: rgba(255,255,255,0.5) !important;
     }
 
+    /* In light mode, .sl-inverted panels have a light background — use dark text */
+    .sl-elements .sl-inverted:not(.dark *) {
+      color: #1A1F2E !important;
+    }
+    .sl-elements .sl-inverted input,
+    .sl-elements .sl-inverted select,
+    .sl-elements .sl-inverted textarea {
+      color: #1A1F2E !important;
+      background: #FFFFFF !important;
+      border-color: #D0D4DC !important;
+    }
+
     /* sl-panel__titlebar — API Base URL lives here; force dark text */
     .sl-elements .sl-panel__titlebar:not(.sl-inverted),
     .sl-elements .sl-panel__titlebar:not(.sl-inverted) * {
@@ -129,6 +144,14 @@ function buildStyles() {
       color: #343B49 !important;
       opacity: 1 !important;
     }
+    .dark #api-reference-root *::placeholder {
+      color: #707070 !important;
+      opacity: 1 !important;
+    }
+    .dark #api-reference-root *::-ms-input-placeholder {
+      color: #707070 !important;
+      opacity: 1 !important;
+    }
     /* Utility class overrides */
     .sl-elements .sl-text-muted { color: #343B49 !important; }
     .sl-elements .sl-text-light { color: #4A5263 !important; }
@@ -153,7 +176,7 @@ function buildStyles() {
     }
     .sl-elements .HttpOperation__Parameters .sl-text-base { font-size: 0.875rem; }
 
-    /* Code blocks — smaller font */
+    /* Code blocks — smaller font + light mode background */
     .sl-elements pre,
     .sl-elements code,
     .sl-elements .sl-bg-code,
@@ -163,6 +186,25 @@ function buildStyles() {
     .sl-elements [class*="JsonEditor"] {
       font-size: 0.8125rem !important;
     }
+    .sl-elements pre,
+    .sl-elements .sl-bg-code,
+    .sl-elements .sl-code-editor,
+    .sl-elements [class*="sl-code-viewer"],
+    .sl-elements [class*="CodeEditor"],
+    .sl-elements [class*="JsonEditor"] {
+      background-color: #F0F1F3 !important;
+      color: #1A1F2E !important;
+    }
+    .sl-elements .token.string    { color: #0550AE !important; }
+    .sl-elements .token.number    { color: #0550AE !important; }
+    .sl-elements .token.boolean   { color: #0550AE !important; }
+    .sl-elements .token.null      { color: #0550AE !important; }
+    .sl-elements .token.property  { color: #6639BA !important; }
+    .sl-elements .token.key       { color: #6639BA !important; }
+    .sl-elements .token.punctuation,
+    .sl-elements .token.operator  { color: #333333 !important; }
+    .sl-elements .token.keyword   { color: #CF222E !important; }
+    .sl-elements .token.comment   { color: #6E7781 !important; }
 
     /* ══════════════════════════════════════
        DARK MODE — brighter text for contrast
@@ -255,7 +297,11 @@ function buildStyles() {
     }
     .dark .sl-elements input::placeholder,
     .dark .sl-elements textarea::placeholder,
-    .dark .sl-elements .sl-placeholder { color: #B0B0B0 !important; opacity: 1 !important; }
+    .dark .sl-elements .sl-placeholder { color: #707070 !important; opacity: 1 !important; }
+    .dark .sl-bg-canvas-dialog input::placeholder,
+    .dark .sl-bg-canvas-dialog textarea::placeholder,
+    .dark .sl-popover input::placeholder,
+    .dark .sl-popover textarea::placeholder { color: #707070 !important; opacity: 1 !important; }
     .dark .sl-elements pre,
     .dark .sl-elements code:not([class*="language-"]) {
       background: #1F1F1F !important;
@@ -281,6 +327,57 @@ function buildStyles() {
     .dark .sl-elements * { scrollbar-color: #474747 #1F1F1F; }
     .dark .sl-elements *::-webkit-scrollbar-track { background: #1F1F1F; }
     .dark .sl-elements *::-webkit-scrollbar-thumb { background: #474747; border-radius: 4px; }
+
+    /* ══════════════════════════════════════
+       AUTH DIALOG PORTAL
+       The dialog is appended to document.body
+       (outside .sl-elements), so target broadly.
+       --color-canvas-dialog is set inline on
+       [data-theme], so override bg directly.
+    ══════════════════════════════════════ */
+    .dark .sl-bg-canvas-dialog {
+      background-color: #1E1E1E !important;
+      color: #E0E0E0 !important;
+    }
+    .dark .sl-bg-canvas-dialog * { color: #E0E0E0 !important; }
+    .dark .sl-bg-canvas-dialog input,
+    .dark .sl-bg-canvas-dialog textarea,
+    .dark .sl-bg-canvas-dialog select {
+      background: #292929 !important;
+      color: #F0F0F0 !important;
+      border-color: #474747 !important;
+    }
+
+    /* Portaled popovers (language picker, etc.) */
+    .dark .sl-popover {
+      background-color: #1E1E1E !important;
+      border-color: #333333 !important;
+      color: #E0E0E0 !important;
+    }
+    .dark .sl-popover * { color: #E0E0E0 !important; }
+    .dark .sl-popover [class*="sl-bg-canvas"] {
+      background-color: #1E1E1E !important;
+    }
+    .dark .sl-popover li:hover,
+    .dark .sl-popover [class*="sl-bg-canvas"]:hover {
+      background-color: #2A2A2A !important;
+    }
+
+    /* ══════════════════════════════════════
+       CODE BLOCK TOKEN COLORS
+       Stoplight injects a <style> that sets
+       .token.* colors — override here.
+    ══════════════════════════════════════ */
+    .dark .sl-elements .token.string    { color: #9ECBFF !important; }
+    .dark .sl-elements .token.number    { color: #79C0FF !important; }
+    .dark .sl-elements .token.boolean   { color: #79C0FF !important; }
+    .dark .sl-elements .token.null      { color: #79C0FF !important; }
+    .dark .sl-elements .token.property  { color: #E3BBFF !important; }
+    .dark .sl-elements .token.key       { color: #E3BBFF !important; }
+    .dark .sl-elements .token.punctuation,
+    .dark .sl-elements .token.operator  { color: #C9D1D9 !important; }
+    .dark .sl-elements .token.keyword   { color: #FF7B72 !important; }
+    .dark .sl-elements .token.comment   { color: #8B949E !important; }
   `
 }
 
@@ -305,26 +402,52 @@ function patchStoplightDOM(root) {
     if (isDark) {
       el.style.setProperty('--color-text-muted', '#C0C0C0')
       el.style.setProperty('--color-text-light', '#B0B0B0')
+      el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
+      el.style.setProperty('--color-canvas-100', '#1F1F1F')
+      el.style.setProperty('--color-canvas-50', '#1A1A1A')
+      el.style.setProperty('--color-canvas-200', '#242424')
     } else {
       el.style.setProperty('--color-text-muted', '#343B49')
       el.style.setProperty('--color-text-light', '#4A5263')
+      el.style.setProperty('--color-canvas-dialog', '#FFFFFF')
+      el.style.setProperty('--color-canvas-100', '#F7F7F8')
+      el.style.setProperty('--color-canvas-50', '#F7F7F8')
+      el.style.setProperty('--color-canvas-200', '#F0F1F3')
     }
   })
+
+  // In light mode, .sl-inverted elements (code panels) override canvas vars back
+  // to Stoplight's dark defaults — reset them explicitly.
+  if (!isDark) {
+    root.querySelectorAll('.sl-inverted').forEach((el) => {
+      el.style.setProperty('--color-canvas-100', '#F7F7F8')
+      el.style.setProperty('--color-canvas-50', '#F7F7F8')
+      el.style.setProperty('--color-canvas-200', '#F0F1F3')
+      el.style.setProperty('--color-canvas-dialog', '#FFFFFF')
+      el.style.setProperty('--color-text-muted', '#343B49')
+      el.style.setProperty('--color-text-light', '#4A5263')
+      el.style.setProperty('color', '#1A1F2E')
+    })
+  }
 
   // Light mode only: fix washed-out text (darken anything where R,G,B > 150)
   const aside = root.querySelector('aside')
   if (!isDark) {
-    root.querySelectorAll('.sl-text-muted, .sl-text-light, [class*="sl-text-muted"], [class*="sl-text-light"], .ServerInfo, .ServerInfo *, input, select, label, .sl-form-group, .sl-form-group *').forEach((el) => {
-      if (el.closest('.sl-badge') || el.classList.contains('sl-badge')) return
-      if (el.closest('.sl-inverted')) return
-      if (aside && aside.contains(el)) return
-      const computed = getComputedStyle(el)
-      const rgb = computed.color
-      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-      if (m && +m[1] > 150 && +m[2] > 150 && +m[3] > 150) {
-        el.style.setProperty('color', '#343B49', 'important')
-      }
-    })
+    root
+      .querySelectorAll(
+        '.sl-text-muted, .sl-text-light, [class*="sl-text-muted"], [class*="sl-text-light"], .ServerInfo, .ServerInfo *, input, select, label, .sl-form-group, .sl-form-group *',
+      )
+      .forEach((el) => {
+        if (el.closest('.sl-badge') || el.classList.contains('sl-badge')) return
+        if (el.closest('.sl-inverted')) return
+        if (aside && aside.contains(el)) return
+        const computed = getComputedStyle(el)
+        const rgb = computed.color
+        const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+        if (m && +m[1] > 150 && +m[2] > 150 && +m[3] > 150) {
+          el.style.setProperty('color', '#343B49', 'important')
+        }
+      })
   }
 
   root.querySelectorAll('input, select').forEach((el) => {
@@ -343,12 +466,14 @@ export default function ApiReference() {
   const injected = useRef({ link: null, style: null, topNav: null, observer: null })
 
   useEffect(() => {
-    const searchBtn = Array.from(document.querySelectorAll('button[type="button"]')).find(
-      (btn) => btn.textContent.trim().startsWith('Search'),
+    const searchBtn = Array.from(document.querySelectorAll('button[type="button"]')).find((btn) =>
+      btn.textContent.trim().startsWith('Search'),
     )
     if (searchBtn) {
       searchBtn.style.display = 'none'
-      return () => { searchBtn.style.display = '' }
+      return () => {
+        searchBtn.style.display = ''
+      }
     }
   }, [])
 
@@ -419,9 +544,46 @@ export default function ApiReference() {
     run()
     const observer = new MutationObserver(run)
     observer.observe(root, { childList: true, subtree: true })
-    injected.current.observer = observer
 
-    return () => observer.disconnect()
+    // Also watch document.body for portaled dialogs (e.g. auth dropdown)
+    const patchPortals = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      const selector =
+        '[data-stoplight-elements] .sl-bg-canvas-dialog, ' +
+        '[data-stoplight-elements] .sl-popover, ' +
+        '[data-stoplight-elements] [data-theme], ' +
+        '[data-stoplight-elements][data-theme]'
+
+      document.body.querySelectorAll(selector).forEach((el) => {
+        if (root.contains(el)) return // already handled above
+
+        if (isDark) {
+          el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
+          el.style.setProperty('--color-canvas-100', '#1E1E1E')
+          if (el.classList.contains('sl-bg-canvas-dialog') || el.classList.contains('sl-popover')) {
+            el.style.setProperty('background-color', '#1E1E1E', 'important')
+          }
+        } else {
+          el.style.removeProperty('--color-canvas-dialog')
+          el.style.removeProperty('--color-canvas-100')
+          el.style.removeProperty('background-color')
+        }
+      })
+    }
+    patchPortals()
+    const bodyObserver = new MutationObserver(patchPortals)
+    bodyObserver.observe(document.body, { childList: true, subtree: true })
+    injected.current.observer = {
+      disconnect: () => {
+        observer.disconnect()
+        bodyObserver.disconnect()
+      },
+    }
+
+    return () => {
+      observer.disconnect()
+      bodyObserver.disconnect()
+    }
   }, [loaded])
 
   return (
@@ -437,12 +599,40 @@ export default function ApiReference() {
 
 function Loader() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '14px' }}>
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ animation: 'api-spin 0.9s linear infinite' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        gap: '14px',
+      }}
+    >
+      <svg
+        width="44"
+        height="44"
+        viewBox="0 0 44 44"
+        fill="none"
+        style={{ animation: 'api-spin 0.9s linear infinite' }}
+      >
         <circle cx="22" cy="22" r="18" stroke="#7F6AD6" strokeWidth="3.5" strokeOpacity="0.15" />
-        <path d="M40 22a18 18 0 0 0-18-18" stroke="#7F6AD6" strokeWidth="3.5" strokeLinecap="round" />
+        <path
+          d="M40 22a18 18 0 0 0-18-18"
+          stroke="#7F6AD6"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
       </svg>
-      <span style={{ fontSize: '14px', fontWeight: 500, color: '#7F6AD6', opacity: 0.8, letterSpacing: '0.01em' }}>
+      <span
+        style={{
+          fontSize: '14px',
+          fontWeight: 500,
+          color: '#7F6AD6',
+          opacity: 0.8,
+          letterSpacing: '0.01em',
+        }}
+      >
         Loading API Reference…
       </span>
       <style>{`@keyframes api-spin { to { transform: rotate(360deg); } }`}</style>

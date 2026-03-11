@@ -1,52 +1,37 @@
 #!/usr/bin/env node
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
-const SOURCE = 'https://api.audius.co/v1/swagger.yaml';
-const TARGET = path.join(__dirname, '../docs/public/openapi.yaml');
+const LOCAL_SOURCE = 'http://localhost:1323/v1/swagger.yaml'
+const PROD_SOURCE = 'https://api.audius.co/v1/swagger.yaml'
+const TARGET = path.join(__dirname, '../docs/public/openapi.yaml')
 
-const SERVER_RE = /-\s*url:\s*['" ]?\/v1['" ]?/g;
+const SERVERS_BLOCK = `servers:
+  - url: https://api.audius.co/v1
+    description: Production`
 
-function fetch(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
-        if (res.statusCode && res.statusCode >= 400) {
-          reject(new Error(`Request failed with status ${res.statusCode}`));
-          return;
-        }
-        let data = '';
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        res.on('end', () => resolve(data));
-      })
-      .on('error', reject);
-  });
+function replaceServers(yaml) {
+  // Remove any existing servers block
+  const stripped = yaml.replace(/^servers:[\s\S]*?(?=^\S)/m, '')
+  // Insert servers block immediately after the info: block
+  return stripped.replace(/^(info:[\s\S]*?)(?=^\S)/m, `$1${SERVERS_BLOCK}\n`)
 }
 
-(async () => {
-  try {
-    console.log(`Fetching ${SOURCE}...`);
-    const raw = await fetch(SOURCE);
-    let patched = raw
-      .replace(/https:\/\/discoveryprovider\.audius\.co/g, 'https://api.audius.co')
-      .replace(SERVER_RE, '- url: https://api.audius.co/v1');
-    // Deduplicate servers — keep only first entry per URL (removes "Server 2" etc.)
-    patched = patched.replace(
-      /(servers:\s*\n)(\s*-\s*url:\s*https:\/\/api\.audius\.co\/v1(?:\s*\n\s*description:\s*[^\n]*)?\s*\n)(\s*-\s*url:\s*https:\/\/api\.audius\.co\/v1(?:\s*\n\s*description:\s*[^\n]*)?\s*\n)+/,
-      '$1$2'
-    );
-    fs.writeFileSync(TARGET, patched, 'utf8');
-    console.log(`Synced spec to ${TARGET}`);
-    // Also write to docs/public/ so Scalar can load it from /openapi.yaml
-    fs.mkdirSync(path.dirname(PUBLIC_TARGET), { recursive: true });
-    fs.writeFileSync(PUBLIC_TARGET, patched, 'utf8');
-    console.log(`Synced spec to ${PUBLIC_TARGET}`);
-  } catch (err) {
-    console.error('Failed to sync OpenAPI spec:', err.message);
-    process.exitCode = 1;
+;(async () => {
+  const useLocal = process.argv.includes('--local')
+  const source = useLocal ? LOCAL_SOURCE : PROD_SOURCE
+
+  console.log(`Fetching from ${source}...`)
+  const res = await fetch(source)
+  if (!res.ok) {
+    console.error(`Failed to fetch OpenAPI spec: status ${res.status}`)
+    process.exitCode = 1
+    return
   }
-})();
+  const raw = await res.text()
+
+  const patched = replaceServers(raw)
+  fs.mkdirSync(path.dirname(TARGET), { recursive: true })
+  fs.writeFileSync(TARGET, patched, 'utf8')
+  console.log(`Synced spec from ${source} to ${TARGET}`)
+})()
