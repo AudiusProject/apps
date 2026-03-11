@@ -4,10 +4,10 @@ import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
 
 import { generateCodeVerifier, generateCodeChallenge } from './pkce'
 import type { OAuthTokenStore } from './tokenStore'
-import { OAuthScope, WriteOnceParams, OAuthEnv, OAUTH_URL } from './types'
+import { OAuthScope, WriteOnceParams, LoginResult } from './types'
 
 export type LoginSuccessCallback = (
-  profile: DecodedUserToken,
+  profile: LoginResult['profile'],
   encodedJwt: string
 ) => void
 export type LoginErrorCallback = (errorMessage: string) => void
@@ -125,8 +125,12 @@ export class OAuth {
   loginSuccessCallback: LoginSuccessCallback | null
   loginErrorCallback: LoginErrorCallback | null
   apiKey: string | null
-  env: OAuthEnv = 'production'
   logger: LoggerService
+  private _currentLoginResolve: ((result: LoginResult) => void) | null = null
+
+  private _currentLoginReject: ((error: Error) => void) | null = null
+
+  private _boundMessageHandler: ((e: MessageEvent) => void) | null = null
 
   constructor(private readonly config: OAuthConfig) {
     if (typeof window === 'undefined') {
@@ -144,25 +148,18 @@ export class OAuth {
     )
   }
 
+  /**
+   * @deprecated No longer necessary to call init() before login(). Use loginAsync() which returns a promise, or pass an onSuccess/onError callbacks to login().
+   */
   init({
     successCallback,
-    errorCallback,
-    env = 'production'
+    errorCallback
   }: {
     successCallback: LoginSuccessCallback
     errorCallback?: LoginErrorCallback
-    env?: OAuthEnv
   }) {
     this.loginSuccessCallback = successCallback
     this.loginErrorCallback = errorCallback ?? null
-    this.env = env
-    window.addEventListener(
-      'message',
-      (e: MessageEvent) => {
-        this._receiveMessage(e)
-      },
-      false
-    )
   }
 
   login({
@@ -170,25 +167,40 @@ export class OAuth {
     params,
     redirectUri = 'postMessage',
     display = 'popup',
-    responseMode = 'fragment'
+    responseMode = 'fragment',
+    onSuccess,
+    onError
   }: {
     scope?: OAuthScope
     params?: WriteOnceParams
     redirectUri?: string
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
+    onSuccess?: LoginSuccessCallback
+    onError?: LoginErrorCallback
   }) {
-    // Delegate to async implementation
-    this._loginAsync({
-      scope,
-      params,
-      redirectUri,
-      display,
-      responseMode
-    })
+    this.loginAsync({ scope, params, redirectUri, display, responseMode })
+      .then(({ profile, encodedJwt }) => {
+        if (onSuccess) {
+          onSuccess(profile, encodedJwt)
+        } else {
+          this.loginSuccessCallback?.(profile, encodedJwt)
+        }
+      })
+      .catch((err: Error) => {
+        const errorMessage =
+          err instanceof Error ? err.message : 'An unknown error occurred.'
+        if (onError) {
+          onError(errorMessage)
+        } else if (this.loginErrorCallback) {
+          this.loginErrorCallback(errorMessage)
+        } else {
+          this.logger.error(errorMessage)
+        }
+      })
   }
 
-  private async _loginAsync({
+  async loginAsync({
     scope = 'read',
     params,
     redirectUri = 'postMessage',
@@ -200,26 +212,32 @@ export class OAuth {
     redirectUri?: string
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
-  }) {
+  }): Promise<LoginResult> {
+    if (this._currentLoginResolve != null) {
+      return Promise.reject(new Error('A login is already in progress.'))
+    }
+
+    const promise = new Promise<LoginResult>((resolve, reject) => {
+      this._currentLoginResolve = resolve
+      this._currentLoginReject = reject
+    })
+
     const scopeFormatted = typeof scope === 'string' ? [scope] : scope
     if (!this.config.appName && !this.apiKey) {
-      this._surfaceError('App name not set (set with `init` method).')
-      return
+      this._settleLogin(new Error('App name or API key not set.'))
+      return promise
     }
     if (scopeFormatted.includes('write') && !this.apiKey) {
-      this._surfaceError(
-        "The 'write' scope requires Audius SDK to be initialized with an API key"
+      this._settleLogin(
+        new Error(
+          "The 'write' scope requires Audius SDK to be initialized with an API key"
+        )
       )
-    }
-    if (!this.loginSuccessCallback) {
-      this._surfaceError(
-        'Login success callback not set (set with `init` method).'
-      )
-      return
+      return promise
     }
     if (!isOAuthScopeValid(scopeFormatted)) {
-      this._surfaceError('Scope must be `read` or `write`.')
-      return
+      this._settleLogin(new Error('Scope must be `read` or `write`.'))
+      return promise
     }
 
     const effectiveScope = scopeFormatted.includes('write')
@@ -228,8 +246,8 @@ export class OAuth {
         ? 'write_once'
         : 'read'
     if (effectiveScope === 'write_once' && !isWriteOnceParams(params)) {
-      this._surfaceError('Missing correct params for `oauth.login`.')
-      return
+      this._settleLogin(new Error('Missing correct params for `oauth.login`.'))
+      return promise
     }
 
     // Determine whether to use PKCE (auto-detect: write scope + apiKey + no apiSecret)
@@ -251,12 +269,14 @@ export class OAuth {
         const codeChallenge = await generateCodeChallenge(codeVerifier)
         pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
       } catch (e) {
-        this._surfaceError(
-          e instanceof Error
-            ? `PKCE code challenge generation failed: ${e.message}`
-            : 'PKCE code challenge generation failed.'
+        this._settleLogin(
+          new Error(
+            e instanceof Error
+              ? `PKCE code challenge generation failed: ${e.message}`
+              : 'PKCE code challenge generation failed.'
+          )
         )
-        return
+        return promise
       }
     }
 
@@ -278,24 +298,47 @@ export class OAuth {
     }=${appIdURISafe}`
     const responseModeParam = `response_mode=${responseMode}`
 
+    if (!this.config.basePath) {
+      this._settleLogin(
+        new Error(
+          'OAuth configuration error: basePath is not set. Please provide a valid basePath before calling loginAsync.'
+        )
+      )
+      return promise
+    }
     const fullOauthUrl = `${
-      OAUTH_URL[this.env]
-    }?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
+      this.config.basePath
+    }/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
 
     if (redirectUri === 'postMessage') {
+      // Register the message listener lazily so it is scoped to this login session
+      if (!this._boundMessageHandler) {
+        this._boundMessageHandler = (e: MessageEvent) => this._receiveMessage(e)
+        window.addEventListener('message', this._boundMessageHandler, false)
+      }
       this.activePopupWindow = window.open(fullOauthUrl, '', windowOptions)
+      if (!this.activePopupWindow) {
+        this._settleLogin(
+          new Error(
+            'The login popup was blocked. Please allow popups for this site and try again.'
+          )
+        )
+        return promise
+      }
       this._clearPopupCheckInterval()
       this.popupCheckInterval = setInterval(() => {
         if (this.activePopupWindow?.closed) {
-          this._surfaceError('The login popup was closed prematurely.')
-          if (this.popupCheckInterval) {
-            clearInterval(this.popupCheckInterval)
-          }
+          this._settleLogin(
+            new Error('The login popup was closed prematurely.')
+          )
+          clearInterval(this.popupCheckInterval)
         }
       }, 500)
     } else {
       window.location.href = fullOauthUrl
     }
+
+    return promise
   }
 
   renderButton({
@@ -344,154 +387,6 @@ export class OAuth {
     return window.localStorage.getItem(CSRF_TOKEN_KEY)
   }
 
-  /* ------- INTERNAL FUNCTIONS ------- */
-
-  _surfaceError(errorMessage: string) {
-    if (this.loginErrorCallback) {
-      this.loginErrorCallback(errorMessage)
-    } else {
-      this.logger.error(errorMessage)
-    }
-  }
-
-  _clearPopupCheckInterval() {
-    if (this.popupCheckInterval) {
-      clearInterval(this.popupCheckInterval)
-    }
-  }
-
-  async _receiveMessage(event: MessageEvent) {
-    const oauthOrigin = new URL(OAUTH_URL[this.env]).origin
-
-    // PKCE flow — consent screen posts { state, code }
-    if (
-      event.origin === oauthOrigin &&
-      event.source === this.activePopupWindow &&
-      event.data.state &&
-      event.data.code &&
-      this.config.tokenStore &&
-      this.config.basePath
-    ) {
-      this._clearPopupCheckInterval()
-      if (this.activePopupWindow) {
-        if (!this.activePopupWindow.closed) {
-          this.activePopupWindow.close()
-        }
-        this.activePopupWindow = null
-      }
-
-      if (this.getCsrfToken() !== event.data.state) {
-        this._surfaceError('State mismatch.')
-        return
-      }
-
-      const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
-      const storedRedirectUri = window.sessionStorage.getItem(
-        PKCE_REDIRECT_URI_KEY
-      )
-      // Clean up PKCE session state
-      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-
-      if (!codeVerifier) {
-        this._surfaceError('PKCE code verifier not found in session storage.')
-        return
-      }
-
-      // Exchange authorization code for tokens
-      try {
-        const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            grant_type: 'authorization_code',
-            code: event.data.code,
-            code_verifier: codeVerifier,
-            client_id: this.apiKey,
-            redirect_uri: storedRedirectUri ?? 'postMessage'
-          })
-        })
-        if (!tokenRes.ok) {
-          const err = await tokenRes.json().catch(() => ({}))
-          this._surfaceError(err.error_description ?? 'Token exchange failed.')
-          return
-        }
-        const tokens = await tokenRes.json()
-        this.config.tokenStore.setTokens(
-          tokens.access_token,
-          tokens.refresh_token
-        )
-
-        // Fetch user profile via /oauth/me
-        const meRes = await fetch(`${this.config.basePath}/oauth/me`, {
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`
-          }
-        })
-        if (!meRes.ok) {
-          this._surfaceError('Failed to fetch user profile.')
-          return
-        }
-        const profile = (await meRes.json()) as DecodedUserToken
-
-        if (this.loginSuccessCallback) {
-          this.loginSuccessCallback(profile, tokens.access_token)
-        }
-      } catch (e) {
-        this._surfaceError(
-          e instanceof Error ? e.message : 'Token exchange failed.'
-        )
-      }
-      return
-    }
-
-    // Implicit flow — consent screen posts { state, token }
-    if (
-      event.origin !== oauthOrigin ||
-      event.source !== this.activePopupWindow ||
-      !event.data.state ||
-      !event.data.token
-    ) {
-      return
-    }
-    this._clearPopupCheckInterval()
-    if (this.activePopupWindow) {
-      if (!this.activePopupWindow.closed) {
-        this.activePopupWindow.close()
-      }
-      this.activePopupWindow = null
-    }
-    if (this.getCsrfToken() !== event.data.state) {
-      this._surfaceError('State mismatch.')
-    }
-    // Verify token and decode
-    if (!this.config.basePath) {
-      this._surfaceError('basePath is required for token verification.')
-      return
-    }
-    try {
-      const verifyRes = await fetch(
-        `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
-      )
-      if (!verifyRes.ok) {
-        this._surfaceError('The token was invalid.')
-        return
-      }
-      const decoded = (await verifyRes.json()) as {
-        data?: DecodedUserToken
-      }
-      if (decoded?.data) {
-        if (this.loginSuccessCallback) {
-          this.loginSuccessCallback(decoded.data, event.data.token)
-        }
-      } else {
-        this._surfaceError('The token was invalid.')
-      }
-    } catch {
-      this._surfaceError('Token verification request failed.')
-    }
-  }
-
   /**
    * Returns true if a refresh token is currently stored and a refresh
    * exchange could be attempted.
@@ -507,14 +402,14 @@ export class OAuth {
    */
   async refreshAccessToken(): Promise<string | null> {
     if (!this.config.tokenStore || !this.config.basePath) {
-      this._surfaceError(
+      this.logger.error(
         'Token store and basePath are required for token refresh.'
       )
       return null
     }
     const refreshToken = this.config.tokenStore.refreshToken
     if (!refreshToken) {
-      this._surfaceError('No refresh token available.')
+      this.logger.error('No refresh token available.')
       return null
     }
     try {
@@ -568,5 +463,171 @@ export class OAuth {
     window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
     window.localStorage.removeItem(CSRF_TOKEN_KEY)
+  }
+
+  /* ------- INTERNAL FUNCTIONS ------- */
+  private _settleLogin(resultOrError: LoginResult | Error) {
+    if (resultOrError instanceof Error) {
+      this._currentLoginReject?.(resultOrError)
+    } else {
+      this._currentLoginResolve?.(resultOrError)
+    }
+    this._currentLoginResolve = null
+    this._currentLoginReject = null
+    // Deregister the message listener now that the login has settled
+    if (this._boundMessageHandler) {
+      window.removeEventListener('message', this._boundMessageHandler, false)
+      this._boundMessageHandler = null
+    }
+    this._clearPopupCheckInterval()
+  }
+
+  _clearPopupCheckInterval() {
+    if (this.popupCheckInterval) {
+      clearInterval(this.popupCheckInterval)
+    }
+  }
+
+  async _receiveMessage(event: MessageEvent) {
+    if (
+      !event.data ||
+      !event.data.state ||
+      event.source !== this.activePopupWindow
+    ) {
+      return
+    }
+
+    // PKCE flow — consent screen posts { state, code }
+    if (event.data.code) {
+      this._clearPopupCheckInterval()
+      if (this.activePopupWindow) {
+        if (!this.activePopupWindow.closed) {
+          this.activePopupWindow.close()
+        }
+        this.activePopupWindow = null
+      }
+
+      if (this.getCsrfToken() !== event.data.state) {
+        this._settleLogin(new Error('State mismatch.'))
+        return
+      }
+
+      const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
+      const storedRedirectUri = window.sessionStorage.getItem(
+        PKCE_REDIRECT_URI_KEY
+      )
+      // Clean up PKCE session state
+      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+
+      if (!codeVerifier) {
+        this._settleLogin(
+          new Error('PKCE code verifier not found in session storage.')
+        )
+        return
+      }
+
+      if (!this.config.basePath) {
+        this._settleLogin(
+          new Error(
+            'basePath is required in SDK configuration for PKCE token exchange.'
+          )
+        )
+        return
+      }
+
+      // Exchange authorization code for tokens
+      try {
+        const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'authorization_code',
+            code: event.data.code,
+            code_verifier: codeVerifier,
+            client_id: this.apiKey,
+            redirect_uri: storedRedirectUri ?? 'postMessage'
+          })
+        })
+        if (!tokenRes.ok) {
+          const err = await tokenRes.json().catch(() => ({}))
+          this._settleLogin(
+            new Error(err.error_description ?? 'Token exchange failed.')
+          )
+          return
+        }
+        const tokens = await tokenRes.json()
+        this.config.tokenStore?.setTokens(
+          tokens.access_token,
+          tokens.refresh_token
+        )
+
+        // Fetch user profile via /oauth/me
+        const meRes = await fetch(`${this.config.basePath}/oauth/me`, {
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`
+          }
+        })
+        if (!meRes.ok) {
+          this._settleLogin(new Error('Failed to fetch user profile.'))
+          return
+        }
+        const profile = (await meRes.json()) as DecodedUserToken
+
+        this._settleLogin({ profile, encodedJwt: tokens.access_token })
+      } catch (e) {
+        this._settleLogin(
+          e instanceof Error ? e : new Error('Token exchange failed.')
+        )
+      }
+      return
+    }
+
+    // Implicit flow — consent screen posts { state, token }
+    if (event.data.token) {
+      this._clearPopupCheckInterval()
+      if (this.activePopupWindow) {
+        if (!this.activePopupWindow.closed) {
+          this.activePopupWindow.close()
+        }
+        this.activePopupWindow = null
+      }
+      if (this.getCsrfToken() !== event.data.state) {
+        this._settleLogin(new Error('State mismatch.'))
+        return
+      }
+      // Verify token and decode
+      if (!this.config.basePath) {
+        this._settleLogin(
+          new Error('basePath is required for token verification.')
+        )
+        return
+      }
+      try {
+        const verifyRes = await fetch(
+          `${this.config.basePath}/users/verify_token?token=${encodeURIComponent(event.data.token)}`
+        )
+        if (!verifyRes.ok) {
+          this._settleLogin(new Error('The token was invalid.'))
+          return
+        }
+        const decoded = (await verifyRes.json()) as {
+          data?: DecodedUserToken
+        }
+        if (decoded?.data) {
+          this._settleLogin({
+            profile: decoded.data,
+            encodedJwt: event.data.token
+          })
+        } else {
+          this._settleLogin(new Error('The token was invalid.'))
+        }
+      } catch {
+        this._settleLogin(new Error('Token verification request failed.'))
+      }
+      return
+    }
+
+    this._settleLogin(new Error('Received message with unknown format.'))
   }
 }
