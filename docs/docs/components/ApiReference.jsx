@@ -6,7 +6,10 @@ const API_URL = '/openapi.yaml'
 let scriptReady = false
 const readyCallbacks = []
 function whenScriptReady(cb) {
-  if (scriptReady) { cb(); return }
+  if (scriptReady) {
+    cb()
+    return
+  }
   readyCallbacks.push(cb)
 }
 
@@ -281,6 +284,42 @@ function buildStyles() {
     .dark .sl-elements * { scrollbar-color: #474747 #1F1F1F; }
     .dark .sl-elements *::-webkit-scrollbar-track { background: #1F1F1F; }
     .dark .sl-elements *::-webkit-scrollbar-thumb { background: #474747; border-radius: 4px; }
+
+    /* ══════════════════════════════════════
+       AUTH DIALOG PORTAL
+       The dialog is appended to document.body
+       (outside .sl-elements), so target broadly.
+       --color-canvas-dialog is set inline on
+       [data-theme], so override bg directly.
+    ══════════════════════════════════════ */
+    .dark .sl-bg-canvas-dialog {
+      background-color: #1E1E1E !important;
+      color: #E0E0E0 !important;
+    }
+    .dark .sl-bg-canvas-dialog * { color: #E0E0E0 !important; }
+    .dark .sl-bg-canvas-dialog input,
+    .dark .sl-bg-canvas-dialog textarea,
+    .dark .sl-bg-canvas-dialog select {
+      background: #292929 !important;
+      color: #F0F0F0 !important;
+      border-color: #474747 !important;
+    }
+
+    /* ══════════════════════════════════════
+       CODE BLOCK TOKEN COLORS
+       Stoplight injects a <style> that sets
+       .token.* colors — override here.
+    ══════════════════════════════════════ */
+    .dark .sl-elements .token.string    { color: #9ECBFF !important; }
+    .dark .sl-elements .token.number    { color: #79C0FF !important; }
+    .dark .sl-elements .token.boolean   { color: #79C0FF !important; }
+    .dark .sl-elements .token.null      { color: #79C0FF !important; }
+    .dark .sl-elements .token.property  { color: #E3BBFF !important; }
+    .dark .sl-elements .token.key       { color: #E3BBFF !important; }
+    .dark .sl-elements .token.punctuation,
+    .dark .sl-elements .token.operator  { color: #C9D1D9 !important; }
+    .dark .sl-elements .token.keyword   { color: #FF7B72 !important; }
+    .dark .sl-elements .token.comment   { color: #8B949E !important; }
   `
 }
 
@@ -305,6 +344,7 @@ function patchStoplightDOM(root) {
     if (isDark) {
       el.style.setProperty('--color-text-muted', '#C0C0C0')
       el.style.setProperty('--color-text-light', '#B0B0B0')
+      el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
     } else {
       el.style.setProperty('--color-text-muted', '#343B49')
       el.style.setProperty('--color-text-light', '#4A5263')
@@ -314,17 +354,21 @@ function patchStoplightDOM(root) {
   // Light mode only: fix washed-out text (darken anything where R,G,B > 150)
   const aside = root.querySelector('aside')
   if (!isDark) {
-    root.querySelectorAll('.sl-text-muted, .sl-text-light, [class*="sl-text-muted"], [class*="sl-text-light"], .ServerInfo, .ServerInfo *, input, select, label, .sl-form-group, .sl-form-group *').forEach((el) => {
-      if (el.closest('.sl-badge') || el.classList.contains('sl-badge')) return
-      if (el.closest('.sl-inverted')) return
-      if (aside && aside.contains(el)) return
-      const computed = getComputedStyle(el)
-      const rgb = computed.color
-      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-      if (m && +m[1] > 150 && +m[2] > 150 && +m[3] > 150) {
-        el.style.setProperty('color', '#343B49', 'important')
-      }
-    })
+    root
+      .querySelectorAll(
+        '.sl-text-muted, .sl-text-light, [class*="sl-text-muted"], [class*="sl-text-light"], .ServerInfo, .ServerInfo *, input, select, label, .sl-form-group, .sl-form-group *',
+      )
+      .forEach((el) => {
+        if (el.closest('.sl-badge') || el.classList.contains('sl-badge')) return
+        if (el.closest('.sl-inverted')) return
+        if (aside && aside.contains(el)) return
+        const computed = getComputedStyle(el)
+        const rgb = computed.color
+        const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+        if (m && +m[1] > 150 && +m[2] > 150 && +m[3] > 150) {
+          el.style.setProperty('color', '#343B49', 'important')
+        }
+      })
   }
 
   root.querySelectorAll('input, select').forEach((el) => {
@@ -343,12 +387,14 @@ export default function ApiReference() {
   const injected = useRef({ link: null, style: null, topNav: null, observer: null })
 
   useEffect(() => {
-    const searchBtn = Array.from(document.querySelectorAll('button[type="button"]')).find(
-      (btn) => btn.textContent.trim().startsWith('Search'),
+    const searchBtn = Array.from(document.querySelectorAll('button[type="button"]')).find((btn) =>
+      btn.textContent.trim().startsWith('Search'),
     )
     if (searchBtn) {
       searchBtn.style.display = 'none'
-      return () => { searchBtn.style.display = '' }
+      return () => {
+        searchBtn.style.display = ''
+      }
     }
   }, [])
 
@@ -419,9 +465,33 @@ export default function ApiReference() {
     run()
     const observer = new MutationObserver(run)
     observer.observe(root, { childList: true, subtree: true })
-    injected.current.observer = observer
 
-    return () => observer.disconnect()
+    // Also watch document.body for portaled dialogs (e.g. auth dropdown)
+    const patchPortals = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      if (!isDark) return
+      document.body.querySelectorAll('.sl-bg-canvas-dialog, [data-theme]').forEach((el) => {
+        if (root.contains(el)) return // already handled above
+        el.style.setProperty('--color-canvas-dialog', '#1E1E1E')
+        if (el.classList.contains('sl-bg-canvas-dialog')) {
+          el.style.setProperty('background-color', '#1E1E1E', 'important')
+        }
+      })
+    }
+    patchPortals()
+    const bodyObserver = new MutationObserver(patchPortals)
+    bodyObserver.observe(document.body, { childList: true, subtree: true })
+    injected.current.observer = {
+      disconnect: () => {
+        observer.disconnect()
+        bodyObserver.disconnect()
+      },
+    }
+
+    return () => {
+      observer.disconnect()
+      bodyObserver.disconnect()
+    }
   }, [loaded])
 
   return (
@@ -437,12 +507,40 @@ export default function ApiReference() {
 
 function Loader() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '14px' }}>
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" style={{ animation: 'api-spin 0.9s linear infinite' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        gap: '14px',
+      }}
+    >
+      <svg
+        width="44"
+        height="44"
+        viewBox="0 0 44 44"
+        fill="none"
+        style={{ animation: 'api-spin 0.9s linear infinite' }}
+      >
         <circle cx="22" cy="22" r="18" stroke="#7F6AD6" strokeWidth="3.5" strokeOpacity="0.15" />
-        <path d="M40 22a18 18 0 0 0-18-18" stroke="#7F6AD6" strokeWidth="3.5" strokeLinecap="round" />
+        <path
+          d="M40 22a18 18 0 0 0-18-18"
+          stroke="#7F6AD6"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
       </svg>
-      <span style={{ fontSize: '14px', fontWeight: 500, color: '#7F6AD6', opacity: 0.8, letterSpacing: '0.01em' }}>
+      <span
+        style={{
+          fontSize: '14px',
+          fontWeight: 500,
+          color: '#7F6AD6',
+          opacity: 0.8,
+          letterSpacing: '0.01em',
+        }}
+      >
         Loading API Reference…
       </span>
       <style>{`@keyframes api-spin { to { transform: rotate(360deg); } }`}</style>
