@@ -1,9 +1,11 @@
+import type { DecodedUserToken } from '../api/generated/default'
+
 export const OAUTH_SCOPE_OPTIONS = ['read', 'write', 'write_once'] as const
 type OAuthScopesTuple = typeof OAUTH_SCOPE_OPTIONS
 export type OAuthScopeOption = OAuthScopesTuple[number]
 export type OAuthScope = OAuthScopeOption | OAuthScopeOption[]
 export type LoginResult = {
-  profile: import('../api/generated/default').DecodedUserToken
+  profile: DecodedUserToken
   encodedJwt: string
 }
 export type WriteOnceParams =
