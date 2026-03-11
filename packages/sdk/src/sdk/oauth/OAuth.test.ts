@@ -8,7 +8,9 @@ import { OAuthTokenStore } from './tokenStore'
 vi.stubGlobal('window', {
   localStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
   sessionStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
+  crypto: { getRandomValues: vi.fn((arr: Uint8Array) => arr.fill(0)) },
   addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
   location: { href: '', origin: 'https://example.com' },
   open: vi.fn()
 })
@@ -204,5 +206,93 @@ describe('OAuth.refreshAccessToken', () => {
     const result = await oauth.refreshAccessToken()
 
     expect(result).toBeNull()
+  })
+})
+
+describe('OAuth message listener lifecycle', () => {
+  beforeEach(() => {
+    vi.mocked(window.addEventListener).mockClear()
+    vi.mocked(window.removeEventListener).mockClear()
+    vi.mocked(window.open).mockReturnValue({
+      closed: false,
+      close: vi.fn()
+    } as unknown as Window)
+    vi.mocked(window.localStorage.setItem).mockClear()
+    vi.mocked(window.localStorage.getItem).mockReturnValue('csrf-token')
+    vi.mocked(window.sessionStorage.setItem).mockClear()
+    vi.mocked(window.sessionStorage.getItem).mockReturnValue(null)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('does not attach a message listener in the constructor', () => {
+    makeOAuth({ basePath: 'https://api.example.com' })
+    expect(window.addEventListener).not.toHaveBeenCalled()
+  })
+
+  it('attaches a message listener when loginAsync starts (postMessage flow)', async () => {
+    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
+    // Kick off a login — don't await so we can inspect immediately
+    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    // Flush microtasks
+    await Promise.resolve()
+    expect(window.addEventListener).toHaveBeenCalledWith(
+      'message',
+      expect.any(Function),
+      false
+    )
+  })
+
+  it('does not attach a duplicate listener on repeated loginAsync calls', async () => {
+    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
+    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    await Promise.resolve()
+    void oauth.loginAsync({ redirectUri: 'postMessage' })
+    await Promise.resolve()
+    // Should still only be registered once
+    const messageAddCalls = vi
+      .mocked(window.addEventListener)
+      .mock.calls.filter(([event]) => event === 'message')
+    expect(messageAddCalls).toHaveLength(1)
+  })
+
+  it('removes the message listener when the login settles', async () => {
+    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
+    const loginPromise = oauth.loginAsync({ redirectUri: 'postMessage' })
+    await Promise.resolve()
+
+    // Retrieve the registered handler
+    const addCall = vi
+      .mocked(window.addEventListener)
+      .mock.calls.find(([event]) => event === 'message')
+    expect(addCall).toBeDefined()
+    const registeredHandler = addCall![1]
+
+    // Settle the login via an error path
+    ;(oauth as any)._settleLogin(new Error('test settle'))
+
+    // Await so rejection is handled
+    await loginPromise.catch(() => {})
+
+    expect(window.removeEventListener).toHaveBeenCalledWith(
+      'message',
+      registeredHandler,
+      false
+    )
+  })
+
+  it('does not attach a listener when redirectUri is not postMessage', async () => {
+    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
+    // When redirectUri is a real URL the code does window.location.href = …
+    // and never enters the postMessage branch — don't await the never-settling promise
+    void oauth.loginAsync({ redirectUri: 'https://myapp.example.com/callback' })
+    await Promise.resolve()
+    expect(window.addEventListener).not.toHaveBeenCalledWith(
+      'message',
+      expect.any(Function),
+      false
+    )
   })
 })

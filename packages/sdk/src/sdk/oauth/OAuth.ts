@@ -130,6 +130,8 @@ export class OAuth {
 
   private _currentLoginReject: ((error: Error) => void) | null = null
 
+  private _boundMessageHandler: ((e: MessageEvent) => void) | null = null
+
   constructor(private readonly config: OAuthConfig) {
     if (typeof window === 'undefined') {
       throw new Error(
@@ -143,15 +145,6 @@ export class OAuth {
     this.popupCheckInterval = null
     this.logger = (config.logger ?? new Logger()).createPrefixedLogger(
       '[oauth]'
-    )
-
-    // initialize message listener for receiving login responses from the popup
-    window.addEventListener(
-      'message',
-      (e: MessageEvent) => {
-        this._receiveMessage(e)
-      },
-      false
     )
   }
 
@@ -309,6 +302,11 @@ export class OAuth {
     }/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
 
     if (redirectUri === 'postMessage') {
+      // Register the message listener lazily so it is scoped to this login session
+      if (!this._boundMessageHandler) {
+        this._boundMessageHandler = (e: MessageEvent) => this._receiveMessage(e)
+        window.addEventListener('message', this._boundMessageHandler, false)
+      }
       this.activePopupWindow = window.open(fullOauthUrl, '', windowOptions)
       if (!this.activePopupWindow) {
         this._settleLogin(
@@ -398,6 +396,12 @@ export class OAuth {
     }
     this._currentLoginResolve = null
     this._currentLoginReject = null
+    // Deregister the message listener now that the login has settled
+    if (this._boundMessageHandler) {
+      window.removeEventListener('message', this._boundMessageHandler, false)
+      this._boundMessageHandler = null
+    }
+    this._clearPopupCheckInterval()
   }
 
   _clearPopupCheckInterval() {
