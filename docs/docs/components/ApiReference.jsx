@@ -404,6 +404,20 @@ function buildStyles() {
         width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
         min-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
         max-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
+        height: 100%;
+        max-height: 100%;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+      }
+
+      .sl-elements aside.sl-flex .sl-overflow-y-auto,
+      .sl-elements aside.sl-flex [class*="overflow-y-auto"] {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
       }
 
       .sl-elements pre,
@@ -497,6 +511,16 @@ function patchStoplightDOM(root) {
       el.style.setProperty('--color-text-muted', '#343B49')
     }
   })
+
+  const isMobile = window.matchMedia(MOBILE_QUERY).matches
+  if (isMobile) {
+    root.querySelectorAll('aside.sl-flex, aside [class*="overflow-y-auto"]').forEach((el) => {
+      el.style.setProperty('overflow-y', 'auto', 'important')
+      el.style.setProperty('-webkit-overflow-scrolling', 'touch')
+      el.style.setProperty('overscroll-behavior', 'contain')
+      el.style.setProperty('touch-action', 'pan-y')
+    })
+  }
 }
 
 export default function ApiReference() {
