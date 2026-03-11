@@ -425,6 +425,15 @@ export class OAuth {
         return
       }
 
+      if (!this.config.basePath) {
+        this._settleLogin(
+          new Error(
+            'basePath is required in SDK configuration for PKCE token exchange.'
+          )
+        )
+        return
+      }
+
       // Exchange authorization code for tokens
       try {
         const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
