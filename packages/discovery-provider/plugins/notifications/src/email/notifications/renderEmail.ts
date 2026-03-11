@@ -84,8 +84,9 @@ export type Resources = {
 // TODO: Fill out defaults
 const DEFAULT_PROFILE_IMG = ''
 const DEFAULT_TRACK_COVER_ART_URL = ''
-const DEFAULT_PLAYLIST_IMAGE_IRL = ''
+const DEFAULT_PLAYLIST_IMAGE_URL = ''
 
+// Image URL format matches discovery provider v1 API (helpers.make_image / make_legacy_image): /content/{cid}/...
 const getUserProfileUrl = (user: UserResource) => {
   let profilePictureUrl = DEFAULT_PROFILE_IMG
   const contentNode = getContentNode()
@@ -98,25 +99,25 @@ const getUserProfileUrl = (user: UserResource) => {
 }
 
 const getTrackCoverArt = (track: TrackResource) => {
-  const contentNodes = track.creator_node_endpoint.split(',')
-  const primaryEndpoint = contentNodes[0]
+  const primaryEndpoint = track.creator_node_endpoint?.split(',')[0]?.trim()
+  if (!primaryEndpoint) return DEFAULT_TRACK_COVER_ART_URL
   let coverArtUrl = DEFAULT_TRACK_COVER_ART_URL
   if (track.cover_art_sizes) {
-    coverArtUrl = `${primaryEndpoint}/ipfs/${track.cover_art_sizes}/1000x1000.jpg`
+    coverArtUrl = `${primaryEndpoint}/content/${track.cover_art_sizes}/1000x1000.jpg`
   } else if (track.cover_art) {
-    coverArtUrl = `${primaryEndpoint}/ipfs/${track.cover_art}`
+    coverArtUrl = `${primaryEndpoint}/content/${track.cover_art}`
   }
   return coverArtUrl
 }
 
 const getPlaylistImage = (playlist: PlaylistResource) => {
-  const contentNodes = playlist.creator_node_endpoint.split(',')
-  const primaryEndpoint = contentNodes[0]
-  let playlistImageUrl = DEFAULT_PLAYLIST_IMAGE_IRL
+  const primaryEndpoint = playlist.creator_node_endpoint?.split(',')[0]?.trim()
+  if (!primaryEndpoint) return DEFAULT_PLAYLIST_IMAGE_URL
+  let playlistImageUrl = DEFAULT_PLAYLIST_IMAGE_URL
   if (playlist.playlist_image_sizes_multihash) {
-    playlistImageUrl = `${primaryEndpoint}/ipfs/${playlist.playlist_image_sizes_multihash}/1000x1000.jpg`
+    playlistImageUrl = `${primaryEndpoint}/content/${playlist.playlist_image_sizes_multihash}/1000x1000.jpg`
   } else if (playlist.playlist_image_multihash) {
-    playlistImageUrl = `${primaryEndpoint}/ipfs/${playlist.playlist_image_multihash}`
+    playlistImageUrl = `${primaryEndpoint}/content/${playlist.playlist_image_multihash}`
   }
   return playlistImageUrl
 }
