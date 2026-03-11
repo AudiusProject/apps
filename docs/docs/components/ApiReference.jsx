@@ -132,6 +132,14 @@ function buildStyles() {
       color: #343B49 !important;
       opacity: 1 !important;
     }
+    .dark #api-reference-root *::placeholder {
+      color: #707070 !important;
+      opacity: 1 !important;
+    }
+    .dark #api-reference-root *::-ms-input-placeholder {
+      color: #707070 !important;
+      opacity: 1 !important;
+    }
     /* Utility class overrides */
     .sl-elements .sl-text-muted { color: #343B49 !important; }
     .sl-elements .sl-text-light { color: #4A5263 !important; }
@@ -258,7 +266,11 @@ function buildStyles() {
     }
     .dark .sl-elements input::placeholder,
     .dark .sl-elements textarea::placeholder,
-    .dark .sl-elements .sl-placeholder { color: #B0B0B0 !important; opacity: 1 !important; }
+    .dark .sl-elements .sl-placeholder { color: #707070 !important; opacity: 1 !important; }
+    .dark .sl-bg-canvas-dialog input::placeholder,
+    .dark .sl-bg-canvas-dialog textarea::placeholder,
+    .dark .sl-popover input::placeholder,
+    .dark .sl-popover textarea::placeholder { color: #707070 !important; opacity: 1 !important; }
     .dark .sl-elements pre,
     .dark .sl-elements code:not([class*="language-"]) {
       background: #1F1F1F !important;
