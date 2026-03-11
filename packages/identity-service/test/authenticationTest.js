@@ -25,16 +25,12 @@ describe('test authentication routes', function () {
     associateWallet = false,
     skipOtp
   } = {}) {
-    const authRequestBody = {
+    await request(app).post('/authentication').send({
       iv,
       cipherText,
-      lookupKey
-    }
-    if (skipOtp !== undefined) {
-      authRequestBody.skipOtp = skipOtp
-    }
-    await request(app).post('/authentication').send(authRequestBody)
-
+      lookupKey,
+      skipOtp
+    })
     await request(app).post('/user').send({
       username,
       walletAddress
@@ -114,20 +110,6 @@ describe('test authentication routes', function () {
           '9bdc91e1bb7ef60177131690b18349625778c14656dc17814945b52a3f07ac77'
       })
       .expect(200, done)
-  })
-
-  it('responds 400 when skipOtp is not a boolean', function (done) {
-    request(app)
-      .post('/authentication')
-      .send({
-        iv: 'a7407b91ccb1a09a270e79296c88a990',
-        cipherText:
-          '00b1684fe58f95ef7bca1442681a61b8aa817a136d3c932dcee2bdcb59454205b73174e71b39fa1d532ee915b6d4ba24e8487603fa63e738de35d3505085a142',
-        lookupKey:
-          '8bdc91e1bb7ef60177131690b18349625778c14656dc17814945b52a3f07ac77',
-        skipOtp: 'true'
-      })
-      .expect(400, { error: 'Invalid skipOtp' }, done)
   })
 
   it('changes passwords for the user', async function () {

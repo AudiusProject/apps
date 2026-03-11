@@ -44,11 +44,6 @@ module.exports = function (app) {
 
       if (body && body.iv && body.cipherText && body.lookupKey) {
         try {
-          const hasSkipOtp = body.skipOtp !== undefined
-          if (hasSkipOtp && typeof body.skipOtp !== 'boolean') {
-            return errorResponseBadRequest('Invalid skipOtp')
-          }
-
           const transaction = await models.sequelize.transaction()
 
           // default to null
@@ -162,28 +157,25 @@ module.exports = function (app) {
             paranoid: false
           })
           if (!existingRecord) {
-            const createAttrs = {
-              iv: body.iv,
-              cipherText: body.cipherText,
-              lookupKey: body.lookupKey,
-              walletAddress
-            }
-            if (hasSkipOtp) {
-              createAttrs.skipOtp = body.skipOtp
-            }
-            await models.Authentication.create(createAttrs, { transaction })
+            await models.Authentication.create(
+              {
+                iv: body.iv,
+                cipherText: body.cipherText,
+                lookupKey: body.lookupKey,
+                walletAddress,
+                skipOtp: body.skipOtp || false
+              },
+              { transaction }
+            )
           } else if (existingRecord.isSoftDeleted()) {
             await existingRecord.restore({ transaction })
           } else {
             // old auth artifacts may not be recoverable
             // restart sign up flow and overwrite existing auth artifacts
-            const updateAttrs = {
+            existingRecord = await existingRecord.update({
               iv: body.iv,
               cipherText: body.cipherText,
               updatedAt: Date.now()
-            }
-            existingRecord = await existingRecord.update(updateAttrs, {
-              transaction
             })
           }
 
