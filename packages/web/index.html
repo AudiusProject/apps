@@ -76,11 +76,26 @@
         const lookupKey = urlParams.get('lookupKey')
         const hasEmail = Boolean(email)
         const hasLookupKey = Boolean(lookupKey)
+        const isEmailPasswordRecovery = mode === 'emailpassword'
 
-        let entropy = null
+        const decodeLoginEntropy = (loginValue) => {
+          try {
+            // Handle URL-safe base64 tokens and missing padding.
+            const normalizedLogin = loginValue.replace(/-/g, '+').replace(/_/g, '/')
+            const padding = '='.repeat((4 - (normalizedLogin.length % 4)) % 4)
+            return atob(normalizedLogin + padding)
+          } catch {
+            return null
+          }
+        }
+
         if (login) {
-          entropy = atob(login)
-          window.localStorage.setItem('hedgehog-entropy-key', entropy)
+          if (!isEmailPasswordRecovery) {
+            const entropy = decodeLoginEntropy(login)
+            if (entropy) {
+              window.localStorage.setItem('hedgehog-entropy-key', entropy)
+            }
+          }
           let redirectUrl = location.protocol + '//' + location.host
           if (useHashRouting) {
             redirectUrl += '/#'
@@ -89,7 +104,6 @@
           window.history.replaceState({}, document.title, redirectUrl)
         }
 
-        const isEmailPasswordRecovery = mode === 'emailpassword'
         const isPasswordRecovery =
           !isEmailPasswordRecovery &&
           (warning === 'RECOVERY_DO_NOT_SHARE' || mode === 'password')
