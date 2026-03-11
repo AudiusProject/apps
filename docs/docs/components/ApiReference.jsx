@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const CDN_BASE = 'https://unpkg.com/@stoplight/elements@8.5.1'
 const API_URL = '/openapi.yaml'
+const MOBILE_QUERY = '(max-width: 1024px)'
 
 let scriptReady = false
 const readyCallbacks = []
@@ -378,6 +379,43 @@ function buildStyles() {
     .dark .sl-elements .token.operator  { color: #C9D1D9 !important; }
     .dark .sl-elements .token.keyword   { color: #FF7B72 !important; }
     .dark .sl-elements .token.comment   { color: #8B949E !important; }
+
+    /* ══════════════════════════════════════
+       MOBILE LAYOUT
+       Stoplight has a responsive layout mode;
+       these overrides remove desktop-only sizing.
+    ══════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      :root {
+        --api-gutter: 0px;
+        --api-left-offset: 0px;
+      }
+
+      #api-reference-root::before {
+        display: none;
+      }
+
+      #api-reference-root elements-api {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .sl-elements aside.sl-flex {
+        width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
+        min-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
+        max-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
+      }
+
+      .sl-elements pre,
+      .sl-elements code,
+      .sl-elements .sl-bg-code,
+      .sl-elements .sl-code-editor,
+      .sl-elements [class*="sl-code-viewer"],
+      .sl-elements [class*="CodeEditor"],
+      .sl-elements [class*="JsonEditor"] {
+        max-width: 100%;
+      }
+    }
   `
 }
 
@@ -463,7 +501,23 @@ function patchStoplightDOM(root) {
 
 export default function ApiReference() {
   const [loaded, setLoaded] = useState(scriptReady)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(MOBILE_QUERY).matches : false,
+  )
   const injected = useRef({ link: null, style: null, topNav: null, observer: null })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mediaQuery = window.matchMedia(MOBILE_QUERY)
+    const handleChange = (event) => setIsMobile(event.matches)
+    setIsMobile(mediaQuery.matches)
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    }
+    mediaQuery.addListener(handleChange)
+    return () => mediaQuery.removeListener(handleChange)
+  }, [])
 
   useEffect(() => {
     const searchBtn = Array.from(document.querySelectorAll('button[type="button"]')).find((btn) =>
@@ -589,7 +643,13 @@ export default function ApiReference() {
   return (
     <div id="api-reference-root">
       {loaded ? (
-        <elements-api apiDescriptionUrl={API_URL} router="hash" layout="sidebar" />
+        <elements-api
+          key={isMobile ? 'mobile' : 'desktop'}
+          apiDescriptionUrl={API_URL}
+          router="hash"
+          layout="responsive"
+          hideTryItPanel={isMobile ? 'true' : undefined}
+        />
       ) : (
         <Loader />
       )}
