@@ -42,9 +42,13 @@ const collapseScopes = (
   raw: string | string[] | (string | null)[] | null | undefined
 ): string | null => {
   if (!raw) return null
-  const tokens = (
-    Array.isArray(raw) ? raw : (raw as string).split(/\s+/)
-  ).filter((t): t is string => typeof t === 'string' && t.length > 0)
+  // Normalize to an array of individual scope tokens, splitting on whitespace
+  const strings = Array.isArray(raw)
+    ? raw.filter((t): t is string => typeof t === 'string')
+    : [raw]
+  const tokens = strings
+    .flatMap((s) => s.split(/\s+/))
+    .filter((t) => t.length > 0)
   if (tokens.includes('write')) return 'write'
   if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('read')) return 'read'
