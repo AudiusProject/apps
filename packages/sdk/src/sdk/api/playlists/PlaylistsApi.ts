@@ -98,7 +98,11 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      return await this.createPlaylistWithEntityManager(params)
+      return await this.createPlaylistWithEntityManager({
+        ...params,
+        metadata:
+          params.metadata as EntityManagerCreatePlaylistRequest['metadata']
+      })
     }
     return super.createPlaylist(params, requestInit)
   }
@@ -407,7 +411,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       return await this.updatePlaylistWithEntityManager({
         userId: params.userId,
         playlistId: params.playlistId,
-        metadata
+        metadata: metadata as EntityManagerUpdatePlaylistRequest['metadata']
       })
     }
     return super.updatePlaylist(params, requestInit)

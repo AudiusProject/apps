@@ -11,7 +11,10 @@ import {
   type CreatePlaylistRequest,
   type UpdatePlaylistRequest
 } from '../generated/default'
-import { UploadTrackMetadataSchema } from '../tracks/types'
+import {
+  UploadTrackMetadataSchema,
+  USDCPurchaseConditions
+} from '../tracks/types'
 
 export type PlaylistsApiServicesConfig = {
   entityManager?: EntityManagerService
