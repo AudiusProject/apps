@@ -46,7 +46,14 @@ const CreatePlaylistMetadataSchema = z
           trackId: HashId
         })
       )
-    )
+    ),
+
+    // Album fields
+    isStreamGated: z.optional(z.boolean()),
+    streamConditions: z.optional(USDCPurchaseConditions).nullable(),
+    isDownloadGated: z.optional(z.boolean()),
+    downloadConditions: z.optional(USDCPurchaseConditions).nullable(),
+    isScheduledRelease: z.optional(z.boolean())
   })
   .strict()
 
