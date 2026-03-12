@@ -66,29 +66,22 @@ const totalTileHeight = {
   grid: 140
 }
 
+const innerHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+
 // Load TRACKS_AHEAD x the number of tiles to be displayed on the screen
 export const getLoadMoreTrackCount = (
   variant: LineupVariant,
   multiplier: number | (() => number)
 ) =>
-  // Some browser contexts can report an initial viewport height of 0 during app boot.
-  // Always compute at call time and clamp to at least 1 to avoid dispatching 0-limit loads.
-  Math.max(
-    1,
-    Math.ceil(
-      ((typeof window !== 'undefined' ? window.innerHeight : 0) /
-        totalTileHeight[variant]) *
-        (typeof multiplier === 'function' ? multiplier() : multiplier)
-    )
+  Math.ceil(
+    (innerHeight / totalTileHeight[variant]) *
+      (typeof multiplier === 'function' ? multiplier() : multiplier)
   )
 
 // Call load more when the user is LOAD_MORE_PAGE_THRESHOLD of the view height
 // away from the bottom of the scrolling window.
 const getLoadMoreThreshold = () =>
-  Math.ceil(
-    (typeof window !== 'undefined' ? window.innerHeight : 0) *
-      LOAD_MORE_PAGE_THRESHOLD
-  )
+  Math.ceil(innerHeight * LOAD_MORE_PAGE_THRESHOLD)
 
 const shouldLoadMore = (
   scrollContainer: HTMLDivElement | null,
