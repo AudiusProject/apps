@@ -65,7 +65,14 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
         ],
       fontFamily:
         strength && t.fontByWeight[variantStyles.fontWeight[strength]],
-      ...('css' in variantStyles ? (variantStyles.css ?? {}) : {})
+      ...('css' in variantStyles ? (variantStyles.css ?? {}) : {}),
+      // On Android, letterSpacing adds trailing space after the last character
+      // that isn't accounted for in text measurement, clipping the final letter.
+      ...(Platform.OS === 'android' &&
+        'css' in variantStyles &&
+        variantStyles.css?.letterSpacing && {
+          paddingRight: variantStyles.css.letterSpacing
+        })
     }),
     ...(color && { color }),
     ...(shadow && t.shadow[shadow]),
