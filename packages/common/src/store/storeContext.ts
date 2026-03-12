@@ -1,4 +1,4 @@
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { VersionedTransaction } from '@solana/web3.js'
 import { QueryClient } from '@tanstack/react-query'
 import { Location } from 'history'
@@ -77,7 +77,7 @@ export type CommonStoreContext = {
   instagramAppId?: string
   instagramRedirectUrl?: string
   share: (url: string, message?: string) => Promise<void> | void
-  audiusSdk: () => Promise<AudiusSdk>
+  audiusSdk: () => Promise<AudiusSdkWithServices>
   authService: AuthService
   identityService: IdentityService
   solanaWalletService: SolanaWalletService

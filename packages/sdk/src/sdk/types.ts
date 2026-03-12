@@ -170,7 +170,7 @@ export type ServicesContainer = {
 /**
  * SDK configuration schema that requires api key only (for read-only access with higher rate limits)
  */
-export const DevAppSchemaWithApiKeyOnly = z.object({
+const ConfigWithApiKeySchema = z.object({
   /**
    * Your app name
    */
@@ -193,7 +193,7 @@ export const DevAppSchemaWithApiKeyOnly = z.object({
 /**
  * SDK configuration schema that requires API secret (read, write using Entity Manager)
  */
-export const DevAppSchemaWithApiSecret = z.object({
+const ConfigWithApiSecretSchema = z.object({
   /**
    * Your app name
    */
@@ -220,7 +220,7 @@ export const DevAppSchemaWithApiSecret = z.object({
 /**
  * SDK configuration schema that requires bearer token (read, write using API)
  */
-export const DevAppSchemaWithBearerToken = z.object({
+const ConfigWithBearerTokenSchema = z.object({
   /**
    * Your app name
    */
@@ -247,7 +247,7 @@ export const DevAppSchemaWithBearerToken = z.object({
 /**
  * SDK configuration schema that requires app name only (for read-only access)
  */
-export const DevAppSchemaWithAppNameOnly = z.object({
+const ConfigWithAppNameSchema = z.object({
   /**
    * Your app name
    */
@@ -264,19 +264,13 @@ export const DevAppSchemaWithAppNameOnly = z.object({
 })
 
 export const SdkConfigSchema = z.union([
-  DevAppSchemaWithAppNameOnly,
-  DevAppSchemaWithApiKeyOnly,
-  DevAppSchemaWithApiSecret,
-  DevAppSchemaWithBearerToken
+  ConfigWithApiKeySchema,
+  ConfigWithBearerTokenSchema,
+  ConfigWithAppNameSchema,
+  ConfigWithApiSecretSchema
 ])
 
-export type SdkWithBearerTokenConfig = z.input<
-  typeof DevAppSchemaWithBearerToken
->
-export type SdkWithApiSecretConfig = z.input<typeof DevAppSchemaWithApiSecret>
-export type SdkWithApiKeyOnlyConfig = z.input<typeof DevAppSchemaWithApiKeyOnly>
-export type SdkWithAppNameOnlyConfig = z.input<
-  typeof DevAppSchemaWithAppNameOnly
->
-
+/**
+ * Config for SDK initialization. Requires at least an app name or API key for read-only access, and API secret or bearer token for write access.
+ */
 export type SdkConfig = z.infer<typeof SdkConfigSchema>

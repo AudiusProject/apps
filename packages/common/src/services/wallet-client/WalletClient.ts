@@ -1,5 +1,5 @@
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
-import { AudiusSdk, Id } from '@audius/sdk'
+import { type AudiusSdkWithServices, Id } from '@audius/sdk'
 import { PublicKey } from '@solana/web3.js'
 
 import { userWalletsFromSDK } from '~/adapters'
@@ -18,13 +18,13 @@ export const MIN_TRANSFERRABLE_WEI = AUDIO('0.001').value
 
 type WalletClientConfig = {
   audiusBackendInstance: AudiusBackend
-  audiusSdk: () => Promise<AudiusSdk>
+  audiusSdk: () => Promise<AudiusSdkWithServices>
   env: Env
 }
 
 export class WalletClient {
   audiusBackendInstance: AudiusBackend
-  audiusSdk: () => Promise<AudiusSdk>
+  audiusSdk: () => Promise<AudiusSdkWithServices>
   env: Env
 
   constructor(config: WalletClientConfig) {

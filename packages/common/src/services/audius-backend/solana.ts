@@ -1,4 +1,4 @@
-import { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { u8 } from '@solana/buffer-layout'
 import {
   Account,
@@ -91,7 +91,7 @@ function isCreateUserBankIfNeededError(
  * userbank does not exist, returns null.
  */
 export const getUserbankAccountInfo = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   { ethAddress: sourceEthAddress, mint = DEFAULT_MINT }: UserBankConfig,
   commitment?: Commitment
 ): Promise<Account | null> => {
@@ -119,7 +119,7 @@ export const getUserbankAccountInfo = async (
  * Defaults to AUDIO mint and the current user's wallet.
  */
 export const createUserBankIfNeeded = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   {
     recordAnalytics,
     mint = DEFAULT_MINT,
@@ -173,7 +173,7 @@ export const createUserBankIfNeeded = async (
  * @throws an error if the balance doesn't change within the timeout.
  */
 export const pollForTokenBalanceChange = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   {
     tokenAccount,
     initialBalance,
@@ -254,7 +254,7 @@ export const findAssociatedTokenAddress = async (
  * by the current user's Solana root wallet and the provided fee payer (likely via relay).
  */
 export const decorateCoinflowWithdrawalTransaction = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   audiusBackendInstance: AudiusBackend,
   {
     transaction,
@@ -361,7 +361,7 @@ export const decorateCoinflowWithdrawalTransaction = async (
  * this transfer and handles it appropriately.
  */
 type RecoverUsdcFromRootWalletParams = {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   /** The root wallet key pair */
   sender: Keypair
   /** The ethereum wallet address of the user, used to derive user bank */
@@ -431,7 +431,7 @@ export const recoverUsdcFromRootWallet = async ({
  *   destination token account doesn't exist this might fail.
  */
 type TransferFromUserBankParams = {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   /** The token mint address */
   mint: PublicKey
   connection: Connection

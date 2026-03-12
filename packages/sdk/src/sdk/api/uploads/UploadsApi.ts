@@ -7,7 +7,7 @@ export class UploadsApi {
   private readonly storage
 
   constructor(services: UploadsApiServicesConfig) {
-    this.storage = services.storageService
+    this.storage = services.storage
   }
 
   /**

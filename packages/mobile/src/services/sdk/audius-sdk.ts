@@ -1,7 +1,12 @@
 import { EventEmitter } from 'events'
 
-import type { AudiusSdk } from '@audius/sdk'
-import { Configuration, SolanaRelay, sdk, ArchiverService } from '@audius/sdk'
+import {
+  Configuration,
+  SolanaRelay,
+  createSdkWithServices,
+  type AudiusSdkWithServices,
+  ArchiverService
+} from '@audius/sdk'
 
 import { env } from 'app/services/env'
 
@@ -10,7 +15,7 @@ import { getAudiusWalletClient } from './auth'
 let inProgress = false
 const SDK_LOADED_EVENT_NAME = 'AUDIUS_SDK_LOADED'
 const sdkEventEmitter = new EventEmitter()
-let sdkInstance: AudiusSdk
+let sdkInstance: AudiusSdkWithServices
 
 const initSdk = async () => {
   inProgress = true
@@ -53,7 +58,7 @@ const initSdk = async () => {
   // Overrides some DN configuration from optimizely
   const audiusWalletClient = await getAudiusWalletClient()
 
-  const audiusSdk = sdk({
+  const audiusSdk = createSdkWithServices({
     appName: env.APP_NAME,
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,

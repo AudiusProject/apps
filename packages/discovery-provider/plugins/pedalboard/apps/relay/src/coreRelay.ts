@@ -114,7 +114,7 @@ export const coreRelay = async (
       metadata,
       subjectSig,
       nonce: nonceBytes
-    } = audiusSdk.services.entityManager.decodeManageEntity(
+    } = audiusSdk.services.entityManager!.decodeManageEntity(
       encodedABI as `0x${string}`
     )
 

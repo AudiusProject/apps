@@ -15,7 +15,7 @@ import { getEntityManagerActionKey } from './rateLimiter'
 const MAX_ACDC_GAS_LIMIT = 10485760
 
 const validateSender = async (encodedABI: string, senderAddress: string) => {
-  const recoveredAddress = await audiusSdk.services.entityManager.recoverSigner(
+  const recoveredAddress = await audiusSdk.services.entityManager!.recoverSigner(
     encodedABI as `0x${string}`
   )
   return recoveredAddress.toLowerCase() === senderAddress.toLowerCase()
@@ -210,7 +210,7 @@ export const retrieveUser = async (
   // if entitymanager transaction, recover signer
   if (contractRegistryKey === 'EntityManager') {
     const recoveredAddress =
-      await audiusSdk.services.entityManager.recoverSigner(
+      await audiusSdk.services.entityManager!.recoverSigner(
         encodedABI as `0x${string}`
       )
 
@@ -247,7 +247,7 @@ export const retrieveDeveloperApp = async (params: {
   contractAddress: string
 }): Promise<DeveloperApps | undefined> => {
   const { encodedABI } = params
-  const recoveredAddress = await audiusSdk.services.entityManager.recoverSigner(
+  const recoveredAddress = await audiusSdk.services.entityManager!.recoverSigner(
     encodedABI as `0x${string}`
   )
   return await discoveryDb<DeveloperApps>(Table.DeveloperApps)

@@ -20,9 +20,9 @@ import untildify from 'untildify'
 import { developmentConfig } from '../config/development'
 import { productionConfig } from '../config/production'
 import type { SdkServicesConfig } from '../config/types'
-import { sdk as audiusSdk } from '../sdk'
 import { Logger } from '../services'
 import type { SdkConfig } from '../types'
+import { createSdkWithServices } from '../createSdkWithServices'
 
 /**
  * Derives the sender addresses for Validators and Anti Abuse Oracles
@@ -158,7 +158,7 @@ const createLookupTable = async ({
       )
     )
   )
-  const sdk = audiusSdk({
+  const sdk = createSdkWithServices({
     appName: 'generate-rewards-lookup-table',
     environment,
     services: {
@@ -276,7 +276,7 @@ const updateLookupTable = async ({
       )
     )
   )
-  const sdk = audiusSdk({
+  const sdk = createSdkWithServices({
     appName: 'generate-rewards-lookup-table',
     environment,
     services: {

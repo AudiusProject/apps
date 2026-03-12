@@ -1,4 +1,4 @@
-import { type AudiusSdk, ChatEvents, Id } from '@audius/sdk'
+import { type AudiusSdkWithServices, ChatEvents, Id } from '@audius/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { Middleware } from 'redux'
 
@@ -13,7 +13,10 @@ const { connect, disconnect, addMessage, setMessageReactionSucceeded } =
   chatActions
 
 export const chatMiddleware =
-  (audiusSdk: () => Promise<AudiusSdk>, queryClient: QueryClient): Middleware =>
+  (
+    audiusSdk: () => Promise<AudiusSdkWithServices>,
+    queryClient: QueryClient
+  ): Middleware =>
   (store) => {
     let messageListener: ChatEvents['message'] | null = null
     let reactionListener: ChatEvents['reaction'] | null = null

@@ -4,7 +4,7 @@ import {
   SolanaRelayWalletAdapter,
   SolanaClient,
   SolanaRelay,
-  sdk
+  createSdkWithServices
 } from '@audius/sdk'
 
 const makeAAOSelector = () =>
@@ -62,7 +62,7 @@ export const audiusSdk = ({
   const solanaClient = solanaRpcEndpoint
     ? makeSolanaClient(solanaRelay, solanaRpcEndpoint)
     : undefined
-  return sdk({
+  return createSdkWithServices({
     appName: 'trending-challenge-rewards',
     apiKey,
     apiSecret,

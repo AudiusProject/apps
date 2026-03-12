@@ -1,6 +1,10 @@
 import { AUDIO, AudioWei, wAUDIO } from '@audius/fixed-decimal'
 import type { LocalStorage } from '@audius/hedgehog'
-import { AudiusSdk, Id, HedgehogWalletNotFoundError } from '@audius/sdk'
+import {
+  type AudiusSdkWithServices,
+  Id,
+  HedgehogWalletNotFoundError
+} from '@audius/sdk'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
@@ -159,7 +163,7 @@ export const audiusBackend = ({
   }: {
     userId: ID
     trackId: ID
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
@@ -189,7 +193,7 @@ export const audiusBackend = ({
         ComputedUserProperties,
         'updatedProfilePicture' | 'updatedCoverPhoto'
       >
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }) {
     let newMetadata = { ...metadata }
     try {
@@ -217,7 +221,11 @@ export const audiusBackend = ({
     return null
   }
 
-  async function clearNotificationBadges({ sdk }: { sdk: AudiusSdk }) {
+  async function clearNotificationBadges({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
       return await fetch(`${identityServiceUrl}/notifications/clear_badges`, {
@@ -233,7 +241,11 @@ export const audiusBackend = ({
     }
   }
 
-  async function getEmailNotificationSettings({ sdk }: { sdk: AudiusSdk }) {
+  async function getEmailNotificationSettings({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
       const res = await fetch(`${identityServiceUrl}/notifications/settings`, {
@@ -255,7 +267,7 @@ export const audiusBackend = ({
     emailFrequency,
     userId
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     emailFrequency: string
     userId: ID
   }) {
@@ -283,7 +295,7 @@ export const audiusBackend = ({
     sdk,
     settings
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     settings: Partial<Record<BrowserNotificationSetting, boolean>>
   }) {
     try {
@@ -309,7 +321,7 @@ export const audiusBackend = ({
     sdk,
     settings
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     settings: Partial<Record<PushNotificationSetting, boolean>>
   }) {
     try {
@@ -328,7 +340,13 @@ export const audiusBackend = ({
     }
   }
 
-  async function signData({ sdk, data }: { sdk: AudiusSdk; data: string }) {
+  async function signData({
+    sdk,
+    data
+  }: {
+    sdk: AudiusSdkWithServices
+    data: string
+  }) {
     try {
       const signature = await sdk.services.audiusWalletClient.signMessage({
         message: data
@@ -344,12 +362,20 @@ export const audiusBackend = ({
     }
   }
 
-  async function signGatedContentRequest({ sdk }: { sdk: AudiusSdk }) {
+  async function signGatedContentRequest({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     const data = `Gated content user signature at ${Date.now()}`
     return await signData({ sdk, data })
   }
 
-  async function signIdentityServiceRequest({ sdk }: { sdk: AudiusSdk }) {
+  async function signIdentityServiceRequest({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
     const data = `Click sign to authenticate with identity service: ${unixTs}`
     return await signData({ sdk, data })
@@ -359,7 +385,7 @@ export const audiusBackend = ({
     sdk,
     input
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     input?: any
   }) {
     let data
@@ -375,7 +401,7 @@ export const audiusBackend = ({
   async function getBrowserPushNotificationSettings({
     sdk
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
@@ -400,7 +426,7 @@ export const audiusBackend = ({
     sdk,
     pushEndpoint
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     pushEndpoint: string
   }) {
     try {
@@ -427,7 +453,7 @@ export const audiusBackend = ({
     sdk,
     deviceToken
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     deviceToken: string
   }) {
     try {
@@ -454,7 +480,7 @@ export const audiusBackend = ({
     enabled = true,
     subscription
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     enabled: boolean
     subscription: PushSubscription
   }) {
@@ -477,7 +503,7 @@ export const audiusBackend = ({
     sdk,
     subscription
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     subscription: PushSubscription
   }) {
     const { data, signature } = await signIdentityServiceRequest({ sdk })
@@ -495,7 +521,11 @@ export const audiusBackend = ({
     ).then((res) => res.json())
   }
 
-  async function getPushNotificationSettings({ sdk }: { sdk: AudiusSdk }) {
+  async function getPushNotificationSettings({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
       return await fetch(`${identityServiceUrl}/push_notifications/settings`, {
@@ -517,7 +547,7 @@ export const audiusBackend = ({
     deviceToken,
     deviceType
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     deviceToken: string
     deviceType: string
   }) {
@@ -547,7 +577,7 @@ export const audiusBackend = ({
     sdk,
     deviceToken
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     deviceToken: string
   }) {
     try {
@@ -571,7 +601,11 @@ export const audiusBackend = ({
     }
   }
 
-  async function updateUserLocationTimezone({ sdk }: { sdk: AudiusSdk }) {
+  async function updateUserLocationTimezone({
+    sdk
+  }: {
+    sdk: AudiusSdkWithServices
+  }) {
     try {
       const { data, signature } = await signIdentityServiceRequest({ sdk })
       const timezone = dayjs.tz.guess()
@@ -594,7 +628,7 @@ export const audiusBackend = ({
     sdk,
     name
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     name: string
   }) {
     try {
@@ -617,7 +651,7 @@ export const audiusBackend = ({
     sdk,
     hasSignedInNativeMobile
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     hasSignedInNativeMobile: boolean
   }) {
     try {
@@ -641,7 +675,7 @@ export const audiusBackend = ({
     sdk,
     token
   }: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     token: string
   }) {
     try {
@@ -672,7 +706,7 @@ export const audiusBackend = ({
     sdk
   }: {
     ethAddress: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }): Promise<AudioWei | null> {
     if (!ethAddress) return null
 
@@ -699,7 +733,7 @@ export const audiusBackend = ({
     sdk
   }: {
     ethAddress: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }): Promise<AudioWei | null> {
     try {
       const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
@@ -735,7 +769,7 @@ export const audiusBackend = ({
     sdk
   }: {
     address: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }): Promise<AudioWei> {
     try {
       const addressPubKey = new PublicKey(address)
@@ -754,7 +788,10 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdk) {
+  async function getAddressTotalStakedBalance(
+    address: string,
+    sdk: AudiusSdkWithServices
+  ) {
     if (!address) return null
 
     try {
@@ -783,7 +820,7 @@ export const audiusBackend = ({
     connection: Connection,
     address: string,
     mint: PublicKey,
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   ) {
     if (!window.phantom) {
       throw new Error(
@@ -847,7 +884,7 @@ export const audiusBackend = ({
     mint
   }: {
     address: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     mint: PublicKey
   }) {
     const connection = sdk.services.solanaClient.connection
@@ -908,7 +945,7 @@ export const audiusBackend = ({
     address: string
     amount: AudioWei
     ethAddress: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     mint: PublicKey
     recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
   }) {
@@ -951,7 +988,7 @@ export const audiusBackend = ({
     ethAddress: string
     destination: PublicKey
     amount: AudioWei
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     mint: MintName | PublicKey
   }) {
     console.info(
@@ -1002,7 +1039,13 @@ export const audiusBackend = ({
     return signature
   }
 
-  async function getSignature({ data, sdk }: { data: any; sdk: AudiusSdk }) {
+  async function getSignature({
+    data,
+    sdk
+  }: {
+    data: any
+    sdk: AudiusSdkWithServices
+  }) {
     return signData({ data, sdk })
   }
 
@@ -1016,7 +1059,7 @@ export const audiusBackend = ({
     sdk
   }: {
     address: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }) {
     try {
       const { amount } = await getAssociatedTokenAccountInfo({
@@ -1069,7 +1112,7 @@ export const audiusBackend = ({
     mint = 'wAUDIO'
   }: {
     address: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     mint?: MintName | PublicKey
   }) {
     const connection = sdk.services.solanaClient.connection

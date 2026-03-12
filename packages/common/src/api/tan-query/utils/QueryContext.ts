@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import type { Dispatch } from 'redux'
 import { getContext } from 'typed-redux-saga'
 
@@ -21,7 +21,7 @@ import {
 } from '../../../models'
 
 export type QueryContextType = {
-  audiusSdk: () => Promise<AudiusSdk>
+  audiusSdk: () => Promise<AudiusSdkWithServices>
   audiusBackend: AudiusBackend
   authService: AuthService
   solanaWalletService: SolanaWalletService

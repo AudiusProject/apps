@@ -92,7 +92,7 @@ export const rateLimiterMiddleware = async (
 }
 
 export const getEntityManagerActionKey = (encodedABI: string): string => {
-  const decodedABI = audiusSdk.services.entityManager.decodeManageEntity(
+  const decodedABI = audiusSdk.services.entityManager!.decodeManageEntity(
     encodedABI as `0x${string}`
   )
   const { action, entityType } = decodedABI

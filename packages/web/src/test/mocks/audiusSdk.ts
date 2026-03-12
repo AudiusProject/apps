@@ -3,12 +3,12 @@ import {
   ClaimableTokensClient,
   PaymentRouterClient,
   RewardManagerClient,
-  sdk,
+  createSdkWithServices,
   StorageNodeSelectorService
 } from '@audius/sdk'
 
 export const audiusSdk = () => {
-  return sdk({
+  return createSdkWithServices({
     appName: 'test',
     environment: 'development',
     services: {

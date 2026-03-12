@@ -1,5 +1,6 @@
 import fetch from 'cross-fetch'
 
+import { ResolveApi } from './api/ResolveApi'
 import {
   ChallengesApi,
   CoinsApi,
@@ -12,7 +13,6 @@ import {
   NotificationsApi,
   PlaylistsApi,
   PrizesApi,
-  ResolveApi,
   RewardsApi,
   SearchApi,
   TipsApi,
@@ -32,9 +32,10 @@ import {
 import { OAuth } from './oauth'
 import { OAuthTokenStore } from './oauth/tokenStore'
 import { Logger, Storage, StorageNodeSelector } from './services'
-import { type SdkConfig } from './types'
+import { SdkConfigSchema, type SdkConfig } from './types'
 
-export const createSdkWithoutServices = (config: SdkConfig) => {
+export const createSdk = (config: SdkConfig) => {
+  SdkConfigSchema.parse(config)
   const { services, environment } = config
 
   const appName = 'appName' in config ? config.appName : undefined
@@ -65,7 +66,8 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
       ? new OAuth({
           apiKey,
           tokenStore,
-          basePath
+          basePath,
+          logger
         })
       : undefined
 
@@ -116,6 +118,7 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
 
   // Initialize API clients
   const usersApi = new UsersApi(apiConfig)
+  const resolveApi = new ResolveApi(apiConfig)
 
   return {
     oauth,
@@ -125,7 +128,7 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     // albums
     playlists: new PlaylistsApi(apiConfig),
     tips: new TipsApi(apiConfig),
-    resolve: new ResolveApi(apiConfig),
+    resolve: resolveApi.resolve.bind(resolveApi),
     // chats
     // grants
     developerApps: new DeveloperAppsApi(apiConfig),
@@ -142,7 +145,7 @@ export const createSdkWithoutServices = (config: SdkConfig) => {
     challenges: new ChallengesApi(apiConfig),
     prizes: new PrizesApi(apiConfig),
     uploads: new UploadsApi({
-      storageService:
+      storage:
         services?.storage ??
         new Storage({
           storageNodeSelector:

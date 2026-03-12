@@ -1,4 +1,4 @@
-import { AudiusSdk, sdk } from '@audius/sdk'
+import { createSdkWithServices, type AudiusSdkWithServices } from '@audius/sdk'
 import { readConfig, Environment } from './config'
 
 const environmentToSdkEnvironment: Record<
@@ -9,12 +9,12 @@ const environmentToSdkEnvironment: Record<
   prod: 'production'
 }
 
-let audiusSdk: AudiusSdk | undefined = undefined
+let audiusSdk: AudiusSdkWithServices | undefined = undefined
 
 export const getAudiusSdk = () => {
   if (audiusSdk === undefined) {
     const config = readConfig()
-    audiusSdk = sdk({
+    audiusSdk = createSdkWithServices({
       appName: 'audius-client',
       environment: environmentToSdkEnvironment[config.environment]
     })

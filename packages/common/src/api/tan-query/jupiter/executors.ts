@@ -1,5 +1,5 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
@@ -72,7 +72,7 @@ async function executeMeteoraSwap(
   swapDirection: 'audioToCoin' | 'coinToAudio',
   inputAmountUi: number,
   dependencies: {
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
     userPublicKey: PublicKey
     keypair: Keypair
     ethAddress: string
