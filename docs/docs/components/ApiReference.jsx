@@ -391,6 +391,10 @@ function buildStyles() {
         --api-left-offset: 0px;
       }
 
+      #api-reference-root {
+        overflow: hidden;
+      }
+
       #api-reference-root::before {
         display: none;
       }
@@ -405,19 +409,27 @@ function buildStyles() {
         min-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
         max-width: min(86vw, var(--vocs-sidebar_width, 300px)) !important;
         height: 100%;
-        max-height: 100%;
+        max-height: calc(100dvh - var(--vocs-topNav_height, 60px));
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-        touch-action: pan-y;
+      }
+
+      .sl-elements .sl-overflow-y-auto,
+      .sl-elements [class*="overflow-y-auto"] {
+        max-height: calc(100vh - var(--vocs-topNav_height, 60px));
+        max-height: calc(100dvh - var(--vocs-topNav_height, 60px));
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch !important;
       }
 
       .sl-elements aside.sl-flex .sl-overflow-y-auto,
       .sl-elements aside.sl-flex [class*="overflow-y-auto"] {
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-        touch-action: pan-y;
+        max-height: calc(100vh - var(--vocs-topNav_height, 60px));
+        max-height: calc(100dvh - var(--vocs-topNav_height, 60px));
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch !important;
       }
 
       .sl-elements pre,
@@ -514,11 +526,12 @@ function patchStoplightDOM(root) {
 
   const isMobile = window.matchMedia(MOBILE_QUERY).matches
   if (isMobile) {
-    root.querySelectorAll('aside.sl-flex, aside [class*="overflow-y-auto"]').forEach((el) => {
-      el.style.setProperty('overflow-y', 'auto', 'important')
+    root.querySelectorAll('.sl-overflow-y-auto, [class*="overflow-y-auto"], aside.sl-flex').forEach((el) => {
+      el.style.setProperty('max-height', 'calc(100vh - var(--vocs-topNav_height, 60px))')
+      el.style.setProperty('max-height', 'calc(100dvh - var(--vocs-topNav_height, 60px))')
+      el.style.setProperty('overflow-x', 'hidden', 'important')
+      el.style.setProperty('overflow-y', 'scroll', 'important')
       el.style.setProperty('-webkit-overflow-scrolling', 'touch')
-      el.style.setProperty('overscroll-behavior', 'contain')
-      el.style.setProperty('touch-action', 'pan-y')
     })
   }
 }
@@ -647,6 +660,21 @@ export default function ApiReference() {
           el.style.removeProperty('background-color')
         }
       })
+
+      if (window.matchMedia(MOBILE_QUERY).matches) {
+        const scrollSelector =
+          '[data-stoplight-elements] aside, ' +
+          '[data-stoplight-elements] .sl-overflow-y-auto, ' +
+          '[data-stoplight-elements] [class*="overflow-y-auto"]'
+
+        document.body.querySelectorAll(scrollSelector).forEach((el) => {
+          el.style.setProperty('max-height', 'calc(100vh - var(--vocs-topNav_height, 60px))')
+          el.style.setProperty('max-height', 'calc(100dvh - var(--vocs-topNav_height, 60px))')
+          el.style.setProperty('overflow-x', 'hidden', 'important')
+          el.style.setProperty('overflow-y', 'scroll', 'important')
+          el.style.setProperty('-webkit-overflow-scrolling', 'touch')
+        })
+      }
     }
     patchPortals()
     const bodyObserver = new MutationObserver(patchPortals)
