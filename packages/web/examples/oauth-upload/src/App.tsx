@@ -143,11 +143,10 @@ export default function App() {
       const audioUpload = sdk.uploads.createAudioUpload({ file: audioFile })
 
       // Step 2 — upload cover art (optional)
-      let imageUpload
-      if (coverFile) {
-        setResult('Uploading cover art...')
-        imageUpload = sdk.uploads.createImageUpload({ file: coverFile })
-      }
+      if (coverFile) setResult('Uploading cover art...')
+      const imageUpload = coverFile
+        ? sdk.uploads.createImageUpload({ file: coverFile })
+        : undefined
 
       // Uploads can be done in parallel since they are independent, so start them both before awaiting either.
       const [audioResult, coverArtSizes] = await Promise.all([
