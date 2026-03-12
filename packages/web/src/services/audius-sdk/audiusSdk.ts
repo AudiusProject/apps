@@ -1,5 +1,5 @@
 import {
-  AudiusSdk,
+  AudiusSdkWithServices,
   createSdkWithServices,
   Configuration,
   SolanaRelay,
@@ -15,7 +15,7 @@ import { getAudiusWalletClient } from './auth'
 
 declare global {
   interface Window {
-    audiusSdk: AudiusSdk
+    audiusSdk: AudiusSdkWithServices
   }
 }
 

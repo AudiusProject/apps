@@ -5,14 +5,18 @@ import { logger } from './logger'
 import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import { connectWeb3 } from './web3'
 import { app } from './server'
-import { AudiusSdk, createSdkWithServices } from '@audius/sdk'
+import {
+  AudiusSdk,
+  createSdkWithServices,
+  type AudiusSdkWithServices
+} from '@audius/sdk'
 
 export type SharedData = {
   config: Config
   web3: ethers.providers.JsonRpcProvider
   sdk: AudiusSdk
   wallets: WalletManager
-  audiusSdk: AudiusSdk
+  audiusSdk: AudiusSdkWithServices
 }
 
 export const config = readConfig()
@@ -27,7 +31,7 @@ export const discoveryDb = initializeDiscoveryDb(
 
 export let web3: providers.JsonRpcProvider
 export let wallets: WalletManager
-export let audiusSdk: AudiusSdk
+export let audiusSdk: AudiusSdkWithServices
 
 const main = async () => {
   audiusSdk = createSdkWithServices({

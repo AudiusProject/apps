@@ -1,5 +1,5 @@
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
-import { Id, OptionalId, type AudiusSdk } from '@audius/sdk'
+import { Id, OptionalId, type AudiusSdkWithServices } from '@audius/sdk'
 import type { createJupiterApiClient, QuoteResponse } from '@jup-ag/api'
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import {
@@ -320,7 +320,7 @@ type GetPurchaseMetadataArgs = {
  * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/tracks/TracksApi.ts#L386 purchase}
  */
 function* purchaseTrackWithCoinflow(args: {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   trackId: ID
   userId: ID
   price: number
@@ -428,7 +428,7 @@ function* purchaseTrackWithCoinflow(args: {
  * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/albums/AlbumsApi.ts#L386 purchase}
  */
 function* purchaseAlbumWithCoinflow(args: {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   albumId: ID
   userId: ID
   price: number

@@ -1,4 +1,4 @@
-import { AudiusSdk, OptionalId } from '@audius/sdk'
+import { AudiusSdkWithServices, OptionalId } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataToSdk } from '~/adapters/user'
@@ -84,7 +84,7 @@ export const useUpdateUser = () => {
 }
 
 export async function updateUser(
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   userId: number,
   metadata: Partial<UserMetadata> | { playlist_library: PlaylistLibrary },
   coverArtFile?: File,

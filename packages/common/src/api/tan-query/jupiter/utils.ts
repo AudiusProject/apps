@@ -1,5 +1,5 @@
 import { USDC } from '@audius/fixed-decimal'
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
@@ -121,7 +121,7 @@ export async function addTransferToUserBankInstructions({
   ethAddress: string
   amountLamports: bigint
   sourceAta: PublicKey
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   feePayer: PublicKey
   instructions: TransactionInstruction[]
 }): Promise<PublicKey> {
@@ -372,7 +372,7 @@ export const getJupiterSwapInstructions = async (
 }
 
 export const buildAndSendTransaction = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   keypair: Keypair,
   feePayer: PublicKey,
   instructions: TransactionInstruction[],
@@ -421,7 +421,7 @@ export const invalidateSwapQueries = async (
 }
 
 export const prepareOutputUserBank = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   ethAddress: string,
   outputTokenConfig: UserBankManagedTokenInfo
 ): Promise<string> => {

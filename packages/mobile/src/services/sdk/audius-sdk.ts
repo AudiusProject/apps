@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events'
 
-import type { AudiusSdk } from '@audius/sdk'
 import {
   Configuration,
   SolanaRelay,
   createSdkWithServices,
+  type AudiusSdkWithServices,
   ArchiverService
 } from '@audius/sdk'
 
@@ -15,7 +15,7 @@ import { getAudiusWalletClient } from './auth'
 let inProgress = false
 const SDK_LOADED_EVENT_NAME = 'AUDIUS_SDK_LOADED'
 const sdkEventEmitter = new EventEmitter()
-let sdkInstance: AudiusSdk
+let sdkInstance: AudiusSdkWithServices
 
 const initSdk = async () => {
   inProgress = true

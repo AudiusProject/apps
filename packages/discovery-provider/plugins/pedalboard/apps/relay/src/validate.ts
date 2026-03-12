@@ -2,7 +2,7 @@ import { audiusSdk } from '.'
 
 /// async in case we need to make a db call
 export const validateTransactionData = async (encodedABI: string) => {
-  const decoded = audiusSdk.services.entityManager.decodeManageEntity(
+  const decoded = audiusSdk.services.entityManager!.decodeManageEntity(
     encodedABI as `0x${string}`
   )
   // TODO: validate decoded tx with zod

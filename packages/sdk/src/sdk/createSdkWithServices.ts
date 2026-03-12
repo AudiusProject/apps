@@ -562,3 +562,5 @@ const initializeApis = ({
     uploads
   }
 }
+
+export type AudiusSdkWithServices = ReturnType<typeof createSdkWithServices>
