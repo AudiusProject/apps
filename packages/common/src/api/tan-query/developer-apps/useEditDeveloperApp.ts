@@ -18,7 +18,7 @@ export const useEditDeveloperApp = () => {
       if (!currentUserId) {
         throw new Error('No current user ID')
       }
-      const { name, description, imageUrl, apiKey } = editApp
+      const { name, description, imageUrl, apiKey, redirectUris } = editApp
       const sdk = await audiusSdk()
 
       await sdk.developerApps.updateDeveloperApp({
@@ -26,12 +26,13 @@ export const useEditDeveloperApp = () => {
         metadata: {
           name,
           description,
-          imageUrl
+          imageUrl,
+          redirectUris
         },
         userId: Id.parse(currentUserId)
       })
 
-      return { name, description, imageUrl, apiKey }
+      return { name, description, imageUrl, apiKey, redirectUris }
     },
     onSuccess: (editApp: DeveloperApp) => {
       queryClient.setQueryData(

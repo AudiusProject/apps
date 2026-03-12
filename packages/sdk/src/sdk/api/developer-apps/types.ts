@@ -6,7 +6,7 @@ import { isApiKeyValid } from '../../utils/apiKey'
 
 const DEVELOPER_APP_MAX_DESCRIPTION_LENGTH = 128
 const DEVELOPER_APP_MAX_IMAGE_URL_LENGTH = 2000
-const DEVELOPER_APP_IMAGE_URL_REGEX = /^(https?):\/\//i
+const URL_REGEX = /^(https?):\/\//i
 
 export type DeveloperAppsApiServicesConfig = {
   entityManager?: EntityManagerService
@@ -19,12 +19,21 @@ export const CreateDeveloperAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_MAX_IMAGE_URL_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: 'Invalid URL'
       })
   ),
   userId: HashId,
-  redirectUris: z.array(z.string().max(2000)).max(50).optional()
+  redirectUris: z
+    .array(
+      z
+        .string()
+        .max(2000)
+        .refine((value) => URL_REGEX.test(value), {
+          message: 'Invalid URL'
+        })
+    )
+    .optional()
 })
 
 export type EntityManagerCreateDeveloperAppRequest = z.input<
@@ -41,12 +50,21 @@ export const UpdateDeveloperAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_MAX_IMAGE_URL_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: 'Invalid URL'
       })
   ),
   userId: HashId,
-  redirectUris: z.array(z.string().max(2000)).max(50).optional()
+  redirectUris: z
+    .array(
+      z
+        .string()
+        .max(2000)
+        .refine((value) => URL_REGEX.test(value), {
+          message: 'Invalid URL'
+        })
+    )
+    .optional()
 })
 
 export type EntityManagerUpdateDeveloperAppRequest = z.input<
