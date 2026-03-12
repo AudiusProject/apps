@@ -37,13 +37,15 @@ export const useDeveloperApps = <TResult = DeveloperApp[]>(
           name,
           description,
           image_url,
-          api_access_keys
+          api_access_keys,
+          redirect_uris
         }): DeveloperApp => ({
           name,
           description: description ?? undefined,
           imageUrl: image_url ?? undefined,
           apiKey: address.slice(2),
-          api_access_keys
+          api_access_keys,
+          redirectUris: redirect_uris ?? undefined
         })
       )
     },

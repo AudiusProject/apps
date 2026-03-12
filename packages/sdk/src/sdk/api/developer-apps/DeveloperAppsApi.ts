@@ -140,6 +140,7 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
         description?: string | null
         image_url?: string | null
         api_access_keys?: Array<{ api_access_key: string; is_active: boolean }>
+        redirect_uris?: string[]
       }>
     }
     return json

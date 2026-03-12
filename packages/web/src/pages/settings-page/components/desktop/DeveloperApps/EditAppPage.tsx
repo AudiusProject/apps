@@ -17,7 +17,10 @@ import {
   Button,
   Flex,
   IconEmbed,
-  Divider
+  Divider,
+  IconPlus,
+  Text,
+  TextInput
 } from '@audius/harmony'
 import { Form, Formik, useField } from 'formik'
 import { z } from 'zod'
@@ -53,7 +56,13 @@ const messages = {
   back: 'Back',
   save: 'Save Changes',
   saving: 'Saving',
-  miscError: 'Sorry, something went wrong. Please try again later.'
+  miscError: 'Sorry, something went wrong. Please try again later.',
+  redirectUrisLabel: 'Redirect URIs',
+  redirectUrisHelp:
+    'Allowed callback URLs for OAuth2 authorization flows for when using OAuth2 PKCE to obtain user access tokens.',
+  removeRedirectUri: 'Remove redirect URI',
+  addRedirectUri: 'Add Redirect URI',
+  redirectUriPlaceholder: 'https://example.com/callback'
 }
 
 const ImageField = ({ name }: { name: string }) => {
@@ -93,6 +102,10 @@ export const EditAppPage = (props: EditAppPageProps) => {
   const initialBearerTokens = getBearerTokens(params)
   const [bearerTokens, setBearerTokens] =
     useState<string[]>(initialBearerTokens)
+  const [redirectUriFields, setRedirectUriFields] = useState<string[]>(() => {
+    const uris = params?.redirectUris ?? []
+    return uris.length > 0 ? uris : ['']
+  })
 
   const record = useRecord()
 
@@ -104,6 +117,8 @@ export const EditAppPage = (props: EditAppPageProps) => {
   // Sync bearer tokens when params change (e.g. navigating to different app)
   useEffect(() => {
     setBearerTokens(getBearerTokens(params))
+    const uris = params?.redirectUris ?? []
+    setRedirectUriFields(uris.length > 0 ? uris : [''])
   }, [params])
 
   useEffect(() => {
@@ -138,9 +153,12 @@ export const EditAppPage = (props: EditAppPageProps) => {
           description: values.description
         })
       )
-      mutate(values)
+      const redirectUris = redirectUriFields
+        .map((u) => u.trim())
+        .filter(Boolean)
+      mutate({ ...values, redirectUris })
     },
-    [mutate, record]
+    [mutate, record, redirectUriFields]
   )
 
   const initialValues: DeveloperAppValues = {
@@ -180,6 +198,28 @@ export const EditAppPage = (props: EditAppPageProps) => {
       }
     })
   }, [apiKey, createAccessKey])
+
+  const handleUpdateRedirectUri = useCallback(
+    (index: number, value: string) => {
+      setRedirectUriFields((prev) => {
+        const next = [...prev]
+        next[index] = value
+        return next
+      })
+    },
+    []
+  )
+
+  const handleAddRedirectUriField = useCallback(() => {
+    setRedirectUriFields((prev) => [...prev, ''])
+  }, [])
+
+  const handleRemoveRedirectUriField = useCallback((index: number) => {
+    setRedirectUriFields((prev) => {
+      const next = prev.filter((_, i) => i !== index)
+      return next.length > 0 ? next : ['']
+    })
+  }, [])
 
   if (!params) return null
 
@@ -281,6 +321,45 @@ export const EditAppPage = (props: EditAppPageProps) => {
           >
             {messages.createNewToken}
           </Button>
+          <Flex direction='column' gap='s'>
+            <Text variant='body' strength='strong'>
+              {messages.redirectUrisLabel}
+            </Text>
+            <Text variant='body' size='s' color='subdued'>
+              {messages.redirectUrisHelp}
+            </Text>
+            {redirectUriFields.map((uri, index) => {
+              const isLast = index === redirectUriFields.length - 1
+              return (
+                <Flex key={index} gap='s' alignItems='center'>
+                  <TextInput
+                    hideLabel={true}
+                    label={messages.addRedirectUri}
+                    placeholder={messages.redirectUriPlaceholder}
+                    value={uri}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleUpdateRedirectUri(index, e.target.value)
+                    }
+                  />
+                  {isLast ? (
+                    <IconButton
+                      onClick={handleAddRedirectUriField}
+                      aria-label={messages.addRedirectUri}
+                      color='default'
+                      icon={IconPlus}
+                    />
+                  ) : (
+                    <IconButton
+                      onClick={() => handleRemoveRedirectUriField(index)}
+                      aria-label={messages.removeRedirectUri}
+                      color='subdued'
+                      icon={IconTrash}
+                    />
+                  )}
+                </Flex>
+              )
+            })}
+          </Flex>
           <div className={styles.actionsContainer}>
             <Button
               variant='secondary'

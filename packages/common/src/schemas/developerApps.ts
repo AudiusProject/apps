@@ -23,6 +23,8 @@ export type DeveloperApp = {
   bearerToken?: string
   /** Bearer tokens from API when fetched with include=metrics */
   api_access_keys?: ApiAccessKey[]
+  /** Pre-registered OAuth redirect/callback URIs */
+  redirectUris?: string[]
 }
 
 export const developerAppSchema = z.object({
@@ -49,7 +51,8 @@ export const developerAppEditSchema = z.object({
         message: messages.invalidUrl
       })
   ),
-  description: z.string().max(DEVELOPER_APP_DESCRIPTION_MAX_LENGTH).optional()
+  description: z.string().max(DEVELOPER_APP_DESCRIPTION_MAX_LENGTH).optional(),
+  redirectUris: z.array(z.string().max(2000)).max(50).optional()
 })
 
 export type NewAppPayload = Omit<DeveloperApp, 'apiKey'>
