@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const DEVELOPER_APP_DESCRIPTION_MAX_LENGTH = 128
 export const DEVELOPER_APP_NAME_MAX_LENGTH = 50
 export const DEVELOPER_APP_IMAGE_URL_MAX_LENGTH = 2000
-const DEVELOPER_APP_IMAGE_URL_REGEX = /^(https?):\/\//i
+const URL_REGEX = /^(https?):\/\//i
 
 const messages = {
   invalidUrl: 'Invalid URL'
@@ -33,7 +33,7 @@ export const developerAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_IMAGE_URL_MAX_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: messages.invalidUrl
       })
   ),
@@ -47,12 +47,23 @@ export const developerAppEditSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_IMAGE_URL_MAX_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: messages.invalidUrl
       })
   ),
   description: z.string().max(DEVELOPER_APP_DESCRIPTION_MAX_LENGTH).optional(),
-  redirectUris: z.array(z.string().max(2000)).max(50).optional()
+  redirectUris: z
+    .array(
+      z
+        .string()
+        .max(2000)
+        .refine((value) => URL_REGEX.test(value), {
+          message: messages.invalidUrl
+        })
+        .optional()
+    )
+    .max(50)
+    .optional()
 })
 
 export type NewAppPayload = Omit<DeveloperApp, 'apiKey'>

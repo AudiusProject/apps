@@ -19,8 +19,7 @@ import {
   IconEmbed,
   Divider,
   IconPlus,
-  Text,
-  TextInput
+  Text
 } from '@audius/harmony'
 import { FieldArray, Form, Formik, useField } from 'formik'
 import { z } from 'zod'
@@ -31,6 +30,7 @@ import { TextAreaField, TextField } from 'components/form-fields'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
+import { removeNullable } from 'utils/typeUtils'
 
 import styles from './EditAppPage.module.css'
 import { MaskedSecretDisplay } from './MaskedSecretDisplay'
@@ -57,9 +57,9 @@ const messages = {
   save: 'Save Changes',
   saving: 'Saving',
   miscError: 'Sorry, something went wrong. Please try again later.',
-  redirectUrisLabel: 'Redirect URIs',
+  redirectUrisLabel: 'Registered Callback URLs',
   redirectUrisHelp:
-    'Allowed callback URLs for OAuth2 authorization flows for when using OAuth2 PKCE to obtain user access tokens.',
+    'Allowed values for the redirect_uri query parameter when using OAuth2 to obtain user access tokens.',
   removeRedirectUri: 'Remove redirect URI',
   addRedirectUri: 'Add Redirect URI',
   redirectUriPlaceholder: 'https://example.com/callback'
@@ -98,7 +98,7 @@ const getBearerTokens = (params: EditAppPageProps['params']) => {
 
 export const EditAppPage = (props: EditAppPageProps) => {
   const { params, setPage } = props
-  const { name, description, apiKey, imageUrl } = params ?? {}
+  const { name, apiKey } = params ?? {}
   const initialBearerTokens = getBearerTokens(params)
   const [bearerTokens, setBearerTokens] =
     useState<string[]>(initialBearerTokens)
@@ -108,7 +108,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
   const { isSuccess, isError, error, mutate, isPending } = useEditDeveloperApp()
   const deactivateAccessKey = useDeactivateDeveloperAppAccessKey()
   const createAccessKey = useCreateDeveloperAppAccessKey()
-  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Sync bearer tokens when params change (e.g. navigating to different app)
   useEffect(() => {
@@ -129,7 +128,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
 
   useEffect(() => {
     if (isError) {
-      setSubmitError(messages.miscError)
       record(
         make(Name.DEVELOPER_APP_EDIT_ERROR, {
           error: error?.message
@@ -140,17 +138,19 @@ export const EditAppPage = (props: EditAppPageProps) => {
 
   const handleSubmit = useCallback(
     (values: DeveloperAppValues) => {
-      setSubmitError(null)
       record(
         make(Name.DEVELOPER_APP_EDIT_SUBMIT, {
           name: values.name,
           description: values.description
         })
       )
+      // Trim redirect URIs and remove empty ones
       const redirectUris = (values.redirectUris ?? [])
-        .map((u) => u.trim())
-        .filter(Boolean)
-      mutate({ ...values, redirectUris })
+        .map((u) => u?.trim())
+        .filter(removeNullable)
+      // Trim image URL and set to undefined if empty string
+      const imageUrl = values.imageUrl?.trim() || undefined
+      mutate({ ...values, redirectUris, imageUrl })
     },
     [mutate, record]
   )
@@ -306,7 +306,7 @@ export const EditAppPage = (props: EditAppPageProps) => {
               {messages.redirectUrisHelp}
             </Text>
             <FieldArray name='redirectUris'>
-              {({ push, remove, replace, form }) => {
+              {({ push, remove, form }) => {
                 const uris: string[] = form.values.redirectUris
                 return (
                   <>
@@ -314,14 +314,11 @@ export const EditAppPage = (props: EditAppPageProps) => {
                       const isLast = index === uris.length - 1
                       return (
                         <Flex key={index} gap='s' alignItems='center'>
-                          <TextInput
-                            hideLabel={true}
+                          <TextField
+                            name={`redirectUris.${index}`}
                             label={`${messages.addRedirectUri} ${index + 1}`}
                             placeholder={messages.redirectUriPlaceholder}
-                            value={uri}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>
-                            ) => replace(index, e.target.value)}
+                            disabled={isPending}
                           />
                           {isLast ? (
                             <IconButton
@@ -365,11 +362,11 @@ export const EditAppPage = (props: EditAppPageProps) => {
               {isPending ? messages.saving : messages.save}
             </Button>
           </div>
-          {submitError == null ? null : (
+          {isError ? (
             <div className={styles.errorContainer}>
               <span className={styles.errorText}>{messages.miscError}</span>
             </div>
-          )}
+          ) : null}
         </Flex>
       </Form>
     </Formik>
