@@ -90,9 +90,11 @@
         }
 
         if (login) {
-          const entropy = decodeLoginEntropy(login)
-          if (entropy) {
-            window.localStorage.setItem('hedgehog-entropy-key', entropy)
+          if (!isEmailPasswordRecovery) {
+            const entropy = decodeLoginEntropy(login)
+            if (entropy) {
+              window.localStorage.setItem('hedgehog-entropy-key', entropy)
+            }
           }
           let redirectUrl = location.protocol + '//' + location.host
           if (useHashRouting) {
