@@ -334,7 +334,7 @@ export const EditAppPage = (props: EditAppPageProps) => {
                 <Flex key={index} gap='s' alignItems='center'>
                   <TextInput
                     hideLabel={true}
-                    label={messages.addRedirectUri}
+                    label={`${messages.addRedirectUri} ${index + 1}`}
                     placeholder={messages.redirectUriPlaceholder}
                     value={uri}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
