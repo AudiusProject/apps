@@ -4,10 +4,7 @@
 
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   background: #fff;
   color: #1a1a1a;
 }
@@ -201,6 +198,6 @@ body {
 
 .error {
   color: #d32f2f;
-  font-size: 13px;
   margin-top: 12px;
+  font-size: 13px;
 }

@@ -1,58 +1,61 @@
-# Upload track (Web)
+# upload
 
-Minimal Vite + React app that lets users **sign in via OAuth** (popup) and **upload a track** using the SDK. Use this as a reference for:
+A serverless Audius track upload example using SDK + OAuth PKCE entirely in the browser. No backend server required.
 
-- **SDK setup** in a browser / Vite app (singleton, node polyfills)
-- **OAuth popup flow** (scope=write) — opens popup, postMessage for token
-- **uploadTrackFiles** — client uploads audio + cover to storage
-- **Server-side createTrack** — client POSTs `{ userId, metadata }`; server uses developer app bearer
+## How it works
 
-## Requirements
+1. User clicks "Sign in with Audius" — `sdk.oauth.loginAsync({ scope: 'write' })` opens a popup, runs the PKCE flow, and stores the access token internally in the SDK's `tokenStore`.
+2. User picks an audio file (and optional cover art), fills in title/genre/description.
+3. On upload:
+   - `sdk.uploads.createAudioUpload({ file })` uploads audio to a storage node → returns `trackCid`, `origFileCid`, `duration`, etc.
+   - `sdk.uploads.createImageUpload({ file })` uploads cover art → returns `coverArtSizes` CID.
+   - `sdk.tracks.createTrack({ userId, metadata })` registers the track on-chain, authenticated via the stored OAuth access token.
 
-- **Your own server** with `AUDIUS_API_KEY` and `AUDIUS_BEARER_TOKEN` in `.env`
-- **Developer app** at [audius.co/settings](https://audius.co/settings) → Developer Apps
-
-## How to run
-
-### 1. Build the SDK and run the server
-
-From the **apps repo root**:
+## Setup
 
 ```bash
+cp .env.example .env
+# Edit .env and set VITE_AUDIUS_API_KEY to your developer app API key
+# Get one at audius.co/settings → Developer Apps
 npm install
 npm run build -w @audius/sdk
-cd packages/web/examples/upload/server
-cp .env.example .env
-# Edit .env: AUDIUS_API_KEY, AUDIUS_BEARER_TOKEN
-npm install
-npm start
-```
-
-Server runs at `http://localhost:3003`:
-
-- `POST /create-track` — body: `{ userId, metadata }` — uses developer app bearer
-
-### 2. Run the client
-
-In another terminal:
-
-```bash
-cd packages/web/examples/upload
-cp .env.example .env
-# Edit .env: VITE_AUDIUS_API_KEY, VITE_WRITE_SERVER_URL=http://localhost:3003
-npm install
 npm run dev
 ```
 
-Or from repo root: `npm run web:example:upload`.
+## Running against local dev vs production
 
-Open the URL shown (default `http://localhost:5176`). Sign in with Audius (popup) → pick audio/cover → enter title/genre → click **Upload**.
+By default the example talks to the **production** Audius network. To point it
+at a local protocol stack instead:
 
-## Flow
+1. Start the local stack and expose its ports to the host:
+   ```bash
+   # from the repo root
+   audius-compose up
+   audius-compose connect
+   ```
+2. Set the environment variable in your `.env`:
+   ```env
+   VITE_AUDIUS_ENVIRONMENT=development
+   ```
+3. Start (or restart) the dev server:
+   ```bash
+   npm run dev
+   ```
 
-1. User clicks "Sign in with Audius" → popup opens, returns token via postMessage
-2. Client verifies token via `verifyIDToken`, gets `userId`
-3. User picks audio (required) + cover (optional), enters title/genre
-4. Client calls `sdk.tracks.uploadTrackFiles({ audioFile, imageFile })` → gets trackCid, etc.
-5. Client POSTs `{ userId, metadata }` to `/create-track`
-6. Server uses `sdk({ apiKey, bearerToken }).tracks.createTrack()` with developer app bearer
+To switch back to production, remove or comment out the
+`VITE_AUDIUS_ENVIRONMENT` line (or set it to `production`) and restart.
+
+## Environment variables
+
+| Variable                  | Required | Description                                                                    |
+| :------------------------ | :------- | :----------------------------------------------------------------------------- |
+| `VITE_AUDIUS_API_KEY`     | Yes      | Developer app API key (enables PKCE write scope)                               |
+| `VITE_AUDIUS_ENVIRONMENT` | No       | `development` to target local stack, `production` (default) for public network |
+
+## Key source files
+
+| File            | Description                                                  |
+| :-------------- | :----------------------------------------------------------- |
+| `src/App.tsx`   | Main UI — OAuth sign-in, file pickers, upload + create logic |
+| `src/sdk.ts`    | SDK singleton initialised with `apiKey`                      |
+| `src/config.ts` | Reads `VITE_AUDIUS_API_KEY` from the environment             |

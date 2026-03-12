@@ -1,19 +1,26 @@
 /**
- * Set in .env: VITE_WRITE_SERVER_URL, optionally VITE_AUDIUS_API_KEY
- * Vite exposes env vars prefixed with VITE_ to the client.
+ * VITE_AUDIUS_API_KEY is required for OAuth write scope (PKCE flow).
+ * Get one at audius.co/settings → Developer Apps.
  */
-const writeServerUrl =
-  typeof import.meta !== 'undefined' && import.meta.env?.VITE_WRITE_SERVER_URL != null
-    ? String(import.meta.env.VITE_WRITE_SERVER_URL).trim().replace(/\/$/, '')
-    : undefined
-
 const apiKey =
-  typeof import.meta !== 'undefined' && import.meta.env?.VITE_AUDIUS_API_KEY != null
+  typeof import.meta !== 'undefined' &&
+  import.meta.env?.VITE_AUDIUS_API_KEY != null
     ? String(import.meta.env.VITE_AUDIUS_API_KEY).trim()
     : undefined
 
+/**
+ * Set VITE_AUDIUS_ENVIRONMENT=development to target a local protocol stack
+ * started via `audius-compose up` + `audius-compose connect`.
+ * Omit or set to "production" (default) for the public Audius network.
+ */
+const environment =
+  typeof import.meta !== 'undefined' &&
+  import.meta.env?.VITE_AUDIUS_ENVIRONMENT === 'development'
+    ? ('development' as const)
+    : ('production' as const)
+
 export const config = {
-  writeServerUrl,
   apiKey,
-  isConfigured: Boolean(writeServerUrl && apiKey)
+  environment,
+  isConfigured: Boolean(apiKey)
 }

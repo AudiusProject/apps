@@ -5,13 +5,10 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig({
   plugins: [
     react(),
-    nodePolyfills({
-      include: ['buffer', 'process'],
-      globals: { Buffer: true, process: true }
-    })
+    nodePolyfills({ include: ['buffer', 'process'], globals: { Buffer: true, process: true } })
   ],
   server: {
-    port: 5177,
+    port: 5176,
     open: true
   }
 })
