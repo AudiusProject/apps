@@ -1,6 +1,6 @@
 import {
   AudiusSdk,
-  sdk,
+  createSdkWithServices,
   Configuration,
   SolanaRelay,
   ArchiverService
@@ -89,7 +89,7 @@ export const initSdk = async () => {
       }
     })
   })
-  const audiusSdk = sdk({
+  const audiusSdk = createSdkWithServices({
     appName: env.APP_NAME,
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,

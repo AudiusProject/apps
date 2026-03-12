@@ -1,7 +1,12 @@
 import { EventEmitter } from 'events'
 
 import type { AudiusSdk } from '@audius/sdk'
-import { Configuration, SolanaRelay, sdk, ArchiverService } from '@audius/sdk'
+import {
+  Configuration,
+  SolanaRelay,
+  createSdkWithServices,
+  ArchiverService
+} from '@audius/sdk'
 
 import { env } from 'app/services/env'
 
@@ -53,7 +58,7 @@ const initSdk = async () => {
   // Overrides some DN configuration from optimizely
   const audiusWalletClient = await getAudiusWalletClient()
 
-  const audiusSdk = sdk({
+  const audiusSdk = createSdkWithServices({
     appName: env.APP_NAME,
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,

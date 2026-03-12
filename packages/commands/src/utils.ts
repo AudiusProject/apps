@@ -1,5 +1,5 @@
 import {
-  sdk,
+  createSdkWithServices,
   SolanaRelay,
   Configuration,
   createHedgehogWalletClient,
@@ -163,7 +163,7 @@ export const initializeAudiusSdk = async ({
 
     const audiusWalletClient = createHedgehogWalletClient(getHedgehog())
 
-    audiusSdk = sdk({
+    audiusSdk = createSdkWithServices({
       appName: 'audius-cmd',
       environment: 'development',
       services: {
