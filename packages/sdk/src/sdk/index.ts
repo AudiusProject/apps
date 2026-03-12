@@ -1,5 +1,7 @@
 /* eslint-disable import/export */
 export { sdk } from './sdk'
+export { createSdk } from './createSdk'
+export { createSdkWithServices } from './createSdkWithServices'
 export type { AudiusSdk } from './sdk'
 export * from './api/generated/default'
 export { TracksApi } from './api/tracks/TracksApi'

@@ -24,6 +24,7 @@ import { GrantsApi } from './api/grants/GrantsApi'
 import { NotificationsApi } from './api/notifications/NotificationsApi'
 import { PlaylistsApi } from './api/playlists/PlaylistsApi'
 import { TracksApi } from './api/tracks/TracksApi'
+import { UploadsApi } from './api/uploads/UploadsApi'
 import { UsersApi } from './api/users/UsersApi'
 import { developmentConfig } from './config/development'
 import { productionConfig } from './config/production'
@@ -89,13 +90,23 @@ import {
   StorageNodeSelector,
   getDefaultStorageNodeSelectorConfig
 } from './services/StorageNodeSelector'
-import { SdkConfig, ServicesContainer } from './types'
+import { SdkConfig, SdkConfigSchema, ServicesContainer } from './types'
 import fetch from './utils/fetch'
 
 const ensureHex = (str: string): Hex =>
   str.startsWith('0x') ? (str as Hex) : `0x${str}`
 
+/**
+ * Creates an instance of the SDK that predates the delegated writes support of
+ * the API server. Handles all the writes locally and relays them. Supports
+ * wallet actions like purchases, tipping, and DMs/chats but requires passing
+ * in an AudiusWalletClient.
+ *
+ * Not recommended for third party use.
+ */
 export const createSdkWithServices = (config: SdkConfig) => {
+  SdkConfigSchema.parse(config)
+
   const isBrowser: boolean =
     typeof window !== 'undefined' && typeof window.document !== 'undefined'
 
@@ -460,7 +471,8 @@ const initializeApis = ({
       ? new OAuth({
           apiKey,
           tokenStore,
-          basePath
+          basePath,
+          logger: services.logger
         })
       : undefined
 
@@ -521,6 +533,7 @@ const initializeApis = ({
   const events = new EventsApi(apiClientConfig, services)
   const explore = new ExploreApi(apiClientConfig)
   const search = new SearchApi(apiClientConfig)
+  const uploads = new UploadsApi(services)
 
   return {
     oauth,
@@ -545,6 +558,7 @@ const initializeApis = ({
     coins,
     wallets,
     challenges,
-    prizes
+    prizes,
+    uploads
   }
 }
