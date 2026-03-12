@@ -1,5 +1,5 @@
 {
-  "name": "@audius/web-example-upload",
+  "name": "@audius/web-example-upload-server",
   "version": "1.0.0",
   "private": true,
   "type": "module",

@@ -1,4 +1,4 @@
-# oauth-upload
+# upload
 
 A serverless Audius track upload example using SDK + OAuth PKCE entirely in the browser. No backend server required.
 

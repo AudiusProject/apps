@@ -1,6 +1,6 @@
-# Upload track (Web)
+# Upload track (Web with backend server)
 
-Minimal Vite + React app that lets users **sign in via OAuth** (popup) and **upload a track** using the SDK. Use this as a reference for:
+Minimal Vite + React app that lets users **sign in via OAuth** (popup) and **upload a track** using the SDK on a backend server. Use this as a reference for:
 
 - **SDK setup** in a browser / Vite app (singleton, node polyfills)
 - **OAuth popup flow** (scope=write) — opens popup, postMessage for token
