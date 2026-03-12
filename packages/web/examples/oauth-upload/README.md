@@ -18,6 +18,7 @@ cp .env.example .env
 # Edit .env and set VITE_AUDIUS_API_KEY to your developer app API key
 # Get one at audius.co/settings → Developer Apps
 npm install
+npm run build -w @audius/sdk
 npm run dev
 ```
 
