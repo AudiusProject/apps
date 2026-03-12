@@ -28,7 +28,7 @@ export const StemsAndDownloadsCollectionField = () => {
           <Text variant='title' size='l'>
             {messages.title}
           </Text>
-          <Text variant='body' textAlign='left'>
+          <Text variant='body' textAlign='left' color='subdued'>
             {messages.description}
           </Text>
         </Flex>
