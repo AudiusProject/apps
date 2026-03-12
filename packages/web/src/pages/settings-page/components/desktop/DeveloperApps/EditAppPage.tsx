@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   DEVELOPER_APP_DESCRIPTION_MAX_LENGTH,
@@ -22,7 +22,7 @@ import {
   Text,
   TextInput
 } from '@audius/harmony'
-import { Form, Formik, useField } from 'formik'
+import { FieldArray, Form, Formik, useField } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
@@ -102,10 +102,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
   const initialBearerTokens = getBearerTokens(params)
   const [bearerTokens, setBearerTokens] =
     useState<string[]>(initialBearerTokens)
-  const [redirectUriFields, setRedirectUriFields] = useState<string[]>(() => {
-    const uris = params?.redirectUris ?? []
-    return uris.length > 0 ? uris : ['']
-  })
 
   const record = useRecord()
 
@@ -117,8 +113,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
   // Sync bearer tokens when params change (e.g. navigating to different app)
   useEffect(() => {
     setBearerTokens(getBearerTokens(params))
-    const uris = params?.redirectUris ?? []
-    setRedirectUriFields(uris.length > 0 ? uris : [''])
   }, [params])
 
   useEffect(() => {
@@ -153,20 +147,24 @@ export const EditAppPage = (props: EditAppPageProps) => {
           description: values.description
         })
       )
-      const redirectUris = redirectUriFields
+      const redirectUris = (values.redirectUris ?? [])
         .map((u) => u.trim())
         .filter(Boolean)
       mutate({ ...values, redirectUris })
     },
-    [mutate, record, redirectUriFields]
+    [mutate, record]
   )
 
-  const initialValues: DeveloperAppValues = {
-    apiKey: apiKey || '',
-    name: name || '',
-    description,
-    imageUrl
-  }
+  const initialValues: DeveloperAppValues = useMemo(
+    () => ({
+      apiKey: params?.apiKey || '',
+      name: params?.name || '',
+      description: params?.description,
+      imageUrl: params?.imageUrl,
+      redirectUris: params?.redirectUris?.length ? params.redirectUris : ['']
+    }),
+    [params]
+  )
 
   const copyApiKey = useCallback(() => {
     if (!apiKey) return
@@ -199,28 +197,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
     })
   }, [apiKey, createAccessKey])
 
-  const handleUpdateRedirectUri = useCallback(
-    (index: number, value: string) => {
-      setRedirectUriFields((prev) => {
-        const next = [...prev]
-        next[index] = value
-        return next
-      })
-    },
-    []
-  )
-
-  const handleAddRedirectUriField = useCallback(() => {
-    setRedirectUriFields((prev) => [...prev, ''])
-  }, [])
-
-  const handleRemoveRedirectUriField = useCallback((index: number) => {
-    setRedirectUriFields((prev) => {
-      const next = prev.filter((_, i) => i !== index)
-      return next.length > 0 ? next : ['']
-    })
-  }, [])
-
   if (!params) return null
 
   return (
@@ -228,6 +204,7 @@ export const EditAppPage = (props: EditAppPageProps) => {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       validationSchema={toFormikValidationSchema(developerAppEditSchema)}
+      enableReinitialize
     >
       <Form>
         <Flex gap='m' direction='column'>
@@ -328,37 +305,46 @@ export const EditAppPage = (props: EditAppPageProps) => {
             <Text variant='body' size='s' color='subdued'>
               {messages.redirectUrisHelp}
             </Text>
-            {redirectUriFields.map((uri, index) => {
-              const isLast = index === redirectUriFields.length - 1
-              return (
-                <Flex key={index} gap='s' alignItems='center'>
-                  <TextInput
-                    hideLabel={true}
-                    label={messages.addRedirectUri}
-                    placeholder={messages.redirectUriPlaceholder}
-                    value={uri}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleUpdateRedirectUri(index, e.target.value)
-                    }
-                  />
-                  {isLast ? (
-                    <IconButton
-                      onClick={handleAddRedirectUriField}
-                      aria-label={messages.addRedirectUri}
-                      color='default'
-                      icon={IconPlus}
-                    />
-                  ) : (
-                    <IconButton
-                      onClick={() => handleRemoveRedirectUriField(index)}
-                      aria-label={messages.removeRedirectUri}
-                      color='subdued'
-                      icon={IconTrash}
-                    />
-                  )}
-                </Flex>
-              )
-            })}
+            <FieldArray name='redirectUris'>
+              {({ push, remove, replace, form }) => {
+                const uris: string[] = form.values.redirectUris
+                return (
+                  <>
+                    {uris.map((uri, index) => {
+                      const isLast = index === uris.length - 1
+                      return (
+                        <Flex key={index} gap='s' alignItems='center'>
+                          <TextInput
+                            hideLabel={true}
+                            label={messages.addRedirectUri}
+                            placeholder={messages.redirectUriPlaceholder}
+                            value={uri}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => replace(index, e.target.value)}
+                          />
+                          {isLast ? (
+                            <IconButton
+                              onClick={() => push('')}
+                              aria-label={messages.addRedirectUri}
+                              color='default'
+                              icon={IconPlus}
+                            />
+                          ) : (
+                            <IconButton
+                              onClick={() => remove(index)}
+                              aria-label={messages.removeRedirectUri}
+                              color='subdued'
+                              icon={IconTrash}
+                            />
+                          )}
+                        </Flex>
+                      )
+                    })}
+                  </>
+                )
+              }}
+            </FieldArray>
           </Flex>
           <div className={styles.actionsContainer}>
             <Button
