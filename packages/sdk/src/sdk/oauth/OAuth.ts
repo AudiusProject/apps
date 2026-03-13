@@ -1,4 +1,5 @@
 import type { DecodedUserToken } from '../api/generated/default'
+import { FetchError, ResponseError } from '../api/generated/default/runtime'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
 
@@ -132,6 +133,10 @@ export class OAuth {
 
   private _boundMessageHandler: ((e: MessageEvent) => void) | null = null
 
+  private _redirectResult: Promise<LoginResult> | null = null
+
+  private _redirectChecked = false
+
   constructor(private readonly config: OAuthConfig) {
     if (typeof window === 'undefined') {
       throw new Error(
@@ -258,7 +263,7 @@ export class OAuth {
       this.config.basePath != null
 
     const csrfToken = generateId()
-    window.localStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
+    window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
 
     let pkceParams = ''
     if (usePkce) {
@@ -310,7 +315,7 @@ export class OAuth {
       this.config.basePath
     }/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${redirectUri}&origin=${originURISafe}&${responseModeParam}&${appIdURIParam}${writeOnceParams}${pkceParams}&display=${display}`
 
-    if (redirectUri === 'postMessage') {
+    if (display === 'popup') {
       // Register the message listener lazily so it is scoped to this login session
       if (!this._boundMessageHandler) {
         this._boundMessageHandler = (e: MessageEvent) => this._receiveMessage(e)
@@ -384,7 +389,67 @@ export class OAuth {
   }
 
   getCsrfToken() {
-    return window.localStorage.getItem(CSRF_TOKEN_KEY)
+    return window.sessionStorage.getItem(CSRF_TOKEN_KEY)
+  }
+
+  /**
+   * Returns true if the current page load contains OAuth redirect params
+   * (`code` + `state`) that haven't been consumed via `getRedirectResult()`.
+   *
+   * Before `getRedirectResult()` has been called, this performs a lightweight
+   * URL check (no network requests). After, it reflects whether a cached
+   * result is still pending.
+   */
+  get hasRedirectResult(): boolean {
+    if (this._redirectChecked) {
+      return this._redirectResult != null
+    }
+    // Lightweight URL check — no side effects
+    const queryParams = new URLSearchParams(window.location.search)
+    const hashParams = new URLSearchParams(
+      window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
+    )
+    const code = queryParams.get('code') ?? hashParams.get('code')
+    const state = queryParams.get('state') ?? hashParams.get('state')
+    return !!(code && state)
+  }
+
+  /**
+   * If the current page was loaded as the result of an OAuth redirect
+   * (i.e. the URL contains `code` and `state` params from the authorization
+   * server), this method returns a promise that resolves with the
+   * `LoginResult` once the token exchange completes.
+   *
+   * Returns `null` if no redirect is pending.
+   *
+   * The result can only be consumed once — subsequent calls return `null`.
+   *
+   * If running inside a popup (`window.opener` exists), this forwards the
+   * authorization code to the opener window via `postMessage` and closes
+   * the popup — the opener's `loginAsync` promise resolves with the result.
+   * In that case, this method returns `null`.
+   */
+  async getRedirectResult(): Promise<LoginResult | null> {
+    if (!this._redirectChecked) {
+      this._redirectChecked = true
+      this._handleRedirectResult()
+    }
+    if (!this._redirectResult) {
+      return null
+    }
+    try {
+      return await this._redirectResult
+    } finally {
+      this._redirectResult = null
+    }
+  }
+
+  /**
+   * Returns true if the user is currently authenticated (i.e. an access
+   * token is present in the token store).
+   */
+  get isAuthenticated(): boolean {
+    return !!this.config.tokenStore?.accessToken
   }
 
   /**
@@ -393,6 +458,37 @@ export class OAuth {
    */
   get hasRefreshToken(): boolean {
     return !!this.config.tokenStore?.refreshToken
+  }
+
+  /**
+   * Fetches the authenticated user's profile from the server using the stored
+   * access token. Always makes a network request, so the result reflects
+   * current server-side state (useful for detecting revoked sessions or
+   * refreshing stale profile data on page load).
+   *
+   * Throws `ResponseError` if the server returns a non-2xx response (e.g. 401
+   * if no token is stored or the token has expired), or `FetchError` if the
+   * request fails at the network level.
+   */
+  async getUser(): Promise<DecodedUserToken> {
+    const accessToken = this.config.tokenStore?.accessToken
+    const headers: Record<string, string> = {}
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`
+    }
+    let res: Response
+    try {
+      res = await fetch(`${this.config.basePath}/oauth/me`, { headers })
+    } catch (e) {
+      throw new FetchError(
+        e instanceof Error ? e : new Error(String(e)),
+        'Failed to fetch user profile.'
+      )
+    }
+    if (!res.ok) {
+      throw new ResponseError(res, 'Failed to fetch user profile.')
+    }
+    return (await res.json()) as DecodedUserToken
   }
 
   /**
@@ -462,10 +558,156 @@ export class OAuth {
     this.config.tokenStore?.clear()
     window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-    window.localStorage.removeItem(CSRF_TOKEN_KEY)
+    window.sessionStorage.removeItem(CSRF_TOKEN_KEY)
   }
 
   /* ------- INTERNAL FUNCTIONS ------- */
+
+  /**
+   * Exchange an authorization code + PKCE verifier for tokens, store them,
+   * fetch the user profile, and return a `LoginResult`.
+   *
+   * Shared by the popup `_receiveMessage` handler and `_detectRedirectResult`.
+   */
+  private async _exchangeCodeForTokens(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string
+  ): Promise<LoginResult> {
+    if (!this.config.basePath) {
+      throw new Error(
+        'basePath is required in SDK configuration for PKCE token exchange.'
+      )
+    }
+
+    const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        code,
+        code_verifier: codeVerifier,
+        client_id: this.apiKey,
+        redirect_uri: redirectUri
+      })
+    })
+    if (!tokenRes.ok) {
+      const err = await tokenRes.json().catch(() => ({}))
+      throw new Error(err.error_description ?? 'Token exchange failed.')
+    }
+    const tokens = await tokenRes.json()
+    this.config.tokenStore?.setTokens(tokens.access_token, tokens.refresh_token)
+
+    const profile = await this.getUser()
+
+    return { profile, encodedJwt: tokens.access_token }
+  }
+
+  /**
+   * Called lazily from `getRedirectResult()`. Checks `window.location` for
+   * OAuth redirect params (`code` + `state`).
+   *
+   * If running inside a popup (i.e. `window.opener` exists), the code and
+   * state are forwarded back to the opener via `postMessage` and the popup
+   * closes itself. The opener's `_receiveMessage` handler then performs the
+   * token exchange using the PKCE verifier from **its** `sessionStorage`.
+   *
+   * If running as a full-page redirect, the token exchange is performed
+   * locally and the result is stored as `_redirectResult`.
+   *
+   * Also cleans up the URL (via `history.replaceState`) so that stale
+   * `code` params cannot be bookmarked or replayed.
+   */
+  private _handleRedirectResult(): void {
+    // Parse both query and fragment (responseMode can be either)
+    const queryParams = new URLSearchParams(window.location.search)
+    const hashParams = new URLSearchParams(
+      window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
+    )
+
+    const code = queryParams.get('code') ?? hashParams.get('code')
+    const state = queryParams.get('state') ?? hashParams.get('state')
+    const openerOrigin =
+      queryParams.get('origin') ??
+      hashParams.get('origin') ??
+      window.location.origin
+
+    if (!code || !state) {
+      return
+    }
+
+    // If running inside a popup (opened by loginAsync on the parent page),
+    // forward the code + state back to the opener and close. The opener's
+    // _receiveMessage handler will do the exchange using its own verifier.
+    if (window.opener) {
+      try {
+        window.opener.postMessage({ code, state }, openerOrigin)
+      } catch {
+        // Cannot communicate with opener — fall through to local handling
+      }
+      window.close()
+      return
+    }
+
+    // Full-page redirect flow — handle the exchange locally
+    const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
+    if (!codeVerifier) {
+      // No verifier means this isn't our redirect (stale bookmark, etc.)
+      return
+    }
+
+    // Verify CSRF state
+    if (this.getCsrfToken() !== state) {
+      // Clean up to avoid leaving stale session keys around
+      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+      this.logger.error('OAuth redirect state mismatch.')
+      return
+    }
+
+    const storedRedirectUri = window.sessionStorage.getItem(
+      PKCE_REDIRECT_URI_KEY
+    )
+
+    // Clean up PKCE session state
+    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+
+    const redirectUriForExchange =
+      storedRedirectUri ??
+      `${window.location.origin}${window.location.pathname}`
+
+    // Remove code/state from the URL to prevent stale bookmarks
+    try {
+      const cleanUrl = new URL(window.location.href)
+      cleanUrl.searchParams.delete('code')
+      cleanUrl.searchParams.delete('state')
+      if (cleanUrl.hash) {
+        const hp = new URLSearchParams(cleanUrl.hash.slice(1))
+        hp.delete('code')
+        hp.delete('state')
+        const remaining = hp.toString()
+        cleanUrl.hash = remaining ? `#${remaining}` : ''
+      }
+      window.history.replaceState(null, '', cleanUrl.toString())
+    } catch {
+      // Non-fatal — URL cleanup is best-effort
+    }
+
+    // Eagerly start the token exchange
+    this._redirectResult = this._exchangeCodeForTokens(
+      code,
+      codeVerifier,
+      redirectUriForExchange
+    ).catch((err) => {
+      this.logger.error(
+        'OAuth redirect token exchange failed:',
+        err instanceof Error ? err.message : err
+      )
+      throw err
+    })
+  }
+
   private _settleLogin(resultOrError: LoginResult | Error) {
     if (resultOrError instanceof Error) {
       this._currentLoginReject?.(resultOrError)
@@ -527,54 +769,13 @@ export class OAuth {
         return
       }
 
-      if (!this.config.basePath) {
-        this._settleLogin(
-          new Error(
-            'basePath is required in SDK configuration for PKCE token exchange.'
-          )
-        )
-        return
-      }
-
-      // Exchange authorization code for tokens
       try {
-        const tokenRes = await fetch(`${this.config.basePath}/oauth/token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            grant_type: 'authorization_code',
-            code: event.data.code,
-            code_verifier: codeVerifier,
-            client_id: this.apiKey,
-            redirect_uri: storedRedirectUri ?? 'postMessage'
-          })
-        })
-        if (!tokenRes.ok) {
-          const err = await tokenRes.json().catch(() => ({}))
-          this._settleLogin(
-            new Error(err.error_description ?? 'Token exchange failed.')
-          )
-          return
-        }
-        const tokens = await tokenRes.json()
-        this.config.tokenStore?.setTokens(
-          tokens.access_token,
-          tokens.refresh_token
+        const result = await this._exchangeCodeForTokens(
+          event.data.code,
+          codeVerifier,
+          storedRedirectUri ?? 'postMessage'
         )
-
-        // Fetch user profile via /oauth/me
-        const meRes = await fetch(`${this.config.basePath}/oauth/me`, {
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`
-          }
-        })
-        if (!meRes.ok) {
-          this._settleLogin(new Error('Failed to fetch user profile.'))
-          return
-        }
-        const profile = (await meRes.json()) as DecodedUserToken
-
-        this._settleLogin({ profile, encodedJwt: tokens.access_token })
+        this._settleLogin(result)
       } catch (e) {
         this._settleLogin(
           e instanceof Error ? e : new Error('Token exchange failed.')
