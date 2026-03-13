@@ -16,10 +16,15 @@ export class OAuthTokenStore {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this._accessToken =
-        window.localStorage.getItem(LS_ACCESS_TOKEN_KEY) ?? null
-      this._refreshToken =
-        window.localStorage.getItem(LS_REFRESH_TOKEN_KEY) ?? null
+      try {
+        const storage = window.localStorage
+        this._accessToken = storage.getItem(LS_ACCESS_TOKEN_KEY) ?? null
+        this._refreshToken = storage.getItem(LS_REFRESH_TOKEN_KEY) ?? null
+      } catch {
+        // If localStorage is unavailable or throws, treat as no persisted tokens.
+        this._accessToken = null
+        this._refreshToken = null
+      }
     }
   }
 
