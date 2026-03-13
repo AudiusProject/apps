@@ -674,7 +674,8 @@ export class OAuth {
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
 
     const redirectUriForExchange =
-      storedRedirectUri ?? `${window.location.origin}${window.location.pathname}`
+      storedRedirectUri ??
+      `${window.location.origin}${window.location.pathname}`
 
     // Remove code/state from the URL to prevent stale bookmarks
     try {
