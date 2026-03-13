@@ -1,4 +1,5 @@
 import type { DecodedUserToken } from '../api/generated/default'
+import { FetchError, ResponseError } from '../api/generated/default/runtime'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid, isWriteOnceParams } from '../utils/oauthScope'
 
@@ -460,6 +461,37 @@ export class OAuth {
   }
 
   /**
+   * Fetches the authenticated user's profile from the server using the stored
+   * access token. Always makes a network request, so the result reflects
+   * current server-side state (useful for detecting revoked sessions or
+   * refreshing stale profile data on page load).
+   *
+   * Throws `ResponseError` if the server returns a non-2xx response (e.g. 401
+   * if no token is stored or the token has expired), or `FetchError` if the
+   * request fails at the network level.
+   */
+  async getUser(): Promise<DecodedUserToken> {
+    const accessToken = this.config.tokenStore?.accessToken
+    const headers: Record<string, string> = {}
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`
+    }
+    let res: Response
+    try {
+      res = await fetch(`${this.config.basePath}/oauth/me`, { headers })
+    } catch (e) {
+      throw new FetchError(
+        e instanceof Error ? e : new Error(String(e)),
+        'Failed to fetch user profile.'
+      )
+    }
+    if (!res.ok) {
+      throw new ResponseError(res, 'Failed to fetch user profile.')
+    }
+    return (await res.json()) as DecodedUserToken
+  }
+
+  /**
    * Refresh the access token using the stored refresh token.
    * Updates the token store on success.
    * Returns the new access token, or `null` if refresh failed.
@@ -566,15 +598,7 @@ export class OAuth {
     const tokens = await tokenRes.json()
     this.config.tokenStore?.setTokens(tokens.access_token, tokens.refresh_token)
 
-    const meRes = await fetch(`${this.config.basePath}/oauth/me`, {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`
-      }
-    })
-    if (!meRes.ok) {
-      throw new Error('Failed to fetch user profile.')
-    }
-    const profile = (await meRes.json()) as DecodedUserToken
+    const profile = await this.getUser()
 
     return { profile, encodedJwt: tokens.access_token }
   }
